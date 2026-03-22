@@ -1,0 +1,1065 @@
+openapi: "3.1.0"
+info:
+  title: TabMail API
+  version: 1.0.0
+  description: |
+    Multi-tenant disposable email service.
+
+    ## Authentication
+
+    | Layer | Header | Description |
+    |-------|--------|-------------|
+    | Public | *(none)* | Auto-assigned to the public tenant with strict rate limits |
+    | Tenant | `X-API-Key` | Tenant-scoped access, limits governed by plan + overrides |
+    | Admin  | `X-Admin-Key` | Full system access, no business rate limits |
+    | Mailbox Token | `Authorization: Bearer <token>` | Mailbox-scoped access for `access_mode=token` mailboxes |
+
+    Admin requests may additionally pass `X-Tenant-ID` to impersonate a tenant on tenant-scoped endpoints.
+
+servers:
+  - url: /
+    description: Current host
+
+security:
+  - {}
+  - APIKey: []
+  - AdminKey: []
+
+components:
+  securitySchemes:
+    APIKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+    AdminKey:
+      type: apiKey
+      in: header
+      name: X-Admin-Key
+    MailboxToken:
+      type: http
+      scheme: bearer
+      bearerFormat: TabMail-Mailbox-Token
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code: { type: string }
+            message: { type: string }
+
+    Meta:
+      type: object
+      properties:
+        total: { type: integer }
+        page: { type: integer }
+        per_page: { type: integer }
+
+    Plan:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        max_domains: { type: integer }
+        max_mailboxes_per_domain: { type: integer }
+        max_messages_per_mailbox: { type: integer }
+        max_message_bytes: { type: integer }
+        retention_hours: { type: integer }
+        rpm_limit: { type: integer }
+        daily_quota: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    Tenant:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        plan_id: { type: string, format: uuid }
+        is_super: { type: boolean }
+        created_at: { type: string, format: date-time }
+
+    TenantOverride:
+      type: object
+      properties:
+        max_domains: { type: integer, nullable: true }
+        max_mailboxes_per_domain: { type: integer, nullable: true }
+        max_messages_per_mailbox: { type: integer, nullable: true }
+        max_message_bytes: { type: integer, nullable: true }
+        retention_hours: { type: integer, nullable: true }
+        rpm_limit: { type: integer, nullable: true }
+        daily_quota: { type: integer, nullable: true }
+
+    EffectiveConfig:
+      type: object
+      properties:
+        max_domains: { type: integer }
+        max_mailboxes_per_domain: { type: integer }
+        max_messages_per_mailbox: { type: integer }
+        max_message_bytes: { type: integer }
+        retention_hours: { type: integer }
+        rpm_limit: { type: integer }
+        daily_quota: { type: integer }
+
+    DomainZone:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        domain: { type: string }
+        is_verified: { type: boolean }
+        mx_verified: { type: boolean }
+        txt_record: { type: string }
+        created_at: { type: string, format: date-time }
+        verified_at: { type: string, format: date-time, nullable: true }
+
+    DomainRoute:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        zone_id: { type: string, format: uuid }
+        route_type: { type: string, enum: [exact, wildcard, sequence] }
+        match_value: { type: string }
+        range_start: { type: integer, nullable: true }
+        range_end: { type: integer, nullable: true }
+        auto_create_mailbox: { type: boolean }
+        retention_hours_override: { type: integer, nullable: true }
+        access_mode_default: { type: string, enum: [public, token, api_key] }
+        created_at: { type: string, format: date-time }
+
+    Mailbox:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        zone_id: { type: string, format: uuid }
+        local_part: { type: string }
+        resolved_domain: { type: string }
+        full_address: { type: string }
+        access_mode: { type: string, enum: [public, token, api_key] }
+        retention_hours_override: { type: integer, nullable: true }
+        expires_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    Message:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        mailbox_id: { type: string, format: uuid }
+        sender: { type: string }
+        recipients: { type: array, items: { type: string } }
+        subject: { type: string }
+        size: { type: integer }
+        seen: { type: boolean }
+        headers: { type: object }
+        received_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+
+    MessageDetail:
+      allOf:
+        - $ref: "#/components/schemas/Message"
+        - type: object
+          properties:
+            text_body: { type: string }
+            html_body: { type: string }
+
+    APIKeyCreated:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        key: { type: string, description: "Full key (shown only once)" }
+        key_prefix: { type: string }
+        label: { type: string }
+        scopes: { type: array, items: { type: string } }
+        created_at: { type: string, format: date-time }
+
+    MailboxTokenResponse:
+      type: object
+      properties:
+        token: { type: string }
+        expires_in: { type: integer }
+
+    AuditEntry:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        actor: { type: string }
+        action: { type: string }
+        resource_type: { type: string }
+        resource_id: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    SMTPMetrics:
+      type: object
+      properties:
+        sessions_opened: { type: integer }
+        sessions_active: { type: integer }
+        recipients_accepted: { type: integer }
+        recipients_rejected: { type: integer }
+        messages_accepted: { type: integer }
+        messages_rejected: { type: integer }
+        deliveries_succeeded: { type: integer }
+        deliveries_failed: { type: integer }
+        bytes_received: { type: integer }
+
+    WebhookMetrics:
+      type: object
+      properties:
+        enabled: { type: boolean }
+        configured: { type: integer }
+        queued: { type: integer }
+        delivered: { type: integer }
+        failed: { type: integer }
+
+    RealtimeMetrics:
+      type: object
+      properties:
+        subscribers_current: { type: integer }
+        events_published: { type: integer }
+
+    MetricPoint:
+      type: object
+      properties:
+        at: { type: string, format: date-time }
+        smtp_accepted: { type: integer }
+        smtp_rejected: { type: integer }
+        deliveries_ok: { type: integer }
+        deliveries_failed: { type: integer }
+        webhooks_delivered: { type: integer }
+        webhooks_failed: { type: integer }
+        realtime_published: { type: integer }
+
+    DeliveryStats:
+      type: object
+      properties:
+        key: { type: string }
+        accepted: { type: integer }
+        rejected: { type: integer }
+        deliveries_ok: { type: integer }
+        deliveries_failed: { type: integer }
+
+    DeadLetter:
+      type: object
+      properties:
+        id: { type: string }
+        url: { type: string }
+        event_type: { type: string }
+        payload: { type: object }
+        attempts: { type: integer }
+        last_error: { type: string }
+        created_at: { type: string, format: date-time }
+        last_tried_at: { type: string, format: date-time }
+
+    SMTPPolicy:
+      type: object
+      properties:
+        default_accept: { type: boolean }
+        accept_domains: { type: array, items: { type: string } }
+        reject_domains: { type: array, items: { type: string } }
+        default_store: { type: boolean }
+        store_domains: { type: array, items: { type: string } }
+        discard_domains: { type: array, items: { type: string } }
+        reject_origin_domains: { type: array, items: { type: string } }
+        updated_at: { type: string, format: date-time }
+
+    MonitorEvent:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        mailbox: { type: string }
+        message_id: { type: string }
+        sender: { type: string }
+        subject: { type: string }
+        size: { type: integer }
+        at: { type: string, format: date-time }
+
+    MetricsSnapshot:
+      type: object
+      properties:
+        started_at: { type: string, format: date-time }
+        uptime_seconds: { type: integer }
+        smtp: { $ref: "#/components/schemas/SMTPMetrics" }
+        webhooks: { $ref: "#/components/schemas/WebhookMetrics" }
+        realtime: { $ref: "#/components/schemas/RealtimeMetrics" }
+        time_series:
+          type: array
+          items: { $ref: "#/components/schemas/MetricPoint" }
+
+    SystemStats:
+      type: object
+      properties:
+        tenants_count: { type: integer }
+        plans_count: { type: integer }
+        domains_count: { type: integer }
+        mailboxes_count: { type: integer }
+        messages_count: { type: integer }
+        metrics: { $ref: "#/components/schemas/MetricsSnapshot" }
+        recent_audit:
+          type: array
+          items: { $ref: "#/components/schemas/AuditEntry" }
+        tenant_delivery:
+          type: array
+          items: { $ref: "#/components/schemas/DeliveryStats" }
+        mailbox_delivery:
+          type: array
+          items: { $ref: "#/components/schemas/DeliveryStats" }
+        dead_letters:
+          type: array
+          items: { $ref: "#/components/schemas/DeadLetter" }
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema: { type: integer, default: 1 }
+    PerPageParam:
+      name: per_page
+      in: query
+      schema: { type: integer, default: 30, maximum: 100 }
+
+paths:
+  /api/v1/token:
+    post:
+      tags: [Mailboxes]
+      summary: Issue a mailbox access token
+      operationId: issueMailboxToken
+      security: [ {} ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address, password]
+              properties:
+                address: { type: string, example: "user@mail.example.com" }
+                password: { type: string }
+      responses:
+        "200":
+          description: Token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/MailboxTokenResponse" }
+        "403": { description: Invalid credentials or mailbox access mode }
+
+  # ── Domains / Zones ─────────────────────────────────
+  /api/v1/domains:
+    get:
+      tags: [Domains]
+      summary: List domain zones
+      operationId: listDomains
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/DomainZone" }
+    post:
+      tags: [Domains]
+      summary: Bind a new domain zone
+      operationId: createDomain
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [domain]
+              properties:
+                domain: { type: string, example: "mail.example.com" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/DomainZone" }
+        "409": { description: Domain already exists }
+
+  /api/v1/domains/{id}:
+    delete:
+      tags: [Domains]
+      summary: Delete a domain zone
+      operationId: deleteDomain
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+        "404": { description: Not found }
+
+  /api/v1/domains/{id}/verify:
+    post:
+      tags: [Domains]
+      summary: Trigger DNS verification
+      operationId: triggerVerify
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Verification info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid }
+                      domain: { type: string }
+                      txt_record: { type: string }
+                      is_verified: { type: boolean }
+                      mx_verified: { type: boolean }
+                      checks: { type: object }
+                      hint: { type: string }
+
+  /api/v1/domains/{id}/verification-status:
+    get:
+      tags: [Domains]
+      summary: Get DNS verification status
+      operationId: verificationStatus
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Verification details (TXT, MX, SPF, DKIM, DMARC)
+
+  # ── Domain Routes ───────────────────────────────────
+  /api/v1/domains/{id}/routes:
+    get:
+      tags: [Domain Routes]
+      summary: List routes for a zone
+      operationId: listRoutes
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/DomainRoute" }
+    post:
+      tags: [Domain Routes]
+      summary: Create a routing rule
+      operationId: createRoute
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [route_type, match_value]
+              properties:
+                route_type: { type: string, enum: [exact, wildcard, sequence] }
+                match_value: { type: string, example: "*.mail.example.com" }
+                range_start: { type: integer }
+                range_end: { type: integer }
+                auto_create_mailbox: { type: boolean, default: true }
+                retention_hours_override: { type: integer }
+                access_mode_default: { type: string, enum: [public, token, api_key], default: public }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/DomainRoute" }
+
+  /api/v1/domains/{id}/routes/{routeId}:
+    delete:
+      tags: [Domain Routes]
+      summary: Delete a route
+      operationId: deleteRoute
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: routeId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+
+  # ── Mailboxes ───────────────────────────────────────
+  /api/v1/mailboxes:
+    get:
+      tags: [Mailboxes]
+      summary: List mailboxes
+      operationId: listMailboxes
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Mailbox" }
+                  meta: { $ref: "#/components/schemas/Meta" }
+    post:
+      tags: [Mailboxes]
+      summary: Create a mailbox
+      operationId: createMailbox
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address]
+              properties:
+                address: { type: string, example: "user@mail.example.com" }
+                password: { type: string }
+                access_mode: { type: string, enum: [public, token, api_key], default: public }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/Mailbox" }
+        "409": { description: Address already exists }
+
+  /api/v1/mailboxes/{id}:
+    delete:
+      tags: [Mailboxes]
+      summary: Delete a mailbox
+      operationId: deleteMailbox
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+
+  # ── Messages ────────────────────────────────────────
+  /api/v1/mailbox/{address}:
+    get:
+      tags: [Messages]
+      summary: List messages in a mailbox
+      operationId: listMessages
+      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+          example: "user@mail.example.com"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Message" }
+                  meta: { $ref: "#/components/schemas/Meta" }
+    delete:
+      tags: [Messages]
+      summary: Purge all messages from a mailbox
+      operationId: purgeMailbox
+      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "204": { description: Purged }
+
+  /api/v1/mailbox/{address}/events:
+    get:
+      tags: [Messages]
+      summary: Stream mailbox events with SSE
+      operationId: streamMailboxEvents
+      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /api/v1/mailbox/{address}/{id}:
+    get:
+      tags: [Messages]
+      summary: Get message detail
+      operationId: getMessage
+      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/MessageDetail" }
+    patch:
+      tags: [Messages]
+      summary: Mark message as seen
+      operationId: markSeen
+      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      seen: { type: boolean }
+    delete:
+      tags: [Messages]
+      summary: Delete a single message
+      operationId: deleteMessage
+      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+
+  /api/v1/mailbox/{address}/{id}/source:
+    get:
+      tags: [Messages]
+      summary: Get raw RFC 822 source
+      operationId: getMessageSource
+      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Raw email
+          content:
+            message/rfc822:
+              schema: { type: string, format: binary }
+
+  # ── Admin: Tenants ──────────────────────────────────
+  /api/v1/admin/tenants:
+    get:
+      tags: [Admin]
+      summary: List all tenants
+      operationId: listTenants
+      security: [{ AdminKey: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Tenant" }
+    post:
+      tags: [Admin]
+      summary: Create a tenant
+      operationId: createTenant
+      security: [{ AdminKey: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, plan_id]
+              properties:
+                name: { type: string }
+                plan_id: { type: string, format: uuid }
+      responses:
+        "201":
+          description: Created
+
+  /api/v1/admin/tenants/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update tenant overrides
+      operationId: updateTenantOverride
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TenantOverride" }
+      responses:
+        "200": { description: Updated }
+    delete:
+      tags: [Admin]
+      summary: Delete a tenant
+      operationId: deleteTenant
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+
+  /api/v1/admin/tenants/{id}/config:
+    get:
+      tags: [Admin]
+      summary: Get effective config (plan + overrides merged)
+      operationId: getEffectiveConfig
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/EffectiveConfig" }
+
+  /api/v1/admin/tenants/{id}/keys:
+    post:
+      tags: [Admin]
+      summary: Issue a new API key for a tenant
+      operationId: createAPIKey
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                label: { type: string }
+                scopes: { type: array, items: { type: string } }
+      responses:
+        "201":
+          description: Created (key shown only once)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/APIKeyCreated" }
+    get:
+      tags: [Admin]
+      summary: List API keys for a tenant
+      operationId: listAPIKeys
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/admin/tenants/{id}/keys/{keyId}:
+    delete:
+      tags: [Admin]
+      summary: Revoke an API key
+      operationId: deleteAPIKey
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: keyId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Revoked }
+
+  # ── Admin: Plans ────────────────────────────────────
+  /api/v1/admin/plans:
+    get:
+      tags: [Admin]
+      summary: List plans
+      operationId: listPlans
+      security: [{ AdminKey: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/Plan" }
+    post:
+      tags: [Admin]
+      summary: Create a plan
+      operationId: createPlan
+      security: [{ AdminKey: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Plan" }
+      responses:
+        "201": { description: Created }
+
+  /api/v1/admin/plans/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update a plan
+      operationId: updatePlan
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/Plan" }
+      responses:
+        "200": { description: Updated }
+    delete:
+      tags: [Admin]
+      summary: Delete a plan
+      operationId: deletePlan
+      security: [{ AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+
+  /api/v1/admin/stats:
+    get:
+      tags: [Admin]
+      summary: System statistics
+      operationId: getStats
+      security: [{ AdminKey: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/SystemStats" }
+
+  /api/v1/admin/status:
+    get:
+      tags: [Admin]
+      summary: System status alias
+      operationId: getStatus
+      security: [{ AdminKey: [] }]
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/admin/policy:
+    get:
+      tags: [Admin]
+      summary: Get current SMTP policy
+      operationId: getSMTPPolicy
+      security: [{ AdminKey: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/SMTPPolicy" }
+    patch:
+      tags: [Admin]
+      summary: Update current SMTP policy
+      operationId: updateSMTPPolicy
+      security: [{ AdminKey: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SMTPPolicy" }
+      responses:
+        "200":
+          description: OK
+
+  /api/v1/admin/monitor/events:
+    get:
+      tags: [Admin]
+      summary: Stream global monitor events with history replay
+      operationId: streamAdminMonitorEvents
+      security: [{ AdminKey: [] }]
+      responses:
+        "200":
+          description: SSE stream
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /api/v1/admin/monitor/history:
+    get:
+      tags: [Admin]
+      summary: List persisted monitor history
+      operationId: listMonitorHistory
+      security: [{ AdminKey: [] }]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+        - name: type
+          in: query
+          schema: { type: string }
+        - name: mailbox
+          in: query
+          schema: { type: string }
+        - name: sender
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/MonitorEvent" }
+                  meta: { $ref: "#/components/schemas/Meta" }
+
+  # ── Health ──────────────────────────────────────────
+  /health:
+    get:
+      tags: [System]
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: ok }
