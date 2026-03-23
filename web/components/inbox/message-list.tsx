@@ -1,11 +1,15 @@
 "use client";
 
-import { formatDistanceToNow } from "date-fns";
+import { formatDistanceToNow, format } from "date-fns";
+import { zhCN, enUS } from "date-fns/locale";
 import type { Message } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Mail, MailOpen } from "lucide-react";
+import { Inbox } from "lucide-react";
 
 interface Props {
   messages: Message[];
@@ -13,70 +17,119 @@ interface Props {
   onSelect: (msg: Message) => void;
 }
 
+function senderInitials(sender: string): string {
+  if (!sender || sender === "(unknown)") return "?";
+  const name = sender.split("@")[0].split(/[._-]/);
+  if (name.length >= 2) return (name[0][0] + name[1][0]).toUpperCase();
+  return sender.slice(0, 2).toUpperCase();
+}
+
+function senderColor(sender: string): string {
+  if (!sender) return "bg-muted";
+  const hash = sender.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const palette = [
+    "bg-blue-500/15 text-blue-700 dark:text-blue-400",
+    "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+    "bg-violet-500/15 text-violet-700 dark:text-violet-400",
+    "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+    "bg-rose-500/15 text-rose-700 dark:text-rose-400",
+    "bg-cyan-500/15 text-cyan-700 dark:text-cyan-400",
+    "bg-pink-500/15 text-pink-700 dark:text-pink-400",
+  ];
+  return palette[hash % palette.length];
+}
+
 export function MessageList({ messages, selectedId, onSelect }: Props) {
+  const { locale, t } = useI18n();
+  const { settings } = useSettings();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
+
+  const formatTime = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (settings.timeFormat === "absolute") {
+      return format(d, locale === "zh" ? "MM/dd HH:mm" : "MMM d, HH:mm", { locale: dateFnsLocale });
+    }
+    return formatDistanceToNow(d, { addSuffix: true, locale: dateFnsLocale });
+  };
+
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-20 text-center text-muted-foreground">
-        <Mail className="h-10 w-10 mb-3 opacity-30" />
-        <p className="text-sm font-medium">No messages yet</p>
-        <p className="text-xs mt-1">Emails sent to this address will appear here</p>
+      <div className="flex flex-col items-center justify-center h-full py-20 px-6 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted mb-5">
+          <Inbox className="h-7 w-7 text-muted-foreground/50" />
+        </div>
+        <p className="font-medium text-sm">{t("msgList.empty")}</p>
+        <p className="text-xs text-muted-foreground mt-1 max-w-[220px] leading-relaxed">
+          {t("msgList.emptyDesc")}
+        </p>
       </div>
     );
   }
 
   return (
     <ScrollArea className="h-full">
-      <div className="divide-y">
-        {messages.map((msg) => (
-          <button
-            key={msg.id}
-            onClick={() => onSelect(msg)}
-            className={cn(
-              "w-full text-left px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer",
-              selectedId === msg.id && "bg-muted",
-              !msg.seen && "bg-primary/[0.03]"
-            )}
-          >
-            <div className="flex items-start justify-between gap-2">
-              <div className="flex items-center gap-2 min-w-0">
-                {msg.seen ? (
-                  <MailOpen className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                ) : (
-                  <Mail className="h-3.5 w-3.5 shrink-0 text-primary" />
-                )}
-                <span
-                  className={cn(
-                    "text-sm truncate",
-                    !msg.seen && "font-semibold"
-                  )}
-                >
-                  {msg.sender || "(unknown)"}
-                </span>
-              </div>
-              <span className="text-[11px] text-muted-foreground whitespace-nowrap shrink-0">
-                {formatDistanceToNow(new Date(msg.received_at), { addSuffix: true })}
-              </span>
-            </div>
-            <p
+      <div className="p-2 space-y-0.5">
+        {messages.map((msg) => {
+          const isSelected = selectedId === msg.id;
+          const isUnread = !msg.seen;
+
+          return (
+            <button
+              key={msg.id}
+              onClick={() => onSelect(msg)}
               className={cn(
-                "text-sm mt-0.5 truncate pl-5.5",
-                !msg.seen ? "text-foreground" : "text-muted-foreground"
+                "w-full text-left rounded-lg px-3 py-3 transition-colors cursor-pointer",
+                "hover:bg-muted/60",
+                isSelected && "bg-muted",
+                isUnread && !isSelected && "bg-primary/[0.04]"
               )}
             >
-              {msg.subject || "(no subject)"}
-            </p>
-            <div className="flex items-center gap-2 mt-1 pl-5.5">
-              {!msg.seen && (
-                <Badge variant="default" className="h-4 text-[10px] px-1.5">
-                  New
-                </Badge>
-              )}
-              <span className="text-[11px] text-muted-foreground">
-                {(msg.size / 1024).toFixed(1)} KB
-              </span>
-            </div>
-          </button>
-        ))}
+              <div className="flex items-start gap-3">
+                <Avatar size="sm" className="mt-0.5 shrink-0">
+                  <AvatarFallback className={cn("text-[10px] font-semibold", senderColor(msg.sender))}>
+                    {senderInitials(msg.sender)}
+                  </AvatarFallback>
+                </Avatar>
+
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn(
+                      "text-sm truncate",
+                      isUnread ? "font-semibold text-foreground" : "text-muted-foreground"
+                    )}>
+                      {msg.sender || t("msgList.unknown")}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground whitespace-nowrap shrink-0">
+                      {formatTime(msg.received_at)}
+                    </span>
+                  </div>
+
+                  <p className={cn(
+                    "text-[13px] mt-0.5 truncate",
+                    isUnread ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {msg.subject || t("msgList.noSubject")}
+                  </p>
+
+                  <div className="flex items-center gap-2 mt-1.5">
+                    {isUnread && (
+                      <Badge variant="default" className="h-[18px] text-[10px] px-1.5 rounded-md">
+                        {t("msgList.new")}
+                      </Badge>
+                    )}
+                    <span className="text-[11px] text-muted-foreground">
+                      {(msg.size / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
+                </div>
+
+                {isUnread && (
+                  <span className="h-2 w-2 rounded-full bg-primary shrink-0 mt-2" />
+                )}
+              </div>
+            </button>
+          );
+        })}
       </div>
     </ScrollArea>
   );

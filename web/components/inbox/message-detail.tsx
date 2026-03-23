@@ -2,12 +2,15 @@
 
 import { useState } from "react";
 import { formatDistanceToNow, format } from "date-fns";
+import { zhCN, enUS } from "date-fns/locale";
 import type { MessageDetail as MessageDetailType } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { useI18n } from "@/lib/i18n";
+import { useSettings } from "@/lib/settings";
 import {
   Trash2,
   FileText,
@@ -32,12 +35,15 @@ export function MessageDetail({
   onBack,
   loading,
 }: Props) {
-  const [activeTab, setActiveTab] = useState("html");
+  const { settings } = useSettings();
+  const [activeTab, setActiveTab] = useState(settings.defaultTab);
+  const { locale, t } = useI18n();
+  const dateFnsLocale = locale === "zh" ? zhCN : enUS;
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground">
-        <div className="animate-pulse text-sm">Loading message...</div>
+        <div className="animate-pulse text-sm">{t("msgDetail.loading")}</div>
       </div>
     );
   }
@@ -56,11 +62,11 @@ export function MessageDetail({
                 className="mb-2 -ml-2 gap-1 text-muted-foreground md:hidden"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
-                Back
+                {t("msgDetail.back")}
               </Button>
             )}
             <h2 className="text-lg font-semibold leading-tight truncate">
-              {message.subject || "(no subject)"}
+              {message.subject || t("msgList.noSubject")}
             </h2>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
@@ -69,9 +75,9 @@ export function MessageDetail({
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
-                {format(new Date(message.received_at), "PPp")}
+                {format(new Date(message.received_at), "PPp", { locale: dateFnsLocale })}
                 <span className="text-xs">
-                  ({formatDistanceToNow(new Date(message.received_at), { addSuffix: true })})
+                  ({formatDistanceToNow(new Date(message.received_at), { addSuffix: true, locale: dateFnsLocale })})
                 </span>
               </span>
             </div>
@@ -106,15 +112,15 @@ export function MessageDetail({
           <TabsList className="h-8">
             <TabsTrigger value="html" className="text-xs gap-1 px-3">
               <FileText className="h-3 w-3" />
-              HTML
+              {t("msgDetail.html")}
             </TabsTrigger>
             <TabsTrigger value="text" className="text-xs gap-1 px-3">
               <FileText className="h-3 w-3" />
-              Text
+              {t("msgDetail.text")}
             </TabsTrigger>
             <TabsTrigger value="source" className="text-xs gap-1 px-3">
               <Code2 className="h-3 w-3" />
-              Source
+              {t("msgDetail.source")}
             </TabsTrigger>
           </TabsList>
         </div>
@@ -130,21 +136,21 @@ export function MessageDetail({
               />
             ) : (
               <div className="p-4 text-sm text-muted-foreground">
-                No HTML content
+                {t("msgDetail.noHtml")}
               </div>
             )}
           </TabsContent>
           <TabsContent value="text" className="h-full m-0">
             <ScrollArea className="h-full">
               <pre className="p-4 text-sm whitespace-pre-wrap font-mono leading-relaxed">
-                {message.text_body || "No text content"}
+                {message.text_body || t("msgDetail.noText")}
               </pre>
             </ScrollArea>
           </TabsContent>
           <TabsContent value="source" className="h-full m-0">
             <ScrollArea className="h-full">
               <pre className="p-4 text-xs whitespace-pre-wrap font-mono leading-relaxed text-muted-foreground">
-                {rawSource || "Loading source..."}
+                {rawSource || t("msgDetail.loadingSource")}
               </pre>
             </ScrollArea>
           </TabsContent>

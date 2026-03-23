@@ -30,6 +30,7 @@ interface AuthState extends AuthSnapshot {
 
 const AuthContext = createContext<AuthState | null>(null);
 const AUTH_EVENT = "tabmail-auth-change";
+let cachedSnapshot: AuthSnapshot | null = null;
 
 function readSnapshot(): AuthSnapshot {
   if (typeof window === "undefined") {
@@ -42,13 +43,27 @@ function readSnapshot(): AuthSnapshot {
     };
   }
 
-  return {
+  const nextSnapshot = {
     adminKey: localStorage.getItem("tabmail_admin_key"),
     apiKey: localStorage.getItem("tabmail_api_key"),
     tenantId: localStorage.getItem("tabmail_tenant_id"),
     mailboxToken: localStorage.getItem("tabmail_mailbox_token"),
     mailboxAddress: localStorage.getItem("tabmail_mailbox_address"),
   };
+
+  if (
+    cachedSnapshot &&
+    cachedSnapshot.adminKey === nextSnapshot.adminKey &&
+    cachedSnapshot.apiKey === nextSnapshot.apiKey &&
+    cachedSnapshot.tenantId === nextSnapshot.tenantId &&
+    cachedSnapshot.mailboxToken === nextSnapshot.mailboxToken &&
+    cachedSnapshot.mailboxAddress === nextSnapshot.mailboxAddress
+  ) {
+    return cachedSnapshot;
+  }
+
+  cachedSnapshot = nextSnapshot;
+  return nextSnapshot;
 }
 
 function subscribe(onStoreChange: () => void) {

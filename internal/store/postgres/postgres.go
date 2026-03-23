@@ -758,7 +758,7 @@ func (s *PgStore) CountTenantMessagesSince(ctx context.Context, tenantID uuid.UU
 func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error) {
 	tag, err := s.pool.Exec(ctx, `
 		DELETE FROM messages WHERE id IN (
-			SELECT id FROM messages WHERE expires_at < $1 LIMIT $2
+			SELECT id FROM messages WHERE expires_at < $1 ORDER BY expires_at, id LIMIT $2
 		)`, before, limit)
 	if err != nil {
 		return 0, err
@@ -770,6 +770,7 @@ func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, l
 	rows, err := s.pool.Query(ctx, `
 		SELECT raw_object_key FROM messages
 		WHERE expires_at < $1 AND raw_object_key IS NOT NULL AND raw_object_key != ''
+		ORDER BY expires_at, id
 		LIMIT $2`, before, limit)
 	if err != nil {
 		return nil, err

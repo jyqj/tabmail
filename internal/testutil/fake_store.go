@@ -699,15 +699,28 @@ func (s *FakeStore) CountAllMessages(_ context.Context) (int, error) {
 func (s *FakeStore) DeleteExpiredMessages(_ context.Context, before time.Time, limit int) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	expired := make([]*models.Message, 0, len(s.messages))
+	for _, m := range s.messages {
+		if m.ExpiresAt.Before(before) {
+			cp := *m
+			expired = append(expired, &cp)
+		}
+	}
+	sort.Slice(expired, func(i, j int) bool {
+		if expired[i].ExpiresAt.Equal(expired[j].ExpiresAt) {
+			return expired[i].ID.String() < expired[j].ID.String()
+		}
+		return expired[i].ExpiresAt.Before(expired[j].ExpiresAt)
+	})
+
 	n := 0
-	for id, m := range s.messages {
+	for _, m := range expired {
 		if n >= limit {
 			break
 		}
-		if m.ExpiresAt.Before(before) {
-			delete(s.messages, id)
-			n++
-		}
+		delete(s.messages, m.ID)
+		n++
 	}
 	return n, nil
 }
@@ -715,14 +728,27 @@ func (s *FakeStore) DeleteExpiredMessages(_ context.Context, before time.Time, l
 func (s *FakeStore) ListExpiredObjectKeys(_ context.Context, before time.Time, limit int) ([]string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	var out []string
+
+	expired := make([]*models.Message, 0, len(s.messages))
 	for _, m := range s.messages {
+		if m.ExpiresAt.Before(before) && m.RawObjectKey != "" {
+			cp := *m
+			expired = append(expired, &cp)
+		}
+	}
+	sort.Slice(expired, func(i, j int) bool {
+		if expired[i].ExpiresAt.Equal(expired[j].ExpiresAt) {
+			return expired[i].ID.String() < expired[j].ID.String()
+		}
+		return expired[i].ExpiresAt.Before(expired[j].ExpiresAt)
+	})
+
+	var out []string
+	for _, m := range expired {
 		if len(out) >= limit {
 			break
 		}
-		if m.ExpiresAt.Before(before) && m.RawObjectKey != "" {
-			out = append(out, m.RawObjectKey)
-		}
+		out = append(out, m.RawObjectKey)
 	}
 	return out, nil
 }

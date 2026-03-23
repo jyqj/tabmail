@@ -126,8 +126,6 @@ func (rv *Resolver) findZone(ctx context.Context, domain string) (*models.Domain
 	return rv.findZone(ctx, parts[1])
 }
 
-var seqPattern = regexp.MustCompile(`\{n\}`)
-
 func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain string) *models.DomainRoute {
 	subdomain := strings.TrimSuffix(fullDomain, "."+zoneDomain)
 	if subdomain == zoneDomain {
@@ -170,7 +168,7 @@ func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain stri
 // extractSeqNum tries to extract the integer from a pattern like "box-{n}.mail.example.com"
 // given a candidate FQDN. Returns -1 on no match.
 func extractSeqNum(pattern, candidate1, candidate2 string) int {
-	re := seqPattern.ReplaceAllString(regexp.QuoteMeta(pattern), `(\d+)`)
+	re := strings.ReplaceAll(regexp.QuoteMeta(pattern), `\{n\}`, `(\d+)`)
 	compiled, err := regexp.Compile("^" + re + "$")
 	if err != nil {
 		return -1

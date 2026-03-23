@@ -21,6 +21,8 @@ export interface Tenant {
 }
 
 export interface TenantOverride {
+  id?: string;
+  tenant_id?: string;
   max_domains?: number | null;
   max_mailboxes_per_domain?: number | null;
   max_messages_per_mailbox?: number | null;
@@ -28,6 +30,7 @@ export interface TenantOverride {
   retention_hours?: number | null;
   rpm_limit?: number | null;
   daily_quota?: number | null;
+  updated_at?: string;
 }
 
 export interface TenantAPIKey {
@@ -38,6 +41,7 @@ export interface TenantAPIKey {
   scopes: string[];
   expires_at: string | null;
   created_at: string;
+  last_used_at?: string | null;
 }
 
 export interface APIKeyCreated extends TenantAPIKey {
@@ -85,6 +89,7 @@ export interface Mailbox {
   id: string;
   tenant_id: string;
   zone_id: string;
+  route_id?: string | null;
   local_part: string;
   resolved_domain: string;
   full_address: string;
@@ -105,6 +110,7 @@ export interface Message {
   size: number;
   seen: boolean;
   headers?: Record<string, string>;
+  raw_object_key?: string;
   received_at: string;
   expires_at: string;
 }
@@ -239,6 +245,7 @@ export interface MailboxTokenResponse {
 }
 
 export interface MonitorEvent {
+  id: string;
   type: string;
   mailbox: string;
   message_id?: string;

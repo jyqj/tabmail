@@ -3,85 +3,154 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
+import { useI18n } from "@/lib/i18n";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuthDialog } from "@/components/auth-dialog";
+import { SettingsPanel } from "@/components/settings-panel";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { healthCheck } from "@/lib/api";
-import { Mail, LayoutDashboard, Shield, BookOpen, Activity } from "lucide-react";
+import {
+  Mail,
+  LayoutDashboard,
+  Shield,
+  BookOpen,
+  Menu,
+  Inbox,
+} from "lucide-react";
 
 export function SiteHeader() {
   const { level } = useAuth();
+  const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [healthy, setHealthy] = useState<boolean | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const check = () => {
       healthCheck()
-        .then(() => {
-          if (!cancelled) setHealthy(true);
-        })
-        .catch(() => {
-          if (!cancelled) setHealthy(false);
-        });
+        .then(() => { if (!cancelled) setHealthy(true); })
+        .catch(() => { if (!cancelled) setHealthy(false); });
     };
     check();
     const timer = setInterval(check, 30_000);
-    return () => {
-      cancelled = true;
-      clearInterval(timer);
-    };
+    return () => { cancelled = true; clearInterval(timer); };
   }, []);
 
+  const navItems = [
+    ...(level === "tenant" || level === "admin"
+      ? [{ href: "/console/domains", label: t("header.console"), icon: LayoutDashboard }]
+      : []),
+    ...(level === "mailbox"
+      ? [{ href: "/", label: t("header.inbox"), icon: Inbox }]
+      : []),
+    ...(level === "admin"
+      ? [{ href: "/admin", label: t("header.admin"), icon: Shield }]
+      : []),
+    { href: "/docs", label: t("header.docs"), icon: BookOpen },
+  ];
+
+  const statusDot = healthy == null
+    ? "bg-slate-400"
+    : healthy
+      ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
+      : "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.6)]";
+
+  const statusText = healthy == null
+    ? t("header.checking")
+    : healthy ? t("header.healthy") : t("header.down");
+
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
       <div className="container flex h-14 items-center justify-between px-4 mx-auto max-w-6xl">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-            <Mail className="h-5 w-5 text-primary" />
-            <span>TabMail</span>
+        <div className="flex items-center gap-5">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-105">
+              <Mail className="h-4 w-4" />
+            </div>
+            <span className="font-semibold tracking-tight text-[15px]">TabMail</span>
           </Link>
-          <nav className="hidden md:flex items-center gap-1">
-            {(level === "tenant" || level === "admin") && (
-              <Button variant="ghost" size="sm" render={<Link href="/console/domains" />} className="gap-1.5">
-                <LayoutDashboard className="h-3.5 w-3.5" />
-                Console
-              </Button>
-            )}
-            {level === "mailbox" && (
-              <Button variant="ghost" size="sm" render={<Link href="/" />} className="gap-1.5">
-                <Mail className="h-3.5 w-3.5" />
-                Mailbox Mode
-              </Button>
-            )}
-            {level === "admin" && (
-              <Button variant="ghost" size="sm" render={<Link href="/admin" />} className="gap-1.5">
-                <Shield className="h-3.5 w-3.5" />
-                Admin
-              </Button>
-            )}
-            <Button variant="ghost" size="sm" render={<Link href="/docs" />} className="gap-1.5">
-              <BookOpen className="h-3.5 w-3.5" />
-              API Docs
-            </Button>
-          </nav>
+
+          {!isMobile && (
+            <nav className="flex items-center gap-0.5">
+              {navItems.map((item) => (
+                <Button
+                  key={item.href}
+                  variant="ghost"
+                  size="sm"
+                  render={<Link href={item.href} />}
+                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                >
+                  <item.icon className="h-3.5 w-3.5" />
+                  {item.label}
+                </Button>
+              ))}
+            </nav>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <Badge
-            variant="outline"
-            className={
-              healthy == null
-                ? "hidden sm:inline-flex border-slate-500/20 text-slate-500"
-                : healthy
-                ? "hidden sm:inline-flex border-emerald-500/20 text-emerald-600"
-                : "hidden sm:inline-flex border-rose-500/20 text-rose-600"
-            }
-          >
-            <Activity className="mr-1 h-3 w-3" />
-            {healthy == null ? "Checking" : healthy ? "API Healthy" : "API Down"}
-          </Badge>
+
+        <div className="flex items-center gap-1.5">
+          {!isMobile && (
+            <div className="flex items-center gap-1.5 mr-1">
+              <span className={`h-2 w-2 rounded-full ${statusDot} transition-colors`} />
+              <span className="text-[11px] text-muted-foreground">{statusText}</span>
+            </div>
+          )}
           <AuthDialog />
           <ThemeToggle />
+          <SettingsPanel />
+
+          {isMobile && (
+            <Sheet>
+              <SheetTrigger
+                render={<Button variant="ghost" size="icon" className="h-8 w-8" />}
+              >
+                <Menu className="h-4 w-4" />
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2.5">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+                      <Mail className="h-3.5 w-3.5" />
+                    </div>
+                    TabMail
+                  </SheetTitle>
+                  <SheetDescription>{t("header.nav")}</SheetDescription>
+                </SheetHeader>
+                <nav className="flex flex-col gap-1 px-4 pt-2">
+                  {navItems.map((item) => (
+                    <SheetClose
+                      key={item.href}
+                      render={
+                        <Link
+                          href={item.href}
+                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                        />
+                      }
+                    >
+                      <item.icon className="h-4 w-4" />
+                      {item.label}
+                    </SheetClose>
+                  ))}
+                </nav>
+                <div className="mt-auto px-4 pb-4">
+                  <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                    <span className={`h-2 w-2 rounded-full ${statusDot}`} />
+                    <span className="text-xs text-muted-foreground">API {statusText}</span>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
       </div>
     </header>

@@ -71,6 +71,19 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
+const overrideFields = [
+  "max_domains",
+  "max_mailboxes_per_domain",
+  "max_messages_per_mailbox",
+  "max_message_bytes",
+  "retention_hours",
+  "rpm_limit",
+  "daily_quota",
+] as const;
+
+type TenantOverrideEditableKey = (typeof overrideFields)[number];
+type TenantOverrideForm = Record<TenantOverrideEditableKey, string>;
+
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -92,7 +105,7 @@ export default function TenantsPage() {
   const [overrideTenant, setOverrideTenant] = useState<Tenant | null>(null);
   const [overrideSaving, setOverrideSaving] = useState(false);
   const [effectiveConfig, setEffectiveConfig] = useState<EffectiveConfig | null>(null);
-  const [overrideForm, setOverrideForm] = useState<Record<keyof TenantOverride, string>>({
+  const [overrideForm, setOverrideForm] = useState<TenantOverrideForm>({
     max_domains: "",
     max_mailboxes_per_domain: "",
     max_messages_per_mailbox: "",
@@ -209,12 +222,12 @@ export default function TenantsPage() {
 
   const handleSaveOverrides = async () => {
     if (!overrideTenant) return;
-    const body: TenantOverride = Object.fromEntries(
+    const body = Object.fromEntries(
       Object.entries(overrideForm).map(([key, value]) => [
         key,
         value.trim() === "" ? null : Number(value),
       ])
-    ) as TenantOverride;
+    ) as Pick<TenantOverride, TenantOverrideEditableKey>;
     setOverrideSaving(true);
     try {
       await updateTenantOverrides(overrideTenant.id, body);
@@ -507,17 +520,7 @@ export default function TenantsPage() {
             </Card>
 
             <div className="space-y-4">
-              {(
-                [
-                  "max_domains",
-                  "max_mailboxes_per_domain",
-                  "max_messages_per_mailbox",
-                  "max_message_bytes",
-                  "retention_hours",
-                  "rpm_limit",
-                  "daily_quota",
-                ] as const
-              ).map((field) => (
+              {overrideFields.map((field) => (
                 <div key={field} className="space-y-2">
                   <Label>{field}</Label>
                   <Input
