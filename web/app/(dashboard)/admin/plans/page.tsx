@@ -30,11 +30,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listPlans, createPlan, deletePlan } from "@/lib/api";
+import { listPlans, createPlan, deletePlan, updatePlan } from "@/lib/api";
 import type { Plan } from "@/lib/types";
-import { Plus, Trash2, CreditCard } from "lucide-react";
+import { Plus, Trash2, CreditCard, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { useI18n } from "@/lib/i18n";
 
 interface PlanFormData {
   name: string;
@@ -58,18 +59,8 @@ const defaultForm: PlanFormData = {
   daily_quota: "1000",
 };
 
-const fields: { key: keyof PlanFormData; label: string; type?: string }[] = [
-  { key: "name", label: "Plan Name" },
-  { key: "max_domains", label: "Max Domains", type: "number" },
-  { key: "max_mailboxes_per_domain", label: "Max Mailboxes / Domain", type: "number" },
-  { key: "max_messages_per_mailbox", label: "Max Messages / Mailbox", type: "number" },
-  { key: "max_message_bytes", label: "Max Message Bytes", type: "number" },
-  { key: "retention_hours", label: "Retention (hours)", type: "number" },
-  { key: "rpm_limit", label: "RPM Limit", type: "number" },
-  { key: "daily_quota", label: "Daily Quota", type: "number" },
-];
-
 export default function PlansPage() {
+  const { t } = useI18n();
   const [plans, setPlans] = useState<Plan[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -77,17 +68,33 @@ export default function PlansPage() {
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<PlanFormData>(defaultForm);
 
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
+  const [editForm, setEditForm] = useState<PlanFormData>(defaultForm);
+  const [saving, setSaving] = useState(false);
+
+  const fields: { key: keyof PlanFormData; label: string; type?: string }[] = [
+    { key: "name", label: t("plans.name") },
+    { key: "max_domains", label: t("plans.maxDomains"), type: "number" },
+    { key: "max_mailboxes_per_domain", label: t("plans.maxMailboxesPerDomain"), type: "number" },
+    { key: "max_messages_per_mailbox", label: t("plans.maxMessagesPerMailbox"), type: "number" },
+    { key: "max_message_bytes", label: t("plans.maxMessageBytes"), type: "number" },
+    { key: "retention_hours", label: t("plans.retentionHours"), type: "number" },
+    { key: "rpm_limit", label: t("plans.rpmLimit"), type: "number" },
+    { key: "daily_quota", label: t("plans.dailyQuota"), type: "number" },
+  ];
+
   const fetchPlans = useCallback(async () => {
     try {
       const res = await listPlans();
       setPlans(res.data);
       setTotal(res.data.length);
     } catch {
-      toast.error("Failed to load plans");
+      toast.error(t("plans.loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchPlans();
@@ -109,11 +116,11 @@ export default function PlansPage() {
       });
       setForm(defaultForm);
       setDialogOpen(false);
-      toast.success("Plan created");
+      toast.success(t("plans.planCreated"));
       fetchPlans();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Failed to create plan");
+      toast.error(err?.error?.message || t("plans.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -122,29 +129,70 @@ export default function PlansPage() {
   const handleDelete = async (id: string) => {
     try {
       await deletePlan(id);
-      toast.success("Plan deleted");
+      toast.success(t("plans.deleted"));
       fetchPlans();
     } catch {
-      toast.error("Failed to delete");
+      toast.error(t("plans.deleteFailed"));
+    }
+  };
+
+  const openEdit = (plan: Plan) => {
+    setEditingPlan(plan);
+    setEditForm({
+      name: plan.name,
+      max_domains: String(plan.max_domains),
+      max_mailboxes_per_domain: String(plan.max_mailboxes_per_domain),
+      max_messages_per_mailbox: String(plan.max_messages_per_mailbox),
+      max_message_bytes: String(plan.max_message_bytes),
+      retention_hours: String(plan.retention_hours),
+      rpm_limit: String(plan.rpm_limit),
+      daily_quota: String(plan.daily_quota),
+    });
+    setEditOpen(true);
+  };
+
+  const handleEdit = async () => {
+    if (!editingPlan || !editForm.name.trim()) return;
+    setSaving(true);
+    try {
+      await updatePlan(editingPlan.id, {
+        name: editForm.name.trim(),
+        max_domains: Number(editForm.max_domains),
+        max_mailboxes_per_domain: Number(editForm.max_mailboxes_per_domain),
+        max_messages_per_mailbox: Number(editForm.max_messages_per_mailbox),
+        max_message_bytes: Number(editForm.max_message_bytes),
+        retention_hours: Number(editForm.retention_hours),
+        rpm_limit: Number(editForm.rpm_limit),
+        daily_quota: Number(editForm.daily_quota),
+      });
+      setEditOpen(false);
+      setEditingPlan(null);
+      toast.success(t("plans.updated"));
+      fetchPlans();
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || t("plans.updateFailed"));
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="Plans"
-        description={`${total} plan${total !== 1 ? "s" : ""}`}
+        title={t("plans.title")}
+        description={t("plans.count", { count: total })}
         actions={
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
               <Plus className="h-3.5 w-3.5" />
-              Create Plan
+              {t("plans.createPlan")}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Create Plan</DialogTitle>
+                <DialogTitle>{t("plans.createTitle")}</DialogTitle>
                 <DialogDescription>
-                  Define default quotas and limits for tenants on this plan.
+                  {t("plans.createDesc")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
@@ -167,7 +215,7 @@ export default function PlansPage() {
                   onClick={handleCreate}
                   disabled={creating || !form.name.trim()}
                 >
-                  {creating ? "Creating..." : "Create"}
+                  {creating ? t("plans.creating") : t("plans.create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -178,9 +226,9 @@ export default function PlansPage() {
       <div className="p-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">All Plans</CardTitle>
+            <CardTitle className="text-base">{t("plans.allPlans")}</CardTitle>
             <CardDescription>
-              Predefined quota templates for tenant assignment.
+              {t("plans.allPlansDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -193,22 +241,22 @@ export default function PlansPage() {
             ) : plans.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No plans yet</p>
+                <p className="text-sm">{t("plans.noPlans")}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="text-right">Domains</TableHead>
+                      <TableHead>{t("tenants.name")}</TableHead>
+                      <TableHead className="text-right">{t("admin.domains")}</TableHead>
                       <TableHead className="text-right">MB/Domain</TableHead>
                       <TableHead className="text-right">Msg/MB</TableHead>
-                      <TableHead className="text-right">Retention</TableHead>
+                      <TableHead className="text-right">{t("plans.retention")}</TableHead>
                       <TableHead className="text-right">RPM</TableHead>
                       <TableHead className="text-right">Daily</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead className="w-10" />
+                      <TableHead>{t("plans.created")}</TableHead>
+                      <TableHead className="w-20" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -239,14 +287,24 @@ export default function PlansPage() {
                           })}
                         </TableCell>
                         <TableCell>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                            onClick={() => handleDelete(p.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => openEdit(p)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              onClick={() => handleDelete(p.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -257,6 +315,42 @@ export default function PlansPage() {
           </CardContent>
         </Card>
       </div>
+
+      {editingPlan && (
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t("plans.editPlan")}</DialogTitle>
+              <DialogDescription>
+                {t("plans.editDesc")}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
+              {fields.map((f) => (
+                <div key={f.key} className="space-y-1.5">
+                  <Label className="text-xs">{f.label}</Label>
+                  <Input
+                    type={f.type || "text"}
+                    value={editForm[f.key]}
+                    onChange={(e) =>
+                      setEditForm((prev) => ({ ...prev, [f.key]: e.target.value }))
+                    }
+                    placeholder={f.label}
+                  />
+                </div>
+              ))}
+            </div>
+            <DialogFooter>
+              <Button
+                onClick={handleEdit}
+                disabled={saving || !editForm.name.trim()}
+              >
+                {saving ? t("plans.saving") : t("plans.save")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

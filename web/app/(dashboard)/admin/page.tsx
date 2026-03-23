@@ -17,6 +17,7 @@ import {
 
 import { getStats } from "@/lib/api";
 import type { SystemStats } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,22 +31,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const statCards = [
-  { key: "tenants_count" as const, label: "Tenants", icon: Users, color: "text-blue-500" },
-  { key: "plans_count" as const, label: "Plans", icon: CreditCard, color: "text-emerald-500" },
-  { key: "domains_count" as const, label: "Domains", icon: Globe, color: "text-violet-500" },
-  { key: "mailboxes_count" as const, label: "Mailboxes", icon: Inbox, color: "text-amber-500" },
-  { key: "messages_count" as const, label: "Messages", icon: Mail, color: "text-rose-500" },
-];
-
 export default function AdminPage() {
   const [stats, setStats] = useState<SystemStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const { t } = useI18n();
+
+  const statCards = [
+    { key: "tenants_count" as const, label: t("admin.tenants"), icon: Users, color: "text-blue-500" },
+    { key: "plans_count" as const, label: t("admin.plans"), icon: CreditCard, color: "text-emerald-500" },
+    { key: "domains_count" as const, label: t("admin.domains"), icon: Globe, color: "text-violet-500" },
+    { key: "mailboxes_count" as const, label: t("admin.mailboxes"), icon: Inbox, color: "text-amber-500" },
+    { key: "messages_count" as const, label: t("admin.messages"), icon: Mail, color: "text-rose-500" },
+  ];
 
   useEffect(() => {
     getStats()
       .then((res) => setStats(res.data))
-      .catch(() => toast.error("Failed to load stats"))
+      .catch(() => toast.error(t("admin.loadFailed")))
       .finally(() => setLoading(false));
   }, []);
 
@@ -53,7 +55,7 @@ export default function AdminPage() {
 
   return (
     <div className="flex flex-col">
-      <PageHeader title="Admin Dashboard" description="Operational status, delivery telemetry, and recent system activity." />
+      <PageHeader title={t("admin.title")} description={t("admin.desc")} />
 
       <div className="space-y-4 p-4">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -79,9 +81,9 @@ export default function AdminPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Activity className="h-4 w-4 text-primary" />
-                Delivery timeline
+                {t("admin.deliveryTimeline")}
               </CardTitle>
-              <CardDescription>Rolling in-memory minute buckets for SMTP, webhook, and realtime traffic.</CardDescription>
+              <CardDescription>{t("admin.deliveryTimelineDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {loading ? (
@@ -95,19 +97,19 @@ export default function AdminPage() {
                       primary: p.smtp_accepted,
                       secondary: p.smtp_rejected,
                     }))}
-                    primaryLabel="Accepted"
-                    secondaryLabel="Rejected"
+                    primaryLabel={t("admin.accepted")}
+                    secondaryLabel={t("admin.rejected")}
                     accent="emerald"
                   />
                   <TimelineCard
-                    title="Delivery / Hooks"
+                    title={t("admin.deliveryHooks")}
                     points={series.map((p) => ({
                       label: p.at,
                       primary: p.deliveries_ok + p.webhooks_delivered,
                       secondary: p.deliveries_failed + p.webhooks_failed,
                     }))}
-                    primaryLabel="Successful"
-                    secondaryLabel="Failed"
+                    primaryLabel={t("admin.successful")}
+                    secondaryLabel={t("admin.failed")}
                     accent="violet"
                   />
                 </div>
@@ -120,37 +122,37 @@ export default function AdminPage() {
               title="SMTP"
               icon={<Mail className="h-4 w-4 text-primary" />}
               rows={[
-                ["Sessions opened", stats?.metrics.smtp.sessions_opened ?? 0],
-                ["Sessions active", stats?.metrics.smtp.sessions_active ?? 0],
-                ["Recipients accepted", stats?.metrics.smtp.recipients_accepted ?? 0],
-                ["Recipients rejected", stats?.metrics.smtp.recipients_rejected ?? 0],
-                ["Messages accepted", stats?.metrics.smtp.messages_accepted ?? 0],
-                ["Messages rejected", stats?.metrics.smtp.messages_rejected ?? 0],
+                [t("admin.sessionsOpened"), stats?.metrics.smtp.sessions_opened ?? 0],
+                [t("admin.sessionsActive"), stats?.metrics.smtp.sessions_active ?? 0],
+                [t("admin.recipientsAccepted"), stats?.metrics.smtp.recipients_accepted ?? 0],
+                [t("admin.recipientsRejected"), stats?.metrics.smtp.recipients_rejected ?? 0],
+                [t("admin.messagesAccepted"), stats?.metrics.smtp.messages_accepted ?? 0],
+                [t("admin.messagesRejected"), stats?.metrics.smtp.messages_rejected ?? 0],
               ]}
-              footer={`Bytes received: ${(stats?.metrics.smtp.bytes_received ?? 0).toLocaleString()}`}
+              footer={`${t("admin.bytesReceived")}: ${(stats?.metrics.smtp.bytes_received ?? 0).toLocaleString()}`}
               loading={loading}
             />
             <MetricsCard
-              title="Realtime"
+              title={t("admin.realtime")}
               icon={<RadioTower className="h-4 w-4 text-primary" />}
               rows={[
-                ["Subscribers", stats?.metrics.realtime.subscribers_current ?? 0],
-                ["Events published", stats?.metrics.realtime.events_published ?? 0],
+                [t("admin.subscribers"), stats?.metrics.realtime.subscribers_current ?? 0],
+                [t("admin.eventsPublished"), stats?.metrics.realtime.events_published ?? 0],
               ]}
-              footer={`Uptime: ${stats?.metrics.uptime_seconds?.toLocaleString() ?? 0}s`}
+              footer={`${t("admin.uptime")}: ${stats?.metrics.uptime_seconds?.toLocaleString() ?? 0}s`}
               loading={loading}
             />
             <MetricsCard
-              title="Webhook"
+              title={t("admin.webhook")}
               icon={<Webhook className="h-4 w-4 text-primary" />}
               rows={[
-                ["Enabled", stats?.metrics.webhooks.enabled ? "Yes" : "No"],
-                ["Configured URLs", stats?.metrics.webhooks.configured ?? 0],
-                ["Queued", stats?.metrics.webhooks.queued ?? 0],
-                ["Delivered", stats?.metrics.webhooks.delivered ?? 0],
-                ["Failed", stats?.metrics.webhooks.failed ?? 0],
-                ["Retried", stats?.metrics.webhooks.retried ?? 0],
-                ["Dead letters", stats?.metrics.webhooks.dead_letter_size ?? 0],
+                [t("admin.enabled"), stats?.metrics.webhooks.enabled ? t("admin.yes") : t("admin.no")],
+                [t("admin.configuredUrls"), stats?.metrics.webhooks.configured ?? 0],
+                [t("admin.queued"), stats?.metrics.webhooks.queued ?? 0],
+                [t("admin.delivered"), stats?.metrics.webhooks.delivered ?? 0],
+                [t("admin.failed"), stats?.metrics.webhooks.failed ?? 0],
+                [t("admin.retried"), stats?.metrics.webhooks.retried ?? 0],
+                [t("admin.deadLetters"), stats?.metrics.webhooks.dead_letter_size ?? 0],
               ]}
               loading={loading}
             />
@@ -159,14 +161,14 @@ export default function AdminPage() {
 
         <div className="grid gap-4 xl:grid-cols-2">
           <DeliveryTable
-            title="Top tenant delivery"
-            description="Delivery counters grouped by tenant."
+            title={t("admin.topTenantDelivery")}
+            description={t("admin.topTenantDeliveryDesc")}
             rows={stats?.tenant_delivery ?? []}
             loading={loading}
           />
           <DeliveryTable
-            title="Top mailbox delivery"
-            description="Most active mailboxes by delivery volume."
+            title={t("admin.topMailboxDelivery")}
+            description={t("admin.topMailboxDeliveryDesc")}
             rows={stats?.mailbox_delivery ?? []}
             loading={loading}
           />
@@ -175,8 +177,8 @@ export default function AdminPage() {
         <div className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
           <Card>
             <CardHeader>
-              <CardTitle>Recent audit</CardTitle>
-              <CardDescription>Latest admin-visible system actions.</CardDescription>
+              <CardTitle>{t("admin.recentAudit")}</CardTitle>
+              <CardDescription>{t("admin.recentAuditDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -186,15 +188,15 @@ export default function AdminPage() {
                   ))}
                 </div>
               ) : !stats?.recent_audit?.length ? (
-                <div className="text-sm text-muted-foreground">No audit entries yet.</div>
+                <div className="text-sm text-muted-foreground">{t("admin.noAuditYet")}</div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Action</TableHead>
-                      <TableHead>Actor</TableHead>
-                      <TableHead>Resource</TableHead>
-                      <TableHead>When</TableHead>
+                      <TableHead>{t("admin.action")}</TableHead>
+                      <TableHead>{t("admin.actor")}</TableHead>
+                      <TableHead>{t("admin.resource")}</TableHead>
+                      <TableHead>{t("admin.when")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -205,7 +207,7 @@ export default function AdminPage() {
                             {entry.action}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{entry.actor || "system"}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{entry.actor || t("admin.system")}</TableCell>
                         <TableCell className="text-sm">{entry.resource_type}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
@@ -222,9 +224,9 @@ export default function AdminPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <TriangleAlert className="h-4 w-4 text-amber-500" />
-                Dead-letter queue
+                {t("admin.deadLetterQueue")}
               </CardTitle>
-              <CardDescription>Webhook jobs that exhausted retries.</CardDescription>
+              <CardDescription>{t("admin.deadLetterDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               {loading ? (
@@ -234,7 +236,7 @@ export default function AdminPage() {
                   ))}
                 </div>
               ) : !stats?.dead_letters?.length ? (
-                <div className="text-sm text-muted-foreground">No dead letters.</div>
+                <div className="text-sm text-muted-foreground">{t("admin.noDeadLetters")}</div>
               ) : (
                 <div className="space-y-3">
                   {stats.dead_letters.map((item) => (
@@ -243,7 +245,7 @@ export default function AdminPage() {
                         <Badge variant="outline" className="font-mono text-[11px]">
                           {item.event_type}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">{item.attempts} attempts</span>
+                        <span className="text-xs text-muted-foreground">{t("admin.attempts", { n: item.attempts })}</span>
                       </div>
                       <div className="space-y-1 text-xs text-muted-foreground">
                         <div className="truncate">
@@ -281,12 +283,13 @@ function MetricsCard({
   loading: boolean;
   footer?: string;
 }) {
+  const { t } = useI18n();
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle className="text-base">{title}</CardTitle>
-          <CardDescription>Live process metrics</CardDescription>
+          <CardDescription>{t("admin.liveMetrics")}</CardDescription>
         </div>
         {icon}
       </CardHeader>
@@ -324,6 +327,7 @@ function DeliveryTable({
   rows: SystemStats["tenant_delivery"];
   loading: boolean;
 }) {
+  const { t } = useI18n();
   return (
     <Card>
       <CardHeader>
@@ -338,16 +342,16 @@ function DeliveryTable({
             ))}
           </div>
         ) : !rows.length ? (
-          <div className="text-sm text-muted-foreground">No delivery activity yet.</div>
+          <div className="text-sm text-muted-foreground">{t("admin.noDeliveryYet")}</div>
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Key</TableHead>
-                <TableHead className="text-right">Accepted</TableHead>
-                <TableHead className="text-right">Rejected</TableHead>
-                <TableHead className="text-right">OK</TableHead>
-                <TableHead className="text-right">Failed</TableHead>
+                <TableHead>{t("admin.key")}</TableHead>
+                <TableHead className="text-right">{t("admin.accepted")}</TableHead>
+                <TableHead className="text-right">{t("admin.rejected")}</TableHead>
+                <TableHead className="text-right">{t("admin.ok")}</TableHead>
+                <TableHead className="text-right">{t("admin.failed")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

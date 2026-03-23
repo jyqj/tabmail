@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,10 +28,19 @@ type Resolver struct {
 	store      store.Store
 	namingMode policy.NamingMode
 	stripPlus  bool
+	cacheMu    sync.RWMutex
+	zoneCache  map[string]zoneCacheEntry
+	routeCache map[uuid.UUID]routeCacheEntry
 }
 
 func New(s store.Store, namingMode policy.NamingMode, stripPlus bool) *Resolver {
-	return &Resolver{store: s, namingMode: namingMode, stripPlus: stripPlus}
+	return &Resolver{
+		store:      s,
+		namingMode: namingMode,
+		stripPlus:  stripPlus,
+		zoneCache:  map[string]zoneCacheEntry{},
+		routeCache: map[uuid.UUID]routeCacheEntry{},
+	}
 }
 
 func (rv *Resolver) StripPlus() bool {
@@ -75,7 +85,7 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		return &Result{Zone: zone, Mailbox: mb}, nil
 	}
 
-	routes, err := rv.store.ListRoutes(ctx, zone.ID)
+	routes, err := rv.listRoutes(ctx, zone.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +96,20 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 			return nil, nil
 		}
 		return &Result{Zone: zone, Route: route}, nil
+	}
+
+	cfg, err := rv.store.EffectiveConfig(ctx, zone.TenantID)
+	if err != nil {
+		return nil, fmt.Errorf("resolver: effective config: %w", err)
+	}
+	if cfg != nil && cfg.MaxMailboxesPerDomain > 0 {
+		count, err := rv.store.CountMailboxes(ctx, zone.ID)
+		if err != nil {
+			return nil, fmt.Errorf("resolver: count mailboxes: %w", err)
+		}
+		if count >= cfg.MaxMailboxesPerDomain {
+			return nil, fmt.Errorf("resolver: mailbox quota exceeded (%d/%d)", count, cfg.MaxMailboxesPerDomain)
+		}
 	}
 
 	retentionH := route.RetentionHoursOverride
@@ -112,10 +136,14 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 
 // findZone tries exact match first, then walks up parent domains.
 func (rv *Resolver) findZone(ctx context.Context, domain string) (*models.DomainZone, error) {
+	if zone, ok := rv.getCachedZone(domain); ok {
+		return zone, nil
+	}
 	z, err := rv.store.GetZoneByDomain(ctx, domain)
 	if err != nil {
 		return nil, err
 	}
+	rv.setCachedZone(domain, z)
 	if z != nil {
 		return z, nil
 	}
@@ -126,18 +154,35 @@ func (rv *Resolver) findZone(ctx context.Context, domain string) (*models.Domain
 	return rv.findZone(ctx, parts[1])
 }
 
+type routeCandidate struct {
+	route         *models.DomainRoute
+	priority      int
+	specificity   int
+	sequenceWidth int
+	exactFQDN     bool
+}
+
 func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain string) *models.DomainRoute {
 	subdomain := strings.TrimSuffix(fullDomain, "."+zoneDomain)
 	if subdomain == zoneDomain {
 		subdomain = ""
 	}
 	fqdn := fullDomain
+	var best *routeCandidate
 
 	for _, r := range routes {
 		switch r.RouteType {
 		case models.RouteExact:
 			if r.MatchValue == fqdn || r.MatchValue == subdomain {
-				return r
+				candidate := &routeCandidate{
+					route:       r,
+					priority:    routePriority(r.RouteType),
+					specificity: len(r.MatchValue),
+					exactFQDN:   r.MatchValue == fqdn,
+				}
+				if best == nil || betterRouteCandidate(candidate, best) {
+					best = candidate
+				}
 			}
 		case models.RouteWildcard:
 			pattern := regexp.QuoteMeta(r.MatchValue)
@@ -147,7 +192,29 @@ func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain stri
 				continue
 			}
 			if re.MatchString(fqdn) || re.MatchString(subdomain+"."+zoneDomain) {
-				return r
+				candidate := &routeCandidate{
+					route:       r,
+					priority:    routePriority(r.RouteType),
+					specificity: len(r.MatchValue),
+				}
+				if best == nil || betterRouteCandidate(candidate, best) {
+					best = candidate
+				}
+			}
+		case models.RouteDeepWildcard:
+			suffix := strings.TrimPrefix(r.MatchValue, "**.")
+			if suffix == "" || suffix == r.MatchValue {
+				continue
+			}
+			if fqdn != suffix && strings.HasSuffix(fqdn, "."+suffix) {
+				candidate := &routeCandidate{
+					route:       r,
+					priority:    routePriority(r.RouteType),
+					specificity: len(suffix),
+				}
+				if best == nil || betterRouteCandidate(candidate, best) {
+					best = candidate
+				}
 			}
 		case models.RouteSequence:
 			if r.RangeStart == nil || r.RangeEnd == nil {
@@ -158,11 +225,134 @@ func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain stri
 				continue
 			}
 			if numPart >= *r.RangeStart && numPart <= *r.RangeEnd {
-				return r
+				candidate := &routeCandidate{
+					route:         r,
+					priority:      routePriority(r.RouteType),
+					specificity:   len(r.MatchValue),
+					sequenceWidth: *r.RangeEnd - *r.RangeStart,
+				}
+				if best == nil || betterRouteCandidate(candidate, best) {
+					best = candidate
+				}
 			}
 		}
 	}
-	return nil
+	if best == nil {
+		return nil
+	}
+	return best.route
+}
+
+func routePriority(t models.RouteType) int {
+	switch t {
+	case models.RouteExact:
+		return 3
+	case models.RouteSequence:
+		return 2
+	case models.RouteWildcard:
+		return 1
+	case models.RouteDeepWildcard:
+		return 0
+	default:
+		return 0
+	}
+}
+
+func betterRouteCandidate(a, b *routeCandidate) bool {
+	if a.priority != b.priority {
+		return a.priority > b.priority
+	}
+	if a.exactFQDN != b.exactFQDN {
+		return a.exactFQDN
+	}
+	if a.specificity != b.specificity {
+		return a.specificity > b.specificity
+	}
+	if a.sequenceWidth != b.sequenceWidth {
+		return a.sequenceWidth < b.sequenceWidth
+	}
+	if !a.route.CreatedAt.Equal(b.route.CreatedAt) {
+		return a.route.CreatedAt.Before(b.route.CreatedAt)
+	}
+	return a.route.ID.String() < b.route.ID.String()
+}
+
+type zoneCacheEntry struct {
+	zone      *models.DomainZone
+	expiresAt time.Time
+}
+
+type routeCacheEntry struct {
+	routes    []*models.DomainRoute
+	expiresAt time.Time
+}
+
+const resolverCacheTTL = 15 * time.Second
+
+func (rv *Resolver) getCachedZone(domain string) (*models.DomainZone, bool) {
+	rv.cacheMu.RLock()
+	entry, ok := rv.zoneCache[domain]
+	rv.cacheMu.RUnlock()
+	if !ok || time.Now().After(entry.expiresAt) {
+		if ok {
+			rv.cacheMu.Lock()
+			delete(rv.zoneCache, domain)
+			rv.cacheMu.Unlock()
+		}
+		return nil, false
+	}
+	if entry.zone == nil {
+		return nil, true
+	}
+	cp := *entry.zone
+	return &cp, true
+}
+
+func (rv *Resolver) setCachedZone(domain string, zone *models.DomainZone) {
+	var cp *models.DomainZone
+	if zone != nil {
+		copyZone := *zone
+		cp = &copyZone
+	}
+	rv.cacheMu.Lock()
+	rv.zoneCache[domain] = zoneCacheEntry{zone: cp, expiresAt: time.Now().Add(resolverCacheTTL)}
+	rv.cacheMu.Unlock()
+}
+
+func (rv *Resolver) listRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error) {
+	rv.cacheMu.RLock()
+	entry, ok := rv.routeCache[zoneID]
+	rv.cacheMu.RUnlock()
+	if ok && time.Now().Before(entry.expiresAt) {
+		return cloneRoutes(entry.routes), nil
+	}
+
+	routes, err := rv.store.ListRoutes(ctx, zoneID)
+	if err != nil {
+		return nil, err
+	}
+	rv.cacheMu.Lock()
+	rv.routeCache[zoneID] = routeCacheEntry{
+		routes:    cloneRoutes(routes),
+		expiresAt: time.Now().Add(resolverCacheTTL),
+	}
+	rv.cacheMu.Unlock()
+	return routes, nil
+}
+
+func cloneRoutes(routes []*models.DomainRoute) []*models.DomainRoute {
+	if routes == nil {
+		return nil
+	}
+	out := make([]*models.DomainRoute, 0, len(routes))
+	for _, route := range routes {
+		if route == nil {
+			continue
+		}
+		cp := *route
+		out = append(out, &cp)
+	}
+	return out
 }
 
 // extractSeqNum tries to extract the integer from a pattern like "box-{n}.mail.example.com"

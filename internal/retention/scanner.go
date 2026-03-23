@@ -56,16 +56,23 @@ func (sc *Scanner) sweep(ctx context.Context) {
 			sc.logger.Err(err).Msg("listing expired object keys")
 			break
 		}
-		for _, key := range keys {
-			if err := sc.obj.Delete(ctx, key); err != nil {
-				sc.logger.Warn().Err(err).Str("key", key).Msg("deleting object")
-			}
-		}
 
 		n, err := sc.store.DeleteExpiredMessages(ctx, now, sc.cfg.RetentionBatchSize)
 		if err != nil {
 			sc.logger.Err(err).Msg("deleting expired messages")
 			break
+		}
+		for _, key := range dedupeStrings(keys) {
+			refs, err := sc.store.CountMessagesByObjectKey(ctx, key)
+			if err != nil {
+				sc.logger.Warn().Err(err).Str("key", key).Msg("counting object references after retention delete")
+				continue
+			}
+			if refs == 0 {
+				if err := sc.obj.Delete(ctx, key); err != nil {
+					sc.logger.Warn().Err(err).Str("key", key).Msg("deleting object")
+				}
+			}
 		}
 		total += n
 		if n < sc.cfg.RetentionBatchSize {
@@ -76,4 +83,20 @@ func (sc *Scanner) sweep(ctx context.Context) {
 	if total > 0 {
 		sc.logger.Info().Int("deleted", total).Msg("retention sweep complete")
 	}
+}
+
+func dedupeStrings(items []string) []string {
+	seen := make(map[string]struct{}, len(items))
+	out := make([]string, 0, len(items))
+	for _, item := range items {
+		if item == "" {
+			continue
+		}
+		if _, ok := seen[item]; ok {
+			continue
+		}
+		seen[item] = struct{}{}
+		out = append(out, item)
+	}
+	return out
 }

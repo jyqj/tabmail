@@ -44,8 +44,13 @@ export interface TenantAPIKey {
   last_used_at?: string | null;
 }
 
-export interface APIKeyCreated extends TenantAPIKey {
+export interface APIKeyCreated {
+  id: string;
   key: string;
+  key_prefix: string;
+  label: string;
+  scopes: string[];
+  created_at: string;
 }
 
 export interface EffectiveConfig {
@@ -69,7 +74,7 @@ export interface DomainZone {
   verified_at: string | null;
 }
 
-export type RouteType = "exact" | "wildcard" | "sequence";
+export type RouteType = "exact" | "wildcard" | "deep_wildcard" | "sequence";
 export type AccessMode = "public" | "token" | "api_key";
 
 export interface DomainRoute {
@@ -97,6 +102,14 @@ export interface Mailbox {
   retention_hours_override: number | null;
   expires_at: string | null;
   created_at: string;
+}
+
+export interface MailboxCreateInput {
+  address: string;
+  access_mode?: AccessMode;
+  password?: string;
+  retention_hours_override?: number;
+  expires_at?: string;
 }
 
 export interface Message {
@@ -147,18 +160,30 @@ export interface DNSCheck {
   details?: string[];
 }
 
+export interface VerificationChecks {
+  txt: DNSCheck;
+  mx: DNSCheck;
+  spf: DNSCheck;
+  dkim: DNSCheck;
+  dmarc: DNSCheck;
+}
+
 export interface VerificationStatus {
   txt_expected: string;
   expected_mx: string;
   is_verified?: boolean;
   mx_verified?: boolean;
-  checks: {
-    txt: DNSCheck;
-    mx: DNSCheck;
-    spf: DNSCheck;
-    dkim: DNSCheck;
-    dmarc: DNSCheck;
-  };
+  checks: VerificationChecks;
+}
+
+export interface DomainVerificationResult {
+  id: string;
+  domain: string;
+  txt_record: string;
+  is_verified: boolean;
+  mx_verified: boolean;
+  checks: VerificationChecks;
+  hint: string;
 }
 
 export interface SystemStats {
@@ -239,9 +264,24 @@ export interface SystemStats {
   }[];
 }
 
+export interface AuditEntry {
+  id: string;
+  tenant_id?: string | null;
+  actor: string;
+  action: string;
+  resource_type: string;
+  resource_id?: string | null;
+  details?: unknown;
+  created_at: string;
+}
+
 export interface MailboxTokenResponse {
   token: string;
   expires_in: number;
+}
+
+export interface MarkSeenResponse {
+  seen: boolean;
 }
 
 export interface MonitorEvent {

@@ -3,12 +3,15 @@ package smtp
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net"
 	"strings"
+	"sync"
 	"time"
 
 	gosmtp "github.com/emersion/go-smtp"
@@ -105,6 +108,9 @@ type backend struct {
 	dispatcher         *hooks.Dispatcher
 	fallbackRetentionH int
 	logger             zerolog.Logger
+	policyMu           sync.RWMutex
+	policyCache        *models.SMTPPolicy
+	policyExpiresAt    time.Time
 }
 
 func (b *backend) NewSession(c *gosmtp.Conn) (gosmtp.Session, error) {
@@ -122,7 +128,7 @@ type session struct {
 	logger     zerolog.Logger
 	from       string
 	recipients []string
-	policy     *models.SMTPPolicy
+	rcptChecks map[string]*resolver.Result
 }
 
 func (s *session) AuthPlain(_ string, _ string) error {
@@ -180,6 +186,10 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 	metrics.TenantRecipientAccepted(res.Zone.TenantID.String())
 	metrics.MailboxRecipientAccepted(addr)
 	s.recipients = append(s.recipients, addr)
+	if s.rcptChecks == nil {
+		s.rcptChecks = make(map[string]*resolver.Result)
+	}
+	s.rcptChecks[addr] = res
 	return nil
 }
 
@@ -205,14 +215,41 @@ func (s *session) Data(r io.Reader) error {
 	successes := 0
 	tenantDaily := map[uuid.UUID]int{}
 	mailboxCounts := map[uuid.UUID]int{}
+	tenantConfigs := map[uuid.UUID]*models.EffectiveConfig{}
+	pol, err := s.currentPolicy()
+	if err != nil {
+		s.logger.Warn().Err(err).Msg("load smtp policy")
+		metrics.SMTPMessageRejected()
+		return smtpErr(451, "temporary policy lookup failure")
+	}
+
+	subject := ""
+	var headersJSON json.RawMessage
+	if env != nil {
+		subject = env.GetHeader("Subject")
+		hm := make(map[string]string)
+		for _, key := range []string{"From", "To", "Cc", "Date", "Message-Id", "Reply-To", "Content-Type"} {
+			if v := env.GetHeader(key); v != "" {
+				hm[key] = v
+			}
+		}
+		headersJSON, _ = json.Marshal(hm)
+	}
+
+	objKey := ""
 
 	for _, rcpt := range s.recipients {
 		addr := sanitizeAddr(rcpt)
-		result, err := s.backend.resolver.Resolve(ctx, addr)
-		if err != nil {
-			metrics.MailboxRecipientRejected(addr)
-			s.logger.Warn().Err(err).Str("rcpt", addr).Msg("resolve failed")
-			continue
+		var result *resolver.Result
+		if checked, ok := s.rcptChecks[addr]; ok && checked != nil && checked.Mailbox != nil {
+			result = checked
+		} else {
+			result, err = s.backend.resolver.Resolve(ctx, addr)
+			if err != nil {
+				metrics.MailboxRecipientRejected(addr)
+				s.logger.Warn().Err(err).Str("rcpt", addr).Msg("resolve failed")
+				continue
+			}
 		}
 		if result == nil || result.Mailbox == nil || result.Zone == nil {
 			metrics.MailboxRecipientRejected(addr)
@@ -229,19 +266,18 @@ func (s *session) Data(r io.Reader) error {
 		}
 
 		mb := result.Mailbox
-		pol, err := s.currentPolicy()
-		if err != nil {
-			s.logger.Warn().Err(err).Msg("load smtp policy")
-			continue
-		}
 		if !policy.ShouldStoreDomain(mb.ResolvedDomain, pol.DefaultStore, pol.StoreDomains, pol.DiscardDomains) {
 			s.logger.Info().Str("mailbox", mb.FullAddress).Msg("message accepted but discarded by store policy")
 			continue
 		}
-		cfg, err := s.backend.store.EffectiveConfig(ctx, mb.TenantID)
-		if err != nil || cfg == nil {
-			s.logger.Warn().Err(err).Str("mailbox", mb.FullAddress).Msg("load tenant config")
-			continue
+		cfg, ok := tenantConfigs[mb.TenantID]
+		if !ok {
+			cfg, err = s.backend.store.EffectiveConfig(ctx, mb.TenantID)
+			if err != nil || cfg == nil {
+				s.logger.Warn().Err(err).Str("mailbox", mb.FullAddress).Msg("load tenant config")
+				continue
+			}
+			tenantConfigs[mb.TenantID] = cfg
 		}
 		if cfg.MaxMessageBytes > 0 && len(raw) > cfg.MaxMessageBytes {
 			s.logger.Warn().
@@ -283,24 +319,20 @@ func (s *session) Data(r io.Reader) error {
 		}
 
 		retH := resolveRetention(s.backend.store, ctx, result, s.backend.fallbackRetentionH)
-		objKey := fmt.Sprintf("%s/%s/%s.eml", mb.TenantID, mb.ID, uuid.New())
-
-		if err := s.backend.obj.Put(ctx, objKey, bytes.NewReader(raw), int64(len(raw))); err != nil {
-			s.logger.Err(err).Str("key", objKey).Msg("storing raw .eml")
-			continue
-		}
-
-		subject := ""
-		var headersJSON json.RawMessage
-		if env != nil {
-			subject = env.GetHeader("Subject")
-			hm := make(map[string]string)
-			for _, key := range []string{"From", "To", "Cc", "Date", "Message-Id", "Reply-To", "Content-Type"} {
-				if v := env.GetHeader(key); v != "" {
-					hm[key] = v
+		if objKey == "" {
+			objKey = objectKeyForRaw(raw)
+			exists, err := s.backend.obj.Exists(ctx, objKey)
+			if err != nil {
+				s.logger.Warn().Err(err).Str("key", objKey).Msg("checking raw .eml existence")
+				continue
+			}
+			if !exists {
+				if err := s.backend.obj.Put(ctx, objKey, bytes.NewReader(raw), int64(len(raw))); err != nil {
+					s.logger.Err(err).Str("key", objKey).Msg("storing raw .eml")
+					objKey = ""
+					continue
 				}
 			}
-			headersJSON, _ = json.Marshal(hm)
 		}
 
 		msg := &models.Message{
@@ -363,6 +395,7 @@ func (s *session) Data(r io.Reader) error {
 func (s *session) Reset() {
 	s.from = ""
 	s.recipients = nil
+	s.rcptChecks = nil
 }
 
 func (s *session) Logout() error {
@@ -371,19 +404,7 @@ func (s *session) Logout() error {
 }
 
 func (s *session) currentPolicy() (*models.SMTPPolicy, error) {
-	if s.policy != nil {
-		return s.policy, nil
-	}
-	pol, err := s.backend.store.GetSMTPPolicy(context.Background())
-	if err != nil {
-		return nil, err
-	}
-	if pol == nil {
-		cp := s.backend.defaultPolicy
-		pol = &cp
-	}
-	s.policy = pol
-	return pol, nil
+	return s.backend.currentPolicy(context.Background())
 }
 
 // resolveRetention applies the 4-level priority:
@@ -418,4 +439,41 @@ func smtpErr(code int, msg string) error {
 		Code:    code,
 		Message: msg,
 	}
+}
+
+func objectKeyForRaw(raw []byte) string {
+	sum := sha256.Sum256(raw)
+	hexSum := hex.EncodeToString(sum[:])
+	return fmt.Sprintf("sha256/%s/%s.eml", hexSum[:2], hexSum)
+}
+
+func (b *backend) currentPolicy(ctx context.Context) (*models.SMTPPolicy, error) {
+	b.policyMu.RLock()
+	if b.policyCache != nil && time.Now().Before(b.policyExpiresAt) {
+		cp := *b.policyCache
+		b.policyMu.RUnlock()
+		return &cp, nil
+	}
+	b.policyMu.RUnlock()
+
+	b.policyMu.Lock()
+	defer b.policyMu.Unlock()
+	if b.policyCache != nil && time.Now().Before(b.policyExpiresAt) {
+		cp := *b.policyCache
+		return &cp, nil
+	}
+
+	pol, err := b.store.GetSMTPPolicy(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if pol == nil {
+		cp := b.defaultPolicy
+		pol = &cp
+	}
+
+	cp := *pol
+	b.policyCache = &cp
+	b.policyExpiresAt = time.Now().Add(2 * time.Second)
+	return &cp, nil
 }

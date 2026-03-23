@@ -193,7 +193,9 @@ func (s *FakeStore) UpsertOverride(_ context.Context, o *models.TenantOverride) 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	cp := *o
-	if cp.ID == uuid.Nil {
+	if existing, ok := s.overrides[cp.TenantID]; ok {
+		cp.ID = existing.ID
+	} else if cp.ID == uuid.Nil {
 		cp.ID = uuid.New()
 	}
 	cp.UpdatedAt = time.Now()
@@ -678,6 +680,18 @@ func (s *FakeStore) CountMessages(_ context.Context, mailboxID uuid.UUID) (int, 
 	return n, nil
 }
 
+func (s *FakeStore) CountMessagesByObjectKey(_ context.Context, objectKey string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	n := 0
+	for _, m := range s.messages {
+		if m.RawObjectKey == objectKey {
+			n++
+		}
+	}
+	return n, nil
+}
+
 func (s *FakeStore) CountTenantMessagesSince(_ context.Context, tenantID uuid.UUID, since time.Time) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -781,6 +795,10 @@ func (s *FakeStore) ListAuditEntries(_ context.Context, limit int) ([]*models.Au
 	return out, nil
 }
 
+func (f *FakeStore) ListAuditEntriesPaged(ctx context.Context, pg models.Page) ([]*models.AuditEntry, int, error) {
+	return nil, 0, nil
+}
+
 func (s *FakeStore) CreateMonitorEvent(_ context.Context, e *models.MonitorEvent) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -863,6 +881,19 @@ func (m *MemoryObjectStore) Delete(_ context.Context, key string) error {
 	defer m.mu.Unlock()
 	delete(m.data, key)
 	return nil
+}
+
+func (m *MemoryObjectStore) Exists(_ context.Context, key string) (bool, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	_, ok := m.data[key]
+	return ok, nil
+}
+
+func (m *MemoryObjectStore) Count() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return len(m.data)
 }
 
 func cloneTenant(t *models.Tenant) *models.Tenant {

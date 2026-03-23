@@ -177,22 +177,23 @@ func (s *PgStore) UpsertOverride(ctx context.Context, o *models.TenantOverride) 
 		o.ID = uuid.New()
 	}
 	o.UpdatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	return s.pool.QueryRow(ctx, `
 		INSERT INTO tenant_overrides (id,tenant_id,max_domains,max_mailboxes_per_domain,
 			max_messages_per_mailbox,max_message_bytes,retention_hours,rpm_limit,daily_quota,updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
 		ON CONFLICT (tenant_id) DO UPDATE SET
-			max_domains=COALESCE(EXCLUDED.max_domains, tenant_overrides.max_domains),
-			max_mailboxes_per_domain=COALESCE(EXCLUDED.max_mailboxes_per_domain, tenant_overrides.max_mailboxes_per_domain),
-			max_messages_per_mailbox=COALESCE(EXCLUDED.max_messages_per_mailbox, tenant_overrides.max_messages_per_mailbox),
-			max_message_bytes=COALESCE(EXCLUDED.max_message_bytes, tenant_overrides.max_message_bytes),
-			retention_hours=COALESCE(EXCLUDED.retention_hours, tenant_overrides.retention_hours),
-			rpm_limit=COALESCE(EXCLUDED.rpm_limit, tenant_overrides.rpm_limit),
-			daily_quota=COALESCE(EXCLUDED.daily_quota, tenant_overrides.daily_quota),
-			updated_at=EXCLUDED.updated_at`,
+			max_domains=EXCLUDED.max_domains,
+			max_mailboxes_per_domain=EXCLUDED.max_mailboxes_per_domain,
+			max_messages_per_mailbox=EXCLUDED.max_messages_per_mailbox,
+			max_message_bytes=EXCLUDED.max_message_bytes,
+			retention_hours=EXCLUDED.retention_hours,
+			rpm_limit=EXCLUDED.rpm_limit,
+			daily_quota=EXCLUDED.daily_quota,
+			updated_at=EXCLUDED.updated_at
+		RETURNING id, updated_at`,
 		o.ID, o.TenantID, o.MaxDomains, o.MaxMailboxesPerDomain, o.MaxMessagesPerMailbox,
-		o.MaxMessageBytes, o.RetentionHours, o.RPMLimit, o.DailyQuota, o.UpdatedAt)
-	return err
+		o.MaxMessageBytes, o.RetentionHours, o.RPMLimit, o.DailyQuota, o.UpdatedAt).
+		Scan(&o.ID, &o.UpdatedAt)
 }
 
 func (s *PgStore) GetOverride(ctx context.Context, tenantID uuid.UUID) (*models.TenantOverride, error) {
@@ -742,6 +743,13 @@ func (s *PgStore) CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, 
 	return n, err
 }
 
+func (s *PgStore) CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error) {
+	var n int
+	err := s.pool.QueryRow(ctx,
+		`SELECT count(*) FROM messages WHERE raw_object_key=$1`, objectKey).Scan(&n)
+	return n, err
+}
+
 func (s *PgStore) CountAllMessages(ctx context.Context) (int, error) {
 	var n int
 	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM messages`).Scan(&n)
@@ -825,6 +833,33 @@ func (s *PgStore) ListAuditEntries(ctx context.Context, limit int) ([]*models.Au
 		out = append(out, e)
 	}
 	return out, rows.Err()
+}
+
+func (s *PgStore) ListAuditEntriesPaged(ctx context.Context, pg models.Page) ([]*models.AuditEntry, int, error) {
+	pg = pg.Normalize()
+	var total int
+	err := s.pool.QueryRow(ctx, `SELECT COUNT(*) FROM audit_log`).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+	rows, err := s.pool.Query(ctx, `
+		SELECT id,tenant_id,actor,action,resource_type,resource_id,details,created_at
+		FROM audit_log
+		ORDER BY created_at DESC
+		LIMIT $1 OFFSET $2`, pg.PerPage, (pg.Page-1)*pg.PerPage)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	var out []*models.AuditEntry
+	for rows.Next() {
+		e := &models.AuditEntry{}
+		if err := rows.Scan(&e.ID, &e.TenantID, &e.Actor, &e.Action, &e.ResourceType, &e.ResourceID, &e.Details, &e.CreatedAt); err != nil {
+			return nil, 0, err
+		}
+		out = append(out, e)
+	}
+	return out, total, rows.Err()
 }
 
 func (s *PgStore) CreateMonitorEvent(ctx context.Context, e *models.MonitorEvent) error {

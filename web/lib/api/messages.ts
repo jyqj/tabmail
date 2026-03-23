@@ -1,6 +1,7 @@
 import type {
   APIListResponse,
   APIResponse,
+  MarkSeenResponse,
   Message,
   MessageDetail,
 } from "../types";
@@ -17,7 +18,7 @@ export function getMessage(address: string, id: string) {
 }
 
 export function markMessageSeen(address: string, id: string) {
-  return request<APIResponse<Message>>(`/api/v1/mailbox/${encodeURIComponent(address)}/${id}`, {
+  return request<APIResponse<MarkSeenResponse>>(`/api/v1/mailbox/${encodeURIComponent(address)}/${id}`, {
     method: "PATCH",
     body: { seen: true },
   });

@@ -80,6 +80,7 @@ type Store interface {
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
 	CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error)
+	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
 	CountTenantMessagesSince(ctx context.Context, tenantID uuid.UUID, since time.Time) (int, error)
 	CountAllMessages(ctx context.Context) (int, error)
 
@@ -91,6 +92,7 @@ type Store interface {
 	// --- Audit -----------------------------------------------------------
 	InsertAudit(ctx context.Context, e *models.AuditEntry) error
 	ListAuditEntries(ctx context.Context, limit int) ([]*models.AuditEntry, error)
+	ListAuditEntriesPaged(ctx context.Context, pg models.Page) ([]*models.AuditEntry, int, error)
 
 	// --- Monitor Events --------------------------------------------------
 	CreateMonitorEvent(ctx context.Context, e *models.MonitorEvent) error
@@ -105,4 +107,5 @@ type ObjectStore interface {
 	Put(ctx context.Context, key string, r io.Reader, size int64) error
 	Get(ctx context.Context, key string) (io.ReadCloser, error)
 	Delete(ctx context.Context, key string) error
+	Exists(ctx context.Context, key string) (bool, error)
 }

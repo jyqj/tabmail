@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 
 export const metadata: Metadata = {
   title: "TabMail",
-  description: "Self-hosted temporary email system with domain binding, multi-tenancy, and API access",
+  description: "自托管临时邮件系统，支持域名绑定、多租户与 API 访问",
   icons: { icon: "/favicon.ico" },
 };
 

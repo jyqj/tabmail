@@ -39,5 +39,20 @@ func (f *FileStore) Get(_ context.Context, key string) (io.ReadCloser, error) {
 }
 
 func (f *FileStore) Delete(_ context.Context, key string) error {
-	return os.Remove(filepath.Join(f.root, key))
+	err := os.Remove(filepath.Join(f.root, key))
+	if os.IsNotExist(err) {
+		return nil
+	}
+	return err
+}
+
+func (f *FileStore) Exists(_ context.Context, key string) (bool, error) {
+	_, err := os.Stat(filepath.Join(f.root, key))
+	if err == nil {
+		return true, nil
+	}
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+	return false, err
 }

@@ -46,6 +46,9 @@ for f in migrations/*.sql; do
 done
 ```
 
+> 如果你是从旧版本升级，请确保执行到最新 migration。  
+> 当前新增了 `004_deep_wildcard_route.sql`，用于支持 `deep_wildcard` 路由类型。
+
 ## 3. 关键环境变量
 
 ### 必填
@@ -162,6 +165,12 @@ POST /api/v1/domains/{id}/verify
 GET /api/v1/domains/{id}/verification-status
 ```
 
+### 路由建议
+
+- 单层子域：`wildcard`，如 `*.mail.example.com`
+- 多层子域：`deep_wildcard`，如 `**.mail.example.com`
+- 有限编号批量地址：`sequence`，如 `box-{n}.mail.example.com`
+
 ## 7. 数据与清理
 
 ### PostgreSQL
@@ -182,6 +191,12 @@ GET /api/v1/domains/{id}/verification-status
 存：
 
 - 原始 `.eml`
+
+当前版本已支持：
+
+- 同一封原始邮件单份落盘
+- 按内容 SHA-256 做跨 SMTP 会话去重
+- 基于引用计数的对象删除保护
 
 ### 自动清理
 

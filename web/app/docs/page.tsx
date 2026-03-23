@@ -3,6 +3,7 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { getBaseUrl } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,9 +34,19 @@ const curlExamples = {
   -d '{
     "domain": "mail.example.com"
   }'`,
+  deepWildcardRoute: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \\
+  -H "X-API-Key: $TENANT_API_KEY" \\
+  -H 'Content-Type: application/json' \\
+  -d '{
+    "route_type": "deep_wildcard",
+    "match_value": "**.mail.example.com",
+    "auto_create_mailbox": true,
+    "access_mode_default": "public"
+  }'`,
 };
 
 export default function DocsPage() {
+  const { t } = useI18n();
   const [view, setView] = useState<"swagger" | "redoc" | "quickstart">("swagger");
   const baseUrl = getBaseUrl() || "http://localhost:8080";
 
@@ -52,9 +63,9 @@ export default function DocsPage() {
   const copy = async (text: string, label: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(`${label} copied`);
+      toast.success(t("docs.copied", { label }));
     } catch {
-      toast.error(`Failed to copy ${label.toLowerCase()}`);
+      toast.error(t("docs.copyFailed", { label }));
     }
   };
 
@@ -67,48 +78,47 @@ export default function DocsPage() {
             <div className="space-y-5">
               <div className="inline-flex items-center gap-2 rounded-full border bg-background px-3 py-1 text-xs text-muted-foreground shadow-sm">
                 <Sparkles className="h-3.5 w-3.5 text-primary" />
-                TabMail API Portal
+                {t("docs.badge")}
               </div>
               <div className="space-y-3">
                 <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                  One place for the spec, the console, and the auth model.
+                  {t("docs.title")}
                 </h1>
                 <p className="max-w-2xl text-base leading-7 text-muted-foreground">
-                  Explore Swagger, switch to ReDoc, inspect the raw OpenAPI file, and copy ready-to-run
-                  examples without leaving the product.
+                  {t("docs.desc")}
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-3">
                 <Button className="gap-2" onClick={() => setView("swagger")}>
                   <BookOpen className="h-4 w-4" />
-                  Open Swagger
+                  {t("docs.openSwagger")}
                 </Button>
                 <Button variant="outline" className="gap-2" onClick={() => setView("redoc")}>
                   <FileCode2 className="h-4 w-4" />
-                  Switch to ReDoc
+                  {t("docs.switchRedoc")}
                 </Button>
                 <Button variant="ghost" className="gap-2" render={<a href={links.openapi} target="_blank" rel="noreferrer" />}>
                   <ExternalLink className="h-4 w-4" />
-                  Raw OpenAPI
+                  {t("docs.rawOpenapi")}
                 </Button>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-3">
                 <PortalInfoCard
                   icon={<Shield className="h-4 w-4 text-emerald-500" />}
-                  title="Admin"
-                  description="X-Admin-Key + optional X-Tenant-ID for tenant-scoped impersonation."
+                  title={t("docs.admin")}
+                  description={t("docs.adminDesc")}
                 />
                 <PortalInfoCard
                   icon={<KeyRound className="h-4 w-4 text-sky-500" />}
-                  title="Tenant"
-                  description="X-API-Key for domains, routes, mailboxes, and protected message access."
+                  title={t("docs.tenant")}
+                  description={t("docs.tenantDesc")}
                 />
                 <PortalInfoCard
                   icon={<Mail className="h-4 w-4 text-amber-500" />}
-                  title="Mailbox"
-                  description="Bearer mailbox token for token-mode inbox access."
+                  title={t("docs.mailbox")}
+                  description={t("docs.mailboxDesc")}
                 />
               </div>
             </div>
@@ -117,16 +127,16 @@ export default function DocsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileCode2 className="h-4 w-4 text-primary" />
-                  Endpoints
+                  {t("docs.endpoints")}
                 </CardTitle>
-                <CardDescription>Copy or open the exact URLs your frontend and scripts use.</CardDescription>
+                <CardDescription>{t("docs.endpointsDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <EndpointRow label="Base URL" value={baseUrl} onCopy={() => copy(baseUrl, "Base URL")} />
-                <EndpointRow label="Swagger UI" value={links.docs} onCopy={() => copy(links.docs, "Swagger URL")} href={links.docs} />
-                <EndpointRow label="ReDoc" value={links.redoc} onCopy={() => copy(links.redoc, "ReDoc URL")} href={links.redoc} />
-                <EndpointRow label="OpenAPI" value={links.openapi} onCopy={() => copy(links.openapi, "OpenAPI URL")} href={links.openapi} />
-                <EndpointRow label="Health" value={links.health} onCopy={() => copy(links.health, "Health URL")} href={links.health} />
+                <EndpointRow label={t("docs.baseUrl")} value={baseUrl} onCopy={() => copy(baseUrl, t("docs.baseUrl"))} />
+                <EndpointRow label={t("docs.swaggerUi")} value={links.docs} onCopy={() => copy(links.docs, t("docs.swaggerUi"))} href={links.docs} />
+                <EndpointRow label={t("docs.redoc")} value={links.redoc} onCopy={() => copy(links.redoc, t("docs.redoc"))} href={links.redoc} />
+                <EndpointRow label={t("docs.openapi")} value={links.openapi} onCopy={() => copy(links.openapi, t("docs.openapi"))} href={links.openapi} />
+                <EndpointRow label={t("docs.health")} value={links.health} onCopy={() => copy(links.health, t("docs.health"))} href={links.health} />
               </CardContent>
             </Card>
           </div>
@@ -135,9 +145,9 @@ export default function DocsPage() {
         <section className="mx-auto max-w-7xl px-4 py-8">
           <Tabs value={view} onValueChange={(v) => setView(v as typeof view)} className="gap-4">
             <TabsList variant="line" className="rounded-2xl border bg-background p-1">
-              <TabsTrigger value="swagger">Swagger</TabsTrigger>
-              <TabsTrigger value="redoc">ReDoc</TabsTrigger>
-              <TabsTrigger value="quickstart">Quickstart</TabsTrigger>
+              <TabsTrigger value="swagger">{t("docs.swaggerUi")}</TabsTrigger>
+              <TabsTrigger value="redoc">{t("docs.redoc")}</TabsTrigger>
+              <TabsTrigger value="quickstart">{t("docs.quickstart")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="swagger" className="m-0">
@@ -152,47 +162,53 @@ export default function DocsPage() {
               <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
                 <Card className="bg-background/90 shadow-sm">
                   <CardHeader>
-                    <CardTitle>Auth matrix</CardTitle>
-                    <CardDescription>Choose the right credential for the job.</CardDescription>
+                    <CardTitle>{t("docs.authMatrix")}</CardTitle>
+                    <CardDescription>{t("docs.authMatrixDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <QuickRow
                       badge="Public"
-                      description="No header. Works only for public inbox reads."
+                      description={t("docs.publicDesc")}
                     />
                     <QuickRow
                       badge="X-API-Key"
-                      description="Tenant-scoped console operations and protected mailbox reads."
+                      description={t("docs.apiKeyDesc")}
                     />
                     <QuickRow
                       badge="X-Admin-Key"
-                      description="System-wide admin routes. Add X-Tenant-ID when acting like a tenant."
+                      description={t("docs.adminKeyDesc")}
                     />
                     <QuickRow
                       badge="Bearer token"
-                      description="Mailbox-scoped token for token-mode inboxes."
+                      description={t("docs.bearerDesc")}
                     />
                   </CardContent>
                 </Card>
 
                 <div className="grid gap-4">
                   <CodeCard
-                    title="Health"
-                    description="Fastest smoke check after deploy."
+                    title={t("docs.health")}
+                    description={t("docs.healthDesc")}
                     code={curlExamples.health}
-                    onCopy={() => copy(curlExamples.health, "Health curl")}
+                    onCopy={() => copy(curlExamples.health, `${t("docs.health")} curl`)}
                   />
                   <CodeCard
-                    title="Mailbox token"
-                    description="Exchange mailbox password for a bearer token."
+                    title={t("docs.mailboxTokenTitle")}
+                    description={t("docs.mailboxTokenDesc")}
                     code={curlExamples.mailboxToken}
-                    onCopy={() => copy(curlExamples.mailboxToken, "Mailbox token curl")}
+                    onCopy={() => copy(curlExamples.mailboxToken, `${t("docs.mailboxTokenTitle")} curl`)}
                   />
                   <CodeCard
-                    title="Create domain"
-                    description="Tenant-scoped domain binding request."
+                    title={t("docs.createDomainTitle")}
+                    description={t("docs.createDomainDesc")}
                     code={curlExamples.domainCreate}
-                    onCopy={() => copy(curlExamples.domainCreate, "Create domain curl")}
+                    onCopy={() => copy(curlExamples.domainCreate, `${t("docs.createDomainTitle")} curl`)}
+                  />
+                  <CodeCard
+                    title={t("docs.deepWildcardTitle")}
+                    description={t("docs.deepWildcardDesc")}
+                    code={curlExamples.deepWildcardRoute}
+                    onCopy={() => copy(curlExamples.deepWildcardRoute, `${t("docs.deepWildcardTitle")} curl`)}
                   />
                 </div>
               </div>
@@ -256,6 +272,7 @@ function EndpointRow({
 }
 
 function DocFrame({ title, src }: { title: string; src: string }) {
+  const { t } = useI18n();
   return (
     <Card className="overflow-hidden border-primary/10 bg-background shadow-lg">
       <CardHeader className="border-b bg-muted/30">
@@ -263,7 +280,7 @@ function DocFrame({ title, src }: { title: string; src: string }) {
           <BookOpen className="h-4 w-4 text-primary" />
           {title}
         </CardTitle>
-        <CardDescription>Rendered from the live backend endpoint.</CardDescription>
+        <CardDescription>{t("docs.liveRendered")}</CardDescription>
       </CardHeader>
       <CardContent className="p-0">
         <iframe src={src} className="h-[calc(100vh-17rem)] w-full border-0" title={title} />
@@ -296,6 +313,7 @@ function CodeCard({
   code: string;
   onCopy: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <Card className="overflow-hidden border-primary/10 bg-[#0b1020] text-slate-100 shadow-lg">
       <CardHeader className="border-b border-white/10">
@@ -309,7 +327,7 @@ function CodeCard({
         <div className="flex justify-end">
           <Button variant="secondary" className="gap-2" onClick={onCopy}>
             <Copy className="h-3.5 w-3.5" />
-            Copy
+            {t("docs.copy")}
           </Button>
         </div>
       </CardContent>

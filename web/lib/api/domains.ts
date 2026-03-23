@@ -1,6 +1,7 @@
 import type {
   AccessMode,
   APIResponse,
+  DomainVerificationResult,
   DomainRoute,
   DomainZone,
   RouteType,
@@ -24,7 +25,7 @@ export function deleteDomain(id: string) {
 }
 
 export function verifyDomain(id: string) {
-  return request<APIResponse<DomainZone>>(`/api/v1/domains/${id}/verify`, {
+  return request<APIResponse<DomainVerificationResult>>(`/api/v1/domains/${id}/verify`, {
     method: "POST",
   });
 }

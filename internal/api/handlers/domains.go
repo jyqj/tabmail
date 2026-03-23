@@ -300,11 +300,19 @@ func (h *DomainHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid access_mode_default")
 		return
 	}
+	if body.RetentionHoursOverride != nil && *body.RetentionHoursOverride <= 0 {
+		errBadRequest(w, "retention_hours_override must be greater than 0")
+		return
+	}
 	if body.RouteType == models.RouteSequence {
 		if body.RangeStart == nil || body.RangeEnd == nil || *body.RangeStart > *body.RangeEnd {
 			errBadRequest(w, "sequence routes require valid range_start and range_end")
 			return
 		}
+	}
+	if body.RouteType == models.RouteDeepWildcard && !strings.HasPrefix(normalizeDNSName(body.MatchValue), "**.") {
+		errBadRequest(w, "deep_wildcard routes must use a **.suffix pattern")
+		return
 	}
 
 	route := &models.DomainRoute{

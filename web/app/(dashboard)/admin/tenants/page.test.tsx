@@ -227,7 +227,7 @@ describe("admin/tenants page", () => {
 
     expect(await screen.findByText("Acme")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText("Acme Corp"), {
+    fireEvent.change(screen.getByPlaceholderText("Example: Acme Corp"), {
       target: { value: "Beta" },
     });
     fireEvent.click(screen.getByRole("button", { name: "choose-plan-1" }));

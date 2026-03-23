@@ -58,8 +58,10 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { useI18n } from "@/lib/i18n";
 
 export default function DomainsPage() {
+  const { t } = useI18n();
   const [zones, setZones] = useState<DomainZone[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -73,7 +75,7 @@ export default function DomainsPage() {
       setZones(res.data);
       setTotal(res.data.length);
     } catch {
-      toast.error("Failed to load domains");
+      toast.error(t("domains.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -90,11 +92,11 @@ export default function DomainsPage() {
       await createDomain(newDomain.trim());
       setNewDomain("");
       setDialogOpen(false);
-      toast.success("Domain created");
+      toast.success(t("domains.domainCreated"));
       fetch();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Failed to create domain");
+      toast.error(err?.error?.message || t("domains.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -103,10 +105,10 @@ export default function DomainsPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteDomain(id);
-      toast.success("Domain deleted");
+      toast.success(t("domains.deleted"));
       fetch();
     } catch {
-      toast.error("Failed to delete");
+      toast.error(t("domains.deleteFailed"));
     }
   };
 
@@ -120,34 +122,33 @@ export default function DomainsPage() {
       );
       fetch();
     } catch {
-      toast.error("Verification failed");
+      toast.error(t("domains.verifyFailed"));
     }
   };
 
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="Domains"
-        description={`${total} domain zone${total !== 1 ? "s" : ""}`}
+        title={t("domains.title")}
+        description={t("domains.count", { count: total })}
         actions={
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
               <Plus className="h-3.5 w-3.5" />
-              Add Domain
+              {t("domains.addDomain")}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Add Domain Zone</DialogTitle>
+                <DialogTitle>{t("domains.addTitle")}</DialogTitle>
                 <DialogDescription>
-                  Enter a domain or subdomain to bind. You will need to configure
-                  DNS records for verification.
+                  {t("domains.addDesc")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-2 py-4">
-                <Label htmlFor="domain">Domain</Label>
+                <Label htmlFor="domain">{t("domains.domain")}</Label>
                 <Input
                   id="domain"
-                  placeholder="mail.example.com"
+                  placeholder={t("domains.placeholder")}
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleCreate()}
@@ -155,7 +156,7 @@ export default function DomainsPage() {
               </div>
               <DialogFooter>
                 <Button onClick={handleCreate} disabled={creating || !newDomain.trim()}>
-                  {creating ? "Creating..." : "Create"}
+                  {creating ? t("domains.creating") : t("domains.create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -166,9 +167,9 @@ export default function DomainsPage() {
       <div className="p-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Domain Zones</CardTitle>
+            <CardTitle className="text-base">{t("domains.domainZones")}</CardTitle>
             <CardDescription>
-              Manage bound domains and their DNS verification status.
+              {t("domains.zonesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -181,17 +182,17 @@ export default function DomainsPage() {
             ) : zones.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Globe className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No domains yet</p>
-                <p className="text-xs mt-1">Add a domain to start receiving emails</p>
+                <p className="text-sm">{t("domains.noDomains")}</p>
+                <p className="text-xs mt-1">{t("domains.noDomainsHint")}</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Domain</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>TXT Record</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>{t("domains.domain")}</TableHead>
+                    <TableHead>{t("domains.status")}</TableHead>
+                    <TableHead>{t("domains.txtRecord")}</TableHead>
+                    <TableHead>{t("domains.created")}</TableHead>
                     <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
@@ -209,12 +210,12 @@ export default function DomainsPage() {
                           {zone.is_verified ? (
                             <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-700">
                               <CheckCircle2 className="h-3 w-3" />
-                              Verified
+                              {t("domains.verified")}
                             </Badge>
                           ) : (
                             <Badge variant="secondary" className="gap-1">
                               <XCircle className="h-3 w-3" />
-                              Pending
+                              {t("domains.pending")}
                             </Badge>
                           )}
                           {zone.mx_verified && (
@@ -242,18 +243,18 @@ export default function DomainsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem render={<Link href={`/console/domains/${zone.id}/routes`} />}>
                               <Route className="h-4 w-4 mr-2" />
-                              Routes
+                              {t("domains.routes")}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleVerify(zone.id)}>
                               <ShieldCheck className="h-4 w-4 mr-2" />
-                              Verify DNS
+                              {t("domains.verifyDns")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDelete(zone.id)}
                               className="text-destructive focus:text-destructive"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
+                              {t("domains.delete")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

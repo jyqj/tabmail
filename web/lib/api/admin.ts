@@ -2,6 +2,7 @@ import type {
   APIKeyCreated,
   APIListResponse,
   APIResponse,
+  AuditEntry,
   EffectiveConfig,
   MonitorEvent,
   Plan,
@@ -112,4 +113,10 @@ export function deletePlan(id: string) {
 
 export function getStats() {
   return request<APIResponse<SystemStats>>("/api/v1/admin/stats");
+}
+
+export function listAudit(params?: { page?: number; per_page?: number }) {
+  return request<APIListResponse<AuditEntry>>("/api/v1/admin/audit", {
+    params: params as Record<string, string | number>,
+  });
 }

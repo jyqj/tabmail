@@ -64,9 +64,9 @@ func TestAdminHandlerUpdateTenantOverridePersistsValues(t *testing.T) {
 	h, st, _, tenantID := seededAdminHandler(t)
 
 	rr := doAdminRequest(t, st, http.MethodPatch, "/api/v1/admin/tenants/"+tenantID.String(), map[string]any{
-		"max_domains":      9,
-		"retention_hours":  72,
-		"daily_quota":      500,
+		"max_domains":       9,
+		"retention_hours":   72,
+		"daily_quota":       500,
 		"max_message_bytes": 2048,
 	}, map[string]string{"id": tenantID.String()}, h.UpdateTenantOverride)
 
@@ -97,6 +97,40 @@ func TestAdminHandlerUpdateTenantOverridePersistsValues(t *testing.T) {
 	}
 	if len(audit) != 1 || audit[0].Action != "tenant.override.upsert" {
 		t.Fatalf("unexpected audit entries: %#v", audit)
+	}
+}
+
+func TestAdminHandlerUpdateTenantOverrideAllowsClearingBackToInherited(t *testing.T) {
+	h, st, _, tenantID := seededAdminHandler(t)
+
+	first := doAdminRequest(t, st, http.MethodPatch, "/api/v1/admin/tenants/"+tenantID.String(), map[string]any{
+		"max_domains":     9,
+		"retention_hours": 72,
+	}, map[string]string{"id": tenantID.String()}, h.UpdateTenantOverride)
+	if first.Code != http.StatusOK {
+		t.Fatalf("expected first update 200, got %d body=%s", first.Code, first.Body.String())
+	}
+
+	second := doAdminRequest(t, st, http.MethodPatch, "/api/v1/admin/tenants/"+tenantID.String(), map[string]any{
+		"max_domains":     nil,
+		"retention_hours": nil,
+	}, map[string]string{"id": tenantID.String()}, h.UpdateTenantOverride)
+	if second.Code != http.StatusOK {
+		t.Fatalf("expected clear update 200, got %d body=%s", second.Code, second.Body.String())
+	}
+
+	override, err := st.GetOverride(context.Background(), tenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if override == nil {
+		t.Fatal("expected override to remain stored")
+	}
+	if override.MaxDomains != nil {
+		t.Fatalf("expected max_domains to be cleared, got %#v", override.MaxDomains)
+	}
+	if override.RetentionHours != nil {
+		t.Fatalf("expected retention_hours to be cleared, got %#v", override.RetentionHours)
 	}
 }
 

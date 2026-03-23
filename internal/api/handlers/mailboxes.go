@@ -67,9 +67,11 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body struct {
-		Address    string            `json:"address"`
-		Password   string            `json:"password,omitempty"`
-		AccessMode models.AccessMode `json:"access_mode,omitempty"`
+		Address                string            `json:"address"`
+		Password               string            `json:"password,omitempty"`
+		AccessMode             models.AccessMode `json:"access_mode,omitempty"`
+		RetentionHoursOverride *int              `json:"retention_hours_override,omitempty"`
+		ExpiresAt              *string           `json:"expires_at,omitempty"`
 	}
 	if err := decodeBody(r, &body); err != nil || body.Address == "" {
 		errBadRequest(w, "address is required")
@@ -128,14 +130,34 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "password is required when access_mode=token")
 		return
 	}
+	if body.RetentionHoursOverride != nil && *body.RetentionHoursOverride <= 0 {
+		errBadRequest(w, "retention_hours_override must be greater than 0")
+		return
+	}
+
+	var expiresAt *time.Time
+	if body.ExpiresAt != nil && strings.TrimSpace(*body.ExpiresAt) != "" {
+		parsed, err := time.Parse(time.RFC3339, strings.TrimSpace(*body.ExpiresAt))
+		if err != nil {
+			errBadRequest(w, "invalid expires_at")
+			return
+		}
+		if !parsed.After(time.Now()) {
+			errBadRequest(w, "expires_at must be in the future")
+			return
+		}
+		expiresAt = &parsed
+	}
 
 	mb := &models.Mailbox{
-		TenantID:       t.ID,
-		ZoneID:         zone.ID,
-		LocalPart:      local,
-		ResolvedDomain: domain,
-		FullAddress:    mailboxKey,
-		AccessMode:     am,
+		TenantID:               t.ID,
+		ZoneID:                 zone.ID,
+		LocalPart:              local,
+		ResolvedDomain:         domain,
+		FullAddress:            mailboxKey,
+		AccessMode:             am,
+		RetentionHoursOverride: body.RetentionHoursOverride,
+		ExpiresAt:              expiresAt,
 	}
 
 	if body.Password != "" {
@@ -163,7 +185,12 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 		Action:       "mailbox.create",
 		ResourceType: "mailbox",
 		ResourceID:   uuidPtr(mb.ID),
-		Details:      mustJSON(map[string]any{"address": mb.FullAddress, "access_mode": mb.AccessMode}),
+		Details: mustJSON(map[string]any{
+			"address":                  mb.FullAddress,
+			"access_mode":              mb.AccessMode,
+			"retention_hours_override": mb.RetentionHoursOverride,
+			"expires_at":               mb.ExpiresAt,
+		}),
 	})
 	if h.dispatcher != nil {
 		h.dispatcher.Publish(hooks.Event{
@@ -206,14 +233,21 @@ func (h *MailboxHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
-	for _, key := range keys {
-		if err := h.obj.Delete(r.Context(), key); err != nil {
-			h.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during mailbox delete")
-		}
-	}
 	if err := h.store.DeleteMailbox(r.Context(), id); err != nil {
 		errInternal(w)
 		return
+	}
+	for _, key := range uniqueStrings(keys) {
+		refs, err := h.store.CountMessagesByObjectKey(r.Context(), key)
+		if err != nil {
+			h.logger.Warn().Err(err).Str("key", key).Msg("count object references during mailbox delete")
+			continue
+		}
+		if refs == 0 {
+			if err := h.obj.Delete(r.Context(), key); err != nil {
+				h.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during mailbox delete")
+			}
+		}
 	}
 	insertAudit(r.Context(), h.store, h.logger, models.AuditEntry{
 		TenantID:     uuidPtr(mb.TenantID),
@@ -319,4 +353,20 @@ func actorFromRequest(r *http.Request) string {
 		return t.ID.String()
 	}
 	return "public"
+}
+
+func uniqueStrings(items []string) []string {
+	seen := make(map[string]struct{}, len(items))
+	out := make([]string, 0, len(items))
+	for _, item := range items {
+		if item == "" {
+			continue
+		}
+		if _, ok := seen[item]; ok {
+			continue
+		}
+		seen[item] = struct{}{}
+		out = append(out, item)
+	}
+	return out
 }

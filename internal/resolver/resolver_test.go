@@ -119,6 +119,153 @@ func TestResolverResolveMatchesSequenceRoute(t *testing.T) {
 	}
 }
 
+func TestResolverRoutePriorityPrefersExactThenSequenceThenWildcard(t *testing.T) {
+	st := testutil.NewFakeStore()
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	now := time.Now()
+
+	st.SeedPlan(&models.Plan{
+		ID:                    planID,
+		Name:                  "starter",
+		MaxDomains:            5,
+		MaxMailboxesPerDomain: 50,
+		MaxMessagesPerMailbox: 200,
+		MaxMessageBytes:       1024 * 1024,
+		RetentionHours:        24,
+		RPMLimit:              60,
+		DailyQuota:            100,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{
+		ID:         zoneID,
+		TenantID:   tenantID,
+		Domain:     "mail.test",
+		IsVerified: true,
+		MXVerified: true,
+		CreatedAt:  now,
+	})
+
+	startWide, endWide := 1, 100
+	startNarrow, endNarrow := 10, 20
+
+	st.SeedRoute(&models.DomainRoute{
+		ID:                     uuid.New(),
+		ZoneID:                 zoneID,
+		RouteType:              models.RouteWildcard,
+		MatchValue:             "*.mail.test",
+		AutoCreateMailbox:      true,
+		AccessModeDefault:      models.AccessPublic,
+		RetentionHoursOverride: intPtr(72),
+		CreatedAt:              now,
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                     uuid.New(),
+		ZoneID:                 zoneID,
+		RouteType:              models.RouteSequence,
+		MatchValue:             "box-{n}.mail.test",
+		RangeStart:             &startWide,
+		RangeEnd:               &endWide,
+		AutoCreateMailbox:      true,
+		AccessModeDefault:      models.AccessAPIKey,
+		RetentionHoursOverride: intPtr(24),
+		CreatedAt:              now.Add(time.Second),
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                     uuid.New(),
+		ZoneID:                 zoneID,
+		RouteType:              models.RouteSequence,
+		MatchValue:             "box-{n}.mail.test",
+		RangeStart:             &startNarrow,
+		RangeEnd:               &endNarrow,
+		AutoCreateMailbox:      true,
+		AccessModeDefault:      models.AccessToken,
+		RetentionHoursOverride: intPtr(12),
+		CreatedAt:              now.Add(2 * time.Second),
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                     uuid.New(),
+		ZoneID:                 zoneID,
+		RouteType:              models.RouteExact,
+		MatchValue:             "box-15.mail.test",
+		AutoCreateMailbox:      true,
+		AccessModeDefault:      models.AccessPublic,
+		RetentionHoursOverride: intPtr(6),
+		CreatedAt:              now.Add(3 * time.Second),
+	})
+
+	routes, err := st.ListRoutes(context.Background(), zoneID)
+	if err != nil {
+		t.Fatalf("list routes: %v", err)
+	}
+
+	best := matchRoute(routes, "hello", "box-15.mail.test", "mail.test")
+	if best == nil || best.RouteType != models.RouteExact || best.MatchValue != "box-15.mail.test" {
+		t.Fatalf("expected exact route to win, got %#v", best)
+	}
+
+	best = matchRoute(routes, "hello", "box-12.mail.test", "mail.test")
+	if best == nil || best.RouteType != models.RouteSequence || best.AccessModeDefault != models.AccessToken {
+		t.Fatalf("expected narrower sequence route to win, got %#v", best)
+	}
+
+	best = matchRoute(routes, "hello", "foo.mail.test", "mail.test")
+	if best == nil || best.RouteType != models.RouteWildcard {
+		t.Fatalf("expected wildcard route to win fallback, got %#v", best)
+	}
+}
+
+func TestResolverResolveMatchesDeepWildcardRoute(t *testing.T) {
+	st := testutil.NewFakeStore()
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.SeedPlan(&models.Plan{
+		ID:                    planID,
+		Name:                  "starter",
+		MaxDomains:            5,
+		MaxMailboxesPerDomain: 50,
+		MaxMessagesPerMailbox: 200,
+		MaxMessageBytes:       1024 * 1024,
+		RetentionHours:        24,
+		RPMLimit:              60,
+		DailyQuota:            100,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{
+		ID:         zoneID,
+		TenantID:   tenantID,
+		Domain:     "mail.test",
+		IsVerified: true,
+		MXVerified: true,
+		CreatedAt:  time.Now(),
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                uuid.New(),
+		ZoneID:            zoneID,
+		RouteType:         models.RouteDeepWildcard,
+		MatchValue:        "**.mail.test",
+		AutoCreateMailbox: true,
+		AccessModeDefault: models.AccessPublic,
+		CreatedAt:         time.Now(),
+	})
+
+	rv := New(st, policy.NamingFull, true)
+	res, err := rv.Resolve(context.Background(), "hello@two.deep.mail.test")
+	if err != nil {
+		t.Fatalf("resolve: %v", err)
+	}
+	if res == nil || res.Route == nil || res.Route.RouteType != models.RouteDeepWildcard {
+		t.Fatalf("expected deep wildcard route, got %#v", res)
+	}
+	if res.Mailbox == nil || res.Mailbox.FullAddress != "hello@two.deep.mail.test" {
+		t.Fatalf("unexpected mailbox: %#v", res)
+	}
+}
+
+func intPtr(v int) *int { return &v }
+
 func TestResolverResolveReturnsExistingMailbox(t *testing.T) {
 	st := seededResolverStore()
 	existing := &models.Mailbox{

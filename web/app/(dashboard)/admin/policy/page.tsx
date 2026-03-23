@@ -6,6 +6,7 @@ import { SlidersHorizontal } from "lucide-react";
 
 import { getSMTPPolicy, updateSMTPPolicy } from "@/lib/api";
 import type { SMTPPolicy } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ function parseList(input: string): string[] {
 }
 
 export default function AdminPolicyPage() {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
@@ -48,7 +50,7 @@ export default function AdminPolicyPage() {
           reject_origin_domains: (p.reject_origin_domains || []).join(", "),
         });
       })
-      .catch(() => toast.error("Failed to load SMTP policy"))
+      .catch(() => toast.error(t("policy.loadFailed")))
       .finally(() => setLoading(false));
   }, []);
 
@@ -65,10 +67,10 @@ export default function AdminPolicyPage() {
         reject_origin_domains: parseList(form.reject_origin_domains),
       };
       await updateSMTPPolicy(payload);
-      toast.success("SMTP policy updated");
+      toast.success(t("policy.updated"));
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Failed to update policy");
+      toast.error(err?.error?.message || t("policy.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -77,11 +79,11 @@ export default function AdminPolicyPage() {
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="SMTP Policy"
-        description="Manage recipient acceptance and storage behavior without redeploying."
+        title={t("policy.title")}
+        description={t("policy.desc")}
         actions={
           <Button onClick={handleSave} disabled={loading || saving}>
-            {saving ? "Saving..." : "Save Policy"}
+            {saving ? t("policy.saving") : t("policy.save")}
           </Button>
         }
       />
@@ -91,10 +93,10 @@ export default function AdminPolicyPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <SlidersHorizontal className="h-4 w-4 text-primary" />
-              Delivery rules
+              {t("policy.deliveryRules")}
             </CardTitle>
             <CardDescription>
-              Use wildcard patterns such as <code>*.example.com</code>. Empty lists mean no explicit overrides.
+              {t("policy.deliveryRulesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-6 lg:grid-cols-2">
@@ -107,46 +109,46 @@ export default function AdminPolicyPage() {
             ) : (
               <>
                 <PolicyBlock
-                  title="Recipient acceptance"
-                  description="Accept everything by default, or switch to explicit allow-list mode."
+                  title={t("policy.recipientAcceptance")}
+                  description={t("policy.recipientAcceptanceDesc")}
                 >
                   <ToggleRow
-                    label="Default accept"
+                    label={t("policy.defaultAccept")}
                     checked={form.default_accept}
                     onCheckedChange={(checked) => setForm((prev) => ({ ...prev, default_accept: checked }))}
                   />
                   <ListField
-                    label="Accept domains"
-                    placeholder="example.com, *.internal"
+                    label={t("policy.acceptDomains")}
+                    placeholder={t("policy.acceptPlaceholder")}
                     value={form.accept_domains}
                     onChange={(value) => setForm((prev) => ({ ...prev, accept_domains: value }))}
                   />
                   <ListField
-                    label="Reject domains"
-                    placeholder="gmail.com, *.blocked.test"
+                    label={t("policy.rejectDomains")}
+                    placeholder={t("policy.rejectPlaceholder")}
                     value={form.reject_domains}
                     onChange={(value) => setForm((prev) => ({ ...prev, reject_domains: value }))}
                   />
                 </PolicyBlock>
 
                 <PolicyBlock
-                  title="Storage policy"
-                  description="Accept a recipient but decide whether inbound mail should be stored."
+                  title={t("policy.storagePolicy")}
+                  description={t("policy.storagePolicyDesc")}
                 >
                   <ToggleRow
-                    label="Default store"
+                    label={t("policy.defaultStore")}
                     checked={form.default_store}
                     onCheckedChange={(checked) => setForm((prev) => ({ ...prev, default_store: checked }))}
                   />
                   <ListField
-                    label="Store domains"
-                    placeholder="example.com, *.persisted"
+                    label={t("policy.storeDomains")}
+                    placeholder={t("policy.storePlaceholder")}
                     value={form.store_domains}
                     onChange={(value) => setForm((prev) => ({ ...prev, store_domains: value }))}
                   />
                   <ListField
-                    label="Discard domains"
-                    placeholder="devnull.example.com"
+                    label={t("policy.discardDomains")}
+                    placeholder={t("policy.discardPlaceholder")}
                     value={form.discard_domains}
                     onChange={(value) => setForm((prev) => ({ ...prev, discard_domains: value }))}
                   />
@@ -154,12 +156,12 @@ export default function AdminPolicyPage() {
 
                 <div className="lg:col-span-2">
                   <PolicyBlock
-                    title="Origin filtering"
-                    description="Reject inbound MAIL FROM domains before the message proceeds."
+                    title={t("policy.originFiltering")}
+                    description={t("policy.originFilteringDesc")}
                   >
                     <ListField
-                      label="Reject origin domains"
-                      placeholder="spam.test, *.blocked.sender"
+                      label={t("policy.rejectOriginDomains")}
+                      placeholder={t("policy.originPlaceholder")}
                       value={form.reject_origin_domains}
                       onChange={(value) => setForm((prev) => ({ ...prev, reject_origin_domains: value }))}
                     />

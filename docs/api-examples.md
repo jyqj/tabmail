@@ -144,6 +144,20 @@ curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \
   }'
 ```
 
+### deep wildcard route
+
+```bash
+curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \
+  -H "X-API-Key: $TENANT_API_KEY" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "route_type": "deep_wildcard",
+    "match_value": "**.mail.example.com",
+    "auto_create_mailbox": true,
+    "access_mode_default": "public"
+  }'
+```
+
 ## 10. 查看 routes
 
 ```bash

@@ -111,6 +111,48 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 	}
 }
 
+func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
+	st, obj, tenantID := seededStores(t)
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+
+	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mx.test", publicTenantID, middleware.NewRateLimiter(rdb, st, 20), zerolog.Nop())
+
+	expiresAt := time.Now().Add(2 * time.Hour).UTC().Truncate(time.Second)
+	body := doJSON(t, router, http.MethodPost, "/api/v1/mailboxes", map[string]any{
+		"address":                  "retained@mail.test",
+		"access_mode":              "token",
+		"password":                 "Passw0rd!",
+		"retention_hours_override": 6,
+		"expires_at":               expiresAt.Format(time.RFC3339),
+	}, map[string]string{
+		"X-Admin-Key": "admin-secret",
+		"X-Tenant-ID": tenantID.String(),
+	})
+
+	data := body["data"].(map[string]any)
+	if data["retention_hours_override"].(float64) != 6 {
+		t.Fatalf("expected retention override 6, got %#v", data["retention_hours_override"])
+	}
+	if data["expires_at"].(string) == "" {
+		t.Fatalf("expected expires_at in response, got %#v", data)
+	}
+
+	mb, err := st.GetMailboxByAddress(context.Background(), "retained@mail.test")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mb == nil {
+		t.Fatal("expected mailbox to be created")
+	}
+	if mb.RetentionHoursOverride == nil || *mb.RetentionHoursOverride != 6 {
+		t.Fatalf("unexpected retention override: %#v", mb.RetentionHoursOverride)
+	}
+	if mb.ExpiresAt == nil || !mb.ExpiresAt.UTC().Equal(expiresAt) {
+		t.Fatalf("unexpected expires_at: %#v", mb.ExpiresAt)
+	}
+}
+
 func seededStores(t *testing.T) (*testutil.FakeStore, *testutil.MemoryObjectStore, uuid.UUID) {
 	t.Helper()
 	st := testutil.NewFakeStore()

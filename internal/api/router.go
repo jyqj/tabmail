@@ -116,6 +116,7 @@ func NewRouter(
 			r.Patch("/admin/policy", adm.UpdateSMTPPolicy)
 			r.Get("/admin/monitor/events", mon.StreamAll)
 			r.Get("/admin/monitor/history", mon.History)
+			r.Get("/admin/audit", adm.ListAudit)
 		})
 	})
 

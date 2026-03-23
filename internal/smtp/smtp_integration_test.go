@@ -124,6 +124,107 @@ func TestSMTPMessageLifecycle(t *testing.T) {
 	}
 }
 
+func TestSMTPStoresSingleRawObjectForMultiRecipientDelivery(t *testing.T) {
+	st := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.SeedPlan(&models.Plan{
+		ID:                    planID,
+		Name:                  "test",
+		MaxDomains:            10,
+		MaxMailboxesPerDomain: 100,
+		MaxMessagesPerMailbox: 1000,
+		MaxMessageBytes:       1024 * 1024,
+		RetentionHours:        24,
+		RPMLimit:              1000,
+		DailyQuota:            1000,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{
+		ID:         zoneID,
+		TenantID:   tenantID,
+		Domain:     "mail.test",
+		IsVerified: true,
+		MXVerified: true,
+		TXTRecord:  "tabmail-verify=test",
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                uuid.New(),
+		ZoneID:            zoneID,
+		RouteType:         models.RouteDeepWildcard,
+		MatchValue:        "**.mail.test",
+		AutoCreateMailbox: true,
+		AccessModeDefault: models.AccessPublic,
+	})
+
+	addr := freeAddr(t)
+	srv := smtpsrv.NewServer(config.SMTP{
+		Addr:            addr,
+		Domain:          "mx.mail.test",
+		MaxRecipients:   10,
+		MaxMessageBytes: 1024 * 1024,
+		Timeout:         5 * time.Second,
+		DefaultAccept:   true,
+		DefaultStore:    true,
+	}, 24, st, obj, resolver.New(st, policy.NamingFull, true), realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, zerolog.Nop())
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		_ = srv.Start(ctx)
+	}()
+	waitTCP(t, addr)
+	defer func() {
+		_ = srv.Shutdown(context.Background())
+	}()
+
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	r := bufio.NewReader(conn)
+
+	expectCode(t, r, "220")
+	sendLine(t, conn, "HELO localhost")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "MAIL FROM:<sender@example.org>")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "RCPT TO:<one.deep.mail.test>")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "RCPT TO:<two.more.deep.mail.test>")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "DATA")
+	expectCode(t, r, "354")
+	sendLine(t, conn, "Subject: shared")
+	sendLine(t, conn, "")
+	sendLine(t, conn, "shared body")
+	sendLine(t, conn, ".")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "QUIT")
+
+	mb1, _ := st.GetMailboxByAddress(context.Background(), "one.deep.mail.test")
+	mb2, _ := st.GetMailboxByAddress(context.Background(), "two.more.deep.mail.test")
+	if mb1 == nil || mb2 == nil {
+		t.Fatalf("expected both mailboxes created, got %#v %#v", mb1, mb2)
+	}
+	msgs1, _, _ := st.ListMessages(context.Background(), mb1.ID, models.Page{Page: 1, PerPage: 10})
+	msgs2, _, _ := st.ListMessages(context.Background(), mb2.ID, models.Page{Page: 1, PerPage: 10})
+	if len(msgs1) != 1 || len(msgs2) != 1 {
+		t.Fatalf("expected one message per mailbox, got %d and %d", len(msgs1), len(msgs2))
+	}
+	if msgs1[0].RawObjectKey == "" || msgs1[0].RawObjectKey != msgs2[0].RawObjectKey {
+		t.Fatalf("expected shared raw object key, got %q and %q", msgs1[0].RawObjectKey, msgs2[0].RawObjectKey)
+	}
+	if obj.Count() != 1 {
+		t.Fatalf("expected single raw object, got %d", obj.Count())
+	}
+}
+
 func freeAddr(t *testing.T) string {
 	t.Helper()
 	ln, err := net.Listen("tcp", "127.0.0.1:0")

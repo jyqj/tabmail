@@ -1,4 +1,4 @@
-import type { APIListResponse, APIResponse, AccessMode, Mailbox } from "../types";
+import type { APIListResponse, APIResponse, Mailbox, MailboxCreateInput } from "../types";
 import { request } from "./base";
 
 export function listMailboxes(page = 1, perPage = 30) {
@@ -7,11 +7,7 @@ export function listMailboxes(page = 1, perPage = 30) {
   });
 }
 
-export function createMailbox(body: {
-  address: string;
-  access_mode?: AccessMode;
-  password?: string;
-}) {
+export function createMailbox(body: MailboxCreateInput) {
   return request<APIResponse<Mailbox>>("/api/v1/mailboxes", {
     method: "POST",
     body,

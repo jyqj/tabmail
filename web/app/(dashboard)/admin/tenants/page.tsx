@@ -70,6 +70,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { useI18n } from "@/lib/i18n";
 
 const overrideFields = [
   "max_domains",
@@ -85,6 +86,7 @@ type TenantOverrideEditableKey = (typeof overrideFields)[number];
 type TenantOverrideForm = Record<TenantOverrideEditableKey, string>;
 
 export default function TenantsPage() {
+  const { t } = useI18n();
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [total, setTotal] = useState(0);
@@ -122,11 +124,11 @@ export default function TenantsPage() {
       setTotal(tRes.data.length);
       setPlans(pRes.data);
     } catch {
-      toast.error("Failed to load tenants");
+      toast.error(t("tenants.loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchTenants();
@@ -140,11 +142,11 @@ export default function TenantsPage() {
       setNewName("");
       setNewPlanId("");
       setCreateOpen(false);
-      toast.success("Tenant created");
+      toast.success(t("tenants.tenantCreated"));
       fetchTenants();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Failed to create tenant");
+      toast.error(err?.error?.message || t("tenants.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -153,10 +155,10 @@ export default function TenantsPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteTenant(id);
-      toast.success("Tenant deleted");
+      toast.success(t("tenants.tenantDeleted"));
       fetchTenants();
     } catch {
-      toast.error("Failed to delete");
+      toast.error(t("tenants.deleteFailed"));
     }
   };
 
@@ -169,7 +171,7 @@ export default function TenantsPage() {
       const res = await listAPIKeys(tenantId);
       setKeys(res.data);
     } catch {
-      toast.error("Failed to load keys");
+      toast.error(t("tenants.keysLoadFailed"));
     } finally {
       setKeysLoading(false);
     }
@@ -181,9 +183,9 @@ export default function TenantsPage() {
       setNewKeyCreated(res.data);
       const keysRes = await listAPIKeys(keysTenantId);
       setKeys(keysRes.data);
-      toast.success("API key created");
+      toast.success(t("tenants.apiKeyCreated"));
     } catch {
-      toast.error("Failed to create key");
+      toast.error(t("tenants.apiKeyCreateFailed"));
     }
   };
 
@@ -191,9 +193,9 @@ export default function TenantsPage() {
     try {
       await revokeAPIKey(keysTenantId, keyId);
       setKeys((prev) => prev.filter((k) => k.id !== keyId));
-      toast.success("Key revoked");
+      toast.success(t("tenants.keyRevoked"));
     } catch {
-      toast.error("Failed to revoke");
+      toast.error(t("tenants.revokeFailed"));
     }
   };
 
@@ -216,7 +218,7 @@ export default function TenantsPage() {
       const res = await getTenantConfig(tenant.id);
       setEffectiveConfig(res.data);
     } catch {
-      toast.error("Failed to load effective config");
+      toast.error(t("tenants.configLoadFailed"));
     }
   };
 
@@ -233,10 +235,10 @@ export default function TenantsPage() {
       await updateTenantOverrides(overrideTenant.id, body);
       const res = await getTenantConfig(overrideTenant.id);
       setEffectiveConfig(res.data);
-      toast.success("Tenant overrides updated");
+      toast.success(t("tenants.overridesUpdated"));
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Failed to update overrides");
+      toast.error(err?.error?.message || t("tenants.overridesUpdateFailed"));
     } finally {
       setOverrideSaving(false);
     }
@@ -245,35 +247,35 @@ export default function TenantsPage() {
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="Tenants"
-        description={`${total} tenant${total !== 1 ? "s" : ""}`}
+        title={t("tenants.title")}
+        description={t("tenants.count", { count: total })}
         actions={
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
             <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
               <Plus className="h-3.5 w-3.5" />
-              Create Tenant
+              {t("tenants.createTenant")}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Create Tenant</DialogTitle>
+                <DialogTitle>{t("tenants.createTitle")}</DialogTitle>
                 <DialogDescription>
-                  Create a new tenant with a plan assignment.
+                  {t("tenants.createDesc")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label>Name</Label>
+                  <Label>{t("tenants.name")}</Label>
                   <Input
-                    placeholder="Acme Corp"
+                    placeholder={t("tenants.placeholder")}
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Plan</Label>
+                  <Label>{t("tenants.plan")}</Label>
                   <Select value={newPlanId} onValueChange={(v) => v && setNewPlanId(v)}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a plan" />
+                      <SelectValue placeholder={t("tenants.selectPlan")} />
                     </SelectTrigger>
                     <SelectContent>
                       {plans.map((p) => (
@@ -290,7 +292,7 @@ export default function TenantsPage() {
                   onClick={handleCreate}
                   disabled={creating || !newName.trim() || !newPlanId}
                 >
-                  {creating ? "Creating..." : "Create"}
+                  {creating ? t("tenants.creating") : t("tenants.create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -301,9 +303,9 @@ export default function TenantsPage() {
       <div className="p-4 space-y-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">All Tenants</CardTitle>
+            <CardTitle className="text-base">{t("tenants.allTenants")}</CardTitle>
             <CardDescription>
-              Manage tenants, their plans, and API keys.
+              {t("tenants.allTenantsDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -316,38 +318,38 @@ export default function TenantsPage() {
             ) : tenants.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No tenants</p>
+                <p className="text-sm">{t("tenants.noTenants")}</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>{t("tenants.name")}</TableHead>
+                    <TableHead>{t("tenants.plan")}</TableHead>
+                    <TableHead>{t("tenants.role")}</TableHead>
+                    <TableHead>{t("common.created")}</TableHead>
                     <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {tenants.map((t) => (
-                    <TableRow key={t.id}>
-                      <TableCell className="font-medium">{t.name}</TableCell>
+                  {tenants.map((tenant) => (
+                    <TableRow key={tenant.id}>
+                      <TableCell className="font-medium">{tenant.name}</TableCell>
                       <TableCell>
-                        <Badge variant="secondary">{planName(t.plan_id)}</Badge>
+                        <Badge variant="secondary">{planName(tenant.plan_id)}</Badge>
                       </TableCell>
                       <TableCell>
-                        {t.is_super ? (
+                        {tenant.is_super ? (
                           <Badge className="gap-1 bg-amber-600 hover:bg-amber-700">
                             <Shield className="h-3 w-3" />
-                            Super
+                            {t("tenants.super")}
                           </Badge>
                         ) : (
-                          <Badge variant="outline">Tenant</Badge>
+                          <Badge variant="outline">{t("tenants.tenant")}</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(t.created_at), {
+                        {formatDistanceToNow(new Date(tenant.created_at), {
                           addSuffix: true,
                         })}
                       </TableCell>
@@ -357,31 +359,31 @@ export default function TenantsPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openKeys(t.id)}>
+                            <DropdownMenuItem onClick={() => openKeys(tenant.id)}>
                               <KeyRound className="h-4 w-4 mr-2" />
-                              API Keys
+                              {t("tenants.apiKeys")}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openOverrides(t)}>
+                            <DropdownMenuItem onClick={() => openOverrides(tenant)}>
                               <SlidersHorizontal className="h-4 w-4 mr-2" />
-                              Overrides
+                              {t("tenants.overrides")}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
-                                navigator.clipboard.writeText(t.id);
-                                toast.success("Tenant ID copied");
+                                navigator.clipboard.writeText(tenant.id);
+                                toast.success(t("tenants.idCopied"));
                               }}
                             >
                               <Copy className="h-4 w-4 mr-2" />
-                              Copy ID
+                              {t("tenants.copyId")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              onClick={() => handleDelete(t.id)}
+                              onClick={() => handleDelete(tenant.id)}
                               className="text-destructive focus:text-destructive"
-                              disabled={t.is_super}
+                              disabled={tenant.is_super}
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
+                              {t("tenants.delete")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -399,16 +401,16 @@ export default function TenantsPage() {
       <Dialog open={keysOpen} onOpenChange={setKeysOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>API Keys</DialogTitle>
+            <DialogTitle>{t("tenants.apiKeysTitle")}</DialogTitle>
             <DialogDescription>
-              Manage API keys for this tenant.
+              {t("tenants.apiKeysDesc")}
             </DialogDescription>
           </DialogHeader>
 
           {newKeyCreated && (
             <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950 p-3">
               <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                New key created (shown only once):
+                {t("tenants.newKeyCreated")}
               </p>
               <div className="flex items-center gap-2">
                 <code className="flex-1 text-xs break-all bg-white dark:bg-black/20 p-2 rounded">
@@ -420,7 +422,7 @@ export default function TenantsPage() {
                   className="h-8 w-8 shrink-0"
                   onClick={() => {
                     navigator.clipboard.writeText(newKeyCreated.key);
-                    toast.success("Copied");
+                    toast.success(t("tenants.copied"));
                   }}
                 >
                   <Copy className="h-3.5 w-3.5" />
@@ -437,7 +439,7 @@ export default function TenantsPage() {
               </div>
             ) : keys.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">
-                No API keys
+                {t("tenants.noApiKeys")}
               </p>
             ) : (
               keys.map((k) => (
@@ -455,7 +457,7 @@ export default function TenantsPage() {
                       )}
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      Scopes: {k.scopes.join(", ")}
+                      {t("tenants.scopes")}: {k.scopes.join(", ")}
                     </p>
                   </div>
                   <Button
@@ -474,7 +476,7 @@ export default function TenantsPage() {
           <DialogFooter>
             <Button size="sm" className="gap-1.5" onClick={handleCreateKey}>
               <Plus className="h-3.5 w-3.5" />
-              Generate Key
+              {t("tenants.generateKey")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -483,10 +485,9 @@ export default function TenantsPage() {
       <Dialog open={overrideOpen} onOpenChange={setOverrideOpen}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Tenant Overrides</DialogTitle>
+            <DialogTitle>{t("tenants.overridesTitle")}</DialogTitle>
             <DialogDescription>
-              Override plan defaults for {overrideTenant?.name ?? "this tenant"}.
-              Leave a field empty to inherit from the assigned plan.
+              {t("tenants.overridesDesc", { name: overrideTenant?.name ?? "" })}
             </DialogDescription>
           </DialogHeader>
 
@@ -495,9 +496,9 @@ export default function TenantsPage() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
                   <Gauge className="h-4 w-4 text-primary" />
-                  Effective Config
+                  {t("tenants.effectiveConfig")}
                 </CardTitle>
-                <CardDescription>Resolved values after plan + override merge.</CardDescription>
+                <CardDescription>{t("tenants.effectiveConfigDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {effectiveConfig ? (
@@ -525,7 +526,7 @@ export default function TenantsPage() {
                   <Label>{field}</Label>
                   <Input
                     type="number"
-                    placeholder="inherit"
+                    placeholder={t("tenants.inherit")}
                     value={overrideForm[field]}
                     onChange={(e) => setOverrideForm((prev) => ({ ...prev, [field]: e.target.value }))}
                   />
@@ -536,10 +537,10 @@ export default function TenantsPage() {
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOverrideOpen(false)}>
-              Close
+              {t("tenants.close")}
             </Button>
             <Button onClick={handleSaveOverrides} disabled={overrideSaving || !overrideTenant}>
-              {overrideSaving ? "Saving..." : "Save Overrides"}
+              {overrideSaving ? t("tenants.saving") : t("tenants.saveOverrides")}
             </Button>
           </DialogFooter>
         </DialogContent>

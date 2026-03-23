@@ -265,12 +265,15 @@ func (h *MessageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		errNotFound(w, "message not found")
 		return
 	}
-	if msg.RawObjectKey != "" {
-		_ = h.obj.Delete(r.Context(), msg.RawObjectKey)
-	}
 	if err := h.store.DeleteMessage(r.Context(), msgID); err != nil {
 		errInternal(w)
 		return
+	}
+	if msg.RawObjectKey != "" {
+		refs, err := h.store.CountMessagesByObjectKey(r.Context(), msg.RawObjectKey)
+		if err == nil && refs == 0 {
+			_ = h.obj.Delete(r.Context(), msg.RawObjectKey)
+		}
 	}
 	insertAudit(r.Context(), h.store, h.logger, models.AuditEntry{
 		TenantID:     uuidPtr(mb.TenantID),
@@ -312,14 +315,21 @@ func (h *MessageHandler) PurgeMailbox(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
-	for _, key := range keys {
-		if err := h.obj.Delete(r.Context(), key); err != nil {
-			h.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during purge")
-		}
-	}
 	if err := h.store.PurgeMailbox(r.Context(), mb.ID); err != nil {
 		errInternal(w)
 		return
+	}
+	for _, key := range uniqueStrings(keys) {
+		refs, err := h.store.CountMessagesByObjectKey(r.Context(), key)
+		if err != nil {
+			h.logger.Warn().Err(err).Str("key", key).Msg("count object references during purge")
+			continue
+		}
+		if refs == 0 {
+			if err := h.obj.Delete(r.Context(), key); err != nil {
+				h.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during purge")
+			}
+		}
 	}
 	insertAudit(r.Context(), h.store, h.logger, models.AuditEntry{
 		TenantID:     uuidPtr(mb.TenantID),

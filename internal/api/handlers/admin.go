@@ -353,6 +353,20 @@ func (h *AdminHandler) Stats(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *AdminHandler) ListAudit(w http.ResponseWriter, r *http.Request) {
+	pg := pageFromReq(r)
+	entries, total, err := h.store.ListAuditEntriesPaged(r.Context(), pg)
+	if err != nil {
+		h.logger.Err(err).Msg("list audit")
+		errInternal(w)
+		return
+	}
+	if entries == nil {
+		entries = []*models.AuditEntry{}
+	}
+	okList(w, entries, total, pg.Page, pg.PerPage)
+}
+
 func (h *AdminHandler) GetSMTPPolicy(w http.ResponseWriter, r *http.Request) {
 	p, err := h.store.GetSMTPPolicy(r.Context())
 	if err != nil {

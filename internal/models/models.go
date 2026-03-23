@@ -92,14 +92,15 @@ type DomainZone struct {
 type RouteType string
 
 const (
-	RouteExact    RouteType = "exact"
-	RouteWildcard RouteType = "wildcard"
-	RouteSequence RouteType = "sequence"
+	RouteExact        RouteType = "exact"
+	RouteWildcard     RouteType = "wildcard"
+	RouteDeepWildcard RouteType = "deep_wildcard"
+	RouteSequence     RouteType = "sequence"
 )
 
 func (r RouteType) Valid() bool {
 	switch r {
-	case RouteExact, RouteWildcard, RouteSequence:
+	case RouteExact, RouteWildcard, RouteDeepWildcard, RouteSequence:
 		return true
 	default:
 		return false

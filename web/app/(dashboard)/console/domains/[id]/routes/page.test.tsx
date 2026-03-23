@@ -219,6 +219,9 @@ describe("console/domain routes page", () => {
     fireEvent.change(screen.getByPlaceholderText("5000"), {
       target: { value: "100" },
     });
+    fireEvent.change(screen.getByPlaceholderText("Inherit tenant default"), {
+      target: { value: "72" },
+    });
     fireEvent.click(screen.getByRole("button", { name: "true" }));
     fireEvent.click(screen.getAllByRole("button", { name: "choose-token" })[1]);
     fireEvent.click(screen.getByRole("button", { name: "Create" }));
@@ -230,6 +233,7 @@ describe("console/domain routes page", () => {
         range_start: 1,
         range_end: 100,
         auto_create_mailbox: false,
+        retention_hours_override: 72,
         access_mode_default: "token",
       });
     });

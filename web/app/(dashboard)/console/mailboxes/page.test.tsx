@@ -218,21 +218,33 @@ describe("console/mailboxes page", () => {
 
     expect(await screen.findByText("first@mail.test")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText("user@mail.example.com"), {
+    fireEvent.change(screen.getByPlaceholderText("mail.example.com"), {
       target: { value: "secure@mail.test" },
     });
     fireEvent.click(screen.getByRole("button", { name: "choose-token" }));
-    fireEvent.change(screen.getByPlaceholderText("Mailbox password"), {
+    fireEvent.change(screen.getByPlaceholderText("Enter mailbox password"), {
       target: { value: "Passw0rd!" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Inherit tenant default"), {
+      target: { value: "12" },
+    });
+    fireEvent.change(screen.getByPlaceholderText("Optional"), {
+      target: { value: "2099-01-01T08:00" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Create" }));
 
     await waitFor(() => {
-      expect(createMailboxMock).toHaveBeenCalledWith({
+      expect(createMailboxMock).toHaveBeenCalledWith(expect.objectContaining({
         address: "secure@mail.test",
         access_mode: "token",
         password: "Passw0rd!",
-      });
+        retention_hours_override: 12,
+      }));
+    });
+    await waitFor(() => {
+      const body = createMailboxMock.mock.calls[0][0];
+      expect(typeof body.expires_at).toBe("string");
+      expect(String(body.expires_at)).toContain("2099-01-01T");
     });
     await waitFor(() => {
       expect(listMailboxesMock).toHaveBeenCalledTimes(2);

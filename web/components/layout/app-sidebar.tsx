@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import { useI18n } from "@/lib/i18n";
 import {
   Sidebar,
   SidebarContent,
@@ -29,24 +30,27 @@ import {
   Home,
   LogOut,
   Shield,
+  ClipboardList,
 } from "lucide-react";
-
-const consoleItems = [
-  { href: "/console/domains", label: "Domains", icon: Globe },
-  { href: "/console/mailboxes", label: "Mailboxes", icon: Inbox },
-];
-
-const adminItems = [
-  { href: "/admin", label: "Statistics", icon: BarChart3 },
-  { href: "/admin/monitor", label: "Monitor", icon: Radar },
-  { href: "/admin/policy", label: "SMTP Policy", icon: SlidersHorizontal },
-  { href: "/admin/tenants", label: "Tenants", icon: Users },
-  { href: "/admin/plans", label: "Plans", icon: CreditCard },
-];
 
 export function AppSidebar() {
   const pathname = usePathname();
   const { level, logout } = useAuth();
+  const { t } = useI18n();
+
+  const consoleItems = [
+    { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
+    { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
+  ];
+
+  const adminItems = [
+    { href: "/admin", label: t("sidebar.statistics"), icon: BarChart3 },
+    { href: "/admin/monitor", label: t("sidebar.monitor"), icon: Radar },
+    { href: "/admin/policy", label: t("sidebar.smtpPolicy"), icon: SlidersHorizontal },
+    { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
+    { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
+    { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
+  ];
 
   return (
     <Sidebar>
@@ -63,7 +67,7 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton render={<Link href="/" />} isActive={pathname === "/"}>
                 <Home className="h-4 w-4" />
-                <span>Home</span>
+                <span>{t("sidebar.home")}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
@@ -72,7 +76,7 @@ export function AppSidebar() {
         <SidebarSeparator />
 
         <SidebarGroup>
-          <SidebarGroupLabel>Console</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("sidebar.console")}</SidebarGroupLabel>
           <SidebarMenu>
             {consoleItems.map((item) => (
               <SidebarMenuItem key={item.href}>
@@ -94,7 +98,7 @@ export function AppSidebar() {
             <SidebarGroup>
               <SidebarGroupLabel className="gap-1.5">
                 <Shield className="h-3 w-3" />
-                Admin
+                {t("sidebar.admin")}
               </SidebarGroupLabel>
               <SidebarMenu>
                 {adminItems.map((item) => (

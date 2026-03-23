@@ -45,14 +45,17 @@ import type { DomainRoute, RouteType, AccessMode } from "@/lib/types";
 import { Plus, Trash2, Route } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { useI18n } from "@/lib/i18n";
 
 const routeTypeColors: Record<RouteType, string> = {
   exact: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   wildcard: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
+  deep_wildcard: "bg-fuchsia-100 text-fuchsia-800 dark:bg-fuchsia-900/30 dark:text-fuchsia-400",
   sequence: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
 };
 
 export default function RoutesPage() {
+  const { t } = useI18n();
   const params = useParams();
   const domainId = params.id as string;
 
@@ -67,6 +70,7 @@ export default function RoutesPage() {
   const [rangeStart, setRangeStart] = useState("");
   const [rangeEnd, setRangeEnd] = useState("");
   const [autoCreate, setAutoCreate] = useState(true);
+  const [retentionHoursOverride, setRetentionHoursOverride] = useState("");
   const [accessMode, setAccessMode] = useState<AccessMode>("public");
 
   const fetchRoutes = useCallback(async () => {
@@ -75,7 +79,7 @@ export default function RoutesPage() {
       setRoutes(res.data);
       setTotal(res.data.length);
     } catch {
-      toast.error("Failed to load routes");
+      toast.error(t("routes.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -89,6 +93,7 @@ export default function RoutesPage() {
     if (!matchValue.trim()) return;
     const sequenceStart = Number(rangeStart);
     const sequenceEnd = Number(rangeEnd);
+    const retentionHours = Number(retentionHoursOverride);
     if (
       routeType === "sequence" &&
       (!rangeStart.trim() ||
@@ -97,7 +102,14 @@ export default function RoutesPage() {
         Number.isNaN(sequenceEnd) ||
         sequenceStart > sequenceEnd)
     ) {
-      toast.error("Sequence routes require a valid start/end range");
+      toast.error(t("routes.seqError"));
+      return;
+    }
+    if (
+      retentionHoursOverride.trim() &&
+      (Number.isNaN(retentionHours) || retentionHours <= 0)
+    ) {
+      toast.error(t("routes.retentionError"));
       return;
     }
     setCreating(true);
@@ -108,17 +120,19 @@ export default function RoutesPage() {
         range_start: routeType === "sequence" ? sequenceStart : undefined,
         range_end: routeType === "sequence" ? sequenceEnd : undefined,
         auto_create_mailbox: autoCreate,
+        retention_hours_override: retentionHoursOverride.trim() ? retentionHours : undefined,
         access_mode_default: accessMode,
       });
       setMatchValue("");
       setRangeStart("");
       setRangeEnd("");
+      setRetentionHoursOverride("");
       setDialogOpen(false);
-      toast.success("Route created");
+      toast.success(t("routes.routeCreated"));
       fetchRoutes();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "Failed to create route");
+      toast.error(err?.error?.message || t("routes.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -127,63 +141,71 @@ export default function RoutesPage() {
   const handleDelete = async (routeId: string) => {
     try {
       await deleteRoute(domainId, routeId);
-      toast.success("Route deleted");
+      toast.success(t("routes.deleted"));
       fetchRoutes();
     } catch {
-      toast.error("Failed to delete");
+      toast.error(t("routes.deleteFailed"));
     }
   };
 
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="Routes"
-        description={`${total} route${total !== 1 ? "s" : ""} for this domain`}
+        title={t("routes.title")}
+        description={t("routes.count", { count: total })}
         actions={
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
               <Plus className="h-3.5 w-3.5" />
-              Add Route
+              {t("routes.addRoute")}
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>Add Route</DialogTitle>
+                <DialogTitle>{t("routes.addTitle")}</DialogTitle>
                 <DialogDescription>
-                  Define a routing rule to match incoming email addresses.
+                  {t("routes.addDesc")}
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label>Route Type</Label>
+                  <Label>{t("routes.routeType")}</Label>
                   <Select value={routeType} onValueChange={(v) => setRouteType(v as RouteType)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="exact">Exact &mdash; single address</SelectItem>
-                      <SelectItem value="wildcard">Wildcard &mdash; *.domain</SelectItem>
-                      <SelectItem value="sequence">Sequence &mdash; prefix-&#123;n&#125;.domain</SelectItem>
+                      <SelectItem value="exact">{t("routes.exact")}</SelectItem>
+                      <SelectItem value="wildcard">{t("routes.wildcard")}</SelectItem>
+                      <SelectItem value="deep_wildcard">{t("routes.deepWildcard")}</SelectItem>
+                      <SelectItem value="sequence">{t("routes.sequence")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Match Value</Label>
+                  <Label>{t("routes.matchValue")}</Label>
                   <Input
                     placeholder={
                       routeType === "exact"
                         ? "user@mail.example.com"
                         : routeType === "wildcard"
                         ? "*.mail.example.com"
+                        : routeType === "deep_wildcard"
+                        ? "**.mail.example.com"
                         : "box-{n}.mail.example.com"
                     }
                     value={matchValue}
                     onChange={(e) => setMatchValue(e.target.value)}
                   />
+                  <p className="text-xs text-muted-foreground">
+                    {routeType === "deep_wildcard"
+                      ? t("routes.deepWildcardHint")
+                      : t("routes.matchHint")}
+                  </p>
                 </div>
                 {routeType === "sequence" && (
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label>Range Start</Label>
+                      <Label>{t("routes.rangeStart")}</Label>
                       <Input
                         type="number"
                         placeholder="1"
@@ -192,7 +214,7 @@ export default function RoutesPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Range End</Label>
+                      <Label>{t("routes.rangeEnd")}</Label>
                       <Input
                         type="number"
                         placeholder="5000"
@@ -203,7 +225,7 @@ export default function RoutesPage() {
                   </div>
                 )}
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="auto-create">Auto-create mailbox on receive</Label>
+                  <Label htmlFor="auto-create">{t("routes.autoCreate")}</Label>
                   <Switch
                     id="auto-create"
                     checked={autoCreate}
@@ -211,22 +233,32 @@ export default function RoutesPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Default Access Mode</Label>
+                  <Label>{t("routes.retentionHoursOverride")}</Label>
+                  <Input
+                    type="number"
+                    min="1"
+                    placeholder={t("routes.inheritDefault")}
+                    value={retentionHoursOverride}
+                    onChange={(e) => setRetentionHoursOverride(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("routes.defaultAccess")}</Label>
                   <Select value={accessMode} onValueChange={(v) => setAccessMode(v as AccessMode)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="token">Token</SelectItem>
-                      <SelectItem value="api_key">API Key</SelectItem>
+                      <SelectItem value="public">{t("routes.public")}</SelectItem>
+                      <SelectItem value="token">{t("routes.token")}</SelectItem>
+                      <SelectItem value="api_key">{t("routes.apiKey")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
               <DialogFooter>
                 <Button onClick={handleCreate} disabled={creating || !matchValue.trim()}>
-                  {creating ? "Creating..." : "Create"}
+                  {creating ? t("routes.creating") : t("routes.create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -237,9 +269,9 @@ export default function RoutesPage() {
       <div className="p-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">Domain Routes</CardTitle>
+            <CardTitle className="text-base">{t("routes.domainRoutes")}</CardTitle>
             <CardDescription>
-              Rules that map incoming email addresses to mailboxes.
+              {t("routes.routesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -252,19 +284,20 @@ export default function RoutesPage() {
             ) : routes.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Route className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">No routes yet</p>
-                <p className="text-xs mt-1">Add a route to start matching emails</p>
+                <p className="text-sm">{t("routes.noRoutes")}</p>
+                <p className="text-xs mt-1">{t("routes.noRoutesHint")}</p>
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Match Value</TableHead>
-                    <TableHead>Range</TableHead>
-                    <TableHead>Access</TableHead>
-                    <TableHead>Auto-create</TableHead>
-                    <TableHead>Created</TableHead>
+                    <TableHead>{t("routes.type")}</TableHead>
+                    <TableHead>{t("routes.matchValue")}</TableHead>
+                    <TableHead>{t("routes.range")}</TableHead>
+                    <TableHead>{t("routes.access")}</TableHead>
+                    <TableHead>{t("routes.autoCreateCol")}</TableHead>
+                    <TableHead>{t("routes.retention")}</TableHead>
+                    <TableHead>{t("routes.created")}</TableHead>
                     <TableHead className="w-10" />
                   </TableRow>
                 </TableHeader>
@@ -293,7 +326,12 @@ export default function RoutesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-sm">
-                        {route.auto_create_mailbox ? "Yes" : "No"}
+                        {route.auto_create_mailbox ? t("routes.yes") : t("routes.no")}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {route.retention_hours_override != null
+                          ? `${route.retention_hours_override}h`
+                          : t("routes.inheritDefault")}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDistanceToNow(new Date(route.created_at), {

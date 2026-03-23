@@ -9,6 +9,7 @@ export {
   getStats,
   getTenantConfig,
   listAPIKeys,
+  listAudit,
   listMonitorHistory,
   listPlans,
   listTenants,

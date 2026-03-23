@@ -120,7 +120,7 @@ components:
       properties:
         id: { type: string, format: uuid }
         zone_id: { type: string, format: uuid }
-        route_type: { type: string, enum: [exact, wildcard, sequence] }
+        route_type: { type: string, enum: [exact, wildcard, deep_wildcard, sequence] }
         match_value: { type: string }
         range_start: { type: integer, nullable: true }
         range_end: { type: integer, nullable: true }
@@ -493,7 +493,7 @@ paths:
               type: object
               required: [route_type, match_value]
               properties:
-                route_type: { type: string, enum: [exact, wildcard, sequence] }
+                route_type: { type: string, enum: [exact, wildcard, deep_wildcard, sequence] }
                 match_value: { type: string, example: "*.mail.example.com" }
                 range_start: { type: integer }
                 range_end: { type: integer }
@@ -566,6 +566,8 @@ paths:
                 address: { type: string, example: "user@mail.example.com" }
                 password: { type: string }
                 access_mode: { type: string, enum: [public, token, api_key], default: public }
+                retention_hours_override: { type: integer, nullable: true, example: 24 }
+                expires_at: { type: string, format: date-time, nullable: true }
       responses:
         "201":
           description: Created
