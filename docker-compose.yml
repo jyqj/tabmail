@@ -1,20 +1,36 @@
+name: tabmail
+
 services:
+  tabmail-migrate:
+    build: .
+    entrypoint: ["tabmail-migrate"]
+    command: ["up"]
+    environment:
+      TABMAIL_DB_DSN: "${TABMAIL_DB_DSN:?set TABMAIL_DB_DSN}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   tabmail:
     build: .
     ports:
       - "8080:8080"
       - "2525:2525"
     environment:
-      TABMAIL_ADMINKEY: "${TABMAIL_ADMIN_KEY:-changeme}"
-      TABMAIL_MAILBOX_TOKEN_SECRET: "${TABMAIL_MAILBOX_TOKEN_SECRET:-change-mailbox-token-secret}"
-      TABMAIL_DB_DSN: "postgres://tabmail:tabmail@postgres:5432/tabmail?sslmode=disable"
-      TABMAIL_REDIS_ADDR: "redis:6379"
-      TABMAIL_SMTP_DOMAIN: "${SMTP_DOMAIN:-localhost}"
+      TABMAIL_ADMINKEY: "${TABMAIL_ADMINKEY:?set TABMAIL_ADMINKEY}"
+      TABMAIL_MAILBOX_TOKEN_SECRET: "${TABMAIL_MAILBOX_TOKEN_SECRET:?set TABMAIL_MAILBOX_TOKEN_SECRET}"
+      TABMAIL_DB_DSN: "${TABMAIL_DB_DSN:?set TABMAIL_DB_DSN}"
+      TABMAIL_REDIS_ADDR: "${TABMAIL_REDIS_ADDR:?set TABMAIL_REDIS_ADDR}"
+      TABMAIL_REDIS_PASSWORD: "${TABMAIL_REDIS_PASSWORD:?set TABMAIL_REDIS_PASSWORD}"
+      TABMAIL_SMTP_DOMAIN: "${TABMAIL_SMTP_DOMAIN:?set TABMAIL_SMTP_DOMAIN}"
       TABMAIL_DATADIR: "/data"
       TABMAIL_LOGLEVEL: "info"
+      TABMAIL_ROLE: "${TABMAIL_ROLE:-all}"
     volumes:
       - mail_data:/data
     depends_on:
+      tabmail-migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
       redis:
@@ -23,26 +39,22 @@ services:
   postgres:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: tabmail
-      POSTGRES_PASSWORD: tabmail
-      POSTGRES_DB: tabmail
+      POSTGRES_USER: "${POSTGRES_USER:?set POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB:?set POSTGRES_DB}"
     volumes:
       - pg_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d:ro
-    ports:
-      - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U tabmail"]
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
       interval: 3s
       timeout: 3s
       retries: 10
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${TABMAIL_REDIS_PASSWORD:?set TABMAIL_REDIS_PASSWORD}"]
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"$${TABMAIL_REDIS_PASSWORD}\" ping"]
       interval: 3s
       timeout: 3s
       retries: 10

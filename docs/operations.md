@@ -74,6 +74,38 @@ docker compose logs -f tabmail
 
 或本地运行时直接查看进程输出。
 
+### 2.6 查看 Prometheus 指标
+
+```bash
+curl http://127.0.0.1:8080/metrics
+```
+
+重点关注：
+
+- `tabmail_ingest_backlog`
+- `tabmail_webhooks_backlog`
+- `tabmail_webhooks_dead_letter_size`
+- `tabmail_smtp_messages_rejected_total`
+- `tabmail_smtp_deliveries_failed_total`
+
+### 2.7 查看 migration 状态
+
+```bash
+make migrate-status
+```
+
+或：
+
+```bash
+psql "$TABMAIL_DB_DSN" -c "SELECT version, name, applied_at FROM schema_migrations ORDER BY version;"
+```
+
+如果应用启动时报 schema version 过旧，先执行：
+
+```bash
+make migrate
+```
+
 ---
 
 ## 3. 监控指标解释
@@ -207,6 +239,40 @@ Admin Dashboard 中的时间序列图是：
 - Loki
 - Grafana
 
+## 3.5 基线告警建议
+
+最小告警基线建议：
+
+### 告警 1：ingest backlog 持续堆积
+
+- 指标：`tabmail_ingest_backlog`
+- 建议阈值：连续 5 分钟 `> 100`
+- 说明：worker 跟不上、对象存储异常、数据库写入异常都会导致 backlog 增长
+
+### 告警 2：webhook backlog 持续堆积
+
+- 指标：`tabmail_webhooks_backlog`
+- 建议阈值：连续 5 分钟 `> 100`
+- 说明：下游 webhook 服务不可用或 worker 处理速度不足
+
+### 告警 3：dead letter 非 0
+
+- 指标：`tabmail_webhooks_dead_letter_size`
+- 建议阈值：`> 0`
+- 说明：说明已有事件进入人工处理区，应尽快排查目标 URL / 网络 / 签名错误
+
+### 告警 4：SMTP reject 激增
+
+- 指标：`tabmail_smtp_messages_rejected_total`
+- 建议方式：结合 5 分钟增量观察异常跳升
+- 说明：常见原因包括域名未验证、配额超限、对象存储异常
+
+### 告警 5：投递失败激增
+
+- 指标：`tabmail_smtp_deliveries_failed_total`
+- 建议方式：结合 5 分钟增量观察异常跳升
+- 说明：优先排查 PostgreSQL、对象存储、worker 与业务日志
+
 ---
 
 ## 4. webhook 调试
@@ -262,11 +328,86 @@ python3 -m http.server 9009
 如果只偶发 retry，但 delivered 仍增长，通常是短暂波动。  
 如果 failed 和 dead letter 持续增长，说明目标端稳定性有问题。
 
+## 5. 备份与恢复
+
+### 5.1 PostgreSQL 备份
+
+```bash
+make backup-db
+```
+
+默认输出到：
+
+- `backups/postgres-<timestamp>.dump`
+
+也可以指定文件名：
+
+```bash
+TABMAIL_DB_DSN='postgres://...' ./scripts/backup_postgres.sh backups/manual.dump
+```
+
+### 5.2 PostgreSQL 恢复
+
+```bash
+TABMAIL_DB_DSN='postgres://...' ./scripts/restore_postgres.sh backups/manual.dump
+```
+
+说明：
+
+- 恢复会执行 `pg_restore --clean --if-exists`
+- 恢复前请确保目标实例可接受覆盖
+- 恢复后建议立即执行 `make migrate-status`
+
+### 5.3 文件对象存储备份
+
+仅适用于 `TABMAIL_OBJECTSTORE=fs`：
+
+```bash
+make backup-obj
+```
+
+默认输出到：
+
+- `backups/objectstore-<timestamp>.tar.gz`
+
+### 5.4 文件对象存储恢复
+
+仅适用于 `TABMAIL_OBJECTSTORE=fs`：
+
+```bash
+TABMAIL_DATADIR=/data ./scripts/restore_files_objectstore.sh backups/objectstore-xxxx.tar.gz
+```
+
+### 5.5 S3 / MinIO 备份建议
+
+当 `TABMAIL_OBJECTSTORE=s3` 时，可以直接使用脚本：
+
+```bash
+make backup-obj-s3
+make restore-obj-s3 FILE=backups/objectstore-s3-xxxx.tar.gz
+```
+
+或：
+
+```bash
+TABMAIL_OBJECTSTORE=s3 make backup-obj
+TABMAIL_OBJECTSTORE=s3 make restore-obj FILE=backups/objectstore-s3-xxxx.tar.gz
+```
+
+同时建议配合对象存储自身能力：
+
+- S3 Versioning
+- Bucket Replication
+- 生命周期策略
+- MinIO bucket replication / snapshot
+
+数据库备份仍需单独执行，不能只备份 bucket。
+
 ---
 
-## 5. SMTP 常见问题
+## 6. SMTP 常见问题
 
-## 5.1 RCPT TO 被拒绝
+## 6.1 RCPT TO 被拒绝
 
 常见返回：
 
@@ -284,7 +425,7 @@ python3 -m http.server 9009
 5. recipient accept/reject policy 是否命中
 6. mailbox naming policy 是否导致地址规范化后找不到
 
-## 5.2 DATA 后消息没看到
+## 6.2 DATA 后消息没看到
 
 检查：
 
@@ -295,7 +436,7 @@ python3 -m http.server 9009
 5. `daily_quota / max_messages_per_mailbox` 是否超限
 6. object store 是否写入失败
 
-## 5.3 STARTTLS 不工作
+## 6.3 STARTTLS 不工作
 
 检查：
 
@@ -310,7 +451,7 @@ python3 -m http.server 9009
 openssl s_client -starttls smtp -crlf -connect 127.0.0.1:2525
 ```
 
-## 5.4 implicit TLS 不工作
+## 6.4 implicit TLS 不工作
 
 检查：
 
@@ -319,7 +460,7 @@ openssl s_client -starttls smtp -crlf -connect 127.0.0.1:2525
 
 ---
 
-## 6. mailbox naming 常见问题
+## 7. mailbox naming 常见问题
 
 当前支持：
 
@@ -364,9 +505,9 @@ example.com
 
 ---
 
-## 7. Monitor 常见问题
+## 8. Monitor 常见问题
 
-## 7.1 SSE 没事件
+## 8.1 SSE 没事件
 
 检查：
 
@@ -377,7 +518,7 @@ example.com
 
 Nginx 常见需要关闭 buffering。
 
-## 7.2 实时流有，历史没有
+## 8.2 实时流有，历史没有
 
 说明：
 
@@ -395,9 +536,9 @@ psql "$TABMAIL_DB_DSN" -c '\d monitor_events'
 
 ---
 
-## 8. Policy 常见问题
+## 9. Policy 常见问题
 
-## 8.1 明明域名存在，但收件被拒
+## 9.1 明明域名存在，但收件被拒
 
 优先检查：
 
@@ -407,7 +548,7 @@ psql "$TABMAIL_DB_DSN" -c '\d monitor_events'
 
 如果 `default_accept=false`，只有 `accept_domains` 命中的域名才会被接受。
 
-## 8.2 明明收件 accepted，但 inbox 里没有邮件
+## 9.2 明明收件 accepted，但 inbox 里没有邮件
 
 优先检查：
 
@@ -417,7 +558,7 @@ psql "$TABMAIL_DB_DSN" -c '\d monitor_events'
 
 这类情况通常是**被接受但不存储**。
 
-## 8.3 发件人被拒
+## 9.3 发件人被拒
 
 检查：
 
@@ -430,9 +571,9 @@ psql "$TABMAIL_DB_DSN" -c '\d monitor_events'
 
 ---
 
-## 9. 数据库与对象存储
+## 10. 数据库与对象存储
 
-## 9.1 查看 monitor / policy 表
+## 10.1 查看 monitor / policy 表
 
 ```bash
 psql "$TABMAIL_DB_DSN" -c '\dt'
@@ -443,13 +584,13 @@ psql "$TABMAIL_DB_DSN" -c '\dt'
 - `smtp_policies`
 - `monitor_events`
 
-## 9.2 查看最新 monitor 记录
+## 10.2 查看最新 monitor 记录
 
 ```bash
 psql "$TABMAIL_DB_DSN" -c 'select type, mailbox, sender, subject, at from monitor_events order by at desc limit 20;'
 ```
 
-## 9.3 查看最新审计
+## 10.3 查看最新审计
 
 ```bash
 psql "$TABMAIL_DB_DSN" -c 'select action, actor, resource_type, created_at from audit_log order by created_at desc limit 20;'
@@ -457,7 +598,7 @@ psql "$TABMAIL_DB_DSN" -c 'select action, actor, resource_type, created_at from 
 
 ---
 
-## 10. 建议的运维习惯
+## 11. 建议的运维习惯
 
 1. 上线前先检查：
    - health

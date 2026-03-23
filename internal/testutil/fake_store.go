@@ -1128,6 +1128,25 @@ func (s *FakeStore) ListWebhookDeliveries(_ context.Context, pg models.Page, sta
 	return out[start:end], total, nil
 }
 
+func (s *FakeStore) CountWebhookDeliveriesByState(_ context.Context, states ...string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(states) == 0 {
+		return len(s.deliveries), nil
+	}
+	set := make(map[string]struct{}, len(states))
+	for _, state := range states {
+		set[state] = struct{}{}
+	}
+	total := 0
+	for _, d := range s.deliveries {
+		if _, ok := set[d.State]; ok {
+			total++
+		}
+	}
+	return total, nil
+}
+
 func (s *FakeStore) CreateIngestJob(_ context.Context, job *models.IngestJob) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -1241,6 +1260,25 @@ func (s *FakeStore) ListIngestJobs(_ context.Context, pg models.Page, state, sou
 		end = total
 	}
 	return out[start:end], total, nil
+}
+
+func (s *FakeStore) CountIngestJobsByState(_ context.Context, states ...string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(states) == 0 {
+		return len(s.ingestJobs), nil
+	}
+	set := make(map[string]struct{}, len(states))
+	for _, state := range states {
+		set[state] = struct{}{}
+	}
+	total := 0
+	for _, job := range s.ingestJobs {
+		if _, ok := set[job.State]; ok {
+			total++
+		}
+	}
+	return total, nil
 }
 
 func (s *FakeStore) Close() error { return nil }

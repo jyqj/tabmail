@@ -5,11 +5,14 @@
 最简单方式：
 
 ```bash
+cp .env.example .env
+# 编辑 .env，填入真实 secrets
 docker compose up -d --build
 ```
 
 服务：
 
+- `tabmail-migrate`
 - `tabmail`
 - `postgres`
 - `redis`
@@ -18,36 +21,50 @@ docker compose up -d --build
 
 - HTTP: `8080`
 - SMTP: `2525`
-- PostgreSQL: `5432`
-- Redis: `6379`
+
+注意：
+
+- 默认 compose **不暴露 PostgreSQL / Redis 到宿主机**
+- 没有真实 secrets 时，Compose 会直接拒绝启动
+- 如需生产部署，优先使用 `docker-compose.prod.yml`
 
 查看状态：
 
 ```bash
 docker compose ps
 docker compose logs -f tabmail
+docker compose logs -f tabmail-migrate
 ```
 
 ## 2. 初始化数据库
 
-项目使用 `migrations/*.sql`。
+项目现在使用 `tabmail-migrate` 工具管理 schema。
 
-手工执行：
+执行最新 migration：
 
 ```bash
 make migrate
 ```
 
-等价于按顺序执行：
+查看状态：
 
 ```bash
-for f in migrations/*.sql; do
-  psql "$TABMAIL_DB_DSN" -f "$f"
-done
+make migrate-status
 ```
 
-> 如果你是从旧版本升级，请确保执行到最新 migration。  
-> 当前新增了 `004_deep_wildcard_route.sql`，用于支持 `deep_wildcard` 路由类型。
+回滚最近一步：
+
+```bash
+make migrate-down STEPS=1
+```
+
+也可以直接调用二进制：
+
+```bash
+go run ./cmd/tabmail-migrate status
+go run ./cmd/tabmail-migrate up
+go run ./cmd/tabmail-migrate down -steps 1
+```
 
 ## 3. 关键环境变量
 
@@ -56,6 +73,10 @@ done
 ```bash
 export TABMAIL_ADMINKEY='change-this-admin-key'
 export TABMAIL_MAILBOX_TOKEN_SECRET='change-this-mailbox-token-secret'
+export POSTGRES_USER='tabmail'
+export POSTGRES_PASSWORD='change-this-postgres-password'
+export POSTGRES_DB='tabmail'
+export TABMAIL_REDIS_PASSWORD='change-this-redis-password'
 export TABMAIL_AUTOCREATE_ROUTE_RPM='60'
 export TABMAIL_AUTOCREATE_TENANT_RPM='300'
 ```
@@ -64,7 +85,8 @@ export TABMAIL_AUTOCREATE_TENANT_RPM='300'
 
 ```bash
 export TABMAIL_DB_DSN='postgres://tabmail:tabmail@127.0.0.1:5432/tabmail?sslmode=disable'
-export TABMAIL_REDIS_ADDR='127.0.0.1:6379'
+export TABMAIL_REDIS_ADDR='redis:6379'
+export TABMAIL_OBJECTSTORE='fs'
 export TABMAIL_DATADIR='/data'
 export TABMAIL_HTTP_ADDR='0.0.0.0:8080'
 export TABMAIL_HTTP_ALLOWED_ORIGINS='http://127.0.0.1:3000,http://localhost:3000'
@@ -93,6 +115,53 @@ export TABMAIL_INGEST_MAX_RETRIES='5'
 export TABMAIL_ROLE='all'
 ```
 
+### S3 / MinIO 对象存储（可选）
+
+多实例部署建议改用 S3 / MinIO 兼容对象存储：
+
+```bash
+export TABMAIL_OBJECTSTORE='s3'
+export TABMAIL_S3_ENDPOINT='minio:9000'
+export TABMAIL_S3_REGION='us-east-1'
+export TABMAIL_S3_BUCKET='tabmail'
+export TABMAIL_S3_ACCESS_KEY='minioadmin'
+export TABMAIL_S3_SECRET_KEY='change-this-s3-secret'
+export TABMAIL_S3_USE_TLS='false'
+export TABMAIL_S3_FORCE_PATH_STYLE='true'
+```
+
+说明：
+
+- 启动时会检查 bucket 是否存在
+- 当前不会自动创建 bucket
+- AWS S3 与 MinIO 都可使用同一套配置
+
+## 3.1 生产推荐 Compose
+
+生产建议：
+
+```bash
+cp .env.example .env
+# 编辑 .env
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+生产 Compose 默认会拆成：
+
+- `tabmail-migrate`
+- `tabmail-api`
+- `tabmail-smtp`
+- `tabmail-worker`
+- `tabmail-retention`
+
+优势：
+
+- API / SMTP / Worker 可独立伸缩
+- migration 与应用启动顺序解耦
+- PostgreSQL / Redis 不对宿主机暴露端口
+- 没有真实 secrets 时无法启动
+- 便于后续迁移到外部对象存储
+
 ## 4. 手工运行
 
 ```bash
@@ -104,6 +173,13 @@ go run ./cmd/tabmail
 ```bash
 make build
 ./bin/tabmail
+```
+
+迁移工具：
+
+```bash
+make build-migrate
+./bin/tabmail-migrate status
 ```
 
 ## 5. 生产部署建议
@@ -158,7 +234,24 @@ export TABMAIL_SMTP_FORCETLS='true'
 - `X-Real-IP`
 - `X-Forwarded-For`
 
-TabMail 会优先读取 `X-Real-IP`。
+TabMail 仅会在 `TABMAIL_HTTP_TRUSTED_PROXIES` 命中的代理来源上信任这些头。
+
+## 5.1 监控栈
+
+仓库提供示例监控编排：
+
+```bash
+docker compose -f docker-compose.monitoring.yml up -d
+```
+
+包含：
+
+- Prometheus
+- Alertmanager
+- Grafana
+
+Grafana 默认加载 `deploy/monitoring/grafana/dashboards/tabmail-overview.json`。
+Alertmanager 默认使用示例 webhook，需要按你的告警通道改成真实 receiver。
 
 ## 6. 域名接入步骤
 
@@ -225,6 +318,7 @@ GET /api/v1/domains/{id}/verification-status
 - `http://127.0.0.1:8080/openapi.yaml`
 - `http://127.0.0.1:8080/docs`
 - `http://127.0.0.1:8080/redoc`
+- `http://127.0.0.1:8080/metrics`
 - `http://127.0.0.1:8080/api/v1/admin/stats`
 - `http://127.0.0.1:8080/api/v1/admin/status`
 - `http://127.0.0.1:8080/api/v1/admin/monitor/events`

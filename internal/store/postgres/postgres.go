@@ -19,6 +19,8 @@ type PgStore struct {
 	pool *pgxpool.Pool
 }
 
+const LatestSchemaVersion = 8
+
 func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
 	poolCfg, err := pgxpool.ParseConfig(cfg.DSN)
 	if err != nil {
@@ -42,6 +44,15 @@ func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
 func (s *PgStore) Close() error {
 	s.pool.Close()
 	return nil
+}
+
+func (s *PgStore) CurrentSchemaVersion(ctx context.Context) (int, error) {
+	var version int
+	err := s.pool.QueryRow(ctx, `SELECT COALESCE(max(version), 0) FROM schema_migrations`).Scan(&version)
+	if err != nil {
+		return 0, err
+	}
+	return version, nil
 }
 
 func hashKey(raw string) string {
@@ -1260,6 +1271,17 @@ func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, sta
 	return out, total, rows.Err()
 }
 
+func (s *PgStore) CountWebhookDeliveriesByState(ctx context.Context, states ...string) (int, error) {
+	if len(states) == 0 {
+		var total int
+		err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries`).Scan(&total)
+		return total, err
+	}
+	var total int
+	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries WHERE state = ANY($1)`, states).Scan(&total)
+	return total, err
+}
+
 func (s *PgStore) CreateIngestJob(ctx context.Context, job *models.IngestJob) error {
 	if job.ID == uuid.Nil {
 		job.ID = uuid.New()
@@ -1371,4 +1393,15 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 		out = append(out, item)
 	}
 	return out, total, rows.Err()
+}
+
+func (s *PgStore) CountIngestJobsByState(ctx context.Context, states ...string) (int, error) {
+	if len(states) == 0 {
+		var total int
+		err := s.pool.QueryRow(ctx, `SELECT count(*) FROM ingest_jobs`).Scan(&total)
+		return total, err
+	}
+	var total int
+	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM ingest_jobs WHERE state = ANY($1)`, states).Scan(&total)
+	return total, err
 }

@@ -14,6 +14,7 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
+	"tabmail/internal/metrics"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
@@ -141,6 +142,18 @@ func NewRouter(
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"ok"}`))
+	})
+	r.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		webhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), "dead")
+		webhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), "pending", "retry", "processing")
+		ingestPending, _ := st.CountIngestJobsByState(r.Context(), "pending", "retry", "processing")
+		snapshot := metrics.Snapshot(dispatcher != nil && dispatcher.Enabled(), webhookDead)
+		body := metrics.RenderPrometheus(snapshot, map[string]float64{
+			"tabmail_webhooks_backlog": float64(webhookPending),
+			"tabmail_ingest_backlog":   float64(ingestPending),
+		})
+		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+		_, _ = w.Write([]byte(body))
 	})
 
 	return r

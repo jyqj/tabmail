@@ -25,8 +25,10 @@ import (
 	"tabmail/internal/resolver"
 	"tabmail/internal/retention"
 	smtpsrv "tabmail/internal/smtp"
+	"tabmail/internal/store"
 	"tabmail/internal/store/fileobj"
 	"tabmail/internal/store/postgres"
+	"tabmail/internal/store/s3obj"
 )
 
 var version = "dev"
@@ -53,6 +55,16 @@ func main() {
 	}
 	defer pg.Close()
 	logger.Info().Msg("connected to PostgreSQL")
+	schemaVersion, err := pg.CurrentSchemaVersion(ctx)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("checking schema version (did you run make migrate?)")
+	}
+	if schemaVersion < postgres.LatestSchemaVersion {
+		logger.Fatal().
+			Int("current", schemaVersion).
+			Int("required", postgres.LatestSchemaVersion).
+			Msg("database schema is out of date; run make migrate before starting")
+	}
 
 	// --- Redis ---
 	rdb := redis.NewClient(&redis.Options{
@@ -67,9 +79,22 @@ func main() {
 	logger.Info().Msg("connected to Redis")
 
 	// --- Object store ---
-	obj, err := fileobj.New(cfg.DataDir)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("initializing file object store")
+	var obj store.ObjectStore
+	switch strings.ToLower(strings.TrimSpace(cfg.ObjectStore)) {
+	case "", "fs":
+		obj, err = fileobj.New(cfg.DataDir)
+		if err != nil {
+			logger.Fatal().Err(err).Msg("initializing filesystem object store")
+		}
+		logger.Info().Str("backend", "fs").Str("data_dir", cfg.DataDir).Msg("object store initialized")
+	case "s3":
+		obj, err = s3obj.New(cfg.S3)
+		if err != nil {
+			logger.Fatal().Err(err).Msg("initializing s3 object store")
+		}
+		logger.Info().Str("backend", "s3").Str("endpoint", cfg.S3.Endpoint).Str("bucket", cfg.S3.Bucket).Msg("object store initialized")
+	default:
+		logger.Fatal().Str("object_store", cfg.ObjectStore).Msg("invalid object store backend")
 	}
 
 	// --- Domain resolver ---

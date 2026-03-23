@@ -1,7 +1,9 @@
 package metrics
 
 import (
+	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -213,4 +215,41 @@ func topDeliveryStats(m map[string]*deliveryCounter, limit int) []models.Deliver
 		out = out[:limit]
 	}
 	return out
+}
+
+func RenderPrometheus(snapshot models.MetricsSnapshot, extras map[string]float64) string {
+	var b strings.Builder
+
+	writeGauge := func(name string, value any) {
+		fmt.Fprintf(&b, "%s %v\n", name, value)
+	}
+
+	writeGauge("tabmail_uptime_seconds", snapshot.UptimeSeconds)
+	writeGauge("tabmail_smtp_sessions_opened_total", snapshot.SMTP.SessionsOpened)
+	writeGauge("tabmail_smtp_sessions_active", snapshot.SMTP.SessionsActive)
+	writeGauge("tabmail_smtp_recipients_accepted_total", snapshot.SMTP.RecipientsAccepted)
+	writeGauge("tabmail_smtp_recipients_rejected_total", snapshot.SMTP.RecipientsRejected)
+	writeGauge("tabmail_smtp_messages_accepted_total", snapshot.SMTP.MessagesAccepted)
+	writeGauge("tabmail_smtp_messages_rejected_total", snapshot.SMTP.MessagesRejected)
+	writeGauge("tabmail_smtp_deliveries_succeeded_total", snapshot.SMTP.DeliveriesSucceeded)
+	writeGauge("tabmail_smtp_deliveries_failed_total", snapshot.SMTP.DeliveriesFailed)
+	writeGauge("tabmail_smtp_bytes_received_total", snapshot.SMTP.BytesReceived)
+	writeGauge("tabmail_webhooks_configured", snapshot.Webhooks.Configured)
+	writeGauge("tabmail_webhooks_queued_total", snapshot.Webhooks.Queued)
+	writeGauge("tabmail_webhooks_delivered_total", snapshot.Webhooks.Delivered)
+	writeGauge("tabmail_webhooks_failed_total", snapshot.Webhooks.Failed)
+	writeGauge("tabmail_webhooks_retried_total", snapshot.Webhooks.Retried)
+	writeGauge("tabmail_webhooks_dead_letter_size", snapshot.Webhooks.DeadLetterSize)
+	writeGauge("tabmail_realtime_subscribers_current", snapshot.Realtime.SubscribersCurrent)
+	writeGauge("tabmail_realtime_events_published_total", snapshot.Realtime.EventsPublished)
+
+	keys := make([]string, 0, len(extras))
+	for k := range extras {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		writeGauge(key, extras[key])
+	}
+	return b.String()
 }

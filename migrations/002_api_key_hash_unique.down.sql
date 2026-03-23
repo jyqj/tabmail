@@ -1,0 +1,1 @@
+-- no-op: v1 schema already creates idx_api_keys_hash

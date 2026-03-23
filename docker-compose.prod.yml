@@ -1,0 +1,121 @@
+name: tabmail-prod
+
+x-tabmail-env: &tabmail-env
+  TABMAIL_ADMINKEY: "${TABMAIL_ADMINKEY:?set TABMAIL_ADMINKEY}"
+  TABMAIL_MAILBOX_TOKEN_SECRET: "${TABMAIL_MAILBOX_TOKEN_SECRET:?set TABMAIL_MAILBOX_TOKEN_SECRET}"
+  TABMAIL_DB_DSN: "${TABMAIL_DB_DSN:?set TABMAIL_DB_DSN}"
+  TABMAIL_REDIS_ADDR: "${TABMAIL_REDIS_ADDR:?set TABMAIL_REDIS_ADDR}"
+  TABMAIL_REDIS_PASSWORD: "${TABMAIL_REDIS_PASSWORD:?set TABMAIL_REDIS_PASSWORD}"
+  TABMAIL_SMTP_DOMAIN: "${TABMAIL_SMTP_DOMAIN:?set TABMAIL_SMTP_DOMAIN}"
+  TABMAIL_LOGLEVEL: "${TABMAIL_LOGLEVEL:-info}"
+  TABMAIL_HTTP_ALLOWED_ORIGINS: "${TABMAIL_HTTP_ALLOWED_ORIGINS:?set TABMAIL_HTTP_ALLOWED_ORIGINS}"
+  TABMAIL_HTTP_TRUSTED_PROXIES: "${TABMAIL_HTTP_TRUSTED_PROXIES:?set TABMAIL_HTTP_TRUSTED_PROXIES}"
+
+services:
+  tabmail-migrate:
+    build: .
+    entrypoint: ["tabmail-migrate"]
+    command: ["up"]
+    environment:
+      TABMAIL_DB_DSN: "${TABMAIL_DB_DSN:?set TABMAIL_DB_DSN}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  tabmail-api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      <<: *tabmail-env
+      TABMAIL_ROLE: "api"
+    depends_on:
+      tabmail-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - mail_data:/data
+    restart: unless-stopped
+
+  tabmail-smtp:
+    build: .
+    ports:
+      - "2525:2525"
+    environment:
+      <<: *tabmail-env
+      TABMAIL_ROLE: "smtp"
+    depends_on:
+      tabmail-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - mail_data:/data
+    restart: unless-stopped
+
+  tabmail-worker:
+    build: .
+    environment:
+      <<: *tabmail-env
+      TABMAIL_ROLE: "worker"
+    depends_on:
+      tabmail-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - mail_data:/data
+    restart: unless-stopped
+
+  tabmail-retention:
+    build: .
+    environment:
+      <<: *tabmail-env
+      TABMAIL_ROLE: "retention"
+    depends_on:
+      tabmail-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - mail_data:/data
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER:?set POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB:?set POSTGRES_DB}"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${TABMAIL_REDIS_PASSWORD:?set TABMAIL_REDIS_PASSWORD}"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${TABMAIL_REDIS_PASSWORD}\" ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+  mail_data:

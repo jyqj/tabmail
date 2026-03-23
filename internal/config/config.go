@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
@@ -12,6 +13,7 @@ const envPrefix = "TABMAIL"
 type Root struct {
 	Role                string `default:"all" desc:"Process role: all, api, smtp, retention"`
 	LogLevel            string `default:"info" desc:"debug, info, warn, error"`
+	ObjectStore         string `split_words:"true" default:"fs" desc:"Object store backend: fs or s3"`
 	DataDir             string `default:"/data" desc:"Base directory for raw .eml storage"`
 	AdminKey            string `required:"true" desc:"Super-admin X-Admin-Key value"`
 	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens"`
@@ -26,6 +28,7 @@ type Root struct {
 	DB      DB
 	Redis   Redis
 	Storage Storage
+	S3      S3
 	Webhook Webhook
 	Ingest  Ingest
 }
@@ -77,6 +80,16 @@ type Storage struct {
 	FallbackRetentionH    int           `default:"24" desc:"System-level fallback retention hours"`
 }
 
+type S3 struct {
+	Endpoint       string `default:"" desc:"S3 endpoint, e.g. s3.amazonaws.com or minio:9000"`
+	Region         string `default:"us-east-1" desc:"S3 region"`
+	Bucket         string `default:"" desc:"S3 bucket name"`
+	AccessKey      string `split_words:"true" default:"" desc:"S3 access key"`
+	SecretKey      string `split_words:"true" default:"" desc:"S3 secret key"`
+	UseTLS         bool   `split_words:"true" default:"true" desc:"Use TLS for S3 connections"`
+	ForcePathStyle bool   `split_words:"true" default:"true" desc:"Force path-style bucket addressing"`
+}
+
 type Webhook struct {
 	URLs         string        `default:"" desc:"Comma-separated inbound event webhook URLs"`
 	Secret       string        `default:"" desc:"Optional webhook signature secret"`
@@ -100,5 +113,76 @@ func Load() (*Root, error) {
 	if err := envconfig.Process(envPrefix, c); err != nil {
 		return nil, fmt.Errorf("config: %w", err)
 	}
+	if err := c.Validate(); err != nil {
+		return nil, err
+	}
 	return c, nil
+}
+
+func (c *Root) Validate() error {
+	if c == nil {
+		return fmt.Errorf("config: nil root config")
+	}
+	role := strings.ToLower(strings.TrimSpace(c.Role))
+	switch role {
+	case "", "all", "api", "smtp", "worker", "retention":
+	default:
+		return fmt.Errorf("config: invalid role %q", c.Role)
+	}
+	if err := validateSecret("TABMAIL_ADMINKEY", c.AdminKey, 12); err != nil {
+		return err
+	}
+	if err := validateSecret("TABMAIL_MAILBOX_TOKEN_SECRET", c.MailboxTokenSecret, 16); err != nil {
+		return err
+	}
+	if strings.TrimSpace(c.DB.DSN) == "" {
+		return fmt.Errorf("config: TABMAIL_DB_DSN is required")
+	}
+	if strings.TrimSpace(c.Redis.Addr) == "" {
+		return fmt.Errorf("config: TABMAIL_REDIS_ADDR is required")
+	}
+	switch strings.ToLower(strings.TrimSpace(c.ObjectStore)) {
+	case "", "fs":
+		if strings.TrimSpace(c.DataDir) == "" {
+			return fmt.Errorf("config: TABMAIL_DATADIR is required when TABMAIL_OBJECTSTORE=fs")
+		}
+	case "s3":
+		if strings.TrimSpace(c.S3.Endpoint) == "" {
+			return fmt.Errorf("config: TABMAIL_S3_ENDPOINT is required when TABMAIL_OBJECTSTORE=s3")
+		}
+		if strings.TrimSpace(c.S3.Bucket) == "" {
+			return fmt.Errorf("config: TABMAIL_S3_BUCKET is required when TABMAIL_OBJECTSTORE=s3")
+		}
+		if strings.TrimSpace(c.S3.AccessKey) == "" {
+			return fmt.Errorf("config: TABMAIL_S3_ACCESS_KEY is required when TABMAIL_OBJECTSTORE=s3")
+		}
+		if strings.TrimSpace(c.S3.SecretKey) == "" {
+			return fmt.Errorf("config: TABMAIL_S3_SECRET_KEY is required when TABMAIL_OBJECTSTORE=s3")
+		}
+	default:
+		return fmt.Errorf("config: TABMAIL_OBJECTSTORE must be one of fs or s3")
+	}
+	if c.SMTP.TLSEnabled {
+		if strings.TrimSpace(c.SMTP.TLSCert) == "" || strings.TrimSpace(c.SMTP.TLSKey) == "" {
+			return fmt.Errorf("config: TABMAIL_SMTP_TLSCERT and TABMAIL_SMTP_TLSKEY are required when TABMAIL_SMTP_TLSENABLED=true")
+		}
+	}
+	return nil
+}
+
+func validateSecret(name, value string, minLen int) error {
+	v := strings.TrimSpace(value)
+	if v == "" {
+		return fmt.Errorf("config: %s is required", name)
+	}
+	if len(v) < minLen {
+		return fmt.Errorf("config: %s must be at least %d characters", name, minLen)
+	}
+	switch strings.ToLower(v) {
+	case "changeme", "change-me", "replace-me", "replace_me", "example",
+		"change-this-admin-key", "change-this-mailbox-token-secret":
+		return fmt.Errorf("config: %s uses an unsafe placeholder value", name)
+	default:
+		return nil
+	}
 }

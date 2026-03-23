@@ -1,0 +1,42 @@
+groups:
+  - name: tabmail-baseline
+    rules:
+      - alert: TabMailIngestBacklogHigh
+        expr: tabmail_ingest_backlog > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: tabmail
+        annotations:
+          summary: "TabMail ingest backlog 持续堆积"
+          description: "tabmail_ingest_backlog 连续 5 分钟超过 100，检查 worker、对象存储与数据库。"
+
+      - alert: TabMailWebhookBacklogHigh
+        expr: tabmail_webhooks_backlog > 100
+        for: 5m
+        labels:
+          severity: warning
+          service: tabmail
+        annotations:
+          summary: "TabMail webhook backlog 持续堆积"
+          description: "tabmail_webhooks_backlog 连续 5 分钟超过 100，检查下游 webhook 或 worker 并发。"
+
+      - alert: TabMailWebhookDeadLettersPresent
+        expr: tabmail_webhooks_dead_letter_size > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: tabmail
+        annotations:
+          summary: "TabMail 出现 webhook dead letter"
+          description: "tabmail_webhooks_dead_letter_size 非 0，请检查 /admin/webhooks 与下游投递端。"
+
+      - alert: TabMailSMTPDeliveryFailures
+        expr: increase(tabmail_smtp_deliveries_failed_total[10m]) > 10
+        for: 10m
+        labels:
+          severity: warning
+          service: tabmail
+        annotations:
+          summary: "TabMail SMTP delivery failure 增长过快"
+          description: "过去 10 分钟 SMTP 投递失败超过 10 次，请检查对象存储、数据库或 resolver。"

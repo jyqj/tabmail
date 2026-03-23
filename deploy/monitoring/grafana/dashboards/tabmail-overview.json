@@ -1,0 +1,66 @@
+{
+  "annotations": {"list": []},
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Ingest Backlog",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "targets": [{"expr": "tabmail_ingest_backlog", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Webhook Backlog",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "targets": [{"expr": "tabmail_webhooks_backlog", "refId": "A"}]
+    },
+    {
+      "type": "stat",
+      "title": "Webhook Dead Letters",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [{"expr": "tabmail_webhooks_dead_letter_size", "refId": "A"}]
+    },
+    {
+      "type": "timeseries",
+      "title": "SMTP Accepted / Rejected",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "targets": [
+        {"expr": "rate(tabmail_smtp_messages_accepted_total[5m])", "legendFormat": "accepted", "refId": "A"},
+        {"expr": "rate(tabmail_smtp_messages_rejected_total[5m])", "legendFormat": "rejected", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "SMTP Delivery Success / Failure",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "targets": [
+        {"expr": "rate(tabmail_smtp_deliveries_succeeded_total[5m])", "legendFormat": "ok", "refId": "A"},
+        {"expr": "rate(tabmail_smtp_deliveries_failed_total[5m])", "legendFormat": "failed", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Webhook Delivered / Failed",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+      "targets": [
+        {"expr": "rate(tabmail_webhooks_delivered_total[5m])", "legendFormat": "delivered", "refId": "A"},
+        {"expr": "rate(tabmail_webhooks_failed_total[5m])", "legendFormat": "failed", "refId": "B"}
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Realtime Subscribers",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+      "targets": [{"expr": "tabmail_realtime_subscribers_current", "legendFormat": "subscribers", "refId": "A"}]
+    }
+  ],
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["tabmail"],
+  "templating": {"list": []},
+  "time": {"from": "now-6h", "to": "now"},
+  "title": "TabMail Overview",
+  "uid": "tabmail-overview",
+  "version": 1
+}

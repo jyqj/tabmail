@@ -110,6 +110,7 @@ type Store interface {
 	ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error)
 	CountDeadWebhookDeliveries(ctx context.Context) (int, error)
 	ListWebhookDeliveries(ctx context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error)
+	CountWebhookDeliveriesByState(ctx context.Context, states ...string) (int, error)
 
 	// --- Ingest jobs -----------------------------------------------------
 	CreateIngestJob(ctx context.Context, job *models.IngestJob) error
@@ -117,6 +118,7 @@ type Store interface {
 	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
 	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
 	ListIngestJobs(ctx context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error)
+	CountIngestJobsByState(ctx context.Context, states ...string) (int, error)
 
 	// --- Lifecycle -------------------------------------------------------
 	Close() error

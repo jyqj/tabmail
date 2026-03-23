@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS audit_log;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS mailboxes;
+DROP TABLE IF EXISTS domain_routes;
+DROP TABLE IF EXISTS domain_zones;
+DROP TABLE IF EXISTS tenant_api_keys;
+DROP TABLE IF EXISTS tenant_overrides;
+DROP TABLE IF EXISTS tenants;
+DROP TABLE IF EXISTS plans;
+DROP TYPE IF EXISTS access_mode;
+DROP TYPE IF EXISTS route_type;
