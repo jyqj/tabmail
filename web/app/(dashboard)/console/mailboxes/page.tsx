@@ -90,7 +90,7 @@ export default function MailboxesPage() {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, t]);
 
   useEffect(() => {
     fetchMailboxes();

@@ -52,24 +52,30 @@ export function AppSidebar() {
     { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
     { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
     { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
-    { href: "/admin/ingest", label: "Ingest Jobs", icon: Boxes },
-    { href: "/admin/webhooks", label: "Webhook Deliveries", icon: Webhook },
+    { href: "/admin/ingest", label: t("sidebar.ingest"), icon: Boxes },
+    { href: "/admin/webhooks", label: t("sidebar.webhooks"), icon: Webhook },
   ];
 
   return (
-    <Sidebar>
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-1">
-          <Mail className="h-5 w-5 text-primary" />
-          <span className="font-semibold tracking-tight">TabMail</span>
+    <Sidebar className="border-r border-border/40 backdrop-blur-3xl bg-background/60">
+      <SidebarHeader className="pb-4 pt-6 px-4">
+        <div className="flex items-center gap-3 px-2 py-1">
+          <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--color-primary),0.5)]">
+            <Mail className="h-4 w-4" />
+          </div>
+          <span className="font-heading text-lg font-bold tracking-tight">TabMail</span>
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="px-3">
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton render={<Link href="/" />} isActive={pathname === "/"}>
+              <SidebarMenuButton 
+                render={<Link href="/" />} 
+                isActive={pathname === "/"}
+                className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
+              >
                 <Home className="h-4 w-4" />
                 <span>{t("sidebar.home")}</span>
               </SidebarMenuButton>
@@ -77,16 +83,17 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarSeparator />
+        <SidebarSeparator className="my-2 bg-border/40" />
 
         <SidebarGroup>
-          <SidebarGroupLabel>{t("sidebar.console")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1">{t("sidebar.console")}</SidebarGroupLabel>
           <SidebarMenu>
             {consoleItems.map((item) => (
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   render={<Link href={item.href} />}
                   isActive={pathname.startsWith(item.href)}
+                  className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.label}</span>
@@ -98,10 +105,10 @@ export function AppSidebar() {
 
         {level === "admin" && (
           <>
-            <SidebarSeparator />
+            <SidebarSeparator className="my-2 bg-border/40" />
             <SidebarGroup>
-              <SidebarGroupLabel className="gap-1.5">
-                <Shield className="h-3 w-3" />
+              <SidebarGroupLabel className="gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1">
+                <Shield className="h-3 w-3 text-destructive/80" />
                 {t("sidebar.admin")}
               </SidebarGroupLabel>
               <SidebarMenu>
@@ -114,6 +121,7 @@ export function AppSidebar() {
                           ? pathname === "/admin"
                           : pathname.startsWith(item.href)
                       }
+                      className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>
@@ -126,10 +134,10 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="p-4 border-t border-border/40 bg-background/40">
         <div className="flex items-center justify-between px-2">
           <ThemeToggle />
-          <Button variant="ghost" size="icon" onClick={logout} className="h-8 w-8">
+          <Button variant="ghost" size="icon" onClick={logout} className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors">
             <LogOut className="h-4 w-4" />
           </Button>
         </div>

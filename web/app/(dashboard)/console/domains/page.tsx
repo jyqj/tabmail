@@ -79,7 +79,7 @@ export default function DomainsPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetch();

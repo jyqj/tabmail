@@ -83,7 +83,7 @@ export default function RoutesPage() {
     } finally {
       setLoading(false);
     }
-  }, [domainId]);
+  }, [domainId, t]);
 
   useEffect(() => {
     fetchRoutes();

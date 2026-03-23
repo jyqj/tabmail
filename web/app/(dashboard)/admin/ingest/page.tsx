@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { listIngestJobs } from "@/lib/api";
 import type { IngestJob } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,7 @@ const stateStyles: Record<string, string> = {
 };
 
 export default function AdminIngestPage() {
+  const { t } = useI18n();
   const [jobs, setJobs] = useState<IngestJob[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -61,11 +63,11 @@ export default function AdminIngestPage() {
       setJobs(res.data);
       setTotal(res.meta.total);
     } catch {
-      toast.error("加载 ingest jobs 失败");
+      toast.error(t("ingest.loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, [page, recipient, source, state]);
+  }, [page, recipient, source, state, t]);
 
   useEffect(() => {
     fetchJobs();
@@ -83,39 +85,39 @@ export default function AdminIngestPage() {
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="Ingest Jobs"
-        description="查看 durable ingest 队列、重试状态与当前 backlog。"
+        title={t("ingest.title")}
+        description={t("ingest.desc")}
         actions={
           <Button variant="outline" size="sm" className="gap-1.5" onClick={fetchJobs}>
             <RefreshCw className="h-3.5 w-3.5" />
-            刷新
+            {t("ingest.refresh")}
           </Button>
         }
       />
 
       <div className="space-y-4 p-4">
         <div className="grid gap-4 md:grid-cols-4">
-          <StatCard title="当前页" value={jobs.length} />
-          <StatCard title="总数" value={total} />
-          <StatCard title="处理中" value={totals.processing || 0} />
-          <StatCard title="重试/死信" value={(totals.retry || 0) + (totals.dead || 0)} />
+          <StatCard title={t("ingest.currentPage")} value={jobs.length} />
+          <StatCard title={t("ingest.total")} value={total} />
+          <StatCard title={t("ingest.processing")} value={totals.processing || 0} />
+          <StatCard title={t("ingest.retryDead")} value={(totals.retry || 0) + (totals.dead || 0)} />
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-4 w-4 text-primary" />
-              筛选
+              {t("ingest.filter")}
             </CardTitle>
-            <CardDescription>按状态、来源和收件人筛选 ingest jobs。</CardDescription>
+            <CardDescription>{t("ingest.filterDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
             <Select value={state} onValueChange={(value) => { setPage(1); setState(value || "all"); }}>
               <SelectTrigger>
-                <SelectValue placeholder="状态" />
+                <SelectValue placeholder={t("ingest.statePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="all">{t("ingest.allStates")}</SelectItem>
                 <SelectItem value="pending">pending</SelectItem>
                 <SelectItem value="processing">processing</SelectItem>
                 <SelectItem value="retry">retry</SelectItem>
@@ -125,10 +127,10 @@ export default function AdminIngestPage() {
             </Select>
             <Select value={source} onValueChange={(value) => { setPage(1); setSource(value || "all"); }}>
               <SelectTrigger>
-                <SelectValue placeholder="来源" />
+                <SelectValue placeholder={t("ingest.sourcePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部来源</SelectItem>
+                <SelectItem value="all">{t("ingest.allSources")}</SelectItem>
                 <SelectItem value="smtp">smtp</SelectItem>
               </SelectContent>
             </Select>
@@ -147,9 +149,9 @@ export default function AdminIngestPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Boxes className="h-4 w-4 text-primary" />
-              队列明细
+              {t("ingest.queueDetail")}
             </CardTitle>
-            <CardDescription>最近创建的 ingest job 会先排队，再由 worker 异步处理。</CardDescription>
+            <CardDescription>{t("ingest.queueDetailDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -159,19 +161,19 @@ export default function AdminIngestPage() {
                 ))}
               </div>
             ) : jobs.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">暂无 ingest jobs</div>
+              <div className="py-12 text-center text-sm text-muted-foreground">{t("ingest.noJobs")}</div>
             ) : (
               <>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>状态</TableHead>
-                      <TableHead>来源</TableHead>
-                      <TableHead>发件人</TableHead>
-                      <TableHead>收件人</TableHead>
-                      <TableHead>尝试</TableHead>
-                      <TableHead>下次重试</TableHead>
-                      <TableHead>创建时间</TableHead>
+                      <TableHead>{t("ingest.state")}</TableHead>
+                      <TableHead>{t("ingest.source")}</TableHead>
+                      <TableHead>{t("ingest.sender")}</TableHead>
+                      <TableHead>{t("ingest.recipient")}</TableHead>
+                      <TableHead>{t("ingest.attempts")}</TableHead>
+                      <TableHead>{t("ingest.nextRetry")}</TableHead>
+                      <TableHead>{t("ingest.createdAt")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -208,7 +210,19 @@ export default function AdminIngestPage() {
                     </div>
                   ))}
                 </div>
-                <Pager page={page} totalPages={totalPages} onPageChange={setPage} />
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    {t("ingest.pageOf", { page, total: totalPages })}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                      {t("ingest.previous")}
+                    </Button>
+                    <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+                      {t("ingest.next")}
+                    </Button>
+                  </div>
+                </div>
               </>
             )}
           </CardContent>
@@ -228,36 +242,5 @@ function StatCard({ title, value }: { title: string; value: number }) {
         <div className="text-3xl font-bold tracking-tight">{value.toLocaleString()}</div>
       </CardContent>
     </Card>
-  );
-}
-
-function Pager({
-  page,
-  totalPages,
-  onPageChange,
-}: {
-  page: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}) {
-  return (
-    <div className="mt-4 flex items-center justify-between">
-      <div className="text-xs text-muted-foreground">
-        第 {page} / {totalPages} 页
-      </div>
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
-          上一页
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={page >= totalPages}
-          onClick={() => onPageChange(page + 1)}
-        >
-          下一页
-        </Button>
-      </div>
-    </div>
   );
 }

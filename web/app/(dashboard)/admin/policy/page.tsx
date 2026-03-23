@@ -52,7 +52,7 @@ export default function AdminPolicyPage() {
       })
       .catch(() => toast.error(t("policy.loadFailed")))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   const handleSave = async () => {
     setSaving(true);

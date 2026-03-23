@@ -49,7 +49,7 @@ export default function AdminPage() {
       .then((res) => setStats(res.data))
       .catch(() => toast.error(t("admin.loadFailed")))
       .finally(() => setLoading(false));
-  }, []);
+  }, [t]);
 
   const series = stats?.metrics.time_series ?? [];
 

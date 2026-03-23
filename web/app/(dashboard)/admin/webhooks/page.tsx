@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { listWebhookDeliveries } from "@/lib/api";
 import type { WebhookDelivery } from "@/lib/types";
+import { useI18n } from "@/lib/i18n";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,7 @@ const stateStyles: Record<string, string> = {
 };
 
 export default function AdminWebhooksPage() {
+  const { t } = useI18n();
   const [items, setItems] = useState<WebhookDelivery[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -61,11 +63,11 @@ export default function AdminWebhooksPage() {
       setItems(res.data);
       setTotal(res.meta.total);
     } catch {
-      toast.error("加载 webhook deliveries 失败");
+      toast.error(t("webhooks.loadFailed"));
     } finally {
       setLoading(false);
     }
-  }, [eventType, page, state, url]);
+  }, [eventType, page, state, url, t]);
 
   useEffect(() => {
     fetchItems();
@@ -83,39 +85,39 @@ export default function AdminWebhooksPage() {
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="Webhook Deliveries"
-        description="查看 webhook 投递状态、重试与 dead-letter。"
+        title={t("webhooks.title")}
+        description={t("webhooks.desc")}
         actions={
           <Button variant="outline" size="sm" className="gap-1.5" onClick={fetchItems}>
             <RefreshCw className="h-3.5 w-3.5" />
-            刷新
+            {t("webhooks.refresh")}
           </Button>
         }
       />
 
       <div className="space-y-4 p-4">
         <div className="grid gap-4 md:grid-cols-4">
-          <StatCard title="当前页" value={items.length} />
-          <StatCard title="总数" value={total} />
-          <StatCard title="已送达" value={stats.delivered || 0} />
-          <StatCard title="死信" value={stats.dead || 0} />
+          <StatCard title={t("webhooks.currentPage")} value={items.length} />
+          <StatCard title={t("webhooks.total")} value={total} />
+          <StatCard title={t("webhooks.delivered")} value={stats.delivered || 0} />
+          <StatCard title={t("webhooks.dead")} value={stats.dead || 0} />
         </div>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-4 w-4 text-primary" />
-              筛选
+              {t("webhooks.filter")}
             </CardTitle>
-            <CardDescription>按状态、事件类型和 URL 过滤 webhook 投递记录。</CardDescription>
+            <CardDescription>{t("webhooks.filterDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
             <Select value={state} onValueChange={(value) => { setPage(1); setState(value || "all"); }}>
               <SelectTrigger>
-                <SelectValue placeholder="状态" />
+                <SelectValue placeholder={t("webhooks.statePlaceholder")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">全部状态</SelectItem>
+                <SelectItem value="all">{t("webhooks.allStates")}</SelectItem>
                 <SelectItem value="pending">pending</SelectItem>
                 <SelectItem value="processing">processing</SelectItem>
                 <SelectItem value="retry">retry</SelectItem>
@@ -146,9 +148,9 @@ export default function AdminWebhooksPage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Webhook className="h-4 w-4 text-primary" />
-              投递明细
+              {t("webhooks.detail")}
             </CardTitle>
-            <CardDescription>可用于排查 webhook backlog、异常 URL 和重复重试。</CardDescription>
+            <CardDescription>{t("webhooks.detailDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {loading ? (
@@ -158,18 +160,18 @@ export default function AdminWebhooksPage() {
                 ))}
               </div>
             ) : items.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">暂无 webhook deliveries</div>
+              <div className="py-12 text-center text-sm text-muted-foreground">{t("webhooks.noDeliveries")}</div>
             ) : (
               <>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>状态</TableHead>
-                      <TableHead>事件类型</TableHead>
-                      <TableHead>URL</TableHead>
-                      <TableHead>尝试</TableHead>
-                      <TableHead>最后尝试</TableHead>
-                      <TableHead>创建时间</TableHead>
+                      <TableHead>{t("webhooks.state")}</TableHead>
+                      <TableHead>{t("webhooks.eventType")}</TableHead>
+                      <TableHead>{t("webhooks.url")}</TableHead>
+                      <TableHead>{t("webhooks.attempts")}</TableHead>
+                      <TableHead>{t("webhooks.lastTried")}</TableHead>
+                      <TableHead>{t("webhooks.createdAt")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -203,7 +205,19 @@ export default function AdminWebhooksPage() {
                     </div>
                   ))}
                 </div>
-                <Pager page={page} totalPages={totalPages} onPageChange={setPage} />
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="text-xs text-muted-foreground">
+                    {t("webhooks.pageOf", { page, total: totalPages })}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                      {t("webhooks.previous")}
+                    </Button>
+                    <Button variant="outline" size="sm" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+                      {t("webhooks.next")}
+                    </Button>
+                  </div>
+                </div>
               </>
             )}
           </CardContent>
@@ -223,36 +237,5 @@ function StatCard({ title, value }: { title: string; value: number }) {
         <div className="text-3xl font-bold tracking-tight">{value.toLocaleString()}</div>
       </CardContent>
     </Card>
-  );
-}
-
-function Pager({
-  page,
-  totalPages,
-  onPageChange,
-}: {
-  page: number;
-  totalPages: number;
-  onPageChange: (page: number) => void;
-}) {
-  return (
-    <div className="mt-4 flex items-center justify-between">
-      <div className="text-xs text-muted-foreground">
-        第 {page} / {totalPages} 页
-      </div>
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
-          上一页
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={page >= totalPages}
-          onClick={() => onPageChange(page + 1)}
-        >
-          下一页
-        </Button>
-      </div>
-    </div>
   );
 }

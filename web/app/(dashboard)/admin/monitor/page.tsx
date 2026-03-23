@@ -65,7 +65,7 @@ export default function AdminMonitorPage() {
       }
     });
     return () => controller.abort();
-  }, [reconnectKey]);
+  }, [reconnectKey, t]);
 
   useEffect(() => {
     listMonitorHistory({
@@ -80,7 +80,7 @@ export default function AdminMonitorPage() {
         setHistoryTotal(res.meta.total);
       })
       .catch(() => toast.error(t("monitor.loadHistoryFailed")));
-  }, [historyPage, filterType, filterMailbox, filterSender]);
+  }, [historyPage, filterType, filterMailbox, filterSender, t]);
 
   const stats = useMemo(() => {
     const counters = { message: 0, delete: 0, purge: 0 };
