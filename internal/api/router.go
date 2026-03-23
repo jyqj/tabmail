@@ -12,6 +12,7 @@ import (
 
 	"tabmail/internal/api/handlers"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/config"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -31,8 +32,10 @@ func NewRouter(
 	stripPlus bool,
 	defaultPolicy models.SMTPPolicy,
 	adminKey string,
+	mailboxTokenSecret string,
 	expectedMXHost string,
 	publicTenantID string,
+	httpCfg config.HTTP,
 	rl *middleware.RateLimiter,
 	logger zerolog.Logger,
 ) http.Handler {
@@ -42,10 +45,10 @@ func NewRouter(
 	r.Use(chimw.RealIP)
 	r.Use(chimw.Recoverer)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins:   append([]string(nil), httpCfg.AllowedOrigins...),
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"*"},
-		AllowCredentials: false,
+		AllowedHeaders:   append([]string(nil), httpCfg.AllowedHeaders...),
+		AllowCredentials: httpCfg.AllowCredentials,
 		MaxAge:           86400,
 	}))
 
@@ -53,8 +56,8 @@ func NewRouter(
 	r.Use(rl.Middleware)
 
 	dh := handlers.NewDomainHandler(st, dispatcher, expectedMXHost, logger)
-	mh := handlers.NewMailboxHandler(st, obj, dispatcher, namingMode, stripPlus, adminKey, logger)
-	msg := handlers.NewMessageHandler(st, obj, hub, dispatcher, namingMode, stripPlus, adminKey, logger)
+	mh := handlers.NewMailboxHandler(st, obj, dispatcher, namingMode, stripPlus, mailboxTokenSecret, logger)
+	msg := handlers.NewMessageHandler(st, obj, hub, dispatcher, namingMode, stripPlus, mailboxTokenSecret, logger)
 	adm := handlers.NewAdminHandler(st, dispatcher, defaultPolicy, logger)
 	mon := handlers.NewMonitorHandler(st, hub, logger)
 
@@ -117,6 +120,8 @@ func NewRouter(
 			r.Get("/admin/monitor/events", mon.StreamAll)
 			r.Get("/admin/monitor/history", mon.History)
 			r.Get("/admin/audit", adm.ListAudit)
+			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
+			r.Get("/admin/webhooks/deliveries", adm.ListWebhookDeliveries)
 		})
 	})
 

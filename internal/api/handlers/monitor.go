@@ -1,21 +1,26 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"time"
 
 	"github.com/rs/zerolog"
+	"tabmail/internal/models"
 	"tabmail/internal/realtime"
-	"tabmail/internal/store"
 )
 
+type monitorStore interface {
+	ListMonitorEvents(ctx context.Context, pg models.Page, eventType, mailbox, sender string) ([]*models.MonitorEvent, int, error)
+}
+
 type MonitorHandler struct {
-	store  store.Store
+	store  monitorStore
 	hub    *realtime.Hub
 	logger zerolog.Logger
 }
 
-func NewMonitorHandler(store store.Store, hub *realtime.Hub, logger zerolog.Logger) *MonitorHandler {
+func NewMonitorHandler(store monitorStore, hub *realtime.Hub, logger zerolog.Logger) *MonitorHandler {
 	return &MonitorHandler{store: store, hub: hub, logger: logger.With().Str("handler", "monitor").Logger()}
 }
 

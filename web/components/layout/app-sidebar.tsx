@@ -31,6 +31,8 @@ import {
   LogOut,
   Shield,
   ClipboardList,
+  Webhook,
+  Boxes,
 } from "lucide-react";
 
 export function AppSidebar() {
@@ -50,6 +52,8 @@ export function AppSidebar() {
     { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
     { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
     { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
+    { href: "/admin/ingest", label: "Ingest Jobs", icon: Boxes },
+    { href: "/admin/webhooks", label: "Webhook Deliveries", icon: Webhook },
   ];
 
   return (

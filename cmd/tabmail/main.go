@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -13,8 +15,10 @@ import (
 
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/autocreate"
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
+	"tabmail/internal/ingest"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
@@ -73,16 +77,19 @@ func main() {
 	if err != nil {
 		logger.Fatal().Err(err).Msg("invalid mailbox naming mode")
 	}
-	res := resolver.New(pg, namingMode, cfg.StripPlusTag)
+	autoCreateLimiter := autocreate.NewLimiter(rdb, cfg.AutoCreateRouteRPM, cfg.AutoCreateTenantRPM)
+	res := resolver.New(pg, namingMode, cfg.StripPlusTag, autoCreateLimiter)
 	hub := realtime.NewHub(cfg.MonitorHistory, pg)
 	dispatcher := hooks.New(hooks.Config{
-		URLs:       cfg.Webhook.URLs,
-		Secret:     cfg.Webhook.Secret,
-		Timeout:    cfg.Webhook.Timeout,
-		MaxRetries: cfg.Webhook.MaxRetries,
-		RetryDelay: cfg.Webhook.RetryDelay,
-		DeadLimit:  cfg.Webhook.DeadLimit,
-	}, logger)
+		URLs:         cfg.Webhook.URLs,
+		Secret:       cfg.Webhook.Secret,
+		Timeout:      cfg.Webhook.Timeout,
+		MaxRetries:   cfg.Webhook.MaxRetries,
+		RetryDelay:   cfg.Webhook.RetryDelay,
+		DeadLimit:    cfg.Webhook.DeadLimit,
+		PollInterval: cfg.Webhook.PollInterval,
+		BatchSize:    cfg.Webhook.BatchSize,
+	}, logger).BindStore(pg)
 	defaultPolicy := models.SMTPPolicy{
 		DefaultAccept:       cfg.SMTP.DefaultAccept,
 		AcceptDomains:       append([]string(nil), cfg.SMTP.AcceptDomains...),
@@ -92,41 +99,56 @@ func main() {
 		DiscardDomains:      append([]string(nil), cfg.SMTP.DiscardDomains...),
 		RejectOriginDomains: append([]string(nil), cfg.SMTP.RejectOriginDomains...),
 	}
+	ingestSvc := ingest.NewService(pg, obj, res, hub, dispatcher, defaultPolicy, cfg.Storage.FallbackRetentionH, rdb, cfg.Ingest, logger)
 
 	// --- Retention scanner ---
 	ret := retention.New(pg, obj, cfg.Storage, logger)
-	go ret.Run(ctx)
+	var smtpSrv *smtpsrv.Server
+	var httpSrv *http.Server
 
-	// --- SMTP server ---
-	smtp := smtpsrv.NewServer(cfg.SMTP, cfg.Storage.FallbackRetentionH, pg, obj, res, hub, dispatcher, defaultPolicy, logger)
-	go func() {
-		if err := smtp.Start(ctx); err != nil {
-			logger.Error().Err(err).Msg("SMTP server error")
-			cancel()
-		}
-	}()
+	switch strings.ToLower(strings.TrimSpace(cfg.Role)) {
+	case "", "all":
+		go ret.Run(ctx)
+		go dispatcher.Run(ctx)
+		go ingestSvc.Run(ctx)
 
-	// --- HTTP API ---
-	rl := middleware.NewRateLimiter(rdb, pg, 20)
-	handler := api.NewRouter(pg, obj, hub, dispatcher, namingMode, cfg.StripPlusTag, defaultPolicy, cfg.AdminKey, cfg.SMTP.Domain, publicTenantID, rl, logger)
+		smtpSrv = smtpsrv.NewServer(cfg.SMTP, ingestSvc, res, logger)
+		go func() {
+			if err := smtpSrv.Start(ctx); err != nil {
+				logger.Error().Err(err).Msg("SMTP server error")
+				cancel()
+			}
+		}()
 
-	httpSrv := &http.Server{
-		Addr:         cfg.HTTP.Addr,
-		Handler:      handler,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 30 * time.Second,
-		IdleTimeout:  60 * time.Second,
+		rl := middleware.NewRateLimiter(rdb, pg, 20, cfg.HTTP.TrustedProxies)
+		handler := api.NewRouter(pg, obj, hub, dispatcher, namingMode, cfg.StripPlusTag, defaultPolicy, cfg.AdminKey, cfg.MailboxTokenSecret, cfg.SMTP.Domain, publicTenantID, cfg.HTTP, rl, logger)
+		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
+		go serveHTTP(ctx, cancel, httpSrv, logger)
+	case "api":
+		go dispatcher.Run(ctx)
+		go ingestSvc.Run(ctx)
+		rl := middleware.NewRateLimiter(rdb, pg, 20, cfg.HTTP.TrustedProxies)
+		handler := api.NewRouter(pg, obj, hub, dispatcher, namingMode, cfg.StripPlusTag, defaultPolicy, cfg.AdminKey, cfg.MailboxTokenSecret, cfg.SMTP.Domain, publicTenantID, cfg.HTTP, rl, logger)
+		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
+		go serveHTTP(ctx, cancel, httpSrv, logger)
+	case "smtp":
+		smtpSrv = smtpsrv.NewServer(cfg.SMTP, ingestSvc, res, logger)
+		go func() {
+			if err := smtpSrv.Start(ctx); err != nil {
+				logger.Error().Err(err).Msg("SMTP server error")
+				cancel()
+			}
+		}()
+	case "worker":
+		go dispatcher.Run(ctx)
+		go ingestSvc.Run(ctx)
+	case "retention":
+		go ret.Run(ctx)
+	default:
+		logger.Fatal().Str("role", cfg.Role).Msg("invalid role; expected all, api, smtp, worker, retention")
 	}
 
-	go func() {
-		logger.Info().Str("addr", cfg.HTTP.Addr).Msg("HTTP API starting")
-		if err := httpSrv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			logger.Error().Err(err).Msg("HTTP server error")
-			cancel()
-		}
-	}()
-
-	logger.Info().Msg("TabMail is running")
+	logger.Info().Str("role", strings.ToLower(strings.TrimSpace(cfg.Role))).Msg("TabMail is running")
 
 	<-ctx.Done()
 	logger.Info().Msg("shutting down...")
@@ -134,8 +156,12 @@ func main() {
 	shutCtx, shutCancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer shutCancel()
 
-	_ = httpSrv.Shutdown(shutCtx)
-	_ = smtp.Shutdown(shutCtx)
+	if httpSrv != nil {
+		_ = httpSrv.Shutdown(shutCtx)
+	}
+	if smtpSrv != nil {
+		_ = smtpSrv.Shutdown(shutCtx)
+	}
 	logger.Info().Msg("shutdown complete")
 }
 
@@ -149,5 +175,23 @@ func setLogLevel(l *zerolog.Logger, level string) {
 		*l = l.Level(zerolog.ErrorLevel)
 	default:
 		*l = l.Level(zerolog.InfoLevel)
+	}
+}
+
+func newHTTPServer(addr string, handler http.Handler) *http.Server {
+	return &http.Server{
+		Addr:         addr,
+		Handler:      handler,
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+}
+
+func serveHTTP(_ context.Context, cancel context.CancelFunc, srv *http.Server, logger zerolog.Logger) {
+	logger.Info().Str("addr", srv.Addr).Msg("HTTP API starting")
+	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		logger.Error().Err(err).Msg("HTTP server error")
+		cancel()
 	}
 }

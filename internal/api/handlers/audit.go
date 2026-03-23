@@ -7,10 +7,13 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"tabmail/internal/models"
-	"tabmail/internal/store"
 )
 
-func insertAudit(ctx context.Context, s store.Store, logger zerolog.Logger, entry models.AuditEntry) {
+type auditStore interface {
+	InsertAudit(ctx context.Context, e *models.AuditEntry) error
+}
+
+func insertAudit(ctx context.Context, s auditStore, logger zerolog.Logger, entry models.AuditEntry) {
 	if entry.Details == nil {
 		entry.Details = json.RawMessage(`{}`)
 	}

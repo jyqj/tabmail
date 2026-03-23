@@ -29,26 +29,32 @@ type FakeStore struct {
 	apiRaw     map[string]resolvedAPIKey
 	smtpPolicy *models.SMTPPolicy
 
-	zones     map[uuid.UUID]*models.DomainZone
-	routes    map[uuid.UUID]*models.DomainRoute
-	mailboxes map[uuid.UUID]*models.Mailbox
-	messages  map[uuid.UUID]*models.Message
-	audits    []*models.AuditEntry
-	monitor   []*models.MonitorEvent
+	zones      map[uuid.UUID]*models.DomainZone
+	routes     map[uuid.UUID]*models.DomainRoute
+	mailboxes  map[uuid.UUID]*models.Mailbox
+	messages   map[uuid.UUID]*models.Message
+	audits     []*models.AuditEntry
+	monitor    []*models.MonitorEvent
+	outbox     map[uuid.UUID]*models.OutboxEvent
+	deliveries map[uuid.UUID]*models.WebhookDelivery
+	ingestJobs map[uuid.UUID]*models.IngestJob
 }
 
 func NewFakeStore() *FakeStore {
 	return &FakeStore{
-		plans:     map[uuid.UUID]*models.Plan{},
-		tenants:   map[uuid.UUID]*models.Tenant{},
-		overrides: map[uuid.UUID]*models.TenantOverride{},
-		apiKeys:   map[uuid.UUID]*models.TenantAPIKey{},
-		apiRaw:    map[string]resolvedAPIKey{},
-		zones:     map[uuid.UUID]*models.DomainZone{},
-		routes:    map[uuid.UUID]*models.DomainRoute{},
-		mailboxes: map[uuid.UUID]*models.Mailbox{},
-		messages:  map[uuid.UUID]*models.Message{},
-		monitor:   []*models.MonitorEvent{},
+		plans:      map[uuid.UUID]*models.Plan{},
+		tenants:    map[uuid.UUID]*models.Tenant{},
+		overrides:  map[uuid.UUID]*models.TenantOverride{},
+		apiKeys:    map[uuid.UUID]*models.TenantAPIKey{},
+		apiRaw:     map[string]resolvedAPIKey{},
+		zones:      map[uuid.UUID]*models.DomainZone{},
+		routes:     map[uuid.UUID]*models.DomainRoute{},
+		mailboxes:  map[uuid.UUID]*models.Mailbox{},
+		messages:   map[uuid.UUID]*models.Message{},
+		monitor:    []*models.MonitorEvent{},
+		outbox:     map[uuid.UUID]*models.OutboxEvent{},
+		deliveries: map[uuid.UUID]*models.WebhookDelivery{},
+		ingestJobs: map[uuid.UUID]*models.IngestJob{},
 	}
 }
 
@@ -501,9 +507,13 @@ func (s *FakeStore) CreateMailbox(_ context.Context, m *models.Mailbox) error {
 	if cp.CreatedAt.IsZero() {
 		cp.CreatedAt = time.Now()
 	}
+	if cp.MessageCount < 0 {
+		cp.MessageCount = 0
+	}
 	s.mailboxes[cp.ID] = &cp
 	m.ID = cp.ID
 	m.CreatedAt = cp.CreatedAt
+	m.MessageCount = cp.MessageCount
 	return nil
 }
 
@@ -612,9 +622,38 @@ func (s *FakeStore) CreateMessage(_ context.Context, m *models.Message) error {
 		cp.ReceivedAt = time.Now()
 	}
 	s.messages[cp.ID] = &cp
+	if mb, ok := s.mailboxes[cp.MailboxID]; ok {
+		mb.MessageCount++
+	}
 	m.ID = cp.ID
 	m.ReceivedAt = cp.ReceivedAt
 	return nil
+}
+
+func (s *FakeStore) CreateMessageWithQuota(_ context.Context, m *models.Message, maxMessages int) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	mb, ok := s.mailboxes[m.MailboxID]
+	if !ok {
+		return false, errors.New("mailbox not found")
+	}
+	if maxMessages > 0 && int(mb.MessageCount) >= maxMessages {
+		return false, nil
+	}
+
+	cp := *m
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	if cp.ReceivedAt.IsZero() {
+		cp.ReceivedAt = time.Now()
+	}
+	s.messages[cp.ID] = &cp
+	mb.MessageCount++
+	m.ID = cp.ID
+	m.ReceivedAt = cp.ReceivedAt
+	return true, nil
 }
 
 func (s *FakeStore) GetMessage(_ context.Context, id uuid.UUID) (*models.Message, error) {
@@ -653,7 +692,12 @@ func (s *FakeStore) MarkSeen(_ context.Context, id uuid.UUID) error {
 func (s *FakeStore) DeleteMessage(_ context.Context, id uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	delete(s.messages, id)
+	if msg, ok := s.messages[id]; ok {
+		if mb, exists := s.mailboxes[msg.MailboxID]; exists && mb.MessageCount > 0 {
+			mb.MessageCount--
+		}
+		delete(s.messages, id)
+	}
 	return nil
 }
 
@@ -665,19 +709,19 @@ func (s *FakeStore) PurgeMailbox(_ context.Context, mailboxID uuid.UUID) error {
 			delete(s.messages, id)
 		}
 	}
+	if mb, ok := s.mailboxes[mailboxID]; ok {
+		mb.MessageCount = 0
+	}
 	return nil
 }
 
 func (s *FakeStore) CountMessages(_ context.Context, mailboxID uuid.UUID) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	n := 0
-	for _, m := range s.messages {
-		if m.MailboxID == mailboxID {
-			n++
-		}
+	if mb, ok := s.mailboxes[mailboxID]; ok {
+		return int(mb.MessageCount), nil
 	}
-	return n, nil
+	return 0, nil
 }
 
 func (s *FakeStore) CountMessagesByObjectKey(_ context.Context, objectKey string) (int, error) {
@@ -732,6 +776,9 @@ func (s *FakeStore) DeleteExpiredMessages(_ context.Context, before time.Time, l
 	for _, m := range expired {
 		if n >= limit {
 			break
+		}
+		if mb, ok := s.mailboxes[m.MailboxID]; ok && mb.MessageCount > 0 {
+			mb.MessageCount--
 		}
 		delete(s.messages, m.ID)
 		n++
@@ -844,6 +891,358 @@ func (s *FakeStore) ListMonitorEvents(_ context.Context, pg models.Page, eventTy
 	return filtered[start:end], total, nil
 }
 
+func (s *FakeStore) CreateOutboxEvent(_ context.Context, e *models.OutboxEvent) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cp := *e
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	now := time.Now().UTC()
+	if cp.OccurredAt.IsZero() {
+		cp.OccurredAt = now
+	}
+	if cp.NextAttemptAt.IsZero() {
+		cp.NextAttemptAt = now
+	}
+	if cp.State == "" {
+		cp.State = "pending"
+	}
+	cp.CreatedAt = now
+	cp.UpdatedAt = now
+	s.outbox[cp.ID] = &cp
+	e.ID = cp.ID
+	return nil
+}
+
+func (s *FakeStore) ClaimOutboxEvents(_ context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if limit <= 0 {
+		limit = 100
+	}
+	var list []*models.OutboxEvent
+	for _, e := range s.outbox {
+		if (e.State == "pending" || e.State == "retry") && !e.NextAttemptAt.After(now) {
+			cp := *e
+			list = append(list, &cp)
+		}
+	}
+	sort.Slice(list, func(i, j int) bool { return list[i].CreatedAt.Before(list[j].CreatedAt) })
+	if len(list) > limit {
+		list = list[:limit]
+	}
+	for _, e := range list {
+		stored := s.outbox[e.ID]
+		stored.State = "processing"
+		stored.Attempts++
+		stored.UpdatedAt = now
+		e.State = stored.State
+		e.Attempts = stored.Attempts
+		e.UpdatedAt = stored.UpdatedAt
+	}
+	return list, nil
+}
+
+func (s *FakeStore) MarkOutboxEventDone(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if e, ok := s.outbox[id]; ok {
+		e.State = "done"
+		e.UpdatedAt = time.Now().UTC()
+	}
+	return nil
+}
+
+func (s *FakeStore) MarkOutboxEventRetry(_ context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if e, ok := s.outbox[id]; ok {
+		e.State = "retry"
+		e.LastError = lastError
+		e.NextAttemptAt = nextAttemptAt
+		e.UpdatedAt = time.Now().UTC()
+	}
+	return nil
+}
+
+func (s *FakeStore) CreateWebhookDeliveries(_ context.Context, event *models.OutboxEvent, urls []string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	now := time.Now().UTC()
+	for _, url := range urls {
+		exists := false
+		for _, d := range s.deliveries {
+			if d.EventID == event.ID && d.URL == url {
+				exists = true
+				break
+			}
+		}
+		if exists {
+			continue
+		}
+		d := &models.WebhookDelivery{
+			ID:            uuid.New(),
+			EventID:       event.ID,
+			URL:           url,
+			EventType:     event.EventType,
+			Payload:       append([]byte(nil), event.Payload...),
+			State:         "pending",
+			NextAttemptAt: now,
+			CreatedAt:     now,
+			UpdatedAt:     now,
+		}
+		s.deliveries[d.ID] = d
+	}
+	return nil
+}
+
+func (s *FakeStore) ClaimWebhookDeliveries(_ context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if limit <= 0 {
+		limit = 100
+	}
+	var list []*models.WebhookDelivery
+	for _, d := range s.deliveries {
+		if (d.State == "pending" || d.State == "retry") && !d.NextAttemptAt.After(now) {
+			cp := *d
+			list = append(list, &cp)
+		}
+	}
+	sort.Slice(list, func(i, j int) bool { return list[i].CreatedAt.Before(list[j].CreatedAt) })
+	if len(list) > limit {
+		list = list[:limit]
+	}
+	for _, d := range list {
+		stored := s.deliveries[d.ID]
+		stored.State = "processing"
+		stored.Attempts++
+		triedAt := now
+		stored.LastTriedAt = &triedAt
+		stored.UpdatedAt = now
+		d.State = stored.State
+		d.Attempts = stored.Attempts
+		d.LastTriedAt = stored.LastTriedAt
+		d.UpdatedAt = stored.UpdatedAt
+	}
+	return list, nil
+}
+
+func (s *FakeStore) MarkWebhookDeliveryDone(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if d, ok := s.deliveries[id]; ok {
+		now := time.Now().UTC()
+		d.State = "delivered"
+		d.DeliveredAt = &now
+		d.UpdatedAt = now
+	}
+	return nil
+}
+
+func (s *FakeStore) MarkWebhookDeliveryRetry(_ context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if d, ok := s.deliveries[id]; ok {
+		d.State = "retry"
+		if dead {
+			d.State = "dead"
+		}
+		d.LastError = lastError
+		d.NextAttemptAt = nextAttemptAt
+		d.UpdatedAt = time.Now().UTC()
+	}
+	return nil
+}
+
+func (s *FakeStore) ListDeadWebhookDeliveries(_ context.Context, limit int) ([]models.DeadLetter, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if limit <= 0 {
+		limit = 20
+	}
+	var out []models.DeadLetter
+	for _, d := range s.deliveries {
+		if d.State != "dead" {
+			continue
+		}
+		out = append(out, models.DeadLetter{
+			ID:          d.ID.String(),
+			URL:         d.URL,
+			EventType:   d.EventType,
+			Payload:     append([]byte(nil), d.Payload...),
+			Attempts:    d.Attempts,
+			LastError:   d.LastError,
+			CreatedAt:   d.CreatedAt,
+			LastTriedAt: derefTime(d.LastTriedAt),
+		})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.After(out[j].CreatedAt) })
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
+}
+
+func (s *FakeStore) CountDeadWebhookDeliveries(_ context.Context) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	total := 0
+	for _, d := range s.deliveries {
+		if d.State == "dead" {
+			total++
+		}
+	}
+	return total, nil
+}
+
+func (s *FakeStore) ListWebhookDeliveries(_ context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.WebhookDelivery
+	for _, d := range s.deliveries {
+		if state != "" && d.State != state {
+			continue
+		}
+		if eventType != "" && d.EventType != eventType {
+			continue
+		}
+		if url != "" && !strings.Contains(strings.ToLower(d.URL), strings.ToLower(url)) {
+			continue
+		}
+		cp := *d
+		out = append(out, &cp)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.After(out[j].CreatedAt) })
+	total := len(out)
+	pg = pg.Normalize()
+	start := pg.Offset()
+	if start >= total {
+		return []*models.WebhookDelivery{}, total, nil
+	}
+	end := start + pg.PerPage
+	if end > total {
+		end = total
+	}
+	return out[start:end], total, nil
+}
+
+func (s *FakeStore) CreateIngestJob(_ context.Context, job *models.IngestJob) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cp := *job
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	now := time.Now().UTC()
+	if cp.NextAttemptAt.IsZero() {
+		cp.NextAttemptAt = now
+	}
+	if cp.State == "" {
+		cp.State = "pending"
+	}
+	cp.CreatedAt = now
+	cp.UpdatedAt = now
+	s.ingestJobs[cp.ID] = &cp
+	job.ID = cp.ID
+	return nil
+}
+
+func (s *FakeStore) ClaimIngestJobs(_ context.Context, now time.Time, limit int) ([]*models.IngestJob, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if limit <= 0 {
+		limit = 100
+	}
+	var jobs []*models.IngestJob
+	for _, job := range s.ingestJobs {
+		if (job.State == "pending" || job.State == "retry") && !job.NextAttemptAt.After(now) {
+			cp := *job
+			jobs = append(jobs, &cp)
+		}
+	}
+	sort.Slice(jobs, func(i, j int) bool { return jobs[i].CreatedAt.Before(jobs[j].CreatedAt) })
+	if len(jobs) > limit {
+		jobs = jobs[:limit]
+	}
+	for _, job := range jobs {
+		stored := s.ingestJobs[job.ID]
+		stored.State = "processing"
+		stored.Attempts++
+		stored.UpdatedAt = now
+		job.State = stored.State
+		job.Attempts = stored.Attempts
+		job.UpdatedAt = stored.UpdatedAt
+	}
+	return jobs, nil
+}
+
+func (s *FakeStore) MarkIngestJobDone(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if job, ok := s.ingestJobs[id]; ok {
+		job.State = "done"
+		job.UpdatedAt = time.Now().UTC()
+	}
+	return nil
+}
+
+func (s *FakeStore) MarkIngestJobRetry(_ context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if job, ok := s.ingestJobs[id]; ok {
+		job.State = "retry"
+		if dead {
+			job.State = "dead"
+		}
+		job.LastError = lastError
+		job.NextAttemptAt = nextAttemptAt
+		job.UpdatedAt = time.Now().UTC()
+	}
+	return nil
+}
+
+func (s *FakeStore) ListIngestJobs(_ context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.IngestJob
+	for _, job := range s.ingestJobs {
+		if state != "" && job.State != state {
+			continue
+		}
+		if source != "" && job.Source != source {
+			continue
+		}
+		if recipient != "" {
+			match := false
+			for _, rcpt := range job.Recipients {
+				if strings.EqualFold(rcpt, recipient) {
+					match = true
+					break
+				}
+			}
+			if !match {
+				continue
+			}
+		}
+		cp := *job
+		out = append(out, &cp)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.After(out[j].CreatedAt) })
+	total := len(out)
+	pg = pg.Normalize()
+	start := pg.Offset()
+	if start >= total {
+		return []*models.IngestJob{}, total, nil
+	}
+	end := start + pg.PerPage
+	if end > total {
+		end = total
+	}
+	return out[start:end], total, nil
+}
+
 func (s *FakeStore) Close() error { return nil }
 
 type MemoryObjectStore struct {
@@ -928,4 +1327,11 @@ func paginateMessages(list []*models.Message, pg models.Page) []*models.Message 
 		end = len(list)
 	}
 	return list[start:end]
+}
+
+func derefTime(v *time.Time) time.Time {
+	if v == nil {
+		return time.Time{}
+	}
+	return *v
 }

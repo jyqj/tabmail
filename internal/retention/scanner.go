@@ -9,14 +9,20 @@ import (
 	"tabmail/internal/store"
 )
 
+type retentionStore interface {
+	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
+	DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error)
+	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+}
+
 type Scanner struct {
-	store  store.Store
+	store  retentionStore
 	obj    store.ObjectStore
 	cfg    config.Storage
 	logger zerolog.Logger
 }
 
-func New(s store.Store, obj store.ObjectStore, cfg config.Storage, logger zerolog.Logger) *Scanner {
+func New(s retentionStore, obj store.ObjectStore, cfg config.Storage, logger zerolog.Logger) *Scanner {
 	return &Scanner{
 		store:  s,
 		obj:    obj,

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -21,8 +22,20 @@ import (
 	"tabmail/internal/store"
 )
 
+type messageStore interface {
+	auditStore
+	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
+	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
+	MarkSeen(ctx context.Context, id uuid.UUID) error
+	DeleteMessage(ctx context.Context, id uuid.UUID) error
+	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
+	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
+	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+}
+
 type MessageHandler struct {
-	store       store.Store
+	store       messageStore
 	obj         store.ObjectStore
 	hub         *realtime.Hub
 	dispatcher  *hooks.Dispatcher
@@ -32,7 +45,7 @@ type MessageHandler struct {
 	logger      zerolog.Logger
 }
 
-func NewMessageHandler(s store.Store, obj store.ObjectStore, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MessageHandler {
+func NewMessageHandler(s messageStore, obj store.ObjectStore, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MessageHandler {
 	return &MessageHandler{store: s, obj: obj, hub: hub, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: l.With().Str("handler", "messages").Logger()}
 }
 

@@ -10,12 +10,16 @@ import (
 const envPrefix = "TABMAIL"
 
 type Root struct {
-	LogLevel       string `default:"info" desc:"debug, info, warn, error"`
-	DataDir        string `default:"/data" desc:"Base directory for raw .eml storage"`
-	AdminKey       string `required:"true" desc:"Super-admin X-Admin-Key value"`
-	MailboxNaming  string `default:"full" desc:"Mailbox naming: full, local, or domain"`
-	StripPlusTag   bool   `default:"true" desc:"Strip +tag from local part"`
-	MonitorHistory int    `default:"50" desc:"Number of recent events to keep for monitor replay (0=disable)"`
+	Role                string `default:"all" desc:"Process role: all, api, smtp, retention"`
+	LogLevel            string `default:"info" desc:"debug, info, warn, error"`
+	DataDir             string `default:"/data" desc:"Base directory for raw .eml storage"`
+	AdminKey            string `required:"true" desc:"Super-admin X-Admin-Key value"`
+	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens"`
+	AutoCreateRouteRPM  int    `split_words:"true" default:"60" desc:"Per-route auto-create RPM (0=disable)"`
+	AutoCreateTenantRPM int    `split_words:"true" default:"300" desc:"Per-tenant auto-create RPM (0=disable)"`
+	MailboxNaming       string `default:"full" desc:"Mailbox naming: full, local, or domain"`
+	StripPlusTag        bool   `default:"true" desc:"Strip +tag from local part"`
+	MonitorHistory      int    `default:"50" desc:"Number of recent events to keep for monitor replay (0=disable)"`
 
 	SMTP    SMTP
 	HTTP    HTTP
@@ -23,6 +27,7 @@ type Root struct {
 	Redis   Redis
 	Storage Storage
 	Webhook Webhook
+	Ingest  Ingest
 }
 
 type SMTP struct {
@@ -45,8 +50,12 @@ type SMTP struct {
 }
 
 type HTTP struct {
-	Addr     string `default:"0.0.0.0:8080" desc:"HTTP API listen address"`
-	BasePath string `default:"" desc:"URL path prefix (e.g. /api)"`
+	Addr             string   `default:"0.0.0.0:8080" desc:"HTTP API listen address"`
+	BasePath         string   `default:"" desc:"URL path prefix (e.g. /api)"`
+	AllowedOrigins   []string `split_words:"true" default:"http://127.0.0.1:3000,http://localhost:3000" desc:"Allowed CORS origins"`
+	AllowedHeaders   []string `split_words:"true" default:"Authorization,Content-Type,X-API-Key,X-Admin-Key,X-Tenant-ID" desc:"Allowed CORS headers"`
+	AllowCredentials bool     `split_words:"true" default:"false" desc:"Allow credentialed CORS requests"`
+	TrustedProxies   []string `split_words:"true" default:"127.0.0.1/32,::1/128" desc:"Trusted proxy CIDRs/IPs for X-Real-IP/X-Forwarded-For"`
 }
 
 type DB struct {
@@ -69,12 +78,21 @@ type Storage struct {
 }
 
 type Webhook struct {
-	URLs       string        `default:"" desc:"Comma-separated inbound event webhook URLs"`
-	Secret     string        `default:"" desc:"Optional webhook signature secret"`
-	Timeout    time.Duration `default:"5s" desc:"Webhook request timeout"`
-	MaxRetries int           `default:"3" desc:"Max webhook retry attempts"`
-	RetryDelay time.Duration `default:"1s" desc:"Base webhook retry delay"`
-	DeadLimit  int           `default:"100" desc:"Max in-memory dead-letter queue size"`
+	URLs         string        `default:"" desc:"Comma-separated inbound event webhook URLs"`
+	Secret       string        `default:"" desc:"Optional webhook signature secret"`
+	Timeout      time.Duration `default:"5s" desc:"Webhook request timeout"`
+	MaxRetries   int           `default:"3" desc:"Max webhook retry attempts"`
+	RetryDelay   time.Duration `default:"1s" desc:"Base webhook retry delay"`
+	DeadLimit    int           `default:"100" desc:"Max in-memory dead-letter queue size"`
+	PollInterval time.Duration `split_words:"true" default:"1s" desc:"Dispatcher polling interval for outbox/deliveries"`
+	BatchSize    int           `split_words:"true" default:"100" desc:"Dispatcher batch size for outbox/deliveries"`
+}
+
+type Ingest struct {
+	Durable      bool          `default:"false" desc:"When enabled, SMTP DATA durably enqueues ingest jobs instead of synchronously delivering"`
+	PollInterval time.Duration `split_words:"true" default:"1s" desc:"Ingest worker polling interval"`
+	BatchSize    int           `split_words:"true" default:"100" desc:"Ingest worker batch size"`
+	MaxRetries   int           `split_words:"true" default:"5" desc:"Max ingest job retry attempts before dead-lettering"`
 }
 
 func Load() (*Root, error) {

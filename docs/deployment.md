@@ -55,6 +55,9 @@ done
 
 ```bash
 export TABMAIL_ADMINKEY='change-this-admin-key'
+export TABMAIL_MAILBOX_TOKEN_SECRET='change-this-mailbox-token-secret'
+export TABMAIL_AUTOCREATE_ROUTE_RPM='60'
+export TABMAIL_AUTOCREATE_TENANT_RPM='300'
 ```
 
 ### 常用
@@ -64,6 +67,9 @@ export TABMAIL_DB_DSN='postgres://tabmail:tabmail@127.0.0.1:5432/tabmail?sslmode
 export TABMAIL_REDIS_ADDR='127.0.0.1:6379'
 export TABMAIL_DATADIR='/data'
 export TABMAIL_HTTP_ADDR='0.0.0.0:8080'
+export TABMAIL_HTTP_ALLOWED_ORIGINS='http://127.0.0.1:3000,http://localhost:3000'
+export TABMAIL_HTTP_ALLOWED_HEADERS='Authorization,Content-Type,X-API-Key,X-Admin-Key,X-Tenant-ID'
+export TABMAIL_HTTP_TRUSTED_PROXIES='127.0.0.1/32,::1/128'
 export TABMAIL_SMTP_ADDR='0.0.0.0:2525'
 export TABMAIL_SMTP_DOMAIN='mail.example.com'
 export TABMAIL_SMTP_TLSENABLED='false'
@@ -78,6 +84,13 @@ export TABMAIL_WEBHOOK_SECRET='change-me'
 export TABMAIL_WEBHOOK_MAXRETRIES='3'
 export TABMAIL_WEBHOOK_RETRYDELAY='1s'
 export TABMAIL_WEBHOOK_DEADLIMIT='100'
+export TABMAIL_WEBHOOK_POLL_INTERVAL='1s'
+export TABMAIL_WEBHOOK_BATCH_SIZE='100'
+export TABMAIL_INGEST_DURABLE='false'
+export TABMAIL_INGEST_POLL_INTERVAL='1s'
+export TABMAIL_INGEST_BATCH_SIZE='100'
+export TABMAIL_INGEST_MAX_RETRIES='5'
+export TABMAIL_ROLE='all'
 ```
 
 ## 4. 手工运行

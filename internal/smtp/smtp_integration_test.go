@@ -14,6 +14,7 @@ import (
 
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
+	"tabmail/internal/ingest"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
@@ -59,6 +60,8 @@ func TestSMTPMessageLifecycle(t *testing.T) {
 	})
 
 	addr := freeAddr(t)
+	resolverSvc := resolver.New(st, policy.NamingFull, true)
+	ingestSvc := ingest.NewService(st, obj, resolverSvc, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, 24, nil, config.Ingest{}, zerolog.Nop())
 	srv := smtpsrv.NewServer(config.SMTP{
 		Addr:            addr,
 		Domain:          "mx.mail.test",
@@ -67,7 +70,7 @@ func TestSMTPMessageLifecycle(t *testing.T) {
 		Timeout:         5 * time.Second,
 		DefaultAccept:   true,
 		DefaultStore:    true,
-	}, 24, st, obj, resolver.New(st, policy.NamingFull, true), realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, zerolog.Nop())
+	}, ingestSvc, resolverSvc, zerolog.Nop())
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -161,6 +164,8 @@ func TestSMTPStoresSingleRawObjectForMultiRecipientDelivery(t *testing.T) {
 	})
 
 	addr := freeAddr(t)
+	resolverSvc := resolver.New(st, policy.NamingFull, true)
+	ingestSvc := ingest.NewService(st, obj, resolverSvc, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, 24, nil, config.Ingest{}, zerolog.Nop())
 	srv := smtpsrv.NewServer(config.SMTP{
 		Addr:            addr,
 		Domain:          "mx.mail.test",
@@ -169,7 +174,7 @@ func TestSMTPStoresSingleRawObjectForMultiRecipientDelivery(t *testing.T) {
 		Timeout:         5 * time.Second,
 		DefaultAccept:   true,
 		DefaultStore:    true,
-	}, 24, st, obj, resolver.New(st, policy.NamingFull, true), realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, zerolog.Nop())
+	}, ingestSvc, resolverSvc, zerolog.Nop())
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -194,9 +199,9 @@ func TestSMTPStoresSingleRawObjectForMultiRecipientDelivery(t *testing.T) {
 	expectCode(t, r, "250")
 	sendLine(t, conn, "MAIL FROM:<sender@example.org>")
 	expectCode(t, r, "250")
-	sendLine(t, conn, "RCPT TO:<one.deep.mail.test>")
+	sendLine(t, conn, "RCPT TO:<one@deep.mail.test>")
 	expectCode(t, r, "250")
-	sendLine(t, conn, "RCPT TO:<two.more.deep.mail.test>")
+	sendLine(t, conn, "RCPT TO:<two@more.deep.mail.test>")
 	expectCode(t, r, "250")
 	sendLine(t, conn, "DATA")
 	expectCode(t, r, "354")
@@ -207,8 +212,8 @@ func TestSMTPStoresSingleRawObjectForMultiRecipientDelivery(t *testing.T) {
 	expectCode(t, r, "250")
 	sendLine(t, conn, "QUIT")
 
-	mb1, _ := st.GetMailboxByAddress(context.Background(), "one.deep.mail.test")
-	mb2, _ := st.GetMailboxByAddress(context.Background(), "two.more.deep.mail.test")
+	mb1, _ := st.GetMailboxByAddress(context.Background(), "one@deep.mail.test")
+	mb2, _ := st.GetMailboxByAddress(context.Background(), "two@more.deep.mail.test")
 	if mb1 == nil || mb2 == nil {
 		t.Fatalf("expected both mailboxes created, got %#v %#v", mb1, mb2)
 	}

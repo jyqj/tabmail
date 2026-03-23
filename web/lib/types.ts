@@ -305,3 +305,35 @@ export interface SMTPPolicy {
   reject_origin_domains: string[];
   updated_at?: string;
 }
+
+export interface IngestJob {
+  id: string;
+  source: string;
+  remote_ip: string;
+  mail_from: string;
+  recipients: string[];
+  raw_object_key: string;
+  metadata?: unknown;
+  state: string;
+  attempts: number;
+  last_error?: string;
+  next_attempt_at: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WebhookDelivery {
+  id: string;
+  event_id: string;
+  url: string;
+  event_type: string;
+  payload?: unknown;
+  state: string;
+  attempts: number;
+  last_error?: string;
+  next_attempt_at: string;
+  last_tried_at?: string | null;
+  delivered_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}

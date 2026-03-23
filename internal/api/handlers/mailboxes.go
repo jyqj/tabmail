@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -19,8 +20,22 @@ import (
 	"tabmail/internal/store"
 )
 
+type mailboxStore interface {
+	auditStore
+	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
+	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
+	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
+	CreateMailbox(ctx context.Context, m *models.Mailbox) error
+	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
+	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
+	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
+	DeleteMailbox(ctx context.Context, id uuid.UUID) error
+	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+}
+
 type MailboxHandler struct {
-	store       store.Store
+	store       mailboxStore
 	obj         store.ObjectStore
 	dispatcher  *hooks.Dispatcher
 	namingMode  policy.NamingMode
@@ -29,7 +44,7 @@ type MailboxHandler struct {
 	logger      zerolog.Logger
 }
 
-func NewMailboxHandler(s store.Store, obj store.ObjectStore, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MailboxHandler {
+func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MailboxHandler {
 	return &MailboxHandler{store: s, obj: obj, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: l.With().Str("handler", "mailboxes").Logger()}
 }
 

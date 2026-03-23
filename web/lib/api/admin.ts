@@ -4,6 +4,7 @@ import type {
   APIResponse,
   AuditEntry,
   EffectiveConfig,
+  IngestJob,
   MonitorEvent,
   Plan,
   SMTPPolicy,
@@ -11,6 +12,7 @@ import type {
   Tenant,
   TenantAPIKey,
   TenantOverride,
+  WebhookDelivery,
 } from "../types";
 import { request, streamEvents, type EventStreamOptions } from "./base";
 
@@ -117,6 +119,30 @@ export function getStats() {
 
 export function listAudit(params?: { page?: number; per_page?: number }) {
   return request<APIListResponse<AuditEntry>>("/api/v1/admin/audit", {
+    params: params as Record<string, string | number>,
+  });
+}
+
+export function listIngestJobs(params?: {
+  page?: number;
+  per_page?: number;
+  state?: string;
+  source?: string;
+  recipient?: string;
+}) {
+  return request<APIListResponse<IngestJob>>("/api/v1/admin/ingest/jobs", {
+    params: params as Record<string, string | number>,
+  });
+}
+
+export function listWebhookDeliveries(params?: {
+  page?: number;
+  per_page?: number;
+  state?: string;
+  event_type?: string;
+  url?: string;
+}) {
+  return request<APIListResponse<WebhookDelivery>>("/api/v1/admin/webhooks/deliveries", {
     params: params as Record<string, string | number>,
   });
 }

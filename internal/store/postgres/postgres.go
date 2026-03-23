@@ -535,10 +535,10 @@ func (s *PgStore) CreateMailbox(ctx context.Context, m *models.Mailbox) error {
 	m.CreatedAt = time.Now()
 	_, err := s.pool.Exec(ctx, `
 		INSERT INTO mailboxes (id,tenant_id,zone_id,route_id,local_part,resolved_domain,
-			full_address,access_mode,password_hash,retention_hours_override,expires_at,created_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+			full_address,access_mode,password_hash,message_count,retention_hours_override,expires_at,created_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
 		m.ID, m.TenantID, m.ZoneID, m.RouteID, m.LocalPart, m.ResolvedDomain,
-		m.FullAddress, m.AccessMode, m.PasswordHash, m.RetentionHoursOverride,
+		m.FullAddress, m.AccessMode, m.PasswordHash, m.MessageCount, m.RetentionHoursOverride,
 		m.ExpiresAt, m.CreatedAt)
 	return err
 }
@@ -552,14 +552,14 @@ func (s *PgStore) GetMailboxByAddress(ctx context.Context, addr string) (*models
 }
 
 const mailboxSelect = `SELECT m.id,m.tenant_id,m.zone_id,m.route_id,m.local_part,
-	m.resolved_domain,m.full_address,m.access_mode,m.password_hash,
+	m.resolved_domain,m.full_address,m.access_mode,m.password_hash,m.message_count,
 	m.retention_hours_override,m.expires_at,m.created_at
 	FROM mailboxes m`
 
 func (s *PgStore) scanMailbox(row pgx.Row) (*models.Mailbox, error) {
 	m := &models.Mailbox{}
 	err := row.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
-		&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash,
+		&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
 		&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt)
 	if err == pgx.ErrNoRows {
 		return nil, nil
@@ -585,7 +585,7 @@ func (s *PgStore) ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg mode
 	for rows.Next() {
 		m := &models.Mailbox{}
 		if err := rows.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
-			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash,
+			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
 			&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt); err != nil {
 			return nil, 0, err
 		}
@@ -612,7 +612,7 @@ func (s *PgStore) ListMailboxesByZone(ctx context.Context, zoneID uuid.UUID, pg 
 	for rows.Next() {
 		m := &models.Mailbox{}
 		if err := rows.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
-			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash,
+			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
 			&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt); err != nil {
 			return nil, 0, err
 		}
@@ -668,13 +668,58 @@ func (s *PgStore) CreateMessage(ctx context.Context, m *models.Message) error {
 		m.ID = uuid.New()
 	}
 	m.ReceivedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, `
+		UPDATE mailboxes SET message_count = message_count + 1 WHERE id=$1`, m.MailboxID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `
 		INSERT INTO messages (id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,
 			size,seen,raw_object_key,headers_json,received_at,expires_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
 		m.ID, m.TenantID, m.MailboxID, m.ZoneID, m.Sender, m.Recipients, m.Subject,
-		m.Size, m.Seen, m.RawObjectKey, m.HeadersJSON, m.ReceivedAt, m.ExpiresAt)
-	return err
+		m.Size, m.Seen, m.RawObjectKey, m.HeadersJSON, m.ReceivedAt, m.ExpiresAt); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func (s *PgStore) CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int) (bool, error) {
+	if m.ID == uuid.Nil {
+		m.ID = uuid.New()
+	}
+	m.ReceivedAt = time.Now()
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer tx.Rollback(ctx)
+
+	tag, err := tx.Exec(ctx, `
+		UPDATE mailboxes
+		SET message_count = message_count + 1
+		WHERE id=$1 AND ($2 <= 0 OR message_count < $2)`,
+		m.MailboxID, maxMessages)
+	if err != nil {
+		return false, err
+	}
+	if tag.RowsAffected() == 0 {
+		return false, nil
+	}
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO messages (id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,
+			size,seen,raw_object_key,headers_json,received_at,expires_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+		m.ID, m.TenantID, m.MailboxID, m.ZoneID, m.Sender, m.Recipients, m.Subject,
+		m.Size, m.Seen, m.RawObjectKey, m.HeadersJSON, m.ReceivedAt, m.ExpiresAt); err != nil {
+		return false, err
+	}
+	return true, tx.Commit(ctx)
 }
 
 func (s *PgStore) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error) {
@@ -727,19 +772,50 @@ func (s *PgStore) MarkSeen(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s *PgStore) DeleteMessage(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM messages WHERE id=$1`, id)
-	return err
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	var mailboxID uuid.UUID
+	err = tx.QueryRow(ctx, `DELETE FROM messages WHERE id=$1 RETURNING mailbox_id`, id).Scan(&mailboxID)
+	if err == pgx.ErrNoRows {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `
+		UPDATE mailboxes SET message_count = GREATEST(message_count - 1, 0) WHERE id=$1`, mailboxID); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 func (s *PgStore) PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM messages WHERE mailbox_id=$1`, mailboxID)
-	return err
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, `DELETE FROM messages WHERE mailbox_id=$1`, mailboxID); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `UPDATE mailboxes SET message_count = 0 WHERE id=$1`, mailboxID); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 func (s *PgStore) CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error) {
 	var n int
 	err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM messages WHERE mailbox_id=$1`, mailboxID).Scan(&n)
+		`SELECT message_count FROM mailboxes WHERE id=$1`, mailboxID).Scan(&n)
+	if err == pgx.ErrNoRows {
+		return 0, nil
+	}
 	return n, err
 }
 
@@ -764,14 +840,54 @@ func (s *PgStore) CountTenantMessagesSince(ctx context.Context, tenantID uuid.UU
 }
 
 func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error) {
-	tag, err := s.pool.Exec(ctx, `
-		DELETE FROM messages WHERE id IN (
-			SELECT id FROM messages WHERE expires_at < $1 ORDER BY expires_at, id LIMIT $2
-		)`, before, limit)
+	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return 0, err
 	}
-	return int(tag.RowsAffected()), nil
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, `
+		WITH doomed AS (
+			SELECT id, mailbox_id
+			FROM messages
+			WHERE expires_at < $1
+			ORDER BY expires_at, id
+			LIMIT $2
+		),
+		deleted AS (
+			DELETE FROM messages m
+			USING doomed d
+			WHERE m.id = d.id
+			RETURNING d.mailbox_id
+		)
+		SELECT mailbox_id, count(*) FROM deleted GROUP BY mailbox_id`, before, limit)
+	if err != nil {
+		return 0, err
+	}
+	defer rows.Close()
+
+	total := 0
+	for rows.Next() {
+		var mailboxID uuid.UUID
+		var count int
+		if err := rows.Scan(&mailboxID, &count); err != nil {
+			return 0, err
+		}
+		total += count
+		if _, err := tx.Exec(ctx, `
+			UPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1`,
+			mailboxID, count); err != nil {
+			return 0, err
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return 0, err
+	}
+	rows.Close()
+	if err := tx.Commit(ctx); err != nil {
+		return 0, err
+	}
+	return total, nil
 }
 
 func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error) {
@@ -914,6 +1030,345 @@ func (s *PgStore) ListMonitorEvents(ctx context.Context, pg models.Page, eventTy
 			return nil, 0, err
 		}
 		out = append(out, e)
+	}
+	return out, total, rows.Err()
+}
+
+func (s *PgStore) CreateOutboxEvent(ctx context.Context, e *models.OutboxEvent) error {
+	if e.ID == uuid.Nil {
+		e.ID = uuid.New()
+	}
+	now := time.Now().UTC()
+	if e.OccurredAt.IsZero() {
+		e.OccurredAt = now
+	}
+	if e.NextAttemptAt.IsZero() {
+		e.NextAttemptAt = now
+	}
+	if e.State == "" {
+		e.State = "pending"
+	}
+	e.CreatedAt = now
+	e.UpdatedAt = now
+	_, err := s.pool.Exec(ctx, `
+		INSERT INTO outbox_events (id,event_type,payload,occurred_at,state,attempts,last_error,next_attempt_at,created_at,updated_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+		e.ID, e.EventType, e.Payload, e.OccurredAt, e.State, e.Attempts, e.LastError, e.NextAttemptAt, e.CreatedAt, e.UpdatedAt)
+	return err
+}
+
+func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	rows, err := s.pool.Query(ctx, `
+		WITH cte AS (
+			SELECT id
+			FROM outbox_events
+			WHERE state IN ('pending','retry') AND next_attempt_at <= $1
+			ORDER BY created_at
+			LIMIT $2
+			FOR UPDATE SKIP LOCKED
+		)
+		UPDATE outbox_events o
+		SET state='processing', attempts=o.attempts + 1, updated_at=$1
+		FROM cte
+		WHERE o.id = cte.id
+		RETURNING o.id,o.event_type,o.payload,o.occurred_at,o.state,o.attempts,o.last_error,o.next_attempt_at,o.created_at,o.updated_at`,
+		now.UTC(), limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*models.OutboxEvent
+	for rows.Next() {
+		e := &models.OutboxEvent{}
+		if err := rows.Scan(&e.ID, &e.EventType, &e.Payload, &e.OccurredAt, &e.State, &e.Attempts, &e.LastError, &e.NextAttemptAt, &e.CreatedAt, &e.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, e)
+	}
+	return out, rows.Err()
+}
+
+func (s *PgStore) MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error {
+	_, err := s.pool.Exec(ctx, `UPDATE outbox_events SET state='done', updated_at=$2 WHERE id=$1`, id, time.Now().UTC())
+	return err
+}
+
+func (s *PgStore) MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error {
+	_, err := s.pool.Exec(ctx, `
+		UPDATE outbox_events
+		SET state='retry', last_error=$2, next_attempt_at=$3, updated_at=$4
+		WHERE id=$1`, id, lastError, nextAttemptAt.UTC(), time.Now().UTC())
+	return err
+}
+
+func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error {
+	if event == nil || len(urls) == 0 {
+		return nil
+	}
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	now := time.Now().UTC()
+	for _, url := range urls {
+		if _, err := tx.Exec(ctx, `
+			INSERT INTO webhook_deliveries (id,event_id,url,event_type,payload,state,attempts,next_attempt_at,created_at,updated_at)
+			VALUES ($1,$2,$3,$4,$5,'pending',0,$6,$6,$6)
+			ON CONFLICT (event_id, url) DO NOTHING`,
+			uuid.New(), event.ID, url, event.EventType, event.Payload, now); err != nil {
+			return err
+		}
+	}
+	return tx.Commit(ctx)
+}
+
+func (s *PgStore) ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	rows, err := s.pool.Query(ctx, `
+		WITH cte AS (
+			SELECT id
+			FROM webhook_deliveries
+			WHERE state IN ('pending','retry') AND next_attempt_at <= $1
+			ORDER BY created_at
+			LIMIT $2
+			FOR UPDATE SKIP LOCKED
+		)
+		UPDATE webhook_deliveries d
+		SET state='processing', attempts=d.attempts + 1, last_tried_at=$1, updated_at=$1
+		FROM cte
+		WHERE d.id = cte.id
+		RETURNING d.id,d.event_id,d.url,d.event_type,d.payload,d.state,d.attempts,d.last_error,d.next_attempt_at,d.last_tried_at,d.delivered_at,d.created_at,d.updated_at`,
+		now.UTC(), limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*models.WebhookDelivery
+	for rows.Next() {
+		d := &models.WebhookDelivery{}
+		if err := rows.Scan(&d.ID, &d.EventID, &d.URL, &d.EventType, &d.Payload, &d.State, &d.Attempts, &d.LastError, &d.NextAttemptAt, &d.LastTriedAt, &d.DeliveredAt, &d.CreatedAt, &d.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, d)
+	}
+	return out, rows.Err()
+}
+
+func (s *PgStore) MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error {
+	now := time.Now().UTC()
+	_, err := s.pool.Exec(ctx, `
+		UPDATE webhook_deliveries
+		SET state='delivered', delivered_at=$2, updated_at=$2
+		WHERE id=$1`, id, now)
+	return err
+}
+
+func (s *PgStore) MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error {
+	state := "retry"
+	if dead {
+		state = "dead"
+	}
+	_, err := s.pool.Exec(ctx, `
+		UPDATE webhook_deliveries
+		SET state=$2, last_error=$3, next_attempt_at=$4, updated_at=$5
+		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
+	return err
+}
+
+func (s *PgStore) ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error) {
+	if limit <= 0 {
+		limit = 20
+	}
+	rows, err := s.pool.Query(ctx, `
+		SELECT id,url,event_type,payload,attempts,last_error,created_at,last_tried_at
+		FROM webhook_deliveries
+		WHERE state='dead'
+		ORDER BY updated_at DESC
+		LIMIT $1`, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := make([]models.DeadLetter, 0, limit)
+	for rows.Next() {
+		var dl models.DeadLetter
+		var id uuid.UUID
+		var lastTriedAt *time.Time
+		if err := rows.Scan(&id, &dl.URL, &dl.EventType, &dl.Payload, &dl.Attempts, &dl.LastError, &dl.CreatedAt, &lastTriedAt); err != nil {
+			return nil, err
+		}
+		dl.ID = id.String()
+		if lastTriedAt != nil {
+			dl.LastTriedAt = *lastTriedAt
+		}
+		out = append(out, dl)
+	}
+	return out, rows.Err()
+}
+
+func (s *PgStore) CountDeadWebhookDeliveries(ctx context.Context) (int, error) {
+	var total int
+	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries WHERE state='dead'`).Scan(&total)
+	return total, err
+}
+
+func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error) {
+	pg = pg.Normalize()
+	filters := []any{}
+	where := " WHERE 1=1"
+	add := func(cond string, val any) {
+		filters = append(filters, val)
+		where += fmt.Sprintf(" AND %s $%d", cond, len(filters))
+	}
+	if state != "" {
+		add("state =", state)
+	}
+	if eventType != "" {
+		add("event_type =", eventType)
+	}
+	if url != "" {
+		add("url ILIKE", "%"+url+"%")
+	}
+
+	var total int
+	if err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries`+where, filters...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+	args := append(filters, pg.PerPage, pg.Offset())
+	rows, err := s.pool.Query(ctx, `
+		SELECT id,event_id,url,event_type,payload,state,attempts,last_error,next_attempt_at,last_tried_at,delivered_at,created_at,updated_at
+		FROM webhook_deliveries`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	var out []*models.WebhookDelivery
+	for rows.Next() {
+		item := &models.WebhookDelivery{}
+		if err := rows.Scan(&item.ID, &item.EventID, &item.URL, &item.EventType, &item.Payload, &item.State, &item.Attempts, &item.LastError, &item.NextAttemptAt, &item.LastTriedAt, &item.DeliveredAt, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, 0, err
+		}
+		out = append(out, item)
+	}
+	return out, total, rows.Err()
+}
+
+func (s *PgStore) CreateIngestJob(ctx context.Context, job *models.IngestJob) error {
+	if job.ID == uuid.Nil {
+		job.ID = uuid.New()
+	}
+	now := time.Now().UTC()
+	if job.NextAttemptAt.IsZero() {
+		job.NextAttemptAt = now
+	}
+	if job.State == "" {
+		job.State = "pending"
+	}
+	job.CreatedAt = now
+	job.UpdatedAt = now
+	_, err := s.pool.Exec(ctx, `
+		INSERT INTO ingest_jobs (id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,created_at,updated_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+		job.ID, job.Source, job.RemoteIP, job.MailFrom, job.Recipients, job.RawObjectKey, job.Metadata, job.State, job.Attempts, job.LastError, job.NextAttemptAt, job.CreatedAt, job.UpdatedAt)
+	return err
+}
+
+func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int) ([]*models.IngestJob, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	rows, err := s.pool.Query(ctx, `
+		WITH cte AS (
+			SELECT id
+			FROM ingest_jobs
+			WHERE state IN ('pending','retry') AND next_attempt_at <= $1
+			ORDER BY created_at
+			LIMIT $2
+			FOR UPDATE SKIP LOCKED
+		)
+		UPDATE ingest_jobs j
+		SET state='processing', attempts=j.attempts + 1, updated_at=$1
+		FROM cte
+		WHERE j.id = cte.id
+		RETURNING j.id,j.source,j.remote_ip,j.mail_from,j.recipients,j.raw_object_key,j.metadata,j.state,j.attempts,j.last_error,j.next_attempt_at,j.created_at,j.updated_at`,
+		now.UTC(), limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*models.IngestJob
+	for rows.Next() {
+		job := &models.IngestJob{}
+		if err := rows.Scan(&job.ID, &job.Source, &job.RemoteIP, &job.MailFrom, &job.Recipients, &job.RawObjectKey, &job.Metadata, &job.State, &job.Attempts, &job.LastError, &job.NextAttemptAt, &job.CreatedAt, &job.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, job)
+	}
+	return out, rows.Err()
+}
+
+func (s *PgStore) MarkIngestJobDone(ctx context.Context, id uuid.UUID) error {
+	_, err := s.pool.Exec(ctx, `UPDATE ingest_jobs SET state='done', updated_at=$2 WHERE id=$1`, id, time.Now().UTC())
+	return err
+}
+
+func (s *PgStore) MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error {
+	state := "retry"
+	if dead {
+		state = "dead"
+	}
+	_, err := s.pool.Exec(ctx, `
+		UPDATE ingest_jobs
+		SET state=$2, last_error=$3, next_attempt_at=$4, updated_at=$5
+		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
+	return err
+}
+
+func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error) {
+	pg = pg.Normalize()
+	filters := []any{}
+	where := " WHERE 1=1"
+	add := func(cond string, val any) {
+		filters = append(filters, val)
+		where += fmt.Sprintf(" AND %s $%d", cond, len(filters))
+	}
+	if state != "" {
+		add("state =", state)
+	}
+	if source != "" {
+		add("source =", source)
+	}
+	if recipient != "" {
+		filters = append(filters, recipient)
+		where += fmt.Sprintf(" AND $%d = ANY(recipients)", len(filters))
+	}
+
+	var total int
+	if err := s.pool.QueryRow(ctx, `SELECT count(*) FROM ingest_jobs`+where, filters...).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+	args := append(filters, pg.PerPage, pg.Offset())
+	rows, err := s.pool.Query(ctx, `
+		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,created_at,updated_at
+		FROM ingest_jobs`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	var out []*models.IngestJob
+	for rows.Next() {
+		item := &models.IngestJob{}
+		if err := rows.Scan(&item.ID, &item.Source, &item.RemoteIP, &item.MailFrom, &item.Recipients, &item.RawObjectKey, &item.Metadata, &item.State, &item.Attempts, &item.LastError, &item.NextAttemptAt, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, 0, err
+		}
+		out = append(out, item)
 	}
 	return out, total, rows.Err()
 }

@@ -6,6 +6,7 @@ services:
       - "2525:2525"
     environment:
       TABMAIL_ADMINKEY: "${TABMAIL_ADMIN_KEY:-changeme}"
+      TABMAIL_MAILBOX_TOKEN_SECRET: "${TABMAIL_MAILBOX_TOKEN_SECRET:-change-mailbox-token-secret}"
       TABMAIL_DB_DSN: "postgres://tabmail:tabmail@postgres:5432/tabmail?sslmode=disable"
       TABMAIL_REDIS_ADDR: "redis:6379"
       TABMAIL_SMTP_DOMAIN: "${SMTP_DOMAIN:-localhost}"

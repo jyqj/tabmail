@@ -9,7 +9,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
+	"tabmail/internal/models"
 )
 
 func TestDispatcherPublishSendsSignedWebhook(t *testing.T) {
@@ -88,12 +90,12 @@ func TestDispatcherDispatchRecordsDeadLettersAndTrims(t *testing.T) {
 	}, zerolog.Nop())
 
 	for _, id := range []string{"job-1", "job-2", "job-3"} {
-		d.dispatch(job{
-			id:        id,
-			url:       "http://127.0.0.1:1",
-			payload:   []byte(`{"type":"message.received"}`),
-			eventType: "message.received",
-			created:   time.Now().UTC(),
+		d.dispatchDirect(&models.WebhookDelivery{
+			ID:        mustUUIDFromString(id),
+			URL:       "http://127.0.0.1:1",
+			Payload:   []byte(`{"type":"message.received"}`),
+			EventType: "message.received",
+			CreatedAt: time.Now().UTC(),
 		})
 	}
 
@@ -105,7 +107,7 @@ func TestDispatcherDispatchRecordsDeadLettersAndTrims(t *testing.T) {
 	if len(letters) != 2 {
 		t.Fatalf("expected 2 dead letters, got %d", len(letters))
 	}
-	if letters[0].ID != "job-3" || letters[1].ID != "job-2" {
+	if letters[0].ID != mustUUIDFromString("job-3").String() || letters[1].ID != mustUUIDFromString("job-2").String() {
 		t.Fatalf("unexpected dead-letter order: %#v", letters)
 	}
 	for _, dl := range letters {
@@ -119,4 +121,8 @@ func TestDispatcherDispatchRecordsDeadLettersAndTrims(t *testing.T) {
 			t.Fatalf("unexpected payload: %s", string(dl.Payload))
 		}
 	}
+}
+
+func mustUUIDFromString(v string) uuid.UUID {
+	return uuid.NewSHA1(uuid.Nil, []byte(v))
 }

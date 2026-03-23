@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -13,11 +14,25 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
-	"tabmail/internal/store"
 )
 
+type domainStore interface {
+	auditStore
+	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
+	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
+	CreateZone(ctx context.Context, z *models.DomainZone) error
+	DeleteZone(ctx context.Context, id uuid.UUID) error
+	UpdateZone(ctx context.Context, z *models.DomainZone) error
+	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
+	ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error)
+	CreateRoute(ctx context.Context, r *models.DomainRoute) error
+	GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error)
+	DeleteRoute(ctx context.Context, id uuid.UUID) error
+}
+
 type DomainHandler struct {
-	store          store.Store
+	store          domainStore
 	dispatcher     *hooks.Dispatcher
 	expectedMXHost string
 	lookupTXT      func(string) ([]string, error)
@@ -25,7 +40,7 @@ type DomainHandler struct {
 	logger         zerolog.Logger
 }
 
-func NewDomainHandler(s store.Store, dispatcher *hooks.Dispatcher, expectedMXHost string, l zerolog.Logger) *DomainHandler {
+func NewDomainHandler(s domainStore, dispatcher *hooks.Dispatcher, expectedMXHost string, l zerolog.Logger) *DomainHandler {
 	return &DomainHandler{
 		store:          s,
 		dispatcher:     dispatcher,

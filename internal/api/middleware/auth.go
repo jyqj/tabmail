@@ -8,8 +8,12 @@ import (
 
 	"github.com/google/uuid"
 	"tabmail/internal/models"
-	"tabmail/internal/store"
 )
+
+type authStore interface {
+	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
+	ResolveAPIKey(ctx context.Context, rawKey string) (*models.Tenant, []string, error)
+}
 
 type ctxKey int
 
@@ -61,7 +65,7 @@ func APIScopesFromCtx(ctx context.Context) []string {
 //  1. X-Admin-Key → super admin (bypass all limits)
 //  2. X-API-Key   → tenant API key
 //  3. no key      → public tenant
-func Auth(st store.Store, adminKey string, publicTenantID string) func(http.Handler) http.Handler {
+func Auth(st authStore, adminKey string, publicTenantID string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

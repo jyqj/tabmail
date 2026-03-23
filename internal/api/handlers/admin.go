@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -13,17 +14,43 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
-	"tabmail/internal/store"
 )
 
+type adminStore interface {
+	auditStore
+	GetPlan(ctx context.Context, id uuid.UUID) (*models.Plan, error)
+	CreateTenant(ctx context.Context, t *models.Tenant) error
+	ListTenants(ctx context.Context) ([]*models.Tenant, error)
+	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
+	UpsertOverride(ctx context.Context, o *models.TenantOverride) error
+	DeleteTenant(ctx context.Context, id uuid.UUID) error
+	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
+	ListPlans(ctx context.Context) ([]*models.Plan, error)
+	CreatePlan(ctx context.Context, p *models.Plan) error
+	UpdatePlan(ctx context.Context, p *models.Plan) error
+	DeletePlan(ctx context.Context, id uuid.UUID) error
+	CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error
+	ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error)
+	DeleteAPIKey(ctx context.Context, id uuid.UUID) error
+	CountAllZones(ctx context.Context) (int, error)
+	CountAllMailboxes(ctx context.Context) (int, error)
+	CountAllMessages(ctx context.Context) (int, error)
+	ListAuditEntries(ctx context.Context, limit int) ([]*models.AuditEntry, error)
+	ListAuditEntriesPaged(ctx context.Context, pg models.Page) ([]*models.AuditEntry, int, error)
+	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
+	UpsertSMTPPolicy(ctx context.Context, p *models.SMTPPolicy) error
+	ListIngestJobs(ctx context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error)
+	ListWebhookDeliveries(ctx context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error)
+}
+
 type AdminHandler struct {
-	store         store.Store
+	store         adminStore
 	dispatcher    *hooks.Dispatcher
 	defaultPolicy models.SMTPPolicy
 	logger        zerolog.Logger
 }
 
-func NewAdminHandler(s store.Store, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, l zerolog.Logger) *AdminHandler {
+func NewAdminHandler(s adminStore, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, l zerolog.Logger) *AdminHandler {
 	return &AdminHandler{store: s, dispatcher: dispatcher, defaultPolicy: defaultPolicy, logger: l.With().Str("handler", "admin").Logger()}
 }
 
@@ -365,6 +392,40 @@ func (h *AdminHandler) ListAudit(w http.ResponseWriter, r *http.Request) {
 		entries = []*models.AuditEntry{}
 	}
 	okList(w, entries, total, pg.Page, pg.PerPage)
+}
+
+func (h *AdminHandler) ListIngestJobs(w http.ResponseWriter, r *http.Request) {
+	pg := pageFromReq(r)
+	state := r.URL.Query().Get("state")
+	source := r.URL.Query().Get("source")
+	recipient := r.URL.Query().Get("recipient")
+	items, total, err := h.store.ListIngestJobs(r.Context(), pg, state, source, recipient)
+	if err != nil {
+		h.logger.Err(err).Msg("list ingest jobs")
+		errInternal(w)
+		return
+	}
+	if items == nil {
+		items = []*models.IngestJob{}
+	}
+	okList(w, items, total, pg.Page, pg.PerPage)
+}
+
+func (h *AdminHandler) ListWebhookDeliveries(w http.ResponseWriter, r *http.Request) {
+	pg := pageFromReq(r)
+	state := r.URL.Query().Get("state")
+	eventType := r.URL.Query().Get("event_type")
+	url := r.URL.Query().Get("url")
+	items, total, err := h.store.ListWebhookDeliveries(r.Context(), pg, state, eventType, url)
+	if err != nil {
+		h.logger.Err(err).Msg("list webhook deliveries")
+		errInternal(w)
+		return
+	}
+	if items == nil {
+		items = []*models.WebhookDelivery{}
+	}
+	okList(w, items, total, pg.Page, pg.PerPage)
 }
 
 func (h *AdminHandler) GetSMTPPolicy(w http.ResponseWriter, r *http.Request) {

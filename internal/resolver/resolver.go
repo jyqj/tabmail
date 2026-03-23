@@ -12,8 +12,20 @@ import (
 	"github.com/google/uuid"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
-	"tabmail/internal/store"
 )
+
+type resolverStore interface {
+	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error)
+	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
+	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
+	CreateMailbox(ctx context.Context, m *models.Mailbox) error
+	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
+}
+
+type autoCreateLimiter interface {
+	Allow(ctx context.Context, tenantID, routeID uuid.UUID) (bool, error)
+}
 
 // Result is the outcome of resolving an email address against domain routes.
 type Result struct {
@@ -25,19 +37,25 @@ type Result struct {
 
 // Resolver maps an incoming email address to a mailbox, auto-creating if allowed.
 type Resolver struct {
-	store      store.Store
+	store      resolverStore
 	namingMode policy.NamingMode
 	stripPlus  bool
+	limiter    autoCreateLimiter
 	cacheMu    sync.RWMutex
 	zoneCache  map[string]zoneCacheEntry
 	routeCache map[uuid.UUID]routeCacheEntry
 }
 
-func New(s store.Store, namingMode policy.NamingMode, stripPlus bool) *Resolver {
+func New(s resolverStore, namingMode policy.NamingMode, stripPlus bool, limiters ...autoCreateLimiter) *Resolver {
+	var limiter autoCreateLimiter
+	if len(limiters) > 0 {
+		limiter = limiters[0]
+	}
 	return &Resolver{
 		store:      s,
 		namingMode: namingMode,
 		stripPlus:  stripPlus,
+		limiter:    limiter,
 		zoneCache:  map[string]zoneCacheEntry{},
 		routeCache: map[uuid.UUID]routeCacheEntry{},
 	}
@@ -97,6 +115,15 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		}
 		return &Result{Zone: zone, Route: route}, nil
 	}
+	if rv.limiter != nil {
+		allowed, err := rv.limiter.Allow(ctx, zone.TenantID, route.ID)
+		if err != nil {
+			return nil, fmt.Errorf("resolver: auto-create rate limit check: %w", err)
+		}
+		if !allowed {
+			return nil, fmt.Errorf("resolver: auto-create rate limit exceeded")
+		}
+	}
 
 	cfg, err := rv.store.EffectiveConfig(ctx, zone.TenantID)
 	if err != nil {
@@ -137,15 +164,18 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 // findZone tries exact match first, then walks up parent domains.
 func (rv *Resolver) findZone(ctx context.Context, domain string) (*models.DomainZone, error) {
 	if zone, ok := rv.getCachedZone(domain); ok {
-		return zone, nil
-	}
-	z, err := rv.store.GetZoneByDomain(ctx, domain)
-	if err != nil {
-		return nil, err
-	}
-	rv.setCachedZone(domain, z)
-	if z != nil {
-		return z, nil
+		if zone != nil {
+			return zone, nil
+		}
+	} else {
+		z, err := rv.store.GetZoneByDomain(ctx, domain)
+		if err != nil {
+			return nil, err
+		}
+		rv.setCachedZone(domain, z)
+		if z != nil {
+			return z, nil
+		}
 	}
 	parts := strings.SplitN(domain, ".", 2)
 	if len(parts) < 2 {

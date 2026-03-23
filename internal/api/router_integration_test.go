@@ -16,6 +16,7 @@ import (
 
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/config"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -30,7 +31,7 @@ func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mx.test", publicTenantID, middleware.NewRateLimiter(rdb, st, 20), zerolog.Nop())
+	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/domains", bytes.NewBufferString(`{"domain":"mail.example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -82,7 +83,7 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mx.test", publicTenantID, middleware.NewRateLimiter(rdb, st, 20), zerolog.Nop())
+	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
 
 	tokenResp := doJSON(t, router, http.MethodPost, "/api/v1/token", map[string]any{
 		"address":  mb.FullAddress,
@@ -116,7 +117,7 @@ func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mx.test", publicTenantID, middleware.NewRateLimiter(rdb, st, 20), zerolog.Nop())
+	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
 
 	expiresAt := time.Now().Add(2 * time.Hour).UTC().Truncate(time.Second)
 	body := doJSON(t, router, http.MethodPost, "/api/v1/mailboxes", map[string]any{
@@ -150,6 +151,60 @@ func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 	}
 	if mb.ExpiresAt == nil || !mb.ExpiresAt.UTC().Equal(expiresAt) {
 		t.Fatalf("unexpected expires_at: %#v", mb.ExpiresAt)
+	}
+}
+
+func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
+	st, obj, _ := seededStores(t)
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+
+	job := &models.IngestJob{
+		ID:            uuid.New(),
+		Source:        "smtp",
+		RemoteIP:      "127.0.0.1",
+		MailFrom:      "sender@example.org",
+		Recipients:    []string{"user@mail.test"},
+		RawObjectKey:  "sha256/aa/job.eml",
+		State:         "retry",
+		Attempts:      2,
+		LastError:     "temporary failure",
+		NextAttemptAt: time.Now().Add(time.Minute),
+	}
+	if err := st.CreateIngestJob(context.Background(), job); err != nil {
+		t.Fatal(err)
+	}
+
+	event := &models.OutboxEvent{
+		ID:         uuid.New(),
+		EventType:  "message.received",
+		Payload:    []byte(`{"type":"message.received"}`),
+		OccurredAt: time.Now(),
+		State:      "done",
+	}
+	if err := st.CreateOutboxEvent(context.Background(), event); err != nil {
+		t.Fatal(err)
+	}
+	if err := st.CreateWebhookDeliveries(context.Background(), event, []string{"https://example.com/hook"}); err != nil {
+		t.Fatal(err)
+	}
+
+	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/ingest/jobs", nil)
+	req.Header.Set("X-Admin-Key", "admin-secret")
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200 for ingest jobs, got %d body=%s", rr.Code, rr.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/api/v1/admin/webhooks/deliveries", nil)
+	req.Header.Set("X-Admin-Key", "admin-secret")
+	rr = httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200 for webhook deliveries, got %d body=%s", rr.Code, rr.Body.String())
 	}
 }
 

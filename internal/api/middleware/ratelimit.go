@@ -9,19 +9,30 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
-	"tabmail/internal/store"
+	"tabmail/internal/models"
 )
 
 // RateLimiter enforces per-tenant RPM and per-IP fallback limits.
 type RateLimiter struct {
-	rdb   *redis.Client
-	store store.Store
-	ipRPM int // fallback RPM for public/unauthenticated
+	rdb            *redis.Client
+	store          rateLimitStore
+	ipRPM          int // fallback RPM for public/unauthenticated
+	trustedProxies []*net.IPNet
 }
 
-func NewRateLimiter(rdb *redis.Client, st store.Store, publicIPRPM int) *RateLimiter {
-	return &RateLimiter{rdb: rdb, store: st, ipRPM: publicIPRPM}
+type rateLimitStore interface {
+	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
+}
+
+func NewRateLimiter(rdb *redis.Client, st rateLimitStore, publicIPRPM int, trustedProxyCIDRs []string) *RateLimiter {
+	return &RateLimiter{
+		rdb:            rdb,
+		store:          st,
+		ipRPM:          publicIPRPM,
+		trustedProxies: parseTrustedProxyCIDRs(trustedProxyCIDRs),
+	}
 }
 
 func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
@@ -47,7 +58,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 		}
 
 		if key == "" {
-			ip := realIP(r)
+			ip := rl.realIP(r)
 			key = fmt.Sprintf("rate:ip:%s", ip)
 			limit = rl.ipRPM
 		}
@@ -83,6 +94,9 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 }
 
 func (rl *RateLimiter) checkSlidingWindow(ctx context.Context, key string, limit int, window time.Duration) (bool, error) {
+	if rl.rdb == nil {
+		return true, nil
+	}
 	now := time.Now().UnixMilli()
 	windowStart := now - window.Milliseconds()
 
@@ -98,21 +112,30 @@ func (rl *RateLimiter) checkSlidingWindow(ctx context.Context, key string, limit
 	return countCmd.Val() < int64(limit), nil
 }
 
-func realIP(r *http.Request) string {
-	if xri := r.Header.Get("X-Real-Ip"); xri != "" {
-		return strings.TrimSpace(xri)
-	}
-	if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-		parts := strings.Split(xff, ",")
-		if len(parts) > 0 {
-			return strings.TrimSpace(parts[0])
+func (rl *RateLimiter) realIP(r *http.Request) string {
+	host, _, _ := net.SplitHostPort(r.RemoteAddr)
+	remoteIP := net.ParseIP(strings.TrimSpace(host))
+	if remoteIP != nil && rl.isTrustedProxy(remoteIP) {
+		if xri := r.Header.Get("X-Real-Ip"); xri != "" {
+			return strings.TrimSpace(xri)
+		}
+		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
+			parts := strings.Split(xff, ",")
+			if len(parts) > 0 {
+				return strings.TrimSpace(parts[0])
+			}
 		}
 	}
-	host, _, _ := net.SplitHostPort(r.RemoteAddr)
+	if xri := r.Header.Get("X-Real-Ip"); xri != "" && remoteIP == nil {
+		return strings.TrimSpace(xri)
+	}
 	return host
 }
 
 func (rl *RateLimiter) checkDailyQuota(ctx context.Context, key string, limit int) (bool, error) {
+	if rl.rdb == nil {
+		return true, nil
+	}
 	pipe := rl.rdb.Pipeline()
 	incr := pipe.Incr(ctx, key)
 	pipe.Expire(ctx, key, 25*time.Hour)
@@ -131,4 +154,43 @@ func writeQuotaError(w http.ResponseWriter, status int, code, msg string) {
 			"message": msg,
 		},
 	})
+}
+
+func (rl *RateLimiter) isTrustedProxy(ip net.IP) bool {
+	if ip == nil {
+		return false
+	}
+	for _, network := range rl.trustedProxies {
+		if network.Contains(ip) {
+			return true
+		}
+	}
+	return false
+}
+
+func parseTrustedProxyCIDRs(items []string) []*net.IPNet {
+	var out []*net.IPNet
+	for _, item := range items {
+		item = strings.TrimSpace(item)
+		if item == "" {
+			continue
+		}
+		if strings.Contains(item, "/") {
+			_, network, err := net.ParseCIDR(item)
+			if err == nil {
+				out = append(out, network)
+			}
+			continue
+		}
+		ip := net.ParseIP(item)
+		if ip == nil {
+			continue
+		}
+		maskBits := 32
+		if ip.To4() == nil {
+			maskBits = 128
+		}
+		out = append(out, &net.IPNet{IP: ip, Mask: net.CIDRMask(maskBits, maskBits)})
+	}
+	return out
 }

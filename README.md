@@ -165,7 +165,11 @@ TABMAIL_ADMINKEY=changeme go run ./cmd/tabmail
 
 | 变量 | 说明 |
 |---|---|
+| `TABMAIL_ROLE` | 进程角色：`all / api / smtp / worker / retention` |
 | `TABMAIL_ADMINKEY` | 超级管理员 `X-Admin-Key` |
+| `TABMAIL_MAILBOX_TOKEN_SECRET` | mailbox bearer token 签名密钥 |
+| `TABMAIL_AUTOCREATE_ROUTE_RPM` | 单路由自动建箱 RPM |
+| `TABMAIL_AUTOCREATE_TENANT_RPM` | 单租户自动建箱 RPM |
 | `TABMAIL_DB_DSN` | PostgreSQL DSN |
 | `TABMAIL_REDIS_ADDR` | Redis 地址 |
 | `TABMAIL_DATADIR` | 原始邮件存储目录 |
@@ -179,8 +183,17 @@ TABMAIL_ADMINKEY=changeme go run ./cmd/tabmail
 | `TABMAIL_STRIPPLUSTAG` | 是否剥离 `+tag` |
 | `TABMAIL_MONITORHISTORY` | monitor 历史缓冲条数 |
 | `TABMAIL_HTTP_ADDR` | HTTP 监听地址 |
+| `TABMAIL_HTTP_ALLOWED_ORIGINS` | 允许的 CORS Origins |
+| `TABMAIL_HTTP_ALLOWED_HEADERS` | 允许的 CORS Headers |
+| `TABMAIL_HTTP_TRUSTED_PROXIES` | 信任的反向代理 IP/CIDR |
 | `TABMAIL_WEBHOOK_URLS` | webhook 地址列表 |
 | `TABMAIL_WEBHOOK_SECRET` | webhook 签名密钥 |
+| `TABMAIL_WEBHOOK_POLL_INTERVAL` | outbox/webhook worker 轮询间隔 |
+| `TABMAIL_WEBHOOK_BATCH_SIZE` | outbox/webhook worker 批处理大小 |
+| `TABMAIL_INGEST_DURABLE` | 是否启用 durable ingest |
+| `TABMAIL_INGEST_POLL_INTERVAL` | ingest worker 轮询间隔 |
+| `TABMAIL_INGEST_BATCH_SIZE` | ingest worker 批处理大小 |
+| `TABMAIL_INGEST_MAX_RETRIES` | ingest job 最大重试次数 |
 
 ---
 

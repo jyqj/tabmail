@@ -93,34 +93,42 @@ func (h *Hub) Subscribe(mailbox string) (<-chan Event, func()) {
 }
 
 func (h *Hub) Publish(event Event) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
 	event.At = time.Now().UTC()
 	metrics.RealtimeEventPublished()
+
+	h.mu.Lock()
 	if h.history != nil {
 		h.history.Value = event
 		h.history = h.history.Next()
 	}
-	if h.recorder != nil {
-		go func(ev Event) {
-			_ = h.recorder.CreateMonitorEvent(context.Background(), &models.MonitorEvent{
-				Type:      string(ev.Type),
-				Mailbox:   ev.Mailbox,
-				MessageID: ev.MessageID,
-				Sender:    ev.Sender,
-				Subject:   ev.Subject,
-				Size:      ev.Size,
-				At:        ev.At,
-			})
-		}(event)
-	}
+	mailboxListeners := make([]chan Event, 0, len(h.listeners[event.Mailbox]))
 	for _, ch := range h.listeners[event.Mailbox] {
+		mailboxListeners = append(mailboxListeners, ch)
+	}
+	globalListeners := make([]chan Event, 0, len(h.listeners[""]))
+	for _, ch := range h.listeners[""] {
+		globalListeners = append(globalListeners, ch)
+	}
+	h.mu.Unlock()
+
+	if h.recorder != nil {
+		_ = h.recorder.CreateMonitorEvent(context.Background(), &models.MonitorEvent{
+			Type:      string(event.Type),
+			Mailbox:   event.Mailbox,
+			MessageID: event.MessageID,
+			Sender:    event.Sender,
+			Subject:   event.Subject,
+			Size:      event.Size,
+			At:        event.At,
+		})
+	}
+	for _, ch := range mailboxListeners {
 		select {
 		case ch <- event:
 		default:
 		}
 	}
-	for _, ch := range h.listeners[""] {
+	for _, ch := range globalListeners {
 		select {
 		case ch <- event:
 		default:

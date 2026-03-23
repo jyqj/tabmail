@@ -98,6 +98,26 @@ type Store interface {
 	CreateMonitorEvent(ctx context.Context, e *models.MonitorEvent) error
 	ListMonitorEvents(ctx context.Context, pg models.Page, eventType, mailbox, sender string) ([]*models.MonitorEvent, int, error)
 
+	// --- Outbox / Webhook deliveries ------------------------------------
+	CreateOutboxEvent(ctx context.Context, e *models.OutboxEvent) error
+	ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error)
+	MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error
+	MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error
+	ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error)
+	MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error
+	MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error)
+	CountDeadWebhookDeliveries(ctx context.Context) (int, error)
+	ListWebhookDeliveries(ctx context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error)
+
+	// --- Ingest jobs -----------------------------------------------------
+	CreateIngestJob(ctx context.Context, job *models.IngestJob) error
+	ClaimIngestJobs(ctx context.Context, now time.Time, limit int) ([]*models.IngestJob, error)
+	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
+	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	ListIngestJobs(ctx context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error)
+
 	// --- Lifecycle -------------------------------------------------------
 	Close() error
 }

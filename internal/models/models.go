@@ -151,6 +151,7 @@ type Mailbox struct {
 	FullAddress            string     `json:"full_address" db:"full_address"`
 	AccessMode             AccessMode `json:"access_mode" db:"access_mode"`
 	PasswordHash           *string    `json:"-" db:"password_hash"`
+	MessageCount           int64      `json:"-" db:"message_count"`
 	RetentionHoursOverride *int       `json:"retention_hours_override,omitempty" db:"retention_hours_override"`
 	ExpiresAt              *time.Time `json:"expires_at,omitempty" db:"expires_at"`
 	CreatedAt              time.Time  `json:"created_at" db:"created_at"`
@@ -262,6 +263,51 @@ type DeadLetter struct {
 	LastError   string          `json:"last_error"`
 	CreatedAt   time.Time       `json:"created_at"`
 	LastTriedAt time.Time       `json:"last_tried_at"`
+}
+
+type OutboxEvent struct {
+	ID            uuid.UUID       `json:"id" db:"id"`
+	EventType     string          `json:"event_type" db:"event_type"`
+	Payload       json.RawMessage `json:"payload" db:"payload"`
+	OccurredAt    time.Time       `json:"occurred_at" db:"occurred_at"`
+	State         string          `json:"state" db:"state"`
+	Attempts      int             `json:"attempts" db:"attempts"`
+	LastError     string          `json:"last_error" db:"last_error"`
+	NextAttemptAt time.Time       `json:"next_attempt_at" db:"next_attempt_at"`
+	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time       `json:"updated_at" db:"updated_at"`
+}
+
+type WebhookDelivery struct {
+	ID            uuid.UUID       `json:"id" db:"id"`
+	EventID       uuid.UUID       `json:"event_id" db:"event_id"`
+	URL           string          `json:"url" db:"url"`
+	EventType     string          `json:"event_type" db:"event_type"`
+	Payload       json.RawMessage `json:"payload" db:"payload"`
+	State         string          `json:"state" db:"state"`
+	Attempts      int             `json:"attempts" db:"attempts"`
+	LastError     string          `json:"last_error" db:"last_error"`
+	NextAttemptAt time.Time       `json:"next_attempt_at" db:"next_attempt_at"`
+	LastTriedAt   *time.Time      `json:"last_tried_at,omitempty" db:"last_tried_at"`
+	DeliveredAt   *time.Time      `json:"delivered_at,omitempty" db:"delivered_at"`
+	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time       `json:"updated_at" db:"updated_at"`
+}
+
+type IngestJob struct {
+	ID            uuid.UUID       `json:"id" db:"id"`
+	Source        string          `json:"source" db:"source"`
+	RemoteIP      string          `json:"remote_ip" db:"remote_ip"`
+	MailFrom      string          `json:"mail_from" db:"mail_from"`
+	Recipients    []string        `json:"recipients" db:"recipients"`
+	RawObjectKey  string          `json:"raw_object_key" db:"raw_object_key"`
+	Metadata      json.RawMessage `json:"metadata,omitempty" db:"metadata"`
+	State         string          `json:"state" db:"state"`
+	Attempts      int             `json:"attempts" db:"attempts"`
+	LastError     string          `json:"last_error" db:"last_error"`
+	NextAttemptAt time.Time       `json:"next_attempt_at" db:"next_attempt_at"`
+	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
+	UpdatedAt     time.Time       `json:"updated_at" db:"updated_at"`
 }
 
 type SystemStats struct {
