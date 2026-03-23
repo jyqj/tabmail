@@ -20,6 +20,7 @@ type ctxKey int
 const (
 	ctxTenant ctxKey = iota
 	ctxIsAdmin
+	ctxBypassLimits
 	ctxAuthMode
 	ctxScopes
 )
@@ -46,6 +47,15 @@ func IsAdmin(ctx context.Context) bool {
 	return false
 }
 
+// BypassLimits returns true when the request should bypass tenant/public limits.
+// Pure admin requests bypass limits; admin impersonation does not.
+func BypassLimits(ctx context.Context) bool {
+	if v, ok := ctx.Value(ctxBypassLimits).(bool); ok {
+		return v
+	}
+	return false
+}
+
 func AuthModeFromCtx(ctx context.Context) string {
 	if v, ok := ctx.Value(ctxAuthMode).(string); ok {
 		return v
@@ -62,7 +72,7 @@ func APIScopesFromCtx(ctx context.Context) []string {
 
 // Auth resolves the caller identity using a 3-layer model:
 //
-//  1. X-Admin-Key → super admin (bypass all limits)
+//  1. X-Admin-Key → super admin (pure admin bypasses limits; impersonation does not)
 //  2. X-API-Key   → tenant API key
 //  3. no key      → public tenant
 func Auth(st authStore, adminKey string, publicTenantID string) func(http.Handler) http.Handler {
@@ -73,6 +83,7 @@ func Auth(st authStore, adminKey string, publicTenantID string) func(http.Handle
 			if key := r.Header.Get("X-Admin-Key"); key != "" {
 				if key == adminKey {
 					tenant := &models.Tenant{Name: "admin", IsSuper: true}
+					bypassLimits := true
 					if tenantID := strings.TrimSpace(r.Header.Get("X-Tenant-ID")); tenantID != "" {
 						id, err := uuid.Parse(tenantID)
 						if err != nil {
@@ -89,9 +100,10 @@ func Auth(st authStore, adminKey string, publicTenantID string) func(http.Handle
 							return
 						}
 						tenant = resolved
-						tenant.IsSuper = true
+						bypassLimits = false
 					}
 					ctx = context.WithValue(ctx, ctxIsAdmin, true)
+					ctx = context.WithValue(ctx, ctxBypassLimits, bypassLimits)
 					ctx = context.WithValue(ctx, ctxAuthMode, AuthModeAdmin)
 					ctx = context.WithValue(ctx, ctxScopes, []string{"*"})
 					ctx = context.WithValue(ctx, ctxTenant, tenant)

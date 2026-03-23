@@ -13,6 +13,7 @@ import (
 	domainapp "tabmail/internal/app/domains"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/policy"
 )
 
 type domainStore interface {
@@ -37,8 +38,8 @@ type DomainHandler struct {
 	logger    zerolog.Logger
 }
 
-func NewDomainHandler(s domainStore, dispatcher *hooks.Dispatcher, expectedMXHost string, l zerolog.Logger) *DomainHandler {
-	service := domainapp.NewService(s, dispatcher, expectedMXHost, l)
+func NewDomainHandler(s domainStore, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, l zerolog.Logger) *DomainHandler {
+	service := domainapp.NewService(s, dispatcher, expectedMXHost, namingMode, addressSecret, l)
 	return &DomainHandler{service: service, lookupTXT: net.LookupTXT, lookupMX: net.LookupMX, logger: l.With().Str("handler", "domains").Logger()}
 }
 
@@ -130,6 +131,21 @@ func (h *DomainHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ok(w, items)
+}
+
+func (h *DomainHandler) SuggestAddress(w http.ResponseWriter, r *http.Request) {
+	zoneID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid id")
+		return
+	}
+	useSubdomain := r.URL.Query().Get("subdomain") == "true" || r.URL.Query().Get("subdomain") == "1"
+	item, err := h.service.SuggestAddress(r.Context(), zoneID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), useSubdomain)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, item)
 }
 
 func (h *DomainHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {

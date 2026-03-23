@@ -5,6 +5,7 @@ import type {
   DomainRoute,
   DomainZone,
   RouteType,
+  SuggestedAddress,
   VerificationStatus,
 } from "../types";
 import { request } from "./base";
@@ -32,6 +33,11 @@ export function verifyDomain(id: string) {
 
 export function getVerificationStatus(id: string) {
   return request<APIResponse<VerificationStatus>>(`/api/v1/domains/${id}/verification-status`);
+}
+
+export function suggestAddress(id: string, opts?: { subdomain?: boolean }) {
+  const qs = opts?.subdomain ? "?subdomain=true" : "";
+  return request<APIResponse<SuggestedAddress>>(`/api/v1/domains/${id}/suggest-address${qs}`);
 }
 
 export function listRoutes(domainId: string) {

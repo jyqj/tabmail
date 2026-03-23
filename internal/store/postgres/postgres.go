@@ -837,6 +837,15 @@ func (s *PgStore) CountMessagesByObjectKey(ctx context.Context, objectKey string
 	return n, err
 }
 
+func (s *PgStore) CountRawObjectReferences(ctx context.Context, objectKey string) (int, error) {
+	var n int
+	err := s.pool.QueryRow(ctx, `
+		SELECT
+			(SELECT count(*) FROM messages WHERE raw_object_key = $1) +
+			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND state IN ('pending','retry','processing'))`, objectKey).Scan(&n)
+	return n, err
+}
+
 func (s *PgStore) CountAllMessages(ctx context.Context) (int, error) {
 	var n int
 	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM messages`).Scan(&n)
@@ -920,6 +929,60 @@ func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, l
 		keys = append(keys, k)
 	}
 	return keys, rows.Err()
+}
+
+func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error) {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer tx.Rollback(ctx)
+
+	rows, err := tx.Query(ctx, `
+		WITH doomed AS (
+			SELECT id, mailbox_id, raw_object_key
+			FROM messages
+			WHERE expires_at < $1
+			ORDER BY expires_at, id
+			LIMIT $2
+		),
+		deleted AS (
+			DELETE FROM messages m USING doomed d WHERE m.id = d.id
+			RETURNING d.mailbox_id, d.raw_object_key
+		)
+		SELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key`, before, limit)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer rows.Close()
+
+	total := 0
+	var keys []string
+	for rows.Next() {
+		var mailboxID uuid.UUID
+		var rawKey *string
+		var count int
+		if err := rows.Scan(&mailboxID, &rawKey, &count); err != nil {
+			return 0, nil, err
+		}
+		total += count
+		if rawKey != nil && *rawKey != "" {
+			keys = append(keys, *rawKey)
+		}
+		if _, err := tx.Exec(ctx, `
+			UPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1`,
+			mailboxID, count); err != nil {
+			return 0, nil, err
+		}
+	}
+	if err := rows.Err(); err != nil {
+		return 0, nil, err
+	}
+	rows.Close()
+	if err := tx.Commit(ctx); err != nil {
+		return 0, nil, err
+	}
+	return total, keys, nil
 }
 
 // ================================================================
@@ -1393,6 +1456,35 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 		out = append(out, item)
 	}
 	return out, total, rows.Err()
+}
+
+func (s *PgStore) PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error) {
+	rows, err := s.pool.Query(ctx, `
+		DELETE FROM ingest_jobs
+		WHERE id IN (
+			SELECT id FROM ingest_jobs
+			WHERE state IN ('done','dead') AND updated_at < $1
+			ORDER BY updated_at
+			LIMIT $2
+		)
+		RETURNING COALESCE(raw_object_key, '')`, before, limit)
+	if err != nil {
+		return 0, nil, err
+	}
+	defer rows.Close()
+	var keys []string
+	n := 0
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return 0, nil, err
+		}
+		n++
+		if key != "" {
+			keys = append(keys, key)
+		}
+	}
+	return n, keys, rows.Err()
 }
 
 func (s *PgStore) CountIngestJobsByState(ctx context.Context, states ...string) (int, error) {

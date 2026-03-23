@@ -27,7 +27,7 @@ type mailboxStore interface {
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
-	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
 }
 
 type MailboxHandler struct {

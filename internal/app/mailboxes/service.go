@@ -28,7 +28,7 @@ type storeRepo interface {
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
-	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
 }
 
 type Service struct {
@@ -168,7 +168,7 @@ func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin boo
 		return app.Internal(err)
 	}
 	for _, key := range uniqueStrings(keys) {
-		refs, err := s.store.CountMessagesByObjectKey(ctx, key)
+		refs, err := s.store.CountRawObjectReferences(ctx, key)
 		if err != nil {
 			s.logger.Warn().Err(err).Str("key", key).Msg("count object references during mailbox delete")
 			continue

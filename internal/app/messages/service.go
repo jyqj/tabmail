@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jhillyerd/enmime/v2"
@@ -29,7 +30,7 @@ type storeRepo interface {
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
-	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
 }
 
 type Viewer struct {
@@ -72,6 +73,9 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	}
 	if viewer.IsAdmin {
 		return mb, nil
+	}
+	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
+		return nil, app.Forbidden("mailbox expired")
 	}
 	switch mb.AccessMode {
 	case models.AccessPublic:
@@ -182,7 +186,7 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 		return app.Internal(err)
 	}
 	if msg.RawObjectKey != "" {
-		refs, err := s.store.CountMessagesByObjectKey(ctx, msg.RawObjectKey)
+		refs, err := s.store.CountRawObjectReferences(ctx, msg.RawObjectKey)
 		if err == nil && refs == 0 {
 			_ = s.obj.Delete(ctx, msg.RawObjectKey)
 		}
@@ -210,7 +214,7 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 		return app.Internal(err)
 	}
 	for _, key := range uniqueStrings(keys) {
-		refs, err := s.store.CountMessagesByObjectKey(ctx, key)
+		refs, err := s.store.CountRawObjectReferences(ctx, key)
 		if err != nil {
 			s.logger.Warn().Err(err).Str("key", key).Msg("count object references during purge")
 			continue

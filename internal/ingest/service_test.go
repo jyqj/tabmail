@@ -111,3 +111,22 @@ func TestServiceDurableAcceptAndProcess(t *testing.T) {
 		t.Fatalf("unexpected received_at: %#v", msgs[0].ReceivedAt)
 	}
 }
+
+func TestRetryBackoffUsesPrecisePowersOfTwo(t *testing.T) {
+	cases := []struct {
+		attempts int
+		min      time.Duration
+		max      time.Duration
+	}{
+		{attempts: 1, min: 1 * time.Second, max: 2 * time.Second},
+		{attempts: 2, min: 2 * time.Second, max: 3 * time.Second},
+		{attempts: 3, min: 4 * time.Second, max: 5 * time.Second},
+		{attempts: 4, min: 8 * time.Second, max: 9 * time.Second},
+	}
+	for _, tc := range cases {
+		got := retryBackoff(tc.attempts)
+		if got < tc.min || got >= tc.max {
+			t.Fatalf("attempt=%d expected duration in [%s,%s), got %s", tc.attempts, tc.min, tc.max, got)
+		}
+	}
+}

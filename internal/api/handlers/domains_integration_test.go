@@ -15,6 +15,7 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/policy"
 	"tabmail/internal/testutil"
 )
 
@@ -43,7 +44,7 @@ func TestTriggerVerifyUpdatesZoneStatus(t *testing.T) {
 		TXTRecord: "tabmail-verify=ok",
 	})
 
-	h := NewDomainHandler(st, hooks.New(hooks.Config{}, zerolog.Nop()), "mx.mail.test", zerolog.Nop())
+	h := NewDomainHandler(st, hooks.New(hooks.Config{}, zerolog.Nop()), "mx.mail.test", policy.NamingFull, "mailbox-secret", zerolog.Nop())
 	h.lookupTXT = func(name string) ([]string, error) {
 		return []string{"tabmail-verify=ok", "v=spf1 include:test"}, nil
 	}

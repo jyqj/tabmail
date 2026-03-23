@@ -81,6 +81,7 @@ type Store interface {
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
 	CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error)
 	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
 	CountTenantMessagesSince(ctx context.Context, tenantID uuid.UUID, since time.Time) (int, error)
 	CountAllMessages(ctx context.Context) (int, error)
 
@@ -88,6 +89,12 @@ type Store interface {
 	DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error)
 	// Returns raw_object_key values for messages deleted by retention.
 	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
+	// Atomically deletes expired messages and returns affected object keys.
+	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
+
+	// Purge completed/dead ingest jobs older than the given time.
+	// Returns count of purged jobs and their object keys for orphan cleanup checks.
+	PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error)
 
 	// --- Audit -----------------------------------------------------------
 	InsertAudit(ctx context.Context, e *models.AuditEntry) error

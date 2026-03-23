@@ -110,6 +110,60 @@ curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/verification-status" \
   -H "X-API-Key: $TENANT_API_KEY"
 ```
 
+## 8.1 生成随机邮箱地址建议
+
+适合验证码收取 / 批量注册场景。返回的地址基于：
+
+- 分钟桶映射
+- 连续隐藏时间段
+- 长随机主体
+
+建议配合 `TABMAIL_MAILBOXNAMING=full` 使用：
+
+```bash
+curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address" \
+  -H "X-API-Key: $TENANT_API_KEY"
+```
+
+返回示例：
+
+```json
+{
+  "data": {
+    "zone_id": "<domain-id>",
+    "domain": "mail.example.com",
+    "local_part": "mk7vdp4qz9x2rc8jh",
+    "address": "mk7vdp4qz9x2rc8jh@mail.example.com",
+    "algorithm": "obfuscated_minute_bucket_v1"
+  }
+}
+```
+
+如果你希望进一步打散注册项目之间的关联，可以直接要求在母域名下生成随机子域名地址：
+
+```bash
+curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address?subdomain=true" \
+  -H "X-API-Key: $TENANT_API_KEY"
+```
+
+返回中的 `domain` 会变成实际可用的随机子域，例如：
+
+```json
+{
+  "data": {
+    "base_domain": "mail.example.com",
+    "domain": "q7m4vp8x2rk3c.mail.example.com",
+    "subdomain_label": "q7m4vp8x2rk3c",
+    "local_part": "mk7vdp4qz9x2rc8jh",
+    "address": "mk7vdp4qz9x2rc8jh@q7m4vp8x2rk3c.mail.example.com",
+    "mode": "subdomain",
+    "algorithm": "obfuscated_minute_bucket_v1"
+  }
+}
+```
+
+如果你依赖“先收件、后建箱”的自动建箱模式，建议母域名下至少配置一条 `wildcard` 或 `deep_wildcard` 路由。
+
 ---
 
 ## 9. 创建 route

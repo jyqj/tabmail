@@ -30,7 +30,7 @@ type messageStore interface {
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
-	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
+	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
 }
 
 type MessageHandler struct {

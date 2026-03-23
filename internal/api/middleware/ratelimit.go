@@ -40,8 +40,9 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		t := TenantFromCtx(ctx)
 		mode := AuthModeFromCtx(ctx)
+		tenantScoped := t != nil && t.ID != uuid.Nil && (mode == AuthModeAPIKey || (mode == AuthModeAdmin && !BypassLimits(ctx)))
 
-		if t != nil && t.IsSuper {
+		if BypassLimits(ctx) {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -49,7 +50,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 		var key string
 		var limit int
 
-		if mode == AuthModeAPIKey && t != nil && t.ID != [16]byte{} {
+		if tenantScoped {
 			cfg, err := rl.store.EffectiveConfig(ctx, t.ID)
 			if err == nil && cfg != nil {
 				key = fmt.Sprintf("rate:tenant:%s", t.ID)
@@ -79,7 +80,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if mode == AuthModeAPIKey && t != nil && t.ID != [16]byte{} {
+		if tenantScoped {
 			cfg, err := rl.store.EffectiveConfig(ctx, t.ID)
 			if err == nil && cfg != nil && cfg.DailyQuota > 0 {
 				ok, err := rl.checkDailyQuota(ctx, fmt.Sprintf("quota:tenant:%s:%s", t.ID, time.Now().UTC().Format("20060102")), cfg.DailyQuota)

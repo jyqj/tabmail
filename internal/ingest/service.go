@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand/v2"
 	"strings"
 	"sync"
 	"time"
@@ -170,17 +171,32 @@ func (s *Service) processBatch(ctx context.Context) error {
 	for _, job := range jobs {
 		if err := s.processJob(ctx, job); err != nil {
 			dead := job.Attempts >= s.maxRetries
-			nextAttempt := time.Now().UTC().Add(time.Duration(job.Attempts) * time.Second)
+			backoff := retryBackoff(job.Attempts)
+			nextAttempt := time.Now().UTC().Add(backoff)
 			if markErr := s.store.MarkIngestJobRetry(ctx, job.ID, err.Error(), nextAttempt, dead); markErr != nil {
 				return markErr
+			}
+			if dead {
+				metrics.IngestJobDead()
+				metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
+			} else {
+				metrics.IngestJobRetried()
 			}
 			continue
 		}
 		if err := s.store.MarkIngestJobDone(ctx, job.ID); err != nil {
 			return err
 		}
+		metrics.IngestJobProcessed()
+		metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
 	}
 	return nil
+}
+
+func retryBackoff(attempts int) time.Duration {
+	exp := max(attempts-1, 0)
+	exp = min(exp, 8)
+	return time.Duration(1<<exp)*time.Second + time.Duration(rand.IntN(1000))*time.Millisecond
 }
 
 func (s *Service) processJob(ctx context.Context, job *models.IngestJob) error {

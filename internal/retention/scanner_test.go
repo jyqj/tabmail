@@ -82,3 +82,66 @@ func TestScannerSweepDeletesExpiredMessagesAndObjectsAcrossBatches(t *testing.T)
 		t.Fatalf("expected active object to remain: %v", err)
 	}
 }
+
+func TestScannerSweepKeepsObjectReferencedByActiveIngestJob(t *testing.T) {
+	ctx := context.Background()
+	store := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+
+	key := "raw/shared.eml"
+	expired := &models.Message{
+		ID:           uuid.New(),
+		MailboxID:    uuid.New(),
+		TenantID:     uuid.New(),
+		ZoneID:       uuid.New(),
+		RawObjectKey: key,
+		ExpiresAt:    time.Now().Add(-time.Hour),
+	}
+	store.SeedMessage(expired)
+	if err := store.CreateIngestJob(ctx, &models.IngestJob{
+		ID:            uuid.New(),
+		RawObjectKey:  key,
+		State:         "pending",
+		NextAttemptAt: time.Now().Add(time.Hour),
+	}); err != nil {
+		t.Fatalf("seed ingest job: %v", err)
+	}
+	if err := obj.Put(ctx, key, bytes.NewBufferString(key), 0); err != nil {
+		t.Fatalf("seed object: %v", err)
+	}
+
+	sc := New(store, obj, config.Storage{RetentionBatchSize: 10}, zerolog.Nop())
+	sc.sweep(ctx)
+
+	if _, err := obj.Get(ctx, key); err != nil {
+		t.Fatalf("expected shared object to remain while ingest job still references it: %v", err)
+	}
+}
+
+func TestScannerSweepPurgesOldDoneIngestJobsAndDeletesOrphanObject(t *testing.T) {
+	ctx := context.Background()
+	store := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+
+	key := "raw/orphan.eml"
+	job := &models.IngestJob{
+		ID:            uuid.New(),
+		RawObjectKey:  key,
+		State:         "done",
+		NextAttemptAt: time.Now().Add(-time.Hour),
+	}
+	if err := store.CreateIngestJob(ctx, job); err != nil {
+		t.Fatalf("seed ingest job: %v", err)
+	}
+	store.ForceIngestJobUpdatedAt(job.ID, time.Now().Add(-(ingestJobRetention + time.Hour)))
+	if err := obj.Put(ctx, key, bytes.NewBufferString(key), 0); err != nil {
+		t.Fatalf("seed object: %v", err)
+	}
+
+	sc := New(store, obj, config.Storage{RetentionBatchSize: 10}, zerolog.Nop())
+	sc.sweep(ctx)
+
+	if _, err := obj.Get(ctx, key); err == nil {
+		t.Fatalf("expected orphan object %s to be deleted after old ingest job purge", key)
+	}
+}

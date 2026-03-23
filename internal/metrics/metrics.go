@@ -20,6 +20,14 @@ type deliveryCounter struct {
 	deliveriesFailed int64
 }
 
+type histogram struct {
+	mu     sync.Mutex
+	bounds []float64
+	counts []uint64
+	sum    float64
+	count  uint64
+}
+
 type collector struct {
 	mu         sync.Mutex
 	timeSeries []models.MetricPoint
@@ -33,23 +41,38 @@ var c = &collector{
 	mailboxes:  make(map[string]*deliveryCounter),
 }
 
+func newHistogram(bounds []float64) *histogram {
+	return &histogram{
+		bounds: append([]float64(nil), bounds...),
+		counts: make([]uint64, len(bounds)),
+	}
+}
+
 var (
-	smtpSessionsOpened      atomic.Int64
-	smtpSessionsActive      atomic.Int64
-	smtpRecipientsAccepted  atomic.Int64
-	smtpRecipientsRejected  atomic.Int64
-	smtpMessagesAccepted    atomic.Int64
-	smtpMessagesRejected    atomic.Int64
-	smtpDeliveriesSucceeded atomic.Int64
-	smtpDeliveriesFailed    atomic.Int64
-	smtpBytesReceived       atomic.Int64
-	webhooksConfigured      atomic.Int64
-	webhooksQueued          atomic.Int64
-	webhooksDelivered       atomic.Int64
-	webhooksFailed          atomic.Int64
-	webhooksRetried         atomic.Int64
-	realtimeSubscribers     atomic.Int64
-	realtimePublished       atomic.Int64
+	smtpSessionsOpened       atomic.Int64
+	smtpSessionsActive       atomic.Int64
+	smtpRecipientsAccepted   atomic.Int64
+	smtpRecipientsRejected   atomic.Int64
+	smtpMessagesAccepted     atomic.Int64
+	smtpMessagesRejected     atomic.Int64
+	smtpDeliveriesSucceeded  atomic.Int64
+	smtpDeliveriesFailed     atomic.Int64
+	smtpBytesReceived        atomic.Int64
+	webhooksConfigured       atomic.Int64
+	webhooksQueued           atomic.Int64
+	webhooksDelivered        atomic.Int64
+	webhooksFailed           atomic.Int64
+	webhooksRetried          atomic.Int64
+	realtimeSubscribers      atomic.Int64
+	realtimePublished        atomic.Int64
+	retentionMessagesDeleted atomic.Int64
+	retentionObjectsDeleted  atomic.Int64
+	retentionObjectsFailed   atomic.Int64
+	ingestJobsProcessed      atomic.Int64
+	ingestJobsRetried        atomic.Int64
+	ingestJobsDead           atomic.Int64
+	ingestLatencyHistogram   = newHistogram([]float64{0.1, 0.5, 1, 2, 5, 10, 30, 60, 300, 600, 1800, 3600})
+	retentionSweepHistogram  = newHistogram([]float64{0.01, 0.05, 0.1, 0.25, 0.5, 1, 2, 5, 10, 30, 60})
 )
 
 func init() {
@@ -81,6 +104,19 @@ func WebhookRetried()            { webhooksRetried.Add(1) }
 func RealtimeSubscriberAdded()   { realtimeSubscribers.Add(1) }
 func RealtimeSubscriberRemoved() { realtimeSubscribers.Add(-1) }
 func RealtimeEventPublished()    { realtimePublished.Add(1) }
+
+func RetentionMessagesDeleted(n int) { retentionMessagesDeleted.Add(int64(n)) }
+func RetentionObjectDeleted()        { retentionObjectsDeleted.Add(1) }
+func RetentionObjectFailed()         { retentionObjectsFailed.Add(1) }
+func IngestJobProcessed()            { ingestJobsProcessed.Add(1) }
+func IngestJobRetried()              { ingestJobsRetried.Add(1) }
+func IngestJobDead()                 { ingestJobsDead.Add(1) }
+func ObserveIngestJobLatency(d time.Duration) {
+	ingestLatencyHistogram.Observe(d.Seconds())
+}
+func ObserveRetentionSweepDuration(d time.Duration) {
+	retentionSweepHistogram.Observe(d.Seconds())
+}
 
 func SMTPDeliverySucceeded(tenantID, mailbox string) {
 	smtpDeliveriesSucceeded.Add(1)
@@ -242,6 +278,14 @@ func RenderPrometheus(snapshot models.MetricsSnapshot, extras map[string]float64
 	writeGauge("tabmail_webhooks_dead_letter_size", snapshot.Webhooks.DeadLetterSize)
 	writeGauge("tabmail_realtime_subscribers_current", snapshot.Realtime.SubscribersCurrent)
 	writeGauge("tabmail_realtime_events_published_total", snapshot.Realtime.EventsPublished)
+	writeGauge("tabmail_retention_messages_deleted_total", retentionMessagesDeleted.Load())
+	writeGauge("tabmail_retention_objects_deleted_total", retentionObjectsDeleted.Load())
+	writeGauge("tabmail_retention_objects_failed_total", retentionObjectsFailed.Load())
+	writeGauge("tabmail_ingest_jobs_processed_total", ingestJobsProcessed.Load())
+	writeGauge("tabmail_ingest_jobs_retried_total", ingestJobsRetried.Load())
+	writeGauge("tabmail_ingest_jobs_dead_total", ingestJobsDead.Load())
+	writeHistogram(&b, "tabmail_ingest_job_latency_seconds", ingestLatencyHistogram)
+	writeHistogram(&b, "tabmail_retention_sweep_duration_seconds", retentionSweepHistogram)
 
 	keys := make([]string, 0, len(extras))
 	for k := range extras {
@@ -252,4 +296,35 @@ func RenderPrometheus(snapshot models.MetricsSnapshot, extras map[string]float64
 		writeGauge(key, extras[key])
 	}
 	return b.String()
+}
+
+func (h *histogram) Observe(v float64) {
+	if h == nil {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	h.sum += v
+	h.count++
+	for i, bound := range h.bounds {
+		if v <= bound {
+			h.counts[i]++
+		}
+	}
+}
+
+func (h *histogram) snapshot() ([]float64, []uint64, float64, uint64) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	return append([]float64(nil), h.bounds...), append([]uint64(nil), h.counts...), h.sum, h.count
+}
+
+func writeHistogram(b *strings.Builder, name string, h *histogram) {
+	bounds, counts, sum, count := h.snapshot()
+	for i, bound := range bounds {
+		fmt.Fprintf(b, "%s_bucket{le=\"%g\"} %d\n", name, bound, counts[i])
+	}
+	fmt.Fprintf(b, "%s_bucket{le=\"+Inf\"} %d\n", name, count)
+	fmt.Fprintf(b, "%s_sum %g\n", name, sum)
+	fmt.Fprintf(b, "%s_count %d\n", name, count)
 }

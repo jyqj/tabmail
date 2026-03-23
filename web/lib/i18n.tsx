@@ -475,6 +475,10 @@ const zh: Messages = {
   "domains.deleteFailed": "删除失败",
   "domains.loadFailed": "加载域名失败",
   "domains.verifyFailed": "验证失败",
+  "domains.generateAddress": "生成随机地址",
+  "domains.generateSubdomainAddress": "生成随机子域名地址",
+  "domains.addressGenerated": "随机地址已复制",
+  "domains.addressGenerateFailed": "生成随机地址失败",
 
   // Routes
   "routes.title": "路由",
@@ -765,6 +769,10 @@ const zh: Messages = {
   "guide.domains.scenario2Desc": "使用 sequence 路由 + token 模式，预分配 1000 个带编号的邮箱地址。",
   "guide.domains.scenario3": "场景 3：多项目隔离",
   "guide.domains.scenario3Desc": "使用 deep_wildcard 路由，按 project.mail.example.com 子域自动隔离不同项目的邮件。",
+  "guide.domains.randomTitle": "场景 4：随机注册地址",
+  "guide.domains.randomDesc": "TabMail 可按分钟桶映射 + 隐藏连续时间段 + 长随机主体生成低特征地址建议，适合验证码收取和批量注册场景。",
+  "guide.domains.randomNote": "建议配合 TABMAIL_MAILBOXNAMING=full 使用。该接口不会在服务端预占地址，只返回极低碰撞概率的推荐地址。",
+  "guide.domains.randomSubdomainNote": "若需要进一步打散关联，可为母域名生成随机子域名地址：例如 local@rnd-parent.example.com。若希望收件前即自动建箱，建议配合 wildcard / deep_wildcard 路由。",
 
   // ── Guide: API ──
   "guide.api.title": "API 完整手册",
@@ -784,6 +792,8 @@ const zh: Messages = {
   "guide.api.bindDomain": "绑定域名",
   "guide.api.verifyDomain": "触发域名验证",
   "guide.api.checkVerification": "查看验证状态",
+  "guide.api.suggestAddress": "生成随机地址",
+  "guide.api.suggestSubdomainAddress": "生成随机子域名地址",
   "guide.api.createWildcard": "创建 wildcard 路由",
   "guide.api.createSequence": "创建 sequence 路由",
   "guide.api.createDeepWildcard": "创建 deep_wildcard 路由",
@@ -1398,6 +1408,10 @@ const en: Messages = {
   "domains.deleteFailed": "Failed to delete",
   "domains.loadFailed": "Failed to load domains",
   "domains.verifyFailed": "Verification failed",
+  "domains.generateAddress": "Generate Random Address",
+  "domains.generateSubdomainAddress": "Generate Random Subdomain Address",
+  "domains.addressGenerated": "Random address copied",
+  "domains.addressGenerateFailed": "Failed to generate random address",
 
   // Routes
   "routes.title": "Routes",
@@ -1688,6 +1702,10 @@ const en: Messages = {
   "guide.domains.scenario2Desc": "Use sequence route + token mode to pre-allocate 1000 numbered mailbox addresses.",
   "guide.domains.scenario3": "Scenario 3: Multi-project Isolation",
   "guide.domains.scenario3Desc": "Use deep_wildcard route to automatically isolate mail by project.mail.example.com subdomain.",
+  "guide.domains.randomTitle": "Scenario 4: Randomized Signup Addresses",
+  "guide.domains.randomDesc": "TabMail can suggest low-signature addresses using a minute-bucket mapping, a hidden continuous time segment, and a long random body — useful for verification-code collection and batch signup flows.",
+  "guide.domains.randomNote": "Recommended with TABMAIL_MAILBOXNAMING=full. The API does not reserve addresses on the server; it returns a very low-collision suggestion.",
+  "guide.domains.randomSubdomainNote": "To further reduce linkage, you can also randomize a child subdomain under a parent zone: for example local@rnd-parent.example.com. If you expect auto-create before manual mailbox creation, pair it with wildcard / deep_wildcard routes.",
 
   // ── Guide: API ──
   "guide.api.title": "Complete API Reference",
@@ -1707,6 +1725,8 @@ const en: Messages = {
   "guide.api.bindDomain": "Bind Domain",
   "guide.api.verifyDomain": "Trigger Domain Verification",
   "guide.api.checkVerification": "Check Verification Status",
+  "guide.api.suggestAddress": "Generate Random Address",
+  "guide.api.suggestSubdomainAddress": "Generate Random Subdomain Address",
   "guide.api.createWildcard": "Create Wildcard Route",
   "guide.api.createSequence": "Create Sequence Route",
   "guide.api.createDeepWildcard": "Create Deep Wildcard Route",

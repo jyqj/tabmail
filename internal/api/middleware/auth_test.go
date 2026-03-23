@@ -49,10 +49,12 @@ func TestAuthResolvesAdminAndScopedTenant(t *testing.T) {
 
 	var gotTenant *models.Tenant
 	var gotAdmin bool
+	var gotBypass bool
 	var gotScopes []string
 	handler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotTenant = TenantFromCtx(r.Context())
 		gotAdmin = IsAdmin(r.Context())
+		gotBypass = BypassLimits(r.Context())
 		gotScopes = APIScopesFromCtx(r.Context())
 		w.WriteHeader(http.StatusNoContent)
 	}))
@@ -69,11 +71,46 @@ func TestAuthResolvesAdminAndScopedTenant(t *testing.T) {
 	if !gotAdmin {
 		t.Fatal("expected admin context")
 	}
-	if gotTenant == nil || gotTenant.ID != tenantID || !gotTenant.IsSuper {
+	if gotBypass {
+		t.Fatal("impersonated admin must not bypass tenant limits")
+	}
+	if gotTenant == nil || gotTenant.ID != tenantID {
 		t.Fatalf("unexpected tenant context: %#v", gotTenant)
+	}
+	if gotTenant.IsSuper {
+		t.Fatal("impersonated tenant must not have IsSuper=true")
 	}
 	if len(gotScopes) != 1 || gotScopes[0] != "*" {
 		t.Fatalf("unexpected scopes: %#v", gotScopes)
+	}
+}
+
+func TestAuthPureAdminBypassesLimits(t *testing.T) {
+	st, _ := seededAuthStore()
+
+	var gotTenant *models.Tenant
+	var gotAdmin bool
+	var gotBypass bool
+	handler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotTenant = TenantFromCtx(r.Context())
+		gotAdmin = IsAdmin(r.Context())
+		gotBypass = BypassLimits(r.Context())
+		w.WriteHeader(http.StatusNoContent)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("X-Admin-Key", "admin-secret")
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusNoContent {
+		t.Fatalf("expected 204, got %d body=%s", rr.Code, rr.Body.String())
+	}
+	if !gotAdmin || !gotBypass {
+		t.Fatalf("expected pure admin to bypass limits, admin=%v bypass=%v", gotAdmin, gotBypass)
+	}
+	if gotTenant == nil || gotTenant.Name != "admin" {
+		t.Fatalf("unexpected admin tenant context: %#v", gotTenant)
 	}
 }
 

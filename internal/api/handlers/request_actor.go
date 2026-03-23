@@ -9,6 +9,9 @@ import (
 
 func actorFromRequest(r *http.Request) string {
 	if middleware.IsAdmin(r.Context()) {
+		if t := middleware.TenantFromCtx(r.Context()); t != nil && t.ID != uuid.Nil {
+			return "admin:as:" + t.ID.String()
+		}
 		return "admin"
 	}
 	if t := middleware.TenantFromCtx(r.Context()); t != nil && t.ID != uuid.Nil {

@@ -64,6 +64,14 @@ func (s *FakeStore) RegisterAPIKey(raw string, tenant *models.Tenant, scopes []s
 	s.apiRaw[raw] = resolvedAPIKey{Tenant: cloneTenant(tenant), Scopes: append([]string(nil), scopes...)}
 }
 
+func (s *FakeStore) ForceIngestJobUpdatedAt(id uuid.UUID, updatedAt time.Time) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if job, ok := s.ingestJobs[id]; ok {
+		job.UpdatedAt = updatedAt
+	}
+}
+
 func (s *FakeStore) SeedPlan(p *models.Plan) {
 	_ = s.CreatePlan(context.Background(), p)
 }
@@ -736,6 +744,23 @@ func (s *FakeStore) CountMessagesByObjectKey(_ context.Context, objectKey string
 	return n, nil
 }
 
+func (s *FakeStore) CountRawObjectReferences(_ context.Context, objectKey string) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	n := 0
+	for _, m := range s.messages {
+		if m.RawObjectKey == objectKey {
+			n++
+		}
+	}
+	for _, job := range s.ingestJobs {
+		if job.RawObjectKey == objectKey && (job.State == "pending" || job.State == "retry" || job.State == "processing") {
+			n++
+		}
+	}
+	return n, nil
+}
+
 func (s *FakeStore) CountTenantMessagesSince(_ context.Context, tenantID uuid.UUID, since time.Time) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -812,6 +837,40 @@ func (s *FakeStore) ListExpiredObjectKeys(_ context.Context, before time.Time, l
 		out = append(out, m.RawObjectKey)
 	}
 	return out, nil
+}
+
+func (s *FakeStore) DeleteExpiredMessagesReturningKeys(_ context.Context, before time.Time, limit int) (int, []string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var expired []*models.Message
+	for _, m := range s.messages {
+		if m.ExpiresAt.Before(before) {
+			cp := *m
+			expired = append(expired, &cp)
+		}
+	}
+	sort.Slice(expired, func(i, j int) bool {
+		if expired[i].ExpiresAt.Equal(expired[j].ExpiresAt) {
+			return expired[i].ID.String() < expired[j].ID.String()
+		}
+		return expired[i].ExpiresAt.Before(expired[j].ExpiresAt)
+	})
+	if len(expired) > limit {
+		expired = expired[:limit]
+	}
+
+	var keys []string
+	for _, m := range expired {
+		if mb, ok := s.mailboxes[m.MailboxID]; ok && mb.MessageCount > 0 {
+			mb.MessageCount--
+		}
+		delete(s.messages, m.ID)
+		if m.RawObjectKey != "" {
+			keys = append(keys, m.RawObjectKey)
+		}
+	}
+	return len(expired), keys, nil
 }
 
 func (s *FakeStore) InsertAudit(_ context.Context, e *models.AuditEntry) error {
@@ -1220,6 +1279,28 @@ func (s *FakeStore) MarkIngestJobRetry(_ context.Context, id uuid.UUID, lastErro
 		job.UpdatedAt = time.Now().UTC()
 	}
 	return nil
+}
+
+func (s *FakeStore) PurgeOldIngestJobs(_ context.Context, before time.Time, limit int) (int, []string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var toDelete []uuid.UUID
+	var keys []string
+	for id, job := range s.ingestJobs {
+		if (job.State == "done" || job.State == "dead") && job.UpdatedAt.Before(before) {
+			toDelete = append(toDelete, id)
+			if job.RawObjectKey != "" {
+				keys = append(keys, job.RawObjectKey)
+			}
+			if len(toDelete) >= limit {
+				break
+			}
+		}
+	}
+	for _, id := range toDelete {
+		delete(s.ingestJobs, id)
+	}
+	return len(toDelete), keys, nil
 }
 
 func (s *FakeStore) ListIngestJobs(_ context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error) {

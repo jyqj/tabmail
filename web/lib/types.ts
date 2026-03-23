@@ -90,6 +90,17 @@ export interface DomainRoute {
   created_at: string;
 }
 
+export interface SuggestedAddress {
+  zone_id: string;
+  base_domain: string;
+  domain: string;
+  subdomain_label?: string;
+  local_part: string;
+  address: string;
+  mode: "mailbox" | "subdomain";
+  algorithm: string;
+}
+
 export interface Mailbox {
   id: string;
   tenant_id: string;

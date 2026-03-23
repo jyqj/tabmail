@@ -129,6 +129,18 @@ components:
         access_mode_default: { type: string, enum: [public, token, api_key] }
         created_at: { type: string, format: date-time }
 
+    SuggestedAddress:
+      type: object
+      properties:
+        zone_id: { type: string, format: uuid }
+        base_domain: { type: string }
+        domain: { type: string }
+        subdomain_label: { type: string, nullable: true }
+        local_part: { type: string }
+        address: { type: string }
+        mode: { type: string, enum: [mailbox, subdomain] }
+        algorithm: { type: string }
+
     Mailbox:
       type: object
       properties:
@@ -451,6 +463,35 @@ paths:
       responses:
         "200":
           description: Verification details (TXT, MX, SPF, DKIM, DMARC)
+
+  /api/v1/domains/{id}/suggest-address:
+    get:
+      tags: [Domains]
+      summary: Generate a randomized mailbox address suggestion for a domain zone
+      operationId: suggestAddress
+      security: [{ APIKey: [] }, { AdminKey: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: subdomain
+          in: query
+          required: false
+          schema: { type: boolean }
+          description: When true, also randomize a child subdomain under the parent zone
+      responses:
+        "200":
+          description: Suggested randomized mailbox address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/SuggestedAddress" }
+        "400": { description: Bad request }
+        "403": { description: Forbidden }
+        "404": { description: Not found }
 
   # ── Domain Routes ───────────────────────────────────
   /api/v1/domains/{id}/routes:

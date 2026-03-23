@@ -44,6 +44,7 @@ import {
   deleteDomain,
   verifyDomain,
   getVerificationStatus,
+  suggestAddress,
 } from "@/lib/api";
 import type { DomainZone } from "@/lib/types";
 import {
@@ -55,6 +56,8 @@ import {
   CheckCircle2,
   XCircle,
   Globe,
+  Shuffle,
+  Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -123,6 +126,19 @@ export default function DomainsPage() {
       fetch();
     } catch {
       toast.error(t("domains.verifyFailed"));
+    }
+  };
+
+  const handleSuggestAddress = async (id: string, subdomain = false) => {
+    try {
+      const res = await suggestAddress(id, { subdomain });
+      await navigator.clipboard.writeText(res.data.address);
+      toast.success(t("domains.addressGenerated"), {
+        description: res.data.address,
+      });
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || t("domains.addressGenerateFailed"));
     }
   };
 
@@ -248,6 +264,16 @@ export default function DomainsPage() {
                             <DropdownMenuItem onClick={() => handleVerify(zone.id)}>
                               <ShieldCheck className="h-4 w-4 mr-2" />
                               {t("domains.verifyDns")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSuggestAddress(zone.id)}>
+                              <Shuffle className="h-4 w-4 mr-2" />
+                              {t("domains.generateAddress")}
+                              <Copy className="h-3.5 w-3.5 ml-auto opacity-60" />
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleSuggestAddress(zone.id, true)}>
+                              <Shuffle className="h-4 w-4 mr-2" />
+                              {t("domains.generateSubdomainAddress")}
+                              <Copy className="h-3.5 w-3.5 ml-auto opacity-60" />
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleDelete(zone.id)}

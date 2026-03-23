@@ -4,6 +4,8 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+	"sync"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
@@ -24,6 +26,36 @@ import (
 //go:embed openapi.yaml
 var openapiSpec embed.FS
 
+type metricsDBCounts struct {
+	webhookDead      int
+	webhookPending   int
+	ingestReady      int
+	ingestProcessing int
+}
+
+type metricsDBCountCache struct {
+	mu        sync.Mutex
+	ttl       time.Duration
+	expiresAt time.Time
+	value     metricsDBCounts
+}
+
+func newMetricsDBCountCache(ttl time.Duration) *metricsDBCountCache {
+	return &metricsDBCountCache{ttl: ttl}
+}
+
+func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) metricsDBCounts {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if c != nil && now.Before(c.expiresAt) {
+		return c.value
+	}
+	value := load()
+	c.value = value
+	c.expiresAt = now.Add(c.ttl)
+	return value
+}
+
 func NewRouter(
 	st store.Store,
 	obj store.ObjectStore,
@@ -41,6 +73,7 @@ func NewRouter(
 	logger zerolog.Logger,
 ) http.Handler {
 	r := chi.NewRouter()
+	metricsCounts := newMetricsDBCountCache(5 * time.Second)
 
 	r.Use(chimw.RequestID)
 	r.Use(chimw.RealIP)
@@ -56,7 +89,7 @@ func NewRouter(
 	r.Use(middleware.Auth(st, adminKey, publicTenantID))
 	r.Use(rl.Middleware)
 
-	dh := handlers.NewDomainHandler(st, dispatcher, expectedMXHost, logger)
+	dh := handlers.NewDomainHandler(st, dispatcher, expectedMXHost, namingMode, mailboxTokenSecret, logger)
 	mh := handlers.NewMailboxHandler(st, obj, dispatcher, namingMode, stripPlus, mailboxTokenSecret, logger)
 	msg := handlers.NewMessageHandler(st, obj, hub, dispatcher, namingMode, stripPlus, mailboxTokenSecret, logger)
 	adm := handlers.NewAdminHandler(st, dispatcher, defaultPolicy, logger)
@@ -74,6 +107,7 @@ func NewRouter(
 			r.With(middleware.RequireScopes("domains:write")).Delete("/domains/{id}", dh.DeleteZone)
 			r.With(middleware.RequireScopes("domains:write")).Post("/domains/{id}/verify", dh.TriggerVerify)
 			r.With(middleware.RequireScopes("domains:read")).Get("/domains/{id}/verification-status", dh.VerificationStatus)
+			r.With(middleware.RequireScopes("domains:read")).Get("/domains/{id}/suggest-address", dh.SuggestAddress)
 
 			// -- Domain routes --
 			r.With(middleware.RequireScopes("routes:read", "domains:read")).Get("/domains/{id}/routes", dh.ListRoutes)
@@ -144,13 +178,25 @@ func NewRouter(
 		w.Write([]byte(`{"status":"ok"}`))
 	})
 	r.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
-		webhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), "dead")
-		webhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), "pending", "retry", "processing")
-		ingestPending, _ := st.CountIngestJobsByState(r.Context(), "pending", "retry", "processing")
-		snapshot := metrics.Snapshot(dispatcher != nil && dispatcher.Enabled(), webhookDead)
+		counts := metricsCounts.Get(time.Now(), func() metricsDBCounts {
+			webhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), "dead")
+			webhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), "pending", "retry", "processing")
+			ingestReady, _ := st.CountIngestJobsByState(r.Context(), "pending", "retry")
+			ingestProcessing, _ := st.CountIngestJobsByState(r.Context(), "processing")
+			return metricsDBCounts{
+				webhookDead:      webhookDead,
+				webhookPending:   webhookPending,
+				ingestReady:      ingestReady,
+				ingestProcessing: ingestProcessing,
+			}
+		})
+		snapshot := metrics.Snapshot(dispatcher != nil && dispatcher.Enabled(), counts.webhookDead)
 		body := metrics.RenderPrometheus(snapshot, map[string]float64{
-			"tabmail_webhooks_backlog": float64(webhookPending),
-			"tabmail_ingest_backlog":   float64(ingestPending),
+			"tabmail_webhooks_backlog":         float64(counts.webhookPending),
+			"tabmail_ingest_backlog":           float64(counts.ingestReady + counts.ingestProcessing),
+			"tabmail_ingest_queue_depth":       float64(counts.ingestReady + counts.ingestProcessing),
+			"tabmail_ingest_queue_ready_depth": float64(counts.ingestReady),
+			"tabmail_ingest_queue_inflight":    float64(counts.ingestProcessing),
 		})
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 		_, _ = w.Write([]byte(body))

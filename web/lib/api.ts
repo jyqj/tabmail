@@ -30,6 +30,7 @@ export {
   getVerificationStatus,
   listDomains,
   listRoutes,
+  suggestAddress,
   verifyDomain,
 } from "./api/domains";
 export { createMailbox, deleteMailbox, listMailboxes } from "./api/mailboxes";

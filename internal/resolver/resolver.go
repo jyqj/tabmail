@@ -100,6 +100,9 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		return nil, err
 	}
 	if mb != nil {
+		if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
+			return nil, nil
+		}
 		return &Result{Zone: zone, Mailbox: mb}, nil
 	}
 

@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   BookOpen, ExternalLink, Copy, Shield, KeyRound, Mail, FileCode2, Sparkles,
   Server, Globe, Terminal, Wrench, AlertTriangle, CheckCircle2, ChevronRight,
-  Database, HardDrive, Lock, Network,
+  Database, Lock, Network,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -355,7 +355,7 @@ function DeployTab({ t, copy }: { t: TFn; copy: CopyFn }) {
             ["TABMAIL_MONITORHISTORY", "50", "Monitor history buffer size"],
             ["TABMAIL_WEBHOOK_URLS", "—", "Webhook endpoint URLs (comma-separated)"],
             ["TABMAIL_WEBHOOK_SECRET", "—", "Webhook HMAC signing secret"],
-            ["TABMAIL_INGEST_DURABLE", "false", "Enable durable ingest queue"],
+            ["TABMAIL_INGEST_DURABLE", "true", "Enable durable ingest queue"],
           ]} />
           <h4 className="text-sm font-semibold">{t("guide.deploy.envS3")}</h4>
           <EnvTable rows={[
@@ -436,6 +436,10 @@ function DomainsTab({ t, copy }: { t: TFn; copy: CopyFn }) {
   -d '{ "domain": "mail.example.com" }'`;
   const verifyCmd = `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/verify" \\
   -H "X-API-Key: $TENANT_API_KEY"`;
+  const suggestCmd = `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address" \\
+  -H "X-API-Key: $TENANT_API_KEY"`;
+  const suggestSubdomainCmd = `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address?subdomain=true" \\
+  -H "X-API-Key: $TENANT_API_KEY"`;
   const testSmtp = `nc 127.0.0.1 2525
 EHLO localhost
 MAIL FROM:<sender@test.com>
@@ -501,6 +505,15 @@ QUIT`;
           ))}
         </div>
       </SubSection>
+
+      <SubSection title={t("guide.domains.randomTitle")} desc={t("guide.domains.randomDesc")}>
+        <div className="space-y-4">
+          <CodeCard t={t} title={t("guide.api.suggestAddress")} description="" code={suggestCmd} onCopy={c(suggestCmd, "suggest address")} />
+          <NoteBox>{t("guide.domains.randomNote")}</NoteBox>
+          <CodeCard t={t} title={t("guide.api.suggestSubdomainAddress")} description="" code={suggestSubdomainCmd} onCopy={c(suggestSubdomainCmd, "suggest subdomain address")} />
+          <NoteBox>{t("guide.domains.randomSubdomainNote")}</NoteBox>
+        </div>
+      </SubSection>
     </div>
   );
 }
@@ -537,6 +550,10 @@ function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
     verifyDomain: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/verify" \\
   -H "X-API-Key: $TENANT_API_KEY"`,
     checkVerification: `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/verification-status" \\
+  -H "X-API-Key: $TENANT_API_KEY"`,
+    suggestAddress: `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address" \\
+  -H "X-API-Key: $TENANT_API_KEY"`,
+    suggestSubdomainAddress: `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address?subdomain=true" \\
   -H "X-API-Key: $TENANT_API_KEY"`,
     createWildcard: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \\
   -H "X-API-Key: $TENANT_API_KEY" \\
@@ -639,6 +656,8 @@ function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
       { key: "guide.api.listDomains", cmdKey: "listDomains" },
       { key: "guide.api.verifyDomain", cmdKey: "verifyDomain" },
       { key: "guide.api.checkVerification", cmdKey: "checkVerification" },
+      { key: "guide.api.suggestAddress", cmdKey: "suggestAddress" },
+      { key: "guide.api.suggestSubdomainAddress", cmdKey: "suggestSubdomainAddress" },
       { key: "guide.api.createWildcard", cmdKey: "createWildcard" },
       { key: "guide.api.createSequence", cmdKey: "createSequence" },
       { key: "guide.api.createDeepWildcard", cmdKey: "createDeepWildcard" },

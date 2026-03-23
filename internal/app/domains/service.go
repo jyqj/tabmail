@@ -12,6 +12,7 @@ import (
 	"tabmail/internal/app"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/policy"
 )
 
 type store interface {
@@ -33,6 +34,8 @@ type Service struct {
 	store          store
 	dispatcher     *hooks.Dispatcher
 	expectedMXHost string
+	namingMode     policy.NamingMode
+	addressSecret  string
 	lookupTXT      func(string) ([]string, error)
 	lookupMX       func(string) ([]*net.MX, error)
 	logger         zerolog.Logger
@@ -69,11 +72,24 @@ type CreateRouteInput struct {
 	AccessModeDefault      models.AccessMode
 }
 
-func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, logger zerolog.Logger) *Service {
+type SuggestedAddress struct {
+	ZoneID         uuid.UUID `json:"zone_id"`
+	BaseDomain     string    `json:"base_domain"`
+	Domain         string    `json:"domain"`
+	SubdomainLabel string    `json:"subdomain_label,omitempty"`
+	LocalPart      string    `json:"local_part"`
+	Address        string    `json:"address"`
+	Mode           string    `json:"mode"`
+	Algorithm      string    `json:"algorithm"`
+}
+
+func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, logger zerolog.Logger) *Service {
 	return &Service{
 		store:          s,
 		dispatcher:     dispatcher,
 		expectedMXHost: normalizeDNSName(expectedMXHost),
+		namingMode:     namingMode,
+		addressSecret:  strings.TrimSpace(addressSecret),
 		lookupTXT:      net.LookupTXT,
 		lookupMX:       net.LookupMX,
 		logger:         logger.With().Str("service", "domains").Logger(),
@@ -209,6 +225,40 @@ func (s *Service) ListRoutes(ctx context.Context, zoneID uuid.UUID, tenant *mode
 		return nil, app.Internal(err)
 	}
 	return items, nil
+}
+
+func (s *Service) SuggestAddress(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, useSubdomain bool) (*SuggestedAddress, error) {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin)
+	if err != nil {
+		return nil, err
+	}
+	if s.namingMode != policy.NamingFull {
+		return nil, app.BadRequest("random address suggestion requires TABMAIL_MAILBOXNAMING=full")
+	}
+	resolvedDomain := zone.Domain
+	subdomainLabel := ""
+	if useSubdomain {
+		label, fqdn, err := policy.GenerateSuggestedSubdomainAddress(time.Now().UTC(), zone.Domain, s.addressSecret)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
+		subdomainLabel = label
+		resolvedDomain = fqdn
+	}
+	local, address, err := policy.GenerateSuggestedAddress(time.Now().UTC(), resolvedDomain, s.addressSecret)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	return &SuggestedAddress{
+		ZoneID:         zone.ID,
+		BaseDomain:     zone.Domain,
+		Domain:         resolvedDomain,
+		SubdomainLabel: subdomainLabel,
+		LocalPart:      local,
+		Address:        address,
+		Mode:           map[bool]string{true: "subdomain", false: "mailbox"}[useSubdomain],
+		Algorithm:      policy.AddressSuggestionAlgorithm,
+	}, nil
 }
 
 func (s *Service) CreateRoute(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, input CreateRouteInput, actor string) (*models.DomainRoute, error) {
