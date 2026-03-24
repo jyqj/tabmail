@@ -61,6 +61,9 @@ const zh: Messages = {
   "home.feat.perfDesc": "Go 后端，每连接独立协程 SMTP。Redis 速率限制。为规模而生。",
   "home.feat.api": "API 优先",
   "home.feat.apiDesc": "OpenAPI 3.1 规范为唯一真实来源。Swagger UI、ReDoc 和类型化 SDK。",
+  "home.noDomains": "暂无已验证的域名，请先在控制台添加并验证域名",
+  "home.randomFailed": "生成随机地址失败，请稍后再试",
+  "home.generating": "生成中…",
 
   // Home — CTA
   "home.ctaTitle": "准备好掌控你的邮件管线了吗？",
@@ -91,6 +94,8 @@ const zh: Messages = {
   "inbox.refresh": "刷新",
   "inbox.purge": "清空",
   "inbox.logout": "退出",
+  "inbox.notFoundTitle": "邮箱尚未创建",
+  "inbox.notFoundDesc": "发送邮件到此地址后，邮箱将自动创建并在此显示。如果已配置通配或序列路由，收到邮件即可查看。",
   "inbox.authTitle": "需要身份验证",
   "inbox.authDesc": "此收件箱配置为 Token 访问模式，请输入邮箱密码解锁。",
   "inbox.password": "邮箱密码",
@@ -396,6 +401,12 @@ const zh: Messages = {
   "plans.saving": "保存中...",
   "plans.updated": "方案已更新",
   "plans.updateFailed": "更新方案失败",
+  "plans.colMbPerDomain": "邮箱/域",
+  "plans.colMsgPerMb": "消息/邮箱",
+  "plans.colRpm": "RPM",
+  "plans.colDaily": "日配额",
+  "plans.confirmDelete": "确定要删除此方案吗？此操作不可撤销。",
+  "tenants.confirmDelete": "确定要删除此租户吗？此操作不可撤销。",
 
   // Tenants
   "tenants.title": "租户",
@@ -994,6 +1005,9 @@ const en: Messages = {
   "home.feat.perfDesc": "Go backend with goroutine-per-connection SMTP. Redis rate limiting. Built for scale.",
   "home.feat.api": "API First",
   "home.feat.apiDesc": "OpenAPI 3.1 spec as single source of truth. Swagger UI, ReDoc, and typed SDKs.",
+  "home.noDomains": "No verified domains yet. Please add and verify a domain in the console first.",
+  "home.randomFailed": "Failed to generate random address. Please try again later.",
+  "home.generating": "Generating…",
 
   // Home — CTA
   "home.ctaTitle": "Ready to own your email pipeline?",
@@ -1024,6 +1038,8 @@ const en: Messages = {
   "inbox.refresh": "Refresh",
   "inbox.purge": "Purge",
   "inbox.logout": "Logout",
+  "inbox.notFoundTitle": "Mailbox not created yet",
+  "inbox.notFoundDesc": "Send an email to this address and the mailbox will be created automatically. If a wildcard or sequence route is configured, incoming mail will appear here.",
   "inbox.authTitle": "Authentication required",
   "inbox.authDesc": "This inbox is configured as token access. Enter the mailbox password to unlock.",
   "inbox.password": "Mailbox password",
@@ -1329,6 +1345,12 @@ const en: Messages = {
   "plans.saving": "Saving...",
   "plans.updated": "Plan updated",
   "plans.updateFailed": "Failed to update plan",
+  "plans.colMbPerDomain": "MB/Domain",
+  "plans.colMsgPerMb": "Msg/MB",
+  "plans.colRpm": "RPM",
+  "plans.colDaily": "Daily",
+  "plans.confirmDelete": "Are you sure you want to delete this plan? This action cannot be undone.",
+  "tenants.confirmDelete": "Are you sure you want to delete this tenant? This action cannot be undone.",
 
   // Tenants
   "tenants.title": "Tenants",

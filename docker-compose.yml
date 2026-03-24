@@ -15,6 +15,7 @@ services:
     build: .
     ports:
       - "8080:8080"
+      - "25:2525"
       - "2525:2525"
     environment:
       TABMAIL_ADMINKEY: "${TABMAIL_ADMINKEY:?set TABMAIL_ADMINKEY}"
@@ -26,6 +27,9 @@ services:
       TABMAIL_DATADIR: "/data"
       TABMAIL_LOGLEVEL: "info"
       TABMAIL_ROLE: "${TABMAIL_ROLE:-all}"
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     volumes:
       - mail_data:/data
     depends_on:
@@ -35,6 +39,15 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+
+  web:
+    build: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      INTERNAL_API_URL: "http://tabmail:8080"
+    depends_on:
+      - tabmail
 
   postgres:
     image: postgres:16-alpine

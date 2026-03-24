@@ -1,8 +1,7 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
-import { getBaseUrl } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,14 +19,15 @@ type TabId = "swagger" | "redoc" | "quickstart" | "deploy" | "domains" | "api" |
 export default function DocsPage() {
   const { t } = useI18n();
   const [view, setView] = useState<TabId>("swagger");
-  const baseUrl = getBaseUrl() || "http://localhost:8080";
+  const [origin, setOrigin] = useState("");
+  useEffect(() => { setOrigin(window.location.origin); }, []);
 
   const links = useMemo(() => ({
-    docs: `${baseUrl}/docs`,
-    redoc: `${baseUrl}/redoc`,
-    openapi: `${baseUrl}/openapi.yaml`,
-    health: `${baseUrl}/health`,
-  }), [baseUrl]);
+    docs: "/backend-docs",
+    redoc: "/backend-redoc",
+    openapi: "/openapi.yaml",
+    health: "/health",
+  }), []);
 
   const copy = async (text: string, label: string) => {
     try {
@@ -69,11 +69,11 @@ export default function DocsPage() {
                 <CardDescription>{t("docs.endpointsDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <EndpointRow label={t("docs.baseUrl")} value={baseUrl} onCopy={() => copy(baseUrl, t("docs.baseUrl"))} />
-                <EndpointRow label={t("docs.swaggerUi")} value={links.docs} onCopy={() => copy(links.docs, t("docs.swaggerUi"))} href={links.docs} />
-                <EndpointRow label={t("docs.redoc")} value={links.redoc} onCopy={() => copy(links.redoc, t("docs.redoc"))} href={links.redoc} />
-                <EndpointRow label={t("docs.openapi")} value={links.openapi} onCopy={() => copy(links.openapi, t("docs.openapi"))} href={links.openapi} />
-                <EndpointRow label={t("docs.health")} value={links.health} onCopy={() => copy(links.health, t("docs.health"))} href={links.health} />
+                <EndpointRow label={t("docs.baseUrl")} value={`${origin}/api/v1`} onCopy={() => copy(`${origin}/api/v1`, t("docs.baseUrl"))} />
+                <EndpointRow label={t("docs.swaggerUi")} value={`${origin}${links.docs}`} onCopy={() => copy(`${origin}${links.docs}`, t("docs.swaggerUi"))} href={links.docs} />
+                <EndpointRow label={t("docs.redoc")} value={`${origin}${links.redoc}`} onCopy={() => copy(`${origin}${links.redoc}`, t("docs.redoc"))} href={links.redoc} />
+                <EndpointRow label={t("docs.openapi")} value={`${origin}${links.openapi}`} onCopy={() => copy(`${origin}${links.openapi}`, t("docs.openapi"))} href={links.openapi} />
+                <EndpointRow label={t("docs.health")} value={`${origin}${links.health}`} onCopy={() => copy(`${origin}${links.health}`, t("docs.health"))} href={links.health} />
               </CardContent>
             </Card>
           </div>

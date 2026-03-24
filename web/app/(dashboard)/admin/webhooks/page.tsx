@@ -60,7 +60,7 @@ export default function AdminWebhooksPage() {
         event_type: eventType || undefined,
         url: url || undefined,
       });
-      setItems(res.data);
+      setItems(res.data ?? []);
       setTotal(res.meta.total);
     } catch {
       toast.error(t("webhooks.loadFailed"));

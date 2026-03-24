@@ -4,6 +4,9 @@ import {
   createContext,
   useContext,
   useCallback,
+  useEffect,
+  useRef,
+  useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
@@ -20,6 +23,7 @@ interface AuthSnapshot {
 
 interface AuthState extends AuthSnapshot {
   level: AuthLevel;
+  hydrated: boolean;
   setAdminKey: (key: string | null) => void;
   setApiKey: (key: string | null) => void;
   setTenantId: (id: string | null) => void;
@@ -90,8 +94,23 @@ function setStorageItem(key: string, value: string | null) {
   else localStorage.removeItem(key);
 }
 
+const serverSnapshot: AuthSnapshot = {
+  adminKey: null,
+  apiKey: null,
+  tenantId: null,
+  mailboxToken: null,
+  mailboxAddress: null,
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const snapshot = useSyncExternalStore(subscribe, readSnapshot, readSnapshot);
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => { setHydrated(true); }, []);
+
+  const snapshot = useSyncExternalStore(
+    subscribe,
+    hydrated ? readSnapshot : () => serverSnapshot,
+    () => serverSnapshot,
+  );
 
   const setAdminKey = useCallback((key: string | null) => {
     setStorageItem("tabmail_admin_key", key?.trim() || null);
@@ -129,6 +148,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     notify();
   }, []);
 
+  const resolving = useRef(false);
+  useEffect(() => {
+    if (!snapshot.adminKey || snapshot.tenantId || resolving.current) return;
+    resolving.current = true;
+    fetch("/api/v1/admin/tenants", {
+      headers: { "X-Admin-Key": snapshot.adminKey },
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.data?.length > 0) {
+          setStorageItem("tabmail_tenant_id", data.data[0].id);
+          notify();
+        }
+      })
+      .catch(() => {})
+      .finally(() => { resolving.current = false; });
+  }, [snapshot.adminKey, snapshot.tenantId]);
+
   const level: AuthLevel = snapshot.adminKey
     ? "admin"
     : snapshot.apiKey
@@ -142,6 +179,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         ...snapshot,
         level,
+        hydrated,
         setAdminKey,
         setApiKey,
         setTenantId,

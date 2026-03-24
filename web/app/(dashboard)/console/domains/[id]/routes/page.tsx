@@ -76,8 +76,8 @@ export default function RoutesPage() {
   const fetchRoutes = useCallback(async () => {
     try {
       const res = await listRoutes(domainId);
-      setRoutes(res.data);
-      setTotal(res.data.length);
+      setRoutes(res.data ?? []);
+      setTotal(res.data?.length ?? 0);
     } catch {
       toast.error(t("routes.loadFailed"));
     } finally {

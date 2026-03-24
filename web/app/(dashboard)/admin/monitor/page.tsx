@@ -76,7 +76,7 @@ export default function AdminMonitorPage() {
       sender: filterSender || undefined,
     })
       .then((res) => {
-        setHistory(res.data);
+        setHistory(res.data ?? []);
         setHistoryTotal(res.meta.total);
       })
       .catch(() => toast.error(t("monitor.loadHistoryFailed")));

@@ -120,9 +120,9 @@ export default function TenantsPage() {
   const fetchTenants = useCallback(async () => {
     try {
       const [tRes, pRes] = await Promise.all([listTenants(), listPlans()]);
-      setTenants(tRes.data);
-      setTotal(tRes.data.length);
-      setPlans(pRes.data);
+      setTenants(tRes.data ?? []);
+      setTotal(tRes.data?.length ?? 0);
+      setPlans(pRes.data ?? []);
     } catch {
       toast.error(t("tenants.loadFailed"));
     } finally {
@@ -153,6 +153,7 @@ export default function TenantsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm(t("tenants.confirmDelete"))) return;
     try {
       await deleteTenant(id);
       toast.success(t("tenants.tenantDeleted"));
@@ -169,7 +170,7 @@ export default function TenantsPage() {
     setNewKeyCreated(null);
     try {
       const res = await listAPIKeys(tenantId);
-      setKeys(res.data);
+      setKeys(res.data ?? []);
     } catch {
       toast.error(t("tenants.keysLoadFailed"));
     } finally {
@@ -182,7 +183,7 @@ export default function TenantsPage() {
       const res = await createAPIKey(keysTenantId, { scopes: ["*"] });
       setNewKeyCreated(res.data);
       const keysRes = await listAPIKeys(keysTenantId);
-      setKeys(keysRes.data);
+      setKeys(keysRes.data ?? []);
       toast.success(t("tenants.apiKeyCreated"));
     } catch {
       toast.error(t("tenants.apiKeyCreateFailed"));
@@ -217,6 +218,17 @@ export default function TenantsPage() {
     try {
       const res = await getTenantConfig(tenant.id);
       setEffectiveConfig(res.data);
+      if (res.data) {
+        setOverrideForm({
+          max_domains: String(res.data.max_domains),
+          max_mailboxes_per_domain: String(res.data.max_mailboxes_per_domain),
+          max_messages_per_mailbox: String(res.data.max_messages_per_mailbox),
+          max_message_bytes: String(res.data.max_message_bytes),
+          retention_hours: String(res.data.retention_hours),
+          rpm_limit: String(res.data.rpm_limit),
+          daily_quota: String(res.data.daily_quota),
+        });
+      }
     } catch {
       toast.error(t("tenants.configLoadFailed"));
     }

@@ -60,7 +60,7 @@ export default function AdminIngestPage() {
         source: source === "all" ? undefined : source,
         recipient: recipient || undefined,
       });
-      setJobs(res.data);
+      setJobs(res.data ?? []);
       setTotal(res.meta.total);
     } catch {
       toast.error(t("ingest.loadFailed"));

@@ -52,6 +52,7 @@ export default function InboxPage() {
   const [mailboxPassword, setMailboxPassword] = useState("");
   const [authenticating, setAuthenticating] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
+  const [notFound, setNotFound] = useState(false);
   const [sseConnected, setSseConnected] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
   const mailboxTokenMatches =
@@ -63,12 +64,29 @@ export default function InboxPage() {
       else setRefreshing(true);
       try {
         const res = await listMessages(address);
-        setMessages(res.data);
-        setTotal(res.meta.total);
+        setMessages(res.data ?? []);
+        setTotal(res.meta?.total ?? res.data?.length ?? 0);
         setAuthRequired(false);
-      } catch {
-        if (!silent) setAuthRequired(true);
-        if (!silent) toast.error(t("toast.loadFailed"));
+        setNotFound(false);
+      } catch (e: unknown) {
+        const err = e as { error?: { code?: string; message?: string } };
+        const code = err?.error?.code ?? "";
+        const msg = err?.error?.message ?? "";
+        const isNotFound = code === "NOT_FOUND" || msg.includes("not found");
+        const isAuthError = code === "UNAUTHORIZED" || code === "FORBIDDEN" || msg.includes("unauthorized");
+        if (!silent) {
+          if (isNotFound) {
+            setNotFound(true);
+            setAuthRequired(false);
+          } else if (isAuthError) {
+            setAuthRequired(true);
+            setNotFound(false);
+          } else {
+            setNotFound(false);
+            setAuthRequired(false);
+            toast.error(t("toast.loadFailed"));
+          }
+        }
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -282,7 +300,19 @@ export default function InboxPage() {
 
       {/* Main */}
       <div className="flex-1 container mx-auto max-w-6xl">
-        {authRequired && (
+        {notFound && (
+          <div className="mx-4 mt-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-5">
+            <div className="flex items-start gap-3">
+              <Mail className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+              <div>
+                <h2 className="text-sm font-semibold">{t("inbox.notFoundTitle")}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{t("inbox.notFoundDesc")}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {authRequired && !notFound && (
           <div className="mx-4 mt-4 rounded-xl border bg-background p-5">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>

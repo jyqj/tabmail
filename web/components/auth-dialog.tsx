@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { issueToken } from "@/lib/api";
+import { issueToken, listTenants } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -44,15 +44,45 @@ export function AuthDialog() {
   const [mailboxLoading, setMailboxLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const handleAdminLogin = () => {
+  const [adminLoading, setAdminLoading] = useState(false);
+
+  const handleAdminLogin = async () => {
     if (!inputAdminKey.trim()) return;
+    const key = inputAdminKey.trim();
+    const explicitTenant = inputTenantId.trim();
+
     clearMailboxAuth();
-    setAdminKey(inputAdminKey.trim());
+    setAdminKey(key);
     setApiKey(null);
-    setTenantId(inputTenantId.trim() || null);
-    setInputAdminKey("");
-    setOpen(false);
-    toast.success(t("toast.adminOk"));
+
+    if (explicitTenant) {
+      setTenantId(explicitTenant);
+      setInputAdminKey("");
+      setOpen(false);
+      toast.success(t("toast.adminOk"));
+      return;
+    }
+
+    setAdminLoading(true);
+    try {
+      const res = await listTenants();
+      if (res.data.length === 1) {
+        setTenantId(res.data[0].id);
+        toast.success(t("toast.adminOk"));
+      } else if (res.data.length > 1) {
+        setTenantId(res.data[0].id);
+        toast.success(t("toast.adminOk"));
+        toast.info(`Auto-selected tenant: ${res.data[0].name}`);
+      } else {
+        toast.success(t("toast.adminOk"));
+      }
+    } catch {
+      toast.success(t("toast.adminOk"));
+    } finally {
+      setAdminLoading(false);
+      setInputAdminKey("");
+      setOpen(false);
+    }
   };
 
   const handleTenantLogin = () => {

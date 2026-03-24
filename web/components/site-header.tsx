@@ -20,13 +20,13 @@ import {
 } from "@/components/ui/sheet";
 import { healthCheck } from "@/lib/api";
 import {
-  Mail,
   LayoutDashboard,
   Shield,
   BookOpen,
   Menu,
   Inbox,
 } from "lucide-react";
+import { TabMailLogo } from "@/components/tabmail-logo";
 
 export function SiteHeader() {
   const { level } = useAuth();
@@ -74,10 +74,12 @@ export function SiteHeader() {
       <div className="container flex h-14 items-center justify-between px-4 mx-auto max-w-6xl">
         <div className="flex items-center gap-5">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-105">
-              <Mail className="h-4 w-4" />
+            <div className="transition-transform group-hover:scale-105">
+              <TabMailLogo size={30} />
             </div>
-            <span className="font-semibold tracking-tight text-[15px]">TabMail</span>
+            <span className="font-heading font-semibold tracking-tight text-[15px]">
+              <span className="text-teal-600 dark:text-teal-400">Tab</span>Mail
+            </span>
           </Link>
 
           {!isMobile && (
@@ -119,10 +121,10 @@ export function SiteHeader() {
               <SheetContent side="left" className="w-72">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2.5">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                      <Mail className="h-3.5 w-3.5" />
-                    </div>
-                    TabMail
+                    <TabMailLogo size={28} />
+                    <span className="font-heading">
+                      <span className="text-teal-600 dark:text-teal-400">Tab</span>Mail
+                    </span>
                   </SheetTitle>
                   <SheetDescription>{t("header.nav")}</SheetDescription>
                 </SheetHeader>

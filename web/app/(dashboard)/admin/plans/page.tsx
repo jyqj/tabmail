@@ -87,8 +87,8 @@ export default function PlansPage() {
   const fetchPlans = useCallback(async () => {
     try {
       const res = await listPlans();
-      setPlans(res.data);
-      setTotal(res.data.length);
+      setPlans(res.data ?? []);
+      setTotal(res.data?.length ?? 0);
     } catch {
       toast.error(t("plans.loadFailed"));
     } finally {
@@ -127,6 +127,7 @@ export default function PlansPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm(t("plans.confirmDelete"))) return;
     try {
       await deletePlan(id);
       toast.success(t("plans.deleted"));
@@ -250,11 +251,11 @@ export default function PlansPage() {
                     <TableRow>
                       <TableHead>{t("tenants.name")}</TableHead>
                       <TableHead className="text-right">{t("admin.domains")}</TableHead>
-                      <TableHead className="text-right">MB/Domain</TableHead>
-                      <TableHead className="text-right">Msg/MB</TableHead>
+                      <TableHead className="text-right">{t("plans.colMbPerDomain")}</TableHead>
+                      <TableHead className="text-right">{t("plans.colMsgPerMb")}</TableHead>
                       <TableHead className="text-right">{t("plans.retention")}</TableHead>
-                      <TableHead className="text-right">RPM</TableHead>
-                      <TableHead className="text-right">Daily</TableHead>
+                      <TableHead className="text-right">{t("plans.colRpm")}</TableHead>
+                      <TableHead className="text-right">{t("plans.colDaily")}</TableHead>
                       <TableHead>{t("plans.created")}</TableHead>
                       <TableHead className="w-20" />
                     </TableRow>

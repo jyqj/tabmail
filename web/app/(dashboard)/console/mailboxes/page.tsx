@@ -83,7 +83,7 @@ export default function MailboxesPage() {
   const fetchMailboxes = useCallback(async () => {
     try {
       const res = await listMailboxes(page);
-      setMailboxes(res.data);
+      setMailboxes(res.data ?? []);
       setTotal(res.meta.total);
     } catch {
       toast.error(t("mailboxes.loadFailed"));

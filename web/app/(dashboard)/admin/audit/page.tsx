@@ -32,7 +32,7 @@ export default function AuditPage() {
   const fetchAudit = useCallback(async () => {
     try {
       const res = await listAudit({ page, per_page: 30 });
-      setEntries(res.data);
+      setEntries(res.data ?? []);
       setTotal(res.meta.total);
     } catch {
       toast.error(t("audit.loadFailed"));
