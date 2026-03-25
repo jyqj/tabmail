@@ -43,6 +43,7 @@ services:
   web:
     build: ./web
     ports:
+      - "80:3000"
       - "3000:3000"
     environment:
       INTERNAL_API_URL: "http://tabmail:8080"
