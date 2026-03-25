@@ -1,5 +1,8 @@
-import { request } from "./base";
+import { request, getBaseUrl } from "./base";
 
-export function healthCheck() {
-  return request<{ status: string }>("/health");
+export async function healthCheck() {
+  const res = await fetch(`${getBaseUrl()}/health`);
+  if (!res.ok) throw new Error(res.statusText);
+  return res.json() as Promise<{ status: string }>;
 }
+
