@@ -956,8 +956,14 @@ func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before
 	}
 	defer rows.Close()
 
+	type mailboxDelta struct {
+		id    uuid.UUID
+		count int
+	}
+
 	total := 0
 	var keys []string
+	var deltas []mailboxDelta
 	for rows.Next() {
 		var mailboxID uuid.UUID
 		var rawKey *string
@@ -969,16 +975,20 @@ func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before
 		if rawKey != nil && *rawKey != "" {
 			keys = append(keys, *rawKey)
 		}
-		if _, err := tx.Exec(ctx, `
-			UPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1`,
-			mailboxID, count); err != nil {
-			return 0, nil, err
-		}
+		deltas = append(deltas, mailboxDelta{id: mailboxID, count: count})
 	}
 	if err := rows.Err(); err != nil {
 		return 0, nil, err
 	}
 	rows.Close()
+
+	for _, d := range deltas {
+		if _, err := tx.Exec(ctx, `
+			UPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1`,
+			d.id, d.count); err != nil {
+			return 0, nil, err
+		}
+	}
 	if err := tx.Commit(ctx); err != nil {
 		return 0, nil, err
 	}
