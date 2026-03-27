@@ -146,14 +146,14 @@ func main() {
 			}
 		}()
 
-		rl := middleware.NewRateLimiter(rdb, pg, 20, cfg.HTTP.TrustedProxies)
+		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		handler := api.NewRouter(pg, obj, hub, dispatcher, namingMode, cfg.StripPlusTag, defaultPolicy, cfg.AdminKey, cfg.MailboxTokenSecret, cfg.SMTP.Domain, publicTenantID, cfg.HTTP, rl, logger)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
 		go serveHTTP(ctx, cancel, httpSrv, logger)
 	case "api":
 		go dispatcher.Run(ctx)
 		go ingestSvc.Run(ctx)
-		rl := middleware.NewRateLimiter(rdb, pg, 20, cfg.HTTP.TrustedProxies)
+		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		handler := api.NewRouter(pg, obj, hub, dispatcher, namingMode, cfg.StripPlusTag, defaultPolicy, cfg.AdminKey, cfg.MailboxTokenSecret, cfg.SMTP.Domain, publicTenantID, cfg.HTTP, rl, logger)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
 		go serveHTTP(ctx, cancel, httpSrv, logger)

@@ -59,6 +59,7 @@ type HTTP struct {
 	AllowedHeaders   []string `split_words:"true" default:"Authorization,Content-Type,X-API-Key,X-Admin-Key,X-Tenant-ID" desc:"Allowed CORS headers"`
 	AllowCredentials bool     `split_words:"true" default:"false" desc:"Allow credentialed CORS requests"`
 	TrustedProxies   []string `split_words:"true" default:"127.0.0.1/32,::1/128" desc:"Trusted proxy CIDRs/IPs for X-Real-IP/X-Forwarded-For"`
+	PublicIPRPM      int      `split_words:"true" default:"0" desc:"Per-IP RPM for unauthenticated requests (0=disable)"`
 }
 
 type DB struct {
