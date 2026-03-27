@@ -72,6 +72,7 @@ type Redis struct {
 	Addr     string `default:"localhost:6379" desc:"Redis address"`
 	Password string `default:"" desc:"Redis password"`
 	DB       int    `default:"0" desc:"Redis database number"`
+	PoolSize int    `default:"50" desc:"Max connections in pool (0 = 10 per CPU)"`
 }
 
 type Storage struct {
