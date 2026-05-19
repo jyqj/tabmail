@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Syne, Geist_Mono } from "next/font/google";
+import { IBM_Plex_Sans, JetBrains_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,9 +8,8 @@ import { I18nProvider } from "@/lib/i18n";
 import { SettingsProvider } from "@/lib/settings";
 import "./globals.css";
 
-const dmSans = DM_Sans({ variable: "--font-dm-sans", subsets: ["latin"], weight: ["400", "500", "600", "700"] });
-const syne = Syne({ variable: "--font-syne", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const ibmPlex = IBM_Plex_Sans({ variable: "--font-ibm-plex", subsets: ["latin"], weight: ["200", "400", "500", "600", "700"] });
+const jetbrainsMono = JetBrains_Mono({ variable: "--font-jetbrains-mono", subsets: ["latin"], weight: ["400", "500", "600"] });
 
 export const metadata: Metadata = {
   title: "TabMail",
@@ -25,7 +24,7 @@ export default function RootLayout({
     <html
       lang="zh"
       suppressHydrationWarning
-      className={`${dmSans.variable} ${syne.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${ibmPlex.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>

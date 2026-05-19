@@ -33,13 +33,20 @@ export function SiteHeader() {
   const { t } = useI18n();
   const isMobile = useIsMobile();
   const [healthy, setHealthy] = useState<boolean | null>(null);
+  const [latency, setLatency] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     const check = () => {
+      const start = Date.now();
       healthCheck()
-        .then(() => { if (!cancelled) setHealthy(true); })
-        .catch(() => { if (!cancelled) setHealthy(false); });
+        .then(() => {
+          if (!cancelled) {
+            setHealthy(true);
+            setLatency(Date.now() - start);
+          }
+        })
+        .catch(() => { if (!cancelled) { setHealthy(false); setLatency(null); } });
     };
     check();
     const timer = setInterval(check, 30_000);
@@ -60,27 +67,23 @@ export function SiteHeader() {
   ];
 
   const statusDot = healthy == null
-    ? "bg-slate-400"
+    ? "bg-muted-foreground/40"
     : healthy
-      ? "bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.6)]"
-      : "bg-rose-500 shadow-[0_0_6px_rgba(244,63,94,0.6)]";
-
-  const statusText = healthy == null
-    ? t("header.checking")
-    : healthy ? t("header.healthy") : t("header.down");
+      ? "bg-emerald-500"
+      : "bg-rose-500";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-backdrop-filter:bg-background/60">
-      <div className="container flex h-14 items-center justify-between px-4 mx-auto max-w-6xl">
-        <div className="flex items-center gap-5">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-card/85 backdrop-blur-md">
+      <div className="flex h-[52px] items-center justify-between px-4 mx-auto max-w-[1280px]">
+        <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="transition-transform group-hover:scale-105">
-              <TabMailLogo size={30} />
-            </div>
-            <span className="font-heading font-semibold tracking-tight text-[15px]">
-              <span className="text-teal-600 dark:text-teal-400">Tab</span>Mail
+            <TabMailLogo size={22} />
+            <span className="font-semibold text-[15px] tracking-tight">
+              <span className="text-primary">Tab</span>Mail
             </span>
           </Link>
+
+          <div className="w-px h-[18px] bg-border mx-1" />
 
           {!isMobile && (
             <nav className="flex items-center gap-0.5">
@@ -90,9 +93,8 @@ export function SiteHeader() {
                   variant="ghost"
                   size="sm"
                   render={<Link href={item.href} />}
-                  className="gap-1.5 text-muted-foreground hover:text-foreground"
+                  className="gap-1.5 text-muted-foreground hover:text-foreground text-[13px] font-medium h-8"
                 >
-                  <item.icon className="h-3.5 w-3.5" />
                   {item.label}
                 </Button>
               ))}
@@ -100,11 +102,18 @@ export function SiteHeader() {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           {!isMobile && (
             <div className="flex items-center gap-1.5 mr-1">
-              <span className={`h-2 w-2 rounded-full ${statusDot} transition-colors`} />
-              <span className="text-[11px] text-muted-foreground">{statusText}</span>
+              <span className="relative flex h-[6px] w-[6px]">
+                {healthy && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40" />
+                )}
+                <span className={`relative inline-flex rounded-full h-[6px] w-[6px] ${statusDot} transition-colors`} />
+              </span>
+              <span className="font-mono text-[11px] text-muted-foreground">
+                api{latency != null ? ` · ${latency} ms` : ""}
+              </span>
             </div>
           )}
           <AuthDialog />
@@ -121,9 +130,9 @@ export function SiteHeader() {
               <SheetContent side="left" className="w-72">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2.5">
-                    <TabMailLogo size={28} />
-                    <span className="font-heading">
-                      <span className="text-teal-600 dark:text-teal-400">Tab</span>Mail
+                    <TabMailLogo size={22} />
+                    <span className="font-semibold">
+                      <span className="text-primary">Tab</span>Mail
                     </span>
                   </SheetTitle>
                   <SheetDescription>{t("header.nav")}</SheetDescription>
@@ -135,7 +144,7 @@ export function SiteHeader() {
                       render={
                         <Link
                           href={item.href}
-                          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                          className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                         />
                       }
                     >
@@ -145,9 +154,11 @@ export function SiteHeader() {
                   ))}
                 </nav>
                 <div className="mt-auto px-4 pb-4">
-                  <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-                    <span className={`h-2 w-2 rounded-full ${statusDot}`} />
-                    <span className="text-xs text-muted-foreground">API {statusText}</span>
+                  <div className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
+                    <span className={`h-[6px] w-[6px] rounded-full ${statusDot}`} />
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      api{latency != null ? ` · ${latency} ms` : ""}
+                    </span>
                   </div>
                 </div>
               </SheetContent>
