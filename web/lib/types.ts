@@ -372,6 +372,8 @@ export interface IngestJob {
   attempts: number;
   last_error?: string;
   next_attempt_at: string;
+  claimed_at?: string | null;
+  lease_until?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -386,6 +388,8 @@ export interface WebhookDelivery {
   attempts: number;
   last_error?: string;
   next_attempt_at: string;
+  claimed_at?: string | null;
+  lease_until?: string | null;
   last_tried_at?: string | null;
   delivered_at?: string | null;
   created_at: string;

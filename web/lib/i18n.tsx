@@ -64,6 +64,9 @@ const zh: Messages = {
   "home.noDomains": "暂无已验证的域名，请先在控制台添加并验证域名",
   "home.randomFailed": "生成随机地址失败，请稍后再试",
   "home.generating": "生成中…",
+  "home.curlHint": "直接 curl",
+  "home.curlTitle": "curl · 拉取最新邮件",
+  "home.noRegister": "不需要注册",
 
   // Home — CTA
   "home.ctaTitle": "准备好掌控你的邮件管线了吗？",
@@ -1130,6 +1133,9 @@ const en: Messages = {
   "home.noDomains": "No verified domains yet. Please add and verify a domain in the console first.",
   "home.randomFailed": "Failed to generate random address. Please try again later.",
   "home.generating": "Generating…",
+  "home.curlHint": "Just curl it",
+  "home.curlTitle": "curl · fetch latest messages",
+  "home.noRegister": "No signup required",
 
   // Home — CTA
   "home.ctaTitle": "Ready to own your email pipeline?",
