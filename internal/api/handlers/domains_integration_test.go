@@ -13,6 +13,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/authn"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -37,6 +38,18 @@ func TestTriggerVerifyUpdatesZoneStatus(t *testing.T) {
 		DailyQuota:            1000,
 	})
 	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	admin := &models.User{
+		ID:           uuid.New(),
+		TenantID:     tenantID,
+		Email:        "admin@example.test",
+		PasswordHash: "hash",
+		DisplayName:  "Admin",
+		Role:         models.RoleAdmin,
+		IsActive:     true,
+	}
+	if err := st.CreateUser(context.Background(), admin); err != nil {
+		t.Fatalf("seed admin user: %v", err)
+	}
 	st.SeedZone(&models.DomainZone{
 		ID:        zoneID,
 		TenantID:  tenantID,
@@ -52,9 +65,13 @@ func TestTriggerVerifyUpdatesZoneStatus(t *testing.T) {
 		return []*net.MX{{Host: "mx.mail.test.", Pref: 10}}, nil
 	}
 
-	handler := middleware.Auth(st, "admin-secret", publicTenantIDForTests)(http.HandlerFunc(h.TriggerVerify))
+	token, err := authn.IssueAccessToken("jwt-test-secret", admin)
+	if err != nil {
+		t.Fatalf("issue admin token: %v", err)
+	}
+	handler := middleware.Auth(st, "jwt-test-secret", publicTenantIDForTests)(http.HandlerFunc(h.TriggerVerify))
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/domains/"+zoneID.String()+"/verify", nil)
-	req.Header.Set("X-Admin-Key", "admin-secret")
+	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("X-Tenant-ID", tenantID.String())
 
 	rctx := chi.NewRouteContext()

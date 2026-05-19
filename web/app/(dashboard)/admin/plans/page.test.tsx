@@ -109,10 +109,12 @@ describe("admin/plans page", () => {
     deletePlanMock.mockReset();
     toastSuccess.mockReset();
     toastError.mockReset();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
   });
 
   it("加载列表并支持创建 plan", async () => {

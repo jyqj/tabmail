@@ -18,11 +18,14 @@ import (
 
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/authn"
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
+	"tabmail/internal/settings"
+	"tabmail/internal/store"
 	"tabmail/internal/testutil"
 )
 
@@ -33,7 +36,7 @@ func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/domains", bytes.NewBufferString(`{"domain":"mail.example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -85,7 +88,7 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	tokenResp := doJSON(t, router, http.MethodPost, "/api/v1/token", map[string]any{
 		"address":  mb.FullAddress,
@@ -119,7 +122,7 @@ func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	expiresAt := time.Now().Add(2 * time.Hour).UTC().Truncate(time.Second)
 	body := doJSON(t, router, http.MethodPost, "/api/v1/mailboxes", map[string]any{
@@ -128,10 +131,7 @@ func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 		"password":                 "Passw0rd!",
 		"retention_hours_override": 6,
 		"expires_at":               expiresAt.Format(time.RFC3339),
-	}, map[string]string{
-		"X-Admin-Key": "admin-secret",
-		"X-Tenant-ID": tenantID.String(),
-	})
+	}, adminHeaders(t, st, tenantID))
 
 	data := body["data"].(map[string]any)
 	if data["retention_hours_override"].(float64) != 6 {
@@ -191,10 +191,10 @@ func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/ingest/jobs", nil)
-	req.Header.Set("X-Admin-Key", "admin-secret")
+	setAdminAuth(t, st, req, uuid.Nil)
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -202,7 +202,7 @@ func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 	}
 
 	req = httptest.NewRequest(http.MethodGet, "/api/v1/admin/webhooks/deliveries", nil)
-	req.Header.Set("X-Admin-Key", "admin-secret")
+	setAdminAuth(t, st, req, uuid.Nil)
 	rr = httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
 	if rr.Code != http.StatusOK {
@@ -232,7 +232,7 @@ func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
 	rr := httptest.NewRecorder()
@@ -265,7 +265,7 @@ func TestRouter_SuggestAddressReturnsStructuredMailboxAddress(t *testing.T) {
 
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	domainID := findTenantZone(t, st, tenantID)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains/"+domainID.String()+"/suggest-address", nil)
@@ -303,7 +303,7 @@ func TestRouter_SuggestAddressSupportsRandomSubdomain(t *testing.T) {
 
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	domainID := findTenantZone(t, st, tenantID)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains/"+domainID.String()+"/suggest-address?subdomain=true", nil)
@@ -353,12 +353,11 @@ func TestRouter_ImpersonationRespectsTenantRateLimit(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	defer rdb.Close()
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	mkReq := func() *httptest.ResponseRecorder {
 		req := httptest.NewRequest(http.MethodGet, "/api/v1/mailboxes", nil)
-		req.Header.Set("X-Admin-Key", "admin-secret")
-		req.Header.Set("X-Tenant-ID", tenantID.String())
+		setAdminAuth(t, st, req, tenantID)
 		rr := httptest.NewRecorder()
 		router.ServeHTTP(rr, req)
 		return rr
@@ -375,6 +374,82 @@ func TestRouter_ImpersonationRespectsTenantRateLimit(t *testing.T) {
 	}
 	if !strings.Contains(second.Body.String(), "RATE_LIMITED") {
 		t.Fatalf("expected RATE_LIMITED error, got %s", second.Body.String())
+	}
+}
+
+func TestRouter_UserJWTRespectsTenantRateLimit(t *testing.T) {
+	st, obj, tenantID := seededStores(t)
+	plan, err := st.GetPlan(context.Background(), uuid.MustParse("00000000-0000-0000-0000-000000000010"))
+	if err != nil || plan == nil {
+		t.Fatalf("get plan: %v plan=%#v", err, plan)
+	}
+	plan.RPMLimit = 1
+	plan.DailyQuota = 100
+	if err := st.UpdatePlan(context.Background(), plan); err != nil {
+		t.Fatalf("update plan: %v", err)
+	}
+
+	mr, err := miniredis.Run()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mr.Close()
+
+	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	defer rdb.Close()
+
+	router := testRouter(st, obj, rdb)
+	token := issueAccessTokenForTest(t, st, tenantID, models.RoleUser)
+
+	mkReq := func() *httptest.ResponseRecorder {
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/mailboxes", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		return rr
+	}
+
+	first := mkReq()
+	if first.Code != http.StatusOK {
+		t.Fatalf("expected first request 200, got %d body=%s", first.Code, first.Body.String())
+	}
+	second := mkReq()
+	if second.Code != http.StatusTooManyRequests {
+		t.Fatalf("expected second request 429, got %d body=%s", second.Code, second.Body.String())
+	}
+}
+
+func TestRouter_APIKeyCannotUseInteractiveAuthRoutes(t *testing.T) {
+	st, obj, tenantID := seededStores(t)
+	tenant, err := st.GetTenant(context.Background(), tenantID)
+	if err != nil || tenant == nil {
+		t.Fatalf("get tenant: %v tenant=%#v", err, tenant)
+	}
+	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
+
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+	router := testRouter(st, obj, rdb)
+
+	for _, tc := range []struct {
+		method string
+		path   string
+		body   string
+	}{
+		{method: http.MethodGet, path: "/api/v1/auth/me"},
+		{method: http.MethodPost, path: "/api/v1/auth/logout"},
+		{method: http.MethodPost, path: "/api/v1/auth/change-password", body: `{"old_password":"old","new_password":"new"}`},
+		{method: http.MethodPost, path: "/api/v1/keys", body: `{"label":"self-elevate","scopes":["domains:read"]}`},
+		{method: http.MethodGet, path: "/api/v1/keys"},
+	} {
+		req := httptest.NewRequest(tc.method, tc.path, strings.NewReader(tc.body))
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-API-Key", "tenant-key")
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		if rr.Code != http.StatusForbidden {
+			t.Fatalf("%s %s: expected 403 for API key, got %d body=%s", tc.method, tc.path, rr.Code, rr.Body.String())
+		}
 	}
 }
 
@@ -400,7 +475,7 @@ func TestRouter_MetricsDBCountsAreLightlyCached(t *testing.T) {
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
 
-	router := api.NewRouter(st, obj, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), policy.NamingFull, true, models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, "admin-secret", "mailbox-secret", "mx.test", publicTenantID, config.HTTP{}, middleware.NewRateLimiter(rdb, st, 20, nil), zerolog.Nop())
+	router := testRouter(st, obj, rdb)
 
 	for i := 0; i < 2; i++ {
 		req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
@@ -469,6 +544,28 @@ func findTenantZone(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID) uu
 	return zones[0].ID
 }
 
+func testRouter(st store.Store, obj *testutil.MemoryObjectStore, rdb *redis.Client) http.Handler {
+	return api.NewRouter(api.RouterConfig{
+		Store:              st,
+		ObjectStore:        obj,
+		Hub:                realtime.NewHub(10, st),
+		Dispatcher:         hooks.New(hooks.Config{}, zerolog.Nop()),
+		NamingMode:         policy.NamingFull,
+		StripPlus:          true,
+		DefaultPolicy:      models.SMTPPolicy{DefaultAccept: true, DefaultStore: true},
+		JWTSecret:          "jwt-test-secret",
+		MailboxTokenSecret: "mailbox-secret",
+		ExpectedMXHost:     "mx.test",
+		PublicTenantID:     publicTenantID,
+		DefaultPlanID:      uuid.MustParse("00000000-0000-0000-0000-000000000010"),
+		OpenRegistration:   true,
+		Settings:           settings.NewManager(st, zerolog.Nop()),
+		HTTP:               config.HTTP{},
+		RateLimiter:        middleware.NewRateLimiter(rdb, st, 20, nil),
+		Logger:             zerolog.Nop(),
+	})
+}
+
 func doJSON(t *testing.T, router http.Handler, method, path string, body any, headers map[string]string) map[string]any {
 	t.Helper()
 	var buf bytes.Buffer
@@ -492,4 +589,42 @@ func doJSON(t *testing.T, router http.Handler, method, path string, body any, he
 		t.Fatal(err)
 	}
 	return out
+}
+
+func adminHeaders(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID) map[string]string {
+	t.Helper()
+	token := issueAccessTokenForTest(t, st, uuid.MustParse(publicTenantID), models.RoleAdmin)
+	headers := map[string]string{"Authorization": "Bearer " + token}
+	if tenantID != uuid.Nil {
+		headers["X-Tenant-ID"] = tenantID.String()
+	}
+	return headers
+}
+
+func setAdminAuth(t *testing.T, st *testutil.FakeStore, req *http.Request, tenantID uuid.UUID) {
+	t.Helper()
+	for k, v := range adminHeaders(t, st, tenantID) {
+		req.Header.Set(k, v)
+	}
+}
+
+func issueAccessTokenForTest(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID, role models.UserRole) string {
+	t.Helper()
+	user := &models.User{
+		ID:           uuid.New(),
+		TenantID:     tenantID,
+		Email:        uuid.NewString() + "@example.test",
+		PasswordHash: "hash",
+		DisplayName:  "Test User",
+		Role:         role,
+		IsActive:     true,
+	}
+	if err := st.CreateUser(context.Background(), user); err != nil {
+		t.Fatalf("seed user: %v", err)
+	}
+	token, err := authn.IssueAccessToken("jwt-test-secret", user)
+	if err != nil {
+		t.Fatalf("issue token: %v", err)
+	}
+	return token
 }

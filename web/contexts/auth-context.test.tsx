@@ -10,14 +10,24 @@ function AuthProbe() {
   return (
     <div>
       <div data-testid="level">{auth.level}</div>
-      <div data-testid="adminKey">{auth.adminKey ?? ""}</div>
-      <div data-testid="apiKey">{auth.apiKey ?? ""}</div>
+      <div data-testid="accessToken">{auth.accessToken ?? ""}</div>
       <div data-testid="tenantId">{auth.tenantId ?? ""}</div>
       <div data-testid="mailboxAddress">{auth.mailboxAddress ?? ""}</div>
       <div data-testid="mailboxToken">{auth.mailboxToken ?? ""}</div>
 
-      <button onClick={() => auth.setAdminKey(" admin-secret ")}>set-admin</button>
-      <button onClick={() => auth.setApiKey(" tenant-key ")}>set-api</button>
+      <button
+        onClick={() =>
+          auth.loginWithTokens(" access-token ", " refresh-token ", {
+            id: "user-1",
+            email: "user@mail.test",
+            display_name: "User",
+            role: "user",
+            tenant_id: "tenant-1",
+          })
+        }
+      >
+        set-jwt
+      </button>
       <button onClick={() => auth.setTenantId(" tenant-1 ")}>set-tenant</button>
       <button onClick={() => auth.setMailboxAuth("User@Mail.Test ", " mailbox-token ")}>set-mailbox</button>
       <button onClick={() => auth.clearMailboxAuth()}>clear-mailbox</button>
@@ -43,22 +53,23 @@ describe("auth-context", () => {
     );
 
     expect(screen.getByTestId("level")).toHaveTextContent("public");
-    expect(screen.getByTestId("adminKey")).toHaveTextContent("");
+    expect(screen.getByTestId("accessToken")).toHaveTextContent("");
     expect(screen.getByTestId("mailboxToken")).toHaveTextContent("");
   });
 
-  it("支持 admin / tenant / mailbox 状态写入与清理", async () => {
+  it("支持 JWT / tenant / mailbox 状态写入与清理", async () => {
     render(
       <AuthProvider>
         <AuthProbe />
       </AuthProvider>
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "set-admin" }));
+    fireEvent.click(screen.getByRole("button", { name: "set-jwt" }));
     await waitFor(() => {
-      expect(screen.getByTestId("level")).toHaveTextContent("admin");
+      expect(screen.getByTestId("level")).toHaveTextContent("user");
     });
-    expect(localStorage.getItem("tabmail_admin_key")).toBe("admin-secret");
+    expect(localStorage.getItem("tabmail_access_token")).toBe(" access-token ");
+    expect(localStorage.getItem("tabmail_refresh_token")).toBe(" refresh-token ");
 
     fireEvent.click(screen.getByRole("button", { name: "set-tenant" }));
     await waitFor(() => {
@@ -70,19 +81,7 @@ describe("auth-context", () => {
     await waitFor(() => {
       expect(screen.getByTestId("level")).toHaveTextContent("public");
     });
-    expect(localStorage.getItem("tabmail_admin_key")).toBeNull();
     expect(localStorage.getItem("tabmail_tenant_id")).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "set-api" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("level")).toHaveTextContent("tenant");
-    });
-    expect(localStorage.getItem("tabmail_api_key")).toBe("tenant-key");
-
-    fireEvent.click(screen.getByRole("button", { name: "logout" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("level")).toHaveTextContent("public");
-    });
 
     fireEvent.click(screen.getByRole("button", { name: "set-mailbox" }));
     await waitFor(() => {

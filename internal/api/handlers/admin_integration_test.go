@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,11 +17,20 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/authn"
 	"tabmail/internal/models"
 	"tabmail/internal/testutil"
 )
 
-const adminKeyForTests = "admin-secret"
+// stubSettings implements settingsManager for tests.
+type stubSettings struct{}
+
+func (s *stubSettings) Get(_ context.Context, _, defaultVal string) string        { return defaultVal }
+func (s *stubSettings) GetInt(_ context.Context, _ string, defaultVal int) int    { return defaultVal }
+func (s *stubSettings) GetBool(_ context.Context, _ string, defaultVal bool) bool { return defaultVal }
+func (s *stubSettings) Set(_ context.Context, _, _, _ string) error               { return nil }
+func (s *stubSettings) All(_ context.Context) ([]*models.SystemSetting, error)    { return nil, nil }
+func (s *stubSettings) Invalidate()                                               {}
 
 func TestAdminHandlerCreateTenantCreatesAuditEntry(t *testing.T) {
 	h, st, planID, _ := seededAdminHandler(t)
@@ -55,7 +65,7 @@ func TestAdminHandlerCreateTenantCreatesAuditEntry(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(audit) != 1 || audit[0].Action != "tenant.create" || audit[0].Actor != "admin" {
+	if len(audit) != 1 || audit[0].Action != "tenant.create" || !strings.HasPrefix(audit[0].Actor, "user:") {
 		t.Fatalf("unexpected audit entries: %#v", audit)
 	}
 }
@@ -155,8 +165,14 @@ func TestAdminHandlerCreateAPIKeyDefaultsScopesAndStoresHash(t *testing.T) {
 		t.Fatalf("unexpected key payload: %#v", data)
 	}
 	scopes := data["scopes"].([]any)
-	if len(scopes) != 1 || scopes[0].(string) != "*" {
-		t.Fatalf("expected default scopes [*], got %#v", scopes)
+	wantScopes := []string{"domains:read", "routes:read", "mailboxes:read", "messages:read"}
+	if len(scopes) != len(wantScopes) {
+		t.Fatalf("expected default scopes %#v, got %#v", wantScopes, scopes)
+	}
+	for i, want := range wantScopes {
+		if scopes[i].(string) != want {
+			t.Fatalf("expected default scopes %#v, got %#v", wantScopes, scopes)
+		}
 	}
 
 	keys, err := st.ListAPIKeys(context.Background(), tenantID)
@@ -180,6 +196,19 @@ func TestAdminHandlerCreateAPIKeyDefaultsScopesAndStoresHash(t *testing.T) {
 	}
 	if len(audit) != 1 || audit[0].Action != "api_key.create" {
 		t.Fatalf("unexpected audit entries: %#v", audit)
+	}
+}
+
+func TestAdminHandlerCreateAPIKeyRejectsWildcardScope(t *testing.T) {
+	h, st, _, tenantID := seededAdminHandler(t)
+
+	rr := doAdminRequest(t, st, http.MethodPost, "/api/v1/admin/tenants/"+tenantID.String()+"/keys", map[string]any{
+		"label":  "bad",
+		"scopes": []string{"*"},
+	}, map[string]string{"id": tenantID.String()}, h.CreateAPIKey)
+
+	if rr.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400, got %d body=%s", rr.Code, rr.Body.String())
 	}
 }
 
@@ -310,7 +339,7 @@ func seededAdminHandler(t *testing.T) (*AdminHandler, *testutil.FakeStore, uuid.
 		DefaultAccept: true,
 		DefaultStore:  true,
 	}
-	return NewAdminHandler(st, nil, defaultPolicy, zerolog.Nop()), st, planID, tenantID
+	return NewAdminHandler(st, nil, defaultPolicy, &stubSettings{}, zerolog.Nop()), st, planID, tenantID
 }
 
 func doAdminRequest(
@@ -332,7 +361,23 @@ func doAdminRequest(
 
 	req := httptest.NewRequest(method, path, &buf)
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("X-Admin-Key", adminKeyForTests)
+	admin := &models.User{
+		ID:           uuid.New(),
+		TenantID:     uuid.MustParse(publicTenantIDForTests),
+		Email:        uuid.NewString() + "@example.test",
+		PasswordHash: "hash",
+		DisplayName:  "Admin",
+		Role:         models.RoleAdmin,
+		IsActive:     true,
+	}
+	if err := st.CreateUser(context.Background(), admin); err != nil {
+		t.Fatalf("seed admin user: %v", err)
+	}
+	token, err := authn.IssueAccessToken("jwt-test-secret", admin)
+	if err != nil {
+		t.Fatalf("issue admin token: %v", err)
+	}
+	req.Header.Set("Authorization", "Bearer "+token)
 
 	if len(params) > 0 {
 		rctx := chi.NewRouteContext()
@@ -343,7 +388,7 @@ func doAdminRequest(
 	}
 
 	rr := httptest.NewRecorder()
-	wrapped := middleware.Auth(st, adminKeyForTests, publicTenantIDForTests)(handler)
+	wrapped := middleware.Auth(st, "jwt-test-secret", publicTenantIDForTests)(handler)
 	wrapped.ServeHTTP(rr, req)
 	return rr
 }

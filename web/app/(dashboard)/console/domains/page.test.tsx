@@ -117,6 +117,7 @@ vi.mock("@/components/ui/dialog", () => ({
 vi.mock("@/components/ui/dropdown-menu", () => ({
   DropdownMenu: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   DropdownMenuContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DropdownMenuSeparator: () => <hr />,
   DropdownMenuItem: ({
     children,
     onClick,
@@ -155,10 +156,12 @@ describe("console/domains page", () => {
     getVerificationStatusMock.mockReset();
     toastSuccess.mockReset();
     toastError.mockReset();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
   });
 
   it("加载列表并支持创建 domain", async () => {
@@ -199,7 +202,7 @@ describe("console/domains page", () => {
 
     render(<DomainsPage />);
 
-    expect(await screen.findByText("mail.test")).toBeInTheDocument();
+    expect((await screen.findAllByText("mail.test")).length).toBeGreaterThan(0);
 
     fireEvent.change(screen.getByPlaceholderText("mail.example.com"), {
       target: { value: "mx.example.com" },
@@ -248,7 +251,7 @@ describe("console/domains page", () => {
 
     render(<DomainsPage />);
 
-    expect(await screen.findByText("mail.test")).toBeInTheDocument();
+    expect((await screen.findAllByText("mail.test")).length).toBeGreaterThan(0);
 
     fireEvent.click(screen.getByRole("button", { name: "Verify DNS" }));
     await waitFor(() => {

@@ -40,7 +40,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		t := TenantFromCtx(ctx)
 		mode := AuthModeFromCtx(ctx)
-		tenantScoped := t != nil && t.ID != uuid.Nil && (mode == AuthModeAPIKey || (mode == AuthModeAdmin && !BypassLimits(ctx)))
+		tenantScoped := t != nil && t.ID != uuid.Nil && (mode == AuthModeAPIKey || mode == AuthModeUser || (mode == AuthModeAdmin && !BypassLimits(ctx)))
 
 		if BypassLimits(ctx) {
 			next.ServeHTTP(w, r)
@@ -104,7 +104,7 @@ func (rl *RateLimiter) checkSlidingWindow(ctx context.Context, key string, limit
 	pipe := rl.rdb.Pipeline()
 	pipe.ZRemRangeByScore(ctx, key, "0", fmt.Sprintf("%d", windowStart))
 	countCmd := pipe.ZCard(ctx, key)
-	pipe.ZAdd(ctx, key, redis.Z{Score: float64(now), Member: now})
+	pipe.ZAdd(ctx, key, redis.Z{Score: float64(now), Member: fmt.Sprintf("%d:%s", now, uuid.NewString())})
 	pipe.Expire(ctx, key, window+time.Second)
 
 	if _, err := pipe.Exec(ctx); err != nil {
@@ -144,6 +144,11 @@ func (rl *RateLimiter) checkDailyQuota(ctx context.Context, key string, limit in
 		return false, err
 	}
 	return incr.Val() <= int64(limit), nil
+}
+
+func (rl *RateLimiter) CheckAddressRateLimit(ctx context.Context, address string, limit int, window time.Duration) (bool, error) {
+	key := fmt.Sprintf("rate:token:%s", strings.ToLower(strings.TrimSpace(address)))
+	return rl.checkSlidingWindow(ctx, key, limit, window)
 }
 
 func writeQuotaError(w http.ResponseWriter, status int, code, msg string) {

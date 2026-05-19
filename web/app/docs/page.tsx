@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { useI18n } from "@/lib/i18n";
+import { getBaseUrl } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,15 +20,19 @@ type TabId = "swagger" | "redoc" | "quickstart" | "deploy" | "domains" | "api" |
 export default function DocsPage() {
   const { t } = useI18n();
   const [view, setView] = useState<TabId>("swagger");
-  const [origin, setOrigin] = useState("");
-  useEffect(() => { setOrigin(window.location.origin); }, []);
-
-  const links = useMemo(() => ({
-    docs: "/backend-docs",
-    redoc: "/backend-redoc",
-    openapi: "/openapi.yaml",
-    health: "/health",
-  }), []);
+  const { origin, links } = useMemo(() => {
+    const configured = getBaseUrl().replace(/\/+$/, "");
+    const base = configured || (typeof window === "undefined" ? "" : window.location.origin);
+    return {
+      origin: base,
+      links: {
+        docs: configured ? "/docs" : "/backend-docs",
+        redoc: configured ? "/redoc" : "/backend-redoc",
+        openapi: "/openapi.yaml",
+        health: "/health",
+      },
+    };
+  }, []);
 
   const copy = async (text: string, label: string) => {
     try {
@@ -69,7 +74,7 @@ export default function DocsPage() {
                 <CardDescription>{t("docs.endpointsDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <EndpointRow label={t("docs.baseUrl")} value={`${origin}/api/v1`} onCopy={() => copy(`${origin}/api/v1`, t("docs.baseUrl"))} />
+                <EndpointRow label={t("docs.baseUrl")} value={origin} onCopy={() => copy(origin, t("docs.baseUrl"))} />
                 <EndpointRow label={t("docs.swaggerUi")} value={`${origin}${links.docs}`} onCopy={() => copy(`${origin}${links.docs}`, t("docs.swaggerUi"))} href={links.docs} />
                 <EndpointRow label={t("docs.redoc")} value={`${origin}${links.redoc}`} onCopy={() => copy(`${origin}${links.redoc}`, t("docs.redoc"))} href={links.redoc} />
                 <EndpointRow label={t("docs.openapi")} value={`${origin}${links.openapi}`} onCopy={() => copy(`${origin}${links.openapi}`, t("docs.openapi"))} href={links.openapi} />
@@ -92,8 +97,8 @@ export default function DocsPage() {
               <TabsTrigger value="ops">{t("guide.ops")}</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="swagger" className="m-0"><DocFrame title="Swagger UI" src={links.docs} /></TabsContent>
-            <TabsContent value="redoc" className="m-0"><DocFrame title="ReDoc" src={links.redoc} /></TabsContent>
+            <TabsContent value="swagger" className="m-0"><DocFrame title="Swagger UI" src={`${origin}${links.docs}`} /></TabsContent>
+            <TabsContent value="redoc" className="m-0"><DocFrame title="ReDoc" src={`${origin}${links.redoc}`} /></TabsContent>
             <TabsContent value="quickstart" className="m-0"><QuickstartTab t={t} copy={copy} /></TabsContent>
             <TabsContent value="deploy" className="m-0"><DeployTab t={t} copy={copy} /></TabsContent>
             <TabsContent value="domains" className="m-0"><DomainsTab t={t} copy={copy} /></TabsContent>
@@ -248,7 +253,7 @@ function QuickstartTab({ t, copy }: { t: TFn; copy: CopyFn }) {
       <Card className="bg-background/90 shadow-sm">
         <CardHeader><CardTitle>{t("docs.authMatrix")}</CardTitle><CardDescription>{t("docs.authMatrixDesc")}</CardDescription></CardHeader>
         <CardContent className="space-y-3">
-          {[["Public", "docs.publicDesc"], ["X-API-Key", "docs.apiKeyDesc"], ["X-Admin-Key", "docs.adminKeyDesc"], ["Bearer token", "docs.bearerDesc"]].map(([b, k]) => (
+          {[["Public", "docs.publicDesc"], ["X-API-Key", "docs.apiKeyDesc"], ["JWT Admin", "docs.adminKeyDesc"], ["Bearer token", "docs.bearerDesc"]].map(([b, k]) => (
             <div key={b} className="rounded-xl border bg-background px-4 py-3"><div className="mb-1"><Badge variant="outline" className="font-mono text-[11px]">{b}</Badge></div><p className="text-sm leading-6 text-muted-foreground">{t(k)}</p></div>
           ))}
         </CardContent>
@@ -299,9 +304,10 @@ function DeployTab({ t, copy }: { t: TFn; copy: CopyFn }) {
 }`;
   const fsConf = `TABMAIL_OBJECTSTORE=fs\nTABMAIL_DATADIR=/data`;
   const s3Conf = `TABMAIL_OBJECTSTORE=s3\nTABMAIL_S3_ENDPOINT=minio:9000\nTABMAIL_S3_REGION=us-east-1\nTABMAIL_S3_BUCKET=tabmail\nTABMAIL_S3_ACCESS_KEY=minioadmin\nTABMAIL_S3_SECRET_KEY=your-secret\nTABMAIL_S3_USE_TLS=false\nTABMAIL_S3_FORCE_PATH_STYLE=true`;
-  const migrateExec = `make migrate`;
-  const migrateStatus = `make migrate-status`;
-  const migrateDown = `make migrate-down STEPS=1`;
+  const schemaStartup = `go run ./cmd/tabmail`;
+  const schemaTables = `psql "$TABMAIL_DB_DSN" -c '\dt'`;
+  const schemaReset = `docker compose down -v
+docker compose up -d --build`;
   const manualRun = `go run ./cmd/tabmail`;
   const manualBuild = `make build\n./bin/tabmail`;
   const monitorCmd = `docker compose -f docker-compose.monitoring.yml up -d`;
@@ -322,7 +328,7 @@ function DeployTab({ t, copy }: { t: TFn; copy: CopyFn }) {
         <div className="space-y-4">
           <CodeCard t={t} title="Production Compose" description="" code={prodCmd} onCopy={c(prodCmd, "prod compose")} />
           <Card className="bg-background/90"><CardHeader><CardTitle className="text-base">{t("guide.deploy.prodRoles")}</CardTitle></CardHeader><CardContent className="space-y-2">
-            {(["migrate", "api", "smtp", "worker", "retention"] as const).map(r => (
+            {(["api", "smtp", "worker", "retention"] as const).map(r => (
               <div key={r} className="flex items-center gap-2 text-sm"><ChevronRight className="h-4 w-4 text-primary" />{t(`guide.deploy.prodRole.${r}`)}</div>
             ))}
           </CardContent></Card>
@@ -333,7 +339,6 @@ function DeployTab({ t, copy }: { t: TFn; copy: CopyFn }) {
         <div className="space-y-4">
           <h4 className="text-sm font-semibold text-destructive">{t("guide.deploy.envRequired")}</h4>
           <EnvTable rows={[
-            ["TABMAIL_ADMINKEY", "—", "Super admin X-Admin-Key"],
             ["TABMAIL_MAILBOX_TOKEN_SECRET", "—", "Mailbox bearer token signing secret"],
             ["POSTGRES_PASSWORD", "—", "PostgreSQL password"],
             ["TABMAIL_REDIS_PASSWORD", "—", "Redis password"],
@@ -394,11 +399,11 @@ function DeployTab({ t, copy }: { t: TFn; copy: CopyFn }) {
         <div className="mt-3"><NoteBox>{t("guide.deploy.storageNote")}</NoteBox></div>
       </SubSection>
 
-      <SubSection title={t("guide.deploy.migrateTitle")} desc={t("guide.deploy.migrateDesc")}>
+      <SubSection title={t("guide.deploy.schemaTitle")} desc={t("guide.deploy.schemaDesc")}>
         <div className="grid gap-4 lg:grid-cols-3">
-          <CodeCard t={t} title={t("guide.deploy.migrateExec")} description="" code={migrateExec} onCopy={c(migrateExec, "migrate")} />
-          <CodeCard t={t} title={t("guide.deploy.migrateStatus")} description="" code={migrateStatus} onCopy={c(migrateStatus, "migrate status")} />
-          <CodeCard t={t} title={t("guide.deploy.migrateDown")} description="" code={migrateDown} onCopy={c(migrateDown, "migrate down")} />
+          <CodeCard t={t} title={t("guide.deploy.schemaStartup")} description="" code={schemaStartup} onCopy={c(schemaStartup, "schema startup")} />
+          <CodeCard t={t} title={t("guide.deploy.schemaTables")} description="" code={schemaTables} onCopy={c(schemaTables, "schema tables")} />
+          <CodeCard t={t} title={t("guide.deploy.schemaReset")} description="" code={schemaReset} onCopy={c(schemaReset, "schema reset")} />
         </div>
       </SubSection>
 
@@ -522,10 +527,10 @@ QUIT`;
 function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
   const c = (code: string, label: string) => () => copy(code, label);
   const [activeSec, setActiveSec] = useState("setup");
-  const setup = `export BASE_URL='http://127.0.0.1:8080'\nexport ADMIN_KEY='changeme'`;
+  const setup = `export BASE_URL='http://127.0.0.1:8080'\nexport ADMIN_ACCESS_TOKEN='<admin-jwt-access-token>'`;
   const cmds: Record<string, string> = {
     createPlan: `curl -X POST "$BASE_URL/api/v1/admin/plans" \\
-  -H "X-Admin-Key: $ADMIN_KEY" \\
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \\
   -H 'Content-Type: application/json' \\
   -d '{
     "name": "starter", "max_domains": 5,
@@ -534,11 +539,11 @@ function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
     "rpm_limit": 120, "daily_quota": 20000
   }'`,
     createTenant: `curl -X POST "$BASE_URL/api/v1/admin/tenants" \\
-  -H "X-Admin-Key: $ADMIN_KEY" \\
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \\
   -H 'Content-Type: application/json' \\
   -d '{ "name": "tenant-a", "plan_id": "<plan-id>" }'`,
     createApiKey: `curl -X POST "$BASE_URL/api/v1/admin/tenants/$TENANT_ID/keys" \\
-  -H "X-Admin-Key: $ADMIN_KEY" \\
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \\
   -H 'Content-Type: application/json' \\
   -d '{ "label": "default key", "scopes": ["domains:read","domains:write","routes:read","routes:write","mailboxes:read","mailboxes:write","messages:read","messages:write"] }'`,
     bindDomain: `curl -X POST "$BASE_URL/api/v1/domains" \\
@@ -618,15 +623,15 @@ function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
     purgeMailbox: `curl -X DELETE "$BASE_URL/api/v1/mailbox/secure@mail.example.com" \\
   -H "Authorization: Bearer $MAILBOX_TOKEN"`,
     systemStats: `curl "$BASE_URL/api/v1/admin/stats" \\
-  -H "X-Admin-Key: $ADMIN_KEY"`,
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"`,
     monitorHistory: `curl "$BASE_URL/api/v1/admin/monitor/history?page=1&per_page=20&type=message" \\
-  -H "X-Admin-Key: $ADMIN_KEY"`,
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"`,
     monitorSse: `curl -N "$BASE_URL/api/v1/admin/monitor/events" \\
-  -H "X-Admin-Key: $ADMIN_KEY"`,
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"`,
     getPolicy: `curl "$BASE_URL/api/v1/admin/policy" \\
-  -H "X-Admin-Key: $ADMIN_KEY"`,
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"`,
     updatePolicy: `curl -X PATCH "$BASE_URL/api/v1/admin/policy" \\
-  -H "X-Admin-Key: $ADMIN_KEY" \\
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \\
   -H 'Content-Type: application/json' \\
   -d '{
     "default_accept": true,
@@ -638,7 +643,7 @@ function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
     "reject_origin_domains": ["*.spam.test"]
   }'`,
     impersonate: `curl "$BASE_URL/api/v1/domains" \\
-  -H "X-Admin-Key: $ADMIN_KEY" \\
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \\
   -H "X-Tenant-ID: $TENANT_ID"`,
     smtpTest: `nc 127.0.0.1 2525\nEHLO localhost\nMAIL FROM:<sender@example.org>\nRCPT TO:<demo@mail.example.com>\nDATA\nSubject: hello\nFrom: sender@example.org\nTo: demo@mail.example.com\n\nhello tabmail\n.\nQUIT`,
     smtpTlsTest: `openssl s_client -starttls smtp -crlf -connect 127.0.0.1:2525`,
@@ -746,19 +751,19 @@ function OpsTab({ t, copy }: { t: TFn; copy: CopyFn }) {
   const c = (code: string, label: string) => () => copy(code, label);
   const healthCmd = `curl http://127.0.0.1:8080/health`;
   const statsCmd = `curl http://127.0.0.1:8080/api/v1/admin/stats \\
-  -H "X-Admin-Key: <admin-key>"`;
+  -H "Authorization: Bearer <admin-jwt-access-token>"`;
   const smtpCheck = `nc -vz 127.0.0.1 2525`;
   const logsCmd = `docker compose logs -f tabmail`;
   const metricsCmd = `curl http://127.0.0.1:8080/metrics`;
   const monitorCmd = `curl -N "http://127.0.0.1:8080/api/v1/admin/monitor/events" \\
-  -H "X-Admin-Key: <admin-key>"`;
+  -H "Authorization: Bearer <admin-jwt-access-token>"`;
   const backupDb = `make backup-db`;
   const restoreDb = `make restore-db FILE=backups/postgres-xxxx.dump`;
   const backupFs = `make backup-obj`;
   const backupS3 = `TABMAIL_OBJECTSTORE=s3 make backup-obj`;
-  const migrateStatusCmd = `make migrate-status`;
-  const migrateRunCmd = `make migrate`;
-  const migrateSqlCmd = `psql "$TABMAIL_DB_DSN" -c "SELECT version, name, applied_at FROM schema_migrations ORDER BY version;"`;
+  const schemaTablesCmd = `psql "$TABMAIL_DB_DSN" -c '\dt'`;
+  const schemaDescribeCmd = `psql "$TABMAIL_DB_DSN" -c '\d messages'`;
+  const schemaResetCmd = `docker compose down -v && docker compose up -d --build`;
   const dbTablesCmd = `psql "$TABMAIL_DB_DSN" -c '\\dt'`;
   const dbMonitorCmd = `psql "$TABMAIL_DB_DSN" -c 'SELECT type, mailbox, sender, subject, at FROM monitor_events ORDER BY at DESC LIMIT 20;'`;
   const dbAuditCmd = `psql "$TABMAIL_DB_DSN" -c 'SELECT action, actor, resource_type, created_at FROM audit_log ORDER BY created_at DESC LIMIT 20;'`;
@@ -864,11 +869,11 @@ function OpsTab({ t, copy }: { t: TFn; copy: CopyFn }) {
         </Card>
       </SubSection>
 
-      <SubSection title={t("guide.ops.migrateTitle")} desc={t("guide.ops.migrateDesc")}>
+      <SubSection title={t("guide.ops.schemaTitle")} desc={t("guide.ops.schemaDesc")}>
         <div className="grid gap-4 lg:grid-cols-3">
-          <CodeCard t={t} title={t("guide.ops.migrateCheck")} description="" code={migrateStatusCmd} onCopy={c(migrateStatusCmd, "migrate status")} />
-          <CodeCard t={t} title={t("guide.ops.migrateRun")} description="" code={migrateRunCmd} onCopy={c(migrateRunCmd, "migrate")} />
-          <CodeCard t={t} title={t("guide.ops.migrateSql")} description="" code={migrateSqlCmd} onCopy={c(migrateSqlCmd, "migrate sql")} />
+          <CodeCard t={t} title={t("guide.ops.schemaTables")} description="" code={schemaTablesCmd} onCopy={c(schemaTablesCmd, "schema tables")} />
+          <CodeCard t={t} title={t("guide.ops.schemaDescribe")} description="" code={schemaDescribeCmd} onCopy={c(schemaDescribeCmd, "schema describe")} />
+          <CodeCard t={t} title={t("guide.ops.schemaReset")} description="" code={schemaResetCmd} onCopy={c(schemaResetCmd, "schema reset")} />
         </div>
       </SubSection>
 

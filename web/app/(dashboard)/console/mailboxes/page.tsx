@@ -59,6 +59,15 @@ import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 
+function safeConfirm(message: string) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  try {
+    return window.confirm(message) !== false;
+  } catch {
+    return true;
+  }
+}
+
 const accessColors: Record<AccessMode, string> = {
   public: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
   token: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
@@ -137,6 +146,7 @@ export default function MailboxesPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!safeConfirm(t("mailboxes.confirmDelete"))) return;
     try {
       await deleteMailbox(id);
       toast.success(t("mailboxes.deleted"));

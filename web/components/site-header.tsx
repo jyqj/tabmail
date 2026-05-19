@@ -47,7 +47,7 @@ export function SiteHeader() {
   }, []);
 
   const navItems = [
-    ...(level === "tenant" || level === "admin"
+    ...(level === "user" || level === "admin"
       ? [{ href: "/console/domains", label: t("header.console"), icon: LayoutDashboard }]
       : []),
     ...(level === "mailbox"

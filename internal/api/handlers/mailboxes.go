@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -31,13 +32,14 @@ type mailboxStore interface {
 }
 
 type MailboxHandler struct {
-	service *mailboxapp.Service
-	logger  zerolog.Logger
+	service     *mailboxapp.Service
+	rateLimiter *middleware.RateLimiter
+	logger      zerolog.Logger
 }
 
-func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MailboxHandler {
+func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, rl *middleware.RateLimiter, l zerolog.Logger) *MailboxHandler {
 	service := mailboxapp.NewService(s, obj, dispatcher, namingMode, stripPlus, tokenSecret, l)
-	return &MailboxHandler{service: service, logger: l.With().Str("handler", "mailboxes").Logger()}
+	return &MailboxHandler{service: service, rateLimiter: rl, logger: l.With().Str("handler", "mailboxes").Logger()}
 }
 
 func (h *MailboxHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -97,6 +99,14 @@ func (h *MailboxHandler) IssueToken(w http.ResponseWriter, r *http.Request) {
 	if err := decodeBody(r, &body); err != nil {
 		errBadRequest(w, "invalid body")
 		return
+	}
+	if h.rateLimiter != nil && body.Address != "" {
+		allowed, err := h.rateLimiter.CheckAddressRateLimit(r.Context(), body.Address, 5, time.Minute)
+		if err == nil && !allowed {
+			w.Header().Set("Retry-After", "60")
+			writeJSON(w, http.StatusTooManyRequests, envelope{Error: &apiErr{Code: "RATE_LIMITED", Message: "too many token requests for this address"}})
+			return
+		}
 	}
 	item, err := h.service.IssueToken(r.Context(), body.Address, body.Password, actorFromRequest(r))
 	if err != nil {

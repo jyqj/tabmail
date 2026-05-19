@@ -199,17 +199,18 @@ func (s *Service) IssueToken(ctx context.Context, address, password, actor strin
 	if err != nil {
 		return nil, app.Internal(err)
 	}
+	const tokenFailMsg = "invalid address or password"
 	if mb == nil {
-		return nil, app.NotFound("mailbox not found")
+		return nil, app.Forbidden(tokenFailMsg)
 	}
 	if mb.AccessMode != models.AccessToken || mb.PasswordHash == nil {
-		return nil, app.Forbidden("mailbox does not support token authentication")
+		return nil, app.Forbidden(tokenFailMsg)
 	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
-		return nil, app.Forbidden("mailbox expired")
+		return nil, app.Forbidden(tokenFailMsg)
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(*mb.PasswordHash), []byte(password)); err != nil {
-		return nil, app.Forbidden("invalid credentials")
+		return nil, app.Forbidden(tokenFailMsg)
 	}
 	ttl := 24 * time.Hour
 	if mb.ExpiresAt != nil {

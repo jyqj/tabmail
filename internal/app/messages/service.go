@@ -19,7 +19,11 @@ import (
 	"tabmail/internal/store"
 )
 
-const AuthModeAPIKey = "api_key"
+const (
+	AuthModeAPIKey  = "api_key"
+	AuthModeUser    = "user"
+	AuthModePublic  = "public"
+)
 
 type storeRepo interface {
 	app.AuditStore
@@ -75,30 +79,47 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 		return mb, nil
 	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
-		return nil, app.Forbidden("mailbox expired")
+		return nil, accessDeniedOrNotFound(viewer, "mailbox expired")
+	}
+	if viewer.Tenant != nil && viewer.AuthMode == AuthModeUser && mb.TenantID == viewer.Tenant.ID {
+		return mb, nil
 	}
 	switch mb.AccessMode {
 	case models.AccessPublic:
 		return mb, nil
 	case models.AccessAPIKey:
 		if viewer.Tenant == nil || viewer.AuthMode != AuthModeAPIKey || mb.TenantID != viewer.Tenant.ID {
-			return nil, app.Forbidden("api key access required")
+			return nil, accessDeniedOrNotFound(viewer, "api key access required")
 		}
 	case models.AccessToken:
 		if viewer.Tenant != nil && viewer.AuthMode == AuthModeAPIKey && mb.TenantID == viewer.Tenant.ID {
 			return mb, nil
 		}
 		if strings.TrimSpace(viewer.BearerToken) == "" {
-			return nil, app.Forbidden("mailbox token required")
+			return nil, accessDeniedOrNotFound(viewer, "mailbox token required")
 		}
 		claims, err := mailtoken.Verify(s.tokenSecret, viewer.BearerToken)
 		if err != nil || claims.MailboxID != mb.ID.String() {
-			return nil, app.Forbidden("invalid mailbox token")
+			return nil, accessDeniedOrNotFound(viewer, "invalid mailbox token")
 		}
 	default:
-		return nil, app.Forbidden("access denied")
+		return nil, accessDeniedOrNotFound(viewer, "access denied")
 	}
 	return mb, nil
+}
+
+func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, viewer Viewer) (*models.Mailbox, error) {
+	if viewer.AuthMode == AuthModePublic {
+		return nil, app.Forbidden("authentication required for write operations")
+	}
+	return s.ResolveMailbox(ctx, address, viewer)
+}
+
+func accessDeniedOrNotFound(viewer Viewer, msg string) error {
+	if viewer.AuthMode == AuthModePublic {
+		return app.NotFound("mailbox not found")
+	}
+	return app.Forbidden(msg)
 }
 
 func (s *Service) ListMessages(ctx context.Context, address string, viewer Viewer, pg models.Page) ([]*models.Message, int, error) {
@@ -161,7 +182,7 @@ func (s *Service) GetRawSource(ctx context.Context, address string, msgID uuid.U
 }
 
 func (s *Service) MarkSeen(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) error {
-	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
+	mb, msg, err := s.lookupMessageForWrite(ctx, address, msgID, viewer)
 	if err != nil {
 		return err
 	}
@@ -175,7 +196,7 @@ func (s *Service) MarkSeen(ctx context.Context, address string, msgID uuid.UUID,
 }
 
 func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer, actor string) error {
-	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
+	mb, msg, err := s.lookupMessageForWrite(ctx, address, msgID, viewer)
 	if err != nil {
 		return err
 	}
@@ -202,7 +223,7 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 }
 
 func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewer, actor string) error {
-	mb, err := s.ResolveMailbox(ctx, address, viewer)
+	mb, err := s.ResolveMailboxForWrite(ctx, address, viewer)
 	if err != nil {
 		return err
 	}
@@ -233,6 +254,21 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 		s.dispatcher.Publish(hooks.Event{Type: "mailbox.purged", Mailbox: mb.FullAddress, TenantID: mb.TenantID.String()})
 	}
 	return nil
+}
+
+func (s *Service) lookupMessageForWrite(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) (*models.Mailbox, *models.Message, error) {
+	mb, err := s.ResolveMailboxForWrite(ctx, address, viewer)
+	if err != nil {
+		return nil, nil, err
+	}
+	msg, err := s.store.GetMessage(ctx, msgID)
+	if err != nil {
+		return nil, nil, app.Internal(err)
+	}
+	if msg == nil || msg.MailboxID != mb.ID {
+		return nil, nil, app.NotFound("message not found")
+	}
+	return mb, msg, nil
 }
 
 func (s *Service) lookupMessage(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) (*models.Mailbox, *models.Message, error) {

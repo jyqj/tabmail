@@ -4,7 +4,7 @@
 
 ```bash
 export BASE_URL='http://127.0.0.1:8080'
-export ADMIN_KEY='changeme'
+export ADMIN_ACCESS_TOKEN='<admin-jwt-access-token>'
 ```
 
 ---
@@ -19,7 +19,7 @@ curl "$BASE_URL/health"
 
 ```bash
 curl -X POST "$BASE_URL/api/v1/admin/plans" \
-  -H "X-Admin-Key: $ADMIN_KEY" \
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "starter",
@@ -37,7 +37,7 @@ curl -X POST "$BASE_URL/api/v1/admin/plans" \
 
 ```bash
 curl -X POST "$BASE_URL/api/v1/admin/tenants" \
-  -H "X-Admin-Key: $ADMIN_KEY" \
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
     "name": "tenant-a",
@@ -51,7 +51,7 @@ curl -X POST "$BASE_URL/api/v1/admin/tenants" \
 export TENANT_ID='<tenant-id>'
 
 curl -X POST "$BASE_URL/api/v1/admin/tenants/$TENANT_ID/keys" \
-  -H "X-Admin-Key: $ADMIN_KEY" \
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
     "label": "default key",
@@ -73,6 +73,8 @@ curl -X POST "$BASE_URL/api/v1/admin/tenants/$TENANT_ID/keys" \
 ```bash
 export TENANT_API_KEY='<tenant-api-key>'
 ```
+
+说明：API Key 只接受显式 scope，不支持通配 `*`；如果请求体省略 `scopes`，后端默认生成只读 key。
 
 ---
 
@@ -350,7 +352,7 @@ curl -X DELETE "$BASE_URL/api/v1/mailbox/secure@mail.example.com" \
 
 ```bash
 curl "$BASE_URL/api/v1/domains" \
-  -H "X-Admin-Key: $ADMIN_KEY" \
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -H "X-Tenant-ID: $TENANT_ID"
 ```
 
@@ -360,35 +362,35 @@ curl "$BASE_URL/api/v1/domains" \
 
 ```bash
 curl "$BASE_URL/api/v1/admin/stats" \
-  -H "X-Admin-Key: $ADMIN_KEY"
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"
 ```
 
 ## 22. 拉取 monitor 历史
 
 ```bash
 curl "$BASE_URL/api/v1/admin/monitor/history?page=1&per_page=20&type=message" \
-  -H "X-Admin-Key: $ADMIN_KEY"
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"
 ```
 
 ## 23. 订阅全局 monitor SSE
 
 ```bash
 curl -N "$BASE_URL/api/v1/admin/monitor/events" \
-  -H "X-Admin-Key: $ADMIN_KEY"
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"
 ```
 
 ## 24. 获取当前 SMTP policy
 
 ```bash
 curl "$BASE_URL/api/v1/admin/policy" \
-  -H "X-Admin-Key: $ADMIN_KEY"
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"
 ```
 
 ## 25. 更新 SMTP policy
 
 ```bash
 curl -X PATCH "$BASE_URL/api/v1/admin/policy" \
-  -H "X-Admin-Key: $ADMIN_KEY" \
+  -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \
   -H 'Content-Type: application/json' \
   -d '{
     "default_accept": true,

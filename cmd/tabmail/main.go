@@ -6,12 +6,15 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
+	"golang.org/x/crypto/bcrypt"
 
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
@@ -24,6 +27,7 @@ import (
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/retention"
+	"tabmail/internal/settings"
 	smtpsrv "tabmail/internal/smtp"
 	"tabmail/internal/store"
 	"tabmail/internal/store/fileobj"
@@ -54,17 +58,7 @@ func main() {
 		logger.Fatal().Err(err).Msg("connecting to postgres")
 	}
 	defer pg.Close()
-	logger.Info().Msg("connected to PostgreSQL")
-	schemaVersion, err := pg.CurrentSchemaVersion(ctx)
-	if err != nil {
-		logger.Fatal().Err(err).Msg("checking schema version (did you run make migrate?)")
-	}
-	if schemaVersion < postgres.LatestSchemaVersion {
-		logger.Fatal().
-			Int("current", schemaVersion).
-			Int("required", postgres.LatestSchemaVersion).
-			Msg("database schema is out of date; run make migrate before starting")
-	}
+	logger.Info().Msg("connected to PostgreSQL and initialized schema")
 
 	// --- Redis ---
 	rdb := redis.NewClient(&redis.Options{
@@ -98,6 +92,22 @@ func main() {
 		logger.Fatal().Str("object_store", cfg.ObjectStore).Msg("invalid object store backend")
 	}
 
+	// --- Bootstrap admin user ---
+	bootstrapAdmin(ctx, pg, cfg, logger)
+
+	// --- System settings (DB-backed, env-var seeded) ---
+	settingsMgr := settings.NewManager(pg, logger)
+	settingsMgr.Seed(ctx, map[string]settings.SeedValue{
+		models.SettingAutoCreateRouteRPM:  {Value: strconv.Itoa(cfg.AutoCreateRouteRPM), Description: "Per-route auto-create mailbox RPM (0=disable)"},
+		models.SettingAutoCreateTenantRPM: {Value: strconv.Itoa(cfg.AutoCreateTenantRPM), Description: "Per-tenant auto-create mailbox RPM (0=disable)"},
+		models.SettingMailboxNaming:       {Value: cfg.MailboxNaming, Description: "Mailbox naming mode: full, local, or domain"},
+		models.SettingStripPlusTag:        {Value: strconv.FormatBool(cfg.StripPlusTag), Description: "Strip +tag from local part of addresses"},
+		models.SettingMonitorHistory:      {Value: strconv.Itoa(cfg.MonitorHistory), Description: "Number of recent events to keep for monitor replay (0=disable)"},
+		models.SettingFallbackRetentionH:  {Value: strconv.Itoa(cfg.Storage.FallbackRetentionH), Description: "System-level fallback retention hours"},
+		models.SettingOpenRegistration:    {Value: strconv.FormatBool(cfg.OpenRegistration), Description: "Allow public user registration"},
+		models.SettingPublicIPRPM:         {Value: strconv.Itoa(cfg.HTTP.PublicIPRPM), Description: "Per-IP RPM for unauthenticated requests (0=disable)"},
+	})
+
 	// --- Domain resolver ---
 	namingMode, err := policy.ParseNamingMode(cfg.MailboxNaming)
 	if err != nil {
@@ -125,7 +135,37 @@ func main() {
 		DiscardDomains:      append([]string(nil), cfg.SMTP.DiscardDomains...),
 		RejectOriginDomains: append([]string(nil), cfg.SMTP.RejectOriginDomains...),
 	}
+	// Seed SMTP policy to DB on first start (if no DB policy exists yet).
+	if existing, err := pg.GetSMTPPolicy(ctx); err == nil && existing == nil {
+		if err := pg.UpsertSMTPPolicy(ctx, &defaultPolicy); err != nil {
+			logger.Warn().Err(err).Msg("seed SMTP policy to DB")
+		} else {
+			logger.Info().Msg("seeded SMTP policy from env vars to DB")
+		}
+	}
+
 	ingestSvc := ingest.NewService(pg, obj, res, hub, dispatcher, defaultPolicy, cfg.Storage.FallbackRetentionH, rdb, cfg.Ingest, logger)
+
+	defaultPlanID, _ := uuid.Parse(cfg.DefaultPlanID)
+
+	routerCfg := api.RouterConfig{
+		Store:              pg,
+		ObjectStore:        obj,
+		Hub:                hub,
+		Dispatcher:         dispatcher,
+		NamingMode:         namingMode,
+		StripPlus:          cfg.StripPlusTag,
+		DefaultPolicy:      defaultPolicy,
+		JWTSecret:          cfg.EffectiveJWTSecret(),
+		MailboxTokenSecret: cfg.MailboxTokenSecret,
+		ExpectedMXHost:     cfg.SMTP.Domain,
+		PublicTenantID:     publicTenantID,
+		DefaultPlanID:      defaultPlanID,
+		OpenRegistration:   cfg.OpenRegistration,
+		Settings:           settingsMgr,
+		HTTP:               cfg.HTTP,
+		Logger:             logger,
+	}
 
 	// --- Retention scanner ---
 	ret := retention.New(pg, obj, cfg.Storage, logger)
@@ -147,14 +187,16 @@ func main() {
 		}()
 
 		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
-		handler := api.NewRouter(pg, obj, hub, dispatcher, namingMode, cfg.StripPlusTag, defaultPolicy, cfg.AdminKey, cfg.MailboxTokenSecret, cfg.SMTP.Domain, publicTenantID, cfg.HTTP, rl, logger)
+		routerCfg.RateLimiter = rl
+		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
 		go serveHTTP(ctx, cancel, httpSrv, logger)
 	case "api":
 		go dispatcher.Run(ctx)
 		go ingestSvc.Run(ctx)
 		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
-		handler := api.NewRouter(pg, obj, hub, dispatcher, namingMode, cfg.StripPlusTag, defaultPolicy, cfg.AdminKey, cfg.MailboxTokenSecret, cfg.SMTP.Domain, publicTenantID, cfg.HTTP, rl, logger)
+		routerCfg.RateLimiter = rl
+		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
 		go serveHTTP(ctx, cancel, httpSrv, logger)
 	case "smtp":
@@ -189,6 +231,55 @@ func main() {
 		_ = smtpSrv.Shutdown(shutCtx)
 	}
 	logger.Info().Msg("shutdown complete")
+}
+
+// bootstrapAdmin creates the first admin user if no admin users exist and
+// bootstrap credentials are provided via environment variables.
+func bootstrapAdmin(ctx context.Context, st store.Store, cfg *config.Root, logger zerolog.Logger) {
+	if cfg.BootstrapAdminEmail == "" || cfg.BootstrapAdminPass == "" {
+		return
+	}
+
+	// Check if any admin user already exists
+	users, _, err := st.ListUsers(ctx, models.Page{Page: 1, PerPage: 1})
+	if err != nil {
+		logger.Warn().Err(err).Msg("bootstrap: failed to check existing users")
+		return
+	}
+	// If any users exist, skip bootstrap
+	if len(users) > 0 {
+		return
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(cfg.BootstrapAdminPass), bcrypt.DefaultCost)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("bootstrap: hash password")
+	}
+
+	// Use the "pro" plan for admin tenant
+	proPlanID, _ := uuid.Parse("00000000-0000-0000-0000-000000000002")
+	tenant := &models.Tenant{
+		Name:    cfg.BootstrapAdminEmail,
+		PlanID:  proPlanID,
+		IsSuper: true,
+	}
+	if err := st.CreateTenant(ctx, tenant); err != nil {
+		logger.Fatal().Err(err).Msg("bootstrap: create admin tenant")
+	}
+
+	email := strings.ToLower(strings.TrimSpace(cfg.BootstrapAdminEmail))
+	user := &models.User{
+		TenantID:     tenant.ID,
+		Email:        email,
+		PasswordHash: string(hash),
+		DisplayName:  "Admin",
+		Role:         models.RoleAdmin,
+		IsActive:     true,
+	}
+	if err := st.CreateUser(ctx, user); err != nil {
+		logger.Fatal().Err(err).Msg("bootstrap: create admin user")
+	}
+	logger.Info().Str("email", email).Msg("bootstrap: admin user created")
 }
 
 func setLogLevel(l *zerolog.Logger, level string) {

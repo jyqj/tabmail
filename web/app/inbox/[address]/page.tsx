@@ -33,6 +33,15 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
+function safeConfirm(message: string) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  try {
+    return window.confirm(message) !== false;
+  } catch {
+    return true;
+  }
+}
+
 export default function InboxPage() {
   const params = useParams();
   const address = decodeURIComponent(params.address as string);
@@ -71,9 +80,10 @@ export default function InboxPage() {
       } catch (e: unknown) {
         const err = e as { error?: { code?: string; message?: string } };
         const code = err?.error?.code ?? "";
-        const msg = err?.error?.message ?? "";
-        const isNotFound = code === "NOT_FOUND" || msg.includes("not found");
-        const isAuthError = code === "UNAUTHORIZED" || code === "FORBIDDEN" || msg.includes("unauthorized");
+        const msg = err?.error?.message ?? (e instanceof Error ? e.message : "");
+        const normalizedMsg = msg.toLowerCase();
+        const isNotFound = code === "NOT_FOUND" || normalizedMsg.includes("not found");
+        const isAuthError = code === "UNAUTHORIZED" || code === "FORBIDDEN" || normalizedMsg.includes("unauthorized") || normalizedMsg.includes("forbidden");
         if (!silent) {
           if (isNotFound) {
             setNotFound(true);
@@ -81,6 +91,7 @@ export default function InboxPage() {
           } else if (isAuthError) {
             setAuthRequired(true);
             setNotFound(false);
+            toast.error(msg || t("toast.authFailed"));
           } else {
             setNotFound(false);
             setAuthRequired(false);
@@ -169,6 +180,7 @@ export default function InboxPage() {
 
   const handleDelete = async () => {
     if (!selectedId) return;
+    if (!safeConfirm(t("inbox.confirmDeleteMessage"))) return;
     try {
       await deleteMessage(address, selectedId);
       setMessages((prev) => prev.filter((m) => m.id !== selectedId));
@@ -182,6 +194,7 @@ export default function InboxPage() {
   };
 
   const handlePurge = async () => {
+    if (!safeConfirm(t("inbox.confirmPurge"))) return;
     try {
       await purgeMailbox(address);
       setMessages([]);

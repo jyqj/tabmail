@@ -37,19 +37,18 @@ function shouldUseMailboxToken(path: string, mailboxAddress: string | null): boo
 
 export function buildHeaders(path: string, extra?: Record<string, string>) {
   const headers: Record<string, string> = { ...(extra || {}) };
-  const adminKey = getStoredKey("tabmail_admin_key");
-  const apiKey = getStoredKey("tabmail_api_key");
+  const accessToken = getStoredKey("tabmail_access_token");
   const tenantId = getStoredKey("tabmail_tenant_id");
   const mailboxToken = getStoredKey("tabmail_mailbox_token");
   const mailboxAddress = getStoredKey("tabmail_mailbox_address");
 
-  if (adminKey) {
-    headers["X-Admin-Key"] = adminKey;
-    if (tenantId) headers["X-Tenant-ID"] = tenantId;
-  } else if (apiKey) {
-    headers["X-API-Key"] = apiKey;
-  } else if (mailboxToken && shouldUseMailboxToken(path, mailboxAddress)) {
+  // Mailbox-scoped inbox tokens must win for their mailbox paths, even when a
+  // console JWT is also present.
+  if (mailboxToken && shouldUseMailboxToken(path, mailboxAddress)) {
     headers.Authorization = `Bearer ${mailboxToken}`;
+  } else if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+    if (tenantId) headers["X-Tenant-ID"] = tenantId;
   }
 
   return headers;
@@ -73,11 +72,26 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   const headers = buildHeaders(path, opts.headers);
   if (opts.body) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(url.toString(), {
+  let res = await fetch(url.toString(), {
     method: opts.method || "GET",
     headers,
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
+
+  // Auto-refresh on 401 if we have a refresh token
+  if (res.status === 401 && getStoredKey("tabmail_access_token") && getStoredKey("tabmail_refresh_token")) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      // Retry with new token
+      const retryHeaders = buildHeaders(path, opts.headers);
+      if (opts.body) retryHeaders["Content-Type"] = "application/json";
+      res = await fetch(url.toString(), {
+        method: opts.method || "GET",
+        headers: retryHeaders,
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+      });
+    }
+  }
 
   if (!res.ok) {
     const err: APIError = await res.json().catch(() => ({
@@ -94,6 +108,41 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   }
 
   return res.json();
+}
+
+async function tryRefreshToken(): Promise<boolean> {
+  const refreshToken = getStoredKey("tabmail_refresh_token");
+  if (!refreshToken) return false;
+
+  try {
+    const base = getBaseUrl();
+    const res = await fetch(`${base}/api/v1/auth/refresh`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (!res.ok) {
+      // Refresh failed — clear tokens
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("tabmail_access_token");
+        localStorage.removeItem("tabmail_refresh_token");
+        localStorage.removeItem("tabmail_user");
+        window.dispatchEvent(new Event("tabmail-auth-change"));
+      }
+      return false;
+    }
+
+    const data = await res.json();
+    if (typeof window !== "undefined" && data?.data) {
+      localStorage.setItem("tabmail_access_token", data.data.access_token);
+      localStorage.setItem("tabmail_refresh_token", data.data.refresh_token);
+      window.dispatchEvent(new Event("tabmail-auth-change"));
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export async function streamEvents(

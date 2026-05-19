@@ -8,6 +8,72 @@ import (
 )
 
 // ============================================================
+// User
+// ============================================================
+
+type UserRole string
+
+const (
+	RoleAdmin UserRole = "admin"
+	RoleUser  UserRole = "user"
+)
+
+type User struct {
+	ID           uuid.UUID  `json:"id" db:"id"`
+	TenantID     uuid.UUID  `json:"tenant_id" db:"tenant_id"`
+	Email        string     `json:"email" db:"email"`
+	PasswordHash string     `json:"-" db:"password_hash"`
+	DisplayName  string     `json:"display_name" db:"display_name"`
+	Role         UserRole   `json:"role" db:"role"`
+	IsActive     bool       `json:"is_active" db:"is_active"`
+	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
+	LastLoginAt  *time.Time `json:"last_login_at,omitempty" db:"last_login_at"`
+}
+
+type RefreshToken struct {
+	ID        uuid.UUID  `json:"id" db:"id"`
+	UserID    uuid.UUID  `json:"user_id" db:"user_id"`
+	TokenHash string     `json:"-" db:"token_hash"`
+	ExpiresAt time.Time  `json:"expires_at" db:"expires_at"`
+	CreatedAt time.Time  `json:"created_at" db:"created_at"`
+	RevokedAt *time.Time `json:"revoked_at,omitempty" db:"revoked_at"`
+}
+
+type AdminInvitation struct {
+	ID         uuid.UUID  `json:"id" db:"id"`
+	Email      string     `json:"email" db:"email"`
+	InviteCode string     `json:"-" db:"invite_code"`
+	InvitedBy  *uuid.UUID `json:"invited_by,omitempty" db:"invited_by"`
+	ExpiresAt  time.Time  `json:"expires_at" db:"expires_at"`
+	AcceptedAt *time.Time `json:"accepted_at,omitempty" db:"accepted_at"`
+	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
+}
+
+// ============================================================
+// System settings
+// ============================================================
+
+type SystemSetting struct {
+	Key         string    `json:"key" db:"key"`
+	Value       string    `json:"value" db:"value"`
+	Description string    `json:"description" db:"description"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
+}
+
+// Well-known setting keys.
+const (
+	SettingAutoCreateRouteRPM  = "auto_create_route_rpm"
+	SettingAutoCreateTenantRPM = "auto_create_tenant_rpm"
+	SettingMailboxNaming       = "mailbox_naming"
+	SettingStripPlusTag        = "strip_plus_tag"
+	SettingMonitorHistory      = "monitor_history"
+	SettingFallbackRetentionH  = "fallback_retention_hours"
+	SettingOpenRegistration    = "open_registration"
+	SettingPublicIPRPM         = "public_ip_rpm"
+)
+
+// ============================================================
 // Plan
 // ============================================================
 
@@ -274,6 +340,8 @@ type OutboxEvent struct {
 	Attempts      int             `json:"attempts" db:"attempts"`
 	LastError     string          `json:"last_error" db:"last_error"`
 	NextAttemptAt time.Time       `json:"next_attempt_at" db:"next_attempt_at"`
+	ClaimedAt     *time.Time      `json:"claimed_at,omitempty" db:"claimed_at"`
+	LeaseUntil    *time.Time      `json:"lease_until,omitempty" db:"lease_until"`
 	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time       `json:"updated_at" db:"updated_at"`
 }
@@ -288,6 +356,8 @@ type WebhookDelivery struct {
 	Attempts      int             `json:"attempts" db:"attempts"`
 	LastError     string          `json:"last_error" db:"last_error"`
 	NextAttemptAt time.Time       `json:"next_attempt_at" db:"next_attempt_at"`
+	ClaimedAt     *time.Time      `json:"claimed_at,omitempty" db:"claimed_at"`
+	LeaseUntil    *time.Time      `json:"lease_until,omitempty" db:"lease_until"`
 	LastTriedAt   *time.Time      `json:"last_tried_at,omitempty" db:"last_tried_at"`
 	DeliveredAt   *time.Time      `json:"delivered_at,omitempty" db:"delivered_at"`
 	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
@@ -306,6 +376,8 @@ type IngestJob struct {
 	Attempts      int             `json:"attempts" db:"attempts"`
 	LastError     string          `json:"last_error" db:"last_error"`
 	NextAttemptAt time.Time       `json:"next_attempt_at" db:"next_attempt_at"`
+	ClaimedAt     *time.Time      `json:"claimed_at,omitempty" db:"claimed_at"`
+	LeaseUntil    *time.Time      `json:"lease_until,omitempty" db:"lease_until"`
 	CreatedAt     time.Time       `json:"created_at" db:"created_at"`
 	UpdatedAt     time.Time       `json:"updated_at" db:"updated_at"`
 }

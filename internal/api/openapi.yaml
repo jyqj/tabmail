@@ -11,7 +11,7 @@ info:
     |-------|--------|-------------|
     | Public | *(none)* | Auto-assigned to the public tenant with strict rate limits |
     | Tenant | `X-API-Key` | Tenant-scoped access, limits governed by plan + overrides |
-    | Admin  | `X-Admin-Key` | Full system access, no business rate limits |
+    | JWT User/Admin | `Authorization: Bearer <jwt>` | Interactive user/admin access; admins may impersonate tenants with `X-Tenant-ID` |
     | Mailbox Token | `Authorization: Bearer <token>` | Mailbox-scoped access for `access_mode=token` mailboxes |
 
     Admin requests may additionally pass `X-Tenant-ID` to impersonate a tenant on tenant-scoped endpoints.
@@ -23,7 +23,6 @@ servers:
 security:
   - {}
   - APIKey: []
-  - AdminKey: []
 
 components:
   securitySchemes:
@@ -31,14 +30,14 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
-    AdminKey:
-      type: apiKey
-      in: header
-      name: X-Admin-Key
     MailboxToken:
       type: http
       scheme: bearer
       bearerFormat: TabMail-Mailbox-Token
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
   schemas:
     Error:
@@ -178,6 +177,18 @@ components:
             text_body: { type: string }
             html_body: { type: string }
 
+    APIKeyScope:
+      type: string
+      enum:
+        - domains:read
+        - domains:write
+        - routes:read
+        - routes:write
+        - mailboxes:read
+        - mailboxes:write
+        - messages:read
+        - messages:write
+
     APIKeyCreated:
       type: object
       properties:
@@ -185,7 +196,9 @@ components:
         key: { type: string, description: "Full key (shown only once)" }
         key_prefix: { type: string }
         label: { type: string }
-        scopes: { type: array, items: { type: string } }
+        scopes:
+          type: array
+          items: { $ref: "#/components/schemas/APIKeyScope" }
         created_at: { type: string, format: date-time }
 
     MailboxTokenResponse:
@@ -323,6 +336,83 @@ components:
           type: array
           items: { $ref: "#/components/schemas/DeadLetter" }
 
+    User:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        email: { type: string }
+        display_name: { type: string }
+        role: { type: string, enum: [admin, user] }
+        is_active: { type: boolean }
+        created_at: { type: string, format: date-time }
+        last_login_at: { type: string, format: date-time, nullable: true }
+
+    LoginResponse:
+      type: object
+      properties:
+        access_token: { type: string }
+        refresh_token: { type: string }
+        token_type: { type: string, example: Bearer }
+        expires_in: { type: integer }
+        user: { $ref: "#/components/schemas/User" }
+
+    RefreshResponse:
+      type: object
+      properties:
+        access_token: { type: string }
+        refresh_token: { type: string }
+        token_type: { type: string, example: Bearer }
+        expires_in: { type: integer }
+
+    IngestJob:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        source: { type: string }
+        remote_ip: { type: string }
+        mail_from: { type: string }
+        recipients: { type: array, items: { type: string } }
+        state: { type: string }
+        attempts: { type: integer }
+        last_error: { type: string }
+        next_attempt_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    WebhookDelivery:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        event_id: { type: string, format: uuid }
+        url: { type: string }
+        event_type: { type: string }
+        payload: { type: object }
+        state: { type: string }
+        attempts: { type: integer }
+        last_error: { type: string }
+        next_attempt_at: { type: string, format: date-time }
+        last_tried_at: { type: string, format: date-time, nullable: true }
+        delivered_at: { type: string, format: date-time, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    SystemSetting:
+      type: object
+      properties:
+        key: { type: string }
+        value: { type: string }
+        description: { type: string }
+        updated_at: { type: string, format: date-time }
+
+    AdminInvitation:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        invite_code: { type: string }
+        expires_at: { type: string, format: date-time }
+
   parameters:
     PageParam:
       name: page
@@ -367,7 +457,7 @@ paths:
       tags: [Domains]
       summary: List domain zones
       operationId: listDomains
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       responses:
         "200":
           description: OK
@@ -383,7 +473,7 @@ paths:
       tags: [Domains]
       summary: Bind a new domain zone
       operationId: createDomain
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -409,7 +499,7 @@ paths:
       tags: [Domains]
       summary: Delete a domain zone
       operationId: deleteDomain
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -424,7 +514,7 @@ paths:
       tags: [Domains]
       summary: Trigger DNS verification
       operationId: triggerVerify
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -454,7 +544,7 @@ paths:
       tags: [Domains]
       summary: Get DNS verification status
       operationId: verificationStatus
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -469,7 +559,7 @@ paths:
       tags: [Domains]
       summary: Generate a randomized mailbox address suggestion for a domain zone
       operationId: suggestAddress
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -499,7 +589,7 @@ paths:
       tags: [Domain Routes]
       summary: List routes for a zone
       operationId: listRoutes
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -520,7 +610,7 @@ paths:
       tags: [Domain Routes]
       summary: Create a routing rule
       operationId: createRoute
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -556,7 +646,7 @@ paths:
       tags: [Domain Routes]
       summary: Delete a route
       operationId: deleteRoute
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -575,7 +665,7 @@ paths:
       tags: [Mailboxes]
       summary: List mailboxes
       operationId: listMailboxes
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PerPageParam"
@@ -595,7 +685,7 @@ paths:
       tags: [Mailboxes]
       summary: Create a mailbox
       operationId: createMailbox
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -625,7 +715,7 @@ paths:
       tags: [Mailboxes]
       summary: Delete a mailbox
       operationId: deleteMailbox
-      security: [{ APIKey: [] }, { AdminKey: [] }]
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -640,7 +730,7 @@ paths:
       tags: [Messages]
       summary: List messages in a mailbox
       operationId: listMessages
-      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      security: [ {}, { APIKey: [] }, { BearerAuth: [] }, { MailboxToken: [] } ]
       parameters:
         - name: address
           in: path
@@ -665,7 +755,7 @@ paths:
       tags: [Messages]
       summary: Purge all messages from a mailbox
       operationId: purgeMailbox
-      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      security: [ {}, { APIKey: [] }, { BearerAuth: [] }, { MailboxToken: [] } ]
       parameters:
         - name: address
           in: path
@@ -679,7 +769,7 @@ paths:
       tags: [Messages]
       summary: Stream mailbox events with SSE
       operationId: streamMailboxEvents
-      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      security: [ {}, { APIKey: [] }, { BearerAuth: [] }, { MailboxToken: [] } ]
       parameters:
         - name: address
           in: path
@@ -698,7 +788,7 @@ paths:
       tags: [Messages]
       summary: Get message detail
       operationId: getMessage
-      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      security: [ {}, { APIKey: [] }, { BearerAuth: [] }, { MailboxToken: [] } ]
       parameters:
         - name: address
           in: path
@@ -721,7 +811,7 @@ paths:
       tags: [Messages]
       summary: Mark message as seen
       operationId: markSeen
-      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      security: [ {}, { APIKey: [] }, { BearerAuth: [] }, { MailboxToken: [] } ]
       parameters:
         - name: address
           in: path
@@ -747,7 +837,7 @@ paths:
       tags: [Messages]
       summary: Delete a single message
       operationId: deleteMessage
-      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      security: [ {}, { APIKey: [] }, { BearerAuth: [] }, { MailboxToken: [] } ]
       parameters:
         - name: address
           in: path
@@ -765,7 +855,7 @@ paths:
       tags: [Messages]
       summary: Get raw RFC 822 source
       operationId: getMessageSource
-      security: [ {}, { APIKey: [] }, { AdminKey: [] }, { MailboxToken: [] } ]
+      security: [ {}, { APIKey: [] }, { BearerAuth: [] }, { MailboxToken: [] } ]
       parameters:
         - name: address
           in: path
@@ -788,7 +878,7 @@ paths:
       tags: [Admin]
       summary: List all tenants
       operationId: listTenants
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       responses:
         "200":
           description: OK
@@ -804,7 +894,7 @@ paths:
       tags: [Admin]
       summary: Create a tenant
       operationId: createTenant
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -824,7 +914,7 @@ paths:
       tags: [Admin]
       summary: Update tenant overrides
       operationId: updateTenantOverride
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -840,7 +930,7 @@ paths:
       tags: [Admin]
       summary: Delete a tenant
       operationId: deleteTenant
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -854,7 +944,7 @@ paths:
       tags: [Admin]
       summary: Get effective config (plan + overrides merged)
       operationId: getEffectiveConfig
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -875,7 +965,7 @@ paths:
       tags: [Admin]
       summary: Issue a new API key for a tenant
       operationId: createAPIKey
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -888,7 +978,10 @@ paths:
               type: object
               properties:
                 label: { type: string }
-                scopes: { type: array, items: { type: string } }
+                scopes:
+                  type: array
+                  description: "Explicit API key scopes. If omitted, a read-only default is used. Wildcard scopes are not accepted."
+                  items: { $ref: "#/components/schemas/APIKeyScope" }
       responses:
         "201":
           description: Created (key shown only once)
@@ -902,7 +995,7 @@ paths:
       tags: [Admin]
       summary: List API keys for a tenant
       operationId: listAPIKeys
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -917,7 +1010,7 @@ paths:
       tags: [Admin]
       summary: Revoke an API key
       operationId: deleteAPIKey
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -936,7 +1029,7 @@ paths:
       tags: [Admin]
       summary: List plans
       operationId: listPlans
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       responses:
         "200":
           description: OK
@@ -952,7 +1045,7 @@ paths:
       tags: [Admin]
       summary: Create a plan
       operationId: createPlan
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -966,7 +1059,7 @@ paths:
       tags: [Admin]
       summary: Update a plan
       operationId: updatePlan
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -982,7 +1075,7 @@ paths:
       tags: [Admin]
       summary: Delete a plan
       operationId: deletePlan
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - name: id
           in: path
@@ -996,7 +1089,7 @@ paths:
       tags: [Admin]
       summary: System statistics
       operationId: getStats
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       responses:
         "200":
           description: OK
@@ -1012,7 +1105,7 @@ paths:
       tags: [Admin]
       summary: System status alias
       operationId: getStatus
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       responses:
         "200":
           description: OK
@@ -1022,7 +1115,7 @@ paths:
       tags: [Admin]
       summary: Get current SMTP policy
       operationId: getSMTPPolicy
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       responses:
         "200":
           description: OK
@@ -1036,7 +1129,7 @@ paths:
       tags: [Admin]
       summary: Update current SMTP policy
       operationId: updateSMTPPolicy
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       requestBody:
         required: true
         content:
@@ -1051,7 +1144,7 @@ paths:
       tags: [Admin]
       summary: Stream global monitor events with history replay
       operationId: streamAdminMonitorEvents
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       responses:
         "200":
           description: SSE stream
@@ -1065,7 +1158,7 @@ paths:
       tags: [Admin]
       summary: List persisted monitor history
       operationId: listMonitorHistory
-      security: [{ AdminKey: [] }]
+      security: [{ BearerAuth: [] }]
       parameters:
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PerPageParam"
@@ -1106,3 +1199,448 @@ paths:
                 type: object
                 properties:
                   status: { type: string, example: ok }
+
+  # ── Auth ───────────────────────────────────────────
+  /api/v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in with email and password
+      operationId: login
+      security: [ {} ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string }
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/LoginResponse" }
+        "401": { description: Invalid email or password }
+        "403": { description: Account disabled }
+
+  /api/v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new account (when open registration is enabled)
+      operationId: register
+      security: [ {} ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                display_name: { type: string }
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/LoginResponse" }
+        "403": { description: Registration not open }
+        "409": { description: Email already registered }
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token using a refresh token
+      operationId: refreshToken
+      security: [ {} ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token: { type: string }
+      responses:
+        "200":
+          description: New token pair issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/RefreshResponse" }
+        "401": { description: Invalid or expired refresh token }
+
+  /api/v1/auth/accept-invite:
+    post:
+      tags: [Auth]
+      summary: Accept an admin invitation and create account
+      operationId: acceptInvite
+      security: [ {} ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [invite_code, password]
+              properties:
+                invite_code: { type: string }
+                password: { type: string, minLength: 8 }
+                display_name: { type: string }
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/LoginResponse" }
+        "400": { description: Invalid or expired invitation }
+        "409": { description: Email already registered }
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Log out (revoke refresh token or all tokens)
+      operationId: logout
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token: { type: string }
+      responses:
+        "204": { description: Logged out }
+
+  /api/v1/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current authenticated user
+      operationId: getMe
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/User" }
+        "401": { description: Not logged in }
+
+  /api/v1/auth/change-password:
+    post:
+      tags: [Auth]
+      summary: Change password for the current user
+      operationId: changePassword
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [old_password, new_password]
+              properties:
+                old_password: { type: string }
+                new_password: { type: string, minLength: 8 }
+      responses:
+        "200":
+          description: Password changed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      status: { type: string, example: "password changed" }
+        "401": { description: Incorrect old password }
+
+  # ── Admin: Users ───────────────────────────────────
+  /api/v1/admin/invite:
+    post:
+      tags: [Admin]
+      summary: Send an admin invitation
+      operationId: inviteAdmin
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        "201":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/AdminInvitation" }
+        "409": { description: Email already registered }
+
+  /api/v1/admin/users:
+    get:
+      tags: [Admin]
+      summary: List all users
+      operationId: listUsers
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/User" }
+                  meta: { $ref: "#/components/schemas/Meta" }
+
+  /api/v1/admin/users/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update a user (role, active status, display name)
+      operationId: updateUser
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role: { type: string, enum: [admin, user] }
+                is_active: { type: boolean }
+                display_name: { type: string }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/User" }
+        "404": { description: User not found }
+    delete:
+      tags: [Admin]
+      summary: Delete a user
+      operationId: deleteUser
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+        "400": { description: Cannot delete yourself }
+
+  # ── Admin: Audit / Ingest / Webhooks / Settings ────
+  /api/v1/admin/audit:
+    get:
+      tags: [Admin]
+      summary: List audit log entries
+      operationId: listAudit
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/AuditEntry" }
+                  meta: { $ref: "#/components/schemas/Meta" }
+
+  /api/v1/admin/ingest/jobs:
+    get:
+      tags: [Admin]
+      summary: List ingest jobs
+      operationId: listIngestJobs
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+        - name: state
+          in: query
+          schema: { type: string }
+        - name: source
+          in: query
+          schema: { type: string }
+        - name: recipient
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/IngestJob" }
+                  meta: { $ref: "#/components/schemas/Meta" }
+
+  /api/v1/admin/webhooks/deliveries:
+    get:
+      tags: [Admin]
+      summary: List webhook deliveries
+      operationId: listWebhookDeliveries
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/PerPageParam"
+        - name: state
+          in: query
+          schema: { type: string }
+        - name: event_type
+          in: query
+          schema: { type: string }
+        - name: url
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/WebhookDelivery" }
+                  meta: { $ref: "#/components/schemas/Meta" }
+
+  /api/v1/admin/settings:
+    get:
+      tags: [Admin]
+      summary: List all system settings
+      operationId: listSettings
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/SystemSetting" }
+    patch:
+      tags: [Admin]
+      summary: Update system settings
+      operationId: updateSettings
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: { type: string }
+              description: "Key-value pairs of settings to update"
+      responses:
+        "200":
+          description: Updated settings list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/SystemSetting" }
+
+  # ── Meta ───────────────────────────────────────────
+  /metrics:
+    get:
+      tags: [System]
+      summary: Prometheus metrics
+      operationId: getMetrics
+      responses:
+        "200":
+          description: Prometheus text format
+          content:
+            text/plain:
+              schema: { type: string }
+
+  /openapi.yaml:
+    get:
+      tags: [System]
+      summary: OpenAPI specification
+      operationId: getOpenAPISpec
+      responses:
+        "200":
+          description: YAML specification
+          content:
+            text/yaml:
+              schema: { type: string }
+
+  /docs:
+    get:
+      tags: [System]
+      summary: Swagger UI
+      operationId: getDocs
+      responses:
+        "200":
+          description: Interactive API documentation
+          content:
+            text/html:
+              schema: { type: string }
+
+  /redoc:
+    get:
+      tags: [System]
+      summary: ReDoc documentation
+      operationId: getRedoc
+      responses:
+        "200":
+          description: ReDoc API documentation
+          content:
+            text/html:
+              schema: { type: string }

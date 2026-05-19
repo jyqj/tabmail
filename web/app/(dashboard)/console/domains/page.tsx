@@ -10,9 +10,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -62,6 +59,15 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+
+function safeConfirm(message: string) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  try {
+    return window.confirm(message) !== false;
+  } catch {
+    return true;
+  }
+}
 
 function CopyButton({ value, className }: { value: string; className?: string }) {
   const [copied, setCopied] = useState(false);
@@ -210,13 +216,21 @@ function DNSSetupGuide({ zone, verificationStatus }: {
 }
 
 function VerificationDetail({ checks }: { checks: VerificationStatus }) {
+  const check = (key: keyof VerificationStatus["checks"]) =>
+    checks.checks[key] ?? { status: "unknown", details: [] };
+  const txt = check("txt");
+  const mx = check("mx");
+  const spf = check("spf");
+  const dkim = check("dkim");
+  const dmarc = check("dmarc");
+
   return (
     <div className="space-y-0">
-      <DNSCheckRow label="TXT (所有权)" status={checks.checks.txt.status} details={checks.checks.txt.details} expected={checks.txt_expected} />
-      <DNSCheckRow label="MX (邮件接收)" status={checks.checks.mx.status} details={checks.checks.mx.details} expected={checks.expected_mx} />
-      <DNSCheckRow label="SPF (发信授权)" status={checks.checks.spf.status} details={checks.checks.spf.details} />
-      <DNSCheckRow label="DKIM (签名)" status={checks.checks.dkim.status} details={checks.checks.dkim.details} />
-      <DNSCheckRow label="DMARC (策略)" status={checks.checks.dmarc.status} details={checks.checks.dmarc.details} />
+      <DNSCheckRow label="TXT (所有权)" status={txt.status} details={txt.details} expected={checks.txt_expected} />
+      <DNSCheckRow label="MX (邮件接收)" status={mx.status} details={mx.details} expected={checks.expected_mx} />
+      <DNSCheckRow label="SPF (发信授权)" status={spf.status} details={spf.details} />
+      <DNSCheckRow label="DKIM (签名)" status={dkim.status} details={dkim.details} />
+      <DNSCheckRow label="DMARC (策略)" status={dmarc.status} details={dmarc.details} />
     </div>
   );
 }
@@ -227,6 +241,7 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
   onDelete: () => void;
   onSuggest: (subdomain: boolean) => void;
 }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(!zone.is_verified || !zone.mx_verified);
   const [verStatus, setVerStatus] = useState<VerificationStatus | null>(null);
   const [verLoading, setVerLoading] = useState(false);
@@ -256,13 +271,13 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
       const txt = status.data.checks.txt.status;
       const mx = status.data.checks.mx.status;
       if (txt === "pass" && mx === "pass") {
-        toast.success("域名验证通过！");
+        toast.success(t("domains.verified"));
       } else {
-        toast.warning(`TXT: ${txt.toUpperCase()} · MX: ${mx.toUpperCase()}`);
+        toast.success(`TXT ${txt.toUpperCase()} · MX ${mx.toUpperCase()}`);
       }
       onVerify();
     } catch {
-      toast.error("验证请求失败");
+      toast.error(t("domains.verifyFailed"));
     } finally {
       setVerifying(false);
     }
@@ -284,12 +299,12 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
               {allVerified ? (
                 <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-700 text-[10px]">
                   <CheckCircle2 className="h-3 w-3" />
-                  已验证
+                  {t("domains.verified")}
                 </Badge>
               ) : (
                 <Badge variant="secondary" className="gap-1 text-[10px]">
                   <AlertCircle className="h-3 w-3" />
-                  待验证
+                  {t("domains.pending")}
                 </Badge>
               )}
               {zone.is_verified && !zone.mx_verified && (
@@ -315,23 +330,23 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
             <DropdownMenuContent align="end">
               <DropdownMenuItem render={<Link href={`/console/domains/${zone.id}/routes`} />}>
                 <Route className="h-4 w-4 mr-2" />
-                路由规则
+                {t("domains.routes")}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onSuggest(false)}>
                 <Shuffle className="h-4 w-4 mr-2" />
-                生成地址
+                {t("domains.generateAddress")}
                 <Copy className="h-3.5 w-3.5 ml-auto opacity-60" />
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onSuggest(true)}>
                 <Shuffle className="h-4 w-4 mr-2" />
-                生成子域地址
+                {t("domains.generateSubdomainAddress")}
                 <Copy className="h-3.5 w-3.5 ml-auto opacity-60" />
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
                 <Trash2 className="h-4 w-4 mr-2" />
-                删除域名
+                {t("domains.delete")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -363,7 +378,7 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
                 disabled={verifying}
               >
                 <ShieldCheck className="h-3 w-3" />
-                {verifying ? "验证中..." : "验证 DNS"}
+                {verifying ? t("domains.verifying") : t("domains.verifyDns")}
               </Button>
             </div>
           </div>
@@ -426,7 +441,7 @@ export default function DomainsPage() {
       await createDomain(newDomain.trim());
       setNewDomain("");
       setDialogOpen(false);
-      toast.success("域名已添加，请按指引配置 DNS 记录");
+      toast.success(t("domains.domainCreated"));
       fetchDomains();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
@@ -437,6 +452,7 @@ export default function DomainsPage() {
   };
 
   const handleDelete = async (id: string) => {
+    if (!safeConfirm(t("domains.confirmDelete"))) return;
     try {
       await deleteDomain(id);
       toast.success(t("domains.deleted"));
@@ -450,10 +466,10 @@ export default function DomainsPage() {
     try {
       const res = await suggestAddress(id, { subdomain });
       await navigator.clipboard.writeText(res.data.address);
-      toast.success("地址已复制", { description: res.data.address });
+      toast.success(t("domains.addressGenerated"), { description: res.data.address });
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "生成地址失败");
+      toast.error(err?.error?.message || t("domains.addressGenerateFailed"));
     }
   };
 

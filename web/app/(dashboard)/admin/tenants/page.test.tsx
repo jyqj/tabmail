@@ -210,10 +210,12 @@ describe("admin/tenants page", () => {
     revokeAPIKeyMock.mockReset();
     toastSuccess.mockReset();
     toastError.mockReset();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
   });
 
   it("加载列表并支持创建 tenant", async () => {
@@ -257,7 +259,7 @@ describe("admin/tenants page", () => {
             tenant_id: "tenant-1",
             key_prefix: "tb_1234567890",
             label: "",
-            scopes: ["*"],
+            scopes: ["domains:read", "routes:read", "mailboxes:read", "messages:read"],
             expires_at: null,
             created_at: new Date().toISOString(),
           },
@@ -269,7 +271,7 @@ describe("admin/tenants page", () => {
         key: "tb_secret_key",
         key_prefix: "tb_1234567890",
         label: "",
-        scopes: ["*"],
+        scopes: ["domains:read", "routes:read", "mailboxes:read", "messages:read"],
         tenant_id: "tenant-1",
         expires_at: null,
         created_at: new Date().toISOString(),
@@ -289,7 +291,7 @@ describe("admin/tenants page", () => {
     fireEvent.click(screen.getByRole("button", { name: /Generate Key/ }));
 
     await waitFor(() => {
-      expect(createAPIKeyMock).toHaveBeenCalledWith("tenant-1", { scopes: ["*"] });
+      expect(createAPIKeyMock).toHaveBeenCalledWith("tenant-1", { scopes: ["domains:read", "routes:read", "mailboxes:read", "messages:read"] });
     });
     await waitFor(() => {
       expect(listAPIKeysMock).toHaveBeenCalledTimes(2);

@@ -3,7 +3,8 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 RUN npm ci
 COPY . .
-ENV INTERNAL_API_URL=http://tabmail:8080
+ARG INTERNAL_API_URL=http://tabmail:8080
+ENV INTERNAL_API_URL=${INTERNAL_API_URL}
 RUN npm run build
 
 FROM node:22-alpine

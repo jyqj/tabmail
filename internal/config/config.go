@@ -15,13 +15,19 @@ type Root struct {
 	LogLevel            string `default:"info" desc:"debug, info, warn, error"`
 	ObjectStore         string `split_words:"true" default:"fs" desc:"Object store backend: fs or s3"`
 	DataDir             string `default:"/data" desc:"Base directory for raw .eml storage"`
-	AdminKey            string `required:"true" desc:"Super-admin X-Admin-Key value"`
-	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens"`
+	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens and JWT"`
 	AutoCreateRouteRPM  int    `split_words:"true" default:"60" desc:"Per-route auto-create RPM (0=disable)"`
 	AutoCreateTenantRPM int    `split_words:"true" default:"300" desc:"Per-tenant auto-create RPM (0=disable)"`
 	MailboxNaming       string `default:"full" desc:"Mailbox naming: full, local, or domain"`
 	StripPlusTag        bool   `default:"true" desc:"Strip +tag from local part"`
 	MonitorHistory      int    `default:"50" desc:"Number of recent events to keep for monitor replay (0=disable)"`
+
+	// Auth
+	JWTSecret           string `split_words:"true" default:"" desc:"JWT signing secret (defaults to MailboxTokenSecret if empty)"`
+	OpenRegistration    bool   `split_words:"true" default:"true" desc:"Allow public user registration"`
+	BootstrapAdminEmail string `split_words:"true" default:"" desc:"Bootstrap admin email (created on first start if no admins exist)"`
+	BootstrapAdminPass  string `split_words:"true" default:"" desc:"Bootstrap admin password"`
+	DefaultPlanID       string `split_words:"true" default:"00000000-0000-0000-0000-000000000001" desc:"Default plan for new user registrations"`
 
 	SMTP    SMTP
 	HTTP    HTTP
@@ -31,6 +37,14 @@ type Root struct {
 	S3      S3
 	Webhook Webhook
 	Ingest  Ingest
+}
+
+// EffectiveJWTSecret returns the JWT secret, falling back to MailboxTokenSecret.
+func (c *Root) EffectiveJWTSecret() string {
+	if c.JWTSecret != "" {
+		return c.JWTSecret
+	}
+	return c.MailboxTokenSecret
 }
 
 type SMTP struct {
@@ -56,7 +70,7 @@ type HTTP struct {
 	Addr             string   `default:"0.0.0.0:8080" desc:"HTTP API listen address"`
 	BasePath         string   `default:"" desc:"URL path prefix (e.g. /api)"`
 	AllowedOrigins   []string `split_words:"true" default:"http://127.0.0.1:3000,http://localhost:3000" desc:"Allowed CORS origins"`
-	AllowedHeaders   []string `split_words:"true" default:"Authorization,Content-Type,X-API-Key,X-Admin-Key,X-Tenant-ID" desc:"Allowed CORS headers"`
+	AllowedHeaders   []string `split_words:"true" default:"Authorization,Content-Type,X-API-Key,X-Tenant-ID" desc:"Allowed CORS headers"`
 	AllowCredentials bool     `split_words:"true" default:"false" desc:"Allow credentialed CORS requests"`
 	TrustedProxies   []string `split_words:"true" default:"127.0.0.1/32,::1/128" desc:"Trusted proxy CIDRs/IPs for X-Real-IP/X-Forwarded-For"`
 	PublicIPRPM      int      `split_words:"true" default:"0" desc:"Per-IP RPM for unauthenticated requests (0=disable)"`
@@ -131,9 +145,6 @@ func (c *Root) Validate() error {
 	default:
 		return fmt.Errorf("config: invalid role %q", c.Role)
 	}
-	if err := validateSecret("TABMAIL_ADMINKEY", c.AdminKey, 12); err != nil {
-		return err
-	}
 	if err := validateSecret("TABMAIL_MAILBOX_TOKEN_SECRET", c.MailboxTokenSecret, 16); err != nil {
 		return err
 	}
@@ -182,7 +193,7 @@ func validateSecret(name, value string, minLen int) error {
 	}
 	switch strings.ToLower(v) {
 	case "changeme", "change-me", "replace-me", "replace_me", "example",
-		"change-this-admin-key", "change-this-mailbox-token-secret":
+		"change-this-mailbox-token-secret":
 		return fmt.Errorf("config: %s uses an unsafe placeholder value", name)
 	default:
 		return nil

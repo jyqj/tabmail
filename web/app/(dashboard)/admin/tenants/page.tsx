@@ -30,6 +30,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { APIKeyScopePicker } from "@/components/api-key-scope-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +57,7 @@ import {
   listAPIKeys,
   revokeAPIKey,
 } from "@/lib/api";
+import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
 import type { Tenant, Plan, TenantAPIKey, APIKeyCreated, TenantOverride, EffectiveConfig } from "@/lib/types";
 import {
   Plus,
@@ -65,8 +67,8 @@ import {
   Copy,
   Users,
   Shield,
-   SlidersHorizontal,
-   Gauge,
+  SlidersHorizontal,
+  Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -85,6 +87,25 @@ const overrideFields = [
 type TenantOverrideEditableKey = (typeof overrideFields)[number];
 type TenantOverrideForm = Record<TenantOverrideEditableKey, string>;
 
+const emptyOverrideForm: TenantOverrideForm = {
+  max_domains: "",
+  max_mailboxes_per_domain: "",
+  max_messages_per_mailbox: "",
+  max_message_bytes: "",
+  retention_hours: "",
+  rpm_limit: "",
+  daily_quota: "",
+};
+
+function confirmAction(message: string) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  try {
+    return window.confirm(message) !== false;
+  } catch {
+    return true;
+  }
+}
+
 export default function TenantsPage() {
   const { t } = useI18n();
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -102,20 +123,13 @@ export default function TenantsPage() {
   const [keys, setKeys] = useState<TenantAPIKey[]>([]);
   const [keysLoading, setKeysLoading] = useState(false);
   const [newKeyCreated, setNewKeyCreated] = useState<APIKeyCreated | null>(null);
+  const [newKeyScopes, setNewKeyScopes] = useState<string[]>([...DEFAULT_API_KEY_SCOPES]);
 
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [overrideTenant, setOverrideTenant] = useState<Tenant | null>(null);
   const [overrideSaving, setOverrideSaving] = useState(false);
   const [effectiveConfig, setEffectiveConfig] = useState<EffectiveConfig | null>(null);
-  const [overrideForm, setOverrideForm] = useState<TenantOverrideForm>({
-    max_domains: "",
-    max_mailboxes_per_domain: "",
-    max_messages_per_mailbox: "",
-    max_message_bytes: "",
-    retention_hours: "",
-    rpm_limit: "",
-    daily_quota: "",
-  });
+  const [overrideForm, setOverrideForm] = useState<TenantOverrideForm>(emptyOverrideForm);
 
   const fetchTenants = useCallback(async () => {
     try {
@@ -153,7 +167,7 @@ export default function TenantsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("tenants.confirmDelete"))) return;
+    if (!confirmAction(t("tenants.confirmDelete"))) return;
     try {
       await deleteTenant(id);
       toast.success(t("tenants.tenantDeleted"));
@@ -168,6 +182,7 @@ export default function TenantsPage() {
     setKeysOpen(true);
     setKeysLoading(true);
     setNewKeyCreated(null);
+    setNewKeyScopes([...DEFAULT_API_KEY_SCOPES]);
     try {
       const res = await listAPIKeys(tenantId);
       setKeys(res.data ?? []);
@@ -180,10 +195,11 @@ export default function TenantsPage() {
 
   const handleCreateKey = async () => {
     try {
-      const res = await createAPIKey(keysTenantId, { scopes: ["*"] });
+      const res = await createAPIKey(keysTenantId, { scopes: newKeyScopes });
       setNewKeyCreated(res.data);
       const keysRes = await listAPIKeys(keysTenantId);
       setKeys(keysRes.data ?? []);
+      setNewKeyScopes([...DEFAULT_API_KEY_SCOPES]);
       toast.success(t("tenants.apiKeyCreated"));
     } catch {
       toast.error(t("tenants.apiKeyCreateFailed"));
@@ -191,6 +207,7 @@ export default function TenantsPage() {
   };
 
   const handleRevokeKey = async (keyId: string) => {
+    if (!confirmAction(t("tenants.confirmRevokeKey"))) return;
     try {
       await revokeAPIKey(keysTenantId, keyId);
       setKeys((prev) => prev.filter((k) => k.id !== keyId));
@@ -206,29 +223,10 @@ export default function TenantsPage() {
     setOverrideTenant(tenant);
     setOverrideOpen(true);
     setEffectiveConfig(null);
-    setOverrideForm({
-      max_domains: "",
-      max_mailboxes_per_domain: "",
-      max_messages_per_mailbox: "",
-      max_message_bytes: "",
-      retention_hours: "",
-      rpm_limit: "",
-      daily_quota: "",
-    });
+    setOverrideForm(emptyOverrideForm);
     try {
       const res = await getTenantConfig(tenant.id);
       setEffectiveConfig(res.data);
-      if (res.data) {
-        setOverrideForm({
-          max_domains: String(res.data.max_domains),
-          max_mailboxes_per_domain: String(res.data.max_mailboxes_per_domain),
-          max_messages_per_mailbox: String(res.data.max_messages_per_mailbox),
-          max_message_bytes: String(res.data.max_message_bytes),
-          retention_hours: String(res.data.retention_hours),
-          rpm_limit: String(res.data.rpm_limit),
-          daily_quota: String(res.data.daily_quota),
-        });
-      }
     } catch {
       toast.error(t("tenants.configLoadFailed"));
     }
@@ -486,10 +484,20 @@ export default function TenantsPage() {
           </div>
 
           <DialogFooter>
-            <Button size="sm" className="gap-1.5" onClick={handleCreateKey}>
-              <Plus className="h-3.5 w-3.5" />
-              {t("tenants.generateKey")}
-            </Button>
+            <div className="w-full space-y-3">
+              <APIKeyScopePicker value={newKeyScopes} onChange={setNewKeyScopes} />
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={handleCreateKey}
+                  disabled={newKeyScopes.length === 0}
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  {t("tenants.generateKey")}
+                </Button>
+              </div>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

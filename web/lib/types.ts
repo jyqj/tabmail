@@ -291,8 +291,40 @@ export interface MailboxTokenResponse {
   expires_in: number;
 }
 
+export type UserRole = "admin" | "user";
+
+export interface AuthUser {
+  id: string;
+  email: string;
+  display_name: string;
+  role: UserRole;
+  tenant_id: string;
+}
+
+export interface LoginResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+  user: AuthUser;
+}
+
+export interface RefreshResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+  expires_in: number;
+}
+
 export interface MarkSeenResponse {
   seen: boolean;
+}
+
+export interface SystemSetting {
+  key: string;
+  value: string;
+  description: string;
+  updated_at: string;
 }
 
 export interface MonitorEvent {

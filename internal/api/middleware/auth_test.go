@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"tabmail/internal/authn"
 	"tabmail/internal/models"
 	"tabmail/internal/testutil"
 )
@@ -20,7 +21,7 @@ func TestAuthResolvesPublicTenant(t *testing.T) {
 
 	var gotTenant *models.Tenant
 	var gotMode string
-	handler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotTenant = TenantFromCtx(r.Context())
 		gotMode = AuthModeFromCtx(r.Context())
 		w.WriteHeader(http.StatusNoContent)
@@ -46,12 +47,13 @@ func TestAuthResolvesPublicTenant(t *testing.T) {
 
 func TestAuthResolvesAdminAndScopedTenant(t *testing.T) {
 	st, tenantID := seededAuthStore()
+	token := issueTestAccessToken(t, st, uuid.MustParse(publicTenantIDForMiddlewareTests), models.RoleAdmin)
 
 	var gotTenant *models.Tenant
 	var gotAdmin bool
 	var gotBypass bool
 	var gotScopes []string
-	handler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotTenant = TenantFromCtx(r.Context())
 		gotAdmin = IsAdmin(r.Context())
 		gotBypass = BypassLimits(r.Context())
@@ -60,7 +62,7 @@ func TestAuthResolvesAdminAndScopedTenant(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set("X-Admin-Key", "admin-secret")
+	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("X-Tenant-ID", tenantID.String())
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
@@ -87,11 +89,13 @@ func TestAuthResolvesAdminAndScopedTenant(t *testing.T) {
 
 func TestAuthPureAdminBypassesLimits(t *testing.T) {
 	st, _ := seededAuthStore()
+	adminTenantID := uuid.MustParse(publicTenantIDForMiddlewareTests)
+	token := issueTestAccessToken(t, st, adminTenantID, models.RoleAdmin)
 
 	var gotTenant *models.Tenant
 	var gotAdmin bool
 	var gotBypass bool
-	handler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gotTenant = TenantFromCtx(r.Context())
 		gotAdmin = IsAdmin(r.Context())
 		gotBypass = BypassLimits(r.Context())
@@ -99,7 +103,7 @@ func TestAuthPureAdminBypassesLimits(t *testing.T) {
 	}))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	req.Header.Set("X-Admin-Key", "admin-secret")
+	req.Header.Set("Authorization", "Bearer "+token)
 	rr := httptest.NewRecorder()
 	handler.ServeHTTP(rr, req)
 
@@ -109,7 +113,7 @@ func TestAuthPureAdminBypassesLimits(t *testing.T) {
 	if !gotAdmin || !gotBypass {
 		t.Fatalf("expected pure admin to bypass limits, admin=%v bypass=%v", gotAdmin, gotBypass)
 	}
-	if gotTenant == nil || gotTenant.Name != "admin" {
+	if gotTenant == nil || gotTenant.ID != adminTenantID {
 		t.Fatalf("unexpected admin tenant context: %#v", gotTenant)
 	}
 }
@@ -122,7 +126,7 @@ func TestAuthResolvesAPIKeyAndEnforcesScopes(t *testing.T) {
 	}
 	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
 
-	okHandler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(
+	okHandler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(
 		RequireTenantKeyOrAdmin(
 			RequireScopes("domains:read")(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if AuthModeFromCtx(r.Context()) != AuthModeAPIKey {
@@ -141,7 +145,7 @@ func TestAuthResolvesAPIKeyAndEnforcesScopes(t *testing.T) {
 		t.Fatalf("expected 204, got %d body=%s", okRR.Code, okRR.Body.String())
 	}
 
-	failHandler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(
+	failHandler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(
 		RequireScopes("domains:write")(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent)
 		})),
@@ -158,7 +162,7 @@ func TestAuthResolvesAPIKeyAndEnforcesScopes(t *testing.T) {
 func TestRequireTenantKeyOrAdminRejectsPublic(t *testing.T) {
 	st, _ := seededAuthStore()
 
-	handler := Auth(st, "admin-secret", publicTenantIDForMiddlewareTests)(
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(
 		RequireTenantKeyOrAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusNoContent)
 		})),
@@ -168,6 +172,29 @@ func TestRequireTenantKeyOrAdminRejectsPublic(t *testing.T) {
 	handler.ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/", nil))
 	if rr.Code != http.StatusForbidden {
 		t.Fatalf("expected 403, got %d", rr.Code)
+	}
+}
+
+func TestRequireAuthRejectsAPIKey(t *testing.T) {
+	st, tenantID := seededAuthStore()
+	tenant, err := st.GetTenant(context.Background(), tenantID)
+	if err != nil || tenant == nil {
+		t.Fatalf("get tenant: %v tenant=%#v", err, tenant)
+	}
+	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
+
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(
+		RequireAuth(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNoContent)
+		})),
+	)
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("X-API-Key", "tenant-key")
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d body=%s", rr.Code, rr.Body.String())
 	}
 }
 
@@ -217,6 +244,59 @@ func seededAuthStore() (*testutil.FakeStore, uuid.UUID) {
 		IsSuper: false,
 	})
 	return st, tenantID
+}
+
+func issueTestAccessToken(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID, role models.UserRole) string {
+	t.Helper()
+	user := &models.User{
+		ID:           uuid.New(),
+		TenantID:     tenantID,
+		Email:        "admin@example.test",
+		PasswordHash: "hash",
+		DisplayName:  "Admin",
+		Role:         role,
+		IsActive:     true,
+	}
+	if err := st.CreateUser(context.Background(), user); err != nil {
+		t.Fatalf("seed user: %v", err)
+	}
+	token, err := authn.IssueAccessToken("jwt-test-secret", user)
+	if err != nil {
+		t.Fatalf("issue access token: %v", err)
+	}
+	return token
+}
+
+func TestRequireScopesBlocksPublicWrite(t *testing.T) {
+	st, _ := seededAuthStore()
+
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(
+		RequireScopes("messages:write")(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNoContent)
+		})),
+	)
+
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, httptest.NewRequest(http.MethodDelete, "/", nil))
+	if rr.Code != http.StatusForbidden {
+		t.Fatalf("expected 403 for public write, got %d body=%s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestRequireScopesAllowsPublicRead(t *testing.T) {
+	st, _ := seededAuthStore()
+
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(
+		RequireScopes("messages:read")(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNoContent)
+		})),
+	)
+
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, httptest.NewRequest(http.MethodGet, "/", nil))
+	if rr.Code != http.StatusNoContent {
+		t.Fatalf("expected 204 for public read, got %d body=%s", rr.Code, rr.Body.String())
+	}
 }
 
 func TestWriteErrorProducesEnvelope(t *testing.T) {

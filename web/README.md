@@ -48,19 +48,18 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:8080
 
 ## 鉴权模式
 
-前端支持 3 种连接方式：
+前端支持 2 种交互式连接方式：
 
-1. **Mailbox**
+1. **Account Login / Register**
+   - 使用 JWT 登录 Console
+   - 管理员可额外通过 `X-Tenant-ID` 代理 tenant-scoped 接口
+
+2. **Mailbox**
    - 输入邮箱地址和密码
    - 调 `POST /api/v1/token`
    - 获取 mailbox token
 
-2. **Tenant API Key**
-   - 用于 tenant-scoped console
-
-3. **Admin Key**
-   - 可额外设置 `X-Tenant-ID`
-   - 用于代理某个 tenant 调用 tenant-scoped 接口
+Tenant API Key 仅用于外部接口调用，不再作为 Console 登录凭据。
 
 ## 当前页面
 

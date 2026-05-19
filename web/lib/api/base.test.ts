@@ -12,26 +12,30 @@ describe("api/base", () => {
     vi.restoreAllMocks();
   });
 
-  it("优先使用 admin key 并附带 tenant id", () => {
-    localStorage.setItem("tabmail_admin_key", "admin-secret");
+  it("使用 JWT 并附带 tenant id", () => {
+    localStorage.setItem("tabmail_access_token", "access-token");
     localStorage.setItem("tabmail_tenant_id", "tenant-1");
-    localStorage.setItem("tabmail_api_key", "tenant-key");
     localStorage.setItem("tabmail_mailbox_token", "mailbox-token");
 
     expect(buildHeaders("/api/v1/domains")).toEqual({
-      "X-Admin-Key": "admin-secret",
+      Authorization: "Bearer access-token",
       "X-Tenant-ID": "tenant-1",
     });
   });
 
-  it("仅在目标 mailbox 路径上附带 mailbox token", () => {
+  it("目标 mailbox 路径上优先使用 mailbox token，避免被 JWT 抢占", () => {
+    localStorage.setItem("tabmail_access_token", "access-token");
+    localStorage.setItem("tabmail_tenant_id", "tenant-1");
     localStorage.setItem("tabmail_mailbox_token", "mailbox-token");
     localStorage.setItem("tabmail_mailbox_address", "user@mail.test");
 
     expect(buildHeaders("/api/v1/mailbox/user%40mail.test")).toEqual({
       Authorization: "Bearer mailbox-token",
     });
-    expect(buildHeaders("/api/v1/mailbox/other%40mail.test")).toEqual({});
+    expect(buildHeaders("/api/v1/mailbox/other%40mail.test")).toEqual({
+      Authorization: "Bearer access-token",
+      "X-Tenant-ID": "tenant-1",
+    });
   });
 
   it("request 会拼接 query 参数并返回文本响应", async () => {

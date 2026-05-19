@@ -11,6 +11,33 @@ import (
 
 // Store is the primary persistence interface for TabMail.
 type Store interface {
+	// --- System settings -------------------------------------------------
+	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
+	UpsertSetting(ctx context.Context, key, value, description string) error
+	ListSettings(ctx context.Context) ([]*models.SystemSetting, error)
+
+	// --- Users -----------------------------------------------------------
+	CreateUser(ctx context.Context, u *models.User) error
+	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
+	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	ListUsers(ctx context.Context, pg models.Page) ([]*models.User, int, error)
+	UpdateUser(ctx context.Context, u *models.User) error
+	UpdateUserPassword(ctx context.Context, id uuid.UUID, passwordHash string) error
+	DeleteUser(ctx context.Context, id uuid.UUID) error
+	TouchUserLogin(ctx context.Context, id uuid.UUID) error
+
+	// --- Refresh tokens --------------------------------------------------
+	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
+	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
+	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
+	RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error
+	DeleteExpiredRefreshTokens(ctx context.Context) error
+
+	// --- Admin invitations -----------------------------------------------
+	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error
+	GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error)
+	MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error
+
 	// --- Plans -----------------------------------------------------------
 	CreatePlan(ctx context.Context, p *models.Plan) error
 	GetPlan(ctx context.Context, id uuid.UUID) (*models.Plan, error)
@@ -33,6 +60,7 @@ type Store interface {
 
 	// --- Tenant API keys -------------------------------------------------
 	CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error
+	GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAPIKey, error)
 	ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error)
 	DeleteAPIKey(ctx context.Context, id uuid.UUID) error
 	// Looks up tenant by raw API key (hashes internally).

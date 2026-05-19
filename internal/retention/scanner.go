@@ -59,7 +59,7 @@ func (sc *Scanner) Run(ctx context.Context) {
 
 func (sc *Scanner) sweep(ctx context.Context) {
 	started := time.Now()
-	defer metrics.ObserveRetentionSweepDuration(time.Since(started))
+	defer func() { metrics.ObserveRetentionSweepDuration(time.Since(started)) }()
 
 	now := time.Now()
 	total := 0

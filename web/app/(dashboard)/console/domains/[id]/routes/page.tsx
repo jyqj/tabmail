@@ -47,6 +47,15 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 
+function safeConfirm(message: string) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  try {
+    return window.confirm(message) !== false;
+  } catch {
+    return true;
+  }
+}
+
 const routeTypeColors: Record<RouteType, string> = {
   exact: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
   wildcard: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
@@ -139,6 +148,7 @@ export default function RoutesPage() {
   };
 
   const handleDelete = async (routeId: string) => {
+    if (!safeConfirm(t("routes.confirmDelete"))) return;
     try {
       await deleteRoute(domainId, routeId);
       toast.success(t("routes.deleted"));

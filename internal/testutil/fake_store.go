@@ -14,6 +14,8 @@ import (
 	"tabmail/internal/models"
 )
 
+const fakeClaimLeaseDuration = 5 * time.Minute
+
 type resolvedAPIKey struct {
 	Tenant *models.Tenant
 	Scopes []string
@@ -38,6 +40,8 @@ type FakeStore struct {
 	outbox     map[uuid.UUID]*models.OutboxEvent
 	deliveries map[uuid.UUID]*models.WebhookDelivery
 	ingestJobs map[uuid.UUID]*models.IngestJob
+	users      map[uuid.UUID]*models.User
+	settings   map[string]*models.SystemSetting
 }
 
 func NewFakeStore() *FakeStore {
@@ -288,6 +292,16 @@ func (s *FakeStore) CreateAPIKey(_ context.Context, k *models.TenantAPIKey) erro
 	k.ID = cp.ID
 	k.CreatedAt = cp.CreatedAt
 	return nil
+}
+
+func (s *FakeStore) GetAPIKey(_ context.Context, id uuid.UUID) (*models.TenantAPIKey, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if k, ok := s.apiKeys[id]; ok {
+		cp := *k
+		return &cp, nil
+	}
+	return nil, nil
 }
 
 func (s *FakeStore) ListAPIKeys(_ context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error) {
@@ -982,7 +996,9 @@ func (s *FakeStore) ClaimOutboxEvents(_ context.Context, now time.Time, limit in
 	}
 	var list []*models.OutboxEvent
 	for _, e := range s.outbox {
-		if (e.State == "pending" || e.State == "retry") && !e.NextAttemptAt.After(now) {
+		claimable := (e.State == "pending" || e.State == "retry") && !e.NextAttemptAt.After(now)
+		expiredLease := e.State == "processing" && (e.LeaseUntil == nil || !e.LeaseUntil.After(now))
+		if claimable || expiredLease {
 			cp := *e
 			list = append(list, &cp)
 		}
@@ -993,11 +1009,16 @@ func (s *FakeStore) ClaimOutboxEvents(_ context.Context, now time.Time, limit in
 	}
 	for _, e := range list {
 		stored := s.outbox[e.ID]
+		leaseUntil := now.Add(fakeClaimLeaseDuration)
 		stored.State = "processing"
 		stored.Attempts++
+		stored.ClaimedAt = &now
+		stored.LeaseUntil = &leaseUntil
 		stored.UpdatedAt = now
 		e.State = stored.State
 		e.Attempts = stored.Attempts
+		e.ClaimedAt = stored.ClaimedAt
+		e.LeaseUntil = stored.LeaseUntil
 		e.UpdatedAt = stored.UpdatedAt
 	}
 	return list, nil
@@ -1008,6 +1029,8 @@ func (s *FakeStore) MarkOutboxEventDone(_ context.Context, id uuid.UUID) error {
 	defer s.mu.Unlock()
 	if e, ok := s.outbox[id]; ok {
 		e.State = "done"
+		e.ClaimedAt = nil
+		e.LeaseUntil = nil
 		e.UpdatedAt = time.Now().UTC()
 	}
 	return nil
@@ -1020,6 +1043,8 @@ func (s *FakeStore) MarkOutboxEventRetry(_ context.Context, id uuid.UUID, lastEr
 		e.State = "retry"
 		e.LastError = lastError
 		e.NextAttemptAt = nextAttemptAt
+		e.ClaimedAt = nil
+		e.LeaseUntil = nil
 		e.UpdatedAt = time.Now().UTC()
 	}
 	return nil
@@ -1064,7 +1089,9 @@ func (s *FakeStore) ClaimWebhookDeliveries(_ context.Context, now time.Time, lim
 	}
 	var list []*models.WebhookDelivery
 	for _, d := range s.deliveries {
-		if (d.State == "pending" || d.State == "retry") && !d.NextAttemptAt.After(now) {
+		claimable := (d.State == "pending" || d.State == "retry") && !d.NextAttemptAt.After(now)
+		expiredLease := d.State == "processing" && (d.LeaseUntil == nil || !d.LeaseUntil.After(now))
+		if claimable || expiredLease {
 			cp := *d
 			list = append(list, &cp)
 		}
@@ -1075,13 +1102,18 @@ func (s *FakeStore) ClaimWebhookDeliveries(_ context.Context, now time.Time, lim
 	}
 	for _, d := range list {
 		stored := s.deliveries[d.ID]
+		leaseUntil := now.Add(fakeClaimLeaseDuration)
+		triedAt := now
 		stored.State = "processing"
 		stored.Attempts++
-		triedAt := now
+		stored.ClaimedAt = &now
+		stored.LeaseUntil = &leaseUntil
 		stored.LastTriedAt = &triedAt
 		stored.UpdatedAt = now
 		d.State = stored.State
 		d.Attempts = stored.Attempts
+		d.ClaimedAt = stored.ClaimedAt
+		d.LeaseUntil = stored.LeaseUntil
 		d.LastTriedAt = stored.LastTriedAt
 		d.UpdatedAt = stored.UpdatedAt
 	}
@@ -1094,6 +1126,8 @@ func (s *FakeStore) MarkWebhookDeliveryDone(_ context.Context, id uuid.UUID) err
 	if d, ok := s.deliveries[id]; ok {
 		now := time.Now().UTC()
 		d.State = "delivered"
+		d.ClaimedAt = nil
+		d.LeaseUntil = nil
 		d.DeliveredAt = &now
 		d.UpdatedAt = now
 	}
@@ -1110,6 +1144,8 @@ func (s *FakeStore) MarkWebhookDeliveryRetry(_ context.Context, id uuid.UUID, la
 		}
 		d.LastError = lastError
 		d.NextAttemptAt = nextAttemptAt
+		d.ClaimedAt = nil
+		d.LeaseUntil = nil
 		d.UpdatedAt = time.Now().UTC()
 	}
 	return nil
@@ -1235,7 +1271,9 @@ func (s *FakeStore) ClaimIngestJobs(_ context.Context, now time.Time, limit int)
 	}
 	var jobs []*models.IngestJob
 	for _, job := range s.ingestJobs {
-		if (job.State == "pending" || job.State == "retry") && !job.NextAttemptAt.After(now) {
+		claimable := (job.State == "pending" || job.State == "retry") && !job.NextAttemptAt.After(now)
+		expiredLease := job.State == "processing" && (job.LeaseUntil == nil || !job.LeaseUntil.After(now))
+		if claimable || expiredLease {
 			cp := *job
 			jobs = append(jobs, &cp)
 		}
@@ -1246,11 +1284,16 @@ func (s *FakeStore) ClaimIngestJobs(_ context.Context, now time.Time, limit int)
 	}
 	for _, job := range jobs {
 		stored := s.ingestJobs[job.ID]
+		leaseUntil := now.Add(fakeClaimLeaseDuration)
 		stored.State = "processing"
 		stored.Attempts++
+		stored.ClaimedAt = &now
+		stored.LeaseUntil = &leaseUntil
 		stored.UpdatedAt = now
 		job.State = stored.State
 		job.Attempts = stored.Attempts
+		job.ClaimedAt = stored.ClaimedAt
+		job.LeaseUntil = stored.LeaseUntil
 		job.UpdatedAt = stored.UpdatedAt
 	}
 	return jobs, nil
@@ -1261,6 +1304,8 @@ func (s *FakeStore) MarkIngestJobDone(_ context.Context, id uuid.UUID) error {
 	defer s.mu.Unlock()
 	if job, ok := s.ingestJobs[id]; ok {
 		job.State = "done"
+		job.ClaimedAt = nil
+		job.LeaseUntil = nil
 		job.UpdatedAt = time.Now().UTC()
 	}
 	return nil
@@ -1276,6 +1321,8 @@ func (s *FakeStore) MarkIngestJobRetry(_ context.Context, id uuid.UUID, lastErro
 		}
 		job.LastError = lastError
 		job.NextAttemptAt = nextAttemptAt
+		job.ClaimedAt = nil
+		job.LeaseUntil = nil
 		job.UpdatedAt = time.Now().UTC()
 	}
 	return nil
@@ -1360,6 +1407,173 @@ func (s *FakeStore) CountIngestJobsByState(_ context.Context, states ...string) 
 		}
 	}
 	return total, nil
+}
+
+// ================================================================
+// Users (stub implementations for Store interface)
+// ================================================================
+
+func (s *FakeStore) CreateUser(_ context.Context, u *models.User) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if u.ID == uuid.Nil {
+		u.ID = uuid.New()
+	}
+	if s.users == nil {
+		s.users = map[uuid.UUID]*models.User{}
+	}
+	cp := *u
+	s.users[cp.ID] = &cp
+	return nil
+}
+
+func (s *FakeStore) GetUser(_ context.Context, id uuid.UUID) (*models.User, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.users == nil {
+		return nil, nil
+	}
+	u, ok := s.users[id]
+	if !ok {
+		return nil, nil
+	}
+	cp := *u
+	return &cp, nil
+}
+
+func (s *FakeStore) GetUserByEmail(_ context.Context, email string) (*models.User, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.users == nil {
+		return nil, nil
+	}
+	lower := strings.ToLower(strings.TrimSpace(email))
+	for _, u := range s.users {
+		if strings.ToLower(u.Email) == lower {
+			cp := *u
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) ListUsers(_ context.Context, pg models.Page) ([]*models.User, int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.users == nil {
+		return nil, 0, nil
+	}
+	var all []*models.User
+	for _, u := range s.users {
+		cp := *u
+		all = append(all, &cp)
+	}
+	return all, len(all), nil
+}
+
+func (s *FakeStore) UpdateUser(_ context.Context, u *models.User) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.users == nil {
+		return errors.New("user not found")
+	}
+	if _, ok := s.users[u.ID]; !ok {
+		return errors.New("user not found")
+	}
+	cp := *u
+	s.users[cp.ID] = &cp
+	return nil
+}
+
+func (s *FakeStore) UpdateUserPassword(_ context.Context, id uuid.UUID, hash string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.users == nil {
+		return errors.New("user not found")
+	}
+	u, ok := s.users[id]
+	if !ok {
+		return errors.New("user not found")
+	}
+	u.PasswordHash = hash
+	return nil
+}
+
+func (s *FakeStore) DeleteUser(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.users != nil {
+		delete(s.users, id)
+	}
+	return nil
+}
+
+func (s *FakeStore) TouchUserLogin(_ context.Context, _ uuid.UUID) error { return nil }
+
+// ================================================================
+// Refresh tokens (stubs)
+// ================================================================
+
+func (s *FakeStore) CreateRefreshToken(_ context.Context, _ *models.RefreshToken) error { return nil }
+func (s *FakeStore) GetRefreshToken(_ context.Context, _ string) (*models.RefreshToken, error) {
+	return nil, nil
+}
+func (s *FakeStore) RevokeRefreshToken(_ context.Context, _ uuid.UUID) error      { return nil }
+func (s *FakeStore) RevokeUserRefreshTokens(_ context.Context, _ uuid.UUID) error { return nil }
+func (s *FakeStore) DeleteExpiredRefreshTokens(_ context.Context) error           { return nil }
+
+// ================================================================
+// Admin invitations (stubs)
+// ================================================================
+
+func (s *FakeStore) CreateAdminInvitation(_ context.Context, _ *models.AdminInvitation) error {
+	return nil
+}
+func (s *FakeStore) GetAdminInvitationByCode(_ context.Context, _ string) (*models.AdminInvitation, error) {
+	return nil, nil
+}
+func (s *FakeStore) MarkInvitationAccepted(_ context.Context, _ uuid.UUID) error { return nil }
+
+// ================================================================
+// System settings (stubs)
+// ================================================================
+
+func (s *FakeStore) GetSetting(_ context.Context, key string) (*models.SystemSetting, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.settings == nil {
+		return nil, nil
+	}
+	ss, ok := s.settings[key]
+	if !ok {
+		return nil, nil
+	}
+	cp := *ss
+	return &cp, nil
+}
+
+func (s *FakeStore) UpsertSetting(_ context.Context, key, value, description string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.settings == nil {
+		s.settings = map[string]*models.SystemSetting{}
+	}
+	s.settings[key] = &models.SystemSetting{Key: key, Value: value, Description: description}
+	return nil
+}
+
+func (s *FakeStore) ListSettings(_ context.Context) ([]*models.SystemSetting, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.settings == nil {
+		return nil, nil
+	}
+	var out []*models.SystemSetting
+	for _, ss := range s.settings {
+		cp := *ss
+		out = append(out, &cp)
+	}
+	return out, nil
 }
 
 func (s *FakeStore) Close() error { return nil }

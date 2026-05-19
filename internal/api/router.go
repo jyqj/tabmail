@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	chimw "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/handlers"
@@ -20,6 +21,7 @@ import (
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
+	"tabmail/internal/settings"
 	"tabmail/internal/store"
 )
 
@@ -56,22 +58,29 @@ func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) me
 	return value
 }
 
-func NewRouter(
-	st store.Store,
-	obj store.ObjectStore,
-	hub *realtime.Hub,
-	dispatcher *hooks.Dispatcher,
-	namingMode policy.NamingMode,
-	stripPlus bool,
-	defaultPolicy models.SMTPPolicy,
-	adminKey string,
-	mailboxTokenSecret string,
-	expectedMXHost string,
-	publicTenantID string,
-	httpCfg config.HTTP,
-	rl *middleware.RateLimiter,
-	logger zerolog.Logger,
-) http.Handler {
+// RouterConfig bundles all parameters for NewRouter.
+type RouterConfig struct {
+	Store              store.Store
+	ObjectStore        store.ObjectStore
+	Hub                *realtime.Hub
+	Dispatcher         *hooks.Dispatcher
+	NamingMode         policy.NamingMode
+	StripPlus          bool
+	DefaultPolicy      models.SMTPPolicy
+	JWTSecret          string
+	MailboxTokenSecret string
+	ExpectedMXHost     string
+	PublicTenantID     string
+	DefaultPlanID      uuid.UUID
+	OpenRegistration   bool
+	Settings           *settings.Manager
+	HTTP               config.HTTP
+	RateLimiter        *middleware.RateLimiter
+	Logger             zerolog.Logger
+}
+
+func NewRouter(cfg RouterConfig) http.Handler {
+	st := cfg.Store
 	r := chi.NewRouter()
 	metricsCounts := newMetricsDBCountCache(5 * time.Second)
 
@@ -79,25 +88,42 @@ func NewRouter(
 	r.Use(chimw.RealIP)
 	r.Use(chimw.Recoverer)
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   append([]string(nil), httpCfg.AllowedOrigins...),
+		AllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-		AllowedHeaders:   append([]string(nil), httpCfg.AllowedHeaders...),
-		AllowCredentials: httpCfg.AllowCredentials,
+		AllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),
+		AllowCredentials: cfg.HTTP.AllowCredentials,
 		MaxAge:           86400,
 	}))
 
-	r.Use(middleware.Auth(st, adminKey, publicTenantID))
-	r.Use(rl.Middleware)
+	r.Use(middleware.Auth(st, cfg.JWTSecret, cfg.PublicTenantID))
+	r.Use(cfg.RateLimiter.Middleware)
 
-	dh := handlers.NewDomainHandler(st, dispatcher, expectedMXHost, namingMode, mailboxTokenSecret, logger)
-	mh := handlers.NewMailboxHandler(st, obj, dispatcher, namingMode, stripPlus, mailboxTokenSecret, logger)
-	msg := handlers.NewMessageHandler(st, obj, hub, dispatcher, namingMode, stripPlus, mailboxTokenSecret, logger)
-	adm := handlers.NewAdminHandler(st, dispatcher, defaultPolicy, logger)
-	mon := handlers.NewMonitorHandler(st, hub, logger)
+	dh := handlers.NewDomainHandler(st, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Logger)
+	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
+	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
+	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
+	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
+	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
 
 	r.Route("/api/v1", func(r chi.Router) {
+		// -- Auth (public, no auth required) --
+		r.Post("/auth/login", auth.Login)
+		r.Post("/auth/register", auth.Register)
+		r.Post("/auth/refresh", auth.Refresh)
+		r.Post("/auth/accept-invite", auth.AcceptInvite)
+
+		// -- Auth (requires login) --
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.RequireAuth)
+			r.Post("/auth/logout", auth.Logout)
+			r.Get("/auth/me", auth.Me)
+			r.Post("/auth/change-password", auth.ChangePassword)
+		})
+
+		// -- Mailbox token issuance --
 		r.Post("/token", mh.IssueToken)
 
+		// -- Tenant resources (requires API key, JWT user, or admin) --
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.RequireTenantKeyOrAdmin)
 
@@ -118,9 +144,18 @@ func NewRouter(
 			r.With(middleware.RequireScopes("mailboxes:read")).Get("/mailboxes", mh.List)
 			r.With(middleware.RequireScopes("mailboxes:write")).Post("/mailboxes", mh.Create)
 			r.With(middleware.RequireScopes("mailboxes:write")).Delete("/mailboxes/{id}", mh.Delete)
+
 		})
 
-		// -- Messages (mailbox-centric) --
+		// -- User API keys (own tenant; interactive JWT sessions only) --
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.RequireAuth)
+			r.Post("/keys", adm.UserCreateAPIKey)
+			r.Get("/keys", adm.UserListAPIKeys)
+			r.Delete("/keys/{keyId}", adm.UserDeleteAPIKey)
+		})
+
+		// -- Messages (mailbox-centric, public access for public mailboxes) --
 		r.With(middleware.RequireScopes("messages:read")).Get("/mailbox/{address}", msg.ListMessages)
 		r.With(middleware.RequireScopes("messages:read")).Get("/mailbox/{address}/events", msg.StreamMailbox)
 		r.With(middleware.RequireScopes("messages:write")).Delete("/mailbox/{address}", msg.PurgeMailbox)
@@ -129,7 +164,7 @@ func NewRouter(
 		r.With(middleware.RequireScopes("messages:write")).Patch("/mailbox/{address}/{id}", msg.MarkSeen)
 		r.With(middleware.RequireScopes("messages:write")).Delete("/mailbox/{address}/{id}", msg.DeleteMessage)
 
-		// -- Admin (requires X-Admin-Key) --
+		// -- Admin --
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.RequireAdmin)
 
@@ -157,6 +192,16 @@ func NewRouter(
 			r.Get("/admin/audit", adm.ListAudit)
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
 			r.Get("/admin/webhooks/deliveries", adm.ListWebhookDeliveries)
+
+			// -- System settings (admin only) --
+			r.Get("/admin/settings", adm.ListSettings)
+			r.Patch("/admin/settings", adm.UpdateSettings)
+
+			// -- User management (admin only) --
+			r.Post("/admin/invite", auth.InviteAdmin)
+			r.Get("/admin/users", auth.ListUsers)
+			r.Patch("/admin/users/{id}", auth.UpdateUserByAdmin)
+			r.Delete("/admin/users/{id}", auth.DeleteUserByAdmin)
 		})
 	})
 
@@ -190,7 +235,7 @@ func NewRouter(
 				ingestProcessing: ingestProcessing,
 			}
 		})
-		snapshot := metrics.Snapshot(dispatcher != nil && dispatcher.Enabled(), counts.webhookDead)
+		snapshot := metrics.Snapshot(cfg.Dispatcher != nil && cfg.Dispatcher.Enabled(), counts.webhookDead)
 		body := metrics.RenderPrometheus(snapshot, map[string]float64{
 			"tabmail_webhooks_backlog":         float64(counts.webhookPending),
 			"tabmail_ingest_backlog":           float64(counts.ingestReady + counts.ingestProcessing),

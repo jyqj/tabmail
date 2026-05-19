@@ -164,10 +164,12 @@ describe("InboxPage", () => {
     streamMailboxEventsMock.mockReset();
     toastSuccess.mockReset();
     toastError.mockReset();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
   });
 
   it("加载消息并可选中未读邮件查看详情", async () => {

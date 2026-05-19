@@ -41,7 +41,7 @@ curl http://127.0.0.1:8080/health
 
 ```bash
 curl http://127.0.0.1:8080/api/v1/admin/stats \
-  -H "X-Admin-Key: <admin-key>"
+  -H "Authorization: Bearer <admin-jwt-access-token>"
 ```
 
 重点关注：
@@ -56,14 +56,14 @@ curl http://127.0.0.1:8080/api/v1/admin/stats \
 
 ```bash
 curl "http://127.0.0.1:8080/api/v1/admin/monitor/history?page=1&per_page=20" \
-  -H "X-Admin-Key: <admin-key>"
+  -H "Authorization: Bearer <admin-jwt-access-token>"
 ```
 
 ### 2.4 实时订阅 monitor
 
 ```bash
 curl -N "http://127.0.0.1:8080/api/v1/admin/monitor/events" \
-  -H "X-Admin-Key: <admin-key>"
+  -H "Authorization: Bearer <admin-jwt-access-token>"
 ```
 
 ### 2.5 查看日志
@@ -88,23 +88,19 @@ curl http://127.0.0.1:8080/metrics
 - `tabmail_smtp_messages_rejected_total`
 - `tabmail_smtp_deliveries_failed_total`
 
-### 2.7 查看 migration 状态
+### 2.7 查看数据库结构
 
 ```bash
-make migrate-status
+psql "$TABMAIL_DB_DSN" -c '\dt'
 ```
 
-或：
+重点确认核心表存在：
 
-```bash
-psql "$TABMAIL_DB_DSN" -c "SELECT version, name, applied_at FROM schema_migrations ORDER BY version;"
-```
-
-如果应用启动时报 schema version 过旧，先执行：
-
-```bash
-make migrate
-```
+- `tenants`
+- `domain_zones`
+- `mailboxes`
+- `messages`
+- `monitor_events`
 
 ---
 
@@ -356,7 +352,7 @@ TABMAIL_DB_DSN='postgres://...' ./scripts/restore_postgres.sh backups/manual.dum
 
 - 恢复会执行 `pg_restore --clean --if-exists`
 - 恢复前请确保目标实例可接受覆盖
-- 恢复后建议立即执行 `make migrate-status`
+- 恢复后建议启动应用，并用 `psql "$TABMAIL_DB_DSN" -c '\dt'` 确认核心表存在
 
 ### 5.3 文件对象存储备份
 
@@ -511,7 +507,7 @@ example.com
 
 检查：
 
-1. admin key 是否正确
+1. admin JWT 是否正确
 2. 是否真的有 SMTP 收件 / delete / purge 事件
 3. `subscribers_current` 是否变化
 4. 反向代理是否缓冲了 SSE
@@ -527,7 +523,7 @@ Nginx 常见需要关闭 buffering。
 
 检查：
 
-- 数据库迁移是否已执行到 `003_monitor_and_policy.sql`
+- 应用是否已连接到目标 PostgreSQL，并自动初始化当前 schema
 - `monitor_events` 是否存在
 
 ```bash

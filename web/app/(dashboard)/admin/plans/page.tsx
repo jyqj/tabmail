@@ -59,6 +59,11 @@ const defaultForm: PlanFormData = {
   daily_quota: "1000",
 };
 
+function confirmAction(message: string) {
+  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
+  return window.confirm(message) !== false;
+}
+
 export default function PlansPage() {
   const { t } = useI18n();
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -127,7 +132,7 @@ export default function PlansPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("plans.confirmDelete"))) return;
+    if (!confirmAction(t("plans.confirmDelete"))) return;
     try {
       await deletePlan(id);
       toast.success(t("plans.deleted"));

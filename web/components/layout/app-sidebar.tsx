@@ -33,6 +33,7 @@ import {
   ClipboardList,
   Webhook,
   Boxes,
+  Settings2,
 } from "lucide-react";
 
 export function AppSidebar() {
@@ -43,6 +44,7 @@ export function AppSidebar() {
   const consoleItems = [
     { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
     { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
+    { href: "/console/keys", label: t("sidebar.apiKeys"), icon: Settings2 },
   ];
 
   const adminItems = [
@@ -54,6 +56,7 @@ export function AppSidebar() {
     { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
     { href: "/admin/ingest", label: t("sidebar.ingest"), icon: Boxes },
     { href: "/admin/webhooks", label: t("sidebar.webhooks"), icon: Webhook },
+    { href: "/admin/settings", label: "Settings", icon: Settings2 },
   ];
 
   return (

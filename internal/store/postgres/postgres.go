@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"crypto/sha256"
+	_ "embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -19,7 +20,14 @@ type PgStore struct {
 	pool *pgxpool.Pool
 }
 
-const LatestSchemaVersion = 8
+// schemaSQL is the current database schema snapshot. TabMail is not online yet,
+// so we intentionally avoid versioned database migrations and initialize the
+// expected schema directly when the store starts.
+//
+//go:embed schema.sql
+var schemaSQL string
+
+const claimLeaseDuration = 5 * time.Minute
 
 func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
 	poolCfg, err := pgxpool.ParseConfig(cfg.DSN)
@@ -38,21 +46,16 @@ func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
 		pool.Close()
 		return nil, fmt.Errorf("postgres: ping: %w", err)
 	}
+	if _, err := pool.Exec(ctx, schemaSQL); err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("postgres: initialize schema: %w", err)
+	}
 	return &PgStore{pool: pool}, nil
 }
 
 func (s *PgStore) Close() error {
 	s.pool.Close()
 	return nil
-}
-
-func (s *PgStore) CurrentSchemaVersion(ctx context.Context) (int, error) {
-	var version int
-	err := s.pool.QueryRow(ctx, `SELECT COALESCE(max(version), 0) FROM schema_migrations`).Scan(&version)
-	if err != nil {
-		return 0, err
-	}
-	return version, nil
 }
 
 func hashKey(raw string) string {
@@ -289,6 +292,28 @@ func (s *PgStore) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*model
 		out = append(out, k)
 	}
 	return out, rows.Err()
+}
+
+func (s *PgStore) GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAPIKey, error) {
+	k := &models.TenantAPIKey{}
+	var scopesJSON []byte
+	err := s.pool.QueryRow(ctx, `
+		SELECT id,tenant_id,key_prefix,label,scopes,expires_at,created_at,last_used_at
+		FROM tenant_api_keys WHERE id=$1`, id).
+		Scan(&k.ID, &k.TenantID, &k.KeyPrefix, &k.Label,
+			&scopesJSON, &k.ExpiresAt, &k.CreatedAt, &k.LastUsedAt)
+	if err == pgx.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	if len(scopesJSON) > 0 {
+		if err := json.Unmarshal(scopesJSON, &k.Scopes); err != nil {
+			return nil, err
+		}
+	}
+	return k, nil
 }
 
 func (s *PgStore) DeleteAPIKey(ctx context.Context, id uuid.UUID) error {
@@ -1145,21 +1170,24 @@ func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit in
 	if limit <= 0 {
 		limit = 100
 	}
+	now = now.UTC()
+	leaseUntil := now.Add(claimLeaseDuration)
 	rows, err := s.pool.Query(ctx, `
 		WITH cte AS (
 			SELECT id
 			FROM outbox_events
-			WHERE state IN ('pending','retry') AND next_attempt_at <= $1
+			WHERE (state IN ('pending','retry') AND next_attempt_at <= $1)
+			   OR (state = 'processing' AND (lease_until IS NULL OR lease_until <= $1))
 			ORDER BY created_at
 			LIMIT $2
 			FOR UPDATE SKIP LOCKED
 		)
 		UPDATE outbox_events o
-		SET state='processing', attempts=o.attempts + 1, updated_at=$1
+		SET state='processing', attempts=o.attempts + 1, claimed_at=$1, lease_until=$3, updated_at=$1
 		FROM cte
 		WHERE o.id = cte.id
-		RETURNING o.id,o.event_type,o.payload,o.occurred_at,o.state,o.attempts,o.last_error,o.next_attempt_at,o.created_at,o.updated_at`,
-		now.UTC(), limit)
+		RETURNING o.id,o.event_type,o.payload,o.occurred_at,o.state,o.attempts,o.last_error,o.next_attempt_at,o.claimed_at,o.lease_until,o.created_at,o.updated_at`,
+		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
 	}
@@ -1167,7 +1195,7 @@ func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit in
 	var out []*models.OutboxEvent
 	for rows.Next() {
 		e := &models.OutboxEvent{}
-		if err := rows.Scan(&e.ID, &e.EventType, &e.Payload, &e.OccurredAt, &e.State, &e.Attempts, &e.LastError, &e.NextAttemptAt, &e.CreatedAt, &e.UpdatedAt); err != nil {
+		if err := rows.Scan(&e.ID, &e.EventType, &e.Payload, &e.OccurredAt, &e.State, &e.Attempts, &e.LastError, &e.NextAttemptAt, &e.ClaimedAt, &e.LeaseUntil, &e.CreatedAt, &e.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, e)
@@ -1176,14 +1204,17 @@ func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit in
 }
 
 func (s *PgStore) MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE outbox_events SET state='done', updated_at=$2 WHERE id=$1`, id, time.Now().UTC())
+	_, err := s.pool.Exec(ctx, `
+		UPDATE outbox_events
+		SET state='done', claimed_at=NULL, lease_until=NULL, updated_at=$2
+		WHERE id=$1`, id, time.Now().UTC())
 	return err
 }
 
 func (s *PgStore) MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error {
 	_, err := s.pool.Exec(ctx, `
 		UPDATE outbox_events
-		SET state='retry', last_error=$2, next_attempt_at=$3, updated_at=$4
+		SET state='retry', last_error=$2, next_attempt_at=$3, claimed_at=NULL, lease_until=NULL, updated_at=$4
 		WHERE id=$1`, id, lastError, nextAttemptAt.UTC(), time.Now().UTC())
 	return err
 }
@@ -1215,21 +1246,24 @@ func (s *PgStore) ClaimWebhookDeliveries(ctx context.Context, now time.Time, lim
 	if limit <= 0 {
 		limit = 100
 	}
+	now = now.UTC()
+	leaseUntil := now.Add(claimLeaseDuration)
 	rows, err := s.pool.Query(ctx, `
 		WITH cte AS (
 			SELECT id
 			FROM webhook_deliveries
-			WHERE state IN ('pending','retry') AND next_attempt_at <= $1
+			WHERE (state IN ('pending','retry') AND next_attempt_at <= $1)
+			   OR (state = 'processing' AND (lease_until IS NULL OR lease_until <= $1))
 			ORDER BY created_at
 			LIMIT $2
 			FOR UPDATE SKIP LOCKED
 		)
 		UPDATE webhook_deliveries d
-		SET state='processing', attempts=d.attempts + 1, last_tried_at=$1, updated_at=$1
+		SET state='processing', attempts=d.attempts + 1, claimed_at=$1, lease_until=$3, last_tried_at=$1, updated_at=$1
 		FROM cte
 		WHERE d.id = cte.id
-		RETURNING d.id,d.event_id,d.url,d.event_type,d.payload,d.state,d.attempts,d.last_error,d.next_attempt_at,d.last_tried_at,d.delivered_at,d.created_at,d.updated_at`,
-		now.UTC(), limit)
+		RETURNING d.id,d.event_id,d.url,d.event_type,d.payload,d.state,d.attempts,d.last_error,d.next_attempt_at,d.claimed_at,d.lease_until,d.last_tried_at,d.delivered_at,d.created_at,d.updated_at`,
+		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
 	}
@@ -1237,7 +1271,7 @@ func (s *PgStore) ClaimWebhookDeliveries(ctx context.Context, now time.Time, lim
 	var out []*models.WebhookDelivery
 	for rows.Next() {
 		d := &models.WebhookDelivery{}
-		if err := rows.Scan(&d.ID, &d.EventID, &d.URL, &d.EventType, &d.Payload, &d.State, &d.Attempts, &d.LastError, &d.NextAttemptAt, &d.LastTriedAt, &d.DeliveredAt, &d.CreatedAt, &d.UpdatedAt); err != nil {
+		if err := rows.Scan(&d.ID, &d.EventID, &d.URL, &d.EventType, &d.Payload, &d.State, &d.Attempts, &d.LastError, &d.NextAttemptAt, &d.ClaimedAt, &d.LeaseUntil, &d.LastTriedAt, &d.DeliveredAt, &d.CreatedAt, &d.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, d)
@@ -1249,7 +1283,7 @@ func (s *PgStore) MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) err
 	now := time.Now().UTC()
 	_, err := s.pool.Exec(ctx, `
 		UPDATE webhook_deliveries
-		SET state='delivered', delivered_at=$2, updated_at=$2
+		SET state='delivered', delivered_at=$2, claimed_at=NULL, lease_until=NULL, updated_at=$2
 		WHERE id=$1`, id, now)
 	return err
 }
@@ -1261,7 +1295,7 @@ func (s *PgStore) MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, la
 	}
 	_, err := s.pool.Exec(ctx, `
 		UPDATE webhook_deliveries
-		SET state=$2, last_error=$3, next_attempt_at=$4, updated_at=$5
+		SET state=$2, last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=$5
 		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
 	return err
 }
@@ -1327,7 +1361,7 @@ func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, sta
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,event_id,url,event_type,payload,state,attempts,last_error,next_attempt_at,last_tried_at,delivered_at,created_at,updated_at
+		SELECT id,event_id,url,event_type,payload,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,last_tried_at,delivered_at,created_at,updated_at
 		FROM webhook_deliveries`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
 		return nil, 0, err
@@ -1336,7 +1370,7 @@ func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, sta
 	var out []*models.WebhookDelivery
 	for rows.Next() {
 		item := &models.WebhookDelivery{}
-		if err := rows.Scan(&item.ID, &item.EventID, &item.URL, &item.EventType, &item.Payload, &item.State, &item.Attempts, &item.LastError, &item.NextAttemptAt, &item.LastTriedAt, &item.DeliveredAt, &item.CreatedAt, &item.UpdatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.EventID, &item.URL, &item.EventType, &item.Payload, &item.State, &item.Attempts, &item.LastError, &item.NextAttemptAt, &item.ClaimedAt, &item.LeaseUntil, &item.LastTriedAt, &item.DeliveredAt, &item.CreatedAt, &item.UpdatedAt); err != nil {
 			return nil, 0, err
 		}
 		out = append(out, item)
@@ -1379,21 +1413,24 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 	if limit <= 0 {
 		limit = 100
 	}
+	now = now.UTC()
+	leaseUntil := now.Add(claimLeaseDuration)
 	rows, err := s.pool.Query(ctx, `
 		WITH cte AS (
 			SELECT id
 			FROM ingest_jobs
-			WHERE state IN ('pending','retry') AND next_attempt_at <= $1
+			WHERE (state IN ('pending','retry') AND next_attempt_at <= $1)
+			   OR (state = 'processing' AND (lease_until IS NULL OR lease_until <= $1))
 			ORDER BY created_at
 			LIMIT $2
 			FOR UPDATE SKIP LOCKED
 		)
 		UPDATE ingest_jobs j
-		SET state='processing', attempts=j.attempts + 1, updated_at=$1
+		SET state='processing', attempts=j.attempts + 1, claimed_at=$1, lease_until=$3, updated_at=$1
 		FROM cte
 		WHERE j.id = cte.id
-		RETURNING j.id,j.source,j.remote_ip,j.mail_from,j.recipients,j.raw_object_key,j.metadata,j.state,j.attempts,j.last_error,j.next_attempt_at,j.created_at,j.updated_at`,
-		now.UTC(), limit)
+		RETURNING j.id,j.source,j.remote_ip,j.mail_from,j.recipients,j.raw_object_key,j.metadata,j.state,j.attempts,j.last_error,j.next_attempt_at,j.claimed_at,j.lease_until,j.created_at,j.updated_at`,
+		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
 	}
@@ -1401,7 +1438,7 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 	var out []*models.IngestJob
 	for rows.Next() {
 		job := &models.IngestJob{}
-		if err := rows.Scan(&job.ID, &job.Source, &job.RemoteIP, &job.MailFrom, &job.Recipients, &job.RawObjectKey, &job.Metadata, &job.State, &job.Attempts, &job.LastError, &job.NextAttemptAt, &job.CreatedAt, &job.UpdatedAt); err != nil {
+		if err := rows.Scan(&job.ID, &job.Source, &job.RemoteIP, &job.MailFrom, &job.Recipients, &job.RawObjectKey, &job.Metadata, &job.State, &job.Attempts, &job.LastError, &job.NextAttemptAt, &job.ClaimedAt, &job.LeaseUntil, &job.CreatedAt, &job.UpdatedAt); err != nil {
 			return nil, err
 		}
 		out = append(out, job)
@@ -1410,7 +1447,10 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 }
 
 func (s *PgStore) MarkIngestJobDone(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE ingest_jobs SET state='done', updated_at=$2 WHERE id=$1`, id, time.Now().UTC())
+	_, err := s.pool.Exec(ctx, `
+		UPDATE ingest_jobs
+		SET state='done', claimed_at=NULL, lease_until=NULL, updated_at=$2
+		WHERE id=$1`, id, time.Now().UTC())
 	return err
 }
 
@@ -1421,7 +1461,7 @@ func (s *PgStore) MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastErro
 	}
 	_, err := s.pool.Exec(ctx, `
 		UPDATE ingest_jobs
-		SET state=$2, last_error=$3, next_attempt_at=$4, updated_at=$5
+		SET state=$2, last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=$5
 		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
 	return err
 }
@@ -1451,7 +1491,7 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,created_at,updated_at
+		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,created_at,updated_at
 		FROM ingest_jobs`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
 		return nil, 0, err
@@ -1460,7 +1500,7 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 	var out []*models.IngestJob
 	for rows.Next() {
 		item := &models.IngestJob{}
-		if err := rows.Scan(&item.ID, &item.Source, &item.RemoteIP, &item.MailFrom, &item.Recipients, &item.RawObjectKey, &item.Metadata, &item.State, &item.Attempts, &item.LastError, &item.NextAttemptAt, &item.CreatedAt, &item.UpdatedAt); err != nil {
+		if err := rows.Scan(&item.ID, &item.Source, &item.RemoteIP, &item.MailFrom, &item.Recipients, &item.RawObjectKey, &item.Metadata, &item.State, &item.Attempts, &item.LastError, &item.NextAttemptAt, &item.ClaimedAt, &item.LeaseUntil, &item.CreatedAt, &item.UpdatedAt); err != nil {
 			return nil, 0, err
 		}
 		out = append(out, item)

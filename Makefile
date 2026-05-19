@@ -1,4 +1,4 @@
-.PHONY: build build-migrate run dev test vet lint web-lint web-test web-build contract-check check migrate migrate-status migrate-down backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
+.PHONY: build run dev test vet lint web-lint web-test web-build contract-check check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
 
 BINARY  := tabmail
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -10,8 +10,6 @@ GORUN   := env $(GOENV) $(GO)
 build:
 	CGO_ENABLED=0 $(GORUN) build $(LDFLAGS) -o bin/$(BINARY) ./cmd/tabmail
 
-build-migrate:
-	CGO_ENABLED=0 $(GORUN) build $(LDFLAGS) -o bin/tabmail-migrate ./cmd/tabmail-migrate
 
 run: build
 	./bin/$(BINARY)
@@ -41,14 +39,6 @@ lint: vet web-lint
 
 check: test vet contract-check web-lint web-test web-build
 
-migrate:
-	$(GORUN) run ./cmd/tabmail-migrate up $(if $(TO),-to $(TO),)
-
-migrate-status:
-	$(GORUN) run ./cmd/tabmail-migrate status
-
-migrate-down:
-	$(GORUN) run ./cmd/tabmail-migrate down -steps $(or $(STEPS),1)
 
 backup-db:
 	./scripts/backup_postgres.sh $(FILE)

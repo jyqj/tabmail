@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
+	"tabmail/internal/api/middleware"
 	adminapp "tabmail/internal/app/admin"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
@@ -15,13 +17,22 @@ type adminStore interface {
 	adminapp.Store
 }
 
+type settingsManager interface {
+	Get(ctx context.Context, key, defaultVal string) string
+	GetInt(ctx context.Context, key string, defaultVal int) int
+	GetBool(ctx context.Context, key string, defaultVal bool) bool
+	Set(ctx context.Context, key, value, description string) error
+	All(ctx context.Context) ([]*models.SystemSetting, error)
+	Invalidate()
+}
+
 type AdminHandler struct {
 	service *adminapp.Service
 	logger  zerolog.Logger
 }
 
-func NewAdminHandler(s adminStore, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, l zerolog.Logger) *AdminHandler {
-	service := adminapp.NewService(s, dispatcher, defaultPolicy, l)
+func NewAdminHandler(s adminStore, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, l zerolog.Logger) *AdminHandler {
+	service := adminapp.NewService(s, dispatcher, defaultPolicy, sm, l)
 	return &AdminHandler{service: service, logger: l.With().Str("handler", "admin").Logger()}
 }
 
@@ -267,4 +278,92 @@ func (h *AdminHandler) UpdateSMTPPolicy(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	ok(w, item)
+}
+
+func (h *AdminHandler) ListSettings(w http.ResponseWriter, r *http.Request) {
+	items, err := h.service.ListSettings(r.Context())
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, items)
+}
+
+func (h *AdminHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
+	var body map[string]string
+	if err := decodeBody(r, &body); err != nil {
+		errBadRequest(w, "invalid body: expected {key: value, ...}")
+		return
+	}
+	if len(body) == 0 {
+		errBadRequest(w, "at least one setting is required")
+		return
+	}
+	if err := h.service.BulkUpdateSettings(r.Context(), body, actorFromRequest(r)); err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	// Return updated list
+	items, err := h.service.ListSettings(r.Context())
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, items)
+}
+
+// --- User-facing API key management (own tenant) ---
+
+func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if tenant == nil || tenant.ID == uuid.Nil {
+		errForbidden(w, "no tenant context")
+		return
+	}
+	var body struct {
+		Label  string   `json:"label"`
+		Scopes []string `json:"scopes,omitempty"`
+	}
+	if err := decodeBody(r, &body); err != nil {
+		errBadRequest(w, "invalid body")
+		return
+	}
+	item, err := h.service.CreateAPIKey(r.Context(), tenant.ID, body.Label, body.Scopes, actorFromRequest(r))
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	created(w, item)
+}
+
+func (h *AdminHandler) UserListAPIKeys(w http.ResponseWriter, r *http.Request) {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if tenant == nil || tenant.ID == uuid.Nil {
+		errForbidden(w, "no tenant context")
+		return
+	}
+	items, err := h.service.ListAPIKeys(r.Context(), tenant.ID)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, items)
+}
+
+func (h *AdminHandler) UserDeleteAPIKey(w http.ResponseWriter, r *http.Request) {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if tenant == nil || tenant.ID == uuid.Nil {
+		errForbidden(w, "no tenant context")
+		return
+	}
+	keyID, err := uuid.Parse(chi.URLParam(r, "keyId"))
+	if err != nil {
+		errBadRequest(w, "invalid key id")
+		return
+	}
+	if err := h.service.DeleteAPIKeyForTenant(r.Context(), tenant.ID, keyID, actorFromRequest(r)); err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	noContent(w)
 }

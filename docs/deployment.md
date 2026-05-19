@@ -12,7 +12,6 @@ docker compose up -d --build
 
 服务：
 
-- `tabmail-migrate`
 - `tabmail`
 - `postgres`
 - `redis`
@@ -33,37 +32,26 @@ docker compose up -d --build
 ```bash
 docker compose ps
 docker compose logs -f tabmail
-docker compose logs -f tabmail-migrate
 ```
 
 ## 2. 初始化数据库
 
-项目现在使用 `tabmail-migrate` 工具管理 schema。
+当前项目未上线，不维护版本化数据库迁移链。应用启动时会自动执行内置当前态 schema 快照：
 
-执行最新 migration：
+- `internal/store/postgres/schema.sql`
+- `internal/store/postgres/postgres.go`
+
+启动后可直接查看表结构：
 
 ```bash
-make migrate
+psql "$TABMAIL_DB_DSN" -c '\dt'
 ```
 
-查看状态：
+如果是开发环境且需要彻底重置库结构，建议直接重建空库或清理 Compose volume：
 
 ```bash
-make migrate-status
-```
-
-回滚最近一步：
-
-```bash
-make migrate-down STEPS=1
-```
-
-也可以直接调用二进制：
-
-```bash
-go run ./cmd/tabmail-migrate status
-go run ./cmd/tabmail-migrate up
-go run ./cmd/tabmail-migrate down -steps 1
+docker compose down -v
+docker compose up -d --build
 ```
 
 ## 3. 关键环境变量
@@ -71,14 +59,13 @@ go run ./cmd/tabmail-migrate down -steps 1
 ### 必填
 
 ```bash
-export TABMAIL_ADMINKEY='change-this-admin-key'
 export TABMAIL_MAILBOX_TOKEN_SECRET='change-this-mailbox-token-secret'
 export POSTGRES_USER='tabmail'
 export POSTGRES_PASSWORD='change-this-postgres-password'
 export POSTGRES_DB='tabmail'
 export TABMAIL_REDIS_PASSWORD='change-this-redis-password'
-export TABMAIL_AUTOCREATE_ROUTE_RPM='60'
-export TABMAIL_AUTOCREATE_TENANT_RPM='300'
+export TABMAIL_AUTO_CREATE_ROUTE_RPM='60'
+export TABMAIL_AUTO_CREATE_TENANT_RPM='300'
 ```
 
 ### 常用
@@ -90,7 +77,7 @@ export TABMAIL_OBJECTSTORE='fs'
 export TABMAIL_DATADIR='/data'
 export TABMAIL_HTTP_ADDR='0.0.0.0:8080'
 export TABMAIL_HTTP_ALLOWED_ORIGINS='http://127.0.0.1:3000,http://localhost:3000'
-export TABMAIL_HTTP_ALLOWED_HEADERS='Authorization,Content-Type,X-API-Key,X-Admin-Key,X-Tenant-ID'
+export TABMAIL_HTTP_ALLOWED_HEADERS='Authorization,Content-Type,X-API-Key,X-Tenant-ID'
 export TABMAIL_HTTP_TRUSTED_PROXIES='127.0.0.1/32,::1/128'
 export TABMAIL_SMTP_ADDR='0.0.0.0:2525'
 export TABMAIL_SMTP_DOMAIN='mail.example.com'
@@ -148,7 +135,6 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 生产 Compose 默认会拆成：
 
-- `tabmail-migrate`
 - `tabmail-api`
 - `tabmail-smtp`
 - `tabmail-worker`
@@ -157,10 +143,32 @@ docker compose -f docker-compose.prod.yml up -d --build
 优势：
 
 - API / SMTP / Worker 可独立伸缩
-- migration 与应用启动顺序解耦
+- 各角色启动时会确保当前 PostgreSQL schema 已初始化
 - PostgreSQL / Redis 不对宿主机暴露端口
 - 没有真实 secrets 时无法启动
 - 便于后续迁移到外部对象存储
+
+## 3.2 Web 前端部署
+
+生产 Compose 已包含 `web` 服务（基于 `web/Dockerfile` 构建的 Next.js 应用）：
+
+```yaml
+web:
+  build: ./web
+  ports:
+    - "3000:3000"
+  environment:
+    INTERNAL_API_URL: "http://tabmail-api:8080"
+  depends_on:
+    - tabmail-api
+```
+
+关键说明：
+
+- `INTERNAL_API_URL` 控制 Next.js 服务端请求后端 API 的地址（容器间通信）
+- 如需自定义构建时的 API 地址，在 `docker compose build` 时传入 `--build-arg INTERNAL_API_URL=...`
+- 前端默认监听 `3000` 端口，建议通过反代（Nginx / Caddy / Traefik）统一对外暴露，并处理 TLS
+- 确保 `TABMAIL_HTTP_ALLOWED_ORIGINS` 包含前端的实际访问域名，否则跨域请求会被拒绝
 
 ## 4. 手工运行
 
@@ -173,13 +181,6 @@ go run ./cmd/tabmail
 ```bash
 make build
 ./bin/tabmail
-```
-
-迁移工具：
-
-```bash
-make build-migrate
-./bin/tabmail-migrate status
 ```
 
 ## 5. 生产部署建议

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { issueToken, listTenants } from "@/lib/api";
+import { issueToken, login, register, logoutSession } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -17,82 +17,77 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { KeyRound, Shield, LogOut, Mail, Copy, Check } from "lucide-react";
+import { KeyRound, LogOut, Mail, Copy, Check, User, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 export function AuthDialog() {
   const {
     level,
-    adminKey,
-    apiKey,
-    tenantId,
+    user,
     mailboxAddress,
-    setAdminKey,
-    setApiKey,
-    setTenantId,
+    refreshToken,
+    loginWithTokens,
     setMailboxAuth,
-    clearMailboxAuth,
     logout,
   } = useAuth();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
-  const [inputAdminKey, setInputAdminKey] = useState("");
-  const [inputApiKey, setInputApiKey] = useState("");
-  const [inputTenantId, setInputTenantId] = useState(tenantId || "");
+  const [copied, setCopied] = useState(false);
+
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // Register form state
+  const [regEmail, setRegEmail] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regName, setRegName] = useState("");
+  const [regLoading, setRegLoading] = useState(false);
+
   const [mailboxAddressInput, setMailboxAddressInput] = useState(mailboxAddress || "");
   const [mailboxPassword, setMailboxPassword] = useState("");
   const [mailboxLoading, setMailboxLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
 
-  const [adminLoading, setAdminLoading] = useState(false);
-
-  const handleAdminLogin = async () => {
-    if (!inputAdminKey.trim()) return;
-    const key = inputAdminKey.trim();
-    const explicitTenant = inputTenantId.trim();
-
-    clearMailboxAuth();
-    setAdminKey(key);
-    setApiKey(null);
-
-    if (explicitTenant) {
-      setTenantId(explicitTenant);
-      setInputAdminKey("");
-      setOpen(false);
-      toast.success(t("toast.adminOk"));
-      return;
-    }
-
-    setAdminLoading(true);
+  const handleLogin = async () => {
+    if (!loginEmail.trim() || !loginPassword.trim()) return;
+    setLoginLoading(true);
     try {
-      const res = await listTenants();
-      if (res.data.length === 1) {
-        setTenantId(res.data[0].id);
-        toast.success(t("toast.adminOk"));
-      } else if (res.data.length > 1) {
-        setTenantId(res.data[0].id);
-        toast.success(t("toast.adminOk"));
-        toast.info(`Auto-selected tenant: ${res.data[0].name}`);
-      } else {
-        toast.success(t("toast.adminOk"));
-      }
-    } catch {
-      toast.success(t("toast.adminOk"));
-    } finally {
-      setAdminLoading(false);
-      setInputAdminKey("");
+      const res = await login(loginEmail.trim(), loginPassword);
+      loginWithTokens(res.data.access_token, res.data.refresh_token, res.data.user);
+      setLoginEmail("");
+      setLoginPassword("");
       setOpen(false);
+      toast.success(`Welcome, ${res.data.user.display_name || res.data.user.email}`);
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || "Login failed");
+    } finally {
+      setLoginLoading(false);
     }
   };
 
-  const handleTenantLogin = () => {
-    if (!inputApiKey.trim()) return;
-    clearMailboxAuth();
-    setAdminKey(null);
-    setApiKey(inputApiKey.trim());
-    setInputApiKey("");
-    setOpen(false);
-    toast.success(t("toast.apiKeyOk"));
+  const handleRegister = async () => {
+    if (!regEmail.trim() || !regPassword.trim()) return;
+    if (regPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    setRegLoading(true);
+    try {
+      const res = await register(regEmail.trim(), regPassword, regName.trim() || undefined);
+      loginWithTokens(res.data.access_token, res.data.refresh_token, res.data.user);
+      setRegEmail("");
+      setRegPassword("");
+      setRegName("");
+      setOpen(false);
+      toast.success(`Account created! Welcome, ${res.data.user.display_name}`);
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || "Registration failed");
+    } finally {
+      setRegLoading(false);
+    }
   };
 
   const handleMailboxLogin = async () => {
@@ -100,9 +95,6 @@ export function AuthDialog() {
     setMailboxLoading(true);
     try {
       const res = await issueToken(mailboxAddressInput.trim(), mailboxPassword);
-      setAdminKey(null);
-      setApiKey(null);
-      setTenantId(null);
       setMailboxAuth(mailboxAddressInput.trim(), res.data.token);
       setMailboxPassword("");
       setOpen(false);
@@ -115,8 +107,18 @@ export function AuthDialog() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      if (refreshToken) {
+        await logoutSession(refreshToken).catch(() => {});
+      }
+    } finally {
+      logout();
+    }
+  };
+
   const handleCopy = () => {
-    const value = mailboxAddress || adminKey || apiKey || "";
+    const value = user?.email || mailboxAddress || "";
     if (!value) return;
     navigator.clipboard.writeText(value);
     setCopied(true);
@@ -127,19 +129,32 @@ export function AuthDialog() {
   if (level !== "public") {
     const levelLabel =
       level === "admin" ? t("auth.level.admin")
-        : level === "tenant" ? t("auth.level.tenant")
+        : level === "user" ? (user?.display_name || user?.email || "User")
           : t("auth.level.mailbox");
-    const displayValue = mailboxAddress || adminKey || apiKey || "";
+    const displayValue = user?.email || mailboxAddress || "";
 
     return (
       <div className="flex items-center gap-1.5">
         <div className="flex items-center gap-2 rounded-lg bg-muted/60 px-2.5 py-1.5">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-            {levelLabel}
-          </span>
-          <code className="text-[11px] text-muted-foreground max-w-[100px] sm:max-w-[140px] truncate">
-            {displayValue.slice(0, 24)}
-          </code>
+          {user ? (
+            <>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                {user.role === "admin" ? "Admin" : "User"}
+              </span>
+              <span className="text-[11px] text-muted-foreground max-w-[100px] sm:max-w-[180px] truncate">
+                {user.display_name || user.email}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+                {levelLabel}
+              </span>
+              <code className="text-[11px] text-muted-foreground max-w-[100px] sm:max-w-[140px] truncate">
+                {displayValue.slice(0, 24)}
+              </code>
+            </>
+          )}
           <button
             onClick={handleCopy}
             className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
@@ -151,7 +166,7 @@ export function AuthDialog() {
             )}
           </button>
         </div>
-        <Button variant="ghost" size="icon" onClick={logout} className="h-8 w-8">
+        <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8">
           <LogOut className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -169,21 +184,61 @@ export function AuthDialog() {
           <DialogTitle>{t("auth.title")}</DialogTitle>
           <DialogDescription>{t("auth.desc")}</DialogDescription>
         </DialogHeader>
-        <Tabs defaultValue="mailbox" className="mt-2">
+        <Tabs defaultValue="login" className="mt-2">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="mailbox" className="gap-1.5">
+            <TabsTrigger value="login" className="gap-1">
+              <User className="h-3.5 w-3.5" />
+              Login
+            </TabsTrigger>
+            <TabsTrigger value="register" className="gap-1">
+              <UserPlus className="h-3.5 w-3.5" />
+              Register
+            </TabsTrigger>
+            <TabsTrigger value="mailbox" className="gap-1">
               <Mail className="h-3.5 w-3.5" />
               {t("auth.mailbox")}
             </TabsTrigger>
-            <TabsTrigger value="apikey" className="gap-1.5">
-              <KeyRound className="h-3.5 w-3.5" />
-              {t("auth.apiKey")}
-            </TabsTrigger>
-            <TabsTrigger value="admin" className="gap-1.5">
-              <Shield className="h-3.5 w-3.5" />
-              {t("auth.admin")}
-            </TabsTrigger>
           </TabsList>
+
+          {/* Login tab */}
+          <TabsContent value="login" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="login-email">Email</Label>
+              <Input id="login-email" type="email" placeholder="you@example.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="login-password">Password</Label>
+              <Input id="login-password" type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleLogin()} />
+            </div>
+            <DialogFooter>
+              <Button onClick={handleLogin} disabled={loginLoading || !loginEmail.trim() || !loginPassword.trim()}>
+                {loginLoading ? "Logging in..." : "Login"}
+              </Button>
+            </DialogFooter>
+          </TabsContent>
+
+          {/* Register tab */}
+          <TabsContent value="register" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label htmlFor="reg-email">Email</Label>
+              <Input id="reg-email" type="email" placeholder="you@example.com" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reg-name">Display Name (optional)</Label>
+              <Input id="reg-name" placeholder="Your name" value={regName} onChange={(e) => setRegName(e.target.value)} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="reg-password">Password (min 8 chars)</Label>
+              <Input id="reg-password" type="password" placeholder="••••••••" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleRegister()} />
+            </div>
+            <DialogFooter>
+              <Button onClick={handleRegister} disabled={regLoading || !regEmail.trim() || regPassword.length < 8}>
+                {regLoading ? "Creating account..." : "Register"}
+              </Button>
+            </DialogFooter>
+          </TabsContent>
+
+          {/* Mailbox tab */}
           <TabsContent value="mailbox" className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label htmlFor="mailbox-address">{t("auth.mailboxAddr")}</Label>
@@ -199,28 +254,7 @@ export function AuthDialog() {
               </Button>
             </DialogFooter>
           </TabsContent>
-          <TabsContent value="apikey" className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="api-key">{t("auth.tenantKey")}</Label>
-              <Input id="api-key" type="password" placeholder={t("auth.tenantKeyPh")} value={inputApiKey} onChange={(e) => setInputApiKey(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleTenantLogin()} />
-            </div>
-            <DialogFooter>
-              <Button onClick={handleTenantLogin} disabled={!inputApiKey.trim()}>{t("auth.connect")}</Button>
-            </DialogFooter>
-          </TabsContent>
-          <TabsContent value="admin" className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="admin-key">{t("auth.adminKey")}</Label>
-              <Input id="admin-key" type="password" placeholder={t("auth.adminKeyPh")} value={inputAdminKey} onChange={(e) => setInputAdminKey(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleAdminLogin()} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="tenant-id">{t("auth.tenantId")}</Label>
-              <Input id="tenant-id" placeholder={t("auth.tenantIdPh")} value={inputTenantId} onChange={(e) => setInputTenantId(e.target.value)} />
-            </div>
-            <DialogFooter>
-              <Button onClick={handleAdminLogin} disabled={!inputAdminKey.trim()}>{t("auth.connect")}</Button>
-            </DialogFooter>
-          </TabsContent>
+
         </Tabs>
       </DialogContent>
     </Dialog>

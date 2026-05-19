@@ -5,7 +5,6 @@ import "testing"
 func TestValidateRejectsPlaceholderSecrets(t *testing.T) {
 	cfg := &Root{
 		Role:               "all",
-		AdminKey:           "change-this-admin-key",
 		MailboxTokenSecret: "change-this-mailbox-token-secret",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
@@ -20,7 +19,6 @@ func TestValidateAcceptsProductionLikeConfig(t *testing.T) {
 		Role:               "worker",
 		ObjectStore:        "fs",
 		DataDir:            "/data",
-		AdminKey:           "super-admin-key-123",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
@@ -34,7 +32,6 @@ func TestValidateRequiresS3FieldsWhenEnabled(t *testing.T) {
 	cfg := &Root{
 		Role:               "all",
 		ObjectStore:        "s3",
-		AdminKey:           "super-admin-key-123",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
@@ -48,7 +45,6 @@ func TestValidateAcceptsS3Config(t *testing.T) {
 	cfg := &Root{
 		Role:               "all",
 		ObjectStore:        "s3",
-		AdminKey:           "super-admin-key-123",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},

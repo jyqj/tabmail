@@ -12,3 +12,6 @@ scrape_configs:
       - targets:
           - tabmail:8080
           - tabmail-api:8080
+          - tabmail-smtp:8080
+          - tabmail-worker:8080
+          - tabmail-retention:8080

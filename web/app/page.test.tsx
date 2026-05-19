@@ -4,8 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import HomePage from "./page";
 
-const { pushMock } = vi.hoisted(() => ({
+const { pushMock, listDomainsMock, suggestAddressMock } = vi.hoisted(() => ({
   pushMock: vi.fn(),
+  listDomainsMock: vi.fn(),
+  suggestAddressMock: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -28,6 +30,11 @@ vi.mock("@/lib/i18n", () => ({
   useI18n: () => ({
     t: (key: string) => key,
   }),
+}));
+
+vi.mock("@/lib/api", () => ({
+  listDomains: (...args: unknown[]) => listDomainsMock(...args),
+  suggestAddress: (...args: unknown[]) => suggestAddressMock(...args),
 }));
 
 vi.mock("@/components/ui/button", () => ({
@@ -56,6 +63,19 @@ vi.mock("@/components/ui/card", () => ({
 describe("home page", () => {
   beforeEach(() => {
     pushMock.mockReset();
+    listDomainsMock.mockReset();
+    suggestAddressMock.mockReset();
+    listDomainsMock.mockResolvedValue({
+      data: [
+        {
+          id: "zone-1",
+          domain: "tabmail.dev",
+          is_verified: true,
+          mx_verified: true,
+        },
+      ],
+    });
+    suggestAddressMock.mockResolvedValue({ data: { address: "aaaaaaaa@tabmail.dev" } });
   });
 
   afterEach(() => {

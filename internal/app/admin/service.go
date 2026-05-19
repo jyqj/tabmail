@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -17,6 +19,9 @@ import (
 
 type Store interface {
 	app.AuditStore
+	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
+	UpsertSetting(ctx context.Context, key, value, description string) error
+	ListSettings(ctx context.Context) ([]*models.SystemSetting, error)
 	GetPlan(ctx context.Context, id uuid.UUID) (*models.Plan, error)
 	CreateTenant(ctx context.Context, t *models.Tenant) error
 	ListTenants(ctx context.Context) ([]*models.Tenant, error)
@@ -29,6 +34,7 @@ type Store interface {
 	UpdatePlan(ctx context.Context, p *models.Plan) error
 	DeletePlan(ctx context.Context, id uuid.UUID) error
 	CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error
+	GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAPIKey, error)
 	ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error)
 	DeleteAPIKey(ctx context.Context, id uuid.UUID) error
 	CountAllZones(ctx context.Context) (int, error)
@@ -46,7 +52,17 @@ type Service struct {
 	store         Store
 	dispatcher    *hooks.Dispatcher
 	defaultPolicy models.SMTPPolicy
+	settings      settingsManager
 	logger        zerolog.Logger
+}
+
+type settingsManager interface {
+	Get(ctx context.Context, key, defaultVal string) string
+	GetInt(ctx context.Context, key string, defaultVal int) int
+	GetBool(ctx context.Context, key string, defaultVal bool) bool
+	Set(ctx context.Context, key, value, description string) error
+	All(ctx context.Context) ([]*models.SystemSetting, error)
+	Invalidate()
 }
 
 type APIKeyIssueResult struct {
@@ -58,8 +74,123 @@ type APIKeyIssueResult struct {
 	CreatedAt any       `json:"created_at"`
 }
 
-func NewService(s Store, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, logger zerolog.Logger) *Service {
-	return &Service{store: s, dispatcher: dispatcher, defaultPolicy: defaultPolicy, logger: logger.With().Str("service", "admin").Logger()}
+var allowedAPIKeyScopes = []string{
+	"domains:read",
+	"domains:write",
+	"routes:read",
+	"routes:write",
+	"mailboxes:read",
+	"mailboxes:write",
+	"messages:read",
+	"messages:write",
+}
+
+var defaultAPIKeyScopes = []string{
+	"domains:read",
+	"routes:read",
+	"mailboxes:read",
+	"messages:read",
+}
+
+func normalizeAPIKeyScopes(scopes []string) ([]string, error) {
+	if len(scopes) == 0 {
+		return append([]string(nil), defaultAPIKeyScopes...), nil
+	}
+	allowed := make(map[string]int, len(allowedAPIKeyScopes))
+	for i, scope := range allowedAPIKeyScopes {
+		allowed[scope] = i
+	}
+	seen := make(map[string]struct{}, len(scopes))
+	normalized := make([]string, 0, len(scopes))
+	for _, raw := range scopes {
+		scope := strings.ToLower(strings.TrimSpace(raw))
+		if scope == "" {
+			continue
+		}
+		if scope == "*" {
+			return nil, app.BadRequest("wildcard api key scope is not allowed; select explicit scopes")
+		}
+		if _, ok := allowed[scope]; !ok {
+			return nil, app.BadRequest("unknown api key scope: " + scope)
+		}
+		if _, ok := seen[scope]; ok {
+			continue
+		}
+		seen[scope] = struct{}{}
+		normalized = append(normalized, scope)
+	}
+	if len(normalized) == 0 {
+		return nil, app.BadRequest("at least one api key scope is required")
+	}
+	sort.Slice(normalized, func(i, j int) bool {
+		return allowed[normalized[i]] < allowed[normalized[j]]
+	})
+	return normalized, nil
+}
+
+func NewService(s Store, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, logger zerolog.Logger) *Service {
+	return &Service{store: s, dispatcher: dispatcher, defaultPolicy: defaultPolicy, settings: sm, logger: logger.With().Str("service", "admin").Logger()}
+}
+
+// ListSettings returns all system settings.
+func (s *Service) ListSettings(ctx context.Context) ([]*models.SystemSetting, error) {
+	items, err := s.settings.All(ctx)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	if items == nil {
+		items = []*models.SystemSetting{}
+	}
+	return items, nil
+}
+
+// UpdateSetting updates a single system setting.
+func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor string) error {
+	if key == "" {
+		return app.BadRequest("key is required")
+	}
+	// Validate known keys
+	switch key {
+	case models.SettingAutoCreateRouteRPM, models.SettingAutoCreateTenantRPM,
+		models.SettingMonitorHistory, models.SettingFallbackRetentionH,
+		models.SettingPublicIPRPM:
+		// Must be a valid int
+		if _, err := fmt.Sscanf(value, "%d", new(int)); err != nil {
+			return app.BadRequest("value must be an integer for " + key)
+		}
+	case models.SettingStripPlusTag, models.SettingOpenRegistration:
+		// Must be a valid bool
+		if value != "true" && value != "false" {
+			return app.BadRequest("value must be true or false for " + key)
+		}
+	case models.SettingMailboxNaming:
+		switch value {
+		case "full", "local", "domain":
+		default:
+			return app.BadRequest("value must be full, local, or domain for " + key)
+		}
+	}
+
+	if err := s.settings.Set(ctx, key, value, ""); err != nil {
+		return app.Internal(err)
+	}
+	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+		Action:       "setting.update",
+		ResourceType: "system_setting",
+		Actor:        actor,
+		Details:      app.MustJSON(map[string]any{"key": key, "value": value}),
+	})
+	return nil
+}
+
+// BulkUpdateSettings updates multiple settings at once.
+func (s *Service) BulkUpdateSettings(ctx context.Context, updates map[string]string, actor string) error {
+	for key, value := range updates {
+		if err := s.UpdateSetting(ctx, key, value, actor); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (s *Service) ListTenants(ctx context.Context) ([]*models.Tenant, error) {
@@ -194,11 +325,12 @@ func (s *Service) CreateAPIKey(ctx context.Context, tenantID uuid.UUID, label st
 	if tenant == nil {
 		return nil, app.NotFound("tenant not found")
 	}
+	scopes, err = normalizeAPIKeyScopes(scopes)
+	if err != nil {
+		return nil, err
+	}
 	raw := generateKey()
 	hash := sha256.Sum256([]byte(raw))
-	if len(scopes) == 0 {
-		scopes = []string{"*"}
-	}
 	k := &models.TenantAPIKey{
 		TenantID:  tenantID,
 		KeyHash:   hex.EncodeToString(hash[:]),
@@ -233,6 +365,20 @@ func (s *Service) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*model
 		return nil, app.Internal(err)
 	}
 	return items, nil
+}
+
+func (s *Service) DeleteAPIKeyForTenant(ctx context.Context, tenantID uuid.UUID, keyID uuid.UUID, actor string) error {
+	key, err := s.store.GetAPIKey(ctx, keyID)
+	if err != nil {
+		return app.Internal(err)
+	}
+	if key == nil {
+		return app.NotFound("api key not found")
+	}
+	if key.TenantID != tenantID {
+		return app.Forbidden("api key belongs to another tenant")
+	}
+	return s.DeleteAPIKey(ctx, keyID, actor)
 }
 
 func (s *Service) DeleteAPIKey(ctx context.Context, keyID uuid.UUID, actor string) error {
