@@ -25,6 +25,7 @@ import {
   RefreshCw,
   BookOpen,
   ChevronDown,
+  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -163,11 +164,11 @@ export default function HomePage() {
               </button>
               <span className="flex items-center gap-1.5 opacity-60">
                 <Code2 className="h-3 w-3" />
-                {t("home.curlHint")}
+                {t("home.curlHint") || "直接 curl"}
               </span>
               <span className="flex items-center gap-1.5 opacity-60">
                 <ShieldCheck className="h-3 w-3" />
-                {t("home.noRegister")}
+                {t("home.noRegister") || "不需要注册"}
               </span>
             </div>
 
@@ -181,7 +182,7 @@ export default function HomePage() {
               {/* Left: steps */}
               <div className="flex-1">
                 <div className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-2">
-                  {t("home.howItWorks")}
+                  {t("home.howItWorks") || "三步上线"}
                 </div>
                 <h2 className="text-[28px] sm:text-[32px] font-semibold leading-tight tracking-[-0.025em]">
                   {t("home.threeSteps")}
@@ -206,7 +207,7 @@ export default function HomePage() {
                 <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
                   <div className="flex items-center h-8 px-3 border-b border-border bg-muted/40 gap-2">
                     <Terminal className="h-3 w-3 text-muted-foreground/70" />
-                    <span className="font-mono text-[11px] text-muted-foreground/70">{t("home.curlTitle")}</span>
+                    <span className="font-mono text-[11px] text-muted-foreground/70">{t("home.curlTitle") || "curl · 拉取最新邮件"}</span>
                     <div className="flex-1" />
                     <button className="p-1 rounded hover:bg-muted transition-colors" title="Copy">
                       <Copy className="h-3 w-3 text-muted-foreground/50" />

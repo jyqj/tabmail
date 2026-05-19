@@ -35,6 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { APIKeyScopePicker } from "@/components/api-key-scope-picker";
 import { createUserAPIKey, listUserAPIKeys, revokeUserAPIKey } from "@/lib/api";
 import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
+import type { TenantAPIKey } from "@/lib/types";
 import { Plus, Key, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";

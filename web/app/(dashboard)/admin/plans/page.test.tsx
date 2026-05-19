@@ -1,6 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mutate } from "swr";
 
 import PlansPage from "./page";
 
@@ -104,6 +105,7 @@ vi.mock("@/components/ui/skeleton", () => ({
 
 describe("admin/plans page", () => {
   beforeEach(() => {
+    mutate(() => true, undefined, { revalidate: false });
     listPlansMock.mockReset();
     createPlanMock.mockReset();
     deletePlanMock.mockReset();
@@ -202,7 +204,8 @@ describe("admin/plans page", () => {
     expect(await screen.findByText("starter")).toBeInTheDocument();
 
     const buttons = screen.getAllByRole("button");
-    fireEvent.click(buttons[buttons.length - 1]);
+    const deleteBtn = buttons.find(b => b.className.includes("text-destructive")) || buttons[buttons.length - 1];
+    fireEvent.click(deleteBtn);
 
     await waitFor(() => {
       expect(deletePlanMock).toHaveBeenCalledWith("plan-1");

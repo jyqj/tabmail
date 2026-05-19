@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom/vitest";
 import React from "react";
 import { beforeEach, vi } from "vitest";
+import { SWRConfig } from "swr";
 
 import { I18nProvider } from "@/lib/i18n";
 
@@ -10,7 +11,14 @@ vi.mock("@testing-library/react", async () => {
   return {
     ...actual,
     render: (ui: React.ReactElement, options?: Parameters<typeof actual.render>[1]) =>
-      actual.render(React.createElement(I18nProvider, null, ui), options),
+      actual.render(
+        React.createElement(
+          SWRConfig,
+          { value: { provider: () => new Map() } },
+          React.createElement(I18nProvider, null, ui)
+        ),
+        options
+      ),
   };
 });
 
@@ -18,3 +26,4 @@ beforeEach(() => {
   window.localStorage.clear();
   window.localStorage.setItem("tabmail-locale", "en");
 });
+

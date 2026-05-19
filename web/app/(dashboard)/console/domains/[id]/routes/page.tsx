@@ -42,7 +42,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { listRoutes, createRoute, deleteRoute } from "@/lib/api";
-import type { RouteType, AccessMode } from "@/lib/types";
+import type { DomainRoute, RouteType, AccessMode } from "@/lib/types";
 import { Plus, Trash2, Route } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";

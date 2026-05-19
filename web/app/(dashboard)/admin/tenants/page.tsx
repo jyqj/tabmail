@@ -58,7 +58,7 @@ import {
   revokeAPIKey,
 } from "@/lib/api";
 import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
-import type { Tenant, TenantAPIKey, APIKeyCreated, TenantOverride, EffectiveConfig } from "@/lib/types";
+import type { Tenant, Plan, TenantAPIKey, APIKeyCreated, TenantOverride, EffectiveConfig } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,

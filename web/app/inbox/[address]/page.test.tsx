@@ -254,9 +254,10 @@ describe("InboxPage", () => {
       expect(issueTokenMock).toHaveBeenCalledWith("user@mail.test", "Passw0rd!");
     });
     expect(authStateRef.current?.setMailboxAuth).toHaveBeenCalledWith("user@mail.test", "mailbox-token");
-    await waitFor(() => {
-      expect(listMessagesMock.mock.calls.length).toBeGreaterThanOrEqual(2);
-    });
+    
+    // Wait for the new message to render, which ensures SWR state updates and React renders the unlocked view
+    expect(await screen.findByText("After Login")).toBeInTheDocument();
+    
     expect(screen.queryByText("inbox.authTitle")).not.toBeInTheDocument();
     expect(toastSuccess).toHaveBeenCalledWith("toast.tokenIssued");
   });

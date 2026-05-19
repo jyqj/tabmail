@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { listMailboxes, createMailbox, deleteMailbox } from "@/lib/api";
-import type { AccessMode } from "@/lib/types";
+import type { Mailbox, AccessMode } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,

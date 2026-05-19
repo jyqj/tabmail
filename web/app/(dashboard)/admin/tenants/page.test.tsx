@@ -282,7 +282,7 @@ describe("admin/tenants page", () => {
 
     expect(await screen.findByText("Acme")).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "API Keys" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "API Keys" }));
 
     await waitFor(() => {
       expect(listAPIKeysMock).toHaveBeenCalledWith("tenant-1");
@@ -332,7 +332,7 @@ describe("admin/tenants page", () => {
 
     expect(await screen.findByText("Acme")).toBeInTheDocument();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Overrides" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Overrides" }));
 
     await waitFor(() => {
       expect(getTenantConfigMock).toHaveBeenCalledWith("tenant-1");

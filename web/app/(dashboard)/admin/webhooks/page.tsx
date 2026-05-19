@@ -6,6 +6,7 @@ import { RefreshCw, Search, Webhook } from "lucide-react";
 import { toast } from "sonner";
 
 import { listWebhookDeliveries } from "@/lib/api";
+import type { WebhookDelivery } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
@@ -57,7 +58,7 @@ export default function AdminWebhooksPage() {
       url: url || undefined,
     }),
   );
-  const items = useMemo(() => response?.data ?? [], [response?.data]);
+  const items = response?.data ?? [];
   const total = response?.meta?.total ?? 0;
 
   useEffect(() => { if (error) toast.error(t("webhooks.loadFailed")); }, [error, t]);

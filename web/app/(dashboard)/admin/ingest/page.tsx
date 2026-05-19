@@ -6,6 +6,7 @@ import { Boxes, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { listIngestJobs } from "@/lib/api";
+import type { IngestJob } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
@@ -57,7 +58,7 @@ export default function AdminIngestPage() {
       recipient: recipient || undefined,
     }),
   );
-  const jobs = useMemo(() => response?.data ?? [], [response?.data]);
+  const jobs = response?.data ?? [];
   const total = response?.meta?.total ?? 0;
 
   useEffect(() => { if (error) toast.error(t("ingest.loadFailed")); }, [error, t]);

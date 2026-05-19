@@ -64,10 +64,10 @@ export default function InboxPage() {
     !!mailboxToken && mailboxAddress?.toLowerCase() === address.toLowerCase();
 
   const { data: response, isLoading: loading, isValidating: refreshing, error, mutate } = useAPI(
-    authRequired ? null : ["inbox", address],
+    address ? ["inbox", address] : null,
     () => listMessages(address),
     {
-      refreshInterval: settings.autoRefresh ? settings.refreshInterval * 1000 : 0,
+      refreshInterval: settings.autoRefresh && !authRequired ? settings.refreshInterval * 1000 : 0,
     },
   );
   const messages = response?.data ?? [];

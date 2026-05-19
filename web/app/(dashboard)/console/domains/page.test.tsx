@@ -253,7 +253,7 @@ describe("console/domains page", () => {
 
     expect((await screen.findAllByText("mail.test")).length).toBeGreaterThan(0);
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Verify DNS" })[0]);
+    fireEvent.click(screen.getByRole("button", { name: "Verify DNS" }));
     await waitFor(() => {
       expect(verifyDomainMock).toHaveBeenCalledWith("zone-1");
     });

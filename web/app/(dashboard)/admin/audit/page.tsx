@@ -6,6 +6,7 @@ import { ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 
 import { listAudit } from "@/lib/api";
+import type { AuditEntry } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
