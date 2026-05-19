@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -411,28 +412,20 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
 
 export default function DomainsPage() {
   const { t } = useI18n();
-  const [zones, setZones] = useState<DomainZone[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: response, isLoading: loading, error, mutate } = useAPI(
+    "domains",
+    () => listDomains(),
+  );
+  const zones = response?.data ?? [];
+  const total = zones.length;
+
+  useEffect(() => {
+    if (error) toast.error(t("domains.loadFailed"));
+  }, [error, t]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState("");
   const [creating, setCreating] = useState(false);
-
-  const fetchDomains = useCallback(async () => {
-    try {
-      const res = await listDomains();
-      setZones(res.data ?? []);
-      setTotal(res.data?.length ?? 0);
-    } catch {
-      toast.error(t("domains.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchDomains();
-  }, [fetchDomains]);
 
   const handleCreate = async () => {
     if (!newDomain.trim()) return;
@@ -442,7 +435,7 @@ export default function DomainsPage() {
       setNewDomain("");
       setDialogOpen(false);
       toast.success(t("domains.domainCreated"));
-      fetchDomains();
+      mutate();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("domains.createFailed"));
@@ -456,7 +449,7 @@ export default function DomainsPage() {
     try {
       await deleteDomain(id);
       toast.success(t("domains.deleted"));
-      fetchDomains();
+      mutate();
     } catch {
       toast.error(t("domains.deleteFailed"));
     }
@@ -534,7 +527,7 @@ export default function DomainsPage() {
               <DomainCard
                 key={zone.id}
                 zone={zone}
-                onVerify={fetchDomains}
+                onVerify={() => mutate()}
                 onDelete={() => handleDelete(zone.id)}
                 onSuggest={(subdomain) => handleSuggestAddress(zone.id, subdomain)}
               />

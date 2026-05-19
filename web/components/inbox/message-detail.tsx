@@ -131,7 +131,7 @@ export function MessageDetail({
               <iframe
                 srcDoc={message.html_body}
                 className="w-full h-full border-0"
-                sandbox="allow-same-origin"
+                sandbox=""
                 title="Email HTML content"
               />
             ) : (

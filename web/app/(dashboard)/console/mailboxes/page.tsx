@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,7 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { listMailboxes, createMailbox, deleteMailbox } from "@/lib/api";
-import type { Mailbox, AccessMode } from "@/lib/types";
+import type { AccessMode } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -76,10 +77,19 @@ const accessColors: Record<AccessMode, string> = {
 
 export default function MailboxesPage() {
   const { t } = useI18n();
-  const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+
+  const { data: response, isLoading: loading, error, mutate } = useAPI(
+    ["mailboxes", page],
+    () => listMailboxes(page),
+  );
+  const mailboxes = response?.data ?? [];
+  const total = response?.meta?.total ?? 0;
+
+  useEffect(() => {
+    if (error) toast.error(t("mailboxes.loadFailed"));
+  }, [error, t]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -88,22 +98,6 @@ export default function MailboxesPage() {
   const [newPassword, setNewPassword] = useState("");
   const [newRetentionHours, setNewRetentionHours] = useState("");
   const [newExpiresAt, setNewExpiresAt] = useState("");
-
-  const fetchMailboxes = useCallback(async () => {
-    try {
-      const res = await listMailboxes(page);
-      setMailboxes(res.data ?? []);
-      setTotal(res.meta.total);
-    } catch {
-      toast.error(t("mailboxes.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [page, t]);
-
-  useEffect(() => {
-    fetchMailboxes();
-  }, [fetchMailboxes]);
 
   const handleCreate = async () => {
     if (!newAddress.trim()) return;
@@ -136,7 +130,7 @@ export default function MailboxesPage() {
       setNewExpiresAt("");
       setDialogOpen(false);
       toast.success(t("mailboxes.mailboxCreated"));
-      fetchMailboxes();
+      mutate();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("mailboxes.createFailed"));
@@ -150,7 +144,7 @@ export default function MailboxesPage() {
     try {
       await deleteMailbox(id);
       toast.success(t("mailboxes.deleted"));
-      fetchMailboxes();
+      mutate();
     } catch {
       toast.error(t("mailboxes.deleteFailed"));
     }

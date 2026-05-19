@@ -1,4 +1,5 @@
 import type {
+  AdminUser,
   APIKeyCreated,
   APIListResponse,
   APIResponse,
@@ -178,4 +179,33 @@ export function listWebhookDeliveries(params?: {
   return request<APIListResponse<WebhookDelivery>>("/api/v1/admin/webhooks/deliveries", {
     params: params as Record<string, string | number>,
   });
+}
+
+// --- User management ---
+
+export function inviteAdmin(email: string) {
+  return request<APIResponse<{ id: string; email: string; invite_code: string; expires_at: string }>>(
+    "/api/v1/admin/invite",
+    { method: "POST", body: { email } }
+  );
+}
+
+export function listUsers(params?: { page?: number; per_page?: number }) {
+  return request<APIListResponse<AdminUser>>("/api/v1/admin/users", {
+    params: params as Record<string, string | number>,
+  });
+}
+
+export function updateUser(
+  id: string,
+  body: { role?: string; is_active?: boolean; display_name?: string }
+) {
+  return request<APIResponse<AdminUser>>(`/api/v1/admin/users/${id}`, {
+    method: "PATCH",
+    body,
+  });
+}
+
+export function deleteUser(id: string) {
+  return request<void>(`/api/v1/admin/users/${id}`, { method: "DELETE" });
 }

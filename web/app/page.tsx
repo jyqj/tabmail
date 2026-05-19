@@ -25,7 +25,6 @@ import {
   RefreshCw,
   BookOpen,
   ChevronDown,
-  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -172,26 +171,6 @@ export default function HomePage() {
               </span>
             </div>
 
-            {/* Live stats strip */}
-            <div className="tm-reveal tm-reveal-6 mt-14 rounded-lg border border-border bg-card px-6 py-5 grid grid-cols-2 md:grid-cols-5 gap-x-8 gap-y-5">
-              {[
-                [t("home.stat.recv") || "每秒接收", "—", "msg/s"],
-                [t("home.stat.tenants") || "在线租户", "—", "tenants"],
-                [t("home.stat.dedup") || "去重命中", "—", "%"],
-                [t("home.stat.p50") || "P50 入库", "—", "ms"],
-                [t("home.stat.p99") || "P99 入库", "—", "ms"],
-              ].map(([label, value, unit]) => (
-                <div key={label as string} className="flex flex-col gap-1">
-                  <div className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground/70">
-                    {label}
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-[28px] font-semibold tracking-[-0.025em] tabular-nums leading-none">{value}</span>
-                    <span className="font-mono text-[11px] text-muted-foreground">{unit}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
           </div>
         </section>
 

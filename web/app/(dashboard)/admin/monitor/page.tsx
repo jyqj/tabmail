@@ -8,12 +8,14 @@ import { toast } from "sonner";
 import { listMonitorHistory, streamAdminMonitorEvents } from "@/lib/api";
 import type { MonitorEvent } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -27,11 +29,9 @@ const MAX_EVENTS = 200;
 export default function AdminMonitorPage() {
   const { t } = useI18n();
   const [events, setEvents] = useState<MonitorEvent[]>([]);
-  const [history, setHistory] = useState<MonitorEvent[]>([]);
   const [connected, setConnected] = useState(false);
   const [reconnectKey, setReconnectKey] = useState(0);
   const [historyPage, setHistoryPage] = useState(1);
-  const [historyTotal, setHistoryTotal] = useState(0);
   const [filterType, setFilterType] = useState("all");
   const [filterMailbox, setFilterMailbox] = useState("");
   const [filterSender, setFilterSender] = useState("");
@@ -67,20 +67,20 @@ export default function AdminMonitorPage() {
     return () => controller.abort();
   }, [reconnectKey, t]);
 
-  useEffect(() => {
-    listMonitorHistory({
+  const { data: historyRes, isLoading: historyLoading, error: historyError } = useAPI(
+    ["monitor-history", historyPage, filterType, filterMailbox, filterSender],
+    () => listMonitorHistory({
       page: historyPage,
       per_page: 30,
       type: filterType === "all" ? undefined : filterType,
       mailbox: filterMailbox || undefined,
       sender: filterSender || undefined,
-    })
-      .then((res) => {
-        setHistory(res.data ?? []);
-        setHistoryTotal(res.meta.total);
-      })
-      .catch(() => toast.error(t("monitor.loadHistoryFailed")));
-  }, [historyPage, filterType, filterMailbox, filterSender, t]);
+    }),
+  );
+  const history = historyRes?.data ?? [];
+  const historyTotal = historyRes?.meta?.total ?? 0;
+
+  useEffect(() => { if (historyError) toast.error(t("monitor.loadHistoryFailed")); }, [historyError, t]);
 
   const stats = useMemo(() => {
     const counters = { message: 0, delete: 0, purge: 0 };
@@ -256,7 +256,13 @@ export default function AdminMonitorPage() {
             <CardDescription>{t("monitor.persistedHistoryDesc")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            {!history.length ? (
+            {historyLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full" />
+                ))}
+              </div>
+            ) : !history.length ? (
               <div className="text-sm text-muted-foreground">{t("monitor.noStored")}</div>
             ) : (
               <div className="space-y-3">
@@ -282,7 +288,7 @@ export default function AdminMonitorPage() {
             )}
             <div className="flex items-center justify-between">
               <div className="text-xs text-muted-foreground">
-                Page {historyPage} · {historyTotal.toLocaleString()} total
+                {t("monitor.pageOf", { page: historyPage, total: historyTotal })}
               </div>
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" disabled={historyPage <= 1} onClick={() => setHistoryPage((p) => p - 1)}>

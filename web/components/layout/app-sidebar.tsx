@@ -52,11 +52,12 @@ export function AppSidebar() {
     { href: "/admin/monitor", label: t("sidebar.monitor"), icon: Radar },
     { href: "/admin/policy", label: t("sidebar.smtpPolicy"), icon: SlidersHorizontal },
     { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
+    { href: "/admin/users", label: t("sidebar.users"), icon: Users },
     { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
     { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
     { href: "/admin/ingest", label: t("sidebar.ingest"), icon: Boxes },
     { href: "/admin/webhooks", label: t("sidebar.webhooks"), icon: Webhook },
-    { href: "/admin/settings", label: "Settings", icon: Settings2 },
+    { href: "/admin/settings", label: t("sidebar.settings"), icon: Settings2 },
   ];
 
   return (

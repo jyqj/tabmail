@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +35,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { APIKeyScopePicker } from "@/components/api-key-scope-picker";
 import { createUserAPIKey, listUserAPIKeys, revokeUserAPIKey } from "@/lib/api";
 import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
-import type { TenantAPIKey } from "@/lib/types";
 import { Plus, Key, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -51,28 +51,21 @@ function safeConfirm(message: string) {
 
 export default function UserAPIKeysPage() {
   const { t } = useI18n();
-  const [keys, setKeys] = useState<TenantAPIKey[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: response, isLoading: loading, error, mutate } = useAPI(
+    "apiKeys",
+    () => listUserAPIKeys(),
+  );
+  const keys = response?.data ?? [];
+
+  useEffect(() => {
+    if (error) toast.error(t("apiKeys.loadFailed"));
+  }, [error, t]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newScopes, setNewScopes] = useState<string[]>([...DEFAULT_API_KEY_SCOPES]);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
-
-  const fetchKeys = useCallback(async () => {
-    try {
-      const res = await listUserAPIKeys();
-      setKeys(res.data ?? []);
-    } catch {
-      toast.error(t("apiKeys.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchKeys();
-  }, [fetchKeys]);
 
   const handleCreate = async () => {
     setCreating(true);
@@ -84,7 +77,7 @@ export default function UserAPIKeysPage() {
       setCreatedKey(res.data.key);
       setNewLabel("");
       setNewScopes([...DEFAULT_API_KEY_SCOPES]);
-      fetchKeys();
+      mutate();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("apiKeys.createFailed"));
@@ -99,7 +92,7 @@ export default function UserAPIKeysPage() {
     try {
       await revokeUserAPIKey(keyId);
       toast.success(t("apiKeys.revoked"));
-      fetchKeys();
+      mutate();
     } catch {
       toast.error(t("apiKeys.revokeFailed"));
     }

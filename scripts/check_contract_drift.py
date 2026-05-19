@@ -22,6 +22,11 @@ SHARED_TYPES = [
     "Message",
     "MonitorEvent",
     "SMTPPolicy",
+    "SystemSetting",
+    "AuditEntry",
+    "WebhookDelivery",
+    "IngestJob",
+    "SystemStats",
 ]
 
 

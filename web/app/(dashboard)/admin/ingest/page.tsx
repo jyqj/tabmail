@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Boxes, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { listIngestJobs } from "@/lib/api";
-import type { IngestJob } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,36 +42,25 @@ const stateStyles: Record<string, string> = {
 
 export default function AdminIngestPage() {
   const { t } = useI18n();
-  const [jobs, setJobs] = useState<IngestJob[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [state, setState] = useState("all");
   const [source, setSource] = useState("all");
   const [recipient, setRecipient] = useState("");
 
-  const fetchJobs = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await listIngestJobs({
-        page,
-        per_page: PAGE_SIZE,
-        state: state === "all" ? undefined : state,
-        source: source === "all" ? undefined : source,
-        recipient: recipient || undefined,
-      });
-      setJobs(res.data ?? []);
-      setTotal(res.meta.total);
-    } catch {
-      toast.error(t("ingest.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [page, recipient, source, state, t]);
+  const { data: response, isLoading: loading, error, mutate } = useAPI(
+    ["ingest", page, state, source, recipient],
+    () => listIngestJobs({
+      page,
+      per_page: PAGE_SIZE,
+      state: state === "all" ? undefined : state,
+      source: source === "all" ? undefined : source,
+      recipient: recipient || undefined,
+    }),
+  );
+  const jobs = useMemo(() => response?.data ?? [], [response?.data]);
+  const total = response?.meta?.total ?? 0;
 
-  useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
+  useEffect(() => { if (error) toast.error(t("ingest.loadFailed")); }, [error, t]);
 
   const totals = useMemo(() => {
     return jobs.reduce<Record<string, number>>((acc, item) => {
@@ -88,7 +77,7 @@ export default function AdminIngestPage() {
         title={t("ingest.title")}
         description={t("ingest.desc")}
         actions={
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={fetchJobs}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => mutate()}>
             <RefreshCw className="h-3.5 w-3.5" />
             {t("ingest.refresh")}
           </Button>

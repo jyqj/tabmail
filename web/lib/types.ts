@@ -301,6 +301,17 @@ export interface AuthUser {
   tenant_id: string;
 }
 
+export interface AdminUser {
+  id: string;
+  tenant_id: string;
+  email: string;
+  display_name: string;
+  role: UserRole;
+  is_active: boolean;
+  created_at: string;
+  last_login_at?: string | null;
+}
+
 export interface LoginResponse {
   access_token: string;
   refresh_token: string;

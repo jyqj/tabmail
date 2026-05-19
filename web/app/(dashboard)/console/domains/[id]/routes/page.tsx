@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +42,7 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { listRoutes, createRoute, deleteRoute } from "@/lib/api";
-import type { DomainRoute, RouteType, AccessMode } from "@/lib/types";
+import type { RouteType, AccessMode } from "@/lib/types";
 import { Plus, Trash2, Route } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -68,9 +69,17 @@ export default function RoutesPage() {
   const params = useParams();
   const domainId = params.id as string;
 
-  const [routes, setRoutes] = useState<DomainRoute[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { data: response, isLoading: loading, error, mutate } = useAPI(
+    ["routes", domainId],
+    () => listRoutes(domainId),
+  );
+  const routes = response?.data ?? [];
+  const total = routes.length;
+
+  useEffect(() => {
+    if (error) toast.error(t("routes.loadFailed"));
+  }, [error, t]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
 
@@ -81,22 +90,6 @@ export default function RoutesPage() {
   const [autoCreate, setAutoCreate] = useState(true);
   const [retentionHoursOverride, setRetentionHoursOverride] = useState("");
   const [accessMode, setAccessMode] = useState<AccessMode>("public");
-
-  const fetchRoutes = useCallback(async () => {
-    try {
-      const res = await listRoutes(domainId);
-      setRoutes(res.data ?? []);
-      setTotal(res.data?.length ?? 0);
-    } catch {
-      toast.error(t("routes.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [domainId, t]);
-
-  useEffect(() => {
-    fetchRoutes();
-  }, [fetchRoutes]);
 
   const handleCreate = async () => {
     if (!matchValue.trim()) return;
@@ -138,7 +131,7 @@ export default function RoutesPage() {
       setRetentionHoursOverride("");
       setDialogOpen(false);
       toast.success(t("routes.routeCreated"));
-      fetchRoutes();
+      mutate();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("routes.createFailed"));
@@ -152,7 +145,7 @@ export default function RoutesPage() {
     try {
       await deleteRoute(domainId, routeId);
       toast.success(t("routes.deleted"));
-      fetchRoutes();
+      mutate();
     } catch {
       toast.error(t("routes.deleteFailed"));
     }

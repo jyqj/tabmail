@@ -6,9 +6,11 @@ export {
   createUserAPIKey,
   deletePlan,
   deleteTenant,
+  deleteUser,
   getSMTPPolicy,
   getStats,
   getTenantConfig,
+  inviteAdmin,
   listIngestJobs,
   listAPIKeys,
   listAudit,
@@ -16,6 +18,7 @@ export {
   listPlans,
   listSettings,
   listTenants,
+  listUsers,
   listUserAPIKeys,
   listWebhookDeliveries,
   revokeAPIKey,
@@ -25,12 +28,15 @@ export {
   updateSettings,
   updateSMTPPolicy,
   updateTenantOverrides,
+  updateUser,
 } from "./api/admin";
 export {
+  acceptInvite,
   issueToken,
   login,
   register,
   logoutSession,
+  changePassword,
 } from "./api/auth";
 export {
   createDomain,

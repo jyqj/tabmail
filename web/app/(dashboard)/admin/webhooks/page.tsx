@@ -1,13 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { RefreshCw, Search, Webhook } from "lucide-react";
 import { toast } from "sonner";
 
 import { listWebhookDeliveries } from "@/lib/api";
-import type { WebhookDelivery } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -42,36 +42,25 @@ const stateStyles: Record<string, string> = {
 
 export default function AdminWebhooksPage() {
   const { t } = useI18n();
-  const [items, setItems] = useState<WebhookDelivery[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
   const [state, setState] = useState("all");
   const [eventType, setEventType] = useState("");
   const [url, setUrl] = useState("");
 
-  const fetchItems = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await listWebhookDeliveries({
-        page,
-        per_page: PAGE_SIZE,
-        state: state === "all" ? undefined : state,
-        event_type: eventType || undefined,
-        url: url || undefined,
-      });
-      setItems(res.data ?? []);
-      setTotal(res.meta.total);
-    } catch {
-      toast.error(t("webhooks.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [eventType, page, state, url, t]);
+  const { data: response, isLoading: loading, error, mutate } = useAPI(
+    ["webhooks", page, state, eventType, url],
+    () => listWebhookDeliveries({
+      page,
+      per_page: PAGE_SIZE,
+      state: state === "all" ? undefined : state,
+      event_type: eventType || undefined,
+      url: url || undefined,
+    }),
+  );
+  const items = useMemo(() => response?.data ?? [], [response?.data]);
+  const total = response?.meta?.total ?? 0;
 
-  useEffect(() => {
-    fetchItems();
-  }, [fetchItems]);
+  useEffect(() => { if (error) toast.error(t("webhooks.loadFailed")); }, [error, t]);
 
   const stats = useMemo(() => {
     return items.reduce<Record<string, number>>((acc, item) => {
@@ -88,7 +77,7 @@ export default function AdminWebhooksPage() {
         title={t("webhooks.title")}
         description={t("webhooks.desc")}
         actions={
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={fetchItems}>
+          <Button variant="outline" size="sm" className="gap-1.5" onClick={() => mutate()}>
             <RefreshCw className="h-3.5 w-3.5" />
             {t("webhooks.refresh")}
           </Button>

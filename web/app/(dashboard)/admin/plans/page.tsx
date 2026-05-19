@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ import { Plus, Trash2, CreditCard, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 
 interface PlanFormData {
   name: string;
@@ -66,9 +67,16 @@ function confirmAction(message: string) {
 
 export default function PlansPage() {
   const { t } = useI18n();
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+
+  const { data: plansRes, isLoading: loading, error: plansError, mutate: mutatePlans } = useAPI(
+    "plans",
+    () => listPlans(),
+  );
+  const plans = plansRes?.data ?? [];
+  const total = plans.length;
+
+  useEffect(() => { if (plansError) toast.error(t("plans.loadFailed")); }, [plansError, t]);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<PlanFormData>(defaultForm);
@@ -89,22 +97,6 @@ export default function PlansPage() {
     { key: "daily_quota", label: t("plans.dailyQuota"), type: "number" },
   ];
 
-  const fetchPlans = useCallback(async () => {
-    try {
-      const res = await listPlans();
-      setPlans(res.data ?? []);
-      setTotal(res.data?.length ?? 0);
-    } catch {
-      toast.error(t("plans.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchPlans();
-  }, [fetchPlans]);
-
   const handleCreate = async () => {
     if (!form.name.trim()) return;
     setCreating(true);
@@ -122,7 +114,7 @@ export default function PlansPage() {
       setForm(defaultForm);
       setDialogOpen(false);
       toast.success(t("plans.planCreated"));
-      fetchPlans();
+      mutatePlans();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("plans.createFailed"));
@@ -136,7 +128,7 @@ export default function PlansPage() {
     try {
       await deletePlan(id);
       toast.success(t("plans.deleted"));
-      fetchPlans();
+      mutatePlans();
     } catch {
       toast.error(t("plans.deleteFailed"));
     }
@@ -174,7 +166,7 @@ export default function PlansPage() {
       setEditOpen(false);
       setEditingPlan(null);
       toast.success(t("plans.updated"));
-      fetchPlans();
+      mutatePlans();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("plans.updateFailed"));

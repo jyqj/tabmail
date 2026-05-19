@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 import {
@@ -18,6 +18,7 @@ import {
 import { getStats } from "@/lib/api";
 import type { SystemStats } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,9 +33,11 @@ import {
 } from "@/components/ui/table";
 
 export default function AdminPage() {
-  const [stats, setStats] = useState<SystemStats | null>(null);
-  const [loading, setLoading] = useState(true);
   const { t } = useI18n();
+  const { data: response, isLoading: loading, error } = useAPI("admin-stats", () => getStats());
+  const stats = response?.data ?? null;
+
+  useEffect(() => { if (error) toast.error(t("admin.loadFailed")); }, [error, t]);
 
   const statCards = [
     { key: "tenants_count" as const, label: t("admin.tenants"), icon: Users, color: "text-blue-500" },
@@ -43,13 +46,6 @@ export default function AdminPage() {
     { key: "mailboxes_count" as const, label: t("admin.mailboxes"), icon: Inbox, color: "text-amber-500" },
     { key: "messages_count" as const, label: t("admin.messages"), icon: Mail, color: "text-rose-500" },
   ];
-
-  useEffect(() => {
-    getStats()
-      .then((res) => setStats(res.data))
-      .catch(() => toast.error(t("admin.loadFailed")))
-      .finally(() => setLoading(false));
-  }, [t]);
 
   const series = stats?.metrics.time_series ?? [];
 
@@ -385,6 +381,7 @@ function TimelineCard({
   secondaryLabel: string;
   accent: "emerald" | "violet";
 }) {
+  const { t } = useI18n();
   const primaryColor = accent === "emerald" ? "#10b981" : "#8b5cf6";
   const secondaryColor = accent === "emerald" ? "#f97316" : "#f43f5e";
   const gradientId = `${title.toLowerCase().replace(/\s+/g, "-")}-grid`;
@@ -405,7 +402,7 @@ function TimelineCard({
       <div className="mb-3 flex items-center justify-between">
         <div>
           <div className="font-medium">{title}</div>
-          <div className="text-xs text-muted-foreground">Last {points.length || 0} minute samples</div>
+          <div className="text-xs text-muted-foreground">{t("admin.lastNSamples", { n: points.length || 0 })}</div>
         </div>
         <div className="flex items-center gap-3 text-xs">
           <LegendDot color={primaryColor} label={primaryLabel} />
@@ -414,7 +411,7 @@ function TimelineCard({
       </div>
       {points.length < 2 ? (
         <div className="flex h-[180px] items-center justify-center text-sm text-muted-foreground">
-          Waiting for more samples…
+          {t("admin.waitingSamples")}
         </div>
       ) : (
         <div className="overflow-x-auto">

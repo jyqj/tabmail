@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,7 @@ import {
   revokeAPIKey,
 } from "@/lib/api";
 import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
-import type { Tenant, Plan, TenantAPIKey, APIKeyCreated, TenantOverride, EffectiveConfig } from "@/lib/types";
+import type { Tenant, TenantAPIKey, APIKeyCreated, TenantOverride, EffectiveConfig } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -73,6 +73,7 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 
 const overrideFields = [
   "max_domains",
@@ -108,10 +109,25 @@ function confirmAction(message: string) {
 
 export default function TenantsPage() {
   const { t } = useI18n();
-  const [tenants, setTenants] = useState<Tenant[]>([]);
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+
+  const { data: tenantsRes, isLoading: tenantsLoading, error: tenantsError, mutate: mutateTenants } = useAPI(
+    "tenants",
+    () => listTenants(),
+  );
+  const { data: plansRes, isLoading: plansLoading, error: plansError } = useAPI(
+    "plans-for-tenants",
+    () => listPlans(),
+  );
+
+  const tenants = tenantsRes?.data ?? [];
+  const plans = plansRes?.data ?? [];
+  const total = tenants.length;
+  const loading = tenantsLoading || plansLoading;
+
+  useEffect(() => {
+    if (tenantsError) toast.error(t("tenants.loadFailed"));
+    if (plansError) toast.error(t("tenants.loadFailed"));
+  }, [tenantsError, plansError, t]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -131,23 +147,6 @@ export default function TenantsPage() {
   const [effectiveConfig, setEffectiveConfig] = useState<EffectiveConfig | null>(null);
   const [overrideForm, setOverrideForm] = useState<TenantOverrideForm>(emptyOverrideForm);
 
-  const fetchTenants = useCallback(async () => {
-    try {
-      const [tRes, pRes] = await Promise.all([listTenants(), listPlans()]);
-      setTenants(tRes.data ?? []);
-      setTotal(tRes.data?.length ?? 0);
-      setPlans(pRes.data ?? []);
-    } catch {
-      toast.error(t("tenants.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchTenants();
-  }, [fetchTenants]);
-
   const handleCreate = async () => {
     if (!newName.trim() || !newPlanId) return;
     setCreating(true);
@@ -157,7 +156,7 @@ export default function TenantsPage() {
       setNewPlanId("");
       setCreateOpen(false);
       toast.success(t("tenants.tenantCreated"));
-      fetchTenants();
+      mutateTenants();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("tenants.createFailed"));
@@ -171,7 +170,7 @@ export default function TenantsPage() {
     try {
       await deleteTenant(id);
       toast.success(t("tenants.tenantDeleted"));
-      fetchTenants();
+      mutateTenants();
     } catch {
       toast.error(t("tenants.deleteFailed"));
     }

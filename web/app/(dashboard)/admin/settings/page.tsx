@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { Settings2 } from "lucide-react";
 
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAPI } from "@/hooks/use-api";
 
 // Well-known setting definitions for rendering
 const SETTING_DEFS: Record<string, { label: string; type: "int" | "bool" | "select"; options?: string[]; group: string }> = {
@@ -27,24 +28,28 @@ const SETTING_DEFS: Record<string, { label: string; type: "int" | "bool" | "sele
 };
 
 export default function AdminSettingsPage() {
-  const [loading, setLoading] = useState(true);
+  const { data: settingsRes, isLoading: loading, error: settingsError, mutate: mutateSettings } = useAPI(
+    "system-settings",
+    () => listSettings(),
+  );
+  const settings = useMemo(() => settingsRes?.data ?? [], [settingsRes?.data]);
+
+  useEffect(() => { if (settingsError) toast.error("Failed to load settings"); }, [settingsError]);
+
   const [saving, setSaving] = useState(false);
-  const [settings, setSettings] = useState<SystemSetting[]>([]);
   const [edits, setEdits] = useState<Record<string, string>>({});
+  const [editsInit, setEditsInit] = useState(false);
 
   useEffect(() => {
-    listSettings()
-      .then((res) => {
-        setSettings(res.data || []);
-        const initial: Record<string, string> = {};
-        for (const s of res.data || []) {
-          initial[s.key] = s.value;
-        }
-        setEdits(initial);
-      })
-      .catch(() => toast.error("Failed to load settings"))
-      .finally(() => setLoading(false));
-  }, []);
+    if (settings.length > 0 && !editsInit) {
+      const initial: Record<string, string> = {};
+      for (const s of settings) {
+        initial[s.key] = s.value;
+      }
+      setEdits(initial);
+      setEditsInit(true);
+    }
+  }, [settings, editsInit]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -62,12 +67,13 @@ export default function AdminSettingsPage() {
         return;
       }
       const res = await updateSettings(changed);
-      setSettings(res.data || []);
       const updated: Record<string, string> = {};
       for (const s of res.data || []) {
         updated[s.key] = s.value;
       }
       setEdits(updated);
+      setEditsInit(true);
+      mutateSettings();
       toast.success("Settings saved");
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
@@ -78,13 +84,16 @@ export default function AdminSettingsPage() {
   };
 
   // Group settings
-  const groups = new Map<string, { key: string; value: string; def: (typeof SETTING_DEFS)[string] | null; setting: SystemSetting }[]>();
-  for (const s of settings) {
-    const def = SETTING_DEFS[s.key] || null;
-    const group = def?.group || "Other";
-    if (!groups.has(group)) groups.set(group, []);
-    groups.get(group)!.push({ key: s.key, value: edits[s.key] ?? s.value, def, setting: s });
-  }
+  const groups = useMemo(() => {
+    const map = new Map<string, { key: string; value: string; def: (typeof SETTING_DEFS)[string] | null; setting: SystemSetting }[]>();
+    for (const s of settings) {
+      const def = SETTING_DEFS[s.key] || null;
+      const group = def?.group || "Other";
+      if (!map.has(group)) map.set(group, []);
+      map.get(group)!.push({ key: s.key, value: edits[s.key] ?? s.value, def, setting: s });
+    }
+    return map;
+  }, [settings, edits]);
 
   return (
     <div className="flex flex-col">

@@ -7,6 +7,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { getSMTPPolicy, updateSMTPPolicy } from "@/lib/api";
 import type { SMTPPolicy } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,8 +25,9 @@ function parseList(input: string): string[] {
 
 export default function AdminPolicyPage() {
   const { t } = useI18n();
-  const [loading, setLoading] = useState(true);
+  const { data: policyRes, isLoading: loading, error: policyError } = useAPI("smtp-policy", () => getSMTPPolicy());
   const [saving, setSaving] = useState(false);
+  const [formInit, setFormInit] = useState(false);
   const [form, setForm] = useState({
     default_accept: true,
     accept_domains: "",
@@ -36,23 +38,23 @@ export default function AdminPolicyPage() {
     reject_origin_domains: "",
   });
 
+  useEffect(() => { if (policyError) toast.error(t("policy.loadFailed")); }, [policyError, t]);
+
   useEffect(() => {
-    getSMTPPolicy()
-      .then((res) => {
-        const p = res.data;
-        setForm({
-          default_accept: p.default_accept,
-          accept_domains: (p.accept_domains || []).join(", "),
-          reject_domains: (p.reject_domains || []).join(", "),
-          default_store: p.default_store,
-          store_domains: (p.store_domains || []).join(", "),
-          discard_domains: (p.discard_domains || []).join(", "),
-          reject_origin_domains: (p.reject_origin_domains || []).join(", "),
-        });
-      })
-      .catch(() => toast.error(t("policy.loadFailed")))
-      .finally(() => setLoading(false));
-  }, [t]);
+    if (policyRes?.data && !formInit) {
+      const p = policyRes.data;
+      setForm({
+        default_accept: p.default_accept,
+        accept_domains: (p.accept_domains || []).join(", "),
+        reject_domains: (p.reject_domains || []).join(", "),
+        default_store: p.default_store,
+        store_domains: (p.store_domains || []).join(", "),
+        discard_domains: (p.discard_domains || []).join(", "),
+        reject_origin_domains: (p.reject_origin_domains || []).join(", "),
+      });
+      setFormInit(true);
+    }
+  }, [policyRes, formInit]);
 
   const handleSave = async () => {
     setSaving(true);

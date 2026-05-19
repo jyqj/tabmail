@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 
 import { listAudit } from "@/lib/api";
-import type { AuditEntry } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
+import { useAPI } from "@/hooks/use-api";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -24,28 +24,19 @@ import {
 
 export default function AuditPage() {
   const { t } = useI18n();
-  const [entries, setEntries] = useState<AuditEntry[]>([]);
-  const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const perPage = 30;
 
-  const fetchAudit = useCallback(async () => {
-    try {
-      const res = await listAudit({ page, per_page: 30 });
-      setEntries(res.data ?? []);
-      setTotal(res.meta.total);
-    } catch {
-      toast.error(t("audit.loadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [page, t]);
+  const { data: response, isLoading: loading, error } = useAPI(
+    ["audit", page, perPage],
+    () => listAudit({ page, per_page: perPage }),
+  );
+  const entries = response?.data ?? [];
+  const total = response?.meta?.total ?? 0;
 
-  useEffect(() => {
-    fetchAudit();
-  }, [fetchAudit]);
+  useEffect(() => { if (error) toast.error(t("audit.loadFailed")); }, [error, t]);
 
-  const totalPages = Math.ceil(total / 30);
+  const totalPages = Math.ceil(total / perPage);
 
   return (
     <div className="flex flex-col">

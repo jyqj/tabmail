@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
+import { useAPI } from "@/hooks/use-api";
 import { SiteHeader } from "@/components/site-header";
 import { MessageList } from "@/components/inbox/message-list";
 import { MessageDetail } from "@/components/inbox/message-detail";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   listMessages,
   getMessage,
@@ -28,7 +30,6 @@ import {
   Mail,
   CheckCheck,
   KeyRound,
-  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -49,75 +50,66 @@ export default function InboxPage() {
   const { t } = useI18n();
   const { settings } = useSettings();
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [total, setTotal] = useState(0);
   const [selectedMsg, setSelectedMsg] = useState<MsgDetail | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rawSource, setRawSource] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mailboxPassword, setMailboxPassword] = useState("");
   const [authenticating, setAuthenticating] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [sseConnected, setSseConnected] = useState(false);
-  const intervalRef = useRef<ReturnType<typeof setInterval>>(null);
   const mailboxTokenMatches =
     !!mailboxToken && mailboxAddress?.toLowerCase() === address.toLowerCase();
 
-  const fetchMessages = useCallback(
-    async (silent = false) => {
-      if (!silent) setLoading(true);
-      else setRefreshing(true);
-      try {
-        const res = await listMessages(address);
-        setMessages(res.data ?? []);
-        setTotal(res.meta?.total ?? res.data?.length ?? 0);
-        setAuthRequired(false);
-        setNotFound(false);
-      } catch (e: unknown) {
-        const err = e as { error?: { code?: string; message?: string } };
-        const code = err?.error?.code ?? "";
-        const msg = err?.error?.message ?? (e instanceof Error ? e.message : "");
-        const normalizedMsg = msg.toLowerCase();
-        const isNotFound = code === "NOT_FOUND" || normalizedMsg.includes("not found");
-        const isAuthError = code === "UNAUTHORIZED" || code === "FORBIDDEN" || normalizedMsg.includes("unauthorized") || normalizedMsg.includes("forbidden");
-        if (!silent) {
-          if (isNotFound) {
-            setNotFound(true);
-            setAuthRequired(false);
-          } else if (isAuthError) {
-            setAuthRequired(true);
-            setNotFound(false);
-            toast.error(msg || t("toast.authFailed"));
-          } else {
-            setNotFound(false);
-            setAuthRequired(false);
-            toast.error(t("toast.loadFailed"));
-          }
-        }
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
+  const { data: response, isLoading: loading, isValidating: refreshing, error, mutate } = useAPI(
+    authRequired ? null : ["inbox", address],
+    () => listMessages(address),
+    {
+      refreshInterval: settings.autoRefresh ? settings.refreshInterval * 1000 : 0,
     },
-    [address, t]
   );
+  const messages = response?.data ?? [];
+  const total = response?.meta?.total ?? response?.data?.length ?? 0;
 
+  // Process SWR errors to determine auth/notFound state
   useEffect(() => {
-    fetchMessages();
-    if (settings.autoRefresh) {
-      intervalRef.current = setInterval(
-        () => fetchMessages(true),
-        settings.refreshInterval * 1000,
-      );
+    if (!error) {
+      return;
     }
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [fetchMessages, settings.autoRefresh, settings.refreshInterval]);
+    const err = error as { error?: { code?: string; message?: string } };
+    const code = err?.error?.code ?? "";
+    const msg = err?.error?.message ?? (error instanceof Error ? error.message : "");
+    const normalizedMsg = msg.toLowerCase();
+    const isNotFound = code === "NOT_FOUND" || normalizedMsg.includes("not found");
+    const isAuthError = code === "UNAUTHORIZED" || code === "FORBIDDEN" || normalizedMsg.includes("unauthorized") || normalizedMsg.includes("forbidden");
+    if (isNotFound) {
+      setNotFound(true);
+      setAuthRequired(false);
+    } else if (isAuthError) {
+      setAuthRequired(true);
+      setNotFound(false);
+      toast.error(msg || t("toast.authFailed"));
+    } else {
+      setNotFound(false);
+      setAuthRequired(false);
+      toast.error(t("toast.loadFailed"));
+    }
+  }, [error, t]);
+
+  // On successful data load, clear error states
+  useEffect(() => {
+    if (response) {
+      setAuthRequired(false);
+      setNotFound(false);
+    }
+  }, [response]);
+
+  // SSE streaming
+  const handleSseEvent = useCallback(() => {
+    mutate();
+  }, [mutate]);
 
   useEffect(() => {
     if (!settings.preferSSE) {
@@ -131,11 +123,11 @@ export default function InboxPage() {
       onEvent: (event) => {
         if (event.type === "ready") { setSseConnected(true); return; }
         if (event.type === "ping") return;
-        fetchMessages(true);
+        handleSseEvent();
       },
     }).catch(() => { setSseConnected(false); });
     return () => { controller.abort(); setSseConnected(false); };
-  }, [address, fetchMessages, settings.preferSSE]);
+  }, [address, handleSseEvent, settings.preferSSE]);
 
   const handleMailboxLogin = async () => {
     if (!mailboxPassword.trim()) return;
@@ -146,7 +138,7 @@ export default function InboxPage() {
       setMailboxPassword("");
       setAuthRequired(false);
       toast.success(t("toast.tokenIssued"));
-      await fetchMessages();
+      mutate();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("toast.authFailed"));
@@ -164,8 +156,18 @@ export default function InboxPage() {
       setSelectedMsg(res.data);
       if (!msg.seen) {
         await markMessageSeen(address, msg.id);
-        setMessages((prev) =>
-          prev.map((m) => (m.id === msg.id ? { ...m, seen: true } : m))
+        // Optimistically update the cached messages list
+        mutate(
+          (current) => {
+            if (!current) return current;
+            return {
+              ...current,
+              data: current.data?.map((m: Message) =>
+                m.id === msg.id ? { ...m, seen: true } : m
+              ),
+            };
+          },
+          { revalidate: false },
         );
       }
     } catch {
@@ -183,11 +185,10 @@ export default function InboxPage() {
     if (!safeConfirm(t("inbox.confirmDeleteMessage"))) return;
     try {
       await deleteMessage(address, selectedId);
-      setMessages((prev) => prev.filter((m) => m.id !== selectedId));
       setSelectedMsg(null);
       setSelectedId(null);
-      setTotal((prev) => prev - 1);
       toast.success(t("toast.deleted"));
+      mutate();
     } catch {
       toast.error(t("toast.deleteFailed"));
     }
@@ -197,11 +198,10 @@ export default function InboxPage() {
     if (!safeConfirm(t("inbox.confirmPurge"))) return;
     try {
       await purgeMailbox(address);
-      setMessages([]);
-      setTotal(0);
       setSelectedMsg(null);
       setSelectedId(null);
       toast.success(t("toast.allDeleted"));
+      mutate();
     } catch {
       toast.error(t("toast.purgeFailed"));
     }
@@ -278,7 +278,7 @@ export default function InboxPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => fetchMessages(true)}
+              onClick={() => mutate()}
               disabled={refreshing}
               className="gap-1.5"
             >
@@ -354,9 +354,18 @@ export default function InboxPage() {
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-            <Loader2 className="h-6 w-6 animate-spin mb-3" />
-            <p className="text-sm">{t("inbox.loading")}</p>
+          <div className="p-4 space-y-3">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-start gap-3 p-3 rounded-lg">
+                <Skeleton className="h-10 w-10 rounded-full shrink-0" />
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-1/3" />
+                  <Skeleton className="h-3 w-2/3" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+                <Skeleton className="h-3 w-16 shrink-0" />
+              </div>
+            ))}
           </div>
         ) : (
           <div className="flex h-[calc(100vh-8rem)] min-h-0">
