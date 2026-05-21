@@ -20,7 +20,7 @@ type Store interface {
 	CreateUser(ctx context.Context, u *models.User) error
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
-	ListUsers(ctx context.Context, pg models.Page) ([]*models.User, int, error)
+	ListUsers(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.User, int, error)
 	UpdateUser(ctx context.Context, u *models.User) error
 	UpdateUserPassword(ctx context.Context, id uuid.UUID, passwordHash string) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
@@ -62,9 +62,11 @@ type Store interface {
 	CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error
 	GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAPIKey, error)
 	ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error)
+	ListAPIKeysByOwner(ctx context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error)
 	DeleteAPIKey(ctx context.Context, id uuid.UUID) error
 	// Looks up tenant by raw API key (hashes internally).
-	ResolveAPIKey(ctx context.Context, rawKey string) (*models.Tenant, []string, error)
+	// Returns the tenant, the API key UUID, scopes, allowed zone IDs, owner user ID, and any error.
+	ResolveAPIKey(ctx context.Context, rawKey string) (*models.Tenant, *uuid.UUID, []string, []uuid.UUID, *uuid.UUID, error)
 	TouchAPIKey(ctx context.Context, id uuid.UUID) error
 
 	// --- Domain zones ----------------------------------------------------
@@ -74,6 +76,7 @@ type Store interface {
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
 	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
+	ListZonesByVisibilities(ctx context.Context, visibilities []models.ResourceVisibility) ([]*models.DomainZone, error)
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
 	DeleteZone(ctx context.Context, id uuid.UUID) error
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
@@ -85,7 +88,8 @@ type Store interface {
 	ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error)
 	DeleteRoute(ctx context.Context, id uuid.UUID) error
 	// Returns all routes whose zone domain matches the given address domain.
-	FindMatchingRoutes(ctx context.Context, domain string) ([]*models.DomainRoute, error)
+	// If tenantID is non-nil, only routes belonging to that tenant are returned.
+	FindMatchingRoutes(ctx context.Context, domain string, tenantID *uuid.UUID) ([]*models.DomainRoute, error)
 
 	// --- SMTP Policy -----------------------------------------------------
 	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
@@ -95,6 +99,9 @@ type Store interface {
 	CreateMailbox(ctx context.Context, m *models.Mailbox) error
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	// Tenant-scoped variants — prefer these when tenant context is available.
+	GetMailboxForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error)
+	GetMailboxByAddressForTenant(ctx context.Context, addr string, tenantID uuid.UUID) (*models.Mailbox, error)
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZone(ctx context.Context, zoneID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
@@ -102,10 +109,13 @@ type Store interface {
 	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
 	CountAllMailboxes(ctx context.Context) (int, error)
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
+	ListZoneObjectKeys(ctx context.Context, zoneID uuid.UUID) ([]string, error)
 
 	// --- Messages --------------------------------------------------------
 	CreateMessage(ctx context.Context, m *models.Message) error
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
+	// Tenant-scoped variant — prefer when tenant context is available.
+	GetMessageForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Message, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
@@ -162,9 +172,9 @@ type Store interface {
 	CreatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error
 	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
 	GetPermissionProfileByName(ctx context.Context, name string) (*models.PermissionProfile, error)
-	ListPermissionProfiles(ctx context.Context) ([]*models.PermissionProfile, error)
+	ListPermissionProfiles(ctx context.Context, tenantID *uuid.UUID) ([]*models.PermissionProfile, error)
 	UpdatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error
-	DeletePermissionProfile(ctx context.Context, id uuid.UUID) error
+	DeletePermissionProfile(ctx context.Context, id uuid.UUID, tenantID *uuid.UUID) error
 
 	// --- User permission overrides -----------------------------------------
 	UpsertUserPermissionOverride(ctx context.Context, o *models.UserPermissionOverride) error
@@ -177,10 +187,44 @@ type Store interface {
 	GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.OutboundJob, error)
 	ListOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
 	ClaimOutboundJobs(ctx context.Context, now time.Time, limit int) ([]*models.OutboundJob, error)
-	MarkOutboundJobSent(ctx context.Context, id uuid.UUID, smtpCode int, smtpResponse, messageID string) error
-	MarkOutboundJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
-	MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, lastError string, dead bool) error
+	MarkOutboundJobSent(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, smtpCode int, smtpResponse, messageID string) error
+	MarkOutboundJobRetry(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, lastError string, dead bool) error
 	CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error)
+	CountOutboundByIdentitySince(ctx context.Context, tenantID uuid.UUID, principalType string, principalID uuid.UUID, identityID uuid.UUID, since time.Time) (int, error)
+
+	// --- Zone grants -------------------------------------------------------
+	CreateZoneGrant(ctx context.Context, g *models.ZoneGrant) error
+	DeleteZoneGrant(ctx context.Context, id uuid.UUID) error
+	ListZoneGrants(ctx context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error)
+	GetZoneGrant(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (*models.ZoneGrant, error)
+	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
+	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
+
+	// --- Send identities -------------------------------------------------------
+	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
+	GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.SendIdentity, error)
+	ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error)
+	FindSendIdentityForAddress(ctx context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error)
+	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
+	DeleteSendIdentity(ctx context.Context, id uuid.UUID) error
+
+	// --- Send-as grants --------------------------------------------------------
+	CreateSendAsGrant(ctx context.Context, g *models.SendAsGrant) error
+	DeleteSendAsGrant(ctx context.Context, id uuid.UUID) error
+	ListSendAsGrantsByIdentity(ctx context.Context, identityID uuid.UUID) ([]*models.SendAsGrant, error)
+	HasSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (bool, error)
+	GetSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (*models.SendAsGrant, error)
+
+	// --- Mailbox grants ----------------------------------------------------
+	CreateMailboxGrant(ctx context.Context, g *models.MailboxGrant) error
+	DeleteMailboxGrant(ctx context.Context, id uuid.UUID) error
+	ListMailboxGrants(ctx context.Context, mailboxID uuid.UUID) ([]*models.MailboxGrant, error)
+	GetMailboxGrant(ctx context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error)
+	ListGrantedMailboxIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
+
+	// --- Outbound jobs (user-scoped) ----------------------------------------
+	ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
 
 	// --- Uniqueness checks -------------------------------------------------
 	ExistsMailboxByAddress(ctx context.Context, address string) (bool, error)

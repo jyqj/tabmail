@@ -22,11 +22,11 @@ func (s *PgStore) CreatePermissionProfile(ctx context.Context, p *models.Permiss
 	p.CreatedAt = now
 	p.UpdatedAt = now
 	_, err := s.pool.Exec(ctx, `
-		INSERT INTO permission_profiles (id, name, description, can_send, daily_send_quota, daily_receive_quota,
+		INSERT INTO permission_profiles (id, tenant_id, name, description, can_send, daily_send_quota, daily_receive_quota,
 			max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
 			can_create_api_keys, is_system, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
-		p.ID, p.Name, p.Description, p.CanSend, p.DailySendQuota, p.DailyReceiveQuota,
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+		p.ID, p.TenantID, p.Name, p.Description, p.CanSend, p.DailySendQuota, p.DailyReceiveQuota,
 		p.MaxMailboxes, p.MaxDomains, uuidSliceParam(p.AllowedZoneIDs), p.CanCreateDomains, p.CanCreateRoutes,
 		p.CanCreateAPIKeys, p.IsSystem, p.CreatedAt, p.UpdatedAt)
 	return err
@@ -40,8 +40,16 @@ func (s *PgStore) GetPermissionProfileByName(ctx context.Context, name string) (
 	return scanPermProfile(s.pool.QueryRow(ctx, permProfileSelect+` WHERE name=$1`, name))
 }
 
-func (s *PgStore) ListPermissionProfiles(ctx context.Context) ([]*models.PermissionProfile, error) {
-	rows, err := s.pool.Query(ctx, permProfileSelect+` ORDER BY name`)
+func (s *PgStore) ListPermissionProfiles(ctx context.Context, tenantID *uuid.UUID) ([]*models.PermissionProfile, error) {
+	var (
+		rows pgx.Rows
+		err  error
+	)
+	if tenantID != nil {
+		rows, err = s.pool.Query(ctx, permProfileSelect+` WHERE tenant_id = $1 OR tenant_id IS NULL ORDER BY name`, *tenantID)
+	} else {
+		rows, err = s.pool.Query(ctx, permProfileSelect+` ORDER BY name`)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -63,19 +71,23 @@ func (s *PgStore) UpdatePermissionProfile(ctx context.Context, p *models.Permiss
 		UPDATE permission_profiles SET name=$2, description=$3, can_send=$4, daily_send_quota=$5,
 			daily_receive_quota=$6, max_mailboxes=$7, max_domains=$8, allowed_zone_ids=$9,
 			can_create_domains=$10, can_create_routes=$11, can_create_api_keys=$12, updated_at=$13
-		WHERE id=$1`,
+		WHERE id=$1 AND (tenant_id IS NOT DISTINCT FROM $14)`,
 		p.ID, p.Name, p.Description, p.CanSend, p.DailySendQuota, p.DailyReceiveQuota,
 		p.MaxMailboxes, p.MaxDomains, uuidSliceParam(p.AllowedZoneIDs), p.CanCreateDomains, p.CanCreateRoutes,
-		p.CanCreateAPIKeys, p.UpdatedAt)
+		p.CanCreateAPIKeys, p.UpdatedAt, p.TenantID)
 	return err
 }
 
-func (s *PgStore) DeletePermissionProfile(ctx context.Context, id uuid.UUID) error {
+func (s *PgStore) DeletePermissionProfile(ctx context.Context, id uuid.UUID, tenantID *uuid.UUID) error {
+	if tenantID != nil {
+		_, err := s.pool.Exec(ctx, `DELETE FROM permission_profiles WHERE id=$1 AND (tenant_id = $2 OR tenant_id IS NULL)`, id, *tenantID)
+		return err
+	}
 	_, err := s.pool.Exec(ctx, `DELETE FROM permission_profiles WHERE id=$1`, id)
 	return err
 }
 
-const permProfileSelect = `SELECT id, name, description, can_send, daily_send_quota, daily_receive_quota,
+const permProfileSelect = `SELECT id, tenant_id, name, description, can_send, daily_send_quota, daily_receive_quota,
 	max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
 	can_create_api_keys, is_system, created_at, updated_at
 	FROM permission_profiles`
@@ -83,7 +95,7 @@ const permProfileSelect = `SELECT id, name, description, can_send, daily_send_qu
 func scanPermProfile(row pgx.Row) (*models.PermissionProfile, error) {
 	p := &models.PermissionProfile{}
 	var allowedZones []uuid.UUID
-	err := row.Scan(&p.ID, &p.Name, &p.Description, &p.CanSend, &p.DailySendQuota, &p.DailyReceiveQuota,
+	err := row.Scan(&p.ID, &p.TenantID, &p.Name, &p.Description, &p.CanSend, &p.DailySendQuota, &p.DailyReceiveQuota,
 		&p.MaxMailboxes, &p.MaxDomains, &allowedZones, &p.CanCreateDomains, &p.CanCreateRoutes,
 		&p.CanCreateAPIKeys, &p.IsSystem, &p.CreatedAt, &p.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -161,7 +173,7 @@ func (s *PgStore) EffectivePermission(ctx context.Context, userID uuid.UUID) (*m
 		SELECT
 			COALESCE(o.can_send,            p.can_send,            FALSE),
 			COALESCE(o.daily_send_quota,    p.daily_send_quota,    0),
-			COALESCE(o.daily_receive_quota, p.daily_receive_quota, 1000),
+			COALESCE(o.daily_receive_quota, p.daily_receive_quota, 500),
 			COALESCE(o.max_mailboxes,       p.max_mailboxes,       10),
 			COALESCE(o.max_domains,         p.max_domains,         1),
 			COALESCE(o.allowed_zone_ids,    p.allowed_zone_ids),

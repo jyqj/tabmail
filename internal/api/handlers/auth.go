@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
@@ -14,6 +15,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 )
 
@@ -23,7 +25,7 @@ type authStore interface {
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
 	UpdateUser(ctx context.Context, u *models.User) error
 	UpdateUserPassword(ctx context.Context, id uuid.UUID, passwordHash string) error
-	ListUsers(ctx context.Context, pg models.Page) ([]*models.User, int, error)
+	ListUsers(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.User, int, error)
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	TouchUserLogin(ctx context.Context, id uuid.UUID) error
 	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
@@ -36,6 +38,7 @@ type authStore interface {
 	GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error)
 	MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error
 	InsertAudit(ctx context.Context, e *models.AuditEntry) error
+	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
 }
 
 type settingsReader interface {
@@ -94,6 +97,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
+		time.Sleep(500 * time.Millisecond) // slow down brute-force attempts
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid email or password"}})
 		return
 	}
@@ -243,7 +247,14 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
-	if rt == nil || rt.RevokedAt != nil || rt.ExpiresAt.Before(time.Now()) {
+	if rt == nil || rt.ExpiresAt.Before(time.Now()) {
+		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid or expired refresh token"}})
+		return
+	}
+	if rt.RevokedAt != nil {
+		// A revoked token was reused — possible token theft. Revoke all tokens for this user.
+		h.logger.Warn().Str("user_id", rt.UserID.String()).Msg("refresh: revoked token reuse detected, revoking all user tokens")
+		_ = h.store.RevokeUserRefreshTokens(r.Context(), rt.UserID)
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid or expired refresh token"}})
 		return
 	}
@@ -316,12 +327,10 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// InviteAdmin handles POST /api/v1/admin/invite
+// InviteAdmin handles POST /api/v1/admin/invite.
+// This endpoint is platform-admin only because accepting an invitation creates
+// a platform_admin user.
 func (h *AuthHandler) InviteAdmin(w http.ResponseWriter, r *http.Request) {
-	if !middleware.IsAdmin(r.Context()) {
-		errForbidden(w, "admin access required")
-		return
-	}
 
 	var req struct {
 		Email string `json:"email"`
@@ -451,7 +460,7 @@ func (h *AuthHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		Email:        inv.Email,
 		PasswordHash: string(hash),
 		DisplayName:  displayName,
-		Role:         models.RoleAdmin,
+		Role:         models.RolePlatformAdmin,
 		IsActive:     true,
 	}
 	if err := h.store.CreateUser(r.Context(), user); err != nil {
@@ -486,8 +495,13 @@ func (h *AuthHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 
 // ListUsers handles GET /api/v1/admin/users
 func (h *AuthHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if tenant == nil {
+		errForbidden(w, "no tenant context")
+		return
+	}
 	pg := pageFromReq(r)
-	users, total, err := h.store.ListUsers(r.Context(), pg)
+	users, total, err := h.store.ListUsers(r.Context(), tenant.ID, pg)
 	if err != nil {
 		h.logger.Err(err).Msg("list users")
 		errInternal(w)
@@ -495,21 +509,23 @@ func (h *AuthHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	}
 	// Strip password hashes from response
 	type safeUser struct {
-		ID          uuid.UUID       `json:"id"`
-		TenantID    uuid.UUID       `json:"tenant_id"`
-		Email       string          `json:"email"`
-		DisplayName string          `json:"display_name"`
-		Role        models.UserRole `json:"role"`
-		IsActive    bool            `json:"is_active"`
-		CreatedAt   time.Time       `json:"created_at"`
-		LastLoginAt *time.Time      `json:"last_login_at,omitempty"`
+		ID                  uuid.UUID       `json:"id"`
+		TenantID            uuid.UUID       `json:"tenant_id"`
+		Email               string          `json:"email"`
+		DisplayName         string          `json:"display_name"`
+		Role                models.UserRole `json:"role"`
+		PermissionProfileID *uuid.UUID      `json:"permission_profile_id,omitempty"`
+		IsActive            bool            `json:"is_active"`
+		CreatedAt           time.Time       `json:"created_at"`
+		UpdatedAt           time.Time       `json:"updated_at"`
+		LastLoginAt         *time.Time      `json:"last_login_at,omitempty"`
 	}
 	safe := make([]safeUser, 0, len(users))
 	for _, u := range users {
 		safe = append(safe, safeUser{
 			ID: u.ID, TenantID: u.TenantID, Email: u.Email,
-			DisplayName: u.DisplayName, Role: u.Role, IsActive: u.IsActive,
-			CreatedAt: u.CreatedAt, LastLoginAt: u.LastLoginAt,
+			DisplayName: u.DisplayName, Role: u.Role, PermissionProfileID: u.PermissionProfileID,
+			IsActive: u.IsActive, CreatedAt: u.CreatedAt, UpdatedAt: u.UpdatedAt, LastLoginAt: u.LastLoginAt,
 		})
 	}
 	okList(w, safe, total, pg.Page, pg.PerPage)
@@ -517,6 +533,11 @@ func (h *AuthHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 
 // UpdateUserByAdmin handles PATCH /api/v1/admin/users/{id}
 func (h *AuthHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Request) {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if tenant == nil {
+		errForbidden(w, "no tenant context")
+		return
+	}
 	userID, err := uuid.Parse(chiURLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
@@ -528,26 +549,41 @@ func (h *AuthHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Request) 
 		errInternal(w)
 		return
 	}
-	if user == nil {
+	if user == nil || user.TenantID != tenant.ID {
 		errNotFound(w, "user not found")
 		return
 	}
 
 	var req struct {
-		Role        *string `json:"role"`
-		IsActive    *bool   `json:"is_active"`
-		DisplayName *string `json:"display_name"`
+		Role                *string          `json:"role"`
+		IsActive            *bool            `json:"is_active"`
+		DisplayName         *string          `json:"display_name"`
+		PermissionProfileID *json.RawMessage `json:"permission_profile_id"`
 	}
 	if err := decodeBody(r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
 	if req.Role != nil {
-		switch models.UserRole(*req.Role) {
-		case models.RoleAdmin, models.RoleUser:
-			user.Role = models.UserRole(*req.Role)
+		newRole := models.UserRole(*req.Role)
+		actor := authz.ActorFromContext(r.Context())
+		switch newRole {
+		case models.RolePlatformAdmin, models.RoleTenantAdmin, models.RoleUser:
+			// tenant_admin cannot promote to platform_admin
+			if newRole == models.RolePlatformAdmin && !actor.IsPlatformAdmin {
+				errForbidden(w, "only platform admin can assign platform_admin role")
+				return
+			}
+			user.Role = newRole
+		case models.RoleAdmin:
+			// Legacy "admin" mapped to platform_admin; only platform_admin can assign
+			if !actor.IsPlatformAdmin {
+				errForbidden(w, "only platform admin can assign admin role")
+				return
+			}
+			user.Role = models.RolePlatformAdmin
 		default:
-			errBadRequest(w, "invalid role, must be admin or user")
+			errBadRequest(w, "invalid role, must be platform_admin, tenant_admin or user")
 			return
 		}
 	}
@@ -557,6 +593,33 @@ func (h *AuthHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Request) 
 	if req.DisplayName != nil {
 		user.DisplayName = *req.DisplayName
 	}
+	if req.PermissionProfileID != nil {
+		raw := strings.TrimSpace(string(*req.PermissionProfileID))
+		if raw == "" || raw == "null" {
+			user.PermissionProfileID = nil
+		} else {
+			var profileID uuid.UUID
+			if err := json.Unmarshal(*req.PermissionProfileID, &profileID); err != nil {
+				errBadRequest(w, "invalid permission_profile_id")
+				return
+			}
+			profile, err := h.store.GetPermissionProfile(r.Context(), profileID)
+			if err != nil {
+				h.logger.Err(err).Msg("update user: lookup permission profile")
+				errInternal(w)
+				return
+			}
+			if profile == nil {
+				errBadRequest(w, "permission profile not found")
+				return
+			}
+			if profile.TenantID != nil && *profile.TenantID != user.TenantID {
+				errForbidden(w, "permission profile belongs to a different tenant")
+				return
+			}
+			user.PermissionProfileID = &profileID
+		}
+	}
 	if err := h.store.UpdateUser(r.Context(), user); err != nil {
 		h.logger.Err(err).Msg("update user")
 		errInternal(w)
@@ -565,11 +628,20 @@ func (h *AuthHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Request) 
 	ok(w, map[string]any{
 		"id": user.ID, "email": user.Email, "display_name": user.DisplayName,
 		"role": user.Role, "is_active": user.IsActive, "tenant_id": user.TenantID,
+		"permission_profile_id": user.PermissionProfileID,
+		"created_at":            user.CreatedAt,
+		"updated_at":            user.UpdatedAt,
+		"last_login_at":         user.LastLoginAt,
 	})
 }
 
 // DeleteUserByAdmin handles DELETE /api/v1/admin/users/{id}
 func (h *AuthHandler) DeleteUserByAdmin(w http.ResponseWriter, r *http.Request) {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if tenant == nil {
+		errForbidden(w, "no tenant context")
+		return
+	}
 	userID, err := uuid.Parse(chiURLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
@@ -578,6 +650,16 @@ func (h *AuthHandler) DeleteUserByAdmin(w http.ResponseWriter, r *http.Request) 
 	// Prevent self-deletion
 	if caller := middleware.UserFromCtx(r.Context()); caller != nil && caller.ID == userID {
 		errBadRequest(w, "cannot delete yourself")
+		return
+	}
+	user, err := h.store.GetUser(r.Context(), userID)
+	if err != nil {
+		h.logger.Err(err).Msg("delete user: lookup")
+		errInternal(w)
+		return
+	}
+	if user == nil || user.TenantID != tenant.ID {
+		errNotFound(w, "user not found")
 		return
 	}
 	if err := h.store.DeleteUser(r.Context(), userID); err != nil {

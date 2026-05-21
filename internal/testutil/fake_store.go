@@ -19,6 +19,7 @@ const fakeClaimLeaseDuration = 5 * time.Minute
 type resolvedAPIKey struct {
 	Tenant *models.Tenant
 	Scopes []string
+	KeyID  uuid.UUID
 }
 
 type FakeStore struct {
@@ -42,30 +43,46 @@ type FakeStore struct {
 	ingestJobs map[uuid.UUID]*models.IngestJob
 	users      map[uuid.UUID]*models.User
 	settings   map[string]*models.SystemSetting
+
+	zoneGrants     map[uuid.UUID]*models.ZoneGrant
+	sendIdentities map[uuid.UUID]*models.SendIdentity
+	sendAsGrants   map[uuid.UUID]*models.SendAsGrant
+	mailboxGrants  map[uuid.UUID]*models.MailboxGrant
 }
 
 func NewFakeStore() *FakeStore {
 	return &FakeStore{
-		plans:      map[uuid.UUID]*models.Plan{},
-		tenants:    map[uuid.UUID]*models.Tenant{},
-		overrides:  map[uuid.UUID]*models.TenantOverride{},
-		apiKeys:    map[uuid.UUID]*models.TenantAPIKey{},
-		apiRaw:     map[string]resolvedAPIKey{},
-		zones:      map[uuid.UUID]*models.DomainZone{},
-		routes:     map[uuid.UUID]*models.DomainRoute{},
-		mailboxes:  map[uuid.UUID]*models.Mailbox{},
-		messages:   map[uuid.UUID]*models.Message{},
-		monitor:    []*models.MonitorEvent{},
-		outbox:     map[uuid.UUID]*models.OutboxEvent{},
-		deliveries: map[uuid.UUID]*models.WebhookDelivery{},
-		ingestJobs: map[uuid.UUID]*models.IngestJob{},
+		plans:          map[uuid.UUID]*models.Plan{},
+		tenants:        map[uuid.UUID]*models.Tenant{},
+		overrides:      map[uuid.UUID]*models.TenantOverride{},
+		apiKeys:        map[uuid.UUID]*models.TenantAPIKey{},
+		apiRaw:         map[string]resolvedAPIKey{},
+		zones:          map[uuid.UUID]*models.DomainZone{},
+		routes:         map[uuid.UUID]*models.DomainRoute{},
+		mailboxes:      map[uuid.UUID]*models.Mailbox{},
+		messages:       map[uuid.UUID]*models.Message{},
+		monitor:        []*models.MonitorEvent{},
+		outbox:         map[uuid.UUID]*models.OutboxEvent{},
+		deliveries:     map[uuid.UUID]*models.WebhookDelivery{},
+		ingestJobs:     map[uuid.UUID]*models.IngestJob{},
+		zoneGrants:     map[uuid.UUID]*models.ZoneGrant{},
+		sendIdentities: map[uuid.UUID]*models.SendIdentity{},
+		sendAsGrants:   map[uuid.UUID]*models.SendAsGrant{},
+		mailboxGrants:  map[uuid.UUID]*models.MailboxGrant{},
 	}
 }
 
 func (s *FakeStore) RegisterAPIKey(raw string, tenant *models.Tenant, scopes []string) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.apiRaw[raw] = resolvedAPIKey{Tenant: cloneTenant(tenant), Scopes: append([]string(nil), scopes...)}
+	kid := uuid.New()
+	s.apiRaw[raw] = resolvedAPIKey{Tenant: cloneTenant(tenant), Scopes: append([]string(nil), scopes...), KeyID: kid}
+	s.apiKeys[kid] = &models.TenantAPIKey{
+		ID:       kid,
+		TenantID: tenant.ID,
+		Label:    "test-key",
+		Scopes:   append([]string(nil), scopes...),
+	}
 }
 
 func (s *FakeStore) ForceIngestJobUpdatedAt(id uuid.UUID, updatedAt time.Time) {
@@ -317,6 +334,19 @@ func (s *FakeStore) ListAPIKeys(_ context.Context, tenantID uuid.UUID) ([]*model
 	return out, nil
 }
 
+func (s *FakeStore) ListAPIKeysByOwner(_ context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.TenantAPIKey
+	for _, k := range s.apiKeys {
+		if k.TenantID == tenantID && k.OwnerUserID != nil && *k.OwnerUserID == ownerUserID {
+			cp := *k
+			out = append(out, &cp)
+		}
+	}
+	return out, nil
+}
+
 func (s *FakeStore) DeleteAPIKey(_ context.Context, id uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -324,13 +354,22 @@ func (s *FakeStore) DeleteAPIKey(_ context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (s *FakeStore) ResolveAPIKey(_ context.Context, rawKey string) (*models.Tenant, []string, error) {
+func (s *FakeStore) ResolveAPIKey(_ context.Context, rawKey string) (*models.Tenant, *uuid.UUID, []string, []uuid.UUID, *uuid.UUID, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if rk, ok := s.apiRaw[rawKey]; ok {
-		return cloneTenant(rk.Tenant), append([]string(nil), rk.Scopes...), nil
+		kid := rk.KeyID
+		var allowedZoneIDs []uuid.UUID
+		var ownerUserID *uuid.UUID
+		if k, exists := s.apiKeys[kid]; exists {
+			if len(k.AllowedZoneIDs) > 0 {
+				allowedZoneIDs = append([]uuid.UUID(nil), k.AllowedZoneIDs...)
+			}
+			ownerUserID = k.OwnerUserID
+		}
+		return cloneTenant(rk.Tenant), &kid, append([]string(nil), rk.Scopes...), allowedZoneIDs, ownerUserID, nil
 	}
-	return nil, nil, nil
+	return nil, nil, nil, nil, nil, nil
 }
 
 func (s *FakeStore) TouchAPIKey(_ context.Context, id uuid.UUID) error {
@@ -407,6 +446,24 @@ func (s *FakeStore) ListAllZones(_ context.Context) ([]*models.DomainZone, error
 	for _, z := range s.zones {
 		cp := *z
 		out = append(out, &cp)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Domain < out[j].Domain })
+	return out, nil
+}
+
+func (s *FakeStore) ListZonesByVisibilities(_ context.Context, visibilities []models.ResourceVisibility) ([]*models.DomainZone, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	allowed := make(map[models.ResourceVisibility]struct{}, len(visibilities))
+	for _, v := range visibilities {
+		allowed[v] = struct{}{}
+	}
+	var out []*models.DomainZone
+	for _, z := range s.zones {
+		if _, ok := allowed[z.Visibility]; ok {
+			cp := *z
+			out = append(out, &cp)
+		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Domain < out[j].Domain })
 	return out, nil
@@ -509,9 +566,12 @@ func (s *FakeStore) DeleteRoute(_ context.Context, id uuid.UUID) error {
 	return nil
 }
 
-func (s *FakeStore) FindMatchingRoutes(ctx context.Context, domain string) ([]*models.DomainRoute, error) {
+func (s *FakeStore) FindMatchingRoutes(ctx context.Context, domain string, tenantID *uuid.UUID) ([]*models.DomainRoute, error) {
 	zone, _ := s.GetZoneByDomain(ctx, domain)
 	if zone == nil {
+		return nil, nil
+	}
+	if tenantID != nil && zone.TenantID != *tenantID {
 		return nil, nil
 	}
 	return s.ListRoutes(ctx, zone.ID)
@@ -588,6 +648,29 @@ func (s *FakeStore) GetMailboxByAddress(_ context.Context, address string) (*mod
 	address = strings.ToLower(strings.TrimSpace(address))
 	for _, m := range s.mailboxes {
 		if m.FullAddress == address {
+			cp := *m
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) GetMailboxForTenant(_ context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if m, ok := s.mailboxes[id]; ok && m.TenantID == tenantID {
+		cp := *m
+		return &cp, nil
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) GetMailboxByAddressForTenant(_ context.Context, addr string, tenantID uuid.UUID) (*models.Mailbox, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	addr = strings.ToLower(strings.TrimSpace(addr))
+	for _, m := range s.mailboxes {
+		if m.FullAddress == addr && m.TenantID == tenantID {
 			cp := *m
 			return &cp, nil
 		}
@@ -688,6 +771,29 @@ func (s *FakeStore) ListMailboxObjectKeys(_ context.Context, mailboxID uuid.UUID
 	return out, nil
 }
 
+func (s *FakeStore) ListZoneObjectKeys(_ context.Context, zoneID uuid.UUID) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	seen := make(map[string]struct{})
+	var out []string
+	for _, m := range s.messages {
+		if m.RawObjectKey == "" {
+			continue
+		}
+		mb, ok := s.mailboxes[m.MailboxID]
+		if !ok || mb.ZoneID != zoneID {
+			continue
+		}
+		if _, dup := seen[m.RawObjectKey]; dup {
+			continue
+		}
+		seen[m.RawObjectKey] = struct{}{}
+		out = append(out, m.RawObjectKey)
+	}
+	sort.Strings(out)
+	return out, nil
+}
+
 func (s *FakeStore) CreateMessage(_ context.Context, m *models.Message) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -737,6 +843,16 @@ func (s *FakeStore) GetMessage(_ context.Context, id uuid.UUID) (*models.Message
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if m, ok := s.messages[id]; ok {
+		cp := *m
+		return &cp, nil
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) GetMessageForTenant(_ context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Message, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if m, ok := s.messages[id]; ok && m.TenantID == tenantID {
 		cp := *m
 		return &cp, nil
 	}
@@ -1465,6 +1581,256 @@ func (s *FakeStore) CountIngestJobsByState(_ context.Context, states ...string) 
 }
 
 // ================================================================
+// Zone grants
+// ================================================================
+
+func (s *FakeStore) CreateZoneGrant(_ context.Context, g *models.ZoneGrant) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cp := *g
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	if cp.CreatedAt.IsZero() {
+		cp.CreatedAt = time.Now()
+	}
+	// Check uniqueness
+	for _, existing := range s.zoneGrants {
+		if existing.ZoneID == cp.ZoneID && existing.PrincipalType == cp.PrincipalType && existing.PrincipalID == cp.PrincipalID {
+			return errors.New("duplicate zone grant")
+		}
+	}
+	s.zoneGrants[cp.ID] = &cp
+	g.ID = cp.ID
+	g.CreatedAt = cp.CreatedAt
+	return nil
+}
+
+func (s *FakeStore) DeleteZoneGrant(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.zoneGrants, id)
+	return nil
+}
+
+func (s *FakeStore) ListZoneGrants(_ context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.ZoneGrant
+	for _, g := range s.zoneGrants {
+		if g.ZoneID == zoneID {
+			cp := *g
+			out = append(out, &cp)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.Before(out[j].CreatedAt) })
+	return out, nil
+}
+
+func (s *FakeStore) GetZoneGrant(_ context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (*models.ZoneGrant, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, g := range s.zoneGrants {
+		if g.ZoneID == zoneID && g.PrincipalType == principalType && g.PrincipalID == principalID {
+			cp := *g
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) ListGrantedZoneIDs(_ context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var ids []uuid.UUID
+	for _, g := range s.zoneGrants {
+		if g.PrincipalType == principalType && g.PrincipalID == principalID {
+			ids = append(ids, g.ZoneID)
+		}
+	}
+	return ids, nil
+}
+
+func (s *FakeStore) GetHighestZoneRole(_ context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, g := range s.zoneGrants {
+		if g.ZoneID == zoneID && g.PrincipalType == principalType && g.PrincipalID == principalID {
+			return g.Role, nil
+		}
+	}
+	return "", nil
+}
+
+// ================================================================
+// Send identities
+// ================================================================
+
+func (s *FakeStore) CreateSendIdentity(_ context.Context, si *models.SendIdentity) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cp := *si
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	if cp.CreatedAt.IsZero() {
+		cp.CreatedAt = time.Now()
+	}
+	// Check uniqueness: (tenant_id, address, identity_type)
+	for _, existing := range s.sendIdentities {
+		if existing.TenantID == cp.TenantID && existing.Address == cp.Address && existing.IdentityType == cp.IdentityType {
+			return errors.New("duplicate send identity")
+		}
+	}
+	s.sendIdentities[cp.ID] = &cp
+	si.ID = cp.ID
+	si.CreatedAt = cp.CreatedAt
+	return nil
+}
+
+func (s *FakeStore) GetSendIdentity(_ context.Context, id uuid.UUID) (*models.SendIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if si, ok := s.sendIdentities[id]; ok {
+		cp := *si
+		return &cp, nil
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) ListSendIdentitiesByZone(_ context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.SendIdentity
+	for _, si := range s.sendIdentities {
+		if si.ZoneID == zoneID {
+			cp := *si
+			out = append(out, &cp)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.Before(out[j].CreatedAt) })
+	return out, nil
+}
+
+func (s *FakeStore) FindSendIdentityForAddress(_ context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	// Try exact match first.
+	for _, si := range s.sendIdentities {
+		if si.TenantID == tenantID && si.Address == address && si.IdentityType == models.SendIdentityExact {
+			cp := *si
+			return &cp, nil
+		}
+	}
+	// Try domain_wildcard.
+	idx := strings.LastIndex(address, "@")
+	if idx < 0 {
+		return nil, nil
+	}
+	domain := address[idx+1:]
+	wildcardAddr := "*@" + domain
+	for _, si := range s.sendIdentities {
+		if si.TenantID == tenantID && si.Address == wildcardAddr && si.IdentityType == models.SendIdentityDomainWildcard {
+			cp := *si
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) UpdateSendIdentitiesVerifiedByZone(_ context.Context, zoneID uuid.UUID, verified bool) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, si := range s.sendIdentities {
+		if si.ZoneID == zoneID {
+			si.Verified = verified
+		}
+	}
+	return nil
+}
+
+func (s *FakeStore) DeleteSendIdentity(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.sendIdentities, id)
+	return nil
+}
+
+// ================================================================
+// Send-as grants
+// ================================================================
+
+func (s *FakeStore) CreateSendAsGrant(_ context.Context, g *models.SendAsGrant) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cp := *g
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	if cp.CreatedAt.IsZero() {
+		cp.CreatedAt = time.Now()
+	}
+	// Check uniqueness: (identity_id, principal_type, principal_id)
+	for _, existing := range s.sendAsGrants {
+		if existing.IdentityID == cp.IdentityID && existing.PrincipalType == cp.PrincipalType && existing.PrincipalID == cp.PrincipalID {
+			return errors.New("duplicate send-as grant")
+		}
+	}
+	s.sendAsGrants[cp.ID] = &cp
+	g.ID = cp.ID
+	g.CreatedAt = cp.CreatedAt
+	return nil
+}
+
+func (s *FakeStore) DeleteSendAsGrant(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.sendAsGrants, id)
+	return nil
+}
+
+func (s *FakeStore) ListSendAsGrantsByIdentity(_ context.Context, identityID uuid.UUID) ([]*models.SendAsGrant, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.SendAsGrant
+	for _, g := range s.sendAsGrants {
+		if g.IdentityID == identityID {
+			cp := *g
+			out = append(out, &cp)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.Before(out[j].CreatedAt) })
+	return out, nil
+}
+
+func (s *FakeStore) HasSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (bool, error) {
+	g, err := s.GetSendAsGrant(ctx, tenantID, address, principalType, principalID)
+	if err != nil {
+		return false, err
+	}
+	return g != nil, nil
+}
+
+func (s *FakeStore) GetSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (*models.SendAsGrant, error) {
+	si, err := s.FindSendIdentityForAddress(ctx, tenantID, address)
+	if err != nil || si == nil {
+		return nil, err
+	}
+	if !si.Verified {
+		return nil, nil
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, g := range s.sendAsGrants {
+		if g.IdentityID == si.ID && g.PrincipalType == principalType && g.PrincipalID == principalID {
+			cp := *g
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+// ================================================================
 // Users (stub implementations for Store interface)
 // ================================================================
 
@@ -1512,7 +1878,7 @@ func (s *FakeStore) GetUserByEmail(_ context.Context, email string) (*models.Use
 	return nil, nil
 }
 
-func (s *FakeStore) ListUsers(_ context.Context, pg models.Page) ([]*models.User, int, error) {
+func (s *FakeStore) ListUsers(_ context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.User, int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if s.users == nil {
@@ -1520,8 +1886,10 @@ func (s *FakeStore) ListUsers(_ context.Context, pg models.Page) ([]*models.User
 	}
 	var all []*models.User
 	for _, u := range s.users {
-		cp := *u
-		all = append(all, &cp)
+		if u.TenantID == tenantID {
+			cp := *u
+			all = append(all, &cp)
+		}
 	}
 	return all, len(all), nil
 }
@@ -1644,13 +2012,15 @@ func (s *FakeStore) GetPermissionProfile(_ context.Context, _ uuid.UUID) (*model
 func (s *FakeStore) GetPermissionProfileByName(_ context.Context, _ string) (*models.PermissionProfile, error) {
 	return nil, nil
 }
-func (s *FakeStore) ListPermissionProfiles(_ context.Context) ([]*models.PermissionProfile, error) {
+func (s *FakeStore) ListPermissionProfiles(_ context.Context, _ *uuid.UUID) ([]*models.PermissionProfile, error) {
 	return nil, nil
 }
 func (s *FakeStore) UpdatePermissionProfile(_ context.Context, _ *models.PermissionProfile) error {
 	return nil
 }
-func (s *FakeStore) DeletePermissionProfile(_ context.Context, _ uuid.UUID) error { return nil }
+func (s *FakeStore) DeletePermissionProfile(_ context.Context, _ uuid.UUID, _ *uuid.UUID) error {
+	return nil
+}
 
 // ================================================================
 // User permission overrides (stubs)
@@ -1681,17 +2051,99 @@ func (s *FakeStore) ListOutboundJobs(_ context.Context, _ uuid.UUID, _ models.Pa
 func (s *FakeStore) ClaimOutboundJobs(_ context.Context, _ time.Time, _ int) ([]*models.OutboundJob, error) {
 	return nil, nil
 }
-func (s *FakeStore) MarkOutboundJobSent(_ context.Context, _ uuid.UUID, _ int, _, _ string) error {
+func (s *FakeStore) MarkOutboundJobSent(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ int, _, _ string) error {
 	return nil
 }
-func (s *FakeStore) MarkOutboundJobRetry(_ context.Context, _ uuid.UUID, _ string, _ time.Time) error {
+func (s *FakeStore) MarkOutboundJobRetry(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ string, _ time.Time) error {
 	return nil
 }
-func (s *FakeStore) MarkOutboundJobFailed(_ context.Context, _ uuid.UUID, _ string, _ bool) error {
+func (s *FakeStore) MarkOutboundJobFailed(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ string, _ bool) error {
 	return nil
 }
 func (s *FakeStore) CountOutboundSince(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ time.Time) (int, error) {
 	return 0, nil
+}
+func (s *FakeStore) CountOutboundByIdentitySince(_ context.Context, _ uuid.UUID, _ string, _ uuid.UUID, _ uuid.UUID, _ time.Time) (int, error) {
+	return 0, nil
+}
+
+// ================================================================
+// Mailbox grants
+// ================================================================
+
+func (s *FakeStore) CreateMailboxGrant(_ context.Context, g *models.MailboxGrant) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	cp := *g
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	if cp.CreatedAt.IsZero() {
+		cp.CreatedAt = time.Now()
+	}
+	// Check uniqueness
+	for _, existing := range s.mailboxGrants {
+		if existing.MailboxID == cp.MailboxID && existing.PrincipalType == cp.PrincipalType && existing.PrincipalID == cp.PrincipalID {
+			return errors.New("duplicate mailbox grant")
+		}
+	}
+	s.mailboxGrants[cp.ID] = &cp
+	g.ID = cp.ID
+	g.CreatedAt = cp.CreatedAt
+	return nil
+}
+
+func (s *FakeStore) DeleteMailboxGrant(_ context.Context, id uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.mailboxGrants, id)
+	return nil
+}
+
+func (s *FakeStore) ListMailboxGrants(_ context.Context, mailboxID uuid.UUID) ([]*models.MailboxGrant, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.MailboxGrant
+	for _, g := range s.mailboxGrants {
+		if g.MailboxID == mailboxID {
+			cp := *g
+			out = append(out, &cp)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.Before(out[j].CreatedAt) })
+	return out, nil
+}
+
+func (s *FakeStore) GetMailboxGrant(_ context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, g := range s.mailboxGrants {
+		if g.MailboxID == mailboxID && g.PrincipalType == principalType && g.PrincipalID == principalID {
+			cp := *g
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) ListGrantedMailboxIDs(_ context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var ids []uuid.UUID
+	for _, g := range s.mailboxGrants {
+		if g.PrincipalType == principalType && g.PrincipalID == principalID {
+			ids = append(ids, g.MailboxID)
+		}
+	}
+	return ids, nil
+}
+
+// ================================================================
+// Outbound jobs (user-scoped)
+// ================================================================
+
+func (s *FakeStore) ListOutboundJobsByUser(_ context.Context, _ uuid.UUID, _ uuid.UUID, _ models.Page) ([]*models.OutboundJob, int, error) {
+	return nil, 0, nil
 }
 
 // ================================================================
