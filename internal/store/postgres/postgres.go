@@ -544,6 +544,11 @@ func (s *PgStore) GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 
 func (s *PgStore) UpsertSMTPPolicy(ctx context.Context, p *models.SMTPPolicy) error {
 	p.UpdatedAt = time.Now().UTC()
+	accept := nonNil(p.AcceptDomains)
+	reject := nonNil(p.RejectDomains)
+	store := nonNil(p.StoreDomains)
+	discard := nonNil(p.DiscardDomains)
+	rejectOrigin := nonNil(p.RejectOriginDomains)
 	_, err := s.pool.Exec(ctx, `
 		INSERT INTO smtp_policies (id,default_accept,accept_domains,reject_domains,default_store,store_domains,discard_domains,reject_origin_domains,updated_at)
 		VALUES (TRUE,$1,$2,$3,$4,$5,$6,$7,$8)
@@ -556,8 +561,15 @@ func (s *PgStore) UpsertSMTPPolicy(ctx context.Context, p *models.SMTPPolicy) er
 			discard_domains=EXCLUDED.discard_domains,
 			reject_origin_domains=EXCLUDED.reject_origin_domains,
 			updated_at=EXCLUDED.updated_at`,
-		p.DefaultAccept, p.AcceptDomains, p.RejectDomains, p.DefaultStore, p.StoreDomains, p.DiscardDomains, p.RejectOriginDomains, p.UpdatedAt)
+		p.DefaultAccept, accept, reject, p.DefaultStore, store, discard, rejectOrigin, p.UpdatedAt)
 	return err
+}
+
+func nonNil(s []string) []string {
+	if s == nil {
+		return []string{}
+	}
+	return s
 }
 
 // ================================================================
