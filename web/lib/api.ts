@@ -53,6 +53,20 @@ export {
   updateAdminDomainAccess,
   verifyDomain,
 } from "./api/domains";
+export {
+  createMailboxGrant,
+  createSendAsGrant,
+  createSendIdentity,
+  createZoneGrant,
+  deleteMailboxGrant,
+  deleteSendAsGrant,
+  deleteSendIdentity,
+  deleteZoneGrant,
+  listMailboxGrants,
+  listSendAsGrants,
+  listSendIdentities,
+  listZoneGrants,
+} from "./api/grants";
 export { createMailbox, deleteMailbox, listMailboxes } from "./api/mailboxes";
 export {
   deleteMessage,

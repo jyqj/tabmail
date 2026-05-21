@@ -39,6 +39,8 @@ export interface TenantAPIKey {
   key_prefix: string;
   label: string;
   scopes: string[];
+  owner_user_id?: string | null;
+  allowed_zone_ids?: string[] | null;
   expires_at: string | null;
   created_at: string;
   last_used_at?: string | null;
@@ -76,6 +78,9 @@ export interface DomainZone {
   is_verified: boolean;
   mx_verified: boolean;
   txt_record: string;
+  dkim_selector: string;
+  dkim_enabled: boolean;
+  dkim_required_for_send: boolean;
   created_at: string;
   verified_at: string | null;
 }
@@ -133,7 +138,7 @@ export interface Message {
   id: string;
   tenant_id: string;
   mailbox_id: string;
-  zone_id?: string;
+  zone_id: string;
   sender: string;
   recipients: string[];
   subject: string;
@@ -190,6 +195,9 @@ export interface VerificationStatus {
   expected_mx: string;
   is_verified?: boolean;
   mx_verified?: boolean;
+  dkim_record?: string;
+  dkim_host?: string;
+  dkim_enabled?: boolean;
   checks: VerificationChecks;
 }
 
@@ -297,7 +305,7 @@ export interface MailboxTokenResponse {
   expires_in: number;
 }
 
-export type UserRole = "admin" | "user";
+export type UserRole = "platform_admin" | "tenant_admin" | "admin" | "user";
 
 export interface AuthUser {
   id: string;
@@ -317,7 +325,15 @@ export interface AdminUser {
   permission_profile_id?: string;
   is_active: boolean;
   created_at: string;
+  updated_at: string;
   last_login_at?: string | null;
+}
+
+export interface UpdateUserRequest {
+  role?: UserRole;
+  is_active?: boolean;
+  display_name?: string;
+  permission_profile_id?: string | null;
 }
 
 export interface LoginResponse {
@@ -463,16 +479,21 @@ export interface OutboundJob {
   id: string;
   tenant_id: string;
   user_id?: string;
+  api_key_id?: string;
   mail_from: string;
   rcpt_to: string[];
   subject: string;
   text_body?: string;
   html_body?: string;
+  headers?: Record<string, string>;
   zone_id: string;
   state: OutboundState;
   attempts: number;
   max_attempts: number;
   last_error?: string;
+  next_attempt_at: string;
+  claimed_at?: string | null;
+  lease_until?: string | null;
   smtp_code?: number;
   smtp_response?: string;
   message_id_header?: string;
@@ -495,5 +516,57 @@ export interface SendEmailResponse {
   id: string;
   message_id: string;
   state: OutboundState;
+  created_at: string;
+}
+
+// ============================================================
+// Grants
+// ============================================================
+
+export type MailboxGrantRole = "owner" | "manager" | "writer" | "reader";
+
+export interface MailboxGrant {
+  id: string;
+  tenant_id: string;
+  mailbox_id: string;
+  principal_type: "user" | "api_key";
+  principal_id: string;
+  role: MailboxGrantRole;
+  created_at: string;
+}
+
+export type ZoneGrantRole = "owner" | "admin" | "editor" | "viewer";
+
+export interface ZoneGrant {
+  id: string;
+  tenant_id: string;
+  zone_id: string;
+  principal_type: "user" | "api_key";
+  principal_id: string;
+  role: ZoneGrantRole;
+  created_by?: string;
+  created_at: string;
+}
+
+export type SendIdentityType = "exact" | "domain_wildcard";
+
+export interface SendIdentity {
+  id: string;
+  tenant_id: string;
+  zone_id: string;
+  mailbox_id?: string;
+  address: string;
+  identity_type: SendIdentityType;
+  verified: boolean;
+  created_at: string;
+}
+
+export interface SendAsGrant {
+  id: string;
+  tenant_id: string;
+  identity_id: string;
+  principal_type: "user" | "api_key";
+  principal_id: string;
+  daily_quota: number;
   created_at: string;
 }
