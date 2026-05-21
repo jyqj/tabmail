@@ -729,6 +729,7 @@ const zh: Messages = {
   "sidebar.users": "用户管理",
   "sidebar.domainResources": "域名资源",
   "sidebar.outbound": "发件管理",
+  "sidebar.sendIdentities": "发件身份",
   "sidebar.permissions": "权限模板",
 
   // Monitor pagination
@@ -1983,6 +1984,7 @@ const en: Messages = {
   "sidebar.users": "Users",
   "sidebar.domainResources": "Domain Resources",
   "sidebar.outbound": "Outbound",
+  "sidebar.sendIdentities": "Send Identities",
   "sidebar.permissions": "Permissions",
 
   // Monitor pagination

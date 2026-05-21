@@ -54,6 +54,7 @@ import {
   ExternalLink,
   Inbox,
   Copy,
+  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -328,6 +329,10 @@ export default function MailboxesPage() {
                               <DropdownMenuItem render={<Link href={`/inbox/${encodeURIComponent(mb.full_address)}`} />}>
                                 <ExternalLink className="h-4 w-4 mr-2" />
                                 {t("mailboxes.openInbox")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem render={<Link href={`/console/mailboxes/${mb.id}/grants`} />}>
+                                <KeyRound className="h-4 w-4 mr-2" />
+                                邮箱授权
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleDelete(mb.id)}

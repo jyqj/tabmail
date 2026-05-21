@@ -55,11 +55,13 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
+  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { usePermissions } from "@/contexts/auth-context";
 
 function safeConfirm(message: string) {
   if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
@@ -140,8 +142,10 @@ function DNSSetupGuide({ zone, verificationStatus }: {
 }) {
   const expectedMx = verificationStatus?.expected_mx || "your-server.example.com";
   const allVerified = zone.is_verified && zone.mx_verified;
+  const hasDkimRecord = !!verificationStatus?.dkim_record;
+  const dkimEnabled = !!verificationStatus?.dkim_enabled;
 
-  if (allVerified) return null;
+  if (allVerified && (!hasDkimRecord || dkimEnabled)) return null;
 
   return (
     <div className="rounded-lg border border-amber-200 dark:border-amber-900/50 bg-amber-50/50 dark:bg-amber-950/20 p-4 space-y-4">
@@ -156,61 +160,94 @@ function DNSSetupGuide({ zone, verificationStatus }: {
       </div>
 
       <div className="space-y-3">
-        <div className="rounded-md bg-background border border-border/60 p-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              TXT 记录（验证域名所有权）
-            </span>
-            {zone.is_verified ? (
-              <Badge variant="default" className="bg-green-600 text-[10px]">已通过</Badge>
-            ) : (
-              <Badge variant="secondary" className="text-[10px]">未通过</Badge>
-            )}
-          </div>
-          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
-            <span className="text-muted-foreground">名称:</span>
-            <div className="flex items-center gap-1.5">
-              <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{zone.domain}</code>
-              <CopyButton value={zone.domain} />
+        {!allVerified && (
+          <>
+            <div className="rounded-md bg-background border border-border/60 p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  TXT 记录（验证域名所有权）
+                </span>
+                {zone.is_verified ? (
+                  <Badge variant="default" className="bg-green-600 text-[10px]">已通过</Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-[10px]">未通过</Badge>
+                )}
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
+                <span className="text-muted-foreground">名称:</span>
+                <div className="flex items-center gap-1.5">
+                  <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{zone.domain}</code>
+                  <CopyButton value={zone.domain} />
+                </div>
+                <span className="text-muted-foreground">类型:</span>
+                <code className="font-mono">TXT</code>
+                <span className="text-muted-foreground">值:</span>
+                <div className="flex items-center gap-1.5">
+                  <code className="font-mono bg-muted px-1.5 py-0.5 rounded break-all">{zone.txt_record}</code>
+                  <CopyButton value={zone.txt_record} />
+                </div>
+              </div>
             </div>
-            <span className="text-muted-foreground">类型:</span>
-            <code className="font-mono">TXT</code>
-            <span className="text-muted-foreground">值:</span>
-            <div className="flex items-center gap-1.5">
-              <code className="font-mono bg-muted px-1.5 py-0.5 rounded break-all">{zone.txt_record}</code>
-              <CopyButton value={zone.txt_record} />
-            </div>
-          </div>
-        </div>
 
-        <div className="rounded-md bg-background border border-border/60 p-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              MX 记录（接收邮件）
-            </span>
-            {zone.mx_verified ? (
-              <Badge variant="default" className="bg-green-600 text-[10px]">已通过</Badge>
-            ) : (
-              <Badge variant="secondary" className="text-[10px]">未通过</Badge>
-            )}
-          </div>
-          <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
-            <span className="text-muted-foreground">名称:</span>
-            <div className="flex items-center gap-1.5">
-              <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{zone.domain}</code>
-              <CopyButton value={zone.domain} />
+            <div className="rounded-md bg-background border border-border/60 p-3">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  MX 记录（接收邮件）
+                </span>
+                {zone.mx_verified ? (
+                  <Badge variant="default" className="bg-green-600 text-[10px]">已通过</Badge>
+                ) : (
+                  <Badge variant="secondary" className="text-[10px]">未通过</Badge>
+                )}
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
+                <span className="text-muted-foreground">名称:</span>
+                <div className="flex items-center gap-1.5">
+                  <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{zone.domain}</code>
+                  <CopyButton value={zone.domain} />
+                </div>
+                <span className="text-muted-foreground">类型:</span>
+                <code className="font-mono">MX</code>
+                <span className="text-muted-foreground">优先级:</span>
+                <code className="font-mono">10</code>
+                <span className="text-muted-foreground">目标:</span>
+                <div className="flex items-center gap-1.5">
+                  <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{expectedMx}</code>
+                  <CopyButton value={expectedMx} />
+                </div>
+              </div>
             </div>
-            <span className="text-muted-foreground">类型:</span>
-            <code className="font-mono">MX</code>
-            <span className="text-muted-foreground">优先级:</span>
-            <code className="font-mono">10</code>
-            <span className="text-muted-foreground">目标:</span>
-            <div className="flex items-center gap-1.5">
-              <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{expectedMx}</code>
-              <CopyButton value={expectedMx} />
+          </>
+        )}
+
+        {hasDkimRecord && (
+          <div className="rounded-md bg-background border border-border/60 p-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                TXT 记录（DKIM 签名）
+              </span>
+              {dkimEnabled ? (
+                <Badge variant="default" className="bg-green-600 text-[10px]">已启用</Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[10px]">未启用</Badge>
+              )}
+            </div>
+            <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
+              <span className="text-muted-foreground">名称:</span>
+              <div className="flex items-center gap-1.5">
+                <code className="font-mono bg-muted px-1.5 py-0.5 rounded break-all">{verificationStatus!.dkim_host}</code>
+                <CopyButton value={verificationStatus!.dkim_host!} />
+              </div>
+              <span className="text-muted-foreground">类型:</span>
+              <code className="font-mono">TXT</code>
+              <span className="text-muted-foreground">值:</span>
+              <div className="flex items-center gap-1.5 min-w-0">
+                <code className="font-mono bg-muted px-1.5 py-0.5 rounded break-all">{verificationStatus!.dkim_record}</code>
+                <CopyButton value={verificationStatus!.dkim_record!} />
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
@@ -313,6 +350,16 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
                   TXT OK · MX 未配置
                 </Badge>
               )}
+              {allVerified && zone.dkim_enabled && (
+                <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-[10px]">
+                  DKIM
+                </Badge>
+              )}
+              {allVerified && !zone.dkim_enabled && (
+                <Badge variant="secondary" className="text-[10px]">
+                  DKIM 未配置
+                </Badge>
+              )}
               <Badge variant="outline" className="text-[10px]">
                 {zone.visibility === "public" ? "公开资源" : zone.visibility === "authenticated" ? "登录可用" : "私有"}
               </Badge>
@@ -341,6 +388,10 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
               <DropdownMenuItem render={<Link href={`/console/domains/${zone.id}/routes`} />}>
                 <Route className="h-4 w-4 mr-2" />
                 {t("domains.routes")}
+              </DropdownMenuItem>
+              <DropdownMenuItem render={<Link href={`/console/domains/${zone.id}/grants`} />}>
+                <KeyRound className="h-4 w-4 mr-2" />
+                域名授权
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onSuggest(false)}>
@@ -421,12 +472,16 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
 
 export default function DomainsPage() {
   const { t } = useI18n();
+  const permissions = usePermissions();
   const { data: response, isLoading: loading, error, mutate } = useAPI(
     "domains",
     () => listDomains(),
   );
   const zones = response?.data ?? [];
   const total = zones.length;
+  const canCreate = permissions?.can_create_domains !== false;
+  const hasQuota = permissions != null && permissions.max_domains > 0;
+  const atLimit = hasQuota && total >= permissions.max_domains;
 
   useEffect(() => {
     if (error) toast.error(t("domains.loadFailed"));
@@ -481,35 +536,47 @@ export default function DomainsPage() {
         title={t("domains.title")}
         description={t("domains.count", { count: total })}
         actions={
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
-              <Plus className="h-3.5 w-3.5" />
-              {t("domains.addDomain")}
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>{t("domains.addTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("domains.addDesc")}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-2 py-4">
-                <Label htmlFor="domain">{t("domains.domain")}</Label>
-                <Input
-                  id="domain"
-                  placeholder={t("domains.placeholder")}
-                  value={newDomain}
-                  onChange={(e) => setNewDomain(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-                />
-              </div>
-              <DialogFooter>
-                <Button onClick={handleCreate} disabled={creating || !newDomain.trim()}>
-                  {creating ? t("domains.creating") : t("domains.create")}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <div className="flex items-center gap-3">
+            {hasQuota && (
+              <span className={cn(
+                "text-sm tabular-nums",
+                atLimit ? "text-destructive font-medium" : "text-muted-foreground",
+              )}>
+                {total} / {permissions.max_domains}
+              </span>
+            )}
+            {canCreate && (
+              <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                <DialogTrigger render={<Button size="sm" className="gap-1.5" disabled={atLimit} />}>
+                  <Plus className="h-3.5 w-3.5" />
+                  {t("domains.addDomain")}
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>{t("domains.addTitle")}</DialogTitle>
+                    <DialogDescription>
+                      {t("domains.addDesc")}
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-2 py-4">
+                    <Label htmlFor="domain">{t("domains.domain")}</Label>
+                    <Input
+                      id="domain"
+                      placeholder={t("domains.placeholder")}
+                      value={newDomain}
+                      onChange={(e) => setNewDomain(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleCreate()}
+                    />
+                  </div>
+                  <DialogFooter>
+                    <Button onClick={handleCreate} disabled={creating || !newDomain.trim()}>
+                      {creating ? t("domains.creating") : t("domains.create")}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            )}
+          </div>
         }
       />
 

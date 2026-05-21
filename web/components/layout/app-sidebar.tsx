@@ -35,34 +35,59 @@ import {
   Boxes,
   Settings2,
   Send,
+  KeyRound,
 } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { level, logout } = useAuth();
+  const { level, logout, permissions } = useAuth();
   const { t } = useI18n();
 
   const consoleItems = [
     { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
     { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
-    { href: "/console/keys", label: t("sidebar.apiKeys"), icon: Settings2 },
-    { href: "/console/outbound", label: t("sidebar.outbound"), icon: Send },
+    // Hide API Keys if permissions loaded and can_create_api_keys is false
+    ...(permissions?.can_create_api_keys !== false
+      ? [{ href: "/console/keys", label: t("sidebar.apiKeys"), icon: Settings2 }]
+      : []),
+    // Hide Outbound if permissions loaded and can_send is false
+    ...(permissions?.can_send !== false
+      ? [{ href: "/console/outbound", label: t("sidebar.outbound"), icon: Send }]
+      : []),
+    ...(permissions?.can_send !== false
+      ? [{ href: "/console/send-identities", label: t("sidebar.sendIdentities"), icon: KeyRound }]
+      : []),
   ];
 
-  const adminItems = [
-    { href: "/admin", label: t("sidebar.statistics"), icon: BarChart3 },
-    { href: "/admin/monitor", label: t("sidebar.monitor"), icon: Radar },
-    { href: "/admin/policy", label: t("sidebar.smtpPolicy"), icon: SlidersHorizontal },
-    { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
+  const isPlatformAdmin = level === "platform_admin";
+
+  // Shared tenant admin items (accessible by both platform_admin and tenant_admin)
+  const sharedAdminItems = [
     { href: "/admin/users", label: t("sidebar.users"), icon: Users },
     { href: "/admin/permissions", label: t("sidebar.permissions"), icon: Shield },
     { href: "/admin/domains", label: t("sidebar.domainResources"), icon: Globe },
-    { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
+  ];
+
+  // Platform-only operations expose global telemetry/audit data.
+  const platformOpsItems = [
+    { href: "/admin", label: t("sidebar.statistics"), icon: BarChart3 },
+    { href: "/admin/monitor", label: t("sidebar.monitor"), icon: Radar },
     { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
     { href: "/admin/ingest", label: t("sidebar.ingest"), icon: Boxes },
     { href: "/admin/webhooks", label: t("sidebar.webhooks"), icon: Webhook },
+  ];
+
+  // Platform-only admin items (only platform_admin)
+  const platformAdminItems = [
+    { href: "/admin/policy", label: t("sidebar.smtpPolicy"), icon: SlidersHorizontal },
+    { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
+    { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
     { href: "/admin/settings", label: t("sidebar.settings"), icon: Settings2 },
   ];
+
+  const adminItems = isPlatformAdmin
+    ? [...platformOpsItems, ...sharedAdminItems, ...platformAdminItems]
+    : sharedAdminItems;
 
   return (
     <Sidebar className="border-r border-border/40 backdrop-blur-3xl bg-background/60">
@@ -111,7 +136,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {level === "admin" && (
+        {(level === "platform_admin" || level === "tenant_admin") && (
           <>
             <SidebarSeparator className="my-2 bg-border/40" />
             <SidebarGroup>
