@@ -78,7 +78,7 @@ export function AppSidebar() {
               <SidebarMenuButton 
                 render={<Link href="/" />} 
                 isActive={pathname === "/"}
-                className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
+                className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium data-[active=true]:border-l-2 data-[active=true]:border-l-primary"
               >
                 <Home className="h-4 w-4" />
                 <span>{t("sidebar.home")}</span>
@@ -97,7 +97,7 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   render={<Link href={item.href} />}
                   isActive={pathname.startsWith(item.href)}
-                  className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
+                  className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium data-[active=true]:border-l-2 data-[active=true]:border-l-primary"
                 >
                   <item.icon className="h-4 w-4" />
                   <span>{item.label}</span>
@@ -125,7 +125,7 @@ export function AppSidebar() {
                           ? pathname === "/admin"
                           : pathname.startsWith(item.href)
                       }
-                      className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium"
+                      className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium data-[active=true]:border-l-2 data-[active=true]:border-l-primary"
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.label}</span>

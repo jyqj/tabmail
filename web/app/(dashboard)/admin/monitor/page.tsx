@@ -128,7 +128,7 @@ export default function AdminMonitorPage() {
       />
 
       <div className="space-y-4 p-4">
-        <Card>
+        <Card className="tm-reveal tm-reveal-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Search className="h-4 w-4 text-primary" />
@@ -167,14 +167,14 @@ export default function AdminMonitorPage() {
           </CardContent>
         </Card>
 
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-4 tm-reveal tm-reveal-2">
           <MonitorCard title={t("monitor.buffered")} value={filteredEvents.length} hint={t("monitor.bufferedHint")} />
           <MonitorCard title={t("monitor.messages")} value={stats.message} hint={t("monitor.messagesHint")} />
           <MonitorCard title={t("monitor.deletes")} value={stats.delete} hint={t("monitor.deletesHint")} />
           <MonitorCard title={t("monitor.purges")} value={stats.purge} hint={t("monitor.purgesHint")} />
         </div>
 
-        <Card className="overflow-hidden border-primary/10 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_35%),var(--card)]">
+        <Card className="overflow-hidden border-primary/10 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.10),transparent_35%),var(--card)] tm-reveal tm-reveal-3">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Radar className="h-4 w-4 text-primary" />
@@ -250,7 +250,7 @@ export default function AdminMonitorPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="tm-reveal tm-reveal-4">
           <CardHeader>
             <CardTitle>{t("monitor.persistedHistory")}</CardTitle>
             <CardDescription>{t("monitor.persistedHistoryDesc")}</CardDescription>

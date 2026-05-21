@@ -505,7 +505,7 @@ export default function DomainsPage() {
       />
 
       <div className="p-4">
-        <div className="space-y-3">
+        <div className="space-y-3 tm-reveal tm-reveal-1">
           {loading ? (
             <div className="space-y-3">
               {Array.from({ length: 2 }).map((_, i) => (

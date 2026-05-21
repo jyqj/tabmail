@@ -238,7 +238,7 @@ export default function MailboxesPage() {
       />
 
       <div className="p-4">
-        <Card>
+        <Card className="tm-reveal tm-reveal-1">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">{t("mailboxes.allMailboxes")}</CardTitle>
             <CardDescription>

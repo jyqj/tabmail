@@ -389,7 +389,7 @@ export default function InboxPage() {
                   loading={detailLoading}
                 />
               ) : (
-                <div className="text-center text-muted-foreground px-4">
+                <div className="text-center text-muted-foreground px-4 tm-reveal tm-reveal-1">
                   <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted mx-auto mb-4">
                     <Mail className="h-7 w-7 opacity-40" />
                   </div>

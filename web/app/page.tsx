@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
@@ -25,10 +25,31 @@ import {
   RefreshCw,
   BookOpen,
   ChevronDown,
-  ArrowUpRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+
+function useScrollReveal() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
+    );
+    el.querySelectorAll(".tm-fade-in").forEach((child) => observer.observe(child));
+    return () => observer.disconnect();
+  }, []);
+  return ref;
+}
 
 function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false);
@@ -58,6 +79,8 @@ export default function HomePage() {
   const { t } = useI18n();
   const [address, setAddress] = useState("");
   const heroInputRef = useRef<HTMLInputElement>(null);
+  const featuresRef = useScrollReveal();
+  const stepsRef = useScrollReveal();
 
   const go = useCallback(() => {
     const target = address.trim();
@@ -177,7 +200,7 @@ export default function HomePage() {
 
         {/* How it works — code-first */}
         <section className="py-8 md:py-14">
-          <div className="mx-auto max-w-[1180px] px-6 md:px-12">
+          <div ref={stepsRef} className="mx-auto max-w-[1180px] px-6 md:px-12">
             <div className="flex flex-col lg:flex-row gap-10 items-stretch">
               {/* Left: steps */}
               <div className="flex-1">
@@ -190,7 +213,7 @@ export default function HomePage() {
 
                 <ol className="mt-7 list-none p-0">
                   {STEPS.map((s) => (
-                    <li key={s.n} className="flex gap-4 py-4 border-t border-border group">
+                    <li key={s.n} className="flex gap-4 py-4 border-t border-border group tm-fade-in">
                       <div className="font-mono text-[13px] font-semibold text-primary w-9 shrink-0 group-hover:translate-x-0.5 transition-transform">{s.n}</div>
                       <div className="flex-1 min-w-0">
                         <div className="text-[15px] font-semibold leading-snug">{s.title}</div>
@@ -243,8 +266,8 @@ export default function HomePage() {
 
         {/* Features */}
         <section className="py-16 md:py-24">
-          <div className="mx-auto max-w-[1180px] px-6 md:px-12">
-            <div className="text-center mb-14">
+          <div ref={featuresRef} className="mx-auto max-w-[1180px] px-6 md:px-12">
+            <div className="text-center mb-14 tm-fade-in">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-primary mb-3">
                 {t("home.features")}
               </p>
@@ -257,10 +280,10 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {FEATURES.map((f) => (
+              {FEATURES.map((f, i) => (
                 <div
                   key={f.titleKey}
-                  className="group relative rounded-lg border border-border bg-card p-5 hover:border-primary/30 hover:shadow-[0_2px_12px_-4px_hsl(174_100%_32%_/_0.08)] transition-all duration-300"
+                  className={cn("group relative rounded-lg border border-border bg-card p-5 tm-card-hover hover:border-primary/30 transition-all duration-300 tm-fade-in", `tm-fade-in-${Math.min(i + 1, 6)}`)}
                 >
                   <div className="flex h-9 w-9 items-center justify-center rounded-md bg-secondary text-primary mb-3 group-hover:bg-primary/10 transition-colors duration-300">
                     <f.icon className="h-[18px] w-[18px]" />
@@ -278,10 +301,7 @@ export default function HomePage() {
         {/* CTA */}
         <section className="relative py-16 md:py-24 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary to-emerald-800 dark:from-primary/90 dark:via-primary/80 dark:to-emerald-900" />
-          <div className="absolute inset-0 opacity-[0.06]" style={{
-            backgroundImage: "linear-gradient(to bottom, white 1px, transparent 1px), linear-gradient(to right, white 1px, transparent 1px)",
-            backgroundSize: "48px 48px",
-          }} />
+          <div className="absolute inset-0 opacity-[0.06] tm-grid-overlay" />
 
           <div className="mx-auto max-w-3xl px-6 text-center relative z-10">
             <h2 className="text-3xl md:text-[40px] font-bold tracking-[-0.03em] text-white mb-4 leading-tight">
@@ -336,20 +356,33 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-[1180px] px-6 md:px-12 py-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2.5">
-              <TabMailLogo size={22} />
-              <span className="font-semibold text-sm tracking-tight">
-                <span className="text-primary">Tab</span>Mail
-              </span>
+      <footer className="border-t border-border bg-muted/30">
+        <div className="mx-auto max-w-[1180px] px-6 md:px-12 py-8">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-6">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-2.5">
+                <TabMailLogo size={22} />
+                <span className="font-semibold text-sm tracking-tight">
+                  <span className="text-primary">Tab</span>Mail
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground max-w-[280px] leading-relaxed">
+                {t("home.desc")}
+              </p>
             </div>
-            <nav className="flex items-center gap-5 text-sm text-muted-foreground">
-              <Link href="/docs" className="hover:text-foreground transition-colors">
+            <nav className="flex items-center gap-6 text-sm text-muted-foreground">
+              <Link href="/docs" className="hover:text-foreground transition-colors text-[13px]">
                 {t("header.docs")}
               </Link>
-              <span>&copy; {new Date().getFullYear()}</span>
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-foreground transition-colors text-[13px]"
+              >
+                GitHub
+              </a>
+              <span className="text-xs opacity-50">&copy; {new Date().getFullYear()}</span>
             </nav>
           </div>
         </div>

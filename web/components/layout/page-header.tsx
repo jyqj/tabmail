@@ -9,7 +9,7 @@ interface Props {
 
 export function PageHeader({ title, description, actions }: Props) {
   return (
-    <header className="sticky top-0 z-40 bg-background border-b">
+    <header className="sticky top-0 z-40 bg-background border-b shadow-[0_1px_3px_-1px_rgba(0,0,0,0.06)]">
       <div className="flex items-center gap-2 px-4 h-14">
         <SidebarTrigger className="-ml-1" />
         <Separator orientation="vertical" className="h-5" />

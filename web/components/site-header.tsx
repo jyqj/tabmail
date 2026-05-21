@@ -27,6 +27,7 @@ import {
   Inbox,
 } from "lucide-react";
 import { TabMailLogo } from "@/components/tabmail-logo";
+import { cn } from "@/lib/utils";
 
 export function SiteHeader() {
   const { level } = useAuth();
@@ -66,12 +67,6 @@ export function SiteHeader() {
     { href: "/docs", label: t("header.docs"), icon: BookOpen },
   ];
 
-  const statusDot = healthy == null
-    ? "bg-muted-foreground/40"
-    : healthy
-      ? "bg-emerald-500"
-      : "bg-rose-500";
-
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/85 backdrop-blur-md">
       <div className="flex h-[52px] items-center justify-between px-4 mx-auto max-w-[1280px]">
@@ -102,20 +97,8 @@ export function SiteHeader() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
-          {!isMobile && (
-            <div className="flex items-center gap-1.5 mr-1">
-              <span className="relative flex h-[6px] w-[6px]">
-                {healthy && (
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40" />
-                )}
-                <span className={`relative inline-flex rounded-full h-[6px] w-[6px] ${statusDot} transition-colors`} />
-              </span>
-              <span className="font-mono text-[11px] text-muted-foreground">
-                api{latency != null ? ` · ${latency} ms` : ""}
-              </span>
-            </div>
-          )}
+        <div className="flex items-center gap-1.5">
+          {!isMobile && <StatusPill healthy={healthy} latency={latency} />}
           <AuthDialog />
           <ThemeToggle />
           <SettingsPanel />
@@ -154,12 +137,7 @@ export function SiteHeader() {
                   ))}
                 </nav>
                 <div className="mt-auto px-4 pb-4">
-                  <div className="flex items-center gap-2 rounded-md bg-muted/50 px-3 py-2">
-                    <span className={`h-[6px] w-[6px] rounded-full ${statusDot}`} />
-                    <span className="font-mono text-[11px] text-muted-foreground">
-                      api{latency != null ? ` · ${latency} ms` : ""}
-                    </span>
-                  </div>
+                  <StatusPill healthy={healthy} latency={latency} />
                 </div>
               </SheetContent>
             </Sheet>
@@ -167,5 +145,30 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
+  );
+}
+
+function StatusPill({ healthy, latency }: { healthy: boolean | null; latency: number | null }) {
+  const dotColor = healthy == null
+    ? "bg-muted-foreground/40"
+    : healthy
+      ? "bg-emerald-500"
+      : "bg-rose-500";
+
+  return (
+    <div className={cn(
+      "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5",
+      "bg-muted/50"
+    )}>
+      <span className="relative flex h-[5px] w-[5px]">
+        {healthy && (
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-40" />
+        )}
+        <span className={cn("relative inline-flex rounded-full h-[5px] w-[5px] transition-colors", dotColor)} />
+      </span>
+      <span className="font-mono text-[10px] text-muted-foreground/70">
+        {latency != null ? `${latency} ms` : "API"}
+      </span>
+    </div>
   );
 }

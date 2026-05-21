@@ -54,7 +54,7 @@ export function MessageList({ messages, selectedId, onSelect }: Props) {
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full py-20 px-6 text-center">
+      <div className="flex flex-col items-center justify-center h-full py-20 px-6 text-center tm-reveal tm-reveal-1">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-muted mb-5">
           <Inbox className="h-7 w-7 text-muted-foreground/50" />
         </div>
@@ -78,8 +78,8 @@ export function MessageList({ messages, selectedId, onSelect }: Props) {
               key={msg.id}
               onClick={() => onSelect(msg)}
               className={cn(
-                "w-full text-left rounded-lg px-3 py-3 transition-colors cursor-pointer",
-                "hover:bg-muted/60",
+                "w-full text-left rounded-lg px-3 py-3 transition-all duration-150 cursor-pointer",
+                "hover:bg-muted/50",
                 isSelected && "bg-muted",
                 isUnread && !isSelected && "bg-primary/[0.04]"
               )}
