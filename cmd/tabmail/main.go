@@ -23,6 +23,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/ingest"
 	"tabmail/internal/models"
+	"tabmail/internal/outbound"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
@@ -146,6 +147,12 @@ func main() {
 
 	ingestSvc := ingest.NewService(pg, obj, res, hub, dispatcher, defaultPolicy, cfg.Storage.FallbackRetentionH, rdb, cfg.Ingest, logger)
 
+	// --- Outbound service ---
+	var outboundSvc *outbound.Service
+	if cfg.Outbound.Enabled {
+		outboundSvc = outbound.NewService(cfg.Outbound, pg, logger)
+	}
+
 	defaultPlanID, _ := uuid.Parse(cfg.DefaultPlanID)
 
 	routerCfg := api.RouterConfig{
@@ -164,6 +171,7 @@ func main() {
 		OpenRegistration:   cfg.OpenRegistration,
 		Settings:           settingsMgr,
 		HTTP:               cfg.HTTP,
+		OutboundService:    outboundSvc,
 		Logger:             logger,
 	}
 
@@ -177,6 +185,9 @@ func main() {
 		go ret.Run(ctx)
 		go dispatcher.Run(ctx)
 		go ingestSvc.Run(ctx)
+		if outboundSvc != nil {
+			outboundSvc.StartWorker(ctx)
+		}
 
 		smtpSrv = smtpsrv.NewServer(cfg.SMTP, ingestSvc, res, logger)
 		go func() {
@@ -210,6 +221,9 @@ func main() {
 	case "worker":
 		go dispatcher.Run(ctx)
 		go ingestSvc.Run(ctx)
+		if outboundSvc != nil {
+			outboundSvc.StartWorker(ctx)
+		}
 	case "retention":
 		go ret.Run(ctx)
 	default:
@@ -229,6 +243,9 @@ func main() {
 	}
 	if smtpSrv != nil {
 		_ = smtpSrv.Shutdown(shutCtx)
+	}
+	if outboundSvc != nil {
+		outboundSvc.Shutdown()
 	}
 	logger.Info().Msg("shutdown complete")
 }

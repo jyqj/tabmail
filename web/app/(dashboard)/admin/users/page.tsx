@@ -37,6 +37,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -44,8 +51,17 @@ import {
   inviteAdmin,
   updateUser,
   deleteUser,
+  listPermissionProfiles,
+  getUserPermission,
+  setUserPermissionOverride,
+  deleteUserPermissionOverride,
 } from "@/lib/api";
-import type { AdminUser } from "@/lib/types";
+import type {
+  AdminUser,
+  PermissionProfile,
+  EffectivePermission,
+  UserPermissionOverride,
+} from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -54,10 +70,36 @@ import {
   Copy,
   Shield,
   UserCheck,
+  SlidersHorizontal,
+  Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+
+const NONE_PROFILE = "__none__";
+
+interface PermOverrideForm {
+  can_send: boolean | null;
+  daily_send_quota: string;
+  daily_receive_quota: string;
+  max_mailboxes: string;
+  max_domains: string;
+  can_create_domains: boolean | null;
+  can_create_routes: boolean | null;
+  can_create_api_keys: boolean | null;
+}
+
+const emptyOverrideForm: PermOverrideForm = {
+  can_send: null,
+  daily_send_quota: "",
+  daily_receive_quota: "",
+  max_mailboxes: "",
+  max_domains: "",
+  can_create_domains: null,
+  can_create_routes: null,
+  can_create_api_keys: null,
+};
 
 function confirmAction(message: string) {
   if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
@@ -79,6 +121,17 @@ export default function UsersPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteResult, setInviteResult] = useState<{ invite_code: string; email: string } | null>(null);
 
+  // Permission profiles list
+  const [profiles, setProfiles] = useState<PermissionProfile[]>([]);
+
+  // Permission management dialog
+  const [permUser, setPermUser] = useState<AdminUser | null>(null);
+  const [permEffective, setPermEffective] = useState<EffectivePermission | null>(null);
+  const [permForm, setPermForm] = useState<PermOverrideForm>(emptyOverrideForm);
+  const [permProfileId, setPermProfileId] = useState<string>(NONE_PROFILE);
+  const [permSaving, setPermSaving] = useState(false);
+  const [permResetting, setPermResetting] = useState(false);
+
   const fetchUsers = useCallback(async () => {
     try {
       const res = await listUsers();
@@ -91,9 +144,24 @@ export default function UsersPage() {
     }
   }, [t]);
 
+  const fetchProfiles = useCallback(async () => {
+    try {
+      const res = await listPermissionProfiles();
+      setProfiles(res.data ?? []);
+    } catch {
+      toast.error(t("admin.permProfilesLoadFailed"));
+    }
+  }, [t]);
+
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+    fetchProfiles();
+  }, [fetchUsers, fetchProfiles]);
+
+  const profileName = (profileId?: string) => {
+    if (!profileId) return null;
+    return profiles.find((p) => p.id === profileId)?.name ?? null;
+  };
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return;
@@ -134,6 +202,100 @@ export default function UsersPage() {
       toast.error(err?.error?.message || t("admin.deleteFailed"));
     }
   };
+
+  // Permission management
+  const openPermDialog = async (user: AdminUser) => {
+    setPermUser(user);
+    setPermEffective(null);
+    setPermForm(emptyOverrideForm);
+    setPermProfileId(user.permission_profile_id || NONE_PROFILE);
+    try {
+      const res = await getUserPermission(user.id);
+      setPermEffective(res.data);
+    } catch {
+      toast.error(t("admin.permLoadFailed"));
+    }
+  };
+
+  const handlePermProfileChange = async (value: string | null) => {
+    if (!permUser) return;
+    const effectiveValue = value ?? NONE_PROFILE;
+    const newProfileId = effectiveValue === NONE_PROFILE ? null : effectiveValue;
+    setPermProfileId(effectiveValue);
+    try {
+      await updateUser(permUser.id, { permission_profile_id: newProfileId });
+      toast.success(t("admin.permProfileUpdated"));
+      fetchUsers();
+      // Refresh effective permissions
+      const res = await getUserPermission(permUser.id);
+      setPermEffective(res.data);
+      // Update the local permUser to reflect the change
+      setPermUser((prev) => prev ? { ...prev, permission_profile_id: newProfileId ?? undefined } : null);
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || t("admin.permProfileUpdateFailed"));
+      // Revert selection
+      setPermProfileId(permUser.permission_profile_id || NONE_PROFILE);
+    }
+  };
+
+  const handleSaveOverrides = async () => {
+    if (!permUser) return;
+    setPermSaving(true);
+    try {
+      const body: Partial<UserPermissionOverride> = {};
+      if (permForm.can_send !== null) body.can_send = permForm.can_send;
+      if (permForm.daily_send_quota.trim() !== "") body.daily_send_quota = Number(permForm.daily_send_quota);
+      if (permForm.daily_receive_quota.trim() !== "") body.daily_receive_quota = Number(permForm.daily_receive_quota);
+      if (permForm.max_mailboxes.trim() !== "") body.max_mailboxes = Number(permForm.max_mailboxes);
+      if (permForm.max_domains.trim() !== "") body.max_domains = Number(permForm.max_domains);
+      if (permForm.can_create_domains !== null) body.can_create_domains = permForm.can_create_domains;
+      if (permForm.can_create_routes !== null) body.can_create_routes = permForm.can_create_routes;
+      if (permForm.can_create_api_keys !== null) body.can_create_api_keys = permForm.can_create_api_keys;
+
+      await setUserPermissionOverride(permUser.id, body);
+      toast.success(t("admin.permSaved"));
+      // Refresh effective permissions
+      const res = await getUserPermission(permUser.id);
+      setPermEffective(res.data);
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || t("admin.permSaveFailed"));
+    } finally {
+      setPermSaving(false);
+    }
+  };
+
+  const handleResetOverrides = async () => {
+    if (!permUser) return;
+    setPermResetting(true);
+    try {
+      await deleteUserPermissionOverride(permUser.id);
+      toast.success(t("admin.permResetSuccess"));
+      setPermForm(emptyOverrideForm);
+      // Refresh effective permissions
+      const res = await getUserPermission(permUser.id);
+      setPermEffective(res.data);
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || t("admin.permResetFailed"));
+    } finally {
+      setPermResetting(false);
+    }
+  };
+
+  const effectiveEntries: { key: string; label: string; value: string }[] = permEffective
+    ? [
+        { key: "can_send", label: t("admin.permCanSend"), value: permEffective.can_send ? "true" : "false" },
+        { key: "daily_send_quota", label: t("admin.permDailySendQuota"), value: String(permEffective.daily_send_quota) },
+        { key: "daily_receive_quota", label: t("admin.permDailyReceiveQuota"), value: String(permEffective.daily_receive_quota) },
+        { key: "max_mailboxes", label: t("admin.permMaxMailboxes"), value: String(permEffective.max_mailboxes) },
+        { key: "max_domains", label: t("admin.permMaxDomains"), value: String(permEffective.max_domains) },
+        { key: "can_create_domains", label: t("admin.permCanCreateDomains"), value: permEffective.can_create_domains ? "true" : "false" },
+        { key: "can_create_routes", label: t("admin.permCanCreateRoutes"), value: permEffective.can_create_routes ? "true" : "false" },
+        { key: "can_create_api_keys", label: t("admin.permCanCreateApiKeys"), value: permEffective.can_create_api_keys ? "true" : "false" },
+      ]
+    : [];
 
   return (
     <div className="flex flex-col">
@@ -249,6 +411,7 @@ export default function UsersPage() {
                     <TableHead>{t("admin.email")}</TableHead>
                     <TableHead>{t("admin.displayName")}</TableHead>
                     <TableHead>{t("admin.role")}</TableHead>
+                    <TableHead>{t("admin.permProfile")}</TableHead>
                     <TableHead>{t("admin.status")}</TableHead>
                     <TableHead>{t("admin.lastLogin")}</TableHead>
                     <TableHead className="w-10" />
@@ -270,6 +433,15 @@ export default function UsersPage() {
                             <UserCheck className="h-3 w-3 mr-1" />
                             {t("admin.roleUser")}
                           </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {profileName(user.permission_profile_id) ? (
+                          <Badge variant="secondary">
+                            {profileName(user.permission_profile_id)}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">{t("admin.permDefault")}</Badge>
                         )}
                       </TableCell>
                       <TableCell>
@@ -297,6 +469,10 @@ export default function UsersPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openPermDialog(user)}>
+                              <SlidersHorizontal className="h-4 w-4 mr-2" />
+                              {t("admin.permManage")}
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
                                 navigator.clipboard.writeText(user.id);
@@ -325,6 +501,222 @@ export default function UsersPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Permission Management Dialog */}
+      <Dialog open={permUser !== null} onOpenChange={(open) => { if (!open) setPermUser(null); }}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{t("admin.permTitle")}</DialogTitle>
+            <DialogDescription>
+              {t("admin.permDesc", { name: permUser?.email ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-6 py-4 lg:grid-cols-2">
+            {/* Left: Effective permissions (read-only) */}
+            <Card className="border-primary/10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.08),transparent_35%),var(--card)]">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Gauge className="h-4 w-4 text-primary" />
+                  {t("admin.permEffective")}
+                </CardTitle>
+                <CardDescription>{t("admin.permEffectiveDesc")}</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {permEffective ? (
+                  effectiveEntries.map((entry) => (
+                    <div key={entry.key} className="flex items-center justify-between gap-3 text-sm">
+                      <span className="text-muted-foreground">{entry.label}</span>
+                      <span className="font-medium tabular-nums">{entry.value}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="space-y-3">
+                    {Array.from({ length: 8 }).map((_, i) => (
+                      <Skeleton key={i} className="h-6 w-full" />
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Right: Override form */}
+            <div className="space-y-4">
+              {/* Profile selector */}
+              <div className="space-y-2">
+                <Label>{t("admin.permProfileLabel")}</Label>
+                <Select value={permProfileId} onValueChange={handlePermProfileChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("admin.permSelectProfile")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={NONE_PROFILE}>{t("admin.permDefault")}</SelectItem>
+                    {profiles.map((profile) => (
+                      <SelectItem key={profile.id} value={profile.id}>
+                        {profile.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="border-t pt-4 space-y-4">
+                <p className="text-sm font-medium text-muted-foreground">{t("admin.permOverride")}</p>
+
+                {/* Boolean switches */}
+                <div className="flex items-center justify-between">
+                  <Label>{t("admin.permCanSend")}</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
+                    <Switch
+                      size="sm"
+                      checked={permForm.can_send === null ? false : permForm.can_send}
+                      onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_send: checked }))}
+                    />
+                    {permForm.can_send !== null && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setPermForm((prev) => ({ ...prev, can_send: null }))}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label>{t("admin.permCanCreateDomains")}</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
+                    <Switch
+                      size="sm"
+                      checked={permForm.can_create_domains === null ? false : permForm.can_create_domains}
+                      onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_domains: checked }))}
+                    />
+                    {permForm.can_create_domains !== null && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setPermForm((prev) => ({ ...prev, can_create_domains: null }))}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label>{t("admin.permCanCreateRoutes")}</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
+                    <Switch
+                      size="sm"
+                      checked={permForm.can_create_routes === null ? false : permForm.can_create_routes}
+                      onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_routes: checked }))}
+                    />
+                    {permForm.can_create_routes !== null && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setPermForm((prev) => ({ ...prev, can_create_routes: null }))}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label>{t("admin.permCanCreateApiKeys")}</Label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
+                    <Switch
+                      size="sm"
+                      checked={permForm.can_create_api_keys === null ? false : permForm.can_create_api_keys}
+                      onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_api_keys: checked }))}
+                    />
+                    {permForm.can_create_api_keys !== null && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => setPermForm((prev) => ({ ...prev, can_create_api_keys: null }))}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Number inputs */}
+                <div className="space-y-2">
+                  <Label>{t("admin.permDailySendQuota")}</Label>
+                  <Input
+                    type="number"
+                    placeholder={t("admin.permInherit")}
+                    value={permForm.daily_send_quota}
+                    onChange={(e) => setPermForm((prev) => ({ ...prev, daily_send_quota: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t("admin.permDailyReceiveQuota")}</Label>
+                  <Input
+                    type="number"
+                    placeholder={t("admin.permInherit")}
+                    value={permForm.daily_receive_quota}
+                    onChange={(e) => setPermForm((prev) => ({ ...prev, daily_receive_quota: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t("admin.permMaxMailboxes")}</Label>
+                  <Input
+                    type="number"
+                    placeholder={t("admin.permInherit")}
+                    value={permForm.max_mailboxes}
+                    onChange={(e) => setPermForm((prev) => ({ ...prev, max_mailboxes: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>{t("admin.permMaxDomains")}</Label>
+                  <Input
+                    type="number"
+                    placeholder={t("admin.permInherit")}
+                    value={permForm.max_domains}
+                    onChange={(e) => setPermForm((prev) => ({ ...prev, max_domains: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={handleResetOverrides}
+              disabled={permResetting || !permUser}
+            >
+              {permResetting ? t("admin.permResetting") : t("admin.permReset")}
+            </Button>
+            <Button
+              onClick={handleSaveOverrides}
+              disabled={permSaving || !permUser}
+            >
+              {permSaving ? t("admin.permSaving") : t("admin.permSave")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

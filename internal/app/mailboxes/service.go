@@ -19,11 +19,14 @@ import (
 
 type storeRepo interface {
 	app.AuditStore
+	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
+	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
 	CreateMailbox(ctx context.Context, m *models.Mailbox) error
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
+	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
@@ -58,18 +61,29 @@ func NewService(s storeRepo, obj store.ObjectStore, dispatcher *hooks.Dispatcher
 	return &Service{store: s, obj: obj, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "mailboxes").Logger()}
 }
 
-func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool, pg models.Page) ([]*models.Mailbox, int, error) {
+func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, pg models.Page) ([]*models.Mailbox, int, error) {
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, 0, err
 	}
-	items, total, err := s.store.ListMailboxes(ctx, tenant.ID, pg)
+	if isAdmin || tenantWide {
+		items, total, err := s.store.ListMailboxes(ctx, tenant.ID, pg)
+		if err != nil {
+			return nil, 0, app.Internal(err)
+		}
+		return items, total, nil
+	}
+	zoneIDs, err := s.accessibleZoneIDs(ctx, tenant, ownerUserID)
+	if err != nil {
+		return nil, 0, err
+	}
+	items, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, zoneIDs, pg)
 	if err != nil {
 		return nil, 0, app.Internal(err)
 	}
 	return items, total, nil
 }
 
-func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin bool, req CreateRequest, actor string) (*models.Mailbox, error) {
+func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, req CreateRequest, actor string) (*models.Mailbox, error) {
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
@@ -89,8 +103,8 @@ func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	if zone == nil {
 		return nil, app.BadRequest(fmt.Sprintf("domain %s is not registered", domain))
 	}
-	if !isAdmin && zone.TenantID != tenant.ID {
-		return nil, app.Forbidden("domain belongs to another tenant")
+	if !canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
+		return nil, app.Forbidden("not your domain")
 	}
 	cfg, err := s.store.EffectiveConfig(ctx, tenant.ID)
 	if err != nil {
@@ -149,7 +163,7 @@ func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	return mb, nil
 }
 
-func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin bool, id uuid.UUID, actor string) error {
+func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, id uuid.UUID, actor string) error {
 	mb, err := s.store.GetMailbox(ctx, id)
 	if err != nil {
 		return app.Internal(err)
@@ -157,7 +171,11 @@ func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	if mb == nil {
 		return app.NotFound("mailbox not found")
 	}
-	if !isAdmin && (tenant == nil || mb.TenantID != tenant.ID) {
+	zone, err := s.store.GetZone(ctx, mb.ZoneID)
+	if err != nil {
+		return app.Internal(err)
+	}
+	if !canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
 		return app.Forbidden("not your mailbox")
 	}
 	keys, err := s.store.ListMailboxObjectKeys(ctx, mb.ID)
@@ -184,6 +202,39 @@ func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin boo
 		s.dispatcher.Publish(hooks.Event{Type: "mailbox.deleted", TenantID: mb.TenantID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "deleted_objects": len(keys)}})
 	}
 	return nil
+}
+
+func (s *Service) accessibleZoneIDs(ctx context.Context, tenant *models.Tenant, ownerUserID *uuid.UUID) ([]uuid.UUID, error) {
+	if tenant == nil || ownerUserID == nil {
+		return []uuid.UUID{}, nil
+	}
+	zones, err := s.store.ListZones(ctx, tenant.ID)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	out := make([]uuid.UUID, 0, len(zones))
+	for _, zone := range zones {
+		if zone.OwnerUserID != nil && *zone.OwnerUserID == *ownerUserID {
+			out = append(out, zone.ID)
+		}
+	}
+	return out, nil
+}
+
+func canManageZone(zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
+	if zone == nil {
+		return false
+	}
+	if isAdmin {
+		return true
+	}
+	if tenant == nil || zone.TenantID != tenant.ID {
+		return false
+	}
+	if tenantWide {
+		return true
+	}
+	return ownerUserID != nil && zone.OwnerUserID != nil && *ownerUserID == *zone.OwnerUserID
 }
 
 func (s *Service) IssueToken(ctx context.Context, address, password, actor string) (*TokenIssueResult, error) {

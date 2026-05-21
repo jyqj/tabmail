@@ -123,14 +123,14 @@ describe("AuthDialog", () => {
 
     render(<AuthDialog />);
 
-    fireEvent.change(screen.getAllByLabelText("Email")[0], {
+    fireEvent.change(screen.getAllByLabelText("auth.email")[0], {
       target: { value: "user@mail.test" },
     });
-    fireEvent.change(screen.getByLabelText("Password"), {
+    fireEvent.change(screen.getByLabelText("auth.password"), {
       target: { value: "Passw0rd!" },
     });
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Login" }).at(-1) as HTMLButtonElement);
+    fireEvent.click(screen.getAllByRole("button", { name: /auth.loginBtn/ }).at(-1) as HTMLButtonElement);
 
     await waitFor(() => {
       expect(loginMock).toHaveBeenCalledWith("user@mail.test", "Passw0rd!");
@@ -143,25 +143,21 @@ describe("AuthDialog", () => {
     expect(toastSuccess).toHaveBeenCalledWith("Welcome, User");
   });
 
-  it("支持 mailbox 登录并写入 mailbox token", async () => {
-    issueTokenMock.mockResolvedValue({
-      data: { token: "mailbox-token" },
-    });
+  it("mailbox 登录态显示单邮箱身份", () => {
+    authStateRef.current = {
+      level: "mailbox",
+      user: null,
+      refreshToken: null,
+      mailboxAddress: "user@mail.test",
+      loginWithTokens: vi.fn(),
+      setMailboxAuth: vi.fn(),
+      logout: vi.fn(),
+    };
 
     render(<AuthDialog />);
 
-    fireEvent.change(screen.getByLabelText("auth.mailboxAddr"), {
-      target: { value: "user@mail.test" },
-    });
-    fireEvent.change(screen.getByLabelText("auth.mailboxPwd"), {
-      target: { value: "Passw0rd!" },
-    });
-    fireEvent.keyDown(screen.getByLabelText("auth.mailboxPwd"), { key: "Enter" });
-
-    await waitFor(() => {
-      expect(issueTokenMock).toHaveBeenCalledWith("user@mail.test", "Passw0rd!");
-    });
-    expect(authStateRef.current?.setMailboxAuth).toHaveBeenCalledWith("user@mail.test", "mailbox-token");
-    expect(toastSuccess).toHaveBeenCalledWith("toast.tokenIssued");
+    expect(screen.getByText("auth.level.mailbox")).toBeInTheDocument();
+    expect(screen.getByText("user@mail.test")).toBeInTheDocument();
+    expect(issueTokenMock).not.toHaveBeenCalled();
   });
 });

@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"tabmail/internal/config"
 	"tabmail/internal/models"
@@ -363,53 +364,55 @@ func (s *PgStore) CreateZone(ctx context.Context, z *models.DomainZone) error {
 	if z.ID == uuid.Nil {
 		z.ID = uuid.New()
 	}
+	if z.Visibility == "" {
+		z.Visibility = models.VisibilityPrivate
+	}
 	z.CreatedAt = time.Now()
 	_, err := s.pool.Exec(ctx, `
-		INSERT INTO domain_zones (id,tenant_id,domain,is_verified,mx_verified,txt_record,created_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7)`,
-		z.ID, z.TenantID, z.Domain, z.IsVerified, z.MXVerified, z.TXTRecord, z.CreatedAt)
+		INSERT INTO domain_zones (id,tenant_id,owner_user_id,parent_zone_id,domain,visibility,
+			allow_random_subdomains,is_verified,mx_verified,txt_record,created_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+		z.ID, z.TenantID, z.OwnerUserID, z.ParentZoneID, z.Domain, z.Visibility,
+		z.AllowRandomSubdomains, z.IsVerified, z.MXVerified, z.TXTRecord, z.CreatedAt)
 	return err
 }
 
-func (s *PgStore) GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error) {
+const zoneSelect = `SELECT id,tenant_id,owner_user_id,parent_zone_id,domain,visibility,
+	allow_random_subdomains,is_verified,mx_verified,txt_record,created_at,verified_at
+	FROM domain_zones`
+
+func scanZone(row pgx.Row) (*models.DomainZone, error) {
 	z := &models.DomainZone{}
-	err := s.pool.QueryRow(ctx, `
-		SELECT id,tenant_id,domain,is_verified,mx_verified,txt_record,created_at,verified_at
-		FROM domain_zones WHERE id=$1`, id).
-		Scan(&z.ID, &z.TenantID, &z.Domain, &z.IsVerified, &z.MXVerified,
-			&z.TXTRecord, &z.CreatedAt, &z.VerifiedAt)
+	var ownerID pgtype.UUID
+	var parentID pgtype.UUID
+	err := row.Scan(&z.ID, &z.TenantID, &ownerID, &parentID, &z.Domain, &z.Visibility,
+		&z.AllowRandomSubdomains, &z.IsVerified, &z.MXVerified, &z.TXTRecord, &z.CreatedAt, &z.VerifiedAt)
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
-	return z, err
-}
-
-func (s *PgStore) GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error) {
-	z := &models.DomainZone{}
-	err := s.pool.QueryRow(ctx, `
-		SELECT id,tenant_id,domain,is_verified,mx_verified,txt_record,created_at,verified_at
-		FROM domain_zones WHERE domain=$1`, domain).
-		Scan(&z.ID, &z.TenantID, &z.Domain, &z.IsVerified, &z.MXVerified,
-			&z.TXTRecord, &z.CreatedAt, &z.VerifiedAt)
-	if err == pgx.ErrNoRows {
-		return nil, nil
-	}
-	return z, err
-}
-
-func (s *PgStore) ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id,tenant_id,domain,is_verified,mx_verified,txt_record,created_at,verified_at
-		FROM domain_zones WHERE tenant_id=$1 ORDER BY domain`, tenantID)
 	if err != nil {
 		return nil, err
 	}
+	if ownerID.Valid {
+		id := uuid.UUID(ownerID.Bytes)
+		z.OwnerUserID = &id
+	}
+	if parentID.Valid {
+		id := uuid.UUID(parentID.Bytes)
+		z.ParentZoneID = &id
+	}
+	if z.Visibility == "" {
+		z.Visibility = models.VisibilityPrivate
+	}
+	return z, nil
+}
+
+func scanZones(rows pgx.Rows) ([]*models.DomainZone, error) {
 	defer rows.Close()
 	var out []*models.DomainZone
 	for rows.Next() {
-		z := &models.DomainZone{}
-		if err := rows.Scan(&z.ID, &z.TenantID, &z.Domain, &z.IsVerified, &z.MXVerified,
-			&z.TXTRecord, &z.CreatedAt, &z.VerifiedAt); err != nil {
+		z, err := scanZone(rows)
+		if err != nil {
 			return nil, err
 		}
 		out = append(out, z)
@@ -417,10 +420,47 @@ func (s *PgStore) ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.
 	return out, rows.Err()
 }
 
+func (s *PgStore) GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error) {
+	return scanZone(s.pool.QueryRow(ctx, zoneSelect+` WHERE id=$1`, id))
+}
+
+func (s *PgStore) GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error) {
+	return scanZone(s.pool.QueryRow(ctx, zoneSelect+` WHERE domain=$1`, domain))
+}
+
+func (s *PgStore) ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error) {
+	rows, err := s.pool.Query(ctx, zoneSelect+` WHERE tenant_id=$1 ORDER BY domain`, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	return scanZones(rows)
+}
+
+func (s *PgStore) ListAllZones(ctx context.Context) ([]*models.DomainZone, error) {
+	rows, err := s.pool.Query(ctx, zoneSelect+` ORDER BY domain`)
+	if err != nil {
+		return nil, err
+	}
+	return scanZones(rows)
+}
+
+func (s *PgStore) ListPublicZones(ctx context.Context) ([]*models.DomainZone, error) {
+	rows, err := s.pool.Query(ctx, zoneSelect+` WHERE visibility='public' ORDER BY domain`)
+	if err != nil {
+		return nil, err
+	}
+	return scanZones(rows)
+}
+
 func (s *PgStore) UpdateZone(ctx context.Context, z *models.DomainZone) error {
+	if z.Visibility == "" {
+		z.Visibility = models.VisibilityPrivate
+	}
 	_, err := s.pool.Exec(ctx, `
-		UPDATE domain_zones SET is_verified=$2, mx_verified=$3, txt_record=$4, verified_at=$5
-		WHERE id=$1`, z.ID, z.IsVerified, z.MXVerified, z.TXTRecord, z.VerifiedAt)
+		UPDATE domain_zones SET owner_user_id=$2, parent_zone_id=$3, visibility=$4,
+			allow_random_subdomains=$5, is_verified=$6, mx_verified=$7, txt_record=$8, verified_at=$9
+		WHERE id=$1`, z.ID, z.OwnerUserID, z.ParentZoneID, z.Visibility,
+		z.AllowRandomSubdomains, z.IsVerified, z.MXVerified, z.TXTRecord, z.VerifiedAt)
 	return err
 }
 
@@ -652,6 +692,36 @@ func (s *PgStore) ListMailboxesByZone(ctx context.Context, zoneID uuid.UUID, pg 
 	rows, err := s.pool.Query(ctx,
 		mailboxSelect+` WHERE m.zone_id=$1 ORDER BY m.created_at DESC LIMIT $2 OFFSET $3`,
 		zoneID, pg.PerPage, pg.Offset())
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	var out []*models.Mailbox
+	for rows.Next() {
+		m := &models.Mailbox{}
+		if err := rows.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
+			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
+			&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt); err != nil {
+			return nil, 0, err
+		}
+		out = append(out, m)
+	}
+	return out, total, rows.Err()
+}
+
+func (s *PgStore) ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
+	pg = pg.Normalize()
+	if len(zoneIDs) == 0 {
+		return []*models.Mailbox{}, 0, nil
+	}
+	var total int
+	if err := s.pool.QueryRow(ctx,
+		`SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND zone_id=ANY($2)`, tenantID, zoneIDs).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+	rows, err := s.pool.Query(ctx,
+		mailboxSelect+` WHERE m.tenant_id=$1 AND m.zone_id=ANY($2) ORDER BY m.created_at DESC LIMIT $3 OFFSET $4`,
+		tenantID, zoneIDs, pg.PerPage, pg.Offset())
 	if err != nil {
 		return nil, 0, err
 	}

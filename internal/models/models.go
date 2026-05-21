@@ -25,8 +25,9 @@ type User struct {
 	PasswordHash string     `json:"-" db:"password_hash"`
 	DisplayName  string     `json:"display_name" db:"display_name"`
 	Role         UserRole   `json:"role" db:"role"`
-	IsActive     bool       `json:"is_active" db:"is_active"`
-	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
+	IsActive            bool       `json:"is_active" db:"is_active"`
+	PermissionProfileID *uuid.UUID `json:"permission_profile_id,omitempty" db:"permission_profile_id"`
+	CreatedAt           time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
 	LastLoginAt  *time.Time `json:"last_login_at,omitempty" db:"last_login_at"`
 }
@@ -144,15 +145,36 @@ type EffectiveConfig struct {
 // Domain zone & route
 // ============================================================
 
+type ResourceVisibility string
+
+const (
+	VisibilityPrivate       ResourceVisibility = "private"
+	VisibilityAuthenticated ResourceVisibility = "authenticated"
+	VisibilityPublic        ResourceVisibility = "public"
+)
+
+func (v ResourceVisibility) Valid() bool {
+	switch v {
+	case VisibilityPrivate, VisibilityAuthenticated, VisibilityPublic:
+		return true
+	default:
+		return false
+	}
+}
+
 type DomainZone struct {
-	ID         uuid.UUID  `json:"id" db:"id"`
-	TenantID   uuid.UUID  `json:"tenant_id" db:"tenant_id"`
-	Domain     string     `json:"domain" db:"domain"`
-	IsVerified bool       `json:"is_verified" db:"is_verified"`
-	MXVerified bool       `json:"mx_verified" db:"mx_verified"`
-	TXTRecord  string     `json:"txt_record,omitempty" db:"txt_record"`
-	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
-	VerifiedAt *time.Time `json:"verified_at,omitempty" db:"verified_at"`
+	ID                    uuid.UUID          `json:"id" db:"id"`
+	TenantID              uuid.UUID          `json:"tenant_id" db:"tenant_id"`
+	OwnerUserID           *uuid.UUID         `json:"owner_user_id,omitempty" db:"owner_user_id"`
+	ParentZoneID          *uuid.UUID         `json:"parent_zone_id,omitempty" db:"parent_zone_id"`
+	Domain                string             `json:"domain" db:"domain"`
+	Visibility            ResourceVisibility `json:"visibility" db:"visibility"`
+	AllowRandomSubdomains bool               `json:"allow_random_subdomains" db:"allow_random_subdomains"`
+	IsVerified            bool               `json:"is_verified" db:"is_verified"`
+	MXVerified            bool               `json:"mx_verified" db:"mx_verified"`
+	TXTRecord             string             `json:"txt_record,omitempty" db:"txt_record"`
+	CreatedAt             time.Time          `json:"created_at" db:"created_at"`
+	VerifiedAt            *time.Time         `json:"verified_at,omitempty" db:"verified_at"`
 }
 
 type RouteType string
@@ -439,4 +461,95 @@ func (p Page) Normalize() Page {
 		p.PerPage = 100
 	}
 	return p
+}
+
+// ============================================================
+// Permission Profile
+// ============================================================
+
+type PermissionProfile struct {
+	ID                uuid.UUID   `json:"id" db:"id"`
+	Name              string      `json:"name" db:"name"`
+	Description       string      `json:"description" db:"description"`
+	CanSend           bool        `json:"can_send" db:"can_send"`
+	DailySendQuota    int         `json:"daily_send_quota" db:"daily_send_quota"`
+	DailyReceiveQuota int         `json:"daily_receive_quota" db:"daily_receive_quota"`
+	MaxMailboxes      int         `json:"max_mailboxes" db:"max_mailboxes"`
+	MaxDomains        int         `json:"max_domains" db:"max_domains"`
+	AllowedZoneIDs    []uuid.UUID `json:"allowed_zone_ids,omitempty" db:"allowed_zone_ids"`
+	CanCreateDomains  bool        `json:"can_create_domains" db:"can_create_domains"`
+	CanCreateRoutes   bool        `json:"can_create_routes" db:"can_create_routes"`
+	CanCreateAPIKeys  bool        `json:"can_create_api_keys" db:"can_create_api_keys"`
+	IsSystem          bool        `json:"is_system" db:"is_system"`
+	CreatedAt         time.Time   `json:"created_at" db:"created_at"`
+	UpdatedAt         time.Time   `json:"updated_at" db:"updated_at"`
+}
+
+type UserPermissionOverride struct {
+	ID                uuid.UUID   `json:"id" db:"id"`
+	UserID            uuid.UUID   `json:"user_id" db:"user_id"`
+	CanSend           *bool       `json:"can_send,omitempty" db:"can_send"`
+	DailySendQuota    *int        `json:"daily_send_quota,omitempty" db:"daily_send_quota"`
+	DailyReceiveQuota *int        `json:"daily_receive_quota,omitempty" db:"daily_receive_quota"`
+	MaxMailboxes      *int        `json:"max_mailboxes,omitempty" db:"max_mailboxes"`
+	MaxDomains        *int        `json:"max_domains,omitempty" db:"max_domains"`
+	AllowedZoneIDs    []uuid.UUID `json:"allowed_zone_ids,omitempty" db:"allowed_zone_ids"`
+	CanCreateDomains  *bool       `json:"can_create_domains,omitempty" db:"can_create_domains"`
+	CanCreateRoutes   *bool       `json:"can_create_routes,omitempty" db:"can_create_routes"`
+	CanCreateAPIKeys  *bool       `json:"can_create_api_keys,omitempty" db:"can_create_api_keys"`
+	UpdatedAt         time.Time   `json:"updated_at" db:"updated_at"`
+}
+
+type EffectivePermission struct {
+	CanSend           bool        `json:"can_send"`
+	DailySendQuota    int         `json:"daily_send_quota"`
+	DailyReceiveQuota int         `json:"daily_receive_quota"`
+	MaxMailboxes      int         `json:"max_mailboxes"`
+	MaxDomains        int         `json:"max_domains"`
+	AllowedZoneIDs    []uuid.UUID `json:"allowed_zone_ids,omitempty"`
+	CanCreateDomains  bool        `json:"can_create_domains"`
+	CanCreateRoutes   bool        `json:"can_create_routes"`
+	CanCreateAPIKeys  bool        `json:"can_create_api_keys"`
+}
+
+// ============================================================
+// Outbound Job
+// ============================================================
+
+type OutboundState string
+
+const (
+	OutboundPending    OutboundState = "pending"
+	OutboundProcessing OutboundState = "processing"
+	OutboundSent       OutboundState = "sent"
+	OutboundRetry      OutboundState = "retry"
+	OutboundFailed     OutboundState = "failed"
+	OutboundDead       OutboundState = "dead"
+)
+
+type OutboundJob struct {
+	ID              uuid.UUID       `json:"id" db:"id"`
+	TenantID        uuid.UUID       `json:"tenant_id" db:"tenant_id"`
+	UserID          *uuid.UUID      `json:"user_id,omitempty" db:"user_id"`
+	APIKeyID        *uuid.UUID      `json:"api_key_id,omitempty" db:"api_key_id"`
+	MailFrom        string          `json:"mail_from" db:"mail_from"`
+	RcptTo          []string        `json:"rcpt_to" db:"rcpt_to"`
+	Subject         string          `json:"subject" db:"subject"`
+	TextBody        string          `json:"text_body,omitempty" db:"text_body"`
+	HTMLBody        string          `json:"html_body,omitempty" db:"html_body"`
+	HeadersJSON     json.RawMessage `json:"headers,omitempty" db:"headers_json"`
+	RawMIME         []byte          `json:"-" db:"raw_mime"`
+	ZoneID          uuid.UUID       `json:"zone_id" db:"zone_id"`
+	State           OutboundState   `json:"state" db:"state"`
+	Attempts        int             `json:"attempts" db:"attempts"`
+	MaxAttempts     int             `json:"max_attempts" db:"max_attempts"`
+	LastError       string          `json:"last_error,omitempty" db:"last_error"`
+	NextAttemptAt   time.Time       `json:"next_attempt_at" db:"next_attempt_at"`
+	ClaimedAt       *time.Time      `json:"claimed_at,omitempty" db:"claimed_at"`
+	LeaseUntil      *time.Time      `json:"lease_until,omitempty" db:"lease_until"`
+	SMTPCode        *int            `json:"smtp_code,omitempty" db:"smtp_code"`
+	SMTPResponse    string          `json:"smtp_response,omitempty" db:"smtp_response"`
+	MessageIDHeader string          `json:"message_id_header,omitempty" db:"message_id_header"`
+	CreatedAt       time.Time       `json:"created_at" db:"created_at"`
+	UpdatedAt       time.Time       `json:"updated_at" db:"updated_at"`
 }

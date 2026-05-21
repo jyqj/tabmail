@@ -1,6 +1,7 @@
 package policy
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/binary"
@@ -13,9 +14,9 @@ import (
 const (
 	AddressSuggestionAlgorithm = "obfuscated_minute_bucket_v1"
 	addressAlphabet            = "abcdefghijklmnopqrstuvwxyz0123456789"
-	addressRandomBodyLength    = 12
+	addressRandomBodyLength    = 16
 	addressTimeCodeLength      = 6
-	subdomainRandomBodyLength  = 10
+	subdomainRandomBodyLength  = 14
 	subdomainTimeCodeLength    = 5
 )
 
@@ -35,6 +36,61 @@ func GenerateSuggestedSubdomainAddress(now time.Time, parentDomain, secret strin
 		return "", "", err
 	}
 	return label, label + "." + parentDomain, nil
+}
+
+// GenerateSuggestedAddressWithCheck 生成建议地址，并通过 existsFn 校验唯一性。
+// 最多重试 maxAttempts 次，避免碰撞。
+func GenerateSuggestedAddressWithCheck(
+	ctx context.Context,
+	now time.Time,
+	domain, secret string,
+	maxAttempts int,
+	existsFn func(ctx context.Context, addr string) (bool, error),
+) (string, string, error) {
+	if maxAttempts <= 0 {
+		maxAttempts = 5
+	}
+	for i := 0; i < maxAttempts; i++ {
+		local, full, err := GenerateSuggestedAddress(now, domain, secret)
+		if err != nil {
+			return "", "", err
+		}
+		exists, err := existsFn(ctx, full)
+		if err != nil {
+			return "", "", fmt.Errorf("uniqueness check: %w", err)
+		}
+		if !exists {
+			return local, full, nil
+		}
+	}
+	return "", "", fmt.Errorf("address generation failed after %d attempts", maxAttempts)
+}
+
+// GenerateSuggestedSubdomainAddressWithCheck 同上，用于子域名。
+func GenerateSuggestedSubdomainAddressWithCheck(
+	ctx context.Context,
+	now time.Time,
+	parentDomain, secret string,
+	maxAttempts int,
+	existsFn func(ctx context.Context, domain string) (bool, error),
+) (string, string, error) {
+	if maxAttempts <= 0 {
+		maxAttempts = 5
+	}
+	for i := 0; i < maxAttempts; i++ {
+		label, full, err := GenerateSuggestedSubdomainAddress(now, parentDomain, secret)
+		if err != nil {
+			return "", "", err
+		}
+		exists, err := existsFn(ctx, full)
+		if err != nil {
+			return "", "", fmt.Errorf("uniqueness check: %w", err)
+		}
+		if !exists {
+			return label, full, nil
+		}
+	}
+	return "", "", fmt.Errorf("subdomain generation failed after %d attempts", maxAttempts)
 }
 
 func generateSuggestedLocalPart(now time.Time, domain, secret string, r io.Reader) (string, error) {

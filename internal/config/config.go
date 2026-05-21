@@ -29,14 +29,15 @@ type Root struct {
 	BootstrapAdminPass  string `split_words:"true" default:"" desc:"Bootstrap admin password"`
 	DefaultPlanID       string `split_words:"true" default:"00000000-0000-0000-0000-000000000001" desc:"Default plan for new user registrations"`
 
-	SMTP    SMTP
-	HTTP    HTTP
-	DB      DB
-	Redis   Redis
-	Storage Storage
-	S3      S3
-	Webhook Webhook
-	Ingest  Ingest
+	SMTP     SMTP
+	HTTP     HTTP
+	DB       DB
+	Redis    Redis
+	Storage  Storage
+	S3       S3
+	Webhook  Webhook
+	Ingest   Ingest
+	Outbound Outbound
 }
 
 // EffectiveJWTSecret returns the JWT secret, falling back to MailboxTokenSecret.
@@ -124,6 +125,22 @@ type Ingest struct {
 	MaxRetries   int           `split_words:"true" default:"5" desc:"Max ingest job retry attempts before dead-lettering"`
 }
 
+type Outbound struct {
+	Enabled      bool          `default:"false" desc:"Enable outbound email sending"`
+	Mode         string        `default:"relay" desc:"Delivery mode: relay or direct"`
+	RelayHost    string        `split_words:"true" default:"" desc:"SMTP relay hostname"`
+	RelayPort    int           `split_words:"true" default:"587" desc:"SMTP relay port"`
+	RelayUser    string        `split_words:"true" default:"" desc:"SMTP relay auth username"`
+	RelayPass    string        `split_words:"true" default:"" desc:"SMTP relay auth password"`
+	RelayTLS     string        `split_words:"true" default:"starttls" desc:"Relay TLS mode: none, starttls, tls"`
+	FromDomain   string        `split_words:"true" default:"" desc:"Default envelope-from domain"`
+	MaxRetries   int           `split_words:"true" default:"5" desc:"Max delivery attempts"`
+	RetryDelay   time.Duration `split_words:"true" default:"30s" desc:"Base retry delay"`
+	PollInterval time.Duration `split_words:"true" default:"2s" desc:"Worker poll interval"`
+	BatchSize    int           `split_words:"true" default:"50" desc:"Worker batch size"`
+	RateLimit    int           `split_words:"true" default:"100" desc:"Global outbound RPM limit"`
+}
+
 func Load() (*Root, error) {
 	c := &Root{}
 	if err := envconfig.Process(envPrefix, c); err != nil {
@@ -178,6 +195,11 @@ func (c *Root) Validate() error {
 	if c.SMTP.TLSEnabled {
 		if strings.TrimSpace(c.SMTP.TLSCert) == "" || strings.TrimSpace(c.SMTP.TLSKey) == "" {
 			return fmt.Errorf("config: TABMAIL_SMTP_TLSCERT and TABMAIL_SMTP_TLSKEY are required when TABMAIL_SMTP_TLSENABLED=true")
+		}
+	}
+	if c.Outbound.Enabled && strings.ToLower(c.Outbound.Mode) == "relay" {
+		if strings.TrimSpace(c.Outbound.RelayHost) == "" {
+			return fmt.Errorf("config: TABMAIL_OUTBOUND_RELAY_HOST is required when outbound is enabled in relay mode")
 		}
 	}
 	return nil

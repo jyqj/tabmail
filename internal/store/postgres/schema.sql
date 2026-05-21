@@ -79,17 +79,25 @@ CREATE INDEX IF NOT EXISTS idx_api_keys_tenant ON tenant_api_keys(tenant_id);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_api_keys_hash ON tenant_api_keys(key_hash);
 
 CREATE TABLE IF NOT EXISTS domain_zones (
-    id          UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id   UUID         NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    domain      VARCHAR(255) NOT NULL UNIQUE,
-    is_verified BOOLEAN      NOT NULL DEFAULT FALSE,
-    mx_verified BOOLEAN      NOT NULL DEFAULT FALSE,
-    txt_record  VARCHAR(255),
-    created_at  TIMESTAMPTZ  NOT NULL DEFAULT now(),
-    verified_at TIMESTAMPTZ
+    id                       UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id                UUID         NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    owner_user_id            UUID,
+    parent_zone_id           UUID         REFERENCES domain_zones(id) ON DELETE SET NULL,
+    domain                   VARCHAR(255) NOT NULL UNIQUE,
+    visibility               VARCHAR(16)  NOT NULL DEFAULT 'private',
+    allow_random_subdomains  BOOLEAN      NOT NULL DEFAULT FALSE,
+    is_verified              BOOLEAN      NOT NULL DEFAULT FALSE,
+    mx_verified              BOOLEAN      NOT NULL DEFAULT FALSE,
+    txt_record               VARCHAR(255),
+    created_at               TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    verified_at              TIMESTAMPTZ,
+    CONSTRAINT domain_zones_visibility_check CHECK (visibility IN ('private','authenticated','public'))
 );
 CREATE INDEX IF NOT EXISTS idx_zones_tenant ON domain_zones(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_zones_domain ON domain_zones(domain);
+CREATE INDEX IF NOT EXISTS idx_zones_owner ON domain_zones(owner_user_id) WHERE owner_user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_zones_parent ON domain_zones(parent_zone_id) WHERE parent_zone_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_zones_visibility ON domain_zones(visibility);
 
 CREATE TABLE IF NOT EXISTS domain_routes (
     id                       UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -290,8 +298,16 @@ CREATE TABLE IF NOT EXISTS admin_invitations (
 CREATE INDEX IF NOT EXISTS idx_invitations_code ON admin_invitations(invite_code);
 CREATE INDEX IF NOT EXISTS idx_invitations_email ON admin_invitations(LOWER(email));
 
+CREATE INDEX IF NOT EXISTS idx_zones_owner ON domain_zones(owner_user_id) WHERE owner_user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_zones_parent ON domain_zones(parent_zone_id) WHERE parent_zone_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_zones_visibility ON domain_zones(visibility);
+
 -- Idempotent current-state hardening for existing local/dev databases.
 ALTER TABLE mailboxes ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
+ALTER TABLE domain_zones ADD COLUMN IF NOT EXISTS owner_user_id UUID;
+ALTER TABLE domain_zones ADD COLUMN IF NOT EXISTS parent_zone_id UUID;
+ALTER TABLE domain_zones ADD COLUMN IF NOT EXISTS visibility VARCHAR(16) NOT NULL DEFAULT 'private';
+ALTER TABLE domain_zones ADD COLUMN IF NOT EXISTS allow_random_subdomains BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMPTZ;
 ALTER TABLE outbox_events ADD COLUMN IF NOT EXISTS lease_until TIMESTAMPTZ;
 ALTER TABLE webhook_deliveries ADD COLUMN IF NOT EXISTS claimed_at TIMESTAMPTZ;
@@ -319,6 +335,14 @@ DO $$ BEGIN
             (access_mode = 'token' AND password_hash IS NOT NULL)
             OR (access_mode <> 'token' AND password_hash IS NULL)
         ) NOT VALID;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'domain_zones_visibility_check') THEN
+        ALTER TABLE domain_zones ADD CONSTRAINT domain_zones_visibility_check
+            CHECK (visibility IN ('private','authenticated','public')) NOT VALID;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'domain_zones_parent_zone_fkey') THEN
+        ALTER TABLE domain_zones ADD CONSTRAINT domain_zones_parent_zone_fkey
+            FOREIGN KEY (parent_zone_id) REFERENCES domain_zones(id) ON DELETE SET NULL NOT VALID;
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'tenant_api_keys_scopes_check') THEN
         ALTER TABLE tenant_api_keys ADD CONSTRAINT tenant_api_keys_scopes_check CHECK (
@@ -368,3 +392,106 @@ FROM (
     GROUP BY mailbox_id
 ) sub
 WHERE m.id = sub.mailbox_id;
+
+-- ============================================================
+-- Permission profiles
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS permission_profiles (
+    id                  UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    name                VARCHAR(64)  UNIQUE NOT NULL,
+    description         TEXT         NOT NULL DEFAULT '',
+    can_send            BOOLEAN      NOT NULL DEFAULT FALSE,
+    daily_send_quota    INT          NOT NULL DEFAULT 0,
+    daily_receive_quota INT          NOT NULL DEFAULT 1000,
+    max_mailboxes       INT          NOT NULL DEFAULT 10,
+    max_domains         INT          NOT NULL DEFAULT 1,
+    allowed_zone_ids    UUID[],
+    can_create_domains  BOOLEAN      NOT NULL DEFAULT FALSE,
+    can_create_routes   BOOLEAN      NOT NULL DEFAULT FALSE,
+    can_create_api_keys BOOLEAN      NOT NULL DEFAULT TRUE,
+    is_system           BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at          TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+-- ============================================================
+-- User permission overrides
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS user_permission_overrides (
+    id                  UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id             UUID         NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    can_send            BOOLEAN,
+    daily_send_quota    INT,
+    daily_receive_quota INT,
+    max_mailboxes       INT,
+    max_domains         INT,
+    allowed_zone_ids    UUID[],
+    can_create_domains  BOOLEAN,
+    can_create_routes   BOOLEAN,
+    can_create_api_keys BOOLEAN,
+    updated_at          TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+-- Users: add permission_profile_id column
+ALTER TABLE users ADD COLUMN IF NOT EXISTS permission_profile_id UUID
+    REFERENCES permission_profiles(id) ON DELETE SET NULL;
+
+-- ============================================================
+-- Outbound jobs (send queue)
+-- ============================================================
+
+DO $$ BEGIN
+    CREATE TYPE outbound_state AS ENUM ('pending','processing','sent','retry','failed','dead');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
+
+CREATE TABLE IF NOT EXISTS outbound_jobs (
+    id              UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id       UUID         NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    user_id         UUID         REFERENCES users(id) ON DELETE SET NULL,
+    api_key_id      UUID         REFERENCES tenant_api_keys(id) ON DELETE SET NULL,
+    mail_from       VARCHAR(512) NOT NULL,
+    rcpt_to         TEXT[]       NOT NULL,
+    subject         TEXT         NOT NULL DEFAULT '',
+    text_body       TEXT,
+    html_body       TEXT,
+    headers_json    JSONB,
+    raw_mime        BYTEA,
+    zone_id         UUID         NOT NULL REFERENCES domain_zones(id),
+    state           outbound_state NOT NULL DEFAULT 'pending',
+    attempts        INT          NOT NULL DEFAULT 0,
+    max_attempts    INT          NOT NULL DEFAULT 5,
+    last_error      TEXT,
+    next_attempt_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    claimed_at      TIMESTAMPTZ,
+    lease_until     TIMESTAMPTZ,
+    smtp_code       INT,
+    smtp_response   TEXT,
+    message_id_header VARCHAR(512),
+    created_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at      TIMESTAMPTZ  NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_outbound_pending ON outbound_jobs (state, next_attempt_at, created_at) WHERE state IN ('pending','retry');
+CREATE INDEX IF NOT EXISTS idx_outbound_tenant_date ON outbound_jobs (tenant_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_outbound_user_date ON outbound_jobs (user_id, created_at DESC) WHERE user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_outbound_lease ON outbound_jobs (state, lease_until) WHERE state = 'processing';
+
+-- Seed permission profiles
+INSERT INTO permission_profiles (id, name, description, can_send, daily_send_quota, daily_receive_quota, max_mailboxes, max_domains, can_create_domains, can_create_routes, can_create_api_keys, is_system)
+VALUES
+    ('00000000-0000-0000-0000-000000000010', 'admin', 'Full access, no limits', TRUE, 0, 0, 0, 0, TRUE, TRUE, TRUE, TRUE),
+    ('00000000-0000-0000-0000-000000000011', 'default', 'Standard user with receive-only access', FALSE, 0, 500, 10, 1, FALSE, FALSE, TRUE, TRUE)
+ON CONFLICT (id) DO NOTHING;
+
+-- Update API key scopes constraint to include send:read and send:write
+DO $$ BEGIN
+    ALTER TABLE tenant_api_keys DROP CONSTRAINT IF EXISTS tenant_api_keys_scopes_check;
+    ALTER TABLE tenant_api_keys ADD CONSTRAINT tenant_api_keys_scopes_check CHECK (
+        jsonb_typeof(scopes) = 'array'
+        AND jsonb_array_length(scopes) > 0
+        AND scopes <@ '["domains:read","domains:write","routes:read","routes:write","mailboxes:read","mailboxes:write","messages:read","messages:write","send:read","send:write"]'::jsonb
+    ) NOT VALID;
+END $$;

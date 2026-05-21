@@ -72,6 +72,8 @@ type Store interface {
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
+	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
 	DeleteZone(ctx context.Context, id uuid.UUID) error
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
@@ -95,6 +97,7 @@ type Store interface {
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZone(ctx context.Context, zoneID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
+	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
 	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
 	CountAllMailboxes(ctx context.Context) (int, error)
@@ -154,6 +157,34 @@ type Store interface {
 	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
 	ListIngestJobs(ctx context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error)
 	CountIngestJobsByState(ctx context.Context, states ...string) (int, error)
+
+	// --- Permission profiles -----------------------------------------------
+	CreatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error
+	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
+	GetPermissionProfileByName(ctx context.Context, name string) (*models.PermissionProfile, error)
+	ListPermissionProfiles(ctx context.Context) ([]*models.PermissionProfile, error)
+	UpdatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error
+	DeletePermissionProfile(ctx context.Context, id uuid.UUID) error
+
+	// --- User permission overrides -----------------------------------------
+	UpsertUserPermissionOverride(ctx context.Context, o *models.UserPermissionOverride) error
+	GetUserPermissionOverride(ctx context.Context, userID uuid.UUID) (*models.UserPermissionOverride, error)
+	DeleteUserPermissionOverride(ctx context.Context, userID uuid.UUID) error
+	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
+
+	// --- Outbound jobs -----------------------------------------------------
+	CreateOutboundJob(ctx context.Context, job *models.OutboundJob) error
+	GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.OutboundJob, error)
+	ListOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
+	ClaimOutboundJobs(ctx context.Context, now time.Time, limit int) ([]*models.OutboundJob, error)
+	MarkOutboundJobSent(ctx context.Context, id uuid.UUID, smtpCode int, smtpResponse, messageID string) error
+	MarkOutboundJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, lastError string, dead bool) error
+	CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error)
+
+	// --- Uniqueness checks -------------------------------------------------
+	ExistsMailboxByAddress(ctx context.Context, address string) (bool, error)
+	ExistsZoneByDomain(ctx context.Context, domain string) (bool, error)
 
 	// --- Lifecycle -------------------------------------------------------
 	Close() error

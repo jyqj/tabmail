@@ -8,7 +8,7 @@ import { TabMailLogo } from "@/components/tabmail-logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useI18n } from "@/lib/i18n";
-import { listDomains, suggestAddress } from "@/lib/api";
+import { listOpenDomains, suggestOpenAddress } from "@/lib/api";
 import {
   Mail,
   ArrowRight,
@@ -34,6 +34,10 @@ function useScrollReveal() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      el.querySelectorAll(".tm-fade-in").forEach((child) => child.classList.add("visible"));
+      return;
+    }
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -93,14 +97,14 @@ export default function HomePage() {
   const handleRandom = async () => {
     setRandomLoading(true);
     try {
-      const domains = await listDomains();
+      const domains = await listOpenDomains();
       const verified = (domains.data ?? []).filter((d) => d.is_verified && d.mx_verified);
       if (verified.length === 0) {
         toast.error(t("home.noDomains"));
         return;
       }
       const domain = verified[Math.floor(Math.random() * verified.length)];
-      const res = await suggestAddress(domain.id, { subdomain: true });
+      const res = await suggestOpenAddress(domain.id, { subdomain: domain.allow_random_subdomains });
       const addr = res.data.address;
       setAddress(addr);
       router.push(`/inbox/${encodeURIComponent(addr)}`);

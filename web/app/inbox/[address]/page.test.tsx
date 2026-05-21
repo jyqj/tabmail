@@ -30,6 +30,7 @@ const {
   toastError: vi.fn(),
   authStateRef: {
     current: null as {
+      level: "public" | "mailbox" | "admin" | "user";
       mailboxAddress: string | null;
       mailboxToken: string | null;
       setMailboxAuth: ReturnType<typeof vi.fn>;
@@ -127,13 +128,13 @@ vi.mock("@/components/inbox/message-detail", () => ({
   }: {
     message: { subject: string };
     rawSource: string | null;
-    onDelete: () => void;
+    onDelete?: () => void;
     onBack?: () => void;
   }) => (
     <div>
       <div>detail:{message.subject}</div>
       <div>source:{rawSource ?? "none"}</div>
-      <button onClick={onDelete}>delete-selected</button>
+      {onDelete && <button onClick={onDelete}>delete-selected</button>}
       <button onClick={onBack}>back-selected</button>
     </div>
   ),
@@ -142,6 +143,7 @@ vi.mock("@/components/inbox/message-detail", () => ({
 describe("InboxPage", () => {
   beforeEach(() => {
     authStateRef.current = {
+      level: "user",
       mailboxAddress: null,
       mailboxToken: null,
       setMailboxAuth: vi.fn(),

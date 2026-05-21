@@ -18,12 +18,15 @@ import (
 type store interface {
 	app.AuditStore
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
+	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
 	CreateZone(ctx context.Context, z *models.DomainZone) error
 	DeleteZone(ctx context.Context, id uuid.UUID) error
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
+	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
 	ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error)
 	CreateRoute(ctx context.Context, r *models.DomainRoute) error
 	GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error)
@@ -72,6 +75,11 @@ type CreateRouteInput struct {
 	AccessModeDefault      models.AccessMode
 }
 
+type ZoneAccessInput struct {
+	Visibility            models.ResourceVisibility
+	AllowRandomSubdomains *bool
+}
+
 type SuggestedAddress struct {
 	ZoneID         uuid.UUID `json:"zone_id"`
 	BaseDomain     string    `json:"base_domain"`
@@ -105,7 +113,7 @@ func (s *Service) SetResolvers(lookupTXT func(string) ([]string, error), lookupM
 	}
 }
 
-func (s *Service) ListZones(ctx context.Context, tenant *models.Tenant, isAdmin bool) ([]*models.DomainZone, error) {
+func (s *Service) ListZones(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) ([]*models.DomainZone, error) {
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
@@ -113,14 +121,60 @@ func (s *Service) ListZones(ctx context.Context, tenant *models.Tenant, isAdmin 
 	if err != nil {
 		return nil, app.Internal(err)
 	}
+	if isAdmin || tenantWide {
+		return items, nil
+	}
+	return filterOwnedZones(items, ownerUserID), nil
+}
+
+func (s *Service) ListAllZones(ctx context.Context, isAdmin bool) ([]*models.DomainZone, error) {
+	if !isAdmin {
+		return nil, app.Forbidden("admin access required")
+	}
+	items, err := s.store.ListAllZones(ctx)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
 	return items, nil
 }
 
-func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin bool, domain, actor string) (*models.DomainZone, error) {
+func (s *Service) ListOpenZones(ctx context.Context, includeAuthenticated bool) ([]*models.DomainZone, error) {
+	items, err := s.store.ListAllZones(ctx)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	out := make([]*models.DomainZone, 0, len(items))
+	for _, zone := range items {
+		if !zone.IsVerified || !zone.MXVerified {
+			continue
+		}
+		switch zone.Visibility {
+		case models.VisibilityPublic:
+			out = append(out, zone)
+		case models.VisibilityAuthenticated:
+			if includeAuthenticated {
+				out = append(out, zone)
+			}
+		}
+	}
+	return out, nil
+}
+
+func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, domain, actor string) (*models.DomainZone, error) {
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
 	domain = normalizeDNSName(domain)
+	if !policy.ValidateDomainPart(domain) {
+		return nil, app.BadRequest("invalid domain")
+	}
+	parent, err := s.findParentZone(ctx, domain)
+	if err != nil {
+		return nil, err
+	}
+	if parent != nil && !canManageZone(parent, tenant, isAdmin, ownerUserID, tenantWide) {
+		return nil, app.Forbidden("parent domain permission required")
+	}
 	cfg, err := s.store.EffectiveConfig(ctx, tenant.ID)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -133,9 +187,14 @@ func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin
 		return nil, app.Forbidden(fmt.Sprintf("domain limit reached (%d)", cfg.MaxDomains))
 	}
 	zone := &models.DomainZone{
-		TenantID:  tenant.ID,
-		Domain:    domain,
-		TXTRecord: fmt.Sprintf("tabmail-verify=%s", uuid.New().String()[:8]),
+		TenantID:    tenant.ID,
+		OwnerUserID: ownerUserID,
+		Domain:      domain,
+		Visibility:  models.VisibilityPrivate,
+		TXTRecord:   fmt.Sprintf("tabmail-verify=%s", uuid.New().String()[:8]),
+	}
+	if parent != nil {
+		zone.ParentZoneID = app.UUIDPtr(parent.ID)
 	}
 	if err := s.store.CreateZone(ctx, zone); err != nil {
 		return nil, app.Conflict("domain already exists")
@@ -146,7 +205,10 @@ func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin
 		Action:       "domain.create",
 		ResourceType: "domain_zone",
 		ResourceID:   app.UUIDPtr(zone.ID),
-		Details:      app.MustJSON(map[string]any{"domain": zone.Domain, "txt_record": zone.TXTRecord}),
+		Details: app.MustJSON(map[string]any{
+			"domain": zone.Domain, "txt_record": zone.TXTRecord, "parent_zone_id": zone.ParentZoneID,
+			"visibility": zone.Visibility, "allow_random_subdomains": zone.AllowRandomSubdomains,
+		}),
 	})
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "domain.created", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String()}})
@@ -154,8 +216,45 @@ func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin
 	return zone, nil
 }
 
-func (s *Service) DeleteZone(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, actor string) error {
-	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin)
+func (s *Service) UpdateZoneAccess(ctx context.Context, zoneID uuid.UUID, isAdmin bool, input ZoneAccessInput, actor string) (*models.DomainZone, error) {
+	if !isAdmin {
+		return nil, app.Forbidden("admin access required")
+	}
+	zone, err := s.store.GetZone(ctx, zoneID)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	if zone == nil {
+		return nil, app.NotFound("zone not found")
+	}
+	if input.Visibility != "" {
+		if !input.Visibility.Valid() {
+			return nil, app.BadRequest("invalid visibility")
+		}
+		zone.Visibility = input.Visibility
+	}
+	if input.AllowRandomSubdomains != nil {
+		zone.AllowRandomSubdomains = *input.AllowRandomSubdomains
+	}
+	if zone.AllowRandomSubdomains && (!zone.IsVerified || !zone.MXVerified) {
+		return nil, app.BadRequest("random subdomains can only be enabled after TXT and MX verification")
+	}
+	if err := s.store.UpdateZone(ctx, zone); err != nil {
+		return nil, app.Internal(err)
+	}
+	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+		TenantID:     app.UUIDPtr(zone.TenantID),
+		Actor:        actor,
+		Action:       "domain.access.update",
+		ResourceType: "domain_zone",
+		ResourceID:   app.UUIDPtr(zone.ID),
+		Details:      app.MustJSON(map[string]any{"domain": zone.Domain, "visibility": zone.Visibility, "allow_random_subdomains": zone.AllowRandomSubdomains}),
+	})
+	return zone, nil
+}
+
+func (s *Service) DeleteZone(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, actor string) error {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
 		return err
 	}
@@ -176,8 +275,8 @@ func (s *Service) DeleteZone(ctx context.Context, zoneID uuid.UUID, tenant *mode
 	return nil
 }
 
-func (s *Service) TriggerVerify(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, actor string) (*models.DomainZone, VerificationChecks, error) {
-	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin)
+func (s *Service) TriggerVerify(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, actor string) (*models.DomainZone, VerificationChecks, error) {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
 		return nil, VerificationChecks{}, err
 	}
@@ -207,8 +306,8 @@ func (s *Service) TriggerVerify(ctx context.Context, zoneID uuid.UUID, tenant *m
 	return zone, checks, nil
 }
 
-func (s *Service) VerificationStatus(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool) (*VerificationStatus, error) {
-	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin)
+func (s *Service) VerificationStatus(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) (*VerificationStatus, error) {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
 		return nil, err
 	}
@@ -216,8 +315,8 @@ func (s *Service) VerificationStatus(ctx context.Context, zoneID uuid.UUID, tena
 	return &VerificationStatus{TXTExpected: zone.TXTRecord, ExpectedMX: s.expectedMX(), IsVerified: checks.TXT.Status == "pass", MXVerified: checks.MX.Status == "pass", Checks: checks}, nil
 }
 
-func (s *Service) ListRoutes(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool) ([]*models.DomainRoute, error) {
-	if _, err := s.ownedZone(ctx, zoneID, tenant, isAdmin); err != nil {
+func (s *Service) ListRoutes(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) ([]*models.DomainRoute, error) {
+	if _, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide); err != nil {
 		return nil, err
 	}
 	items, err := s.store.ListRoutes(ctx, zoneID)
@@ -227,17 +326,47 @@ func (s *Service) ListRoutes(ctx context.Context, zoneID uuid.UUID, tenant *mode
 	return items, nil
 }
 
-func (s *Service) SuggestAddress(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, useSubdomain bool) (*SuggestedAddress, error) {
-	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin)
+func (s *Service) SuggestAddress(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, canManage bool, useSubdomain bool) (*SuggestedAddress, error) {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
 		return nil, err
 	}
+	if useSubdomain && !canManage {
+		return nil, app.Forbidden("full domain permission is required to generate random subdomains")
+	}
+	return s.suggestForZone(zone, useSubdomain, canManage || isAdmin)
+}
+
+func (s *Service) SuggestOpenAddress(ctx context.Context, zoneID uuid.UUID, includeAuthenticated bool, useSubdomain bool) (*SuggestedAddress, error) {
+	zone, err := s.store.GetZone(ctx, zoneID)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	if zone == nil {
+		return nil, app.NotFound("zone not found")
+	}
+	if zone.Visibility != models.VisibilityPublic && !(includeAuthenticated && zone.Visibility == models.VisibilityAuthenticated) {
+		return nil, app.Forbidden("domain is not open for this viewer")
+	}
+	if useSubdomain && !zone.AllowRandomSubdomains {
+		return nil, app.Forbidden("random subdomains are not enabled for this domain")
+	}
+	return s.suggestForZone(zone, useSubdomain, zone.AllowRandomSubdomains)
+}
+
+func (s *Service) suggestForZone(zone *models.DomainZone, useSubdomain bool, canGenerateSubdomain bool) (*SuggestedAddress, error) {
 	if s.namingMode != policy.NamingFull {
 		return nil, app.BadRequest("random address suggestion requires TABMAIL_MAILBOXNAMING=full")
+	}
+	if !zone.IsVerified || !zone.MXVerified {
+		return nil, app.Forbidden("domain must pass TXT and MX verification before address generation")
 	}
 	resolvedDomain := zone.Domain
 	subdomainLabel := ""
 	if useSubdomain {
+		if !canGenerateSubdomain {
+			return nil, app.Forbidden("random subdomains are not enabled for this viewer")
+		}
 		label, fqdn, err := policy.GenerateSuggestedSubdomainAddress(time.Now().UTC(), zone.Domain, s.addressSecret)
 		if err != nil {
 			return nil, app.Internal(err)
@@ -261,8 +390,8 @@ func (s *Service) SuggestAddress(ctx context.Context, zoneID uuid.UUID, tenant *
 	}, nil
 }
 
-func (s *Service) CreateRoute(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, input CreateRouteInput, actor string) (*models.DomainRoute, error) {
-	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin)
+func (s *Service) CreateRoute(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, input CreateRouteInput, actor string) (*models.DomainRoute, error) {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
 		return nil, err
 	}
@@ -282,6 +411,9 @@ func (s *Service) CreateRoute(ctx context.Context, zoneID uuid.UUID, tenant *mod
 	}
 	if !am.Valid() {
 		return nil, app.BadRequest("invalid access_mode_default")
+	}
+	if autoCreate && am == models.AccessToken {
+		return nil, app.BadRequest("token access routes cannot auto-create mailboxes because each token mailbox needs its own password")
 	}
 	if input.RetentionHoursOverride != nil && *input.RetentionHoursOverride <= 0 {
 		return nil, app.BadRequest("retention_hours_override must be greater than 0")
@@ -312,7 +444,7 @@ func (s *Service) CreateRoute(ctx context.Context, zoneID uuid.UUID, tenant *mod
 	return route, nil
 }
 
-func (s *Service) DeleteRoute(ctx context.Context, routeID uuid.UUID, tenant *models.Tenant, isAdmin bool, actor string) error {
+func (s *Service) DeleteRoute(ctx context.Context, routeID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, actor string) error {
 	route, err := s.store.GetRoute(ctx, routeID)
 	if err != nil {
 		return app.Internal(err)
@@ -320,7 +452,7 @@ func (s *Service) DeleteRoute(ctx context.Context, routeID uuid.UUID, tenant *mo
 	if route == nil {
 		return app.NotFound("route not found")
 	}
-	zone, err := s.ownedZone(ctx, route.ZoneID, tenant, isAdmin)
+	zone, err := s.ownedZone(ctx, route.ZoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
 		return err
 	}
@@ -341,7 +473,7 @@ func (s *Service) DeleteRoute(ctx context.Context, routeID uuid.UUID, tenant *mo
 	return nil
 }
 
-func (s *Service) ownedZone(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool) (*models.DomainZone, error) {
+func (s *Service) ownedZone(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) (*models.DomainZone, error) {
 	zone, err := s.store.GetZone(ctx, zoneID)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -349,7 +481,7 @@ func (s *Service) ownedZone(ctx context.Context, zoneID uuid.UUID, tenant *model
 	if zone == nil {
 		return nil, app.NotFound("zone not found")
 	}
-	if !isAdmin && (tenant == nil || zone.TenantID != tenant.ID) {
+	if !canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
 		return nil, app.Forbidden("not your domain")
 	}
 	return zone, nil
@@ -397,6 +529,50 @@ func (s *Service) expectedMX() string {
 		return "localhost"
 	}
 	return s.expectedMXHost
+}
+
+func (s *Service) findParentZone(ctx context.Context, domain string) (*models.DomainZone, error) {
+	parts := strings.Split(domain, ".")
+	for i := 1; i < len(parts)-1; i++ {
+		parentDomain := strings.Join(parts[i:], ".")
+		zone, err := s.store.GetZoneByDomain(ctx, parentDomain)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
+		if zone != nil {
+			return zone, nil
+		}
+	}
+	return nil, nil
+}
+
+func canManageZone(zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
+	if zone == nil {
+		return false
+	}
+	if isAdmin {
+		return true
+	}
+	if tenant == nil || zone.TenantID != tenant.ID {
+		return false
+	}
+	if tenantWide {
+		return true
+	}
+	return ownerUserID != nil && zone.OwnerUserID != nil && *ownerUserID == *zone.OwnerUserID
+}
+
+func filterOwnedZones(items []*models.DomainZone, ownerUserID *uuid.UUID) []*models.DomainZone {
+	if ownerUserID == nil {
+		return []*models.DomainZone{}
+	}
+	out := make([]*models.DomainZone, 0, len(items))
+	for _, zone := range items {
+		if zone.OwnerUserID != nil && *zone.OwnerUserID == *ownerUserID {
+			out = append(out, zone)
+		}
+	}
+	return out
 }
 
 func ensureTenantScope(tenant *models.Tenant, isAdmin bool) error {

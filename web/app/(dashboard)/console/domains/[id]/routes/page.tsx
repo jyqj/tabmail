@@ -114,6 +114,10 @@ export default function RoutesPage() {
       toast.error(t("routes.retentionError"));
       return;
     }
+    if (autoCreate && accessMode === "token") {
+      toast.error(t("routes.tokenAutoCreateError"));
+      return;
+    }
     setCreating(true);
     try {
       await createRoute(domainId, {
@@ -183,6 +187,9 @@ export default function RoutesPage() {
                       <SelectItem value="sequence">{t("routes.sequence")}</SelectItem>
                     </SelectContent>
                   </Select>
+                  {autoCreate && accessMode === "token" && (
+                    <p className="text-xs text-destructive">{t("routes.tokenAutoCreateError")}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>{t("routes.matchValue")}</Label>
@@ -253,7 +260,7 @@ export default function RoutesPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="public">{t("routes.public")}</SelectItem>
-                      <SelectItem value="token">{t("routes.token")}</SelectItem>
+                      <SelectItem value="token" disabled={autoCreate}>{t("routes.token")}</SelectItem>
                       <SelectItem value="api_key">{t("routes.apiKey")}</SelectItem>
                     </SelectContent>
                   </Select>

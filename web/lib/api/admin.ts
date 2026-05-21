@@ -198,7 +198,7 @@ export function listUsers(params?: { page?: number; per_page?: number }) {
 
 export function updateUser(
   id: string,
-  body: { role?: string; is_active?: boolean; display_name?: string }
+  body: { role?: string; is_active?: boolean; display_name?: string; permission_profile_id?: string | null }
 ) {
   return request<APIResponse<AdminUser>>(`/api/v1/admin/users/${id}`, {
     method: "PATCH",

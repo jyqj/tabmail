@@ -23,7 +23,7 @@ import {
 interface Props {
   message: MessageDetailType;
   rawSource: string | null;
-  onDelete: () => void;
+  onDelete?: () => void;
   onBack?: () => void;
   loading?: boolean;
 }
@@ -91,14 +91,16 @@ export function MessageDetail({
               </div>
             )}
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onDelete}
-            className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onDelete}
+              className="shrink-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 

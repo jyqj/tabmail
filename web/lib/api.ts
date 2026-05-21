@@ -42,11 +42,15 @@ export {
   createDomain,
   createRoute,
   deleteDomain,
+  listAdminDomains,
   deleteRoute,
   getVerificationStatus,
   listDomains,
+  listOpenDomains,
   listRoutes,
   suggestAddress,
+  suggestOpenAddress,
+  updateAdminDomainAccess,
   verifyDomain,
 } from "./api/domains";
 export { createMailbox, deleteMailbox, listMailboxes } from "./api/mailboxes";
@@ -59,4 +63,19 @@ export {
   purgeMailbox,
   streamMailboxEvents,
 } from "./api/messages";
+export {
+  getOutboundJob,
+  listOutboundJobs,
+  sendEmail,
+} from "./api/outbound";
+export {
+  createPermissionProfile,
+  deletePermissionProfile,
+  deleteUserPermissionOverride,
+  getMyPermissions,
+  getUserPermission,
+  listPermissionProfiles,
+  setUserPermissionOverride,
+  updatePermissionProfile,
+} from "./api/permissions";
 export { healthCheck } from "./api/system";

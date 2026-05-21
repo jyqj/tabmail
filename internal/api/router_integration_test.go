@@ -299,7 +299,7 @@ func TestRouter_SuggestAddressSupportsRandomSubdomain(t *testing.T) {
 	if err != nil || tenant == nil {
 		t.Fatalf("get tenant: %v tenant=%#v", err, tenant)
 	}
-	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
+	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read", "domains:write"})
 
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
 	t.Cleanup(func() { _ = rdb.Close() })
@@ -329,6 +329,129 @@ func TestRouter_SuggestAddressSupportsRandomSubdomain(t *testing.T) {
 	}
 	if data["mode"] != "subdomain" {
 		t.Fatalf("unexpected mode: %#v", data["mode"])
+	}
+}
+
+func TestRouter_SuggestSubdomainRequiresDomainWriteScope(t *testing.T) {
+	st, obj, tenantID := seededStores(t)
+	tenant, err := st.GetTenant(context.Background(), tenantID)
+	if err != nil || tenant == nil {
+		t.Fatalf("get tenant: %v tenant=%#v", err, tenant)
+	}
+	st.RegisterAPIKey("read-key", tenant, []string{"domains:read"})
+
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+	router := testRouter(st, obj, rdb)
+
+	domainID := findTenantZone(t, st, tenantID)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains/"+domainID.String()+"/suggest-address?subdomain=true", nil)
+	req.Header.Set("X-API-Key", "read-key")
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	if rr.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d body=%s", rr.Code, rr.Body.String())
+	}
+}
+
+func TestRouter_UserSeesOnlyOwnedDomains(t *testing.T) {
+	st, obj, tenantID := seededStores(t)
+	owner := seedUserForTest(t, st, tenantID, models.RoleUser)
+	other := seedUserForTest(t, st, tenantID, models.RoleUser)
+	ownedZone := &models.DomainZone{
+		ID:          uuid.New(),
+		TenantID:    tenantID,
+		OwnerUserID: &owner.ID,
+		Domain:      "owned.mail.test",
+		IsVerified:  true,
+		MXVerified:  true,
+		TXTRecord:   "tabmail-verify-owned",
+	}
+	otherZone := &models.DomainZone{
+		ID:          uuid.New(),
+		TenantID:    tenantID,
+		OwnerUserID: &other.ID,
+		Domain:      "other.mail.test",
+		IsVerified:  true,
+		MXVerified:  true,
+		TXTRecord:   "tabmail-verify-other",
+	}
+	st.SeedZone(ownedZone)
+	st.SeedZone(otherZone)
+
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+	router := testRouter(st, obj, rdb)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains", nil)
+	req.Header.Set("Authorization", "Bearer "+issueAccessTokenForExistingUser(t, owner))
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Fatalf("expected 200, got %d body=%s", rr.Code, rr.Body.String())
+	}
+	var body struct {
+		Data []models.DomainZone `json:"data"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	if len(body.Data) != 1 || body.Data[0].ID != ownedZone.ID {
+		t.Fatalf("expected only owned zone, got %#v", body.Data)
+	}
+}
+
+func TestRouter_UserCannotDeleteMessagesInAnotherUsersDomain(t *testing.T) {
+	st, obj, tenantID := seededStores(t)
+	owner := seedUserForTest(t, st, tenantID, models.RoleUser)
+	other := seedUserForTest(t, st, tenantID, models.RoleUser)
+	zoneID := uuid.New()
+	st.SeedZone(&models.DomainZone{
+		ID:          zoneID,
+		TenantID:    tenantID,
+		OwnerUserID: &owner.ID,
+		Domain:      "owned-records.test",
+		IsVerified:  true,
+		MXVerified:  true,
+		TXTRecord:   "tabmail-verify-records",
+	})
+	mailboxID := uuid.New()
+	st.SeedMailbox(&models.Mailbox{
+		ID:             mailboxID,
+		TenantID:       tenantID,
+		ZoneID:         zoneID,
+		LocalPart:      "inbox",
+		ResolvedDomain: "owned-records.test",
+		FullAddress:    "inbox@owned-records.test",
+		AccessMode:     models.AccessPublic,
+	})
+	msgID := uuid.New()
+	st.SeedMessage(&models.Message{
+		ID:         msgID,
+		TenantID:   tenantID,
+		MailboxID:  mailboxID,
+		ZoneID:     zoneID,
+		Sender:     "sender@example.test",
+		Recipients: []string{"inbox@owned-records.test"},
+		Subject:    "owned record",
+		ReceivedAt: time.Now(),
+		ExpiresAt:  time.Now().Add(24 * time.Hour),
+	})
+
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+	router := testRouter(st, obj, rdb)
+
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/mailbox/inbox@owned-records.test/"+msgID.String(), nil)
+	req.Header.Set("Authorization", "Bearer "+issueAccessTokenForExistingUser(t, other))
+	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	if rr.Code != http.StatusForbidden {
+		t.Fatalf("expected 403, got %d body=%s", rr.Code, rr.Body.String())
+	}
+	msg, err := st.GetMessage(context.Background(), msgID)
+	if err != nil || msg == nil {
+		t.Fatalf("message should remain after forbidden delete, err=%v msg=%#v", err, msg)
 	}
 }
 
@@ -608,7 +731,7 @@ func setAdminAuth(t *testing.T, st *testutil.FakeStore, req *http.Request, tenan
 	}
 }
 
-func issueAccessTokenForTest(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID, role models.UserRole) string {
+func seedUserForTest(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID, role models.UserRole) *models.User {
 	t.Helper()
 	user := &models.User{
 		ID:           uuid.New(),
@@ -622,9 +745,19 @@ func issueAccessTokenForTest(t *testing.T, st *testutil.FakeStore, tenantID uuid
 	if err := st.CreateUser(context.Background(), user); err != nil {
 		t.Fatalf("seed user: %v", err)
 	}
+	return user
+}
+
+func issueAccessTokenForExistingUser(t *testing.T, user *models.User) string {
+	t.Helper()
 	token, err := authn.IssueAccessToken("jwt-test-secret", user)
 	if err != nil {
 		t.Fatalf("issue token: %v", err)
 	}
 	return token
+}
+
+func issueAccessTokenForTest(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID, role models.UserRole) string {
+	t.Helper()
+	return issueAccessTokenForExistingUser(t, seedUserForTest(t, st, tenantID, role))
 }

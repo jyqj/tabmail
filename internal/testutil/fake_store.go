@@ -347,6 +347,9 @@ func (s *FakeStore) CreateZone(_ context.Context, z *models.DomainZone) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	cp := *z
+	if cp.Visibility == "" {
+		cp.Visibility = models.VisibilityPrivate
+	}
 	if cp.ID == uuid.Nil {
 		cp.ID = uuid.New()
 	}
@@ -355,6 +358,7 @@ func (s *FakeStore) CreateZone(_ context.Context, z *models.DomainZone) error {
 	}
 	s.zones[cp.ID] = &cp
 	z.ID = cp.ID
+	z.Visibility = cp.Visibility
 	z.CreatedAt = cp.CreatedAt
 	return nil
 }
@@ -396,10 +400,39 @@ func (s *FakeStore) ListZones(_ context.Context, tenantID uuid.UUID) ([]*models.
 	return out, nil
 }
 
+func (s *FakeStore) ListAllZones(_ context.Context) ([]*models.DomainZone, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.DomainZone
+	for _, z := range s.zones {
+		cp := *z
+		out = append(out, &cp)
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Domain < out[j].Domain })
+	return out, nil
+}
+
+func (s *FakeStore) ListPublicZones(_ context.Context) ([]*models.DomainZone, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.DomainZone
+	for _, z := range s.zones {
+		if z.Visibility == models.VisibilityPublic {
+			cp := *z
+			out = append(out, &cp)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Domain < out[j].Domain })
+	return out, nil
+}
+
 func (s *FakeStore) UpdateZone(_ context.Context, z *models.DomainZone) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	cp := *z
+	if cp.Visibility == "" {
+		cp.Visibility = models.VisibilityPrivate
+	}
 	s.zones[z.ID] = &cp
 	return nil
 }
@@ -585,6 +618,28 @@ func (s *FakeStore) ListMailboxesByZone(_ context.Context, zoneID uuid.UUID, pg 
 			cp := *m
 			list = append(list, &cp)
 		}
+	}
+	sort.Slice(list, func(i, j int) bool { return list[i].CreatedAt.After(list[j].CreatedAt) })
+	return paginateMailboxes(list, pg), len(list), nil
+}
+
+func (s *FakeStore) ListMailboxesByZones(_ context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	allowed := make(map[uuid.UUID]struct{}, len(zoneIDs))
+	for _, id := range zoneIDs {
+		allowed[id] = struct{}{}
+	}
+	var list []*models.Mailbox
+	for _, m := range s.mailboxes {
+		if m.TenantID != tenantID {
+			continue
+		}
+		if _, ok := allowed[m.ZoneID]; !ok {
+			continue
+		}
+		cp := *m
+		list = append(list, &cp)
 	}
 	sort.Slice(list, func(i, j int) bool { return list[i].CreatedAt.After(list[j].CreatedAt) })
 	return paginateMailboxes(list, pg), len(list), nil
@@ -1574,6 +1629,80 @@ func (s *FakeStore) ListSettings(_ context.Context) ([]*models.SystemSetting, er
 		out = append(out, &cp)
 	}
 	return out, nil
+}
+
+// ================================================================
+// Permission profiles (stubs)
+// ================================================================
+
+func (s *FakeStore) CreatePermissionProfile(_ context.Context, _ *models.PermissionProfile) error {
+	return nil
+}
+func (s *FakeStore) GetPermissionProfile(_ context.Context, _ uuid.UUID) (*models.PermissionProfile, error) {
+	return nil, nil
+}
+func (s *FakeStore) GetPermissionProfileByName(_ context.Context, _ string) (*models.PermissionProfile, error) {
+	return nil, nil
+}
+func (s *FakeStore) ListPermissionProfiles(_ context.Context) ([]*models.PermissionProfile, error) {
+	return nil, nil
+}
+func (s *FakeStore) UpdatePermissionProfile(_ context.Context, _ *models.PermissionProfile) error {
+	return nil
+}
+func (s *FakeStore) DeletePermissionProfile(_ context.Context, _ uuid.UUID) error { return nil }
+
+// ================================================================
+// User permission overrides (stubs)
+// ================================================================
+
+func (s *FakeStore) UpsertUserPermissionOverride(_ context.Context, _ *models.UserPermissionOverride) error {
+	return nil
+}
+func (s *FakeStore) GetUserPermissionOverride(_ context.Context, _ uuid.UUID) (*models.UserPermissionOverride, error) {
+	return nil, nil
+}
+func (s *FakeStore) DeleteUserPermissionOverride(_ context.Context, _ uuid.UUID) error { return nil }
+func (s *FakeStore) EffectivePermission(_ context.Context, _ uuid.UUID) (*models.EffectivePermission, error) {
+	return nil, nil
+}
+
+// ================================================================
+// Outbound jobs (stubs)
+// ================================================================
+
+func (s *FakeStore) CreateOutboundJob(_ context.Context, _ *models.OutboundJob) error { return nil }
+func (s *FakeStore) GetOutboundJob(_ context.Context, _ uuid.UUID) (*models.OutboundJob, error) {
+	return nil, nil
+}
+func (s *FakeStore) ListOutboundJobs(_ context.Context, _ uuid.UUID, _ models.Page) ([]*models.OutboundJob, int, error) {
+	return nil, 0, nil
+}
+func (s *FakeStore) ClaimOutboundJobs(_ context.Context, _ time.Time, _ int) ([]*models.OutboundJob, error) {
+	return nil, nil
+}
+func (s *FakeStore) MarkOutboundJobSent(_ context.Context, _ uuid.UUID, _ int, _, _ string) error {
+	return nil
+}
+func (s *FakeStore) MarkOutboundJobRetry(_ context.Context, _ uuid.UUID, _ string, _ time.Time) error {
+	return nil
+}
+func (s *FakeStore) MarkOutboundJobFailed(_ context.Context, _ uuid.UUID, _ string, _ bool) error {
+	return nil
+}
+func (s *FakeStore) CountOutboundSince(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ time.Time) (int, error) {
+	return 0, nil
+}
+
+// ================================================================
+// Uniqueness checks (stubs)
+// ================================================================
+
+func (s *FakeStore) ExistsMailboxByAddress(_ context.Context, _ string) (bool, error) {
+	return false, nil
+}
+func (s *FakeStore) ExistsZoneByDomain(_ context.Context, _ string) (bool, error) {
+	return false, nil
 }
 
 func (s *FakeStore) Close() error { return nil }

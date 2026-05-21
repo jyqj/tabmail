@@ -46,7 +46,7 @@ function safeConfirm(message: string) {
 export default function InboxPage() {
   const params = useParams();
   const address = decodeURIComponent(params.address as string);
-  const { mailboxAddress, mailboxToken, setMailboxAuth, clearMailboxAuth } = useAuth();
+  const { level, mailboxAddress, mailboxToken, setMailboxAuth, clearMailboxAuth } = useAuth();
   const { t } = useI18n();
   const { settings } = useSettings();
 
@@ -62,6 +62,7 @@ export default function InboxPage() {
   const [sseConnected, setSseConnected] = useState(false);
   const mailboxTokenMatches =
     !!mailboxToken && mailboxAddress?.toLowerCase() === address.toLowerCase();
+  const canWriteRecords = level === "admin" || level === "user";
 
   const { data: response, isLoading: loading, isValidating: refreshing, error, mutate } = useAPI(
     address ? ["inbox", address] : null,
@@ -154,21 +155,25 @@ export default function InboxPage() {
     try {
       const res = await getMessage(address, msg.id);
       setSelectedMsg(res.data);
-      if (!msg.seen) {
-        await markMessageSeen(address, msg.id);
-        // Optimistically update the cached messages list
-        mutate(
-          (current) => {
-            if (!current) return current;
-            return {
-              ...current,
-              data: current.data?.map((m: Message) =>
-                m.id === msg.id ? { ...m, seen: true } : m
-              ),
-            };
-          },
-          { revalidate: false },
-        );
+      if (canWriteRecords && !msg.seen) {
+        try {
+          await markMessageSeen(address, msg.id);
+          // Optimistically update the cached messages list
+          mutate(
+            (current) => {
+              if (!current) return current;
+              return {
+                ...current,
+                data: current.data?.map((m: Message) =>
+                  m.id === msg.id ? { ...m, seen: true } : m
+                ),
+              };
+            },
+            { revalidate: false },
+          );
+        } catch {
+          // Read-only views can still open the message; leave seen state unchanged.
+        }
       }
     } catch {
       toast.error(t("toast.loadFailed"));
@@ -285,7 +290,7 @@ export default function InboxPage() {
               <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
               <span className="hidden sm:inline">{t("inbox.refresh")}</span>
             </Button>
-            {messages.length > 0 && (
+            {canWriteRecords && messages.length > 0 && (
               <Button
                 variant="outline"
                 size="sm"
@@ -384,7 +389,7 @@ export default function InboxPage() {
                 <MessageDetail
                   message={selectedMsg}
                   rawSource={rawSource}
-                  onDelete={handleDelete}
+                  onDelete={canWriteRecords ? handleDelete : undefined}
                   onBack={() => { setSelectedMsg(null); setSelectedId(null); }}
                   loading={detailLoading}
                 />

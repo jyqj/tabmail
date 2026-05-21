@@ -1,24 +1,120 @@
 openapi: "3.1.0"
 info:
   title: TabMail API
-  version: 1.0.0
+  version: "2.0"
   description: |
-    Multi-tenant disposable email service.
+    TabMail is a multi-tenant, API-first disposable email service with both
+    inbound (SMTP receive) and outbound (SMTP send) capabilities.
+
+    ## Quick Start for Bot/Automation Users
+
+    ### Step 1: Get an API Key
+    ```bash
+    # Login to get a JWT token
+    curl -X POST https://your-tabmail/api/v1/auth/login \
+      -H "Content-Type: application/json" \
+      -d '{"email":"you@example.com","password":"your-password"}'
+
+    # Create an API Key with the JWT
+    curl -X POST https://your-tabmail/api/v1/keys \
+      -H "Authorization: Bearer <jwt_token>" \
+      -H "Content-Type: application/json" \
+      -d '{"label":"my-bot","scopes":["mailboxes:write","messages:read","send:write"]}'
+    ```
+
+    ### Step 2: Create a Disposable Mailbox
+    ```bash
+    # Get a suggested address
+    curl https://your-tabmail/api/v1/domains/{domain_id}/suggest-address \
+      -H "X-API-Key: tabmail_..."
+
+    # Create the mailbox
+    curl -X POST https://your-tabmail/api/v1/mailboxes \
+      -H "X-API-Key: tabmail_..." \
+      -H "Content-Type: application/json" \
+      -d '{"full_address":"suggested-addr@domain.com","zone_id":"..."}'
+    ```
+
+    ### Step 3: Receive Emails (Poll or SSE)
+    ```bash
+    # Poll for messages
+    curl https://your-tabmail/api/v1/mailbox/addr@domain.com \
+      -H "X-API-Key: tabmail_..."
+
+    # Or use Server-Sent Events for real-time
+    curl -N https://your-tabmail/api/v1/mailbox/addr@domain.com/events \
+      -H "X-API-Key: tabmail_..."
+    ```
+
+    ### Step 4: Read a Message
+    ```bash
+    curl https://your-tabmail/api/v1/mailbox/addr@domain.com/{message_id} \
+      -H "X-API-Key: tabmail_..."
+    ```
+
+    ### Step 5: Send an Email (Requires Permission)
+    ```bash
+    curl -X POST https://your-tabmail/api/v1/send \
+      -H "X-API-Key: tabmail_..." \
+      -H "Content-Type: application/json" \
+      -d '{
+        "from": "noreply@your-verified-domain.com",
+        "to": ["recipient@gmail.com"],
+        "subject": "Hello from TabMail",
+        "text_body": "This is a test email."
+      }'
+    ```
 
     ## Authentication
 
-    | Layer | Header | Description |
-    |-------|--------|-------------|
-    | Public | *(none)* | Auto-assigned to the public tenant with strict rate limits |
-    | Tenant | `X-API-Key` | Tenant-scoped access, limits governed by plan + overrides |
-    | JWT User/Admin | `Authorization: Bearer <jwt>` | Interactive user/admin access; admins may impersonate tenants with `X-Tenant-ID` |
-    | Mailbox Token | `Authorization: Bearer <token>` | Mailbox-scoped access for `access_mode=token` mailboxes |
+    TabMail supports three authentication methods:
 
-    Admin requests may additionally pass `X-Tenant-ID` to impersonate a tenant on tenant-scoped endpoints.
+    1. **JWT Bearer Token** — For interactive user sessions. Obtained via `/auth/login`.
+    2. **API Key** — For bot/automation use. Header: `X-API-Key: tabmail_...`
+    3. **Public Access** — No credentials needed for public mailboxes (read-only).
+
+    ## Rate Limits
+
+    Rate limit headers are included in all responses:
+    - `X-RateLimit-Limit` — Maximum requests per minute
+    - `X-RateLimit-Remaining` — Remaining requests in current window
+    - `X-RateLimit-Reset` — Unix timestamp when the window resets
+
+    ## Error Format
+
+    All errors follow this format:
+    ```json
+    {
+      "error": {
+        "code": "ERROR_CODE",
+        "message": "Human-readable description"
+      }
+    }
+    ```
 
 servers:
   - url: /
     description: Current host
+
+tags:
+  - name: Auth
+    description: Authentication and user session management
+  - name: Domains
+    description: Domain zone management
+  - name: Domain Routes
+    description: Routing rules for domain zones
+  - name: Mailboxes
+    description: Mailbox lifecycle management
+  - name: Messages
+    description: Message retrieval and management
+  - name: Sending
+    description: Outbound email sending API
+  - name: Permissions
+    description: Permission profile management (admin only)
+  - name: Admin
+    description: Administrative operations
+  - name: System
+    description: Health, metrics, and documentation
 
 security:
   - {}
@@ -30,6 +126,7 @@ components:
       type: apiKey
       in: header
       name: X-API-Key
+      description: Tenant API key
     MailboxToken:
       type: http
       scheme: bearer
@@ -38,6 +135,12 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: JWT access token from /auth/login
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: Tenant API key (alias for APIKey)
 
   schemas:
     Error:
@@ -46,7 +149,19 @@ components:
         error:
           type: object
           properties:
-            code: { type: string }
+            code:
+              type: string
+              enum:
+                - BAD_REQUEST
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - NOT_FOUND
+                - CONFLICT
+                - RATE_LIMITED
+                - QUOTA_EXCEEDED
+                - DOMAIN_NOT_VERIFIED
+                - SEND_NOT_ALLOWED
+                - INTERNAL
             message: { type: string }
 
     Meta:
@@ -107,7 +222,11 @@ components:
       properties:
         id: { type: string, format: uuid }
         tenant_id: { type: string, format: uuid }
+        owner_user_id: { type: string, format: uuid, nullable: true }
+        parent_zone_id: { type: string, format: uuid, nullable: true }
         domain: { type: string }
+        visibility: { type: string, enum: [private, authenticated, public] }
+        allow_random_subdomains: { type: boolean }
         is_verified: { type: boolean }
         mx_verified: { type: boolean }
         txt_record: { type: string }
@@ -188,6 +307,7 @@ components:
         - mailboxes:write
         - messages:read
         - messages:write
+        - send:write
 
     APIKeyCreated:
       type: object
@@ -413,15 +533,185 @@ components:
         invite_code: { type: string }
         expires_at: { type: string, format: date-time }
 
+    # ── Sending Schemas ──────────────────────────────────
+    SendEmailResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        message_id:
+          type: string
+          example: "<uuid@mail.example.com>"
+        state:
+          $ref: '#/components/schemas/OutboundState'
+        created_at:
+          type: string
+          format: date-time
+
+    OutboundState:
+      type: string
+      enum: [pending, processing, sent, retry, failed, dead]
+
+    OutboundJob:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        mail_from:
+          type: string
+        rcpt_to:
+          type: array
+          items:
+            type: string
+        subject:
+          type: string
+        state:
+          $ref: '#/components/schemas/OutboundState'
+        attempts:
+          type: integer
+        max_attempts:
+          type: integer
+        last_error:
+          type: string
+        smtp_code:
+          type: integer
+        smtp_response:
+          type: string
+        message_id_header:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    # ── Permission Schemas ───────────────────────────────
+    PermissionProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        can_send:
+          type: boolean
+        daily_send_quota:
+          type: integer
+          description: "0 = unlimited"
+        daily_receive_quota:
+          type: integer
+          description: "0 = unlimited"
+        max_mailboxes:
+          type: integer
+          description: "0 = unlimited"
+        max_domains:
+          type: integer
+          description: "0 = unlimited"
+        allowed_zone_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+          description: "null = all zones allowed"
+        can_create_domains:
+          type: boolean
+        can_create_routes:
+          type: boolean
+        can_create_api_keys:
+          type: boolean
+        is_system:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    EffectivePermission:
+      type: object
+      properties:
+        can_send:
+          type: boolean
+        daily_send_quota:
+          type: integer
+        daily_receive_quota:
+          type: integer
+        max_mailboxes:
+          type: integer
+        max_domains:
+          type: integer
+        allowed_zone_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+          nullable: true
+        can_create_domains:
+          type: boolean
+        can_create_routes:
+          type: boolean
+        can_create_api_keys:
+          type: boolean
+
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    QuotaExceeded:
+      description: Daily quota exceeded
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error:
+              code: QUOTA_EXCEEDED
+              message: "daily send quota exceeded (50/50)"
+
   parameters:
     PageParam:
       name: page
       in: query
-      schema: { type: integer, default: 1 }
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      description: Page number
     PerPageParam:
       name: per_page
       in: query
-      schema: { type: integer, default: 30, maximum: 100 }
+      schema:
+        type: integer
+        default: 30
+        minimum: 1
+        maximum: 100
+      description: Items per page
 
 paths:
   /api/v1/token:
@@ -450,6 +740,53 @@ paths:
                 properties:
                   data: { $ref: "#/components/schemas/MailboxTokenResponse" }
         "403": { description: Invalid credentials or mailbox access mode }
+
+  # ── Open Domain Resources ───────────────────────────
+  /api/v1/resources/domains:
+    get:
+      tags: [Domains]
+      summary: List verified domain resources open to the current viewer
+      operationId: listOpenDomains
+      security: [ {}, { BearerAuth: [] } ]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/DomainZone" }
+
+  /api/v1/resources/domains/{id}/suggest-address:
+    get:
+      tags: [Domains]
+      summary: Generate a randomized address for an open domain resource
+      operationId: suggestOpenAddress
+      security: [ {}, { BearerAuth: [] } ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: subdomain
+          in: query
+          required: false
+          schema: { type: boolean }
+          description: Requires allow_random_subdomains on the open resource
+      responses:
+        "200":
+          description: Suggested randomized mailbox address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/SuggestedAddress" }
+        "403": { description: Resource is not open to this viewer }
+        "404": { description: Not found }
 
   # ── Domains / Zones ─────────────────────────────────
   /api/v1/domains:
@@ -871,6 +1208,422 @@ paths:
           content:
             message/rfc822:
               schema: { type: string, format: binary }
+
+  # ── Sending ─────────────────────────────────────────
+  /api/v1/send:
+    post:
+      tags: [Sending]
+      summary: Send an email
+      operationId: sendEmail
+      description: |
+        Send an outbound email. Requires `send:write` scope for API keys,
+        or JWT authentication with `can_send` permission enabled.
+
+        The sender (`from`) domain must be a verified domain zone owned by
+        the caller's tenant.
+
+        **Rate limiting**: Subject to daily send quota configured in the
+        user's permission profile.
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [from, to, subject]
+              properties:
+                from:
+                  type: string
+                  format: email
+                  description: Sender address. Domain must be a verified zone.
+                  example: "noreply@mail.example.com"
+                to:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                  minItems: 1
+                  description: Primary recipients
+                  example: ["user@gmail.com"]
+                cc:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                  description: CC recipients
+                bcc:
+                  type: array
+                  items:
+                    type: string
+                    format: email
+                  description: BCC recipients (hidden from other recipients)
+                subject:
+                  type: string
+                  maxLength: 998
+                  description: Email subject line
+                  example: "Your verification code"
+                text_body:
+                  type: string
+                  description: Plain text body
+                  example: "Your code is 123456"
+                html_body:
+                  type: string
+                  description: HTML body
+                  example: "<p>Your code is <b>123456</b></p>"
+                headers:
+                  type: object
+                  additionalProperties:
+                    type: string
+                  description: Custom email headers
+                  example:
+                    Reply-To: "support@example.com"
+      responses:
+        '201':
+          description: Email queued for delivery
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendEmailResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/QuotaExceeded'
+
+  /api/v1/outbound:
+    get:
+      tags: [Sending]
+      summary: List outbound jobs
+      operationId: listOutboundJobs
+      description: List outbound email delivery jobs for the current tenant.
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        '200':
+          description: Paginated list of outbound jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OutboundJob'
+                  total:
+                    type: integer
+
+  /api/v1/outbound/{id}:
+    get:
+      tags: [Sending]
+      summary: Get outbound job status
+      operationId: getOutboundJob
+      description: Get the delivery status of a specific outbound email job.
+      security:
+        - BearerAuth: []
+        - ApiKeyAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Outbound job details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutboundJob'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Admin: Domain Resources ─────────────────────────
+  /api/v1/admin/domains:
+    get:
+      tags: [Admin]
+      summary: List all domain resources
+      operationId: adminListDomains
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/DomainZone" }
+
+  /api/v1/admin/domains/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update domain resource visibility and random subdomain policy
+      operationId: adminUpdateDomainAccess
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                visibility: { type: string, enum: [private, authenticated, public] }
+                allow_random_subdomains: { type: boolean }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/DomainZone" }
+        "400": { description: Invalid visibility or random-subdomain state }
+        "403": { description: Admin access required }
+        "404": { description: Not found }
+
+  # ── Admin: Permissions ─────────────────────────────
+  /api/v1/admin/permissions:
+    get:
+      tags: [Permissions]
+      summary: List all permission profiles
+      operationId: listPermissionProfiles
+      security: [{ BearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/PermissionProfile" }
+    post:
+      tags: [Permissions]
+      summary: Create permission profile
+      operationId: createPermissionProfile
+      security: [{ BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                can_send: { type: boolean, default: false }
+                daily_send_quota: { type: integer, default: 0, description: "0 = unlimited" }
+                daily_receive_quota: { type: integer, default: 0, description: "0 = unlimited" }
+                max_mailboxes: { type: integer, default: 0, description: "0 = unlimited" }
+                max_domains: { type: integer, default: 0, description: "0 = unlimited" }
+                allowed_zone_ids:
+                  type: array
+                  items: { type: string, format: uuid }
+                  nullable: true
+                  description: "null = all zones allowed"
+                can_create_domains: { type: boolean, default: true }
+                can_create_routes: { type: boolean, default: true }
+                can_create_api_keys: { type: boolean, default: true }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/PermissionProfile" }
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "409": { description: Profile name already exists }
+
+  /api/v1/admin/permissions/{id}:
+    patch:
+      tags: [Permissions]
+      summary: Update permission profile
+      operationId: updatePermissionProfile
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                description: { type: string }
+                can_send: { type: boolean }
+                daily_send_quota: { type: integer }
+                daily_receive_quota: { type: integer }
+                max_mailboxes: { type: integer }
+                max_domains: { type: integer }
+                allowed_zone_ids:
+                  type: array
+                  items: { type: string, format: uuid }
+                  nullable: true
+                can_create_domains: { type: boolean }
+                can_create_routes: { type: boolean }
+                can_create_api_keys: { type: boolean }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/PermissionProfile" }
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Permissions]
+      summary: Delete permission profile
+      operationId: deletePermissionProfile
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+        "400": { description: Cannot delete system profiles }
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/admin/users/{userId}/permissions:
+    get:
+      tags: [Permissions]
+      summary: Get user's effective permissions
+      operationId: getUserPermissions
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/EffectivePermission" }
+        "404":
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags: [Permissions]
+      summary: Set user permission override
+      operationId: setUserPermissionOverride
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                profile_id:
+                  type: string
+                  format: uuid
+                  description: Permission profile to assign
+                overrides:
+                  type: object
+                  description: Field-level overrides on top of the profile
+                  properties:
+                    can_send: { type: boolean }
+                    daily_send_quota: { type: integer }
+                    daily_receive_quota: { type: integer }
+                    max_mailboxes: { type: integer }
+                    max_domains: { type: integer }
+                    allowed_zone_ids:
+                      type: array
+                      items: { type: string, format: uuid }
+                      nullable: true
+                    can_create_domains: { type: boolean }
+                    can_create_routes: { type: boolean }
+                    can_create_api_keys: { type: boolean }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/EffectivePermission" }
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [Permissions]
+      summary: Delete user permission override
+      operationId: deleteUserPermissionOverride
+      description: Remove user-specific permission override, reverting to the default profile.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Override removed }
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/auth/me/permissions:
+    get:
+      tags: [Permissions]
+      summary: Get my permissions
+      operationId: getMyPermissions
+      description: Get the effective permissions for the currently authenticated user.
+      security: [{ BearerAuth: [] }, { ApiKeyAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: "#/components/schemas/EffectivePermission" }
+        "401": { description: Not authenticated }
 
   # ── Admin: Tenants ──────────────────────────────────
   /api/v1/admin/tenants:

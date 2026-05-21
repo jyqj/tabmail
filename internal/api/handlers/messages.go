@@ -24,6 +24,7 @@ import (
 type messageStore interface {
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
@@ -45,10 +46,18 @@ func NewMessageHandler(s messageStore, obj store.ObjectStore, hub *realtime.Hub,
 }
 
 func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
+	var userID *uuid.UUID
+	if user := middleware.UserFromCtx(r.Context()); user != nil {
+		id := user.ID
+		userID = &id
+	}
+	mode := middleware.AuthModeFromCtx(r.Context())
 	return messageapp.Viewer{
 		Tenant:      middleware.TenantFromCtx(r.Context()),
 		IsAdmin:     middleware.IsAdmin(r.Context()),
-		AuthMode:    middleware.AuthModeFromCtx(r.Context()),
+		AuthMode:    mode,
+		UserID:      userID,
+		TenantWide:  mode == middleware.AuthModeAPIKey,
 		BearerToken: mailboxBearerToken(r),
 	}
 }

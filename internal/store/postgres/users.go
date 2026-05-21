@@ -23,39 +23,41 @@ func (s *PgStore) CreateUser(ctx context.Context, u *models.User) error {
 	u.CreatedAt = now
 	u.UpdatedAt = now
 	_, err := s.pool.Exec(ctx, `
-		INSERT INTO users (id, tenant_id, email, password_hash, display_name, role, is_active, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+		INSERT INTO users (id, tenant_id, email, password_hash, display_name, role, is_active, permission_profile_id, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 		u.ID, u.TenantID, strings.ToLower(strings.TrimSpace(u.Email)),
-		u.PasswordHash, u.DisplayName, u.Role, u.IsActive, u.CreatedAt, u.UpdatedAt)
+		u.PasswordHash, u.DisplayName, u.Role, u.IsActive, u.PermissionProfileID, u.CreatedAt, u.UpdatedAt)
 	return err
 }
 
-func (s *PgStore) GetUser(ctx context.Context, id uuid.UUID) (*models.User, error) {
+const userSelect = `SELECT id, tenant_id, email, password_hash, display_name, role, is_active,
+	       permission_profile_id, created_at, updated_at, last_login_at
+	FROM users`
+
+func scanUser(row pgx.Row) (*models.User, error) {
 	u := &models.User{}
-	err := s.pool.QueryRow(ctx, `
-		SELECT id, tenant_id, email, password_hash, display_name, role, is_active,
-		       created_at, updated_at, last_login_at
-		FROM users WHERE id = $1`, id).
-		Scan(&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName,
-			&u.Role, &u.IsActive, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt)
+	var profileID pgtype.UUID
+	err := row.Scan(&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName,
+		&u.Role, &u.IsActive, &profileID, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt)
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
-	return u, err
+	if err != nil {
+		return nil, err
+	}
+	if profileID.Valid {
+		id := uuid.UUID(profileID.Bytes)
+		u.PermissionProfileID = &id
+	}
+	return u, nil
+}
+
+func (s *PgStore) GetUser(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	return scanUser(s.pool.QueryRow(ctx, userSelect+` WHERE id = $1`, id))
 }
 
 func (s *PgStore) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	u := &models.User{}
-	err := s.pool.QueryRow(ctx, `
-		SELECT id, tenant_id, email, password_hash, display_name, role, is_active,
-		       created_at, updated_at, last_login_at
-		FROM users WHERE LOWER(email) = LOWER($1)`, strings.TrimSpace(email)).
-		Scan(&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName,
-			&u.Role, &u.IsActive, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt)
-	if err == pgx.ErrNoRows {
-		return nil, nil
-	}
-	return u, err
+	return scanUser(s.pool.QueryRow(ctx, userSelect+` WHERE LOWER(email) = LOWER($1)`, strings.TrimSpace(email)))
 }
 
 func (s *PgStore) ListUsers(ctx context.Context, pg models.Page) ([]*models.User, int, error) {
@@ -65,20 +67,16 @@ func (s *PgStore) ListUsers(ctx context.Context, pg models.Page) ([]*models.User
 	if err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx, `
-		SELECT id, tenant_id, email, password_hash, display_name, role, is_active,
-		       created_at, updated_at, last_login_at
-		FROM users ORDER BY created_at DESC
-		LIMIT $1 OFFSET $2`, pg.PerPage, pg.Offset())
+	rows, err := s.pool.Query(ctx,
+		userSelect+` ORDER BY created_at DESC LIMIT $1 OFFSET $2`, pg.PerPage, pg.Offset())
 	if err != nil {
 		return nil, 0, err
 	}
 	defer rows.Close()
 	var out []*models.User
 	for rows.Next() {
-		u := &models.User{}
-		if err := rows.Scan(&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName,
-			&u.Role, &u.IsActive, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt); err != nil {
+		u, err := scanUser(rows)
+		if err != nil {
 			return nil, 0, err
 		}
 		out = append(out, u)

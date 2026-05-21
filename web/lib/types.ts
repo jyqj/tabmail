@@ -63,10 +63,16 @@ export interface EffectiveConfig {
   daily_quota: number;
 }
 
+export type ResourceVisibility = "private" | "authenticated" | "public";
+
 export interface DomainZone {
   id: string;
   tenant_id: string;
+  owner_user_id?: string | null;
+  parent_zone_id?: string | null;
   domain: string;
+  visibility: ResourceVisibility;
+  allow_random_subdomains: boolean;
   is_verified: boolean;
   mx_verified: boolean;
   txt_record: string;
@@ -298,6 +304,7 @@ export interface AuthUser {
   email: string;
   display_name: string;
   role: UserRole;
+  permission_profile_id?: string;
   tenant_id: string;
 }
 
@@ -307,6 +314,7 @@ export interface AdminUser {
   email: string;
   display_name: string;
   role: UserRole;
+  permission_profile_id?: string;
   is_active: boolean;
   created_at: string;
   last_login_at?: string | null;
@@ -394,4 +402,98 @@ export interface WebhookDelivery {
   delivered_at?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// ============================================================
+// Permission Profile
+// ============================================================
+
+export interface PermissionProfile {
+  id: string;
+  name: string;
+  description: string;
+  can_send: boolean;
+  daily_send_quota: number;
+  daily_receive_quota: number;
+  max_mailboxes: number;
+  max_domains: number;
+  allowed_zone_ids: string[] | null;
+  can_create_domains: boolean;
+  can_create_routes: boolean;
+  can_create_api_keys: boolean;
+  is_system: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserPermissionOverride {
+  id: string;
+  user_id: string;
+  can_send?: boolean | null;
+  daily_send_quota?: number | null;
+  daily_receive_quota?: number | null;
+  max_mailboxes?: number | null;
+  max_domains?: number | null;
+  allowed_zone_ids?: string[] | null;
+  can_create_domains?: boolean | null;
+  can_create_routes?: boolean | null;
+  can_create_api_keys?: boolean | null;
+  updated_at: string;
+}
+
+export interface EffectivePermission {
+  can_send: boolean;
+  daily_send_quota: number;
+  daily_receive_quota: number;
+  max_mailboxes: number;
+  max_domains: number;
+  allowed_zone_ids: string[] | null;
+  can_create_domains: boolean;
+  can_create_routes: boolean;
+  can_create_api_keys: boolean;
+}
+
+// ============================================================
+// Outbound
+// ============================================================
+
+export type OutboundState = "pending" | "processing" | "sent" | "retry" | "failed" | "dead";
+
+export interface OutboundJob {
+  id: string;
+  tenant_id: string;
+  user_id?: string;
+  mail_from: string;
+  rcpt_to: string[];
+  subject: string;
+  text_body?: string;
+  html_body?: string;
+  zone_id: string;
+  state: OutboundState;
+  attempts: number;
+  max_attempts: number;
+  last_error?: string;
+  smtp_code?: number;
+  smtp_response?: string;
+  message_id_header?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SendEmailRequest {
+  from: string;
+  to: string[];
+  cc?: string[];
+  bcc?: string[];
+  subject: string;
+  text_body?: string;
+  html_body?: string;
+  headers?: Record<string, string>;
+}
+
+export interface SendEmailResponse {
+  id: string;
+  message_id: string;
+  state: OutboundState;
+  created_at: string;
 }

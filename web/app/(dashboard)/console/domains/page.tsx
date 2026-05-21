@@ -313,6 +313,15 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
                   TXT OK · MX 未配置
                 </Badge>
               )}
+              <Badge variant="outline" className="text-[10px]">
+                {zone.visibility === "public" ? "公开资源" : zone.visibility === "authenticated" ? "登录可用" : "私有"}
+              </Badge>
+              {zone.parent_zone_id && (
+                <Badge variant="outline" className="text-[10px]">子域名资源</Badge>
+              )}
+              {zone.allow_random_subdomains && (
+                <Badge variant="outline" className="text-[10px]">开放随机子域名</Badge>
+              )}
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">

@@ -4,6 +4,7 @@ import type {
   DomainVerificationResult,
   DomainRoute,
   DomainZone,
+  ResourceVisibility,
   RouteType,
   SuggestedAddress,
   VerificationStatus,
@@ -12,6 +13,24 @@ import { request } from "./base";
 
 export function listDomains() {
   return request<APIResponse<DomainZone[]>>("/api/v1/domains");
+}
+
+export function listOpenDomains() {
+  return request<APIResponse<DomainZone[]>>("/api/v1/resources/domains");
+}
+
+export function listAdminDomains() {
+  return request<APIResponse<DomainZone[]>>("/api/v1/admin/domains");
+}
+
+export function updateAdminDomainAccess(
+  id: string,
+  body: { visibility?: ResourceVisibility; allow_random_subdomains?: boolean }
+) {
+  return request<APIResponse<DomainZone>>(`/api/v1/admin/domains/${id}`, {
+    method: "PATCH",
+    body,
+  });
 }
 
 export function createDomain(domain: string) {
@@ -38,6 +57,11 @@ export function getVerificationStatus(id: string) {
 export function suggestAddress(id: string, opts?: { subdomain?: boolean }) {
   const qs = opts?.subdomain ? "?subdomain=true" : "";
   return request<APIResponse<SuggestedAddress>>(`/api/v1/domains/${id}/suggest-address${qs}`);
+}
+
+export function suggestOpenAddress(id: string, opts?: { subdomain?: boolean }) {
+  const qs = opts?.subdomain ? "?subdomain=true" : "";
+  return request<APIResponse<SuggestedAddress>>(`/api/v1/resources/domains/${id}/suggest-address${qs}`);
 }
 
 export function listRoutes(domainId: string) {

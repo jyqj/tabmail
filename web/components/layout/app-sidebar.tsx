@@ -34,6 +34,7 @@ import {
   Webhook,
   Boxes,
   Settings2,
+  Send,
 } from "lucide-react";
 
 export function AppSidebar() {
@@ -45,6 +46,7 @@ export function AppSidebar() {
     { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
     { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
     { href: "/console/keys", label: t("sidebar.apiKeys"), icon: Settings2 },
+    { href: "/console/outbound", label: t("sidebar.outbound"), icon: Send },
   ];
 
   const adminItems = [
@@ -53,6 +55,8 @@ export function AppSidebar() {
     { href: "/admin/policy", label: t("sidebar.smtpPolicy"), icon: SlidersHorizontal },
     { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
     { href: "/admin/users", label: t("sidebar.users"), icon: Users },
+    { href: "/admin/permissions", label: t("sidebar.permissions"), icon: Shield },
+    { href: "/admin/domains", label: t("sidebar.domainResources"), icon: Globe },
     { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
     { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
     { href: "/admin/ingest", label: t("sidebar.ingest"), icon: Boxes },

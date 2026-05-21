@@ -19,6 +19,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
+	"tabmail/internal/outbound"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
 	"tabmail/internal/settings"
@@ -76,6 +77,7 @@ type RouterConfig struct {
 	Settings           *settings.Manager
 	HTTP               config.HTTP
 	RateLimiter        *middleware.RateLimiter
+	OutboundService    *outbound.Service
 	Logger             zerolog.Logger
 }
 
@@ -96,6 +98,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	}))
 
 	r.Use(middleware.Auth(st, cfg.JWTSecret, cfg.PublicTenantID))
+	r.Use(middleware.PermissionLoader(st))
 	r.Use(cfg.RateLimiter.Middleware)
 
 	dh := handlers.NewDomainHandler(st, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Logger)
@@ -104,6 +107,11 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
 	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
+	perm := handlers.NewPermissionHandler(st, cfg.Logger)
+	var oh *handlers.OutboundHandler
+	if cfg.OutboundService != nil {
+		oh = handlers.NewOutboundHandler(cfg.OutboundService, st, cfg.Logger)
+	}
 
 	r.Route("/api/v1", func(r chi.Router) {
 		// -- Auth (public, no auth required) --
@@ -118,10 +126,15 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Post("/auth/logout", auth.Logout)
 			r.Get("/auth/me", auth.Me)
 			r.Post("/auth/change-password", auth.ChangePassword)
+			r.Get("/auth/me/permissions", perm.MyPermissions)
 		})
 
 		// -- Mailbox token issuance --
 		r.Post("/token", mh.IssueToken)
+
+		// -- Open resources (public or authenticated based on resource visibility) --
+		r.Get("/resources/domains", dh.ListOpenZones)
+		r.Get("/resources/domains/{id}/suggest-address", dh.SuggestOpenAddress)
 
 		// -- Tenant resources (requires API key, JWT user, or admin) --
 		r.Group(func(r chi.Router) {
@@ -145,6 +158,13 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.With(middleware.RequireScopes("mailboxes:write")).Post("/mailboxes", mh.Create)
 			r.With(middleware.RequireScopes("mailboxes:write")).Delete("/mailboxes/{id}", mh.Delete)
 
+			// -- Outbound / Sending --
+			if oh != nil {
+				r.With(middleware.RequireScopes("send:write")).Post("/send", oh.Send)
+				r.With(middleware.RequireScopes("send:read")).Get("/outbound", oh.ListJobs)
+				r.With(middleware.RequireScopes("send:read")).Get("/outbound/{id}", oh.GetJob)
+			}
+
 		})
 
 		// -- User API keys (own tenant; interactive JWT sessions only) --
@@ -167,6 +187,9 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		// -- Admin --
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.RequireAdmin)
+
+			r.Get("/admin/domains", dh.AdminListZones)
+			r.Patch("/admin/domains/{id}", dh.AdminUpdateZoneAccess)
 
 			r.Get("/admin/tenants", adm.ListTenants)
 			r.Post("/admin/tenants", adm.CreateTenant)
@@ -196,6 +219,17 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			// -- System settings (admin only) --
 			r.Get("/admin/settings", adm.ListSettings)
 			r.Patch("/admin/settings", adm.UpdateSettings)
+
+			// -- Permission profiles (admin only) --
+			r.Get("/admin/permissions", perm.ListProfiles)
+			r.Post("/admin/permissions", perm.CreateProfile)
+			r.Patch("/admin/permissions/{id}", perm.UpdateProfile)
+			r.Delete("/admin/permissions/{id}", perm.DeleteProfile)
+
+			// -- User permissions (admin only) --
+			r.Get("/admin/users/{id}/permissions", perm.GetUserPermission)
+			r.Put("/admin/users/{id}/permissions", perm.SetUserPermissionOverride)
+			r.Delete("/admin/users/{id}/permissions", perm.DeleteUserPermissionOverride)
 
 			// -- User management (admin only) --
 			r.Post("/admin/invite", auth.InviteAdmin)

@@ -26,6 +26,7 @@ const (
 	ctxAuthMode
 	ctxScopes
 	ctxUser
+	ctxPermission
 )
 
 const (
@@ -73,12 +74,87 @@ func APIScopesFromCtx(ctx context.Context) []string {
 	return nil
 }
 
+func HasScope(ctx context.Context, required ...string) bool {
+	mode := AuthModeFromCtx(ctx)
+	if mode == AuthModeAdmin || mode == AuthModeUser {
+		return true
+	}
+	return hasAnyScope(APIScopesFromCtx(ctx), required...)
+}
+
 // UserFromCtx returns the authenticated user, or nil.
 func UserFromCtx(ctx context.Context) *models.User {
 	if v, ok := ctx.Value(ctxUser).(*models.User); ok {
 		return v
 	}
 	return nil
+}
+
+// PermissionFromCtx returns the resolved effective permission, or nil.
+func PermissionFromCtx(ctx context.Context) *models.EffectivePermission {
+	if v, ok := ctx.Value(ctxPermission).(*models.EffectivePermission); ok {
+		return v
+	}
+	return nil
+}
+
+type permStore interface {
+	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
+}
+
+// PermissionLoader loads effective permissions for JWT users and injects into context.
+// For admin users, it grants unlimited permissions.
+// For API key and public access, permissions are not loaded (nil in context).
+func PermissionLoader(st permStore) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			mode := AuthModeFromCtx(ctx)
+
+			// Only load permissions for JWT users
+			if mode != AuthModeAdmin && mode != AuthModeUser {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			// Admin gets unlimited
+			if mode == AuthModeAdmin {
+				ctx = context.WithValue(ctx, ctxPermission, &models.EffectivePermission{
+					CanSend:           true,
+					DailySendQuota:    0, // unlimited
+					DailyReceiveQuota: 0,
+					MaxMailboxes:      0,
+					MaxDomains:        0,
+					AllowedZoneIDs:    nil, // all
+					CanCreateDomains:  true,
+					CanCreateRoutes:   true,
+					CanCreateAPIKeys:  true,
+				})
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+
+			user := UserFromCtx(ctx)
+			if user == nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			perm, err := st.EffectivePermission(ctx, user.ID)
+			if err != nil {
+				// Fall back to defaults on error, don't block the request
+				perm = &models.EffectivePermission{
+					CanSend:           false,
+					DailyReceiveQuota: 500,
+					MaxMailboxes:      10,
+					MaxDomains:        1,
+					CanCreateAPIKeys:  true,
+				}
+			}
+			ctx = context.WithValue(ctx, ctxPermission, perm)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
 // Auth resolves the caller identity using a 3-layer model:

@@ -7,6 +7,8 @@ export const API_KEY_SCOPE_OPTIONS = [
   { value: "mailboxes:write", label: "Mailboxes write" },
   { value: "messages:read", label: "Messages read" },
   { value: "messages:write", label: "Messages write" },
+  { value: "send:read", label: "Send read" },
+  { value: "send:write", label: "Send write" },
 ] as const;
 
 export const DEFAULT_API_KEY_SCOPES = [

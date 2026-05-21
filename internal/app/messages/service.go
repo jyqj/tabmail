@@ -20,14 +20,15 @@ import (
 )
 
 const (
-	AuthModeAPIKey  = "api_key"
-	AuthModeUser    = "user"
-	AuthModePublic  = "public"
+	AuthModeAPIKey = "api_key"
+	AuthModeUser   = "user"
+	AuthModePublic = "public"
 )
 
 type storeRepo interface {
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
@@ -41,6 +42,8 @@ type Viewer struct {
 	Tenant      *models.Tenant
 	IsAdmin     bool
 	AuthMode    string
+	UserID      *uuid.UUID
+	TenantWide  bool
 	BearerToken string
 }
 
@@ -81,7 +84,11 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
 		return nil, accessDeniedOrNotFound(viewer, "mailbox expired")
 	}
-	if viewer.Tenant != nil && viewer.AuthMode == AuthModeUser && mb.TenantID == viewer.Tenant.ID {
+	canManage, err := s.canManageMailbox(ctx, mb, viewer)
+	if err != nil {
+		return nil, err
+	}
+	if canManage {
 		return mb, nil
 	}
 	switch mb.AccessMode {
@@ -112,7 +119,58 @@ func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, vi
 	if viewer.AuthMode == AuthModePublic {
 		return nil, app.Forbidden("authentication required for write operations")
 	}
-	return s.ResolveMailbox(ctx, address, viewer)
+	addr := strings.ToLower(strings.TrimSpace(address))
+	if addr == "" {
+		return nil, app.BadRequest("address is required")
+	}
+	mailboxKey, err := policy.ExtractMailbox(addr, s.namingMode, s.stripPlus)
+	if err != nil {
+		return nil, app.BadRequest("invalid address")
+	}
+	mb, err := s.store.GetMailboxByAddress(ctx, mailboxKey)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	if mb == nil {
+		return nil, app.NotFound("mailbox not found")
+	}
+	if viewer.IsAdmin {
+		return mb, nil
+	}
+	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
+		return nil, app.Forbidden("mailbox expired")
+	}
+	canManage, err := s.canManageMailbox(ctx, mb, viewer)
+	if err != nil {
+		return nil, err
+	}
+	if canManage {
+		return mb, nil
+	}
+	return nil, app.Forbidden("write access requires mailbox owner or admin")
+}
+
+func (s *Service) canManageMailbox(ctx context.Context, mb *models.Mailbox, viewer Viewer) (bool, error) {
+	if mb == nil {
+		return false, nil
+	}
+	if viewer.IsAdmin {
+		return true, nil
+	}
+	if viewer.Tenant == nil || mb.TenantID != viewer.Tenant.ID {
+		return false, nil
+	}
+	if viewer.TenantWide || viewer.AuthMode == AuthModeAPIKey {
+		return true, nil
+	}
+	zone, err := s.store.GetZone(ctx, mb.ZoneID)
+	if err != nil {
+		return false, app.Internal(err)
+	}
+	if zone == nil {
+		return false, nil
+	}
+	return viewer.UserID != nil && zone.OwnerUserID != nil && *viewer.UserID == *zone.OwnerUserID, nil
 }
 
 func accessDeniedOrNotFound(viewer Viewer, msg string) error {

@@ -19,12 +19,15 @@ import (
 type domainStore interface {
 	app.AuditStore
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
+	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
 	CreateZone(ctx context.Context, z *models.DomainZone) error
 	DeleteZone(ctx context.Context, id uuid.UUID) error
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
+	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
 	ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error)
 	CreateRoute(ctx context.Context, r *models.DomainRoute) error
 	GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error)
@@ -43,8 +46,40 @@ func NewDomainHandler(s domainStore, dispatcher *hooks.Dispatcher, expectedMXHos
 	return &DomainHandler{service: service, lookupTXT: net.LookupTXT, lookupMX: net.LookupMX, logger: l.With().Str("handler", "domains").Logger()}
 }
 
+func domainOwnerUserID(r *http.Request) *uuid.UUID {
+	user := middleware.UserFromCtx(r.Context())
+	if user == nil {
+		return nil
+	}
+	id := user.ID
+	return &id
+}
+
+func domainTenantWide(r *http.Request) bool {
+	return middleware.AuthModeFromCtx(r.Context()) == middleware.AuthModeAPIKey
+}
+
 func (h *DomainHandler) ListZones(w http.ResponseWriter, r *http.Request) {
-	items, err := h.service.ListZones(r.Context(), middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()))
+	items, err := h.service.ListZones(r.Context(), middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r))
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, items)
+}
+
+func (h *DomainHandler) ListOpenZones(w http.ResponseWriter, r *http.Request) {
+	includeAuthenticated := middleware.AuthModeFromCtx(r.Context()) != middleware.AuthModePublic
+	items, err := h.service.ListOpenZones(r.Context(), includeAuthenticated)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, items)
+}
+
+func (h *DomainHandler) AdminListZones(w http.ResponseWriter, r *http.Request) {
+	items, err := h.service.ListAllZones(r.Context(), middleware.IsAdmin(r.Context()))
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -60,12 +95,42 @@ func (h *DomainHandler) CreateZone(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "domain is required")
 		return
 	}
-	item, err := h.service.CreateZone(r.Context(), middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), body.Domain, actorFromRequest(r))
+	var ownerID *uuid.UUID
+	if user := middleware.UserFromCtx(r.Context()); user != nil {
+		id := user.ID
+		ownerID = &id
+	}
+	item, err := h.service.CreateZone(r.Context(), middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), ownerID, domainTenantWide(r), body.Domain, actorFromRequest(r))
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
 	created(w, item)
+}
+
+func (h *DomainHandler) AdminUpdateZoneAccess(w http.ResponseWriter, r *http.Request) {
+	zoneID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid id")
+		return
+	}
+	var body struct {
+		Visibility            models.ResourceVisibility `json:"visibility"`
+		AllowRandomSubdomains *bool                     `json:"allow_random_subdomains,omitempty"`
+	}
+	if err := decodeBody(r, &body); err != nil {
+		errBadRequest(w, "invalid body")
+		return
+	}
+	item, err := h.service.UpdateZoneAccess(r.Context(), zoneID, middleware.IsAdmin(r.Context()), domainapp.ZoneAccessInput{
+		Visibility:            body.Visibility,
+		AllowRandomSubdomains: body.AllowRandomSubdomains,
+	}, actorFromRequest(r))
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, item)
 }
 
 func (h *DomainHandler) DeleteZone(w http.ResponseWriter, r *http.Request) {
@@ -74,7 +139,7 @@ func (h *DomainHandler) DeleteZone(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	if err := h.service.DeleteZone(r.Context(), id, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), actorFromRequest(r)); err != nil {
+	if err := h.service.DeleteZone(r.Context(), id, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r), actorFromRequest(r)); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -88,7 +153,7 @@ func (h *DomainHandler) TriggerVerify(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	zone, checks, err := h.service.TriggerVerify(r.Context(), id, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), actorFromRequest(r))
+	zone, checks, err := h.service.TriggerVerify(r.Context(), id, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r), actorFromRequest(r))
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -111,7 +176,7 @@ func (h *DomainHandler) VerificationStatus(w http.ResponseWriter, r *http.Reques
 		errBadRequest(w, "invalid id")
 		return
 	}
-	item, err := h.service.VerificationStatus(r.Context(), id, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()))
+	item, err := h.service.VerificationStatus(r.Context(), id, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r))
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -125,7 +190,7 @@ func (h *DomainHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	items, err := h.service.ListRoutes(r.Context(), zoneID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()))
+	items, err := h.service.ListRoutes(r.Context(), zoneID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r))
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -140,7 +205,24 @@ func (h *DomainHandler) SuggestAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	useSubdomain := r.URL.Query().Get("subdomain") == "true" || r.URL.Query().Get("subdomain") == "1"
-	item, err := h.service.SuggestAddress(r.Context(), zoneID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), useSubdomain)
+	canManage := middleware.HasScope(r.Context(), "domains:write")
+	item, err := h.service.SuggestAddress(r.Context(), zoneID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r), canManage, useSubdomain)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, item)
+}
+
+func (h *DomainHandler) SuggestOpenAddress(w http.ResponseWriter, r *http.Request) {
+	zoneID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid id")
+		return
+	}
+	useSubdomain := r.URL.Query().Get("subdomain") == "true" || r.URL.Query().Get("subdomain") == "1"
+	includeAuthenticated := middleware.AuthModeFromCtx(r.Context()) != middleware.AuthModePublic
+	item, err := h.service.SuggestOpenAddress(r.Context(), zoneID, includeAuthenticated, useSubdomain)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -167,7 +249,7 @@ func (h *DomainHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.CreateRoute(r.Context(), zoneID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainapp.CreateRouteInput{
+	item, err := h.service.CreateRoute(r.Context(), zoneID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r), domainapp.CreateRouteInput{
 		RouteType:              body.RouteType,
 		MatchValue:             body.MatchValue,
 		RangeStart:             body.RangeStart,
@@ -189,7 +271,7 @@ func (h *DomainHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid route id")
 		return
 	}
-	if err := h.service.DeleteRoute(r.Context(), routeID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), actorFromRequest(r)); err != nil {
+	if err := h.service.DeleteRoute(r.Context(), routeID, middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), domainOwnerUserID(r), domainTenantWide(r), actorFromRequest(r)); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}

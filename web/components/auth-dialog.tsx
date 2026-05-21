@@ -264,12 +264,13 @@ export function AuthDialog() {
               <div className="flex-1 flex flex-col">
                 <div className="space-y-4 flex-1">
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-medium text-foreground/80">
+                    <label htmlFor="auth-login-email" className="text-[13px] font-medium text-foreground/80">
                       {t("auth.email")}
                     </label>
                     <div className="relative">
                       <Mail className={iconBase} />
                       <Input
+                        id="auth-login-email"
                         className={inputBase}
                         type="email"
                         placeholder="you@example.com"
@@ -281,12 +282,13 @@ export function AuthDialog() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-medium text-foreground/80">
+                    <label htmlFor="auth-login-password" className="text-[13px] font-medium text-foreground/80">
                       {t("auth.password")}
                     </label>
                     <div className="relative">
                       <Lock className={iconBase} />
                       <Input
+                        id="auth-login-password"
                         className={cn(inputBase, "pr-10")}
                         type={showPwd ? "text" : "password"}
                         placeholder="••••••••"
@@ -332,12 +334,13 @@ export function AuthDialog() {
               <div className="flex-1 flex flex-col">
                 <div className="space-y-4 flex-1">
                   <div className="space-y-1.5">
-                    <label className="text-[13px] font-medium text-foreground/80">
+                    <label htmlFor="auth-register-email" className="text-[13px] font-medium text-foreground/80">
                       {t("auth.email")}
                     </label>
                     <div className="relative">
                       <Mail className={iconBase} />
                       <Input
+                        id="auth-register-email"
                         className={inputBase}
                         type="email"
                         placeholder="you@example.com"
@@ -349,7 +352,7 @@ export function AuthDialog() {
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-baseline justify-between">
-                      <label className="text-[13px] font-medium text-foreground/80">
+                      <label htmlFor="auth-register-name" className="text-[13px] font-medium text-foreground/80">
                         {t("auth.displayName")}
                       </label>
                       <span className="text-[11px] text-muted-foreground/50">
@@ -359,6 +362,7 @@ export function AuthDialog() {
                     <div className="relative">
                       <User className={iconBase} />
                       <Input
+                        id="auth-register-name"
                         className={inputBase}
                         placeholder={t("auth.displayNamePlaceholder")}
                         value={regName}
@@ -368,7 +372,7 @@ export function AuthDialog() {
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-baseline justify-between">
-                      <label className="text-[13px] font-medium text-foreground/80">
+                      <label htmlFor="auth-register-password" className="text-[13px] font-medium text-foreground/80">
                         {t("auth.password")}
                       </label>
                       <span className="text-[11px] text-muted-foreground/50">
@@ -378,6 +382,7 @@ export function AuthDialog() {
                     <div className="relative">
                       <Lock className={iconBase} />
                       <Input
+                        id="auth-register-password"
                         className={cn(inputBase, "pr-10")}
                         type={showPwd ? "text" : "password"}
                         placeholder="••••••••"

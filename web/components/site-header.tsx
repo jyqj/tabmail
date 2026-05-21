@@ -21,7 +21,6 @@ import {
 import { healthCheck } from "@/lib/api";
 import {
   LayoutDashboard,
-  Shield,
   BookOpen,
   Menu,
   Inbox,
@@ -60,9 +59,6 @@ export function SiteHeader() {
       : []),
     ...(level === "mailbox"
       ? [{ href: "/", label: t("header.inbox"), icon: Inbox }]
-      : []),
-    ...(level === "admin"
-      ? [{ href: "/admin", label: t("header.admin"), icon: Shield }]
       : []),
     { href: "/docs", label: t("header.docs"), icon: BookOpen },
   ];

@@ -33,8 +33,8 @@ vi.mock("@/lib/i18n", () => ({
 }));
 
 vi.mock("@/lib/api", () => ({
-  listDomains: (...args: unknown[]) => listDomainsMock(...args),
-  suggestAddress: (...args: unknown[]) => suggestAddressMock(...args),
+  listOpenDomains: (...args: unknown[]) => listDomainsMock(...args),
+  suggestOpenAddress: (...args: unknown[]) => suggestAddressMock(...args),
 }));
 
 vi.mock("@/components/ui/button", () => ({
@@ -72,6 +72,7 @@ describe("home page", () => {
           domain: "tabmail.dev",
           is_verified: true,
           mx_verified: true,
+          allow_random_subdomains: false,
         },
       ],
     });
