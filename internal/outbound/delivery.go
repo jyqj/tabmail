@@ -56,7 +56,9 @@ func DeliverRelay(ctx context.Context, cfg config.Outbound, from string, to []st
 }
 
 // DeliverDirect sends email by resolving MX records for each recipient domain.
-func DeliverDirect(ctx context.Context, from string, to []string, mime []byte) error {
+// When requireTLS is true, delivery fails if STARTTLS is unavailable or negotiation fails,
+// preventing MITM downgrade attacks.
+func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, requireTLS bool) error {
 	byDomain := groupByDomain(to)
 	var lastErr error
 	for domain, rcpts := range byDomain {
@@ -67,7 +69,8 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte) e
 		}
 		delivered := false
 		for _, mx := range mxs {
-			addr := fmt.Sprintf("%s:25", strings.TrimSuffix(mx, "."))
+			host := strings.TrimSuffix(mx, ".")
+			addr := fmt.Sprintf("%s:25", host)
 			conn, err := net.DialTimeout("tcp", addr, 30*time.Second)
 			if err != nil {
 				continue
@@ -77,6 +80,32 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte) e
 				conn.Close()
 				continue
 			}
+
+			if ok, _ := client.Extension("STARTTLS"); ok {
+				tlsConf := &tls.Config{ServerName: host}
+				if tlsErr := client.StartTLS(tlsConf); tlsErr != nil {
+					client.Close()
+					if requireTLS {
+						lastErr = fmt.Errorf("STARTTLS required but negotiation failed for %s: %w", host, tlsErr)
+						continue
+					}
+					conn2, err2 := net.DialTimeout("tcp", addr, 30*time.Second)
+					if err2 != nil {
+						lastErr = fmt.Errorf("reconnect to %s after TLS failure: %w", host, err2)
+						continue
+					}
+					client, err = smtp.NewClient(conn2, mx)
+					if err != nil {
+						conn2.Close()
+						continue
+					}
+				}
+			} else if requireTLS {
+				client.Close()
+				lastErr = fmt.Errorf("STARTTLS required but not supported by %s", host)
+				continue
+			}
+
 			if err := sendSMTP(client, from, rcpts, mime); err != nil {
 				client.Close()
 				lastErr = err

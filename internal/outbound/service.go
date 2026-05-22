@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/mail"
 	"sync"
 	"time"
 
@@ -11,17 +12,21 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/config"
+	tabdkim "tabmail/internal/dkim"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
 
+const maxRetryDelay = 1 * time.Hour
+
 // Service manages outbound email submission and background delivery.
 type Service struct {
-	cfg    config.Outbound
-	store  store.Store
-	logger zerolog.Logger
-	stopCh chan struct{}
-	wg     sync.WaitGroup
+	cfg      config.Outbound
+	store    store.Store
+	logger   zerolog.Logger
+	stopCh   chan struct{}
+	wg       sync.WaitGroup
+	stopOnce sync.Once
 }
 
 // NewService creates a new outbound service.
@@ -56,6 +61,26 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		return nil, fmt.Errorf("outbound sending is disabled")
 	}
 
+	// Validate all email addresses using RFC 5322 parsing.
+	if _, err := mail.ParseAddress(req.From); err != nil {
+		return nil, fmt.Errorf("invalid from address %q: %w", req.From, err)
+	}
+	for _, addr := range req.To {
+		if _, err := mail.ParseAddress(addr); err != nil {
+			return nil, fmt.Errorf("invalid to address %q: %w", addr, err)
+		}
+	}
+	for _, addr := range req.CC {
+		if _, err := mail.ParseAddress(addr); err != nil {
+			return nil, fmt.Errorf("invalid cc address %q: %w", addr, err)
+		}
+	}
+	for _, addr := range req.BCC {
+		if _, err := mail.ParseAddress(addr); err != nil {
+			return nil, fmt.Errorf("invalid bcc address %q: %w", addr, err)
+		}
+	}
+
 	// Merge all recipients.
 	allRcpt := make([]string, 0, len(req.To)+len(req.CC)+len(req.BCC))
 	allRcpt = append(allRcpt, req.To...)
@@ -81,14 +106,18 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 	// Build Message-ID header.
 	msgID := fmt.Sprintf("<%s@%s>", uuid.New().String(), extractDomain(req.From))
 
-	// Marshal custom headers.
-	var headersJSON []byte
-	if len(req.Headers) > 0 {
-		var err error
-		headersJSON, err = json.Marshal(req.Headers)
-		if err != nil {
-			return nil, fmt.Errorf("invalid headers: %w", err)
-		}
+	// Marshal custom headers + structured To/CC/BCC metadata for MIME building.
+	merged := make(map[string]any)
+	for k, v := range req.Headers {
+		merged[k] = v
+	}
+	merged["_to"] = req.To
+	if len(req.CC) > 0 {
+		merged["_cc"] = req.CC
+	}
+	headersJSON, err := json.Marshal(merged)
+	if err != nil {
+		return nil, fmt.Errorf("invalid headers: %w", err)
 	}
 
 	now := time.Now().UTC()
@@ -172,11 +201,38 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 		return
 	}
 
+	// DKIM sign if enabled for this zone.
+	if s.cfg.DKIMSign {
+		zone, zoneErr := s.store.GetZone(ctx, job.ZoneID)
+		if zoneErr != nil {
+			log.Warn().Err(zoneErr).Msg("loading zone for DKIM")
+		}
+		if zone != nil && zone.DKIMEnabled && zone.DKIMPrivateKeyPEM != nil {
+			signed, signErr := tabdkim.SignMessage(mime, zone.Domain, zone.DKIMSelector, *zone.DKIMPrivateKeyPEM)
+			if signErr != nil {
+				// Check fail policy: fail_closed blocks delivery on sign failure.
+				if s.cfg.DKIMFailPolicy == "fail_closed" || zone.DKIMRequiredForSend {
+					log.Error().Err(signErr).Msg("DKIM signing failed, delivery blocked by policy")
+					s.failOrRetry(ctx, job, fmt.Sprintf("dkim sign: %s", signErr))
+					return
+				}
+				log.Warn().Err(signErr).Msg("DKIM signing failed, delivering unsigned (fail_open)")
+			} else {
+				mime = signed
+			}
+		} else if zone != nil && zone.DKIMRequiredForSend {
+			// Zone requires DKIM but it's not enabled/configured.
+			log.Error().Msg("zone requires DKIM for send but DKIM is not enabled")
+			s.failOrRetry(ctx, job, "zone requires DKIM but signing is not configured")
+			return
+		}
+	}
+
 	// Deliver via configured mode.
 	var deliverErr error
 	switch s.cfg.Mode {
 	case "direct":
-		deliverErr = DeliverDirect(ctx, job.MailFrom, job.RcptTo, mime)
+		deliverErr = DeliverDirect(ctx, job.MailFrom, job.RcptTo, mime, s.cfg.RequireTLS)
 	default:
 		deliverErr = DeliverRelay(ctx, s.cfg, job.MailFrom, job.RcptTo, mime)
 	}
@@ -187,7 +243,11 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 		return
 	}
 
-	if err := s.store.MarkOutboundJobSent(ctx, job.ID, 250, "OK", job.MessageIDHeader); err != nil {
+	if err := s.store.MarkOutboundJobSent(ctx, job.ID, job.DeliveryToken, 250, "OK", job.MessageIDHeader); err != nil {
+		if isTokenMismatch(err) {
+			log.Warn().Msg("delivery token mismatch on mark-sent; job was re-claimed by another worker, skipping")
+			return
+		}
 		log.Error().Err(err).Msg("marking job sent")
 	}
 	log.Info().Msg("outbound delivered")
@@ -196,21 +256,37 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 func (s *Service) failOrRetry(ctx context.Context, job *models.OutboundJob, errMsg string) {
 	attempt := job.Attempts + 1
 	if attempt >= job.MaxAttempts {
-		if err := s.store.MarkOutboundJobFailed(ctx, job.ID, errMsg, true); err != nil {
+		if err := s.store.MarkOutboundJobFailed(ctx, job.ID, job.DeliveryToken, errMsg, true); err != nil {
+			if isTokenMismatch(err) {
+				s.logger.Warn().Str("job_id", job.ID.String()).Msg("delivery token mismatch on mark-failed; skipping")
+				return
+			}
 			s.logger.Error().Err(err).Str("job_id", job.ID.String()).Msg("marking job dead")
 		}
 		return
 	}
 	delay := s.cfg.RetryDelay * time.Duration(1<<uint(attempt))
+	if delay > maxRetryDelay {
+		delay = maxRetryDelay
+	}
 	next := time.Now().UTC().Add(delay)
-	if err := s.store.MarkOutboundJobRetry(ctx, job.ID, errMsg, next); err != nil {
+	if err := s.store.MarkOutboundJobRetry(ctx, job.ID, job.DeliveryToken, errMsg, next); err != nil {
+		if isTokenMismatch(err) {
+			s.logger.Warn().Str("job_id", job.ID.String()).Msg("delivery token mismatch on mark-retry; skipping")
+			return
+		}
 		s.logger.Error().Err(err).Str("job_id", job.ID.String()).Msg("marking job retry")
 	}
 }
 
+// isTokenMismatch checks if the error is a delivery token mismatch sentinel.
+func isTokenMismatch(err error) bool {
+	return err != nil && err.Error() == "delivery token mismatch: job was re-claimed"
+}
+
 // Shutdown gracefully stops the worker.
 func (s *Service) Shutdown() {
-	close(s.stopCh)
+	s.stopOnce.Do(func() { close(s.stopCh) })
 	s.wg.Wait()
 }
 

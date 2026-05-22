@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -107,6 +108,27 @@ func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request
 		UpdatedAt:         time.Now(),
 	}
 
+	// Validate AllowedZoneIDs belong to the target tenant.
+	// Global profiles (TenantID=nil) cannot carry tenant-local zone IDs because they are reusable across tenants.
+	if len(body.AllowedZoneIDs) > 0 && profileTenantID == nil {
+		errBadRequest(w, "allowed_zone_ids require a tenant-scoped permission profile")
+		return
+	}
+	if len(body.AllowedZoneIDs) > 0 && profileTenantID != nil {
+		for _, zoneID := range body.AllowedZoneIDs {
+			zone, err := h.store.GetZone(r.Context(), zoneID)
+			if err != nil {
+				h.logger.Err(err).Msg("validating allowed zone")
+				errInternal(w)
+				return
+			}
+			if zone == nil || zone.TenantID != *profileTenantID {
+				errBadRequest(w, fmt.Sprintf("zone %s not found or does not belong to target tenant", zoneID))
+				return
+			}
+		}
+	}
+
 	if err := h.store.CreatePermissionProfile(r.Context(), profile); err != nil {
 		h.logger.Err(err).Msg("failed to create permission profile")
 		errInternal(w)
@@ -202,6 +224,27 @@ func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request
 	}
 	if body.CanCreateAPIKeys != nil {
 		existing.CanCreateAPIKeys = *body.CanCreateAPIKeys
+	}
+
+	// Validate AllowedZoneIDs belong to the profile's tenant.
+	// Global profiles (TenantID=nil) cannot carry tenant-local zone IDs because they are reusable across tenants.
+	if body.AllowedZoneIDs != nil && len(body.AllowedZoneIDs) > 0 && existing.TenantID == nil {
+		errBadRequest(w, "allowed_zone_ids require a tenant-scoped permission profile")
+		return
+	}
+	if body.AllowedZoneIDs != nil && len(body.AllowedZoneIDs) > 0 && existing.TenantID != nil {
+		for _, zoneID := range body.AllowedZoneIDs {
+			zone, err := h.store.GetZone(r.Context(), zoneID)
+			if err != nil {
+				h.logger.Err(err).Msg("validating allowed zone")
+				errInternal(w)
+				return
+			}
+			if zone == nil || zone.TenantID != *existing.TenantID {
+				errBadRequest(w, fmt.Sprintf("zone %s not found or does not belong to target tenant", zoneID))
+				return
+			}
+		}
 	}
 
 	if err := h.store.UpdatePermissionProfile(r.Context(), existing); err != nil {
@@ -323,6 +366,22 @@ func (h *PermissionHandler) SetUserPermissionOverride(w http.ResponseWriter, r *
 		return
 	}
 	body.UserID = userID
+
+	// Validate AllowedZoneIDs belong to the user's tenant.
+	if len(body.AllowedZoneIDs) > 0 {
+		for _, zoneID := range body.AllowedZoneIDs {
+			zone, err := h.store.GetZone(r.Context(), zoneID)
+			if err != nil {
+				h.logger.Err(err).Msg("validating override zone")
+				errInternal(w)
+				return
+			}
+			if zone == nil || zone.TenantID != tenant.ID {
+				errBadRequest(w, fmt.Sprintf("zone %s not found or does not belong to tenant", zoneID))
+				return
+			}
+		}
+	}
 
 	if err := h.store.UpsertUserPermissionOverride(r.Context(), &body); err != nil {
 		h.logger.Err(err).Str("user_id", userID.String()).Msg("failed to upsert permission override")

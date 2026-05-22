@@ -40,7 +40,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		t := TenantFromCtx(ctx)
 		mode := AuthModeFromCtx(ctx)
-		tenantScoped := t != nil && t.ID != uuid.Nil && (mode == AuthModeAPIKey || mode == AuthModeUser || (mode == AuthModeAdmin && !BypassLimits(ctx)))
+		tenantScoped := t != nil && t.ID != uuid.Nil && (mode == AuthModeAPIKey || mode == AuthModeUser || mode == AuthModeTenantAdmin || (mode == AuthModeAdmin && !BypassLimits(ctx)))
 
 		if BypassLimits(ctx) {
 			next.ServeHTTP(w, r)
@@ -49,10 +49,12 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 
 		var key string
 		var limit int
+		var tenantCfg *models.EffectiveConfig
 
 		if tenantScoped {
 			cfg, err := rl.store.EffectiveConfig(ctx, t.ID)
 			if err == nil && cfg != nil {
+				tenantCfg = cfg
 				key = fmt.Sprintf("rate:tenant:%s", t.ID)
 				limit = cfg.RPMLimit
 			}
@@ -80,14 +82,11 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if tenantScoped {
-			cfg, err := rl.store.EffectiveConfig(ctx, t.ID)
-			if err == nil && cfg != nil && cfg.DailyQuota > 0 {
-				ok, err := rl.checkDailyQuota(ctx, fmt.Sprintf("quota:tenant:%s:%s", t.ID, time.Now().UTC().Format("20060102")), cfg.DailyQuota)
-				if err == nil && !ok {
-					writeQuotaError(w, http.StatusTooManyRequests, "QUOTA_EXCEEDED", "daily quota exceeded")
-					return
-				}
+		if tenantScoped && tenantCfg != nil && tenantCfg.DailyQuota > 0 {
+			ok, err := rl.checkDailyQuota(ctx, fmt.Sprintf("quota:tenant:%s:%s", t.ID, time.Now().UTC().Format("20060102")), tenantCfg.DailyQuota)
+			if err == nil && !ok {
+				writeQuotaError(w, http.StatusTooManyRequests, "QUOTA_EXCEEDED", "daily quota exceeded")
+				return
 			}
 		}
 		next.ServeHTTP(w, r)

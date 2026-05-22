@@ -12,7 +12,11 @@ import (
 )
 
 var (
-	cssSafe = regexp.MustCompile(".*")
+	// Only allow CSS property values that contain safe characters:
+	// alphanumeric, spaces, hyphens, colons, semicolons, parens, commas,
+	// dots, hashes (for colors), percent signs, and slashes.
+	// Rejects url(), expression(), javascript:, etc.
+	cssSafe = regexp.MustCompile(`^[a-zA-Z0-9\s\-:;,.'\"#%!/()]+$`)
 	policy  = bluemonday.UGCPolicy().
 		AllowElements("center").
 		AllowAttrs("style").Matching(cssSafe).Globally()

@@ -52,12 +52,14 @@ import {
   updateUser,
   deleteUser,
   listPermissionProfiles,
+  listDomains,
   getUserPermission,
   setUserPermissionOverride,
   deleteUserPermissionOverride,
 } from "@/lib/api";
 import type {
   AdminUser,
+  DomainZone,
   PermissionProfile,
   EffectivePermission,
   UserPermissionOverride,
@@ -76,6 +78,7 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import { useAuth } from "@/contexts/auth-context";
 
 const NONE_PROFILE = "__none__";
 
@@ -85,6 +88,7 @@ interface PermOverrideForm {
   daily_receive_quota: string;
   max_mailboxes: string;
   max_domains: string;
+  allowed_zone_ids: string[] | null;
   can_create_domains: boolean | null;
   can_create_routes: boolean | null;
   can_create_api_keys: boolean | null;
@@ -96,6 +100,7 @@ const emptyOverrideForm: PermOverrideForm = {
   daily_receive_quota: "",
   max_mailboxes: "",
   max_domains: "",
+  allowed_zone_ids: null,
   can_create_domains: null,
   can_create_routes: null,
   can_create_api_keys: null,
@@ -112,6 +117,8 @@ function confirmAction(message: string) {
 
 export default function UsersPage() {
   const { t } = useI18n();
+  const { level } = useAuth();
+  const isPlatformAdmin = level === "platform_admin";
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -123,6 +130,7 @@ export default function UsersPage() {
 
   // Permission profiles list
   const [profiles, setProfiles] = useState<PermissionProfile[]>([]);
+  const [domains, setDomains] = useState<DomainZone[]>([]);
 
   // Permission management dialog
   const [permUser, setPermUser] = useState<AdminUser | null>(null);
@@ -153,15 +161,28 @@ export default function UsersPage() {
     }
   }, [t]);
 
+  const fetchDomains = useCallback(async () => {
+    try {
+      const res = await listDomains();
+      setDomains(res.data ?? []);
+    } catch {
+      toast.error("域名列表加载失败");
+    }
+  }, []);
+
   useEffect(() => {
     fetchUsers();
     fetchProfiles();
-  }, [fetchUsers, fetchProfiles]);
+    fetchDomains();
+  }, [fetchUsers, fetchProfiles, fetchDomains]);
 
   const profileName = (profileId?: string) => {
     if (!profileId) return null;
     return profiles.find((p) => p.id === profileId)?.name ?? null;
   };
+
+  const domainLabel = (id: string) =>
+    domains.find((domain) => domain.id === id)?.domain ?? id.slice(0, 8);
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) return;
@@ -249,6 +270,7 @@ export default function UsersPage() {
       if (permForm.daily_receive_quota.trim() !== "") body.daily_receive_quota = Number(permForm.daily_receive_quota);
       if (permForm.max_mailboxes.trim() !== "") body.max_mailboxes = Number(permForm.max_mailboxes);
       if (permForm.max_domains.trim() !== "") body.max_domains = Number(permForm.max_domains);
+      if (permForm.allowed_zone_ids !== null) body.allowed_zone_ids = permForm.allowed_zone_ids;
       if (permForm.can_create_domains !== null) body.can_create_domains = permForm.can_create_domains;
       if (permForm.can_create_routes !== null) body.can_create_routes = permForm.can_create_routes;
       if (permForm.can_create_api_keys !== null) body.can_create_api_keys = permForm.can_create_api_keys;
@@ -291,6 +313,13 @@ export default function UsersPage() {
         { key: "daily_receive_quota", label: t("admin.permDailyReceiveQuota"), value: String(permEffective.daily_receive_quota) },
         { key: "max_mailboxes", label: t("admin.permMaxMailboxes"), value: String(permEffective.max_mailboxes) },
         { key: "max_domains", label: t("admin.permMaxDomains"), value: String(permEffective.max_domains) },
+        {
+          key: "allowed_zone_ids",
+          label: "允许域名范围",
+          value: permEffective.allowed_zone_ids?.length
+            ? permEffective.allowed_zone_ids.map(domainLabel).join(", ")
+            : "全部域名",
+        },
         { key: "can_create_domains", label: t("admin.permCanCreateDomains"), value: permEffective.can_create_domains ? "true" : "false" },
         { key: "can_create_routes", label: t("admin.permCanCreateRoutes"), value: permEffective.can_create_routes ? "true" : "false" },
         { key: "can_create_api_keys", label: t("admin.permCanCreateApiKeys"), value: permEffective.can_create_api_keys ? "true" : "false" },
@@ -303,6 +332,7 @@ export default function UsersPage() {
         title={t("admin.usersTitle")}
         description={t("admin.usersCount", { count: total })}
         actions={
+          isPlatformAdmin ? (
           <Dialog
             open={inviteOpen}
             onOpenChange={(open) => {
@@ -381,6 +411,7 @@ export default function UsersPage() {
               )}
             </DialogContent>
           </Dialog>
+          ) : null
         }
       />
 
@@ -423,10 +454,15 @@ export default function UsersPage() {
                       <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell>{user.display_name}</TableCell>
                       <TableCell>
-                        {user.role === "admin" ? (
+                        {(user.role === "platform_admin" || user.role === "admin") ? (
                           <Badge className="gap-1 bg-amber-600 hover:bg-amber-700">
                             <Shield className="h-3 w-3" />
-                            {t("admin.roleAdmin")}
+                            {t("admin.rolePlatformAdmin")}
+                          </Badge>
+                        ) : user.role === "tenant_admin" ? (
+                          <Badge className="gap-1 bg-blue-600 hover:bg-blue-700">
+                            <Shield className="h-3 w-3" />
+                            {t("admin.roleTenantAdmin")}
                           </Badge>
                         ) : (
                           <Badge variant="outline">
@@ -650,6 +686,68 @@ export default function UsersPage() {
                       </Button>
                     )}
                   </div>
+                </div>
+
+                <div className="space-y-3 rounded-md border p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <Label>{"允许域名范围"}</Label>
+                      <p className="text-xs text-muted-foreground">
+                        {"继承表示沿用模板；全部域名表示覆盖为不限制；勾选域名表示只允许这些域名。"}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 gap-2">
+                      <Button
+                        type="button"
+                        variant={permForm.allowed_zone_ids === null ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPermForm((prev) => ({ ...prev, allowed_zone_ids: null }))}
+                      >
+                        {"继承"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={permForm.allowed_zone_ids !== null && permForm.allowed_zone_ids.length === 0 ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setPermForm((prev) => ({ ...prev, allowed_zone_ids: [] }))}
+                      >
+                        {"全部"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {domains.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">{"暂无可选域名。"}</p>
+                  ) : (
+                    <div className="grid gap-2">
+                      {domains.map((domain) => {
+                        const selected = permForm.allowed_zone_ids?.includes(domain.id) ?? false;
+                        return (
+                          <label
+                            key={domain.id}
+                            className="flex items-center justify-between rounded border px-3 py-2 text-sm"
+                          >
+                            <span className="truncate">{domain.domain}</span>
+                            <Switch
+                              size="sm"
+                              checked={selected}
+                              onCheckedChange={(checked) =>
+                                setPermForm((prev) => {
+                                  const current = prev.allowed_zone_ids ?? [];
+                                  return {
+                                    ...prev,
+                                    allowed_zone_ids: checked
+                                      ? Array.from(new Set([...current, domain.id]))
+                                      : current.filter((id) => id !== domain.id),
+                                  };
+                                })
+                              }
+                            />
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
                 {/* Number inputs */}

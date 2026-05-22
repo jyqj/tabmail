@@ -131,7 +131,7 @@ export function MessageDetail({
           <TabsContent value="html" className="h-full m-0">
             {message.html_body ? (
               <iframe
-                srcDoc={message.html_body}
+                srcDoc={`<html><head><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:;"></head><body>${message.html_body}</body></html>`}
                 className="w-full h-full border-0"
                 sandbox=""
                 title="Email HTML content"

@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"tabmail/internal/api/middleware"
 	adminapp "tabmail/internal/app/admin"
+	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 )
@@ -176,14 +177,16 @@ func (h *AdminHandler) CreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Label  string   `json:"label"`
-		Scopes []string `json:"scopes,omitempty"`
+		Label          string      `json:"label"`
+		Scopes         []string    `json:"scopes,omitempty"`
+		AllowedZoneIDs []uuid.UUID `json:"allowed_zone_ids,omitempty"`
 	}
 	if err := decodeBody(r, &body); err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.CreateAPIKey(r.Context(), tenantID, body.Label, body.Scopes, actorFromRequest(r))
+	// Admin endpoint: no scope restriction, no owner
+	item, err := h.service.CreateAPIKey(r.Context(), tenantID, body.Label, body.Scopes, actorFromRequest(r), nil, nil, body.AllowedZoneIDs)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -315,20 +318,39 @@ func (h *AdminHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 // --- User-facing API key management (own tenant) ---
 
 func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
+	ctx := r.Context()
+	tenant := middleware.TenantFromCtx(ctx)
 	if tenant == nil || tenant.ID == uuid.Nil {
 		errForbidden(w, "no tenant context")
 		return
 	}
+
+	var callerPerm *models.EffectivePermission
+	var callerUserID *uuid.UUID
+
+	actor := authz.ActorFromContext(ctx)
+	if !actor.IsPlatformAdmin && !actor.IsTenantAdmin {
+		if actor.Permission != nil && !actor.Permission.CanCreateAPIKeys {
+			errForbidden(w, "API key creation not allowed")
+			return
+		}
+		callerPerm = actor.Permission
+		if actor.Type == authz.PrincipalUser {
+			id := actor.ID
+			callerUserID = &id
+		}
+	}
+
 	var body struct {
-		Label  string   `json:"label"`
-		Scopes []string `json:"scopes,omitempty"`
+		Label          string      `json:"label"`
+		Scopes         []string    `json:"scopes,omitempty"`
+		AllowedZoneIDs []uuid.UUID `json:"allowed_zone_ids,omitempty"`
 	}
 	if err := decodeBody(r, &body); err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.CreateAPIKey(r.Context(), tenant.ID, body.Label, body.Scopes, actorFromRequest(r))
+	item, err := h.service.CreateAPIKey(ctx, tenant.ID, body.Label, body.Scopes, actorFromRequest(r), callerPerm, callerUserID, body.AllowedZoneIDs)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -337,12 +359,28 @@ func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) 
 }
 
 func (h *AdminHandler) UserListAPIKeys(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
+	ctx := r.Context()
+	tenant := middleware.TenantFromCtx(ctx)
 	if tenant == nil || tenant.ID == uuid.Nil {
 		errForbidden(w, "no tenant context")
 		return
 	}
-	items, err := h.service.ListAPIKeys(r.Context(), tenant.ID)
+
+	// Non-admin users only see their own keys
+	actor := authz.ActorFromContext(ctx)
+	if !actor.IsPlatformAdmin && !actor.IsTenantAdmin {
+		if actor.Type == authz.PrincipalUser {
+			items, err := h.service.ListAPIKeysByOwner(ctx, tenant.ID, actor.ID)
+			if err != nil {
+				respondAppError(w, h.logger, err)
+				return
+			}
+			ok(w, items)
+			return
+		}
+	}
+
+	items, err := h.service.ListAPIKeys(ctx, tenant.ID)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -351,7 +389,8 @@ func (h *AdminHandler) UserListAPIKeys(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) UserDeleteAPIKey(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
+	ctx := r.Context()
+	tenant := middleware.TenantFromCtx(ctx)
 	if tenant == nil || tenant.ID == uuid.Nil {
 		errForbidden(w, "no tenant context")
 		return
@@ -361,7 +400,18 @@ func (h *AdminHandler) UserDeleteAPIKey(w http.ResponseWriter, r *http.Request) 
 		errBadRequest(w, "invalid key id")
 		return
 	}
-	if err := h.service.DeleteAPIKeyForTenant(r.Context(), tenant.ID, keyID, actorFromRequest(r)); err != nil {
+
+	// Non-admin callers pass their user ID for ownership check
+	var callerUserID *uuid.UUID
+	actor := authz.ActorFromContext(ctx)
+	if !actor.IsPlatformAdmin && !actor.IsTenantAdmin {
+		if actor.Type == authz.PrincipalUser {
+			id := actor.ID
+			callerUserID = &id
+		}
+	}
+
+	if err := h.service.DeleteAPIKeyForTenant(ctx, tenant.ID, keyID, actorFromRequest(r), callerUserID); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}

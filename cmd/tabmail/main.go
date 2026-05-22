@@ -250,21 +250,21 @@ func main() {
 	logger.Info().Msg("shutdown complete")
 }
 
-// bootstrapAdmin creates the first admin user if no admin users exist and
-// bootstrap credentials are provided via environment variables.
+// bootstrapAdmin creates the bootstrap admin user if they don't already exist.
+// Skips only when the bootstrap email is already registered, so existing
+// non-admin users no longer block admin creation.
 func bootstrapAdmin(ctx context.Context, st store.Store, cfg *config.Root, logger zerolog.Logger) {
 	if cfg.BootstrapAdminEmail == "" || cfg.BootstrapAdminPass == "" {
 		return
 	}
 
-	// Check if any admin user already exists
-	users, _, err := st.ListUsers(ctx, models.Page{Page: 1, PerPage: 1})
+	// Check if the bootstrap admin already exists
+	existing, err := st.GetUserByEmail(ctx, cfg.BootstrapAdminEmail)
 	if err != nil {
 		logger.Warn().Err(err).Msg("bootstrap: failed to check existing users")
 		return
 	}
-	// If any users exist, skip bootstrap
-	if len(users) > 0 {
+	if existing != nil {
 		return
 	}
 
@@ -290,7 +290,7 @@ func bootstrapAdmin(ctx context.Context, st store.Store, cfg *config.Root, logge
 		Email:        email,
 		PasswordHash: string(hash),
 		DisplayName:  "Admin",
-		Role:         models.RoleAdmin,
+		Role:         models.RolePlatformAdmin,
 		IsActive:     true,
 	}
 	if err := st.CreateUser(ctx, user); err != nil {

@@ -196,6 +196,7 @@ type Store interface {
 	// --- Zone grants -------------------------------------------------------
 	CreateZoneGrant(ctx context.Context, g *models.ZoneGrant) error
 	DeleteZoneGrant(ctx context.Context, id uuid.UUID) error
+	DeleteZoneGrantScoped(ctx context.Context, id uuid.UUID, zoneID uuid.UUID) error
 	ListZoneGrants(ctx context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error)
 	GetZoneGrant(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (*models.ZoneGrant, error)
 	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
@@ -204,6 +205,7 @@ type Store interface {
 	// --- Send identities -------------------------------------------------------
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
 	GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.SendIdentity, error)
+	ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error)
 	ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error)
 	FindSendIdentityForAddress(ctx context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error)
 	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
@@ -212,6 +214,7 @@ type Store interface {
 	// --- Send-as grants --------------------------------------------------------
 	CreateSendAsGrant(ctx context.Context, g *models.SendAsGrant) error
 	DeleteSendAsGrant(ctx context.Context, id uuid.UUID) error
+	DeleteSendAsGrantScoped(ctx context.Context, id uuid.UUID, identityID uuid.UUID) error
 	ListSendAsGrantsByIdentity(ctx context.Context, identityID uuid.UUID) ([]*models.SendAsGrant, error)
 	HasSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (bool, error)
 	GetSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (*models.SendAsGrant, error)
@@ -219,12 +222,14 @@ type Store interface {
 	// --- Mailbox grants ----------------------------------------------------
 	CreateMailboxGrant(ctx context.Context, g *models.MailboxGrant) error
 	DeleteMailboxGrant(ctx context.Context, id uuid.UUID) error
+	DeleteMailboxGrantScoped(ctx context.Context, id uuid.UUID, mailboxID uuid.UUID) error
 	ListMailboxGrants(ctx context.Context, mailboxID uuid.UUID) ([]*models.MailboxGrant, error)
 	GetMailboxGrant(ctx context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error)
 	ListGrantedMailboxIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
 
 	// --- Outbound jobs (user-scoped) ----------------------------------------
 	ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
+	ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
 
 	// --- Uniqueness checks -------------------------------------------------
 	ExistsMailboxByAddress(ctx context.Context, address string) (bool, error)

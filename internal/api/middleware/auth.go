@@ -13,8 +13,9 @@ import (
 
 type authStore interface {
 	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
-	ResolveAPIKey(ctx context.Context, rawKey string) (*models.Tenant, []string, error)
+	ResolveAPIKey(ctx context.Context, rawKey string) (*models.Tenant, *uuid.UUID, []string, []uuid.UUID, *uuid.UUID, error)
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
+	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
 }
 
 type ctxKey int
@@ -27,13 +28,16 @@ const (
 	ctxScopes
 	ctxUser
 	ctxPermission
+	ctxAPIKeyID
+	ctxOwnerUserID
 )
 
 const (
-	AuthModePublic = "public"
-	AuthModeAPIKey = "api_key"
-	AuthModeAdmin  = "admin"
-	AuthModeUser   = "user"
+	AuthModePublic      = "public"
+	AuthModeAPIKey      = "api_key"
+	AuthModeAdmin       = "admin"        // platform_admin
+	AuthModeTenantAdmin = "tenant_admin" // tenant_admin
+	AuthModeUser        = "user"
 )
 
 // TenantFromCtx returns the resolved tenant, or nil for unauthenticated requests.
@@ -44,12 +48,23 @@ func TenantFromCtx(ctx context.Context) *models.Tenant {
 	return nil
 }
 
-// IsAdmin returns true when the request was authenticated as an admin.
+// IsAdmin returns true when the request was authenticated as a platform admin.
+// Note: ctxIsAdmin is only set to true for platform_admin (or legacy admin) users.
 func IsAdmin(ctx context.Context) bool {
 	if v, ok := ctx.Value(ctxIsAdmin).(bool); ok {
 		return v
 	}
 	return false
+}
+
+// IsPlatformAdmin is an alias for IsAdmin — true only for platform_admin.
+func IsPlatformAdmin(ctx context.Context) bool {
+	return IsAdmin(ctx)
+}
+
+// IsTenantAdmin returns true when the request was authenticated as a tenant admin.
+func IsTenantAdmin(ctx context.Context) bool {
+	return AuthModeFromCtx(ctx) == AuthModeTenantAdmin
 }
 
 // BypassLimits returns true when the request should bypass tenant/public limits.
@@ -76,7 +91,7 @@ func APIScopesFromCtx(ctx context.Context) []string {
 
 func HasScope(ctx context.Context, required ...string) bool {
 	mode := AuthModeFromCtx(ctx)
-	if mode == AuthModeAdmin || mode == AuthModeUser {
+	if mode == AuthModeAdmin || mode == AuthModeUser || mode == AuthModeTenantAdmin {
 		return true
 	}
 	return hasAnyScope(APIScopesFromCtx(ctx), required...)
@@ -90,9 +105,26 @@ func UserFromCtx(ctx context.Context) *models.User {
 	return nil
 }
 
+// APIKeyIDFromCtx returns the authenticated API key's UUID, or nil.
+func APIKeyIDFromCtx(ctx context.Context) *uuid.UUID {
+	if v, ok := ctx.Value(ctxAPIKeyID).(*uuid.UUID); ok {
+		return v
+	}
+	return nil
+}
+
 // PermissionFromCtx returns the resolved effective permission, or nil.
 func PermissionFromCtx(ctx context.Context) *models.EffectivePermission {
 	if v, ok := ctx.Value(ctxPermission).(*models.EffectivePermission); ok {
+		return v
+	}
+	return nil
+}
+
+// OwnerUserIDFromCtx returns the API key owner's user ID, or nil.
+// This is set only for API key authentication when the key has an active owner.
+func OwnerUserIDFromCtx(ctx context.Context) *uuid.UUID {
+	if v, ok := ctx.Value(ctxOwnerUserID).(*uuid.UUID); ok {
 		return v
 	}
 	return nil
@@ -112,13 +144,13 @@ func PermissionLoader(st permStore) func(http.Handler) http.Handler {
 			mode := AuthModeFromCtx(ctx)
 
 			// Only load permissions for JWT users
-			if mode != AuthModeAdmin && mode != AuthModeUser {
+			if mode != AuthModeAdmin && mode != AuthModeTenantAdmin && mode != AuthModeUser {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			// Admin gets unlimited
-			if mode == AuthModeAdmin {
+			// Admin / tenant_admin gets unlimited
+			if mode == AuthModeAdmin || mode == AuthModeTenantAdmin {
 				ctx = context.WithValue(ctx, ctxPermission, &models.EffectivePermission{
 					CanSend:           true,
 					DailySendQuota:    0, // unlimited
@@ -142,14 +174,8 @@ func PermissionLoader(st permStore) func(http.Handler) http.Handler {
 
 			perm, err := st.EffectivePermission(ctx, user.ID)
 			if err != nil {
-				// Fall back to defaults on error, don't block the request
-				perm = &models.EffectivePermission{
-					CanSend:           false,
-					DailyReceiveQuota: 500,
-					MaxMailboxes:      10,
-					MaxDomains:        1,
-					CanCreateAPIKeys:  true,
-				}
+				writeError(w, http.StatusInternalServerError, "INTERNAL", "failed to load permissions")
+				return
 			}
 			ctx = context.WithValue(ctx, ctxPermission, perm)
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -187,14 +213,15 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 						return
 					}
 
-					isAdmin := user.Role == models.RoleAdmin
+					isPlatformAdmin := user.Role == models.RolePlatformAdmin || user.Role == models.RoleAdmin
+					isTenantAdmin := user.Role == models.RoleTenantAdmin
 					ctx = context.WithValue(ctx, ctxUser, user)
 					ctx = context.WithValue(ctx, ctxTenant, tenant)
-					ctx = context.WithValue(ctx, ctxIsAdmin, isAdmin)
-					ctx = context.WithValue(ctx, ctxBypassLimits, isAdmin)
+					ctx = context.WithValue(ctx, ctxIsAdmin, isPlatformAdmin) // ctxIsAdmin only true for platform_admin
+					ctx = context.WithValue(ctx, ctxBypassLimits, isPlatformAdmin)
 					ctx = context.WithValue(ctx, ctxScopes, []string{"*"})
-					if isAdmin {
-						// Admin can impersonate tenant via X-Tenant-ID header
+					if isPlatformAdmin {
+						// Platform admin can impersonate tenant via X-Tenant-ID header
 						if tenantIDStr := strings.TrimSpace(r.Header.Get("X-Tenant-ID")); tenantIDStr != "" {
 							tid, parseErr := uuid.Parse(tenantIDStr)
 							if parseErr != nil {
@@ -214,6 +241,8 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 							ctx = context.WithValue(ctx, ctxBypassLimits, false)
 						}
 						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeAdmin)
+					} else if isTenantAdmin {
+						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeTenantAdmin)
 					} else {
 						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeUser)
 					}
@@ -226,7 +255,7 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 
 			// Layer 2: X-API-Key → tenant API key
 			if key := strings.TrimSpace(r.Header.Get("X-API-Key")); key != "" {
-				tenant, scopes, err := st.ResolveAPIKey(ctx, key)
+				tenant, keyID, scopes, allowedZoneIDs, ownerUserID, err := st.ResolveAPIKey(ctx, key)
 				if err != nil {
 					writeError(w, http.StatusInternalServerError, "INTERNAL", "key lookup failed")
 					return
@@ -238,6 +267,48 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 				ctx = context.WithValue(ctx, ctxAuthMode, AuthModeAPIKey)
 				ctx = context.WithValue(ctx, ctxScopes, scopes)
 				ctx = context.WithValue(ctx, ctxTenant, tenant)
+				if keyID != nil {
+					ctx = context.WithValue(ctx, ctxAPIKeyID, keyID)
+				}
+
+				// If the API key has an owner, verify the owner is still active
+				// and load their effective permission for quota enforcement.
+				// We store the owner user ID separately (ctxOwnerUserID) instead of
+				// injecting a synthetic User into ctxUser, so that
+				// ActorFromContext correctly identifies the caller as PrincipalAPIKey.
+				if ownerUserID != nil {
+					owner, ownerErr := st.GetUser(ctx, *ownerUserID)
+					if ownerErr != nil {
+						writeError(w, http.StatusInternalServerError, "INTERNAL", "api key owner lookup failed")
+						return
+					}
+					if owner == nil || !owner.IsActive {
+						writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "api key owner not found or inactive")
+						return
+					}
+					ownerPerm, permErr := st.EffectivePermission(ctx, *ownerUserID)
+					if permErr != nil || ownerPerm == nil {
+						writeError(w, http.StatusInternalServerError, "INTERNAL", "failed to load api key owner permissions")
+						return
+					}
+					// Merge zone allowlists fail-closed: the key may only narrow the owner's
+					// current permission, never expand it if the owner's profile changes later.
+					if len(allowedZoneIDs) > 0 {
+						ownerPerm.AllowedZoneIDs = intersectAllowedZones(ownerPerm.AllowedZoneIDs, allowedZoneIDs)
+					}
+					ctx = context.WithValue(ctx, ctxPermission, ownerPerm)
+					ctx = context.WithValue(ctx, ctxOwnerUserID, ownerUserID)
+				}
+				// Build a restricted EffectivePermission for API keys with zone limits
+				// but no owner user.
+				if ownerUserID == nil && len(allowedZoneIDs) > 0 {
+					ctx = context.WithValue(ctx, ctxPermission, &models.EffectivePermission{
+						CanSend:          true,
+						AllowedZoneIDs:   allowedZoneIDs,
+						CanCreateDomains: true,
+						CanCreateRoutes:  true,
+					})
+				}
 				next.ServeHTTP(w, r.WithContext(ctx))
 				return
 			}
@@ -260,11 +331,46 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 	}
 }
 
-// RequireAdmin rejects non-admin requests with 403.
+func intersectAllowedZones(ownerZones, keyZones []uuid.UUID) []uuid.UUID {
+	if len(keyZones) == 0 {
+		return ownerZones
+	}
+	if len(ownerZones) == 0 {
+		return append([]uuid.UUID(nil), keyZones...)
+	}
+	ownerSet := make(map[uuid.UUID]struct{}, len(ownerZones))
+	for _, id := range ownerZones {
+		ownerSet[id] = struct{}{}
+	}
+	intersection := make([]uuid.UUID, 0, len(keyZones))
+	for _, id := range keyZones {
+		if _, ok := ownerSet[id]; ok {
+			intersection = append(intersection, id)
+		}
+	}
+	if len(intersection) == 0 {
+		return []uuid.UUID{uuid.Nil}
+	}
+	return intersection
+}
+
+// RequireAdmin accepts platform_admin and tenant_admin. Rejects others with 403.
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !IsAdmin(r.Context()) {
+		mode := AuthModeFromCtx(r.Context())
+		if mode != AuthModeAdmin && mode != AuthModeTenantAdmin {
 			writeError(w, http.StatusForbidden, "FORBIDDEN", "admin access required")
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+// RequirePlatformAdmin accepts only platform_admin. Rejects others with 403.
+func RequirePlatformAdmin(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !IsPlatformAdmin(r.Context()) {
+			writeError(w, http.StatusForbidden, "FORBIDDEN", "platform admin access required")
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -276,7 +382,7 @@ func RequireAdmin(next http.Handler) http.Handler {
 func RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch AuthModeFromCtx(r.Context()) {
-		case AuthModeAdmin, AuthModeUser:
+		case AuthModeAdmin, AuthModeTenantAdmin, AuthModeUser:
 			next.ServeHTTP(w, r)
 		case AuthModePublic:
 			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
@@ -286,11 +392,11 @@ func RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
-// RequireTenantKeyOrAdmin allows admin, user (JWT), or API key authenticated requests.
+// RequireTenantKeyOrAdmin allows admin, tenant_admin, user (JWT), or API key authenticated requests.
 func RequireTenantKeyOrAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch AuthModeFromCtx(r.Context()) {
-		case AuthModeAdmin, AuthModeAPIKey, AuthModeUser:
+		case AuthModeAdmin, AuthModeTenantAdmin, AuthModeAPIKey, AuthModeUser:
 			next.ServeHTTP(w, r)
 		default:
 			writeError(w, http.StatusForbidden, "FORBIDDEN", "authentication required")
@@ -302,7 +408,7 @@ func RequireScopes(required ...string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			mode := AuthModeFromCtx(r.Context())
-			if mode == AuthModeAdmin || mode == AuthModeUser {
+			if mode == AuthModeAdmin || mode == AuthModeTenantAdmin || mode == AuthModeUser {
 				next.ServeHTTP(w, r)
 				return
 			}

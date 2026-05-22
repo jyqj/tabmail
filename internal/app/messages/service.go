@@ -28,9 +28,13 @@ const (
 type storeRepo interface {
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	GetMailboxByAddressForTenant(ctx context.Context, addr string, tenantID uuid.UUID) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
+	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
+	GetMailboxGrant(ctx context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
+	GetMessageForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Message, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
@@ -39,12 +43,16 @@ type storeRepo interface {
 }
 
 type Viewer struct {
-	Tenant      *models.Tenant
-	IsAdmin     bool
-	AuthMode    string
-	UserID      *uuid.UUID
-	TenantWide  bool
-	BearerToken string
+	Tenant         *models.Tenant
+	IsAdmin        bool
+	IsTenantAdmin  bool
+	AuthMode       string
+	UserID         *uuid.UUID
+	TenantWide     bool
+	BearerToken    string
+	PrincipalType  string
+	PrincipalID    *uuid.UUID
+	AllowedZoneIDs []uuid.UUID
 }
 
 type Service struct {
@@ -71,7 +79,19 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	if err != nil {
 		return nil, app.BadRequest("invalid address")
 	}
-	mb, err := s.store.GetMailboxByAddress(ctx, mailboxKey)
+	var mb *models.Mailbox
+	// For public/mailbox-token access, don't restrict lookup to the public tenant.
+	// For authenticated users/API keys, try tenant-local lookup first, then fall
+	// back to global lookup so public/token mailboxes in other tenants remain
+	// reachable; the access-mode checks below are the security boundary.
+	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic {
+		mb, err = s.store.GetMailboxByAddressForTenant(ctx, mailboxKey, viewer.Tenant.ID)
+		if err == nil && mb == nil {
+			mb, err = s.store.GetMailboxByAddress(ctx, mailboxKey)
+		}
+	} else {
+		mb, err = s.store.GetMailboxByAddress(ctx, mailboxKey)
+	}
 	if err != nil {
 		return nil, app.Internal(err)
 	}
@@ -81,10 +101,13 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	if viewer.IsAdmin {
 		return mb, nil
 	}
+	if viewer.IsTenantAdmin && viewer.Tenant != nil && mb.TenantID == viewer.Tenant.ID {
+		return mb, nil
+	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
 		return nil, accessDeniedOrNotFound(viewer, "mailbox expired")
 	}
-	canManage, err := s.canManageMailbox(ctx, mb, viewer)
+	canManage, err := s.canAccessMailbox(ctx, mb, viewer, false)
 	if err != nil {
 		return nil, err
 	}
@@ -127,7 +150,13 @@ func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, vi
 	if err != nil {
 		return nil, app.BadRequest("invalid address")
 	}
-	mb, err := s.store.GetMailboxByAddress(ctx, mailboxKey)
+	var mb *models.Mailbox
+	// For public/mailbox-token access, don't restrict lookup to the public tenant.
+	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic {
+		mb, err = s.store.GetMailboxByAddressForTenant(ctx, mailboxKey, viewer.Tenant.ID)
+	} else {
+		mb, err = s.store.GetMailboxByAddress(ctx, mailboxKey)
+	}
 	if err != nil {
 		return nil, app.Internal(err)
 	}
@@ -137,10 +166,13 @@ func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, vi
 	if viewer.IsAdmin {
 		return mb, nil
 	}
+	if viewer.IsTenantAdmin && viewer.Tenant != nil && mb.TenantID == viewer.Tenant.ID {
+		return mb, nil
+	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
 		return nil, app.Forbidden("mailbox expired")
 	}
-	canManage, err := s.canManageMailbox(ctx, mb, viewer)
+	canManage, err := s.canAccessMailbox(ctx, mb, viewer, true)
 	if err != nil {
 		return nil, err
 	}
@@ -150,7 +182,7 @@ func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, vi
 	return nil, app.Forbidden("write access requires mailbox owner or admin")
 }
 
-func (s *Service) canManageMailbox(ctx context.Context, mb *models.Mailbox, viewer Viewer) (bool, error) {
+func (s *Service) canAccessMailbox(ctx context.Context, mb *models.Mailbox, viewer Viewer, requireWrite bool) (bool, error) {
 	if mb == nil {
 		return false, nil
 	}
@@ -159,6 +191,34 @@ func (s *Service) canManageMailbox(ctx context.Context, mb *models.Mailbox, view
 	}
 	if viewer.Tenant == nil || mb.TenantID != viewer.Tenant.ID {
 		return false, nil
+	}
+	if !viewerZoneAllowed(viewer, mb.ZoneID) {
+		return false, app.Forbidden("zone not in allowed list")
+	}
+	if viewer.IsTenantAdmin {
+		return true, nil
+	}
+	if viewer.PrincipalID != nil && viewer.PrincipalType != "" {
+		grant, err := s.store.GetMailboxGrant(ctx, mb.ID, viewer.PrincipalType, *viewer.PrincipalID)
+		if err != nil {
+			return false, app.Internal(err)
+		}
+		if grant != nil {
+			if requireWrite && !grant.Role.CanWrite() {
+				return false, nil
+			}
+			return true, nil
+		}
+		role, err := s.store.GetHighestZoneRole(ctx, mb.ZoneID, viewer.PrincipalType, *viewer.PrincipalID)
+		if err != nil {
+			return false, app.Internal(err)
+		}
+		if role != "" {
+			if requireWrite && !role.CanEdit() {
+				return false, nil
+			}
+			return true, nil
+		}
 	}
 	if viewer.TenantWide || viewer.AuthMode == AuthModeAPIKey {
 		return true, nil
@@ -171,6 +231,18 @@ func (s *Service) canManageMailbox(ctx context.Context, mb *models.Mailbox, view
 		return false, nil
 	}
 	return viewer.UserID != nil && zone.OwnerUserID != nil && *viewer.UserID == *zone.OwnerUserID, nil
+}
+
+func viewerZoneAllowed(viewer Viewer, zoneID uuid.UUID) bool {
+	if len(viewer.AllowedZoneIDs) == 0 {
+		return true
+	}
+	for _, id := range viewer.AllowedZoneIDs {
+		if id == zoneID {
+			return true
+		}
+	}
+	return false
 }
 
 func accessDeniedOrNotFound(viewer Viewer, msg string) error {
@@ -319,7 +391,12 @@ func (s *Service) lookupMessageForWrite(ctx context.Context, address string, msg
 	if err != nil {
 		return nil, nil, err
 	}
-	msg, err := s.store.GetMessage(ctx, msgID)
+	var msg *models.Message
+	if viewer.Tenant != nil {
+		msg, err = s.store.GetMessageForTenant(ctx, msgID, viewer.Tenant.ID)
+	} else {
+		msg, err = s.store.GetMessage(ctx, msgID)
+	}
 	if err != nil {
 		return nil, nil, app.Internal(err)
 	}
@@ -334,7 +411,14 @@ func (s *Service) lookupMessage(ctx context.Context, address string, msgID uuid.
 	if err != nil {
 		return nil, nil, err
 	}
-	msg, err := s.store.GetMessage(ctx, msgID)
+	var msg *models.Message
+	// For cross-tenant public access, use the resolved mailbox rather than the
+	// viewer's tenant (which would miss or mask the message).
+	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic && mb.TenantID == viewer.Tenant.ID {
+		msg, err = s.store.GetMessageForTenant(ctx, msgID, viewer.Tenant.ID)
+	} else {
+		msg, err = s.store.GetMessage(ctx, msgID)
+	}
 	if err != nil {
 		return nil, nil, app.Internal(err)
 	}

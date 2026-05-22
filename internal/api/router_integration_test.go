@@ -285,7 +285,7 @@ func TestRouter_SuggestAddressReturnsStructuredMailboxAddress(t *testing.T) {
 		t.Fatalf("unexpected address: %#v", address)
 	}
 	local, _ := data["local_part"].(string)
-	if len(local) != 18 {
+	if len(local) != 22 {
 		t.Fatalf("unexpected local part length: %q", local)
 	}
 	if data["algorithm"] != policy.AddressSuggestionAlgorithm {

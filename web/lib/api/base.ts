@@ -110,7 +110,21 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   return res.json();
 }
 
+// Singleflight: coalesce concurrent refresh calls so only one network request
+// is made per rotation cycle. Subsequent 401 handlers await the same promise.
+let refreshPromise: Promise<boolean> | null = null;
+
 async function tryRefreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = doRefreshToken().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
+}
+
+async function doRefreshToken(): Promise<boolean> {
   const refreshToken = getStoredKey("tabmail_refresh_token");
   if (!refreshToken) return false;
 
@@ -150,52 +164,90 @@ export async function streamEvents(
   { signal, onEvent }: EventStreamOptions,
   transform?: (data: unknown) => unknown
 ) {
-  const res = await fetch(`${getBaseUrl()}${path}`, {
-    method: "GET",
-    headers: buildHeaders(path),
-    signal,
-  });
+  async function connect() {
+    const res = await fetch(`${getBaseUrl()}${path}`, {
+      method: "GET",
+      headers: buildHeaders(path),
+      signal,
+    });
 
-  if (!res.ok || !res.body) {
-    const err: APIError = await res.json().catch(() => ({
-      error: { code: "UNKNOWN", message: res.statusText },
-    }));
-    throw err;
-  }
-
-  const reader = res.body.getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
-  let currentEvent = "message";
-
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-
-    buffer += decoder.decode(value, { stream: true });
-    let boundary = buffer.indexOf("\n\n");
-
-    while (boundary >= 0) {
-      const chunk = buffer.slice(0, boundary);
-      buffer = buffer.slice(boundary + 2);
-
-      let dataLine = "";
-      for (const line of chunk.split("\n")) {
-        if (line.startsWith("event:")) currentEvent = line.slice(6).trim();
-        if (line.startsWith("data:")) dataLine += line.slice(5).trim();
-      }
-
-      if (dataLine) {
-        try {
-          const parsed = JSON.parse(dataLine) as unknown;
-          onEvent({ type: currentEvent, data: transform ? transform(parsed) : parsed });
-        } catch {
-          onEvent({ type: currentEvent, data: dataLine });
+    if (!res.ok || !res.body) {
+      // If 401 and we have tokens, try refresh then reconnect once
+      if (
+        res.status === 401 &&
+        getStoredKey("tabmail_access_token") &&
+        getStoredKey("tabmail_refresh_token")
+      ) {
+        const refreshed = await tryRefreshToken();
+        if (refreshed) {
+          const retryRes = await fetch(`${getBaseUrl()}${path}`, {
+            method: "GET",
+            headers: buildHeaders(path),
+            signal,
+          });
+          if (retryRes.ok && retryRes.body) return retryRes;
         }
       }
 
-      currentEvent = "message";
-      boundary = buffer.indexOf("\n\n");
+      const err: APIError = await res.json().catch(() => ({
+        error: { code: "UNKNOWN", message: res.statusText },
+      }));
+      throw err;
     }
+
+    return res;
+  }
+
+  async function readStream(res: Response) {
+    const reader = res.body!.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let currentEvent = "message";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      let boundary = buffer.indexOf("\n\n");
+
+      while (boundary >= 0) {
+        const chunk = buffer.slice(0, boundary);
+        buffer = buffer.slice(boundary + 2);
+
+        let dataLine = "";
+        for (const line of chunk.split("\n")) {
+          if (line.startsWith("event:")) currentEvent = line.slice(6).trim();
+          if (line.startsWith("data:")) dataLine += line.slice(5).trim();
+        }
+
+        if (dataLine) {
+          try {
+            const parsed = JSON.parse(dataLine) as unknown;
+            onEvent({ type: currentEvent, data: transform ? transform(parsed) : parsed });
+          } catch {
+            onEvent({ type: currentEvent, data: dataLine });
+          }
+        }
+
+        currentEvent = "message";
+        boundary = buffer.indexOf("\n\n");
+      }
+    }
+  }
+
+  const initialRes = await connect();
+  try {
+    await readStream(initialRes);
+  } catch (streamErr) {
+    // Stream read failed (connection dropped). If not intentionally aborted,
+    // try refresh + reconnect once.
+    if (signal?.aborted) throw streamErr;
+
+    const refreshed = await tryRefreshToken();
+    if (!refreshed) throw streamErr;
+
+    const reconnectRes = await connect();
+    await readStream(reconnectRes);
   }
 }

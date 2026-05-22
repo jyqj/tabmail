@@ -13,6 +13,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
+	"tabmail/internal/permissions"
 	"tabmail/internal/policy"
 	"tabmail/internal/store"
 )
@@ -28,10 +29,14 @@ type storeRepo interface {
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
+	GetMailboxForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
 	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
+	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
+	CreateMailboxGrant(ctx context.Context, g *models.MailboxGrant) error
 }
 
 type Service struct {
@@ -61,11 +66,18 @@ func NewService(s storeRepo, obj store.ObjectStore, dispatcher *hooks.Dispatcher
 	return &Service{store: s, obj: obj, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "mailboxes").Logger()}
 }
 
-func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, pg models.Page) ([]*models.Mailbox, int, error) {
+func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, pg models.Page) ([]*models.Mailbox, int, error) {
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, 0, err
 	}
 	if isAdmin || tenantWide {
+		if perm != nil && len(perm.AllowedZoneIDs) > 0 {
+			items, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, perm.AllowedZoneIDs, pg)
+			if err != nil {
+				return nil, 0, app.Internal(err)
+			}
+			return items, total, nil
+		}
 		items, total, err := s.store.ListMailboxes(ctx, tenant.ID, pg)
 		if err != nil {
 			return nil, 0, app.Internal(err)
@@ -76,6 +88,23 @@ func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool,
 	if err != nil {
 		return nil, 0, err
 	}
+	// Intersect with AllowedZoneIDs from permission profile
+	if perm != nil && len(perm.AllowedZoneIDs) > 0 {
+		allowed := make(map[uuid.UUID]struct{}, len(perm.AllowedZoneIDs))
+		for _, id := range perm.AllowedZoneIDs {
+			allowed[id] = struct{}{}
+		}
+		filtered := make([]uuid.UUID, 0, len(zoneIDs))
+		for _, id := range zoneIDs {
+			if _, ok := allowed[id]; ok {
+				filtered = append(filtered, id)
+			}
+		}
+		zoneIDs = filtered
+	}
+	if len(zoneIDs) == 0 {
+		return []*models.Mailbox{}, 0, nil
+	}
 	items, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, zoneIDs, pg)
 	if err != nil {
 		return nil, 0, app.Internal(err)
@@ -83,7 +112,7 @@ func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool,
 	return items, total, nil
 }
 
-func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, req CreateRequest, actor string) (*models.Mailbox, error) {
+func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, req CreateRequest, actor string) (*models.Mailbox, error) {
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
@@ -103,8 +132,23 @@ func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	if zone == nil {
 		return nil, app.BadRequest(fmt.Sprintf("domain %s is not registered", domain))
 	}
-	if !canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
+	if !s.canManageZoneWithGrants(ctx, zone, tenant, isAdmin, ownerUserID, tenantWide) {
 		return nil, app.Forbidden("not your domain")
+	}
+	// Permission checks for non-admin JWT users
+	if perm != nil && !isAdmin {
+		if !permissions.IsZoneAllowed(perm, zone.ID) {
+			return nil, app.Forbidden("zone not in allowed list")
+		}
+		if !permissions.IsUnlimited(perm.MaxMailboxes) {
+			total, err := s.countUserMailboxes(ctx, tenant, ownerUserID)
+			if err != nil {
+				return nil, err
+			}
+			if total >= perm.MaxMailboxes {
+				return nil, app.Forbidden("mailbox limit reached")
+			}
+		}
 	}
 	cfg, err := s.store.EffectiveConfig(ctx, tenant.ID)
 	if err != nil {
@@ -156,6 +200,19 @@ func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin boo
 		}
 		return nil, app.Internal(err)
 	}
+	// Auto-create owner grant for the creating user
+	if ownerUserID != nil {
+		grant := &models.MailboxGrant{
+			TenantID:      tenant.ID,
+			MailboxID:     mb.ID,
+			PrincipalType: "user",
+			PrincipalID:   *ownerUserID,
+			Role:          models.MailboxRoleOwner,
+		}
+		if err := s.store.CreateMailboxGrant(ctx, grant); err != nil {
+			s.logger.Warn().Err(err).Str("mailbox_id", mb.ID.String()).Msg("failed to create owner mailbox grant")
+		}
+	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(tenant.ID), Actor: actor, Action: "mailbox.create", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "access_mode": mb.AccessMode, "retention_hours_override": mb.RetentionHoursOverride, "expires_at": mb.ExpiresAt})})
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "mailbox.created", TenantID: tenant.ID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "access_mode": mb.AccessMode}})
@@ -163,19 +220,28 @@ func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	return mb, nil
 }
 
-func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, id uuid.UUID, actor string) error {
-	mb, err := s.store.GetMailbox(ctx, id)
+func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, id uuid.UUID, actor string) error {
+	var mb *models.Mailbox
+	var err error
+	if tenant != nil && !isAdmin {
+		mb, err = s.store.GetMailboxForTenant(ctx, id, tenant.ID)
+	} else {
+		mb, err = s.store.GetMailbox(ctx, id)
+	}
 	if err != nil {
 		return app.Internal(err)
 	}
 	if mb == nil {
 		return app.NotFound("mailbox not found")
 	}
+	if perm != nil && len(perm.AllowedZoneIDs) > 0 && !permissions.IsZoneAllowed(perm, mb.ZoneID) {
+		return app.Forbidden("zone not in allowed list")
+	}
 	zone, err := s.store.GetZone(ctx, mb.ZoneID)
 	if err != nil {
 		return app.Internal(err)
 	}
-	if !canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
+	if !s.canManageZoneWithGrants(ctx, zone, tenant, isAdmin, ownerUserID, tenantWide) {
 		return app.Forbidden("not your mailbox")
 	}
 	keys, err := s.store.ListMailboxObjectKeys(ctx, mb.ID)
@@ -204,6 +270,21 @@ func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	return nil
 }
 
+func (s *Service) countUserMailboxes(ctx context.Context, tenant *models.Tenant, ownerUserID *uuid.UUID) (int, error) {
+	zoneIDs, err := s.accessibleZoneIDs(ctx, tenant, ownerUserID)
+	if err != nil {
+		return 0, err
+	}
+	if len(zoneIDs) == 0 {
+		return 0, nil
+	}
+	_, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, zoneIDs, models.Page{Page: 1, PerPage: 1})
+	if err != nil {
+		return 0, app.Internal(err)
+	}
+	return total, nil
+}
+
 func (s *Service) accessibleZoneIDs(ctx context.Context, tenant *models.Tenant, ownerUserID *uuid.UUID) ([]uuid.UUID, error) {
 	if tenant == nil || ownerUserID == nil {
 		return []uuid.UUID{}, nil
@@ -212,29 +293,40 @@ func (s *Service) accessibleZoneIDs(ctx context.Context, tenant *models.Tenant, 
 	if err != nil {
 		return nil, app.Internal(err)
 	}
-	out := make([]uuid.UUID, 0, len(zones))
+	idSet := make(map[uuid.UUID]struct{})
 	for _, zone := range zones {
 		if zone.OwnerUserID != nil && *zone.OwnerUserID == *ownerUserID {
-			out = append(out, zone.ID)
+			idSet[zone.ID] = struct{}{}
 		}
+	}
+	// Add granted zones
+	grantedIDs, err := s.store.ListGrantedZoneIDs(ctx, "user", *ownerUserID)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	for _, id := range grantedIDs {
+		idSet[id] = struct{}{}
+	}
+	out := make([]uuid.UUID, 0, len(idSet))
+	for id := range idSet {
+		out = append(out, id)
 	}
 	return out, nil
 }
 
 func canManageZone(zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
-	if zone == nil {
-		return false
-	}
-	if isAdmin {
+	return app.CanManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide)
+}
+
+func (s *Service) canManageZoneWithGrants(ctx context.Context, zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
+	if canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
 		return true
 	}
-	if tenant == nil || zone.TenantID != tenant.ID {
-		return false
+	if ownerUserID != nil {
+		role, _ := s.store.GetHighestZoneRole(ctx, zone.ID, "user", *ownerUserID)
+		return role.CanManage()
 	}
-	if tenantWide {
-		return true
-	}
-	return ownerUserID != nil && zone.OwnerUserID != nil && *ownerUserID == *zone.OwnerUserID
+	return false
 }
 
 func (s *Service) IssueToken(ctx context.Context, address, password, actor string) (*TokenIssueResult, error) {
@@ -282,13 +374,7 @@ func (s *Service) IssueToken(ctx context.Context, address, password, actor strin
 }
 
 func ensureTenantScope(tenant *models.Tenant, isAdmin bool) error {
-	if tenant == nil {
-		return app.Forbidden("no tenant context")
-	}
-	if isAdmin && tenant.ID == uuid.Nil {
-		return app.BadRequest("admin requests to tenant-scoped endpoints must include X-Tenant-ID")
-	}
-	return nil
+	return app.EnsureTenantScope(tenant, isAdmin)
 }
 
 func uniqueStrings(items []string) []string {

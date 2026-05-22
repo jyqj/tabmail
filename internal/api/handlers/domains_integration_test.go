@@ -57,13 +57,15 @@ func TestTriggerVerifyUpdatesZoneStatus(t *testing.T) {
 		TXTRecord: "tabmail-verify=ok",
 	})
 
-	h := NewDomainHandler(st, hooks.New(hooks.Config{}, zerolog.Nop()), "mx.mail.test", policy.NamingFull, "mailbox-secret", zerolog.Nop())
-	h.lookupTXT = func(name string) ([]string, error) {
-		return []string{"tabmail-verify=ok", "v=spf1 include:test"}, nil
-	}
-	h.lookupMX = func(name string) ([]*net.MX, error) {
-		return []*net.MX{{Host: "mx.mail.test.", Pref: 10}}, nil
-	}
+	h := NewDomainHandler(st, testutil.NewMemoryObjectStore(), hooks.New(hooks.Config{}, zerolog.Nop()), "mx.mail.test", policy.NamingFull, "mailbox-secret", zerolog.Nop())
+	h.SetResolvers(
+		func(name string) ([]string, error) {
+			return []string{"tabmail-verify=ok", "v=spf1 include:test"}, nil
+		},
+		func(name string) ([]*net.MX, error) {
+			return []*net.MX{{Host: "mx.mail.test.", Pref: 10}}, nil
+		},
+	)
 
 	token, err := authn.IssueAccessToken("jwt-test-secret", admin)
 	if err != nil {

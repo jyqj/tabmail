@@ -101,13 +101,14 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	r.Use(middleware.PermissionLoader(st))
 	r.Use(cfg.RateLimiter.Middleware)
 
-	dh := handlers.NewDomainHandler(st, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Logger)
+	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Logger)
 	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
 	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
+	gh := handlers.NewGrantHandler(st, cfg.Logger)
 	var oh *handlers.OutboundHandler
 	if cfg.OutboundService != nil {
 		oh = handlers.NewOutboundHandler(cfg.OutboundService, st, cfg.Logger)
@@ -148,6 +149,11 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.With(middleware.RequireScopes("domains:read")).Get("/domains/{id}/verification-status", dh.VerificationStatus)
 			r.With(middleware.RequireScopes("domains:read")).Get("/domains/{id}/suggest-address", dh.SuggestAddress)
 
+			// -- Domain grants --
+			r.With(middleware.RequireScopes("domains:read")).Get("/domains/{id}/grants", dh.ListZoneGrants)
+			r.With(middleware.RequireScopes("domains:write")).Post("/domains/{id}/grants", dh.CreateZoneGrant)
+			r.With(middleware.RequireScopes("domains:write")).Delete("/domains/{id}/grants/{grantId}", dh.DeleteZoneGrant)
+
 			// -- Domain routes --
 			r.With(middleware.RequireScopes("routes:read", "domains:read")).Get("/domains/{id}/routes", dh.ListRoutes)
 			r.With(middleware.RequireScopes("routes:write", "domains:write")).Post("/domains/{id}/routes", dh.CreateRoute)
@@ -157,6 +163,21 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.With(middleware.RequireScopes("mailboxes:read")).Get("/mailboxes", mh.List)
 			r.With(middleware.RequireScopes("mailboxes:write")).Post("/mailboxes", mh.Create)
 			r.With(middleware.RequireScopes("mailboxes:write")).Delete("/mailboxes/{id}", mh.Delete)
+
+			// -- Mailbox grants --
+			r.With(middleware.RequireScopes("mailboxes:read")).Get("/mailboxes/{mailboxId}/grants", gh.ListMailboxGrants)
+			r.With(middleware.RequireScopes("mailboxes:write")).Post("/mailboxes/{mailboxId}/grants", gh.CreateMailboxGrant)
+			r.With(middleware.RequireScopes("mailboxes:write")).Delete("/mailboxes/{mailboxId}/grants/{id}", gh.DeleteMailboxGrant)
+
+			// -- Send identities --
+			r.With(middleware.RequireScopes("send:read")).Get("/send-identities", gh.ListSendIdentities)
+			r.With(middleware.RequireScopes("send:write")).Post("/send-identities", gh.CreateSendIdentity)
+			r.With(middleware.RequireScopes("send:write")).Delete("/send-identities/{id}", gh.DeleteSendIdentity)
+
+			// -- Send-as grants --
+			r.With(middleware.RequireScopes("send:read")).Get("/send-identities/{id}/grants", gh.ListSendAsGrants)
+			r.With(middleware.RequireScopes("send:write")).Post("/send-identities/{id}/grants", gh.CreateSendAsGrant)
+			r.With(middleware.RequireScopes("send:write")).Delete("/send-identities/{id}/grants/{grantId}", gh.DeleteSendAsGrant)
 
 			// -- Outbound / Sending --
 			if oh != nil {
@@ -184,12 +205,33 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		r.With(middleware.RequireScopes("messages:write")).Patch("/mailbox/{address}/{id}", msg.MarkSeen)
 		r.With(middleware.RequireScopes("messages:write")).Delete("/mailbox/{address}/{id}", msg.DeleteMessage)
 
-		// -- Admin --
+		// -- Admin (tenant-level, accessible by platform_admin and tenant_admin) --
 		r.Group(func(r chi.Router) {
-			r.Use(middleware.RequireAdmin)
+			r.Use(middleware.RequireAdmin) // platform_admin or tenant_admin
 
 			r.Get("/admin/domains", dh.AdminListZones)
 			r.Patch("/admin/domains/{id}", dh.AdminUpdateZoneAccess)
+
+			// -- Permission profiles --
+			r.Get("/admin/permissions", perm.ListProfiles)
+			r.Post("/admin/permissions", perm.CreateProfile)
+			r.Patch("/admin/permissions/{id}", perm.UpdateProfile)
+			r.Delete("/admin/permissions/{id}", perm.DeleteProfile)
+
+			// -- User permissions --
+			r.Get("/admin/users/{id}/permissions", perm.GetUserPermission)
+			r.Put("/admin/users/{id}/permissions", perm.SetUserPermissionOverride)
+			r.Delete("/admin/users/{id}/permissions", perm.DeleteUserPermissionOverride)
+
+			// -- User management --
+			r.Get("/admin/users", auth.ListUsers)
+			r.Patch("/admin/users/{id}", auth.UpdateUserByAdmin)
+			r.Delete("/admin/users/{id}", auth.DeleteUserByAdmin)
+		})
+
+		// -- Platform admin only --
+		r.Group(func(r chi.Router) {
+			r.Use(middleware.RequirePlatformAdmin) // only platform_admin
 
 			r.Get("/admin/tenants", adm.ListTenants)
 			r.Post("/admin/tenants", adm.CreateTenant)
@@ -201,41 +243,27 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/admin/tenants/{id}/keys", adm.ListAPIKeys)
 			r.Delete("/admin/tenants/{id}/keys/{keyId}", adm.DeleteAPIKey)
 
-			r.Get("/admin/plans", adm.ListPlans)
-			r.Post("/admin/plans", adm.CreatePlan)
-			r.Patch("/admin/plans/{id}", adm.UpdatePlan)
-			r.Delete("/admin/plans/{id}", adm.DeletePlan)
-
 			r.Get("/admin/stats", adm.Stats)
 			r.Get("/admin/status", adm.Stats)
-			r.Get("/admin/policy", adm.GetSMTPPolicy)
-			r.Patch("/admin/policy", adm.UpdateSMTPPolicy)
 			r.Get("/admin/monitor/events", mon.StreamAll)
 			r.Get("/admin/monitor/history", mon.History)
 			r.Get("/admin/audit", adm.ListAudit)
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
 			r.Get("/admin/webhooks/deliveries", adm.ListWebhookDeliveries)
 
-			// -- System settings (admin only) --
+			r.Post("/admin/invite", auth.InviteAdmin)
+
+			r.Get("/admin/plans", adm.ListPlans)
+			r.Post("/admin/plans", adm.CreatePlan)
+			r.Patch("/admin/plans/{id}", adm.UpdatePlan)
+			r.Delete("/admin/plans/{id}", adm.DeletePlan)
+
+			r.Get("/admin/policy", adm.GetSMTPPolicy)
+			r.Patch("/admin/policy", adm.UpdateSMTPPolicy)
+
+			// -- System settings (platform admin only) --
 			r.Get("/admin/settings", adm.ListSettings)
 			r.Patch("/admin/settings", adm.UpdateSettings)
-
-			// -- Permission profiles (admin only) --
-			r.Get("/admin/permissions", perm.ListProfiles)
-			r.Post("/admin/permissions", perm.CreateProfile)
-			r.Patch("/admin/permissions/{id}", perm.UpdateProfile)
-			r.Delete("/admin/permissions/{id}", perm.DeleteProfile)
-
-			// -- User permissions (admin only) --
-			r.Get("/admin/users/{id}/permissions", perm.GetUserPermission)
-			r.Put("/admin/users/{id}/permissions", perm.SetUserPermissionOverride)
-			r.Delete("/admin/users/{id}/permissions", perm.DeleteUserPermissionOverride)
-
-			// -- User management (admin only) --
-			r.Post("/admin/invite", auth.InviteAdmin)
-			r.Get("/admin/users", auth.ListUsers)
-			r.Patch("/admin/users/{id}", auth.UpdateUserByAdmin)
-			r.Delete("/admin/users/{id}", auth.DeleteUserByAdmin)
 		})
 	})
 

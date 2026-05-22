@@ -42,19 +42,21 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { level, logout, permissions } = useAuth();
   const { t } = useI18n();
+  const isAdminLevel = level === "platform_admin" || level === "tenant_admin" || level === "admin";
+  const canCreateAPIKeys = isAdminLevel || permissions?.can_create_api_keys === true;
+  const canSend = isAdminLevel || permissions?.can_send === true;
 
   const consoleItems = [
     { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
     { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
-    // Hide API Keys if permissions loaded and can_create_api_keys is false
-    ...(permissions?.can_create_api_keys !== false
+    // Fail closed while permissions are loading/unavailable.
+    ...(canCreateAPIKeys
       ? [{ href: "/console/keys", label: t("sidebar.apiKeys"), icon: Settings2 }]
       : []),
-    // Hide Outbound if permissions loaded and can_send is false
-    ...(permissions?.can_send !== false
+    ...(canSend
       ? [{ href: "/console/outbound", label: t("sidebar.outbound"), icon: Send }]
       : []),
-    ...(permissions?.can_send !== false
+    ...(canSend
       ? [{ href: "/console/send-identities", label: t("sidebar.sendIdentities"), icon: KeyRound }]
       : []),
   ];

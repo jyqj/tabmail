@@ -12,6 +12,9 @@ func actorFromRequest(r *http.Request) string {
 	if user := middleware.UserFromCtx(r.Context()); user != nil {
 		return "user:" + user.ID.String()
 	}
+	if keyID := middleware.APIKeyIDFromCtx(r.Context()); keyID != nil {
+		return "api_key:" + keyID.String()
+	}
 	if t := middleware.TenantFromCtx(r.Context()); t != nil && t.ID != uuid.Nil {
 		return t.ID.String()
 	}

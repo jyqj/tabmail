@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"strings"
+	"sync"
 
 	gosmtp "github.com/emersion/go-smtp"
 	"github.com/rs/zerolog"
@@ -66,9 +67,54 @@ func (s *Server) Start(_ context.Context) error {
 		if err != nil {
 			return err
 		}
+		ln = s.wrapListener(ln)
 		return s.inner.Serve(tls.NewListener(ln, s.inner.TLSConfig))
 	}
-	return s.inner.ListenAndServe()
+	ln, err := net.Listen("tcp", s.cfg.Addr)
+	if err != nil {
+		return err
+	}
+	ln = s.wrapListener(ln)
+	return s.inner.Serve(ln)
+}
+
+// wrapListener applies MaxConnections limiting if configured.
+func (s *Server) wrapListener(ln net.Listener) net.Listener {
+	if s.cfg.MaxConnections > 0 {
+		s.logger.Info().Int("max_connections", s.cfg.MaxConnections).Msg("SMTP connection limit enabled")
+		return &limitedListener{
+			Listener: ln,
+			sem:      make(chan struct{}, s.cfg.MaxConnections),
+		}
+	}
+	return ln
+}
+
+type limitedListener struct {
+	net.Listener
+	sem chan struct{}
+}
+
+func (l *limitedListener) Accept() (net.Conn, error) {
+	l.sem <- struct{}{}
+	conn, err := l.Listener.Accept()
+	if err != nil {
+		<-l.sem
+		return nil, err
+	}
+	return &limitedConn{Conn: conn, sem: l.sem}, nil
+}
+
+type limitedConn struct {
+	net.Conn
+	sem  chan struct{}
+	once sync.Once
+}
+
+func (c *limitedConn) Close() error {
+	err := c.Conn.Close()
+	c.once.Do(func() { <-c.sem })
+	return err
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {

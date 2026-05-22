@@ -10,16 +10,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
+	tabdkim "tabmail/internal/dkim"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/permissions"
 	"tabmail/internal/policy"
 )
 
 type store interface {
 	app.AuditStore
+	app.PrincipalStore
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
 	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
+	ListZonesByVisibilities(ctx context.Context, visibilities []models.ResourceVisibility) ([]*models.DomainZone, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
 	CreateZone(ctx context.Context, z *models.DomainZone) error
@@ -31,6 +35,18 @@ type store interface {
 	CreateRoute(ctx context.Context, r *models.DomainRoute) error
 	GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error)
 	DeleteRoute(ctx context.Context, id uuid.UUID) error
+	// Send identities & grants
+	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
+	CreateSendAsGrant(ctx context.Context, g *models.SendAsGrant) error
+	ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error)
+	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
+	// Zone grants
+	CreateZoneGrant(ctx context.Context, g *models.ZoneGrant) error
+	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
+	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
+	ListZoneGrants(ctx context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error)
+	DeleteZoneGrant(ctx context.Context, id uuid.UUID) error
+	GetZoneGrant(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (*models.ZoneGrant, error)
 }
 
 type Service struct {
@@ -63,6 +79,9 @@ type VerificationStatus struct {
 	IsVerified  bool               `json:"is_verified"`
 	MXVerified  bool               `json:"mx_verified"`
 	Checks      VerificationChecks `json:"checks"`
+	DKIMRecord  string             `json:"dkim_record"`
+	DKIMHost    string             `json:"dkim_host"`
+	DKIMEnabled bool               `json:"dkim_enabled"`
 }
 
 type CreateRouteInput struct {
@@ -104,6 +123,8 @@ func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, na
 	}
 }
 
+// SetResolvers overrides DNS resolvers. Must only be called during
+// initialization (e.g., in tests), never during request handling.
 func (s *Service) SetResolvers(lookupTXT func(string) ([]string, error), lookupMX func(string) ([]*net.MX, error)) {
 	if lookupTXT != nil {
 		s.lookupTXT = lookupTXT
@@ -124,7 +145,7 @@ func (s *Service) ListZones(ctx context.Context, tenant *models.Tenant, isAdmin 
 	if isAdmin || tenantWide {
 		return items, nil
 	}
-	return filterOwnedZones(items, ownerUserID), nil
+	return s.filterAccessibleZones(ctx, items, ownerUserID), nil
 }
 
 func (s *Service) ListAllZones(ctx context.Context, isAdmin bool) ([]*models.DomainZone, error) {
@@ -139,30 +160,39 @@ func (s *Service) ListAllZones(ctx context.Context, isAdmin bool) ([]*models.Dom
 }
 
 func (s *Service) ListOpenZones(ctx context.Context, includeAuthenticated bool) ([]*models.DomainZone, error) {
-	items, err := s.store.ListAllZones(ctx)
+	vis := []models.ResourceVisibility{models.VisibilityPublic}
+	if includeAuthenticated {
+		vis = append(vis, models.VisibilityAuthenticated)
+	}
+	items, err := s.store.ListZonesByVisibilities(ctx, vis)
 	if err != nil {
 		return nil, app.Internal(err)
 	}
 	out := make([]*models.DomainZone, 0, len(items))
 	for _, zone := range items {
-		if !zone.IsVerified || !zone.MXVerified {
-			continue
-		}
-		switch zone.Visibility {
-		case models.VisibilityPublic:
+		if zone.IsVerified && zone.MXVerified {
 			out = append(out, zone)
-		case models.VisibilityAuthenticated:
-			if includeAuthenticated {
-				out = append(out, zone)
-			}
 		}
 	}
 	return out, nil
 }
 
-func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, domain, actor string) (*models.DomainZone, error) {
+func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, domain, actor string) (*models.DomainZone, error) {
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
+	}
+	// Permission checks for non-admin JWT users. API keys are gated by scopes
+	// and optional AllowedZoneIDs; they do not have owner-level quotas.
+	if perm != nil && !isAdmin {
+		if ownerUserID != nil && !perm.CanCreateDomains {
+			return nil, app.Forbidden("domain creation not allowed")
+		}
+		if ownerUserID != nil && !permissions.IsUnlimited(perm.MaxDomains) {
+			owned := countOwnedZones(ctx, s.store, tenant.ID, ownerUserID)
+			if owned >= perm.MaxDomains {
+				return nil, app.Forbidden("domain limit reached")
+			}
+		}
 	}
 	domain = normalizeDNSName(domain)
 	if !policy.ValidateDomainPart(domain) {
@@ -172,8 +202,24 @@ func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin
 	if err != nil {
 		return nil, err
 	}
-	if parent != nil && !canManageZone(parent, tenant, isAdmin, ownerUserID, tenantWide) {
+	if parent != nil && !s.canManageZoneWithGrants(ctx, parent, tenant, isAdmin, ownerUserID, tenantWide) {
 		return nil, app.Forbidden("parent domain permission required")
+	}
+	// Validate the full ancestor chain belongs to the same tenant.
+	if parent != nil && !isAdmin {
+		if err := s.validateZoneAncestry(ctx, parent, tenant); err != nil {
+			return nil, err
+		}
+	}
+	// AllowedZoneIDs check: a zone-restricted API key/user may only create
+	// subdomains under an allowed parent, never new root domains.
+	if perm != nil && !isAdmin && parent != nil {
+		if !permissions.IsZoneAllowed(perm, parent.ID) {
+			return nil, app.Forbidden("parent zone not in allowed list")
+		}
+	}
+	if perm != nil && !isAdmin && parent == nil && len(perm.AllowedZoneIDs) > 0 {
+		return nil, app.Forbidden("restricted credentials cannot create root domains")
 	}
 	cfg, err := s.store.EffectiveConfig(ctx, tenant.ID)
 	if err != nil {
@@ -196,8 +242,56 @@ func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin
 	if parent != nil {
 		zone.ParentZoneID = app.UUIDPtr(parent.ID)
 	}
+	privPEM, _, err := tabdkim.GenerateKeyPair()
+	if err != nil {
+		return nil, app.Internal(fmt.Errorf("generate dkim key: %w", err))
+	}
+	zone.DKIMPrivateKeyPEM = &privPEM
+	zone.DKIMSelector = tabdkim.DefaultSelector
+	zone.DKIMEnabled = false
 	if err := s.store.CreateZone(ctx, zone); err != nil {
-		return nil, app.Conflict("domain already exists")
+		errLower := strings.ToLower(err.Error())
+		if strings.Contains(errLower, "duplicate") || strings.Contains(errLower, "unique") || strings.Contains(errLower, "23505") {
+			return nil, app.Conflict("domain already exists")
+		}
+		return nil, app.Internal(err)
+	}
+	// Auto-create owner grant for the zone creator
+	if ownerUserID != nil {
+		grant := &models.ZoneGrant{
+			TenantID:      tenant.ID,
+			ZoneID:        zone.ID,
+			PrincipalType: "user",
+			PrincipalID:   *ownerUserID,
+			Role:          models.ZoneRoleOwner,
+			CreatedBy:     ownerUserID,
+		}
+		if err := s.store.CreateZoneGrant(ctx, grant); err != nil {
+			s.logger.Warn().Err(err).Msg("creating owner zone grant")
+		}
+	}
+	// Auto-create domain_wildcard send identity for this zone.
+	si := &models.SendIdentity{
+		TenantID:     tenant.ID,
+		ZoneID:       zone.ID,
+		Address:      "*@" + zone.Domain,
+		IdentityType: models.SendIdentityDomainWildcard,
+		Verified:     false, // will be verified when zone passes verification
+	}
+	if err := s.store.CreateSendIdentity(ctx, si); err != nil {
+		s.logger.Warn().Err(err).Msg("creating domain wildcard send identity")
+	}
+	// Auto-grant send-as to zone owner.
+	if ownerUserID != nil && si.ID != (uuid.UUID{}) {
+		sag := &models.SendAsGrant{
+			TenantID:      tenant.ID,
+			IdentityID:    si.ID,
+			PrincipalType: "user",
+			PrincipalID:   *ownerUserID,
+		}
+		if err := s.store.CreateSendAsGrant(ctx, sag); err != nil {
+			s.logger.Warn().Err(err).Msg("creating owner send-as grant")
+		}
 	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
 		TenantID:     app.UUIDPtr(tenant.ID),
@@ -216,7 +310,7 @@ func (s *Service) CreateZone(ctx context.Context, tenant *models.Tenant, isAdmin
 	return zone, nil
 }
 
-func (s *Service) UpdateZoneAccess(ctx context.Context, zoneID uuid.UUID, isAdmin bool, input ZoneAccessInput, actor string) (*models.DomainZone, error) {
+func (s *Service) UpdateZoneAccess(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, input ZoneAccessInput, actor string) (*models.DomainZone, error) {
 	if !isAdmin {
 		return nil, app.Forbidden("admin access required")
 	}
@@ -225,6 +319,9 @@ func (s *Service) UpdateZoneAccess(ctx context.Context, zoneID uuid.UUID, isAdmi
 		return nil, app.Internal(err)
 	}
 	if zone == nil {
+		return nil, app.NotFound("zone not found")
+	}
+	if tenant != nil && zone.TenantID != tenant.ID {
 		return nil, app.NotFound("zone not found")
 	}
 	if input.Visibility != "" {
@@ -275,6 +372,10 @@ func (s *Service) DeleteZone(ctx context.Context, zoneID uuid.UUID, tenant *mode
 	return nil
 }
 
+func (s *Service) ManagedZone(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) (*models.DomainZone, error) {
+	return s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
+}
+
 func (s *Service) TriggerVerify(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, actor string) (*models.DomainZone, VerificationChecks, error) {
 	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
@@ -283,6 +384,11 @@ func (s *Service) TriggerVerify(ctx context.Context, zoneID uuid.UUID, tenant *m
 	checks := s.lookupVerification(zone)
 	zone.IsVerified = checks.TXT.Status == "pass"
 	zone.MXVerified = checks.MX.Status == "pass"
+	if checks.DKIM.Status == "pass" && zone.DKIMPrivateKeyPEM != nil {
+		zone.DKIMEnabled = true
+	} else {
+		zone.DKIMEnabled = false
+	}
 	if zone.IsVerified && zone.MXVerified {
 		now := time.Now()
 		zone.VerifiedAt = &now
@@ -291,6 +397,11 @@ func (s *Service) TriggerVerify(ctx context.Context, zoneID uuid.UUID, tenant *m
 	}
 	if err := s.store.UpdateZone(ctx, zone); err != nil {
 		return nil, VerificationChecks{}, app.Internal(err)
+	}
+	// Sync send identity verified status with zone verification
+	verified := zone.IsVerified && zone.MXVerified
+	if err := s.store.UpdateSendIdentitiesVerifiedByZone(ctx, zone.ID, verified); err != nil {
+		s.logger.Warn().Err(err).Msg("syncing send identity verified status")
 	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
@@ -312,7 +423,28 @@ func (s *Service) VerificationStatus(ctx context.Context, zoneID uuid.UUID, tena
 		return nil, err
 	}
 	checks := s.lookupVerification(zone)
-	return &VerificationStatus{TXTExpected: zone.TXTRecord, ExpectedMX: s.expectedMX(), IsVerified: checks.TXT.Status == "pass", MXVerified: checks.MX.Status == "pass", Checks: checks}, nil
+	dkimRecord := ""
+	dkimHost := ""
+	if zone.DKIMPrivateKeyPEM != nil {
+		selector := zone.DKIMSelector
+		if selector == "" {
+			selector = tabdkim.DefaultSelector
+		}
+		if pubB64, err := tabdkim.PublicKeyFromPEM(*zone.DKIMPrivateKeyPEM); err == nil {
+			dkimRecord = tabdkim.DNSTXTValue(pubB64)
+			dkimHost = tabdkim.DNSRecordName(selector, zone.Domain)
+		}
+	}
+	return &VerificationStatus{
+		TXTExpected: zone.TXTRecord,
+		ExpectedMX:  s.expectedMX(),
+		IsVerified:  checks.TXT.Status == "pass",
+		MXVerified:  checks.MX.Status == "pass",
+		Checks:      checks,
+		DKIMRecord:  dkimRecord,
+		DKIMHost:    dkimHost,
+		DKIMEnabled: zone.DKIMEnabled,
+	}, nil
 }
 
 func (s *Service) ListRoutes(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) ([]*models.DomainRoute, error) {
@@ -390,7 +522,16 @@ func (s *Service) suggestForZone(zone *models.DomainZone, useSubdomain bool, can
 	}, nil
 }
 
-func (s *Service) CreateRoute(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, input CreateRouteInput, actor string) (*models.DomainRoute, error) {
+func (s *Service) CreateRoute(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, input CreateRouteInput, actor string) (*models.DomainRoute, error) {
+	// Permission checks for non-admin JWT users plus zone allowlists for API keys.
+	if perm != nil && !isAdmin {
+		if ownerUserID != nil && !perm.CanCreateRoutes {
+			return nil, app.Forbidden("route creation not allowed")
+		}
+		if !permissions.IsZoneAllowed(perm, zoneID) {
+			return nil, app.Forbidden("zone not in allowed list")
+		}
+	}
 	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
 	if err != nil {
 		return nil, err
@@ -481,10 +622,105 @@ func (s *Service) ownedZone(ctx context.Context, zoneID uuid.UUID, tenant *model
 	if zone == nil {
 		return nil, app.NotFound("zone not found")
 	}
-	if !canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
-		return nil, app.Forbidden("not your domain")
+	if canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
+		return zone, nil
 	}
-	return zone, nil
+	// Fallback: check zone grants
+	if ownerUserID != nil {
+		role, _ := s.store.GetHighestZoneRole(ctx, zoneID, "user", *ownerUserID)
+		if role.CanManage() {
+			return zone, nil
+		}
+	}
+	return nil, app.Forbidden("not your domain")
+}
+
+// ListZoneGrants returns all grants for a zone. Requires manage access.
+func (s *Service) ListZoneGrants(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) ([]*models.ZoneGrant, error) {
+	if _, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide); err != nil {
+		return nil, err
+	}
+	grants, err := s.store.ListZoneGrants(ctx, zoneID)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	return grants, nil
+}
+
+// CreateZoneGrant adds a new grant for a zone. Requires manage access.
+func (s *Service) CreateZoneGrant(ctx context.Context, zoneID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, grant *models.ZoneGrant, actor string) (*models.ZoneGrant, error) {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
+	if err != nil {
+		return nil, err
+	}
+	if !grant.Role.Valid() {
+		return nil, app.BadRequest("invalid role")
+	}
+	if grant.PrincipalType != "user" && grant.PrincipalType != "api_key" {
+		return nil, app.BadRequest("principal_type must be 'user' or 'api_key'")
+	}
+	// Verify the principal belongs to the same tenant.
+	if err := app.ValidatePrincipalTenant(ctx, s.store, zone.TenantID, grant.PrincipalType, grant.PrincipalID); err != nil {
+		return nil, err
+	}
+	// Check for existing grant
+	existing, err := s.store.GetZoneGrant(ctx, zoneID, grant.PrincipalType, grant.PrincipalID)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	if existing != nil {
+		return nil, app.Conflict("grant already exists for this principal")
+	}
+	grant.TenantID = zone.TenantID
+	grant.ZoneID = zoneID
+	grant.CreatedBy = ownerUserID
+	if err := s.store.CreateZoneGrant(ctx, grant); err != nil {
+		return nil, app.Internal(err)
+	}
+	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+		TenantID:     app.UUIDPtr(zone.TenantID),
+		Actor:        actor,
+		Action:       "zone_grant.create",
+		ResourceType: "zone_grant",
+		ResourceID:   app.UUIDPtr(grant.ID),
+		Details:      app.MustJSON(map[string]any{"zone_id": zoneID, "principal_type": grant.PrincipalType, "principal_id": grant.PrincipalID, "role": grant.Role}),
+	})
+	return grant, nil
+}
+
+// DeleteZoneGrant removes a grant from a zone. Requires manage access.
+func (s *Service) DeleteZoneGrant(ctx context.Context, zoneID, grantID uuid.UUID, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, actor string) error {
+	zone, err := s.ownedZone(ctx, zoneID, tenant, isAdmin, ownerUserID, tenantWide)
+	if err != nil {
+		return err
+	}
+	// Verify the grant belongs to this zone
+	grants, err := s.store.ListZoneGrants(ctx, zoneID)
+	if err != nil {
+		return app.Internal(err)
+	}
+	found := false
+	for _, g := range grants {
+		if g.ID == grantID {
+			found = true
+			break
+		}
+	}
+	if !found {
+		return app.NotFound("grant not found")
+	}
+	if err := s.store.DeleteZoneGrant(ctx, grantID); err != nil {
+		return app.Internal(err)
+	}
+	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+		TenantID:     app.UUIDPtr(zone.TenantID),
+		Actor:        actor,
+		Action:       "zone_grant.delete",
+		ResourceType: "zone_grant",
+		ResourceID:   app.UUIDPtr(grantID),
+		Details:      app.MustJSON(map[string]any{"zone_id": zoneID}),
+	})
+	return nil
 }
 
 func (s *Service) lookupVerification(zone *models.DomainZone) VerificationChecks {
@@ -546,29 +782,61 @@ func (s *Service) findParentZone(ctx context.Context, domain string) (*models.Do
 	return nil, nil
 }
 
-func canManageZone(zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
-	if zone == nil {
-		return false
+// validateZoneAncestry walks up the parent_zone_id chain and verifies that all
+// ancestors belong to the same tenant. It also detects circular references.
+func (s *Service) validateZoneAncestry(ctx context.Context, parent *models.DomainZone, tenant *models.Tenant) error {
+	current := parent
+	visited := make(map[uuid.UUID]bool)
+	for current != nil {
+		if visited[current.ID] {
+			return fmt.Errorf("circular zone hierarchy detected")
+		}
+		visited[current.ID] = true
+		if current.TenantID != tenant.ID {
+			return app.Forbidden("ancestor domain belongs to a different tenant")
+		}
+		if current.ParentZoneID == nil {
+			break
+		}
+		next, err := s.store.GetZone(ctx, *current.ParentZoneID)
+		if err != nil {
+			return app.Internal(err)
+		}
+		current = next
 	}
-	if isAdmin {
-		return true
-	}
-	if tenant == nil || zone.TenantID != tenant.ID {
-		return false
-	}
-	if tenantWide {
-		return true
-	}
-	return ownerUserID != nil && zone.OwnerUserID != nil && *ownerUserID == *zone.OwnerUserID
+	return nil
 }
 
-func filterOwnedZones(items []*models.DomainZone, ownerUserID *uuid.UUID) []*models.DomainZone {
+func canManageZone(zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
+	return app.CanManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide)
+}
+
+func (s *Service) canManageZoneWithGrants(ctx context.Context, zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
+	if canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
+		return true
+	}
+	if ownerUserID != nil {
+		role, _ := s.store.GetHighestZoneRole(ctx, zone.ID, "user", *ownerUserID)
+		return role.CanManage()
+	}
+	return false
+}
+
+func (s *Service) filterAccessibleZones(ctx context.Context, items []*models.DomainZone, ownerUserID *uuid.UUID) []*models.DomainZone {
 	if ownerUserID == nil {
 		return []*models.DomainZone{}
+	}
+	// Get zones with grants
+	grantedIDs, _ := s.store.ListGrantedZoneIDs(ctx, "user", *ownerUserID)
+	grantedSet := make(map[uuid.UUID]struct{}, len(grantedIDs))
+	for _, id := range grantedIDs {
+		grantedSet[id] = struct{}{}
 	}
 	out := make([]*models.DomainZone, 0, len(items))
 	for _, zone := range items {
 		if zone.OwnerUserID != nil && *zone.OwnerUserID == *ownerUserID {
+			out = append(out, zone)
+		} else if _, ok := grantedSet[zone.ID]; ok {
 			out = append(out, zone)
 		}
 	}
@@ -576,13 +844,7 @@ func filterOwnedZones(items []*models.DomainZone, ownerUserID *uuid.UUID) []*mod
 }
 
 func ensureTenantScope(tenant *models.Tenant, isAdmin bool) error {
-	if tenant == nil {
-		return app.Forbidden("no tenant context")
-	}
-	if isAdmin && tenant.ID == uuid.Nil {
-		return app.BadRequest("admin requests to tenant-scoped endpoints must include X-Tenant-ID")
-	}
-	return nil
+	return app.EnsureTenantScope(tenant, isAdmin)
 }
 
 func lookupTXTRecord(name string, match func(string) bool) DNSCheck {
@@ -598,6 +860,23 @@ func lookupTXTRecord(name string, match func(string) bool) DNSCheck {
 		check.Details = append(check.Details, err.Error())
 	}
 	return check
+}
+
+func countOwnedZones(ctx context.Context, st store, tenantID uuid.UUID, ownerUserID *uuid.UUID) int {
+	if ownerUserID == nil {
+		return 0
+	}
+	zones, err := st.ListZones(ctx, tenantID)
+	if err != nil {
+		return 0
+	}
+	n := 0
+	for _, z := range zones {
+		if z.OwnerUserID != nil && *z.OwnerUserID == *ownerUserID {
+			n++
+		}
+	}
+	return n
 }
 
 func normalizeDNSName(v string) string {

@@ -14,6 +14,7 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
 	messageapp "tabmail/internal/app/messages"
+	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -24,9 +25,13 @@ import (
 type messageStore interface {
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	GetMailboxByAddressForTenant(ctx context.Context, addr string, tenantID uuid.UUID) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
+	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
+	GetMailboxGrant(ctx context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
+	GetMessageForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Message, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
@@ -46,19 +51,33 @@ func NewMessageHandler(s messageStore, obj store.ObjectStore, hub *realtime.Hub,
 }
 
 func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
+	actor := authz.ActorFromContext(r.Context())
 	var userID *uuid.UUID
-	if user := middleware.UserFromCtx(r.Context()); user != nil {
-		id := user.ID
+	if actor.Type == authz.PrincipalUser {
+		id := actor.ID
 		userID = &id
+	}
+	var principalID *uuid.UUID
+	if actor.Type != "" && actor.ID != uuid.Nil {
+		id := actor.ID
+		principalID = &id
+	}
+	var allowedZoneIDs []uuid.UUID
+	if actor.Permission != nil && len(actor.Permission.AllowedZoneIDs) > 0 {
+		allowedZoneIDs = append([]uuid.UUID(nil), actor.Permission.AllowedZoneIDs...)
 	}
 	mode := middleware.AuthModeFromCtx(r.Context())
 	return messageapp.Viewer{
-		Tenant:      middleware.TenantFromCtx(r.Context()),
-		IsAdmin:     middleware.IsAdmin(r.Context()),
-		AuthMode:    mode,
-		UserID:      userID,
-		TenantWide:  mode == middleware.AuthModeAPIKey,
-		BearerToken: mailboxBearerToken(r),
+		Tenant:         middleware.TenantFromCtx(r.Context()),
+		IsAdmin:        actor.IsPlatformAdmin,
+		IsTenantAdmin:  actor.IsTenantAdmin,
+		AuthMode:       mode,
+		UserID:         userID,
+		TenantWide:     actor.TenantWide,
+		BearerToken:    mailboxBearerToken(r),
+		PrincipalType:  string(actor.Type),
+		PrincipalID:    principalID,
+		AllowedZoneIDs: allowedZoneIDs,
 	}
 }
 

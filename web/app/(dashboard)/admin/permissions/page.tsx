@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,8 +44,9 @@ import {
   createPermissionProfile,
   updatePermissionProfile,
   deletePermissionProfile,
+  listDomains,
 } from "@/lib/api";
-import type { PermissionProfile } from "@/lib/types";
+import type { DomainZone, PermissionProfile } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -56,7 +57,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
-import { useI18n } from "@/lib/i18n";
 import { useAPI } from "@/hooks/use-api";
 
 interface PermissionFormData {
@@ -67,6 +67,7 @@ interface PermissionFormData {
   daily_receive_quota: string;
   max_mailboxes: string;
   max_domains: string;
+  allowed_zone_ids: string[];
   can_create_domains: boolean;
   can_create_routes: boolean;
   can_create_api_keys: boolean;
@@ -80,6 +81,7 @@ const defaultForm: PermissionFormData = {
   daily_receive_quota: "0",
   max_mailboxes: "0",
   max_domains: "0",
+  allowed_zone_ids: [],
   can_create_domains: false,
   can_create_routes: false,
   can_create_api_keys: false,
@@ -98,9 +100,11 @@ function formatQuota(value: number): string {
 function PermissionFormFields({
   form,
   setForm,
+  domainOptions,
 }: {
   form: PermissionFormData;
-  setForm: React.Dispatch<React.SetStateAction<PermissionFormData>>;
+  setForm: Dispatch<SetStateAction<PermissionFormData>>;
+  domainOptions: DomainZone[];
 }) {
   const switchFields: { key: keyof PermissionFormData; label: string }[] = [
     { key: "can_send", label: "可发件" },
@@ -176,13 +180,57 @@ function PermissionFormFields({
           </div>
         ))}
       </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs">{"允许域名范围"}</Label>
+          <span className="text-[10px] text-muted-foreground">
+            {form.allowed_zone_ids.length === 0 ? "全部域名" : `${form.allowed_zone_ids.length} 个域名`}
+          </span>
+        </div>
+        <div className="rounded-md border p-3 space-y-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-xs"
+            onClick={() => setForm((prev) => ({ ...prev, allowed_zone_ids: [] }))}
+          >
+            {"允许全部域名"}
+          </Button>
+          {domainOptions.length === 0 ? (
+            <p className="text-xs text-muted-foreground">{"暂无可选域名；留空表示全部域名。"}</p>
+          ) : (
+            <div className="grid gap-2">
+              {domainOptions.map((zone) => {
+                const checked = form.allowed_zone_ids.includes(zone.id);
+                return (
+                  <label key={zone.id} className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs">
+                    <span className="truncate" title={zone.domain}>{zone.domain}</span>
+                    <Switch
+                      size="sm"
+                      checked={checked}
+                      onCheckedChange={(next: boolean) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          allowed_zone_ids: next
+                            ? Array.from(new Set([...prev.allowed_zone_ids, zone.id]))
+                            : prev.allowed_zone_ids.filter((id) => id !== zone.id),
+                        }))
+                      }
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
 
 export default function PermissionsPage() {
-  const { t } = useI18n();
-
   const {
     data: profilesRes,
     isLoading: loading,
@@ -191,6 +239,8 @@ export default function PermissionsPage() {
   } = useAPI("permission-profiles", () => listPermissionProfiles());
   const profiles = profilesRes?.data ?? [];
   const total = profiles.length;
+  const { data: domainsRes } = useAPI("permission-profile-domains", () => listDomains());
+  const domainOptions = domainsRes?.data ?? [];
 
   useEffect(() => {
     if (profilesError) toast.error("加载权限模板失败");
@@ -218,6 +268,7 @@ export default function PermissionsPage() {
         daily_receive_quota: Number(form.daily_receive_quota),
         max_mailboxes: Number(form.max_mailboxes),
         max_domains: Number(form.max_domains),
+        allowed_zone_ids: form.allowed_zone_ids,
         can_create_domains: form.can_create_domains,
         can_create_routes: form.can_create_routes,
         can_create_api_keys: form.can_create_api_keys,
@@ -248,6 +299,7 @@ export default function PermissionsPage() {
       daily_receive_quota: String(profile.daily_receive_quota),
       max_mailboxes: String(profile.max_mailboxes),
       max_domains: String(profile.max_domains),
+      allowed_zone_ids: profile.allowed_zone_ids ?? [],
       can_create_domains: profile.can_create_domains,
       can_create_routes: profile.can_create_routes,
       can_create_api_keys: profile.can_create_api_keys,
@@ -267,6 +319,7 @@ export default function PermissionsPage() {
         daily_receive_quota: Number(editForm.daily_receive_quota),
         max_mailboxes: Number(editForm.max_mailboxes),
         max_domains: Number(editForm.max_domains),
+        allowed_zone_ids: editForm.allowed_zone_ids,
         can_create_domains: editForm.can_create_domains,
         can_create_routes: editForm.can_create_routes,
         can_create_api_keys: editForm.can_create_api_keys,
@@ -318,7 +371,11 @@ export default function PermissionsPage() {
                   {"配置权限模板的各项参数，创建后可分配给用户。"}
                 </DialogDescription>
               </DialogHeader>
-              <PermissionFormFields form={form} setForm={setForm} />
+              <PermissionFormFields
+                form={form}
+                setForm={setForm}
+                domainOptions={domainOptions}
+              />
               <DialogFooter>
                 <Button
                   onClick={handleCreate}
@@ -363,6 +420,7 @@ export default function PermissionsPage() {
                       <TableHead className="text-right">{"日发件额"}</TableHead>
                       <TableHead className="text-right">{"日收件额"}</TableHead>
                       <TableHead className="text-right">{"邮箱数"}</TableHead>
+                      <TableHead>{"域名范围"}</TableHead>
                       <TableHead>{"创建时间"}</TableHead>
                       <TableHead className="w-10" />
                     </TableRow>
@@ -411,6 +469,13 @@ export default function PermissionsPage() {
                         </TableCell>
                         <TableCell className="text-right tabular-nums">
                           {formatQuota(profile.max_mailboxes)}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className="text-[10px]">
+                            {profile.allowed_zone_ids && profile.allowed_zone_ids.length > 0
+                              ? `${profile.allowed_zone_ids.length} 个域名`
+                              : "全部域名"}
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatDistanceToNow(new Date(profile.created_at), {
@@ -478,7 +543,11 @@ export default function PermissionsPage() {
                 {"修改权限模板的配置参数。"}
               </DialogDescription>
             </DialogHeader>
-            <PermissionFormFields form={editForm} setForm={setEditForm} />
+            <PermissionFormFields
+              form={editForm}
+              setForm={setEditForm}
+              domainOptions={domainOptions}
+            />
             <DialogFooter>
               <Button
                 onClick={handleEdit}

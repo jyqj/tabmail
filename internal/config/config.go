@@ -53,6 +53,7 @@ type SMTP struct {
 	Domain              string        `default:"localhost" desc:"SMTP HELO/banner domain"`
 	MaxRecipients       int           `default:"200" desc:"Max RCPT TO per message"`
 	MaxMessageBytes     int           `default:"26214400" desc:"Max message size (bytes)"`
+	MaxConnections      int           `split_words:"true" default:"100" desc:"Max concurrent SMTP connections (0=unlimited)"`
 	Timeout             time.Duration `default:"300s" desc:"Idle connection timeout"`
 	TLSEnabled          bool          `default:"false" desc:"Enable STARTTLS"`
 	TLSCert             string        `default:"" desc:"TLS certificate path"`
@@ -139,6 +140,9 @@ type Outbound struct {
 	PollInterval time.Duration `split_words:"true" default:"2s" desc:"Worker poll interval"`
 	BatchSize    int           `split_words:"true" default:"50" desc:"Worker batch size"`
 	RateLimit    int           `split_words:"true" default:"100" desc:"Global outbound RPM limit"`
+	DKIMSign       bool   `split_words:"true" default:"true" desc:"Sign outbound emails with DKIM when keys are available"`
+	DKIMFailPolicy string `split_words:"true" default:"fail_open" desc:"DKIM failure policy: fail_open (deliver unsigned) or fail_closed (block delivery)"`
+	RequireTLS     bool   `split_words:"true" default:"false" desc:"Require STARTTLS for direct delivery (fail if unavailable)"`
 }
 
 func Load() (*Root, error) {

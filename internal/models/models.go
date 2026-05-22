@@ -216,6 +216,21 @@ func (r ZoneGrantRole) CanEdit() bool {
 	return r == ZoneRoleOwner || r == ZoneRoleAdmin || r == ZoneRoleEditor
 }
 
+func (r ZoneGrantRole) RoleLevel() int {
+	switch r {
+	case ZoneRoleOwner:
+		return 4
+	case ZoneRoleAdmin:
+		return 3
+	case ZoneRoleEditor:
+		return 2
+	case ZoneRoleViewer:
+		return 1
+	default:
+		return 0
+	}
+}
+
 type ZoneGrant struct {
 	ID            uuid.UUID     `json:"id" db:"id"`
 	TenantID      uuid.UUID     `json:"tenant_id" db:"tenant_id"`

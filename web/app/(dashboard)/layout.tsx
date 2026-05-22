@@ -24,6 +24,20 @@ export default function DashboardLayout({
     if (level === "user" && pathname.startsWith("/admin")) {
       router.replace("/console/domains");
     }
+    // Tenant admins cannot access platform-only admin pages
+    if (level === "tenant_admin" && (
+      pathname === "/admin" ||
+      pathname.startsWith("/admin/monitor") ||
+      pathname.startsWith("/admin/audit") ||
+      pathname.startsWith("/admin/ingest") ||
+      pathname.startsWith("/admin/webhooks") ||
+      pathname.startsWith("/admin/tenants") ||
+      pathname.startsWith("/admin/plans") ||
+      pathname.startsWith("/admin/settings") ||
+      pathname.startsWith("/admin/policy")
+    )) {
+      router.replace("/admin/users");
+    }
   }, [hydrated, level, pathname, router]);
 
   if (!hydrated) {

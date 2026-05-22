@@ -170,10 +170,9 @@ CREATE INDEX IF NOT EXISTS idx_users_tenant ON users(tenant_id);
 
 -- FK for tenant_api_keys.owner_user_id (declared after users table exists)
 DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_api_keys_owner_user') THEN
-        ALTER TABLE tenant_api_keys ADD CONSTRAINT fk_api_keys_owner_user
-            FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL NOT VALID;
-    END IF;
+    ALTER TABLE tenant_api_keys DROP CONSTRAINT IF EXISTS fk_api_keys_owner_user;
+    ALTER TABLE tenant_api_keys ADD CONSTRAINT fk_api_keys_owner_user
+        FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE NOT VALID;
 END $$;
 
 CREATE TABLE IF NOT EXISTS user_permission_overrides (
@@ -339,6 +338,7 @@ CREATE TABLE IF NOT EXISTS outbound_jobs (
 CREATE INDEX IF NOT EXISTS idx_outbound_pending ON outbound_jobs (state, next_attempt_at, created_at) WHERE state IN ('pending','retry');
 CREATE INDEX IF NOT EXISTS idx_outbound_tenant_date ON outbound_jobs (tenant_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_outbound_user_date ON outbound_jobs (user_id, created_at DESC) WHERE user_id IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_outbound_tenant_api_key_date ON outbound_jobs (tenant_id, api_key_id, created_at DESC) WHERE api_key_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_outbound_lease ON outbound_jobs (state, lease_until) WHERE state = 'processing';
 
 -- ============================================================
@@ -385,7 +385,7 @@ CREATE TABLE IF NOT EXISTS send_as_grants (
     identity_id     UUID        NOT NULL REFERENCES send_identities(id) ON DELETE CASCADE,
     principal_type  VARCHAR(16) NOT NULL CHECK (principal_type IN ('user', 'api_key')),
     principal_id    UUID        NOT NULL,
-    daily_quota     INT         NOT NULL DEFAULT 0,
+    daily_quota     INT         NOT NULL DEFAULT 0 CHECK (daily_quota >= 0),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (identity_id, principal_type, principal_id)
 );

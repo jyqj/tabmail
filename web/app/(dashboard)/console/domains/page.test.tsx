@@ -30,6 +30,13 @@ vi.mock("@/lib/api", () => ({
   getVerificationStatus: (...args: unknown[]) => getVerificationStatusMock(...args),
 }));
 
+vi.mock("@/contexts/auth-context", () => ({
+  usePermissions: () => ({
+    can_create_domains: true,
+    max_domains: 0,
+  }),
+}));
+
 vi.mock("sonner", () => ({
   toast: {
     success: toastSuccess,

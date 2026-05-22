@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"strings"
 	"time"
 
@@ -10,6 +12,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"tabmail/internal/models"
 )
+
+func hashInviteCode(code string) string {
+	h := sha256.Sum256([]byte(code))
+	return hex.EncodeToString(h[:])
+}
 
 // ================================================================
 // Users
@@ -60,15 +67,15 @@ func (s *PgStore) GetUserByEmail(ctx context.Context, email string) (*models.Use
 	return scanUser(s.pool.QueryRow(ctx, userSelect+` WHERE LOWER(email) = LOWER($1)`, strings.TrimSpace(email)))
 }
 
-func (s *PgStore) ListUsers(ctx context.Context, pg models.Page) ([]*models.User, int, error) {
+func (s *PgStore) ListUsers(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.User, int, error) {
 	pg = pg.Normalize()
 	var total int
-	err := s.pool.QueryRow(ctx, `SELECT COUNT(*) FROM users`).Scan(&total)
+	err := s.pool.QueryRow(ctx, `SELECT COUNT(*) FROM users WHERE tenant_id = $1`, tenantID).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
 	rows, err := s.pool.Query(ctx,
-		userSelect+` ORDER BY created_at DESC LIMIT $1 OFFSET $2`, pg.PerPage, pg.Offset())
+		userSelect+` WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`, tenantID, pg.PerPage, pg.Offset())
 	if err != nil {
 		return nil, 0, err
 	}
@@ -87,9 +94,11 @@ func (s *PgStore) ListUsers(ctx context.Context, pg models.Page) ([]*models.User
 func (s *PgStore) UpdateUser(ctx context.Context, u *models.User) error {
 	u.UpdatedAt = time.Now()
 	_, err := s.pool.Exec(ctx, `
-		UPDATE users SET email = $2, display_name = $3, role = $4, is_active = $5, updated_at = $6
+		UPDATE users SET email = $2, display_name = $3, role = $4, is_active = $5,
+			permission_profile_id = $6, updated_at = $7
 		WHERE id = $1`,
-		u.ID, strings.ToLower(strings.TrimSpace(u.Email)), u.DisplayName, u.Role, u.IsActive, u.UpdatedAt)
+		u.ID, strings.ToLower(strings.TrimSpace(u.Email)), u.DisplayName, u.Role, u.IsActive,
+		u.PermissionProfileID, u.UpdatedAt)
 	return err
 }
 
@@ -99,8 +108,18 @@ func (s *PgStore) UpdateUserPassword(ctx context.Context, id uuid.UUID, password
 }
 
 func (s *PgStore) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM users WHERE id = $1`, id)
-	return err
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if _, err := tx.Exec(ctx, `DELETE FROM tenant_api_keys WHERE owner_user_id = $1`, id); err != nil {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `DELETE FROM users WHERE id = $1`, id); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 func (s *PgStore) TouchUserLogin(ctx context.Context, id uuid.UUID) error {
@@ -163,7 +182,7 @@ func (s *PgStore) CreateAdminInvitation(ctx context.Context, inv *models.AdminIn
 	_, err := s.pool.Exec(ctx, `
 		INSERT INTO admin_invitations (id, email, invite_code, invited_by, expires_at, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6)`,
-		inv.ID, strings.ToLower(strings.TrimSpace(inv.Email)), inv.InviteCode,
+		inv.ID, strings.ToLower(strings.TrimSpace(inv.Email)), hashInviteCode(inv.InviteCode),
 		inv.InvitedBy, inv.ExpiresAt, inv.CreatedAt)
 	return err
 }
@@ -173,7 +192,7 @@ func (s *PgStore) GetAdminInvitationByCode(ctx context.Context, code string) (*m
 	var invitedBy pgtype.UUID
 	err := s.pool.QueryRow(ctx, `
 		SELECT id, email, invite_code, invited_by, expires_at, accepted_at, created_at
-		FROM admin_invitations WHERE invite_code = $1`, code).
+		FROM admin_invitations WHERE invite_code = $1`, hashInviteCode(code)).
 		Scan(&inv.ID, &inv.Email, &inv.InviteCode, &invitedBy,
 			&inv.ExpiresAt, &inv.AcceptedAt, &inv.CreatedAt)
 	if err == pgx.ErrNoRows {

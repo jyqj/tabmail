@@ -11,6 +11,7 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
 	mailboxapp "tabmail/internal/app/mailboxes"
+	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -28,10 +29,14 @@ type mailboxStore interface {
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
+	GetMailboxForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
 	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
+	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
+	CreateMailboxGrant(ctx context.Context, g *models.MailboxGrant) error
 }
 
 type MailboxHandler struct {
@@ -45,22 +50,11 @@ func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, dispatcher *hooks.
 	return &MailboxHandler{service: service, rateLimiter: rl, logger: l.With().Str("handler", "mailboxes").Logger()}
 }
 
-func mailboxOwnerUserID(r *http.Request) *uuid.UUID {
-	user := middleware.UserFromCtx(r.Context())
-	if user == nil {
-		return nil
-	}
-	id := user.ID
-	return &id
-}
-
-func mailboxTenantWide(r *http.Request) bool {
-	return middleware.AuthModeFromCtx(r.Context()) == middleware.AuthModeAPIKey
-}
-
 func (h *MailboxHandler) List(w http.ResponseWriter, r *http.Request) {
 	pg := pageFromReq(r)
-	items, total, err := h.service.List(r.Context(), middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), mailboxOwnerUserID(r), mailboxTenantWide(r), pg)
+	tenant, isAdmin, ownerUserID, tenantWide := mailboxActorParams(r)
+	actor := authz.ActorFromContext(r.Context())
+	items, total, err := h.service.List(r.Context(), tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, pg)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -80,7 +74,9 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "address is required")
 		return
 	}
-	item, err := h.service.Create(r.Context(), middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), mailboxOwnerUserID(r), mailboxTenantWide(r), mailboxapp.CreateRequest{
+	tenant, isAdmin, ownerUserID, tenantWide := mailboxActorParams(r)
+	actor := authz.ActorFromContext(r.Context())
+	item, err := h.service.Create(r.Context(), tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, mailboxapp.CreateRequest{
 		Address:                body.Address,
 		Password:               body.Password,
 		AccessMode:             body.AccessMode,
@@ -100,7 +96,9 @@ func (h *MailboxHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	if err := h.service.Delete(r.Context(), middleware.TenantFromCtx(r.Context()), middleware.IsAdmin(r.Context()), mailboxOwnerUserID(r), mailboxTenantWide(r), id, actorFromRequest(r)); err != nil {
+	tenant, isAdmin, ownerUserID, tenantWide := mailboxActorParams(r)
+	actor := authz.ActorFromContext(r.Context())
+	if err := h.service.Delete(r.Context(), tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, id, actorFromRequest(r)); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}

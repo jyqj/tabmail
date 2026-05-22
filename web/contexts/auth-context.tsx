@@ -6,12 +6,13 @@ import {
   useCallback,
   useEffect,
   useState,
+  useRef,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import type { AuthUser } from "@/lib/types";
+import type { AuthUser, EffectivePermission } from "@/lib/types";
 
-type AuthLevel = "public" | "mailbox" | "admin" | "user";
+type AuthLevel = "public" | "mailbox" | "platform_admin" | "tenant_admin" | "admin" | "user";
 
 interface AuthSnapshot {
   // JWT auth (new)
@@ -27,6 +28,9 @@ interface AuthSnapshot {
 interface AuthState extends AuthSnapshot {
   level: AuthLevel;
   hydrated: boolean;
+  permissions: EffectivePermission | null;
+  permissionsLoading: boolean;
+  permissionsError: boolean;
   // JWT auth
   loginWithTokens: (accessToken: string, refreshToken: string, user: AuthUser) => void;
   setTenantId: (id: string | null) => void;
@@ -119,6 +123,11 @@ const serverSnapshot: AuthSnapshot = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
+  const [permissions, setPermissions] = useState<EffectivePermission | null>(null);
+  const [permissionsLoading, setPermissionsLoading] = useState(false);
+  const [permissionsError, setPermissionsError] = useState(false);
+  const permsFetchedForToken = useRef<string | null>(null);
+
   useEffect(() => {
     const timer = window.setTimeout(() => setHydrated(true), 0);
     return () => window.clearTimeout(timer);
@@ -129,6 +138,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hydrated ? readSnapshot : () => serverSnapshot,
     () => serverSnapshot,
   );
+
+  // Load permissions when a JWT user session is present
+  useEffect(() => {
+    const token = snapshot.accessToken;
+    if (!token || !snapshot.user) {
+      // No session -- clear cached permissions
+      if (permissions !== null) setPermissions(null);
+      setPermissionsError(false);
+      permsFetchedForToken.current = null;
+      return;
+    }
+    // Avoid re-fetching for the same token
+    if (permsFetchedForToken.current === token) return;
+    permsFetchedForToken.current = token;
+
+    let cancelled = false;
+    setPermissionsLoading(true);
+
+    (async () => {
+      try {
+        // Dynamic import to avoid circular dependency with api modules
+        const { getMyPermissions } = await import("@/lib/api/permissions");
+        const res = await getMyPermissions();
+        if (!cancelled) {
+          setPermissions(res.data);
+          setPermissionsError(false);
+        }
+      } catch {
+        // Permission load failed — default to restrictive permissions to avoid
+        // showing features the user may not have access to.
+        if (!cancelled) {
+          setPermissions({
+            can_send: false,
+            daily_send_quota: 0,
+            daily_receive_quota: 0,
+            max_mailboxes: 0,
+            max_domains: 0,
+            allowed_zone_ids: null,
+            can_create_domains: false,
+            can_create_routes: false,
+            can_create_api_keys: false,
+          });
+          setPermissionsError(true);
+        }
+      } finally {
+        if (!cancelled) setPermissionsLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [snapshot.accessToken, snapshot.user]);
 
   const loginWithTokens = useCallback((accessToken: string, refreshToken: string, user: AuthUser) => {
     setStorageItem("tabmail_access_token", accessToken);
@@ -162,11 +223,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStorageItem("tabmail_tenant_id", null);
     setStorageItem("tabmail_mailbox_address", null);
     setStorageItem("tabmail_mailbox_token", null);
+    setPermissions(null);
+    setPermissionsError(false);
+    permsFetchedForToken.current = null;
     notify();
   }, []);
 
   const level: AuthLevel = snapshot.accessToken && snapshot.user
-    ? (snapshot.user.role === "admin" ? "admin" : "user")
+    ? (snapshot.user.role === "platform_admin" || snapshot.user.role === "admin"
+        ? "platform_admin"
+        : snapshot.user.role === "tenant_admin"
+        ? "tenant_admin"
+        : "user")
     : snapshot.mailboxToken
     ? "mailbox"
     : "public";
@@ -177,6 +245,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...snapshot,
         level,
         hydrated,
+        permissions,
+        permissionsLoading,
+        permissionsError,
         loginWithTokens,
         setTenantId,
         setMailboxAuth,
@@ -193,4 +264,9 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used within AuthProvider");
   return ctx;
+}
+
+export function usePermissions(): EffectivePermission | null {
+  const { permissions } = useAuth();
+  return permissions;
 }

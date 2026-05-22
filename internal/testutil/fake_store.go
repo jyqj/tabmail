@@ -1613,6 +1613,17 @@ func (s *FakeStore) DeleteZoneGrant(_ context.Context, id uuid.UUID) error {
 	return nil
 }
 
+func (s *FakeStore) DeleteZoneGrantScoped(_ context.Context, id uuid.UUID, zoneID uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	g, ok := s.zoneGrants[id]
+	if !ok || g.ZoneID != zoneID {
+		return errors.New("grant not found")
+	}
+	delete(s.zoneGrants, id)
+	return nil
+}
+
 func (s *FakeStore) ListZoneGrants(_ context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -1696,6 +1707,18 @@ func (s *FakeStore) GetSendIdentity(_ context.Context, id uuid.UUID) (*models.Se
 		return &cp, nil
 	}
 	return nil, nil
+}
+
+func (s *FakeStore) ListSendIdentities(_ context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.SendIdentity
+	for _, si := range s.sendIdentities {
+		if si.TenantID == tenantID {
+			out = append(out, si)
+		}
+	}
+	return out, nil
 }
 
 func (s *FakeStore) ListSendIdentitiesByZone(_ context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error) {
@@ -1785,6 +1808,17 @@ func (s *FakeStore) CreateSendAsGrant(_ context.Context, g *models.SendAsGrant) 
 func (s *FakeStore) DeleteSendAsGrant(_ context.Context, id uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	delete(s.sendAsGrants, id)
+	return nil
+}
+
+func (s *FakeStore) DeleteSendAsGrantScoped(_ context.Context, id uuid.UUID, identityID uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	g, ok := s.sendAsGrants[id]
+	if !ok || g.IdentityID != identityID {
+		return errors.New("grant not found")
+	}
 	delete(s.sendAsGrants, id)
 	return nil
 }
@@ -2100,6 +2134,17 @@ func (s *FakeStore) DeleteMailboxGrant(_ context.Context, id uuid.UUID) error {
 	return nil
 }
 
+func (s *FakeStore) DeleteMailboxGrantScoped(_ context.Context, id uuid.UUID, mailboxID uuid.UUID) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	g, ok := s.mailboxGrants[id]
+	if !ok || g.MailboxID != mailboxID {
+		return errors.New("grant not found")
+	}
+	delete(s.mailboxGrants, id)
+	return nil
+}
+
 func (s *FakeStore) ListMailboxGrants(_ context.Context, mailboxID uuid.UUID) ([]*models.MailboxGrant, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -2143,6 +2188,10 @@ func (s *FakeStore) ListGrantedMailboxIDs(_ context.Context, principalType strin
 // ================================================================
 
 func (s *FakeStore) ListOutboundJobsByUser(_ context.Context, _ uuid.UUID, _ uuid.UUID, _ models.Page) ([]*models.OutboundJob, int, error) {
+	return nil, 0, nil
+}
+
+func (s *FakeStore) ListOutboundJobsByAPIKey(_ context.Context, _ uuid.UUID, _ uuid.UUID, _ models.Page) ([]*models.OutboundJob, int, error) {
 	return nil, 0, nil
 }
 

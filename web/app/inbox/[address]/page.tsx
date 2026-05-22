@@ -62,7 +62,7 @@ export default function InboxPage() {
   const [sseConnected, setSseConnected] = useState(false);
   const mailboxTokenMatches =
     !!mailboxToken && mailboxAddress?.toLowerCase() === address.toLowerCase();
-  const canWriteRecords = level === "admin" || level === "user";
+  const canWriteRecords = level === "platform_admin" || level === "tenant_admin" || level === "user";
 
   const { data: response, isLoading: loading, isValidating: refreshing, error, mutate } = useAPI(
     address ? ["inbox", address] : null,
