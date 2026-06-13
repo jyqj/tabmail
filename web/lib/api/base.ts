@@ -12,6 +12,9 @@ export interface EventStreamOptions {
   onEvent: (event: { type: string; data: unknown }) => void;
 }
 
+const MAILBOX_API_KEY_ADDRESS_KEY = "tabmail_mailbox_api_key_address";
+const MAILBOX_API_KEY_KEY = "tabmail_mailbox_api_key";
+
 export function getBaseUrl(): string {
   if (typeof window !== "undefined") {
     return process.env.NEXT_PUBLIC_API_URL || "";
@@ -24,28 +27,110 @@ function getStoredKey(key: string): string | null {
   return localStorage.getItem(key);
 }
 
-function shouldUseMailboxToken(path: string, mailboxAddress: string | null): boolean {
-  if (!path.startsWith("/api/v1/mailbox/")) return false;
-  if (!mailboxAddress) return true;
+function setStoredKey(key: string, value: string | null) {
+  if (typeof window === "undefined") return;
+  if (value && value.trim()) localStorage.setItem(key, value.trim());
+  else localStorage.removeItem(key);
+}
+
+function notifyAuthChange() {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("tabmail-auth-change"));
+  }
+}
+
+function getMailboxAddressFromPath(path: string): string | null {
+  if (!path.startsWith("/api/v1/mailbox/")) return null;
 
   const parts = path.split("/");
   const encodedAddress = parts[4];
-  if (!encodedAddress) return false;
+  if (!encodedAddress) return null;
 
-  return decodeURIComponent(encodedAddress).toLowerCase() === mailboxAddress.toLowerCase();
+  try {
+    return decodeURIComponent(encodedAddress).toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function shouldUseMailboxCredential(path: string, mailboxAddress: string | null): boolean {
+  const pathAddress = getMailboxAddressFromPath(path);
+  if (!pathAddress) return false;
+  if (!mailboxAddress) return true;
+
+  return pathAddress === mailboxAddress.toLowerCase();
+}
+
+function hasExplicitAuthHeader(headers: Record<string, string>) {
+  return Boolean(
+    headers.Authorization ||
+      headers.authorization ||
+      headers["X-API-Key"] ||
+      headers["x-api-key"]
+  );
+}
+
+export function getMailboxAPIKeySnapshot() {
+  return {
+    address: getStoredKey(MAILBOX_API_KEY_ADDRESS_KEY),
+    key: getStoredKey(MAILBOX_API_KEY_KEY),
+  };
+}
+
+export function setMailboxAPIKeyAuth(address: string | null, apiKey: string | null) {
+  setStoredKey(MAILBOX_API_KEY_ADDRESS_KEY, address?.trim().toLowerCase() || null);
+  setStoredKey(MAILBOX_API_KEY_KEY, apiKey?.trim() || null);
+  notifyAuthChange();
+}
+
+export function clearMailboxAPIKeyAuth() {
+  setMailboxAPIKeyAuth(null, null);
+}
+
+function requestUsedAccessToken(headers: Record<string, string>): boolean {
+  const accessToken = getStoredKey("tabmail_access_token");
+  return Boolean(accessToken && headers.Authorization === `Bearer ${accessToken}`);
+}
+
+function hasStoredAdminSession(): boolean {
+  const rawUser = getStoredKey("tabmail_user");
+  if (!rawUser) return false;
+  try {
+    const user = JSON.parse(rawUser) as { role?: string };
+    return (
+      user.role === "super_admin" ||
+      user.role === "admin"
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function buildHeaders(path: string, extra?: Record<string, string>) {
   const headers: Record<string, string> = { ...(extra || {}) };
+  if (hasExplicitAuthHeader(headers)) return headers;
+
   const accessToken = getStoredKey("tabmail_access_token");
   const tenantId = getStoredKey("tabmail_tenant_id");
   const mailboxToken = getStoredKey("tabmail_mailbox_token");
   const mailboxAddress = getStoredKey("tabmail_mailbox_address");
+  const mailboxAPIKey = getStoredKey(MAILBOX_API_KEY_KEY);
+  const mailboxAPIKeyAddress = getStoredKey(MAILBOX_API_KEY_ADDRESS_KEY);
 
   // Mailbox-scoped inbox tokens must win for their mailbox paths, even when a
-  // console JWT is also present.
-  if (mailboxToken && shouldUseMailboxToken(path, mailboxAddress)) {
+  // console JWT or a stored mailbox API key is also present.
+  if (mailboxToken && shouldUseMailboxCredential(path, mailboxAddress)) {
     headers.Authorization = `Bearer ${mailboxToken}`;
+  } else if (accessToken && hasStoredAdminSession()) {
+    // Admin sessions keep JWT semantics for admin-only mailbox operations such
+    // as break-glass/delete/purge, even if a mailbox API key is stored.
+    headers.Authorization = `Bearer ${accessToken}`;
+    if (tenantId) headers["X-Tenant-ID"] = tenantId;
+  } else if (mailboxAPIKey && shouldUseMailboxCredential(path, mailboxAPIKeyAddress)) {
+    // Explicit mailbox API-key access is scoped to the matching mailbox path.
+    // Use X-API-Key rather than Authorization so mailbox-token/JWT bearer
+    // semantics remain distinct and unaffected outside this mailbox.
+    headers["X-API-Key"] = mailboxAPIKey;
   } else if (accessToken) {
     headers.Authorization = `Bearer ${accessToken}`;
     if (tenantId) headers["X-Tenant-ID"] = tenantId;
@@ -79,7 +164,7 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   });
 
   // Auto-refresh on 401 if we have a refresh token
-  if (res.status === 401 && getStoredKey("tabmail_access_token") && getStoredKey("tabmail_refresh_token")) {
+  if (res.status === 401 && requestUsedAccessToken(headers) && getStoredKey("tabmail_refresh_token")) {
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       // Retry with new token
@@ -173,11 +258,7 @@ export async function streamEvents(
 
     if (!res.ok || !res.body) {
       // If 401 and we have tokens, try refresh then reconnect once
-      if (
-        res.status === 401 &&
-        getStoredKey("tabmail_access_token") &&
-        getStoredKey("tabmail_refresh_token")
-      ) {
+      if (res.status === 401 && requestUsedAccessToken(buildHeaders(path)) && getStoredKey("tabmail_refresh_token")) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
           const retryRes = await fetch(`${getBaseUrl()}${path}`, {

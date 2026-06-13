@@ -230,6 +230,56 @@ func TestSMTPStoresSingleRawObjectForMultiRecipientDelivery(t *testing.T) {
 	}
 }
 
+func TestSMTPAuthDisabled(t *testing.T) {
+	st := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+	addr := freeAddr(t)
+	resolverSvc := resolver.New(st, policy.NamingFull, true)
+	ingestSvc := ingest.NewService(st, obj, resolverSvc, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, 24, nil, config.Ingest{}, zerolog.Nop())
+	srv := smtpsrv.NewServer(config.SMTP{
+		Addr:            addr,
+		Domain:          "mx.mail.test",
+		MaxRecipients:   10,
+		MaxMessageBytes: 1024 * 1024,
+		Timeout:         5 * time.Second,
+		DefaultAccept:   true,
+		DefaultStore:    true,
+	}, ingestSvc, resolverSvc, zerolog.Nop())
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		_ = srv.Start(ctx)
+	}()
+	waitTCP(t, addr)
+	defer func() {
+		_ = srv.Shutdown(context.Background())
+	}()
+
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	r := bufio.NewReader(conn)
+
+	expectCode(t, r, "220")
+	sendLine(t, conn, "EHLO localhost")
+	caps := readSMTPResponse(t, r)
+	for _, line := range caps {
+		if strings.Contains(strings.ToUpper(line), "AUTH") {
+			t.Fatalf("expected AUTH not advertised, got EHLO response: %#v", caps)
+		}
+	}
+	sendLine(t, conn, "AUTH PLAIN AHVzZXIAcGFzcw==")
+	resp := readSMTPResponse(t, r)
+	if len(resp) == 0 || !strings.HasPrefix(resp[len(resp)-1], "502") {
+		t.Fatalf("expected AUTH unsupported 502 response, got %#v", resp)
+	}
+	sendLine(t, conn, "QUIT")
+}
+
 func freeAddr(t *testing.T) string {
 	t.Helper()
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
@@ -253,6 +303,31 @@ func waitTCP(t *testing.T, addr string) {
 		time.Sleep(50 * time.Millisecond)
 	}
 	t.Fatalf("smtp server did not start on %s", addr)
+}
+
+func readSMTPResponse(t *testing.T, r *bufio.Reader) []string {
+	t.Helper()
+	line, err := r.ReadString('\n')
+	if err != nil {
+		t.Fatal(err)
+	}
+	line = strings.TrimRight(line, "\r\n")
+	lines := []string{line}
+	if len(line) < 4 || line[3] != '-' {
+		return lines
+	}
+	code := line[:3]
+	for {
+		next, err := r.ReadString('\n')
+		if err != nil {
+			t.Fatal(err)
+		}
+		next = strings.TrimRight(next, "\r\n")
+		lines = append(lines, next)
+		if len(next) >= 4 && strings.HasPrefix(next, code) && next[3] == ' ' {
+			return lines
+		}
+	}
 }
 
 func sendLine(t *testing.T, conn net.Conn, line string) {

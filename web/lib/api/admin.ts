@@ -91,7 +91,7 @@ export function getTenantConfig(id: string) {
 
 export function createAPIKey(
   tenantId: string,
-  body: { label?: string; scopes?: string[] }
+  body: { label?: string; scopes?: string[]; allowed_zone_ids?: string[] }
 ) {
   return request<APIResponse<APIKeyCreated>>(`/api/v1/admin/tenants/${tenantId}/keys`, {
     method: "POST",
@@ -111,7 +111,7 @@ export function revokeAPIKey(tenantId: string, keyId: string) {
 
 // --- User-facing API key endpoints (own tenant) ---
 
-export function createUserAPIKey(body: { label?: string; scopes?: string[] }) {
+export function createUserAPIKey(body: { label?: string; scopes?: string[]; allowed_zone_ids?: string[] }) {
   return request<APIResponse<APIKeyCreated>>("/api/v1/keys", {
     method: "POST",
     body,

@@ -2,7 +2,6 @@ package authz
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"tabmail/internal/api/middleware"
@@ -26,6 +25,7 @@ const (
 	// Route actions
 	ActionRouteRead   Action = "route.read"
 	ActionRouteManage Action = "route.manage"
+	ActionRouteDelete Action = "route.delete"
 
 	// Mailbox actions
 	ActionMailboxRead   Action = "mailbox.read"
@@ -34,7 +34,9 @@ const (
 	ActionMailboxDelete Action = "mailbox.delete"
 
 	// Message actions
+	ActionMessageList   Action = "message.list"
 	ActionMessageRead   Action = "message.read"
+	ActionMessageSource Action = "message.source"
 	ActionMessageWrite  Action = "message.write"
 	ActionMessageDelete Action = "message.delete"
 
@@ -57,31 +59,112 @@ const (
 
 // Actor represents the authenticated caller.
 type Actor struct {
-	Type            PrincipalType
-	ID              uuid.UUID
-	TenantID        uuid.UUID
-	Role            models.UserRole
-	IsPlatformAdmin bool
-	IsTenantAdmin   bool
-	TenantWide      bool // true for API key access (no specific user)
-	Permission      *models.EffectivePermission
-	OwnerUserID     *uuid.UUID // For API keys with an active owner user
+	Type         PrincipalType
+	ID           uuid.UUID
+	TenantID     uuid.UUID
+	Role         models.UserRole
+	IsSuperAdmin bool
+	IsAdmin      bool
+	TenantWide   bool // true for API key access (no specific user)
+	Permission   *models.EffectivePermission
+	OwnerUserID  *uuid.UUID // For API keys with an active owner user
+}
+
+// EffectiveUserID returns the user identity ownership checks should use:
+// the user itself for PrincipalUser, the owning user for PrincipalAPIKey
+// (nil for ownerless integration keys), and nil for anything else.
+func (a Actor) EffectiveUserID() *uuid.UUID {
+	switch a.Type {
+	case PrincipalUser:
+		id := a.ID
+		return &id
+	case PrincipalAPIKey:
+		return a.OwnerUserID
+	}
+	return nil
+}
+
+// AuditLabel returns the audit actor label in the exact format produced by
+// the handlers' actorFromRequest helper: "user:<uuid>" for users,
+// "api_key:<uuid>" for API keys, the tenant ID string when only a tenant
+// context exists, and "public" otherwise.
+func (a Actor) AuditLabel() string {
+	switch a.Type {
+	case PrincipalUser:
+		return "user:" + a.ID.String()
+	case PrincipalAPIKey:
+		return "api_key:" + a.ID.String()
+	}
+	if a.TenantID != uuid.Nil {
+		return a.TenantID.String()
+	}
+	return "public"
 }
 
 // Resource identifies what is being accessed.
 type Resource struct {
-	Type     string    // "zone", "mailbox", "message", "outbound_job", etc.
-	ID       uuid.UUID // resource primary key
-	TenantID uuid.UUID
-	ZoneID   uuid.UUID // for zone-scoped resources
+	Type        string    // "zone", "mailbox", "message", "outbound_job", etc.
+	ID          uuid.UUID // resource primary key
+	TenantID    uuid.UUID
+	ZoneID      uuid.UUID  // for zone-scoped resources
+	OwnerUserID *uuid.UUID // the resource's owning user, e.g. zone.OwnerUserID
+}
+
+// ZoneResource builds the Resource for a loaded domain zone.
+func ZoneResource(zone *models.DomainZone) Resource {
+	return Resource{Type: "zone", ID: zone.ID, TenantID: zone.TenantID, ZoneID: zone.ID, OwnerUserID: zone.OwnerUserID}
+}
+
+// CanManageZone reports whether the actor has management access to the zone.
+// It reproduces app.CanManageZone as invoked with parameters derived by the
+// handlers' domainActorParams helper: super admins manage any zone, tenant
+// isolation precedes the admin bypass, tenant-wide keys bypass ownership,
+// and regular actors must own the zone.
+func CanManageZone(actor Actor, zone *models.DomainZone) bool {
+	if zone == nil {
+		return false
+	}
+	if actor.IsSuperAdmin {
+		return true
+	}
+	if actor.TenantID == uuid.Nil {
+		return false
+	}
+	if zone.TenantID != actor.TenantID {
+		return false
+	}
+	if actor.IsAdmin {
+		return true
+	}
+	if actor.TenantWide {
+		return true
+	}
+	uid := actor.EffectiveUserID()
+	return uid != nil && zone.OwnerUserID != nil && *uid == *zone.OwnerUserID
+}
+
+// ZoneAllowed reports whether the zone is within the actor's allowed-zone
+// list. Admins and super admins always pass; an absent permission or an
+// empty allowlist means all zones are allowed.
+func ZoneAllowed(actor Actor, zoneID uuid.UUID) bool {
+	if actor.IsSuperAdmin || actor.IsAdmin {
+		return true
+	}
+	if actor.Permission == nil || len(actor.Permission.AllowedZoneIDs) == 0 {
+		return true
+	}
+	for _, id := range actor.Permission.AllowedZoneIDs {
+		if id == zoneID {
+			return true
+		}
+	}
+	return false
 }
 
 // Store is the minimal store interface needed by the authorizer.
-type Store interface {
-	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
-	GetMailboxGrant(ctx context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error)
-	HasSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (bool, error)
-}
+// After the grant system removal this is an empty marker; kept so the
+// constructor signature stays stable and future checks can be added.
+type Store interface{}
 
 // Authorizer performs authorization checks against the store.
 type Authorizer struct {
@@ -128,33 +211,31 @@ func ActorFromContext(ctx context.Context) Actor {
 		actor.TenantID = tenant.ID
 	}
 
-	actor.IsPlatformAdmin = middleware.IsAdmin(ctx)
-	actor.IsTenantAdmin = middleware.IsTenantAdmin(ctx)
+	actor.IsSuperAdmin = middleware.IsSuperAdmin(ctx)
+	actor.IsAdmin = middleware.IsAdmin(ctx)
 	actor.Permission = middleware.PermissionFromCtx(ctx)
 
 	return actor
 }
 
 // Authorize checks whether the actor can perform the action on the resource.
-func (a *Authorizer) Authorize(ctx context.Context, actor Actor, action Action, res Resource) error {
-	// Platform admin can do anything.
-	if actor.IsPlatformAdmin {
+func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, res Resource) error {
+	// super_admin can do everything.
+	if actor.IsSuperAdmin {
 		return nil
 	}
 
-	// Tenant isolation: non-platform-admin must belong to the same tenant.
+	// Tenant isolation: non-super-admin must belong to the same tenant.
 	if res.TenantID != (uuid.UUID{}) && actor.TenantID != res.TenantID {
 		return ErrForbidden("access denied")
 	}
 
-	// Tenant admin can do most things within their tenant.
-	if actor.IsTenantAdmin {
-		switch action {
-		case ActionTenantManage:
-			return ErrForbidden("platform admin required")
-		default:
-			return nil
+	// admin has full access within their tenant, except managing other admins.
+	if actor.IsAdmin {
+		if action == ActionTenantUsersManage {
+			return ErrForbidden("super admin required")
 		}
+		return nil
 	}
 
 	// Regular users and API keys — check per-action rules.
@@ -166,37 +247,50 @@ func (a *Authorizer) Authorize(ctx context.Context, actor Actor, action Action, 
 		return a.checkZoneCreate(actor)
 
 	case ActionZoneManage, ActionZoneDelete:
-		return a.checkZoneAccess(ctx, actor, res, true)
+		return a.checkZoneAccessAndOwnership(actor, res)
 
 	case ActionZoneRead:
-		return a.checkZoneAccess(ctx, actor, res, false)
+		return a.checkZoneAccessAndOwnership(actor, res)
 
 	case ActionRouteManage:
 		if actor.Permission != nil && !actor.Permission.CanCreateRoutes {
 			return ErrForbidden("route creation not allowed")
 		}
-		return a.checkZoneAccess(ctx, actor, res, true)
+		return a.checkZoneAccessAndOwnership(actor, res)
 
-	case ActionRouteRead:
-		return a.checkZoneAccess(ctx, actor, res, false)
+	case ActionRouteRead, ActionRouteDelete:
+		// Deleting a route only requires zone allowlist + ownership; the
+		// CanCreateRoutes flag gates creation, not deletion.
+		return a.checkZoneAccessAndOwnership(actor, res)
 
 	case ActionMailboxCreate:
-		return a.checkMailboxCreate(ctx, actor, res)
+		// Creating a mailbox requires zone allowlist membership and zone
+		// ownership, mirroring the canManageZone + IsZoneAllowed pair the
+		// mailboxes service previously enforced inline.
+		return a.checkZoneAccessAndOwnership(actor, res)
 
 	case ActionMailboxRead:
-		return a.checkMailboxAccess(ctx, actor, res, false)
+		return a.checkZoneAccessAndOwnership(actor, res)
 
 	case ActionMailboxWrite, ActionMailboxDelete:
-		return a.checkMailboxAccess(ctx, actor, res, true)
+		return a.checkZoneAccessAndOwnership(actor, res)
 
-	case ActionMessageRead:
-		return a.checkMailboxAccess(ctx, actor, res, false)
+	case ActionMessageList:
+		return a.checkZoneAccessAndOwnership(actor, res)
+
+	case ActionMessageRead, ActionMessageSource:
+		return a.checkZoneAccessAndOwnership(actor, res)
 
 	case ActionMessageWrite, ActionMessageDelete:
-		return a.checkMailboxAccess(ctx, actor, res, true)
+		return a.checkZoneAccessAndOwnership(actor, res)
 
 	case ActionSendFrom:
-		return a.checkSendFrom(actor)
+		if err := a.checkSendFrom(actor); err != nil {
+			return err
+		}
+		// Sending only requires the zone to be in the allowlist, not zone
+		// ownership.
+		return a.checkZoneAccess(actor, res)
 
 	case ActionOutboundRead:
 		return nil // filtered at query level
@@ -236,93 +330,53 @@ func (a *Authorizer) checkZoneCreate(actor Actor) error {
 	return nil
 }
 
-func (a *Authorizer) checkZoneAccess(ctx context.Context, actor Actor, res Resource, requireManage bool) error {
+// checkZoneAccessAndOwnership applies the allowlist check first and then
+// enforces zone ownership for non-tenant-wide actors. Admins are handled
+// before this is called.
+func (a *Authorizer) checkZoneAccessAndOwnership(actor Actor, res Resource) error {
+	if err := a.checkZoneAccess(actor, res); err != nil {
+		return err
+	}
+	return checkZoneOwnership(actor, res)
+}
+
+// checkZoneOwnership enforces ownership for regular users and user-owned API
+// keys. Ownership is required when the resource carries an owner, or when a
+// zone resource has been loaded (res.ID set). Pre-load/create-time checks
+// (zero res.ID and nil owner) stay allowlist-only. A loaded zone with no
+// owner is denied for regular actors, matching app.CanManageZone. Tenant-wide
+// keys bypass ownership (but not the allowlist).
+func checkZoneOwnership(actor Actor, res Resource) error {
+	if actor.TenantWide {
+		return nil
+	}
+	loadedZone := res.Type == "zone" && res.ID != (uuid.UUID{})
+	if res.OwnerUserID == nil && !loadedZone {
+		return nil
+	}
+	uid := actor.EffectiveUserID()
+	if uid != nil && res.OwnerUserID != nil && *uid == *res.OwnerUserID {
+		return nil
+	}
+	return ErrForbidden("not your domain")
+}
+
+// checkZoneAccess verifies the actor has access to the zone via
+// EffectivePermission.AllowedZoneIDs. Admins are handled before this is called.
+func (a *Authorizer) checkZoneAccess(actor Actor, res Resource) error {
 	if actor.TenantWide {
 		if res.ZoneID != (uuid.UUID{}) && actor.Permission != nil && !isZoneAllowed(actor.Permission, res.ZoneID) {
 			return ErrForbidden("zone not in allowed list")
 		}
-		return nil // API key scope already checked by middleware
+		return nil
 	}
 	if res.ZoneID == (uuid.UUID{}) {
-		return nil // no zone constraint
+		return nil
 	}
 	if actor.Permission != nil && !isZoneAllowed(actor.Permission, res.ZoneID) {
 		return ErrForbidden("zone not in allowed list")
 	}
-	// Check zone grants
-	role, err := a.store.GetHighestZoneRole(ctx, res.ZoneID, string(actor.Type), actor.ID)
-	if err != nil {
-		return fmt.Errorf("checking zone grant: %w", err)
-	}
-	if role != "" {
-		if requireManage && !role.CanManage() {
-			return ErrForbidden("zone management access required")
-		}
-		return nil
-	}
-	if actor.OwnerUserID != nil {
-		role, err := a.store.GetHighestZoneRole(ctx, res.ZoneID, string(PrincipalUser), *actor.OwnerUserID)
-		if err != nil {
-			return fmt.Errorf("checking owner zone grant: %w", err)
-		}
-		if role != "" {
-			if requireManage && !role.CanManage() {
-				return ErrForbidden("zone management access required")
-			}
-			return nil
-		}
-	}
-	// No grant found
-	if requireManage {
-		return ErrForbidden("not your domain")
-	}
-	return ErrForbidden("zone access denied")
-}
-
-func (a *Authorizer) checkMailboxCreate(ctx context.Context, actor Actor, res Resource) error {
-	perm := actor.Permission
-	if perm != nil {
-		if !isZoneAllowed(perm, res.ZoneID) {
-			return ErrForbidden("zone not in allowed list")
-		}
-	}
-	return a.checkZoneAccess(ctx, actor, res, true)
-}
-
-func (a *Authorizer) checkMailboxAccess(ctx context.Context, actor Actor, res Resource, requireWrite bool) error {
-	if actor.TenantWide {
-		if res.ZoneID != (uuid.UUID{}) && actor.Permission != nil && !isZoneAllowed(actor.Permission, res.ZoneID) {
-			return ErrForbidden("zone not in allowed list")
-		}
-		return nil
-	}
-	// Check mailbox-level grant first
-	if res.ID != (uuid.UUID{}) {
-		grant, err := a.store.GetMailboxGrant(ctx, res.ID, string(actor.Type), actor.ID)
-		if err != nil {
-			return fmt.Errorf("checking mailbox grant: %w", err)
-		}
-		if grant != nil {
-			if requireWrite && !grant.Role.CanWrite() {
-				return ErrForbidden("mailbox write access required")
-			}
-			return nil
-		}
-		if actor.OwnerUserID != nil {
-			grant, err := a.store.GetMailboxGrant(ctx, res.ID, string(PrincipalUser), *actor.OwnerUserID)
-			if err != nil {
-				return fmt.Errorf("checking owner mailbox grant: %w", err)
-			}
-			if grant != nil {
-				if requireWrite && !grant.Role.CanWrite() {
-					return ErrForbidden("mailbox write access required")
-				}
-				return nil
-			}
-		}
-	}
-	// Fall back to zone-level access
-	return a.checkZoneAccess(ctx, actor, res, requireWrite)
+	return nil
 }
 
 func (a *Authorizer) checkSendFrom(actor Actor) error {
@@ -330,8 +384,6 @@ func (a *Authorizer) checkSendFrom(actor Actor) error {
 	if perm != nil && !perm.CanSend {
 		return ErrForbidden("sending not allowed")
 	}
-	// Address-level send-as grant check is deferred to the handler,
-	// because the address string is not part of Resource.
 	return nil
 }
 

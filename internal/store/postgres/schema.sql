@@ -23,15 +23,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE user_role AS ENUM ('admin', 'user');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-DO $$ BEGIN
-    ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'platform_admin';
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-DO $$ BEGIN
-    ALTER TYPE user_role ADD VALUE IF NOT EXISTS 'tenant_admin';
+    CREATE TYPE user_role AS ENUM ('super_admin', 'admin', 'user');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -41,17 +33,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE zone_grant_role AS ENUM ('owner', 'admin', 'editor', 'viewer');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-DO $$ BEGIN
     CREATE TYPE send_identity_type AS ENUM ('exact', 'domain_wildcard');
-EXCEPTION WHEN duplicate_object THEN NULL;
-END $$;
-
-DO $$ BEGIN
-    CREATE TYPE mailbox_grant_role AS ENUM ('owner', 'manager', 'writer', 'reader');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
@@ -110,10 +92,11 @@ CREATE TABLE IF NOT EXISTS tenant_api_keys (
     expires_at      TIMESTAMPTZ,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT now(),
     last_used_at    TIMESTAMPTZ,
+    last_used_ip    INET,
     CONSTRAINT tenant_api_keys_scopes_check CHECK (
         jsonb_typeof(scopes) = 'array'
         AND jsonb_array_length(scopes) > 0
-        AND scopes <@ '["domains:read","domains:write","routes:read","routes:write","mailboxes:read","mailboxes:write","messages:read","messages:write","send:read","send:write"]'::jsonb
+        AND scopes <@ '["domains:read","domains:write","routes:read","routes:write","mailboxes:read","mailboxes:write","messages:read","messages:write","send:read","send:write","webhooks:read","webhooks:write"]'::jsonb
     )
 );
 CREATE INDEX IF NOT EXISTS idx_api_keys_prefix ON tenant_api_keys(key_prefix);
@@ -167,6 +150,43 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(LOWER(email));
 CREATE INDEX IF NOT EXISTS idx_users_tenant ON users(tenant_id);
+
+-- Keep the database enum aligned with the application-level role model:
+-- super_admin = platform-wide administrator, admin = tenant administrator.
+-- Earlier pre-launch snapshots briefly introduced platform_admin/tenant_admin;
+-- normalize those values back to the current code semantics.
+DO $$
+DECLARE
+    labels TEXT[];
+BEGIN
+    SELECT array_agg(e.enumlabel ORDER BY e.enumsortorder)
+    INTO labels
+    FROM pg_enum e
+    JOIN pg_type t ON t.oid = e.enumtypid
+    WHERE t.typname = 'user_role';
+
+    IF labels IS DISTINCT FROM ARRAY['super_admin', 'admin', 'user'] THEN
+        DROP TYPE IF EXISTS user_role_current;
+        CREATE TYPE user_role_current AS ENUM ('super_admin', 'admin', 'user');
+
+        ALTER TABLE users ALTER COLUMN role DROP DEFAULT;
+        ALTER TABLE users
+            ALTER COLUMN role TYPE user_role_current
+            USING (
+                CASE role::text
+                    WHEN 'platform_admin' THEN 'super_admin'
+                    WHEN 'tenant_admin' THEN 'admin'
+                    WHEN 'super_admin' THEN 'super_admin'
+                    WHEN 'admin' THEN 'admin'
+                    ELSE 'user'
+                END
+            )::user_role_current;
+        ALTER TABLE users ALTER COLUMN role SET DEFAULT 'user';
+
+        DROP TYPE user_role;
+        ALTER TYPE user_role_current RENAME TO user_role;
+    END IF;
+END $$;
 
 -- FK for tenant_api_keys.owner_user_id (declared after users table exists)
 DO $$ BEGIN
@@ -342,26 +362,7 @@ CREATE INDEX IF NOT EXISTS idx_outbound_tenant_api_key_date ON outbound_jobs (te
 CREATE INDEX IF NOT EXISTS idx_outbound_lease ON outbound_jobs (state, lease_until) WHERE state = 'processing';
 
 -- ============================================================
--- Zone grants (team-level domain permissions)
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS zone_grants (
-    id              UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id       UUID            NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    zone_id         UUID            NOT NULL REFERENCES domain_zones(id) ON DELETE CASCADE,
-    principal_type  VARCHAR(16)     NOT NULL CHECK (principal_type IN ('user', 'api_key')),
-    principal_id    UUID            NOT NULL,
-    role            zone_grant_role NOT NULL DEFAULT 'viewer',
-    created_by      UUID            REFERENCES users(id) ON DELETE SET NULL,
-    created_at      TIMESTAMPTZ     NOT NULL DEFAULT now(),
-    UNIQUE (zone_id, principal_type, principal_id)
-);
-CREATE INDEX IF NOT EXISTS idx_zone_grants_zone ON zone_grants(zone_id);
-CREATE INDEX IF NOT EXISTS idx_zone_grants_principal ON zone_grants(principal_type, principal_id);
-CREATE INDEX IF NOT EXISTS idx_zone_grants_tenant ON zone_grants(tenant_id);
-
--- ============================================================
--- Send identities & send-as grants
+-- Send identities
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS send_identities (
@@ -378,37 +379,6 @@ CREATE TABLE IF NOT EXISTS send_identities (
 CREATE INDEX IF NOT EXISTS idx_send_identities_zone ON send_identities(zone_id);
 CREATE INDEX IF NOT EXISTS idx_send_identities_tenant ON send_identities(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_send_identities_address ON send_identities(address);
-
-CREATE TABLE IF NOT EXISTS send_as_grants (
-    id              UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id       UUID        NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    identity_id     UUID        NOT NULL REFERENCES send_identities(id) ON DELETE CASCADE,
-    principal_type  VARCHAR(16) NOT NULL CHECK (principal_type IN ('user', 'api_key')),
-    principal_id    UUID        NOT NULL,
-    daily_quota     INT         NOT NULL DEFAULT 0 CHECK (daily_quota >= 0),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    UNIQUE (identity_id, principal_type, principal_id)
-);
-CREATE INDEX IF NOT EXISTS idx_send_as_grants_identity ON send_as_grants(identity_id);
-CREATE INDEX IF NOT EXISTS idx_send_as_grants_principal ON send_as_grants(principal_type, principal_id);
-
--- ============================================================
--- Mailbox grants (per-mailbox access control)
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS mailbox_grants (
-    id              UUID               PRIMARY KEY DEFAULT gen_random_uuid(),
-    tenant_id       UUID               NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
-    mailbox_id      UUID               NOT NULL REFERENCES mailboxes(id) ON DELETE CASCADE,
-    principal_type  VARCHAR(16)        NOT NULL CHECK (principal_type IN ('user', 'api_key')),
-    principal_id    UUID               NOT NULL,
-    role            mailbox_grant_role NOT NULL DEFAULT 'reader',
-    created_at      TIMESTAMPTZ        NOT NULL DEFAULT now(),
-    UNIQUE (mailbox_id, principal_type, principal_id)
-);
-CREATE INDEX IF NOT EXISTS idx_mailbox_grants_mailbox ON mailbox_grants(mailbox_id);
-CREATE INDEX IF NOT EXISTS idx_mailbox_grants_principal ON mailbox_grants(principal_type, principal_id);
-CREATE INDEX IF NOT EXISTS idx_mailbox_grants_tenant ON mailbox_grants(tenant_id);
 
 -- ============================================================
 -- System operations
@@ -563,9 +533,6 @@ DO $$ BEGIN
     END IF;
 END $$;
 
--- Migrate legacy 'admin' role to 'platform_admin'
-UPDATE users SET role = 'platform_admin' WHERE role = 'admin';
-
 -- Backfill mailbox message counts
 UPDATE mailboxes m
 SET message_count = sub.count
@@ -577,23 +544,66 @@ FROM (
 WHERE m.id = sub.mailbox_id
   AND m.message_count = 0;
 
--- Backfill zone grants from owner_user_id
-INSERT INTO zone_grants (tenant_id, zone_id, principal_type, principal_id, role)
-SELECT tenant_id, id, 'user', owner_user_id, 'owner'
-FROM domain_zones
-WHERE owner_user_id IS NOT NULL
-ON CONFLICT DO NOTHING;
-
 -- Backfill send identities for existing zones
 INSERT INTO send_identities (tenant_id, zone_id, address, identity_type, verified)
 SELECT tenant_id, id, '*@' || domain, 'domain_wildcard', (is_verified AND mx_verified)
 FROM domain_zones
 ON CONFLICT DO NOTHING;
 
--- Backfill send-as grants for zone owners
-INSERT INTO send_as_grants (tenant_id, identity_id, principal_type, principal_id)
-SELECT si.tenant_id, si.id, 'user', dz.owner_user_id
-FROM send_identities si
-JOIN domain_zones dz ON dz.id = si.zone_id
-WHERE dz.owner_user_id IS NOT NULL AND si.identity_type = 'domain_wildcard'
-ON CONFLICT DO NOTHING;
+-- Migration: remove grant tables
+DROP TABLE IF EXISTS send_as_grants CASCADE;
+DROP TABLE IF EXISTS mailbox_grants CASCADE;
+DROP TABLE IF EXISTS zone_grants CASCADE;
+
+-- ============================================================
+-- Webhook endpoints (tenant-level)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS webhook_endpoints (
+    id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id   UUID        NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    url         TEXT        NOT NULL,
+    secret      TEXT,
+    event_types TEXT[]      NOT NULL DEFAULT '{}',
+    is_active   BOOLEAN     NOT NULL DEFAULT TRUE,
+    created_by  UUID        REFERENCES users(id) ON DELETE SET NULL,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_webhook_endpoints_tenant ON webhook_endpoints(tenant_id);
+
+-- ============================================================
+-- Outbound delivery attempts
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS outbound_attempts (
+    id            UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    job_id        UUID         NOT NULL REFERENCES outbound_jobs(id) ON DELETE CASCADE,
+    tenant_id     UUID         NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    adapter       VARCHAR(32)  NOT NULL DEFAULT 'direct_mx',
+    attempt       INT          NOT NULL DEFAULT 1,
+    smtp_code     INT,
+    smtp_response TEXT         NOT NULL DEFAULT '',
+    remote_host   TEXT         NOT NULL DEFAULT '',
+    started_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    finished_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    error         TEXT         NOT NULL DEFAULT ''
+);
+CREATE INDEX IF NOT EXISTS idx_outbound_attempts_job ON outbound_attempts(job_id);
+CREATE INDEX IF NOT EXISTS idx_outbound_attempts_tenant ON outbound_attempts(tenant_id);
+
+-- ============================================================
+-- Suppression list
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS suppression_list (
+    id         UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id  UUID         NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    address    VARCHAR(255) NOT NULL,
+    reason     VARCHAR(32)  NOT NULL DEFAULT 'hard_bounce',
+    source_job_id UUID,
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    UNIQUE(tenant_id, address)
+);
+CREATE INDEX IF NOT EXISTS idx_suppression_tenant_addr ON suppression_list(tenant_id, LOWER(address));
+CREATE INDEX IF NOT EXISTS idx_webhook_endpoints_active ON webhook_endpoints(tenant_id) WHERE is_active = TRUE;

@@ -31,6 +31,7 @@ vi.mock("@/lib/api", () => ({
 }));
 
 vi.mock("@/contexts/auth-context", () => ({
+  useAuth: () => ({ level: "user" }),
   usePermissions: () => ({
     can_create_domains: true,
     max_domains: 0,

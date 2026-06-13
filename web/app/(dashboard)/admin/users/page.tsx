@@ -79,6 +79,7 @@ import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/auth-context";
+import { canManageTenantUsers } from "@/lib/permissions";
 
 const NONE_PROFILE = "__none__";
 
@@ -118,7 +119,8 @@ function confirmAction(message: string) {
 export default function UsersPage() {
   const { t } = useI18n();
   const { level } = useAuth();
-  const isPlatformAdmin = level === "platform_admin";
+  // UX-only gate; the backend authz seam is authoritative.
+  const isPlatformAdmin = canManageTenantUsers(level);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -166,9 +168,9 @@ export default function UsersPage() {
       const res = await listDomains();
       setDomains(res.data ?? []);
     } catch {
-      toast.error("域名列表加载失败");
+      toast.error(t("domains.loadFailed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchUsers();
@@ -315,10 +317,10 @@ export default function UsersPage() {
         { key: "max_domains", label: t("admin.permMaxDomains"), value: String(permEffective.max_domains) },
         {
           key: "allowed_zone_ids",
-          label: "允许域名范围",
+          label: t("admin.permAllowedZoneScope"),
           value: permEffective.allowed_zone_ids?.length
             ? permEffective.allowed_zone_ids.map(domainLabel).join(", ")
-            : "全部域名",
+            : t("admin.permAllDomains"),
         },
         { key: "can_create_domains", label: t("admin.permCanCreateDomains"), value: permEffective.can_create_domains ? "true" : "false" },
         { key: "can_create_routes", label: t("admin.permCanCreateRoutes"), value: permEffective.can_create_routes ? "true" : "false" },
@@ -454,15 +456,15 @@ export default function UsersPage() {
                       <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell>{user.display_name}</TableCell>
                       <TableCell>
-                        {(user.role === "platform_admin" || user.role === "admin") ? (
+                        {user.role === "super_admin" ? (
                           <Badge className="gap-1 bg-amber-600 hover:bg-amber-700">
                             <Shield className="h-3 w-3" />
-                            {t("admin.rolePlatformAdmin")}
+                            {t("admin.roleSuperAdmin")}
                           </Badge>
-                        ) : user.role === "tenant_admin" ? (
+                        ) : user.role === "admin" ? (
                           <Badge className="gap-1 bg-blue-600 hover:bg-blue-700">
                             <Shield className="h-3 w-3" />
-                            {t("admin.roleTenantAdmin")}
+                            {t("admin.roleAdmin")}
                           </Badge>
                         ) : (
                           <Badge variant="outline">
@@ -691,9 +693,9 @@ export default function UsersPage() {
                 <div className="space-y-3 rounded-md border p-3">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <Label>{"允许域名范围"}</Label>
+                      <Label>{t("admin.permAllowedZoneScope")}</Label>
                       <p className="text-xs text-muted-foreground">
-                        {"继承表示沿用模板；全部域名表示覆盖为不限制；勾选域名表示只允许这些域名。"}
+                        {t("admin.permAllowedZoneHint")}
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-2">
@@ -703,7 +705,7 @@ export default function UsersPage() {
                         size="sm"
                         onClick={() => setPermForm((prev) => ({ ...prev, allowed_zone_ids: null }))}
                       >
-                        {"继承"}
+                        {t("admin.permInheritShort")}
                       </Button>
                       <Button
                         type="button"
@@ -711,13 +713,13 @@ export default function UsersPage() {
                         size="sm"
                         onClick={() => setPermForm((prev) => ({ ...prev, allowed_zone_ids: [] }))}
                       >
-                        {"全部"}
+                        {t("admin.permAll")}
                       </Button>
                     </div>
                   </div>
 
                   {domains.length === 0 ? (
-                    <p className="text-xs text-muted-foreground">{"暂无可选域名。"}</p>
+                    <p className="text-xs text-muted-foreground">{t("admin.permNoDomains")}</p>
                   ) : (
                     <div className="grid gap-2">
                       {domains.map((domain) => {

@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"errors"
 	"io"
 	"time"
 
@@ -9,13 +10,39 @@ import (
 	"tabmail/internal/models"
 )
 
-// Store is the primary persistence interface for TabMail.
-type Store interface {
-	// --- System settings -------------------------------------------------
-	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
-	UpsertSetting(ctx context.Context, key, value, description string) error
-	ListSettings(ctx context.Context) ([]*models.SystemSetting, error)
+var (
+	ErrOutboundDailyQuotaExceeded = errors.New("outbound daily quota exceeded")
+	ErrSendAsDailyQuotaExceeded   = errors.New("send-as daily quota exceeded")
+)
 
+// OutboundQuotaReservation describes quota limits that must be checked in the
+// same critical section as outbound job creation.
+type OutboundQuotaReservation struct {
+	UserDaily   *OutboundUserDailyQuota
+	SendAsDaily *OutboundSendAsDailyQuota
+}
+
+func (q OutboundQuotaReservation) HasLimits() bool {
+	return (q.UserDaily != nil && q.UserDaily.Limit > 0) ||
+		(q.SendAsDaily != nil && q.SendAsDaily.Limit > 0)
+}
+
+type OutboundUserDailyQuota struct {
+	UserID *uuid.UUID
+	Since  time.Time
+	Limit  int
+}
+
+type OutboundSendAsDailyQuota struct {
+	PrincipalType string
+	PrincipalID   uuid.UUID
+	IdentityID    uuid.UUID
+	Since         time.Time
+	Limit         int
+}
+
+// UserStore persists users, refresh tokens, and admin invitations.
+type UserStore interface {
 	// --- Users -----------------------------------------------------------
 	CreateUser(ctx context.Context, u *models.User) error
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
@@ -37,14 +64,19 @@ type Store interface {
 	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error
 	GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error)
 	MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error
+}
 
-	// --- Plans -----------------------------------------------------------
+// PlanStore persists subscription plans.
+type PlanStore interface {
 	CreatePlan(ctx context.Context, p *models.Plan) error
 	GetPlan(ctx context.Context, id uuid.UUID) (*models.Plan, error)
 	ListPlans(ctx context.Context) ([]*models.Plan, error)
 	UpdatePlan(ctx context.Context, p *models.Plan) error
 	DeletePlan(ctx context.Context, id uuid.UUID) error
+}
 
+// TenantStore persists tenants, tenant overrides, and tenant API keys.
+type TenantStore interface {
 	// --- Tenants ---------------------------------------------------------
 	CreateTenant(ctx context.Context, t *models.Tenant) error
 	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
@@ -67,8 +99,11 @@ type Store interface {
 	// Looks up tenant by raw API key (hashes internally).
 	// Returns the tenant, the API key UUID, scopes, allowed zone IDs, owner user ID, and any error.
 	ResolveAPIKey(ctx context.Context, rawKey string) (*models.Tenant, *uuid.UUID, []string, []uuid.UUID, *uuid.UUID, error)
-	TouchAPIKey(ctx context.Context, id uuid.UUID) error
+	TouchAPIKey(ctx context.Context, id uuid.UUID, ip string) error
+}
 
+// ZoneStore persists domain zones and domain routes.
+type ZoneStore interface {
 	// --- Domain zones ----------------------------------------------------
 	CreateZone(ctx context.Context, z *models.DomainZone) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
@@ -90,18 +125,13 @@ type Store interface {
 	// Returns all routes whose zone domain matches the given address domain.
 	// If tenantID is non-nil, only routes belonging to that tenant are returned.
 	FindMatchingRoutes(ctx context.Context, domain string, tenantID *uuid.UUID) ([]*models.DomainRoute, error)
+}
 
-	// --- SMTP Policy -----------------------------------------------------
-	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
-	UpsertSMTPPolicy(ctx context.Context, p *models.SMTPPolicy) error
-
-	// --- Mailboxes -------------------------------------------------------
+// MailboxStore persists mailboxes.
+type MailboxStore interface {
 	CreateMailbox(ctx context.Context, m *models.Mailbox) error
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
-	// Tenant-scoped variants — prefer these when tenant context is available.
-	GetMailboxForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error)
-	GetMailboxByAddressForTenant(ctx context.Context, addr string, tenantID uuid.UUID) (*models.Mailbox, error)
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZone(ctx context.Context, zoneID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
@@ -110,12 +140,12 @@ type Store interface {
 	CountAllMailboxes(ctx context.Context) (int, error)
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	ListZoneObjectKeys(ctx context.Context, zoneID uuid.UUID) ([]string, error)
+}
 
-	// --- Messages --------------------------------------------------------
+// MessageStore persists messages and message retention cleanup.
+type MessageStore interface {
 	CreateMessage(ctx context.Context, m *models.Message) error
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
-	// Tenant-scoped variant — prefer when tenant context is available.
-	GetMessageForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Message, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
@@ -132,11 +162,33 @@ type Store interface {
 	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
 	// Atomically deletes expired messages and returns affected object keys.
 	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
+}
 
-	// Purge completed/dead ingest jobs older than the given time.
-	// Returns count of purged jobs and their object keys for orphan cleanup checks.
-	PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error)
+// TenantScoped is a read view bound to a single tenant. Every lookup is
+// filtered to that tenant; a row belonging to another tenant is reported
+// as not found. Obtain via Store.ForTenant.
+type TenantScoped interface {
+	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
+	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
+}
 
+// ScopedStore hands out tenant-scoped read views. Prefer ForTenant over the
+// unscoped point-lookups whenever tenant context is available; the unscoped
+// MailboxStore/MessageStore getters are for genuinely tenant-less paths
+// (SMTP-time resolution, super-admin global access).
+type ScopedStore interface {
+	ForTenant(tenantID uuid.UUID) TenantScoped
+}
+
+// PolicyStore persists the SMTP policy.
+type PolicyStore interface {
+	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
+	UpsertSMTPPolicy(ctx context.Context, p *models.SMTPPolicy) error
+}
+
+// AuditStore persists audit entries and monitor events.
+type AuditStore interface {
 	// --- Audit -----------------------------------------------------------
 	InsertAudit(ctx context.Context, e *models.AuditEntry) error
 	ListAuditEntries(ctx context.Context, limit int) ([]*models.AuditEntry, error)
@@ -145,7 +197,10 @@ type Store interface {
 	// --- Monitor Events --------------------------------------------------
 	CreateMonitorEvent(ctx context.Context, e *models.MonitorEvent) error
 	ListMonitorEvents(ctx context.Context, pg models.Page, eventType, mailbox, sender string) ([]*models.MonitorEvent, int, error)
+}
 
+// OutboxStore persists outbox events, webhook deliveries, and webhook endpoints.
+type OutboxStore interface {
 	// --- Outbox / Webhook deliveries ------------------------------------
 	CreateOutboxEvent(ctx context.Context, e *models.OutboxEvent) error
 	ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error)
@@ -160,7 +215,24 @@ type Store interface {
 	ListWebhookDeliveries(ctx context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error)
 	CountWebhookDeliveriesByState(ctx context.Context, states ...string) (int, error)
 
-	// --- Ingest jobs -----------------------------------------------------
+	// --- Webhook endpoints (tenant-level) ---------------------------------
+	CreateWebhookEndpoint(ctx context.Context, ep *models.WebhookEndpoint) error
+	ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) ([]*models.WebhookEndpoint, error)
+	GetWebhookEndpoint(ctx context.Context, id uuid.UUID) (*models.WebhookEndpoint, error)
+	UpdateWebhookEndpoint(ctx context.Context, ep *models.WebhookEndpoint) error
+	DeleteWebhookEndpoint(ctx context.Context, id uuid.UUID) error
+}
+
+// SuppressionStore persists the suppression list.
+type SuppressionStore interface {
+	AddSuppression(ctx context.Context, e *models.SuppressionEntry) error
+	IsSuppressed(ctx context.Context, tenantID uuid.UUID, address string) (bool, error)
+	ListSuppressions(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.SuppressionEntry, int, error)
+	DeleteSuppression(ctx context.Context, tenantID uuid.UUID, id uuid.UUID) error
+}
+
+// IngestStore persists ingest jobs.
+type IngestStore interface {
 	CreateIngestJob(ctx context.Context, job *models.IngestJob) error
 	ClaimIngestJobs(ctx context.Context, now time.Time, limit int) ([]*models.IngestJob, error)
 	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
@@ -168,6 +240,13 @@ type Store interface {
 	ListIngestJobs(ctx context.Context, pg models.Page, state, source, recipient string) ([]*models.IngestJob, int, error)
 	CountIngestJobsByState(ctx context.Context, states ...string) (int, error)
 
+	// Purge completed/dead ingest jobs older than the given time.
+	// Returns count of purged jobs and their object keys for orphan cleanup checks.
+	PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error)
+}
+
+// PermissionStore persists permission profiles and user permission overrides.
+type PermissionStore interface {
 	// --- Permission profiles -----------------------------------------------
 	CreatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error
 	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
@@ -178,12 +257,15 @@ type Store interface {
 
 	// --- User permission overrides -----------------------------------------
 	UpsertUserPermissionOverride(ctx context.Context, o *models.UserPermissionOverride) error
-	GetUserPermissionOverride(ctx context.Context, userID uuid.UUID) (*models.UserPermissionOverride, error)
 	DeleteUserPermissionOverride(ctx context.Context, userID uuid.UUID) error
 	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
+}
 
+// OutboundStore persists outbound jobs, outbound attempts, and send identities.
+type OutboundStore interface {
 	// --- Outbound jobs -----------------------------------------------------
 	CreateOutboundJob(ctx context.Context, job *models.OutboundJob) error
+	CreateOutboundJobWithQuota(ctx context.Context, job *models.OutboundJob, quota OutboundQuotaReservation) error
 	GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.OutboundJob, error)
 	ListOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
 	ClaimOutboundJobs(ctx context.Context, now time.Time, limit int) ([]*models.OutboundJob, error)
@@ -192,15 +274,15 @@ type Store interface {
 	MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, lastError string, dead bool) error
 	CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error)
 	CountOutboundByIdentitySince(ctx context.Context, tenantID uuid.UUID, principalType string, principalID uuid.UUID, identityID uuid.UUID, since time.Time) (int, error)
+	RequeueOutboundJob(ctx context.Context, id uuid.UUID) error
 
-	// --- Zone grants -------------------------------------------------------
-	CreateZoneGrant(ctx context.Context, g *models.ZoneGrant) error
-	DeleteZoneGrant(ctx context.Context, id uuid.UUID) error
-	DeleteZoneGrantScoped(ctx context.Context, id uuid.UUID, zoneID uuid.UUID) error
-	ListZoneGrants(ctx context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error)
-	GetZoneGrant(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (*models.ZoneGrant, error)
-	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
-	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
+	// --- Outbound jobs (user-scoped) ----------------------------------------
+	ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
+	ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
+
+	// --- Outbound attempts ------------------------------------------------
+	CreateOutboundAttempt(ctx context.Context, a *models.OutboundAttempt) error
+	ListOutboundAttempts(ctx context.Context, jobID uuid.UUID) ([]*models.OutboundAttempt, error)
 
 	// --- Send identities -------------------------------------------------------
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
@@ -210,33 +292,38 @@ type Store interface {
 	FindSendIdentityForAddress(ctx context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error)
 	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
 	DeleteSendIdentity(ctx context.Context, id uuid.UUID) error
+}
 
-	// --- Send-as grants --------------------------------------------------------
-	CreateSendAsGrant(ctx context.Context, g *models.SendAsGrant) error
-	DeleteSendAsGrant(ctx context.Context, id uuid.UUID) error
-	DeleteSendAsGrantScoped(ctx context.Context, id uuid.UUID, identityID uuid.UUID) error
-	ListSendAsGrantsByIdentity(ctx context.Context, identityID uuid.UUID) ([]*models.SendAsGrant, error)
-	HasSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (bool, error)
-	GetSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (*models.SendAsGrant, error)
+// SettingsStore persists system settings.
+type SettingsStore interface {
+	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
+	UpsertSetting(ctx context.Context, key, value, description string) error
+	ListSettings(ctx context.Context) ([]*models.SystemSetting, error)
+}
 
-	// --- Mailbox grants ----------------------------------------------------
-	CreateMailboxGrant(ctx context.Context, g *models.MailboxGrant) error
-	DeleteMailboxGrant(ctx context.Context, id uuid.UUID) error
-	DeleteMailboxGrantScoped(ctx context.Context, id uuid.UUID, mailboxID uuid.UUID) error
-	ListMailboxGrants(ctx context.Context, mailboxID uuid.UUID) ([]*models.MailboxGrant, error)
-	GetMailboxGrant(ctx context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error)
-	ListGrantedMailboxIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
-
-	// --- Outbound jobs (user-scoped) ----------------------------------------
-	ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
-	ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
-
-	// --- Uniqueness checks -------------------------------------------------
-	ExistsMailboxByAddress(ctx context.Context, address string) (bool, error)
-	ExistsZoneByDomain(ctx context.Context, domain string) (bool, error)
-
-	// --- Lifecycle -------------------------------------------------------
+// LifecycleStore manages store lifecycle.
+type LifecycleStore interface {
 	Close() error
+}
+
+// Store is the primary persistence interface for TabMail.
+type Store interface {
+	UserStore
+	PlanStore
+	TenantStore
+	ZoneStore
+	MailboxStore
+	MessageStore
+	ScopedStore
+	PolicyStore
+	AuditStore
+	OutboxStore
+	SuppressionStore
+	IngestStore
+	PermissionStore
+	OutboundStore
+	SettingsStore
+	LifecycleStore
 }
 
 // ObjectStore handles raw .eml blob storage.

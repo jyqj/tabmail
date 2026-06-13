@@ -140,27 +140,6 @@ func (s *PgStore) UpsertUserPermissionOverride(ctx context.Context, o *models.Us
 		Scan(&o.ID, &o.UpdatedAt)
 }
 
-func (s *PgStore) GetUserPermissionOverride(ctx context.Context, userID uuid.UUID) (*models.UserPermissionOverride, error) {
-	o := &models.UserPermissionOverride{}
-	var allowedZones []uuid.UUID
-	err := s.pool.QueryRow(ctx, `
-		SELECT id, user_id, can_send, daily_send_quota, daily_receive_quota,
-			max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
-			can_create_api_keys, updated_at
-		FROM user_permission_overrides WHERE user_id=$1`, userID).
-		Scan(&o.ID, &o.UserID, &o.CanSend, &o.DailySendQuota, &o.DailyReceiveQuota,
-			&o.MaxMailboxes, &o.MaxDomains, &allowedZones, &o.CanCreateDomains, &o.CanCreateRoutes,
-			&o.CanCreateAPIKeys, &o.UpdatedAt)
-	if err == pgx.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	o.AllowedZoneIDs = allowedZones
-	return o, nil
-}
-
 func (s *PgStore) DeleteUserPermissionOverride(ctx context.Context, userID uuid.UUID) error {
 	_, err := s.pool.Exec(ctx, `DELETE FROM user_permission_overrides WHERE user_id=$1`, userID)
 	return err

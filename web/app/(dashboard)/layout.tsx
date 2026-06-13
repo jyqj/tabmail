@@ -24,8 +24,8 @@ export default function DashboardLayout({
     if (level === "user" && pathname.startsWith("/admin")) {
       router.replace("/console/domains");
     }
-    // Tenant admins cannot access platform-only admin pages
-    if (level === "tenant_admin" && (
+    // Regular admins cannot access super_admin-only admin pages
+    if (level === "admin" && (
       pathname === "/admin" ||
       pathname.startsWith("/admin/monitor") ||
       pathname.startsWith("/admin/audit") ||

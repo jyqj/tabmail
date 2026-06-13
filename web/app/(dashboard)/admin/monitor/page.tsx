@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { listMonitorHistory, streamAdminMonitorEvents } from "@/lib/api";
 import type { MonitorEvent } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -67,7 +67,7 @@ export default function AdminMonitorPage() {
     return () => controller.abort();
   }, [reconnectKey, t]);
 
-  const { data: historyRes, isLoading: historyLoading, error: historyError } = useAPI(
+  const { data: historyRes, isLoading: historyLoading } = useCRUDPage(
     ["monitor-history", historyPage, filterType, filterMailbox, filterSender],
     () => listMonitorHistory({
       page: historyPage,
@@ -76,11 +76,10 @@ export default function AdminMonitorPage() {
       mailbox: filterMailbox || undefined,
       sender: filterSender || undefined,
     }),
+    "monitor.loadHistoryFailed",
   );
   const history = historyRes?.data ?? [];
   const historyTotal = historyRes?.meta?.total ?? 0;
-
-  useEffect(() => { if (historyError) toast.error(t("monitor.loadHistoryFailed")); }, [historyError, t]);
 
   const stats = useMemo(() => {
     const counters = { message: 0, delete: 0, purge: 0 };

@@ -7,7 +7,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { getSMTPPolicy, updateSMTPPolicy } from "@/lib/api";
 import type { SMTPPolicy } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,7 +25,7 @@ function parseList(input: string): string[] {
 
 export default function AdminPolicyPage() {
   const { t } = useI18n();
-  const { data: policyRes, isLoading: loading, error: policyError } = useAPI("smtp-policy", () => getSMTPPolicy());
+  const { data: policyRes, isLoading: loading } = useCRUDPage("smtp-policy", () => getSMTPPolicy(), "policy.loadFailed");
   const [saving, setSaving] = useState(false);
   const [formInit, setFormInit] = useState(false);
   const [form, setForm] = useState({
@@ -37,8 +37,6 @@ export default function AdminPolicyPage() {
     discard_domains: "",
     reject_origin_domains: "",
   });
-
-  useEffect(() => { if (policyError) toast.error(t("policy.loadFailed")); }, [policyError, t]);
 
   useEffect(() => {
     if (policyRes?.data && !formInit) {

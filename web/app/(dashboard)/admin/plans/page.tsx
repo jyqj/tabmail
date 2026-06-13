@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,7 +36,7 @@ import { Plus, Trash2, CreditCard, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 
 interface PlanFormData {
   name: string;
@@ -68,14 +68,13 @@ function confirmAction(message: string) {
 export default function PlansPage() {
   const { t } = useI18n();
 
-  const { data: plansRes, isLoading: loading, error: plansError, mutate: mutatePlans } = useAPI(
+  const { data: plansRes, isLoading: loading, mutate: mutatePlans } = useCRUDPage(
     "plans",
     () => listPlans(),
+    "plans.loadFailed",
   );
   const plans = plansRes?.data ?? [];
   const total = plans.length;
-
-  useEffect(() => { if (plansError) toast.error(t("plans.loadFailed")); }, [plansError, t]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);

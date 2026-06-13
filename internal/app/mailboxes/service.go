@@ -10,6 +10,7 @@ import (
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
 	"tabmail/internal/app"
+	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
@@ -29,18 +30,16 @@ type storeRepo interface {
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
-	GetMailboxForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
 	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
-	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
-	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
-	CreateMailboxGrant(ctx context.Context, g *models.MailboxGrant) error
 }
 
 type Service struct {
 	store       storeRepo
+	az          *authz.Authorizer
 	obj         store.ObjectStore
 	dispatcher  *hooks.Dispatcher
 	namingMode  policy.NamingMode
@@ -63,16 +62,17 @@ type TokenIssueResult struct {
 }
 
 func NewService(s storeRepo, obj store.ObjectStore, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, logger zerolog.Logger) *Service {
-	return &Service{store: s, obj: obj, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "mailboxes").Logger()}
+	return &Service{store: s, az: authz.New(s), obj: obj, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "mailboxes").Logger()}
 }
 
-func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, pg models.Page) ([]*models.Mailbox, int, error) {
-	if err := ensureTenantScope(tenant, isAdmin); err != nil {
+func (s *Service) List(ctx context.Context, actor authz.Actor, tenant *models.Tenant, pg models.Page) ([]*models.Mailbox, int, error) {
+	isAdmin := actor.IsSuperAdmin || actor.IsAdmin
+	if err := app.EnsureTenantScope(tenant, isAdmin); err != nil {
 		return nil, 0, err
 	}
-	if isAdmin || tenantWide {
-		if perm != nil && len(perm.AllowedZoneIDs) > 0 {
-			items, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, perm.AllowedZoneIDs, pg)
+	if isAdmin || actor.TenantWide {
+		if actor.Permission != nil && len(actor.Permission.AllowedZoneIDs) > 0 {
+			items, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, actor.Permission.AllowedZoneIDs, pg)
 			if err != nil {
 				return nil, 0, app.Internal(err)
 			}
@@ -84,24 +84,20 @@ func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool,
 		}
 		return items, total, nil
 	}
-	zoneIDs, err := s.accessibleZoneIDs(ctx, tenant, ownerUserID)
+	zoneIDs, err := s.accessibleZoneIDs(ctx, tenant, actor.EffectiveUserID())
 	if err != nil {
 		return nil, 0, err
 	}
-	// Intersect with AllowedZoneIDs from permission profile
-	if perm != nil && len(perm.AllowedZoneIDs) > 0 {
-		allowed := make(map[uuid.UUID]struct{}, len(perm.AllowedZoneIDs))
-		for _, id := range perm.AllowedZoneIDs {
-			allowed[id] = struct{}{}
+	// Intersect owned zones with the actor's zone allowlist. ZoneAllowed
+	// returns true for an absent or empty allowlist, matching the previous
+	// AllowedZoneIDs intersection.
+	filtered := make([]uuid.UUID, 0, len(zoneIDs))
+	for _, id := range zoneIDs {
+		if authz.ZoneAllowed(actor, id) {
+			filtered = append(filtered, id)
 		}
-		filtered := make([]uuid.UUID, 0, len(zoneIDs))
-		for _, id := range zoneIDs {
-			if _, ok := allowed[id]; ok {
-				filtered = append(filtered, id)
-			}
-		}
-		zoneIDs = filtered
 	}
+	zoneIDs = filtered
 	if len(zoneIDs) == 0 {
 		return []*models.Mailbox{}, 0, nil
 	}
@@ -112,8 +108,9 @@ func (s *Service) List(ctx context.Context, tenant *models.Tenant, isAdmin bool,
 	return items, total, nil
 }
 
-func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, req CreateRequest, actor string) (*models.Mailbox, error) {
-	if err := ensureTenantScope(tenant, isAdmin); err != nil {
+func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.Tenant, req CreateRequest) (*models.Mailbox, error) {
+	isAdmin := actor.IsSuperAdmin || actor.IsAdmin
+	if err := app.EnsureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
 	addr := strings.ToLower(strings.TrimSpace(req.Address))
@@ -132,22 +129,19 @@ func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	if zone == nil {
 		return nil, app.BadRequest(fmt.Sprintf("domain %s is not registered", domain))
 	}
-	if !s.canManageZoneWithGrants(ctx, zone, tenant, isAdmin, ownerUserID, tenantWide) {
-		return nil, app.Forbidden("not your domain")
+	// Zone allowlist and zone ownership are enforced through the authz seam,
+	// replacing the previous canManageZone + IsZoneAllowed pair.
+	if err := s.authorize(ctx, actor, authz.ActionMailboxCreate, authz.ZoneResource(zone)); err != nil {
+		return nil, err
 	}
-	// Permission checks for non-admin JWT users
-	if perm != nil && !isAdmin {
-		if !permissions.IsZoneAllowed(perm, zone.ID) {
-			return nil, app.Forbidden("zone not in allowed list")
+	// Per-user mailbox quota for non-admin principals.
+	if actor.Permission != nil && !isAdmin && !permissions.IsUnlimited(actor.Permission.MaxMailboxes) {
+		total, err := s.countUserMailboxes(ctx, tenant, actor.EffectiveUserID())
+		if err != nil {
+			return nil, err
 		}
-		if !permissions.IsUnlimited(perm.MaxMailboxes) {
-			total, err := s.countUserMailboxes(ctx, tenant, ownerUserID)
-			if err != nil {
-				return nil, err
-			}
-			if total >= perm.MaxMailboxes {
-				return nil, app.Forbidden("mailbox limit reached")
-			}
+		if total >= actor.Permission.MaxMailboxes {
+			return nil, app.Forbidden("mailbox limit reached")
 		}
 	}
 	cfg, err := s.store.EffectiveConfig(ctx, tenant.ID)
@@ -200,33 +194,24 @@ func (s *Service) Create(ctx context.Context, tenant *models.Tenant, isAdmin boo
 		}
 		return nil, app.Internal(err)
 	}
-	// Auto-create owner grant for the creating user
-	if ownerUserID != nil {
-		grant := &models.MailboxGrant{
-			TenantID:      tenant.ID,
-			MailboxID:     mb.ID,
-			PrincipalType: "user",
-			PrincipalID:   *ownerUserID,
-			Role:          models.MailboxRoleOwner,
-		}
-		if err := s.store.CreateMailboxGrant(ctx, grant); err != nil {
-			s.logger.Warn().Err(err).Str("mailbox_id", mb.ID.String()).Msg("failed to create owner mailbox grant")
-		}
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(tenant.ID), Actor: actor, Action: "mailbox.create", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "access_mode": mb.AccessMode, "retention_hours_override": mb.RetentionHoursOverride, "expires_at": mb.ExpiresAt})})
+	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(tenant.ID), Actor: actor.AuditLabel(), Action: "mailbox.create", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "access_mode": mb.AccessMode, "retention_hours_override": mb.RetentionHoursOverride, "expires_at": mb.ExpiresAt})})
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "mailbox.created", TenantID: tenant.ID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "access_mode": mb.AccessMode}})
 	}
 	return mb, nil
 }
 
-func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool, perm *models.EffectivePermission, id uuid.UUID, actor string) error {
+func (s *Service) Delete(ctx context.Context, actor authz.Actor, tenant *models.Tenant, id uuid.UUID) error {
 	var mb *models.Mailbox
 	var err error
-	if tenant != nil && !isAdmin {
-		mb, err = s.store.GetMailboxForTenant(ctx, id, tenant.ID)
-	} else {
+	if tenant != nil {
+		mb, err = s.store.ForTenant(tenant.ID).GetMailbox(ctx, id)
+	} else if actor.IsSuperAdmin {
+		// Without a tenant context only super admins may use the global
+		// lookup, matching the previous handler-derived isAdmin value.
 		mb, err = s.store.GetMailbox(ctx, id)
+	} else {
+		return app.Forbidden("no tenant context")
 	}
 	if err != nil {
 		return app.Internal(err)
@@ -234,15 +219,17 @@ func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin boo
 	if mb == nil {
 		return app.NotFound("mailbox not found")
 	}
-	if perm != nil && len(perm.AllowedZoneIDs) > 0 && !permissions.IsZoneAllowed(perm, mb.ZoneID) {
-		return app.Forbidden("zone not in allowed list")
-	}
 	zone, err := s.store.GetZone(ctx, mb.ZoneID)
 	if err != nil {
 		return app.Internal(err)
 	}
-	if !s.canManageZoneWithGrants(ctx, zone, tenant, isAdmin, ownerUserID, tenantWide) {
+	if zone == nil {
 		return app.Forbidden("not your mailbox")
+	}
+	// Zone allowlist and zone ownership are enforced through the authz seam;
+	// ownership is compared against the zone owner, as before.
+	if err := s.authorize(ctx, actor, authz.ActionMailboxDelete, authz.ZoneResource(zone)); err != nil {
+		return err
 	}
 	keys, err := s.store.ListMailboxObjectKeys(ctx, mb.ID)
 	if err != nil {
@@ -263,7 +250,7 @@ func (s *Service) Delete(ctx context.Context, tenant *models.Tenant, isAdmin boo
 			}
 		}
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.delete", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
+	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor.AuditLabel(), Action: "mailbox.delete", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "mailbox.deleted", TenantID: mb.TenantID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "deleted_objects": len(keys)}})
 	}
@@ -293,40 +280,25 @@ func (s *Service) accessibleZoneIDs(ctx context.Context, tenant *models.Tenant, 
 	if err != nil {
 		return nil, app.Internal(err)
 	}
-	idSet := make(map[uuid.UUID]struct{})
+	out := make([]uuid.UUID, 0, len(zones))
 	for _, zone := range zones {
 		if zone.OwnerUserID != nil && *zone.OwnerUserID == *ownerUserID {
-			idSet[zone.ID] = struct{}{}
+			out = append(out, zone.ID)
 		}
-	}
-	// Add granted zones
-	grantedIDs, err := s.store.ListGrantedZoneIDs(ctx, "user", *ownerUserID)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	for _, id := range grantedIDs {
-		idSet[id] = struct{}{}
-	}
-	out := make([]uuid.UUID, 0, len(idSet))
-	for id := range idSet {
-		out = append(out, id)
 	}
 	return out, nil
 }
 
-func canManageZone(zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
-	return app.CanManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide)
-}
-
-func (s *Service) canManageZoneWithGrants(ctx context.Context, zone *models.DomainZone, tenant *models.Tenant, isAdmin bool, ownerUserID *uuid.UUID, tenantWide bool) bool {
-	if canManageZone(zone, tenant, isAdmin, ownerUserID, tenantWide) {
-		return true
+// authorize runs the authz seam and converts AuthzError into an app-level
+// Forbidden error so HTTP status and message stay stable.
+func (s *Service) authorize(ctx context.Context, actor authz.Actor, action authz.Action, res authz.Resource) error {
+	if err := s.az.Authorize(ctx, actor, action, res); err != nil {
+		if authz.IsAuthzError(err) {
+			return app.Forbidden(err.Error())
+		}
+		return app.Internal(err)
 	}
-	if ownerUserID != nil {
-		role, _ := s.store.GetHighestZoneRole(ctx, zone.ID, "user", *ownerUserID)
-		return role.CanManage()
-	}
-	return false
+	return nil
 }
 
 func (s *Service) IssueToken(ctx context.Context, address, password, actor string) (*TokenIssueResult, error) {
@@ -371,10 +343,6 @@ func (s *Service) IssueToken(ctx context.Context, address, password, actor strin
 	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.issue_token", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "ttl_seconds": int(ttl.Seconds())})})
 	return &TokenIssueResult{Token: token, ExpiresIn: int(ttl.Seconds())}, nil
-}
-
-func ensureTenantScope(tenant *models.Tenant, isAdmin bool) error {
-	return app.EnsureTenantScope(tenant, isAdmin)
 }
 
 func uniqueStrings(items []string) []string {

@@ -25,13 +25,10 @@ import (
 type messageStore interface {
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
-	GetMailboxByAddressForTenant(ctx context.Context, addr string, tenantID uuid.UUID) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
-	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
-	GetMailboxGrant(ctx context.Context, mailboxID uuid.UUID, principalType string, principalID uuid.UUID) (*models.MailboxGrant, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
-	GetMessageForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Message, error)
+	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	MarkSeen(ctx context.Context, id uuid.UUID) error
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
@@ -69,10 +66,11 @@ func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
 	mode := middleware.AuthModeFromCtx(r.Context())
 	return messageapp.Viewer{
 		Tenant:         middleware.TenantFromCtx(r.Context()),
-		IsAdmin:        actor.IsPlatformAdmin,
-		IsTenantAdmin:  actor.IsTenantAdmin,
+		IsSuperAdmin:   actor.IsSuperAdmin,
+		IsAdmin:        actor.IsAdmin,
 		AuthMode:       mode,
 		UserID:         userID,
+		OwnerUserID:    actor.OwnerUserID,
 		TenantWide:     actor.TenantWide,
 		BearerToken:    mailboxBearerToken(r),
 		PrincipalType:  string(actor.Type),
@@ -185,6 +183,50 @@ func (h *MessageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	noContent(w)
+}
+
+func (h *MessageHandler) BreakGlassRead(w http.ResponseWriter, r *http.Request) {
+	msgID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid message id")
+		return
+	}
+	var body struct {
+		Reason string `json:"reason"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		errBadRequest(w, "invalid request body")
+		return
+	}
+	item, err := h.service.BreakGlassRead(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), actorFromRequest(r), body.Reason)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, item)
+}
+
+func (h *MessageHandler) BreakGlassSource(w http.ResponseWriter, r *http.Request) {
+	msgID, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid message id")
+		return
+	}
+	var body struct {
+		Reason string `json:"reason"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		errBadRequest(w, "invalid request body")
+		return
+	}
+	rc, err := h.service.BreakGlassSource(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), actorFromRequest(r), body.Reason)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	defer rc.Close()
+	w.Header().Set("Content-Type", "message/rfc822")
+	_, _ = io.Copy(w, rc)
 }
 
 func (h *MessageHandler) PurgeMailbox(w http.ResponseWriter, r *http.Request) {

@@ -44,6 +44,7 @@ export {
   deleteDomain,
   listAdminDomains,
   deleteRoute,
+  explainRoute,
   getVerificationStatus,
   listDomains,
   listOpenDomains,
@@ -53,22 +54,16 @@ export {
   updateAdminDomainAccess,
   verifyDomain,
 } from "./api/domains";
+export type { RouteExplainResult } from "./api/domains";
 export {
-  createMailboxGrant,
-  createSendAsGrant,
   createSendIdentity,
-  createZoneGrant,
-  deleteMailboxGrant,
-  deleteSendAsGrant,
   deleteSendIdentity,
-  deleteZoneGrant,
-  listMailboxGrants,
-  listSendAsGrants,
   listSendIdentities,
-  listZoneGrants,
-} from "./api/grants";
+} from "./api/send-identities";
 export { createMailbox, deleteMailbox, listMailboxes } from "./api/mailboxes";
 export {
+  breakGlassRead,
+  breakGlassSource,
   deleteMessage,
   getMessage,
   getMessageSource,
@@ -93,3 +88,10 @@ export {
   updatePermissionProfile,
 } from "./api/permissions";
 export { healthCheck } from "./api/system";
+export {
+  createWebhookEndpoint,
+  deleteWebhookEndpoint,
+  listWebhookEndpoints,
+  updateWebhookEndpoint,
+} from "./api/webhook-endpoints";
+export type { WebhookEndpoint } from "./api/webhook-endpoints";

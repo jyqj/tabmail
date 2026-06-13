@@ -30,7 +30,7 @@ func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request)
 	actor := authz.ActorFromContext(r.Context())
 
 	var tenantID *uuid.UUID
-	if !actor.IsPlatformAdmin {
+	if !actor.IsSuperAdmin {
 		tenant := middleware.TenantFromCtx(r.Context())
 		if tenant == nil {
 			errForbidden(w, "no tenant context")
@@ -79,7 +79,7 @@ func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request
 	}
 
 	var profileTenantID *uuid.UUID
-	if actor.IsPlatformAdmin {
+	if actor.IsSuperAdmin {
 		profileTenantID = body.TenantID
 	} else {
 		if tenant == nil {
@@ -163,7 +163,7 @@ func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if !actor.IsPlatformAdmin {
+	if !actor.IsSuperAdmin {
 		if tenant == nil {
 			errForbidden(w, "no tenant context")
 			return
@@ -281,7 +281,7 @@ func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if !actor.IsPlatformAdmin {
+	if !actor.IsSuperAdmin {
 		if tenant == nil {
 			errForbidden(w, "no tenant context")
 			return
@@ -293,7 +293,7 @@ func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request
 	}
 
 	var deleteTenantID *uuid.UUID
-	if !actor.IsPlatformAdmin && tenant != nil {
+	if !actor.IsSuperAdmin && tenant != nil {
 		deleteTenantID = &tenant.ID
 	}
 

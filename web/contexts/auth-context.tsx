@@ -11,8 +11,9 @@ import {
   type ReactNode,
 } from "react";
 import type { AuthUser, EffectivePermission } from "@/lib/types";
+import type { PermissionLevel } from "@/lib/permissions";
 
-type AuthLevel = "public" | "mailbox" | "platform_admin" | "tenant_admin" | "admin" | "user";
+type AuthLevel = PermissionLevel;
 
 interface AuthSnapshot {
   // JWT auth (new)
@@ -230,10 +231,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const level: AuthLevel = snapshot.accessToken && snapshot.user
-    ? (snapshot.user.role === "platform_admin" || snapshot.user.role === "admin"
-        ? "platform_admin"
-        : snapshot.user.role === "tenant_admin"
-        ? "tenant_admin"
+    ? (snapshot.user.role === "super_admin"
+        ? "super_admin"
+        : snapshot.user.role === "admin"
+        ? "admin"
         : "user")
     : snapshot.mailboxToken
     ? "mailbox"

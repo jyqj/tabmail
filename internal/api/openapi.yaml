@@ -458,7 +458,7 @@ components:
         tenant_id: { type: string, format: uuid }
         email: { type: string }
         display_name: { type: string }
-        role: { type: string, enum: [admin, user] }
+        role: { type: string, enum: [super_admin, admin, user] }
         is_active: { type: boolean }
         permission_profile_id: { type: string, format: uuid, nullable: true }
         created_at: { type: string, format: date-time }
@@ -2639,7 +2639,7 @@ paths:
             schema:
               type: object
               properties:
-                role: { type: string, enum: [admin, user] }
+                role: { type: string, enum: [super_admin, admin, user] }
                 is_active: { type: boolean }
                 display_name: { type: string }
       responses:

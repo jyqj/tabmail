@@ -29,14 +29,11 @@ type mailboxStore interface {
 	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
-	GetMailboxForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
+	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
 	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
-	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
-	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
-	CreateMailboxGrant(ctx context.Context, g *models.MailboxGrant) error
 }
 
 type MailboxHandler struct {
@@ -52,9 +49,9 @@ func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, dispatcher *hooks.
 
 func (h *MailboxHandler) List(w http.ResponseWriter, r *http.Request) {
 	pg := pageFromReq(r)
-	tenant, isAdmin, ownerUserID, tenantWide := mailboxActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	items, total, err := h.service.List(r.Context(), tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, pg)
+	tenant := middleware.TenantFromCtx(r.Context())
+	items, total, err := h.service.List(r.Context(), actor, tenant, pg)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -74,15 +71,15 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "address is required")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := mailboxActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	item, err := h.service.Create(r.Context(), tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, mailboxapp.CreateRequest{
+	tenant := middleware.TenantFromCtx(r.Context())
+	item, err := h.service.Create(r.Context(), actor, tenant, mailboxapp.CreateRequest{
 		Address:                body.Address,
 		Password:               body.Password,
 		AccessMode:             body.AccessMode,
 		RetentionHoursOverride: body.RetentionHoursOverride,
 		ExpiresAt:              body.ExpiresAt,
-	}, actorFromRequest(r))
+	})
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -96,9 +93,9 @@ func (h *MailboxHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := mailboxActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if err := h.service.Delete(r.Context(), tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, id, actorFromRequest(r)); err != nil {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if err := h.service.Delete(r.Context(), actor, tenant, id); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -122,7 +119,7 @@ func (h *MailboxHandler) IssueToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	item, err := h.service.IssueToken(r.Context(), body.Address, body.Password, actorFromRequest(r))
+	item, err := h.service.IssueToken(r.Context(), body.Address, body.Password, authz.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return

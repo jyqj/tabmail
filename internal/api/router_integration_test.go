@@ -716,7 +716,7 @@ func doJSON(t *testing.T, router http.Handler, method, path string, body any, he
 
 func adminHeaders(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID) map[string]string {
 	t.Helper()
-	token := issueAccessTokenForTest(t, st, uuid.MustParse(publicTenantID), models.RoleAdmin)
+	token := issueAccessTokenForTest(t, st, uuid.MustParse(publicTenantID), models.RoleSuperAdmin)
 	headers := map[string]string{"Authorization": "Bearer " + token}
 	if tenantID != uuid.Nil {
 		headers["X-Tenant-ID"] = tenantID.String()

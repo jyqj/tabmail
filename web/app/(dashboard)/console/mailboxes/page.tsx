@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useAPI } from "@/hooks/use-api";
+import { useState } from "react";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,21 +54,12 @@ import {
   ExternalLink,
   Inbox,
   Copy,
-  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
-
-function safeConfirm(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
-  try {
-    return window.confirm(message) !== false;
-  } catch {
-    return true;
-  }
-}
+import { safeConfirm } from "@/lib/utils";
 
 const accessColors: Record<AccessMode, string> = {
   public: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
@@ -80,16 +71,13 @@ export default function MailboxesPage() {
   const { t } = useI18n();
   const [page, setPage] = useState(1);
 
-  const { data: response, isLoading: loading, error, mutate } = useAPI(
+  const { data: response, isLoading: loading, mutate } = useCRUDPage(
     ["mailboxes", page],
     () => listMailboxes(page),
+    "mailboxes.loadFailed",
   );
   const mailboxes = response?.data ?? [];
   const total = response?.meta?.total ?? 0;
-
-  useEffect(() => {
-    if (error) toast.error(t("mailboxes.loadFailed"));
-  }, [error, t]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -329,10 +317,6 @@ export default function MailboxesPage() {
                               <DropdownMenuItem render={<Link href={`/inbox/${encodeURIComponent(mb.full_address)}`} />}>
                                 <ExternalLink className="h-4 w-4 mr-2" />
                                 {t("mailboxes.openInbox")}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem render={<Link href={`/console/mailboxes/${mb.id}/grants`} />}>
-                                <KeyRound className="h-4 w-4 mr-2" />
-                                邮箱授权
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleDelete(mb.id)}

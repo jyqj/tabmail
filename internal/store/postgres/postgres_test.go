@@ -33,6 +33,9 @@ func TestSchemaSnapshotContainsCurrentStateHardening(t *testing.T) {
 		"idx_messages_raw_object_key",
 		"idx_ingest_jobs_raw_state",
 		"idx_audit_created_at",
+		"CREATE TYPE user_role AS ENUM ('super_admin', 'admin', 'user')",
+		"WHEN 'platform_admin' THEN 'super_admin'",
+		"WHEN 'tenant_admin' THEN 'admin'",
 	}
 	for _, want := range expected {
 		if !strings.Contains(schemaSQL, want) {

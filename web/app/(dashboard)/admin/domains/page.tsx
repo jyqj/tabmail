@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { listAdminDomains, updateAdminDomainAccess } from "@/lib/api";
 import type { DomainZone, ResourceVisibility } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,38 +27,36 @@ import {
 } from "@/components/ui/table";
 import { Globe, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
-
-const visibilityLabels: Record<ResourceVisibility, string> = {
-  private: "仅所有者",
-  authenticated: "登录用户可用",
-  public: "未登录可用",
-};
+import { useI18n } from "@/lib/i18n";
 
 function canEnableRandomSubdomains(zone: DomainZone) {
   return zone.is_verified && zone.mx_verified;
 }
 
 export default function AdminDomainsPage() {
-  const { data: response, isLoading, error, mutate } = useAPI(
+  const { t } = useI18n();
+  const { data: response, isLoading, mutate } = useCRUDPage(
     "admin-domains",
     () => listAdminDomains(),
+    "adminDomains.loadFailed",
   );
   const zones = response?.data ?? [];
   const [saving, setSaving] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    if (error) toast.error("加载域名资源失败");
-  }, [error]);
+  const visibilityLabels: Record<ResourceVisibility, string> = {
+    private: t("adminDomains.visibilityPrivate"),
+    authenticated: t("adminDomains.visibilityAuthenticated"),
+    public: t("adminDomains.visibilityPublic"),
+  };
 
   const patchZone = async (zone: DomainZone, patch: { visibility?: ResourceVisibility; allow_random_subdomains?: boolean }) => {
     setSaving((prev) => ({ ...prev, [zone.id]: true }));
     try {
       await updateAdminDomainAccess(zone.id, patch);
-      toast.success("域名资源策略已更新");
+      toast.success(t("adminDomains.updated"));
       mutate();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "更新失败");
+      toast.error(err?.error?.message || t("adminDomains.updateFailed"));
     } finally {
       setSaving((prev) => ({ ...prev, [zone.id]: false }));
     }
@@ -67,12 +65,12 @@ export default function AdminDomainsPage() {
   return (
     <div className="flex flex-col">
       <PageHeader
-        title="域名资源"
-        description="统一管理 tenant 私有域名、子域名资源、公开可用范围与随机子域名能力。"
+        title={t("adminDomains.title")}
+        description={t("adminDomains.description")}
         actions={
           <Button variant="outline" size="sm" onClick={() => mutate()} className="gap-1.5">
             <RefreshCw className="h-3.5 w-3.5" />
-            刷新
+            {t("adminDomains.refresh")}
           </Button>
         }
       />
@@ -82,10 +80,10 @@ export default function AdminDomainsPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Globe className="h-4 w-4 text-primary" />
-              全部域名资源
+              {t("adminDomains.allResources")}
             </CardTitle>
             <CardDescription>
-              public 资源会出现在未登录随机地址入口；authenticated 仅对登录用户开放。随机子域名必须先通过 TXT 与 MX 校验。
+              {t("adminDomains.allResourcesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -96,17 +94,17 @@ export default function AdminDomainsPage() {
                 ))}
               </div>
             ) : zones.length === 0 ? (
-              <div className="py-12 text-center text-sm text-muted-foreground">暂无域名资源</div>
+              <div className="py-12 text-center text-sm text-muted-foreground">{t("adminDomains.empty")}</div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>域名</TableHead>
-                    <TableHead>租户</TableHead>
-                    <TableHead>父资源</TableHead>
-                    <TableHead>校验</TableHead>
-                    <TableHead>开放范围</TableHead>
-                    <TableHead>随机子域名</TableHead>
+                    <TableHead>{t("adminDomains.domain")}</TableHead>
+                    <TableHead>{t("adminDomains.tenant")}</TableHead>
+                    <TableHead>{t("adminDomains.parent")}</TableHead>
+                    <TableHead>{t("adminDomains.verification")}</TableHead>
+                    <TableHead>{t("adminDomains.visibility")}</TableHead>
+                    <TableHead>{t("adminDomains.randomSubdomains")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -125,10 +123,10 @@ export default function AdminDomainsPage() {
                       <TableCell>
                         <div className="flex gap-1.5">
                           <Badge variant={zone.is_verified ? "default" : "secondary"} className="text-[10px]">
-                            TXT {zone.is_verified ? "OK" : "待校验"}
+                            TXT {zone.is_verified ? "OK" : t("adminDomains.pending")}
                           </Badge>
                           <Badge variant={zone.mx_verified ? "default" : "secondary"} className="text-[10px]">
-                            MX {zone.mx_verified ? "OK" : "待校验"}
+                            MX {zone.mx_verified ? "OK" : t("adminDomains.pending")}
                           </Badge>
                         </div>
                       </TableCell>
@@ -157,7 +155,7 @@ export default function AdminDomainsPage() {
                             onCheckedChange={(checked) => patchZone(zone, { allow_random_subdomains: checked })}
                           />
                           <span className="text-xs text-muted-foreground">
-                            {canEnableRandomSubdomains(zone) ? "可配置" : "需先完成 TXT/MX"}
+                            {canEnableRandomSubdomains(zone) ? t("adminDomains.configurable") : t("adminDomains.needTxtMx")}
                           </span>
                         </div>
                       </TableCell>

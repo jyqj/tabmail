@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   listPermissionProfiles,
@@ -45,8 +52,10 @@ import {
   updatePermissionProfile,
   deletePermissionProfile,
   listDomains,
+  listAdminDomains,
+  listTenants,
 } from "@/lib/api";
-import type { DomainZone, PermissionProfile } from "@/lib/types";
+import type { DomainZone, PermissionProfile, Tenant } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -58,8 +67,15 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
+import { useAuth } from "@/contexts/auth-context";
+import { isSuperAdminLevel } from "@/lib/permissions";
+import { useI18n } from "@/lib/i18n";
+
+const GLOBAL_PROFILE_SCOPE = "__global__";
 
 interface PermissionFormData {
+  tenant_id: string | null;
   name: string;
   description: string;
   can_send: boolean;
@@ -74,6 +90,7 @@ interface PermissionFormData {
 }
 
 const defaultForm: PermissionFormData = {
+  tenant_id: null,
   name: "",
   description: "",
   can_send: true,
@@ -97,51 +114,126 @@ function formatQuota(value: number): string {
   return value === 0 ? "∞" : String(value);
 }
 
+function profileScope(profile: PermissionProfile): "system" | "global" | "tenant" {
+  if (profile.is_system) return "system";
+  return profile.tenant_id ? "tenant" : "global";
+}
+
+function shortId(id: string): string {
+  return `${id.slice(0, 8)}…`;
+}
+
+function tenantLabel(tenants: Tenant[], tenantId?: string | null): string {
+  if (!tenantId) return "global";
+  return tenants.find((tenant) => tenant.id === tenantId)?.name ?? shortId(tenantId);
+}
+
+function zoneLabel(zone: DomainZone): string {
+  return zone.domain || shortId(zone.id);
+}
+
 function PermissionFormFields({
   form,
   setForm,
   domainOptions,
+  isPlatformAdmin,
+  tenants,
+  tenantScopeLocked = false,
 }: {
   form: PermissionFormData;
   setForm: Dispatch<SetStateAction<PermissionFormData>>;
   domainOptions: DomainZone[];
+  isPlatformAdmin: boolean;
+  tenants: Tenant[];
+  tenantScopeLocked?: boolean;
 }) {
+  const { t } = useI18n();
+  const scopedDomainOptions =
+    isPlatformAdmin && form.tenant_id
+      ? domainOptions.filter((zone) => zone.tenant_id === form.tenant_id)
+      : isPlatformAdmin
+        ? []
+        : domainOptions;
+  const domainPickerDisabled = isPlatformAdmin && !form.tenant_id;
   const switchFields: { key: keyof PermissionFormData; label: string }[] = [
-    { key: "can_send", label: "可发件" },
-    { key: "can_create_domains", label: "可创建域名" },
-    { key: "can_create_routes", label: "可创建路由" },
-    { key: "can_create_api_keys", label: "可创建 API Key" },
+    { key: "can_send", label: t("permissions.canSend") },
+    { key: "can_create_domains", label: t("permissions.canCreateDomains") },
+    { key: "can_create_routes", label: t("permissions.canCreateRoutes") },
+    { key: "can_create_api_keys", label: t("permissions.canCreateApiKeys") },
   ];
 
   const numberFields: { key: keyof PermissionFormData; label: string }[] = [
-    { key: "daily_send_quota", label: "每日发件配额" },
-    { key: "daily_receive_quota", label: "每日收件配额" },
-    { key: "max_mailboxes", label: "最大邮箱数" },
-    { key: "max_domains", label: "最大域名数" },
+    { key: "daily_send_quota", label: t("permissions.dailySendQuota") },
+    { key: "daily_receive_quota", label: t("permissions.dailyReceiveQuota") },
+    { key: "max_mailboxes", label: t("permissions.maxMailboxes") },
+    { key: "max_domains", label: t("permissions.maxDomains") },
   ];
 
   return (
     <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
       <div className="space-y-1.5">
-        <Label className="text-xs">{"名称"}</Label>
+        <Label className="text-xs">{t("permissions.name")}</Label>
         <Input
           value={form.name}
           onChange={(e) =>
             setForm((prev) => ({ ...prev, name: e.target.value }))
           }
-          placeholder={"模板名称"}
+          placeholder={t("permissions.namePlaceholder")}
         />
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs">{"描述"}</Label>
+        <Label className="text-xs">{t("permissions.descriptionField")}</Label>
         <Input
           value={form.description}
           onChange={(e) =>
             setForm((prev) => ({ ...prev, description: e.target.value }))
           }
-          placeholder={"模板描述（可选）"}
+          placeholder={t("permissions.descriptionPlaceholder")}
         />
       </div>
+
+      {isPlatformAdmin && (
+        <div className="space-y-1.5">
+          <Label className="text-xs">{t("permissions.scope")}</Label>
+          <Select
+            value={form.tenant_id ?? GLOBAL_PROFILE_SCOPE}
+            disabled={tenantScopeLocked}
+            onValueChange={(value) =>
+              setForm((prev) => {
+                const nextTenantID = value === GLOBAL_PROFILE_SCOPE ? null : value;
+                return {
+                  ...prev,
+                  tenant_id: nextTenantID,
+                  allowed_zone_ids: nextTenantID
+                    ? prev.allowed_zone_ids.filter((id) =>
+                        domainOptions.some(
+                          (zone) => zone.id === id && zone.tenant_id === nextTenantID,
+                        ),
+                      )
+                    : [],
+                };
+              })
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={GLOBAL_PROFILE_SCOPE}>{t("permissions.scopeGlobalOption")}</SelectItem>
+              {tenants.map((tenant) => (
+                <SelectItem key={tenant.id} value={tenant.id}>
+                  {tenant.name} · {shortId(tenant.id)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-[10px] text-muted-foreground">
+            {tenantScopeLocked
+              ? t("permissions.scopeLockedHint")
+              : t("permissions.scopeHint")}
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         {switchFields.map((f) => (
@@ -175,7 +267,7 @@ function PermissionFormFields({
               placeholder="0"
             />
             <p className="text-[10px] text-muted-foreground">
-              {"0 = 无限制"}
+              {t("permissions.zeroUnlimited")}
             </p>
           </div>
         ))}
@@ -183,9 +275,11 @@ function PermissionFormFields({
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-xs">{"允许域名范围"}</Label>
+          <Label className="text-xs">{t("permissions.allowedZones")}</Label>
           <span className="text-[10px] text-muted-foreground">
-            {form.allowed_zone_ids.length === 0 ? "全部域名" : `${form.allowed_zone_ids.length} 个域名`}
+            {form.allowed_zone_ids.length === 0
+              ? t("permissions.allDomains")
+              : t("permissions.domainCount", { count: form.allowed_zone_ids.length })}
           </span>
         </div>
         <div className="rounded-md border p-3 space-y-2">
@@ -195,18 +289,23 @@ function PermissionFormFields({
             size="sm"
             className="h-7 px-2 text-xs"
             onClick={() => setForm((prev) => ({ ...prev, allowed_zone_ids: [] }))}
+            disabled={domainPickerDisabled}
           >
-            {"允许全部域名"}
+            {t("permissions.allowAllDomains")}
           </Button>
-          {domainOptions.length === 0 ? (
-            <p className="text-xs text-muted-foreground">{"暂无可选域名；留空表示全部域名。"}</p>
+          {domainPickerDisabled ? (
+            <p className="text-xs text-muted-foreground">
+              {t("permissions.globalNoDomainsHint")}
+            </p>
+          ) : scopedDomainOptions.length === 0 ? (
+            <p className="text-xs text-muted-foreground">{t("permissions.noDomainsHint")}</p>
           ) : (
             <div className="grid gap-2">
-              {domainOptions.map((zone) => {
+              {scopedDomainOptions.map((zone) => {
                 const checked = form.allowed_zone_ids.includes(zone.id);
                 return (
                   <label key={zone.id} className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs">
-                    <span className="truncate" title={zone.domain}>{zone.domain}</span>
+                    <span className="truncate" title={zone.domain}>{zoneLabel(zone)}</span>
                     <Switch
                       size="sm"
                       checked={checked}
@@ -231,20 +330,28 @@ function PermissionFormFields({
 }
 
 export default function PermissionsPage() {
+  const { level } = useAuth();
+  const { t } = useI18n();
+  // UX-only gate; the backend authz seam is authoritative.
+  const isPlatformAdmin = isSuperAdminLevel(level);
   const {
     data: profilesRes,
     isLoading: loading,
-    error: profilesError,
     mutate: mutateProfiles,
-  } = useAPI("permission-profiles", () => listPermissionProfiles());
+  } = useCRUDPage("permission-profiles", () => listPermissionProfiles(), "permissions.loadFailed");
   const profiles = profilesRes?.data ?? [];
   const total = profiles.length;
-  const { data: domainsRes } = useAPI("permission-profile-domains", () => listDomains());
+  const { data: domainsRes } = useAPI(
+    isPlatformAdmin ? "permission-profile-admin-domains" : "permission-profile-domains",
+    () => (isPlatformAdmin ? listAdminDomains() : listDomains()),
+  );
+  const { data: tenantsRes } = useAPI(
+    isPlatformAdmin ? "permission-profile-tenants" : null,
+    () => listTenants(),
+  );
   const domainOptions = domainsRes?.data ?? [];
-
-  useEffect(() => {
-    if (profilesError) toast.error("加载权限模板失败");
-  }, [profilesError]);
+  const tenants = tenantsRes?.data ?? [];
+  const zoneById = new Map(domainOptions.map((zone) => [zone.id, zone]));
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -261,6 +368,7 @@ export default function PermissionsPage() {
     setCreating(true);
     try {
       await createPermissionProfile({
+        ...(isPlatformAdmin ? { tenant_id: form.tenant_id } : {}),
         name: form.name.trim(),
         description: form.description.trim(),
         can_send: form.can_send,
@@ -275,11 +383,11 @@ export default function PermissionsPage() {
       });
       setForm(defaultForm);
       setDialogOpen(false);
-      toast.success("权限模板已创建");
+      toast.success(t("permissions.created"));
       mutateProfiles();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "创建失败");
+      toast.error(err?.error?.message || t("permissions.createFailed"));
     } finally {
       setCreating(false);
     }
@@ -287,11 +395,12 @@ export default function PermissionsPage() {
 
   const openEdit = (profile: PermissionProfile) => {
     if (profile.is_system) {
-      toast.error("系统模板不可编辑");
+      toast.error(t("permissions.systemCannotEdit"));
       return;
     }
     setEditingProfile(profile);
     setEditForm({
+      tenant_id: profile.tenant_id ?? null,
       name: profile.name,
       description: profile.description,
       can_send: profile.can_send,
@@ -326,11 +435,11 @@ export default function PermissionsPage() {
       });
       setEditOpen(false);
       setEditingProfile(null);
-      toast.success("权限模板已更新");
+      toast.success(t("permissions.updated"));
       mutateProfiles();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "更新失败");
+      toast.error(err?.error?.message || t("permissions.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -338,50 +447,52 @@ export default function PermissionsPage() {
 
   const handleDelete = async (profile: PermissionProfile) => {
     if (profile.is_system) {
-      toast.error("系统模板不可删除");
+      toast.error(t("permissions.systemCannotDelete"));
       return;
     }
-    if (!confirmAction("确定要删除该权限模板吗？此操作不可撤销。"))
+    if (!confirmAction(t("permissions.confirmDelete")))
       return;
     try {
       await deletePermissionProfile(profile.id);
-      toast.success("权限模板已删除");
+      toast.success(t("permissions.deleted"));
       mutateProfiles();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || "删除失败");
+      toast.error(err?.error?.message || t("permissions.deleteFailed"));
     }
   };
 
   return (
     <div className="flex flex-col">
       <PageHeader
-        title={"权限模板"}
-        description={`共 ${total} 个模板`}
+        title={t("permissions.title")}
+        description={t("permissions.total", { count: total })}
         actions={
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
               <Plus className="h-3.5 w-3.5" />
-              {"创建模板"}
+              {t("permissions.create")}
             </DialogTrigger>
             <DialogContent className="sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>{"创建权限模板"}</DialogTitle>
+                <DialogTitle>{t("permissions.createTitle")}</DialogTitle>
                 <DialogDescription>
-                  {"配置权限模板的各项参数，创建后可分配给用户。"}
+                  {t("permissions.createDesc")}
                 </DialogDescription>
               </DialogHeader>
               <PermissionFormFields
                 form={form}
                 setForm={setForm}
                 domainOptions={domainOptions}
+                isPlatformAdmin={isPlatformAdmin}
+                tenants={tenants}
               />
               <DialogFooter>
                 <Button
                   onClick={handleCreate}
                   disabled={creating || !form.name.trim()}
                 >
-                  {creating ? "创建中..." : "创建"}
+                  {creating ? t("permissions.creating") : t("permissions.create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -392,9 +503,9 @@ export default function PermissionsPage() {
       <div className="p-4">
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base">{"所有模板"}</CardTitle>
+            <CardTitle className="text-base">{t("permissions.allProfiles")}</CardTitle>
             <CardDescription>
-              {"管理权限模板，控制用户的发件、收件、域名和邮箱权限。"}
+              {t("permissions.allProfilesDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -407,40 +518,61 @@ export default function PermissionsPage() {
             ) : profiles.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Shield className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">{"暂无权限模板"}</p>
+                <p className="text-sm">{t("permissions.noProfiles")}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>{"名称"}</TableHead>
-                      <TableHead>{"描述"}</TableHead>
-                      <TableHead>{"发件"}</TableHead>
-                      <TableHead className="text-right">{"日发件额"}</TableHead>
-                      <TableHead className="text-right">{"日收件额"}</TableHead>
-                      <TableHead className="text-right">{"邮箱数"}</TableHead>
-                      <TableHead>{"域名范围"}</TableHead>
-                      <TableHead>{"创建时间"}</TableHead>
+                      <TableHead>{t("permissions.name")}</TableHead>
+                      <TableHead>{t("permissions.scope")}</TableHead>
+                      <TableHead>{t("permissions.descriptionField")}</TableHead>
+                      <TableHead>{t("permissions.canSendShort")}</TableHead>
+                      <TableHead className="text-right">{t("permissions.dailySendQuotaShort")}</TableHead>
+                      <TableHead className="text-right">{t("permissions.dailyReceiveQuotaShort")}</TableHead>
+                      <TableHead className="text-right">{t("permissions.mailboxesShort")}</TableHead>
+                      <TableHead>{t("permissions.allowedZones")}</TableHead>
+                      <TableHead>{t("permissions.createdAt")}</TableHead>
                       <TableHead className="w-10" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {profiles.map((profile) => (
-                      <TableRow key={profile.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            {profile.name}
-                            {profile.is_system && (
+                    {profiles.map((profile) => {
+                      const scope = profileScope(profile);
+                      return (
+                        <TableRow key={profile.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              {profile.name}
+                              {profile.is_system && (
+                                <Badge
+                                  variant="secondary"
+                                  className="text-[10px] px-1.5"
+                                >
+                                  {t("permissions.scopeSystem")}
+                                </Badge>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
                               <Badge
-                                variant="secondary"
-                                className="text-[10px] px-1.5"
+                                variant={scope === "tenant" ? "default" : "outline"}
+                                className="w-fit text-[10px]"
                               >
-                                {"system"}
+                                {scope}
                               </Badge>
-                            )}
-                          </div>
-                        </TableCell>
+                              {scope === "tenant" && (
+                                <span
+                                  className="max-w-[140px] truncate text-[10px] text-muted-foreground"
+                                  title={profile.tenant_id ?? ""}
+                                >
+                                  {tenantLabel(tenants, profile.tenant_id)}
+                                </span>
+                              )}
+                            </div>
+                          </TableCell>
                         <TableCell
                           className="max-w-[200px] truncate text-muted-foreground text-sm"
                           title={profile.description}
@@ -450,14 +582,14 @@ export default function PermissionsPage() {
                         <TableCell>
                           {profile.can_send ? (
                             <Badge className="bg-green-600 hover:bg-green-700 text-[10px]">
-                              {"可发件"}
+                              {t("permissions.canSendBadge")}
                             </Badge>
                           ) : (
                             <Badge
                               variant="outline"
                               className="text-[10px] text-muted-foreground"
                             >
-                              {"不可发件"}
+                              {t("permissions.cannotSendBadge")}
                             </Badge>
                           )}
                         </TableCell>
@@ -473,8 +605,11 @@ export default function PermissionsPage() {
                         <TableCell>
                           <Badge variant="outline" className="text-[10px]">
                             {profile.allowed_zone_ids && profile.allowed_zone_ids.length > 0
-                              ? `${profile.allowed_zone_ids.length} 个域名`
-                              : "全部域名"}
+                              ? profile.allowed_zone_ids
+                                  .map((id) => zoneById.get(id)?.domain ?? shortId(id))
+                                  .slice(0, 2)
+                                  .join(", ")
+                              : t("permissions.allDomains")}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
@@ -501,16 +636,16 @@ export default function PermissionsPage() {
                                 onClick={() => openEdit(profile)}
                               >
                                 <Pencil className="h-4 w-4 mr-2" />
-                                {"编辑"}
+                                {t("permissions.edit")}
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => {
                                   navigator.clipboard.writeText(profile.id);
-                                  toast.success("ID 已复制");
+                                  toast.success(t("permissions.idCopied"));
                                 }}
                               >
                                 <Copy className="h-4 w-4 mr-2" />
-                                {"复制 ID"}
+                                {t("permissions.copyId")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
@@ -519,13 +654,14 @@ export default function PermissionsPage() {
                                 className="text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                {"删除"}
+                                {t("permissions.delete")}
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
-                    ))}
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
@@ -538,22 +674,25 @@ export default function PermissionsPage() {
         <Dialog open={editOpen} onOpenChange={setEditOpen}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{"编辑权限模板"}</DialogTitle>
+              <DialogTitle>{t("permissions.editTitle")}</DialogTitle>
               <DialogDescription>
-                {"修改权限模板的配置参数。"}
+                {t("permissions.editDesc")}
               </DialogDescription>
             </DialogHeader>
             <PermissionFormFields
               form={editForm}
               setForm={setEditForm}
               domainOptions={domainOptions}
+              isPlatformAdmin={isPlatformAdmin}
+              tenants={tenants}
+              tenantScopeLocked
             />
             <DialogFooter>
               <Button
                 onClick={handleEdit}
                 disabled={saving || !editForm.name.trim()}
               >
-                {saving ? "保存中..." : "保存"}
+                {saving ? t("permissions.saving") : t("permissions.save")}
               </Button>
             </DialogFooter>
           </DialogContent>

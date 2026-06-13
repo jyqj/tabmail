@@ -172,6 +172,7 @@ func main() {
 		Settings:           settingsMgr,
 		HTTP:               cfg.HTTP,
 		OutboundService:    outboundSvc,
+		Resolver:           res,
 		Logger:             logger,
 	}
 
@@ -290,7 +291,7 @@ func bootstrapAdmin(ctx context.Context, st store.Store, cfg *config.Root, logge
 		Email:        email,
 		PasswordHash: string(hash),
 		DisplayName:  "Admin",
-		Role:         models.RolePlatformAdmin,
+		Role:         models.RoleSuperAdmin,
 		IsActive:     true,
 	}
 	if err := st.CreateUser(ctx, user); err != nil {

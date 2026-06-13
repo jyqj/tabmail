@@ -44,6 +44,20 @@ export function getMessageSource(address: string, id: string) {
   return request<string>(`/api/v1/mailbox/${encodeAddress(address)}/${id}/source`);
 }
 
+export function breakGlassRead(address: string, id: string, reason: string) {
+  return request<APIResponse<MessageDetail>>(`/api/v1/mailbox/${encodeAddress(address)}/${id}/break-glass`, {
+    method: "POST",
+    body: { reason },
+  });
+}
+
+export function breakGlassSource(address: string, id: string, reason: string) {
+  return request<string>(`/api/v1/mailbox/${encodeAddress(address)}/${id}/break-glass/source`, {
+    method: "POST",
+    body: { reason },
+  });
+}
+
 export function streamMailboxEvents(address: string, options: EventStreamOptions) {
   return streamEvents(`/api/v1/mailbox/${encodeAddress(address)}/events`, options);
 }

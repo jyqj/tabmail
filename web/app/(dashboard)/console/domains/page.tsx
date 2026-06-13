@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,32 +55,26 @@ import {
   ChevronDown,
   ChevronUp,
   ExternalLink,
-  KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
-import { usePermissions } from "@/contexts/auth-context";
-
-function safeConfirm(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
-  try {
-    return window.confirm(message) !== false;
-  } catch {
-    return true;
-  }
-}
+import { cn, safeConfirm } from "@/lib/utils";
+import { useAuth, usePermissions } from "@/contexts/auth-context";
+import { canCreateDomains } from "@/lib/permissions";
 
 function CopyButton({ value, className }: { value: string; className?: string }) {
+  const { t } = useI18n();
   const [copied, setCopied] = useState(false);
   return (
     <button
+      type="button"
+      aria-label={t("domains.copyValue")}
       onClick={(e) => {
         e.stopPropagation();
         navigator.clipboard.writeText(value);
         setCopied(true);
-        toast.success("已复制");
+        toast.success(t("domains.copied"));
         setTimeout(() => setCopied(false), 2000);
       }}
       className={cn(
@@ -99,6 +93,7 @@ function DNSCheckRow({ label, status, details, expected }: {
   details?: string[];
   expected?: string;
 }) {
+  const { t } = useI18n();
   const pass = status === "pass";
   return (
     <div className="flex items-start gap-3 py-2.5 border-b border-border/40 last:border-0">
@@ -118,14 +113,14 @@ function DNSCheckRow({ label, status, details, expected }: {
         </div>
         {expected && !pass && (
           <div className="mt-1.5 flex items-center gap-1.5">
-            <span className="text-xs text-muted-foreground">期望:</span>
+            <span className="text-xs text-muted-foreground">{t("domains.expected")}:</span>
             <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono">{expected}</code>
             <CopyButton value={expected} />
           </div>
         )}
         {details && details.length > 0 && (
           <div className="mt-1">
-            <span className="text-xs text-muted-foreground">当前:</span>
+            <span className="text-xs text-muted-foreground">{t("domains.current")}:</span>
             {details.map((d, i) => (
               <code key={i} className="block text-xs text-muted-foreground/80 font-mono mt-0.5 break-all">{d}</code>
             ))}
@@ -140,6 +135,7 @@ function DNSSetupGuide({ zone, verificationStatus }: {
   zone: DomainZone;
   verificationStatus: VerificationStatus | null;
 }) {
+  const { t } = useI18n();
   const expectedMx = verificationStatus?.expected_mx || "your-server.example.com";
   const allVerified = zone.is_verified && zone.mx_verified;
   const hasDkimRecord = !!verificationStatus?.dkim_record;
@@ -152,9 +148,9 @@ function DNSSetupGuide({ zone, verificationStatus }: {
       <div className="flex items-start gap-2.5">
         <AlertCircle className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
         <div>
-          <p className="text-sm font-medium text-amber-800 dark:text-amber-200">请配置以下 DNS 记录</p>
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-200">{t("domains.dnsSetupTitle")}</p>
           <p className="text-xs text-amber-600 dark:text-amber-400 mt-0.5">
-            在你的 DNS 服务商（如 Cloudflare、阿里云等）添加以下记录，然后点击「验证 DNS」
+            {t("domains.dnsSetupDesc")}
           </p>
         </div>
       </div>
@@ -165,23 +161,23 @@ function DNSSetupGuide({ zone, verificationStatus }: {
             <div className="rounded-md bg-background border border-border/60 p-3">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  TXT 记录（验证域名所有权）
+                  {t("domains.txtOwnershipRecord")}
                 </span>
                 {zone.is_verified ? (
-                  <Badge variant="default" className="bg-green-600 text-[10px]">已通过</Badge>
+                  <Badge variant="default" className="bg-green-600 text-[10px]">{t("domains.passed")}</Badge>
                 ) : (
-                  <Badge variant="secondary" className="text-[10px]">未通过</Badge>
+                  <Badge variant="secondary" className="text-[10px]">{t("domains.notPassed")}</Badge>
                 )}
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
-                <span className="text-muted-foreground">名称:</span>
+                <span className="text-muted-foreground">{t("domains.recordName")}:</span>
                 <div className="flex items-center gap-1.5">
                   <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{zone.domain}</code>
                   <CopyButton value={zone.domain} />
                 </div>
-                <span className="text-muted-foreground">类型:</span>
+                <span className="text-muted-foreground">{t("domains.recordType")}:</span>
                 <code className="font-mono">TXT</code>
-                <span className="text-muted-foreground">值:</span>
+                <span className="text-muted-foreground">{t("domains.recordValue")}:</span>
                 <div className="flex items-center gap-1.5">
                   <code className="font-mono bg-muted px-1.5 py-0.5 rounded break-all">{zone.txt_record}</code>
                   <CopyButton value={zone.txt_record} />
@@ -192,25 +188,25 @@ function DNSSetupGuide({ zone, verificationStatus }: {
             <div className="rounded-md bg-background border border-border/60 p-3">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  MX 记录（接收邮件）
+                  {t("domains.mxReceiveRecord")}
                 </span>
                 {zone.mx_verified ? (
-                  <Badge variant="default" className="bg-green-600 text-[10px]">已通过</Badge>
+                  <Badge variant="default" className="bg-green-600 text-[10px]">{t("domains.passed")}</Badge>
                 ) : (
-                  <Badge variant="secondary" className="text-[10px]">未通过</Badge>
+                  <Badge variant="secondary" className="text-[10px]">{t("domains.notPassed")}</Badge>
                 )}
               </div>
               <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
-                <span className="text-muted-foreground">名称:</span>
+                <span className="text-muted-foreground">{t("domains.recordName")}:</span>
                 <div className="flex items-center gap-1.5">
                   <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{zone.domain}</code>
                   <CopyButton value={zone.domain} />
                 </div>
-                <span className="text-muted-foreground">类型:</span>
+                <span className="text-muted-foreground">{t("domains.recordType")}:</span>
                 <code className="font-mono">MX</code>
-                <span className="text-muted-foreground">优先级:</span>
+                <span className="text-muted-foreground">{t("domains.recordPriority")}:</span>
                 <code className="font-mono">10</code>
-                <span className="text-muted-foreground">目标:</span>
+                <span className="text-muted-foreground">{t("domains.recordTarget")}:</span>
                 <div className="flex items-center gap-1.5">
                   <code className="font-mono bg-muted px-1.5 py-0.5 rounded">{expectedMx}</code>
                   <CopyButton value={expectedMx} />
@@ -224,23 +220,23 @@ function DNSSetupGuide({ zone, verificationStatus }: {
           <div className="rounded-md bg-background border border-border/60 p-3">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                TXT 记录（DKIM 签名）
+                {t("domains.dkimTxtRecord")}
               </span>
               {dkimEnabled ? (
-                <Badge variant="default" className="bg-green-600 text-[10px]">已启用</Badge>
+                <Badge variant="default" className="bg-green-600 text-[10px]">{t("domains.enabled")}</Badge>
               ) : (
-                <Badge variant="secondary" className="text-[10px]">未启用</Badge>
+                <Badge variant="secondary" className="text-[10px]">{t("domains.notEnabled")}</Badge>
               )}
             </div>
             <div className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-xs mt-2">
-              <span className="text-muted-foreground">名称:</span>
+              <span className="text-muted-foreground">{t("domains.recordName")}:</span>
               <div className="flex items-center gap-1.5">
                 <code className="font-mono bg-muted px-1.5 py-0.5 rounded break-all">{verificationStatus!.dkim_host}</code>
                 <CopyButton value={verificationStatus!.dkim_host!} />
               </div>
-              <span className="text-muted-foreground">类型:</span>
+              <span className="text-muted-foreground">{t("domains.recordType")}:</span>
               <code className="font-mono">TXT</code>
-              <span className="text-muted-foreground">值:</span>
+              <span className="text-muted-foreground">{t("domains.recordValue")}:</span>
               <div className="flex items-center gap-1.5 min-w-0">
                 <code className="font-mono bg-muted px-1.5 py-0.5 rounded break-all">{verificationStatus!.dkim_record}</code>
                 <CopyButton value={verificationStatus!.dkim_record!} />
@@ -254,6 +250,7 @@ function DNSSetupGuide({ zone, verificationStatus }: {
 }
 
 function VerificationDetail({ checks }: { checks: VerificationStatus }) {
+  const { t } = useI18n();
   const check = (key: keyof VerificationStatus["checks"]) =>
     checks.checks[key] ?? { status: "unknown", details: [] };
   const txt = check("txt");
@@ -264,11 +261,11 @@ function VerificationDetail({ checks }: { checks: VerificationStatus }) {
 
   return (
     <div className="space-y-0">
-      <DNSCheckRow label="TXT (所有权)" status={txt.status} details={txt.details} expected={checks.txt_expected} />
-      <DNSCheckRow label="MX (邮件接收)" status={mx.status} details={mx.details} expected={checks.expected_mx} />
-      <DNSCheckRow label="SPF (发信授权)" status={spf.status} details={spf.details} />
-      <DNSCheckRow label="DKIM (签名)" status={dkim.status} details={dkim.details} />
-      <DNSCheckRow label="DMARC (策略)" status={dmarc.status} details={dmarc.details} />
+      <DNSCheckRow label={t("domains.txtOwnershipCheck")} status={txt.status} details={txt.details} expected={checks.txt_expected} />
+      <DNSCheckRow label={t("domains.mxReceiveCheck")} status={mx.status} details={mx.details} expected={checks.expected_mx} />
+      <DNSCheckRow label={t("domains.spfCheck")} status={spf.status} details={spf.details} />
+      <DNSCheckRow label={t("domains.dkimCheck")} status={dkim.status} details={dkim.details} />
+      <DNSCheckRow label={t("domains.dmarcCheck")} status={dmarc.status} details={dmarc.details} />
     </div>
   );
 }
@@ -347,7 +344,7 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
               )}
               {zone.is_verified && !zone.mx_verified && (
                 <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-300">
-                  TXT OK · MX 未配置
+                  {t("domains.txtOkMxMissing")}
                 </Badge>
               )}
               {allVerified && zone.dkim_enabled && (
@@ -357,41 +354,55 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
               )}
               {allVerified && !zone.dkim_enabled && (
                 <Badge variant="secondary" className="text-[10px]">
-                  DKIM 未配置
+                  {t("domains.dkimMissing")}
                 </Badge>
               )}
               <Badge variant="outline" className="text-[10px]">
-                {zone.visibility === "public" ? "公开资源" : zone.visibility === "authenticated" ? "登录可用" : "私有"}
+                {zone.visibility === "public"
+                  ? t("domains.visibilityPublic")
+                  : zone.visibility === "authenticated"
+                  ? t("domains.visibilityAuthenticated")
+                  : t("domains.visibilityPrivate")}
               </Badge>
               {zone.parent_zone_id && (
-                <Badge variant="outline" className="text-[10px]">子域名资源</Badge>
+                <Badge variant="outline" className="text-[10px]">{t("domains.subdomainResource")}</Badge>
               )}
               {zone.allow_random_subdomains && (
-                <Badge variant="outline" className="text-[10px]">开放随机子域名</Badge>
+                <Badge variant="outline" className="text-[10px]">{t("domains.randomSubdomainsOpen")}</Badge>
               )}
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            创建于 {formatDistanceToNow(new Date(zone.created_at), { addSuffix: true })}
+            {t("domains.createdAt", {
+              time: formatDistanceToNow(new Date(zone.created_at), { addSuffix: true }),
+            })}
           </p>
         </div>
 
         <div className="flex items-center gap-1.5">
+          <Link
+            href={`/console/domains/${zone.id}`}
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 text-xs font-medium transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <Globe className="h-3.5 w-3.5" />
+            {t("domains.detailsDns")}
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger
-              render={<Button variant="ghost" size="icon" className="h-8 w-8" />}
+              render={<Button variant="ghost" size="icon" className="h-8 w-8" aria-label={t("domains.openMenu")} />}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              <DropdownMenuItem render={<Link href={`/console/domains/${zone.id}`} />}>
+                <Globe className="h-4 w-4 mr-2" />
+                {t("domains.dnsChecklist")}
+              </DropdownMenuItem>
               <DropdownMenuItem render={<Link href={`/console/domains/${zone.id}/routes`} />}>
                 <Route className="h-4 w-4 mr-2" />
                 {t("domains.routes")}
-              </DropdownMenuItem>
-              <DropdownMenuItem render={<Link href={`/console/domains/${zone.id}/grants`} />}>
-                <KeyRound className="h-4 w-4 mr-2" />
-                域名授权
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => onSuggest(false)}>
@@ -420,7 +431,7 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
           <DNSSetupGuide zone={zone} verificationStatus={verStatus} />
 
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">DNS 检查详情</span>
+            <span className="text-sm font-medium">{t("domains.dnsCheckDetails")}</span>
             <div className="flex items-center gap-2">
               <Button
                 variant="outline"
@@ -430,7 +441,7 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
                 disabled={verLoading}
               >
                 <RefreshCw className={cn("h-3 w-3", verLoading && "animate-spin")} />
-                刷新状态
+                {t("domains.refreshStatus")}
               </Button>
               <Button
                 size="sm"
@@ -452,14 +463,14 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
           ) : verStatus ? (
             <VerificationDetail checks={verStatus} />
           ) : (
-            <p className="text-sm text-muted-foreground text-center py-4">点击「刷新状态」查看 DNS 检查结果</p>
+            <p className="text-sm text-muted-foreground text-center py-4">{t("domains.refreshDnsHint")}</p>
           )}
 
           {allVerified && (
             <div className="flex items-center gap-2 pt-2">
               <Button variant="outline" size="sm" className="gap-1.5 text-xs" render={<Link href={`/console/domains/${zone.id}/routes`} />}>
                 <Route className="h-3 w-3" />
-                配置路由规则
+                {t("domains.configureRoutes")}
                 <ExternalLink className="h-3 w-3 opacity-60" />
               </Button>
             </div>
@@ -472,26 +483,26 @@ function DomainCard({ zone, onVerify, onDelete, onSuggest }: {
 
 export default function DomainsPage() {
   const { t } = useI18n();
+  const { level } = useAuth();
   const permissions = usePermissions();
-  const { data: response, isLoading: loading, error, mutate } = useAPI(
+  const { data: response, isLoading: loading, mutate } = useCRUDPage(
     "domains",
     () => listDomains(),
+    "domains.loadFailed",
   );
   const zones = response?.data ?? [];
   const total = zones.length;
-  const canCreate = permissions?.can_create_domains !== false;
+  // UX-only gate; the backend authz seam is authoritative.
+  const canCreate = canCreateDomains(level, permissions);
   const hasQuota = permissions != null && permissions.max_domains > 0;
   const atLimit = hasQuota && total >= permissions.max_domains;
-
-  useEffect(() => {
-    if (error) toast.error(t("domains.loadFailed"));
-  }, [error, t]);
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState("");
   const [creating, setCreating] = useState(false);
 
   const handleCreate = async () => {
+    if (!canCreate || atLimit) return;
     if (!newDomain.trim()) return;
     setCreating(true);
     try {

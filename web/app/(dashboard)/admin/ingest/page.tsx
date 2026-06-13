@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Boxes, RefreshCw, Search } from "lucide-react";
-import { toast } from "sonner";
 
 import { listIngestJobs } from "@/lib/api";
 import type { IngestJob } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +47,7 @@ export default function AdminIngestPage() {
   const [source, setSource] = useState("all");
   const [recipient, setRecipient] = useState("");
 
-  const { data: response, isLoading: loading, error, mutate } = useAPI(
+  const { data: response, isLoading: loading, mutate } = useCRUDPage(
     ["ingest", page, state, source, recipient],
     () => listIngestJobs({
       page,
@@ -57,11 +56,10 @@ export default function AdminIngestPage() {
       source: source === "all" ? undefined : source,
       recipient: recipient || undefined,
     }),
+    "ingest.loadFailed",
   );
   const jobs = response?.data ?? [];
   const total = response?.meta?.total ?? 0;
-
-  useEffect(() => { if (error) toast.error(t("ingest.loadFailed")); }, [error, t]);
 
   const totals = useMemo(() => {
     return jobs.reduce<Record<string, number>>((acc, item) => {

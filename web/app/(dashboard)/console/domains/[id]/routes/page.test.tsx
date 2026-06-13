@@ -20,12 +20,19 @@ const {
 
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "zone-1" }),
+  usePathname: () => "/console/domains/zone-1/routes",
 }));
 
 vi.mock("@/lib/api", () => ({
   listRoutes: (...args: unknown[]) => listRoutesMock(...args),
   createRoute: (...args: unknown[]) => createRouteMock(...args),
   deleteRoute: (...args: unknown[]) => deleteRouteMock(...args),
+  explainRoute: vi.fn(),
+}));
+
+vi.mock("@/contexts/auth-context", () => ({
+  useAuth: () => ({ level: "user" }),
+  usePermissions: () => ({ can_create_routes: true }),
 }));
 
 vi.mock("sonner", () => ({
@@ -157,10 +164,12 @@ describe("console/domain routes page", () => {
     deleteRouteMock.mockReset();
     toastSuccess.mockReset();
     toastError.mockReset();
+    vi.spyOn(window, "confirm").mockReturnValue(true);
   });
 
   afterEach(() => {
     cleanup();
+    vi.restoreAllMocks();
   });
 
   it("加载列表并支持创建 sequence route", async () => {
@@ -266,8 +275,7 @@ describe("console/domain routes page", () => {
 
     expect(await screen.findByText("user@mail.test")).toBeInTheDocument();
 
-    const buttons = screen.getAllByRole("button");
-    fireEvent.click(buttons[buttons.length - 1]);
+    fireEvent.click(screen.getByRole("button", { name: "Delete route user@mail.test" }));
 
     await waitFor(() => {
       expect(deleteRouteMock).toHaveBeenCalledWith("zone-1", "route-1");

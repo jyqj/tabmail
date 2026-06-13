@@ -40,7 +40,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 		ctx := r.Context()
 		t := TenantFromCtx(ctx)
 		mode := AuthModeFromCtx(ctx)
-		tenantScoped := t != nil && t.ID != uuid.Nil && (mode == AuthModeAPIKey || mode == AuthModeUser || mode == AuthModeTenantAdmin || (mode == AuthModeAdmin && !BypassLimits(ctx)))
+		tenantScoped := t != nil && t.ID != uuid.Nil && (mode == AuthModeAPIKey || mode == AuthModeUser || mode == AuthModeAdmin || (mode == AuthModeSuperAdmin && !BypassLimits(ctx)))
 
 		if BypassLimits(ctx) {
 			next.ServeHTTP(w, r)

@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { RefreshCw, Search, Webhook } from "lucide-react";
-import { toast } from "sonner";
 
 import { listWebhookDeliveries } from "@/lib/api";
 import type { WebhookDelivery } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +47,7 @@ export default function AdminWebhooksPage() {
   const [eventType, setEventType] = useState("");
   const [url, setUrl] = useState("");
 
-  const { data: response, isLoading: loading, error, mutate } = useAPI(
+  const { data: response, isLoading: loading, mutate } = useCRUDPage(
     ["webhooks", page, state, eventType, url],
     () => listWebhookDeliveries({
       page,
@@ -57,11 +56,10 @@ export default function AdminWebhooksPage() {
       event_type: eventType || undefined,
       url: url || undefined,
     }),
+    "webhooks.loadFailed",
   );
   const items = response?.data ?? [];
   const total = response?.meta?.total ?? 0;
-
-  useEffect(() => { if (error) toast.error(t("webhooks.loadFailed")); }, [error, t]);
 
   const stats = useMemo(() => {
     return items.reduce<Record<string, number>>((acc, item) => {

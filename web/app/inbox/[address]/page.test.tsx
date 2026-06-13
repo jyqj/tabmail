@@ -216,7 +216,7 @@ describe("InboxPage", () => {
     await waitFor(() => {
       expect(getMessageMock).toHaveBeenCalledWith("user@mail.test", "msg-1");
     });
-    expect(markMessageSeenMock).toHaveBeenCalledWith("user@mail.test", "msg-1");
+    expect(markMessageSeenMock).not.toHaveBeenCalled();
     expect(await screen.findByText("detail:Welcome")).toBeInTheDocument();
     expect(await screen.findByText("source:RAW-SOURCE")).toBeInTheDocument();
   });

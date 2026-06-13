@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ClipboardList } from "lucide-react";
-import { toast } from "sonner";
 
 import { listAudit } from "@/lib/api";
 import type { AuditEntry } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,14 +27,13 @@ export default function AuditPage() {
   const [page, setPage] = useState(1);
   const perPage = 30;
 
-  const { data: response, isLoading: loading, error } = useAPI(
+  const { data: response, isLoading: loading } = useCRUDPage(
     ["audit", page, perPage],
     () => listAudit({ page, per_page: perPage }),
+    "audit.loadFailed",
   );
   const entries = response?.data ?? [];
   const total = response?.meta?.total ?? 0;
-
-  useEffect(() => { if (error) toast.error(t("audit.loadFailed")); }, [error, t]);
 
   const totalPages = Math.ceil(total / perPage);
 

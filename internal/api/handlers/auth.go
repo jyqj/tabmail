@@ -328,8 +328,8 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 }
 
 // InviteAdmin handles POST /api/v1/admin/invite.
-// This endpoint is platform-admin only because accepting an invitation creates
-// a platform_admin user.
+// This endpoint is super-admin only because accepting an invitation creates
+// a super_admin user.
 func (h *AuthHandler) InviteAdmin(w http.ResponseWriter, r *http.Request) {
 
 	var req struct {
@@ -460,7 +460,7 @@ func (h *AuthHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		Email:        inv.Email,
 		PasswordHash: string(hash),
 		DisplayName:  displayName,
-		Role:         models.RolePlatformAdmin,
+		Role:         models.RoleSuperAdmin,
 		IsActive:     true,
 	}
 	if err := h.store.CreateUser(r.Context(), user); err != nil {
@@ -568,22 +568,15 @@ func (h *AuthHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Request) 
 		newRole := models.UserRole(*req.Role)
 		actor := authz.ActorFromContext(r.Context())
 		switch newRole {
-		case models.RolePlatformAdmin, models.RoleTenantAdmin, models.RoleUser:
-			// tenant_admin cannot promote to platform_admin
-			if newRole == models.RolePlatformAdmin && !actor.IsPlatformAdmin {
-				errForbidden(w, "only platform admin can assign platform_admin role")
+		case models.RoleSuperAdmin, models.RoleAdmin, models.RoleUser:
+			// Only super_admin can promote to super_admin
+			if newRole == models.RoleSuperAdmin && !actor.IsSuperAdmin {
+				errForbidden(w, "only super admin can assign super_admin role")
 				return
 			}
 			user.Role = newRole
-		case models.RoleAdmin:
-			// Legacy "admin" mapped to platform_admin; only platform_admin can assign
-			if !actor.IsPlatformAdmin {
-				errForbidden(w, "only platform admin can assign admin role")
-				return
-			}
-			user.Role = models.RolePlatformAdmin
 		default:
-			errBadRequest(w, "invalid role, must be platform_admin, tenant_admin or user")
+			errBadRequest(w, "invalid role, must be super_admin, admin or user")
 			return
 		}
 	}

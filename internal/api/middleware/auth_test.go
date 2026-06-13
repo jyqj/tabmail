@@ -45,9 +45,9 @@ func TestAuthResolvesPublicTenant(t *testing.T) {
 	}
 }
 
-func TestAuthResolvesAdminAndScopedTenant(t *testing.T) {
+func TestAuthResolvesSuperAdminAndScopedTenant(t *testing.T) {
 	st, tenantID := seededAuthStore()
-	token := issueTestAccessToken(t, st, uuid.MustParse(publicTenantIDForMiddlewareTests), models.RoleAdmin)
+	token := issueTestAccessToken(t, st, uuid.MustParse(publicTenantIDForMiddlewareTests), models.RoleSuperAdmin)
 
 	var gotTenant *models.Tenant
 	var gotAdmin bool
@@ -87,10 +87,10 @@ func TestAuthResolvesAdminAndScopedTenant(t *testing.T) {
 	}
 }
 
-func TestAuthPureAdminBypassesLimits(t *testing.T) {
+func TestAuthPureSuperAdminBypassesLimits(t *testing.T) {
 	st, _ := seededAuthStore()
 	adminTenantID := uuid.MustParse(publicTenantIDForMiddlewareTests)
-	token := issueTestAccessToken(t, st, adminTenantID, models.RoleAdmin)
+	token := issueTestAccessToken(t, st, adminTenantID, models.RoleSuperAdmin)
 
 	var gotTenant *models.Tenant
 	var gotAdmin bool
@@ -114,6 +114,39 @@ func TestAuthPureAdminBypassesLimits(t *testing.T) {
 		t.Fatalf("expected pure admin to bypass limits, admin=%v bypass=%v", gotAdmin, gotBypass)
 	}
 	if gotTenant == nil || gotTenant.ID != adminTenantID {
+		t.Fatalf("unexpected admin tenant context: %#v", gotTenant)
+	}
+}
+
+func TestAuthTenantAdminDoesNotBypassLimits(t *testing.T) {
+	st, tenantID := seededAuthStore()
+	token := issueTestAccessToken(t, st, tenantID, models.RoleAdmin)
+
+	var gotTenant *models.Tenant
+	var gotAdmin bool
+	var gotBypass bool
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotTenant = TenantFromCtx(r.Context())
+		gotAdmin = IsAdmin(r.Context())
+		gotBypass = BypassLimits(r.Context())
+		w.WriteHeader(http.StatusNoContent)
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Authorization", "Bearer "+token)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusNoContent {
+		t.Fatalf("expected 204, got %d body=%s", rr.Code, rr.Body.String())
+	}
+	if !gotAdmin {
+		t.Fatal("expected admin context")
+	}
+	if gotBypass {
+		t.Fatal("tenant admin must not bypass limits")
+	}
+	if gotTenant == nil || gotTenant.ID != tenantID {
 		t.Fatalf("unexpected admin tenant context: %#v", gotTenant)
 	}
 }

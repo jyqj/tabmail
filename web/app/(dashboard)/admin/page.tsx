@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { toast } from "sonner";
 import {
   Activity,
   CreditCard,
@@ -18,7 +17,7 @@ import {
 import { getStats } from "@/lib/api";
 import type { SystemStats } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -34,10 +33,8 @@ import {
 
 export default function AdminPage() {
   const { t } = useI18n();
-  const { data: response, isLoading: loading, error } = useAPI("admin-stats", () => getStats());
+  const { data: response, isLoading: loading } = useCRUDPage("admin-stats", () => getStats(), "admin.loadFailed");
   const stats = response?.data ?? null;
-
-  useEffect(() => { if (error) toast.error(t("admin.loadFailed")); }, [error, t]);
 
   const statCards = [
     { key: "tenants_count" as const, label: t("admin.tenants"), icon: Users, color: "text-blue-500" },

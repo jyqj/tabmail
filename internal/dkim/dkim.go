@@ -9,6 +9,8 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"strings"
+	"unicode"
 
 	"github.com/emersion/go-msgauth/dkim"
 )
@@ -60,6 +62,46 @@ func PublicKeyFromPEM(privatePEM string) (string, error) {
 // DNSTXTValue returns the full DKIM DNS TXT record value.
 func DNSTXTValue(publicKeyBase64 string) string {
 	return "v=DKIM1; k=rsa; p=" + publicKeyBase64
+}
+
+// TXTValueMatchesPublicKey reports whether a DKIM DNS TXT value contains the
+// expected RSA public key. The public-key comparison is exact after removing
+// DNS/display whitespace from the p= tag; other tag values are parsed
+// case-insensitively where DKIM allows it.
+func TXTValueMatchesPublicKey(txtValue, publicKeyBase64 string) bool {
+	tags := parseDKIMTags(txtValue)
+	if !strings.EqualFold(tags["v"], "DKIM1") {
+		return false
+	}
+	if k := strings.TrimSpace(tags["k"]); k != "" && !strings.EqualFold(k, "rsa") {
+		return false
+	}
+	return stripWhitespace(tags["p"]) == stripWhitespace(publicKeyBase64)
+}
+
+func parseDKIMTags(txtValue string) map[string]string {
+	tags := make(map[string]string)
+	for _, part := range strings.Split(txtValue, ";") {
+		key, value, ok := strings.Cut(part, "=")
+		if !ok {
+			continue
+		}
+		key = strings.ToLower(strings.TrimSpace(key))
+		if key == "" {
+			continue
+		}
+		tags[key] = strings.TrimSpace(value)
+	}
+	return tags
+}
+
+func stripWhitespace(v string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		return r
+	}, v)
 }
 
 // DNSRecordName returns the DNS record name for DKIM.

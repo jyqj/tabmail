@@ -125,7 +125,7 @@ export function AuthDialog() {
           {user ? (
             <>
               <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-                {user.role === "platform_admin" || user.role === "admin" ? "Platform Admin" : user.role === "tenant_admin" ? "Tenant Admin" : "User"}
+                {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Admin" : "User"}
               </span>
               <span className="text-[11px] text-muted-foreground max-w-[100px] sm:max-w-[180px] truncate">
                 {user.display_name || user.email}

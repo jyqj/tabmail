@@ -104,6 +104,33 @@ func TestDNSTXTValue(t *testing.T) {
 	}
 }
 
+func TestTXTValueMatchesPublicKey(t *testing.T) {
+	_, pubB64, err := GenerateKeyPair()
+	if err != nil {
+		t.Fatalf("GenerateKeyPair error: %v", err)
+	}
+	_, otherPubB64, err := GenerateKeyPair()
+	if err != nil {
+		t.Fatalf("GenerateKeyPair error: %v", err)
+	}
+
+	if !TXTValueMatchesPublicKey(DNSTXTValue(pubB64), pubB64) {
+		t.Fatal("expected generated DKIM TXT to match public key")
+	}
+	if !TXTValueMatchesPublicKey(" k = rsa ; p = "+pubB64[:64]+" \t"+pubB64[64:]+" ; v = DKIM1 ", pubB64) {
+		t.Fatal("expected reordered/whitespace DKIM TXT to match public key")
+	}
+	if TXTValueMatchesPublicKey(DNSTXTValue(otherPubB64), pubB64) {
+		t.Fatal("mismatched DKIM public key must not pass")
+	}
+	if TXTValueMatchesPublicKey("v=DKIM1; k=rsa; p=not-the-current-key", pubB64) {
+		t.Fatal("generic DKIM-looking TXT must not pass without current public key")
+	}
+	if TXTValueMatchesPublicKey("contains dkim but no p tag", pubB64) {
+		t.Fatal("text that merely contains dkim must not pass")
+	}
+}
+
 func TestDNSRecordName(t *testing.T) {
 	name := DNSRecordName("default", "example.com")
 	expected := "default._domainkey.example.com"

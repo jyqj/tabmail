@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/emersion/go-sasl"
 	gosmtp "github.com/emersion/go-smtp"
 	"github.com/rs/zerolog"
 
@@ -149,10 +150,21 @@ type session struct {
 }
 
 func (s *session) AuthPlain(_ string, _ string) error {
+	return gosmtp.ErrAuthUnsupported
+}
+
+func (s *session) AuthMechanisms() []string {
 	return nil
 }
 
-func (s *session) Mail(from string, _ *gosmtp.MailOptions) error {
+func (s *session) Auth(_ string) (sasl.Server, error) {
+	return nil, gosmtp.ErrAuthUnsupported
+}
+
+func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
+	if opts != nil && opts.Auth != nil {
+		return gosmtp.ErrAuthUnsupported
+	}
 	s.from = sanitizeAddr(from)
 	pol, err := s.currentPolicy()
 	if err != nil {

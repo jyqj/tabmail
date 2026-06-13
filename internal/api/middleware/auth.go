@@ -14,6 +14,7 @@ import (
 type authStore interface {
 	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
 	ResolveAPIKey(ctx context.Context, rawKey string) (*models.Tenant, *uuid.UUID, []string, []uuid.UUID, *uuid.UUID, error)
+	TouchAPIKey(ctx context.Context, id uuid.UUID, ip string) error
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
 	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
 }
@@ -33,11 +34,11 @@ const (
 )
 
 const (
-	AuthModePublic      = "public"
-	AuthModeAPIKey      = "api_key"
-	AuthModeAdmin       = "admin"        // platform_admin
-	AuthModeTenantAdmin = "tenant_admin" // tenant_admin
-	AuthModeUser        = "user"
+	AuthModePublic     = "public"
+	AuthModeAPIKey     = "api_key"
+	AuthModeSuperAdmin = "super_admin"
+	AuthModeAdmin      = "admin"
+	AuthModeUser       = "user"
 )
 
 // TenantFromCtx returns the resolved tenant, or nil for unauthenticated requests.
@@ -48,23 +49,18 @@ func TenantFromCtx(ctx context.Context) *models.Tenant {
 	return nil
 }
 
-// IsAdmin returns true when the request was authenticated as a platform admin.
-// Note: ctxIsAdmin is only set to true for platform_admin (or legacy admin) users.
-func IsAdmin(ctx context.Context) bool {
+// IsSuperAdmin returns true when the request was authenticated as a super_admin.
+func IsSuperAdmin(ctx context.Context) bool {
 	if v, ok := ctx.Value(ctxIsAdmin).(bool); ok {
 		return v
 	}
 	return false
 }
 
-// IsPlatformAdmin is an alias for IsAdmin — true only for platform_admin.
-func IsPlatformAdmin(ctx context.Context) bool {
-	return IsAdmin(ctx)
-}
-
-// IsTenantAdmin returns true when the request was authenticated as a tenant admin.
-func IsTenantAdmin(ctx context.Context) bool {
-	return AuthModeFromCtx(ctx) == AuthModeTenantAdmin
+// IsAdmin returns true when the request was authenticated as admin or super_admin.
+func IsAdmin(ctx context.Context) bool {
+	mode := AuthModeFromCtx(ctx)
+	return mode == AuthModeSuperAdmin || mode == AuthModeAdmin
 }
 
 // BypassLimits returns true when the request should bypass tenant/public limits.
@@ -91,7 +87,7 @@ func APIScopesFromCtx(ctx context.Context) []string {
 
 func HasScope(ctx context.Context, required ...string) bool {
 	mode := AuthModeFromCtx(ctx)
-	if mode == AuthModeAdmin || mode == AuthModeUser || mode == AuthModeTenantAdmin {
+	if mode == AuthModeSuperAdmin || mode == AuthModeAdmin || mode == AuthModeUser {
 		return true
 	}
 	return hasAnyScope(APIScopesFromCtx(ctx), required...)
@@ -144,13 +140,13 @@ func PermissionLoader(st permStore) func(http.Handler) http.Handler {
 			mode := AuthModeFromCtx(ctx)
 
 			// Only load permissions for JWT users
-			if mode != AuthModeAdmin && mode != AuthModeTenantAdmin && mode != AuthModeUser {
+			if mode != AuthModeSuperAdmin && mode != AuthModeAdmin && mode != AuthModeUser {
 				next.ServeHTTP(w, r)
 				return
 			}
 
-			// Admin / tenant_admin gets unlimited
-			if mode == AuthModeAdmin || mode == AuthModeTenantAdmin {
+			// super_admin / admin gets unlimited
+			if mode == AuthModeSuperAdmin || mode == AuthModeAdmin {
 				ctx = context.WithValue(ctx, ctxPermission, &models.EffectivePermission{
 					CanSend:           true,
 					DailySendQuota:    0, // unlimited
@@ -213,15 +209,15 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 						return
 					}
 
-					isPlatformAdmin := user.Role == models.RolePlatformAdmin || user.Role == models.RoleAdmin
-					isTenantAdmin := user.Role == models.RoleTenantAdmin
+					isSuperAdmin := user.Role == models.RoleSuperAdmin
+					isAdmin := user.Role == models.RoleAdmin
 					ctx = context.WithValue(ctx, ctxUser, user)
 					ctx = context.WithValue(ctx, ctxTenant, tenant)
-					ctx = context.WithValue(ctx, ctxIsAdmin, isPlatformAdmin) // ctxIsAdmin only true for platform_admin
-					ctx = context.WithValue(ctx, ctxBypassLimits, isPlatformAdmin)
+					ctx = context.WithValue(ctx, ctxIsAdmin, isSuperAdmin) // ctxIsAdmin only true for super_admin
+					ctx = context.WithValue(ctx, ctxBypassLimits, isSuperAdmin)
 					ctx = context.WithValue(ctx, ctxScopes, []string{"*"})
-					if isPlatformAdmin {
-						// Platform admin can impersonate tenant via X-Tenant-ID header
+					if isSuperAdmin {
+						// Super admin can impersonate tenant via X-Tenant-ID header
 						if tenantIDStr := strings.TrimSpace(r.Header.Get("X-Tenant-ID")); tenantIDStr != "" {
 							tid, parseErr := uuid.Parse(tenantIDStr)
 							if parseErr != nil {
@@ -240,9 +236,9 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 							ctx = context.WithValue(ctx, ctxTenant, resolved)
 							ctx = context.WithValue(ctx, ctxBypassLimits, false)
 						}
+						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeSuperAdmin)
+					} else if isAdmin {
 						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeAdmin)
-					} else if isTenantAdmin {
-						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeTenantAdmin)
 					} else {
 						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeUser)
 					}
@@ -269,6 +265,7 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 				ctx = context.WithValue(ctx, ctxTenant, tenant)
 				if keyID != nil {
 					ctx = context.WithValue(ctx, ctxAPIKeyID, keyID)
+					go func() { _ = st.TouchAPIKey(context.Background(), *keyID, r.RemoteAddr) }()
 				}
 
 				// If the API key has an owner, verify the owner is still active
@@ -354,11 +351,11 @@ func intersectAllowedZones(ownerZones, keyZones []uuid.UUID) []uuid.UUID {
 	return intersection
 }
 
-// RequireAdmin accepts platform_admin and tenant_admin. Rejects others with 403.
+// RequireAdmin accepts super_admin and admin. Rejects others with 403.
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mode := AuthModeFromCtx(r.Context())
-		if mode != AuthModeAdmin && mode != AuthModeTenantAdmin {
+		if mode != AuthModeSuperAdmin && mode != AuthModeAdmin {
 			writeError(w, http.StatusForbidden, "FORBIDDEN", "admin access required")
 			return
 		}
@@ -366,11 +363,11 @@ func RequireAdmin(next http.Handler) http.Handler {
 	})
 }
 
-// RequirePlatformAdmin accepts only platform_admin. Rejects others with 403.
-func RequirePlatformAdmin(next http.Handler) http.Handler {
+// RequireSuperAdmin accepts only super_admin. Rejects others with 403.
+func RequireSuperAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if !IsPlatformAdmin(r.Context()) {
-			writeError(w, http.StatusForbidden, "FORBIDDEN", "platform admin access required")
+		if !IsSuperAdmin(r.Context()) {
+			writeError(w, http.StatusForbidden, "FORBIDDEN", "super admin access required")
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -382,7 +379,7 @@ func RequirePlatformAdmin(next http.Handler) http.Handler {
 func RequireAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch AuthModeFromCtx(r.Context()) {
-		case AuthModeAdmin, AuthModeTenantAdmin, AuthModeUser:
+		case AuthModeSuperAdmin, AuthModeAdmin, AuthModeUser:
 			next.ServeHTTP(w, r)
 		case AuthModePublic:
 			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
@@ -392,11 +389,11 @@ func RequireAuth(next http.Handler) http.Handler {
 	})
 }
 
-// RequireTenantKeyOrAdmin allows admin, tenant_admin, user (JWT), or API key authenticated requests.
+// RequireTenantKeyOrAdmin allows super_admin, admin, user (JWT), or API key authenticated requests.
 func RequireTenantKeyOrAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch AuthModeFromCtx(r.Context()) {
-		case AuthModeAdmin, AuthModeTenantAdmin, AuthModeAPIKey, AuthModeUser:
+		case AuthModeSuperAdmin, AuthModeAdmin, AuthModeAPIKey, AuthModeUser:
 			next.ServeHTTP(w, r)
 		default:
 			writeError(w, http.StatusForbidden, "FORBIDDEN", "authentication required")
@@ -408,7 +405,7 @@ func RequireScopes(required ...string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			mode := AuthModeFromCtx(r.Context())
-			if mode == AuthModeAdmin || mode == AuthModeTenantAdmin || mode == AuthModeUser {
+			if mode == AuthModeSuperAdmin || mode == AuthModeAdmin || mode == AuthModeUser {
 				next.ServeHTTP(w, r)
 				return
 			}

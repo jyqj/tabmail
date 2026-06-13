@@ -1,4 +1,4 @@
-.PHONY: build run dev test vet lint web-lint web-test web-build contract-check check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
+.PHONY: build run dev test vet lint web-lint web-test web-build contract-check i18n-check check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
 
 BINARY  := tabmail
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -35,9 +35,12 @@ web-build:
 contract-check:
 	python3 scripts/check_contract_drift.py
 
+i18n-check:
+	python3 scripts/check_i18n_keys.py
+
 lint: vet web-lint
 
-check: test vet contract-check web-lint web-test web-build
+check: test vet contract-check i18n-check web-lint web-test web-build
 
 
 backup-db:

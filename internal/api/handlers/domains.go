@@ -5,9 +5,11 @@ import (
 	"net"
 	"net/http"
 
+	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
+
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
 	domainapp "tabmail/internal/app/domains"
@@ -15,12 +17,12 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	"tabmail/internal/resolver"
 	"tabmail/internal/store"
 )
 
 type domainStore interface {
 	app.AuditStore
-	app.PrincipalStore
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
 	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
@@ -38,32 +40,25 @@ type domainStore interface {
 	DeleteRoute(ctx context.Context, id uuid.UUID) error
 	ListZoneObjectKeys(ctx context.Context, zoneID uuid.UUID) ([]string, error)
 	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
-	// Send identities & grants
+	// Send identities
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
-	CreateSendAsGrant(ctx context.Context, g *models.SendAsGrant) error
 	ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error)
 	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
-	// Zone grants
-	CreateZoneGrant(ctx context.Context, g *models.ZoneGrant) error
-	GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error)
-	ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error)
-	ListZoneGrants(ctx context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error)
-	DeleteZoneGrant(ctx context.Context, id uuid.UUID) error
-	GetZoneGrant(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (*models.ZoneGrant, error)
 }
 
 type DomainHandler struct {
 	service     *domainapp.Service
 	store       domainStore
 	objectStore store.ObjectStore
+	resolver    *resolver.Resolver
 	lookupTXT   func(string) ([]string, error)
 	lookupMX    func(string) ([]*net.MX, error)
 	logger      zerolog.Logger
 }
 
-func NewDomainHandler(s domainStore, obj store.ObjectStore, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, l zerolog.Logger) *DomainHandler {
+func NewDomainHandler(s domainStore, obj store.ObjectStore, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, res *resolver.Resolver, l zerolog.Logger) *DomainHandler {
 	service := domainapp.NewService(s, dispatcher, expectedMXHost, namingMode, addressSecret, l)
-	return &DomainHandler{service: service, store: s, objectStore: obj, lookupTXT: net.LookupTXT, lookupMX: net.LookupMX, logger: l.With().Str("handler", "domains").Logger()}
+	return &DomainHandler{service: service, store: s, objectStore: obj, resolver: res, lookupTXT: net.LookupTXT, lookupMX: net.LookupMX, logger: l.With().Str("handler", "domains").Logger()}
 }
 
 // SetResolvers overrides DNS resolvers on the underlying service. For test use only.
@@ -74,14 +69,13 @@ func (h *DomainHandler) SetResolvers(lookupTXT func(string) ([]string, error), l
 }
 
 func (h *DomainHandler) ListZones(w http.ResponseWriter, r *http.Request) {
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	items, err := h.service.ListZones(r.Context(), tenant, isAdmin, ownerUserID, tenantWide)
+	tenant := middleware.TenantFromCtx(r.Context())
+	items, err := h.service.ListZones(r.Context(), actor, tenant)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
-	items = filterZonesForActor(actor, items)
 	ok(w, items)
 }
 
@@ -97,8 +91,8 @@ func (h *DomainHandler) ListOpenZones(w http.ResponseWriter, r *http.Request) {
 
 func (h *DomainHandler) AdminListZones(w http.ResponseWriter, r *http.Request) {
 	actor := authz.ActorFromContext(r.Context())
-	if actor.IsPlatformAdmin {
-		items, err := h.service.ListAllZones(r.Context(), true)
+	if actor.IsSuperAdmin {
+		items, err := h.service.ListAllZones(r.Context(), actor)
 		if err != nil {
 			respondAppError(w, h.logger, err)
 			return
@@ -108,7 +102,7 @@ func (h *DomainHandler) AdminListZones(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tenant := middleware.TenantFromCtx(r.Context())
-	items, err := h.service.ListZones(r.Context(), tenant, true, nil, true)
+	items, err := h.service.ListZones(r.Context(), actor, tenant)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -124,9 +118,9 @@ func (h *DomainHandler) CreateZone(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "domain is required")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	item, err := h.service.CreateZone(r.Context(), tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, body.Domain, actorFromRequest(r))
+	tenant := middleware.TenantFromCtx(r.Context())
+	item, err := h.service.CreateZone(r.Context(), actor, tenant, body.Domain)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -149,14 +143,14 @@ func (h *DomainHandler) AdminUpdateZoneAccess(w http.ResponseWriter, r *http.Req
 		return
 	}
 	actor := authz.ActorFromContext(r.Context())
-	tenant, isAdmin, _, _ := domainActorParams(r)
-	if actor.IsPlatformAdmin {
+	tenant := middleware.TenantFromCtx(r.Context())
+	if actor.IsSuperAdmin {
 		tenant = nil
 	}
-	item, err := h.service.UpdateZoneAccess(r.Context(), zoneID, tenant, isAdmin, domainapp.ZoneAccessInput{
+	item, err := h.service.UpdateZoneAccess(r.Context(), actor, tenant, zoneID, domainapp.ZoneAccessInput{
 		Visibility:            body.Visibility,
 		AllowRandomSubdomains: body.AllowRandomSubdomains,
-	}, actorFromRequest(r))
+	})
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -171,12 +165,8 @@ func (h *DomainHandler) DeleteZone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, id) {
-		return
-	}
-	if _, err := h.service.ManagedZone(r.Context(), id, tenant, isAdmin, ownerUserID, tenantWide); err != nil {
+	if _, err := h.service.ManagedZone(r.Context(), actor, id); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -190,7 +180,7 @@ func (h *DomainHandler) DeleteZone(w http.ResponseWriter, r *http.Request) {
 			// Non-fatal: proceed with deletion even if we can't list keys.
 		}
 	}
-	if err := h.service.DeleteZone(r.Context(), id, tenant, isAdmin, ownerUserID, tenantWide, actorFromRequest(r)); err != nil {
+	if err := h.service.DeleteZone(r.Context(), actor, id); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -223,12 +213,8 @@ func (h *DomainHandler) TriggerVerify(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, id) {
-		return
-	}
-	zone, checks, err := h.service.TriggerVerify(r.Context(), id, tenant, isAdmin, ownerUserID, tenantWide, actorFromRequest(r))
+	zone, checks, err := h.service.TriggerVerify(r.Context(), actor, id)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -251,12 +237,8 @@ func (h *DomainHandler) VerificationStatus(w http.ResponseWriter, r *http.Reques
 		errBadRequest(w, "invalid id")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, id) {
-		return
-	}
-	item, err := h.service.VerificationStatus(r.Context(), id, tenant, isAdmin, ownerUserID, tenantWide)
+	item, err := h.service.VerificationStatus(r.Context(), actor, id)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -270,12 +252,8 @@ func (h *DomainHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, zoneID) {
-		return
-	}
-	items, err := h.service.ListRoutes(r.Context(), zoneID, tenant, isAdmin, ownerUserID, tenantWide)
+	items, err := h.service.ListRoutes(r.Context(), actor, zoneID)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -290,13 +268,9 @@ func (h *DomainHandler) SuggestAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	useSubdomain := r.URL.Query().Get("subdomain") == "true" || r.URL.Query().Get("subdomain") == "1"
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, zoneID) {
-		return
-	}
 	canManage := middleware.HasScope(r.Context(), "domains:write")
-	item, err := h.service.SuggestAddress(r.Context(), zoneID, tenant, isAdmin, ownerUserID, tenantWide, canManage, useSubdomain)
+	item, err := h.service.SuggestAddress(r.Context(), actor, zoneID, canManage, useSubdomain)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -339,12 +313,8 @@ func (h *DomainHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, zoneID) {
-		return
-	}
-	item, err := h.service.CreateRoute(r.Context(), zoneID, tenant, isAdmin, ownerUserID, tenantWide, actor.Permission, domainapp.CreateRouteInput{
+	item, err := h.service.CreateRoute(r.Context(), actor, zoneID, domainapp.CreateRouteInput{
 		RouteType:              body.RouteType,
 		MatchValue:             body.MatchValue,
 		RangeStart:             body.RangeStart,
@@ -352,7 +322,7 @@ func (h *DomainHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		AutoCreateMailbox:      body.AutoCreateMailbox,
 		RetentionHoursOverride: body.RetentionHoursOverride,
 		AccessModeDefault:      body.AccessModeDefault,
-	}, actorFromRequest(r))
+	})
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -367,130 +337,46 @@ func (h *DomainHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	actor := authz.ActorFromContext(r.Context())
-	if route, err := h.store.GetRoute(r.Context(), routeID); err == nil && route != nil {
-		if !ensureZoneAllowedForActor(w, actor, route.ZoneID) {
-			return
-		}
-	} else if err != nil {
-		h.logger.Err(err).Stringer("route_id", routeID).Msg("lookup route for authz")
-		errInternal(w)
-		return
-	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
-	if err := h.service.DeleteRoute(r.Context(), routeID, tenant, isAdmin, ownerUserID, tenantWide, actorFromRequest(r)); err != nil {
+	if err := h.service.DeleteRoute(r.Context(), actor, routeID); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
 	noContent(w)
 }
 
-// ListZoneGrants handles GET /api/v1/domains/{id}/grants
-func (h *DomainHandler) ListZoneGrants(w http.ResponseWriter, r *http.Request) {
-	zoneID, err := uuid.Parse(chi.URLParam(r, "id"))
-	if err != nil {
-		errBadRequest(w, "invalid id")
+// ExplainRoute handles POST /api/v1/domains/{id}/routes/explain
+func (h *DomainHandler) ExplainRoute(w http.ResponseWriter, r *http.Request) {
+	if h.resolver == nil {
+		errInternal(w)
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
-	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, zoneID) {
-		return
-	}
-	items, err := h.service.ListZoneGrants(r.Context(), zoneID, tenant, isAdmin, ownerUserID, tenantWide)
-	if err != nil {
-		respondAppError(w, h.logger, err)
-		return
-	}
-	ok(w, items)
-}
-
-// CreateZoneGrant handles POST /api/v1/domains/{id}/grants
-func (h *DomainHandler) CreateZoneGrant(w http.ResponseWriter, r *http.Request) {
 	zoneID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid id")
 		return
 	}
 	var body struct {
-		PrincipalType string               `json:"principal_type"`
-		PrincipalID   uuid.UUID            `json:"principal_id"`
-		Role          models.ZoneGrantRole `json:"role"`
+		Address string `json:"address"`
 	}
-	if err := decodeBody(r, &body); err != nil {
-		errBadRequest(w, "invalid body")
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Address == "" {
+		errBadRequest(w, "address is required")
 		return
 	}
-	grant := &models.ZoneGrant{
-		PrincipalType: body.PrincipalType,
-		PrincipalID:   body.PrincipalID,
-		Role:          body.Role,
-	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
 	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, zoneID) {
-		return
-	}
-	item, err := h.service.CreateZoneGrant(r.Context(), zoneID, tenant, isAdmin, ownerUserID, tenantWide, grant, actorFromRequest(r))
+	zone, err := h.service.ManagedZone(r.Context(), actor, zoneID)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
-	created(w, item)
-}
-
-// DeleteZoneGrant handles DELETE /api/v1/domains/{id}/grants/{grantId}
-func (h *DomainHandler) DeleteZoneGrant(w http.ResponseWriter, r *http.Request) {
-	zoneID, err := uuid.Parse(chi.URLParam(r, "id"))
+	result, err := h.resolver.Explain(r.Context(), body.Address)
 	if err != nil {
-		errBadRequest(w, "invalid id")
+		h.logger.Err(err).Str("address", body.Address).Msg("explain route failed")
+		errInternal(w)
 		return
 	}
-	grantID, err := uuid.Parse(chi.URLParam(r, "grantId"))
-	if err != nil {
-		errBadRequest(w, "invalid grant id")
+	if result.ZoneID != "" && result.ZoneID != zone.ID.String() {
+		errForbidden(w, "address resolves outside this domain")
 		return
 	}
-	tenant, isAdmin, ownerUserID, tenantWide := domainActorParams(r)
-	actor := authz.ActorFromContext(r.Context())
-	if !ensureZoneAllowedForActor(w, actor, zoneID) {
-		return
-	}
-	if err := h.service.DeleteZoneGrant(r.Context(), zoneID, grantID, tenant, isAdmin, ownerUserID, tenantWide, actorFromRequest(r)); err != nil {
-		respondAppError(w, h.logger, err)
-		return
-	}
-	noContent(w)
-}
-
-func ensureZoneAllowedForActor(w http.ResponseWriter, actor authz.Actor, zoneID uuid.UUID) bool {
-	if actor.IsPlatformAdmin || actor.IsTenantAdmin {
-		return true
-	}
-	if actor.Permission == nil || len(actor.Permission.AllowedZoneIDs) == 0 {
-		return true
-	}
-	for _, id := range actor.Permission.AllowedZoneIDs {
-		if id == zoneID {
-			return true
-		}
-	}
-	errForbidden(w, "zone not in allowed list")
-	return false
-}
-
-func filterZonesForActor(actor authz.Actor, zones []*models.DomainZone) []*models.DomainZone {
-	if actor.IsPlatformAdmin || actor.IsTenantAdmin || actor.Permission == nil || len(actor.Permission.AllowedZoneIDs) == 0 {
-		return zones
-	}
-	allowed := make(map[uuid.UUID]struct{}, len(actor.Permission.AllowedZoneIDs))
-	for _, id := range actor.Permission.AllowedZoneIDs {
-		allowed[id] = struct{}{}
-	}
-	out := make([]*models.DomainZone, 0, len(zones))
-	for _, z := range zones {
-		if _, ok := allowed[z.ID]; ok {
-			out = append(out, z)
-		}
-	}
-	return out
+	ok(w, result)
 }

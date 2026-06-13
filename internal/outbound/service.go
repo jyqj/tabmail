@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/mail"
+	"strings"
 	"sync"
 	"time"
 
@@ -23,6 +24,7 @@ const maxRetryDelay = 1 * time.Hour
 type Service struct {
 	cfg      config.Outbound
 	store    store.Store
+	adapter  DeliveryAdapter
 	logger   zerolog.Logger
 	stopCh   chan struct{}
 	wg       sync.WaitGroup
@@ -31,11 +33,19 @@ type Service struct {
 
 // NewService creates a new outbound service.
 func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Service {
+	var adapter DeliveryAdapter
+	switch cfg.Mode {
+	case "direct":
+		adapter = NewDirectAdapter(cfg.RequireTLS)
+	default:
+		adapter = NewRelayAdapter(cfg)
+	}
 	return &Service{
-		cfg:    cfg,
-		store:  st,
-		logger: logger.With().Str("component", "outbound").Logger(),
-		stopCh: make(chan struct{}),
+		cfg:     cfg,
+		store:   st,
+		adapter: adapter,
+		logger:  logger.With().Str("component", "outbound").Logger(),
+		stopCh:  make(chan struct{}),
 	}
 }
 
@@ -53,6 +63,7 @@ type SendRequest struct {
 	TextBody string
 	HTMLBody string
 	Headers  map[string]string
+	Quota    store.OutboundQuotaReservation
 }
 
 // Submit enqueues an outbound email job after validation.
@@ -141,7 +152,7 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		NextAttemptAt:   now,
 	}
 
-	if err := s.store.CreateOutboundJob(ctx, job); err != nil {
+	if err := s.createOutboundJob(ctx, job, req.Quota); err != nil {
 		return nil, fmt.Errorf("enqueue outbound job: %w", err)
 	}
 
@@ -152,6 +163,13 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		Msg("outbound job enqueued")
 
 	return job, nil
+}
+
+func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation) error {
+	if quota.HasLimits() {
+		return s.store.CreateOutboundJobWithQuota(ctx, job, quota)
+	}
+	return s.store.CreateOutboundJob(ctx, job)
 }
 
 // StartWorker begins the background delivery worker loop.
@@ -201,17 +219,32 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 		return
 	}
 
+	zone, zoneErr := s.store.GetZone(ctx, job.ZoneID)
+	if zoneErr != nil {
+		if s.dkimFailClosed() {
+			log.Error().Err(zoneErr).Msg("loading zone for DKIM, delivery blocked by policy")
+			s.failOrRetry(ctx, job, fmt.Sprintf("load zone for dkim: %s", zoneErr))
+			return
+		}
+		log.Warn().Err(zoneErr).Msg("loading zone for DKIM")
+	}
+	if zone != nil && zone.DKIMRequiredForSend && !s.cfg.DKIMSign {
+		log.Error().Msg("zone requires DKIM for send but global DKIM signing is disabled")
+		s.failOrRetry(ctx, job, "zone requires DKIM but global signing is disabled")
+		return
+	}
+
 	// DKIM sign if enabled for this zone.
 	if s.cfg.DKIMSign {
-		zone, zoneErr := s.store.GetZone(ctx, job.ZoneID)
-		if zoneErr != nil {
-			log.Warn().Err(zoneErr).Msg("loading zone for DKIM")
-		}
 		if zone != nil && zone.DKIMEnabled && zone.DKIMPrivateKeyPEM != nil {
-			signed, signErr := tabdkim.SignMessage(mime, zone.Domain, zone.DKIMSelector, *zone.DKIMPrivateKeyPEM)
+			selector := strings.TrimSpace(zone.DKIMSelector)
+			if selector == "" {
+				selector = tabdkim.DefaultSelector
+			}
+			signed, signErr := tabdkim.SignMessage(mime, zone.Domain, selector, *zone.DKIMPrivateKeyPEM)
 			if signErr != nil {
 				// Check fail policy: fail_closed blocks delivery on sign failure.
-				if s.cfg.DKIMFailPolicy == "fail_closed" || zone.DKIMRequiredForSend {
+				if s.dkimFailClosed() || zone.DKIMRequiredForSend {
 					log.Error().Err(signErr).Msg("DKIM signing failed, delivery blocked by policy")
 					s.failOrRetry(ctx, job, fmt.Sprintf("dkim sign: %s", signErr))
 					return
@@ -228,22 +261,56 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 		}
 	}
 
-	// Deliver via configured mode.
-	var deliverErr error
-	switch s.cfg.Mode {
-	case "direct":
-		deliverErr = DeliverDirect(ctx, job.MailFrom, job.RcptTo, mime, s.cfg.RequireTLS)
-	default:
-		deliverErr = DeliverRelay(ctx, s.cfg, job.MailFrom, job.RcptTo, mime)
+	// Deliver via configured adapter.
+	result, deliverErr := s.adapter.Deliver(ctx, job, mime)
+
+	// Record the attempt.
+	if result != nil {
+		attempt := &models.OutboundAttempt{
+			ID:           uuid.New(),
+			JobID:        job.ID,
+			TenantID:     job.TenantID,
+			Adapter:      result.Adapter,
+			Attempt:      job.Attempts,
+			SMTPCode:     result.SMTPCode,
+			SMTPResponse: result.SMTPResponse,
+			RemoteHost:   result.RemoteHost,
+			StartedAt:    result.StartedAt,
+			FinishedAt:   result.FinishedAt,
+			Error:        result.Error,
+		}
+		if storeErr := s.store.CreateOutboundAttempt(ctx, attempt); storeErr != nil {
+			log.Warn().Err(storeErr).Msg("recording delivery attempt")
+		}
 	}
 
 	if deliverErr != nil {
 		log.Warn().Err(deliverErr).Int("attempt", job.Attempts+1).Msg("delivery failed")
+		// Hard bounce (5xx) → add recipients to suppression list.
+		if result != nil && result.SMTPCode >= 500 && result.SMTPCode < 600 {
+			for _, rcpt := range job.RcptTo {
+				_ = s.store.AddSuppression(ctx, &models.SuppressionEntry{
+					ID:          uuid.New(),
+					TenantID:    job.TenantID,
+					Address:     rcpt,
+					Reason:      "hard_bounce",
+					SourceJobID: &job.ID,
+					CreatedAt:   time.Now(),
+				})
+			}
+			log.Info().Int("smtp_code", result.SMTPCode).Msg("hard bounce: recipients added to suppression list")
+		}
 		s.failOrRetry(ctx, job, deliverErr.Error())
 		return
 	}
 
-	if err := s.store.MarkOutboundJobSent(ctx, job.ID, job.DeliveryToken, 250, "OK", job.MessageIDHeader); err != nil {
+	smtpCode := 250
+	smtpResponse := "OK"
+	if result != nil && result.SMTPCode > 0 {
+		smtpCode = result.SMTPCode
+		smtpResponse = result.SMTPResponse
+	}
+	if err := s.store.MarkOutboundJobSent(ctx, job.ID, job.DeliveryToken, smtpCode, smtpResponse, job.MessageIDHeader); err != nil {
 		if isTokenMismatch(err) {
 			log.Warn().Msg("delivery token mismatch on mark-sent; job was re-claimed by another worker, skipping")
 			return
@@ -251,6 +318,10 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 		log.Error().Err(err).Msg("marking job sent")
 	}
 	log.Info().Msg("outbound delivered")
+}
+
+func (s *Service) dkimFailClosed() bool {
+	return strings.ToLower(strings.TrimSpace(s.cfg.DKIMFailPolicy)) != config.DKIMFailOpen
 }
 
 func (s *Service) failOrRetry(ctx context.Context, job *models.OutboundJob, errMsg string) {

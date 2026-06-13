@@ -16,9 +16,16 @@ import {
   deleteMessage,
   purgeMailbox,
   getMessageSource,
+  breakGlassRead,
+  breakGlassSource,
   issueToken,
   streamMailboxEvents,
 } from "@/lib/api";
+import {
+  clearMailboxAPIKeyAuth,
+  getMailboxAPIKeySnapshot,
+  setMailboxAPIKeyAuth,
+} from "@/lib/api/base";
 import type { Message, MessageDetail as MsgDetail } from "@/lib/types";
 import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/lib/i18n";
@@ -32,16 +39,8 @@ import {
   KeyRound,
 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-
-function safeConfirm(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
-  try {
-    return window.confirm(message) !== false;
-  } catch {
-    return true;
-  }
-}
+import { cn, safeConfirm } from "@/lib/utils";
+import { isAdminLevel } from "@/lib/permissions";
 
 export default function InboxPage() {
   const params = useParams();
@@ -53,16 +52,20 @@ export default function InboxPage() {
   const [selectedMsg, setSelectedMsg] = useState<MsgDetail | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [rawSource, setRawSource] = useState<string | null>(null);
+  const [rawSourceError, setRawSourceError] = useState<string | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [mailboxPassword, setMailboxPassword] = useState("");
+  const [mailboxAPIKey, setMailboxAPIKey] = useState("");
+  const [mailboxAPIKeyMatches, setMailboxAPIKeyMatches] = useState(false);
   const [authenticating, setAuthenticating] = useState(false);
   const [authRequired, setAuthRequired] = useState(false);
   const [notFound, setNotFound] = useState(false);
   const [sseConnected, setSseConnected] = useState(false);
   const mailboxTokenMatches =
     !!mailboxToken && mailboxAddress?.toLowerCase() === address.toLowerCase();
-  const canWriteRecords = level === "platform_admin" || level === "tenant_admin" || level === "user";
+  // UX-only gate; the backend authz seam is authoritative.
+  const canWriteRecords = isAdminLevel(level);
 
   const { data: response, isLoading: loading, isValidating: refreshing, error, mutate } = useAPI(
     address ? ["inbox", address] : null,
@@ -107,6 +110,22 @@ export default function InboxPage() {
     }
   }, [response]);
 
+  useEffect(() => {
+    const updateStoredAPIKeyState = () => {
+      const { address: keyAddress, key } = getMailboxAPIKeySnapshot();
+      setMailboxAPIKeyMatches(
+        !!key && keyAddress?.toLowerCase() === address.toLowerCase(),
+      );
+    };
+    updateStoredAPIKeyState();
+    window.addEventListener("storage", updateStoredAPIKeyState);
+    window.addEventListener("tabmail-auth-change", updateStoredAPIKeyState);
+    return () => {
+      window.removeEventListener("storage", updateStoredAPIKeyState);
+      window.removeEventListener("tabmail-auth-change", updateStoredAPIKeyState);
+    };
+  }, [address]);
+
   // SSE streaming
   const handleSseEvent = useCallback(() => {
     mutate();
@@ -148,10 +167,30 @@ export default function InboxPage() {
     }
   };
 
+  const handleAPIKeyLogin = async () => {
+    const key = mailboxAPIKey.trim();
+    if (!key) return;
+    setMailboxAPIKeyAuth(address, key);
+    setMailboxAPIKey("");
+    setAuthRequired(false);
+    setNotFound(false);
+    setMailboxAPIKeyMatches(true);
+    toast.success(t("toast.apiKeyOk"));
+    mutate();
+  };
+
+  const handleClearMailboxAPIKey = () => {
+    clearMailboxAPIKeyAuth();
+    setMailboxAPIKeyMatches(false);
+    setAuthRequired(true);
+    mutate();
+  };
+
   const handleSelect = async (msg: Message) => {
     setSelectedId(msg.id);
     setDetailLoading(true);
     setRawSource(null);
+    setRawSourceError(null);
     try {
       const res = await getMessage(address, msg.id);
       setSelectedMsg(res.data);
@@ -182,7 +221,10 @@ export default function InboxPage() {
     }
     getMessageSource(address, msg.id)
       .then((src) => setRawSource(src))
-      .catch(() => {});
+      .catch((e: unknown) => {
+        const err = e as { error?: { message?: string } };
+        setRawSourceError(err?.error?.message || t("msgDetail.sourceLoadFailed"));
+      });
   };
 
   const handleDelete = async () => {
@@ -196,6 +238,24 @@ export default function InboxPage() {
       mutate();
     } catch {
       toast.error(t("toast.deleteFailed"));
+    }
+  };
+
+  const handleBreakGlass = async (reason: string) => {
+    if (!selectedId) return;
+    try {
+      const res = await breakGlassRead(address, selectedId, reason);
+      setSelectedMsg(res.data);
+      setRawSourceError(null);
+      breakGlassSource(address, selectedId, reason)
+        .then((src) => setRawSource(src))
+        .catch((e: unknown) => {
+          const err = e as { error?: { message?: string } };
+          setRawSourceError(err?.error?.message || t("msgDetail.sourceLoadFailed"));
+        });
+      toast.success(t("msgDetail.breakGlass"));
+    } catch {
+      toast.error(t("toast.loadFailed"));
     }
   };
 
@@ -312,6 +372,17 @@ export default function InboxPage() {
                 <span className="hidden sm:inline">{t("inbox.logout")}</span>
               </Button>
             )}
+            {mailboxAPIKeyMatches && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearMailboxAPIKey}
+                className="gap-1.5"
+              >
+                <KeyRound className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{t("inbox.forgetApiKey")}</span>
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -342,17 +413,36 @@ export default function InboxPage() {
                   {t("inbox.authDesc")}
                 </p>
               </div>
-              <div className="flex w-full max-w-md flex-col gap-2 sm:flex-row">
-                <Input
-                  type="password"
-                  placeholder={t("inbox.password")}
-                  value={mailboxPassword}
-                  onChange={(e) => setMailboxPassword(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleMailboxLogin()}
-                />
-                <Button onClick={handleMailboxLogin} disabled={authenticating || !mailboxPassword.trim()}>
-                  {authenticating ? t("inbox.connecting") : t("inbox.unlock")}
-                </Button>
+              <div className="grid w-full max-w-md gap-3">
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    type="password"
+                    placeholder={t("inbox.password")}
+                    value={mailboxPassword}
+                    onChange={(e) => setMailboxPassword(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleMailboxLogin()}
+                  />
+                  <Button onClick={handleMailboxLogin} disabled={authenticating || !mailboxPassword.trim()}>
+                    {authenticating ? t("inbox.connecting") : t("inbox.unlock")}
+                  </Button>
+                </div>
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <Input
+                    type="password"
+                    placeholder={t("inbox.apiKey")}
+                    value={mailboxAPIKey}
+                    onChange={(e) => setMailboxAPIKey(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleAPIKeyLogin()}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={handleAPIKeyLogin}
+                    disabled={!mailboxAPIKey.trim()}
+                  >
+                    {t("inbox.useApiKey")}
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground">{t("inbox.apiKeyDesc")}</p>
               </div>
             </div>
           </div>
@@ -389,9 +479,11 @@ export default function InboxPage() {
                 <MessageDetail
                   message={selectedMsg}
                   rawSource={rawSource}
+                  rawSourceError={rawSourceError}
                   onDelete={canWriteRecords ? handleDelete : undefined}
                   onBack={() => { setSelectedMsg(null); setSelectedId(null); }}
                   loading={detailLoading}
+                  onBreakGlass={selectedMsg?.body_redacted && canWriteRecords ? handleBreakGlass : undefined}
                 />
               ) : (
                 <div className="text-center text-muted-foreground px-4 tm-reveal tm-reveal-1">

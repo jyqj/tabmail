@@ -268,10 +268,14 @@ func intPtr(v int) *int { return &v }
 
 func TestResolverResolveReturnsExistingMailbox(t *testing.T) {
 	st := seededResolverStore()
+	zone, err := st.GetZoneByDomain(context.Background(), "mail.test")
+	if err != nil || zone == nil {
+		t.Fatalf("seeded zone missing: %v", err)
+	}
 	existing := &models.Mailbox{
 		ID:             uuid.New(),
-		TenantID:       uuid.New(),
-		ZoneID:         uuid.New(),
+		TenantID:       zone.TenantID,
+		ZoneID:         zone.ID,
 		LocalPart:      "user",
 		ResolvedDomain: "sub.mail.test",
 		FullAddress:    "user@sub.mail.test",
@@ -293,6 +297,79 @@ func TestResolverResolveReturnsExistingMailbox(t *testing.T) {
 	}
 	if res.Mailbox.ID != existing.ID {
 		t.Fatalf("unexpected mailbox returned: %#v", res.Mailbox)
+	}
+}
+
+func TestResolverCheckIgnoresExistingMailboxFromDifferentZoneInLocalNamingMode(t *testing.T) {
+	st := testutil.NewFakeStore()
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneAID := uuid.New()
+	zoneBID := uuid.New()
+	now := time.Now()
+
+	st.SeedPlan(&models.Plan{
+		ID:                    planID,
+		Name:                  "starter",
+		MaxDomains:            5,
+		MaxMailboxesPerDomain: 50,
+		MaxMessagesPerMailbox: 200,
+		MaxMessageBytes:       1024 * 1024,
+		RetentionHours:        24,
+		RPMLimit:              60,
+		DailyQuota:            100,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{
+		ID:         zoneAID,
+		TenantID:   tenantID,
+		Domain:     "a.mail.test",
+		IsVerified: true,
+		MXVerified: true,
+		CreatedAt:  now,
+	})
+	st.SeedZone(&models.DomainZone{
+		ID:         zoneBID,
+		TenantID:   tenantID,
+		Domain:     "b.mail.test",
+		IsVerified: true,
+		MXVerified: true,
+		CreatedAt:  now,
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                uuid.New(),
+		ZoneID:            zoneBID,
+		RouteType:         models.RouteExact,
+		MatchValue:        "b.mail.test",
+		AutoCreateMailbox: true,
+		AccessModeDefault: models.AccessPublic,
+		CreatedAt:         now,
+	})
+	existing := &models.Mailbox{
+		ID:             uuid.New(),
+		TenantID:       tenantID,
+		ZoneID:         zoneAID,
+		LocalPart:      "user",
+		ResolvedDomain: "a.mail.test",
+		FullAddress:    "user",
+		AccessMode:     models.AccessPublic,
+		CreatedAt:      now,
+	}
+	st.SeedMailbox(existing)
+
+	rv := New(st, policy.NamingLocal, true)
+	res, err := rv.Check(context.Background(), "user@b.mail.test")
+	if err != nil {
+		t.Fatalf("check: %v", err)
+	}
+	if res == nil || res.Zone == nil || res.Zone.ID != zoneBID {
+		t.Fatalf("expected zone B result, got %#v", res)
+	}
+	if res.Mailbox != nil {
+		t.Fatalf("must not return mailbox from zone A for zone B address: %#v", res.Mailbox)
+	}
+	if res.Route == nil || res.Route.ZoneID != zoneBID {
+		t.Fatalf("expected zone B route after ignoring cross-zone mailbox, got %#v", res)
 	}
 }
 

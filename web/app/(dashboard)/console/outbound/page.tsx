@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { ChevronDown, ChevronRight, RefreshCw, Send } from "lucide-react";
 import { toast } from "sonner";
@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { listOutboundJobs, sendEmail } from "@/lib/api";
 import type { OutboundJob } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
-import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,18 +70,15 @@ export default function OutboundPage() {
   const {
     data: response,
     isLoading: loading,
-    error,
     mutate,
-  } = useAPI(["outbound", page], () =>
-    listOutboundJobs({ page, per_page: PAGE_SIZE }),
+  } = useCRUDPage(
+    ["outbound", page],
+    () => listOutboundJobs({ page, per_page: PAGE_SIZE }),
+    "outbound.loadFailed",
   );
   const jobs = response?.data ?? [];
   const total = response?.meta?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-
-  useEffect(() => {
-    if (error) toast.error(t("outbound.loadFailed"));
-  }, [error, t]);
 
   const resetForm = () => {
     setFormFrom("");

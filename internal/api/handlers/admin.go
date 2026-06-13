@@ -29,16 +29,19 @@ type settingsManager interface {
 
 type AdminHandler struct {
 	service *adminapp.Service
-	logger  zerolog.Logger
+	// store serves super-admin read-only paths that carry no service-layer
+	// invariants (no audit, no validation) — they bypass the service on purpose.
+	store  adminStore
+	logger zerolog.Logger
 }
 
 func NewAdminHandler(s adminStore, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, l zerolog.Logger) *AdminHandler {
 	service := adminapp.NewService(s, dispatcher, defaultPolicy, sm, l)
-	return &AdminHandler{service: service, logger: l.With().Str("handler", "admin").Logger()}
+	return &AdminHandler{service: service, store: s, logger: l.With().Str("handler", "admin").Logger()}
 }
 
 func (h *AdminHandler) ListTenants(w http.ResponseWriter, r *http.Request) {
-	items, err := h.service.ListTenants(r.Context())
+	items, err := h.store.ListTenants(r.Context())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -106,7 +109,7 @@ func (h *AdminHandler) GetEffectiveConfig(w http.ResponseWriter, r *http.Request
 		errBadRequest(w, "invalid id")
 		return
 	}
-	cfg, err := h.service.GetEffectiveConfig(r.Context(), id)
+	cfg, err := h.store.EffectiveConfig(r.Context(), id)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -115,7 +118,7 @@ func (h *AdminHandler) GetEffectiveConfig(w http.ResponseWriter, r *http.Request
 }
 
 func (h *AdminHandler) ListPlans(w http.ResponseWriter, r *http.Request) {
-	items, err := h.service.ListPlans(r.Context())
+	items, err := h.store.ListPlans(r.Context())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -329,7 +332,7 @@ func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) 
 	var callerUserID *uuid.UUID
 
 	actor := authz.ActorFromContext(ctx)
-	if !actor.IsPlatformAdmin && !actor.IsTenantAdmin {
+	if !actor.IsSuperAdmin && !actor.IsAdmin {
 		if actor.Permission != nil && !actor.Permission.CanCreateAPIKeys {
 			errForbidden(w, "API key creation not allowed")
 			return
@@ -368,7 +371,7 @@ func (h *AdminHandler) UserListAPIKeys(w http.ResponseWriter, r *http.Request) {
 
 	// Non-admin users only see their own keys
 	actor := authz.ActorFromContext(ctx)
-	if !actor.IsPlatformAdmin && !actor.IsTenantAdmin {
+	if !actor.IsSuperAdmin && !actor.IsAdmin {
 		if actor.Type == authz.PrincipalUser {
 			items, err := h.service.ListAPIKeysByOwner(ctx, tenant.ID, actor.ID)
 			if err != nil {
@@ -404,7 +407,7 @@ func (h *AdminHandler) UserDeleteAPIKey(w http.ResponseWriter, r *http.Request) 
 	// Non-admin callers pass their user ID for ownership check
 	var callerUserID *uuid.UUID
 	actor := authz.ActorFromContext(ctx)
-	if !actor.IsPlatformAdmin && !actor.IsTenantAdmin {
+	if !actor.IsSuperAdmin && !actor.IsAdmin {
 		if actor.Type == authz.PrincipalUser {
 			id := actor.ID
 			callerUserID = &id

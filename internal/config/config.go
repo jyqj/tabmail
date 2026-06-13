@@ -8,7 +8,12 @@ import (
 	"github.com/kelseyhightower/envconfig"
 )
 
-const envPrefix = "TABMAIL"
+const (
+	envPrefix = "TABMAIL"
+
+	DKIMFailOpen   = "fail_open"
+	DKIMFailClosed = "fail_closed"
+)
 
 type Root struct {
 	Role                string `default:"all" desc:"Process role: all, api, smtp, retention"`
@@ -127,23 +132,29 @@ type Ingest struct {
 }
 
 type Outbound struct {
-	Enabled      bool          `default:"false" desc:"Enable outbound email sending"`
-	Mode         string        `default:"relay" desc:"Delivery mode: relay or direct"`
-	RelayHost    string        `split_words:"true" default:"" desc:"SMTP relay hostname"`
-	RelayPort    int           `split_words:"true" default:"587" desc:"SMTP relay port"`
-	RelayUser    string        `split_words:"true" default:"" desc:"SMTP relay auth username"`
-	RelayPass    string        `split_words:"true" default:"" desc:"SMTP relay auth password"`
-	RelayTLS     string        `split_words:"true" default:"starttls" desc:"Relay TLS mode: none, starttls, tls"`
-	FromDomain   string        `split_words:"true" default:"" desc:"Default envelope-from domain"`
-	MaxRetries   int           `split_words:"true" default:"5" desc:"Max delivery attempts"`
-	RetryDelay   time.Duration `split_words:"true" default:"30s" desc:"Base retry delay"`
-	PollInterval time.Duration `split_words:"true" default:"2s" desc:"Worker poll interval"`
-	BatchSize    int           `split_words:"true" default:"50" desc:"Worker batch size"`
-	RateLimit    int           `split_words:"true" default:"100" desc:"Global outbound RPM limit"`
-	DKIMSign       bool   `split_words:"true" default:"true" desc:"Sign outbound emails with DKIM when keys are available"`
-	DKIMFailPolicy string `split_words:"true" default:"fail_open" desc:"DKIM failure policy: fail_open (deliver unsigned) or fail_closed (block delivery)"`
-	RequireTLS     bool   `split_words:"true" default:"false" desc:"Require STARTTLS for direct delivery (fail if unavailable)"`
+	Enabled        bool          `default:"false" desc:"Enable outbound email sending"`
+	Mode           string        `default:"relay" desc:"Delivery mode: relay or direct"`
+	RelayHost      string        `split_words:"true" default:"" desc:"SMTP relay hostname"`
+	RelayPort      int           `split_words:"true" default:"587" desc:"SMTP relay port"`
+	RelayUser      string        `split_words:"true" default:"" desc:"SMTP relay auth username"`
+	RelayPass      string        `split_words:"true" default:"" desc:"SMTP relay auth password"`
+	RelayTLS       string        `split_words:"true" default:"starttls" desc:"Relay TLS mode: none, starttls, tls"`
+	FromDomain     string        `split_words:"true" default:"" desc:"Default envelope-from domain"`
+	MaxRetries     int           `split_words:"true" default:"5" desc:"Max delivery attempts"`
+	RetryDelay     time.Duration `split_words:"true" default:"30s" desc:"Base retry delay"`
+	PollInterval   time.Duration `split_words:"true" default:"2s" desc:"Worker poll interval"`
+	BatchSize      int           `split_words:"true" default:"50" desc:"Worker batch size"`
+	RateLimit      int           `split_words:"true" default:"100" desc:"Global outbound RPM limit"`
+	DKIMSign       bool          `split_words:"true" default:"true" desc:"Sign outbound emails with DKIM when keys are available"`
+	DKIMFailPolicy string        `split_words:"true" default:"fail_closed" desc:"DKIM failure policy: fail_closed (block delivery on signing failure, default) or fail_open (deliver unsigned)"`
+	RequireTLS     bool          `split_words:"true" default:"false" desc:"Require STARTTLS for direct delivery (fail if unavailable)"`
 }
+
+func (o Outbound) GetRelayHost() string { return o.RelayHost }
+func (o Outbound) GetRelayPort() int    { return o.RelayPort }
+func (o Outbound) GetRelayUser() string { return o.RelayUser }
+func (o Outbound) GetRelayPass() string { return o.RelayPass }
+func (o Outbound) GetRelayTLS() string  { return o.RelayTLS }
 
 func Load() (*Root, error) {
 	c := &Root{}
@@ -200,6 +211,15 @@ func (c *Root) Validate() error {
 		if strings.TrimSpace(c.SMTP.TLSCert) == "" || strings.TrimSpace(c.SMTP.TLSKey) == "" {
 			return fmt.Errorf("config: TABMAIL_SMTP_TLSCERT and TABMAIL_SMTP_TLSKEY are required when TABMAIL_SMTP_TLSENABLED=true")
 		}
+	}
+	dkimFailPolicy := strings.ToLower(strings.TrimSpace(c.Outbound.DKIMFailPolicy))
+	switch dkimFailPolicy {
+	case "", DKIMFailClosed:
+		c.Outbound.DKIMFailPolicy = DKIMFailClosed
+	case DKIMFailOpen:
+		c.Outbound.DKIMFailPolicy = DKIMFailOpen
+	default:
+		return fmt.Errorf("config: TABMAIL_OUTBOUND_DKIM_FAIL_POLICY must be %s or %s", DKIMFailClosed, DKIMFailOpen)
 	}
 	if c.Outbound.Enabled && strings.ToLower(c.Outbound.Mode) == "relay" {
 		if strings.TrimSpace(c.Outbound.RelayHost) == "" {

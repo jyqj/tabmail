@@ -14,25 +14,23 @@ import (
 type UserRole string
 
 const (
-	RolePlatformAdmin UserRole = "platform_admin"
-	RoleTenantAdmin   UserRole = "tenant_admin"
-	RoleUser          UserRole = "user"
-	// Deprecated: use RolePlatformAdmin. Kept for backward compatibility during migration.
-	RoleAdmin UserRole = "admin"
+	RoleSuperAdmin UserRole = "super_admin"
+	RoleAdmin      UserRole = "admin"
+	RoleUser       UserRole = "user"
 )
 
 type User struct {
-	ID           uuid.UUID  `json:"id" db:"id"`
-	TenantID     uuid.UUID  `json:"tenant_id" db:"tenant_id"`
-	Email        string     `json:"email" db:"email"`
-	PasswordHash string     `json:"-" db:"password_hash"`
-	DisplayName  string     `json:"display_name" db:"display_name"`
-	Role         UserRole   `json:"role" db:"role"`
+	ID                  uuid.UUID  `json:"id" db:"id"`
+	TenantID            uuid.UUID  `json:"tenant_id" db:"tenant_id"`
+	Email               string     `json:"email" db:"email"`
+	PasswordHash        string     `json:"-" db:"password_hash"`
+	DisplayName         string     `json:"display_name" db:"display_name"`
+	Role                UserRole   `json:"role" db:"role"`
 	IsActive            bool       `json:"is_active" db:"is_active"`
 	PermissionProfileID *uuid.UUID `json:"permission_profile_id,omitempty" db:"permission_profile_id"`
 	CreatedAt           time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
-	LastLoginAt  *time.Time `json:"last_login_at,omitempty" db:"last_login_at"`
+	UpdatedAt           time.Time  `json:"updated_at" db:"updated_at"`
+	LastLoginAt         *time.Time `json:"last_login_at,omitempty" db:"last_login_at"`
 }
 
 type RefreshToken struct {
@@ -132,6 +130,7 @@ type TenantAPIKey struct {
 	ExpiresAt      *time.Time  `json:"expires_at,omitempty" db:"expires_at"`
 	CreatedAt      time.Time   `json:"created_at" db:"created_at"`
 	LastUsedAt     *time.Time  `json:"last_used_at,omitempty" db:"last_used_at"`
+	LastUsedIP     *string     `json:"last_used_ip,omitempty" db:"last_used_ip"`
 }
 
 // EffectiveConfig merges plan defaults with tenant overrides.
@@ -184,62 +183,6 @@ type DomainZone struct {
 	DKIMRequiredForSend   bool               `json:"dkim_required_for_send" db:"dkim_required_for_send"`
 	CreatedAt             time.Time          `json:"created_at" db:"created_at"`
 	VerifiedAt            *time.Time         `json:"verified_at,omitempty" db:"verified_at"`
-}
-
-// ============================================================
-// Zone Grants
-// ============================================================
-
-type ZoneGrantRole string
-
-const (
-	ZoneRoleOwner  ZoneGrantRole = "owner"
-	ZoneRoleAdmin  ZoneGrantRole = "admin"
-	ZoneRoleEditor ZoneGrantRole = "editor"
-	ZoneRoleViewer ZoneGrantRole = "viewer"
-)
-
-func (r ZoneGrantRole) Valid() bool {
-	switch r {
-	case ZoneRoleOwner, ZoneRoleAdmin, ZoneRoleEditor, ZoneRoleViewer:
-		return true
-	default:
-		return false
-	}
-}
-
-func (r ZoneGrantRole) CanManage() bool {
-	return r == ZoneRoleOwner || r == ZoneRoleAdmin
-}
-
-func (r ZoneGrantRole) CanEdit() bool {
-	return r == ZoneRoleOwner || r == ZoneRoleAdmin || r == ZoneRoleEditor
-}
-
-func (r ZoneGrantRole) RoleLevel() int {
-	switch r {
-	case ZoneRoleOwner:
-		return 4
-	case ZoneRoleAdmin:
-		return 3
-	case ZoneRoleEditor:
-		return 2
-	case ZoneRoleViewer:
-		return 1
-	default:
-		return 0
-	}
-}
-
-type ZoneGrant struct {
-	ID            uuid.UUID     `json:"id" db:"id"`
-	TenantID      uuid.UUID     `json:"tenant_id" db:"tenant_id"`
-	ZoneID        uuid.UUID     `json:"zone_id" db:"zone_id"`
-	PrincipalType string        `json:"principal_type" db:"principal_type"` // "user" or "api_key"
-	PrincipalID   uuid.UUID     `json:"principal_id" db:"principal_id"`
-	Role          ZoneGrantRole `json:"role" db:"role"`
-	CreatedBy     *uuid.UUID    `json:"created_by,omitempty" db:"created_by"`
-	CreatedAt     time.Time     `json:"created_at" db:"created_at"`
 }
 
 type RouteType string
@@ -333,8 +276,10 @@ type Message struct {
 // MessageDetail includes parsed body content.
 type MessageDetail struct {
 	Message
-	TextBody string `json:"text_body,omitempty"`
-	HTMLBody string `json:"html_body,omitempty"`
+	TextBody     string `json:"text_body,omitempty"`
+	HTMLBody     string `json:"html_body,omitempty"`
+	BodyRedacted bool   `json:"body_redacted,omitempty"`
+	BodyAccess   string `json:"body_access,omitempty"`
 }
 
 // ============================================================
@@ -579,7 +524,7 @@ type EffectivePermission struct {
 }
 
 // ============================================================
-// Send Identities & Grants
+// Send Identities
 // ============================================================
 
 type SendIdentityType string
@@ -600,58 +545,51 @@ type SendIdentity struct {
 	CreatedAt    time.Time        `json:"created_at" db:"created_at"`
 }
 
-type SendAsGrant struct {
-	ID            uuid.UUID `json:"id" db:"id"`
-	TenantID      uuid.UUID `json:"tenant_id" db:"tenant_id"`
-	IdentityID    uuid.UUID `json:"identity_id" db:"identity_id"`
-	PrincipalType string    `json:"principal_type" db:"principal_type"` // "user" or "api_key"
-	PrincipalID   uuid.UUID `json:"principal_id" db:"principal_id"`
-	DailyQuota    int       `json:"daily_quota" db:"daily_quota"` // 0 = unlimited
-	CreatedAt     time.Time `json:"created_at" db:"created_at"`
+// ============================================================
+// Webhook Endpoints (tenant-level)
+// ============================================================
+
+type WebhookEndpoint struct {
+	ID         uuid.UUID  `json:"id" db:"id"`
+	TenantID   uuid.UUID  `json:"tenant_id" db:"tenant_id"`
+	URL        string     `json:"url" db:"url"`
+	Secret     *string    `json:"-" db:"secret"`
+	EventTypes []string   `json:"event_types" db:"event_types"`
+	IsActive   bool       `json:"is_active" db:"is_active"`
+	CreatedBy  *uuid.UUID `json:"created_by,omitempty" db:"created_by"`
+	CreatedAt  time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt  time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 // ============================================================
-// Outbound Job
+// Outbound Attempts
 // ============================================================
 
+type OutboundAttempt struct {
+	ID           uuid.UUID `json:"id" db:"id"`
+	JobID        uuid.UUID `json:"job_id" db:"job_id"`
+	TenantID     uuid.UUID `json:"tenant_id" db:"tenant_id"`
+	Adapter      string    `json:"adapter" db:"adapter"`
+	Attempt      int       `json:"attempt" db:"attempt"`
+	SMTPCode     int       `json:"smtp_code" db:"smtp_code"`
+	SMTPResponse string    `json:"smtp_response" db:"smtp_response"`
+	RemoteHost   string    `json:"remote_host" db:"remote_host"`
+	StartedAt    time.Time `json:"started_at" db:"started_at"`
+	FinishedAt   time.Time `json:"finished_at" db:"finished_at"`
+	Error        string    `json:"error" db:"error"`
+}
+
 // ============================================================
-// Mailbox Grants
+// Suppression List
 // ============================================================
 
-type MailboxGrantRole string
-
-const (
-	MailboxRoleOwner   MailboxGrantRole = "owner"
-	MailboxRoleManager MailboxGrantRole = "manager"
-	MailboxRoleWriter  MailboxGrantRole = "writer"
-	MailboxRoleReader  MailboxGrantRole = "reader"
-)
-
-func (r MailboxGrantRole) Valid() bool {
-	switch r {
-	case MailboxRoleOwner, MailboxRoleManager, MailboxRoleWriter, MailboxRoleReader:
-		return true
-	default:
-		return false
-	}
-}
-
-func (r MailboxGrantRole) CanWrite() bool {
-	return r == MailboxRoleOwner || r == MailboxRoleManager || r == MailboxRoleWriter
-}
-
-func (r MailboxGrantRole) CanManage() bool {
-	return r == MailboxRoleOwner || r == MailboxRoleManager
-}
-
-type MailboxGrant struct {
-	ID            uuid.UUID        `json:"id" db:"id"`
-	TenantID      uuid.UUID        `json:"tenant_id" db:"tenant_id"`
-	MailboxID     uuid.UUID        `json:"mailbox_id" db:"mailbox_id"`
-	PrincipalType string           `json:"principal_type" db:"principal_type"` // "user" or "api_key"
-	PrincipalID   uuid.UUID        `json:"principal_id" db:"principal_id"`
-	Role          MailboxGrantRole `json:"role" db:"role"`
-	CreatedAt     time.Time        `json:"created_at" db:"created_at"`
+type SuppressionEntry struct {
+	ID          uuid.UUID  `json:"id" db:"id"`
+	TenantID    uuid.UUID  `json:"tenant_id" db:"tenant_id"`
+	Address     string     `json:"address" db:"address"`
+	Reason      string     `json:"reason" db:"reason"`
+	SourceJobID *uuid.UUID `json:"source_job_id,omitempty" db:"source_job_id"`
+	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
 }
 
 // ============================================================

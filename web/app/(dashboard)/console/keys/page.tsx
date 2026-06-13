@@ -1,12 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAPI } from "@/hooks/use-api";
+import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   Card,
   CardContent,
@@ -33,39 +35,36 @@ import {
 } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { APIKeyScopePicker } from "@/components/api-key-scope-picker";
-import { createUserAPIKey, listUserAPIKeys, revokeUserAPIKey } from "@/lib/api";
-import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
-import type { TenantAPIKey } from "@/lib/types";
+import { createUserAPIKey, listDomains, listUserAPIKeys, revokeUserAPIKey } from "@/lib/api";
+import { DEFAULT_API_KEY_SCOPES, API_KEY_TEMPLATES } from "@/lib/api-key-scopes";
+import type { DomainZone } from "@/lib/types";
 import { Plus, Key, Trash2, Copy } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import { safeConfirm } from "@/lib/utils";
 
-function safeConfirm(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
-  try {
-    return window.confirm(message) !== false;
-  } catch {
-    return true;
-  }
+function zoneLabel(zone: DomainZone) {
+  return zone.domain || `${zone.id.slice(0, 8)}…`;
 }
 
 export default function UserAPIKeysPage() {
   const { t } = useI18n();
-  const { data: response, isLoading: loading, error, mutate } = useAPI(
+  const { data: response, isLoading: loading, mutate } = useCRUDPage(
     "apiKeys",
     () => listUserAPIKeys(),
+    "apiKeys.loadFailed",
   );
+  const { data: domainsResponse } = useAPI("api-key-domains", () => listDomains());
   const keys = response?.data ?? [];
-
-  useEffect(() => {
-    if (error) toast.error(t("apiKeys.loadFailed"));
-  }, [error, t]);
+  const domainOptions = domainsResponse?.data ?? [];
+  const domainById = new Map(domainOptions.map((zone) => [zone.id, zone]));
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newLabel, setNewLabel] = useState("");
   const [newScopes, setNewScopes] = useState<string[]>([...DEFAULT_API_KEY_SCOPES]);
+  const [newAllowedZoneIds, setNewAllowedZoneIds] = useState<string[]>([]);
   const [createdKey, setCreatedKey] = useState<string | null>(null);
 
   const handleCreate = async () => {
@@ -74,10 +73,12 @@ export default function UserAPIKeysPage() {
       const res = await createUserAPIKey({
         label: newLabel.trim() || undefined,
         scopes: newScopes,
+        allowed_zone_ids: newAllowedZoneIds,
       });
       setCreatedKey(res.data.key);
       setNewLabel("");
       setNewScopes([...DEFAULT_API_KEY_SCOPES]);
+      setNewAllowedZoneIds([]);
       mutate();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
@@ -112,6 +113,7 @@ export default function UserAPIKeysPage() {
               if (!open) {
                 setCreatedKey(null);
                 setNewScopes([...DEFAULT_API_KEY_SCOPES]);
+                setNewAllowedZoneIds([]);
               }
             }}
           >
@@ -167,11 +169,90 @@ export default function UserAPIKeysPage() {
                         onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>{t("apiKeys.template")}</Label>
+                      <div className="flex flex-wrap gap-2">
+                        {API_KEY_TEMPLATES.map((tpl) => (
+                          <Button
+                            key={tpl.id}
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="text-xs"
+                            onClick={() => {
+                              if (tpl.id !== "custom") {
+                                setNewScopes([...tpl.scopes]);
+                              }
+                            }}
+                          >
+                            {t(`apiKeys.tpl.${tpl.id}` as Parameters<typeof t>[0])}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
                     <APIKeyScopePicker
                       value={newScopes}
                       onChange={setNewScopes}
                       disabled={creating}
                     />
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between gap-3">
+                        <Label>{t("apiKeys.allowedZones")}</Label>
+                        <span className="text-xs text-muted-foreground">
+                          {newAllowedZoneIds.length === 0
+                            ? t("apiKeys.allowedZonesAll")
+                            : t("apiKeys.allowedZonesCount", { count: newAllowedZoneIds.length })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t("apiKeys.allowedZonesHint")}
+                      </p>
+                      <div className="rounded-md border p-3 space-y-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 px-2 text-xs"
+                          onClick={() => setNewAllowedZoneIds([])}
+                          disabled={creating}
+                        >
+                          {t("apiKeys.allowAllZones")}
+                        </Button>
+                        {domainOptions.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">
+                            {t("apiKeys.noDomainsForAllowlist")}
+                          </p>
+                        ) : (
+                          <div className="grid gap-2">
+                            {domainOptions.map((zone) => {
+                              const checked = newAllowedZoneIds.includes(zone.id);
+                              return (
+                                <label
+                                  key={zone.id}
+                                  className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs"
+                                >
+                                  <span className="truncate" title={zone.domain}>
+                                    {zoneLabel(zone)}
+                                  </span>
+                                  <Switch
+                                    size="sm"
+                                    checked={checked}
+                                    disabled={creating}
+                                    onCheckedChange={(next: boolean) =>
+                                      setNewAllowedZoneIds((prev) =>
+                                        next
+                                          ? Array.from(new Set([...prev, zone.id]))
+                                          : prev.filter((id) => id !== zone.id),
+                                      )
+                                    }
+                                  />
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <DialogFooter>
                     <Button onClick={handleCreate} disabled={creating || newScopes.length === 0}>
@@ -211,6 +292,7 @@ export default function UserAPIKeysPage() {
                     <TableHead>{t("apiKeys.label")}</TableHead>
                     <TableHead>{t("apiKeys.prefix")}</TableHead>
                     <TableHead>{t("apiKeys.scopes")}</TableHead>
+                    <TableHead>{t("apiKeys.allowedZones")}</TableHead>
                     <TableHead>{t("apiKeys.lastUsed")}</TableHead>
                     <TableHead>{t("apiKeys.created")}</TableHead>
                     <TableHead className="w-10" />
@@ -234,12 +316,40 @@ export default function UserAPIKeysPage() {
                           ))}
                         </div>
                       </TableCell>
+                      <TableCell>
+                        {!k.allowed_zone_ids || k.allowed_zone_ids.length === 0 ? (
+                          <Badge variant="outline" className="text-xs">
+                            {t("apiKeys.allowedZonesAll")}
+                          </Badge>
+                        ) : (
+                          <div className="flex max-w-[220px] flex-wrap gap-1">
+                            {k.allowed_zone_ids.slice(0, 3).map((id) => {
+                              const zone = domainById.get(id);
+                              return (
+                                <Badge key={id} variant="secondary" className="max-w-full truncate text-xs" title={id}>
+                                  {zone ? zoneLabel(zone) : `${id.slice(0, 8)}…`}
+                                </Badge>
+                              );
+                            })}
+                            {k.allowed_zone_ids.length > 3 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{k.allowed_zone_ids.length - 3}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
-                        {k.last_used_at
-                          ? formatDistanceToNow(new Date(k.last_used_at), {
-                              addSuffix: true,
-                            })
-                          : t("apiKeys.never")}
+                        <div>
+                          {k.last_used_at
+                            ? formatDistanceToNow(new Date(k.last_used_at), {
+                                addSuffix: true,
+                              })
+                            : t("apiKeys.never")}
+                        </div>
+                        {k.last_used_ip && (
+                          <div className="text-xs text-muted-foreground/60 font-mono">{k.last_used_ip}</div>
+                        )}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDistanceToNow(new Date(k.created_at), {

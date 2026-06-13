@@ -87,6 +87,8 @@ var allowedAPIKeyScopes = []string{
 	"messages:write",
 	"send:read",
 	"send:write",
+	"webhooks:read",
+	"webhooks:write",
 }
 
 var defaultAPIKeyScopes = []string{
@@ -197,14 +199,6 @@ func (s *Service) BulkUpdateSettings(ctx context.Context, updates map[string]str
 	return nil
 }
 
-func (s *Service) ListTenants(ctx context.Context) ([]*models.Tenant, error) {
-	items, err := s.store.ListTenants(ctx)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	return items, nil
-}
-
 func (s *Service) CreateTenant(ctx context.Context, name string, planID uuid.UUID, actor string) (*models.Tenant, error) {
 	plan, err := s.store.GetPlan(ctx, planID)
 	if err != nil {
@@ -262,22 +256,6 @@ func (s *Service) DeleteTenant(ctx context.Context, id uuid.UUID, actor string) 
 		Details:      app.MustJSON(map[string]any{"tenant_id": id}),
 	})
 	return nil
-}
-
-func (s *Service) GetEffectiveConfig(ctx context.Context, id uuid.UUID) (*models.EffectiveConfig, error) {
-	cfg, err := s.store.EffectiveConfig(ctx, id)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	return cfg, nil
-}
-
-func (s *Service) ListPlans(ctx context.Context) ([]*models.Plan, error) {
-	items, err := s.store.ListPlans(ctx)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	return items, nil
 }
 
 func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
@@ -369,6 +347,12 @@ func (s *Service) CreateAPIKey(ctx context.Context, tenantID uuid.UUID, label st
 		}
 		if _, ok := scopeSet["messages:write"]; ok {
 			return nil, app.Forbidden("cannot create api key with messages:write scope: admin approval required")
+		}
+		if _, ok := scopeSet["webhooks:read"]; ok {
+			return nil, app.Forbidden("cannot create api key with webhooks:read scope: admin approval required")
+		}
+		if _, ok := scopeSet["webhooks:write"]; ok {
+			return nil, app.Forbidden("cannot create api key with webhooks:write scope: admin approval required")
 		}
 	}
 

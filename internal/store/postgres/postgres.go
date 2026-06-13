@@ -16,6 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"tabmail/internal/config"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type PgStore struct {
@@ -276,7 +277,7 @@ func (s *PgStore) CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) erro
 
 func (s *PgStore) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error) {
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at
+		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
 		FROM tenant_api_keys WHERE tenant_id=$1 ORDER BY created_at`, tenantID)
 	if err != nil {
 		return nil, err
@@ -287,7 +288,7 @@ func (s *PgStore) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*model
 
 func (s *PgStore) ListAPIKeysByOwner(ctx context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error) {
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at
+		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
 		FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2 ORDER BY created_at`, tenantID, ownerUserID)
 	if err != nil {
 		return nil, err
@@ -303,7 +304,7 @@ func scanAPIKeys(rows pgx.Rows) ([]*models.TenantAPIKey, error) {
 		var scopesJSON []byte
 		var ownerID pgtype.UUID
 		if err := rows.Scan(&k.ID, &k.TenantID, &k.KeyPrefix, &k.Label,
-			&scopesJSON, &ownerID, &k.AllowedZoneIDs, &k.ExpiresAt, &k.CreatedAt, &k.LastUsedAt); err != nil {
+			&scopesJSON, &ownerID, &k.AllowedZoneIDs, &k.ExpiresAt, &k.CreatedAt, &k.LastUsedAt, &k.LastUsedIP); err != nil {
 			return nil, err
 		}
 		if ownerID.Valid {
@@ -325,10 +326,10 @@ func (s *PgStore) GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAP
 	var scopesJSON []byte
 	var ownerID pgtype.UUID
 	err := s.pool.QueryRow(ctx, `
-		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at
+		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
 		FROM tenant_api_keys WHERE id=$1`, id).
 		Scan(&k.ID, &k.TenantID, &k.KeyPrefix, &k.Label,
-			&scopesJSON, &ownerID, &k.AllowedZoneIDs, &k.ExpiresAt, &k.CreatedAt, &k.LastUsedAt)
+			&scopesJSON, &ownerID, &k.AllowedZoneIDs, &k.ExpiresAt, &k.CreatedAt, &k.LastUsedAt, &k.LastUsedIP)
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
@@ -383,13 +384,17 @@ func (s *PgStore) ResolveAPIKey(ctx context.Context, rawKey string) (*models.Ten
 		uid := uuid.UUID(ownerUserID.Bytes)
 		ownerPtr = &uid
 	}
-	go func() { _ = s.TouchAPIKey(context.Background(), keyID) }()
 	return t, &keyID, scopes, allowedZoneIDs, ownerPtr, nil
 }
 
-func (s *PgStore) TouchAPIKey(ctx context.Context, id uuid.UUID) error {
+func (s *PgStore) TouchAPIKey(ctx context.Context, id uuid.UUID, ip string) error {
+	if ip == "" {
+		_, err := s.pool.Exec(ctx,
+			`UPDATE tenant_api_keys SET last_used_at=now() WHERE id=$1`, id)
+		return err
+	}
 	_, err := s.pool.Exec(ctx,
-		`UPDATE tenant_api_keys SET last_used_at=now() WHERE id=$1`, id)
+		`UPDATE tenant_api_keys SET last_used_at=now(), last_used_ip=$2 WHERE id=$1`, id, ip)
 	return err
 }
 
@@ -705,12 +710,25 @@ func (s *PgStore) GetMailboxByAddress(ctx context.Context, addr string) (*models
 	return s.scanMailbox(s.pool.QueryRow(ctx, mailboxSelect+` WHERE m.full_address=$1`, addr))
 }
 
-func (s *PgStore) GetMailboxForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Mailbox, error) {
-	return s.scanMailbox(s.pool.QueryRow(ctx, mailboxSelect+` WHERE m.id=$1 AND m.tenant_id=$2`, id, tenantID))
+// ForTenant returns a read view whose lookups are filtered to tenantID; rows
+// belonging to another tenant read as not found (nil, nil).
+func (s *PgStore) ForTenant(tenantID uuid.UUID) store.TenantScoped {
+	return &pgTenantView{store: s, tenantID: tenantID}
 }
 
-func (s *PgStore) GetMailboxByAddressForTenant(ctx context.Context, addr string, tenantID uuid.UUID) (*models.Mailbox, error) {
-	return s.scanMailbox(s.pool.QueryRow(ctx, mailboxSelect+` WHERE m.full_address=$1 AND m.tenant_id=$2`, addr, tenantID))
+// pgTenantView implements store.TenantScoped by appending a tenant_id filter
+// to the unscoped point-lookup queries.
+type pgTenantView struct {
+	store    *PgStore
+	tenantID uuid.UUID
+}
+
+func (v *pgTenantView) GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error) {
+	return v.store.scanMailbox(v.store.pool.QueryRow(ctx, mailboxSelect+` WHERE m.id=$1 AND m.tenant_id=$2`, id, v.tenantID))
+}
+
+func (v *pgTenantView) GetMailboxByAddress(ctx context.Context, addr string) (*models.Mailbox, error) {
+	return v.store.scanMailbox(v.store.pool.QueryRow(ctx, mailboxSelect+` WHERE m.full_address=$1 AND m.tenant_id=$2`, addr, v.tenantID))
 }
 
 const mailboxSelect = `SELECT m.id,m.tenant_id,m.zone_id,m.route_id,m.local_part,
@@ -950,12 +968,12 @@ func (s *PgStore) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message
 	return m, err
 }
 
-func (s *PgStore) GetMessageForTenant(ctx context.Context, id uuid.UUID, tenantID uuid.UUID) (*models.Message, error) {
+func (v *pgTenantView) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error) {
 	m := &models.Message{}
-	err := s.pool.QueryRow(ctx, `
+	err := v.store.pool.QueryRow(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at
-		FROM messages WHERE id=$1 AND tenant_id=$2`, id, tenantID).
+		FROM messages WHERE id=$1 AND tenant_id=$2`, id, v.tenantID).
 		Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients,
 			&m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON,
 			&m.ReceivedAt, &m.ExpiresAt)
@@ -1741,101 +1759,6 @@ func (s *PgStore) CountIngestJobsByState(ctx context.Context, states ...string) 
 }
 
 // ================================================================
-// Zone grants
-// ================================================================
-
-func (s *PgStore) CreateZoneGrant(ctx context.Context, g *models.ZoneGrant) error {
-	if g.ID == uuid.Nil {
-		g.ID = uuid.New()
-	}
-	g.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
-		INSERT INTO zone_grants (id, tenant_id, zone_id, principal_type, principal_id, role, created_by, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-		g.ID, g.TenantID, g.ZoneID, g.PrincipalType, g.PrincipalID, g.Role, g.CreatedBy, g.CreatedAt)
-	return err
-}
-
-func (s *PgStore) DeleteZoneGrant(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM zone_grants WHERE id = $1`, id)
-	return err
-}
-
-func (s *PgStore) DeleteZoneGrantScoped(ctx context.Context, id uuid.UUID, zoneID uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `DELETE FROM zone_grants WHERE id = $1 AND zone_id = $2`, id, zoneID)
-	if err != nil {
-		return err
-	}
-	if tag.RowsAffected() == 0 {
-		return pgx.ErrNoRows
-	}
-	return nil
-}
-
-func (s *PgStore) ListZoneGrants(ctx context.Context, zoneID uuid.UUID) ([]*models.ZoneGrant, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id, tenant_id, zone_id, principal_type, principal_id, role, created_by, created_at
-		FROM zone_grants WHERE zone_id = $1 ORDER BY created_at`, zoneID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var grants []*models.ZoneGrant
-	for rows.Next() {
-		g := &models.ZoneGrant{}
-		if err := rows.Scan(&g.ID, &g.TenantID, &g.ZoneID, &g.PrincipalType, &g.PrincipalID, &g.Role, &g.CreatedBy, &g.CreatedAt); err != nil {
-			return nil, err
-		}
-		grants = append(grants, g)
-	}
-	return grants, rows.Err()
-}
-
-func (s *PgStore) GetZoneGrant(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (*models.ZoneGrant, error) {
-	g := &models.ZoneGrant{}
-	err := s.pool.QueryRow(ctx, `
-		SELECT id, tenant_id, zone_id, principal_type, principal_id, role, created_by, created_at
-		FROM zone_grants WHERE zone_id = $1 AND principal_type = $2 AND principal_id = $3`,
-		zoneID, principalType, principalID).
-		Scan(&g.ID, &g.TenantID, &g.ZoneID, &g.PrincipalType, &g.PrincipalID, &g.Role, &g.CreatedBy, &g.CreatedAt)
-	if err == pgx.ErrNoRows {
-		return nil, nil
-	}
-	return g, err
-}
-
-func (s *PgStore) ListGrantedZoneIDs(ctx context.Context, principalType string, principalID uuid.UUID) ([]uuid.UUID, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT zone_id FROM zone_grants WHERE principal_type = $1 AND principal_id = $2`,
-		principalType, principalID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var ids []uuid.UUID
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-		ids = append(ids, id)
-	}
-	return ids, rows.Err()
-}
-
-func (s *PgStore) GetHighestZoneRole(ctx context.Context, zoneID uuid.UUID, principalType string, principalID uuid.UUID) (models.ZoneGrantRole, error) {
-	var role models.ZoneGrantRole
-	err := s.pool.QueryRow(ctx, `
-		SELECT role FROM zone_grants
-		WHERE zone_id = $1 AND principal_type = $2 AND principal_id = $3`,
-		zoneID, principalType, principalID).Scan(&role)
-	if err == pgx.ErrNoRows {
-		return "", nil
-	}
-	return role, err
-}
-
-// ================================================================
 // Send identities
 // ================================================================
 
@@ -1945,86 +1868,4 @@ func (s *PgStore) UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID
 func (s *PgStore) DeleteSendIdentity(ctx context.Context, id uuid.UUID) error {
 	_, err := s.pool.Exec(ctx, `DELETE FROM send_identities WHERE id = $1`, id)
 	return err
-}
-
-// ================================================================
-// Send-as grants
-// ================================================================
-
-func (s *PgStore) CreateSendAsGrant(ctx context.Context, g *models.SendAsGrant) error {
-	if g.ID == uuid.Nil {
-		g.ID = uuid.New()
-	}
-	g.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
-		INSERT INTO send_as_grants (id, tenant_id, identity_id, principal_type, principal_id, daily_quota, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		g.ID, g.TenantID, g.IdentityID, g.PrincipalType, g.PrincipalID, g.DailyQuota, g.CreatedAt)
-	return err
-}
-
-func (s *PgStore) DeleteSendAsGrant(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM send_as_grants WHERE id = $1`, id)
-	return err
-}
-
-func (s *PgStore) DeleteSendAsGrantScoped(ctx context.Context, id uuid.UUID, identityID uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `DELETE FROM send_as_grants WHERE id = $1 AND identity_id = $2`, id, identityID)
-	if err != nil {
-		return err
-	}
-	if tag.RowsAffected() == 0 {
-		return pgx.ErrNoRows
-	}
-	return nil
-}
-
-func (s *PgStore) ListSendAsGrantsByIdentity(ctx context.Context, identityID uuid.UUID) ([]*models.SendAsGrant, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id, tenant_id, identity_id, principal_type, principal_id, daily_quota, created_at
-		FROM send_as_grants WHERE identity_id = $1 ORDER BY created_at`, identityID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var out []*models.SendAsGrant
-	for rows.Next() {
-		g := &models.SendAsGrant{}
-		if err := rows.Scan(&g.ID, &g.TenantID, &g.IdentityID, &g.PrincipalType, &g.PrincipalID, &g.DailyQuota, &g.CreatedAt); err != nil {
-			return nil, err
-		}
-		out = append(out, g)
-	}
-	return out, rows.Err()
-}
-
-func (s *PgStore) HasSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (bool, error) {
-	g, err := s.GetSendAsGrant(ctx, tenantID, address, principalType, principalID)
-	if err != nil {
-		return false, err
-	}
-	return g != nil, nil
-}
-
-func (s *PgStore) GetSendAsGrant(ctx context.Context, tenantID uuid.UUID, address string, principalType string, principalID uuid.UUID) (*models.SendAsGrant, error) {
-	// Find identity first.
-	si, err := s.FindSendIdentityForAddress(ctx, tenantID, address)
-	if err != nil || si == nil {
-		return nil, err
-	}
-	if !si.Verified {
-		return nil, nil
-	}
-	g := &models.SendAsGrant{}
-	err = s.pool.QueryRow(ctx, `
-		SELECT id, tenant_id, identity_id, principal_type, principal_id, daily_quota, created_at
-		FROM send_as_grants WHERE identity_id = $1 AND principal_type = $2 AND principal_id = $3`,
-		si.ID, principalType, principalID).Scan(&g.ID, &g.TenantID, &g.IdentityID, &g.PrincipalType, &g.PrincipalID, &g.DailyQuota, &g.CreatedAt)
-	if err == pgx.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	return g, nil
 }

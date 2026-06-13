@@ -91,3 +91,25 @@ export function deleteRoute(domainId: string, routeId: string) {
     method: "DELETE",
   });
 }
+
+export interface RouteExplainResult {
+  accepted: boolean;
+  tenant_id?: string;
+  zone_id?: string;
+  zone_domain?: string;
+  route_id?: string;
+  route_type?: string;
+  mailbox_id?: string;
+  mailbox_address?: string;
+  auto_create_mailbox: boolean;
+  would_create_mailbox: boolean;
+  reason_code: string;
+  steps: string[];
+}
+
+export function explainRoute(domainId: string, address: string) {
+  return request<APIResponse<RouteExplainResult>>(`/api/v1/domains/${domainId}/routes/explain`, {
+    method: "POST",
+    body: { address },
+  });
+}

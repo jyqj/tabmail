@@ -3,6 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
+import {
+  canCreateAPIKeys,
+  canSend,
+  isAdminLevel,
+  isSuperAdminLevel,
+} from "@/lib/permissions";
 import { useI18n } from "@/lib/i18n";
 import {
   Sidebar,
@@ -42,28 +48,52 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { level, logout, permissions } = useAuth();
   const { t } = useI18n();
-  const isAdminLevel = level === "platform_admin" || level === "tenant_admin" || level === "admin";
-  const canCreateAPIKeys = isAdminLevel || permissions?.can_create_api_keys === true;
-  const canSend = isAdminLevel || permissions?.can_send === true;
+  // UX-only gates; the backend authz seam is authoritative.
+  const adminLevel = isAdminLevel(level);
+  const showAPIKeys = canCreateAPIKeys(level, permissions);
+  const showSend = canSend(level, permissions);
+  const webhookPermissions = permissions as
+    | (typeof permissions & {
+        can_manage_webhooks?: boolean;
+        can_create_webhooks?: boolean;
+        can_manage_webhook_endpoints?: boolean;
+        can_create_webhook_endpoints?: boolean;
+        scopes?: string[];
+        webhook_scopes?: string[];
+      })
+    | null;
+  const canUseWebhooks =
+    adminLevel ||
+    webhookPermissions?.can_manage_webhooks === true ||
+    webhookPermissions?.can_create_webhooks === true ||
+    webhookPermissions?.can_manage_webhook_endpoints === true ||
+    webhookPermissions?.can_create_webhook_endpoints === true ||
+    webhookPermissions?.scopes?.some((scope) => scope.startsWith("webhooks:")) === true ||
+    webhookPermissions?.webhook_scopes?.some((scope) => scope.startsWith("webhooks:")) === true;
 
   const consoleItems = [
     { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
     { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
     // Fail closed while permissions are loading/unavailable.
-    ...(canCreateAPIKeys
+    ...(showAPIKeys
       ? [{ href: "/console/keys", label: t("sidebar.apiKeys"), icon: Settings2 }]
       : []),
-    ...(canSend
+    ...(showSend
       ? [{ href: "/console/outbound", label: t("sidebar.outbound"), icon: Send }]
       : []),
-    ...(canSend
+    ...(showSend
       ? [{ href: "/console/send-identities", label: t("sidebar.sendIdentities"), icon: KeyRound }]
+      : []),
+    // Fail closed: current EffectivePermission has no webhook flag, so plain
+    // users do not see this unless a future explicit capability is present.
+    ...(canUseWebhooks
+      ? [{ href: "/console/webhooks", label: t("sidebar.webhookEndpoints"), icon: Webhook }]
       : []),
   ];
 
-  const isPlatformAdmin = level === "platform_admin";
+  const isPlatformAdmin = isSuperAdminLevel(level);
 
-  // Shared tenant admin items (accessible by both platform_admin and tenant_admin)
+  // Shared admin items (accessible by both super_admin and admin)
   const sharedAdminItems = [
     { href: "/admin/users", label: t("sidebar.users"), icon: Users },
     { href: "/admin/permissions", label: t("sidebar.permissions"), icon: Shield },
@@ -79,7 +109,7 @@ export function AppSidebar() {
     { href: "/admin/webhooks", label: t("sidebar.webhooks"), icon: Webhook },
   ];
 
-  // Platform-only admin items (only platform_admin)
+  // Platform-only admin items (only super_admin)
   const platformAdminItems = [
     { href: "/admin/policy", label: t("sidebar.smtpPolicy"), icon: SlidersHorizontal },
     { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
@@ -138,7 +168,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {(level === "platform_admin" || level === "tenant_admin") && (
+        {adminLevel && (
           <>
             <SidebarSeparator className="my-2 bg-border/40" />
             <SidebarGroup>

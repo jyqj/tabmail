@@ -44,6 +44,7 @@ export interface TenantAPIKey {
   expires_at: string | null;
   created_at: string;
   last_used_at?: string | null;
+  last_used_ip?: string | null;
 }
 
 export interface APIKeyCreated {
@@ -52,6 +53,7 @@ export interface APIKeyCreated {
   key_prefix: string;
   label: string;
   scopes: string[];
+  allowed_zone_ids?: string[] | null;
   created_at: string;
 }
 
@@ -153,6 +155,8 @@ export interface Message {
 export interface MessageDetail extends Message {
   text_body: string;
   html_body: string;
+  body_redacted?: boolean;
+  body_access?: string;
 }
 
 export interface Meta {
@@ -305,7 +309,7 @@ export interface MailboxTokenResponse {
   expires_in: number;
 }
 
-export type UserRole = "platform_admin" | "tenant_admin" | "admin" | "user";
+export type UserRole = "super_admin" | "admin" | "user";
 
 export interface AuthUser {
   id: string;
@@ -426,6 +430,7 @@ export interface WebhookDelivery {
 
 export interface PermissionProfile {
   id: string;
+  tenant_id?: string | null;
   name: string;
   description: string;
   can_send: boolean;
@@ -519,35 +524,6 @@ export interface SendEmailResponse {
   created_at: string;
 }
 
-// ============================================================
-// Grants
-// ============================================================
-
-export type MailboxGrantRole = "owner" | "manager" | "writer" | "reader";
-
-export interface MailboxGrant {
-  id: string;
-  tenant_id: string;
-  mailbox_id: string;
-  principal_type: "user" | "api_key";
-  principal_id: string;
-  role: MailboxGrantRole;
-  created_at: string;
-}
-
-export type ZoneGrantRole = "owner" | "admin" | "editor" | "viewer";
-
-export interface ZoneGrant {
-  id: string;
-  tenant_id: string;
-  zone_id: string;
-  principal_type: "user" | "api_key";
-  principal_id: string;
-  role: ZoneGrantRole;
-  created_by?: string;
-  created_at: string;
-}
-
 export type SendIdentityType = "exact" | "domain_wildcard";
 
 export interface SendIdentity {
@@ -558,15 +534,5 @@ export interface SendIdentity {
   address: string;
   identity_type: SendIdentityType;
   verified: boolean;
-  created_at: string;
-}
-
-export interface SendAsGrant {
-  id: string;
-  tenant_id: string;
-  identity_id: string;
-  principal_type: "user" | "api_key";
-  principal_id: string;
-  daily_quota: number;
   created_at: string;
 }

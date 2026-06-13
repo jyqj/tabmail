@@ -36,6 +36,7 @@ type serviceStore interface {
 	ClaimIngestJobs(ctx context.Context, now time.Time, limit int) ([]*models.IngestJob, error)
 	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
 	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
 }
 
 type Envelope struct {
@@ -134,6 +135,7 @@ func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte, rcptChec
 			NextAttemptAt: time.Now().UTC(),
 		}
 		if err := s.store.CreateIngestJob(ctx, job); err != nil {
+			s.deleteRawObjectIfOrphaned(ctx, objKey, "create_ingest_job_failed")
 			return AcceptResult{}, err
 		}
 		return AcceptResult{Queued: true}, nil
@@ -169,7 +171,8 @@ func (s *Service) processBatch(ctx context.Context) error {
 		return err
 	}
 	for _, job := range jobs {
-		if err := s.processJob(ctx, job); err != nil {
+		result, err := s.processJob(ctx, job)
+		if err != nil {
 			dead := job.Attempts >= s.maxRetries
 			backoff := retryBackoff(job.Attempts)
 			nextAttempt := time.Now().UTC().Add(backoff)
@@ -179,6 +182,7 @@ func (s *Service) processBatch(ctx context.Context) error {
 			if dead {
 				metrics.IngestJobDead()
 				metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
+				s.deleteRawObjectIfOrphaned(ctx, job.RawObjectKey, "dead_ingest_job")
 			} else {
 				metrics.IngestJobRetried()
 			}
@@ -187,10 +191,18 @@ func (s *Service) processBatch(ctx context.Context) error {
 		if err := s.store.MarkIngestJobDone(ctx, job.ID); err != nil {
 			return err
 		}
+		if result.delivered == 0 {
+			s.deleteRawObjectIfOrphaned(ctx, result.rawObjectKey, "zero_delivery_ingest_job")
+		}
 		metrics.IngestJobProcessed()
 		metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
 	}
 	return nil
+}
+
+type processJobResult struct {
+	rawObjectKey string
+	delivered    int
 }
 
 func retryBackoff(attempts int) time.Duration {
@@ -199,18 +211,19 @@ func retryBackoff(attempts int) time.Duration {
 	return time.Duration(1<<exp)*time.Second + time.Duration(rand.IntN(1000))*time.Millisecond
 }
 
-func (s *Service) processJob(ctx context.Context, job *models.IngestJob) error {
+func (s *Service) processJob(ctx context.Context, job *models.IngestJob) (processJobResult, error) {
 	if job == nil {
-		return nil
+		return processJobResult{}, nil
 	}
+	result := processJobResult{rawObjectKey: job.RawObjectKey}
 	rc, err := s.obj.Get(ctx, job.RawObjectKey)
 	if err != nil {
-		return fmt.Errorf("get raw object: %w", err)
+		return result, fmt.Errorf("get raw object: %w", err)
 	}
 	defer rc.Close()
 	raw, err := io.ReadAll(rc)
 	if err != nil {
-		return fmt.Errorf("read raw object: %w", err)
+		return result, fmt.Errorf("read raw object: %w", err)
 	}
 	delivered, err := s.deliver(ctx, Envelope{
 		Source:     job.Source,
@@ -220,12 +233,13 @@ func (s *Service) processJob(ctx context.Context, job *models.IngestJob) error {
 		Metadata:   job.Metadata,
 	}, raw, nil)
 	if err != nil {
-		return err
+		return result, err
 	}
+	result.delivered = delivered
 	if delivered == 0 {
 		s.logger.Warn().Str("job_id", job.ID.String()).Msg("ingest job processed with zero deliveries")
 	}
-	return nil
+	return result, nil
 }
 
 func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte, rcptChecks map[string]*resolver.Result) (int, error) {
@@ -430,6 +444,27 @@ func (s *Service) persistRaw(ctx context.Context, raw []byte) (string, error) {
 		}
 	}
 	return key, nil
+}
+
+func (s *Service) deleteRawObjectIfOrphaned(ctx context.Context, key, reason string) {
+	key = strings.TrimSpace(key)
+	if key == "" || s == nil || s.obj == nil || s.store == nil {
+		return
+	}
+	refs, err := s.store.CountRawObjectReferences(ctx, key)
+	if err != nil {
+		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("count raw object references")
+		return
+	}
+	if refs > 0 {
+		s.logger.Debug().Str("key", key).Str("reason", reason).Int("refs", refs).Msg("raw object still referenced")
+		return
+	}
+	if err := s.obj.Delete(ctx, key); err != nil {
+		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("delete orphan raw object")
+		return
+	}
+	s.logger.Info().Str("key", key).Str("reason", reason).Msg("deleted orphan raw object")
 }
 
 func (s *Service) reserveTenantDaily(ctx context.Context, tenantID uuid.UUID, limit int) (bool, error) {

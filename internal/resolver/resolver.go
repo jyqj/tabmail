@@ -100,6 +100,11 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		return nil, err
 	}
 	if mb != nil {
+		if mb.ZoneID != zone.ID {
+			mb = nil
+		}
+	}
+	if mb != nil {
 		if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
 			return nil, nil
 		}
@@ -156,7 +161,7 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		CreatedAt:              time.Now(),
 	}
 	if err := rv.store.CreateMailbox(ctx, mb); err != nil {
-		if existing, _ := rv.store.GetMailboxByAddress(ctx, mailboxKey); existing != nil {
+		if existing, _ := rv.store.GetMailboxByAddress(ctx, mailboxKey); existing != nil && existing.ZoneID == zone.ID {
 			return &Result{Zone: zone, Route: route, Mailbox: existing}, nil
 		}
 		return nil, fmt.Errorf("resolver: create mailbox: %w", err)
