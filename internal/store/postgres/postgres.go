@@ -920,7 +920,7 @@ func (s *PgStore) CreateMessage(ctx context.Context, m *models.Message) error {
 	return tx.Commit(ctx)
 }
 
-func (s *PgStore) CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int) (bool, error) {
+func (s *PgStore) CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int, ensureObject func(context.Context) error) (bool, error) {
 	if m.ID == uuid.Nil {
 		m.ID = uuid.New()
 	}
@@ -930,6 +930,20 @@ func (s *PgStore) CreateMessageWithQuota(ctx context.Context, m *models.Message,
 		return false, err
 	}
 	defer tx.Rollback(ctx)
+
+	// Serialize against raw-object GC on the same content key and re-ensure the
+	// object exists (re-Put if a concurrent sweep reaped it) before committing a
+	// row that references it.
+	if m.RawObjectKey != "" {
+		if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext($1::text))`, m.RawObjectKey); err != nil {
+			return false, err
+		}
+		if ensureObject != nil {
+			if err := ensureObject(ctx); err != nil {
+				return false, err
+			}
+		}
+	}
 
 	tag, err := tx.Exec(ctx, `
 		UPDATE mailboxes
@@ -1079,6 +1093,40 @@ func (s *PgStore) CountRawObjectReferences(ctx context.Context, objectKey string
 			(SELECT count(*) FROM messages WHERE raw_object_key = $1) +
 			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND state IN ('pending','retry','processing'))`, objectKey).Scan(&n)
 	return n, err
+}
+
+// ReleaseRawObjectIfUnreferenced deletes the raw object via del, but only when
+// no live row references it. The reference count and the del callback run inside
+// one transaction holding pg_advisory_xact_lock on the content key, so a
+// concurrent insert that re-uses the same key (which takes the same lock before
+// committing its referencing row) cannot interleave between the count and the
+// delete. del is invoked while the lock is held and must be idempotent.
+func (s *PgStore) ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error) {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return false, err
+	}
+	defer tx.Rollback(ctx)
+
+	if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext($1::text))`, key); err != nil {
+		return false, err
+	}
+	var n int
+	if err := tx.QueryRow(ctx, `
+		SELECT
+			(SELECT count(*) FROM messages WHERE raw_object_key = $1) +
+			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND state IN ('pending','retry','processing'))`, key).Scan(&n); err != nil {
+		return false, err
+	}
+	if n > 0 {
+		return false, nil
+	}
+	if del != nil {
+		if err := del(ctx); err != nil {
+			return false, err
+		}
+	}
+	return true, tx.Commit(ctx)
 }
 
 func (s *PgStore) CountAllMessages(ctx context.Context) (int, error) {
@@ -1599,7 +1647,7 @@ func (s *PgStore) CountWebhookDeliveriesByState(ctx context.Context, states ...s
 	return total, err
 }
 
-func (s *PgStore) CreateIngestJob(ctx context.Context, job *models.IngestJob) error {
+func (s *PgStore) CreateIngestJob(ctx context.Context, job *models.IngestJob, ensureObject func(context.Context) error) error {
 	if job.ID == uuid.Nil {
 		job.ID = uuid.New()
 	}
@@ -1612,11 +1660,33 @@ func (s *PgStore) CreateIngestJob(ctx context.Context, job *models.IngestJob) er
 	}
 	job.CreatedAt = now
 	job.UpdatedAt = now
-	_, err := s.pool.Exec(ctx, `
+
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+
+	// Serialize against raw-object GC on the same content key and re-ensure the
+	// object exists before committing the pending job that references it.
+	if job.RawObjectKey != "" {
+		if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext($1::text))`, job.RawObjectKey); err != nil {
+			return err
+		}
+		if ensureObject != nil {
+			if err := ensureObject(ctx); err != nil {
+				return err
+			}
+		}
+	}
+
+	if _, err := tx.Exec(ctx, `
 		INSERT INTO ingest_jobs (id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,created_at,updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-		job.ID, job.Source, job.RemoteIP, job.MailFrom, job.Recipients, job.RawObjectKey, job.Metadata, job.State, job.Attempts, job.LastError, job.NextAttemptAt, job.CreatedAt, job.UpdatedAt)
-	return err
+		job.ID, job.Source, job.RemoteIP, job.MailFrom, job.Recipients, job.RawObjectKey, job.Metadata, job.State, job.Attempts, job.LastError, job.NextAttemptAt, job.CreatedAt, job.UpdatedAt); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int) ([]*models.IngestJob, error) {

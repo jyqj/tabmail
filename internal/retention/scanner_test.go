@@ -103,7 +103,7 @@ func TestScannerSweepKeepsObjectReferencedByActiveIngestJob(t *testing.T) {
 		RawObjectKey:  key,
 		State:         "pending",
 		NextAttemptAt: time.Now().Add(time.Hour),
-	}); err != nil {
+	}, nil); err != nil {
 		t.Fatalf("seed ingest job: %v", err)
 	}
 	if err := obj.Put(ctx, key, bytes.NewBufferString(key), 0); err != nil {
@@ -130,7 +130,7 @@ func TestScannerSweepPurgesOldDoneIngestJobsAndDeletesOrphanObject(t *testing.T)
 		State:         "done",
 		NextAttemptAt: time.Now().Add(-time.Hour),
 	}
-	if err := store.CreateIngestJob(ctx, job); err != nil {
+	if err := store.CreateIngestJob(ctx, job, nil); err != nil {
 		t.Fatalf("seed ingest job: %v", err)
 	}
 	store.ForceIngestJobUpdatedAt(job.ID, time.Now().Add(-(ingestJobRetention + time.Hour)))

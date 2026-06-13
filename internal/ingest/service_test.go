@@ -70,7 +70,7 @@ func TestServiceDurableAcceptAndProcess(t *testing.T) {
 		Source:     "smtp",
 		MailFrom:   "sender@example.org",
 		Recipients: []string{"user@mail.test"},
-	}, []byte("Subject: durable\r\n\r\nhello"), nil)
+	}, []byte("Subject: durable\r\n\r\nhello"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func TestServiceDurableZeroDeliveryDeletesRawObject(t *testing.T) {
 		Source:     "smtp",
 		MailFrom:   "sender@example.org",
 		Recipients: []string{"user@mail.test"},
-	}, raw, nil)
+	}, raw)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -169,7 +169,7 @@ func TestServiceDurableSizeFailureDeletesRawObject(t *testing.T) {
 		Source:     "smtp",
 		MailFrom:   "sender@example.org",
 		Recipients: []string{"user@mail.test"},
-	}, raw, nil)
+	}, raw)
 	if err != nil {
 		t.Fatal(err)
 	}

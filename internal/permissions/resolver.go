@@ -76,17 +76,10 @@ func Resolve(profile *models.PermissionProfile, override *models.UserPermissionO
 }
 
 // IsZoneAllowed checks whether a zone ID is in the allowed list.
-// If AllowedZoneIDs is nil/empty, all zones are allowed.
+// If AllowedZoneIDs is nil/empty, all zones are allowed. The rule itself lives
+// on models.EffectivePermission; this is a thin delegate.
 func IsZoneAllowed(perm *models.EffectivePermission, zoneID uuid.UUID) bool {
-	if len(perm.AllowedZoneIDs) == 0 {
-		return true
-	}
-	for _, id := range perm.AllowedZoneIDs {
-		if id == zoneID {
-			return true
-		}
-	}
-	return false
+	return perm.AllowsZone(zoneID)
 }
 
 // IsUnlimited returns true if the value is 0, which means unlimited.

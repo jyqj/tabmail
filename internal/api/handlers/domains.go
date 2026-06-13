@@ -17,6 +17,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/resolver"
 	"tabmail/internal/store"
 )
@@ -39,7 +40,7 @@ type domainStore interface {
 	GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error)
 	DeleteRoute(ctx context.Context, id uuid.UUID) error
 	ListZoneObjectKeys(ctx context.Context, zoneID uuid.UUID) ([]string, error)
-	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 	// Send identities
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
 	ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error)
@@ -190,15 +191,8 @@ func (h *DomainHandler) DeleteZone(w http.ResponseWriter, r *http.Request) {
 		ctx := context.Background()
 		go func() {
 			for _, key := range objectKeys {
-				refs, err := h.store.CountRawObjectReferences(ctx, key)
-				if err != nil {
-					h.logger.Warn().Err(err).Str("key", key).Msg("count object references during zone delete")
-					continue
-				}
-				if refs == 0 {
-					if err := h.objectStore.Delete(ctx, key); err != nil {
-						h.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during zone delete")
-					}
+				if _, err := rawobject.Release(ctx, h.store, h.objectStore, key); err != nil {
+					h.logger.Warn().Err(err).Str("key", key).Msg("release raw object during zone delete")
 				}
 			}
 		}()

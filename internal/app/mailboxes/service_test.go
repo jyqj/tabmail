@@ -134,8 +134,8 @@ func (s *mailboxTestStore) DeleteMailbox(_ context.Context, id uuid.UUID) error 
 	delete(s.mailboxes, id)
 	return nil
 }
-func (s *mailboxTestStore) CountRawObjectReferences(context.Context, string) (int, error) {
-	return 0, nil
+func (s *mailboxTestStore) ReleaseRawObjectIfUnreferenced(context.Context, string, func(context.Context) error) (bool, error) {
+	return false, nil
 }
 
 func TestDeleteTenantAdminUsesTenantScopedMailboxLookup(t *testing.T) {

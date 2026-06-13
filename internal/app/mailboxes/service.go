@@ -16,6 +16,7 @@ import (
 	"tabmail/internal/models"
 	"tabmail/internal/permissions"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/store"
 )
 
@@ -34,7 +35,7 @@ type storeRepo interface {
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
-	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type Service struct {
@@ -66,7 +67,7 @@ func NewService(s storeRepo, obj store.ObjectStore, dispatcher *hooks.Dispatcher
 }
 
 func (s *Service) List(ctx context.Context, actor authz.Actor, tenant *models.Tenant, pg models.Page) ([]*models.Mailbox, int, error) {
-	isAdmin := actor.IsSuperAdmin || actor.IsAdmin
+	isAdmin := actor.IsTenantAdmin()
 	if err := app.EnsureTenantScope(tenant, isAdmin); err != nil {
 		return nil, 0, err
 	}
@@ -109,7 +110,7 @@ func (s *Service) List(ctx context.Context, actor authz.Actor, tenant *models.Te
 }
 
 func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.Tenant, req CreateRequest) (*models.Mailbox, error) {
-	isAdmin := actor.IsSuperAdmin || actor.IsAdmin
+	isAdmin := actor.IsTenantAdmin()
 	if err := app.EnsureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
@@ -239,15 +240,8 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, tenant *models.
 		return app.Internal(err)
 	}
 	for _, key := range uniqueStrings(keys) {
-		refs, err := s.store.CountRawObjectReferences(ctx, key)
-		if err != nil {
-			s.logger.Warn().Err(err).Str("key", key).Msg("count object references during mailbox delete")
-			continue
-		}
-		if refs == 0 {
-			if err := s.obj.Delete(ctx, key); err != nil {
-				s.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during mailbox delete")
-			}
+		if _, err := rawobject.Release(ctx, s.store, s.obj, key); err != nil {
+			s.logger.Warn().Err(err).Str("key", key).Msg("release raw object during mailbox delete")
 		}
 	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor.AuditLabel(), Action: "mailbox.delete", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
@@ -292,13 +286,7 @@ func (s *Service) accessibleZoneIDs(ctx context.Context, tenant *models.Tenant, 
 // authorize runs the authz seam and converts AuthzError into an app-level
 // Forbidden error so HTTP status and message stay stable.
 func (s *Service) authorize(ctx context.Context, actor authz.Actor, action authz.Action, res authz.Resource) error {
-	if err := s.az.Authorize(ctx, actor, action, res); err != nil {
-		if authz.IsAuthzError(err) {
-			return app.Forbidden(err.Error())
-		}
-		return app.Internal(err)
-	}
-	return nil
+	return app.FromAuthz(s.az.Authorize(ctx, actor, action, res))
 }
 
 func (s *Service) IssueToken(ctx context.Context, address, password, actor string) (*TokenIssueResult, error) {

@@ -146,7 +146,6 @@ type session struct {
 	logger     zerolog.Logger
 	from       string
 	recipients []string
-	rcptChecks map[string]*resolver.Result
 }
 
 func (s *session) AuthPlain(_ string, _ string) error {
@@ -201,7 +200,7 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 		metrics.SMTPRecipientRejected()
 		return smtpErr(550, "unknown recipient domain")
 	}
-	if !res.Zone.IsVerified || !res.Zone.MXVerified {
+	if !res.Zone.CanReceiveMessage() {
 		metrics.SMTPRecipientRejected()
 		metrics.TenantRecipientRejected(res.Zone.TenantID.String())
 		return smtpErr(550, "domain is not verified")
@@ -215,10 +214,6 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 	metrics.TenantRecipientAccepted(res.Zone.TenantID.String())
 	metrics.MailboxRecipientAccepted(addr)
 	s.recipients = append(s.recipients, addr)
-	if s.rcptChecks == nil {
-		s.rcptChecks = make(map[string]*resolver.Result)
-	}
-	s.rcptChecks[addr] = res
 	return nil
 }
 
@@ -239,7 +234,7 @@ func (s *session) Data(r io.Reader) error {
 		Source:     "smtp",
 		MailFrom:   s.from,
 		Recipients: append([]string(nil), s.recipients...),
-	}, raw, s.rcptChecks)
+	}, raw)
 	if err != nil {
 		s.logger.Warn().Err(err).Msg("ingest accept failed")
 		metrics.SMTPMessageRejected()
@@ -260,7 +255,6 @@ func (s *session) Data(r io.Reader) error {
 func (s *session) Reset() {
 	s.from = ""
 	s.recipients = nil
-	s.rcptChecks = nil
 }
 
 func (s *session) Logout() error {

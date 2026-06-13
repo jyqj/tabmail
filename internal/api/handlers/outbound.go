@@ -382,7 +382,7 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
 	actor := authz.ActorFromContext(ctx)
-	if actor.IsSuperAdmin || actor.IsAdmin {
+	if actor.IsTenantAdmin() {
 		return h.store.ListOutboundJobs(ctx, tenantID, pg)
 	}
 
@@ -402,7 +402,7 @@ func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.O
 	}
 
 	actor := authz.ActorFromContext(ctx)
-	if actor.IsSuperAdmin || actor.IsAdmin {
+	if actor.IsTenantAdmin() {
 		return true
 	}
 

@@ -185,6 +185,14 @@ type DomainZone struct {
 	VerifiedAt            *time.Time         `json:"verified_at,omitempty" db:"verified_at"`
 }
 
+// CanReceiveMessage reports whether the zone is ready to accept inbound mail:
+// ownership must be verified and the MX records confirmed. This is the single
+// home for the receive-readiness rule; DKIM/send configuration is deliberately
+// kept separate.
+func (z DomainZone) CanReceiveMessage() bool {
+	return z.IsVerified && z.MXVerified
+}
+
 type RouteType string
 
 const (
@@ -521,6 +529,30 @@ type EffectivePermission struct {
 	CanCreateDomains  bool        `json:"can_create_domains"`
 	CanCreateRoutes   bool        `json:"can_create_routes"`
 	CanCreateAPIKeys  bool        `json:"can_create_api_keys"`
+}
+
+// AllowsZone reports whether zoneID is within the permission's allowed-zone
+// list. A nil permission or an empty list means every zone is allowed. This is
+// the canonical home for the zone-allowlist membership rule.
+func (p *EffectivePermission) AllowsZone(zoneID uuid.UUID) bool {
+	if p == nil {
+		return true
+	}
+	return ZoneAllowed(p.AllowedZoneIDs, zoneID)
+}
+
+// ZoneAllowed reports whether zoneID is within allowedZoneIDs. An empty list
+// means every zone is allowed.
+func ZoneAllowed(allowedZoneIDs []uuid.UUID, zoneID uuid.UUID) bool {
+	if len(allowedZoneIDs) == 0 {
+		return true
+	}
+	for _, id := range allowedZoneIDs {
+		if id == zoneID {
+			return true
+		}
+	}
+	return false
 }
 
 // ============================================================

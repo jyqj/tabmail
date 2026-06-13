@@ -7,6 +7,7 @@ import (
 	"github.com/rs/zerolog"
 	"tabmail/internal/config"
 	"tabmail/internal/metrics"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/store"
 )
 
@@ -14,7 +15,7 @@ type retentionStore interface {
 	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
 	DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error)
 	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
-	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 	PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error)
 }
 
@@ -106,24 +107,20 @@ func (sc *Scanner) purgeIngestJobs(ctx context.Context) {
 }
 
 func (sc *Scanner) deleteObjectIfOrphaned(ctx context.Context, key string) {
-	refs, err := sc.store.CountRawObjectReferences(ctx, key)
-	if err != nil {
+	switch out, err := rawobject.Release(ctx, sc.store, sc.obj, key); out {
+	case rawobject.CountFailed:
 		sc.logger.Warn().Err(err).Str("key", key).Msg("counting object references")
 		sc.failedKeys[key] = struct{}{}
-		return
-	}
-	if refs > 0 {
-		delete(sc.failedKeys, key)
-		return
-	}
-	if err := sc.obj.Delete(ctx, key); err != nil {
+	case rawobject.DeleteFailed:
 		metrics.RetentionObjectFailed()
 		sc.logger.Warn().Err(err).Str("key", key).Msg("deleting object")
 		sc.failedKeys[key] = struct{}{}
-		return
+	case rawobject.Deleted:
+		metrics.RetentionObjectDeleted()
+		delete(sc.failedKeys, key)
+	default: // StillReferenced or Noop
+		delete(sc.failedKeys, key)
 	}
-	metrics.RetentionObjectDeleted()
-	delete(sc.failedKeys, key)
 }
 
 func (sc *Scanner) retryFailedKeys(ctx context.Context) {

@@ -129,7 +129,7 @@ func (s *Service) SetResolvers(lookupTXT func(string) ([]string, error), lookupM
 }
 
 func (s *Service) ListZones(ctx context.Context, actor authz.Actor, tenant *models.Tenant) ([]*models.DomainZone, error) {
-	if err := ensureTenantScope(tenant, actor.IsSuperAdmin || actor.IsAdmin); err != nil {
+	if err := ensureTenantScope(tenant, actor.IsTenantAdmin()); err != nil {
 		return nil, err
 	}
 	items, err := s.store.ListZones(ctx, tenant.ID)
@@ -140,7 +140,7 @@ func (s *Service) ListZones(ctx context.Context, actor authz.Actor, tenant *mode
 }
 
 func (s *Service) ListAllZones(ctx context.Context, actor authz.Actor) ([]*models.DomainZone, error) {
-	if !actor.IsSuperAdmin && !actor.IsAdmin {
+	if !actor.IsTenantAdmin() {
 		return nil, app.Forbidden("admin access required")
 	}
 	items, err := s.store.ListAllZones(ctx)
@@ -169,7 +169,7 @@ func (s *Service) ListOpenZones(ctx context.Context, includeAuthenticated bool) 
 }
 
 func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *models.Tenant, domain string) (*models.DomainZone, error) {
-	isAdmin := actor.IsSuperAdmin || actor.IsAdmin
+	isAdmin := actor.IsTenantAdmin()
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
@@ -276,7 +276,7 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 }
 
 func (s *Service) UpdateZoneAccess(ctx context.Context, actor authz.Actor, tenant *models.Tenant, zoneID uuid.UUID, input ZoneAccessInput) (*models.DomainZone, error) {
-	if !actor.IsSuperAdmin && !actor.IsAdmin {
+	if !actor.IsTenantAdmin() {
 		return nil, app.Forbidden("admin access required")
 	}
 	zone, err := s.store.GetZone(ctx, zoneID)
@@ -431,7 +431,7 @@ func (s *Service) SuggestAddress(ctx context.Context, actor authz.Actor, zoneID 
 	if useSubdomain && !canManage {
 		return nil, app.Forbidden("full domain permission is required to generate random subdomains")
 	}
-	return s.suggestForZone(zone, useSubdomain, canManage || actor.IsSuperAdmin || actor.IsAdmin)
+	return s.suggestForZone(zone, useSubdomain, canManage || actor.IsTenantAdmin())
 }
 
 func (s *Service) SuggestOpenAddress(ctx context.Context, zoneID uuid.UUID, includeAuthenticated bool, useSubdomain bool) (*SuggestedAddress, error) {
@@ -591,13 +591,7 @@ func (s *Service) ownedZone(ctx context.Context, actor authz.Actor, zoneID uuid.
 // authorize runs the authz seam and converts AuthzError into an app-level
 // Forbidden error so HTTP status and message stay stable.
 func (s *Service) authorize(ctx context.Context, actor authz.Actor, action authz.Action, res authz.Resource) error {
-	if err := s.az.Authorize(ctx, actor, action, res); err != nil {
-		if authz.IsAuthzError(err) {
-			return app.Forbidden(err.Error())
-		}
-		return app.Internal(err)
-	}
-	return nil
+	return app.FromAuthz(s.az.Authorize(ctx, actor, action, res))
 }
 
 func (s *Service) lookupVerification(zone *models.DomainZone) VerificationChecks {

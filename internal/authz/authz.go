@@ -2,6 +2,7 @@ package authz
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"tabmail/internal/api/middleware"
@@ -70,6 +71,16 @@ type Actor struct {
 	OwnerUserID  *uuid.UUID // For API keys with an active owner user
 }
 
+// IsTenantAdmin reports whether the actor has admin authority within its tenant
+// — a tenant admin or a global super admin. Use this for tenant-scoped
+// privileged access (the common case). See docs/adr/0001-admin-and-super-admin-roles.md.
+func (a Actor) IsTenantAdmin() bool { return a.IsSuperAdmin || a.IsAdmin }
+
+// IsGlobalAdmin reports whether the actor is a global platform operator (super
+// admin) able to act across tenants. Use this only for cross-tenant actions:
+// tenant impersonation, system-wide configuration, and role escalation.
+func (a Actor) IsGlobalAdmin() bool { return a.IsSuperAdmin }
+
 // EffectiveUserID returns the user identity ownership checks should use:
 // the user itself for PrincipalUser, the owning user for PrincipalAPIKey
 // (nil for ownerless integration keys), and nil for anything else.
@@ -124,7 +135,7 @@ func CanManageZone(actor Actor, zone *models.DomainZone) bool {
 	if zone == nil {
 		return false
 	}
-	if actor.IsSuperAdmin {
+	if actor.IsGlobalAdmin() {
 		return true
 	}
 	if actor.TenantID == uuid.Nil {
@@ -147,18 +158,10 @@ func CanManageZone(actor Actor, zone *models.DomainZone) bool {
 // list. Admins and super admins always pass; an absent permission or an
 // empty allowlist means all zones are allowed.
 func ZoneAllowed(actor Actor, zoneID uuid.UUID) bool {
-	if actor.IsSuperAdmin || actor.IsAdmin {
+	if actor.IsTenantAdmin() {
 		return true
 	}
-	if actor.Permission == nil || len(actor.Permission.AllowedZoneIDs) == 0 {
-		return true
-	}
-	for _, id := range actor.Permission.AllowedZoneIDs {
-		if id == zoneID {
-			return true
-		}
-	}
-	return false
+	return actor.Permission.AllowsZone(zoneID)
 }
 
 // Store is the minimal store interface needed by the authorizer.
@@ -221,19 +224,19 @@ func ActorFromContext(ctx context.Context) Actor {
 // Authorize checks whether the actor can perform the action on the resource.
 func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, res Resource) error {
 	// super_admin can do everything.
-	if actor.IsSuperAdmin {
+	if actor.IsGlobalAdmin() {
 		return nil
 	}
 
 	// Tenant isolation: non-super-admin must belong to the same tenant.
 	if res.TenantID != (uuid.UUID{}) && actor.TenantID != res.TenantID {
-		return ErrForbidden("access denied")
+		return forbidden(KindTenantIsolation, "access denied")
 	}
 
 	// admin has full access within their tenant, except managing other admins.
 	if actor.IsAdmin {
 		if action == ActionTenantUsersManage {
-			return ErrForbidden("super admin required")
+			return forbidden(KindAdminRequired, "super admin required")
 		}
 		return nil
 	}
@@ -241,7 +244,7 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 	// Regular users and API keys — check per-action rules.
 	switch action {
 	case ActionTenantManage, ActionTenantUsersManage:
-		return ErrForbidden("admin access required")
+		return forbidden(KindAdminRequired, "admin access required")
 
 	case ActionZoneCreate:
 		return a.checkZoneCreate(actor)
@@ -254,7 +257,7 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 
 	case ActionRouteManage:
 		if actor.Permission != nil && !actor.Permission.CanCreateRoutes {
-			return ErrForbidden("route creation not allowed")
+			return forbidden(KindCapability, "route creation not allowed")
 		}
 		return a.checkZoneAccessAndOwnership(actor, res)
 
@@ -297,12 +300,12 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 
 	case ActionAPIKeyCreate:
 		if actor.Permission != nil && !actor.Permission.CanCreateAPIKeys {
-			return ErrForbidden("API key creation not allowed")
+			return forbidden(KindCapability, "API key creation not allowed")
 		}
 		return nil
 
 	case ActionAPIKeyManage:
-		return ErrForbidden("admin access required")
+		return forbidden(KindAdminRequired, "admin access required")
 
 	default:
 		return ErrForbidden("unknown action")
@@ -325,7 +328,7 @@ func (a *Authorizer) checkZoneCreate(actor Actor) error {
 		return nil // API key — scope check happens at middleware level
 	}
 	if !perm.CanCreateDomains {
-		return ErrForbidden("domain creation not allowed")
+		return forbidden(KindCapability, "domain creation not allowed")
 	}
 	return nil
 }
@@ -358,23 +361,23 @@ func checkZoneOwnership(actor Actor, res Resource) error {
 	if uid != nil && res.OwnerUserID != nil && *uid == *res.OwnerUserID {
 		return nil
 	}
-	return ErrForbidden("not your domain")
+	return forbidden(KindOwnership, "not your domain")
 }
 
 // checkZoneAccess verifies the actor has access to the zone via
 // EffectivePermission.AllowedZoneIDs. Admins are handled before this is called.
 func (a *Authorizer) checkZoneAccess(actor Actor, res Resource) error {
 	if actor.TenantWide {
-		if res.ZoneID != (uuid.UUID{}) && actor.Permission != nil && !isZoneAllowed(actor.Permission, res.ZoneID) {
-			return ErrForbidden("zone not in allowed list")
+		if res.ZoneID != (uuid.UUID{}) && !actor.Permission.AllowsZone(res.ZoneID) {
+			return forbidden(KindZoneNotAllowed, "zone not in allowed list")
 		}
 		return nil
 	}
 	if res.ZoneID == (uuid.UUID{}) {
 		return nil
 	}
-	if actor.Permission != nil && !isZoneAllowed(actor.Permission, res.ZoneID) {
-		return ErrForbidden("zone not in allowed list")
+	if !actor.Permission.AllowsZone(res.ZoneID) {
+		return forbidden(KindZoneNotAllowed, "zone not in allowed list")
 	}
 	return nil
 }
@@ -382,29 +385,31 @@ func (a *Authorizer) checkZoneAccess(actor Actor, res Resource) error {
 func (a *Authorizer) checkSendFrom(actor Actor) error {
 	perm := actor.Permission
 	if perm != nil && !perm.CanSend {
-		return ErrForbidden("sending not allowed")
+		return forbidden(KindCapability, "sending not allowed")
 	}
 	return nil
-}
-
-func isZoneAllowed(perm *models.EffectivePermission, zoneID uuid.UUID) bool {
-	if len(perm.AllowedZoneIDs) == 0 {
-		return true
-	}
-	for _, id := range perm.AllowedZoneIDs {
-		if id == zoneID {
-			return true
-		}
-	}
-	return false
 }
 
 // ---------------------------------------------------------------------------
 // Error types
 // ---------------------------------------------------------------------------
 
-// AuthzError is a typed authorization error.
+// Kind classifies why authorization was denied, so callers and tests can
+// distinguish denial reasons without string-matching the message.
+type Kind string
+
+const (
+	KindForbidden       Kind = "forbidden"        // generic / unclassified denial
+	KindTenantIsolation Kind = "tenant_isolation" // actor and resource are in different tenants
+	KindAdminRequired   Kind = "admin_required"   // action needs admin / super-admin
+	KindOwnership       Kind = "ownership"        // actor does not own the resource
+	KindZoneNotAllowed  Kind = "zone_not_allowed" // zone is outside the actor's allowlist
+	KindCapability      Kind = "capability"       // a permission flag (can_create_* / can_send) is off
+)
+
+// AuthzError is a typed authorization error carrying a denial Kind.
 type AuthzError struct {
+	Reason  Kind
 	Message string
 }
 
@@ -412,16 +417,29 @@ func (e *AuthzError) Error() string {
 	return e.Message
 }
 
-// ErrForbidden creates a new AuthzError.
+// ErrForbidden creates a generic (unclassified) authorization denial.
 func ErrForbidden(msg string) *AuthzError {
-	return &AuthzError{Message: msg}
+	return forbidden(KindForbidden, msg)
+}
+
+// forbidden creates a classified authorization denial.
+func forbidden(kind Kind, msg string) *AuthzError {
+	return &AuthzError{Reason: kind, Message: msg}
 }
 
 // IsAuthzError returns true if the error is an AuthzError.
 func IsAuthzError(err error) bool {
-	if err == nil {
-		return false
+	var ae *AuthzError
+	return errors.As(err, &ae)
+}
+
+// KindOf returns the denial Kind for err, defaulting to KindForbidden for any
+// authorization error that was not explicitly classified and for non-authz
+// errors.
+func KindOf(err error) Kind {
+	var ae *AuthzError
+	if errors.As(err, &ae) && ae.Reason != "" {
+		return ae.Reason
 	}
-	_, ok := err.(*AuthzError)
-	return ok
+	return KindForbidden
 }

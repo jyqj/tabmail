@@ -4,16 +4,15 @@ import (
 	"context"
 	"io"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jhillyerd/enmime/v2"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
 	"tabmail/internal/hooks"
-	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/sanitize"
 	"tabmail/internal/store"
@@ -36,7 +35,7 @@ type storeRepo interface {
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
-	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type Viewer struct {
@@ -53,183 +52,32 @@ type Viewer struct {
 	AllowedZoneIDs []uuid.UUID
 }
 
+// IsTenantAdmin reports whether the viewer has admin authority within its
+// tenant — a tenant admin or a global super admin.
+func (v Viewer) IsTenantAdmin() bool { return v.IsSuperAdmin || v.IsAdmin }
+
 type Service struct {
-	store       storeRepo
-	obj         store.ObjectStore
-	hub         *realtime.Hub
-	dispatcher  *hooks.Dispatcher
-	namingMode  policy.NamingMode
-	stripPlus   bool
-	tokenSecret string
-	logger      zerolog.Logger
+	store      storeRepo
+	obj        store.ObjectStore
+	hub        *realtime.Hub
+	dispatcher *hooks.Dispatcher
+	resolver   *mailboxResolver
+	logger     zerolog.Logger
 }
 
 func NewService(s storeRepo, obj store.ObjectStore, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, logger zerolog.Logger) *Service {
-	return &Service{store: s, obj: obj, hub: hub, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "messages").Logger()}
+	return &Service{store: s, obj: obj, hub: hub, dispatcher: dispatcher, resolver: newMailboxResolver(s, namingMode, stripPlus, tokenSecret), logger: logger.With().Str("service", "messages").Logger()}
 }
 
+// ResolveMailbox delegates to the mailbox-access resolver, which owns the
+// address-to-mailbox lookup and the access-mode authorization matrix.
 func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Viewer) (*models.Mailbox, error) {
-	addr := strings.ToLower(strings.TrimSpace(address))
-	if addr == "" {
-		return nil, app.BadRequest("address is required")
-	}
-	mailboxKey, err := policy.ExtractMailbox(addr, s.namingMode, s.stripPlus)
-	if err != nil {
-		return nil, app.BadRequest("invalid address")
-	}
-	var mb *models.Mailbox
-	// For public/mailbox-token access, don't restrict lookup to the public tenant.
-	// For authenticated users/API keys, try tenant-local lookup first, then fall
-	// back to global lookup so public/token mailboxes in other tenants remain
-	// reachable; the access-mode checks below are the security boundary.
-	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic {
-		mb, err = s.store.ForTenant(viewer.Tenant.ID).GetMailboxByAddress(ctx, mailboxKey)
-		if err == nil && mb == nil {
-			mb, err = s.store.GetMailboxByAddress(ctx, mailboxKey)
-		}
-	} else {
-		mb, err = s.store.GetMailboxByAddress(ctx, mailboxKey)
-	}
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	if mb == nil {
-		return nil, app.NotFound("mailbox not found")
-	}
-	if viewer.IsSuperAdmin || viewer.IsAdmin {
-		return mb, nil
-	}
-	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
-		return nil, accessDeniedOrNotFound(viewer, "mailbox expired")
-	}
-	canManage, err := s.canAccessMailbox(ctx, mb, viewer, false)
-	if err != nil {
-		return nil, err
-	}
-	if canManage {
-		return mb, nil
-	}
-	switch mb.AccessMode {
-	case models.AccessPublic:
-		return mb, nil
-	case models.AccessAPIKey:
-		if viewer.Tenant == nil || viewer.AuthMode != AuthModeAPIKey || mb.TenantID != viewer.Tenant.ID {
-			return nil, accessDeniedOrNotFound(viewer, "api key access required")
-		}
-		if !viewerZoneAllowed(viewer, mb.ZoneID) {
-			return nil, app.Forbidden("zone not in allowed list")
-		}
-		if !viewer.TenantWide {
-			return nil, accessDeniedOrNotFound(viewer, "api key requires tenant-wide access")
-		}
-	case models.AccessToken:
-		if viewer.Tenant != nil && viewer.AuthMode == AuthModeAPIKey && viewer.TenantWide && mb.TenantID == viewer.Tenant.ID {
-			return mb, nil
-		}
-		if strings.TrimSpace(viewer.BearerToken) == "" {
-			return nil, accessDeniedOrNotFound(viewer, "mailbox token required")
-		}
-		claims, err := mailtoken.Verify(s.tokenSecret, viewer.BearerToken)
-		if err != nil || claims.MailboxID != mb.ID.String() {
-			return nil, accessDeniedOrNotFound(viewer, "invalid mailbox token")
-		}
-	default:
-		return nil, accessDeniedOrNotFound(viewer, "access denied")
-	}
-	return mb, nil
+	return s.resolver.Resolve(ctx, address, viewer)
 }
 
+// ResolveMailboxForWrite delegates to the resolver's write path.
 func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, viewer Viewer) (*models.Mailbox, error) {
-	if viewer.AuthMode == AuthModePublic {
-		return nil, app.Forbidden("authentication required for write operations")
-	}
-	addr := strings.ToLower(strings.TrimSpace(address))
-	if addr == "" {
-		return nil, app.BadRequest("address is required")
-	}
-	mailboxKey, err := policy.ExtractMailbox(addr, s.namingMode, s.stripPlus)
-	if err != nil {
-		return nil, app.BadRequest("invalid address")
-	}
-	var mb *models.Mailbox
-	// Public viewers were rejected above, so the unscoped branch only runs for
-	// tenant-less (super-admin) viewers where no tenant filter exists.
-	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic {
-		mb, err = s.store.ForTenant(viewer.Tenant.ID).GetMailboxByAddress(ctx, mailboxKey)
-	} else {
-		mb, err = s.store.GetMailboxByAddress(ctx, mailboxKey)
-	}
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	if mb == nil {
-		return nil, app.NotFound("mailbox not found")
-	}
-	if viewer.IsSuperAdmin || viewer.IsAdmin {
-		return mb, nil
-	}
-	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
-		return nil, app.Forbidden("mailbox expired")
-	}
-	canManage, err := s.canAccessMailbox(ctx, mb, viewer, true)
-	if err != nil {
-		return nil, err
-	}
-	if canManage {
-		return mb, nil
-	}
-	return nil, app.Forbidden("write access requires mailbox owner or admin")
-}
-
-func (s *Service) canAccessMailbox(ctx context.Context, mb *models.Mailbox, viewer Viewer, requireWrite bool) (bool, error) {
-	if mb == nil {
-		return false, nil
-	}
-	if viewer.IsSuperAdmin || viewer.IsAdmin {
-		return true, nil
-	}
-	if viewer.Tenant == nil || mb.TenantID != viewer.Tenant.ID {
-		return false, nil
-	}
-	if !viewerZoneAllowed(viewer, mb.ZoneID) {
-		return false, app.Forbidden("zone not in allowed list")
-	}
-	if viewer.TenantWide {
-		return true, nil
-	}
-	zone, err := s.store.GetZone(ctx, mb.ZoneID)
-	if err != nil {
-		return false, app.Internal(err)
-	}
-	if zone == nil {
-		return false, nil
-	}
-	if zone.OwnerUserID == nil {
-		return false, nil
-	}
-	if viewer.UserID != nil && *viewer.UserID == *zone.OwnerUserID {
-		return true, nil
-	}
-	return viewer.OwnerUserID != nil && *viewer.OwnerUserID == *zone.OwnerUserID, nil
-}
-
-func viewerZoneAllowed(viewer Viewer, zoneID uuid.UUID) bool {
-	if len(viewer.AllowedZoneIDs) == 0 {
-		return true
-	}
-	for _, id := range viewer.AllowedZoneIDs {
-		if id == zoneID {
-			return true
-		}
-	}
-	return false
-}
-
-func accessDeniedOrNotFound(viewer Viewer, msg string) error {
-	if viewer.AuthMode == AuthModePublic {
-		return app.NotFound("mailbox not found")
-	}
-	return app.Forbidden(msg)
+	return s.resolver.ResolveForWrite(ctx, address, viewer)
 }
 
 func (s *Service) ListMessages(ctx context.Context, address string, viewer Viewer, pg models.Page) ([]*models.Message, int, error) {
@@ -324,12 +172,7 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 	if err := s.store.DeleteMessage(ctx, msgID); err != nil {
 		return app.Internal(err)
 	}
-	if msg.RawObjectKey != "" {
-		refs, err := s.store.CountRawObjectReferences(ctx, msg.RawObjectKey)
-		if err == nil && refs == 0 {
-			_ = s.obj.Delete(ctx, msg.RawObjectKey)
-		}
-	}
+	_, _ = rawobject.Release(ctx, s.store, s.obj, msg.RawObjectKey)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "message.delete", ResourceType: "message", ResourceID: app.UUIDPtr(msg.ID), Details: app.MustJSON(map[string]any{"mailbox": mb.FullAddress})})
 	if s.hub != nil {
 		s.hub.Publish(realtime.Event{Type: realtime.EventDelete, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: msg.Sender, Subject: msg.Subject, Size: msg.Size})
@@ -353,15 +196,8 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 		return app.Internal(err)
 	}
 	for _, key := range uniqueStrings(keys) {
-		refs, err := s.store.CountRawObjectReferences(ctx, key)
-		if err != nil {
-			s.logger.Warn().Err(err).Str("key", key).Msg("count object references during purge")
-			continue
-		}
-		if refs == 0 {
-			if err := s.obj.Delete(ctx, key); err != nil {
-				s.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during purge")
-			}
+		if _, err := rawobject.Release(ctx, s.store, s.obj, key); err != nil {
+			s.logger.Warn().Err(err).Str("key", key).Msg("release raw object during purge")
 		}
 	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.purge", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
@@ -377,7 +213,7 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 // BreakGlassRead allows an admin to read a message body with an audited
 // reason. The access is logged and the full message detail is returned.
 func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer, actor string, reason string) (*models.MessageDetail, error) {
-	if !viewer.IsSuperAdmin && !viewer.IsAdmin {
+	if !viewer.IsTenantAdmin() {
 		return nil, app.Forbidden("break-glass is only available to admin users")
 	}
 	if strings.TrimSpace(reason) == "" {
@@ -420,7 +256,7 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 
 // BreakGlassSource allows an admin to read raw message source with an audited reason.
 func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer, actor string, reason string) (io.ReadCloser, error) {
-	if !viewer.IsSuperAdmin && !viewer.IsAdmin {
+	if !viewer.IsTenantAdmin() {
 		return nil, app.Forbidden("break-glass is only available to admin users")
 	}
 	if strings.TrimSpace(reason) == "" {
@@ -460,7 +296,7 @@ func (s *Service) canReadMessageContent(ctx context.Context, mb *models.Mailbox,
 		return false
 	}
 	// Non-admin viewers who resolved the mailbox successfully can read content.
-	if !viewer.IsSuperAdmin && !viewer.IsAdmin {
+	if !viewer.IsTenantAdmin() {
 		return true
 	}
 	// Admin users need break-glass for content — deny direct content access.

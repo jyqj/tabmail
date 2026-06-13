@@ -33,7 +33,7 @@ type mailboxStore interface {
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
-	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type MailboxHandler struct {

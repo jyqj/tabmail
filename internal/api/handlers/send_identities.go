@@ -55,7 +55,7 @@ func (h *SendIdentityHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	// Filter by AllowedZoneIDs for non-admin callers.
 	actor := authz.ActorFromContext(ctx)
-	if !actor.IsSuperAdmin && !actor.IsAdmin {
+	if !actor.IsTenantAdmin() {
 		items = filterSendIdentitiesByZone(actor, items)
 	}
 

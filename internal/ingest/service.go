@@ -22,6 +22,7 @@ import (
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/store"
@@ -30,13 +31,13 @@ import (
 type serviceStore interface {
 	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
-	CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int) (bool, error)
+	CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int, ensureObject func(context.Context) error) (bool, error)
 	CountTenantMessagesSince(ctx context.Context, tenantID uuid.UUID, since time.Time) (int, error)
-	CreateIngestJob(ctx context.Context, job *models.IngestJob) error
+	CreateIngestJob(ctx context.Context, job *models.IngestJob, ensureObject func(context.Context) error) error
 	ClaimIngestJobs(ctx context.Context, now time.Time, limit int) ([]*models.IngestJob, error)
 	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
 	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
-	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type Envelope struct {
@@ -114,7 +115,7 @@ func NewService(
 
 func (s *Service) Durable() bool { return s != nil && s.durable }
 
-func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte, rcptChecks map[string]*resolver.Result) (AcceptResult, error) {
+func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte) (AcceptResult, error) {
 	if len(env.Recipients) == 0 {
 		return AcceptResult{}, nil
 	}
@@ -134,13 +135,13 @@ func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte, rcptChec
 			State:         "pending",
 			NextAttemptAt: time.Now().UTC(),
 		}
-		if err := s.store.CreateIngestJob(ctx, job); err != nil {
+		if err := s.store.CreateIngestJob(ctx, job, s.rawObjectEnsurer(raw)); err != nil {
 			s.deleteRawObjectIfOrphaned(ctx, objKey, "create_ingest_job_failed")
 			return AcceptResult{}, err
 		}
 		return AcceptResult{Queued: true}, nil
 	}
-	delivered, err := s.deliver(ctx, env, raw, rcptChecks)
+	delivered, err := s.deliver(ctx, env, raw)
 	if err != nil {
 		return AcceptResult{}, err
 	}
@@ -231,7 +232,7 @@ func (s *Service) processJob(ctx context.Context, job *models.IngestJob) (proces
 		MailFrom:   job.MailFrom,
 		Recipients: append([]string(nil), job.Recipients...),
 		Metadata:   job.Metadata,
-	}, raw, nil)
+	}, raw)
 	if err != nil {
 		return result, err
 	}
@@ -242,7 +243,7 @@ func (s *Service) processJob(ctx context.Context, job *models.IngestJob) (proces
 	return result, nil
 }
 
-func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte, rcptChecks map[string]*resolver.Result) (int, error) {
+func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, error) {
 	if len(env.Recipients) == 0 {
 		return 0, nil
 	}
@@ -279,23 +280,22 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte, rcptChe
 
 	for _, rcpt := range env.Recipients {
 		addr := sanitizeAddr(rcpt)
+		// Resolution (and any auto-create) is owned solely by the resolver,
+		// whose short-TTL cache already absorbs repeated zone/route lookups
+		// across the SMTP session; there is no caller-supplied result to reuse.
 		var result *resolver.Result
-		if checked, ok := rcptChecks[addr]; ok && checked != nil && checked.Mailbox != nil {
-			result = checked
-		} else {
-			result, err = s.resolver.Resolve(ctx, addr)
-			if err != nil {
-				metrics.MailboxRecipientRejected(addr)
-				s.logger.Warn().Err(err).Str("rcpt", addr).Msg("resolve failed")
-				continue
-			}
+		result, err = s.resolver.Resolve(ctx, addr)
+		if err != nil {
+			metrics.MailboxRecipientRejected(addr)
+			s.logger.Warn().Err(err).Str("rcpt", addr).Msg("resolve failed")
+			continue
 		}
 		if result == nil || result.Mailbox == nil || result.Zone == nil {
 			metrics.MailboxRecipientRejected(addr)
 			s.logger.Debug().Str("rcpt", addr).Msg("no matching zone/route, rejecting recipient")
 			continue
 		}
-		if !result.Zone.IsVerified || !result.Zone.MXVerified {
+		if !result.Zone.CanReceiveMessage() {
 			metrics.MailboxRecipientRejected(addr)
 			s.logger.Warn().Str("rcpt", addr).Msg("recipient zone is not verified")
 			continue
@@ -350,7 +350,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte, rcptChe
 				Msg("tenant daily quota exceeded")
 			continue
 		}
-		ok, err := s.store.CreateMessageWithQuota(ctx, msg, cfg.MaxMessagesPerMailbox)
+		ok, err := s.store.CreateMessageWithQuota(ctx, msg, cfg.MaxMessagesPerMailbox, s.rawObjectEnsurer(raw))
 		if err != nil {
 			_ = s.releaseTenantDaily(ctx, mb.TenantID)
 			metrics.SMTPDeliveryFailed(mb.TenantID.String(), mb.FullAddress)
@@ -446,25 +446,28 @@ func (s *Service) persistRaw(ctx context.Context, raw []byte) (string, error) {
 	return key, nil
 }
 
+// rawObjectEnsurer returns a callback the store invokes while holding the
+// raw-object advisory lock, guaranteeing the object is present before a row
+// referencing it commits — re-Putting it if a concurrent GC sweep reaped it.
+func (s *Service) rawObjectEnsurer(raw []byte) func(context.Context) error {
+	return func(ctx context.Context) error {
+		_, err := s.persistRaw(ctx, raw)
+		return err
+	}
+}
+
 func (s *Service) deleteRawObjectIfOrphaned(ctx context.Context, key, reason string) {
-	key = strings.TrimSpace(key)
-	if key == "" || s == nil || s.obj == nil || s.store == nil {
+	if s == nil {
 		return
 	}
-	refs, err := s.store.CountRawObjectReferences(ctx, key)
-	if err != nil {
-		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("count raw object references")
-		return
+	switch out, err := rawobject.Release(ctx, s.store, s.obj, key); out {
+	case rawobject.CountFailed, rawobject.DeleteFailed:
+		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("release orphan raw object")
+	case rawobject.StillReferenced:
+		s.logger.Debug().Str("key", key).Str("reason", reason).Msg("raw object still referenced")
+	case rawobject.Deleted:
+		s.logger.Info().Str("key", key).Str("reason", reason).Msg("deleted orphan raw object")
 	}
-	if refs > 0 {
-		s.logger.Debug().Str("key", key).Str("reason", reason).Int("refs", refs).Msg("raw object still referenced")
-		return
-	}
-	if err := s.obj.Delete(ctx, key); err != nil {
-		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("delete orphan raw object")
-		return
-	}
-	s.logger.Info().Str("key", key).Str("reason", reason).Msg("deleted orphan raw object")
 }
 
 func (s *Service) reserveTenantDaily(ctx context.Context, tenantID uuid.UUID, limit int) (bool, error) {

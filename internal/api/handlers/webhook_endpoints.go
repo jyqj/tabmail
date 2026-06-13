@@ -220,7 +220,7 @@ func (h *WebhookEndpointHandler) Delete(w http.ResponseWriter, r *http.Request) 
 func authorizeWebhookEndpointAccess(w http.ResponseWriter, r *http.Request, requiredScope string) bool {
 	actor := authz.ActorFromContext(r.Context())
 	switch {
-	case actor.IsSuperAdmin || actor.IsAdmin:
+	case actor.IsTenantAdmin():
 		return true
 	case actor.Type == authz.PrincipalAPIKey:
 		if middleware.HasScope(r.Context(), requiredScope) {

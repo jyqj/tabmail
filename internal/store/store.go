@@ -153,6 +153,9 @@ type MessageStore interface {
 	CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error)
 	CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error)
 	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
+	// Deletes the raw object via del only when no live row references it,
+	// performing the count and delete atomically under an advisory lock.
+	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 	CountTenantMessagesSince(ctx context.Context, tenantID uuid.UUID, since time.Time) (int, error)
 	CountAllMessages(ctx context.Context) (int, error)
 
@@ -233,7 +236,7 @@ type SuppressionStore interface {
 
 // IngestStore persists ingest jobs.
 type IngestStore interface {
-	CreateIngestJob(ctx context.Context, job *models.IngestJob) error
+	CreateIngestJob(ctx context.Context, job *models.IngestJob, ensureObject func(context.Context) error) error
 	ClaimIngestJobs(ctx context.Context, now time.Time, limit int) ([]*models.IngestJob, error)
 	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
 	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
