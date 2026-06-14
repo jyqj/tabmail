@@ -646,6 +646,9 @@ type OutboundJob struct {
 	APIKeyID        *uuid.UUID      `json:"api_key_id,omitempty" db:"api_key_id"`
 	MailFrom        string          `json:"mail_from" db:"mail_from"`
 	RcptTo          []string        `json:"rcpt_to" db:"rcpt_to"`
+	To              []string        `json:"to,omitempty" db:"to_addrs"`
+	CC              []string        `json:"cc,omitempty" db:"cc_addrs"`
+	BCC             []string        `json:"bcc,omitempty" db:"bcc_addrs"`
 	Subject         string          `json:"subject" db:"subject"`
 	TextBody        string          `json:"text_body,omitempty" db:"text_body"`
 	HTMLBody        string          `json:"html_body,omitempty" db:"html_body"`

@@ -86,3 +86,51 @@ func TestValidateAcceptsS3Config(t *testing.T) {
 		t.Fatalf("unexpected validate error for s3 config: %v", err)
 	}
 }
+
+func validOutboundConfig() *Root {
+	return &Root{
+		Role:               "worker",
+		ObjectStore:        "fs",
+		DataDir:            "/data",
+		MailboxTokenSecret: "mailbox-token-secret-123456",
+		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
+		Redis:              Redis{Addr: "redis:6379"},
+	}
+}
+
+func TestValidateNormalizesAndRejectsOutboundMode(t *testing.T) {
+	cfg := validOutboundConfig()
+	cfg.Outbound.Mode = " Direct "
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("unexpected validate error: %v", err)
+	}
+	if cfg.Outbound.Mode != "direct" {
+		t.Fatalf("expected Mode normalized to %q, got %q", "direct", cfg.Outbound.Mode)
+	}
+
+	cfg = validOutboundConfig()
+	cfg.Outbound.Mode = "ses"
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected invalid outbound mode to be rejected (would silently fall back to relay)")
+	}
+}
+
+func TestValidateNormalizesAndRejectsRelayTLS(t *testing.T) {
+	cfg := validOutboundConfig()
+	cfg.Outbound.RelayTLS = " StartTLS "
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("unexpected validate error: %v", err)
+	}
+	if cfg.Outbound.RelayTLS != "starttls" {
+		t.Fatalf("expected RelayTLS normalized to %q, got %q", "starttls", cfg.Outbound.RelayTLS)
+	}
+
+	// A misspelled value must be rejected: DeliverRelay's switch only matches
+	// "tls"/"starttls" and otherwise dials plaintext, so accepting this would be
+	// a silent downgrade to unencrypted relay.
+	cfg = validOutboundConfig()
+	cfg.Outbound.RelayTLS = "startls"
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected misspelled RelayTLS to be rejected (would silently downgrade to plaintext)")
+	}
+}

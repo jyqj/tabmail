@@ -3,8 +3,6 @@ package ingest
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -53,9 +51,54 @@ type AcceptResult struct {
 	Delivered int
 }
 
+// RecipientStatus is the disposition of one recipient in a delivered envelope.
+type RecipientStatus string
+
+const (
+	// RecipientDelivered means the message was stored for this recipient.
+	RecipientDelivered RecipientStatus = "delivered"
+	// RecipientRejected means a routing, policy, or quota rule dropped the
+	// recipient. This is an expected, terminal outcome — not retried.
+	RecipientRejected RecipientStatus = "rejected"
+	// RecipientError means a store/config failure prevented delivery; the
+	// envelope as a whole may still be retried by the durable worker.
+	RecipientError RecipientStatus = "error"
+)
+
+// RecipientOutcome is the disposition of a single recipient after delivery. It
+// makes the accept decision a returned value rather than a side effect buried in
+// logs: Reason is a stable machine code for rejected/error outcomes (empty for
+// delivered), and MessageID is set only when the message was stored.
+type RecipientOutcome struct {
+	Address   string
+	Status    RecipientStatus
+	Reason    string
+	MessageID string
+}
+
+func rejectedOutcome(addr, reason string) RecipientOutcome {
+	return RecipientOutcome{Address: addr, Status: RecipientRejected, Reason: reason}
+}
+
+func erroredOutcome(addr, reason string) RecipientOutcome {
+	return RecipientOutcome{Address: addr, Status: RecipientError, Reason: reason}
+}
+
+// deliveredCount reports how many outcomes resulted in a stored message.
+func deliveredCount(outcomes []RecipientOutcome) int {
+	n := 0
+	for _, o := range outcomes {
+		if o.Status == RecipientDelivered {
+			n++
+		}
+	}
+	return n
+}
+
 type Service struct {
 	store              serviceStore
 	obj                store.ObjectStore
+	objects            *rawobject.Store
 	resolver           *resolver.Resolver
 	hub                *realtime.Hub
 	dispatcher         *hooks.Dispatcher
@@ -99,6 +142,7 @@ func NewService(
 	return &Service{
 		store:              st,
 		obj:                obj,
+		objects:            rawobject.NewStore(obj, st),
 		resolver:           res,
 		hub:                hub,
 		dispatcher:         dispatcher,
@@ -120,7 +164,7 @@ func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte) (AcceptR
 		return AcceptResult{}, nil
 	}
 	if s.durable {
-		objKey, err := s.persistRaw(ctx, raw)
+		objKey, err := s.objects.Put(ctx, raw)
 		if err != nil {
 			return AcceptResult{}, err
 		}
@@ -135,17 +179,17 @@ func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte) (AcceptR
 			State:         "pending",
 			NextAttemptAt: time.Now().UTC(),
 		}
-		if err := s.store.CreateIngestJob(ctx, job, s.rawObjectEnsurer(raw)); err != nil {
+		if err := s.objects.StoreIngestJob(ctx, job, raw); err != nil {
 			s.deleteRawObjectIfOrphaned(ctx, objKey, "create_ingest_job_failed")
 			return AcceptResult{}, err
 		}
 		return AcceptResult{Queued: true}, nil
 	}
-	delivered, err := s.deliver(ctx, env, raw)
+	outcomes, err := s.deliver(ctx, env, raw)
 	if err != nil {
 		return AcceptResult{}, err
 	}
-	return AcceptResult{Delivered: delivered}, nil
+	return AcceptResult{Delivered: deliveredCount(outcomes)}, nil
 }
 
 func (s *Service) Run(ctx context.Context) {
@@ -226,7 +270,7 @@ func (s *Service) processJob(ctx context.Context, job *models.IngestJob) (proces
 	if err != nil {
 		return result, fmt.Errorf("read raw object: %w", err)
 	}
-	delivered, err := s.deliver(ctx, Envelope{
+	outcomes, err := s.deliver(ctx, Envelope{
 		Source:     job.Source,
 		RemoteIP:   job.RemoteIP,
 		MailFrom:   job.MailFrom,
@@ -236,16 +280,21 @@ func (s *Service) processJob(ctx context.Context, job *models.IngestJob) (proces
 	if err != nil {
 		return result, err
 	}
-	result.delivered = delivered
-	if delivered == 0 {
+	result.delivered = deliveredCount(outcomes)
+	if result.delivered == 0 {
 		s.logger.Warn().Str("job_id", job.ID.String()).Msg("ingest job processed with zero deliveries")
 	}
 	return result, nil
 }
 
-func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, error) {
+// deliver attempts to store the envelope for every recipient and returns one
+// RecipientOutcome per recipient. The per-recipient drop reasons are part of the
+// return value (not just logs), so the accept decision can be asserted through
+// this interface. A non-nil error signals an envelope-level failure (policy load
+// or raw persistence) that should be retried, distinct from per-recipient drops.
+func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]RecipientOutcome, error) {
 	if len(env.Recipients) == 0 {
-		return 0, nil
+		return nil, nil
 	}
 	envMime, err := enmime.ReadEnvelope(bytes.NewReader(raw))
 	if err != nil {
@@ -253,11 +302,11 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 	}
 
 	now := time.Now()
-	successes := 0
+	outcomes := make([]RecipientOutcome, 0, len(env.Recipients))
 	tenantConfigs := map[uuid.UUID]*models.EffectiveConfig{}
 	pol, err := s.currentPolicy(ctx)
 	if err != nil {
-		return 0, fmt.Errorf("load smtp policy: %w", err)
+		return nil, fmt.Errorf("load smtp policy: %w", err)
 	}
 
 	subject := ""
@@ -273,9 +322,9 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 		headersJSON, _ = json.Marshal(hm)
 	}
 
-	objKey, err := s.persistRaw(ctx, raw)
+	objKey, err := s.objects.Put(ctx, raw)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	for _, rcpt := range env.Recipients {
@@ -288,16 +337,19 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 		if err != nil {
 			metrics.MailboxRecipientRejected(addr)
 			s.logger.Warn().Err(err).Str("rcpt", addr).Msg("resolve failed")
+			outcomes = append(outcomes, erroredOutcome(addr, "resolve_error"))
 			continue
 		}
 		if result == nil || result.Mailbox == nil || result.Zone == nil {
 			metrics.MailboxRecipientRejected(addr)
 			s.logger.Debug().Str("rcpt", addr).Msg("no matching zone/route, rejecting recipient")
+			outcomes = append(outcomes, rejectedOutcome(addr, "no_route"))
 			continue
 		}
 		if !result.Zone.CanReceiveMessage() {
 			metrics.MailboxRecipientRejected(addr)
 			s.logger.Warn().Str("rcpt", addr).Msg("recipient zone is not verified")
+			outcomes = append(outcomes, rejectedOutcome(addr, "zone_unverified"))
 			continue
 		}
 		if result.Created {
@@ -307,6 +359,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 		mb := result.Mailbox
 		if !policy.ShouldStoreDomain(mb.ResolvedDomain, pol.DefaultStore, pol.StoreDomains, pol.DiscardDomains) {
 			s.logger.Info().Str("mailbox", mb.FullAddress).Msg("message accepted but discarded by store policy")
+			outcomes = append(outcomes, rejectedOutcome(addr, "store_policy_discard"))
 			continue
 		}
 		cfg, ok := tenantConfigs[mb.TenantID]
@@ -314,6 +367,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 			cfg, err = s.store.EffectiveConfig(ctx, mb.TenantID)
 			if err != nil || cfg == nil {
 				s.logger.Warn().Err(err).Str("mailbox", mb.FullAddress).Msg("load tenant config")
+				outcomes = append(outcomes, erroredOutcome(addr, "tenant_config"))
 				continue
 			}
 			tenantConfigs[mb.TenantID] = cfg
@@ -324,6 +378,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 				Int("limit", cfg.MaxMessageBytes).
 				Int("size", len(raw)).
 				Msg("tenant max message bytes exceeded")
+			outcomes = append(outcomes, rejectedOutcome(addr, "max_message_bytes"))
 			continue
 		}
 
@@ -342,19 +397,22 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 		}
 		if ok, err := s.reserveTenantDaily(ctx, mb.TenantID, cfg.DailyQuota); err != nil {
 			s.logger.Warn().Err(err).Str("tenant", mb.TenantID.String()).Msg("reserve tenant daily quota")
+			outcomes = append(outcomes, erroredOutcome(addr, "quota_error"))
 			continue
 		} else if !ok {
 			s.logger.Warn().
 				Str("tenant", mb.TenantID.String()).
 				Int("limit", cfg.DailyQuota).
 				Msg("tenant daily quota exceeded")
+			outcomes = append(outcomes, rejectedOutcome(addr, "tenant_daily_quota"))
 			continue
 		}
-		ok, err := s.store.CreateMessageWithQuota(ctx, msg, cfg.MaxMessagesPerMailbox, s.rawObjectEnsurer(raw))
+		ok, err := s.objects.StoreMessage(ctx, msg, raw, cfg.MaxMessagesPerMailbox)
 		if err != nil {
 			_ = s.releaseTenantDaily(ctx, mb.TenantID)
 			metrics.SMTPDeliveryFailed(mb.TenantID.String(), mb.FullAddress)
 			s.logger.Err(err).Str("mailbox", mb.FullAddress).Msg("storing message metadata")
+			outcomes = append(outcomes, erroredOutcome(addr, "store_failed"))
 			continue
 		}
 		if !ok {
@@ -363,6 +421,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 				Str("mailbox", mb.FullAddress).
 				Int("limit", cfg.MaxMessagesPerMailbox).
 				Msg("mailbox message quota exceeded")
+			outcomes = append(outcomes, rejectedOutcome(addr, "mailbox_quota"))
 			continue
 		}
 		metrics.SMTPDeliverySucceeded(mb.TenantID.String(), mb.FullAddress)
@@ -387,7 +446,11 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 				Subject:    subject,
 			})
 		}
-		successes++
+		outcomes = append(outcomes, RecipientOutcome{
+			Address:   addr,
+			Status:    RecipientDelivered,
+			MessageID: msg.ID.String(),
+		})
 		s.logger.Info().
 			Str("from", env.MailFrom).
 			Str("to", addr).
@@ -395,7 +458,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) (int, e
 			Int64("size", int64(len(raw))).
 			Msg("message delivered")
 	}
-	return successes, nil
+	return outcomes, nil
 }
 
 func (s *Service) currentPolicy(ctx context.Context) (*models.SMTPPolicy, error) {
@@ -432,35 +495,11 @@ func (s *Service) CurrentPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 	return s.currentPolicy(ctx)
 }
 
-func (s *Service) persistRaw(ctx context.Context, raw []byte) (string, error) {
-	key := objectKeyForRaw(raw)
-	exists, err := s.obj.Exists(ctx, key)
-	if err != nil {
-		return "", fmt.Errorf("checking raw object existence: %w", err)
-	}
-	if !exists {
-		if err := s.obj.Put(ctx, key, bytes.NewReader(raw), int64(len(raw))); err != nil {
-			return "", fmt.Errorf("storing raw .eml: %w", err)
-		}
-	}
-	return key, nil
-}
-
-// rawObjectEnsurer returns a callback the store invokes while holding the
-// raw-object advisory lock, guaranteeing the object is present before a row
-// referencing it commits — re-Putting it if a concurrent GC sweep reaped it.
-func (s *Service) rawObjectEnsurer(raw []byte) func(context.Context) error {
-	return func(ctx context.Context) error {
-		_, err := s.persistRaw(ctx, raw)
-		return err
-	}
-}
-
 func (s *Service) deleteRawObjectIfOrphaned(ctx context.Context, key, reason string) {
 	if s == nil {
 		return
 	}
-	switch out, err := rawobject.Release(ctx, s.store, s.obj, key); out {
+	switch out, err := s.objects.Release(ctx, key); out {
 	case rawobject.CountFailed, rawobject.DeleteFailed:
 		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("release orphan raw object")
 	case rawobject.StillReferenced:
@@ -546,10 +585,4 @@ func sanitizeAddr(addr string) string {
 	addr = strings.TrimPrefix(addr, "<")
 	addr = strings.TrimSuffix(addr, ">")
 	return strings.ToLower(addr)
-}
-
-func objectKeyForRaw(raw []byte) string {
-	sum := sha256.Sum256(raw)
-	hexSum := hex.EncodeToString(sum[:])
-	return fmt.Sprintf("sha256/%s/%s.eml", hexSum[:2], hexSum)
 }

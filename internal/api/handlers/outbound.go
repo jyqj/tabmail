@@ -139,11 +139,22 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Reject synchronously when the zone's DKIM policy cannot be satisfied,
+	// rather than accepting a job that would only ever be driven to dead.
+	if reason := h.outbound.DKIMSendBlockReason(zone); reason != "" {
+		errBadRequest(w, reason)
+		return
+	}
+
 	quota := store.OutboundQuotaReservation{}
 	todayStart := time.Now().UTC().Truncate(24 * time.Hour)
 
-	// Verify the From address corresponds to an existing mailbox or
-	// a matching route in the zone.
+	// The From address must be a real mailbox in this tenant or a verified
+	// send identity — the two authorized send-as paths. Inbound domain routes
+	// govern ingress delivery, not outbound From authorization, so they no
+	// longer gate sending. This makes the send_identities feature (manual
+	// exact identities, the auto-created *@domain wildcard, and its Verified
+	// flag) actually enforce send-as.
 	mailbox, err := h.store.ForTenant(tenant.ID).GetMailboxByAddress(ctx, body.From)
 	if err != nil {
 		h.logger.Err(err).Str("from", body.From).Msg("looking up mailbox by address")
@@ -151,14 +162,14 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if mailbox == nil {
-		routes, err := h.store.FindMatchingRoutes(ctx, fromDomain, &tenant.ID)
+		identity, err := h.store.FindSendIdentityForAddress(ctx, tenant.ID, body.From)
 		if err != nil {
-			h.logger.Err(err).Str("domain", fromDomain).Msg("finding matching routes for send-as")
+			h.logger.Err(err).Str("from", body.From).Msg("finding send identity for send-as")
 			errInternal(w)
 			return
 		}
-		if len(routes) == 0 {
-			errBadRequest(w, "from address does not exist as a mailbox")
+		if identity == nil || !identity.Verified {
+			errBadRequest(w, "from address is not an authorized mailbox or verified send identity")
 			return
 		}
 	}
@@ -381,16 +392,15 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 }
 
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	actor := authz.ActorFromContext(ctx)
-	if actor.IsTenantAdmin() {
+	// ActionOutboundRead defers row scope to the query level; the authz seam
+	// resolves which owned rows this actor may see.
+	switch scope := authz.ListScope(authz.ActorFromContext(ctx)); {
+	case scope.AllInTenant:
 		return h.store.ListOutboundJobs(ctx, tenantID, pg)
-	}
-
-	switch actor.Type {
-	case authz.PrincipalUser:
-		return h.store.ListOutboundJobsByUser(ctx, tenantID, actor.ID, pg)
-	case authz.PrincipalAPIKey:
-		return h.store.ListOutboundJobsByAPIKey(ctx, tenantID, actor.ID, pg)
+	case scope.UserID != nil:
+		return h.store.ListOutboundJobsByUser(ctx, tenantID, *scope.UserID, pg)
+	case scope.APIKeyID != nil:
+		return h.store.ListOutboundJobsByAPIKey(ctx, tenantID, *scope.APIKeyID, pg)
 	default:
 		return nil, 0, errOutboundJobAuthRequired
 	}
@@ -400,20 +410,8 @@ func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.O
 	if job == nil || job.TenantID != tenantID {
 		return false
 	}
-
-	actor := authz.ActorFromContext(ctx)
-	if actor.IsTenantAdmin() {
-		return true
-	}
-
-	switch actor.Type {
-	case authz.PrincipalUser:
-		return job.UserID != nil && *job.UserID == actor.ID
-	case authz.PrincipalAPIKey:
-		return job.APIKeyID != nil && *job.APIKeyID == actor.ID
-	default:
-		return false
-	}
+	// Same owner rule as listAccessibleOutboundJobs, via the single authz seam.
+	return authz.CanAccessOwned(authz.ActorFromContext(ctx), job.UserID, job.APIKeyID)
 }
 
 func (h *OutboundHandler) writeOutboundJobAccessError(w http.ResponseWriter, err error, logMsg string) {

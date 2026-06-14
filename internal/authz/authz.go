@@ -164,6 +164,56 @@ func ZoneAllowed(actor Actor, zoneID uuid.UUID) bool {
 	return actor.Permission.AllowsZone(zoneID)
 }
 
+// OwnerScope describes which owned resources an actor may see when listing or
+// fetching resources that carry an owning user / API key (e.g. outbound jobs).
+// It is the single home for the rule "a tenant admin sees every owned resource
+// in the tenant; a regular user or API key sees only its own", so the list and
+// get paths cannot drift apart. ActionOutboundRead authorizes the action and
+// defers the row scope to the query level; ListScope is that query scope.
+type OwnerScope struct {
+	// AllInTenant is true when the actor may see every owned resource in the
+	// tenant. When true, UserID and APIKeyID are nil.
+	AllInTenant bool
+	// UserID, when set, restricts results to resources owned by this user.
+	UserID *uuid.UUID
+	// APIKeyID, when set, restricts results to resources created by this API key.
+	APIKeyID *uuid.UUID
+}
+
+// ListScope returns the owner scope an actor gets for listing owned resources:
+// a tenant admin sees all; a user sees its own; an API key sees its own. Any
+// other principal sees nothing (the zero OwnerScope).
+func ListScope(actor Actor) OwnerScope {
+	if actor.IsTenantAdmin() {
+		return OwnerScope{AllInTenant: true}
+	}
+	switch actor.Type {
+	case PrincipalUser:
+		id := actor.ID
+		return OwnerScope{UserID: &id}
+	case PrincipalAPIKey:
+		id := actor.ID
+		return OwnerScope{APIKeyID: &id}
+	}
+	return OwnerScope{}
+}
+
+// CanAccessOwned reports whether the actor may access a single resource owned by
+// ownerUserID / ownerAPIKeyID, applying the same rule as ListScope. Tenant
+// isolation is the caller's responsibility and must be checked separately.
+func CanAccessOwned(actor Actor, ownerUserID, ownerAPIKeyID *uuid.UUID) bool {
+	if actor.IsTenantAdmin() {
+		return true
+	}
+	switch actor.Type {
+	case PrincipalUser:
+		return ownerUserID != nil && *ownerUserID == actor.ID
+	case PrincipalAPIKey:
+		return ownerAPIKeyID != nil && *ownerAPIKeyID == actor.ID
+	}
+	return false
+}
+
 // Store is the minimal store interface needed by the authorizer.
 // After the grant system removal this is an empty marker; kept so the
 // constructor signature stays stable and future checks can be added.

@@ -221,7 +221,33 @@ func (c *Root) Validate() error {
 	default:
 		return fmt.Errorf("config: TABMAIL_OUTBOUND_DKIM_FAIL_POLICY must be %s or %s", DKIMFailClosed, DKIMFailOpen)
 	}
-	if c.Outbound.Enabled && strings.ToLower(c.Outbound.Mode) == "relay" {
+	// Normalize and validate the outbound delivery mode and relay TLS mode so a
+	// stray space or casing cannot silently coerce delivery: an untrimmed or
+	// misspelled Mode falls through to the relay adapter in NewService, and an
+	// untrimmed or misspelled RelayTLS falls through to a plaintext dial in
+	// DeliverRelay. Write the canonical value back so downstream literal
+	// comparisons stay robust.
+	mode := strings.ToLower(strings.TrimSpace(c.Outbound.Mode))
+	switch mode {
+	case "", "relay":
+		c.Outbound.Mode = "relay"
+	case "direct":
+		c.Outbound.Mode = "direct"
+	default:
+		return fmt.Errorf("config: TABMAIL_OUTBOUND_MODE must be relay or direct, got %q", c.Outbound.Mode)
+	}
+	relayTLS := strings.ToLower(strings.TrimSpace(c.Outbound.RelayTLS))
+	switch relayTLS {
+	case "", "starttls":
+		c.Outbound.RelayTLS = "starttls"
+	case "tls":
+		c.Outbound.RelayTLS = "tls"
+	case "none":
+		c.Outbound.RelayTLS = "none"
+	default:
+		return fmt.Errorf("config: TABMAIL_OUTBOUND_RELAY_TLS must be none, starttls, or tls, got %q", c.Outbound.RelayTLS)
+	}
+	if c.Outbound.Enabled && c.Outbound.Mode == "relay" {
 		if strings.TrimSpace(c.Outbound.RelayHost) == "" {
 			return fmt.Errorf("config: TABMAIL_OUTBOUND_RELAY_HOST is required when outbound is enabled in relay mode")
 		}

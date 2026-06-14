@@ -117,18 +117,16 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 	// Build Message-ID header.
 	msgID := fmt.Sprintf("<%s@%s>", uuid.New().String(), extractDomain(req.From))
 
-	// Marshal custom headers + structured To/CC/BCC metadata for MIME building.
-	merged := make(map[string]any)
-	for k, v := range req.Headers {
-		merged[k] = v
-	}
-	merged["_to"] = req.To
-	if len(req.CC) > 0 {
-		merged["_cc"] = req.CC
-	}
-	headersJSON, err := json.Marshal(merged)
-	if err != nil {
-		return nil, fmt.Errorf("invalid headers: %w", err)
+	// Persist only the caller-supplied custom headers. Recipients are stored
+	// structurally (To/CC/BCC below), not flattened into the header blob, so the
+	// builder never reverse-engineers them and BCC cannot leak into a header.
+	var headersJSON json.RawMessage
+	if len(req.Headers) > 0 {
+		b, err := json.Marshal(req.Headers)
+		if err != nil {
+			return nil, fmt.Errorf("invalid headers: %w", err)
+		}
+		headersJSON = b
 	}
 
 	now := time.Now().UTC()
@@ -139,6 +137,9 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		APIKeyID:        req.APIKeyID,
 		MailFrom:        req.From,
 		RcptTo:          allRcpt,
+		To:              req.To,
+		CC:              req.CC,
+		BCC:             req.BCC,
 		Subject:         req.Subject,
 		TextBody:        req.TextBody,
 		HTMLBody:        req.HTMLBody,
@@ -211,8 +212,8 @@ func (s *Service) processJobs(ctx context.Context) {
 func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 	log := s.logger.With().Str("job_id", job.ID.String()).Logger()
 
-	// Build MIME message.
-	mime, err := BuildMIME(job)
+	// Build MIME message from the structurally-stored recipients.
+	mime, err := Build(messageFromJob(job))
 	if err != nil {
 		log.Error().Err(err).Msg("building MIME")
 		s.failOrRetry(ctx, job, fmt.Sprintf("mime build: %s", err))
@@ -322,6 +323,24 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 
 func (s *Service) dkimFailClosed() bool {
 	return strings.ToLower(strings.TrimSpace(s.cfg.DKIMFailPolicy)) != config.DKIMFailOpen
+}
+
+// DKIMSendBlockReason returns a non-empty reason when the zone's DKIM policy
+// makes a send impossible to satisfy with the current configuration. Callers use
+// it to reject synchronously at submit time instead of accepting a job that the
+// delivery worker can only ever drive to dead (deliverJob keeps the same checks
+// as defense in depth).
+func (s *Service) DKIMSendBlockReason(zone *models.DomainZone) string {
+	if zone == nil || !zone.DKIMRequiredForSend {
+		return ""
+	}
+	if !s.cfg.DKIMSign {
+		return "zone requires DKIM for send but outbound DKIM signing is disabled"
+	}
+	if !zone.DKIMEnabled || zone.DKIMPrivateKeyPEM == nil {
+		return "zone requires DKIM for send but no DKIM key is configured for the zone"
+	}
+	return ""
 }
 
 func (s *Service) failOrRetry(ctx context.Context, job *models.OutboundJob, errMsg string) {

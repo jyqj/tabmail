@@ -89,12 +89,14 @@ func insertOutboundJob(ctx context.Context, execer outboundJobExecer, job *model
 	_, err := execer.Exec(ctx, `
 		INSERT INTO outbound_jobs (id, tenant_id, user_id, api_key_id, mail_from, rcpt_to, subject,
 			text_body, html_body, headers_json, raw_mime, zone_id, state, attempts, max_attempts,
-			last_error, next_attempt_at, smtp_code, smtp_response, message_id_header, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
+			last_error, next_attempt_at, smtp_code, smtp_response, message_id_header, created_at, updated_at,
+			to_addrs, cc_addrs, bcc_addrs)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)`,
 		job.ID, job.TenantID, job.UserID, job.APIKeyID, job.MailFrom, job.RcptTo, job.Subject,
 		job.TextBody, job.HTMLBody, job.HeadersJSON, job.RawMIME, job.ZoneID, job.State,
 		job.Attempts, job.MaxAttempts, job.LastError, job.NextAttemptAt, job.SMTPCode,
-		job.SMTPResponse, job.MessageIDHeader, job.CreatedAt, job.UpdatedAt)
+		job.SMTPResponse, job.MessageIDHeader, job.CreatedAt, job.UpdatedAt,
+		nonNil(job.To), nonNil(job.CC), nonNil(job.BCC))
 	return err
 }
 
@@ -130,7 +132,7 @@ func quotaDay(since time.Time) string {
 const outboundJobSelect = `SELECT id, tenant_id, user_id, api_key_id, mail_from, rcpt_to, subject,
 	text_body, html_body, headers_json, raw_mime, zone_id, state, attempts, max_attempts,
 	last_error, next_attempt_at, claimed_at, lease_until, smtp_code, smtp_response,
-	message_id_header, delivery_token, created_at, updated_at
+	message_id_header, delivery_token, created_at, updated_at, to_addrs, cc_addrs, bcc_addrs
 	FROM outbound_jobs`
 
 func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
@@ -142,7 +144,8 @@ func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
 	err := row.Scan(&job.ID, &job.TenantID, &userID, &apiKeyID, &job.MailFrom, &job.RcptTo, &job.Subject,
 		&job.TextBody, &job.HTMLBody, &job.HeadersJSON, &job.RawMIME, &job.ZoneID, &job.State,
 		&job.Attempts, &job.MaxAttempts, &job.LastError, &job.NextAttemptAt, &job.ClaimedAt,
-		&job.LeaseUntil, &smtpCode, &job.SMTPResponse, &job.MessageIDHeader, &deliveryToken, &job.CreatedAt, &job.UpdatedAt)
+		&job.LeaseUntil, &smtpCode, &job.SMTPResponse, &job.MessageIDHeader, &deliveryToken, &job.CreatedAt, &job.UpdatedAt,
+		&job.To, &job.CC, &job.BCC)
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
@@ -218,7 +221,8 @@ func (s *PgStore) ClaimOutboundJobs(ctx context.Context, now time.Time, limit in
 		RETURNING j.id, j.tenant_id, j.user_id, j.api_key_id, j.mail_from, j.rcpt_to, j.subject,
 			j.text_body, j.html_body, j.headers_json, j.raw_mime, j.zone_id, j.state, j.attempts,
 			j.max_attempts, j.last_error, j.next_attempt_at, j.claimed_at, j.lease_until,
-			j.smtp_code, j.smtp_response, j.message_id_header, j.delivery_token, j.created_at, j.updated_at`,
+			j.smtp_code, j.smtp_response, j.message_id_header, j.delivery_token, j.created_at, j.updated_at,
+			j.to_addrs, j.cc_addrs, j.bcc_addrs`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err

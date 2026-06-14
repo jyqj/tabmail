@@ -25,168 +25,179 @@ func isValidHeaderName(name string) bool {
 
 // forbiddenCustomHeaders are headers that must not be set via user-supplied custom headers.
 var forbiddenCustomHeaders = map[string]struct{}{
-	"from":                      {},
-	"to":                        {},
-	"cc":                        {},
-	"bcc":                       {},
-	"subject":                   {},
-	"date":                      {},
-	"message-id":                {},
-	"mime-version":              {},
-	"content-type":              {},
-	"content-transfer-encoding": {},
-	"return-path":               {},
-	"sender":                    {},
-	"received":                  {},
-	"dkim-signature":            {},
-	"domainkey-signature":       {},
-	"arc-seal":                  {},
-	"arc-message-signature":     {},
+	"from":                       {},
+	"to":                         {},
+	"cc":                         {},
+	"bcc":                        {},
+	"subject":                    {},
+	"date":                       {},
+	"message-id":                 {},
+	"mime-version":               {},
+	"content-type":               {},
+	"content-transfer-encoding":  {},
+	"return-path":                {},
+	"sender":                     {},
+	"received":                   {},
+	"dkim-signature":             {},
+	"domainkey-signature":        {},
+	"arc-seal":                   {},
+	"arc-message-signature":      {},
 	"arc-authentication-results": {},
-	"x-mailer":                  {},
-	"x-originating-ip":          {},
-	"x-originating-email":       {},
-	"x-google-dkim-signature":   {},
-	"authentication-results":    {},
-	"received-spf":              {},
+	"x-mailer":                   {},
+	"x-originating-ip":           {},
+	"x-originating-email":        {},
+	"x-google-dkim-signature":    {},
+	"authentication-results":     {},
+	"received-spf":               {},
 }
 
-// BuildMIME constructs a complete MIME message from an OutboundJob.
-// All outbound mail goes through the structured builder to enforce header
-// safety checks (CRLF sanitization, forbidden-header blocking, BCC omission).
-// The RawMIME passthrough was removed because it bypassed every safety measure;
-// if a future code path needs raw MIME support, it must add validation here.
-func BuildMIME(job *models.OutboundJob) ([]byte, error) {
+// Message is the semantic input to the MIME builder. Recipients are supplied by
+// role: To and CC become headers, while BCC is envelope-only and is NEVER
+// emitted as a header. This module is the single home for outbound message
+// safety — it owns header-name validation, forbidden-header blocking, CRLF
+// stripping, and body encoding — so a caller holding only this interface cannot
+// construct an unsafe or BCC-leaking message. The persistence row carries
+// recipients structurally (To/CC/BCC), so the builder never reverse-engineers
+// them from a header blob.
+type Message struct {
+	From      string
+	To        []string
+	CC        []string
+	BCC       []string
+	Subject   string
+	TextBody  string
+	HTMLBody  string
+	Headers   map[string]string
+	MessageID string
+}
+
+// EnvelopeRecipients returns the full RCPT TO set (To + CC + BCC) used for the
+// SMTP envelope. BCC appears here but never in a rendered header.
+func (m Message) EnvelopeRecipients() []string {
+	rcpt := make([]string, 0, len(m.To)+len(m.CC)+len(m.BCC))
+	rcpt = append(rcpt, m.To...)
+	rcpt = append(rcpt, m.CC...)
+	rcpt = append(rcpt, m.BCC...)
+	return rcpt
+}
+
+// Build renders the message to a complete MIME wire form. It returns an error if
+// the body cannot be encoded, rather than silently emitting a truncated message.
+func Build(m Message) ([]byte, error) {
 	var buf bytes.Buffer
 
-	writeHeader(&buf, "From", job.MailFrom)
-
-	// Build To and CC from the SendRequest's structured fields.
-	// job.RcptTo contains all recipients (To+CC+BCC) for SMTP envelope,
-	// but MIME headers must only include To and CC — BCC must be omitted.
-	toAddrs, ccAddrs := splitRecipientHeaders(job)
-	if len(toAddrs) > 0 {
-		writeHeader(&buf, "To", strings.Join(toAddrs, ", "))
+	writeHeader(&buf, "From", m.From)
+	if len(m.To) > 0 {
+		writeHeader(&buf, "To", strings.Join(m.To, ", "))
 	}
-	if len(ccAddrs) > 0 {
-		writeHeader(&buf, "Cc", strings.Join(ccAddrs, ", "))
+	if len(m.CC) > 0 {
+		writeHeader(&buf, "Cc", strings.Join(m.CC, ", "))
 	}
-
-	writeHeader(&buf, "Subject", sanitizeHeaderValue(job.Subject))
+	writeHeader(&buf, "Subject", m.Subject)
 	writeHeader(&buf, "Date", time.Now().UTC().Format(time.RFC1123Z))
-	writeHeader(&buf, "Message-ID", job.MessageIDHeader)
+	writeHeader(&buf, "Message-ID", m.MessageID)
 	writeHeader(&buf, "MIME-Version", "1.0")
 
-	if len(job.HeadersJSON) > 0 {
-		var headers map[string]any
-		if err := json.Unmarshal(job.HeadersJSON, &headers); err == nil {
-			for k, raw := range headers {
-				v, ok := raw.(string)
-				if !ok {
-					continue // Skip non-string values (e.g. _to, _cc arrays)
-				}
-				if _, blocked := forbiddenCustomHeaders[strings.ToLower(k)]; blocked {
-					continue
-				}
-				if strings.HasPrefix(k, "_") {
-					continue // Skip internal metadata keys (_to, _cc, etc.)
-				}
-				if !isValidHeaderName(k) {
-					continue // Skip invalid header names to prevent injection
-				}
-				writeHeader(&buf, k, sanitizeHeaderValue(v))
-			}
+	for k, v := range m.Headers {
+		if _, blocked := forbiddenCustomHeaders[strings.ToLower(k)]; blocked {
+			continue
 		}
+		if !isValidHeaderName(k) {
+			continue // Skip invalid header names to prevent injection.
+		}
+		writeHeader(&buf, k, v)
 	}
 
-	hasText := job.TextBody != ""
-	hasHTML := job.HTMLBody != ""
-
-	if hasText && hasHTML {
-		w := multipart.NewWriter(&buf)
-		writeHeader(&buf, "Content-Type", fmt.Sprintf("multipart/alternative; boundary=%s", w.Boundary()))
-		buf.WriteString("\r\n")
-
-		textPart, _ := w.CreatePart(textproto.MIMEHeader{
-			"Content-Type":              {"text/plain; charset=utf-8"},
-			"Content-Transfer-Encoding": {"quoted-printable"},
-		})
-		qpw := quotedprintable.NewWriter(textPart)
-		qpw.Write([]byte(job.TextBody))
-		qpw.Close()
-
-		htmlPart, _ := w.CreatePart(textproto.MIMEHeader{
-			"Content-Type":              {"text/html; charset=utf-8"},
-			"Content-Transfer-Encoding": {"quoted-printable"},
-		})
-		qpw = quotedprintable.NewWriter(htmlPart)
-		qpw.Write([]byte(job.HTMLBody))
-		qpw.Close()
-
-		w.Close()
-	} else if hasHTML {
-		writeHeader(&buf, "Content-Type", "text/html; charset=utf-8")
-		writeHeader(&buf, "Content-Transfer-Encoding", "quoted-printable")
-		buf.WriteString("\r\n")
-		qpw := quotedprintable.NewWriter(&buf)
-		qpw.Write([]byte(job.HTMLBody))
-		qpw.Close()
-	} else {
-		writeHeader(&buf, "Content-Type", "text/plain; charset=utf-8")
-		writeHeader(&buf, "Content-Transfer-Encoding", "quoted-printable")
-		buf.WriteString("\r\n")
-		qpw := quotedprintable.NewWriter(&buf)
-		qpw.Write([]byte(job.TextBody))
-		qpw.Close()
+	if err := writeBody(&buf, m); err != nil {
+		return nil, err
 	}
-
 	return buf.Bytes(), nil
 }
 
-// splitRecipientHeaders extracts To and CC addresses from the job's HeadersJSON.
-// BCC addresses are deliberately excluded from MIME headers.
-func splitRecipientHeaders(job *models.OutboundJob) (to, cc []string) {
-	if len(job.HeadersJSON) > 0 {
-		var h map[string]any
-		if err := json.Unmarshal(job.HeadersJSON, &h); err == nil {
-			if ccVal, ok := h["_cc"]; ok {
-				if arr, ok := ccVal.([]any); ok {
-					for _, v := range arr {
-						if s, ok := v.(string); ok {
-							cc = append(cc, s)
-						}
-					}
-				}
-			}
+// writeBody renders the text and/or HTML body, surfacing any encoding error.
+func writeBody(buf *bytes.Buffer, m Message) error {
+	hasText := m.TextBody != ""
+	hasHTML := m.HTMLBody != ""
+
+	switch {
+	case hasText && hasHTML:
+		w := multipart.NewWriter(buf)
+		writeHeader(buf, "Content-Type", fmt.Sprintf("multipart/alternative; boundary=%s", w.Boundary()))
+		buf.WriteString("\r\n")
+		if err := writeQPPart(w, "text/plain; charset=utf-8", m.TextBody); err != nil {
+			return err
 		}
-	}
-
-	// To addresses = RcptTo minus CC and BCC.
-	// We reconstruct To by excluding known CC addresses from all recipients.
-	// Since BCC is not stored separately after Submit, we use a heuristic:
-	// everything in RcptTo that is not in _cc is either To or BCC.
-	// Without separate BCC tracking, we must accept that BCC recipients appear
-	// nowhere in headers (which is correct behavior).
-
-	// If _to is stored in headers, use it directly.
-	if len(job.HeadersJSON) > 0 {
-		var h map[string]any
-		if err := json.Unmarshal(job.HeadersJSON, &h); err == nil {
-			if toVal, ok := h["_to"]; ok {
-				if arr, ok := toVal.([]any); ok {
-					for _, v := range arr {
-						if s, ok := v.(string); ok {
-							to = append(to, s)
-						}
-					}
-				}
-				return to, cc
-			}
+		if err := writeQPPart(w, "text/html; charset=utf-8", m.HTMLBody); err != nil {
+			return err
 		}
+		if err := w.Close(); err != nil {
+			return fmt.Errorf("close multipart body: %w", err)
+		}
+	case hasHTML:
+		return writeSinglePartQP(buf, "text/html; charset=utf-8", m.HTMLBody)
+	default:
+		return writeSinglePartQP(buf, "text/plain; charset=utf-8", m.TextBody)
 	}
+	return nil
+}
 
-	// Fallback: if no _to/_cc metadata, put all RcptTo into To (legacy behavior).
-	return job.RcptTo, nil
+func writeQPPart(w *multipart.Writer, contentType, body string) error {
+	part, err := w.CreatePart(textproto.MIMEHeader{
+		"Content-Type":              {contentType},
+		"Content-Transfer-Encoding": {"quoted-printable"},
+	})
+	if err != nil {
+		return fmt.Errorf("create mime part: %w", err)
+	}
+	return encodeQP(part, body)
+}
+
+func writeSinglePartQP(buf *bytes.Buffer, contentType, body string) error {
+	writeHeader(buf, "Content-Type", contentType)
+	writeHeader(buf, "Content-Transfer-Encoding", "quoted-printable")
+	buf.WriteString("\r\n")
+	return encodeQP(buf, body)
+}
+
+func encodeQP(w io.Writer, body string) error {
+	qpw := quotedprintable.NewWriter(w)
+	if _, err := qpw.Write([]byte(body)); err != nil {
+		return fmt.Errorf("encode body: %w", err)
+	}
+	if err := qpw.Close(); err != nil {
+		return fmt.Errorf("flush body: %w", err)
+	}
+	return nil
+}
+
+// messageFromJob maps a persisted job to the builder's semantic Message. The job
+// carries recipients structurally, so no reconstruction from a header blob is
+// required and BCC can never leak into a header through a missing-metadata path.
+func messageFromJob(job *models.OutboundJob) Message {
+	return Message{
+		From:      job.MailFrom,
+		To:        job.To,
+		CC:        job.CC,
+		BCC:       job.BCC,
+		Subject:   job.Subject,
+		TextBody:  job.TextBody,
+		HTMLBody:  job.HTMLBody,
+		Headers:   parseCustomHeaders(job.HeadersJSON),
+		MessageID: job.MessageIDHeader,
+	}
+}
+
+// parseCustomHeaders decodes the stored custom-header map. HeadersJSON now holds
+// only caller-supplied custom headers (no _to/_cc recipient metadata).
+func parseCustomHeaders(raw json.RawMessage) map[string]string {
+	if len(raw) == 0 {
+		return nil
+	}
+	var h map[string]string
+	if err := json.Unmarshal(raw, &h); err != nil {
+		return nil
+	}
+	return h
 }
 
 // sanitizeHeaderValue removes CR and LF characters to prevent header injection.
