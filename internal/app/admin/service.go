@@ -55,7 +55,11 @@ type Service struct {
 	dispatcher    *hooks.Dispatcher
 	defaultPolicy models.SMTPPolicy
 	settings      settingsManager
-	logger        zerolog.Logger
+	// policyInvalidator drops any cached SMTP policy after an update so ingest
+	// stops deciding accept/store/discard against the stale entry. May be nil
+	// (e.g. in tests or when ingest is not wired in); the TTL still bounds drift.
+	policyInvalidator policyInvalidator
+	logger            zerolog.Logger
 }
 
 type settingsManager interface {
@@ -65,6 +69,11 @@ type settingsManager interface {
 	Set(ctx context.Context, key, value, description string) error
 	All(ctx context.Context) ([]*models.SystemSetting, error)
 	Invalidate()
+}
+
+// policyInvalidator evicts a cached SMTP policy. Implemented by ingest.Service.
+type policyInvalidator interface {
+	InvalidateSMTPPolicy()
 }
 
 type APIKeyIssueResult struct {
@@ -134,8 +143,8 @@ func normalizeAPIKeyScopes(scopes []string) ([]string, error) {
 	return normalized, nil
 }
 
-func NewService(s Store, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, logger zerolog.Logger) *Service {
-	return &Service{store: s, dispatcher: dispatcher, defaultPolicy: defaultPolicy, settings: sm, logger: logger.With().Str("service", "admin").Logger()}
+func NewService(s Store, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, pi policyInvalidator, logger zerolog.Logger) *Service {
+	return &Service{store: s, dispatcher: dispatcher, defaultPolicy: defaultPolicy, settings: sm, policyInvalidator: pi, logger: logger.With().Str("service", "admin").Logger()}
 }
 
 // ListSettings returns all system settings.
@@ -571,6 +580,11 @@ func (s *Service) UpdateSMTPPolicy(ctx context.Context, policy *models.SMTPPolic
 		Actor:        actor,
 		Details:      app.MustJSON(policy),
 	})
+	// Drop the ingest policy cache so the new policy takes effect immediately
+	// instead of waiting out the 2s TTL.
+	if s.policyInvalidator != nil {
+		s.policyInvalidator.InvalidateSMTPPolicy()
+	}
 	return policy, nil
 }
 

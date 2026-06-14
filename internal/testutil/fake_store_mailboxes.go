@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 )
 
@@ -82,48 +83,45 @@ func (v *fakeTenantView) GetMailboxByAddress(_ context.Context, addr string) (*m
 	return nil, nil
 }
 
-func (s *FakeStore) ListMailboxes(_ context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
+// ListMailboxesScoped mirrors the SQL: tenant_id always, plus zone allowlist
+// (ZoneIDs) when AllZones is false, plus owner_user_id (via zone lookup) when
+// OwnerUserID is set. The owner dimension reads zone.owner_user_id exactly like
+// the SQL subquery JOIN to domain_zones.
+func (s *FakeStore) ListMailboxesScoped(_ context.Context, scope authz.ZoneListFilter, pg models.Page) ([]*models.Mailbox, int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	var list []*models.Mailbox
-	for _, m := range s.mailboxes {
-		if m.TenantID == tenantID {
-			cp := *m
-			list = append(list, &cp)
-		}
+	if !scope.AllZones && len(scope.ZoneIDs) == 0 {
+		return []*models.Mailbox{}, 0, nil
 	}
-	sort.Slice(list, func(i, j int) bool { return list[i].CreatedAt.After(list[j].CreatedAt) })
-	return paginateMailboxes(list, pg), len(list), nil
-}
-
-func (s *FakeStore) ListMailboxesByZone(_ context.Context, zoneID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	var list []*models.Mailbox
-	for _, m := range s.mailboxes {
-		if m.ZoneID == zoneID {
-			cp := *m
-			list = append(list, &cp)
-		}
-	}
-	sort.Slice(list, func(i, j int) bool { return list[i].CreatedAt.After(list[j].CreatedAt) })
-	return paginateMailboxes(list, pg), len(list), nil
-}
-
-func (s *FakeStore) ListMailboxesByZones(_ context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	allowed := make(map[uuid.UUID]struct{}, len(zoneIDs))
-	for _, id := range zoneIDs {
+	allowed := make(map[uuid.UUID]struct{}, len(scope.ZoneIDs))
+	for _, id := range scope.ZoneIDs {
 		allowed[id] = struct{}{}
 	}
+	// Owner dimension: resolve which zones this user owns, then restrict
+	// membership to those zones (matches the SQL subquery).
+	var ownerZones map[uuid.UUID]struct{}
+	if scope.OwnerUserID != nil {
+		ownerZones = map[uuid.UUID]struct{}{}
+		for _, z := range s.zones {
+			if z.OwnerUserID != nil && *z.OwnerUserID == *scope.OwnerUserID {
+				ownerZones[z.ID] = struct{}{}
+			}
+		}
+	}
 	var list []*models.Mailbox
 	for _, m := range s.mailboxes {
-		if m.TenantID != tenantID {
+		if m.TenantID != scope.TenantID {
 			continue
 		}
-		if _, ok := allowed[m.ZoneID]; !ok {
-			continue
+		if !scope.AllZones {
+			if _, ok := allowed[m.ZoneID]; !ok {
+				continue
+			}
+		}
+		if ownerZones != nil {
+			if _, ok := ownerZones[m.ZoneID]; !ok {
+				continue
+			}
 		}
 		cp := *m
 		list = append(list, &cp)

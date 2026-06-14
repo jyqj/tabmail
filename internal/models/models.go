@@ -266,19 +266,21 @@ type Mailbox struct {
 // ============================================================
 
 type Message struct {
-	ID           uuid.UUID       `json:"id" db:"id"`
-	TenantID     uuid.UUID       `json:"tenant_id" db:"tenant_id"`
-	MailboxID    uuid.UUID       `json:"mailbox_id" db:"mailbox_id"`
-	ZoneID       uuid.UUID       `json:"zone_id" db:"zone_id"`
-	Sender       string          `json:"sender" db:"sender"`
-	Recipients   []string        `json:"recipients" db:"recipients"`
-	Subject      string          `json:"subject" db:"subject"`
-	Size         int64           `json:"size" db:"size"`
-	Seen         bool            `json:"seen" db:"seen"`
-	RawObjectKey string          `json:"raw_object_key,omitempty" db:"raw_object_key"`
-	HeadersJSON  json.RawMessage `json:"headers,omitempty" db:"headers_json"`
-	ReceivedAt   time.Time       `json:"received_at" db:"received_at"`
-	ExpiresAt    time.Time       `json:"expires_at" db:"expires_at"`
+	ID            uuid.UUID       `json:"id" db:"id"`
+	TenantID      uuid.UUID       `json:"tenant_id" db:"tenant_id"`
+	MailboxID     uuid.UUID       `json:"mailbox_id" db:"mailbox_id"`
+	ZoneID        uuid.UUID       `json:"zone_id" db:"zone_id"`
+	Sender        string          `json:"sender" db:"sender"`
+	Recipients    []string        `json:"recipients" db:"recipients"`
+	Subject       string          `json:"subject" db:"subject"`
+	Size          int64           `json:"size" db:"size"`
+	Seen          bool            `json:"seen" db:"seen"`
+	RawObjectKey  string          `json:"raw_object_key,omitempty" db:"raw_object_key"`
+	HeadersJSON   json.RawMessage `json:"headers,omitempty" db:"headers_json"`
+	ReceivedAt    time.Time       `json:"received_at" db:"received_at"`
+	ExpiresAt     time.Time       `json:"expires_at" db:"expires_at"`
+	OTPCode       string          `json:"otp_code,omitempty" db:"otp_code"`
+	OTPConfidence float32         `json:"otp_confidence,omitempty" db:"otp_confidence"`
 }
 
 // MessageDetail includes parsed body content.
@@ -555,6 +557,11 @@ func ZoneAllowed(allowedZoneIDs []uuid.UUID, zoneID uuid.UUID) bool {
 	return false
 }
 
+// IsUnlimited returns true if the quota value is 0, which means unlimited.
+func IsUnlimited(quota int) bool {
+	return quota == 0
+}
+
 // ============================================================
 // Send Identities
 // ============================================================
@@ -575,6 +582,21 @@ type SendIdentity struct {
 	IdentityType SendIdentityType `json:"identity_type" db:"identity_type"`
 	Verified     bool             `json:"verified" db:"verified"`
 	CreatedAt    time.Time        `json:"created_at" db:"created_at"`
+}
+
+// OutboundTemplate is a tenant-scoped email template. The SubjectTmpl, TextTmpl
+// and HTMLTmpl fields hold Go template source; the template package parses them
+// once at load time and re-renders per message with caller-supplied Vars. The
+// HTML part is always rendered through html/template for automatic escaping.
+type OutboundTemplate struct {
+	ID          uuid.UUID `json:"id" db:"id"`
+	TenantID    uuid.UUID `json:"tenant_id" db:"tenant_id"`
+	Name        string    `json:"name" db:"name"`
+	SubjectTmpl string    `json:"subject_tmpl" db:"subject_tmpl"`
+	TextTmpl    string    `json:"text_tmpl,omitempty" db:"text_tmpl"`
+	HTMLTmpl    string    `json:"html_tmpl,omitempty" db:"html_tmpl"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // ============================================================

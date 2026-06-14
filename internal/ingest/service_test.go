@@ -87,9 +87,7 @@ func TestServiceDurableAcceptAndProcess(t *testing.T) {
 		t.Fatalf("expected mailbox not materialized before worker, got %#v", mb)
 	}
 
-	if err := svc.processBatch(context.Background()); err != nil {
-		t.Fatal(err)
-	}
+	svc.ProcessBatch(context.Background())
 
 	mb, err = st.GetMailboxByAddress(context.Background(), "user@mail.test")
 	if err != nil {
@@ -139,9 +137,7 @@ func TestServiceDurableZeroDeliveryDeletesRawObject(t *testing.T) {
 		t.Fatalf("expected raw object queued before worker, ok=%v err=%v", ok, err)
 	}
 
-	if err := svc.processBatch(context.Background()); err != nil {
-		t.Fatal(err)
-	}
+	svc.ProcessBatch(context.Background())
 	if ok, err := obj.Exists(context.Background(), key); err != nil || ok {
 		t.Fatalf("expected zero-delivery raw object to be deleted, ok=%v err=%v", ok, err)
 	}
@@ -178,9 +174,7 @@ func TestServiceDurableSizeFailureDeletesRawObject(t *testing.T) {
 		t.Fatalf("expected durable accept to queue, got %#v", res)
 	}
 
-	if err := svc.processBatch(context.Background()); err != nil {
-		t.Fatal(err)
-	}
+	svc.ProcessBatch(context.Background())
 	if ok, err := obj.Exists(context.Background(), key); err != nil || ok {
 		t.Fatalf("expected size-failed raw object to be deleted, ok=%v err=%v", ok, err)
 	}
@@ -311,21 +305,206 @@ func TestDeliverReturnsPerRecipientOutcomes(t *testing.T) {
 	}
 }
 
-func TestRetryBackoffUsesPrecisePowersOfTwo(t *testing.T) {
+// retryBackoff's exponential-with-jitter formula is now asserted table-driven
+// in internal/workqueue (TestExponentialBackoff_IngestFormula), which drives
+// the same ExponentialBackoff policy ingest's worker uses. The legacy
+// TestRetryBackoffUsesPrecisePowersOfTwo lived here only to lock the local
+// retryBackoff free function, which the refactor deleted.
+
+func intPtr(v int) *int { return &v }
+
+// TestResolveRetentionPureFunction locks the mailbox > route > tenant > fallback
+// precedence without touching the store. Pre-P5 this read EffectiveConfig from
+// the store; now it consumes the tenantConfigs cache value the caller supplies,
+// so a single delivery no longer triggers a second EffectiveConfig round-trip.
+// Each level is *int (nil = unset). The "non-nil tenant 0" case pins the legacy
+// behavior: a configured retention of 0 (immediate expiry) is honored, not
+// skipped to fallback — matching the pre-P5 EffectiveConfig semantics.
+func TestResolveRetentionPureFunction(t *testing.T) {
 	cases := []struct {
-		attempts int
-		min      time.Duration
-		max      time.Duration
+		name                          string
+		mailbox, route, tenant        *int
+		fallback, want                int
 	}{
-		{attempts: 1, min: 1 * time.Second, max: 2 * time.Second},
-		{attempts: 2, min: 2 * time.Second, max: 3 * time.Second},
-		{attempts: 3, min: 4 * time.Second, max: 5 * time.Second},
-		{attempts: 4, min: 8 * time.Second, max: 9 * time.Second},
+		{"mailbox wins over everything", intPtr(99), intPtr(48), intPtr(24), 12, 99},
+		{"route wins when mailbox unset", nil, intPtr(48), intPtr(24), 12, 48},
+		{"tenant wins when mailbox+route unset", nil, nil, intPtr(24), 12, 24},
+		{"explicit fallback when all unset", nil, nil, nil, 72, 72},
+		{"default 24 when nothing set at all", nil, nil, nil, 0, 24},
+		{"non-nil tenant 0 honored as immediate expiry (legacy)", nil, nil, intPtr(0), 72, 0},
 	}
 	for _, tc := range cases {
-		got := retryBackoff(tc.attempts)
-		if got < tc.min || got >= tc.max {
-			t.Fatalf("attempt=%d expected duration in [%s,%s), got %s", tc.attempts, tc.min, tc.max, got)
-		}
+		t.Run(tc.name, func(t *testing.T) {
+			if got := resolveRetention(tc.mailbox, tc.route, tc.tenant, tc.fallback); got != tc.want {
+				t.Fatalf("resolveRetention(%v,%v,%v,%d) = %d, want %d",
+					tc.mailbox, tc.route, tc.tenant, tc.fallback, got, tc.want)
+			}
+		})
 	}
 }
+
+// seedExistingMailboxStore builds a tenant+zone+route plus a pre-existing
+// mailbox so deliver's reuse condition (Mailbox != nil && !Created) is met for
+// the given recipient. The seeded mailbox has NO RetentionHoursOverride so the
+// only signal that reuse took effect is the override carried by a caller-supplied
+// Result (see TestAcceptWithResolvedReusesRCPTResult).
+func seedExistingMailboxStore(t *testing.T, recipient string) (*testutil.FakeStore, *testutil.MemoryObjectStore, *models.Mailbox) {
+	t.Helper()
+	st := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.SeedPlan(&models.Plan{
+		ID: planID, Name: "reuse-test", MaxDomains: 10, MaxMailboxesPerDomain: 100,
+		MaxMessagesPerMailbox: 1000, MaxMessageBytes: 1024 * 1024, RetentionHours: 24,
+		RPMLimit: 1000, DailyQuota: 1000,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true, MXVerified: true})
+	st.SeedRoute(&models.DomainRoute{ID: uuid.New(), ZoneID: zoneID, RouteType: models.RouteExact, MatchValue: "mail.test", AutoCreateMailbox: true, AccessModeDefault: models.AccessPublic})
+
+	mb := &models.Mailbox{
+		ID:             uuid.New(),
+		TenantID:       tenantID,
+		ZoneID:         zoneID,
+		LocalPart:      "user",
+		ResolvedDomain: "mail.test",
+		FullAddress:    recipient,
+		AccessMode:     models.AccessPublic,
+		CreatedAt:      time.Now(),
+	}
+	st.SeedMailbox(mb)
+	return st, obj, mb
+}
+
+// TestAcceptWithResolvedReusesRCPTResult proves the SMTP-session-reuse fast
+// path: when WithResolved supplies a Reusable Result, deliverResolved skips
+// resolver.Resolve entirely and uses the supplied Mailbox — including its
+// RetentionHoursOverride, which the store-seeded mailbox deliberately does not
+// carry. So ExpiresAt reflects the supplied override (99h) iff reuse happened,
+// and the tenant default (24h) iff it did not.
+func TestAcceptWithResolvedReusesRCPTResult(t *testing.T) {
+	const recipient = "user@mail.test"
+
+	st, obj, seededMB := seedExistingMailboxStore(t, recipient)
+	resolverSvc := resolver.New(st, policy.NamingFull, true)
+	svc := NewService(
+		st, obj, resolverSvc, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()),
+		models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, 24, nil,
+		config.Ingest{Durable: false, BatchSize: 10}, zerolog.Nop(),
+	)
+
+	raw := []byte("Subject: reuse\r\n\r\nhello")
+
+	// --- Control: no WithResolved -> fresh Resolve -> seeded mailbox (no override)
+	// -> ExpiresAt ~ now + tenant 24h.
+	res1, err := svc.Accept(context.Background(), Envelope{
+		Source: "smtp", MailFrom: "sender@example.org", Recipients: []string{recipient},
+	}, raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res1.Delivered != 1 {
+		t.Fatalf("control: expected 1 delivered, got %d", res1.Delivered)
+	}
+
+	// --- Reuse: WithResolved supplies a Result whose Mailbox carries override=99.
+	// The supplied Mailbox is a copy of the seeded one with a fresh override; if
+	// deliverResolved reuses it verbatim, the stored message's ExpiresAt will be
+	// ~now + 99h. If it re-resolves, it reads the seeded (override-less) mailbox
+	// and ExpiresAt is ~now + 24h.
+	reusedMB := *seededMB
+	reusedMB.RetentionHoursOverride = intPtr(99)
+	supplied := &resolver.Result{
+		Zone: &models.DomainZone{ID: seededMB.ZoneID, TenantID: seededMB.TenantID, Domain: "mail.test", IsVerified: true, MXVerified: true},
+		Mailbox: &reusedMB,
+	}
+
+	res2, err := svc.Accept(context.Background(), Envelope{
+		Source: "smtp", MailFrom: "sender@example.org", Recipients: []string{recipient},
+	}, raw, WithResolved(recipient, supplied))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res2.Delivered != 1 {
+		t.Fatalf("reuse: expected 1 delivered, got %d", res2.Delivered)
+	}
+
+	msgs, total, err := st.ListMessages(context.Background(), seededMB.ID, models.Page{Page: 1, PerPage: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if total != 2 || len(msgs) != 2 {
+		t.Fatalf("expected 2 messages (control + reuse), got total=%d len=%d", total, len(msgs))
+	}
+	// The reuse message is the second (later ReceivedAt). Assert its ExpiresAt is
+	// ~99h from now, not 24h — the only way that happens is deliverResolved using
+	// the supplied Mailbox.RetentionHoursOverride rather than re-resolving.
+	var reuseMsg *models.Message
+	for i := range msgs {
+		if reuseMsg == nil || msgs[i].ReceivedAt.After(reuseMsg.ReceivedAt) {
+			reuseMsg = msgs[i]
+		}
+	}
+	delta := reuseMsg.ExpiresAt.Sub(reuseMsg.ReceivedAt)
+	const expectH = 99
+	if delta < (expectH-1)*time.Hour || delta > (expectH+1)*time.Hour {
+		t.Fatalf("reuse: expected ExpiresAt-ReceivedAt ~%dh (reuse), got %v", expectH, delta)
+	}
+}
+
+// TestAcceptWithResolvedDoesNotReuseAutoCreateResult locks the safety rail: a
+// caller-supplied Result with Mailbox==nil (the shape Check returns for an
+// auto-create route that has not materialized) MUST NOT short-circuit Resolve.
+// deliverResolved must fall back to Resolve, which then auto-creates the mailbox
+// for a recipient that does not yet exist.
+func TestAcceptWithResolvedDoesNotReuseAutoCreateResult(t *testing.T) {
+	const recipient = "fresh@mail.test" // not seeded -> auto-create path
+
+	st := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.SeedPlan(&models.Plan{
+		ID: planID, Name: "autocreate-test", MaxDomains: 10, MaxMailboxesPerDomain: 100,
+		MaxMessagesPerMailbox: 1000, MaxMessageBytes: 1024 * 1024, RetentionHours: 24,
+		RPMLimit: 1000, DailyQuota: 1000,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true, MXVerified: true})
+	st.SeedRoute(&models.DomainRoute{ID: uuid.New(), ZoneID: zoneID, RouteType: models.RouteExact, MatchValue: "mail.test", AutoCreateMailbox: true, AccessModeDefault: models.AccessPublic})
+
+	resolverSvc := resolver.New(st, policy.NamingFull, true)
+	svc := NewService(
+		st, obj, resolverSvc, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()),
+		models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, 24, nil,
+		config.Ingest{Durable: false, BatchSize: 10}, zerolog.Nop(),
+	)
+
+	// Supplied Result mirrors what Check returns for an auto-create route: Zone +
+	// Route set, Mailbox nil. Reusable() is false, so deliverResolved must ignore
+	// it and run Resolve, which materializes the mailbox.
+	zone := &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true, MXVerified: true}
+	supplied := &resolver.Result{Zone: zone, Mailbox: nil} // Mailbox nil -> not Reusable
+
+	res, err := svc.Accept(context.Background(), Envelope{
+		Source: "smtp", MailFrom: "sender@example.org", Recipients: []string{recipient},
+	}, []byte("Subject: autocreate\r\n\r\nhello"), WithResolved(recipient, supplied))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Delivered != 1 {
+		t.Fatalf("expected auto-create recipient delivered, got %d", res.Delivered)
+	}
+	mb, err := st.GetMailboxByAddress(context.Background(), recipient)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if mb == nil {
+		t.Fatal("expected mailbox auto-created despite non-reusable WithResolved")
+	}
+}
+

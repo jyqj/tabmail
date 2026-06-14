@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/mail"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,6 +15,8 @@ import (
 	tabdkim "tabmail/internal/dkim"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
+	"tabmail/internal/template"
+	"tabmail/internal/workqueue"
 )
 
 const maxRetryDelay = 1 * time.Hour
@@ -26,10 +27,17 @@ type Service struct {
 	store    store.Store
 	adapter  DeliveryAdapter
 	logger   zerolog.Logger
-	stopCh   chan struct{}
-	wg       sync.WaitGroup
-	stopOnce sync.Once
+	template *template.Service
+	// worker drives the background delivery loop. Built lazily in StartWorker
+	// so a disabled service stays a no-op.
+	worker *workqueue.Worker[*outboundJob]
 }
+
+// SetTemplateService wires the optional template renderer. Pass nil (or skip
+// the call) to keep the legacy bare-string send path byte-for-byte unchanged;
+// Submit only consults templates when req.TemplateName is non-nil AND a
+// service is set.
+func (s *Service) SetTemplateService(ts *template.Service) { s.template = ts }
 
 // NewService creates a new outbound service.
 func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Service {
@@ -45,31 +53,54 @@ func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Ser
 		store:   st,
 		adapter: adapter,
 		logger:  logger.With().Str("component", "outbound").Logger(),
-		stopCh:  make(chan struct{}),
 	}
 }
 
 // SendRequest is the validated input for submitting an outbound email.
 type SendRequest struct {
-	TenantID uuid.UUID
-	UserID   *uuid.UUID
-	APIKeyID *uuid.UUID
-	ZoneID   uuid.UUID
-	From     string
-	To       []string
-	CC       []string
-	BCC      []string
-	Subject  string
-	TextBody string
-	HTMLBody string
-	Headers  map[string]string
-	Quota    store.OutboundQuotaReservation
+	TenantID      uuid.UUID
+	UserID        *uuid.UUID
+	APIKeyID      *uuid.UUID
+	ZoneID        uuid.UUID
+	From          string
+	To            []string
+	CC            []string
+	BCC           []string
+	Subject       string
+	TextBody      string
+	HTMLBody      string
+	Headers       map[string]string
+	TemplateName  *string           // optional; nil keeps the legacy bare-string path
+	TemplateVars  map[string]string // used only when TemplateName is non-nil
+	Quota         store.OutboundQuotaReservation
 }
 
 // Submit enqueues an outbound email job after validation.
 func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.OutboundJob, error) {
 	if !s.cfg.Enabled {
 		return nil, fmt.Errorf("outbound sending is disabled")
+	}
+
+	// Template path (opt-in). When TemplateName is set the caller wants the
+	// Subject/Text/HTML populated by rendering a tenant template; we do that
+	// up front so the existing validators below run against the rendered
+	// values. A nil template service with a non-nil TemplateName is a
+	// configuration error, not a silent fall-through to bare strings.
+	if req.TemplateName != nil && *req.TemplateName != "" {
+		if s.template == nil {
+			return nil, fmt.Errorf("template support is not configured")
+		}
+		rendered, err := s.template.Render(template.RenderInput{
+			TenantID: req.TenantID,
+			Name:     *req.TemplateName,
+			Vars:     req.TemplateVars,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("render template %q: %w", *req.TemplateName, err)
+		}
+		req.Subject = rendered.Subject
+		req.TextBody = rendered.TextBody
+		req.HTMLBody = rendered.HTMLBody
 	}
 
 	// Validate all email addresses using RFC 5322 parsing.
@@ -173,66 +204,84 @@ func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob
 	return s.store.CreateOutboundJob(ctx, job)
 }
 
-// StartWorker begins the background delivery worker loop.
+// StartWorker begins the background delivery worker loop. It is the
+// goroutine-shape entry point (outbound's legacy form); Stop drains it.
 func (s *Service) StartWorker(ctx context.Context) {
 	if !s.cfg.Enabled {
 		s.logger.Info().Msg("outbound disabled, worker not started")
 		return
 	}
-	s.wg.Add(1)
-	go func() {
-		defer s.wg.Done()
-		s.logger.Info().Msg("outbound worker started")
-		ticker := time.NewTicker(s.cfg.PollInterval)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-s.stopCh:
-				return
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				s.processJobs(ctx)
-			}
-		}
-	}()
+	s.ensureWorker().Start(ctx)
+	s.logger.Info().Msg("outbound worker started")
 }
 
-func (s *Service) processJobs(ctx context.Context) {
-	jobs, err := s.store.ClaimOutboundJobs(ctx, time.Now().UTC(), s.cfg.BatchSize)
-	if err != nil {
-		s.logger.Error().Err(err).Msg("claiming outbound jobs")
+// Stop drains a StartWorker-launched goroutine, waiting for the in-flight
+// batch to finish. Absorbs the legacy Shutdown() semantics.
+func (s *Service) Stop() {
+	if s.worker == nil {
 		return
 	}
-	for _, job := range jobs {
-		s.deliverJob(ctx, job)
-	}
+	s.worker.Stop()
 }
 
-func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
-	log := s.logger.With().Str("job_id", job.ID.String()).Logger()
+// Shutdown is retained for the main goroutine's existing call site; it
+// forwards to Stop.
+func (s *Service) Shutdown() { s.Stop() }
+
+// ensureWorker builds the workqueue.Worker once. Idempotent.
+func (s *Service) ensureWorker() *workqueue.Worker[*outboundJob] {
+	if s.worker != nil {
+		return s.worker
+	}
+	policy := workqueue.ExponentialCappedBackoff[*outboundJob]{
+		Base:         s.cfg.RetryDelay,
+		Cap:          maxRetryDelay,
+		MaxAttempts:  func(j *workqueue.Job[*outboundJob]) int { return j.Payload.MaxAttempts },
+	}
+	s.worker = workqueue.NewWorker[*outboundJob](
+		newOutboundStore(s.store),
+		s.processOne,
+		policy,
+		nil,
+		5*time.Minute,
+		s.cfg.PollInterval,
+		s.cfg.BatchSize,
+		s.logger,
+	)
+	return s.worker
+}
+
+// processOne is the workqueue.Handler for outbound jobs. It performs the full
+// delivery sequence (MIME build, zone load, DKIM sign, adapter deliver,
+// attempt record, mark sent) and returns nil on success or an error to drive
+// retry/dead through the ExponentialCappedBackoff policy. A delivery-token
+// mismatch on the success mark is logged and swallowed (the job was
+// re-claimed), matching the legacy skip-on-mismatch behavior.
+func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*outboundJob]) error {
+	if job == nil || job.Payload == nil || job.Payload.OutboundJob == nil {
+		return nil
+	}
+	out := job.Payload.OutboundJob
+	log := s.logger.With().Str("job_id", out.ID.String()).Logger()
 
 	// Build MIME message from the structurally-stored recipients.
-	mime, err := Build(messageFromJob(job))
+	mime, err := Build(messageFromJob(out))
 	if err != nil {
 		log.Error().Err(err).Msg("building MIME")
-		s.failOrRetry(ctx, job, fmt.Sprintf("mime build: %s", err))
-		return
+		return fmt.Errorf("mime build: %s", err)
 	}
 
-	zone, zoneErr := s.store.GetZone(ctx, job.ZoneID)
+	zone, zoneErr := s.store.GetZone(ctx, out.ZoneID)
 	if zoneErr != nil {
 		if s.dkimFailClosed() {
 			log.Error().Err(zoneErr).Msg("loading zone for DKIM, delivery blocked by policy")
-			s.failOrRetry(ctx, job, fmt.Sprintf("load zone for dkim: %s", zoneErr))
-			return
+			return fmt.Errorf("load zone for dkim: %s", zoneErr)
 		}
 		log.Warn().Err(zoneErr).Msg("loading zone for DKIM")
 	}
 	if zone != nil && zone.DKIMRequiredForSend && !s.cfg.DKIMSign {
 		log.Error().Msg("zone requires DKIM for send but global DKIM signing is disabled")
-		s.failOrRetry(ctx, job, "zone requires DKIM but global signing is disabled")
-		return
+		return fmt.Errorf("zone requires DKIM but global signing is disabled")
 	}
 
 	// DKIM sign if enabled for this zone.
@@ -244,35 +293,31 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 			}
 			signed, signErr := tabdkim.SignMessage(mime, zone.Domain, selector, *zone.DKIMPrivateKeyPEM)
 			if signErr != nil {
-				// Check fail policy: fail_closed blocks delivery on sign failure.
 				if s.dkimFailClosed() || zone.DKIMRequiredForSend {
 					log.Error().Err(signErr).Msg("DKIM signing failed, delivery blocked by policy")
-					s.failOrRetry(ctx, job, fmt.Sprintf("dkim sign: %s", signErr))
-					return
+					return fmt.Errorf("dkim sign: %s", signErr)
 				}
 				log.Warn().Err(signErr).Msg("DKIM signing failed, delivering unsigned (fail_open)")
 			} else {
 				mime = signed
 			}
 		} else if zone != nil && zone.DKIMRequiredForSend {
-			// Zone requires DKIM but it's not enabled/configured.
 			log.Error().Msg("zone requires DKIM for send but DKIM is not enabled")
-			s.failOrRetry(ctx, job, "zone requires DKIM but signing is not configured")
-			return
+			return fmt.Errorf("zone requires DKIM but signing is not configured")
 		}
 	}
 
 	// Deliver via configured adapter.
-	result, deliverErr := s.adapter.Deliver(ctx, job, mime)
+	result, deliverErr := s.adapter.Deliver(ctx, out, mime)
 
 	// Record the attempt.
 	if result != nil {
 		attempt := &models.OutboundAttempt{
 			ID:           uuid.New(),
-			JobID:        job.ID,
-			TenantID:     job.TenantID,
+			JobID:        out.ID,
+			TenantID:     out.TenantID,
 			Adapter:      result.Adapter,
-			Attempt:      job.Attempts,
+			Attempt:      out.Attempts,
 			SMTPCode:     result.SMTPCode,
 			SMTPResponse: result.SMTPResponse,
 			RemoteHost:   result.RemoteHost,
@@ -286,23 +331,22 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 	}
 
 	if deliverErr != nil {
-		log.Warn().Err(deliverErr).Int("attempt", job.Attempts+1).Msg("delivery failed")
+		log.Warn().Err(deliverErr).Int("attempt", out.Attempts+1).Msg("delivery failed")
 		// Hard bounce (5xx) → add recipients to suppression list.
 		if result != nil && result.SMTPCode >= 500 && result.SMTPCode < 600 {
-			for _, rcpt := range job.RcptTo {
+			for _, rcpt := range out.RcptTo {
 				_ = s.store.AddSuppression(ctx, &models.SuppressionEntry{
 					ID:          uuid.New(),
-					TenantID:    job.TenantID,
+					TenantID:    out.TenantID,
 					Address:     rcpt,
 					Reason:      "hard_bounce",
-					SourceJobID: &job.ID,
+					SourceJobID: &out.ID,
 					CreatedAt:   time.Now(),
 				})
 			}
 			log.Info().Int("smtp_code", result.SMTPCode).Msg("hard bounce: recipients added to suppression list")
 		}
-		s.failOrRetry(ctx, job, deliverErr.Error())
-		return
+		return fmt.Errorf("%s", deliverErr.Error())
 	}
 
 	smtpCode := 250
@@ -311,14 +355,16 @@ func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 		smtpCode = result.SMTPCode
 		smtpResponse = result.SMTPResponse
 	}
-	if err := s.store.MarkOutboundJobSent(ctx, job.ID, job.DeliveryToken, smtpCode, smtpResponse, job.MessageIDHeader); err != nil {
+	if err := s.store.MarkOutboundJobSent(ctx, out.ID, job.Lease.Token, smtpCode, smtpResponse, out.MessageIDHeader); err != nil {
 		if isTokenMismatch(err) {
 			log.Warn().Msg("delivery token mismatch on mark-sent; job was re-claimed by another worker, skipping")
-			return
+			return nil
 		}
 		log.Error().Err(err).Msg("marking job sent")
+		return nil
 	}
 	log.Info().Msg("outbound delivered")
+	return nil
 }
 
 func (s *Service) dkimFailClosed() bool {
@@ -343,41 +389,9 @@ func (s *Service) DKIMSendBlockReason(zone *models.DomainZone) string {
 	return ""
 }
 
-func (s *Service) failOrRetry(ctx context.Context, job *models.OutboundJob, errMsg string) {
-	attempt := job.Attempts + 1
-	if attempt >= job.MaxAttempts {
-		if err := s.store.MarkOutboundJobFailed(ctx, job.ID, job.DeliveryToken, errMsg, true); err != nil {
-			if isTokenMismatch(err) {
-				s.logger.Warn().Str("job_id", job.ID.String()).Msg("delivery token mismatch on mark-failed; skipping")
-				return
-			}
-			s.logger.Error().Err(err).Str("job_id", job.ID.String()).Msg("marking job dead")
-		}
-		return
-	}
-	delay := s.cfg.RetryDelay * time.Duration(1<<uint(attempt))
-	if delay > maxRetryDelay {
-		delay = maxRetryDelay
-	}
-	next := time.Now().UTC().Add(delay)
-	if err := s.store.MarkOutboundJobRetry(ctx, job.ID, job.DeliveryToken, errMsg, next); err != nil {
-		if isTokenMismatch(err) {
-			s.logger.Warn().Str("job_id", job.ID.String()).Msg("delivery token mismatch on mark-retry; skipping")
-			return
-		}
-		s.logger.Error().Err(err).Str("job_id", job.ID.String()).Msg("marking job retry")
-	}
-}
-
 // isTokenMismatch checks if the error is a delivery token mismatch sentinel.
 func isTokenMismatch(err error) bool {
 	return err != nil && err.Error() == "delivery token mismatch: job was re-claimed"
-}
-
-// Shutdown gracefully stops the worker.
-func (s *Service) Shutdown() {
-	s.stopOnce.Do(func() { close(s.stopCh) })
-	s.wg.Wait()
 }
 
 func extractDomain(addr string) string {

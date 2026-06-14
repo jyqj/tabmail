@@ -14,7 +14,6 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
-	"tabmail/internal/permissions"
 	"tabmail/internal/policy"
 	"tabmail/internal/rawobject"
 	"tabmail/internal/store"
@@ -24,24 +23,23 @@ type storeRepo interface {
 	app.AuditStore
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
-	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	ListZonesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
 	CreateMailbox(ctx context.Context, m *models.Mailbox) error
-	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
-	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
+	ListMailboxesScoped(ctx context.Context, scope authz.ZoneListFilter, pg models.Page) ([]*models.Mailbox, int, error)
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
-	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type Service struct {
 	store       storeRepo
 	az          *authz.Authorizer
 	obj         store.ObjectStore
+	objects     *rawobject.Store
 	dispatcher  *hooks.Dispatcher
 	namingMode  policy.NamingMode
 	stripPlus   bool
@@ -62,8 +60,8 @@ type TokenIssueResult struct {
 	ExpiresIn int    `json:"expires_in"`
 }
 
-func NewService(s storeRepo, obj store.ObjectStore, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, logger zerolog.Logger) *Service {
-	return &Service{store: s, az: authz.New(s), obj: obj, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "mailboxes").Logger()}
+func NewService(s storeRepo, obj store.ObjectStore, objects *rawobject.Store, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, logger zerolog.Logger) *Service {
+	return &Service{store: s, az: authz.New(s), obj: obj, objects: objects, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "mailboxes").Logger()}
 }
 
 func (s *Service) List(ctx context.Context, actor authz.Actor, tenant *models.Tenant, pg models.Page) ([]*models.Mailbox, int, error) {
@@ -71,38 +69,12 @@ func (s *Service) List(ctx context.Context, actor authz.Actor, tenant *models.Te
 	if err := app.EnsureTenantScope(tenant, isAdmin); err != nil {
 		return nil, 0, err
 	}
-	if isAdmin || actor.TenantWide {
-		if actor.Permission != nil && len(actor.Permission.AllowedZoneIDs) > 0 {
-			items, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, actor.Permission.AllowedZoneIDs, pg)
-			if err != nil {
-				return nil, 0, app.Internal(err)
-			}
-			return items, total, nil
-		}
-		items, total, err := s.store.ListMailboxes(ctx, tenant.ID, pg)
-		if err != nil {
-			return nil, 0, app.Internal(err)
-		}
-		return items, total, nil
-	}
-	zoneIDs, err := s.accessibleZoneIDs(ctx, tenant, actor.EffectiveUserID())
-	if err != nil {
-		return nil, 0, err
-	}
-	// Intersect owned zones with the actor's zone allowlist. ZoneAllowed
-	// returns true for an absent or empty allowlist, matching the previous
-	// AllowedZoneIDs intersection.
-	filtered := make([]uuid.UUID, 0, len(zoneIDs))
-	for _, id := range zoneIDs {
-		if authz.ZoneAllowed(actor, id) {
-			filtered = append(filtered, id)
-		}
-	}
-	zoneIDs = filtered
-	if len(zoneIDs) == 0 {
-		return []*models.Mailbox{}, 0, nil
-	}
-	items, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, zoneIDs, pg)
+	// Tenant isolation, the zone allowlist, and (for regular users / user-owned
+	// API keys) zone ownership are all enforced in SQL via the ZoneListFilter.
+	// This replaces the previous accessibleZoneIDs ∩ ZoneAllowed in-memory
+	// computation; the store's owner_user_id subquery reproduces it exactly.
+	scope := authz.ZoneListScope(actor, tenant.ID)
+	items, total, err := s.store.ListMailboxesScoped(ctx, scope, pg)
 	if err != nil {
 		return nil, 0, app.Internal(err)
 	}
@@ -136,8 +108,8 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.
 		return nil, err
 	}
 	// Per-user mailbox quota for non-admin principals.
-	if actor.Permission != nil && !isAdmin && !permissions.IsUnlimited(actor.Permission.MaxMailboxes) {
-		total, err := s.countUserMailboxes(ctx, tenant, actor.EffectiveUserID())
+	if actor.Permission != nil && !isAdmin && !models.IsUnlimited(actor.Permission.MaxMailboxes) {
+		total, err := s.countUserMailboxes(ctx, actor, tenant)
 		if err != nil {
 			return nil, err
 		}
@@ -240,7 +212,7 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, tenant *models.
 		return app.Internal(err)
 	}
 	for _, key := range uniqueStrings(keys) {
-		if _, err := rawobject.Release(ctx, s.store, s.obj, key); err != nil {
+		if _, err := s.objects.Release(ctx, key); err != nil {
 			s.logger.Warn().Err(err).Str("key", key).Msg("release raw object during mailbox delete")
 		}
 	}
@@ -251,36 +223,16 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, tenant *models.
 	return nil
 }
 
-func (s *Service) countUserMailboxes(ctx context.Context, tenant *models.Tenant, ownerUserID *uuid.UUID) (int, error) {
-	zoneIDs, err := s.accessibleZoneIDs(ctx, tenant, ownerUserID)
-	if err != nil {
-		return 0, err
-	}
-	if len(zoneIDs) == 0 {
-		return 0, nil
-	}
-	_, total, err := s.store.ListMailboxesByZones(ctx, tenant.ID, zoneIDs, models.Page{Page: 1, PerPage: 1})
+// countUserMailboxes counts the regular user's mailboxes for quota enforcement.
+// It applies the same ZoneListFilter as List (owned zones ∩ allowlist) via the
+// scoped store method, so quota accounting cannot diverge from list visibility.
+func (s *Service) countUserMailboxes(ctx context.Context, actor authz.Actor, tenant *models.Tenant) (int, error) {
+	scope := authz.ZoneListScope(actor, tenant.ID)
+	_, total, err := s.store.ListMailboxesScoped(ctx, scope, models.Page{Page: 1, PerPage: 1})
 	if err != nil {
 		return 0, app.Internal(err)
 	}
 	return total, nil
-}
-
-func (s *Service) accessibleZoneIDs(ctx context.Context, tenant *models.Tenant, ownerUserID *uuid.UUID) ([]uuid.UUID, error) {
-	if tenant == nil || ownerUserID == nil {
-		return []uuid.UUID{}, nil
-	}
-	zones, err := s.store.ListZones(ctx, tenant.ID)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	out := make([]uuid.UUID, 0, len(zones))
-	for _, zone := range zones {
-		if zone.OwnerUserID != nil && *zone.OwnerUserID == *ownerUserID {
-			out = append(out, zone.ID)
-		}
-	}
-	return out, nil
 }
 
 // authorize runs the authz seam and converts AuthzError into an app-level

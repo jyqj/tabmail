@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
+	"tabmail/internal/authz"
 	"tabmail/internal/config"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
@@ -34,7 +35,7 @@ func TestSubmitReservesUserDailyQuotaWithJobCreation(t *testing.T) {
 	if _, err := svc.Submit(ctx, req); !errors.Is(err, store.ErrOutboundDailyQuotaExceeded) {
 		t.Fatalf("second submit expected user quota error, got %v", err)
 	}
-	_, total, err := st.ListOutboundJobs(ctx, tenantID, models.Page{Page: 1, PerPage: 10})
+	_, total, err := st.ListOutboundJobsScoped(ctx, authz.OwnerListFilter{TenantID: tenantID, AllInTenant: true}, models.Page{Page: 1, PerPage: 10})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -75,7 +76,7 @@ func TestSubmitReservesSendAsDailyQuotaWithJobCreation(t *testing.T) {
 	if _, err := svc.Submit(ctx, req); !errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
 		t.Fatalf("second submit expected send-as quota error, got %v", err)
 	}
-	_, total, err := st.ListOutboundJobs(ctx, tenantID, models.Page{Page: 1, PerPage: 10})
+	_, total, err := st.ListOutboundJobsScoped(ctx, authz.OwnerListFilter{TenantID: tenantID, AllInTenant: true}, models.Page{Page: 1, PerPage: 10})
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 )
 
@@ -108,7 +109,14 @@ type ZoneStore interface {
 	CreateZone(ctx context.Context, z *models.DomainZone) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
+	// ListZones returns every zone in the tenant. Used by internal helpers
+	// (owned-zone resolution, quota counts); display paths must use
+	// ListZonesScoped so the zone allowlist and ownership are enforced in SQL.
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	// ListZonesScoped applies the ZoneListFilter in SQL: tenant isolation,
+	// zone allowlist (ZoneIDs), and owner_user_id filter. This is the single
+	// zone-list entry point for the domains display path.
+	ListZonesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error)
 	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListZonesByVisibilities(ctx context.Context, visibilities []models.ResourceVisibility) ([]*models.DomainZone, error)
@@ -132,9 +140,12 @@ type MailboxStore interface {
 	CreateMailbox(ctx context.Context, m *models.Mailbox) error
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
-	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
-	ListMailboxesByZone(ctx context.Context, zoneID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
-	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
+	// ListMailboxesScoped applies the ZoneListFilter in SQL: tenant isolation,
+	// zone allowlist (ZoneIDs), and owner_user_id filter (via the caller-resolved
+	// owned-zone set in scope.ZoneIDs for the regular-user path). This is the
+	// single mailbox-list entry point; an empty scope.ZoneIDs with AllZones=false
+	// returns an empty result (no fallback).
+	ListMailboxesScoped(ctx context.Context, scope authz.ZoneListFilter, pg models.Page) ([]*models.Mailbox, int, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
 	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
 	CountAllMailboxes(ctx context.Context) (int, error)
@@ -270,7 +281,12 @@ type OutboundStore interface {
 	CreateOutboundJob(ctx context.Context, job *models.OutboundJob) error
 	CreateOutboundJobWithQuota(ctx context.Context, job *models.OutboundJob, quota OutboundQuotaReservation) error
 	GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.OutboundJob, error)
-	ListOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
+	// ListOutboundJobsScoped applies the OwnerListFilter in SQL: tenant
+	// isolation plus the mutually-exclusive owner dimension (AllInTenant for
+	// admins, user_id for users, api_key_id for API keys). This replaces the
+	// former ListOutboundJobs / ListOutboundJobsByUser / ListOutboundJobsByAPIKey
+	// trio so the owner rule cannot drift between the three branches.
+	ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerListFilter, pg models.Page) ([]*models.OutboundJob, int, error)
 	ClaimOutboundJobs(ctx context.Context, now time.Time, limit int) ([]*models.OutboundJob, error)
 	MarkOutboundJobSent(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, smtpCode int, smtpResponse, messageID string) error
 	MarkOutboundJobRetry(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, lastError string, nextAttemptAt time.Time) error
@@ -279,10 +295,6 @@ type OutboundStore interface {
 	CountOutboundByIdentitySince(ctx context.Context, tenantID uuid.UUID, principalType string, principalID uuid.UUID, identityID uuid.UUID, since time.Time) (int, error)
 	RequeueOutboundJob(ctx context.Context, id uuid.UUID) error
 
-	// --- Outbound jobs (user-scoped) ----------------------------------------
-	ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
-	ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error)
-
 	// --- Outbound attempts ------------------------------------------------
 	CreateOutboundAttempt(ctx context.Context, a *models.OutboundAttempt) error
 	ListOutboundAttempts(ctx context.Context, jobID uuid.UUID) ([]*models.OutboundAttempt, error)
@@ -290,11 +302,21 @@ type OutboundStore interface {
 	// --- Send identities -------------------------------------------------------
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
 	GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.SendIdentity, error)
-	ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error)
+	// ListSendIdentitiesScoped applies the ZoneListFilter in SQL: tenant
+	// isolation and zone allowlist. This is the single list entry point for the
+	// send-identities display path.
+	ListSendIdentitiesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.SendIdentity, error)
 	ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error)
 	FindSendIdentityForAddress(ctx context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error)
 	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
 	DeleteSendIdentity(ctx context.Context, id uuid.UUID) error
+
+	// --- Outbound templates ----------------------------------------------------
+	CreateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error
+	GetOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) (*models.OutboundTemplate, error)
+	ListOutboundTemplates(ctx context.Context, tenantID uuid.UUID) ([]*models.OutboundTemplate, error)
+	UpdateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error
+	DeleteOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) error
 }
 
 // SettingsStore persists system settings.

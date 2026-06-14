@@ -15,6 +15,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/store"
 )
 
@@ -22,18 +23,16 @@ type mailboxStore interface {
 	app.AuditStore
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
-	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	ListZonesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountMailboxes(ctx context.Context, zoneID uuid.UUID) (int, error)
 	CreateMailbox(ctx context.Context, m *models.Mailbox) error
-	ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
-	ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error)
+	ListMailboxesScoped(ctx context.Context, scope authz.ZoneListFilter, pg models.Page) ([]*models.Mailbox, int, error)
 	GetMailbox(ctx context.Context, id uuid.UUID) (*models.Mailbox, error)
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
 	DeleteMailbox(ctx context.Context, id uuid.UUID) error
-	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type MailboxHandler struct {
@@ -42,14 +41,14 @@ type MailboxHandler struct {
 	logger      zerolog.Logger
 }
 
-func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, rl *middleware.RateLimiter, l zerolog.Logger) *MailboxHandler {
-	service := mailboxapp.NewService(s, obj, dispatcher, namingMode, stripPlus, tokenSecret, l)
+func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, objects *rawobject.Store, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, rl *middleware.RateLimiter, l zerolog.Logger) *MailboxHandler {
+	service := mailboxapp.NewService(s, obj, objects, dispatcher, namingMode, stripPlus, tokenSecret, l)
 	return &MailboxHandler{service: service, rateLimiter: rl, logger: l.With().Str("handler", "mailboxes").Logger()}
 }
 
 func (h *MailboxHandler) List(w http.ResponseWriter, r *http.Request) {
 	pg := pageFromReq(r)
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	items, total, err := h.service.List(r.Context(), actor, tenant, pg)
 	if err != nil {
@@ -71,7 +70,7 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "address is required")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	item, err := h.service.Create(r.Context(), actor, tenant, mailboxapp.CreateRequest{
 		Address:                body.Address,
@@ -93,7 +92,7 @@ func (h *MailboxHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	if err := h.service.Delete(r.Context(), actor, tenant, id); err != nil {
 		respondAppError(w, h.logger, err)
@@ -119,7 +118,7 @@ func (h *MailboxHandler) IssueToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	item, err := h.service.IssueToken(r.Context(), body.Address, body.Password, authz.ActorFromContext(r.Context()).AuditLabel())
+	item, err := h.service.IssueToken(r.Context(), body.Address, body.Password, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return

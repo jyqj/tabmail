@@ -192,6 +192,76 @@ func (s *FakeStore) ReleaseRawObjectIfUnreferenced(ctx context.Context, key stri
 	return true, nil
 }
 
+func (s *FakeStore) EnqueueOrphanRetry(_ context.Context, key string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.orphanRetries == nil {
+		s.orphanRetries = map[string]int{}
+	}
+	s.orphanRetries[key]++
+	return nil
+}
+
+func (s *FakeStore) ListPendingOrphanRetries(_ context.Context, limit int) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if limit <= 0 {
+		return nil, nil
+	}
+	out := make([]string, 0, len(s.orphanRetries))
+	for key, attempts := range s.orphanRetries {
+		if attempts < 10 {
+			out = append(out, key)
+		}
+	}
+	sort.Strings(out)
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
+}
+
+func (s *FakeStore) ClearOrphanRetry(_ context.Context, key string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.orphanRetries, key)
+	return nil
+}
+
+func (s *FakeStore) ReapExhaustedOrphanRetries(_ context.Context) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	dropped := 0
+	for key, attempts := range s.orphanRetries {
+		if attempts >= 10 {
+			delete(s.orphanRetries, key)
+			dropped++
+		}
+	}
+	return dropped, nil
+}
+
+// SeedOrphanRetry sets the retry attempt count for a key (test helper).
+func (s *FakeStore) SeedOrphanRetry(key string, attempts int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.orphanRetries == nil {
+		s.orphanRetries = map[string]int{}
+	}
+	s.orphanRetries[key] = attempts
+}
+
+// OrphanRetryAttempts returns the retry attempt count for a key, or -1 if the
+// key is not queued (test helper).
+func (s *FakeStore) OrphanRetryAttempts(key string) int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if a, ok := s.orphanRetries[key]; ok {
+		return a
+	}
+	return -1
+}
+
 func (s *FakeStore) CountTenantMessagesSince(_ context.Context, tenantID uuid.UUID, since time.Time) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

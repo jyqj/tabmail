@@ -5,7 +5,6 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"tabmail/internal/api/middleware"
 	"tabmail/internal/models"
 )
 
@@ -170,6 +169,11 @@ func ZoneAllowed(actor Actor, zoneID uuid.UUID) bool {
 // in the tenant; a regular user or API key sees only its own", so the list and
 // get paths cannot drift apart. ActionOutboundRead authorizes the action and
 // defers the row scope to the query level; ListScope is that query scope.
+//
+// This is preserved as the legacy owner-only scope. New list paths should use
+// ListScope (the tagged union) via ZoneListScope / OwnerListScope, which carry
+// TenantID into SQL so tenant isolation is enforced at the query level rather
+// than relying on in-memory fallbacks.
 type OwnerScope struct {
 	// AllInTenant is true when the actor may see every owned resource in the
 	// tenant. When true, UserID and APIKeyID are nil.
@@ -183,6 +187,10 @@ type OwnerScope struct {
 // ListScope returns the owner scope an actor gets for listing owned resources:
 // a tenant admin sees all; a user sees its own; an API key sees its own. Any
 // other principal sees nothing (the zero OwnerScope).
+//
+// Preserved as a thin legacy constructor for outbound.go during the list-scope
+// migration. Prefer OwnerListScope(actor, tenantID) for new call sites — it
+// additionally pins TenantID so the store can enforce tenant isolation in SQL.
 func ListScope(actor Actor) OwnerScope {
 	if actor.IsTenantAdmin() {
 		return OwnerScope{AllInTenant: true}
@@ -196,6 +204,113 @@ func ListScope(actor Actor) OwnerScope {
 		return OwnerScope{APIKeyID: &id}
 	}
 	return OwnerScope{}
+}
+
+// ZoneListFilter is the zone-scoped list query shape for domain zones,
+// mailboxes, and send identities. It is constructed by ZoneListScope so that
+// tenant isolation, the zone allowlist, and (for non-admin principals) zone
+// ownership all become SQL WHERE clauses rather than in-memory fallbacks.
+//
+// Field semantics:
+//   - TenantID is always set and must be applied as WHERE tenant_id = $1.
+//   - AllZones=true means every zone in the tenant passes the zone dimension.
+//     This is the case for an admin without an allowlist.
+//   - AllZones=false means ZoneIDs holds the allowed-zone set and must be
+//     applied as WHERE zone_id = ANY($2). An empty ZoneIDs slice means "no
+//     visible zone" and the store must return an empty result — it must NOT
+//     fall back to AllZones.
+//   - OwnerUserID, when non-nil, restricts to zones owned by that user
+//     (regular users / user-owned API keys). Admins and tenant-wide keys get a
+//     nil OwnerUserID (no owner filter). This is the zone.owner_user_id
+//     dimension; the caller resolves owned-zone IDs for the mailbox path and
+//     injects them via ZoneIDs.
+type ZoneListFilter struct {
+	TenantID    uuid.UUID
+	AllZones    bool
+	ZoneIDs     []uuid.UUID
+	OwnerUserID *uuid.UUID
+}
+
+// OwnerListFilter is the owner-scoped list query shape for resources that carry
+// an owning user / API key (outbound jobs). AllInTenant, UserID, and APIKeyID
+// are mutually exclusive: AllInTenant is true for tenant admins; otherwise
+// exactly one of UserID / APIKeyID is set. TenantID is always set and must be
+// applied as WHERE tenant_id = $1.
+type OwnerListFilter struct {
+	TenantID    uuid.UUID
+	AllInTenant bool
+	UserID      *uuid.UUID
+	APIKeyID    *uuid.UUID
+}
+
+// ZoneListScope resolves the zone-scoped list filter for an actor within a
+// tenant. Rules (must match the previous in-memory filters exactly):
+//
+//   - Tenant admin (or super admin) with an empty allowlist: AllZones=true,
+//     OwnerUserID=nil. The owner dimension is unrestricted.
+//   - Tenant admin with a non-empty allowlist: AllZones=false, ZoneIDs=allowlist,
+//     OwnerUserID=nil. (Admin + allowlist restricts to the listed zones.)
+//   - Tenant-wide (ownerless integration) API key with an empty allowlist:
+//     AllZones=true, OwnerUserID=nil.
+//   - Tenant-wide API key with a non-empty allowlist: AllZones=false,
+//     ZoneIDs=allowlist, OwnerUserID=nil.
+//   - Regular user or user-owned API key with an empty allowlist: AllZones=true,
+//     OwnerUserID=effective user. (The store applies owner_user_id; for the
+//     mailbox path the caller pre-resolves owned zone IDs into ZoneIDs.)
+//   - Regular user / user-owned API key with a non-empty allowlist:
+//     AllZones=false, ZoneIDs=allowlist, OwnerUserID=effective user.
+//
+// ZoneListScope never reads the store; owned-zone resolution for mailboxes
+// stays in the mailboxes service.
+func ZoneListScope(actor Actor, tenantID uuid.UUID) ZoneListFilter {
+	f := ZoneListFilter{TenantID: tenantID}
+	allowlist := actor.allowlist()
+	if actor.IsTenantAdmin() || actor.TenantWide {
+		if len(allowlist) > 0 {
+			f.ZoneIDs = allowlist
+		} else {
+			f.AllZones = true
+		}
+		return f
+	}
+	// Regular user or user-owned API key.
+	f.OwnerUserID = actor.EffectiveUserID()
+	if len(allowlist) > 0 {
+		f.ZoneIDs = allowlist
+	} else {
+		f.AllZones = true
+	}
+	return f
+}
+
+// OwnerListScope resolves the owner-scoped list filter for an actor within a
+// tenant. It mirrors the legacy ListScope(actor) rule and additionally pins
+// TenantID so the store can apply WHERE tenant_id = $1. The three owner
+// dimensions are mutually exclusive by construction.
+func OwnerListScope(actor Actor, tenantID uuid.UUID) OwnerListFilter {
+	f := OwnerListFilter{TenantID: tenantID}
+	if actor.IsTenantAdmin() {
+		f.AllInTenant = true
+		return f
+	}
+	switch actor.Type {
+	case PrincipalUser:
+		id := actor.ID
+		f.UserID = &id
+	case PrincipalAPIKey:
+		id := actor.ID
+		f.APIKeyID = &id
+	}
+	return f
+}
+
+// allowlist returns the actor's zone allowlist, or nil when the actor has no
+// permission profile (treated as unrestricted, matching ZoneAllowed).
+func (a Actor) allowlist() []uuid.UUID {
+	if a.Permission == nil {
+		return nil
+	}
+	return a.Permission.AllowedZoneIDs
 }
 
 // CanAccessOwned reports whether the actor may access a single resource owned by
@@ -227,48 +342,6 @@ type Authorizer struct {
 // New creates an Authorizer backed by the given store.
 func New(st Store) *Authorizer {
 	return &Authorizer{store: st}
-}
-
-// ActorFromContext extracts an Actor from the request context using the
-// existing middleware helpers, so callers don't need to build it manually.
-//
-// API key identity is checked first so that an API key with an owner is
-// correctly identified as PrincipalAPIKey (not PrincipalUser). The owner's
-// user ID is stored in OwnerUserID for fallback grant checks.
-func ActorFromContext(ctx context.Context) Actor {
-	actor := Actor{}
-
-	keyID := middleware.APIKeyIDFromCtx(ctx)
-	user := middleware.UserFromCtx(ctx)
-
-	if keyID != nil {
-		// API key is the primary identity — even when the key has an owner.
-		actor.Type = PrincipalAPIKey
-		actor.ID = *keyID
-		if ownerID := middleware.OwnerUserIDFromCtx(ctx); ownerID != nil {
-			actor.OwnerUserID = ownerID
-		} else {
-			// Only ownerless integration keys are tenant-wide. User-owned API keys
-			// keep the API-key principal for audit/grants, but inherit ownership via
-			// OwnerUserID rather than becoming broad tenant credentials.
-			actor.TenantWide = true
-		}
-	} else if user != nil {
-		actor.Type = PrincipalUser
-		actor.ID = user.ID
-		actor.TenantID = user.TenantID
-		actor.Role = user.Role
-	}
-
-	if tenant := middleware.TenantFromCtx(ctx); tenant != nil {
-		actor.TenantID = tenant.ID
-	}
-
-	actor.IsSuperAdmin = middleware.IsSuperAdmin(ctx)
-	actor.IsAdmin = middleware.IsAdmin(ctx)
-	actor.Permission = middleware.PermissionFromCtx(ctx)
-
-	return actor
 }
 
 // Authorize checks whether the actor can perform the action on the resource.
@@ -360,12 +433,6 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 	default:
 		return ErrForbidden("unknown action")
 	}
-}
-
-// AuthorizeFromContext is a convenience wrapper that extracts the Actor from
-// the context and delegates to Authorize.
-func (a *Authorizer) AuthorizeFromContext(ctx context.Context, action Action, res Resource) error {
-	return a.Authorize(ctx, ActorFromContext(ctx), action, res)
 }
 
 // ---------------------------------------------------------------------------

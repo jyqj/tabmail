@@ -21,6 +21,7 @@ import (
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/settings"
@@ -64,6 +65,7 @@ func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) me
 type RouterConfig struct {
 	Store              store.Store
 	ObjectStore        store.ObjectStore
+	RawObjects         *rawobject.Store
 	Hub                *realtime.Hub
 	Dispatcher         *hooks.Dispatcher
 	NamingMode         policy.NamingMode
@@ -80,7 +82,15 @@ type RouterConfig struct {
 	RateLimiter        *middleware.RateLimiter
 	OutboundService    *outbound.Service
 	Resolver           *resolver.Resolver
+	IngestInvalidator  policyInvalidatorProvider
 	Logger             zerolog.Logger
+}
+
+// policyInvalidatorProvider narrows the ingest.Service to the method the admin
+// handler needs, so router.go does not import internal/ingest (which would pull
+// redis/enmime into the API package's dependency surface).
+type policyInvalidatorProvider interface {
+	InvalidateSMTPPolicy()
 }
 
 func NewRouter(cfg RouterConfig) http.Handler {
@@ -103,10 +113,10 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	r.Use(middleware.PermissionLoader(st))
 	r.Use(cfg.RateLimiter.Middleware)
 
-	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
-	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
-	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
-	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
+	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
+	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
+	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
+	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
 	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)

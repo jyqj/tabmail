@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"tabmail/internal/config"
 	"tabmail/internal/models"
 )
 
@@ -54,18 +55,10 @@ func (a *directAdapter) Deliver(ctx context.Context, job *models.OutboundJob, mi
 
 // relayAdapter delivers through a configured SMTP relay.
 type relayAdapter struct {
-	cfg relayConfig
+	cfg config.Outbound
 }
 
-type relayConfig interface {
-	GetRelayHost() string
-	GetRelayPort() int
-	GetRelayUser() string
-	GetRelayPass() string
-	GetRelayTLS() string
-}
-
-func NewRelayAdapter(cfg relayConfig) DeliveryAdapter {
+func NewRelayAdapter(cfg config.Outbound) DeliveryAdapter {
 	return &relayAdapter{cfg: cfg}
 }
 
@@ -74,10 +67,10 @@ func (a *relayAdapter) Name() string { return "smtp_relay" }
 func (a *relayAdapter) Deliver(ctx context.Context, job *models.OutboundJob, mime []byte) (*DeliveryResult, error) {
 	result := &DeliveryResult{
 		Adapter:    a.Name(),
-		RemoteHost: a.cfg.GetRelayHost(),
+		RemoteHost: a.cfg.RelayHost,
 		StartedAt:  time.Now(),
 	}
-	err := deliverRelayVia(ctx, a.cfg, job.MailFrom, job.RcptTo, mime)
+	err := DeliverRelay(ctx, a.cfg, job.MailFrom, job.RcptTo, mime)
 	result.FinishedAt = time.Now()
 	if err != nil {
 		result.Error = err.Error()

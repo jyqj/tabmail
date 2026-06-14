@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
@@ -72,12 +73,27 @@ func (s *FakeStore) GetOutboundJob(_ context.Context, id uuid.UUID) (*models.Out
 	return cloneOutboundJob(job), nil
 }
 
-func (s *FakeStore) ListOutboundJobs(_ context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
+// ListOutboundJobsScoped mirrors the SQL: tenant_id always, plus the
+// mutually-exclusive owner dimension (AllInTenant for admins, user_id for
+// users, api_key_id for API keys).
+func (s *FakeStore) ListOutboundJobsScoped(_ context.Context, scope authz.OwnerListFilter, pg models.Page) ([]*models.OutboundJob, int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	return s.listOutboundJobsLocked(pg, func(job *models.OutboundJob) bool {
-		return job.TenantID == tenantID
-	})
+	pred := func(job *models.OutboundJob) bool {
+		if job.TenantID != scope.TenantID {
+			return false
+		}
+		switch {
+		case scope.AllInTenant:
+			return true
+		case scope.UserID != nil:
+			return job.UserID != nil && *job.UserID == *scope.UserID
+		case scope.APIKeyID != nil:
+			return job.APIKeyID != nil && *job.APIKeyID == *scope.APIKeyID
+		}
+		return false
+	}
+	return s.listOutboundJobsLocked(pg, pred)
 }
 
 func (s *FakeStore) ClaimOutboundJobs(_ context.Context, _ time.Time, _ int) ([]*models.OutboundJob, error) {
@@ -106,22 +122,6 @@ func (s *FakeStore) CountOutboundByIdentitySince(_ context.Context, tenantID uui
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.countOutboundByIdentitySinceLocked(tenantID, principalType, principalID, identityID, since), nil
-}
-
-func (s *FakeStore) ListOutboundJobsByUser(_ context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	return s.listOutboundJobsLocked(pg, func(job *models.OutboundJob) bool {
-		return job.TenantID == tenantID && job.UserID != nil && *job.UserID == userID
-	})
-}
-
-func (s *FakeStore) ListOutboundJobsByAPIKey(_ context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	return s.listOutboundJobsLocked(pg, func(job *models.OutboundJob) bool {
-		return job.TenantID == tenantID && job.APIKeyID != nil && *job.APIKeyID == apiKeyID
-	})
 }
 
 func (s *FakeStore) RequeueOutboundJob(_ context.Context, id uuid.UUID) error {
@@ -200,15 +200,33 @@ func (s *FakeStore) GetSendIdentity(_ context.Context, id uuid.UUID) (*models.Se
 	return nil, nil
 }
 
-func (s *FakeStore) ListSendIdentities(_ context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error) {
+// ListSendIdentitiesScoped mirrors the SQL: tenant_id always, plus zone
+// allowlist (ZoneIDs) when AllZones is false. An empty ZoneIDs with
+// AllZones=false yields empty.
+func (s *FakeStore) ListSendIdentitiesScoped(_ context.Context, scope authz.ZoneListFilter) ([]*models.SendIdentity, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if !scope.AllZones && len(scope.ZoneIDs) == 0 {
+		return []*models.SendIdentity{}, nil
+	}
+	allowed := make(map[uuid.UUID]struct{}, len(scope.ZoneIDs))
+	for _, id := range scope.ZoneIDs {
+		allowed[id] = struct{}{}
+	}
 	var out []*models.SendIdentity
 	for _, si := range s.sendIdentities {
-		if si.TenantID == tenantID {
-			out = append(out, si)
+		if si.TenantID != scope.TenantID {
+			continue
 		}
+		if !scope.AllZones {
+			if _, ok := allowed[si.ZoneID]; !ok {
+				continue
+			}
+		}
+		cp := *si
+		out = append(out, &cp)
 	}
+	sort.Slice(out, func(i, j int) bool { return out[i].CreatedAt.Before(out[j].CreatedAt) })
 	return out, nil
 }
 
@@ -455,4 +473,73 @@ func (s *FakeStore) listOutboundJobsLocked(pg models.Page, keep func(*models.Out
 		end = len(items)
 	}
 	return items[start:end], total, nil
+}
+
+func (s *FakeStore) CreateOutboundTemplate(_ context.Context, t *models.OutboundTemplate) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+	for _, existing := range s.outboundTemplates {
+		if existing.TenantID == t.TenantID && existing.Name == t.Name {
+			return errors.New("duplicate outbound template")
+		}
+	}
+	cp := *t
+	s.outboundTemplates[cp.ID] = &cp
+	return nil
+}
+
+func (s *FakeStore) GetOutboundTemplate(_ context.Context, tenantID uuid.UUID, name string) (*models.OutboundTemplate, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, t := range s.outboundTemplates {
+		if t.TenantID == tenantID && t.Name == name {
+			cp := *t
+			return &cp, nil
+		}
+	}
+	return nil, nil
+}
+
+func (s *FakeStore) ListOutboundTemplates(_ context.Context, tenantID uuid.UUID) ([]*models.OutboundTemplate, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var out []*models.OutboundTemplate
+	for _, t := range s.outboundTemplates {
+		if t.TenantID == tenantID {
+			cp := *t
+			out = append(out, &cp)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
+	return out, nil
+}
+
+func (s *FakeStore) UpdateOutboundTemplate(_ context.Context, t *models.OutboundTemplate) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for id, existing := range s.outboundTemplates {
+		if existing.TenantID == t.TenantID && existing.Name == t.Name {
+			cp := *t
+			cp.ID = existing.ID
+			cp.CreatedAt = existing.CreatedAt
+			s.outboundTemplates[id] = &cp
+			return nil
+		}
+	}
+	return errors.New("outbound template not found")
+}
+
+func (s *FakeStore) DeleteOutboundTemplate(_ context.Context, tenantID uuid.UUID, name string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for id, t := range s.outboundTemplates {
+		if t.TenantID == tenantID && t.Name == name {
+			delete(s.outboundTemplates, id)
+			return nil
+		}
+	}
+	return nil
 }

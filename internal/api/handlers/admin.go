@@ -27,6 +27,11 @@ type settingsManager interface {
 	Invalidate()
 }
 
+// policyInvalidator evicts the cached SMTP policy. Implemented by ingest.Service.
+type policyInvalidator interface {
+	InvalidateSMTPPolicy()
+}
+
 type AdminHandler struct {
 	service *adminapp.Service
 	// store serves super-admin read-only paths that carry no service-layer
@@ -35,8 +40,8 @@ type AdminHandler struct {
 	logger zerolog.Logger
 }
 
-func NewAdminHandler(s adminStore, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, l zerolog.Logger) *AdminHandler {
-	service := adminapp.NewService(s, dispatcher, defaultPolicy, sm, l)
+func NewAdminHandler(s adminStore, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, pi policyInvalidator, l zerolog.Logger) *AdminHandler {
+	service := adminapp.NewService(s, dispatcher, defaultPolicy, sm, pi, l)
 	return &AdminHandler{service: service, store: s, logger: l.With().Str("handler", "admin").Logger()}
 }
 
@@ -63,7 +68,7 @@ func (h *AdminHandler) CreateTenant(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid plan_id")
 		return
 	}
-	item, err := h.service.CreateTenant(r.Context(), body.Name, planID, actorFromRequest(r))
+	item, err := h.service.CreateTenant(r.Context(), body.Name, planID, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -82,7 +87,7 @@ func (h *AdminHandler) UpdateTenantOverride(w http.ResponseWriter, r *http.Reque
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.UpdateTenantOverride(r.Context(), tenantID, body, actorFromRequest(r))
+	item, err := h.service.UpdateTenantOverride(r.Context(), tenantID, body, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -96,7 +101,7 @@ func (h *AdminHandler) DeleteTenant(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	if err := h.service.DeleteTenant(r.Context(), id, actorFromRequest(r)); err != nil {
+	if err := h.service.DeleteTenant(r.Context(), id, middleware.ActorFromContext(r.Context()).AuditLabel()); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -132,7 +137,7 @@ func (h *AdminHandler) CreatePlan(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "name is required")
 		return
 	}
-	item, err := h.service.CreatePlan(r.Context(), &p, actorFromRequest(r))
+	item, err := h.service.CreatePlan(r.Context(), &p, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -152,7 +157,7 @@ func (h *AdminHandler) UpdatePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	p.ID = id
-	item, err := h.service.UpdatePlan(r.Context(), &p, actorFromRequest(r))
+	item, err := h.service.UpdatePlan(r.Context(), &p, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -166,7 +171,7 @@ func (h *AdminHandler) DeletePlan(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	if err := h.service.DeletePlan(r.Context(), id, actorFromRequest(r)); err != nil {
+	if err := h.service.DeletePlan(r.Context(), id, middleware.ActorFromContext(r.Context()).AuditLabel()); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -189,7 +194,7 @@ func (h *AdminHandler) CreateAPIKey(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Admin endpoint: no scope restriction, no owner
-	item, err := h.service.CreateAPIKey(r.Context(), tenantID, body.Label, body.Scopes, actorFromRequest(r), nil, nil, body.AllowedZoneIDs)
+	item, err := h.service.CreateAPIKey(r.Context(), tenantID, body.Label, body.Scopes, middleware.ActorFromContext(r.Context()).AuditLabel(), nil, nil, body.AllowedZoneIDs)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -217,7 +222,7 @@ func (h *AdminHandler) DeleteAPIKey(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid key id")
 		return
 	}
-	if err := h.service.DeleteAPIKey(r.Context(), keyID, actorFromRequest(r)); err != nil {
+	if err := h.service.DeleteAPIKey(r.Context(), keyID, middleware.ActorFromContext(r.Context()).AuditLabel()); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -278,7 +283,7 @@ func (h *AdminHandler) UpdateSMTPPolicy(w http.ResponseWriter, r *http.Request) 
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.UpdateSMTPPolicy(r.Context(), &body, actorFromRequest(r))
+	item, err := h.service.UpdateSMTPPolicy(r.Context(), &body, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -305,7 +310,7 @@ func (h *AdminHandler) UpdateSettings(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "at least one setting is required")
 		return
 	}
-	if err := h.service.BulkUpdateSettings(r.Context(), body, actorFromRequest(r)); err != nil {
+	if err := h.service.BulkUpdateSettings(r.Context(), body, middleware.ActorFromContext(r.Context()).AuditLabel()); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -331,7 +336,7 @@ func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) 
 	var callerPerm *models.EffectivePermission
 	var callerUserID *uuid.UUID
 
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if !actor.IsTenantAdmin() {
 		if actor.Permission != nil && !actor.Permission.CanCreateAPIKeys {
 			errForbidden(w, "API key creation not allowed")
@@ -353,7 +358,7 @@ func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) 
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.CreateAPIKey(ctx, tenant.ID, body.Label, body.Scopes, actorFromRequest(r), callerPerm, callerUserID, body.AllowedZoneIDs)
+	item, err := h.service.CreateAPIKey(ctx, tenant.ID, body.Label, body.Scopes, middleware.ActorFromContext(r.Context()).AuditLabel(), callerPerm, callerUserID, body.AllowedZoneIDs)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -370,7 +375,7 @@ func (h *AdminHandler) UserListAPIKeys(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Non-admin users only see their own keys
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if !actor.IsTenantAdmin() {
 		if actor.Type == authz.PrincipalUser {
 			items, err := h.service.ListAPIKeysByOwner(ctx, tenant.ID, actor.ID)
@@ -406,7 +411,7 @@ func (h *AdminHandler) UserDeleteAPIKey(w http.ResponseWriter, r *http.Request) 
 
 	// Non-admin callers pass their user ID for ownership check
 	var callerUserID *uuid.UUID
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if !actor.IsTenantAdmin() {
 		if actor.Type == authz.PrincipalUser {
 			id := actor.ID
@@ -414,7 +419,7 @@ func (h *AdminHandler) UserDeleteAPIKey(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	if err := h.service.DeleteAPIKeyForTenant(ctx, tenant.ID, keyID, actorFromRequest(r), callerUserID); err != nil {
+	if err := h.service.DeleteAPIKeyForTenant(ctx, tenant.ID, keyID, middleware.ActorFromContext(r.Context()).AuditLabel(), callerUserID); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}

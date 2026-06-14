@@ -8,32 +8,32 @@ import (
 	"tabmail/internal/config"
 	"tabmail/internal/metrics"
 	"tabmail/internal/rawobject"
-	"tabmail/internal/store"
 )
 
 type retentionStore interface {
 	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
 	DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error)
 	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
-	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 	PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error)
+	EnqueueOrphanRetry(ctx context.Context, key string) error
+	ListPendingOrphanRetries(ctx context.Context, limit int) ([]string, error)
+	ClearOrphanRetry(ctx context.Context, key string) error
+	ReapExhaustedOrphanRetries(ctx context.Context) (int, error)
 }
 
 type Scanner struct {
-	store      retentionStore
-	obj        store.ObjectStore
-	cfg        config.Storage
-	logger     zerolog.Logger
-	failedKeys map[string]struct{}
+	objects *rawobject.Store
+	store   retentionStore
+	cfg     config.Storage
+	logger  zerolog.Logger
 }
 
-func New(s retentionStore, obj store.ObjectStore, cfg config.Storage, logger zerolog.Logger) *Scanner {
+func New(objects *rawobject.Store, s retentionStore, cfg config.Storage, logger zerolog.Logger) *Scanner {
 	return &Scanner{
-		store:      s,
-		obj:        obj,
-		cfg:        cfg,
-		logger:     logger.With().Str("component", "retention").Logger(),
-		failedKeys: make(map[string]struct{}),
+		objects: objects,
+		store:   s,
+		cfg:     cfg,
+		logger:  logger.With().Str("component", "retention").Logger(),
 	}
 }
 
@@ -66,6 +66,7 @@ func (sc *Scanner) sweep(ctx context.Context) {
 	total := 0
 
 	sc.retryFailedKeys(ctx)
+	sc.reapExhausted(ctx)
 
 	for {
 		n, keys, err := sc.store.DeleteExpiredMessagesReturningKeys(ctx, now, sc.cfg.RetentionBatchSize)
@@ -107,33 +108,64 @@ func (sc *Scanner) purgeIngestJobs(ctx context.Context) {
 }
 
 func (sc *Scanner) deleteObjectIfOrphaned(ctx context.Context, key string) {
-	switch out, err := rawobject.Release(ctx, sc.store, sc.obj, key); out {
+	switch out, err := sc.objects.Release(ctx, key); out {
 	case rawobject.CountFailed:
 		sc.logger.Warn().Err(err).Str("key", key).Msg("counting object references")
-		sc.failedKeys[key] = struct{}{}
+		sc.enqueueRetry(ctx, key)
 	case rawobject.DeleteFailed:
 		metrics.RetentionObjectFailed()
 		sc.logger.Warn().Err(err).Str("key", key).Msg("deleting object")
-		sc.failedKeys[key] = struct{}{}
+		sc.enqueueRetry(ctx, key)
 	case rawobject.Deleted:
 		metrics.RetentionObjectDeleted()
-		delete(sc.failedKeys, key)
+		sc.clearRetry(ctx, key)
 	default: // StillReferenced or Noop
-		delete(sc.failedKeys, key)
+		sc.clearRetry(ctx, key)
+	}
+}
+
+func (sc *Scanner) enqueueRetry(ctx context.Context, key string) {
+	if err := sc.store.EnqueueOrphanRetry(ctx, key); err != nil {
+		sc.logger.Warn().Err(err).Str("key", key).Msg("enqueue orphan retry")
+	}
+}
+
+func (sc *Scanner) clearRetry(ctx context.Context, key string) {
+	if err := sc.store.ClearOrphanRetry(ctx, key); err != nil {
+		sc.logger.Warn().Err(err).Str("key", key).Msg("clear orphan retry")
 	}
 }
 
 func (sc *Scanner) retryFailedKeys(ctx context.Context) {
-	if len(sc.failedKeys) == 0 {
+	keys, err := sc.store.ListPendingOrphanRetries(ctx, sc.cfg.RetentionBatchSize)
+	if err != nil {
+		sc.logger.Warn().Err(err).Msg("listing pending orphan retries")
+		return
+	}
+	if len(keys) == 0 {
 		return
 	}
 	retried := 0
-	for key := range sc.failedKeys {
+	for _, key := range keys {
 		sc.deleteObjectIfOrphaned(ctx, key)
 		retried++
 	}
 	if retried > 0 {
-		sc.logger.Info().Int("retried", retried).Int("remaining", len(sc.failedKeys)).Msg("retried previously failed object deletions")
+		sc.logger.Info().Int("retried", retried).Msg("retried previously failed object deletions")
+	}
+}
+
+// reapExhausted drops retry entries that have hit the attempt cap. Without this
+// the orphan_objects table would accumulate zombie rows — keys that are no
+// longer retried (filtered out of ListPendingOrphanRetries) yet never cleared.
+func (sc *Scanner) reapExhausted(ctx context.Context) {
+	n, err := sc.store.ReapExhaustedOrphanRetries(ctx)
+	if err != nil {
+		sc.logger.Warn().Err(err).Msg("reaping exhausted orphan retries")
+		return
+	}
+	if n > 0 {
+		sc.logger.Info().Int("dropped", n).Msg("dropped exhausted orphan object retries")
 	}
 }
 

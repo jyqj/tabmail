@@ -25,6 +25,7 @@ import (
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/retention"
@@ -34,6 +35,7 @@ import (
 	"tabmail/internal/store/fileobj"
 	"tabmail/internal/store/postgres"
 	"tabmail/internal/store/s3obj"
+	"tabmail/internal/template"
 )
 
 var version = "dev"
@@ -96,6 +98,9 @@ func main() {
 	// --- Bootstrap admin user ---
 	bootstrapAdmin(ctx, pg, cfg, logger)
 
+	// --- Raw-object lifecycle store (shared by API handlers + retention) ---
+	objects := rawobject.NewStore(obj, pg)
+
 	// --- System settings (DB-backed, env-var seeded) ---
 	settingsMgr := settings.NewManager(pg, logger)
 	settingsMgr.Seed(ctx, map[string]settings.SeedValue{
@@ -151,6 +156,10 @@ func main() {
 	var outboundSvc *outbound.Service
 	if cfg.Outbound.Enabled {
 		outboundSvc = outbound.NewService(cfg.Outbound, pg, logger)
+		// Wire the optional template renderer. With it attached, callers that
+		// set template_name get tenant-scoped, html/template-escaped rendering;
+		// callers that omit it stay on the byte-identical bare-string path.
+		outboundSvc.SetTemplateService(template.NewService(pg))
 	}
 
 	defaultPlanID, _ := uuid.Parse(cfg.DefaultPlanID)
@@ -158,6 +167,7 @@ func main() {
 	routerCfg := api.RouterConfig{
 		Store:              pg,
 		ObjectStore:        obj,
+		RawObjects:         objects,
 		Hub:                hub,
 		Dispatcher:         dispatcher,
 		NamingMode:         namingMode,
@@ -173,11 +183,12 @@ func main() {
 		HTTP:               cfg.HTTP,
 		OutboundService:    outboundSvc,
 		Resolver:           res,
+		IngestInvalidator:  ingestSvc,
 		Logger:             logger,
 	}
 
 	// --- Retention scanner ---
-	ret := retention.New(pg, obj, cfg.Storage, logger)
+	ret := retention.New(objects, pg, cfg.Storage, logger)
 	var smtpSrv *smtpsrv.Server
 	var httpSrv *http.Server
 

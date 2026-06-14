@@ -15,7 +15,6 @@ import (
 	"tabmail/internal/config"
 	"tabmail/internal/ingest"
 	"tabmail/internal/metrics"
-	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/resolver"
 )
@@ -146,6 +145,13 @@ type session struct {
 	logger     zerolog.Logger
 	from       string
 	recipients []string
+	// results caches RCPT-phase resolver.Results keyed by sanitizeAddr(rcpt) so
+	// DATA can hand them to ingest.Accept via WithResolved and skip a redundant
+	// Resolve per recipient. Only Reusable entries (Mailbox present, not just
+	// Created) are stored; auto-create results are left for deliver to resolve.
+	// The map is touched only from the single go-smtp session goroutine, so it
+	// needs no extra synchronization.
+	results map[string]*resolver.Result
 }
 
 func (s *session) AuthPlain(_ string, _ string) error {
@@ -165,7 +171,7 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 		return gosmtp.ErrAuthUnsupported
 	}
 	s.from = sanitizeAddr(from)
-	pol, err := s.currentPolicy()
+	pol, err := s.backend.ingest.CurrentPolicy(context.Background())
 	if err != nil {
 		return smtpErr(451, "temporary policy lookup failure")
 	}
@@ -182,7 +188,7 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 		metrics.SMTPRecipientRejected()
 		return smtpErr(550, "invalid recipient")
 	}
-	pol, err := s.currentPolicy()
+	pol, err := s.backend.ingest.CurrentPolicy(context.Background())
 	if err != nil {
 		return smtpErr(451, "temporary policy lookup failure")
 	}
@@ -214,6 +220,15 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 	metrics.TenantRecipientAccepted(res.Zone.TenantID.String())
 	metrics.MailboxRecipientAccepted(addr)
 	s.recipients = append(s.recipients, addr)
+	// Cache Reusable results for DATA-phase reuse. Check never sets Created, so
+	// the Mailbox!=nil gate alone matches Reusable here; the helper is used for
+	// symmetry with deliver's reuse condition and to keep the contract explicit.
+	if res.Reusable() {
+		if s.results == nil {
+			s.results = map[string]*resolver.Result{}
+		}
+		s.results[addr] = res
+	}
 	return nil
 }
 
@@ -230,11 +245,18 @@ func (s *session) Data(r io.Reader) error {
 		metrics.SMTPMessageRejected()
 		return smtpErr(554, "no valid recipients")
 	}
+	// Hand the RCPT-phase results to deliver via WithResolved. recipients are
+	// already sanitizeAddr-normalized (set in Rcpt), and WithResolved re-runs
+	// sanitizeAddr on the key, so the map lookup aligns byte-for-byte.
+	opts := make([]ingest.AcceptOption, 0, len(s.results))
+	for addr, r := range s.results {
+		opts = append(opts, ingest.WithResolved(addr, r))
+	}
 	res, err := s.backend.ingest.Accept(ctx, ingest.Envelope{
 		Source:     "smtp",
 		MailFrom:   s.from,
 		Recipients: append([]string(nil), s.recipients...),
-	}, raw)
+	}, raw, opts...)
 	if err != nil {
 		s.logger.Warn().Err(err).Msg("ingest accept failed")
 		metrics.SMTPMessageRejected()
@@ -255,15 +277,12 @@ func (s *session) Data(r io.Reader) error {
 func (s *session) Reset() {
 	s.from = ""
 	s.recipients = nil
+	s.results = nil
 }
 
 func (s *session) Logout() error {
 	metrics.SMTPSessionClosed()
 	return nil
-}
-
-func (s *session) currentPolicy() (*models.SMTPPolicy, error) {
-	return s.backend.currentPolicy(context.Background())
 }
 
 func smtpErr(code int, msg string) error {
@@ -278,8 +297,4 @@ func sanitizeAddr(addr string) string {
 	addr = strings.TrimPrefix(addr, "<")
 	addr = strings.TrimSuffix(addr, ">")
 	return strings.ToLower(addr)
-}
-
-func (b *backend) currentPolicy(ctx context.Context) (*models.SMTPPolicy, error) {
-	return b.ingest.CurrentPolicy(ctx)
 }

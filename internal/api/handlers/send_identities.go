@@ -17,7 +17,7 @@ import (
 type sendIdentityStore interface {
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
 	GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.SendIdentity, error)
-	ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error)
+	ListSendIdentitiesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.SendIdentity, error)
 	DeleteSendIdentity(ctx context.Context, id uuid.UUID) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 }
@@ -46,17 +46,14 @@ func (h *SendIdentityHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	items, err := h.store.ListSendIdentities(ctx, tenant.ID)
+	// Tenant isolation and the zone allowlist are enforced in SQL via the
+	// ZoneListFilter, replacing the previous in-memory filterSendIdentitiesByZone.
+	actor := middleware.ActorFromContext(ctx)
+	items, err := h.store.ListSendIdentitiesScoped(ctx, authz.ZoneListScope(actor, tenant.ID))
 	if err != nil {
 		h.logger.Err(err).Msg("listing send identities")
 		errInternal(w)
 		return
-	}
-
-	// Filter by AllowedZoneIDs for non-admin callers.
-	actor := authz.ActorFromContext(ctx)
-	if !actor.IsTenantAdmin() {
-		items = filterSendIdentitiesByZone(actor, items)
 	}
 
 	if items == nil {
@@ -88,7 +85,7 @@ func (h *SendIdentityHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.TenantID == uuid.Nil {
 		errForbidden(w, "authentication required")
 		return
@@ -140,7 +137,7 @@ func (h *SendIdentityHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.TenantID == uuid.Nil {
 		errForbidden(w, "authentication required")
 		return
@@ -166,18 +163,4 @@ func (h *SendIdentityHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	noContent(w)
-}
-
-// filterSendIdentitiesByZone filters send identities based on the actor's
-// allowed-zone list via the authz seam. ZoneAllowed treats admins and an
-// absent/empty allowlist as all-zones-allowed, matching the previous inline
-// filter (which was only invoked for non-admin callers).
-func filterSendIdentitiesByZone(actor authz.Actor, items []*models.SendIdentity) []*models.SendIdentity {
-	out := make([]*models.SendIdentity, 0, len(items))
-	for _, si := range items {
-		if authz.ZoneAllowed(actor, si.ZoneID) {
-			out = append(out, si)
-		}
-	}
-	return out
 }

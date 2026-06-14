@@ -324,6 +324,15 @@ CREATE INDEX IF NOT EXISTS idx_messages_tenant_expires ON messages(tenant_id, ex
 CREATE INDEX IF NOT EXISTS idx_messages_expires        ON messages(expires_at);
 CREATE INDEX IF NOT EXISTS idx_messages_raw_object_key ON messages(raw_object_key) WHERE raw_object_key IS NOT NULL;
 
+-- OTP signal columns added to the already-created messages table. ALTER ...
+-- ADD COLUMN IF NOT EXISTS keeps existing databases compatible: a pre-P6
+-- instance has the columns added with defaults on schema reload, and code that
+-- has not yet been upgraded still writes rows (the new columns fall back to
+-- their DEFAULT). otp_code is short-lived sensitive credential stored for the
+-- message's retention window (expires_at) alongside the raw object.
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS otp_code       VARCHAR(32) NOT NULL DEFAULT '';
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS otp_confidence REAL        NOT NULL DEFAULT 0;
+
 -- ============================================================
 -- Outbound jobs (send queue)
 -- ============================================================
@@ -382,6 +391,23 @@ CREATE TABLE IF NOT EXISTS send_identities (
 CREATE INDEX IF NOT EXISTS idx_send_identities_zone ON send_identities(zone_id);
 CREATE INDEX IF NOT EXISTS idx_send_identities_tenant ON send_identities(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_send_identities_address ON send_identities(address);
+
+-- ============================================================
+-- Outbound templates (tenant-scoped email templates)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS outbound_templates (
+    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id    UUID         NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name         VARCHAR(128) NOT NULL,
+    subject_tmpl TEXT         NOT NULL DEFAULT '',
+    text_tmpl    TEXT,
+    html_tmpl    TEXT,
+    created_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    UNIQUE (tenant_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_outbound_templates_tenant_name ON outbound_templates(tenant_id, name);
 
 -- ============================================================
 -- System operations
@@ -610,3 +636,15 @@ CREATE TABLE IF NOT EXISTS suppression_list (
 );
 CREATE INDEX IF NOT EXISTS idx_suppression_tenant_addr ON suppression_list(tenant_id, LOWER(address));
 CREATE INDEX IF NOT EXISTS idx_webhook_endpoints_active ON webhook_endpoints(tenant_id) WHERE is_active = TRUE;
+
+-- ============================================================
+-- Orphan object retry queue (retention scanner persistence)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS orphan_objects (
+    object_key     VARCHAR(512) PRIMARY KEY,
+    first_failed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_failed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    attempts       INT         NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_orphan_objects_last_failed ON orphan_objects(last_failed_at);

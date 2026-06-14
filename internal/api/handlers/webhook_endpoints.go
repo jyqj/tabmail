@@ -124,7 +124,7 @@ func (h *WebhookEndpointHandler) Update(w http.ResponseWriter, r *http.Request) 
 	if !authorizeWebhookEndpointAccess(w, r, "webhooks:write") {
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	if actor.TenantID == uuid.Nil {
 		errForbidden(w, "tenant required")
 		return
@@ -184,7 +184,7 @@ func (h *WebhookEndpointHandler) Delete(w http.ResponseWriter, r *http.Request) 
 	if !authorizeWebhookEndpointAccess(w, r, "webhooks:write") {
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	if actor.TenantID == uuid.Nil {
 		errForbidden(w, "tenant required")
 		return
@@ -218,7 +218,7 @@ func (h *WebhookEndpointHandler) Delete(w http.ResponseWriter, r *http.Request) 
 // is intentionally stricter than the routes' RequireScopes middleware, which
 // passes any logged-in JWT user; this helper adds that rule on purpose.
 func authorizeWebhookEndpointAccess(w http.ResponseWriter, r *http.Request, requiredScope string) bool {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	switch {
 	case actor.IsTenantAdmin():
 		return true

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 )
 
@@ -62,6 +63,40 @@ func (s *FakeStore) ListZones(_ context.Context, tenantID uuid.UUID) ([]*models.
 			cp := *z
 			out = append(out, &cp)
 		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Domain < out[j].Domain })
+	return out, nil
+}
+
+// ListZonesScoped mirrors the SQL: tenant_id always, plus the zone allowlist
+// (ZoneIDs) when AllZones is false, plus owner_user_id when OwnerUserID is set.
+func (s *FakeStore) ListZonesScoped(_ context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if !scope.AllZones && len(scope.ZoneIDs) == 0 {
+		return []*models.DomainZone{}, nil
+	}
+	allowed := make(map[uuid.UUID]struct{}, len(scope.ZoneIDs))
+	for _, id := range scope.ZoneIDs {
+		allowed[id] = struct{}{}
+	}
+	var out []*models.DomainZone
+	for _, z := range s.zones {
+		if z.TenantID != scope.TenantID {
+			continue
+		}
+		if !scope.AllZones {
+			if _, ok := allowed[z.ID]; !ok {
+				continue
+			}
+		}
+		if scope.OwnerUserID != nil {
+			if z.OwnerUserID == nil || *z.OwnerUserID != *scope.OwnerUserID {
+				continue
+			}
+		}
+		cp := *z
+		out = append(out, &cp)
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Domain < out[j].Domain })
 	return out, nil

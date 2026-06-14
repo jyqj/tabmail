@@ -35,7 +35,6 @@ type storeRepo interface {
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
-	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type Viewer struct {
@@ -59,14 +58,15 @@ func (v Viewer) IsTenantAdmin() bool { return v.IsSuperAdmin || v.IsAdmin }
 type Service struct {
 	store      storeRepo
 	obj        store.ObjectStore
+	objects    *rawobject.Store
 	hub        *realtime.Hub
 	dispatcher *hooks.Dispatcher
 	resolver   *mailboxResolver
 	logger     zerolog.Logger
 }
 
-func NewService(s storeRepo, obj store.ObjectStore, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, logger zerolog.Logger) *Service {
-	return &Service{store: s, obj: obj, hub: hub, dispatcher: dispatcher, resolver: newMailboxResolver(s, namingMode, stripPlus, tokenSecret), logger: logger.With().Str("service", "messages").Logger()}
+func NewService(s storeRepo, obj store.ObjectStore, objects *rawobject.Store, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, logger zerolog.Logger) *Service {
+	return &Service{store: s, obj: obj, objects: objects, hub: hub, dispatcher: dispatcher, resolver: newMailboxResolver(s, namingMode, stripPlus, tokenSecret), logger: logger.With().Str("service", "messages").Logger()}
 }
 
 // ResolveMailbox delegates to the mailbox-access resolver, which owns the
@@ -172,7 +172,7 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 	if err := s.store.DeleteMessage(ctx, msgID); err != nil {
 		return app.Internal(err)
 	}
-	_, _ = rawobject.Release(ctx, s.store, s.obj, msg.RawObjectKey)
+	_, _ = s.objects.Release(ctx, msg.RawObjectKey)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "message.delete", ResourceType: "message", ResourceID: app.UUIDPtr(msg.ID), Details: app.MustJSON(map[string]any{"mailbox": mb.FullAddress})})
 	if s.hub != nil {
 		s.hub.Publish(realtime.Event{Type: realtime.EventDelete, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: msg.Sender, Subject: msg.Subject, Size: msg.Size})
@@ -196,7 +196,7 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 		return app.Internal(err)
 	}
 	for _, key := range uniqueStrings(keys) {
-		if _, err := rawobject.Release(ctx, s.store, s.obj, key); err != nil {
+		if _, err := s.objects.Release(ctx, key); err != nil {
 			s.logger.Warn().Err(err).Str("key", key).Msg("release raw object during purge")
 		}
 	}

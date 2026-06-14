@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"tabmail/internal/authz"
 	"tabmail/internal/config"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
@@ -478,6 +480,44 @@ func (s *PgStore) ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.
 	return scanZones(rows)
 }
 
+// ListZonesScoped applies the ZoneListFilter in SQL. The WHERE clauses mirror
+// the previous in-memory filterAccessibleZones (CanManageZone ∧ ZoneAllowed):
+//
+//   - tenant_id is always pinned (tenant isolation in SQL, never in-memory).
+//   - When scope.AllZones is false, zone_id = ANY($n) restricts to the allowlist
+//     (or the caller-resolved owned-zone set). An empty ZoneIDs with AllZones=false
+//     yields no rows — there is no AllZones fallback.
+//   - When scope.OwnerUserID is non-nil, owner_user_id = $n restricts to the
+//     owner's zones (regular users / user-owned API keys). Admins and
+//     tenant-wide keys get no owner filter.
+func (s *PgStore) ListZonesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error) {
+	var (
+		where = []string{"tenant_id=$1"}
+		args  = []any{scope.TenantID}
+		n     = 1
+	)
+	if !scope.AllZones {
+		if len(scope.ZoneIDs) == 0 {
+			// No visible zone: return empty without hitting the DB.
+			return []*models.DomainZone{}, nil
+		}
+		n++
+		where = append(where, "id = ANY($"+strconv.Itoa(n)+")")
+		args = append(args, scope.ZoneIDs)
+	}
+	if scope.OwnerUserID != nil {
+		n++
+		where = append(where, "owner_user_id = $"+strconv.Itoa(n))
+		args = append(args, *scope.OwnerUserID)
+	}
+	q := zoneSelect + " WHERE " + strings.Join(where, " AND ") + " ORDER BY domain"
+	rows, err := s.pool.Query(ctx, q, args...)
+	if err != nil {
+		return nil, err
+	}
+	return scanZones(rows)
+}
+
 func (s *PgStore) ListAllZones(ctx context.Context) ([]*models.DomainZone, error) {
 	rows, err := s.pool.Query(ctx, zoneSelect+` ORDER BY domain`)
 	if err != nil {
@@ -747,73 +787,50 @@ func (s *PgStore) scanMailbox(row pgx.Row) (*models.Mailbox, error) {
 	return m, err
 }
 
-func (s *PgStore) ListMailboxes(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
+// ListMailboxesScoped applies the ZoneListFilter in SQL, mirroring the previous
+// in-memory mailboxes.List (accessibleZoneIDs ∩ ZoneAllowed). The mailbox
+// owner dimension is expressed via zone membership: the caller resolves owned
+// zone IDs into scope.ZoneIDs for the regular-user path, so the same
+// tenant_id + zone_id=ANY + owner_user_id clauses enforce everything. An empty
+// ZoneIDs with AllZones=false returns an empty result with no fallback.
+func (s *PgStore) ListMailboxesScoped(ctx context.Context, scope authz.ZoneListFilter, pg models.Page) ([]*models.Mailbox, int, error) {
 	pg = pg.Normalize()
-	var total int
-	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM mailboxes WHERE tenant_id=$1`, tenantID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-	rows, err := s.pool.Query(ctx,
-		mailboxSelect+` WHERE m.tenant_id=$1 ORDER BY m.created_at DESC LIMIT $2 OFFSET $3`,
-		tenantID, pg.PerPage, pg.Offset())
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-	var out []*models.Mailbox
-	for rows.Next() {
-		m := &models.Mailbox{}
-		if err := rows.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
-			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
-			&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt); err != nil {
-			return nil, 0, err
-		}
-		out = append(out, m)
-	}
-	return out, total, rows.Err()
-}
-
-func (s *PgStore) ListMailboxesByZone(ctx context.Context, zoneID uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
-	pg = pg.Normalize()
-	var total int
-	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM mailboxes WHERE zone_id=$1`, zoneID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-	rows, err := s.pool.Query(ctx,
-		mailboxSelect+` WHERE m.zone_id=$1 ORDER BY m.created_at DESC LIMIT $2 OFFSET $3`,
-		zoneID, pg.PerPage, pg.Offset())
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-	var out []*models.Mailbox
-	for rows.Next() {
-		m := &models.Mailbox{}
-		if err := rows.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
-			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
-			&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt); err != nil {
-			return nil, 0, err
-		}
-		out = append(out, m)
-	}
-	return out, total, rows.Err()
-}
-
-func (s *PgStore) ListMailboxesByZones(ctx context.Context, tenantID uuid.UUID, zoneIDs []uuid.UUID, pg models.Page) ([]*models.Mailbox, int, error) {
-	pg = pg.Normalize()
-	if len(zoneIDs) == 0 {
+	if !scope.AllZones && len(scope.ZoneIDs) == 0 {
 		return []*models.Mailbox{}, 0, nil
 	}
+	args := []any{scope.TenantID}
+	// countWhere is built against bare mailboxes columns; rowWhere against the
+	// mailboxSelect "m" alias. They carry the same $N placeholders so a single
+	// args slice serves both.
+	countClauses := []string{"tenant_id=$1"}
+	rowClauses := []string{"m.tenant_id=$1"}
+	n := 1
+	if !scope.AllZones {
+		n++
+		countClauses = append(countClauses, "zone_id = ANY($"+strconv.Itoa(n)+")")
+		rowClauses = append(rowClauses, "m.zone_id = ANY($"+strconv.Itoa(n)+")")
+		args = append(args, scope.ZoneIDs)
+	}
+	// Owner dimension for the regular-user path: restrict to zones owned by
+	// the user. Only applied when OwnerUserID is set (admins / tenant-wide keys
+	// get nil). The caller also feeds resolved owned-zone IDs into ZoneIDs, so
+	// this is a defense-in-depth guard.
+	if scope.OwnerUserID != nil {
+		n++
+		countClauses = append(countClauses, "zone_id IN (SELECT id FROM domain_zones WHERE owner_user_id = $"+strconv.Itoa(n)+")")
+		rowClauses = append(rowClauses, "m.zone_id IN (SELECT id FROM domain_zones WHERE owner_user_id = $"+strconv.Itoa(n)+")")
+		args = append(args, *scope.OwnerUserID)
+	}
 	var total int
 	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND zone_id=ANY($2)`, tenantID, zoneIDs).Scan(&total); err != nil {
+		"SELECT count(*) FROM mailboxes WHERE "+strings.Join(countClauses, " AND "), args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
+	rowArgs := append(args, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx,
-		mailboxSelect+` WHERE m.tenant_id=$1 AND m.zone_id=ANY($2) ORDER BY m.created_at DESC LIMIT $3 OFFSET $4`,
-		tenantID, zoneIDs, pg.PerPage, pg.Offset())
+		mailboxSelect+" WHERE "+strings.Join(rowClauses, " AND ")+
+			" ORDER BY m.created_at DESC LIMIT $"+strconv.Itoa(n+1)+" OFFSET $"+strconv.Itoa(n+2),
+		rowArgs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -911,10 +928,12 @@ func (s *PgStore) CreateMessage(ctx context.Context, m *models.Message) error {
 	}
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO messages (id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,
-			size,seen,raw_object_key,headers_json,received_at,expires_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+			size,seen,raw_object_key,headers_json,received_at,expires_at,
+			otp_code,otp_confidence)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
 		m.ID, m.TenantID, m.MailboxID, m.ZoneID, m.Sender, m.Recipients, m.Subject,
-		m.Size, m.Seen, m.RawObjectKey, m.HeadersJSON, m.ReceivedAt, m.ExpiresAt); err != nil {
+		m.Size, m.Seen, m.RawObjectKey, m.HeadersJSON, m.ReceivedAt, m.ExpiresAt,
+		m.OTPCode, m.OTPConfidence); err != nil {
 		return err
 	}
 	return tx.Commit(ctx)
@@ -958,10 +977,12 @@ func (s *PgStore) CreateMessageWithQuota(ctx context.Context, m *models.Message,
 	}
 	if _, err := tx.Exec(ctx, `
 		INSERT INTO messages (id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,
-			size,seen,raw_object_key,headers_json,received_at,expires_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+			size,seen,raw_object_key,headers_json,received_at,expires_at,
+			otp_code,otp_confidence)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
 		m.ID, m.TenantID, m.MailboxID, m.ZoneID, m.Sender, m.Recipients, m.Subject,
-		m.Size, m.Seen, m.RawObjectKey, m.HeadersJSON, m.ReceivedAt, m.ExpiresAt); err != nil {
+		m.Size, m.Seen, m.RawObjectKey, m.HeadersJSON, m.ReceivedAt, m.ExpiresAt,
+		m.OTPCode, m.OTPConfidence); err != nil {
 		return false, err
 	}
 	return true, tx.Commit(ctx)
@@ -971,11 +992,12 @@ func (s *PgStore) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message
 	m := &models.Message{}
 	err := s.pool.QueryRow(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
-		       raw_object_key,headers_json,received_at,expires_at
+		       raw_object_key,headers_json,received_at,expires_at,
+		       otp_code,otp_confidence
 		FROM messages WHERE id=$1`, id).
 		Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients,
 			&m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON,
-			&m.ReceivedAt, &m.ExpiresAt)
+			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence)
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
@@ -986,11 +1008,12 @@ func (v *pgTenantView) GetMessage(ctx context.Context, id uuid.UUID) (*models.Me
 	m := &models.Message{}
 	err := v.store.pool.QueryRow(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
-		       raw_object_key,headers_json,received_at,expires_at
+		       raw_object_key,headers_json,received_at,expires_at,
+		       otp_code,otp_confidence
 		FROM messages WHERE id=$1 AND tenant_id=$2`, id, v.tenantID).
 		Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients,
 			&m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON,
-			&m.ReceivedAt, &m.ExpiresAt)
+			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence)
 	if err == pgx.ErrNoRows {
 		return nil, nil
 	}
@@ -1006,7 +1029,8 @@ func (s *PgStore) ListMessages(ctx context.Context, mailboxID uuid.UUID, pg mode
 	}
 	rows, err := s.pool.Query(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
-		       raw_object_key,headers_json,received_at,expires_at
+		       raw_object_key,headers_json,received_at,expires_at,
+		       otp_code,otp_confidence
 		FROM messages WHERE mailbox_id=$1 ORDER BY received_at DESC LIMIT $2 OFFSET $3`,
 		mailboxID, pg.PerPage, pg.Offset())
 	if err != nil {
@@ -1018,7 +1042,8 @@ func (s *PgStore) ListMessages(ctx context.Context, mailboxID uuid.UUID, pg mode
 		m := &models.Message{}
 		if err := rows.Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender,
 			&m.Recipients, &m.Subject, &m.Size, &m.Seen, &m.RawObjectKey,
-			&m.HeadersJSON, &m.ReceivedAt, &m.ExpiresAt); err != nil {
+			&m.HeadersJSON, &m.ReceivedAt, &m.ExpiresAt,
+			&m.OTPCode, &m.OTPConfidence); err != nil {
 			return nil, 0, err
 		}
 		out = append(out, m)
@@ -1127,6 +1152,63 @@ func (s *PgStore) ReleaseRawObjectIfUnreferenced(ctx context.Context, key string
 		}
 	}
 	return true, tx.Commit(ctx)
+}
+
+const orphanMaxAttempts = 10
+
+// EnqueueOrphanRetry records (or re-records) a raw object key whose deletion
+// failed, so the retention scanner can retry it across restarts. Idempotent:
+// re-enqueue bumps last_failed_at and attempts. Keys past orphanMaxAttempts are
+// dropped to bound the queue.
+func (s *PgStore) EnqueueOrphanRetry(ctx context.Context, key string) error {
+	_, err := s.pool.Exec(ctx, `
+		INSERT INTO orphan_objects (object_key, first_failed_at, last_failed_at, attempts)
+		VALUES ($1, now(), now(), 1)
+		ON CONFLICT (object_key) DO UPDATE
+			SET last_failed_at = now(),
+			    attempts = orphan_objects.attempts + 1`, key)
+	return err
+}
+
+// ListPendingOrphanRetries returns up to limit keys still under the retry
+// attempt cap, oldest failures first.
+func (s *PgStore) ListPendingOrphanRetries(ctx context.Context, limit int) ([]string, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT object_key FROM orphan_objects
+		WHERE attempts < $2
+		ORDER BY last_failed_at
+		LIMIT $1`, limit, orphanMaxAttempts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []string
+	for rows.Next() {
+		var key string
+		if err := rows.Scan(&key); err != nil {
+			return nil, err
+		}
+		out = append(out, key)
+	}
+	return out, rows.Err()
+}
+
+// ClearOrphanRetry removes a key from the retry queue once it has been deleted
+// (or is no longer orphaned). Idempotent.
+func (s *PgStore) ClearOrphanRetry(ctx context.Context, key string) error {
+	_, err := s.pool.Exec(ctx, `DELETE FROM orphan_objects WHERE object_key = $1`, key)
+	return err
+}
+
+// ReapExhaustedOrphanRetries drops keys that have reached the retry cap, so the
+// orphan queue stays bounded instead of accumulating zombie rows that are
+// neither retried (filtered out of ListPendingOrphanRetries) nor cleared.
+func (s *PgStore) ReapExhaustedOrphanRetries(ctx context.Context) (int, error) {
+	tag, err := s.pool.Exec(ctx, `DELETE FROM orphan_objects WHERE attempts >= $1`, orphanMaxAttempts)
+	if err != nil {
+		return 0, err
+	}
+	return int(tag.RowsAffected()), nil
 }
 
 func (s *PgStore) CountAllMessages(ctx context.Context) (int, error) {
@@ -1856,10 +1938,23 @@ func (s *PgStore) GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.Se
 	return si, err
 }
 
-func (s *PgStore) ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
-		FROM send_identities WHERE tenant_id = $1 ORDER BY created_at`, tenantID)
+// ListSendIdentitiesScoped applies the ZoneListFilter in SQL: tenant isolation
+// plus the zone allowlist. An empty ZoneIDs with AllZones=false returns empty.
+func (s *PgStore) ListSendIdentitiesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.SendIdentity, error) {
+	if !scope.AllZones && len(scope.ZoneIDs) == 0 {
+		return []*models.SendIdentity{}, nil
+	}
+	args := []any{scope.TenantID}
+	where := []string{"tenant_id = $1"}
+	n := 1
+	if !scope.AllZones {
+		n++
+		where = append(where, "zone_id = ANY($"+strconv.Itoa(n)+")")
+		args = append(args, scope.ZoneIDs)
+	}
+	q := "SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at FROM send_identities WHERE " +
+		strings.Join(where, " AND ") + " ORDER BY created_at"
+	rows, err := s.pool.Query(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}

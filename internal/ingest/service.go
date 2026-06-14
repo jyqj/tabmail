@@ -8,14 +8,15 @@ import (
 	"io"
 	"math/rand/v2"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jhillyerd/enmime/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
+	"tabmail/internal/classify"
 	"tabmail/internal/config"
+	"tabmail/internal/configcache"
 	"tabmail/internal/hooks"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
@@ -24,6 +25,7 @@ import (
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/store"
+	"tabmail/internal/workqueue"
 )
 
 type serviceStore interface {
@@ -49,6 +51,41 @@ type Envelope struct {
 type AcceptResult struct {
 	Queued    bool
 	Delivered int
+}
+
+// AcceptOption customizes an Accept call without changing its positional
+// signature, so existing callers Accept(ctx, env, raw) keep compiling.
+type AcceptOption func(*acceptCfg)
+
+// acceptCfg is the materialized set of Accept customizations. Only resolved is
+// populated today (SMTP session reuse of RCPT-phase resolution); future per-call
+// overrides extend this struct without touching Accept's signature.
+type acceptCfg struct {
+	// resolved carries RCPT-phase resolver.Results keyed by sanitizeAddr(rcpt).
+	// deliver consults it for each recipient: a Reusable entry short-circuits
+	// the second Resolve; non-reusable entries (auto-create, or absent) fall
+	// back to a fresh Resolve so auto-create semantics are preserved exactly.
+	resolved map[string]*resolver.Result
+}
+
+// WithResolved hands a previously-resolved Result for addr to Accept so deliver
+// can skip a redundant Resolve. Only Mailbox-bearing, non-Created Results are
+// reused; auto-create and stale entries are ignored (see Result.Reusable).
+func WithResolved(addr string, r *resolver.Result) AcceptOption {
+	return func(c *acceptCfg) {
+		if c.resolved == nil {
+			c.resolved = map[string]*resolver.Result{}
+		}
+		c.resolved[sanitizeAddr(addr)] = r
+	}
+}
+
+func applyAcceptOptions(opts []AcceptOption) acceptCfg {
+	var cfg acceptCfg
+	for _, opt := range opts {
+		opt(&cfg)
+	}
+	return cfg
 }
 
 // RecipientStatus is the disposition of one recipient in a delivered envelope.
@@ -110,9 +147,12 @@ type Service struct {
 	batchSize          int
 	maxRetries         int
 	logger             zerolog.Logger
-	policyMu           sync.RWMutex
-	policyCache        *models.SMTPPolicy
-	policyExpiresAt    time.Time
+	// policyCache holds a single-key SMTP-policy entry (the empty string). A
+	// 2s TTL bounds staleness even if an admin update races the invalidator.
+	policyCache *configcache.ConfigCache[string, *models.SMTPPolicy]
+	// worker drives the durable claim loop. It is nil in non-durable mode or
+	// before Run/ensureWorker is called.
+	worker *workqueue.Worker[*ingestJob]
 }
 
 func NewService(
@@ -139,7 +179,7 @@ func NewService(
 	if maxRetries <= 0 {
 		maxRetries = 5
 	}
-	return &Service{
+	s := &Service{
 		store:              st,
 		obj:                obj,
 		objects:            rawobject.NewStore(obj, st),
@@ -155,11 +195,24 @@ func NewService(
 		maxRetries:         maxRetries,
 		logger:             logger.With().Str("component", "ingest").Logger(),
 	}
+	s.policyCache = configcache.New(2*time.Second, func(ctx context.Context, _ string) (*models.SMTPPolicy, error) {
+		pol, err := st.GetSMTPPolicy(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if pol == nil {
+			cp := s.defaultPolicy
+			pol = &cp
+		}
+		cp := *pol
+		return &cp, nil
+	})
+	return s
 }
 
 func (s *Service) Durable() bool { return s != nil && s.durable }
 
-func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte) (AcceptResult, error) {
+func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte, opts ...AcceptOption) (AcceptResult, error) {
 	if len(env.Recipients) == 0 {
 		return AcceptResult{}, nil
 	}
@@ -185,7 +238,7 @@ func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte) (AcceptR
 		}
 		return AcceptResult{Queued: true}, nil
 	}
-	outcomes, err := s.deliver(ctx, env, raw)
+	outcomes, err := s.deliverResolved(ctx, env, raw, applyAcceptOptions(opts).resolved)
 	if err != nil {
 		return AcceptResult{}, err
 	}
@@ -196,103 +249,99 @@ func (s *Service) Run(ctx context.Context) {
 	if s == nil || !s.durable {
 		return
 	}
-	ticker := time.NewTicker(s.pollInterval)
-	defer ticker.Stop()
-	for {
-		if err := s.processBatch(ctx); err != nil {
-			s.logger.Warn().Err(err).Msg("process ingest batch")
-		}
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-		}
-	}
+	s.ensureWorker().Run(ctx)
 }
 
-func (s *Service) processBatch(ctx context.Context) error {
-	jobs, err := s.store.ClaimIngestJobs(ctx, time.Now().UTC(), s.batchSize)
+// ProcessBatch runs a single claim+process cycle. It is the synchronous entry
+// point used by tests; production code uses Run.
+func (s *Service) ProcessBatch(ctx context.Context) {
+	if s == nil || !s.durable {
+		return
+	}
+	s.ensureWorker().ProcessBatch(ctx)
+}
+
+// ensureWorker lazily builds the workqueue.Worker backing Run/ProcessBatch. It
+// is idempotent.
+func (s *Service) ensureWorker() *workqueue.Worker[*ingestJob] {
+	if s.worker != nil {
+		return s.worker
+	}
+	storeAdapter := newIngestStore(s.store)
+	hooks := &ingestHooks{svc: s}
+	policy := workqueue.ExponentialBackoff[*ingestJob]{
+		Base:   time.Second,
+		CapExp: 8,
+		Jitter: func() time.Duration { return time.Duration(rand.IntN(1000)) * time.Millisecond },
+		Max:    s.maxRetries,
+	}
+	s.worker = workqueue.NewWorker[*ingestJob](
+		storeAdapter,
+		s.processOne,
+		policy,
+		hooks,
+		5*time.Minute,
+		s.pollInterval,
+		s.batchSize,
+		s.logger,
+	)
+	return s.worker
+}
+
+// processOne is the workqueue.Handler for ingest jobs. It loads the raw
+// object, runs deliver, and records the delivery count on the payload so
+// ingestHooks.OnDone can release the raw object when nobody was delivered.
+// A nil error marks the job done.
+func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*ingestJob]) error {
+	if job == nil || job.Payload == nil || job.Payload.IngestJob == nil {
+		return nil
+	}
+	m := job.Payload.IngestJob
+	rc, err := s.obj.Get(ctx, m.RawObjectKey)
 	if err != nil {
-		return err
-	}
-	for _, job := range jobs {
-		result, err := s.processJob(ctx, job)
-		if err != nil {
-			dead := job.Attempts >= s.maxRetries
-			backoff := retryBackoff(job.Attempts)
-			nextAttempt := time.Now().UTC().Add(backoff)
-			if markErr := s.store.MarkIngestJobRetry(ctx, job.ID, err.Error(), nextAttempt, dead); markErr != nil {
-				return markErr
-			}
-			if dead {
-				metrics.IngestJobDead()
-				metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
-				s.deleteRawObjectIfOrphaned(ctx, job.RawObjectKey, "dead_ingest_job")
-			} else {
-				metrics.IngestJobRetried()
-			}
-			continue
-		}
-		if err := s.store.MarkIngestJobDone(ctx, job.ID); err != nil {
-			return err
-		}
-		if result.delivered == 0 {
-			s.deleteRawObjectIfOrphaned(ctx, result.rawObjectKey, "zero_delivery_ingest_job")
-		}
-		metrics.IngestJobProcessed()
-		metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
-	}
-	return nil
-}
-
-type processJobResult struct {
-	rawObjectKey string
-	delivered    int
-}
-
-func retryBackoff(attempts int) time.Duration {
-	exp := max(attempts-1, 0)
-	exp = min(exp, 8)
-	return time.Duration(1<<exp)*time.Second + time.Duration(rand.IntN(1000))*time.Millisecond
-}
-
-func (s *Service) processJob(ctx context.Context, job *models.IngestJob) (processJobResult, error) {
-	if job == nil {
-		return processJobResult{}, nil
-	}
-	result := processJobResult{rawObjectKey: job.RawObjectKey}
-	rc, err := s.obj.Get(ctx, job.RawObjectKey)
-	if err != nil {
-		return result, fmt.Errorf("get raw object: %w", err)
+		return fmt.Errorf("get raw object: %w", err)
 	}
 	defer rc.Close()
 	raw, err := io.ReadAll(rc)
 	if err != nil {
-		return result, fmt.Errorf("read raw object: %w", err)
+		return fmt.Errorf("read raw object: %w", err)
 	}
-	outcomes, err := s.deliver(ctx, Envelope{
-		Source:     job.Source,
-		RemoteIP:   job.RemoteIP,
-		MailFrom:   job.MailFrom,
-		Recipients: append([]string(nil), job.Recipients...),
-		Metadata:   job.Metadata,
-	}, raw)
+	outcomes, err := s.deliverResolved(ctx, Envelope{
+		Source:     m.Source,
+		RemoteIP:   m.RemoteIP,
+		MailFrom:   m.MailFrom,
+		Recipients: append([]string(nil), m.Recipients...),
+		Metadata:   m.Metadata,
+	}, raw, nil)
 	if err != nil {
-		return result, err
+		return err
 	}
-	result.delivered = deliveredCount(outcomes)
-	if result.delivered == 0 {
-		s.logger.Warn().Str("job_id", job.ID.String()).Msg("ingest job processed with zero deliveries")
+	job.Payload.delivered = deliveredCount(outcomes)
+	if job.Payload.delivered == 0 {
+		s.logger.Warn().Str("job_id", m.ID.String()).Msg("ingest job processed with zero deliveries")
 	}
-	return result, nil
+	return nil
 }
 
-// deliver attempts to store the envelope for every recipient and returns one
-// RecipientOutcome per recipient. The per-recipient drop reasons are part of the
-// return value (not just logs), so the accept decision can be asserted through
-// this interface. A non-nil error signals an envelope-level failure (policy load
-// or raw persistence) that should be retried, distinct from per-recipient drops.
+// deliver is the zero-option entry kept for direct unit-test calls. It always
+// re-resolves every recipient (no RCPT-phase reuse), matching pre-P5 behavior.
 func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]RecipientOutcome, error) {
+	return s.deliverResolved(ctx, env, raw, nil)
+}
+
+// deliverResolved attempts to store the envelope for every recipient and returns
+// one RecipientOutcome per recipient. The per-recipient drop reasons are part of
+// the return value (not just logs), so the accept decision can be asserted
+// through this interface. A non-nil error signals an envelope-level failure
+// (policy load or raw persistence) that should be retried, distinct from
+// per-recipient drops.
+//
+// resolved (may be nil) carries RCPT-phase Results keyed by sanitizeAddr(rcpt).
+// For each recipient deliverResolved prefers the cached entry when it is
+// Reusable (Mailbox present and not just Created), short-circuiting a redundant
+// Resolve; otherwise it falls back to s.resolver.Resolve so auto-create and
+// quota semantics are untouched.
+func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte, resolved map[string]*resolver.Result) ([]RecipientOutcome, error) {
 	if len(env.Recipients) == 0 {
 		return nil, nil
 	}
@@ -329,16 +378,22 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]Reci
 
 	for _, rcpt := range env.Recipients {
 		addr := sanitizeAddr(rcpt)
-		// Resolution (and any auto-create) is owned solely by the resolver,
-		// whose short-TTL cache already absorbs repeated zone/route lookups
-		// across the SMTP session; there is no caller-supplied result to reuse.
+		// Reuse a RCPT-phase Result when it is safe (Mailbox present, not just
+		// Created): this is the SMTP-session-reuse fast path. Auto-create
+		// results (Mailbox nil) and freshly-Created results always fall through
+		// to a fresh Resolve so the limiter/quota gates and concurrent-retention
+		// semantics stay identical to the pre-reuse behavior.
 		var result *resolver.Result
-		result, err = s.resolver.Resolve(ctx, addr)
-		if err != nil {
-			metrics.MailboxRecipientRejected(addr)
-			s.logger.Warn().Err(err).Str("rcpt", addr).Msg("resolve failed")
-			outcomes = append(outcomes, erroredOutcome(addr, "resolve_error"))
-			continue
+		if cached, ok := resolved[addr]; ok && cached.Reusable() {
+			result = cached
+		} else {
+			result, err = s.resolver.Resolve(ctx, addr)
+			if err != nil {
+				metrics.MailboxRecipientRejected(addr)
+				s.logger.Warn().Err(err).Str("rcpt", addr).Msg("resolve failed")
+				outcomes = append(outcomes, erroredOutcome(addr, "resolve_error"))
+				continue
+			}
 		}
 		if result == nil || result.Mailbox == nil || result.Zone == nil {
 			metrics.MailboxRecipientRejected(addr)
@@ -382,7 +437,8 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]Reci
 			continue
 		}
 
-		retH := resolveRetention(s.store, ctx, result, s.fallbackRetentionH)
+		mbRetention, routeRetention, tenantRetention := retentionOf(result, cfg)
+		retH := resolveRetention(mbRetention, routeRetention, tenantRetention, s.fallbackRetentionH)
 		msg := &models.Message{
 			TenantID:     mb.TenantID,
 			MailboxID:    mb.ID,
@@ -394,6 +450,21 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]Reci
 			RawObjectKey: objKey,
 			HeadersJSON:  headersJSON,
 			ExpiresAt:    now.Add(time.Duration(retH) * time.Hour),
+		}
+		// OTP signal extraction. Reuses the already-parsed envelope (no extra
+		// decode). OTPCode/OTPConfidence stay zero-value when nothing is found,
+		// so the omitempty JSON path and existing deliver tests are unaffected.
+		if envMime != nil {
+			otp := classify.OTPFromMessage(classify.Env{
+				Subject:  subject,
+				TextBody: envMime.Text,
+				HTMLBody: envMime.HTML,
+				From:     env.MailFrom,
+			})
+			if otp.Found {
+				msg.OTPCode = otp.Code
+				msg.OTPConfidence = otp.Confidence
+			}
 		}
 		if ok, err := s.reserveTenantDaily(ctx, mb.TenantID, cfg.DailyQuota); err != nil {
 			s.logger.Warn().Err(err).Str("tenant", mb.TenantID.String()).Msg("reserve tenant daily quota")
@@ -462,33 +533,19 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]Reci
 }
 
 func (s *Service) currentPolicy(ctx context.Context) (*models.SMTPPolicy, error) {
-	s.policyMu.RLock()
-	if s.policyCache != nil && time.Now().Before(s.policyExpiresAt) {
-		cp := *s.policyCache
-		s.policyMu.RUnlock()
-		return &cp, nil
-	}
-	s.policyMu.RUnlock()
+	return s.policyCache.Get(ctx, "")
+}
 
-	s.policyMu.Lock()
-	defer s.policyMu.Unlock()
-	if s.policyCache != nil && time.Now().Before(s.policyExpiresAt) {
-		cp := *s.policyCache
-		return &cp, nil
-	}
+// InvalidatePolicy drops the cached SMTP policy so the next read observes the
+// latest committed policy. Called by the admin write path after UpsertSMTPPolicy.
+func (s *Service) InvalidatePolicy() {
+	s.policyCache.InvalidateAll()
+}
 
-	pol, err := s.store.GetSMTPPolicy(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if pol == nil {
-		cp := s.defaultPolicy
-		pol = &cp
-	}
-	cp := *pol
-	s.policyCache = &cp
-	s.policyExpiresAt = time.Now().Add(2 * time.Second)
-	return &cp, nil
+// InvalidateSMTPPolicy satisfies the admin service's policyInvalidator seam.
+// It forwards to InvalidatePolicy for naming parity with the admin surface.
+func (s *Service) InvalidateSMTPPolicy() {
+	s.InvalidatePolicy()
 }
 
 func (s *Service) CurrentPolicy(ctx context.Context) (*models.SMTPPolicy, error) {
@@ -561,23 +618,50 @@ return redis.call("DECR", KEYS[1])
 	return err
 }
 
-func resolveRetention(st interface {
-	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
-}, ctx context.Context, res *resolver.Result, fallback int) int {
-	if res.Mailbox.RetentionHoursOverride != nil {
-		return *res.Mailbox.RetentionHoursOverride
+// resolveRetention picks the retention window for a message from mailbox →
+// route → tenant → fallback, mirroring the EffectiveConfig precedence without
+// re-querying the store. Each level is a *int: nil means "unset" (skip to the
+// next level); a non-nil value is returned as-is. This matches the legacy
+// behavior where a non-nil EffectiveConfig.RetentionHours was returned even
+// when 0 (immediate expiry), so the tenant level deliberately uses != nil
+// rather than > 0. The caller passes the tenant's cached RetentionHours (the
+// same value held in tenantConfigs from deliver's per-tenant EffectiveConfig
+// lookup), so a single delivery no longer triggers a second EffectiveConfig
+// round-trip per recipient.
+func resolveRetention(mailboxOverride, routeOverride, tenantRetention *int, fallback int) int {
+	if mailboxOverride != nil {
+		return *mailboxOverride
 	}
-	if res.Route != nil && res.Route.RetentionHoursOverride != nil {
-		return *res.Route.RetentionHoursOverride
+	if routeOverride != nil {
+		return *routeOverride
 	}
-	cfg, err := st.EffectiveConfig(ctx, res.Mailbox.TenantID)
-	if err == nil && cfg != nil {
-		return cfg.RetentionHours
+	if tenantRetention != nil {
+		return *tenantRetention
 	}
 	if fallback > 0 {
 		return fallback
 	}
 	return 24
+}
+
+// retentionOf extracts the override/route/tenant retention for a recipient from
+// the resolved Result and the cached tenant config, returning nil for unset
+// levels so resolveRetention's != nil precedence matches the legacy
+// EffectiveConfig behavior (a non-nil cfg returns RetentionHours even when 0).
+func retentionOf(res *resolver.Result, cfg *models.EffectiveConfig) (mailbox, route, tenant *int) {
+	if res.Mailbox != nil && res.Mailbox.RetentionHoursOverride != nil {
+		v := *res.Mailbox.RetentionHoursOverride
+		mailbox = &v
+	}
+	if res.Route != nil && res.Route.RetentionHoursOverride != nil {
+		v := *res.Route.RetentionHoursOverride
+		route = &v
+	}
+	if cfg != nil {
+		v := cfg.RetentionHours
+		tenant = &v
+	}
+	return mailbox, route, tenant
 }
 
 func sanitizeAddr(addr string) string {

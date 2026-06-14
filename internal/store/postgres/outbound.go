@@ -5,12 +5,15 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
@@ -172,16 +175,41 @@ func (s *PgStore) GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.Out
 	return scanOutboundJob(s.pool.QueryRow(ctx, outboundJobSelect+` WHERE id=$1`, id))
 }
 
-func (s *PgStore) ListOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
+// ListOutboundJobsScoped applies the OwnerListFilter in SQL: tenant isolation
+// plus the mutually-exclusive owner dimension (AllInTenant for admins, user_id
+// for users, api_key_id for API keys). The constructor guarantees mutual
+// exclusivity; this method asserts it defensively.
+func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerListFilter, pg models.Page) ([]*models.OutboundJob, int, error) {
 	pg = pg.Normalize()
+	args := []any{scope.TenantID}
+	where := []string{"tenant_id=$1"}
+	n := 1
+	switch {
+	case scope.AllInTenant:
+		// No owner filter — admins see the whole tenant.
+	case scope.UserID != nil:
+		n++
+		where = append(where, "user_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.UserID)
+	case scope.APIKeyID != nil:
+		n++
+		where = append(where, "api_key_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.APIKeyID)
+	default:
+		// Unknown principal: return empty rather than the whole tenant.
+		return []*models.OutboundJob{}, 0, nil
+	}
+	whereSQL := strings.Join(where, " AND ")
 	var total int
 	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1`, tenantID).Scan(&total); err != nil {
+		"SELECT count(*) FROM outbound_jobs WHERE "+whereSQL, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
+	rowArgs := append(args, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx,
-		outboundJobSelect+` WHERE tenant_id=$1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
-		tenantID, pg.PerPage, pg.Offset())
+		outboundJobSelect+" WHERE "+whereSQL+
+			" ORDER BY created_at DESC LIMIT $"+strconv.Itoa(n+1)+" OFFSET $"+strconv.Itoa(n+2),
+		rowArgs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -321,56 +349,6 @@ func (s *PgStore) MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliv
 		return ErrDeliveryTokenMismatch
 	}
 	return nil
-}
-
-func (s *PgStore) ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	pg = pg.Normalize()
-	var total int
-	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND user_id=$2`, tenantID, userID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-	rows, err := s.pool.Query(ctx,
-		outboundJobSelect+` WHERE tenant_id=$1 AND user_id=$2 ORDER BY created_at DESC LIMIT $3 OFFSET $4`,
-		tenantID, userID, pg.PerPage, pg.Offset())
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-	var out []*models.OutboundJob
-	for rows.Next() {
-		job, err := scanOutboundJob(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-		out = append(out, job)
-	}
-	return out, total, rows.Err()
-}
-
-func (s *PgStore) ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	pg = pg.Normalize()
-	var total int
-	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND api_key_id=$2`, tenantID, apiKeyID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-	rows, err := s.pool.Query(ctx,
-		outboundJobSelect+` WHERE tenant_id=$1 AND api_key_id=$2 ORDER BY created_at DESC LIMIT $3 OFFSET $4`,
-		tenantID, apiKeyID, pg.PerPage, pg.Offset())
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-	var out []*models.OutboundJob
-	for rows.Next() {
-		job, err := scanOutboundJob(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-		out = append(out, job)
-	}
-	return out, total, rows.Err()
 }
 
 func (s *PgStore) CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error) {
@@ -521,5 +499,75 @@ func (s *PgStore) ListSuppressions(ctx context.Context, tenantID uuid.UUID, pg m
 
 func (s *PgStore) DeleteSuppression(ctx context.Context, tenantID uuid.UUID, id uuid.UUID) error {
 	_, err := s.pool.Exec(ctx, `DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`, id, tenantID)
+	return err
+}
+
+// ================================================================
+// Outbound templates
+// ================================================================
+
+func (s *PgStore) CreateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error {
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+	now := time.Now().UTC()
+	t.CreatedAt = now
+	t.UpdatedAt = now
+	_, err := s.pool.Exec(ctx, `
+		INSERT INTO outbound_templates (id, tenant_id, name, subject_tmpl, text_tmpl, html_tmpl, created_at, updated_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+		t.ID, t.TenantID, t.Name, t.SubjectTmpl, t.TextTmpl, t.HTMLTmpl, t.CreatedAt, t.UpdatedAt)
+	return err
+}
+
+func (s *PgStore) GetOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) (*models.OutboundTemplate, error) {
+	t := &models.OutboundTemplate{}
+	err := s.pool.QueryRow(ctx, `
+		SELECT id, tenant_id, name, subject_tmpl, text_tmpl, html_tmpl, created_at, updated_at
+		FROM outbound_templates WHERE tenant_id=$1 AND name=$2`, tenantID, name).
+		Scan(&t.ID, &t.TenantID, &t.Name, &t.SubjectTmpl, &t.TextTmpl, &t.HTMLTmpl, &t.CreatedAt, &t.UpdatedAt)
+	if err == pgx.ErrNoRows {
+		return nil, nil
+	}
+	return t, err
+}
+
+func (s *PgStore) ListOutboundTemplates(ctx context.Context, tenantID uuid.UUID) ([]*models.OutboundTemplate, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT id, tenant_id, name, subject_tmpl, text_tmpl, html_tmpl, created_at, updated_at
+		FROM outbound_templates WHERE tenant_id=$1 ORDER BY name`, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*models.OutboundTemplate
+	for rows.Next() {
+		t := &models.OutboundTemplate{}
+		if err := rows.Scan(&t.ID, &t.TenantID, &t.Name, &t.SubjectTmpl, &t.TextTmpl, &t.HTMLTmpl, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, t)
+	}
+	return out, rows.Err()
+}
+
+func (s *PgStore) UpdateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error {
+	t.UpdatedAt = time.Now().UTC()
+	tag, err := s.pool.Exec(ctx, `
+		UPDATE outbound_templates
+		SET subject_tmpl=$3, text_tmpl=$4, html_tmpl=$5, updated_at=$6
+		WHERE tenant_id=$1 AND name=$2`,
+		t.TenantID, t.Name, t.SubjectTmpl, t.TextTmpl, t.HTMLTmpl, t.UpdatedAt)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
+func (s *PgStore) DeleteOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) error {
+	_, err := s.pool.Exec(ctx, `DELETE FROM outbound_templates WHERE tenant_id=$1 AND name=$2`, tenantID, name)
 	return err
 }

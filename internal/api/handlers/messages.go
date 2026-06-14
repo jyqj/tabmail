@@ -18,6 +18,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/store"
 )
@@ -33,7 +34,6 @@ type messageStore interface {
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error
 	ListMailboxObjectKeys(ctx context.Context, mailboxID uuid.UUID) ([]string, error)
-	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
 }
 
 type MessageHandler struct {
@@ -42,13 +42,13 @@ type MessageHandler struct {
 	logger  zerolog.Logger
 }
 
-func NewMessageHandler(s messageStore, obj store.ObjectStore, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MessageHandler {
-	service := messageapp.NewService(s, obj, hub, dispatcher, namingMode, stripPlus, tokenSecret, l)
+func NewMessageHandler(s messageStore, obj store.ObjectStore, objects *rawobject.Store, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MessageHandler {
+	service := messageapp.NewService(s, obj, objects, hub, dispatcher, namingMode, stripPlus, tokenSecret, l)
 	return &MessageHandler{service: service, hub: hub, logger: l.With().Str("handler", "messages").Logger()}
 }
 
 func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	var userID *uuid.UUID
 	if actor.Type == authz.PrincipalUser {
 		id := actor.ID
@@ -178,7 +178,7 @@ func (h *MessageHandler) DeleteMessage(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid message id")
 		return
 	}
-	if err := h.service.DeleteMessage(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), actorFromRequest(r)); err != nil {
+	if err := h.service.DeleteMessage(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), middleware.ActorFromContext(r.Context()).AuditLabel()); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -198,7 +198,7 @@ func (h *MessageHandler) BreakGlassRead(w http.ResponseWriter, r *http.Request) 
 		errBadRequest(w, "invalid request body")
 		return
 	}
-	item, err := h.service.BreakGlassRead(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), actorFromRequest(r), body.Reason)
+	item, err := h.service.BreakGlassRead(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), middleware.ActorFromContext(r.Context()).AuditLabel(), body.Reason)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -219,7 +219,7 @@ func (h *MessageHandler) BreakGlassSource(w http.ResponseWriter, r *http.Request
 		errBadRequest(w, "invalid request body")
 		return
 	}
-	rc, err := h.service.BreakGlassSource(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), actorFromRequest(r), body.Reason)
+	rc, err := h.service.BreakGlassSource(r.Context(), chi.URLParam(r, "address"), msgID, h.resolveViewer(r), middleware.ActorFromContext(r.Context()).AuditLabel(), body.Reason)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -230,7 +230,7 @@ func (h *MessageHandler) BreakGlassSource(w http.ResponseWriter, r *http.Request
 }
 
 func (h *MessageHandler) PurgeMailbox(w http.ResponseWriter, r *http.Request) {
-	if err := h.service.PurgeMailbox(r.Context(), chi.URLParam(r, "address"), h.resolveViewer(r), actorFromRequest(r)); err != nil {
+	if err := h.service.PurgeMailbox(r.Context(), chi.URLParam(r, "address"), h.resolveViewer(r), middleware.ActorFromContext(r.Context()).AuditLabel()); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}

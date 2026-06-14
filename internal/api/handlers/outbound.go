@@ -43,14 +43,16 @@ func NewOutboundHandler(svc *outbound.Service, st store.Store, logger zerolog.Lo
 
 // sendRequest is the JSON body for POST /api/v1/send.
 type sendRequest struct {
-	From     string            `json:"from"`
-	To       []string          `json:"to"`
-	CC       []string          `json:"cc"`
-	BCC      []string          `json:"bcc"`
-	Subject  string            `json:"subject"`
-	TextBody string            `json:"text_body"`
-	HTMLBody string            `json:"html_body"`
-	Headers  map[string]string `json:"headers"`
+	From         string            `json:"from"`
+	To           []string          `json:"to"`
+	CC           []string          `json:"cc"`
+	BCC          []string          `json:"bcc"`
+	Subject      string            `json:"subject"`
+	TextBody     string            `json:"text_body"`
+	HTMLBody     string            `json:"html_body"`
+	Headers      map[string]string `json:"headers"`
+	TemplateName *string           `json:"template_name"`
+	TemplateVars map[string]string `json:"template_vars"`
 }
 
 // maxSendBodyBytes limits the JSON request body for outbound send to 2 MB.
@@ -80,7 +82,7 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 
 	// Resolve caller identity for job attribution and quota tracking.
 	// actor.Permission is populated by middleware.PermissionLoader for JWT
@@ -199,19 +201,21 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 
 	// Build and submit the outbound job.
 	job, err := h.outbound.Submit(ctx, outbound.SendRequest{
-		TenantID: tenant.ID,
-		UserID:   userID,
-		APIKeyID: apiKeyID,
-		ZoneID:   zone.ID,
-		From:     body.From,
-		To:       body.To,
-		CC:       body.CC,
-		BCC:      body.BCC,
-		Subject:  body.Subject,
-		TextBody: body.TextBody,
-		HTMLBody: body.HTMLBody,
-		Headers:  body.Headers,
-		Quota:    quota,
+		TenantID:     tenant.ID,
+		UserID:       userID,
+		APIKeyID:     apiKeyID,
+		ZoneID:       zone.ID,
+		From:         body.From,
+		To:           body.To,
+		CC:           body.CC,
+		BCC:          body.BCC,
+		Subject:      body.Subject,
+		TextBody:     body.TextBody,
+		HTMLBody:     body.HTMLBody,
+		Headers:      body.Headers,
+		TemplateName: body.TemplateName,
+		TemplateVars: body.TemplateVars,
+		Quota:        quota,
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
@@ -393,17 +397,11 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
 	// ActionOutboundRead defers row scope to the query level; the authz seam
-	// resolves which owned rows this actor may see.
-	switch scope := authz.ListScope(authz.ActorFromContext(ctx)); {
-	case scope.AllInTenant:
-		return h.store.ListOutboundJobs(ctx, tenantID, pg)
-	case scope.UserID != nil:
-		return h.store.ListOutboundJobsByUser(ctx, tenantID, *scope.UserID, pg)
-	case scope.APIKeyID != nil:
-		return h.store.ListOutboundJobsByAPIKey(ctx, tenantID, *scope.APIKeyID, pg)
-	default:
-		return nil, 0, errOutboundJobAuthRequired
-	}
+	// resolves which owned rows this actor may see. The OwnerListFilter pins
+	// TenantID and the mutually-exclusive owner dimension, so tenant isolation
+	// and the owner rule are both enforced in SQL.
+	scope := authz.OwnerListScope(middleware.ActorFromContext(ctx), tenantID)
+	return h.store.ListOutboundJobsScoped(ctx, scope, pg)
 }
 
 func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.OutboundJob) bool {
@@ -411,7 +409,7 @@ func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.O
 		return false
 	}
 	// Same owner rule as listAccessibleOutboundJobs, via the single authz seam.
-	return authz.CanAccessOwned(authz.ActorFromContext(ctx), job.UserID, job.APIKeyID)
+	return authz.CanAccessOwned(middleware.ActorFromContext(ctx), job.UserID, job.APIKeyID)
 }
 
 func (h *OutboundHandler) writeOutboundJobAccessError(w http.ResponseWriter, err error, logMsg string) {

@@ -49,13 +49,28 @@ func (s *mailboxTestStore) GetZoneByDomain(_ context.Context, domain string) (*m
 	}
 	return nil, nil
 }
-func (s *mailboxTestStore) ListZones(_ context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error) {
+func (s *mailboxTestStore) ListZonesScoped(_ context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error) {
 	var out []*models.DomainZone
+	allowed := make(map[uuid.UUID]struct{}, len(scope.ZoneIDs))
+	for _, id := range scope.ZoneIDs {
+		allowed[id] = struct{}{}
+	}
 	for _, z := range s.zones {
-		if z.TenantID == tenantID {
-			cp := *z
-			out = append(out, &cp)
+		if z.TenantID != scope.TenantID {
+			continue
 		}
+		if !scope.AllZones {
+			if _, ok := allowed[z.ID]; !ok {
+				continue
+			}
+		}
+		if scope.OwnerUserID != nil {
+			if z.OwnerUserID == nil || *z.OwnerUserID != *scope.OwnerUserID {
+				continue
+			}
+		}
+		cp := *z
+		out = append(out, &cp)
 	}
 	return out, nil
 }
@@ -71,11 +86,39 @@ func (s *mailboxTestStore) CreateMailbox(_ context.Context, m *models.Mailbox) e
 	s.mailboxes[m.ID] = &cp
 	return nil
 }
-func (s *mailboxTestStore) ListMailboxes(context.Context, uuid.UUID, models.Page) ([]*models.Mailbox, int, error) {
-	return nil, 0, nil
-}
-func (s *mailboxTestStore) ListMailboxesByZones(context.Context, uuid.UUID, []uuid.UUID, models.Page) ([]*models.Mailbox, int, error) {
-	return nil, 0, nil
+func (s *mailboxTestStore) ListMailboxesScoped(_ context.Context, scope authz.ZoneListFilter, _ models.Page) ([]*models.Mailbox, int, error) {
+	allowed := make(map[uuid.UUID]struct{}, len(scope.ZoneIDs))
+	for _, id := range scope.ZoneIDs {
+		allowed[id] = struct{}{}
+	}
+	var ownerZones map[uuid.UUID]struct{}
+	if scope.OwnerUserID != nil {
+		ownerZones = map[uuid.UUID]struct{}{}
+		for _, z := range s.zones {
+			if z.OwnerUserID != nil && *z.OwnerUserID == *scope.OwnerUserID {
+				ownerZones[z.ID] = struct{}{}
+			}
+		}
+	}
+	var out []*models.Mailbox
+	for _, m := range s.mailboxes {
+		if m.TenantID != scope.TenantID {
+			continue
+		}
+		if !scope.AllZones {
+			if _, ok := allowed[m.ZoneID]; !ok {
+				continue
+			}
+		}
+		if ownerZones != nil {
+			if _, ok := ownerZones[m.ZoneID]; !ok {
+				continue
+			}
+		}
+		cp := *m
+		out = append(out, &cp)
+	}
+	return out, len(out), nil
 }
 func (s *mailboxTestStore) GetMailbox(_ context.Context, id uuid.UUID) (*models.Mailbox, error) {
 	s.usedGlobalGet = true
@@ -147,7 +190,7 @@ func TestDeleteTenantAdminUsesTenantScopedMailboxLookup(t *testing.T) {
 	st.zones[zone.ID] = zone
 	st.mailboxes[mb.ID] = mb
 
-	svc := NewService(st, nil, nil, policy.NamingFull, false, "secret", zerolog.Nop())
+	svc := NewService(st, nil, nil, nil, policy.NamingFull, false, "secret", zerolog.Nop())
 	if err := svc.Delete(ctx, adminActor(tenant.ID), tenant, mb.ID); err != nil {
 		t.Fatalf("tenant admin should delete own tenant mailbox: %v", err)
 	}
@@ -172,7 +215,7 @@ func TestDeleteTenantAdminRejectsCrossTenantMailboxID(t *testing.T) {
 	st.zones[zoneB.ID] = zoneB
 	st.mailboxes[mbB.ID] = mbB
 
-	svc := NewService(st, nil, nil, policy.NamingFull, false, "secret", zerolog.Nop())
+	svc := NewService(st, nil, nil, nil, policy.NamingFull, false, "secret", zerolog.Nop())
 	err := svc.Delete(ctx, adminActor(tenantA.ID), tenantA, mbB.ID)
 	if err == nil {
 		t.Fatal("expected cross-tenant mailbox delete to be rejected")
@@ -200,7 +243,7 @@ func TestCreateRejectsCrossTenantZoneAccess(t *testing.T) {
 	zoneB := &models.DomainZone{ID: uuid.New(), TenantID: tenantB.ID, Domain: "b.example"}
 	st.zones[zoneB.ID] = zoneB
 
-	svc := NewService(st, nil, nil, policy.NamingFull, false, "secret", zerolog.Nop())
+	svc := NewService(st, nil, nil, nil, policy.NamingFull, false, "secret", zerolog.Nop())
 	_, err := svc.Create(ctx, userActor(tenantA.ID, userA), tenantA, CreateRequest{Address: "inbox@b.example"})
 	if err == nil {
 		t.Fatal("expected cross-tenant zone access to be rejected")
