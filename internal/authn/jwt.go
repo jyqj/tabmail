@@ -79,6 +79,29 @@ func VerifyAccessToken(secret, token string) (*AccessClaims, error) {
 	return &claims, nil
 }
 
+// IsAccessTokenShaped reports whether a bearer token is structurally one of
+// our access tokens, regardless of whether it verifies. Mailbox tokens use the
+// same `payload.signature` envelope but carry mailbox claims instead of a user
+// id, so callers can use this to tell an unusable access token (which should be
+// rejected) apart from a mailbox token (which is handled further down the stack).
+func IsAccessTokenShaped(token string) bool {
+	payload, _, found := strings.Cut(token, ".")
+	if !found {
+		return false
+	}
+	body, err := base64.RawURLEncoding.DecodeString(payload)
+	if err != nil {
+		return false
+	}
+	var probe struct {
+		UserID string `json:"uid"`
+	}
+	if err := json.Unmarshal(body, &probe); err != nil {
+		return false
+	}
+	return probe.UserID != ""
+}
+
 // GenerateRefreshToken creates a random refresh token and returns (raw, hash).
 func GenerateRefreshToken() (raw string, hash string, err error) {
 	buf := make([]byte, 32)

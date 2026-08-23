@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 
 	"tabmail/internal/authn"
+	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
 	"tabmail/internal/testutil"
 )
@@ -149,6 +152,81 @@ func TestAuthTenantAdminDoesNotBypassLimits(t *testing.T) {
 	if gotTenant == nil || gotTenant.ID != tenantID {
 		t.Fatalf("unexpected admin tenant context: %#v", gotTenant)
 	}
+}
+
+func TestAuthRejectsUnusableAccessTokens(t *testing.T) {
+	st, tenantID := seededAuthStore()
+	user := &models.User{
+		ID:       uuid.New(),
+		TenantID: tenantID,
+		Email:    "user@example.test",
+		Role:     models.RoleUser,
+		IsActive: true,
+	}
+	if err := st.CreateUser(context.Background(), user); err != nil {
+		t.Fatalf("seed user: %v", err)
+	}
+	validToken, err := authn.IssueAccessToken("jwt-test-secret", user)
+	if err != nil {
+		t.Fatalf("issue access token: %v", err)
+	}
+	payload, _, _ := strings.Cut(validToken, ".")
+
+	cases := []struct {
+		name  string
+		token string
+	}{
+		{"tampered signature", payload + ".deadbeef"},
+		{"signed with another secret", mustIssueWith(t, "other-secret", user)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				t.Fatalf("request reached handler as %q", AuthModeFromCtx(r.Context()))
+			}))
+			req := httptest.NewRequest(http.MethodGet, "/", nil)
+			req.Header.Set("Authorization", "Bearer "+tc.token)
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+			if rr.Code != http.StatusUnauthorized {
+				t.Fatalf("expected 401, got %d body=%s", rr.Code, rr.Body.String())
+			}
+		})
+	}
+}
+
+func TestAuthFallsThroughForMailboxTokens(t *testing.T) {
+	st, _ := seededAuthStore()
+	mailboxToken, err := mailtoken.Issue("mailbox-secret", uuid.NewString(), "user@mail.test", time.Hour)
+	if err != nil {
+		t.Fatalf("issue mailbox token: %v", err)
+	}
+
+	var gotMode string
+	handler := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotMode = AuthModeFromCtx(r.Context())
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Authorization", "Bearer "+mailboxToken)
+	rr := httptest.NewRecorder()
+	handler.ServeHTTP(rr, req)
+
+	if rr.Code != http.StatusNoContent {
+		t.Fatalf("expected mailbox token to fall through, got %d body=%s", rr.Code, rr.Body.String())
+	}
+	if gotMode != AuthModePublic {
+		t.Fatalf("unexpected auth mode: %q", gotMode)
+	}
+}
+
+func mustIssueWith(t *testing.T, secret string, user *models.User) string {
+	t.Helper()
+	token, err := authn.IssueAccessToken(secret, user)
+	if err != nil {
+		t.Fatalf("issue access token: %v", err)
+	}
+	return token
 }
 
 func TestAuthResolvesAPIKeyAndEnforcesScopes(t *testing.T) {

@@ -3,8 +3,11 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"tabmail/internal/authn"
@@ -179,12 +182,54 @@ func PermissionLoader(st permStore) func(http.Handler) http.Handler {
 	}
 }
 
+// apiKeyTouchInterval is the minimum gap between "last used" writes for the
+// same API key. Without it every authenticated request issues an UPDATE.
+const apiKeyTouchInterval = time.Minute
+
+// apiKeyTouchTimeout bounds the detached last-used write so a slow database
+// cannot accumulate goroutines.
+const apiKeyTouchTimeout = 5 * time.Second
+
+// maxTrackedAPIKeys caps the debouncer's memory. Once exceeded, entries older
+// than the touch interval are dropped; they would be rewritten on next use.
+const maxTrackedAPIKeys = 4096
+
+// touchDebouncer collapses repeated last-used writes for the same API key into
+// at most one write per interval, per process.
+type touchDebouncer struct {
+	mu       sync.Mutex
+	interval time.Duration
+	last     map[uuid.UUID]time.Time
+}
+
+func newTouchDebouncer(interval time.Duration) *touchDebouncer {
+	return &touchDebouncer{interval: interval, last: map[uuid.UUID]time.Time{}}
+}
+
+func (d *touchDebouncer) shouldTouch(id uuid.UUID, now time.Time) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if seen, ok := d.last[id]; ok && now.Sub(seen) < d.interval {
+		return false
+	}
+	if len(d.last) >= maxTrackedAPIKeys {
+		for key, seen := range d.last {
+			if now.Sub(seen) >= d.interval {
+				delete(d.last, key)
+			}
+		}
+	}
+	d.last[id] = now
+	return true
+}
+
 // Auth resolves the caller identity using a 3-layer model:
 //
 //  1. Authorization: Bearer <JWT>  → logged-in user (admin or regular user)
 //  2. X-API-Key                    → tenant API key
 //  3. no credentials               → public tenant
 func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handler) http.Handler {
+	apiKeyTouches := newTouchDebouncer(apiKeyTouchInterval)
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -193,6 +238,18 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 			if bearer := extractBearer(r); bearer != "" {
 				// Try JWT access token first
 				claims, err := authn.VerifyAccessToken(jwtSecret, bearer)
+				switch {
+				case err == nil:
+				case errors.Is(err, authn.ErrTokenExpired):
+					// The signature verified, so this is definitely our access
+					// token. Say so instead of silently downgrading the caller
+					// to the public tenant.
+					writeError(w, http.StatusUnauthorized, "TOKEN_EXPIRED", "access token expired")
+					return
+				case authn.IsAccessTokenShaped(bearer):
+					writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "invalid access token")
+					return
+				}
 				if err == nil {
 					user, err := st.GetUser(ctx, claims.UserID)
 					if err != nil {
@@ -265,7 +322,14 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 				ctx = context.WithValue(ctx, ctxTenant, tenant)
 				if keyID != nil {
 					ctx = context.WithValue(ctx, ctxAPIKeyID, keyID)
-					go func() { _ = st.TouchAPIKey(context.Background(), *keyID, r.RemoteAddr) }()
+					if apiKeyTouches.shouldTouch(*keyID, time.Now()) {
+						id, remoteAddr := *keyID, r.RemoteAddr
+						go func() {
+							touchCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), apiKeyTouchTimeout)
+							defer cancel()
+							_ = st.TouchAPIKey(touchCtx, id, remoteAddr)
+						}()
+					}
 				}
 
 				// If the API key has an owner, verify the owner is still active
