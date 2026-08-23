@@ -2,6 +2,7 @@ package api
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"sync"
@@ -318,25 +319,46 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	return r
 }
 
-func serveSwaggerUI(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(`<!DOCTYPE html>
+// The docs viewers load from a CDN, so the versions are pinned exactly and
+// guarded by subresource integrity: `@5` and `latest` would let a third party
+// ship new script into an operator's browser at any time. Update the version
+// and the hash together; the browser refuses to run the file if they disagree.
+const (
+	swaggerUIVersion   = "5.32.14"
+	swaggerUICSSSRI    = "sha384-fgyWYkUAamzuI8mJFu/xpRP0JWCJRwkwUwsYDoOYVHUJ8NQE5cENn8ib3ppwFFSX"
+	swaggerUIBundleSRI = "sha384-Dt83RhU85ZmX7werw9uTFCzmauXUoSyx3pdzTQMABtsnFmooJy4Vz9/ACh7n5m1A"
+
+	redocVersion = "2.5.3"
+	redocSRI     = "sha384-xiEssMQFSpSfLbzRZCGfxxIM5QDb2DTrU6vyoZdp2sV1L6pmOMy6MpTtUoLbpC96"
+)
+
+var swaggerUIPage = fmt.Sprintf(`<!DOCTYPE html>
 <html><head><title>TabMail API</title>
-<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@%[1]s/swagger-ui.css"
+      integrity="%[2]s" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head><body>
 <div id="swagger-ui"></div>
-<script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script src="https://unpkg.com/swagger-ui-dist@%[1]s/swagger-ui-bundle.js"
+        integrity="%[3]s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>SwaggerUIBundle({url:"/openapi.yaml",dom_id:"#swagger-ui",deepLinking:true})</script>
-</body></html>`))
-}
+</body></html>`, swaggerUIVersion, swaggerUICSSSRI, swaggerUIBundleSRI)
 
-func serveRedoc(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(`<!DOCTYPE html>
+var redocPage = fmt.Sprintf(`<!DOCTYPE html>
 <html><head><title>TabMail API</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 </head><body>
 <redoc spec-url="/openapi.yaml"></redoc>
-<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
-</body></html>`))
+<script src="https://cdn.redoc.ly/redoc/v%[1]s/bundles/redoc.standalone.js"
+        integrity="%[2]s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body></html>`, redocVersion, redocSRI)
+
+func serveSwaggerUI(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(swaggerUIPage))
+}
+
+func serveRedoc(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(redocPage))
 }
