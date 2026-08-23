@@ -420,7 +420,6 @@ Authorization: Bearer <mailbox-token>
 - `docs/deployment.md`
 - `docs/api-examples.md`
 - `docs/operations.md`
-- `docs/optimization-plan.md`
 
 ---
 

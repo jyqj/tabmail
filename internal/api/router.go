@@ -51,7 +51,7 @@ func newMetricsDBCountCache(ttl time.Duration) *metricsDBCountCache {
 func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) metricsDBCounts {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c != nil && now.Before(c.expiresAt) {
+	if now.Before(c.expiresAt) {
 		return c.value
 	}
 	value := load()
