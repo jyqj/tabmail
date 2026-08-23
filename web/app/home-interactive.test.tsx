@@ -2,7 +2,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import HomePage from "./page";
+import { AddressSearch, type AddressSearchLabels } from "./home-interactive";
 
 const { pushMock, listDomainsMock, suggestAddressMock } = vi.hoisted(() => ({
   pushMock: vi.fn(),
@@ -16,22 +16,6 @@ vi.mock("next/navigation", () => ({
   }),
 }));
 
-vi.mock("next/link", () => ({
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => (
-    <a href={href}>{children}</a>
-  ),
-}));
-
-vi.mock("@/components/site-header", () => ({
-  SiteHeader: () => <div>site-header</div>,
-}));
-
-vi.mock("@/lib/i18n", () => ({
-  useI18n: () => ({
-    t: (key: string) => key,
-  }),
-}));
-
 vi.mock("@/lib/api", () => ({
   listOpenDomains: (...args: unknown[]) => listDomainsMock(...args),
   suggestOpenAddress: (...args: unknown[]) => suggestAddressMock(...args),
@@ -40,10 +24,10 @@ vi.mock("@/lib/api", () => ({
 vi.mock("@/components/ui/button", () => ({
   Button: ({
     children,
-    render,
+    render: renderProp,
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement> & { render?: React.ReactElement }) =>
-    render ? React.cloneElement(render, undefined, children) : <button {...props}>{children}</button>,
+    renderProp ? React.cloneElement(renderProp, undefined, children) : <button {...props}>{children}</button>,
 }));
 
 vi.mock("@/components/ui/input", async () => {
@@ -55,12 +39,20 @@ vi.mock("@/components/ui/input", async () => {
   };
 });
 
-vi.mock("@/components/ui/card", () => ({
-  Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+// The page translates on the server and hands the island finished strings, so
+// the labels stand in for what a Server Component would pass.
+const labels: AddressSearchLabels = {
+  placeholder: "home.placeholder",
+  openInbox: "home.openInbox",
+  random: "home.random",
+  generating: "home.generating",
+  curlHint: "home.curlHint",
+  noRegister: "home.noRegister",
+  noDomains: "home.noDomains",
+  randomFailed: "home.randomFailed",
+};
 
-describe("home page", () => {
+describe("home address search", () => {
   beforeEach(() => {
     pushMock.mockReset();
     listDomainsMock.mockReset();
@@ -85,7 +77,7 @@ describe("home page", () => {
   });
 
   it("支持输入地址后打开 inbox", async () => {
-    render(<HomePage />);
+    render(<AddressSearch labels={labels} />);
 
     fireEvent.change(screen.getByPlaceholderText("home.placeholder"), {
       target: { value: "user@mail.test" },
@@ -100,7 +92,7 @@ describe("home page", () => {
   it("支持生成随机地址并跳转", async () => {
     vi.spyOn(Math, "random").mockReturnValue(0);
 
-    render(<HomePage />);
+    render(<AddressSearch labels={labels} />);
 
     fireEvent.click(screen.getByRole("button", { name: /home.random/i }));
 
