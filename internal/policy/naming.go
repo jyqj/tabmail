@@ -31,6 +31,17 @@ func ParseNamingMode(s string) (NamingMode, error) {
 	}
 }
 
+// SanitizeAddr normalizes an SMTP envelope address: trims whitespace, strips
+// one pair of surrounding angle brackets, and lowercases the result. It is the
+// shared canonical form used to key resolver results between the SMTP session
+// and the ingest pipeline.
+func SanitizeAddr(addr string) string {
+	addr = strings.TrimSpace(addr)
+	addr = strings.TrimPrefix(addr, "<")
+	addr = strings.TrimSuffix(addr, ">")
+	return strings.ToLower(addr)
+}
+
 func NormalizeAddressParts(address string, stripPlus bool) (string, string, error) {
 	address = strings.ToLower(strings.TrimSpace(strings.Trim(address, "<>")))
 	if address == "" {

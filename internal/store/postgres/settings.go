@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -13,7 +14,7 @@ func (s *PgStore) GetSetting(ctx context.Context, key string) (*models.SystemSet
 	err := s.pool.QueryRow(ctx,
 		`SELECT key, value, description, updated_at FROM system_settings WHERE key = $1`, key).
 		Scan(&ss.Key, &ss.Value, &ss.Description, &ss.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return ss, err

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"strings"
 	"time"
 
@@ -46,7 +47,7 @@ func scanUser(row pgx.Row) (*models.User, error) {
 	var profileID pgtype.UUID
 	err := row.Scan(&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName,
 		&u.Role, &u.IsActive, &profileID, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -149,7 +150,7 @@ func (s *PgStore) GetRefreshToken(ctx context.Context, tokenHash string) (*model
 		SELECT id, user_id, token_hash, expires_at, created_at, revoked_at
 		FROM refresh_tokens WHERE token_hash = $1`, tokenHash).
 		Scan(&rt.ID, &rt.UserID, &rt.TokenHash, &rt.ExpiresAt, &rt.CreatedAt, &rt.RevokedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return rt, err
@@ -195,7 +196,7 @@ func (s *PgStore) GetAdminInvitationByCode(ctx context.Context, code string) (*m
 		FROM admin_invitations WHERE invite_code = $1`, hashInviteCode(code)).
 		Scan(&inv.ID, &inv.Email, &inv.InviteCode, &invitedBy,
 			&inv.ExpiresAt, &inv.AcceptedAt, &inv.CreatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {

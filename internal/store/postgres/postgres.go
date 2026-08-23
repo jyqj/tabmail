@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -87,7 +88,7 @@ func (s *PgStore) GetPlan(ctx context.Context, id uuid.UUID) (*models.Plan, erro
 		&p.ID, &p.Name, &p.MaxDomains, &p.MaxMailboxesPerDomain, &p.MaxMessagesPerMailbox,
 		&p.MaxMessageBytes, &p.RetentionHours, &p.RPMLimit, &p.DailyQuota,
 		&p.CreatedAt, &p.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return p, err
@@ -150,7 +151,7 @@ func (s *PgStore) GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, 
 	err := s.pool.QueryRow(ctx,
 		`SELECT id,name,plan_id,is_super,created_at FROM tenants WHERE id=$1`, id).
 		Scan(&t.ID, &t.Name, &t.PlanID, &t.IsSuper, &t.CreatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return t, err
@@ -215,7 +216,7 @@ func (s *PgStore) GetOverride(ctx context.Context, tenantID uuid.UUID) (*models.
 		FROM tenant_overrides WHERE tenant_id=$1`, tenantID).
 		Scan(&o.ID, &o.TenantID, &o.MaxDomains, &o.MaxMailboxesPerDomain, &o.MaxMessagesPerMailbox,
 			&o.MaxMessageBytes, &o.RetentionHours, &o.RPMLimit, &o.DailyQuota, &o.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return o, err
@@ -239,7 +240,7 @@ func (s *PgStore) EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*mod
 		WHERE t.id = $1`, tenantID).
 		Scan(&ec.MaxDomains, &ec.MaxMailboxesPerDomain, &ec.MaxMessagesPerMailbox,
 			&ec.MaxMessageBytes, &ec.RetentionHours, &ec.RPMLimit, &ec.DailyQuota)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("tenant %s not found", tenantID)
 	}
 	return ec, err
@@ -324,7 +325,7 @@ func (s *PgStore) GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAP
 		FROM tenant_api_keys WHERE id=$1`, id).
 		Scan(&k.ID, &k.TenantID, &k.KeyPrefix, &k.Label,
 			&scopesJSON, &ownerID, &k.AllowedZoneIDs, &k.ExpiresAt, &k.CreatedAt, &k.LastUsedAt, &k.LastUsedIP)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -362,7 +363,7 @@ func (s *PgStore) ResolveAPIKey(ctx context.Context, rawKey string) (*models.Ten
 		WHERE k.key_hash = $1
 		  AND (k.expires_at IS NULL OR k.expires_at > now())`, h).
 		Scan(&keyID, &scopesJSON, &allowedZoneIDs, &ownerUserID, &t.ID, &t.Name, &t.PlanID, &t.IsSuper, &t.CreatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil, nil, nil, nil, nil
 	}
 	if err != nil {
@@ -423,7 +424,7 @@ func scanZone(row pgx.Row) (*models.DomainZone, error) {
 	var parentID pgtype.UUID
 	err := row.Scan(&z.ID, &z.TenantID, &ownerID, &parentID, &z.Domain, &z.Visibility,
 		&z.AllowRandomSubdomains, &z.IsVerified, &z.MXVerified, &z.TXTRecord, &z.DKIMPrivateKeyPEM, &z.DKIMSelector, &z.DKIMEnabled, &z.DKIMRequiredForSend, &z.CreatedAt, &z.VerifiedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -599,7 +600,7 @@ func (s *PgStore) GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRou
 		FROM domain_routes WHERE id=$1`, id).
 		Scan(&r.ID, &r.ZoneID, &r.RouteType, &r.MatchValue, &r.RangeStart, &r.RangeEnd,
 			&r.AutoCreateMailbox, &r.RetentionHoursOverride, &r.AccessModeDefault, &r.CreatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return r, err
@@ -679,7 +680,7 @@ func (s *PgStore) GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 		SELECT default_accept,accept_domains,reject_domains,default_store,store_domains,discard_domains,reject_origin_domains,updated_at
 		FROM smtp_policies WHERE id=TRUE`).
 		Scan(&p.DefaultAccept, &p.AcceptDomains, &p.RejectDomains, &p.DefaultStore, &p.StoreDomains, &p.DiscardDomains, &p.RejectOriginDomains, &p.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return p, err
@@ -773,7 +774,7 @@ func (s *PgStore) scanMailbox(row pgx.Row) (*models.Mailbox, error) {
 	err := row.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
 		&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
 		&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return m, err
@@ -990,7 +991,7 @@ func (s *PgStore) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message
 		Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients,
 			&m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON,
 			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return m, err
@@ -1006,7 +1007,7 @@ func (v *pgTenantView) GetMessage(ctx context.Context, id uuid.UUID) (*models.Me
 		Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients,
 			&m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON,
 			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return m, err
@@ -1057,7 +1058,7 @@ func (s *PgStore) DeleteMessage(ctx context.Context, id uuid.UUID) error {
 
 	var mailboxID uuid.UUID
 	err = tx.QueryRow(ctx, `DELETE FROM messages WHERE id=$1 RETURNING mailbox_id`, id).Scan(&mailboxID)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil
 	}
 	if err != nil {
@@ -1090,7 +1091,7 @@ func (s *PgStore) CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, 
 	var n int
 	err := s.pool.QueryRow(ctx,
 		`SELECT message_count FROM mailboxes WHERE id=$1`, mailboxID).Scan(&n)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return 0, nil
 	}
 	return n, err
@@ -1924,7 +1925,7 @@ func (s *PgStore) GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.Se
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities WHERE id = $1`, id).
 		Scan(&si.ID, &si.TenantID, &si.ZoneID, &si.MailboxID, &si.Address, &si.IdentityType, &si.Verified, &si.CreatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return si, err
@@ -1992,7 +1993,7 @@ func (s *PgStore) FindSendIdentityForAddress(ctx context.Context, tenantID uuid.
 	if err == nil {
 		return si, nil
 	}
-	if err != pgx.ErrNoRows {
+	if !errors.Is(err, pgx.ErrNoRows) {
 		return nil, err
 	}
 	// Try domain_wildcard: extract domain from address.
@@ -2008,7 +2009,7 @@ func (s *PgStore) FindSendIdentityForAddress(ctx context.Context, tenantID uuid.
 		WHERE tenant_id = $1 AND address = $2 AND identity_type = 'domain_wildcard'`, tenantID, wildcardAddr)
 	si = &models.SendIdentity{}
 	err = row.Scan(&si.ID, &si.TenantID, &si.ZoneID, &si.MailboxID, &si.Address, &si.IdentityType, &si.Verified, &si.CreatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {

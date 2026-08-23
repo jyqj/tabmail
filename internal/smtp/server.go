@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"io"
 	"net"
-	"strings"
 	"sync"
 
 	"github.com/emersion/go-sasl"
@@ -145,7 +144,7 @@ type session struct {
 	logger     zerolog.Logger
 	from       string
 	recipients []string
-	// results caches RCPT-phase resolver.Results keyed by sanitizeAddr(rcpt) so
+	// results caches RCPT-phase resolver.Results keyed by policy.SanitizeAddr(rcpt) so
 	// DATA can hand them to ingest.Accept via WithResolved and skip a redundant
 	// Resolve per recipient. Only Reusable entries (Mailbox present, not just
 	// Created) are stored; auto-create results are left for deliver to resolve.
@@ -170,7 +169,7 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 	if opts != nil && opts.Auth != nil {
 		return gosmtp.ErrAuthUnsupported
 	}
-	s.from = sanitizeAddr(from)
+	s.from = policy.SanitizeAddr(from)
 	pol, err := s.backend.ingest.CurrentPolicy(context.Background())
 	if err != nil {
 		return smtpErr(451, "temporary policy lookup failure")
@@ -182,7 +181,7 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 }
 
 func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
-	addr := sanitizeAddr(to)
+	addr := policy.SanitizeAddr(to)
 	_, domain, err := policy.NormalizeAddressParts(addr, s.backend.resolver.StripPlus())
 	if err != nil {
 		metrics.SMTPRecipientRejected()
@@ -246,8 +245,9 @@ func (s *session) Data(r io.Reader) error {
 		return smtpErr(554, "no valid recipients")
 	}
 	// Hand the RCPT-phase results to deliver via WithResolved. recipients are
-	// already sanitizeAddr-normalized (set in Rcpt), and WithResolved re-runs
-	// sanitizeAddr on the key, so the map lookup aligns byte-for-byte.
+	// already policy.SanitizeAddr-normalized (set in Rcpt), and WithResolved
+	// re-runs policy.SanitizeAddr on the key, so the map lookup aligns
+	// byte-for-byte.
 	opts := make([]ingest.AcceptOption, 0, len(s.results))
 	for addr, r := range s.results {
 		opts = append(opts, ingest.WithResolved(addr, r))
@@ -290,11 +290,4 @@ func smtpErr(code int, msg string) error {
 		Code:    code,
 		Message: msg,
 	}
-}
-
-func sanitizeAddr(addr string) string {
-	addr = strings.TrimSpace(addr)
-	addr = strings.TrimPrefix(addr, "<")
-	addr = strings.TrimSuffix(addr, ">")
-	return strings.ToLower(addr)
 }

@@ -10,10 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
-	"github.com/jhillyerd/enmime/v2"
-	"github.com/redis/go-redis/v9"
-	"github.com/rs/zerolog"
 	"tabmail/internal/classify"
 	"tabmail/internal/config"
 	"tabmail/internal/configcache"
@@ -26,6 +22,11 @@ import (
 	"tabmail/internal/resolver"
 	"tabmail/internal/store"
 	"tabmail/internal/workqueue"
+
+	"github.com/google/uuid"
+	"github.com/jhillyerd/enmime/v2"
+	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type serviceStore interface {
@@ -61,7 +62,7 @@ type AcceptOption func(*acceptCfg)
 // populated today (SMTP session reuse of RCPT-phase resolution); future per-call
 // overrides extend this struct without touching Accept's signature.
 type acceptCfg struct {
-	// resolved carries RCPT-phase resolver.Results keyed by sanitizeAddr(rcpt).
+	// resolved carries RCPT-phase resolver.Results keyed by policy.SanitizeAddr(rcpt).
 	// deliver consults it for each recipient: a Reusable entry short-circuits
 	// the second Resolve; non-reusable entries (auto-create, or absent) fall
 	// back to a fresh Resolve so auto-create semantics are preserved exactly.
@@ -76,7 +77,7 @@ func WithResolved(addr string, r *resolver.Result) AcceptOption {
 		if c.resolved == nil {
 			c.resolved = map[string]*resolver.Result{}
 		}
-		c.resolved[sanitizeAddr(addr)] = r
+		c.resolved[policy.SanitizeAddr(addr)] = r
 	}
 }
 
@@ -336,7 +337,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]Reci
 // (policy load or raw persistence) that should be retried, distinct from
 // per-recipient drops.
 //
-// resolved (may be nil) carries RCPT-phase Results keyed by sanitizeAddr(rcpt).
+// resolved (may be nil) carries RCPT-phase Results keyed by policy.SanitizeAddr(rcpt).
 // For each recipient deliverResolved prefers the cached entry when it is
 // Reusable (Mailbox present and not just Created), short-circuiting a redundant
 // Resolve; otherwise it falls back to s.resolver.Resolve so auto-create and
@@ -377,7 +378,7 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 	}
 
 	for _, rcpt := range env.Recipients {
-		addr := sanitizeAddr(rcpt)
+		addr := policy.SanitizeAddr(rcpt)
 		// Reuse a RCPT-phase Result when it is safe (Mailbox present, not just
 		// Created): this is the SMTP-session-reuse fast path. Auto-create
 		// results (Mailbox nil) and freshly-Created results always fall through
@@ -662,11 +663,4 @@ func retentionOf(res *resolver.Result, cfg *models.EffectiveConfig) (mailbox, ro
 		tenant = &v
 	}
 	return mailbox, route, tenant
-}
-
-func sanitizeAddr(addr string) string {
-	addr = strings.TrimSpace(addr)
-	addr = strings.TrimPrefix(addr, "<")
-	addr = strings.TrimSuffix(addr, ">")
-	return strings.ToLower(addr)
 }

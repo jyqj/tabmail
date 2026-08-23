@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -41,7 +42,7 @@ func (s *PgStore) GetWebhookEndpoint(ctx context.Context, id uuid.UUID) (*models
 		SELECT id,tenant_id,url,event_types,is_active,created_by,created_at,updated_at
 		FROM webhook_endpoints WHERE id=$1`, id).
 		Scan(&ep.ID, &ep.TenantID, &ep.URL, &ep.EventTypes, &ep.IsActive, &ep.CreatedBy, &ep.CreatedAt, &ep.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return ep, err

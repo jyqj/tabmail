@@ -149,7 +149,7 @@ func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
 		&job.Attempts, &job.MaxAttempts, &job.LastError, &job.NextAttemptAt, &job.ClaimedAt,
 		&job.LeaseUntil, &smtpCode, &job.SMTPResponse, &job.MessageIDHeader, &deliveryToken, &job.CreatedAt, &job.UpdatedAt,
 		&job.To, &job.CC, &job.BCC)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -526,7 +526,7 @@ func (s *PgStore) GetOutboundTemplate(ctx context.Context, tenantID uuid.UUID, n
 		SELECT id, tenant_id, name, subject_tmpl, text_tmpl, html_tmpl, created_at, updated_at
 		FROM outbound_templates WHERE tenant_id=$1 AND name=$2`, tenantID, name).
 		Scan(&t.ID, &t.TenantID, &t.Name, &t.SubjectTmpl, &t.TextTmpl, &t.HTMLTmpl, &t.CreatedAt, &t.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return t, err
