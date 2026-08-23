@@ -122,6 +122,7 @@ func validOutboundConfig() *Root {
 		ObjectStore:        "fs",
 		DataDir:            "/data",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
+		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
 	}
