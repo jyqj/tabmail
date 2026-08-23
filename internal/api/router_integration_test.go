@@ -33,6 +33,47 @@ const publicTenantID = "00000000-0000-0000-0000-000000000001"
 
 const testMetricsToken = "metrics-test-token"
 
+// TestRouter_DocsAssetsSelfHosted pins the CDN removal: /docs and /redoc must
+// reference only same-origin assets, and those assets must actually be served.
+func TestRouter_DocsAssetsSelfHosted(t *testing.T) {
+	st, obj, _ := seededStores(t)
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+
+	router := testRouter(st, obj, rdb)
+
+	for _, page := range []string{"/docs", "/redoc"} {
+		req := httptest.NewRequest(http.MethodGet, page, nil)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("%s: expected 200, got %d", page, rr.Code)
+		}
+		body := rr.Body.String()
+		for _, forbidden := range []string{"unpkg.com", "cdn.redoc.ly", "https://"} {
+			if strings.Contains(body, forbidden) {
+				t.Fatalf("%s still references external origin %q", page, forbidden)
+			}
+		}
+	}
+
+	for _, asset := range []string{
+		"/docs-assets/swagger-ui.css",
+		"/docs-assets/swagger-ui-bundle.js",
+		"/docs-assets/redoc.standalone.js",
+	} {
+		req := httptest.NewRequest(http.MethodGet, asset, nil)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("%s: expected 200, got %d", asset, rr.Code)
+		}
+		if rr.Body.Len() < 1024 {
+			t.Fatalf("%s: suspiciously small body (%d bytes)", asset, rr.Body.Len())
+		}
+	}
+}
+
 func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})

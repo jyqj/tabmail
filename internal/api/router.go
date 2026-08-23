@@ -33,6 +33,12 @@ import (
 //go:embed openapi.yaml
 var openapiSpec embed.FS
 
+// docsAssets holds the vendored Swagger UI / ReDoc bundles so /docs and
+// /redoc work without loading script from third-party CDNs.
+//
+//go:embed docsassets/*.js docsassets/*.css
+var docsAssets embed.FS
+
 type metricsDBCounts struct {
 	webhookDead      int
 	webhookPending   int
@@ -294,6 +300,12 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	})
 	r.Get("/docs", serveSwaggerUI)
 	r.Get("/redoc", serveRedoc)
+	docsAssetsSub, _ := fs.Sub(docsAssets, "docsassets")
+	docsAssetsServer := http.StripPrefix("/docs-assets/", http.FileServerFS(docsAssetsSub))
+	r.Get("/docs-assets/*", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=3600")
+		docsAssetsServer.ServeHTTP(w, r)
+	})
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -359,10 +371,10 @@ func serveSwaggerUI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(`<!DOCTYPE html>
 <html><head><title>TabMail API</title>
-<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+<link rel="stylesheet" href="/docs-assets/swagger-ui.css">
 </head><body>
 <div id="swagger-ui"></div>
-<script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script src="/docs-assets/swagger-ui-bundle.js"></script>
 <script>SwaggerUIBundle({url:"/openapi.yaml",dom_id:"#swagger-ui",deepLinking:true})</script>
 </body></html>`))
 }
@@ -374,6 +386,6 @@ func serveRedoc(w http.ResponseWriter, r *http.Request) {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 </head><body>
 <redoc spec-url="/openapi.yaml"></redoc>
-<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+<script src="/docs-assets/redoc.standalone.js"></script>
 </body></html>`))
 }
