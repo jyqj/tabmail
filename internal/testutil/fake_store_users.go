@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"tabmail/internal/models"
@@ -108,7 +109,16 @@ func (s *FakeStore) DeleteUser(_ context.Context, id uuid.UUID) error {
 
 func (s *FakeStore) TouchUserLogin(_ context.Context, _ uuid.UUID) error { return nil }
 
-func (s *FakeStore) CreateRefreshToken(_ context.Context, _ *models.RefreshToken) error { return nil }
+func (s *FakeStore) CreateRefreshToken(_ context.Context, rt *models.RefreshToken) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if rt.ID == uuid.Nil {
+		rt.ID = uuid.New()
+	}
+	cp := *rt
+	s.refreshTokens[cp.ID] = &cp
+	return nil
+}
 
 func (s *FakeStore) GetRefreshToken(_ context.Context, _ string) (*models.RefreshToken, error) {
 	return nil, nil
@@ -118,7 +128,27 @@ func (s *FakeStore) RevokeRefreshToken(_ context.Context, _ uuid.UUID) error { r
 
 func (s *FakeStore) RevokeUserRefreshTokens(_ context.Context, _ uuid.UUID) error { return nil }
 
-func (s *FakeStore) DeleteExpiredRefreshTokens(_ context.Context) error { return nil }
+func (s *FakeStore) DeleteExpiredRefreshTokens(_ context.Context) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	deleted := 0
+	now := time.Now()
+	for id, rt := range s.refreshTokens {
+		if rt.ExpiresAt.Before(now) {
+			delete(s.refreshTokens, id)
+			deleted++
+		}
+	}
+	return deleted, nil
+}
+
+// CountRefreshTokens reports the rows currently held; tests use it to verify
+// retention sweeps.
+func (s *FakeStore) CountRefreshTokens() int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return len(s.refreshTokens)
+}
 
 func (s *FakeStore) CreateAdminInvitation(_ context.Context, _ *models.AdminInvitation) error {
 	return nil

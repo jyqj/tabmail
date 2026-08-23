@@ -58,7 +58,11 @@ type UserStore interface {
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
 	RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error
-	DeleteExpiredRefreshTokens(ctx context.Context) error
+	// DeleteExpiredRefreshTokens drops session rows whose expiry has passed
+	// (the retention role calls it on a schedule) and reports how many went.
+	// Revoked-but-unexpired rows stay: the auth service reads them to detect
+	// refresh-token reuse.
+	DeleteExpiredRefreshTokens(ctx context.Context) (int, error)
 
 	// --- Admin invitations -----------------------------------------------
 	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error

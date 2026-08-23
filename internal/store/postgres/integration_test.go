@@ -549,3 +549,51 @@ func TestIntegrationClaimIngestJobsLease(t *testing.T) {
 		t.Fatalf("expected second attempt, got %d", due[0].Attempts)
 	}
 }
+
+func TestIntegrationDeleteExpiredRefreshTokens(t *testing.T) {
+	st := newTestStore(t)
+	ctx := context.Background()
+	tenant := seedTenant(t, st)
+
+	user := &models.User{
+		TenantID:     tenant.ID,
+		Email:        "it-user-" + uuid.NewString() + "@mail.test",
+		PasswordHash: "x",
+		Role:         models.RoleUser,
+		IsActive:     true,
+	}
+	if err := st.CreateUser(ctx, user); err != nil {
+		t.Fatalf("create user: %v", err)
+	}
+
+	expired := &models.RefreshToken{UserID: user.ID, TokenHash: "hash-expired", ExpiresAt: time.Now().Add(-time.Hour)}
+	revokedButLive := &models.RefreshToken{UserID: user.ID, TokenHash: "hash-revoked", ExpiresAt: time.Now().Add(time.Hour)}
+	valid := &models.RefreshToken{UserID: user.ID, TokenHash: "hash-valid", ExpiresAt: time.Now().Add(time.Hour)}
+	for _, rt := range []*models.RefreshToken{expired, revokedButLive, valid} {
+		if err := st.CreateRefreshToken(ctx, rt); err != nil {
+			t.Fatalf("create refresh token: %v", err)
+		}
+	}
+	if err := st.RevokeRefreshToken(ctx, revokedButLive.ID); err != nil {
+		t.Fatalf("revoke refresh token: %v", err)
+	}
+
+	n, err := st.DeleteExpiredRefreshTokens(ctx)
+	if err != nil {
+		t.Fatalf("delete expired refresh tokens: %v", err)
+	}
+	if n != 1 {
+		t.Fatalf("expected 1 deleted refresh token, got %d", n)
+	}
+
+	if rt, err := st.GetRefreshToken(ctx, "hash-expired"); err != nil || rt != nil {
+		t.Fatalf("expected the expired token to be gone, rt=%#v err=%v", rt, err)
+	}
+	// Revoked-but-unexpired rows must survive: reuse detection reads them.
+	if rt, err := st.GetRefreshToken(ctx, "hash-revoked"); err != nil || rt == nil || rt.RevokedAt == nil {
+		t.Fatalf("expected the revoked token to remain with revoked_at set, rt=%#v err=%v", rt, err)
+	}
+	if rt, err := st.GetRefreshToken(ctx, "hash-valid"); err != nil || rt == nil {
+		t.Fatalf("expected the valid token to remain, rt=%#v err=%v", rt, err)
+	}
+}
