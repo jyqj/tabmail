@@ -1,0 +1,203 @@
+package sendidentitiesapp
+
+import (
+	"context"
+	"testing"
+
+	"github.com/google/uuid"
+	"github.com/rs/zerolog"
+	"tabmail/internal/app"
+	"tabmail/internal/authz"
+	"tabmail/internal/models"
+)
+
+type identityTestStore struct {
+	identities map[uuid.UUID]*models.SendIdentity
+	zones      map[uuid.UUID]*models.DomainZone
+	deleted    []uuid.UUID
+}
+
+func newIdentityTestStore() *identityTestStore {
+	return &identityTestStore{
+		identities: map[uuid.UUID]*models.SendIdentity{},
+		zones:      map[uuid.UUID]*models.DomainZone{},
+	}
+}
+
+func (s *identityTestStore) CreateSendIdentity(_ context.Context, si *models.SendIdentity) error {
+	cp := *si
+	if cp.ID == uuid.Nil {
+		cp.ID = uuid.New()
+	}
+	s.identities[cp.ID] = &cp
+	si.ID = cp.ID
+	return nil
+}
+
+func (s *identityTestStore) GetSendIdentity(_ context.Context, id uuid.UUID) (*models.SendIdentity, error) {
+	si, found := s.identities[id]
+	if !found {
+		return nil, nil
+	}
+	cp := *si
+	return &cp, nil
+}
+
+func (s *identityTestStore) ListSendIdentities(_ context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error) {
+	var out []*models.SendIdentity
+	for _, si := range s.identities {
+		if si.TenantID == tenantID {
+			cp := *si
+			out = append(out, &cp)
+		}
+	}
+	return out, nil
+}
+
+func (s *identityTestStore) DeleteSendIdentity(_ context.Context, id uuid.UUID) error {
+	delete(s.identities, id)
+	s.deleted = append(s.deleted, id)
+	return nil
+}
+
+func (s *identityTestStore) GetZone(_ context.Context, id uuid.UUID) (*models.DomainZone, error) {
+	zone, found := s.zones[id]
+	if !found {
+		return nil, nil
+	}
+	cp := *zone
+	return &cp, nil
+}
+
+func requireKind(t *testing.T, err error, want app.ErrorKind) {
+	t.Helper()
+	appErr, found := app.As(err)
+	if !found {
+		t.Fatalf("expected an application error, got %v", err)
+	}
+	if appErr.Kind != want {
+		t.Fatalf("expected kind %q, got %q (%s)", want, appErr.Kind, appErr.Message)
+	}
+}
+
+func TestListRequiresTenant(t *testing.T) {
+	svc := NewService(newIdentityTestStore(), zerolog.Nop())
+	_, err := svc.List(context.Background(), authz.Actor{}, uuid.Nil)
+	requireKind(t, err, app.KindForbidden)
+}
+
+func TestListFiltersNonAdminByAllowedZones(t *testing.T) {
+	st := newIdentityTestStore()
+	tenantID := uuid.New()
+	allowedZone := uuid.New()
+	blockedZone := uuid.New()
+	st.identities[uuid.New()] = &models.SendIdentity{ID: uuid.New(), TenantID: tenantID, ZoneID: allowedZone, Address: "a@allowed.test"}
+	st.identities[uuid.New()] = &models.SendIdentity{ID: uuid.New(), TenantID: tenantID, ZoneID: blockedZone, Address: "b@blocked.test"}
+
+	svc := NewService(st, zerolog.Nop())
+	actor := authz.Actor{
+		Type:       authz.PrincipalUser,
+		TenantID:   tenantID,
+		Permission: &models.EffectivePermission{AllowedZoneIDs: []uuid.UUID{allowedZone}},
+	}
+	items, err := svc.List(context.Background(), actor, tenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(items) != 1 || items[0].ZoneID != allowedZone {
+		t.Fatalf("expected only the allowed-zone identity, got %#v", items)
+	}
+
+	admin := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
+	items, err = svc.List(context.Background(), admin, tenantID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(items) != 2 {
+		t.Fatalf("expected admin to see both identities, got %d", len(items))
+	}
+}
+
+func TestListReturnsEmptySliceNotNil(t *testing.T) {
+	svc := NewService(newIdentityTestStore(), zerolog.Nop())
+	items, err := svc.List(context.Background(), authz.Actor{IsAdmin: true}, uuid.New())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if items == nil {
+		t.Fatal("expected empty slice, got nil")
+	}
+}
+
+func TestCreateHidesForeignZoneAsNotFound(t *testing.T) {
+	st := newIdentityTestStore()
+	zoneID := uuid.New()
+	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: uuid.New(), Domain: "other.test"}
+
+	svc := NewService(st, zerolog.Nop())
+	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: uuid.New(), IsAdmin: true}
+	_, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "x@other.test"})
+	requireKind(t, err, app.KindNotFound)
+}
+
+func TestCreateDetectsWildcardAndInheritsVerification(t *testing.T) {
+	st := newIdentityTestStore()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true}
+
+	svc := NewService(st, zerolog.Nop())
+	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
+
+	wildcard, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: " *@mail.test "})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if wildcard.IdentityType != models.SendIdentityDomainWildcard {
+		t.Fatalf("expected wildcard identity type, got %q", wildcard.IdentityType)
+	}
+	if wildcard.Address != "*@mail.test" {
+		t.Fatalf("expected trimmed address, got %q", wildcard.Address)
+	}
+	if !wildcard.Verified {
+		t.Fatal("expected identity to inherit zone verification")
+	}
+
+	exact, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "team@mail.test"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if exact.IdentityType != models.SendIdentityExact {
+		t.Fatalf("expected exact identity type, got %q", exact.IdentityType)
+	}
+}
+
+func TestDeleteHidesForeignIdentityAsNotFound(t *testing.T) {
+	st := newIdentityTestStore()
+	id := uuid.New()
+	st.identities[id] = &models.SendIdentity{ID: id, TenantID: uuid.New(), Address: "x@other.test"}
+
+	svc := NewService(st, zerolog.Nop())
+	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: uuid.New(), IsAdmin: true}
+	err := svc.Delete(context.Background(), actor, id)
+	requireKind(t, err, app.KindNotFound)
+	if len(st.deleted) != 0 {
+		t.Fatalf("expected no deletions, got %v", st.deleted)
+	}
+}
+
+func TestDeleteRemovesOwnedIdentity(t *testing.T) {
+	st := newIdentityTestStore()
+	tenantID := uuid.New()
+	id := uuid.New()
+	st.identities[id] = &models.SendIdentity{ID: id, TenantID: tenantID, Address: "x@mail.test"}
+
+	svc := NewService(st, zerolog.Nop())
+	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
+	if err := svc.Delete(context.Background(), actor, id); err != nil {
+		t.Fatal(err)
+	}
+	if len(st.deleted) != 1 || st.deleted[0] != id {
+		t.Fatalf("expected identity %s deleted, got %v", id, st.deleted)
+	}
+}
