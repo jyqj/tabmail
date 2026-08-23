@@ -5,8 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/jackc/pgx/v5"
 	"tabmail/internal/models"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func (s *PgStore) GetSetting(ctx context.Context, key string) (*models.SystemSetting, error) {

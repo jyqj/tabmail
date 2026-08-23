@@ -9,13 +9,14 @@ import (
 	"strings"
 	"time"
 
+	"tabmail/internal/authz"
+	"tabmail/internal/models"
+	"tabmail/internal/store"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
-	"tabmail/internal/authz"
-	"tabmail/internal/models"
-	"tabmail/internal/store"
 )
 
 // ================================================================

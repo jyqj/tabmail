@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"tabmail/internal/models"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
-	"tabmail/internal/models"
 )
 
 func hashInviteCode(code string) string {
