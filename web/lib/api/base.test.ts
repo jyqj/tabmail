@@ -87,6 +87,33 @@ describe("api/base", () => {
       String(input).endsWith("/api/v1/auth/refresh")
     );
     expect(refreshCall?.[1]?.body).toBeUndefined();
+    // It does carry the double-submit CSRF pair for the route handler.
+    const refreshHeaders = refreshCall?.[1]?.headers as Record<string, string>;
+    expect(refreshHeaders["X-CSRF-Token"]).toBeTruthy();
+    expect(document.cookie).toContain(`tabmail_csrf=${refreshHeaders["X-CSRF-Token"]}`);
+  });
+
+  it("会话端点携带与 cookie 匹配的双提交 CSRF 头，其余端点不带", async () => {
+    const fetchMock = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ data: {} }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        })
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await request("/api/v1/auth/login", {
+      method: "POST",
+      body: { email: "user@mail.test", password: "pw" },
+    });
+    const loginHeaders = fetchMock.mock.calls[0][1]?.headers as Record<string, string>;
+    expect(loginHeaders["X-CSRF-Token"]).toBeTruthy();
+    expect(document.cookie).toContain(`tabmail_csrf=${loginHeaders["X-CSRF-Token"]}`);
+
+    await request("/api/v1/domains");
+    const plainHeaders = fetchMock.mock.calls[1][1]?.headers as Record<string, string>;
+    expect(plainHeaders["X-CSRF-Token"]).toBeUndefined();
   });
 
   it("刷新失败时清除本地会话标记", async () => {

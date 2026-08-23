@@ -11,6 +11,7 @@ import {
   refreshCookieOptions,
   splitRefreshToken,
 } from "./auth-session";
+import { requireCsrf } from "./csrf";
 
 const upstreamUnavailable = {
   error: { code: "UPSTREAM_UNAVAILABLE", message: "auth service unavailable" },
@@ -31,6 +32,8 @@ async function forward(path: string, init: RequestInit): Promise<Response | null
 // proxySessionIssue forwards a credential exchange (login, register,
 // accept-invite) and moves the issued refresh token into the httpOnly cookie.
 export async function proxySessionIssue(request: NextRequest, path: string): Promise<NextResponse> {
+  const csrfRejection = requireCsrf(request);
+  if (csrfRejection) return csrfRejection;
   const upstream = await forward(path, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -58,6 +61,8 @@ export async function proxySessionIssue(request: NextRequest, path: string): Pro
 // rotates refresh tokens, so a success always rewrites the cookie; a refused
 // refresh clears it so the browser stops retrying a dead session.
 export async function proxySessionRefresh(request: NextRequest): Promise<NextResponse> {
+  const csrfRejection = requireCsrf(request);
+  if (csrfRejection) return csrfRejection;
   const token = request.cookies.get(REFRESH_COOKIE_NAME)?.value;
   if (!token) {
     return NextResponse.json(
@@ -93,6 +98,8 @@ export async function proxySessionRefresh(request: NextRequest): Promise<NextRes
 // always clears the cookie: a browser logout must succeed locally even when
 // the backend is unreachable or the access token already expired.
 export async function proxySessionLogout(request: NextRequest): Promise<NextResponse> {
+  const csrfRejection = requireCsrf(request);
+  if (csrfRejection) return csrfRejection;
   const token = request.cookies.get(REFRESH_COOKIE_NAME)?.value ?? "";
   const headers: Record<string, string> = { "Content-Type": "application/json" };
   const authorization = request.headers.get("authorization");

@@ -1,19 +1,8 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { SWRConfig } from "swr";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import InboxPage from "./page";
-
-// Each render gets its own SWR cache so pages cached by one test never leak
-// into the next.
-function renderPage() {
-  return render(
-    <SWRConfig value={{ provider: () => new Map() }}>
-      <InboxPage />
-    </SWRConfig>,
-  );
-}
 
 const {
   listMessagesMock,
@@ -229,7 +218,7 @@ describe("InboxPage", () => {
     markMessageSeenMock.mockResolvedValue({ data: { seen: true } });
     getMessageSourceMock.mockResolvedValue("RAW-SOURCE");
 
-    renderPage();
+    render(<InboxPage />);
 
     expect(await screen.findByRole("button", { name: "Welcome" })).toBeInTheDocument();
 
@@ -264,7 +253,7 @@ describe("InboxPage", () => {
       return { data: { token: "mailbox-token" } };
     });
 
-    renderPage();
+    render(<InboxPage />);
 
     expect(await screen.findByText("inbox.authTitle")).toBeInTheDocument();
     expect(toastError).toHaveBeenCalled();
@@ -308,7 +297,7 @@ describe("InboxPage", () => {
             },
     );
 
-    renderPage();
+    render(<InboxPage />);
 
     expect(await screen.findByRole("button", { name: "First Page" })).toBeInTheDocument();
     expect(listMessagesMock).toHaveBeenCalledWith("user@mail.test", 1, 30, undefined);

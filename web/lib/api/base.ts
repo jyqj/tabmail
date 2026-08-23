@@ -1,3 +1,4 @@
+import { CSRF_HEADER_NAME, ensureCsrfToken } from "../csrf";
 import type { APIError } from "../types";
 
 export interface RequestOptions {
@@ -39,6 +40,15 @@ function requestBaseUrl(path: string): string {
     return "";
   }
   return getBaseUrl();
+}
+
+// The session route handlers require the double-submit CSRF pair: the header
+// must repeat the browser-minted tabmail_csrf cookie.
+function withSessionCsrfHeader(path: string, headers: Record<string, string>) {
+  if (typeof window === "undefined" || !SAME_ORIGIN_SESSION_PATHS.has(path)) return headers;
+  const token = ensureCsrfToken();
+  if (token) headers[CSRF_HEADER_NAME] = token;
+  return headers;
 }
 
 // ---------------------------------------------------------------------------
@@ -217,7 +227,7 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
     }
   }
 
-  const headers = buildHeaders(path, opts.headers);
+  const headers = withSessionCsrfHeader(path, buildHeaders(path, opts.headers));
   if (opts.body) headers["Content-Type"] = "application/json";
 
   let res = await fetch(url.toString(), {
@@ -231,7 +241,7 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       // Retry with new token
-      const retryHeaders = buildHeaders(path, opts.headers);
+      const retryHeaders = withSessionCsrfHeader(path, buildHeaders(path, opts.headers));
       if (opts.body) retryHeaders["Content-Type"] = "application/json";
       res = await fetch(url.toString(), {
         method: opts.method || "GET",
@@ -286,7 +296,11 @@ async function doRefreshToken(): Promise<boolean> {
   try {
     // Always same-origin: the refresh token lives in an httpOnly cookie that
     // only the Next /api/v1/auth route handlers can read and rotate.
-    const res = await fetch("/api/v1/auth/refresh", { method: "POST" });
+    const csrfToken = ensureCsrfToken();
+    const res = await fetch("/api/v1/auth/refresh", {
+      method: "POST",
+      headers: csrfToken ? { [CSRF_HEADER_NAME]: csrfToken } : undefined,
+    });
 
     if (!res.ok) {
       // The session is gone server-side; drop the stale local marker so the
