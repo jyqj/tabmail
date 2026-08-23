@@ -94,8 +94,8 @@ describe("api/base", () => {
   });
 
   it("会话端点携带与 cookie 匹配的双提交 CSRF 头，其余端点不带", async () => {
-    const fetchMock = vi.fn(
-      async (_input: RequestInfo | URL, _init?: RequestInit) =>
+    const fetchMock = vi.fn<typeof fetch>(
+      async () =>
         new Response(JSON.stringify({ data: {} }), {
           status: 200,
           headers: { "content-type": "application/json" },

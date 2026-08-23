@@ -5,7 +5,6 @@ import { formatDistanceToNow } from "date-fns";
 import { RefreshCw, Search, Webhook } from "lucide-react";
 
 import { listWebhookDeliveries } from "@/lib/api";
-import type { WebhookDelivery } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
@@ -58,7 +57,7 @@ export default function AdminWebhooksPage() {
     }),
     "webhooks.loadFailed",
   );
-  const items = response?.data ?? [];
+  const items = useMemo(() => response?.data ?? [], [response]);
   const total = response?.meta?.total ?? 0;
 
   const stats = useMemo(() => {

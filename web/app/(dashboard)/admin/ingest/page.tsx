@@ -5,7 +5,6 @@ import { formatDistanceToNow } from "date-fns";
 import { Boxes, RefreshCw, Search } from "lucide-react";
 
 import { listIngestJobs } from "@/lib/api";
-import type { IngestJob } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
@@ -58,7 +57,7 @@ export default function AdminIngestPage() {
     }),
     "ingest.loadFailed",
   );
-  const jobs = response?.data ?? [];
+  const jobs = useMemo(() => response?.data ?? [], [response]);
   const total = response?.meta?.total ?? 0;
 
   const totals = useMemo(() => {

@@ -39,7 +39,7 @@ import {
   deleteSendIdentity,
   listDomains,
 } from "@/lib/api";
-import type { SendIdentity, DomainZone } from "@/lib/types";
+import type { DomainZone } from "@/lib/types";
 import {
   Plus,
   Trash2,
