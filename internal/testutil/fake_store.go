@@ -47,6 +47,10 @@ type FakeStore struct {
 	settings         map[string]*models.SystemSetting
 
 	sendIdentities map[uuid.UUID]*models.SendIdentity
+
+	outboundTemplates map[uuid.UUID]*models.OutboundTemplate
+
+	orphanRetries map[string]int
 }
 
 func NewFakeStore() *FakeStore {
@@ -68,6 +72,7 @@ func NewFakeStore() *FakeStore {
 		outboundAttempts: map[uuid.UUID]*models.OutboundAttempt{},
 		suppressions:     map[uuid.UUID]*models.SuppressionEntry{},
 		sendIdentities:   map[uuid.UUID]*models.SendIdentity{},
+		outboundTemplates: map[uuid.UUID]*models.OutboundTemplate{},
 	}
 }
 

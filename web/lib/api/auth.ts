@@ -36,9 +36,9 @@ export function register(email: string, password: string, displayName?: string) 
   });
 }
 
-export function logoutSession(refreshToken?: string) {
+export function logoutSession() {
   return request<unknown>("/api/v1/auth/logout", {
     method: "POST",
-    body: refreshToken ? { refresh_token: refreshToken } : {},
+    body: {},
   });
 }

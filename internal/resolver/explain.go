@@ -85,7 +85,7 @@ func (rv *Resolver) Explain(ctx context.Context, address string) (*ExplainResult
 	}
 	result.Steps = append(result.Steps, fmt.Sprintf("loaded %d routes for zone", len(routes)))
 
-	route := matchRoute(routes, local, domain, zone.Domain)
+	route := rv.matchRoute(routes, local, domain, zone.Domain)
 	if route == nil {
 		result.ReasonCode = ReasonRouteNotFound
 		result.Steps = append(result.Steps, "no matching route found")

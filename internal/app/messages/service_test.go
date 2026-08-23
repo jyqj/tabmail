@@ -110,7 +110,7 @@ func seededMessageServiceWithStore(t *testing.T, st *testutil.FakeStore, tenant 
 		CreatedAt:      time.Now(),
 	}
 	st.SeedMailbox(mailbox)
-	svc := NewService(st, testutil.NewMemoryObjectStore(), nil, nil, policy.NamingFull, true, "mailbox-secret", zerolog.Nop())
+	svc := NewService(st, testutil.NewMemoryObjectStore(), nil, nil, nil, policy.NamingFull, true, "mailbox-secret", zerolog.Nop())
 	return st, svc, tenant, mailbox
 }
 

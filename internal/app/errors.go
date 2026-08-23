@@ -1,6 +1,10 @@
 package app
 
-import "errors"
+import (
+	"errors"
+
+	"tabmail/internal/authz"
+)
 
 type ErrorKind string
 
@@ -54,4 +58,18 @@ func As(err error) (*Error, bool) {
 		return appErr, true
 	}
 	return nil, false
+}
+
+// FromAuthz maps an authorization result into an app error: an authz denial
+// becomes Forbidden (preserving the message), any other error becomes Internal,
+// and nil stays nil. It is the single converter shared by the service
+// authorize() wrappers.
+func FromAuthz(err error) error {
+	if err == nil {
+		return nil
+	}
+	if authz.IsAuthzError(err) {
+		return Forbidden(err.Error())
+	}
+	return Internal(err)
 }

@@ -1,9 +1,11 @@
 package api
 
 import (
+	"crypto/subtle"
 	"embed"
 	"io/fs"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -21,6 +23,7 @@ import (
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/settings"
@@ -29,6 +32,12 @@ import (
 
 //go:embed openapi.yaml
 var openapiSpec embed.FS
+
+// docsAssets holds the vendored Swagger UI / ReDoc bundles so /docs and
+// /redoc work without loading script from third-party CDNs.
+//
+//go:embed docsassets/*.js docsassets/*.css
+var docsAssets embed.FS
 
 type metricsDBCounts struct {
 	webhookDead      int
@@ -51,7 +60,7 @@ func newMetricsDBCountCache(ttl time.Duration) *metricsDBCountCache {
 func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) metricsDBCounts {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c != nil && now.Before(c.expiresAt) {
+	if now.Before(c.expiresAt) {
 		return c.value
 	}
 	value := load()
@@ -64,6 +73,7 @@ func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) me
 type RouterConfig struct {
 	Store              store.Store
 	ObjectStore        store.ObjectStore
+	RawObjects         *rawobject.Store
 	Hub                *realtime.Hub
 	Dispatcher         *hooks.Dispatcher
 	NamingMode         policy.NamingMode
@@ -78,18 +88,30 @@ type RouterConfig struct {
 	Settings           *settings.Manager
 	HTTP               config.HTTP
 	RateLimiter        *middleware.RateLimiter
+	AuthCache          *middleware.CachedAuthStore
 	OutboundService    *outbound.Service
 	Resolver           *resolver.Resolver
+	IngestInvalidator  policyInvalidatorProvider
 	Logger             zerolog.Logger
+}
+
+// policyInvalidatorProvider narrows the ingest.Service to the method the admin
+// handler needs, so router.go does not import internal/ingest (which would pull
+// redis/enmime into the API package's dependency surface).
+type policyInvalidatorProvider interface {
+	InvalidateSMTPPolicy()
 }
 
 func NewRouter(cfg RouterConfig) http.Handler {
 	st := cfg.Store
+	cached := cfg.AuthCache
+	if cached == nil {
+		cached = middleware.NewCachedAuthStore(st, st.EffectiveConfig)
+	}
 	r := chi.NewRouter()
 	metricsCounts := newMetricsDBCountCache(5 * time.Second)
 
 	r.Use(chimw.RequestID)
-	r.Use(chimw.RealIP)
 	r.Use(chimw.Recoverer)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),
@@ -99,16 +121,17 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		MaxAge:           86400,
 	}))
 
-	r.Use(middleware.Auth(st, cfg.JWTSecret, cfg.PublicTenantID))
-	r.Use(middleware.PermissionLoader(st))
+	r.Use(middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID))
+	r.Use(middleware.PermissionLoader(cached))
 	r.Use(cfg.RateLimiter.Middleware)
 
-	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
-	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
-	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
-	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
+	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
+	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
+	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
+	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
-	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
+	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger)
+	ua := handlers.NewUserAdminHandler(st, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
 	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
 	si := handlers.NewSendIdentityHandler(st, cfg.Logger)
@@ -227,9 +250,9 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Delete("/admin/users/{id}/permissions", perm.DeleteUserPermissionOverride)
 
 			// -- User management --
-			r.Get("/admin/users", auth.ListUsers)
-			r.Patch("/admin/users/{id}", auth.UpdateUserByAdmin)
-			r.Delete("/admin/users/{id}", auth.DeleteUserByAdmin)
+			r.Get("/admin/users", ua.ListUsers)
+			r.Patch("/admin/users/{id}", ua.UpdateUserByAdmin)
+			r.Delete("/admin/users/{id}", ua.DeleteUserByAdmin)
 		})
 
 		// -- Super admin only --
@@ -254,7 +277,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
 			r.Get("/admin/webhooks/deliveries", adm.ListWebhookDeliveries)
 
-			r.Post("/admin/invite", auth.InviteAdmin)
+			r.Post("/admin/invite", ua.InviteAdmin)
 
 			r.Get("/admin/plans", adm.ListPlans)
 			r.Post("/admin/plans", adm.CreatePlan)
@@ -282,12 +305,26 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	})
 	r.Get("/docs", serveSwaggerUI)
 	r.Get("/redoc", serveRedoc)
+	docsAssetsSub, _ := fs.Sub(docsAssets, "docsassets")
+	docsAssetsServer := http.StripPrefix("/docs-assets/", http.FileServerFS(docsAssetsSub))
+	r.Get("/docs-assets/*", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "public, max-age=3600")
+		docsAssetsServer.ServeHTTP(w, r)
+	})
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"ok"}`))
 	})
+	metricsToken := strings.TrimSpace(cfg.HTTP.MetricsToken)
 	r.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		// /metrics is never public: it requires either the configured scrape
+		// token or an authenticated super-admin session.
+		if !metricsAuthorized(r, metricsToken) {
+			w.Header().Set("WWW-Authenticate", "Bearer")
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
 		counts := metricsCounts.Get(time.Now(), func() metricsDBCounts {
 			webhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), "dead")
 			webhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), "pending", "retry", "processing")
@@ -315,14 +352,34 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	return r
 }
 
+// metricsAuthorized allows a request to scrape /metrics when it carries the
+// configured metrics bearer token or belongs to an authenticated super-admin
+// session. With no token configured, only super admins can read metrics.
+func metricsAuthorized(r *http.Request, token string) bool {
+	if token != "" {
+		const prefix = "Bearer "
+		header := r.Header.Get("Authorization")
+		if strings.HasPrefix(header, prefix) {
+			presented := strings.TrimSpace(strings.TrimPrefix(header, prefix))
+			if subtle.ConstantTimeCompare([]byte(presented), []byte(token)) == 1 {
+				return true
+			}
+		}
+	}
+	if user := middleware.UserFromCtx(r.Context()); user != nil && user.Role == models.RoleSuperAdmin {
+		return true
+	}
+	return false
+}
+
 func serveSwaggerUI(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Write([]byte(`<!DOCTYPE html>
 <html><head><title>TabMail API</title>
-<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+<link rel="stylesheet" href="/docs-assets/swagger-ui.css">
 </head><body>
 <div id="swagger-ui"></div>
-<script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script src="/docs-assets/swagger-ui-bundle.js"></script>
 <script>SwaggerUIBundle({url:"/openapi.yaml",dom_id:"#swagger-ui",deepLinking:true})</script>
 </body></html>`))
 }
@@ -334,6 +391,6 @@ func serveRedoc(w http.ResponseWriter, r *http.Request) {
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 </head><body>
 <redoc spec-url="/openapi.yaml"></redoc>
-<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+<script src="/docs-assets/redoc.standalone.js"></script>
 </body></html>`))
 }

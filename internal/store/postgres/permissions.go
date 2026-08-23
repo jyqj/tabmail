@@ -2,12 +2,14 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"tabmail/internal/models"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"tabmail/internal/models"
 )
 
 // ================================================================
@@ -98,7 +100,7 @@ func scanPermProfile(row pgx.Row) (*models.PermissionProfile, error) {
 	err := row.Scan(&p.ID, &p.TenantID, &p.Name, &p.Description, &p.CanSend, &p.DailySendQuota, &p.DailyReceiveQuota,
 		&p.MaxMailboxes, &p.MaxDomains, &allowedZones, &p.CanCreateDomains, &p.CanCreateRoutes,
 		&p.CanCreateAPIKeys, &p.IsSystem, &p.CreatedAt, &p.UpdatedAt)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -166,7 +168,7 @@ func (s *PgStore) EffectivePermission(ctx context.Context, userID uuid.UUID) (*m
 		Scan(&ep.CanSend, &ep.DailySendQuota, &ep.DailyReceiveQuota,
 			&ep.MaxMailboxes, &ep.MaxDomains, &allowedZones,
 			&ep.CanCreateDomains, &ep.CanCreateRoutes, &ep.CanCreateAPIKeys)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("user %s not found", userID)
 	}
 	if err != nil {

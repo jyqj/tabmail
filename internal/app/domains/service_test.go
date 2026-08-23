@@ -34,6 +34,34 @@ func (s *domainTestStore) ListZones(_ context.Context, tenantID uuid.UUID) ([]*m
 	}
 	return out, nil
 }
+func (s *domainTestStore) ListZonesScoped(_ context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error) {
+	if !scope.AllZones && len(scope.ZoneIDs) == 0 {
+		return []*models.DomainZone{}, nil
+	}
+	allowed := make(map[uuid.UUID]struct{}, len(scope.ZoneIDs))
+	for _, id := range scope.ZoneIDs {
+		allowed[id] = struct{}{}
+	}
+	out := make([]*models.DomainZone, 0, len(s.zones))
+	for _, z := range s.zones {
+		if z.TenantID != scope.TenantID {
+			continue
+		}
+		if !scope.AllZones {
+			if _, ok := allowed[z.ID]; !ok {
+				continue
+			}
+		}
+		if scope.OwnerUserID != nil {
+			if z.OwnerUserID == nil || *z.OwnerUserID != *scope.OwnerUserID {
+				continue
+			}
+		}
+		cp := *z
+		out = append(out, &cp)
+	}
+	return out, nil
+}
 func (s *domainTestStore) ListAllZones(context.Context) ([]*models.DomainZone, error) {
 	return nil, nil
 }
@@ -108,7 +136,7 @@ func TestManagedZoneRejectsCrossTenantAccess(t *testing.T) {
 	zoneB := &models.DomainZone{ID: uuid.New(), TenantID: tenantB.ID, Domain: "b.example"}
 	st.zones[zoneB.ID] = zoneB
 
-	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", zerolog.Nop())
+	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", nil, zerolog.Nop())
 	_, err := svc.ManagedZone(ctx, userActor(tenantA.ID, userA), zoneB.ID)
 	if err == nil {
 		t.Fatal("expected cross-tenant access to be rejected")
@@ -122,7 +150,7 @@ func TestManagedZoneAllowsTenantAdminOwnTenant(t *testing.T) {
 	zone := &models.DomainZone{ID: uuid.New(), TenantID: tenant.ID, Domain: "tenant.example"}
 	st.zones[zone.ID] = zone
 
-	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", zerolog.Nop())
+	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", nil, zerolog.Nop())
 	got, err := svc.ManagedZone(ctx, adminActor(tenant.ID), zone.ID)
 	if err != nil {
 		t.Fatalf("tenant admin should manage own tenant zone: %v", err)
@@ -145,7 +173,7 @@ func TestListZonesFiltersByOwnerAndAllowlist(t *testing.T) {
 	st.zones[ownedDenied.ID] = ownedDenied
 	st.zones[foreign.ID] = foreign
 
-	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", zerolog.Nop())
+	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", nil, zerolog.Nop())
 
 	actor := userActor(tenant.ID, owner)
 	actor.Permission = &models.EffectivePermission{AllowedZoneIDs: []uuid.UUID{ownedAllowed.ID, foreign.ID}}
@@ -175,7 +203,7 @@ func TestCreateRouteAuthorizedThroughSeam(t *testing.T) {
 	zone := &models.DomainZone{ID: uuid.New(), TenantID: tenant.ID, OwnerUserID: &owner, Domain: "routes.example"}
 	st.zones[zone.ID] = zone
 
-	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", zerolog.Nop())
+	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", nil, zerolog.Nop())
 	input := CreateRouteInput{RouteType: models.RouteExact, MatchValue: "routes.example"}
 
 	// CanCreateRoutes=false is denied by ActionRouteManage.
@@ -206,5 +234,71 @@ func TestCreateRouteAuthorizedThroughSeam(t *testing.T) {
 	}
 	if route == nil || route.ZoneID != zone.ID {
 		t.Fatalf("unexpected route: %#v", route)
+	}
+}
+
+// fakeResolverInvalidator records resolver cache invalidations so write paths
+// can assert they evict the right cache. Implements ResolverInvalidator.
+type fakeResolverInvalidator struct {
+	zonesCleared  []string
+	routesCleared []uuid.UUID
+}
+
+func (f *fakeResolverInvalidator) InvalidateZone(domain string) {
+	f.zonesCleared = append(f.zonesCleared, domain)
+}
+
+func (f *fakeResolverInvalidator) InvalidateRoutes(zoneID uuid.UUID) {
+	f.routesCleared = append(f.routesCleared, zoneID)
+}
+
+// TestCreateRouteInvalidatesResolverRouteCache pins the seam: a successful
+// route write evicts the resolver's route cache for that zone (not the zone
+// cache). Refactors that drop the invalidateRoutes call break this test.
+func TestCreateRouteInvalidatesResolverRouteCache(t *testing.T) {
+	ctx := context.Background()
+	st := newDomainTestStore()
+	tenant := &models.Tenant{ID: uuid.New(), Name: "tenant"}
+	owner := uuid.New()
+	zone := &models.DomainZone{ID: uuid.New(), TenantID: tenant.ID, OwnerUserID: &owner, Domain: "routes.example"}
+	st.zones[zone.ID] = zone
+
+	inv := &fakeResolverInvalidator{}
+	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", inv, zerolog.Nop())
+
+	allowed := userActor(tenant.ID, owner)
+	allowed.Permission = &models.EffectivePermission{CanCreateRoutes: true}
+	if _, err := svc.CreateRoute(ctx, allowed, zone.ID, CreateRouteInput{RouteType: models.RouteExact, MatchValue: "routes.example"}); err != nil {
+		t.Fatalf("create route: %v", err)
+	}
+	if len(inv.routesCleared) != 1 || inv.routesCleared[0] != zone.ID {
+		t.Fatalf("expected route cache invalidation for zone %s, got %#v", zone.ID, inv.routesCleared)
+	}
+	if len(inv.zonesCleared) != 0 {
+		t.Fatalf("route write must not invalidate zone cache, got %#v", inv.zonesCleared)
+	}
+}
+
+// TestCreateZoneInvalidatesResolverZoneCache pins the seam: a successful zone
+// write evicts the resolver's zone cache for that domain.
+func TestCreateZoneInvalidatesResolverZoneCache(t *testing.T) {
+	ctx := context.Background()
+	st := newDomainTestStore()
+	tenant := &models.Tenant{ID: uuid.New(), Name: "tenant"}
+
+	inv := &fakeResolverInvalidator{}
+	svc := NewService(st, nil, "mx.example", policy.NamingFull, "secret", inv, zerolog.Nop())
+
+	actor := adminActor(tenant.ID)
+	actor.Permission = &models.EffectivePermission{MaxDomains: 0}
+	created, err := svc.CreateZone(ctx, actor, tenant, "new.example")
+	if err != nil {
+		t.Fatalf("create zone: %v", err)
+	}
+	if len(inv.zonesCleared) != 1 || inv.zonesCleared[0] != created.Domain {
+		t.Fatalf("expected zone cache invalidation for %s, got %#v", created.Domain, inv.zonesCleared)
+	}
+	if len(inv.routesCleared) != 0 {
+		t.Fatalf("zone create must not invalidate route cache, got %#v", inv.routesCleared)
 	}
 }

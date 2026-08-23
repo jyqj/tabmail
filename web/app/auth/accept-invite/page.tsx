@@ -48,7 +48,7 @@ function AcceptInviteForm() {
     try {
       const res = await acceptInvite(code, password, displayName || undefined);
       const data = res.data;
-      loginWithTokens(data.access_token, data.refresh_token, data.user);
+      loginWithTokens(data.access_token, data.user);
       toast.success(t("auth.welcomeaboard"));
       router.push("/");
     } catch (err: unknown) {

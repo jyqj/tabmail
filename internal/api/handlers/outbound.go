@@ -43,14 +43,16 @@ func NewOutboundHandler(svc *outbound.Service, st store.Store, logger zerolog.Lo
 
 // sendRequest is the JSON body for POST /api/v1/send.
 type sendRequest struct {
-	From     string            `json:"from"`
-	To       []string          `json:"to"`
-	CC       []string          `json:"cc"`
-	BCC      []string          `json:"bcc"`
-	Subject  string            `json:"subject"`
-	TextBody string            `json:"text_body"`
-	HTMLBody string            `json:"html_body"`
-	Headers  map[string]string `json:"headers"`
+	From         string            `json:"from"`
+	To           []string          `json:"to"`
+	CC           []string          `json:"cc"`
+	BCC          []string          `json:"bcc"`
+	Subject      string            `json:"subject"`
+	TextBody     string            `json:"text_body"`
+	HTMLBody     string            `json:"html_body"`
+	Headers      map[string]string `json:"headers"`
+	TemplateName *string           `json:"template_name"`
+	TemplateVars map[string]string `json:"template_vars"`
 }
 
 // maxSendBodyBytes limits the JSON request body for outbound send to 2 MB.
@@ -80,7 +82,7 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 
 	// Resolve caller identity for job attribution and quota tracking.
 	// actor.Permission is populated by middleware.PermissionLoader for JWT
@@ -139,11 +141,22 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Reject synchronously when the zone's DKIM policy cannot be satisfied,
+	// rather than accepting a job that would only ever be driven to dead.
+	if reason := h.outbound.DKIMSendBlockReason(zone); reason != "" {
+		errBadRequest(w, reason)
+		return
+	}
+
 	quota := store.OutboundQuotaReservation{}
 	todayStart := time.Now().UTC().Truncate(24 * time.Hour)
 
-	// Verify the From address corresponds to an existing mailbox or
-	// a matching route in the zone.
+	// The From address must be a real mailbox in this tenant or a verified
+	// send identity — the two authorized send-as paths. Inbound domain routes
+	// govern ingress delivery, not outbound From authorization, so they no
+	// longer gate sending. This makes the send_identities feature (manual
+	// exact identities, the auto-created *@domain wildcard, and its Verified
+	// flag) actually enforce send-as.
 	mailbox, err := h.store.ForTenant(tenant.ID).GetMailboxByAddress(ctx, body.From)
 	if err != nil {
 		h.logger.Err(err).Str("from", body.From).Msg("looking up mailbox by address")
@@ -151,14 +164,14 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if mailbox == nil {
-		routes, err := h.store.FindMatchingRoutes(ctx, fromDomain, &tenant.ID)
+		identity, err := h.store.FindSendIdentityForAddress(ctx, tenant.ID, body.From)
 		if err != nil {
-			h.logger.Err(err).Str("domain", fromDomain).Msg("finding matching routes for send-as")
+			h.logger.Err(err).Str("from", body.From).Msg("finding send identity for send-as")
 			errInternal(w)
 			return
 		}
-		if len(routes) == 0 {
-			errBadRequest(w, "from address does not exist as a mailbox")
+		if identity == nil || !identity.Verified {
+			errBadRequest(w, "from address is not an authorized mailbox or verified send identity")
 			return
 		}
 	}
@@ -188,19 +201,21 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 
 	// Build and submit the outbound job.
 	job, err := h.outbound.Submit(ctx, outbound.SendRequest{
-		TenantID: tenant.ID,
-		UserID:   userID,
-		APIKeyID: apiKeyID,
-		ZoneID:   zone.ID,
-		From:     body.From,
-		To:       body.To,
-		CC:       body.CC,
-		BCC:      body.BCC,
-		Subject:  body.Subject,
-		TextBody: body.TextBody,
-		HTMLBody: body.HTMLBody,
-		Headers:  body.Headers,
-		Quota:    quota,
+		TenantID:     tenant.ID,
+		UserID:       userID,
+		APIKeyID:     apiKeyID,
+		ZoneID:       zone.ID,
+		From:         body.From,
+		To:           body.To,
+		CC:           body.CC,
+		BCC:          body.BCC,
+		Subject:      body.Subject,
+		TextBody:     body.TextBody,
+		HTMLBody:     body.HTMLBody,
+		Headers:      body.Headers,
+		TemplateName: body.TemplateName,
+		TemplateVars: body.TemplateVars,
+		Quota:        quota,
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
@@ -381,39 +396,20 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 }
 
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	actor := authz.ActorFromContext(ctx)
-	if actor.IsSuperAdmin || actor.IsAdmin {
-		return h.store.ListOutboundJobs(ctx, tenantID, pg)
-	}
-
-	switch actor.Type {
-	case authz.PrincipalUser:
-		return h.store.ListOutboundJobsByUser(ctx, tenantID, actor.ID, pg)
-	case authz.PrincipalAPIKey:
-		return h.store.ListOutboundJobsByAPIKey(ctx, tenantID, actor.ID, pg)
-	default:
-		return nil, 0, errOutboundJobAuthRequired
-	}
+	// ActionOutboundRead defers row scope to the query level; the authz seam
+	// resolves which owned rows this actor may see. The OwnerListFilter pins
+	// TenantID and the mutually-exclusive owner dimension, so tenant isolation
+	// and the owner rule are both enforced in SQL.
+	scope := authz.OwnerListScope(middleware.ActorFromContext(ctx), tenantID)
+	return h.store.ListOutboundJobsScoped(ctx, scope, pg)
 }
 
 func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.OutboundJob) bool {
 	if job == nil || job.TenantID != tenantID {
 		return false
 	}
-
-	actor := authz.ActorFromContext(ctx)
-	if actor.IsSuperAdmin || actor.IsAdmin {
-		return true
-	}
-
-	switch actor.Type {
-	case authz.PrincipalUser:
-		return job.UserID != nil && *job.UserID == actor.ID
-	case authz.PrincipalAPIKey:
-		return job.APIKeyID != nil && *job.APIKeyID == actor.ID
-	default:
-		return false
-	}
+	// Same owner rule as listAccessibleOutboundJobs, via the single authz seam.
+	return authz.CanAccessOwned(middleware.ActorFromContext(ctx), job.UserID, job.APIKeyID)
 }
 
 func (h *OutboundHandler) writeOutboundJobAccessError(w http.ResponseWriter, err error, logMsg string) {

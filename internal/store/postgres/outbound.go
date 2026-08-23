@@ -5,14 +5,18 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
+	"strings"
 	"time"
+
+	"tabmail/internal/authz"
+	"tabmail/internal/models"
+	"tabmail/internal/store"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
-	"tabmail/internal/models"
-	"tabmail/internal/store"
 )
 
 // ================================================================
@@ -89,12 +93,14 @@ func insertOutboundJob(ctx context.Context, execer outboundJobExecer, job *model
 	_, err := execer.Exec(ctx, `
 		INSERT INTO outbound_jobs (id, tenant_id, user_id, api_key_id, mail_from, rcpt_to, subject,
 			text_body, html_body, headers_json, raw_mime, zone_id, state, attempts, max_attempts,
-			last_error, next_attempt_at, smtp_code, smtp_response, message_id_header, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)`,
+			last_error, next_attempt_at, smtp_code, smtp_response, message_id_header, created_at, updated_at,
+			to_addrs, cc_addrs, bcc_addrs)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25)`,
 		job.ID, job.TenantID, job.UserID, job.APIKeyID, job.MailFrom, job.RcptTo, job.Subject,
 		job.TextBody, job.HTMLBody, job.HeadersJSON, job.RawMIME, job.ZoneID, job.State,
 		job.Attempts, job.MaxAttempts, job.LastError, job.NextAttemptAt, job.SMTPCode,
-		job.SMTPResponse, job.MessageIDHeader, job.CreatedAt, job.UpdatedAt)
+		job.SMTPResponse, job.MessageIDHeader, job.CreatedAt, job.UpdatedAt,
+		nonNil(job.To), nonNil(job.CC), nonNil(job.BCC))
 	return err
 }
 
@@ -130,7 +136,7 @@ func quotaDay(since time.Time) string {
 const outboundJobSelect = `SELECT id, tenant_id, user_id, api_key_id, mail_from, rcpt_to, subject,
 	text_body, html_body, headers_json, raw_mime, zone_id, state, attempts, max_attempts,
 	last_error, next_attempt_at, claimed_at, lease_until, smtp_code, smtp_response,
-	message_id_header, delivery_token, created_at, updated_at
+	message_id_header, delivery_token, created_at, updated_at, to_addrs, cc_addrs, bcc_addrs
 	FROM outbound_jobs`
 
 func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
@@ -142,8 +148,9 @@ func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
 	err := row.Scan(&job.ID, &job.TenantID, &userID, &apiKeyID, &job.MailFrom, &job.RcptTo, &job.Subject,
 		&job.TextBody, &job.HTMLBody, &job.HeadersJSON, &job.RawMIME, &job.ZoneID, &job.State,
 		&job.Attempts, &job.MaxAttempts, &job.LastError, &job.NextAttemptAt, &job.ClaimedAt,
-		&job.LeaseUntil, &smtpCode, &job.SMTPResponse, &job.MessageIDHeader, &deliveryToken, &job.CreatedAt, &job.UpdatedAt)
-	if err == pgx.ErrNoRows {
+		&job.LeaseUntil, &smtpCode, &job.SMTPResponse, &job.MessageIDHeader, &deliveryToken, &job.CreatedAt, &job.UpdatedAt,
+		&job.To, &job.CC, &job.BCC)
+	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -169,16 +176,41 @@ func (s *PgStore) GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.Out
 	return scanOutboundJob(s.pool.QueryRow(ctx, outboundJobSelect+` WHERE id=$1`, id))
 }
 
-func (s *PgStore) ListOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
+// ListOutboundJobsScoped applies the OwnerListFilter in SQL: tenant isolation
+// plus the mutually-exclusive owner dimension (AllInTenant for admins, user_id
+// for users, api_key_id for API keys). The constructor guarantees mutual
+// exclusivity; this method asserts it defensively.
+func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerListFilter, pg models.Page) ([]*models.OutboundJob, int, error) {
 	pg = pg.Normalize()
+	args := []any{scope.TenantID}
+	where := []string{"tenant_id=$1"}
+	n := 1
+	switch {
+	case scope.AllInTenant:
+		// No owner filter — admins see the whole tenant.
+	case scope.UserID != nil:
+		n++
+		where = append(where, "user_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.UserID)
+	case scope.APIKeyID != nil:
+		n++
+		where = append(where, "api_key_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.APIKeyID)
+	default:
+		// Unknown principal: return empty rather than the whole tenant.
+		return []*models.OutboundJob{}, 0, nil
+	}
+	whereSQL := strings.Join(where, " AND ")
 	var total int
 	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1`, tenantID).Scan(&total); err != nil {
+		"SELECT count(*) FROM outbound_jobs WHERE "+whereSQL, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
+	rowArgs := append(args, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx,
-		outboundJobSelect+` WHERE tenant_id=$1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
-		tenantID, pg.PerPage, pg.Offset())
+		outboundJobSelect+" WHERE "+whereSQL+
+			" ORDER BY created_at DESC LIMIT $"+strconv.Itoa(n+1)+" OFFSET $"+strconv.Itoa(n+2),
+		rowArgs...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -218,7 +250,8 @@ func (s *PgStore) ClaimOutboundJobs(ctx context.Context, now time.Time, limit in
 		RETURNING j.id, j.tenant_id, j.user_id, j.api_key_id, j.mail_from, j.rcpt_to, j.subject,
 			j.text_body, j.html_body, j.headers_json, j.raw_mime, j.zone_id, j.state, j.attempts,
 			j.max_attempts, j.last_error, j.next_attempt_at, j.claimed_at, j.lease_until,
-			j.smtp_code, j.smtp_response, j.message_id_header, j.delivery_token, j.created_at, j.updated_at`,
+			j.smtp_code, j.smtp_response, j.message_id_header, j.delivery_token, j.created_at, j.updated_at,
+			j.to_addrs, j.cc_addrs, j.bcc_addrs`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
@@ -317,56 +350,6 @@ func (s *PgStore) MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliv
 		return ErrDeliveryTokenMismatch
 	}
 	return nil
-}
-
-func (s *PgStore) ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	pg = pg.Normalize()
-	var total int
-	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND user_id=$2`, tenantID, userID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-	rows, err := s.pool.Query(ctx,
-		outboundJobSelect+` WHERE tenant_id=$1 AND user_id=$2 ORDER BY created_at DESC LIMIT $3 OFFSET $4`,
-		tenantID, userID, pg.PerPage, pg.Offset())
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-	var out []*models.OutboundJob
-	for rows.Next() {
-		job, err := scanOutboundJob(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-		out = append(out, job)
-	}
-	return out, total, rows.Err()
-}
-
-func (s *PgStore) ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	pg = pg.Normalize()
-	var total int
-	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND api_key_id=$2`, tenantID, apiKeyID).Scan(&total); err != nil {
-		return nil, 0, err
-	}
-	rows, err := s.pool.Query(ctx,
-		outboundJobSelect+` WHERE tenant_id=$1 AND api_key_id=$2 ORDER BY created_at DESC LIMIT $3 OFFSET $4`,
-		tenantID, apiKeyID, pg.PerPage, pg.Offset())
-	if err != nil {
-		return nil, 0, err
-	}
-	defer rows.Close()
-	var out []*models.OutboundJob
-	for rows.Next() {
-		job, err := scanOutboundJob(rows)
-		if err != nil {
-			return nil, 0, err
-		}
-		out = append(out, job)
-	}
-	return out, total, rows.Err()
 }
 
 func (s *PgStore) CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error) {
@@ -517,5 +500,75 @@ func (s *PgStore) ListSuppressions(ctx context.Context, tenantID uuid.UUID, pg m
 
 func (s *PgStore) DeleteSuppression(ctx context.Context, tenantID uuid.UUID, id uuid.UUID) error {
 	_, err := s.pool.Exec(ctx, `DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`, id, tenantID)
+	return err
+}
+
+// ================================================================
+// Outbound templates
+// ================================================================
+
+func (s *PgStore) CreateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error {
+	if t.ID == uuid.Nil {
+		t.ID = uuid.New()
+	}
+	now := time.Now().UTC()
+	t.CreatedAt = now
+	t.UpdatedAt = now
+	_, err := s.pool.Exec(ctx, `
+		INSERT INTO outbound_templates (id, tenant_id, name, subject_tmpl, text_tmpl, html_tmpl, created_at, updated_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+		t.ID, t.TenantID, t.Name, t.SubjectTmpl, t.TextTmpl, t.HTMLTmpl, t.CreatedAt, t.UpdatedAt)
+	return err
+}
+
+func (s *PgStore) GetOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) (*models.OutboundTemplate, error) {
+	t := &models.OutboundTemplate{}
+	err := s.pool.QueryRow(ctx, `
+		SELECT id, tenant_id, name, subject_tmpl, text_tmpl, html_tmpl, created_at, updated_at
+		FROM outbound_templates WHERE tenant_id=$1 AND name=$2`, tenantID, name).
+		Scan(&t.ID, &t.TenantID, &t.Name, &t.SubjectTmpl, &t.TextTmpl, &t.HTMLTmpl, &t.CreatedAt, &t.UpdatedAt)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+	return t, err
+}
+
+func (s *PgStore) ListOutboundTemplates(ctx context.Context, tenantID uuid.UUID) ([]*models.OutboundTemplate, error) {
+	rows, err := s.pool.Query(ctx, `
+		SELECT id, tenant_id, name, subject_tmpl, text_tmpl, html_tmpl, created_at, updated_at
+		FROM outbound_templates WHERE tenant_id=$1 ORDER BY name`, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []*models.OutboundTemplate
+	for rows.Next() {
+		t := &models.OutboundTemplate{}
+		if err := rows.Scan(&t.ID, &t.TenantID, &t.Name, &t.SubjectTmpl, &t.TextTmpl, &t.HTMLTmpl, &t.CreatedAt, &t.UpdatedAt); err != nil {
+			return nil, err
+		}
+		out = append(out, t)
+	}
+	return out, rows.Err()
+}
+
+func (s *PgStore) UpdateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error {
+	t.UpdatedAt = time.Now().UTC()
+	tag, err := s.pool.Exec(ctx, `
+		UPDATE outbound_templates
+		SET subject_tmpl=$3, text_tmpl=$4, html_tmpl=$5, updated_at=$6
+		WHERE tenant_id=$1 AND name=$2`,
+		t.TenantID, t.Name, t.SubjectTmpl, t.TextTmpl, t.HTMLTmpl, t.UpdatedAt)
+	if err != nil {
+		return err
+	}
+	if tag.RowsAffected() == 0 {
+		return pgx.ErrNoRows
+	}
+	return nil
+}
+
+func (s *PgStore) DeleteOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) error {
+	_, err := s.pool.Exec(ctx, `DELETE FROM outbound_templates WHERE tenant_id=$1 AND name=$2`, tenantID, name)
 	return err
 }

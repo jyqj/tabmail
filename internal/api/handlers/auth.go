@@ -2,43 +2,33 @@ package handlers
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
+	"tabmail/internal/api/middleware"
+	"tabmail/internal/authn"
+	"tabmail/internal/models"
+
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/bcrypt"
-	"tabmail/internal/api/middleware"
-	"tabmail/internal/authn"
-	"tabmail/internal/authz"
-	"tabmail/internal/models"
 )
 
+// authStore is the subset of the store the session-lifecycle handler needs.
 type authStore interface {
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	CreateUser(ctx context.Context, u *models.User) error
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
-	UpdateUser(ctx context.Context, u *models.User) error
 	UpdateUserPassword(ctx context.Context, id uuid.UUID, passwordHash string) error
-	ListUsers(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.User, int, error)
-	DeleteUser(ctx context.Context, id uuid.UUID) error
 	TouchUserLogin(ctx context.Context, id uuid.UUID) error
 	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
 	RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error
 	CreateTenant(ctx context.Context, t *models.Tenant) error
-	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
-	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error
 	GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error)
 	MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error
-	InsertAudit(ctx context.Context, e *models.AuditEntry) error
-	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
 }
 
 type settingsReader interface {
@@ -52,18 +42,62 @@ type AuthHandler struct {
 	defaultPlanID           uuid.UUID
 	defaultOpenRegistration bool
 	settings                settingsReader
+	cookieSecure            bool
 	logger                  zerolog.Logger
 }
 
-func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, l zerolog.Logger) *AuthHandler {
+func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, cookieSecure bool, l zerolog.Logger) *AuthHandler {
 	return &AuthHandler{
 		store:                   s,
 		jwtSecret:               jwtSecret,
 		defaultPlanID:           defaultPlanID,
 		defaultOpenRegistration: openRegistration,
 		settings:                settings,
+		cookieSecure:            cookieSecure,
 		logger:                  l.With().Str("handler", "auth").Logger(),
 	}
+}
+
+// RefreshCookieName is the httpOnly cookie that carries the refresh token.
+// The token never appears in a JSON response body, so XSS cannot exfiltrate
+// it from localStorage.
+const RefreshCookieName = "tabmail_refresh_token"
+
+// refreshCookiePath restricts the cookie to the auth endpoints that actually
+// consume it (/api/v1/auth/refresh, /api/v1/auth/logout).
+const refreshCookiePath = "/api/v1/auth"
+
+func (h *AuthHandler) setRefreshCookie(w http.ResponseWriter, token string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     RefreshCookieName,
+		Value:    token,
+		Path:     refreshCookiePath,
+		MaxAge:   int(authn.RefreshTokenTTL.Seconds()),
+		HttpOnly: true,
+		Secure:   h.cookieSecure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func (h *AuthHandler) clearRefreshCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     RefreshCookieName,
+		Value:    "",
+		Path:     refreshCookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   h.cookieSecure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// refreshTokenFromRequest prefers the httpOnly cookie and falls back to a JSON
+// body field for non-browser API clients.
+func refreshTokenFromRequest(r *http.Request, bodyToken string) string {
+	if c, err := r.Cookie(RefreshCookieName); err == nil && c.Value != "" {
+		return c.Value
+	}
+	return bodyToken
 }
 
 // Login handles POST /api/v1/auth/login
@@ -111,11 +145,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	go func() { _ = h.store.TouchUserLogin(context.Background(), user.ID) }()
 
+	h.setRefreshCookie(w, refreshToken)
 	ok(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 		"user": map[string]any{
 			"id":           user.ID,
 			"email":        user.Email,
@@ -211,11 +245,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.setRefreshCookie(w, refreshToken)
 	created(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 		"user": map[string]any{
 			"id":           user.ID,
 			"email":        user.Email,
@@ -231,16 +265,15 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	if err := decodeBody(r, &req); err != nil {
-		errBadRequest(w, "invalid request body")
-		return
-	}
-	if req.RefreshToken == "" {
+	_ = decodeBody(r, &req)
+
+	rawToken := refreshTokenFromRequest(r, req.RefreshToken)
+	if rawToken == "" {
 		errBadRequest(w, "refresh_token is required")
 		return
 	}
 
-	tokenHash := authn.HashToken(req.RefreshToken)
+	tokenHash := authn.HashToken(rawToken)
 	rt, err := h.store.GetRefreshToken(r.Context(), tokenHash)
 	if err != nil {
 		h.logger.Err(err).Msg("refresh: lookup token")
@@ -275,11 +308,11 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.setRefreshCookie(w, refreshToken)
 	ok(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 	})
 }
 
@@ -288,16 +321,11 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	if err := decodeBody(r, &req); err != nil {
-		// Even without body, revoke all tokens for the logged-in user
-		if user := middleware.UserFromCtx(r.Context()); user != nil {
-			_ = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
-		}
-		noContent(w)
-		return
-	}
-	if req.RefreshToken != "" {
-		tokenHash := authn.HashToken(req.RefreshToken)
+	_ = decodeBody(r, &req)
+
+	rawToken := refreshTokenFromRequest(r, req.RefreshToken)
+	if rawToken != "" {
+		tokenHash := authn.HashToken(rawToken)
 		rt, err := h.store.GetRefreshToken(r.Context(), tokenHash)
 		if err == nil && rt != nil {
 			_ = h.store.RevokeRefreshToken(r.Context(), rt.ID)
@@ -305,6 +333,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	} else if user := middleware.UserFromCtx(r.Context()); user != nil {
 		_ = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
 	}
+	h.clearRefreshCookie(w)
 	noContent(w)
 }
 
@@ -324,69 +353,6 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 		"is_active":     user.IsActive,
 		"created_at":    user.CreatedAt,
 		"last_login_at": user.LastLoginAt,
-	})
-}
-
-// InviteAdmin handles POST /api/v1/admin/invite.
-// This endpoint is super-admin only because accepting an invitation creates
-// a super_admin user.
-func (h *AuthHandler) InviteAdmin(w http.ResponseWriter, r *http.Request) {
-
-	var req struct {
-		Email string `json:"email"`
-	}
-	if err := decodeBody(r, &req); err != nil {
-		errBadRequest(w, "invalid request body")
-		return
-	}
-	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
-	if req.Email == "" {
-		errBadRequest(w, "email is required")
-		return
-	}
-
-	existing, err := h.store.GetUserByEmail(r.Context(), req.Email)
-	if err != nil {
-		h.logger.Err(err).Msg("invite: check existing")
-		errInternal(w)
-		return
-	}
-	if existing != nil {
-		errConflict(w, "email already registered")
-		return
-	}
-
-	code, err := generateInviteCode()
-	if err != nil {
-		h.logger.Err(err).Msg("invite: generate code")
-		errInternal(w)
-		return
-	}
-
-	inviter := middleware.UserFromCtx(r.Context())
-	var inviterID *uuid.UUID
-	if inviter != nil {
-		id := inviter.ID
-		inviterID = &id
-	}
-
-	inv := &models.AdminInvitation{
-		Email:      req.Email,
-		InviteCode: code,
-		InvitedBy:  inviterID,
-		ExpiresAt:  time.Now().Add(72 * time.Hour),
-	}
-	if err := h.store.CreateAdminInvitation(r.Context(), inv); err != nil {
-		h.logger.Err(err).Msg("invite: create invitation")
-		errInternal(w)
-		return
-	}
-
-	created(w, map[string]any{
-		"id":          inv.ID,
-		"email":       inv.Email,
-		"invite_code": code,
-		"expires_at":  inv.ExpiresAt,
 	})
 }
 
@@ -478,11 +444,11 @@ func (h *AuthHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.setRefreshCookie(w, refreshToken)
 	created(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 		"user": map[string]any{
 			"id":           user.ID,
 			"email":        user.Email,
@@ -491,176 +457,6 @@ func (h *AuthHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 			"tenant_id":    user.TenantID,
 		},
 	})
-}
-
-// ListUsers handles GET /api/v1/admin/users
-func (h *AuthHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
-	if tenant == nil {
-		errForbidden(w, "no tenant context")
-		return
-	}
-	pg := pageFromReq(r)
-	users, total, err := h.store.ListUsers(r.Context(), tenant.ID, pg)
-	if err != nil {
-		h.logger.Err(err).Msg("list users")
-		errInternal(w)
-		return
-	}
-	// Strip password hashes from response
-	type safeUser struct {
-		ID                  uuid.UUID       `json:"id"`
-		TenantID            uuid.UUID       `json:"tenant_id"`
-		Email               string          `json:"email"`
-		DisplayName         string          `json:"display_name"`
-		Role                models.UserRole `json:"role"`
-		PermissionProfileID *uuid.UUID      `json:"permission_profile_id,omitempty"`
-		IsActive            bool            `json:"is_active"`
-		CreatedAt           time.Time       `json:"created_at"`
-		UpdatedAt           time.Time       `json:"updated_at"`
-		LastLoginAt         *time.Time      `json:"last_login_at,omitempty"`
-	}
-	safe := make([]safeUser, 0, len(users))
-	for _, u := range users {
-		safe = append(safe, safeUser{
-			ID: u.ID, TenantID: u.TenantID, Email: u.Email,
-			DisplayName: u.DisplayName, Role: u.Role, PermissionProfileID: u.PermissionProfileID,
-			IsActive: u.IsActive, CreatedAt: u.CreatedAt, UpdatedAt: u.UpdatedAt, LastLoginAt: u.LastLoginAt,
-		})
-	}
-	okList(w, safe, total, pg.Page, pg.PerPage)
-}
-
-// UpdateUserByAdmin handles PATCH /api/v1/admin/users/{id}
-func (h *AuthHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
-	if tenant == nil {
-		errForbidden(w, "no tenant context")
-		return
-	}
-	userID, err := uuid.Parse(chiURLParam(r, "id"))
-	if err != nil {
-		errBadRequest(w, "invalid user id")
-		return
-	}
-	user, err := h.store.GetUser(r.Context(), userID)
-	if err != nil {
-		h.logger.Err(err).Msg("update user: lookup")
-		errInternal(w)
-		return
-	}
-	if user == nil || user.TenantID != tenant.ID {
-		errNotFound(w, "user not found")
-		return
-	}
-
-	var req struct {
-		Role                *string          `json:"role"`
-		IsActive            *bool            `json:"is_active"`
-		DisplayName         *string          `json:"display_name"`
-		PermissionProfileID *json.RawMessage `json:"permission_profile_id"`
-	}
-	if err := decodeBody(r, &req); err != nil {
-		errBadRequest(w, "invalid request body")
-		return
-	}
-	if req.Role != nil {
-		newRole := models.UserRole(*req.Role)
-		actor := authz.ActorFromContext(r.Context())
-		switch newRole {
-		case models.RoleSuperAdmin, models.RoleAdmin, models.RoleUser:
-			// Only super_admin can promote to super_admin
-			if newRole == models.RoleSuperAdmin && !actor.IsSuperAdmin {
-				errForbidden(w, "only super admin can assign super_admin role")
-				return
-			}
-			user.Role = newRole
-		default:
-			errBadRequest(w, "invalid role, must be super_admin, admin or user")
-			return
-		}
-	}
-	if req.IsActive != nil {
-		user.IsActive = *req.IsActive
-	}
-	if req.DisplayName != nil {
-		user.DisplayName = *req.DisplayName
-	}
-	if req.PermissionProfileID != nil {
-		raw := strings.TrimSpace(string(*req.PermissionProfileID))
-		if raw == "" || raw == "null" {
-			user.PermissionProfileID = nil
-		} else {
-			var profileID uuid.UUID
-			if err := json.Unmarshal(*req.PermissionProfileID, &profileID); err != nil {
-				errBadRequest(w, "invalid permission_profile_id")
-				return
-			}
-			profile, err := h.store.GetPermissionProfile(r.Context(), profileID)
-			if err != nil {
-				h.logger.Err(err).Msg("update user: lookup permission profile")
-				errInternal(w)
-				return
-			}
-			if profile == nil {
-				errBadRequest(w, "permission profile not found")
-				return
-			}
-			if profile.TenantID != nil && *profile.TenantID != user.TenantID {
-				errForbidden(w, "permission profile belongs to a different tenant")
-				return
-			}
-			user.PermissionProfileID = &profileID
-		}
-	}
-	if err := h.store.UpdateUser(r.Context(), user); err != nil {
-		h.logger.Err(err).Msg("update user")
-		errInternal(w)
-		return
-	}
-	ok(w, map[string]any{
-		"id": user.ID, "email": user.Email, "display_name": user.DisplayName,
-		"role": user.Role, "is_active": user.IsActive, "tenant_id": user.TenantID,
-		"permission_profile_id": user.PermissionProfileID,
-		"created_at":            user.CreatedAt,
-		"updated_at":            user.UpdatedAt,
-		"last_login_at":         user.LastLoginAt,
-	})
-}
-
-// DeleteUserByAdmin handles DELETE /api/v1/admin/users/{id}
-func (h *AuthHandler) DeleteUserByAdmin(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
-	if tenant == nil {
-		errForbidden(w, "no tenant context")
-		return
-	}
-	userID, err := uuid.Parse(chiURLParam(r, "id"))
-	if err != nil {
-		errBadRequest(w, "invalid user id")
-		return
-	}
-	// Prevent self-deletion
-	if caller := middleware.UserFromCtx(r.Context()); caller != nil && caller.ID == userID {
-		errBadRequest(w, "cannot delete yourself")
-		return
-	}
-	user, err := h.store.GetUser(r.Context(), userID)
-	if err != nil {
-		h.logger.Err(err).Msg("delete user: lookup")
-		errInternal(w)
-		return
-	}
-	if user == nil || user.TenantID != tenant.ID {
-		errNotFound(w, "user not found")
-		return
-	}
-	if err := h.store.DeleteUser(r.Context(), userID); err != nil {
-		h.logger.Err(err).Msg("delete user")
-		errInternal(w)
-		return
-	}
-	noContent(w)
 }
 
 // ChangePassword handles POST /api/v1/auth/change-password
@@ -740,16 +536,4 @@ func (h *AuthHandler) issueTokenPair(ctx context.Context, user *models.User) (ac
 
 func (h *AuthHandler) updatePasswordHash(ctx context.Context, userID uuid.UUID, hash string) error {
 	return h.store.UpdateUserPassword(ctx, userID, hash)
-}
-
-func generateInviteCode() (string, error) {
-	buf := make([]byte, 24)
-	if _, err := rand.Read(buf); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(buf), nil
-}
-
-func chiURLParam(r *http.Request, key string) string {
-	return chi.URLParam(r, key)
 }

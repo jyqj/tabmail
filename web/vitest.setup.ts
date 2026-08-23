@@ -3,7 +3,11 @@ import React from "react";
 import { beforeEach, vi } from "vitest";
 import { SWRConfig } from "swr";
 
-import { I18nProvider } from "@/lib/i18n";
+import { I18nProvider, preloadLocale } from "@/lib/i18n";
+
+// Tests run with the "en" locale (set below); load its message table up
+// front so t() resolves synchronously on first render.
+await preloadLocale("en");
 
 vi.mock("@testing-library/react", async () => {
   const actual = await vi.importActual<typeof import("@testing-library/react")>("@testing-library/react");

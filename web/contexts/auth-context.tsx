@@ -16,12 +16,9 @@ import type { PermissionLevel } from "@/lib/permissions";
 type AuthLevel = PermissionLevel;
 
 interface AuthSnapshot {
-  // JWT auth (new)
   accessToken: string | null;
-  refreshToken: string | null;
   user: AuthUser | null;
   tenantId: string | null;
-  // Mailbox auth
   mailboxToken: string | null;
   mailboxAddress: string | null;
 }
@@ -32,8 +29,7 @@ interface AuthState extends AuthSnapshot {
   permissions: EffectivePermission | null;
   permissionsLoading: boolean;
   permissionsError: boolean;
-  // JWT auth
-  loginWithTokens: (accessToken: string, refreshToken: string, user: AuthUser) => void;
+  loginWithTokens: (accessToken: string, user: AuthUser) => void;
   setTenantId: (id: string | null) => void;
   setMailboxAuth: (address: string | null, token: string | null) => void;
   clearMailboxAuth: () => void;
@@ -57,7 +53,6 @@ function readSnapshot(): AuthSnapshot {
   if (typeof window === "undefined") {
     return {
       accessToken: null,
-      refreshToken: null,
       user: null,
       tenantId: null,
       mailboxToken: null,
@@ -67,7 +62,6 @@ function readSnapshot(): AuthSnapshot {
 
   const nextSnapshot: AuthSnapshot = {
     accessToken: localStorage.getItem("tabmail_access_token"),
-    refreshToken: localStorage.getItem("tabmail_refresh_token"),
     user: parseUser(localStorage.getItem("tabmail_user")),
     tenantId: localStorage.getItem("tabmail_tenant_id"),
     mailboxToken: localStorage.getItem("tabmail_mailbox_token"),
@@ -77,7 +71,6 @@ function readSnapshot(): AuthSnapshot {
   if (
     cachedSnapshot &&
     cachedSnapshot.accessToken === nextSnapshot.accessToken &&
-    cachedSnapshot.refreshToken === nextSnapshot.refreshToken &&
     cachedSnapshot.tenantId === nextSnapshot.tenantId &&
     cachedSnapshot.mailboxToken === nextSnapshot.mailboxToken &&
     cachedSnapshot.mailboxAddress === nextSnapshot.mailboxAddress
@@ -115,7 +108,6 @@ function setStorageItem(key: string, value: string | null) {
 
 const serverSnapshot: AuthSnapshot = {
   accessToken: null,
-  refreshToken: null,
   user: null,
   tenantId: null,
   mailboxToken: null,
@@ -140,17 +132,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => serverSnapshot,
   );
 
-  // Load permissions when a JWT user session is present
   useEffect(() => {
     const token = snapshot.accessToken;
     if (!token || !snapshot.user) {
-      // No session -- clear cached permissions
       if (permissions !== null) setPermissions(null);
       setPermissionsError(false);
       permsFetchedForToken.current = null;
       return;
     }
-    // Avoid re-fetching for the same token
     if (permsFetchedForToken.current === token) return;
     permsFetchedForToken.current = token;
 
@@ -159,7 +148,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
-        // Dynamic import to avoid circular dependency with api modules
         const { getMyPermissions } = await import("@/lib/api/permissions");
         const res = await getMyPermissions();
         if (!cancelled) {
@@ -167,8 +155,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setPermissionsError(false);
         }
       } catch {
-        // Permission load failed — default to restrictive permissions to avoid
-        // showing features the user may not have access to.
         if (!cancelled) {
           setPermissions({
             can_send: false,
@@ -192,9 +178,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.accessToken, snapshot.user]);
 
-  const loginWithTokens = useCallback((accessToken: string, refreshToken: string, user: AuthUser) => {
+  const loginWithTokens = useCallback((accessToken: string, user: AuthUser) => {
     setStorageItem("tabmail_access_token", accessToken);
-    setStorageItem("tabmail_refresh_token", refreshToken);
     localStorage.setItem("tabmail_user", JSON.stringify(user));
     setStorageItem("tabmail_tenant_id", user.tenant_id);
     notify();
@@ -219,7 +204,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setStorageItem("tabmail_access_token", null);
-    setStorageItem("tabmail_refresh_token", null);
     localStorage.removeItem("tabmail_user");
     setStorageItem("tabmail_tenant_id", null);
     setStorageItem("tabmail_mailbox_address", null);

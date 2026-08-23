@@ -1,25 +1,20 @@
 package outbound
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
-
-	"tabmail/internal/models"
 )
 
-func TestBuildMIME_TextOnly(t *testing.T) {
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com"},
-		Subject:         "Hello",
-		TextBody:        "Hello world",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON:     mustJSON(t, map[string]any{"_to": []string{"to@example.com"}}),
-	}
-	mime, err := BuildMIME(job)
+func TestBuild_TextOnly(t *testing.T) {
+	mime, err := Build(Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		Subject:   "Hello",
+		TextBody:  "Hello world",
+		MessageID: "<test@example.com>",
+	})
 	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
+		t.Fatalf("Build error: %v", err)
 	}
 	s := string(mime)
 	if !strings.Contains(s, "Content-Type: text/plain") {
@@ -36,18 +31,16 @@ func TestBuildMIME_TextOnly(t *testing.T) {
 	}
 }
 
-func TestBuildMIME_HTMLOnly(t *testing.T) {
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com"},
-		Subject:         "Hello",
-		HTMLBody:        "<p>Hello world</p>",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON:     mustJSON(t, map[string]any{"_to": []string{"to@example.com"}}),
-	}
-	mime, err := BuildMIME(job)
+func TestBuild_HTMLOnly(t *testing.T) {
+	mime, err := Build(Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		Subject:   "Hello",
+		HTMLBody:  "<p>Hello world</p>",
+		MessageID: "<test@example.com>",
+	})
 	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
+		t.Fatalf("Build error: %v", err)
 	}
 	s := string(mime)
 	if !strings.Contains(s, "Content-Type: text/html") {
@@ -58,19 +51,17 @@ func TestBuildMIME_HTMLOnly(t *testing.T) {
 	}
 }
 
-func TestBuildMIME_MultipartAlternative(t *testing.T) {
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com"},
-		Subject:         "Hello",
-		TextBody:        "Hello world",
-		HTMLBody:        "<p>Hello world</p>",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON:     mustJSON(t, map[string]any{"_to": []string{"to@example.com"}}),
-	}
-	mime, err := BuildMIME(job)
+func TestBuild_MultipartAlternative(t *testing.T) {
+	mime, err := Build(Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		Subject:   "Hello",
+		TextBody:  "Hello world",
+		HTMLBody:  "<p>Hello world</p>",
+		MessageID: "<test@example.com>",
+	})
 	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
+		t.Fatalf("Build error: %v", err)
 	}
 	s := string(mime)
 	if !strings.Contains(s, "multipart/alternative") {
@@ -84,21 +75,18 @@ func TestBuildMIME_MultipartAlternative(t *testing.T) {
 	}
 }
 
-func TestBuildMIME_BCCNotInHeaders(t *testing.T) {
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com", "cc@example.com", "bcc@example.com"},
-		Subject:         "Hello",
-		TextBody:        "Hello world",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON: mustJSON(t, map[string]any{
-			"_to": []string{"to@example.com"},
-			"_cc": []string{"cc@example.com"},
-		}),
-	}
-	mime, err := BuildMIME(job)
+func TestBuild_BCCNotInHeaders(t *testing.T) {
+	mime, err := Build(Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		CC:        []string{"cc@example.com"},
+		BCC:       []string{"bcc@example.com"},
+		Subject:   "Hello",
+		TextBody:  "Hello world",
+		MessageID: "<test@example.com>",
+	})
 	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
+		t.Fatalf("Build error: %v", err)
 	}
 	s := string(mime)
 	if !strings.Contains(s, "To: to@example.com") {
@@ -112,37 +100,52 @@ func TestBuildMIME_BCCNotInHeaders(t *testing.T) {
 	}
 }
 
-func TestBuildMIME_InternalMetadataKeysNotInHeaders(t *testing.T) {
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com"},
-		Subject:         "Hello",
-		TextBody:        "Hello world",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON: mustJSON(t, map[string]any{
-			"_to":     []string{"to@example.com"},
-			"_cc":     []string{},
-			"_custom": "should-not-appear",
-			"X-Custom": "should-appear",
-		}),
+// TestBuild_BCCNeverLeaksWithoutMetadata pins the bug the old shallow builder
+// carried: when recipient metadata was missing it dumped every RcptTo address
+// into the To header, exposing BCC. With recipients typed on the Message there
+// is no missing-metadata path — BCC can only ever be an envelope recipient.
+func TestBuild_BCCNeverLeaksWithoutMetadata(t *testing.T) {
+	msg := Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		BCC:       []string{"secret@example.com"},
+		Subject:   "Hello",
+		TextBody:  "Hi",
+		MessageID: "<test@example.com>",
 	}
-	mime, err := BuildMIME(job)
+	mime, err := Build(msg)
 	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
+		t.Fatalf("Build error: %v", err)
 	}
-	s := string(mime)
-
-	// Internal metadata keys prefixed with _ must not appear as custom headers.
-	if strings.Contains(s, "_to:") || strings.Contains(s, "_cc:") || strings.Contains(s, "_custom:") {
-		t.Error("internal metadata keys (_to, _cc, _custom) must not appear as MIME headers")
+	if strings.Contains(string(mime), "secret@example.com") {
+		t.Error("BCC recipient leaked into the rendered message")
 	}
+	env := msg.EnvelopeRecipients()
+	if len(env) != 2 || env[0] != "to@example.com" || env[1] != "secret@example.com" {
+		t.Errorf("envelope must include BCC for delivery, got %v", env)
+	}
+}
 
-	if !strings.Contains(s, "X-Custom: should-appear") {
+func TestBuild_CustomHeaders(t *testing.T) {
+	mime, err := Build(Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		Subject:   "Hello",
+		TextBody:  "Hello world",
+		MessageID: "<test@example.com>",
+		Headers: map[string]string{
+			"X-Custom": "should-appear",
+		},
+	})
+	if err != nil {
+		t.Fatalf("Build error: %v", err)
+	}
+	if !strings.Contains(string(mime), "X-Custom: should-appear") {
 		t.Error("legitimate custom header X-Custom should appear")
 	}
 }
 
-func TestBuildMIME_HeaderNameInjectionBlocked(t *testing.T) {
+func TestBuild_HeaderNameInjectionBlocked(t *testing.T) {
 	tests := []struct {
 		name string
 		key  string
@@ -157,21 +160,16 @@ func TestBuildMIME_HeaderNameInjectionBlocked(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			hdrs := map[string]any{
-				"_to": []string{"to@example.com"},
-				tt.key: "injected-value",
-			}
-			job := &models.OutboundJob{
-				MailFrom:        "sender@example.com",
-				RcptTo:          []string{"to@example.com"},
-				Subject:         "Hello",
-				TextBody:        "Hello world",
-				MessageIDHeader: "<test@example.com>",
-				HeadersJSON:     mustJSON(t, hdrs),
-			}
-			mime, err := BuildMIME(job)
+			mime, err := Build(Message{
+				From:      "sender@example.com",
+				To:        []string{"to@example.com"},
+				Subject:   "Hello",
+				TextBody:  "Hello world",
+				MessageID: "<test@example.com>",
+				Headers:   map[string]string{tt.key: "injected-value"},
+			})
 			if err != nil {
-				t.Fatalf("BuildMIME error: %v", err)
+				t.Fatalf("Build error: %v", err)
 			}
 			if strings.Contains(string(mime), "injected-value") {
 				t.Errorf("header with invalid name %q should be blocked", tt.key)
@@ -180,25 +178,23 @@ func TestBuildMIME_HeaderNameInjectionBlocked(t *testing.T) {
 	}
 }
 
-func TestBuildMIME_ForbiddenHeadersBlocked(t *testing.T) {
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com"},
-		Subject:         "Hello",
-		TextBody:        "Hello world",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON: mustJSON(t, map[string]any{
-			"_to":                  []string{"to@example.com"},
-			"From":                 "evil@attacker.com",
-			"Bcc":                  "hidden@attacker.com",
-			"DKIM-Signature":       "forged",
-			"Return-Path":          "bounce@attacker.com",
-			"X-Custom-Legit":       "this-is-fine",
-		}),
-	}
-	mime, err := BuildMIME(job)
+func TestBuild_ForbiddenHeadersBlocked(t *testing.T) {
+	mime, err := Build(Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		Subject:   "Hello",
+		TextBody:  "Hello world",
+		MessageID: "<test@example.com>",
+		Headers: map[string]string{
+			"From":           "evil@attacker.com",
+			"Bcc":            "hidden@attacker.com",
+			"DKIM-Signature": "forged",
+			"Return-Path":    "bounce@attacker.com",
+			"X-Custom-Legit": "this-is-fine",
+		},
+	})
 	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
+		t.Fatalf("Build error: %v", err)
 	}
 	s := string(mime)
 
@@ -223,41 +219,35 @@ func TestBuildMIME_ForbiddenHeadersBlocked(t *testing.T) {
 	}
 }
 
-func TestBuildMIME_HeaderValueCRLFStripped(t *testing.T) {
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com"},
-		Subject:         "Normal\r\nBcc: evil@attacker.com",
-		TextBody:        "Hello",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON: mustJSON(t, map[string]any{
-			"_to":      []string{"to@example.com"},
+func TestBuild_HeaderValueCRLFStripped(t *testing.T) {
+	mime, err := Build(Message{
+		From:      "sender@example.com",
+		To:        []string{"to@example.com"},
+		Subject:   "Normal\r\nBcc: evil@attacker.com",
+		TextBody:  "Hello",
+		MessageID: "<test@example.com>",
+		Headers: map[string]string{
 			"X-Custom": "value\r\nBcc: evil@attacker.com",
-		}),
-	}
-	mime, err := BuildMIME(job)
+		},
+	})
 	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
+		t.Fatalf("Build error: %v", err)
 	}
 	s := string(mime)
 
 	// After sanitization, CR/LF are stripped so no header injection can occur.
-	// The Subject should be on a single line (no newline within the value).
 	for _, line := range strings.Split(s, "\r\n") {
 		if strings.HasPrefix(line, "Subject:") {
 			if strings.Contains(line, "\n") || strings.Contains(line, "\r") {
 				t.Error("Subject header contains unstripped CR/LF")
 			}
-			// The injected Bcc must not appear as a separate header line.
 			break
 		}
-		// Check that no standalone Bcc header was injected.
 		if strings.HasPrefix(line, "Bcc:") {
 			t.Error("CRLF injection created a Bcc header line")
 		}
 	}
 
-	// X-Custom value must also not create a new header line.
 	for _, line := range strings.Split(s, "\r\n") {
 		if strings.HasPrefix(line, "X-Custom:") {
 			if strings.Contains(line, "\n") || strings.Contains(line, "\r") {
@@ -301,48 +291,4 @@ func TestIsValidHeaderName(t *testing.T) {
 	if !isValidHeaderName(strings.Repeat("A", 126)) {
 		t.Error("126-char header name should be valid")
 	}
-}
-
-func TestBuildMIME_RawMIMEIgnored(t *testing.T) {
-	// RawMIME passthrough was removed for security — BuildMIME must always use
-	// the structured builder so that header safety checks are enforced.
-	raw := []byte("From: evil@attacker.com\r\nBcc: leak@attacker.com\r\nSubject: Raw\r\n\r\nBody")
-	job := &models.OutboundJob{
-		MailFrom:        "sender@example.com",
-		RcptTo:          []string{"to@example.com"},
-		Subject:         "Safe Subject",
-		TextBody:        "Hello world",
-		MessageIDHeader: "<test@example.com>",
-		HeadersJSON:     mustJSON(t, map[string]any{"_to": []string{"to@example.com"}}),
-		RawMIME:         raw,
-	}
-	mime, err := BuildMIME(job)
-	if err != nil {
-		t.Fatalf("BuildMIME error: %v", err)
-	}
-	s := string(mime)
-
-	// The raw MIME must NOT be returned verbatim.
-	if s == string(raw) {
-		t.Fatal("RawMIME was returned as-is — passthrough should be disabled")
-	}
-	// The structured From header must be used, not the one from raw MIME.
-	if !strings.Contains(s, "From: sender@example.com") {
-		t.Error("expected structured From header")
-	}
-	if strings.Contains(s, "evil@attacker.com") {
-		t.Error("raw MIME From address leaked into output")
-	}
-	if strings.Contains(s, "leak@attacker.com") {
-		t.Error("raw MIME Bcc address leaked into output")
-	}
-}
-
-func mustJSON(t *testing.T, v any) json.RawMessage {
-	t.Helper()
-	b, err := json.Marshal(v)
-	if err != nil {
-		t.Fatalf("mustJSON: %v", err)
-	}
-	return b
 }

@@ -31,6 +31,49 @@ import (
 
 const publicTenantID = "00000000-0000-0000-0000-000000000001"
 
+const testMetricsToken = "metrics-test-token"
+
+// TestRouter_DocsAssetsSelfHosted pins the CDN removal: /docs and /redoc must
+// reference only same-origin assets, and those assets must actually be served.
+func TestRouter_DocsAssetsSelfHosted(t *testing.T) {
+	st, obj, _ := seededStores(t)
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	t.Cleanup(func() { _ = rdb.Close() })
+
+	router := testRouter(st, obj, rdb)
+
+	for _, page := range []string{"/docs", "/redoc"} {
+		req := httptest.NewRequest(http.MethodGet, page, nil)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("%s: expected 200, got %d", page, rr.Code)
+		}
+		body := rr.Body.String()
+		for _, forbidden := range []string{"unpkg.com", "cdn.redoc.ly", "https://"} {
+			if strings.Contains(body, forbidden) {
+				t.Fatalf("%s still references external origin %q", page, forbidden)
+			}
+		}
+	}
+
+	for _, asset := range []string{
+		"/docs-assets/swagger-ui.css",
+		"/docs-assets/swagger-ui-bundle.js",
+		"/docs-assets/redoc.standalone.js",
+	} {
+		req := httptest.NewRequest(http.MethodGet, asset, nil)
+		rr := httptest.NewRecorder()
+		router.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK {
+			t.Fatalf("%s: expected 200, got %d", asset, rr.Code)
+		}
+		if rr.Body.Len() < 1024 {
+			t.Fatalf("%s: suspiciously small body (%d bytes)", asset, rr.Body.Len())
+		}
+	}
+}
+
 func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
@@ -173,7 +216,7 @@ func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 		LastError:     "temporary failure",
 		NextAttemptAt: time.Now().Add(time.Minute),
 	}
-	if err := st.CreateIngestJob(context.Background(), job); err != nil {
+	if err := st.CreateIngestJob(context.Background(), job, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -220,7 +263,7 @@ func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 		RawObjectKey:  "raw/pending.eml",
 		State:         "pending",
 		NextAttemptAt: time.Now().Add(time.Minute),
-	}); err != nil {
+	}, nil); err != nil {
 		t.Fatal(err)
 	}
 	if err := st.CreateIngestJob(context.Background(), &models.IngestJob{
@@ -228,14 +271,23 @@ func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 		RawObjectKey:  "raw/processing.eml",
 		State:         "processing",
 		NextAttemptAt: time.Now().Add(time.Minute),
-	}); err != nil {
+	}, nil); err != nil {
 		t.Fatal(err)
 	}
 
 	router := testRouter(st, obj, rdb)
 
+	// Unauthenticated scrapes are rejected.
 	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
 	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 for unauthenticated /metrics, got %d body=%s", rr.Code, rr.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	req.Header.Set("Authorization", "Bearer "+testMetricsToken)
+	rr = httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
@@ -602,6 +654,7 @@ func TestRouter_MetricsDBCountsAreLightlyCached(t *testing.T) {
 
 	for i := 0; i < 2; i++ {
 		req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+		req.Header.Set("Authorization", "Bearer "+testMetricsToken)
 		rr := httptest.NewRecorder()
 		router.ServeHTTP(rr, req)
 		if rr.Code != http.StatusOK {
@@ -683,7 +736,7 @@ func testRouter(st store.Store, obj *testutil.MemoryObjectStore, rdb *redis.Clie
 		DefaultPlanID:      uuid.MustParse("00000000-0000-0000-0000-000000000010"),
 		OpenRegistration:   true,
 		Settings:           settings.NewManager(st, zerolog.Nop()),
-		HTTP:               config.HTTP{},
+		HTTP:               config.HTTP{MetricsToken: testMetricsToken},
 		RateLimiter:        middleware.NewRateLimiter(rdb, st, 20, nil),
 		Logger:             zerolog.Nop(),
 	})

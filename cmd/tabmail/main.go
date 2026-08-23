@@ -25,6 +25,7 @@ import (
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/retention"
@@ -34,6 +35,7 @@ import (
 	"tabmail/internal/store/fileobj"
 	"tabmail/internal/store/postgres"
 	"tabmail/internal/store/s3obj"
+	"tabmail/internal/template"
 )
 
 var version = "dev"
@@ -96,6 +98,9 @@ func main() {
 	// --- Bootstrap admin user ---
 	bootstrapAdmin(ctx, pg, cfg, logger)
 
+	// --- Raw-object lifecycle store (shared by API handlers + retention) ---
+	objects := rawobject.NewStore(obj, pg)
+
 	// --- System settings (DB-backed, env-var seeded) ---
 	settingsMgr := settings.NewManager(pg, logger)
 	settingsMgr.Seed(ctx, map[string]settings.SeedValue{
@@ -151,19 +156,26 @@ func main() {
 	var outboundSvc *outbound.Service
 	if cfg.Outbound.Enabled {
 		outboundSvc = outbound.NewService(cfg.Outbound, pg, logger)
+		// Wire the optional template renderer. With it attached, callers that
+		// set template_name get tenant-scoped, html/template-escaped rendering;
+		// callers that omit it stay on the byte-identical bare-string path.
+		outboundSvc.SetTemplateService(template.NewService(pg))
 	}
 
 	defaultPlanID, _ := uuid.Parse(cfg.DefaultPlanID)
 
+	authCache := middleware.NewCachedAuthStore(pg, pg.EffectiveConfig)
+
 	routerCfg := api.RouterConfig{
 		Store:              pg,
 		ObjectStore:        obj,
+		RawObjects:         objects,
 		Hub:                hub,
 		Dispatcher:         dispatcher,
 		NamingMode:         namingMode,
 		StripPlus:          cfg.StripPlusTag,
 		DefaultPolicy:      defaultPolicy,
-		JWTSecret:          cfg.EffectiveJWTSecret(),
+		JWTSecret:          cfg.JWTSecret,
 		MailboxTokenSecret: cfg.MailboxTokenSecret,
 		ExpectedMXHost:     cfg.SMTP.Domain,
 		PublicTenantID:     publicTenantID,
@@ -171,13 +183,15 @@ func main() {
 		OpenRegistration:   cfg.OpenRegistration,
 		Settings:           settingsMgr,
 		HTTP:               cfg.HTTP,
+		AuthCache:          authCache,
 		OutboundService:    outboundSvc,
 		Resolver:           res,
+		IngestInvalidator:  ingestSvc,
 		Logger:             logger,
 	}
 
 	// --- Retention scanner ---
-	ret := retention.New(pg, obj, cfg.Storage, logger)
+	ret := retention.New(objects, pg, cfg.Storage, logger)
 	var smtpSrv *smtpsrv.Server
 	var httpSrv *http.Server
 
@@ -198,7 +212,7 @@ func main() {
 			}
 		}()
 
-		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
+		rl := middleware.NewRateLimiter(rdb, authCache, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		routerCfg.RateLimiter = rl
 		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
@@ -206,7 +220,7 @@ func main() {
 	case "api":
 		go dispatcher.Run(ctx)
 		go ingestSvc.Run(ctx)
-		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
+		rl := middleware.NewRateLimiter(rdb, authCache, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		routerCfg.RateLimiter = rl
 		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)

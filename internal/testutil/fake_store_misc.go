@@ -155,7 +155,12 @@ func (s *FakeStore) ListMonitorEvents(_ context.Context, pg models.Page, eventTy
 	return filtered[start:end], total, nil
 }
 
-func (s *FakeStore) CreateIngestJob(_ context.Context, job *models.IngestJob) error {
+func (s *FakeStore) CreateIngestJob(ctx context.Context, job *models.IngestJob, ensureObject func(context.Context) error) error {
+	if job.RawObjectKey != "" && ensureObject != nil {
+		if err := ensureObject(ctx); err != nil {
+			return err
+		}
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	cp := *job

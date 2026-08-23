@@ -2,9 +2,9 @@ package authz
 
 import (
 	"context"
+	"errors"
 
 	"github.com/google/uuid"
-	"tabmail/internal/api/middleware"
 	"tabmail/internal/models"
 )
 
@@ -70,6 +70,16 @@ type Actor struct {
 	OwnerUserID  *uuid.UUID // For API keys with an active owner user
 }
 
+// IsTenantAdmin reports whether the actor has admin authority within its tenant
+// — a tenant admin or a global super admin. Use this for tenant-scoped
+// privileged access (the common case). See docs/adr/0001-admin-and-super-admin-roles.md.
+func (a Actor) IsTenantAdmin() bool { return a.IsSuperAdmin || a.IsAdmin }
+
+// IsGlobalAdmin reports whether the actor is a global platform operator (super
+// admin) able to act across tenants. Use this only for cross-tenant actions:
+// tenant impersonation, system-wide configuration, and role escalation.
+func (a Actor) IsGlobalAdmin() bool { return a.IsSuperAdmin }
+
 // EffectiveUserID returns the user identity ownership checks should use:
 // the user itself for PrincipalUser, the owning user for PrincipalAPIKey
 // (nil for ownerless integration keys), and nil for anything else.
@@ -124,7 +134,7 @@ func CanManageZone(actor Actor, zone *models.DomainZone) bool {
 	if zone == nil {
 		return false
 	}
-	if actor.IsSuperAdmin {
+	if actor.IsGlobalAdmin() {
 		return true
 	}
 	if actor.TenantID == uuid.Nil {
@@ -147,16 +157,174 @@ func CanManageZone(actor Actor, zone *models.DomainZone) bool {
 // list. Admins and super admins always pass; an absent permission or an
 // empty allowlist means all zones are allowed.
 func ZoneAllowed(actor Actor, zoneID uuid.UUID) bool {
-	if actor.IsSuperAdmin || actor.IsAdmin {
+	if actor.IsTenantAdmin() {
 		return true
 	}
-	if actor.Permission == nil || len(actor.Permission.AllowedZoneIDs) == 0 {
-		return true
+	return actor.Permission.AllowsZone(zoneID)
+}
+
+// OwnerScope describes which owned resources an actor may see when listing or
+// fetching resources that carry an owning user / API key (e.g. outbound jobs).
+// It is the single home for the rule "a tenant admin sees every owned resource
+// in the tenant; a regular user or API key sees only its own", so the list and
+// get paths cannot drift apart. ActionOutboundRead authorizes the action and
+// defers the row scope to the query level; ListScope is that query scope.
+//
+// This is preserved as the legacy owner-only scope. New list paths should use
+// ListScope (the tagged union) via ZoneListScope / OwnerListScope, which carry
+// TenantID into SQL so tenant isolation is enforced at the query level rather
+// than relying on in-memory fallbacks.
+type OwnerScope struct {
+	// AllInTenant is true when the actor may see every owned resource in the
+	// tenant. When true, UserID and APIKeyID are nil.
+	AllInTenant bool
+	// UserID, when set, restricts results to resources owned by this user.
+	UserID *uuid.UUID
+	// APIKeyID, when set, restricts results to resources created by this API key.
+	APIKeyID *uuid.UUID
+}
+
+// ListScope returns the owner scope an actor gets for listing owned resources:
+// a tenant admin sees all; a user sees its own; an API key sees its own. Any
+// other principal sees nothing (the zero OwnerScope).
+//
+// Preserved as a thin legacy constructor for outbound.go during the list-scope
+// migration. Prefer OwnerListScope(actor, tenantID) for new call sites — it
+// additionally pins TenantID so the store can enforce tenant isolation in SQL.
+func ListScope(actor Actor) OwnerScope {
+	if actor.IsTenantAdmin() {
+		return OwnerScope{AllInTenant: true}
 	}
-	for _, id := range actor.Permission.AllowedZoneIDs {
-		if id == zoneID {
-			return true
+	switch actor.Type {
+	case PrincipalUser:
+		id := actor.ID
+		return OwnerScope{UserID: &id}
+	case PrincipalAPIKey:
+		id := actor.ID
+		return OwnerScope{APIKeyID: &id}
+	}
+	return OwnerScope{}
+}
+
+// ZoneListFilter is the zone-scoped list query shape for domain zones,
+// mailboxes, and send identities. It is constructed by ZoneListScope so that
+// tenant isolation, the zone allowlist, and (for non-admin principals) zone
+// ownership all become SQL WHERE clauses rather than in-memory fallbacks.
+//
+// Field semantics:
+//   - TenantID is always set and must be applied as WHERE tenant_id = $1.
+//   - AllZones=true means every zone in the tenant passes the zone dimension.
+//     This is the case for an admin without an allowlist.
+//   - AllZones=false means ZoneIDs holds the allowed-zone set and must be
+//     applied as WHERE zone_id = ANY($2). An empty ZoneIDs slice means "no
+//     visible zone" and the store must return an empty result — it must NOT
+//     fall back to AllZones.
+//   - OwnerUserID, when non-nil, restricts to zones owned by that user
+//     (regular users / user-owned API keys). Admins and tenant-wide keys get a
+//     nil OwnerUserID (no owner filter). This is the zone.owner_user_id
+//     dimension; the caller resolves owned-zone IDs for the mailbox path and
+//     injects them via ZoneIDs.
+type ZoneListFilter struct {
+	TenantID    uuid.UUID
+	AllZones    bool
+	ZoneIDs     []uuid.UUID
+	OwnerUserID *uuid.UUID
+}
+
+// OwnerListFilter is the owner-scoped list query shape for resources that carry
+// an owning user / API key (outbound jobs). AllInTenant, UserID, and APIKeyID
+// are mutually exclusive: AllInTenant is true for tenant admins; otherwise
+// exactly one of UserID / APIKeyID is set. TenantID is always set and must be
+// applied as WHERE tenant_id = $1.
+type OwnerListFilter struct {
+	TenantID    uuid.UUID
+	AllInTenant bool
+	UserID      *uuid.UUID
+	APIKeyID    *uuid.UUID
+}
+
+// ZoneListScope resolves the zone-scoped list filter for an actor within a
+// tenant. Rules (must match the previous in-memory filters exactly):
+//
+//   - Tenant admin (or super admin) with an empty allowlist: AllZones=true,
+//     OwnerUserID=nil. The owner dimension is unrestricted.
+//   - Tenant admin with a non-empty allowlist: AllZones=false, ZoneIDs=allowlist,
+//     OwnerUserID=nil. (Admin + allowlist restricts to the listed zones.)
+//   - Tenant-wide (ownerless integration) API key with an empty allowlist:
+//     AllZones=true, OwnerUserID=nil.
+//   - Tenant-wide API key with a non-empty allowlist: AllZones=false,
+//     ZoneIDs=allowlist, OwnerUserID=nil.
+//   - Regular user or user-owned API key with an empty allowlist: AllZones=true,
+//     OwnerUserID=effective user. (The store applies owner_user_id; for the
+//     mailbox path the caller pre-resolves owned zone IDs into ZoneIDs.)
+//   - Regular user / user-owned API key with a non-empty allowlist:
+//     AllZones=false, ZoneIDs=allowlist, OwnerUserID=effective user.
+//
+// ZoneListScope never reads the store; owned-zone resolution for mailboxes
+// stays in the mailboxes service.
+func ZoneListScope(actor Actor, tenantID uuid.UUID) ZoneListFilter {
+	f := ZoneListFilter{TenantID: tenantID}
+	allowlist := actor.allowlist()
+	if actor.IsTenantAdmin() || actor.TenantWide {
+		if len(allowlist) > 0 {
+			f.ZoneIDs = allowlist
+		} else {
+			f.AllZones = true
 		}
+		return f
+	}
+	// Regular user or user-owned API key.
+	f.OwnerUserID = actor.EffectiveUserID()
+	if len(allowlist) > 0 {
+		f.ZoneIDs = allowlist
+	} else {
+		f.AllZones = true
+	}
+	return f
+}
+
+// OwnerListScope resolves the owner-scoped list filter for an actor within a
+// tenant. It mirrors the legacy ListScope(actor) rule and additionally pins
+// TenantID so the store can apply WHERE tenant_id = $1. The three owner
+// dimensions are mutually exclusive by construction.
+func OwnerListScope(actor Actor, tenantID uuid.UUID) OwnerListFilter {
+	f := OwnerListFilter{TenantID: tenantID}
+	if actor.IsTenantAdmin() {
+		f.AllInTenant = true
+		return f
+	}
+	switch actor.Type {
+	case PrincipalUser:
+		id := actor.ID
+		f.UserID = &id
+	case PrincipalAPIKey:
+		id := actor.ID
+		f.APIKeyID = &id
+	}
+	return f
+}
+
+// allowlist returns the actor's zone allowlist, or nil when the actor has no
+// permission profile (treated as unrestricted, matching ZoneAllowed).
+func (a Actor) allowlist() []uuid.UUID {
+	if a.Permission == nil {
+		return nil
+	}
+	return a.Permission.AllowedZoneIDs
+}
+
+// CanAccessOwned reports whether the actor may access a single resource owned by
+// ownerUserID / ownerAPIKeyID, applying the same rule as ListScope. Tenant
+// isolation is the caller's responsibility and must be checked separately.
+func CanAccessOwned(actor Actor, ownerUserID, ownerAPIKeyID *uuid.UUID) bool {
+	if actor.IsTenantAdmin() {
+		return true
+	}
+	switch actor.Type {
+	case PrincipalUser:
+		return ownerUserID != nil && *ownerUserID == actor.ID
+	case PrincipalAPIKey:
+		return ownerAPIKeyID != nil && *ownerAPIKeyID == actor.ID
 	}
 	return false
 }
@@ -176,64 +344,22 @@ func New(st Store) *Authorizer {
 	return &Authorizer{store: st}
 }
 
-// ActorFromContext extracts an Actor from the request context using the
-// existing middleware helpers, so callers don't need to build it manually.
-//
-// API key identity is checked first so that an API key with an owner is
-// correctly identified as PrincipalAPIKey (not PrincipalUser). The owner's
-// user ID is stored in OwnerUserID for fallback grant checks.
-func ActorFromContext(ctx context.Context) Actor {
-	actor := Actor{}
-
-	keyID := middleware.APIKeyIDFromCtx(ctx)
-	user := middleware.UserFromCtx(ctx)
-
-	if keyID != nil {
-		// API key is the primary identity — even when the key has an owner.
-		actor.Type = PrincipalAPIKey
-		actor.ID = *keyID
-		if ownerID := middleware.OwnerUserIDFromCtx(ctx); ownerID != nil {
-			actor.OwnerUserID = ownerID
-		} else {
-			// Only ownerless integration keys are tenant-wide. User-owned API keys
-			// keep the API-key principal for audit/grants, but inherit ownership via
-			// OwnerUserID rather than becoming broad tenant credentials.
-			actor.TenantWide = true
-		}
-	} else if user != nil {
-		actor.Type = PrincipalUser
-		actor.ID = user.ID
-		actor.TenantID = user.TenantID
-		actor.Role = user.Role
-	}
-
-	if tenant := middleware.TenantFromCtx(ctx); tenant != nil {
-		actor.TenantID = tenant.ID
-	}
-
-	actor.IsSuperAdmin = middleware.IsSuperAdmin(ctx)
-	actor.IsAdmin = middleware.IsAdmin(ctx)
-	actor.Permission = middleware.PermissionFromCtx(ctx)
-
-	return actor
-}
-
 // Authorize checks whether the actor can perform the action on the resource.
 func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, res Resource) error {
 	// super_admin can do everything.
-	if actor.IsSuperAdmin {
+	if actor.IsGlobalAdmin() {
 		return nil
 	}
 
 	// Tenant isolation: non-super-admin must belong to the same tenant.
 	if res.TenantID != (uuid.UUID{}) && actor.TenantID != res.TenantID {
-		return ErrForbidden("access denied")
+		return forbidden(KindTenantIsolation, "access denied")
 	}
 
 	// admin has full access within their tenant, except managing other admins.
 	if actor.IsAdmin {
 		if action == ActionTenantUsersManage {
-			return ErrForbidden("super admin required")
+			return forbidden(KindAdminRequired, "super admin required")
 		}
 		return nil
 	}
@@ -241,7 +367,7 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 	// Regular users and API keys — check per-action rules.
 	switch action {
 	case ActionTenantManage, ActionTenantUsersManage:
-		return ErrForbidden("admin access required")
+		return forbidden(KindAdminRequired, "admin access required")
 
 	case ActionZoneCreate:
 		return a.checkZoneCreate(actor)
@@ -254,7 +380,7 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 
 	case ActionRouteManage:
 		if actor.Permission != nil && !actor.Permission.CanCreateRoutes {
-			return ErrForbidden("route creation not allowed")
+			return forbidden(KindCapability, "route creation not allowed")
 		}
 		return a.checkZoneAccessAndOwnership(actor, res)
 
@@ -297,22 +423,16 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 
 	case ActionAPIKeyCreate:
 		if actor.Permission != nil && !actor.Permission.CanCreateAPIKeys {
-			return ErrForbidden("API key creation not allowed")
+			return forbidden(KindCapability, "API key creation not allowed")
 		}
 		return nil
 
 	case ActionAPIKeyManage:
-		return ErrForbidden("admin access required")
+		return forbidden(KindAdminRequired, "admin access required")
 
 	default:
 		return ErrForbidden("unknown action")
 	}
-}
-
-// AuthorizeFromContext is a convenience wrapper that extracts the Actor from
-// the context and delegates to Authorize.
-func (a *Authorizer) AuthorizeFromContext(ctx context.Context, action Action, res Resource) error {
-	return a.Authorize(ctx, ActorFromContext(ctx), action, res)
 }
 
 // ---------------------------------------------------------------------------
@@ -325,7 +445,7 @@ func (a *Authorizer) checkZoneCreate(actor Actor) error {
 		return nil // API key — scope check happens at middleware level
 	}
 	if !perm.CanCreateDomains {
-		return ErrForbidden("domain creation not allowed")
+		return forbidden(KindCapability, "domain creation not allowed")
 	}
 	return nil
 }
@@ -358,23 +478,23 @@ func checkZoneOwnership(actor Actor, res Resource) error {
 	if uid != nil && res.OwnerUserID != nil && *uid == *res.OwnerUserID {
 		return nil
 	}
-	return ErrForbidden("not your domain")
+	return forbidden(KindOwnership, "not your domain")
 }
 
 // checkZoneAccess verifies the actor has access to the zone via
 // EffectivePermission.AllowedZoneIDs. Admins are handled before this is called.
 func (a *Authorizer) checkZoneAccess(actor Actor, res Resource) error {
 	if actor.TenantWide {
-		if res.ZoneID != (uuid.UUID{}) && actor.Permission != nil && !isZoneAllowed(actor.Permission, res.ZoneID) {
-			return ErrForbidden("zone not in allowed list")
+		if res.ZoneID != (uuid.UUID{}) && !actor.Permission.AllowsZone(res.ZoneID) {
+			return forbidden(KindZoneNotAllowed, "zone not in allowed list")
 		}
 		return nil
 	}
 	if res.ZoneID == (uuid.UUID{}) {
 		return nil
 	}
-	if actor.Permission != nil && !isZoneAllowed(actor.Permission, res.ZoneID) {
-		return ErrForbidden("zone not in allowed list")
+	if !actor.Permission.AllowsZone(res.ZoneID) {
+		return forbidden(KindZoneNotAllowed, "zone not in allowed list")
 	}
 	return nil
 }
@@ -382,29 +502,31 @@ func (a *Authorizer) checkZoneAccess(actor Actor, res Resource) error {
 func (a *Authorizer) checkSendFrom(actor Actor) error {
 	perm := actor.Permission
 	if perm != nil && !perm.CanSend {
-		return ErrForbidden("sending not allowed")
+		return forbidden(KindCapability, "sending not allowed")
 	}
 	return nil
-}
-
-func isZoneAllowed(perm *models.EffectivePermission, zoneID uuid.UUID) bool {
-	if len(perm.AllowedZoneIDs) == 0 {
-		return true
-	}
-	for _, id := range perm.AllowedZoneIDs {
-		if id == zoneID {
-			return true
-		}
-	}
-	return false
 }
 
 // ---------------------------------------------------------------------------
 // Error types
 // ---------------------------------------------------------------------------
 
-// AuthzError is a typed authorization error.
+// Kind classifies why authorization was denied, so callers and tests can
+// distinguish denial reasons without string-matching the message.
+type Kind string
+
+const (
+	KindForbidden       Kind = "forbidden"        // generic / unclassified denial
+	KindTenantIsolation Kind = "tenant_isolation" // actor and resource are in different tenants
+	KindAdminRequired   Kind = "admin_required"   // action needs admin / super-admin
+	KindOwnership       Kind = "ownership"        // actor does not own the resource
+	KindZoneNotAllowed  Kind = "zone_not_allowed" // zone is outside the actor's allowlist
+	KindCapability      Kind = "capability"       // a permission flag (can_create_* / can_send) is off
+)
+
+// AuthzError is a typed authorization error carrying a denial Kind.
 type AuthzError struct {
+	Reason  Kind
 	Message string
 }
 
@@ -412,16 +534,29 @@ func (e *AuthzError) Error() string {
 	return e.Message
 }
 
-// ErrForbidden creates a new AuthzError.
+// ErrForbidden creates a generic (unclassified) authorization denial.
 func ErrForbidden(msg string) *AuthzError {
-	return &AuthzError{Message: msg}
+	return forbidden(KindForbidden, msg)
+}
+
+// forbidden creates a classified authorization denial.
+func forbidden(kind Kind, msg string) *AuthzError {
+	return &AuthzError{Reason: kind, Message: msg}
 }
 
 // IsAuthzError returns true if the error is an AuthzError.
 func IsAuthzError(err error) bool {
-	if err == nil {
-		return false
+	var ae *AuthzError
+	return errors.As(err, &ae)
+}
+
+// KindOf returns the denial Kind for err, defaulting to KindForbidden for any
+// authorization error that was not explicitly classified and for non-authz
+// errors.
+func KindOf(err error) Kind {
+	var ae *AuthzError
+	if errors.As(err, &ae) && ae.Reason != "" {
+		return ae.Reason
 	}
-	_, ok := err.(*AuthzError)
-	return ok
+	return KindForbidden
 }

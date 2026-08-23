@@ -36,10 +36,14 @@ docker compose logs -f tabmail
 
 ## 2. 初始化数据库
 
-当前项目未上线，不维护版本化数据库迁移链。应用启动时会自动执行内置当前态 schema 快照：
+数据库结构由版本化迁移（goose）管理，应用启动时自动执行所有未应用的迁移：
 
-- `internal/store/postgres/schema.sql`
-- `internal/store/postgres/postgres.go`
+- `internal/store/postgres/migrations/`（编号迁移文件，禁止修改已发布的迁移）
+- `internal/store/postgres/migrate.go`（启动时通过 advisory lock 串行执行）
+
+多角色（api / smtp / worker / retention）并发启动时会通过 Postgres session
+advisory lock 自动串行化迁移，不会产生 DDL 竞争。已应用版本记录在
+`goose_db_version` 表中。
 
 启动后可直接查看表结构：
 
@@ -60,6 +64,7 @@ docker compose up -d --build
 
 ```bash
 export TABMAIL_MAILBOX_TOKEN_SECRET='change-this-mailbox-token-secret'
+export TABMAIL_JWT_SECRET='change-this-jwt-secret'
 export POSTGRES_USER='tabmail'
 export POSTGRES_PASSWORD='change-this-postgres-password'
 export POSTGRES_DB='tabmail'
@@ -143,7 +148,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 优势：
 
 - API / SMTP / Worker 可独立伸缩
-- 各角色启动时会确保当前 PostgreSQL schema 已初始化
+- 各角色启动时会确保 PostgreSQL 迁移已应用（advisory lock 串行化）
 - PostgreSQL / Redis 不对宿主机暴露端口
 - 没有真实 secrets 时无法启动
 - 便于后续迁移到外部对象存储

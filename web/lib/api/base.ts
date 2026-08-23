@@ -160,19 +160,20 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
   let res = await fetch(url.toString(), {
     method: opts.method || "GET",
     headers,
+    credentials: "include",
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
 
-  // Auto-refresh on 401 if we have a refresh token
-  if (res.status === 401 && requestUsedAccessToken(headers) && getStoredKey("tabmail_refresh_token")) {
+  // Auto-refresh on 401 when we were using the stored access token.
+  if (res.status === 401 && requestUsedAccessToken(headers)) {
     const refreshed = await tryRefreshToken();
     if (refreshed) {
-      // Retry with new token
       const retryHeaders = buildHeaders(path, opts.headers);
       if (opts.body) retryHeaders["Content-Type"] = "application/json";
       res = await fetch(url.toString(), {
         method: opts.method || "GET",
         headers: retryHeaders,
+        credentials: "include",
         body: opts.body ? JSON.stringify(opts.body) : undefined,
       });
     }
@@ -210,22 +211,17 @@ async function tryRefreshToken(): Promise<boolean> {
 }
 
 async function doRefreshToken(): Promise<boolean> {
-  const refreshToken = getStoredKey("tabmail_refresh_token");
-  if (!refreshToken) return false;
-
   try {
     const base = getBaseUrl();
     const res = await fetch(`${base}/api/v1/auth/refresh`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      credentials: "include",
     });
 
     if (!res.ok) {
-      // Refresh failed — clear tokens
       if (typeof window !== "undefined") {
         localStorage.removeItem("tabmail_access_token");
-        localStorage.removeItem("tabmail_refresh_token");
         localStorage.removeItem("tabmail_user");
         window.dispatchEvent(new Event("tabmail-auth-change"));
       }
@@ -235,7 +231,6 @@ async function doRefreshToken(): Promise<boolean> {
     const data = await res.json();
     if (typeof window !== "undefined" && data?.data) {
       localStorage.setItem("tabmail_access_token", data.data.access_token);
-      localStorage.setItem("tabmail_refresh_token", data.data.refresh_token);
       window.dispatchEvent(new Event("tabmail-auth-change"));
     }
     return true;
@@ -253,17 +248,18 @@ export async function streamEvents(
     const res = await fetch(`${getBaseUrl()}${path}`, {
       method: "GET",
       headers: buildHeaders(path),
+      credentials: "include",
       signal,
     });
 
     if (!res.ok || !res.body) {
-      // If 401 and we have tokens, try refresh then reconnect once
-      if (res.status === 401 && requestUsedAccessToken(buildHeaders(path)) && getStoredKey("tabmail_refresh_token")) {
+      if (res.status === 401 && requestUsedAccessToken(buildHeaders(path))) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
           const retryRes = await fetch(`${getBaseUrl()}${path}`, {
             method: "GET",
             headers: buildHeaders(path),
+            credentials: "include",
             signal,
           });
           if (retryRes.ok && retryRes.body) return retryRes;
@@ -321,8 +317,6 @@ export async function streamEvents(
   try {
     await readStream(initialRes);
   } catch (streamErr) {
-    // Stream read failed (connection dropped). If not intentionally aborted,
-    // try refresh + reconnect once.
     if (signal?.aborted) throw streamErr;
 
     const refreshed = await tryRefreshToken();

@@ -17,7 +17,7 @@ function AuthProbe() {
 
       <button
         onClick={() =>
-          auth.loginWithTokens(" access-token ", " refresh-token ", {
+          auth.loginWithTokens(" access-token ", {
             id: "user-1",
             email: "user@mail.test",
             display_name: "User",
@@ -69,7 +69,6 @@ describe("auth-context", () => {
       expect(screen.getByTestId("level")).toHaveTextContent("user");
     });
     expect(localStorage.getItem("tabmail_access_token")).toBe(" access-token ");
-    expect(localStorage.getItem("tabmail_refresh_token")).toBe(" refresh-token ");
 
     fireEvent.click(screen.getByRole("button", { name: "set-tenant" }));
     await waitFor(() => {

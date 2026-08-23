@@ -20,7 +20,7 @@ type Root struct {
 	LogLevel            string `default:"info" desc:"debug, info, warn, error"`
 	ObjectStore         string `split_words:"true" default:"fs" desc:"Object store backend: fs or s3"`
 	DataDir             string `default:"/data" desc:"Base directory for raw .eml storage"`
-	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens and JWT"`
+	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens"`
 	AutoCreateRouteRPM  int    `split_words:"true" default:"60" desc:"Per-route auto-create RPM (0=disable)"`
 	AutoCreateTenantRPM int    `split_words:"true" default:"300" desc:"Per-tenant auto-create RPM (0=disable)"`
 	MailboxNaming       string `default:"full" desc:"Mailbox naming: full, local, or domain"`
@@ -28,7 +28,7 @@ type Root struct {
 	MonitorHistory      int    `default:"50" desc:"Number of recent events to keep for monitor replay (0=disable)"`
 
 	// Auth
-	JWTSecret           string `split_words:"true" default:"" desc:"JWT signing secret (defaults to MailboxTokenSecret if empty)"`
+	JWTSecret           string `split_words:"true" default:"" desc:"JWT signing secret for user sessions (required, must differ from MailboxTokenSecret)"`
 	OpenRegistration    bool   `split_words:"true" default:"true" desc:"Allow public user registration"`
 	BootstrapAdminEmail string `split_words:"true" default:"" desc:"Bootstrap admin email (created on first start if no admins exist)"`
 	BootstrapAdminPass  string `split_words:"true" default:"" desc:"Bootstrap admin password"`
@@ -43,14 +43,6 @@ type Root struct {
 	Webhook  Webhook
 	Ingest   Ingest
 	Outbound Outbound
-}
-
-// EffectiveJWTSecret returns the JWT secret, falling back to MailboxTokenSecret.
-func (c *Root) EffectiveJWTSecret() string {
-	if c.JWTSecret != "" {
-		return c.JWTSecret
-	}
-	return c.MailboxTokenSecret
 }
 
 type SMTP struct {
@@ -79,8 +71,10 @@ type HTTP struct {
 	AllowedOrigins   []string `split_words:"true" default:"http://127.0.0.1:3000,http://localhost:3000" desc:"Allowed CORS origins"`
 	AllowedHeaders   []string `split_words:"true" default:"Authorization,Content-Type,X-API-Key,X-Tenant-ID" desc:"Allowed CORS headers"`
 	AllowCredentials bool     `split_words:"true" default:"false" desc:"Allow credentialed CORS requests"`
+	CookieSecure     bool     `split_words:"true" default:"false" desc:"Set Secure flag on refresh-token httpOnly cookie (enable when API is served over HTTPS)"`
 	TrustedProxies   []string `split_words:"true" default:"127.0.0.1/32,::1/128" desc:"Trusted proxy CIDRs/IPs for X-Real-IP/X-Forwarded-For"`
 	PublicIPRPM      int      `split_words:"true" default:"0" desc:"Per-IP RPM for unauthenticated requests (0=disable)"`
+	MetricsToken     string   `split_words:"true" default:"" desc:"Bearer token required to scrape /metrics (unset = super-admin JWT only)"`
 }
 
 type DB struct {
@@ -180,6 +174,12 @@ func (c *Root) Validate() error {
 	if err := validateSecret("TABMAIL_MAILBOX_TOKEN_SECRET", c.MailboxTokenSecret, 16); err != nil {
 		return err
 	}
+	if err := validateSecret("TABMAIL_JWT_SECRET", c.JWTSecret, 16); err != nil {
+		return err
+	}
+	if strings.TrimSpace(c.JWTSecret) == strings.TrimSpace(c.MailboxTokenSecret) {
+		return fmt.Errorf("config: TABMAIL_JWT_SECRET must differ from TABMAIL_MAILBOX_TOKEN_SECRET")
+	}
 	if strings.TrimSpace(c.DB.DSN) == "" {
 		return fmt.Errorf("config: TABMAIL_DB_DSN is required")
 	}
@@ -221,7 +221,33 @@ func (c *Root) Validate() error {
 	default:
 		return fmt.Errorf("config: TABMAIL_OUTBOUND_DKIM_FAIL_POLICY must be %s or %s", DKIMFailClosed, DKIMFailOpen)
 	}
-	if c.Outbound.Enabled && strings.ToLower(c.Outbound.Mode) == "relay" {
+	// Normalize and validate the outbound delivery mode and relay TLS mode so a
+	// stray space or casing cannot silently coerce delivery: an untrimmed or
+	// misspelled Mode falls through to the relay adapter in NewService, and an
+	// untrimmed or misspelled RelayTLS falls through to a plaintext dial in
+	// DeliverRelay. Write the canonical value back so downstream literal
+	// comparisons stay robust.
+	mode := strings.ToLower(strings.TrimSpace(c.Outbound.Mode))
+	switch mode {
+	case "", "relay":
+		c.Outbound.Mode = "relay"
+	case "direct":
+		c.Outbound.Mode = "direct"
+	default:
+		return fmt.Errorf("config: TABMAIL_OUTBOUND_MODE must be relay or direct, got %q", c.Outbound.Mode)
+	}
+	relayTLS := strings.ToLower(strings.TrimSpace(c.Outbound.RelayTLS))
+	switch relayTLS {
+	case "", "starttls":
+		c.Outbound.RelayTLS = "starttls"
+	case "tls":
+		c.Outbound.RelayTLS = "tls"
+	case "none":
+		c.Outbound.RelayTLS = "none"
+	default:
+		return fmt.Errorf("config: TABMAIL_OUTBOUND_RELAY_TLS must be none, starttls, or tls, got %q", c.Outbound.RelayTLS)
+	}
+	if c.Outbound.Enabled && c.Outbound.Mode == "relay" {
 		if strings.TrimSpace(c.Outbound.RelayHost) == "" {
 			return fmt.Errorf("config: TABMAIL_OUTBOUND_RELAY_HOST is required when outbound is enabled in relay mode")
 		}

@@ -158,9 +158,9 @@ curl http://127.0.0.1:8080/metrics
 说明：
 
 - 默认 compose **只暴露 HTTP / SMTP**
-- 应用启动时会自动初始化当前 PostgreSQL schema 快照
+- 应用启动时会自动应用 PostgreSQL 版本化迁移
 - PostgreSQL / Redis **不再直暴露宿主机端口**
-- 必须先提供真实的 `TABMAIL_MAILBOX_TOKEN_SECRET` / `POSTGRES_PASSWORD` / `TABMAIL_REDIS_PASSWORD`
+- 必须先提供真实的 `TABMAIL_MAILBOX_TOKEN_SECRET` / `TABMAIL_JWT_SECRET` / `POSTGRES_PASSWORD` / `TABMAIL_REDIS_PASSWORD`
 - 生产推荐使用 `docker-compose.prod.yml`
 
 ### 2. 本地开发
@@ -169,10 +169,11 @@ curl http://127.0.0.1:8080/metrics
 
 ```bash
 TABMAIL_MAILBOX_TOKEN_SECRET='replace-with-a-real-mailbox-secret' \
+TABMAIL_JWT_SECRET='replace-with-a-real-jwt-secret' \
 go run ./cmd/tabmail
 ```
 
-当前未上线阶段不维护版本化 migration；`cmd/tabmail` 启动时会按内置 `internal/store/postgres/schema.sql` 自动创建/补齐当前表结构。
+数据库结构由内置的版本化迁移（goose）管理；`cmd/tabmail` 启动时会自动应用 `internal/store/postgres/migrations/` 下所有未执行的迁移。
 
 ```bash
 psql "$TABMAIL_DB_DSN" -c '\dt'
@@ -187,6 +188,7 @@ psql "$TABMAIL_DB_DSN" -c '\dt'
 | `TABMAIL_ROLE` | 进程角色：`all / api / smtp / worker / retention` |
 | `TABMAIL_OBJECTSTORE` | 对象存储后端：`fs / s3` |
 | `TABMAIL_MAILBOX_TOKEN_SECRET` | mailbox bearer token 签名密钥 |
+| `TABMAIL_JWT_SECRET` | 用户 JWT 签名密钥（必须与 mailbox token 密钥不同） |
 | `TABMAIL_AUTO_CREATE_ROUTE_RPM` | 单路由自动建箱 RPM |
 | `TABMAIL_AUTO_CREATE_TENANT_RPM` | 单租户自动建箱 RPM |
 | `TABMAIL_DB_DSN` | PostgreSQL DSN |
@@ -234,7 +236,7 @@ docker compose -f docker-compose.prod.yml up -d --build
 生产 compose 特点：
 
 - API / SMTP / Worker / Retention 分角色运行
-- 各角色启动时都会确保当前 PostgreSQL schema 已初始化
+- 各角色启动时都会确保 PostgreSQL 迁移已应用（advisory lock 串行化）
 - PostgreSQL / Redis 不暴露宿主机端口
 - 所有关键 secrets 必填
 - 适合后续继续接入反向代理与对象存储
@@ -269,10 +271,17 @@ TABMAIL_S3_FORCE_PATH_STYLE=true
 
 ## 数据库初始化
 
-当前项目未上线，不保留版本化数据库迁移链。数据库初始化集中在一个当前态 schema 快照：
+数据库结构由版本化迁移（goose）管理：
 
-- `internal/store/postgres/schema.sql`
-- `internal/store/postgres/postgres.go` 启动时自动执行
+- `internal/store/postgres/migrations/`：编号迁移文件（`00001_baseline.sql` 起）
+- `internal/store/postgres/migrate.go`：启动时自动应用所有未执行的迁移
+
+规则：
+
+- 新的 schema 变更必须新增一个编号迁移文件，禁止修改已发布的迁移
+- 多角色并发启动时通过 Postgres session advisory lock 串行化迁移
+- 已应用版本记录在 `goose_db_version` 表；基线迁移完全幂等，对旧快照方式
+  初始化过的存量库同样可以安全执行
 
 查看当前库表：
 
@@ -420,7 +429,6 @@ Authorization: Bearer <mailbox-token>
 - `docs/deployment.md`
 - `docs/api-examples.md`
 - `docs/operations.md`
-- `docs/optimization-plan.md`
 
 ---
 

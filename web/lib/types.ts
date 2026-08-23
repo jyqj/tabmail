@@ -342,7 +342,7 @@ export interface UpdateUserRequest {
 
 export interface LoginResponse {
   access_token: string;
-  refresh_token: string;
+  refresh_token?: string;
   token_type: string;
   expires_in: number;
   user: AuthUser;
@@ -350,7 +350,7 @@ export interface LoginResponse {
 
 export interface RefreshResponse {
   access_token: string;
-  refresh_token: string;
+  refresh_token?: string;
   token_type: string;
   expires_in: number;
 }

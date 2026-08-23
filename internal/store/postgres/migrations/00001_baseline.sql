@@ -1,6 +1,9 @@
--- TabMail baseline schema.
--- Pre-launch: executed by postgres.New on fresh databases.
--- All columns declared inline; no ALTER TABLE patches.
+-- +goose Up
+-- TabMail baseline schema (versioned migration 00001).
+-- This file is the former internal/store/postgres/schema.sql snapshot converted
+-- into the first goose migration. Every statement is idempotent, so it applies
+-- cleanly both to fresh databases and to databases created by the pre-migration
+-- snapshot bootstrapping.
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -8,34 +11,46 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- Enum types
 -- ============================================================
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE route_type AS ENUM ('exact', 'wildcard', 'sequence', 'deep_wildcard');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
+-- +goose StatementBegin
 DO $$ BEGIN
     ALTER TYPE route_type ADD VALUE IF NOT EXISTS 'deep_wildcard';
 EXCEPTION WHEN undefined_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE access_mode AS ENUM ('public', 'token', 'api_key');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE user_role AS ENUM ('super_admin', 'admin', 'user');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE outbound_state AS ENUM ('pending','processing','sent','retry','failed','dead');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE send_identity_type AS ENUM ('exact', 'domain_wildcard');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
 -- ============================================================
 -- Plans & tenants
@@ -155,6 +170,7 @@ CREATE INDEX IF NOT EXISTS idx_users_tenant ON users(tenant_id);
 -- super_admin = platform-wide administrator, admin = tenant administrator.
 -- Earlier pre-launch snapshots briefly introduced platform_admin/tenant_admin;
 -- normalize those values back to the current code semantics.
+-- +goose StatementBegin
 DO $$
 DECLARE
     labels TEXT[];
@@ -187,13 +203,16 @@ BEGIN
         ALTER TYPE user_role_current RENAME TO user_role;
     END IF;
 END $$;
+-- +goose StatementEnd
 
 -- FK for tenant_api_keys.owner_user_id (declared after users table exists)
+-- +goose StatementBegin
 DO $$ BEGIN
     ALTER TABLE tenant_api_keys DROP CONSTRAINT IF EXISTS fk_api_keys_owner_user;
     ALTER TABLE tenant_api_keys ADD CONSTRAINT fk_api_keys_owner_user
         FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE NOT VALID;
 END $$;
+-- +goose StatementEnd
 
 CREATE TABLE IF NOT EXISTS user_permission_overrides (
     id                  UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -324,6 +343,15 @@ CREATE INDEX IF NOT EXISTS idx_messages_tenant_expires ON messages(tenant_id, ex
 CREATE INDEX IF NOT EXISTS idx_messages_expires        ON messages(expires_at);
 CREATE INDEX IF NOT EXISTS idx_messages_raw_object_key ON messages(raw_object_key) WHERE raw_object_key IS NOT NULL;
 
+-- OTP signal columns added to the already-created messages table. ALTER ...
+-- ADD COLUMN IF NOT EXISTS keeps existing databases compatible: a pre-P6
+-- instance has the columns added with defaults on schema reload, and code that
+-- has not yet been upgraded still writes rows (the new columns fall back to
+-- their DEFAULT). otp_code is short-lived sensitive credential stored for the
+-- message's retention window (expires_at) alongside the raw object.
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS otp_code       VARCHAR(32) NOT NULL DEFAULT '';
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS otp_confidence REAL        NOT NULL DEFAULT 0;
+
 -- ============================================================
 -- Outbound jobs (send queue)
 -- ============================================================
@@ -335,6 +363,9 @@ CREATE TABLE IF NOT EXISTS outbound_jobs (
     api_key_id        UUID           REFERENCES tenant_api_keys(id) ON DELETE SET NULL,
     mail_from         VARCHAR(512)   NOT NULL,
     rcpt_to           TEXT[]         NOT NULL,
+    to_addrs          TEXT[]         NOT NULL DEFAULT '{}',
+    cc_addrs          TEXT[]         NOT NULL DEFAULT '{}',
+    bcc_addrs         TEXT[]         NOT NULL DEFAULT '{}',
     subject           TEXT           NOT NULL DEFAULT '',
     text_body         TEXT,
     html_body         TEXT,
@@ -379,6 +410,23 @@ CREATE TABLE IF NOT EXISTS send_identities (
 CREATE INDEX IF NOT EXISTS idx_send_identities_zone ON send_identities(zone_id);
 CREATE INDEX IF NOT EXISTS idx_send_identities_tenant ON send_identities(tenant_id);
 CREATE INDEX IF NOT EXISTS idx_send_identities_address ON send_identities(address);
+
+-- ============================================================
+-- Outbound templates (tenant-scoped email templates)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS outbound_templates (
+    id           UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    tenant_id    UUID         NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+    name         VARCHAR(128) NOT NULL,
+    subject_tmpl TEXT         NOT NULL DEFAULT '',
+    text_tmpl    TEXT,
+    html_tmpl    TEXT,
+    created_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    updated_at   TIMESTAMPTZ  NOT NULL DEFAULT now(),
+    UNIQUE (tenant_id, name)
+);
+CREATE INDEX IF NOT EXISTS idx_outbound_templates_tenant_name ON outbound_templates(tenant_id, name);
 
 -- ============================================================
 -- System operations
@@ -527,11 +575,13 @@ ON CONFLICT (id) DO NOTHING;
 -- Add tenant_id to permission_profiles for tenant scoping
 ALTER TABLE permission_profiles ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE;
 -- Drop legacy unique constraint on name (replaced by partial indexes)
+-- +goose StatementBegin
 DO $$ BEGIN
     IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'permission_profiles_name_key') THEN
         ALTER TABLE permission_profiles DROP CONSTRAINT permission_profiles_name_key;
     END IF;
 END $$;
+-- +goose StatementEnd
 
 -- Backfill mailbox message counts
 UPDATE mailboxes m
@@ -607,3 +657,21 @@ CREATE TABLE IF NOT EXISTS suppression_list (
 );
 CREATE INDEX IF NOT EXISTS idx_suppression_tenant_addr ON suppression_list(tenant_id, LOWER(address));
 CREATE INDEX IF NOT EXISTS idx_webhook_endpoints_active ON webhook_endpoints(tenant_id) WHERE is_active = TRUE;
+
+-- ============================================================
+-- Orphan object retry queue (retention scanner persistence)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS orphan_objects (
+    object_key     VARCHAR(512) PRIMARY KEY,
+    first_failed_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_failed_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    attempts       INT         NOT NULL DEFAULT 1
+);
+CREATE INDEX IF NOT EXISTS idx_orphan_objects_last_failed ON orphan_objects(last_failed_at);
+
+
+-- +goose Down
+-- Baseline migration: intentionally irreversible. Restoring a pre-baseline
+-- database means dropping everything; do that by recreating the database.
+SELECT 1;
