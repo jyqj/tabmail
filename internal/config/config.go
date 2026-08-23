@@ -28,11 +28,12 @@ type Root struct {
 	MonitorHistory      int    `default:"50" desc:"Number of recent events to keep for monitor replay (0=disable)"`
 
 	// Auth
-	JWTSecret           string `split_words:"true" default:"" desc:"JWT signing secret (defaults to MailboxTokenSecret if empty)"`
-	OpenRegistration    bool   `split_words:"true" default:"true" desc:"Allow public user registration"`
-	BootstrapAdminEmail string `split_words:"true" default:"" desc:"Bootstrap admin email (created on first start if no admins exist)"`
-	BootstrapAdminPass  string `split_words:"true" default:"" desc:"Bootstrap admin password"`
-	DefaultPlanID       string `split_words:"true" default:"00000000-0000-0000-0000-000000000001" desc:"Default plan for new user registrations"`
+	JWTSecret           string        `split_words:"true" default:"" desc:"JWT signing secret (defaults to MailboxTokenSecret if empty)"`
+	OpenRegistration    bool          `split_words:"true" default:"true" desc:"Allow public user registration"`
+	FailedLoginDelay    time.Duration `split_words:"true" default:"500ms" desc:"Delay applied to failed logins when the Redis login throttle is unreachable"`
+	BootstrapAdminEmail string        `split_words:"true" default:"" desc:"Bootstrap admin email (created on first start if no admins exist)"`
+	BootstrapAdminPass  string        `split_words:"true" default:"" desc:"Bootstrap admin password"`
+	DefaultPlanID       string        `split_words:"true" default:"00000000-0000-0000-0000-000000000001" desc:"Default plan for new user registrations"`
 
 	SMTP     SMTP
 	HTTP     HTTP

@@ -75,6 +75,7 @@ type RouterConfig struct {
 	PublicTenantID     string
 	DefaultPlanID      uuid.UUID
 	OpenRegistration   bool
+	FailedLoginDelay   time.Duration
 	Settings           *settings.Manager
 	HTTP               config.HTTP
 	RateLimiter        *middleware.RateLimiter
@@ -108,7 +109,10 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
-	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
+	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, handlers.AuthHandlerConfig{
+		Throttle:         cfg.RateLimiter,
+		FailedLoginDelay: cfg.FailedLoginDelay,
+	}, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
 	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
 	si := handlers.NewSendIdentityHandler(st, cfg.Logger)

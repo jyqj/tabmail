@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -45,6 +46,22 @@ type settingsReader interface {
 	GetBool(ctx context.Context, key string, defaultVal bool) bool
 }
 
+// loginThrottle bounds password guessing against a single account.
+type loginThrottle interface {
+	LoginAttemptsExceeded(ctx context.Context, identity string) bool
+	RecordLoginFailure(ctx context.Context, identity string) error
+}
+
+// AuthHandlerConfig bundles the optional knobs for NewAuthHandler.
+type AuthHandlerConfig struct {
+	// Throttle records failed logins. When nil or unreachable, FailedLoginDelay
+	// is applied instead.
+	Throttle loginThrottle
+	// FailedLoginDelay slows a failed login response when the throttle is
+	// unavailable. Tests set it to zero.
+	FailedLoginDelay time.Duration
+}
+
 // AuthHandler handles authentication endpoints.
 type AuthHandler struct {
 	store                   authStore
@@ -52,16 +69,20 @@ type AuthHandler struct {
 	defaultPlanID           uuid.UUID
 	defaultOpenRegistration bool
 	settings                settingsReader
+	throttle                loginThrottle
+	failedLoginDelay        time.Duration
 	logger                  zerolog.Logger
 }
 
-func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, l zerolog.Logger) *AuthHandler {
+func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, authCfg AuthHandlerConfig, l zerolog.Logger) *AuthHandler {
 	return &AuthHandler{
 		store:                   s,
 		jwtSecret:               jwtSecret,
 		defaultPlanID:           defaultPlanID,
 		defaultOpenRegistration: openRegistration,
 		settings:                settings,
+		throttle:                authCfg.Throttle,
+		failedLoginDelay:        authCfg.FailedLoginDelay,
 		logger:                  l.With().Str("handler", "auth").Logger(),
 	}
 }
@@ -82,6 +103,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if h.throttle != nil && h.throttle.LoginAttemptsExceeded(r.Context(), req.Email) {
+		w.Header().Set("Retry-After", strconv.Itoa(int(middleware.LoginFailureWindow.Seconds())))
+		writeJSON(w, http.StatusTooManyRequests, envelope{Error: &apiErr{Code: "RATE_LIMITED", Message: "too many failed login attempts, try again later"}})
+		return
+	}
+
 	user, err := h.store.GetUserByEmail(r.Context(), req.Email)
 	if err != nil {
 		h.logger.Err(err).Msg("login: get user")
@@ -89,6 +116,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user == nil {
+		h.penalizeFailedLogin(r.Context(), req.Email)
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid email or password"}})
 		return
 	}
@@ -97,7 +125,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.Password)); err != nil {
-		time.Sleep(500 * time.Millisecond) // slow down brute-force attempts
+		h.penalizeFailedLogin(r.Context(), req.Email)
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid email or password"}})
 		return
 	}
@@ -109,7 +137,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() { _ = h.store.TouchUserLogin(context.Background(), user.ID) }()
+	// Logins are already throttled, so this runs inline rather than in a
+	// detached goroutine; a failed bookkeeping write must not fail the login.
+	if err := h.store.TouchUserLogin(r.Context(), user.ID); err != nil {
+		h.logger.Warn().Err(err).Str("user_id", user.ID.String()).Msg("login: record last login")
+	}
 
 	ok(w, map[string]any{
 		"access_token":  accessToken,
@@ -713,6 +745,18 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	// Revoke all refresh tokens to force re-login
 	_ = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
 	ok(w, map[string]string{"status": "password changed"})
+}
+
+// penalizeFailedLogin counts the attempt against the account's throttle window.
+// Only when that counter cannot be reached does it fall back to slowing the
+// response down, which is the last line of defence against brute forcing.
+func (h *AuthHandler) penalizeFailedLogin(ctx context.Context, email string) {
+	if h.throttle != nil && h.throttle.RecordLoginFailure(ctx, email) == nil {
+		return
+	}
+	if h.failedLoginDelay > 0 {
+		time.Sleep(h.failedLoginDelay)
+	}
 }
 
 func (h *AuthHandler) issueTokenPair(ctx context.Context, user *models.User) (accessToken, refreshToken string, err error) {
