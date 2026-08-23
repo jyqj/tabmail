@@ -6,6 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand/v2"
@@ -65,6 +66,7 @@ type Service struct {
 	pollInterval       time.Duration
 	batchSize          int
 	maxRetries         int
+	concurrency        int
 	logger             zerolog.Logger
 	policyMu           sync.RWMutex
 	policyCache        *models.SMTPPolicy
@@ -95,6 +97,10 @@ func NewService(
 	if maxRetries <= 0 {
 		maxRetries = 5
 	}
+	concurrency := cfg.Concurrency
+	if concurrency <= 0 {
+		concurrency = 8
+	}
 	return &Service{
 		store:              st,
 		obj:                obj,
@@ -108,6 +114,7 @@ func NewService(
 		pollInterval:       pollInterval,
 		batchSize:          batchSize,
 		maxRetries:         maxRetries,
+		concurrency:        concurrency,
 		logger:             logger.With().Str("component", "ingest").Logger(),
 	}
 }
@@ -165,38 +172,71 @@ func (s *Service) Run(ctx context.Context) {
 	}
 }
 
+// processBatch fans the claimed jobs out to a bounded worker pool. Each job is
+// independent (its own recipients, its own retry state), and the 5-minute
+// claim lease means a job whose outcome we fail to record simply becomes
+// claimable again, so parallel processing does not weaken delivery guarantees.
 func (s *Service) processBatch(ctx context.Context) error {
 	jobs, err := s.store.ClaimIngestJobs(ctx, time.Now().UTC(), s.batchSize)
 	if err != nil {
 		return err
 	}
-	for _, job := range jobs {
-		result, err := s.processJob(ctx, job)
-		if err != nil {
-			dead := job.Attempts >= s.maxRetries
-			backoff := retryBackoff(job.Attempts)
-			nextAttempt := time.Now().UTC().Add(backoff)
-			if markErr := s.store.MarkIngestJobRetry(ctx, job.ID, err.Error(), nextAttempt, dead); markErr != nil {
-				return markErr
-			}
-			if dead {
-				metrics.IngestJobDead()
-				metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
-				s.deleteRawObjectIfOrphaned(ctx, job.RawObjectKey, "dead_ingest_job")
-			} else {
-				metrics.IngestJobRetried()
-			}
-			continue
-		}
-		if err := s.store.MarkIngestJobDone(ctx, job.ID); err != nil {
-			return err
-		}
-		if result.delivered == 0 {
-			s.deleteRawObjectIfOrphaned(ctx, result.rawObjectKey, "zero_delivery_ingest_job")
-		}
-		metrics.IngestJobProcessed()
-		metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
+	if len(jobs) == 0 {
+		return nil
 	}
+
+	sem := make(chan struct{}, min(s.concurrency, len(jobs)))
+	var (
+		wg   sync.WaitGroup
+		mu   sync.Mutex
+		errs []error
+	)
+	for _, job := range jobs {
+		wg.Add(1)
+		sem <- struct{}{}
+		go func() {
+			defer wg.Done()
+			defer func() { <-sem }()
+			if err := s.finishJob(ctx, job); err != nil {
+				mu.Lock()
+				errs = append(errs, err)
+				mu.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	return errors.Join(errs...)
+}
+
+// finishJob runs one claimed job to completion and records its outcome.
+// Delivery errors are absorbed into the job's retry state; only a failure to
+// record that state is reported back to the caller.
+func (s *Service) finishJob(ctx context.Context, job *models.IngestJob) error {
+	result, err := s.processJob(ctx, job)
+	if err != nil {
+		dead := job.Attempts >= s.maxRetries
+		backoff := retryBackoff(job.Attempts)
+		nextAttempt := time.Now().UTC().Add(backoff)
+		if markErr := s.store.MarkIngestJobRetry(ctx, job.ID, err.Error(), nextAttempt, dead); markErr != nil {
+			return markErr
+		}
+		if dead {
+			metrics.IngestJobDead()
+			metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
+			s.deleteRawObjectIfOrphaned(ctx, job.RawObjectKey, "dead_ingest_job")
+		} else {
+			metrics.IngestJobRetried()
+		}
+		return nil
+	}
+	if err := s.store.MarkIngestJobDone(ctx, job.ID); err != nil {
+		return err
+	}
+	if result.delivered == 0 {
+		s.deleteRawObjectIfOrphaned(ctx, result.rawObjectKey, "zero_delivery_ingest_job")
+	}
+	metrics.IngestJobProcessed()
+	metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
 	return nil
 }
 

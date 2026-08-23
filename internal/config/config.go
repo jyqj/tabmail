@@ -130,6 +130,7 @@ type Ingest struct {
 	PollInterval time.Duration `split_words:"true" default:"1s" desc:"Ingest worker polling interval"`
 	BatchSize    int           `split_words:"true" default:"100" desc:"Ingest worker batch size"`
 	MaxRetries   int           `split_words:"true" default:"5" desc:"Max ingest job retry attempts before dead-lettering"`
+	Concurrency  int           `default:"8" desc:"Parallel workers per claimed ingest batch"`
 }
 
 type Outbound struct {
