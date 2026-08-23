@@ -2,22 +2,12 @@ import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import DocsPage from "./page";
+import { DocsEndpoints, DocsTabs, DocsViewProvider, type DocsLinks, type DocsTabLabels } from "./docs-view";
 
-const {
-  getBaseUrlMock,
-  writeTextMock,
-  toastSuccess,
-  toastError,
-} = vi.hoisted(() => ({
-  getBaseUrlMock: vi.fn(),
+const { writeTextMock, toastSuccess, toastError } = vi.hoisted(() => ({
   writeTextMock: vi.fn(),
   toastSuccess: vi.fn(),
   toastError: vi.fn(),
-}));
-
-vi.mock("@/lib/api", () => ({
-  getBaseUrl: () => getBaseUrlMock(),
 }));
 
 vi.mock("sonner", () => ({
@@ -27,17 +17,13 @@ vi.mock("sonner", () => ({
   },
 }));
 
-vi.mock("@/components/site-header", () => ({
-  SiteHeader: () => <div>site-header</div>,
-}));
-
 vi.mock("@/components/ui/button", () => ({
   Button: ({
     children,
-    render,
+    render: renderProp,
     ...props
   }: React.ButtonHTMLAttributes<HTMLButtonElement> & { render?: React.ReactElement }) =>
-    render ? React.cloneElement(render, undefined, children) : <button {...props}>{children}</button>,
+    renderProp ? React.cloneElement(renderProp, undefined, children) : <button {...props}>{children}</button>,
 }));
 
 vi.mock("@/components/ui/card", () => ({
@@ -97,13 +83,52 @@ vi.mock("@/components/ui/tabs", async () => {
   };
 });
 
-describe("docs page", () => {
+// The page resolves the API origin and every label on the server, so the test
+// hands the islands the same finished values a Server Component would.
+const origin = "https://api.tabmail.test";
+
+const links: DocsLinks = {
+  docs: "/docs",
+  redoc: "/redoc",
+  openapi: "/openapi.yaml",
+  health: "/health",
+};
+
+const tabLabels: DocsTabLabels = {
+  swaggerUi: "Swagger UI",
+  redoc: "ReDoc",
+  quickstart: "Quickstart",
+  deploy: "Deploy",
+  domains: "Domains",
+  api: "API",
+  ops: "Ops",
+  liveRendered: "Live rendered",
+};
+
+function renderDocs() {
+  return render(
+    <DocsViewProvider>
+      <DocsEndpoints
+        origin={origin}
+        links={links}
+        labels={{
+          baseUrl: "Base URL",
+          swaggerUi: "Swagger UI",
+          redoc: "ReDoc",
+          openapi: "OpenAPI",
+          health: "Health",
+        }}
+      />
+      <DocsTabs origin={origin} links={links} labels={tabLabels} />
+    </DocsViewProvider>
+  );
+}
+
+describe("docs view", () => {
   beforeEach(() => {
-    getBaseUrlMock.mockReset();
     writeTextMock.mockReset();
     toastSuccess.mockReset();
     toastError.mockReset();
-    getBaseUrlMock.mockReturnValue("https://api.tabmail.test");
     Object.assign(navigator, {
       clipboard: {
         writeText: writeTextMock,
@@ -116,19 +141,18 @@ describe("docs page", () => {
   });
 
   it("默认展示 swagger 并渲染基于 base url 的链接", async () => {
-    render(<DocsPage />);
+    renderDocs();
 
-    expect(screen.getByText("TabMail API Portal")).toBeInTheDocument();
-    expect(screen.getByText("https://api.tabmail.test")).toBeInTheDocument();
+    expect(screen.getByText(origin)).toBeInTheDocument();
     const iframe = screen.getByTitle("Swagger UI");
-    expect(iframe).toHaveAttribute("src", "https://api.tabmail.test/docs");
-    expect(screen.getByText("https://api.tabmail.test/openapi.yaml")).toBeInTheDocument();
+    expect(iframe).toHaveAttribute("src", `${origin}/docs`);
+    expect(screen.getByText(`${origin}/openapi.yaml`)).toBeInTheDocument();
   });
 
   it("支持切换 quickstart 并复制 curl 示例", async () => {
     writeTextMock.mockResolvedValue(undefined);
 
-    render(<DocsPage />);
+    renderDocs();
 
     fireEvent.click(screen.getByRole("button", { name: "Quickstart" }));
 
