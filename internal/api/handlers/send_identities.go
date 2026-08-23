@@ -54,7 +54,7 @@ func (h *SendIdentityHandler) List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Filter by AllowedZoneIDs for non-admin callers.
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if !actor.IsSuperAdmin && !actor.IsAdmin {
 		items = filterSendIdentitiesByZone(actor, items)
 	}
@@ -88,7 +88,7 @@ func (h *SendIdentityHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.TenantID == uuid.Nil {
 		errForbidden(w, "authentication required")
 		return
@@ -140,7 +140,7 @@ func (h *SendIdentityHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.TenantID == uuid.Nil {
 		errForbidden(w, "authentication required")
 		return

@@ -80,7 +80,7 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 
 	// Resolve caller identity for job attribution and quota tracking.
 	// actor.Permission is populated by middleware.PermissionLoader for JWT
@@ -381,7 +381,7 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 }
 
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.IsSuperAdmin || actor.IsAdmin {
 		return h.store.ListOutboundJobs(ctx, tenantID, pg)
 	}
@@ -401,7 +401,7 @@ func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.O
 		return false
 	}
 
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.IsSuperAdmin || actor.IsAdmin {
 		return true
 	}

@@ -13,7 +13,6 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
 	domainapp "tabmail/internal/app/domains"
-	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -69,7 +68,7 @@ func (h *DomainHandler) SetResolvers(lookupTXT func(string) ([]string, error), l
 }
 
 func (h *DomainHandler) ListZones(w http.ResponseWriter, r *http.Request) {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	items, err := h.service.ListZones(r.Context(), actor, tenant)
 	if err != nil {
@@ -90,7 +89,7 @@ func (h *DomainHandler) ListOpenZones(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *DomainHandler) AdminListZones(w http.ResponseWriter, r *http.Request) {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	if actor.IsSuperAdmin {
 		items, err := h.service.ListAllZones(r.Context(), actor)
 		if err != nil {
@@ -118,7 +117,7 @@ func (h *DomainHandler) CreateZone(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "domain is required")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	item, err := h.service.CreateZone(r.Context(), actor, tenant, body.Domain)
 	if err != nil {
@@ -142,7 +141,7 @@ func (h *DomainHandler) AdminUpdateZoneAccess(w http.ResponseWriter, r *http.Req
 		errBadRequest(w, "invalid body")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	if actor.IsSuperAdmin {
 		tenant = nil
@@ -165,7 +164,7 @@ func (h *DomainHandler) DeleteZone(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	if _, err := h.service.ManagedZone(r.Context(), actor, id); err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -213,7 +212,7 @@ func (h *DomainHandler) TriggerVerify(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	zone, checks, err := h.service.TriggerVerify(r.Context(), actor, id)
 	if err != nil {
 		respondAppError(w, h.logger, err)
@@ -237,7 +236,7 @@ func (h *DomainHandler) VerificationStatus(w http.ResponseWriter, r *http.Reques
 		errBadRequest(w, "invalid id")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	item, err := h.service.VerificationStatus(r.Context(), actor, id)
 	if err != nil {
 		respondAppError(w, h.logger, err)
@@ -252,7 +251,7 @@ func (h *DomainHandler) ListRoutes(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	items, err := h.service.ListRoutes(r.Context(), actor, zoneID)
 	if err != nil {
 		respondAppError(w, h.logger, err)
@@ -268,7 +267,7 @@ func (h *DomainHandler) SuggestAddress(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	useSubdomain := r.URL.Query().Get("subdomain") == "true" || r.URL.Query().Get("subdomain") == "1"
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	canManage := middleware.HasScope(r.Context(), "domains:write")
 	item, err := h.service.SuggestAddress(r.Context(), actor, zoneID, canManage, useSubdomain)
 	if err != nil {
@@ -313,7 +312,7 @@ func (h *DomainHandler) CreateRoute(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	item, err := h.service.CreateRoute(r.Context(), actor, zoneID, domainapp.CreateRouteInput{
 		RouteType:              body.RouteType,
 		MatchValue:             body.MatchValue,
@@ -336,7 +335,7 @@ func (h *DomainHandler) DeleteRoute(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid route id")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	if err := h.service.DeleteRoute(r.Context(), actor, routeID); err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -362,7 +361,7 @@ func (h *DomainHandler) ExplainRoute(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "address is required")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	zone, err := h.service.ManagedZone(r.Context(), actor, zoneID)
 	if err != nil {
 		respondAppError(w, h.logger, err)

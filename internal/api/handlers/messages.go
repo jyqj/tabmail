@@ -48,7 +48,7 @@ func NewMessageHandler(s messageStore, obj store.ObjectStore, hub *realtime.Hub,
 }
 
 func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	var userID *uuid.UUID
 	if actor.Type == authz.PrincipalUser {
 		id := actor.ID

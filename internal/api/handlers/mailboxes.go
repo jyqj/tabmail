@@ -11,7 +11,6 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
 	mailboxapp "tabmail/internal/app/mailboxes"
-	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -49,7 +48,7 @@ func NewMailboxHandler(s mailboxStore, obj store.ObjectStore, dispatcher *hooks.
 
 func (h *MailboxHandler) List(w http.ResponseWriter, r *http.Request) {
 	pg := pageFromReq(r)
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	items, total, err := h.service.List(r.Context(), actor, tenant, pg)
 	if err != nil {
@@ -71,7 +70,7 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "address is required")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	item, err := h.service.Create(r.Context(), actor, tenant, mailboxapp.CreateRequest{
 		Address:                body.Address,
@@ -93,7 +92,7 @@ func (h *MailboxHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 	if err := h.service.Delete(r.Context(), actor, tenant, id); err != nil {
 		respondAppError(w, h.logger, err)
@@ -119,7 +118,7 @@ func (h *MailboxHandler) IssueToken(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	item, err := h.service.IssueToken(r.Context(), body.Address, body.Password, authz.ActorFromContext(r.Context()).AuditLabel())
+	item, err := h.service.IssueToken(r.Context(), body.Address, body.Password, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return

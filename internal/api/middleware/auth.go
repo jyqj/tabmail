@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"tabmail/internal/authn"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 )
 
@@ -127,6 +128,49 @@ func OwnerUserIDFromCtx(ctx context.Context) *uuid.UUID {
 		return v
 	}
 	return nil
+}
+
+// ActorFromContext assembles the authz.Actor for the current request. It lives
+// here rather than in authz because the context keys are this package's; authz
+// stays a pure policy package with no knowledge of HTTP.
+//
+// API key identity is checked first so that an API key with an owner is
+// correctly identified as PrincipalAPIKey (not PrincipalUser). The owner's
+// user ID is carried in OwnerUserID for ownership checks.
+func ActorFromContext(ctx context.Context) authz.Actor {
+	actor := authz.Actor{}
+
+	keyID := APIKeyIDFromCtx(ctx)
+	user := UserFromCtx(ctx)
+
+	if keyID != nil {
+		// API key is the primary identity — even when the key has an owner.
+		actor.Type = authz.PrincipalAPIKey
+		actor.ID = *keyID
+		if ownerID := OwnerUserIDFromCtx(ctx); ownerID != nil {
+			actor.OwnerUserID = ownerID
+		} else {
+			// Only ownerless integration keys are tenant-wide. User-owned API keys
+			// keep the API-key principal for audit, but inherit ownership via
+			// OwnerUserID rather than becoming broad tenant credentials.
+			actor.TenantWide = true
+		}
+	} else if user != nil {
+		actor.Type = authz.PrincipalUser
+		actor.ID = user.ID
+		actor.TenantID = user.TenantID
+		actor.Role = user.Role
+	}
+
+	if tenant := TenantFromCtx(ctx); tenant != nil {
+		actor.TenantID = tenant.ID
+	}
+
+	actor.IsSuperAdmin = IsSuperAdmin(ctx)
+	actor.IsAdmin = IsAdmin(ctx)
+	actor.Permission = PermissionFromCtx(ctx)
+
+	return actor
 }
 
 type permStore interface {

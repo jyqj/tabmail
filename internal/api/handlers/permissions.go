@@ -10,7 +10,6 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
-	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
@@ -27,7 +26,7 @@ func NewPermissionHandler(st store.Store, l zerolog.Logger) *PermissionHandler {
 // ListProfiles returns permission profiles visible to the caller.
 // Platform admin sees all profiles; tenant admin sees system + own tenant profiles.
 func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request) {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 
 	var tenantID *uuid.UUID
 	if !actor.IsSuperAdmin {
@@ -52,7 +51,7 @@ func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request)
 // Platform admin can create system profiles (tenant_id=nil) or tenant-scoped.
 // Tenant admin always creates tenant-scoped profiles.
 func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 
 	var body struct {
@@ -139,7 +138,7 @@ func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request
 
 // UpdateProfile updates an existing permission profile.
 func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
@@ -257,7 +256,7 @@ func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request
 
 // DeleteProfile deletes a permission profile.
 func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request) {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())
 
 	id, err := uuid.Parse(chi.URLParam(r, "id"))

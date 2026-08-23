@@ -250,8 +250,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/admin/tenants/{id}/keys", adm.ListAPIKeys)
 			r.Delete("/admin/tenants/{id}/keys/{keyId}", adm.DeleteAPIKey)
 
-		r.Get("/admin/stats", adm.Stats)
-		r.Get("/admin/monitor/events", mon.StreamAll)
+			r.Get("/admin/stats", adm.Stats)
+			r.Get("/admin/monitor/events", mon.StreamAll)
 			r.Get("/admin/monitor/history", mon.History)
 			r.Get("/admin/audit", adm.ListAudit)
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
