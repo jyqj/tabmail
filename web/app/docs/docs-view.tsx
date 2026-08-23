@@ -26,19 +26,17 @@ export interface DocsLinks {
 
 // The tab panels unmount when inactive and the page opens on the Swagger frame,
 // so the written guides — by far the bulk of this route — are fetched only once
-// a reader actually opens one.
+// a reader actually opens one. Each guide lives in its own module under
+// ./guide, so opening one tab downloads only that tab's chunk.
 function TabSkeleton() {
   return <div className="h-96 animate-pulse rounded-2xl border bg-muted/30" />;
 }
 
-const guideTab = <K extends "QuickstartTab" | "DeployTab" | "DomainsTab" | "ApiTab" | "OpsTab">(name: K) =>
-  dynamic(() => import("./guide-tabs").then((m) => m[name]), { loading: TabSkeleton });
-
-const QuickstartTab = guideTab("QuickstartTab");
-const DeployTab = guideTab("DeployTab");
-const DomainsTab = guideTab("DomainsTab");
-const ApiTab = guideTab("ApiTab");
-const OpsTab = guideTab("OpsTab");
+const QuickstartTab = dynamic(() => import("./guide/quickstart-tab").then((m) => m.QuickstartTab), { loading: TabSkeleton });
+const DeployTab = dynamic(() => import("./guide/deploy-tab").then((m) => m.DeployTab), { loading: TabSkeleton });
+const DomainsTab = dynamic(() => import("./guide/domains-tab").then((m) => m.DomainsTab), { loading: TabSkeleton });
+const ApiTab = dynamic(() => import("./guide/api-tab").then((m) => m.ApiTab), { loading: TabSkeleton });
+const OpsTab = dynamic(() => import("./guide/ops-tab").then((m) => m.OpsTab), { loading: TabSkeleton });
 
 const DocsViewContext = createContext<{ view: TabId; setView: (v: TabId) => void } | null>(null);
 
