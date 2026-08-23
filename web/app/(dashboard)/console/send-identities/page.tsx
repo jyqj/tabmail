@@ -130,7 +130,7 @@ export default function SendIdentitiesPage() {
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>{t("sendIdentities.create")}</DialogTitle>
+                  <DialogTitle>{t("sendIdentities.createTitle")}</DialogTitle>
                   <DialogDescription>
                     {t("sendIdentities.createDesc")}
                   </DialogDescription>
