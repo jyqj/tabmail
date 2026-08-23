@@ -62,6 +62,14 @@ func errForbidden(w http.ResponseWriter, msg string) {
 	writeJSON(w, http.StatusForbidden, envelope{Error: &apiErr{Code: "FORBIDDEN", Message: msg}})
 }
 
+func errUnauthorized(w http.ResponseWriter, msg string) {
+	writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: msg}})
+}
+
+func errRateLimited(w http.ResponseWriter, msg string) {
+	writeJSON(w, http.StatusTooManyRequests, envelope{Error: &apiErr{Code: "RATE_LIMITED", Message: msg}})
+}
+
 func errInternal(w http.ResponseWriter) {
 	writeJSON(w, http.StatusInternalServerError, envelope{Error: &apiErr{Code: "INTERNAL", Message: "internal server error"}})
 }

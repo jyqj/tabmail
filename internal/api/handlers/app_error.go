@@ -20,12 +20,16 @@ func respondAppError(w http.ResponseWriter, logger zerolog.Logger, err error) {
 	switch appErr.Kind {
 	case appcore.KindBadRequest:
 		errBadRequest(w, appErr.Message)
+	case appcore.KindUnauthorized:
+		errUnauthorized(w, appErr.Message)
 	case appcore.KindForbidden:
 		errForbidden(w, appErr.Message)
 	case appcore.KindNotFound:
 		errNotFound(w, appErr.Message)
 	case appcore.KindConflict:
 		errConflict(w, appErr.Message)
+	case appcore.KindRateLimited:
+		errRateLimited(w, appErr.Message)
 	default:
 		if appErr.Err != nil {
 			logger.Err(appErr.Err).Msg("application internal error")
