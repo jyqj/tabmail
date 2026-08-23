@@ -1,6 +1,9 @@
--- TabMail baseline schema.
--- Pre-launch: executed by postgres.New on fresh databases.
--- All columns declared inline; no ALTER TABLE patches.
+-- +goose Up
+-- TabMail baseline schema (versioned migration 00001).
+-- This file is the former internal/store/postgres/schema.sql snapshot converted
+-- into the first goose migration. Every statement is idempotent, so it applies
+-- cleanly both to fresh databases and to databases created by the pre-migration
+-- snapshot bootstrapping.
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -8,34 +11,46 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- Enum types
 -- ============================================================
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE route_type AS ENUM ('exact', 'wildcard', 'sequence', 'deep_wildcard');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
+-- +goose StatementBegin
 DO $$ BEGIN
     ALTER TYPE route_type ADD VALUE IF NOT EXISTS 'deep_wildcard';
 EXCEPTION WHEN undefined_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE access_mode AS ENUM ('public', 'token', 'api_key');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE user_role AS ENUM ('super_admin', 'admin', 'user');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE outbound_state AS ENUM ('pending','processing','sent','retry','failed','dead');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
+-- +goose StatementBegin
 DO $$ BEGIN
     CREATE TYPE send_identity_type AS ENUM ('exact', 'domain_wildcard');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
+-- +goose StatementEnd
 
 -- ============================================================
 -- Plans & tenants
@@ -155,6 +170,7 @@ CREATE INDEX IF NOT EXISTS idx_users_tenant ON users(tenant_id);
 -- super_admin = platform-wide administrator, admin = tenant administrator.
 -- Earlier pre-launch snapshots briefly introduced platform_admin/tenant_admin;
 -- normalize those values back to the current code semantics.
+-- +goose StatementBegin
 DO $$
 DECLARE
     labels TEXT[];
@@ -187,13 +203,16 @@ BEGIN
         ALTER TYPE user_role_current RENAME TO user_role;
     END IF;
 END $$;
+-- +goose StatementEnd
 
 -- FK for tenant_api_keys.owner_user_id (declared after users table exists)
+-- +goose StatementBegin
 DO $$ BEGIN
     ALTER TABLE tenant_api_keys DROP CONSTRAINT IF EXISTS fk_api_keys_owner_user;
     ALTER TABLE tenant_api_keys ADD CONSTRAINT fk_api_keys_owner_user
         FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE CASCADE NOT VALID;
 END $$;
+-- +goose StatementEnd
 
 CREATE TABLE IF NOT EXISTS user_permission_overrides (
     id                  UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -556,11 +575,13 @@ ON CONFLICT (id) DO NOTHING;
 -- Add tenant_id to permission_profiles for tenant scoping
 ALTER TABLE permission_profiles ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE;
 -- Drop legacy unique constraint on name (replaced by partial indexes)
+-- +goose StatementBegin
 DO $$ BEGIN
     IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'permission_profiles_name_key') THEN
         ALTER TABLE permission_profiles DROP CONSTRAINT permission_profiles_name_key;
     END IF;
 END $$;
+-- +goose StatementEnd
 
 -- Backfill mailbox message counts
 UPDATE mailboxes m
@@ -648,3 +669,9 @@ CREATE TABLE IF NOT EXISTS orphan_objects (
     attempts       INT         NOT NULL DEFAULT 1
 );
 CREATE INDEX IF NOT EXISTS idx_orphan_objects_last_failed ON orphan_objects(last_failed_at);
+
+
+-- +goose Down
+-- Baseline migration: intentionally irreversible. Restoring a pre-baseline
+-- database means dropping everything; do that by recreating the database.
+SELECT 1;

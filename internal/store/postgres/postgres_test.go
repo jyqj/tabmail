@@ -66,7 +66,13 @@ func TestHashKeyDeterministic(t *testing.T) {
 	}
 }
 
-func TestSchemaSnapshotContainsCurrentStateHardening(t *testing.T) {
+func TestBaselineMigrationContainsCurrentStateHardening(t *testing.T) {
+	raw, err := migrationsFS.ReadFile("migrations/00001_baseline.sql")
+	if err != nil {
+		t.Fatalf("read baseline migration: %v", err)
+	}
+	baseline := string(raw)
+
 	expected := []string{
 		"ON DELETE SET NULL",
 		"mailboxes_access_password_check",
@@ -83,8 +89,8 @@ func TestSchemaSnapshotContainsCurrentStateHardening(t *testing.T) {
 		"WHEN 'tenant_admin' THEN 'admin'",
 	}
 	for _, want := range expected {
-		if !strings.Contains(schemaSQL, want) {
-			t.Fatalf("schemaSQL missing %q", want)
+		if !strings.Contains(baseline, want) {
+			t.Fatalf("baseline migration missing %q", want)
 		}
 	}
 }

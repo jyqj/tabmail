@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"crypto/sha256"
-	_ "embed"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -25,13 +24,6 @@ type PgStore struct {
 	pool *pgxpool.Pool
 }
 
-// schemaSQL is the current database schema snapshot. TabMail is not online yet,
-// so we intentionally avoid versioned database migrations and initialize the
-// expected schema directly when the store starts.
-//
-//go:embed schema.sql
-var schemaSQL string
-
 const claimLeaseDuration = 5 * time.Minute
 
 func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
@@ -51,9 +43,9 @@ func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
 		pool.Close()
 		return nil, fmt.Errorf("postgres: ping: %w", err)
 	}
-	if _, err := pool.Exec(ctx, schemaSQL); err != nil {
+	if err := Migrate(ctx, poolCfg.ConnConfig); err != nil {
 		pool.Close()
-		return nil, fmt.Errorf("postgres: initialize schema: %w", err)
+		return nil, err
 	}
 	return &PgStore{pool: pool}, nil
 }
