@@ -73,6 +73,7 @@ type HTTP struct {
 	AllowCredentials bool     `split_words:"true" default:"false" desc:"Allow credentialed CORS requests"`
 	TrustedProxies   []string `split_words:"true" default:"127.0.0.1/32,::1/128" desc:"Trusted proxy CIDRs/IPs for X-Real-IP/X-Forwarded-For"`
 	PublicIPRPM      int      `split_words:"true" default:"0" desc:"Per-IP RPM for unauthenticated requests (0=disable)"`
+	MetricsToken     string   `split_words:"true" default:"" desc:"Bearer token required to scrape /metrics (unset = super-admin JWT only)"`
 }
 
 type DB struct {

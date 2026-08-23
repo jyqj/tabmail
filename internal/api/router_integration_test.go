@@ -31,6 +31,8 @@ import (
 
 const publicTenantID = "00000000-0000-0000-0000-000000000001"
 
+const testMetricsToken = "metrics-test-token"
+
 func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
@@ -234,8 +236,17 @@ func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 
 	router := testRouter(st, obj, rdb)
 
+	// Unauthenticated scrapes are rejected.
 	req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
 	rr := httptest.NewRecorder()
+	router.ServeHTTP(rr, req)
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401 for unauthenticated /metrics, got %d body=%s", rr.Code, rr.Body.String())
+	}
+
+	req = httptest.NewRequest(http.MethodGet, "/metrics", nil)
+	req.Header.Set("Authorization", "Bearer "+testMetricsToken)
+	rr = httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
 
 	if rr.Code != http.StatusOK {
@@ -602,6 +613,7 @@ func TestRouter_MetricsDBCountsAreLightlyCached(t *testing.T) {
 
 	for i := 0; i < 2; i++ {
 		req := httptest.NewRequest(http.MethodGet, "/metrics", nil)
+		req.Header.Set("Authorization", "Bearer "+testMetricsToken)
 		rr := httptest.NewRecorder()
 		router.ServeHTTP(rr, req)
 		if rr.Code != http.StatusOK {
@@ -683,7 +695,7 @@ func testRouter(st store.Store, obj *testutil.MemoryObjectStore, rdb *redis.Clie
 		DefaultPlanID:      uuid.MustParse("00000000-0000-0000-0000-000000000010"),
 		OpenRegistration:   true,
 		Settings:           settings.NewManager(st, zerolog.Nop()),
-		HTTP:               config.HTTP{},
+		HTTP:               config.HTTP{MetricsToken: testMetricsToken},
 		RateLimiter:        middleware.NewRateLimiter(rdb, st, 20, nil),
 		Logger:             zerolog.Nop(),
 	})

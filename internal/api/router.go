@@ -1,9 +1,11 @@
 package api
 
 import (
+	"crypto/subtle"
 	"embed"
 	"io/fs"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -287,7 +289,15 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"ok"}`))
 	})
+	metricsToken := strings.TrimSpace(cfg.HTTP.MetricsToken)
 	r.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		// /metrics is never public: it requires either the configured scrape
+		// token or an authenticated super-admin session.
+		if !metricsAuthorized(r, metricsToken) {
+			w.Header().Set("WWW-Authenticate", "Bearer")
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
 		counts := metricsCounts.Get(time.Now(), func() metricsDBCounts {
 			webhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), "dead")
 			webhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), "pending", "retry", "processing")
@@ -313,6 +323,26 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	})
 
 	return r
+}
+
+// metricsAuthorized allows a request to scrape /metrics when it carries the
+// configured metrics bearer token or belongs to an authenticated super-admin
+// session. With no token configured, only super admins can read metrics.
+func metricsAuthorized(r *http.Request, token string) bool {
+	if token != "" {
+		const prefix = "Bearer "
+		header := r.Header.Get("Authorization")
+		if strings.HasPrefix(header, prefix) {
+			presented := strings.TrimSpace(strings.TrimPrefix(header, prefix))
+			if subtle.ConstantTimeCompare([]byte(presented), []byte(token)) == 1 {
+				return true
+			}
+		}
+	}
+	if user := middleware.UserFromCtx(r.Context()); user != nil && user.Role == models.RoleSuperAdmin {
+		return true
+	}
+	return false
 }
 
 func serveSwaggerUI(w http.ResponseWriter, r *http.Request) {

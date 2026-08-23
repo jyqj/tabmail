@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
       { source: "/openapi.yaml", destination: `${apiUrl}/openapi.yaml` },
       { source: "/backend-docs", destination: `${apiUrl}/docs` },
       { source: "/backend-redoc", destination: `${apiUrl}/redoc` },
-      { source: "/metrics", destination: `${apiUrl}/metrics` },
     ];
   },
 };

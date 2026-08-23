@@ -8,6 +8,10 @@ rule_files:
 scrape_configs:
   - job_name: tabmail
     metrics_path: /metrics
+    # /metrics is authenticated; set the same value as TABMAIL_HTTP_METRICS_TOKEN.
+    authorization:
+      type: Bearer
+      credentials: replace-with-metrics-scrape-token
     static_configs:
       - targets:
           - tabmail:8080
