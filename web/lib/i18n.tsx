@@ -5,16 +5,17 @@ import {
   useContext,
   useEffect,
   useCallback,
+  useMemo,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
 
-import { DEFAULT_LOCALE, type Locale, type Messages } from "./i18n-types";
+import { createTranslate } from "./i18n-format";
+import { DEFAULT_LOCALE, type Locale, type Messages, type Translate } from "./i18n-types";
+import { readLocaleCookie, writeLocaleCookie } from "./locale-cookie";
 import { zh } from "./messages/zh";
 
 export type { Locale };
-
-const STORAGE_KEY = "tabmail-locale";
 
 // Only the default catalog is bundled with the app; the others are fetched the
 // first time someone selects them. Until a catalog arrives `t` answers from the
@@ -71,22 +72,17 @@ function selectLocale(locale: Locale) {
   void preloadLocale(locale);
 }
 
-function storedLocale(): Locale {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return (stored === "zh" || stored === "en") ? stored : DEFAULT_LOCALE;
-}
-
 // Adopt the stored locale as soon as the module loads rather than from an
 // effect, so the first client render already reports it and consumers that key
 // effects off `t` do not have to tear down and re-run after mount.
 if (typeof window !== "undefined") {
-  selectLocale(storedLocale());
+  selectLocale(readLocaleCookie());
 }
 
 interface I18nContextValue {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (key: string, params?: Record<string, string | number>) => string;
+  t: Translate;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
@@ -103,30 +99,16 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [locale]);
 
   useEffect(() => {
-    selectLocale(storedLocale());
+    selectLocale(readLocaleCookie());
   }, []);
 
   const setLocale = useCallback((l: Locale) => {
-    localStorage.setItem(STORAGE_KEY, l);
+    writeLocaleCookie(l);
     document.documentElement.lang = l;
     selectLocale(l);
   }, []);
 
-  const t = useCallback(
-    (key: string, params?: Record<string, string | number>): string => {
-      let msg = messages[key] ?? zh[key] ?? key;
-      if (!params) return msg;
-      msg = msg.replace(/\{(\w+)\|([^|]*)\|([^}]*)}/g, (_match, k, singular, plural) => {
-        const v = params[k];
-        return v !== undefined ? (Number(v) === 1 ? singular : plural) : _match;
-      });
-      return Object.entries(params).reduce(
-        (s, [k, v]) => s.replaceAll(`{${k}}`, String(v)),
-        msg,
-      );
-    },
-    [messages],
-  );
+  const t = useMemo(() => createTranslate(messages), [messages]);
 
   return (
     <I18nContext value={{ locale, setLocale, t }}>
