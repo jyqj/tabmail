@@ -105,6 +105,8 @@ export const zh: Messages = {
   "msgList.new": "新",
   "msgList.unknown": "（未知发件人）",
   "msgList.noSubject": "（无主题）",
+  "msgList.loadMore": "加载更多",
+  "msgList.loadingMore": "加载中…",
 
   // Message detail
   "msgDetail.loading": "加载中...",

@@ -105,6 +105,8 @@ export const en: Messages = {
   "msgList.new": "New",
   "msgList.unknown": "(unknown)",
   "msgList.noSubject": "(no subject)",
+  "msgList.loadMore": "Load more",
+  "msgList.loadingMore": "Loading…",
 
   // Message detail
   "msgDetail.loading": "Loading message...",

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
-import { useAPI } from "@/hooks/use-api";
+import { useAPIInfinite } from "@/hooks/use-api";
 import { SiteHeader } from "@/components/site-header";
 import { MessageList } from "@/components/inbox/message-list";
 import { MessageDetail } from "@/components/inbox/message-detail";
@@ -26,7 +26,7 @@ import {
   getMailboxAPIKeySnapshot,
   setMailboxAPIKeyAuth,
 } from "@/lib/api/base";
-import type { Message, MessageDetail as MsgDetail } from "@/lib/types";
+import type { APIListResponse, Message, MessageDetail as MsgDetail } from "@/lib/types";
 import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/lib/i18n";
 import { useSettings } from "@/lib/settings";
@@ -67,15 +67,45 @@ export default function InboxPage() {
   // UX-only gate; the backend authz seam is authoritative.
   const canWriteRecords = isAdminLevel(level);
 
-  const { data: response, isLoading: loading, isValidating: refreshing, error, mutate } = useAPI(
-    address ? ["inbox", address] : null,
-    () => listMessages(address),
+  // Keyset pagination: the first page is keyed by the address alone; every
+  // following page is keyed by the previous page's meta.next_cursor, so a
+  // refreshed first page transparently re-keys (and refetches) the pages
+  // behind it.
+  const getPageKey = useCallback(
+    (pageIndex: number, previous: APIListResponse<Message> | null) => {
+      if (!address) return null;
+      if (pageIndex === 0) return ["inbox", address, null] as const;
+      const cursor = previous?.meta?.next_cursor;
+      return cursor ? (["inbox", address, cursor] as const) : null;
+    },
+    [address],
+  );
+
+  const {
+    data: pages,
+    isLoading: loading,
+    isValidating: refreshing,
+    error,
+    mutate,
+    size,
+    setSize,
+  } = useAPIInfinite(
+    getPageKey,
+    (key) => {
+      const [, addr, cursor] = key as readonly [string, string, string | null];
+      return listMessages(addr, 1, 30, cursor ?? undefined);
+    },
     {
       refreshInterval: settings.autoRefresh && !authRequired ? settings.refreshInterval * 1000 : 0,
     },
   );
-  const messages = response?.data ?? [];
-  const total = response?.meta?.total ?? response?.data?.length ?? 0;
+  const messages = useMemo(() => (pages ?? []).flatMap((p) => p?.data ?? []), [pages]);
+  const total = pages?.[0]?.meta?.total ?? messages.length;
+  const nextCursor = pages?.length ? pages[pages.length - 1]?.meta?.next_cursor : undefined;
+  const loadingMore = !!pages && size > 0 && typeof pages[size - 1] === "undefined";
+  const handleLoadMore = useCallback(() => {
+    setSize((current) => current + 1);
+  }, [setSize]);
 
   // Process SWR errors to determine auth/notFound state
   useEffect(() => {
@@ -104,11 +134,11 @@ export default function InboxPage() {
 
   // On successful data load, clear error states
   useEffect(() => {
-    if (response) {
+    if (pages) {
       setAuthRequired(false);
       setNotFound(false);
     }
-  }, [response]);
+  }, [pages]);
 
   useEffect(() => {
     const updateStoredAPIKeyState = () => {
@@ -197,17 +227,20 @@ export default function InboxPage() {
       if (canWriteRecords && !msg.seen) {
         try {
           await markMessageSeen(address, msg.id);
-          // Optimistically update the cached messages list
+          // Optimistically update the cached pages (entries can be undefined
+          // for a page that is still loading)
           mutate(
-            (current) => {
-              if (!current) return current;
-              return {
-                ...current,
-                data: current.data?.map((m: Message) =>
-                  m.id === msg.id ? { ...m, seen: true } : m
-                ),
-              };
-            },
+            (current) =>
+              current?.map((page) =>
+                page?.data
+                  ? {
+                      ...page,
+                      data: page.data.map((m: Message) =>
+                        m.id === msg.id ? { ...m, seen: true } : m
+                      ),
+                    }
+                  : page
+              ),
             { revalidate: false },
           );
         } catch {
@@ -468,7 +501,14 @@ export default function InboxPage() {
               "w-full md:w-[380px] md:shrink-0 md:border-r bg-background",
               showDetail && "hidden md:block"
             )}>
-              <MessageList messages={messages} selectedId={selectedId} onSelect={handleSelect} />
+              <MessageList
+                messages={messages}
+                selectedId={selectedId}
+                onSelect={handleSelect}
+                hasMore={!!nextCursor}
+                loadingMore={loadingMore}
+                onLoadMore={handleLoadMore}
+              />
             </div>
 
             <div className={cn(

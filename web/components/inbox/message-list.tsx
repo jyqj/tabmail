@@ -9,12 +9,17 @@ import { useSettings } from "@/lib/settings";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Inbox } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Inbox, Loader2 } from "lucide-react";
 
 interface Props {
   messages: Message[];
   selectedId: string | null;
   onSelect: (msg: Message) => void;
+  /** True when the last page carried a meta.next_cursor. */
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 function senderInitials(sender: string): string {
@@ -39,7 +44,14 @@ function senderColor(sender: string): string {
   return palette[hash % palette.length];
 }
 
-export function MessageList({ messages, selectedId, onSelect }: Props) {
+export function MessageList({
+  messages,
+  selectedId,
+  onSelect,
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
+}: Props) {
   const { locale, t } = useI18n();
   const { settings } = useSettings();
   const dateFnsLocale = locale === "zh" ? zhCN : enUS;
@@ -130,6 +142,21 @@ export function MessageList({ messages, selectedId, onSelect }: Props) {
             </button>
           );
         })}
+
+        {hasMore && onLoadMore && (
+          <div className="pt-1 pb-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full text-muted-foreground"
+              onClick={onLoadMore}
+              disabled={loadingMore}
+            >
+              {loadingMore && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              {loadingMore ? t("msgList.loadingMore") : t("msgList.loadMore")}
+            </Button>
+          </div>
+        )}
       </div>
     </ScrollArea>
   );
