@@ -15,7 +15,9 @@ import (
 
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
+	"tabmail/internal/config"
 	"tabmail/internal/models"
+	"tabmail/internal/outbound"
 	"tabmail/internal/testutil"
 )
 
@@ -227,10 +229,10 @@ func TestSendDoesNotRequireZoneOwnership(t *testing.T) {
 	})
 
 	// userA does not own the zone: authorization must still pass (send.from
-	// carries no ownership rule), so the request reaches the later
-	// mailbox-existence check instead of being rejected with 403.
+	// carries no ownership rule), so the request reaches the later send-as
+	// check (no mailbox, no send identity) instead of being rejected with 403.
 	rr := doOutboundSendRequest(t, f.st, h, `{"from":"noone@shared.example.test","to":["rcpt@example.org"]}`, outboundUserHeaders(t, f.userA))
-	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "from address does not exist as a mailbox") {
+	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "not an authorized mailbox or verified send identity") {
 		t.Fatalf("non-owner same-tenant send should pass authz, got %d body=%s", rr.Code, rr.Body.String())
 	}
 
@@ -245,6 +247,70 @@ func TestSendDoesNotRequireZoneOwnership(t *testing.T) {
 	rr = doOutboundSendRequest(t, f.st, h, `{"from":"x@other.example.test","to":["rcpt@example.org"]}`, outboundUserHeaders(t, f.userA))
 	if rr.Code != http.StatusForbidden {
 		t.Fatalf("cross-tenant send expected 403, got %d body=%s", rr.Code, rr.Body.String())
+	}
+}
+
+// TestSendAuthorizesViaVerifiedSendIdentity pins the behavior change that made
+// SendIdentity the authoritative send-as gate: a From address with no mailbox
+// is accepted when a verified send identity (here the *@domain wildcard) covers
+// it, and rejected when that identity is unverified — even on a verified zone,
+// so a stale/un-synced Verified flag cannot bypass the gate.
+func TestSendAuthorizesViaVerifiedSendIdentity(t *testing.T) {
+	f := newOutboundAccessFixture(t)
+	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, zerolog.Nop())
+	h := NewOutboundHandler(svc, f.st, zerolog.Nop())
+
+	zoneID := uuid.New()
+	f.st.SeedZone(&models.DomainZone{
+		ID:         zoneID,
+		TenantID:   f.tenantID,
+		Domain:     "mail.example.test",
+		IsVerified: true,
+		MXVerified: true,
+	})
+	// No mailbox exists for anyone@mail.example.test; only a verified wildcard
+	// send identity authorizes sending from it.
+	if err := f.st.CreateSendIdentity(context.Background(), &models.SendIdentity{
+		TenantID:     f.tenantID,
+		ZoneID:       zoneID,
+		Address:      "*@mail.example.test",
+		IdentityType: models.SendIdentityDomainWildcard,
+		Verified:     true,
+	}); err != nil {
+		t.Fatalf("seed verified identity: %v", err)
+	}
+
+	rr := doOutboundSendRequest(t, f.st, h,
+		`{"from":"anyone@mail.example.test","to":["rcpt@example.org"],"subject":"hi","text_body":"x"}`,
+		outboundUserHeaders(t, f.userA))
+	if rr.Code != http.StatusCreated {
+		t.Fatalf("verified send identity should authorize send-as (201), got %d body=%s", rr.Code, rr.Body.String())
+	}
+
+	// An unverified identity must NOT authorize send-as, even on a verified
+	// zone (pins that the gate checks the Verified flag, not just existence).
+	unverifiedZone := uuid.New()
+	f.st.SeedZone(&models.DomainZone{
+		ID:         unverifiedZone,
+		TenantID:   f.tenantID,
+		Domain:     "unverified.example.test",
+		IsVerified: true,
+		MXVerified: true,
+	})
+	if err := f.st.CreateSendIdentity(context.Background(), &models.SendIdentity{
+		TenantID:     f.tenantID,
+		ZoneID:       unverifiedZone,
+		Address:      "*@unverified.example.test",
+		IdentityType: models.SendIdentityDomainWildcard,
+		Verified:     false,
+	}); err != nil {
+		t.Fatalf("seed unverified identity: %v", err)
+	}
+	rr = doOutboundSendRequest(t, f.st, h,
+		`{"from":"anyone@unverified.example.test","to":["rcpt@example.org"],"subject":"hi","text_body":"x"}`,
+		outboundUserHeaders(t, f.userA))
+	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "not an authorized mailbox or verified send identity") {
+		t.Fatalf("unverified send identity should be rejected, got %d body=%s", rr.Code, rr.Body.String())
 	}
 }
 

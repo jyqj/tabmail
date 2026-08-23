@@ -230,6 +230,128 @@ func TestSMTPStoresSingleRawObjectForMultiRecipientDelivery(t *testing.T) {
 	}
 }
 
+// TestSMTPReusesRCPTResolutionForExistingMailboxes exercises the session-reuse
+// fast path end-to-end: RCPT runs Check for two already-provisioned mailboxes
+// (so Check returns Mailbox != nil), DATA hands both Results to Accept via
+// WithResolved, and deliverResolved must skip a second Resolve per recipient
+// while producing byte-identical delivery semantics (one message each, single
+// shared raw object). This guards the reuse rail against regressing either
+// direction: missing the reuse is invisible here, but a broken reuse (wrong
+// Mailbox reused, auto-create Result reused, key mismatch) shows up as failed
+// delivery or duplicated raw objects.
+func TestSMTPReusesRCPTResolutionForExistingMailboxes(t *testing.T) {
+	st := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.SeedPlan(&models.Plan{
+		ID:                    planID,
+		Name:                  "test",
+		MaxDomains:            10,
+		MaxMailboxesPerDomain: 100,
+		MaxMessagesPerMailbox: 1000,
+		MaxMessageBytes:       1024 * 1024,
+		RetentionHours:        24,
+		RPMLimit:              1000,
+		DailyQuota:            1000,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{
+		ID:         zoneID,
+		TenantID:   tenantID,
+		Domain:     "mail.test",
+		IsVerified: true,
+		MXVerified: true,
+		TXTRecord:  "tabmail-verify=test",
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                uuid.New(),
+		ZoneID:            zoneID,
+		RouteType:         models.RouteExact,
+		MatchValue:        "mail.test",
+		AutoCreateMailbox: true,
+		AccessModeDefault: models.AccessPublic,
+	})
+	// Pre-provision both mailboxes so RCPT's Check returns Mailbox != nil and
+	// session.results caches them for DATA — exercising the reuse fast path.
+	// Without reuse the outcome is identical (Resolve would re-read these); the
+	// assertion is that reuse does not corrupt delivery.
+	mb1 := &models.Mailbox{ID: uuid.New(), TenantID: tenantID, ZoneID: zoneID, LocalPart: "one", ResolvedDomain: "mail.test", FullAddress: "one@mail.test", AccessMode: models.AccessPublic, CreatedAt: time.Now()}
+	mb2 := &models.Mailbox{ID: uuid.New(), TenantID: tenantID, ZoneID: zoneID, LocalPart: "two", ResolvedDomain: "mail.test", FullAddress: "two@mail.test", AccessMode: models.AccessPublic, CreatedAt: time.Now()}
+	st.SeedMailbox(mb1)
+	st.SeedMailbox(mb2)
+
+	addr := freeAddr(t)
+	resolverSvc := resolver.New(st, policy.NamingFull, true)
+	ingestSvc := ingest.NewService(st, obj, resolverSvc, realtime.NewHub(10, st), hooks.New(hooks.Config{}, zerolog.Nop()), models.SMTPPolicy{DefaultAccept: true, DefaultStore: true}, 24, nil, config.Ingest{}, zerolog.Nop())
+	srv := smtpsrv.NewServer(config.SMTP{
+		Addr:            addr,
+		Domain:          "mx.mail.test",
+		MaxRecipients:   10,
+		MaxMessageBytes: 1024 * 1024,
+		Timeout:         5 * time.Second,
+		DefaultAccept:   true,
+		DefaultStore:    true,
+	}, ingestSvc, resolverSvc, zerolog.Nop())
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	go func() {
+		_ = srv.Start(ctx)
+	}()
+	waitTCP(t, addr)
+	defer func() {
+		_ = srv.Shutdown(context.Background())
+	}()
+
+	conn, err := net.Dial("tcp", addr)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer conn.Close()
+	r := bufio.NewReader(conn)
+
+	expectCode(t, r, "220")
+	sendLine(t, conn, "HELO localhost")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "MAIL FROM:<sender@example.org>")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "RCPT TO:<one@mail.test>")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "RCPT TO:<two@mail.test>")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "DATA")
+	expectCode(t, r, "354")
+	sendLine(t, conn, "Subject: reuse")
+	sendLine(t, conn, "")
+	sendLine(t, conn, "shared body")
+	sendLine(t, conn, ".")
+	expectCode(t, r, "250")
+	sendLine(t, conn, "QUIT")
+
+	// Mailboxes must be unchanged (no second auto-create) and each hold one
+	// message sharing the same raw object key.
+	got1, _ := st.GetMailboxByAddress(context.Background(), "one@mail.test")
+	got2, _ := st.GetMailboxByAddress(context.Background(), "two@mail.test")
+	if got1 == nil || got2 == nil || got1.ID != mb1.ID || got2.ID != mb2.ID {
+		t.Fatalf("expected pre-seeded mailboxes unchanged, got %#v %#v", got1, got2)
+	}
+	msgs1, _, _ := st.ListMessages(context.Background(), mb1.ID, models.Page{Page: 1, PerPage: 10})
+	msgs2, _, _ := st.ListMessages(context.Background(), mb2.ID, models.Page{Page: 1, PerPage: 10})
+	if len(msgs1) != 1 || len(msgs2) != 1 {
+		t.Fatalf("expected one message per mailbox, got %d and %d", len(msgs1), len(msgs2))
+	}
+	if msgs1[0].RawObjectKey == "" || msgs1[0].RawObjectKey != msgs2[0].RawObjectKey {
+		t.Fatalf("expected shared raw object key, got %q and %q", msgs1[0].RawObjectKey, msgs2[0].RawObjectKey)
+	}
+	if obj.Count() != 1 {
+		t.Fatalf("expected single raw object, got %d", obj.Count())
+	}
+}
+
 func TestSMTPAuthDisabled(t *testing.T) {
 	st := testutil.NewFakeStore()
 	obj := testutil.NewMemoryObjectStore()

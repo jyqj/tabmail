@@ -42,7 +42,7 @@ func TestTriggerVerifyDKIMRequiresCurrentPublicKey(t *testing.T) {
 
 	dkimHost := tabdkim.DNSRecordName("mail", zone.Domain)
 	dkimTXT := tabdkim.DNSTXTValue(stalePubB64)
-	svc := NewService(st, nil, "mx.example.test", policy.NamingFull, "secret", zerolog.Nop())
+	svc := NewService(st, nil, "mx.example.test", policy.NamingFull, "secret", nil, zerolog.Nop())
 	svc.SetResolvers(
 		func(name string) ([]string, error) {
 			switch name {

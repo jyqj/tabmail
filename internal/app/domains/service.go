@@ -14,13 +14,13 @@ import (
 	tabdkim "tabmail/internal/dkim"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
-	"tabmail/internal/permissions"
 	"tabmail/internal/policy"
 )
 
 type store interface {
 	app.AuditStore
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
+	ListZonesScoped(ctx context.Context, scope authz.ZoneListFilter) ([]*models.DomainZone, error)
 	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListZonesByVisibilities(ctx context.Context, visibilities []models.ResourceVisibility) ([]*models.DomainZone, error)
@@ -41,6 +41,15 @@ type store interface {
 	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
 }
 
+// ResolverInvalidator drops resolver-side caches after a zone/route write so the
+// SMTP path does not serve from stale entries for the resolver TTL. Defined in
+// this package to avoid a reverse import of internal/resolver; the concrete
+// *resolver.Resolver satisfies it via InvalidateZone / InvalidateRoutes.
+type ResolverInvalidator interface {
+	InvalidateZone(domain string)
+	InvalidateRoutes(zoneID uuid.UUID)
+}
+
 type Service struct {
 	store          store
 	az             *authz.Authorizer
@@ -48,9 +57,13 @@ type Service struct {
 	expectedMXHost string
 	namingMode     policy.NamingMode
 	addressSecret  string
-	lookupTXT      func(string) ([]string, error)
-	lookupMX       func(string) ([]*net.MX, error)
-	logger         zerolog.Logger
+	// resolverInv drops resolver caches after zone/route writes. May be nil
+	// (e.g. in tests or when the resolver is not wired in); the resolver TTL
+	// still bounds drift.
+	resolverInv ResolverInvalidator
+	lookupTXT   func(string) ([]string, error)
+	lookupMX    func(string) ([]*net.MX, error)
+	logger      zerolog.Logger
 }
 
 type DNSCheck struct {
@@ -103,7 +116,7 @@ type SuggestedAddress struct {
 	Algorithm      string    `json:"algorithm"`
 }
 
-func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, logger zerolog.Logger) *Service {
+func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, resolverInv ResolverInvalidator, logger zerolog.Logger) *Service {
 	return &Service{
 		store:          s,
 		az:             authz.New(s),
@@ -111,10 +124,26 @@ func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, na
 		expectedMXHost: normalizeDNSName(expectedMXHost),
 		namingMode:     namingMode,
 		addressSecret:  strings.TrimSpace(addressSecret),
+		resolverInv:    resolverInv,
 		lookupTXT:      net.LookupTXT,
 		lookupMX:       net.LookupMX,
 		logger:         logger.With().Str("service", "domains").Logger(),
 	}
+}
+
+// invalidateZone forwards to the resolver cache when wired; no-op otherwise.
+func (s *Service) invalidateZone(domain string) {
+	if s == nil || s.resolverInv == nil {
+		return
+	}
+	s.resolverInv.InvalidateZone(domain)
+}
+
+func (s *Service) invalidateRoutes(zoneID uuid.UUID) {
+	if s == nil || s.resolverInv == nil {
+		return
+	}
+	s.resolverInv.InvalidateRoutes(zoneID)
 }
 
 // SetResolvers overrides DNS resolvers. Must only be called during
@@ -129,18 +158,20 @@ func (s *Service) SetResolvers(lookupTXT func(string) ([]string, error), lookupM
 }
 
 func (s *Service) ListZones(ctx context.Context, actor authz.Actor, tenant *models.Tenant) ([]*models.DomainZone, error) {
-	if err := ensureTenantScope(tenant, actor.IsSuperAdmin || actor.IsAdmin); err != nil {
+	if err := ensureTenantScope(tenant, actor.IsTenantAdmin()); err != nil {
 		return nil, err
 	}
-	items, err := s.store.ListZones(ctx, tenant.ID)
+	// The zone allowlist and ownership dimensions are enforced in SQL via the
+	// ZoneListFilter, replacing the previous in-memory filterAccessibleZones.
+	items, err := s.store.ListZonesScoped(ctx, authz.ZoneListScope(actor, tenant.ID))
 	if err != nil {
 		return nil, app.Internal(err)
 	}
-	return filterAccessibleZones(actor, items), nil
+	return items, nil
 }
 
 func (s *Service) ListAllZones(ctx context.Context, actor authz.Actor) ([]*models.DomainZone, error) {
-	if !actor.IsSuperAdmin && !actor.IsAdmin {
+	if !actor.IsTenantAdmin() {
 		return nil, app.Forbidden("admin access required")
 	}
 	items, err := s.store.ListAllZones(ctx)
@@ -169,7 +200,7 @@ func (s *Service) ListOpenZones(ctx context.Context, includeAuthenticated bool) 
 }
 
 func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *models.Tenant, domain string) (*models.DomainZone, error) {
-	isAdmin := actor.IsSuperAdmin || actor.IsAdmin
+	isAdmin := actor.IsTenantAdmin()
 	if err := ensureTenantScope(tenant, isAdmin); err != nil {
 		return nil, err
 	}
@@ -181,7 +212,7 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	// without an owner are gated by scopes and optional AllowedZoneIDs; they
 	// do not have owner-level quotas.
 	ownerUserID := actor.EffectiveUserID()
-	if actor.Permission != nil && !isAdmin && ownerUserID != nil && !permissions.IsUnlimited(actor.Permission.MaxDomains) {
+	if actor.Permission != nil && !isAdmin && ownerUserID != nil && !models.IsUnlimited(actor.Permission.MaxDomains) {
 		owned := countOwnedZones(ctx, s.store, tenant.ID, ownerUserID)
 		if owned >= actor.Permission.MaxDomains {
 			return nil, app.Forbidden("domain limit reached")
@@ -247,6 +278,7 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 		}
 		return nil, app.Internal(err)
 	}
+	s.invalidateZone(zone.Domain)
 	// Auto-create domain_wildcard send identity for this zone.
 	si := &models.SendIdentity{
 		TenantID:     tenant.ID,
@@ -276,7 +308,7 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 }
 
 func (s *Service) UpdateZoneAccess(ctx context.Context, actor authz.Actor, tenant *models.Tenant, zoneID uuid.UUID, input ZoneAccessInput) (*models.DomainZone, error) {
-	if !actor.IsSuperAdmin && !actor.IsAdmin {
+	if !actor.IsTenantAdmin() {
 		return nil, app.Forbidden("admin access required")
 	}
 	zone, err := s.store.GetZone(ctx, zoneID)
@@ -304,6 +336,7 @@ func (s *Service) UpdateZoneAccess(ctx context.Context, actor authz.Actor, tenan
 	if err := s.store.UpdateZone(ctx, zone); err != nil {
 		return nil, app.Internal(err)
 	}
+	s.invalidateZone(zone.Domain)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
@@ -323,6 +356,8 @@ func (s *Service) DeleteZone(ctx context.Context, actor authz.Actor, zoneID uuid
 	if err := s.store.DeleteZone(ctx, zoneID); err != nil {
 		return app.Internal(err)
 	}
+	s.invalidateZone(zone.Domain)
+	s.invalidateRoutes(zoneID)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
@@ -363,6 +398,7 @@ func (s *Service) TriggerVerify(ctx context.Context, actor authz.Actor, zoneID u
 	if err := s.store.UpdateZone(ctx, zone); err != nil {
 		return nil, VerificationChecks{}, app.Internal(err)
 	}
+	s.invalidateZone(zone.Domain)
 	// Sync send identity verified status with zone verification
 	verified := zone.IsVerified && zone.MXVerified
 	if err := s.store.UpdateSendIdentitiesVerifiedByZone(ctx, zone.ID, verified); err != nil {
@@ -431,7 +467,7 @@ func (s *Service) SuggestAddress(ctx context.Context, actor authz.Actor, zoneID 
 	if useSubdomain && !canManage {
 		return nil, app.Forbidden("full domain permission is required to generate random subdomains")
 	}
-	return s.suggestForZone(zone, useSubdomain, canManage || actor.IsSuperAdmin || actor.IsAdmin)
+	return s.suggestForZone(zone, useSubdomain, canManage || actor.IsTenantAdmin())
 }
 
 func (s *Service) SuggestOpenAddress(ctx context.Context, zoneID uuid.UUID, includeAuthenticated bool, useSubdomain bool) (*SuggestedAddress, error) {
@@ -529,6 +565,7 @@ func (s *Service) CreateRoute(ctx context.Context, actor authz.Actor, zoneID uui
 	if err := s.store.CreateRoute(ctx, route); err != nil {
 		return nil, app.Internal(err)
 	}
+	s.invalidateRoutes(route.ZoneID)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
@@ -558,6 +595,7 @@ func (s *Service) DeleteRoute(ctx context.Context, actor authz.Actor, routeID uu
 	if err := s.store.DeleteRoute(ctx, routeID); err != nil {
 		return app.Internal(err)
 	}
+	s.invalidateRoutes(route.ZoneID)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
@@ -591,13 +629,7 @@ func (s *Service) ownedZone(ctx context.Context, actor authz.Actor, zoneID uuid.
 // authorize runs the authz seam and converts AuthzError into an app-level
 // Forbidden error so HTTP status and message stay stable.
 func (s *Service) authorize(ctx context.Context, actor authz.Actor, action authz.Action, res authz.Resource) error {
-	if err := s.az.Authorize(ctx, actor, action, res); err != nil {
-		if authz.IsAuthzError(err) {
-			return app.Forbidden(err.Error())
-		}
-		return app.Internal(err)
-	}
-	return nil
+	return app.FromAuthz(s.az.Authorize(ctx, actor, action, res))
 }
 
 func (s *Service) lookupVerification(zone *models.DomainZone) VerificationChecks {
@@ -679,19 +711,6 @@ func (s *Service) validateZoneAncestry(ctx context.Context, parent *models.Domai
 		current = next
 	}
 	return nil
-}
-
-// filterAccessibleZones keeps zones the actor can manage that are also inside
-// the actor's zone allowlist. This mirrors the previous owner-match filter in
-// the service combined with the allowlist filter the handler used to apply.
-func filterAccessibleZones(actor authz.Actor, items []*models.DomainZone) []*models.DomainZone {
-	out := make([]*models.DomainZone, 0, len(items))
-	for _, zone := range items {
-		if authz.CanManageZone(actor, zone) && authz.ZoneAllowed(actor, zone.ID) {
-			out = append(out, zone)
-		}
-	}
-	return out
 }
 
 func ensureTenantScope(tenant *models.Tenant, isAdmin bool) error {

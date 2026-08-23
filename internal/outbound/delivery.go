@@ -155,17 +155,6 @@ func groupByDomain(addrs []string) map[string][]string {
 	return m
 }
 
-// deliverRelayVia sends email through a relay described by the relayConfig interface.
-func deliverRelayVia(ctx context.Context, cfg relayConfig, from string, to []string, mime []byte) error {
-	return DeliverRelay(ctx, config.Outbound{
-		RelayHost: cfg.GetRelayHost(),
-		RelayPort: cfg.GetRelayPort(),
-		RelayUser: cfg.GetRelayUser(),
-		RelayPass: cfg.GetRelayPass(),
-		RelayTLS:  cfg.GetRelayTLS(),
-	}, from, to, mime)
-}
-
 func lookupMX(ctx context.Context, domain string) ([]string, error) {
 	resolver := &net.Resolver{}
 	records, err := resolver.LookupMX(ctx, domain)

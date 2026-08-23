@@ -6,10 +6,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/configcache"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 )
@@ -35,15 +35,38 @@ type Result struct {
 	Created bool // true if the mailbox was auto-created
 }
 
+// Reusable reports whether this Result can short-circuit a later Resolve call.
+//
+// Check (materialize=false) returns the same Zone/Mailbox as Resolve for an
+// already-existing mailbox, so the SMTP RCPT result is safe to hand to DATA.
+// It must NOT be reused when:
+//   - Mailbox is nil: Check on an auto-create route returns {Zone, Route}
+//     without materializing, so the Result has no Mailbox and Resolve would
+//     still need to run (and possibly create).
+//   - Created is true: the mailbox was just materialized in this call. A second
+//     delivery in the same session should not assume the Result is stable — a
+//     concurrent retention sweep or quota change can invalidate it, and
+//     re-running Resolve lets the limiter/quota gates fire again.
+//
+// Both conditions collapse to: Mailbox is present and was not just created.
+func (r *Result) Reusable() bool { return r != nil && r.Mailbox != nil && !r.Created }
+
+// resolverCacheTTL is how long zone/route lookups stay cached. Writes from the
+// domain service invalidate entries immediately; this TTL is the crash-consistent
+// fallback (a writer that crashes between committing and invalidating is
+// eventually self-consistent).
+const resolverCacheTTL = 15 * time.Second
+
 // Resolver maps an incoming email address to a mailbox, auto-creating if allowed.
 type Resolver struct {
 	store      resolverStore
 	namingMode policy.NamingMode
 	stripPlus  bool
 	limiter    autoCreateLimiter
-	cacheMu    sync.RWMutex
-	zoneCache  map[string]zoneCacheEntry
-	routeCache map[uuid.UUID]routeCacheEntry
+	// zoneCache uses negative caching so the parent-domain walk in findZone
+	// does not re-hit the store for every level on each lookup.
+	zoneCache  *configcache.ConfigCache[string, *models.DomainZone]
+	routeCache *configcache.ConfigCache[uuid.UUID, []*models.DomainRoute]
 }
 
 func New(s resolverStore, namingMode policy.NamingMode, stripPlus bool, limiters ...autoCreateLimiter) *Resolver {
@@ -51,14 +74,47 @@ func New(s resolverStore, namingMode policy.NamingMode, stripPlus bool, limiters
 	if len(limiters) > 0 {
 		limiter = limiters[0]
 	}
-	return &Resolver{
+	rv := &Resolver{
 		store:      s,
 		namingMode: namingMode,
 		stripPlus:  stripPlus,
 		limiter:    limiter,
-		zoneCache:  map[string]zoneCacheEntry{},
-		routeCache: map[uuid.UUID]routeCacheEntry{},
 	}
+	rv.zoneCache = configcache.New(resolverCacheTTL, func(ctx context.Context, domain string) (*models.DomainZone, error) {
+		zone, err := s.GetZoneByDomain(ctx, domain)
+		if err != nil {
+			return nil, err
+		}
+		if zone != nil {
+			cp := *zone
+			zone = &cp
+		}
+		return zone, nil
+	}, configcache.WithNilCache[string, *models.DomainZone](true))
+	// routeCache uses negative caching too: a zone with no routes returns a nil
+	// slice that would otherwise be re-queried on every message. Safe because
+	// CreateRoute/DeleteRoute invalidate the zone's entry, so a freshly-added
+	// route is visible immediately instead of after the TTL.
+	rv.routeCache = configcache.New(resolverCacheTTL, func(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error) {
+		routes, err := s.ListRoutes(ctx, zoneID)
+		if err != nil {
+			return nil, err
+		}
+		return cloneRoutes(routes), nil
+	}, configcache.WithNilCache[uuid.UUID, []*models.DomainRoute](true))
+	return rv
+}
+
+// InvalidateZone drops the cached zone lookup for domain (including a cached
+// "no zone" negative entry). Callers should invoke it after any zone write.
+func (rv *Resolver) InvalidateZone(domain string) {
+	rv.zoneCache.Invalidate(domain)
+}
+
+// InvalidateRoutes drops the cached route list for a zone. Callers should
+// invoke it after any route write (create/delete) for the zone.
+func (rv *Resolver) InvalidateRoutes(zoneID uuid.UUID) {
+	rv.routeCache.Invalidate(zoneID)
 }
 
 func (rv *Resolver) StripPlus() bool {
@@ -171,19 +227,12 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 
 // findZone tries exact match first, then walks up parent domains.
 func (rv *Resolver) findZone(ctx context.Context, domain string) (*models.DomainZone, error) {
-	if zone, ok := rv.getCachedZone(domain); ok {
-		if zone != nil {
-			return zone, nil
-		}
-	} else {
-		z, err := rv.store.GetZoneByDomain(ctx, domain)
-		if err != nil {
-			return nil, err
-		}
-		rv.setCachedZone(domain, z)
-		if z != nil {
-			return z, nil
-		}
+	zone, err := rv.zoneCache.Get(ctx, domain)
+	if err != nil {
+		return nil, err
+	}
+	if zone != nil {
+		return zone, nil
 	}
 	parts := strings.SplitN(domain, ".", 2)
 	if len(parts) < 2 {
@@ -315,67 +364,8 @@ func betterRouteCandidate(a, b *routeCandidate) bool {
 	return a.route.ID.String() < b.route.ID.String()
 }
 
-type zoneCacheEntry struct {
-	zone      *models.DomainZone
-	expiresAt time.Time
-}
-
-type routeCacheEntry struct {
-	routes    []*models.DomainRoute
-	expiresAt time.Time
-}
-
-const resolverCacheTTL = 15 * time.Second
-
-func (rv *Resolver) getCachedZone(domain string) (*models.DomainZone, bool) {
-	rv.cacheMu.RLock()
-	entry, ok := rv.zoneCache[domain]
-	rv.cacheMu.RUnlock()
-	if !ok || time.Now().After(entry.expiresAt) {
-		if ok {
-			rv.cacheMu.Lock()
-			delete(rv.zoneCache, domain)
-			rv.cacheMu.Unlock()
-		}
-		return nil, false
-	}
-	if entry.zone == nil {
-		return nil, true
-	}
-	cp := *entry.zone
-	return &cp, true
-}
-
-func (rv *Resolver) setCachedZone(domain string, zone *models.DomainZone) {
-	var cp *models.DomainZone
-	if zone != nil {
-		copyZone := *zone
-		cp = &copyZone
-	}
-	rv.cacheMu.Lock()
-	rv.zoneCache[domain] = zoneCacheEntry{zone: cp, expiresAt: time.Now().Add(resolverCacheTTL)}
-	rv.cacheMu.Unlock()
-}
-
 func (rv *Resolver) listRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error) {
-	rv.cacheMu.RLock()
-	entry, ok := rv.routeCache[zoneID]
-	rv.cacheMu.RUnlock()
-	if ok && time.Now().Before(entry.expiresAt) {
-		return cloneRoutes(entry.routes), nil
-	}
-
-	routes, err := rv.store.ListRoutes(ctx, zoneID)
-	if err != nil {
-		return nil, err
-	}
-	rv.cacheMu.Lock()
-	rv.routeCache[zoneID] = routeCacheEntry{
-		routes:    cloneRoutes(routes),
-		expiresAt: time.Now().Add(resolverCacheTTL),
-	}
-	rv.cacheMu.Unlock()
-	return routes, nil
+	return rv.routeCache.Get(ctx, zoneID)
 }
 
 func cloneRoutes(routes []*models.DomainRoute) []*models.DomainRoute {

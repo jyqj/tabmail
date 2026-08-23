@@ -175,7 +175,7 @@ func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 		LastError:     "temporary failure",
 		NextAttemptAt: time.Now().Add(time.Minute),
 	}
-	if err := st.CreateIngestJob(context.Background(), job); err != nil {
+	if err := st.CreateIngestJob(context.Background(), job, nil); err != nil {
 		t.Fatal(err)
 	}
 
@@ -222,7 +222,7 @@ func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 		RawObjectKey:  "raw/pending.eml",
 		State:         "pending",
 		NextAttemptAt: time.Now().Add(time.Minute),
-	}); err != nil {
+	}, nil); err != nil {
 		t.Fatal(err)
 	}
 	if err := st.CreateIngestJob(context.Background(), &models.IngestJob{
@@ -230,7 +230,7 @@ func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 		RawObjectKey:  "raw/processing.eml",
 		State:         "processing",
 		NextAttemptAt: time.Now().Add(time.Minute),
-	}); err != nil {
+	}, nil); err != nil {
 		t.Fatal(err)
 	}
 

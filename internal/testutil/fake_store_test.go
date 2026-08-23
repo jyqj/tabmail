@@ -88,7 +88,7 @@ func TestFakeStoreClaimLeasesAndReclaimsExpiredProcessing(t *testing.T) {
 	t.Run("ingest", func(t *testing.T) {
 		st := NewFakeStore()
 		job := &models.IngestJob{RawObjectKey: "raw/job.eml", Recipients: []string{"a@mail.test"}, NextAttemptAt: now}
-		if err := st.CreateIngestJob(ctx, job); err != nil {
+		if err := st.CreateIngestJob(ctx, job, nil); err != nil {
 			t.Fatal(err)
 		}
 		claimed, err := st.ClaimIngestJobs(ctx, now, 10)

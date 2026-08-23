@@ -15,7 +15,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
-	"tabmail/internal/authz"
 	"tabmail/internal/models"
 )
 
@@ -566,7 +565,7 @@ func (h *AuthHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Request) 
 	}
 	if req.Role != nil {
 		newRole := models.UserRole(*req.Role)
-		actor := authz.ActorFromContext(r.Context())
+		actor := middleware.ActorFromContext(r.Context())
 		switch newRole {
 		case models.RoleSuperAdmin, models.RoleAdmin, models.RoleUser:
 			// Only super_admin can promote to super_admin

@@ -29,7 +29,12 @@ func (s *FakeStore) CreateMessage(_ context.Context, m *models.Message) error {
 	return nil
 }
 
-func (s *FakeStore) CreateMessageWithQuota(_ context.Context, m *models.Message, maxMessages int) (bool, error) {
+func (s *FakeStore) CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int, ensureObject func(context.Context) error) (bool, error) {
+	if m.RawObjectKey != "" && ensureObject != nil {
+		if err := ensureObject(ctx); err != nil {
+			return false, err
+		}
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -160,6 +165,101 @@ func (s *FakeStore) CountRawObjectReferences(_ context.Context, objectKey string
 		}
 	}
 	return n, nil
+}
+
+func (s *FakeStore) ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	n := 0
+	for _, m := range s.messages {
+		if m.RawObjectKey == key {
+			n++
+		}
+	}
+	for _, job := range s.ingestJobs {
+		if job.RawObjectKey == key && (job.State == "pending" || job.State == "retry" || job.State == "processing") {
+			n++
+		}
+	}
+	if n > 0 {
+		return false, nil
+	}
+	if del != nil {
+		if err := del(ctx); err != nil {
+			return false, err
+		}
+	}
+	return true, nil
+}
+
+func (s *FakeStore) EnqueueOrphanRetry(_ context.Context, key string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.orphanRetries == nil {
+		s.orphanRetries = map[string]int{}
+	}
+	s.orphanRetries[key]++
+	return nil
+}
+
+func (s *FakeStore) ListPendingOrphanRetries(_ context.Context, limit int) ([]string, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if limit <= 0 {
+		return nil, nil
+	}
+	out := make([]string, 0, len(s.orphanRetries))
+	for key, attempts := range s.orphanRetries {
+		if attempts < 10 {
+			out = append(out, key)
+		}
+	}
+	sort.Strings(out)
+	if len(out) > limit {
+		out = out[:limit]
+	}
+	return out, nil
+}
+
+func (s *FakeStore) ClearOrphanRetry(_ context.Context, key string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.orphanRetries, key)
+	return nil
+}
+
+func (s *FakeStore) ReapExhaustedOrphanRetries(_ context.Context) (int, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	dropped := 0
+	for key, attempts := range s.orphanRetries {
+		if attempts >= 10 {
+			delete(s.orphanRetries, key)
+			dropped++
+		}
+	}
+	return dropped, nil
+}
+
+// SeedOrphanRetry sets the retry attempt count for a key (test helper).
+func (s *FakeStore) SeedOrphanRetry(key string, attempts int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.orphanRetries == nil {
+		s.orphanRetries = map[string]int{}
+	}
+	s.orphanRetries[key] = attempts
+}
+
+// OrphanRetryAttempts returns the retry attempt count for a key, or -1 if the
+// key is not queued (test helper).
+func (s *FakeStore) OrphanRetryAttempts(key string) int {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if a, ok := s.orphanRetries[key]; ok {
+		return a
+	}
+	return -1
 }
 
 func (s *FakeStore) CountTenantMessagesSince(_ context.Context, tenantID uuid.UUID, since time.Time) (int, error) {

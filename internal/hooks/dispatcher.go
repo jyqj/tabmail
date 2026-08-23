@@ -18,6 +18,7 @@ import (
 	"github.com/rs/zerolog"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
+	"tabmail/internal/workqueue"
 )
 
 type Config struct {
@@ -68,6 +69,12 @@ type Dispatcher struct {
 	pollInterval time.Duration
 	batchSize    int
 	store        dispatcherStore
+
+	// outboxWorker fans claimed outbox events out into webhook_delivery rows.
+	// deliveryWorker POSTs each delivery to its URL. Both are built lazily in
+	// Run so a dispatcher without a store stays a no-op.
+	outboxWorker   *workqueue.Worker[*outboxPayload]
+	deliveryWorker *workqueue.Worker[*deliveryPayload]
 
 	mu          sync.Mutex
 	deadLetters []models.DeadLetter
@@ -202,70 +209,68 @@ func (d *Dispatcher) Run(ctx context.Context) {
 	if !d.Enabled() || d.store == nil {
 		return
 	}
-	ticker := time.NewTicker(d.pollInterval)
-	defer ticker.Stop()
-	for {
-		if err := d.processBatch(ctx); err != nil {
-			d.logger.Warn().Err(err).Msg("process webhook batch")
-		}
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-		}
-	}
+	d.ensureWorkers()
+	// Two independent workers run concurrently: the outbox worker fans events
+	// out into delivery rows, the delivery worker POSTs each delivery. The
+	// legacy single-loop serialized them, but the two stages share no
+	// per-job state, so concurrency changes only scheduling, not any job's
+	// state transitions or retry cadence.
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() { defer wg.Done(); d.outboxWorker.Run(ctx) }()
+	go func() { defer wg.Done(); d.deliveryWorker.Run(ctx) }()
+	wg.Wait()
 }
 
-func (d *Dispatcher) processBatch(ctx context.Context) error {
-	now := time.Now().UTC()
-	outboxEvents, err := d.store.ClaimOutboxEvents(ctx, now, d.batchSize)
-	if err != nil {
-		return err
+// ensureWorkers builds the outbox and delivery workers once. Idempotent.
+func (d *Dispatcher) ensureWorkers() {
+	if d.outboxWorker != nil && d.deliveryWorker != nil {
+		return
 	}
-	for _, event := range outboxEvents {
-		if err := d.store.CreateWebhookDeliveries(ctx, event, d.urls); err != nil {
-			metrics.WebhookRetried()
-			_ = d.store.MarkOutboxEventRetry(ctx, event.ID, err.Error(), now.Add(d.retryDelay))
-			continue
-		}
-		if err := d.store.MarkOutboxEventDone(ctx, event.ID); err != nil {
-			return err
-		}
-	}
+	d.outboxWorker = workqueue.NewWorker[*outboxPayload](
+		newOutboxStore(d.store),
+		d.processOutbox,
+		workqueue.FixedBackoff[*outboxPayload]{Base: d.retryDelay},
+		outboxHooks{},
+		5*time.Minute,
+		d.pollInterval,
+		d.batchSize,
+		d.logger,
+	)
+	d.deliveryWorker = workqueue.NewWorker[*deliveryPayload](
+		newDeliveryStore(d.store),
+		d.processDelivery,
+		workqueue.LinearBackoff[*deliveryPayload]{Base: d.retryDelay, Max: d.maxRetries},
+		&deliveryHooks{dispatcher: d},
+		5*time.Minute,
+		d.pollInterval,
+		d.batchSize,
+		d.logger,
+	)
+}
 
-	deliveries, err := d.store.ClaimWebhookDeliveries(ctx, now, d.batchSize)
-	if err != nil {
-		return err
+// processOutbox fans one claimed outbox event out into a webhook_delivery row
+// per configured URL. On failure it returns the error so the worker retries
+// the event (outbox events are never marked dead).
+func (d *Dispatcher) processOutbox(ctx context.Context, job *workqueue.Job[*outboxPayload]) error {
+	if job == nil || job.Payload == nil || job.Payload.OutboxEvent == nil {
+		return nil
 	}
-	for _, delivery := range deliveries {
-		if err := d.dispatch(ctx, delivery); err != nil {
-			dead := delivery.Attempts >= d.maxRetries
-			if dead {
-				metrics.WebhookFailed()
-			} else {
-				metrics.WebhookRetried()
-			}
-			_ = d.store.MarkWebhookDeliveryRetry(ctx, delivery.ID, err.Error(), now.Add(d.retryDelay*time.Duration(delivery.Attempts)), dead)
-			if dead {
-				d.pushDeadLetter(models.DeadLetter{
-					ID:          delivery.ID.String(),
-					URL:         delivery.URL,
-					EventType:   delivery.EventType,
-					Payload:     append([]byte(nil), delivery.Payload...),
-					Attempts:    delivery.Attempts,
-					LastError:   err.Error(),
-					CreatedAt:   delivery.CreatedAt,
-					LastTriedAt: now,
-				})
-			}
-			continue
-		}
-		metrics.WebhookDelivered()
-		if err := d.store.MarkWebhookDeliveryDone(ctx, delivery.ID); err != nil {
-			return err
-		}
+	event := job.Payload.OutboxEvent
+	if err := d.store.CreateWebhookDeliveries(ctx, event, d.urls); err != nil {
+		return err
 	}
 	return nil
+}
+
+// processDelivery POSTs one claimed webhook delivery to its URL. On failure
+// the worker routes through LinearBackoff (retry until attempts >= maxRetries,
+// then dead). On success the worker marks the delivery done.
+func (d *Dispatcher) processDelivery(ctx context.Context, job *workqueue.Job[*deliveryPayload]) error {
+	if job == nil || job.Payload == nil || job.Payload.WebhookDelivery == nil {
+		return nil
+	}
+	return d.dispatch(ctx, job.Payload.WebhookDelivery)
 }
 
 func (d *Dispatcher) dispatchDirect(delivery *models.WebhookDelivery) {

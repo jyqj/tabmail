@@ -415,3 +415,79 @@ func seededResolverStore() *testutil.FakeStore {
 	})
 	return st
 }
+
+// countingStore wraps FakeStore to count cache-miss queries, so tests can
+// assert that Invalidate* forces a re-query rather than relying on the TTL.
+type countingStore struct {
+	*testutil.FakeStore
+	zoneCalls  int
+	routeCalls int
+}
+
+func (c *countingStore) GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error) {
+	c.zoneCalls++
+	return c.FakeStore.GetZoneByDomain(ctx, domain)
+}
+
+func (c *countingStore) ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error) {
+	c.routeCalls++
+	return c.FakeStore.ListRoutes(ctx, zoneID)
+}
+
+// TestResolverInvalidateZoneForcesRequery pins the seam: InvalidateZone makes
+// the next lookup re-query the store instead of serving the cached entry.
+func TestResolverInvalidateZoneForcesRequery(t *testing.T) {
+	st := &countingStore{FakeStore: seededResolverStore()}
+	rv := New(st, policy.NamingFull, true)
+
+	if _, err := rv.Check(context.Background(), "user@sub.mail.test"); err != nil {
+		t.Fatal(err)
+	}
+	afterFirst := st.zoneCalls
+
+	if _, err := rv.Check(context.Background(), "user@sub.mail.test"); err != nil {
+		t.Fatal(err)
+	}
+	if st.zoneCalls != afterFirst {
+		t.Fatalf("cached lookup should not re-query zone: %d -> %d", afterFirst, st.zoneCalls)
+	}
+
+	rv.InvalidateZone("mail.test")
+	if _, err := rv.Check(context.Background(), "user@sub.mail.test"); err != nil {
+		t.Fatal(err)
+	}
+	if st.zoneCalls == afterFirst {
+		t.Fatal("expected InvalidateZone to force a store re-query, but zone call count did not increase")
+	}
+}
+
+// TestResolverInvalidateRoutesForcesRequery pins the seam for route invalidation.
+// Uses Check (materialize=false) so the mailbox-absent branch exercises listRoutes.
+func TestResolverInvalidateRoutesForcesRequery(t *testing.T) {
+	st := &countingStore{FakeStore: seededResolverStore()}
+	zone, err := st.FakeStore.GetZoneByDomain(context.Background(), "mail.test")
+	if err != nil || zone == nil {
+		t.Fatalf("seeded zone missing: %v", err)
+	}
+	rv := New(st, policy.NamingFull, true)
+
+	if _, err := rv.Check(context.Background(), "user@sub.mail.test"); err != nil {
+		t.Fatal(err)
+	}
+	afterFirst := st.routeCalls
+
+	if _, err := rv.Check(context.Background(), "user@sub.mail.test"); err != nil {
+		t.Fatal(err)
+	}
+	if st.routeCalls != afterFirst {
+		t.Fatalf("cached lookup should not re-query routes: %d -> %d", afterFirst, st.routeCalls)
+	}
+
+	rv.InvalidateRoutes(zone.ID)
+	if _, err := rv.Check(context.Background(), "user@sub.mail.test"); err != nil {
+		t.Fatal(err)
+	}
+	if st.routeCalls == afterFirst {
+		t.Fatal("expected InvalidateRoutes to force a store re-query, but route call count did not increase")
+	}
+}

@@ -339,7 +339,7 @@ func seededAdminHandler(t *testing.T) (*AdminHandler, *testutil.FakeStore, uuid.
 		DefaultAccept: true,
 		DefaultStore:  true,
 	}
-	return NewAdminHandler(st, nil, defaultPolicy, &stubSettings{}, zerolog.Nop()), st, planID, tenantID
+	return NewAdminHandler(st, nil, defaultPolicy, &stubSettings{}, nil, zerolog.Nop()), st, planID, tenantID
 }
 
 func doAdminRequest(

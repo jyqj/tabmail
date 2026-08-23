@@ -185,6 +185,14 @@ type DomainZone struct {
 	VerifiedAt            *time.Time         `json:"verified_at,omitempty" db:"verified_at"`
 }
 
+// CanReceiveMessage reports whether the zone is ready to accept inbound mail:
+// ownership must be verified and the MX records confirmed. This is the single
+// home for the receive-readiness rule; DKIM/send configuration is deliberately
+// kept separate.
+func (z DomainZone) CanReceiveMessage() bool {
+	return z.IsVerified && z.MXVerified
+}
+
 type RouteType string
 
 const (
@@ -258,19 +266,21 @@ type Mailbox struct {
 // ============================================================
 
 type Message struct {
-	ID           uuid.UUID       `json:"id" db:"id"`
-	TenantID     uuid.UUID       `json:"tenant_id" db:"tenant_id"`
-	MailboxID    uuid.UUID       `json:"mailbox_id" db:"mailbox_id"`
-	ZoneID       uuid.UUID       `json:"zone_id" db:"zone_id"`
-	Sender       string          `json:"sender" db:"sender"`
-	Recipients   []string        `json:"recipients" db:"recipients"`
-	Subject      string          `json:"subject" db:"subject"`
-	Size         int64           `json:"size" db:"size"`
-	Seen         bool            `json:"seen" db:"seen"`
-	RawObjectKey string          `json:"raw_object_key,omitempty" db:"raw_object_key"`
-	HeadersJSON  json.RawMessage `json:"headers,omitempty" db:"headers_json"`
-	ReceivedAt   time.Time       `json:"received_at" db:"received_at"`
-	ExpiresAt    time.Time       `json:"expires_at" db:"expires_at"`
+	ID            uuid.UUID       `json:"id" db:"id"`
+	TenantID      uuid.UUID       `json:"tenant_id" db:"tenant_id"`
+	MailboxID     uuid.UUID       `json:"mailbox_id" db:"mailbox_id"`
+	ZoneID        uuid.UUID       `json:"zone_id" db:"zone_id"`
+	Sender        string          `json:"sender" db:"sender"`
+	Recipients    []string        `json:"recipients" db:"recipients"`
+	Subject       string          `json:"subject" db:"subject"`
+	Size          int64           `json:"size" db:"size"`
+	Seen          bool            `json:"seen" db:"seen"`
+	RawObjectKey  string          `json:"raw_object_key,omitempty" db:"raw_object_key"`
+	HeadersJSON   json.RawMessage `json:"headers,omitempty" db:"headers_json"`
+	ReceivedAt    time.Time       `json:"received_at" db:"received_at"`
+	ExpiresAt     time.Time       `json:"expires_at" db:"expires_at"`
+	OTPCode       string          `json:"otp_code,omitempty" db:"otp_code"`
+	OTPConfidence float32         `json:"otp_confidence,omitempty" db:"otp_confidence"`
 }
 
 // MessageDetail includes parsed body content.
@@ -523,6 +533,35 @@ type EffectivePermission struct {
 	CanCreateAPIKeys  bool        `json:"can_create_api_keys"`
 }
 
+// AllowsZone reports whether zoneID is within the permission's allowed-zone
+// list. A nil permission or an empty list means every zone is allowed. This is
+// the canonical home for the zone-allowlist membership rule.
+func (p *EffectivePermission) AllowsZone(zoneID uuid.UUID) bool {
+	if p == nil {
+		return true
+	}
+	return ZoneAllowed(p.AllowedZoneIDs, zoneID)
+}
+
+// ZoneAllowed reports whether zoneID is within allowedZoneIDs. An empty list
+// means every zone is allowed.
+func ZoneAllowed(allowedZoneIDs []uuid.UUID, zoneID uuid.UUID) bool {
+	if len(allowedZoneIDs) == 0 {
+		return true
+	}
+	for _, id := range allowedZoneIDs {
+		if id == zoneID {
+			return true
+		}
+	}
+	return false
+}
+
+// IsUnlimited returns true if the quota value is 0, which means unlimited.
+func IsUnlimited(quota int) bool {
+	return quota == 0
+}
+
 // ============================================================
 // Send Identities
 // ============================================================
@@ -543,6 +582,21 @@ type SendIdentity struct {
 	IdentityType SendIdentityType `json:"identity_type" db:"identity_type"`
 	Verified     bool             `json:"verified" db:"verified"`
 	CreatedAt    time.Time        `json:"created_at" db:"created_at"`
+}
+
+// OutboundTemplate is a tenant-scoped email template. The SubjectTmpl, TextTmpl
+// and HTMLTmpl fields hold Go template source; the template package parses them
+// once at load time and re-renders per message with caller-supplied Vars. The
+// HTML part is always rendered through html/template for automatic escaping.
+type OutboundTemplate struct {
+	ID          uuid.UUID `json:"id" db:"id"`
+	TenantID    uuid.UUID `json:"tenant_id" db:"tenant_id"`
+	Name        string    `json:"name" db:"name"`
+	SubjectTmpl string    `json:"subject_tmpl" db:"subject_tmpl"`
+	TextTmpl    string    `json:"text_tmpl,omitempty" db:"text_tmpl"`
+	HTMLTmpl    string    `json:"html_tmpl,omitempty" db:"html_tmpl"`
+	CreatedAt   time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
 }
 
 // ============================================================
@@ -614,6 +668,9 @@ type OutboundJob struct {
 	APIKeyID        *uuid.UUID      `json:"api_key_id,omitempty" db:"api_key_id"`
 	MailFrom        string          `json:"mail_from" db:"mail_from"`
 	RcptTo          []string        `json:"rcpt_to" db:"rcpt_to"`
+	To              []string        `json:"to,omitempty" db:"to_addrs"`
+	CC              []string        `json:"cc,omitempty" db:"cc_addrs"`
+	BCC             []string        `json:"bcc,omitempty" db:"bcc_addrs"`
 	Subject         string          `json:"subject" db:"subject"`
 	TextBody        string          `json:"text_body,omitempty" db:"text_body"`
 	HTMLBody        string          `json:"html_body,omitempty" db:"html_body"`

@@ -196,6 +196,25 @@ func TestTenantIsolation(t *testing.T) {
 	}
 }
 
+func TestDenialKinds(t *testing.T) {
+	az := New(newMockStore())
+	ctx := context.Background()
+
+	// A cross-tenant denial is classified as tenant isolation.
+	err := az.Authorize(ctx, admin(), ActionZoneRead, Resource{TenantID: tenantB, ZoneID: zoneID})
+	if KindOf(err) != KindTenantIsolation {
+		t.Fatalf("tenant isolation denial: KindOf = %q, want %q", KindOf(err), KindTenantIsolation)
+	}
+
+	// Constructors carry their Kind; the default constructor is generic.
+	if KindOf(forbidden(KindOwnership, "x")) != KindOwnership {
+		t.Fatalf("classified constructor lost its Kind")
+	}
+	if KindOf(ErrForbidden("x")) != KindForbidden {
+		t.Fatalf("default denial should be KindForbidden")
+	}
+}
+
 func TestRegularUserZoneAccess(t *testing.T) {
 	az := New(newMockStore())
 	ctx := context.Background()
