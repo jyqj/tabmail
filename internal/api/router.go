@@ -88,6 +88,7 @@ type RouterConfig struct {
 	Settings           *settings.Manager
 	HTTP               config.HTTP
 	RateLimiter        *middleware.RateLimiter
+	AuthCache          *middleware.CachedAuthStore
 	OutboundService    *outbound.Service
 	Resolver           *resolver.Resolver
 	IngestInvalidator  policyInvalidatorProvider
@@ -103,11 +104,14 @@ type policyInvalidatorProvider interface {
 
 func NewRouter(cfg RouterConfig) http.Handler {
 	st := cfg.Store
+	cached := cfg.AuthCache
+	if cached == nil {
+		cached = middleware.NewCachedAuthStore(st, st.EffectiveConfig)
+	}
 	r := chi.NewRouter()
 	metricsCounts := newMetricsDBCountCache(5 * time.Second)
 
 	r.Use(chimw.RequestID)
-	r.Use(chimw.RealIP)
 	r.Use(chimw.Recoverer)
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),
@@ -117,8 +121,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		MaxAge:           86400,
 	}))
 
-	r.Use(middleware.Auth(st, cfg.JWTSecret, cfg.PublicTenantID))
-	r.Use(middleware.PermissionLoader(st))
+	r.Use(middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID))
+	r.Use(middleware.PermissionLoader(cached))
 	r.Use(cfg.RateLimiter.Middleware)
 
 	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
@@ -126,7 +130,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
-	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
+	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
 	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
 	si := handlers.NewSendIdentityHandler(st, cfg.Logger)

@@ -116,6 +116,20 @@ type SuggestedAddress struct {
 	Algorithm      string    `json:"algorithm"`
 }
 
+const dnsLookupTimeout = 3 * time.Second
+
+func lookupTXTWithTimeout(name string) ([]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dnsLookupTimeout)
+	defer cancel()
+	return net.DefaultResolver.LookupTXT(ctx, name)
+}
+
+func lookupMXWithTimeout(name string) ([]*net.MX, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), dnsLookupTimeout)
+	defer cancel()
+	return net.DefaultResolver.LookupMX(ctx, name)
+}
+
 func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, resolverInv ResolverInvalidator, logger zerolog.Logger) *Service {
 	return &Service{
 		store:          s,
@@ -125,8 +139,8 @@ func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, na
 		namingMode:     namingMode,
 		addressSecret:  strings.TrimSpace(addressSecret),
 		resolverInv:    resolverInv,
-		lookupTXT:      net.LookupTXT,
-		lookupMX:       net.LookupMX,
+		lookupTXT:      lookupTXTWithTimeout,
+		lookupMX:       lookupMXWithTimeout,
 		logger:         logger.With().Str("service", "domains").Logger(),
 	}
 }

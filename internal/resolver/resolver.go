@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -67,6 +68,9 @@ type Resolver struct {
 	// does not re-hit the store for every level on each lookup.
 	zoneCache  *configcache.ConfigCache[string, *models.DomainZone]
 	routeCache *configcache.ConfigCache[uuid.UUID, []*models.DomainRoute]
+	// Precompiled route regexes keyed by route ID; populated on first match.
+	wildcardRegexCache sync.Map
+	sequenceRegexCache sync.Map
 }
 
 func New(s resolverStore, namingMode policy.NamingMode, stripPlus bool, limiters ...autoCreateLimiter) *Resolver {
@@ -172,7 +176,7 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		return nil, err
 	}
 
-	route := matchRoute(routes, local, domain, zone.Domain)
+	route := rv.matchRoute(routes, local, domain, zone.Domain)
 	if route == nil || !route.AutoCreateMailbox || !materialize {
 		if route == nil || !route.AutoCreateMailbox {
 			return nil, nil
@@ -249,7 +253,7 @@ type routeCandidate struct {
 	exactFQDN     bool
 }
 
-func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain string) *models.DomainRoute {
+func (rv *Resolver) matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain string) *models.DomainRoute {
 	subdomain := strings.TrimSuffix(fullDomain, "."+zoneDomain)
 	if subdomain == zoneDomain {
 		subdomain = ""
@@ -272,10 +276,8 @@ func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain stri
 				}
 			}
 		case models.RouteWildcard:
-			pattern := regexp.QuoteMeta(r.MatchValue)
-			pattern = strings.ReplaceAll(pattern, `\*`, `[^.]+`)
-			re, err := regexp.Compile("^" + pattern + "$")
-			if err != nil {
+			re := rv.wildcardRegex(r)
+			if re == nil {
 				continue
 			}
 			if re.MatchString(fqdn) || re.MatchString(subdomain+"."+zoneDomain) {
@@ -307,7 +309,7 @@ func matchRoute(routes []*models.DomainRoute, local, fullDomain, zoneDomain stri
 			if r.RangeStart == nil || r.RangeEnd == nil {
 				continue
 			}
-			numPart := extractSeqNum(r.MatchValue, subdomain+"."+zoneDomain, fqdn)
+			numPart := rv.extractSeqNum(r, subdomain+"."+zoneDomain, fqdn)
 			if numPart < 0 {
 				continue
 			}
@@ -383,14 +385,34 @@ func cloneRoutes(routes []*models.DomainRoute) []*models.DomainRoute {
 	return out
 }
 
-// extractSeqNum tries to extract the integer from a pattern like "box-{n}.mail.example.com"
-// given a candidate FQDN. Returns -1 on no match.
-func extractSeqNum(pattern, candidate1, candidate2 string) int {
-	re := strings.ReplaceAll(regexp.QuoteMeta(pattern), `\{n\}`, `(\d+)`)
-	compiled, err := regexp.Compile("^" + re + "$")
+func (rv *Resolver) wildcardRegex(r *models.DomainRoute) *regexp.Regexp {
+	if v, ok := rv.wildcardRegexCache.Load(r.ID); ok {
+		return v.(*regexp.Regexp)
+	}
+	pattern := regexp.QuoteMeta(r.MatchValue)
+	pattern = strings.ReplaceAll(pattern, `\*`, `[^.]+`)
+	re, err := regexp.Compile("^" + pattern + "$")
+	if err != nil {
+		return nil
+	}
+	rv.wildcardRegexCache.Store(r.ID, re)
+	return re
+}
+
+func (rv *Resolver) extractSeqNum(r *models.DomainRoute, candidate1, candidate2 string) int {
+	if v, ok := rv.sequenceRegexCache.Load(r.ID); ok {
+		return matchSeqNum(v.(*regexp.Regexp), candidate1, candidate2)
+	}
+	rePattern := strings.ReplaceAll(regexp.QuoteMeta(r.MatchValue), `\{n\}`, `(\d+)`)
+	compiled, err := regexp.Compile("^" + rePattern + "$")
 	if err != nil {
 		return -1
 	}
+	rv.sequenceRegexCache.Store(r.ID, compiled)
+	return matchSeqNum(compiled, candidate1, candidate2)
+}
+
+func matchSeqNum(compiled *regexp.Regexp, candidate1, candidate2 string) int {
 	for _, c := range []string{candidate1, candidate2} {
 		m := compiled.FindStringSubmatch(c)
 		if len(m) >= 2 {

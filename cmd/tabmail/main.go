@@ -164,6 +164,8 @@ func main() {
 
 	defaultPlanID, _ := uuid.Parse(cfg.DefaultPlanID)
 
+	authCache := middleware.NewCachedAuthStore(pg, pg.EffectiveConfig)
+
 	routerCfg := api.RouterConfig{
 		Store:              pg,
 		ObjectStore:        obj,
@@ -181,6 +183,7 @@ func main() {
 		OpenRegistration:   cfg.OpenRegistration,
 		Settings:           settingsMgr,
 		HTTP:               cfg.HTTP,
+		AuthCache:          authCache,
 		OutboundService:    outboundSvc,
 		Resolver:           res,
 		IngestInvalidator:  ingestSvc,
@@ -209,7 +212,7 @@ func main() {
 			}
 		}()
 
-		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
+		rl := middleware.NewRateLimiter(rdb, authCache, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		routerCfg.RateLimiter = rl
 		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
@@ -217,7 +220,7 @@ func main() {
 	case "api":
 		go dispatcher.Run(ctx)
 		go ingestSvc.Run(ctx)
-		rl := middleware.NewRateLimiter(rdb, pg, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
+		rl := middleware.NewRateLimiter(rdb, authCache, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		routerCfg.RateLimiter = rl
 		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)

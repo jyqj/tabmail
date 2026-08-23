@@ -200,17 +200,19 @@ func TestResolverRoutePriorityPrefersExactThenSequenceThenWildcard(t *testing.T)
 		t.Fatalf("list routes: %v", err)
 	}
 
-	best := matchRoute(routes, "hello", "box-15.mail.test", "mail.test")
+	rv := New(st, policy.NamingFull, true)
+
+	best := rv.matchRoute(routes, "hello", "box-15.mail.test", "mail.test")
 	if best == nil || best.RouteType != models.RouteExact || best.MatchValue != "box-15.mail.test" {
 		t.Fatalf("expected exact route to win, got %#v", best)
 	}
 
-	best = matchRoute(routes, "hello", "box-12.mail.test", "mail.test")
+	best = rv.matchRoute(routes, "hello", "box-12.mail.test", "mail.test")
 	if best == nil || best.RouteType != models.RouteSequence || best.AccessModeDefault != models.AccessToken {
 		t.Fatalf("expected narrower sequence route to win, got %#v", best)
 	}
 
-	best = matchRoute(routes, "hello", "foo.mail.test", "mail.test")
+	best = rv.matchRoute(routes, "hello", "foo.mail.test", "mail.test")
 	if best == nil || best.RouteType != models.RouteWildcard {
 		t.Fatalf("expected wildcard route to win fallback, got %#v", best)
 	}

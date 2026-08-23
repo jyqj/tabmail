@@ -310,7 +310,7 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 				ctx = context.WithValue(ctx, ctxTenant, tenant)
 				if keyID != nil {
 					ctx = context.WithValue(ctx, ctxAPIKeyID, keyID)
-					go func() { _ = st.TouchAPIKey(context.Background(), *keyID, r.RemoteAddr) }()
+					touchAPIKeyAsync(st, *keyID, r.RemoteAddr)
 				}
 
 				// If the API key has an owner, verify the owner is still active

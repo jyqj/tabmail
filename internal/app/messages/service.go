@@ -116,7 +116,8 @@ func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uu
 					if cleaned, err := sanitize.HTML(env.HTML); err == nil {
 						detail.HTMLBody = cleaned
 					} else {
-						detail.HTMLBody = env.HTML
+						detail.HTMLBody = ""
+						detail.BodyAccess = "sanitize_failed"
 					}
 				}
 			}
@@ -245,7 +246,8 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 					if cleaned, err := sanitize.HTML(env.HTML); err == nil {
 						detail.HTMLBody = cleaned
 					} else {
-						detail.HTMLBody = env.HTML
+						detail.HTMLBody = ""
+						detail.BodyAccess = "sanitize_failed"
 					}
 				}
 			}

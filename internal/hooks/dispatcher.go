@@ -50,6 +50,7 @@ type dispatcherStore interface {
 	MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error
 	MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
 	CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error
+	ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) ([]*models.WebhookEndpoint, error)
 	ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error)
 	MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error
 	MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
@@ -127,7 +128,9 @@ func New(cfg Config, logger zerolog.Logger) *Dispatcher {
 	}
 }
 
-func (d *Dispatcher) Enabled() bool { return d != nil && d.enabled }
+func (d *Dispatcher) Enabled() bool {
+	return d != nil && (d.enabled || d.store != nil)
+}
 
 func (d *Dispatcher) BindStore(st dispatcherStore) *Dispatcher {
 	if d != nil {
@@ -257,10 +260,68 @@ func (d *Dispatcher) processOutbox(ctx context.Context, job *workqueue.Job[*outb
 		return nil
 	}
 	event := job.Payload.OutboxEvent
-	if err := d.store.CreateWebhookDeliveries(ctx, event, d.urls); err != nil {
+	urls := append([]string(nil), d.urls...)
+	if tenantID, ok := tenantIDFromOutboxPayload(event.Payload); ok && d.store != nil {
+		endpoints, err := d.store.ListWebhookEndpoints(ctx, tenantID)
+		if err != nil {
+			return err
+		}
+		for _, ep := range endpoints {
+			if ep == nil || !ep.IsActive {
+				continue
+			}
+			if !endpointAcceptsEvent(ep, event.EventType) {
+				continue
+			}
+			urls = appendUniqueURL(urls, ep.URL)
+		}
+	}
+	if len(urls) == 0 {
+		return nil
+	}
+	if err := d.store.CreateWebhookDeliveries(ctx, event, urls); err != nil {
 		return err
 	}
 	return nil
+}
+
+func tenantIDFromOutboxPayload(payload json.RawMessage) (uuid.UUID, bool) {
+	var partial struct {
+		TenantID string `json:"tenant_id"`
+	}
+	if err := json.Unmarshal(payload, &partial); err != nil || strings.TrimSpace(partial.TenantID) == "" {
+		return uuid.Nil, false
+	}
+	id, err := uuid.Parse(partial.TenantID)
+	if err != nil {
+		return uuid.Nil, false
+	}
+	return id, true
+}
+
+func endpointAcceptsEvent(ep *models.WebhookEndpoint, eventType string) bool {
+	if ep == nil || len(ep.EventTypes) == 0 {
+		return true
+	}
+	for _, t := range ep.EventTypes {
+		if t == eventType || t == "*" {
+			return true
+		}
+	}
+	return false
+}
+
+func appendUniqueURL(urls []string, url string) []string {
+	url = strings.TrimSpace(url)
+	if url == "" {
+		return urls
+	}
+	for _, existing := range urls {
+		if existing == url {
+			return urls
+		}
+	}
+	return append(urls, url)
 }
 
 // processDelivery POSTs one claimed webhook delivery to its URL. On failure

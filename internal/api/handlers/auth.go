@@ -51,18 +51,62 @@ type AuthHandler struct {
 	defaultPlanID           uuid.UUID
 	defaultOpenRegistration bool
 	settings                settingsReader
+	cookieSecure            bool
 	logger                  zerolog.Logger
 }
 
-func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, l zerolog.Logger) *AuthHandler {
+func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, cookieSecure bool, l zerolog.Logger) *AuthHandler {
 	return &AuthHandler{
 		store:                   s,
 		jwtSecret:               jwtSecret,
 		defaultPlanID:           defaultPlanID,
 		defaultOpenRegistration: openRegistration,
 		settings:                settings,
+		cookieSecure:            cookieSecure,
 		logger:                  l.With().Str("handler", "auth").Logger(),
 	}
+}
+
+// RefreshCookieName is the httpOnly cookie that carries the refresh token.
+// The token never appears in a JSON response body, so XSS cannot exfiltrate
+// it from localStorage.
+const RefreshCookieName = "tabmail_refresh_token"
+
+// refreshCookiePath restricts the cookie to the auth endpoints that actually
+// consume it (/api/v1/auth/refresh, /api/v1/auth/logout).
+const refreshCookiePath = "/api/v1/auth"
+
+func (h *AuthHandler) setRefreshCookie(w http.ResponseWriter, token string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     RefreshCookieName,
+		Value:    token,
+		Path:     refreshCookiePath,
+		MaxAge:   int(authn.RefreshTokenTTL.Seconds()),
+		HttpOnly: true,
+		Secure:   h.cookieSecure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+func (h *AuthHandler) clearRefreshCookie(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     RefreshCookieName,
+		Value:    "",
+		Path:     refreshCookiePath,
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   h.cookieSecure,
+		SameSite: http.SameSiteLaxMode,
+	})
+}
+
+// refreshTokenFromRequest prefers the httpOnly cookie and falls back to a JSON
+// body field for non-browser API clients.
+func refreshTokenFromRequest(r *http.Request, bodyToken string) string {
+	if c, err := r.Cookie(RefreshCookieName); err == nil && c.Value != "" {
+		return c.Value
+	}
+	return bodyToken
 }
 
 // Login handles POST /api/v1/auth/login
@@ -110,11 +154,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	go func() { _ = h.store.TouchUserLogin(context.Background(), user.ID) }()
 
+	h.setRefreshCookie(w, refreshToken)
 	ok(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 		"user": map[string]any{
 			"id":           user.ID,
 			"email":        user.Email,
@@ -210,11 +254,11 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.setRefreshCookie(w, refreshToken)
 	created(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 		"user": map[string]any{
 			"id":           user.ID,
 			"email":        user.Email,
@@ -230,16 +274,15 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	if err := decodeBody(r, &req); err != nil {
-		errBadRequest(w, "invalid request body")
-		return
-	}
-	if req.RefreshToken == "" {
+	_ = decodeBody(r, &req)
+
+	rawToken := refreshTokenFromRequest(r, req.RefreshToken)
+	if rawToken == "" {
 		errBadRequest(w, "refresh_token is required")
 		return
 	}
 
-	tokenHash := authn.HashToken(req.RefreshToken)
+	tokenHash := authn.HashToken(rawToken)
 	rt, err := h.store.GetRefreshToken(r.Context(), tokenHash)
 	if err != nil {
 		h.logger.Err(err).Msg("refresh: lookup token")
@@ -274,11 +317,11 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.setRefreshCookie(w, refreshToken)
 	ok(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 	})
 }
 
@@ -287,16 +330,11 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	if err := decodeBody(r, &req); err != nil {
-		// Even without body, revoke all tokens for the logged-in user
-		if user := middleware.UserFromCtx(r.Context()); user != nil {
-			_ = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
-		}
-		noContent(w)
-		return
-	}
-	if req.RefreshToken != "" {
-		tokenHash := authn.HashToken(req.RefreshToken)
+	_ = decodeBody(r, &req)
+
+	rawToken := refreshTokenFromRequest(r, req.RefreshToken)
+	if rawToken != "" {
+		tokenHash := authn.HashToken(rawToken)
 		rt, err := h.store.GetRefreshToken(r.Context(), tokenHash)
 		if err == nil && rt != nil {
 			_ = h.store.RevokeRefreshToken(r.Context(), rt.ID)
@@ -304,6 +342,7 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	} else if user := middleware.UserFromCtx(r.Context()); user != nil {
 		_ = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
 	}
+	h.clearRefreshCookie(w)
 	noContent(w)
 }
 
@@ -477,11 +516,11 @@ func (h *AuthHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.setRefreshCookie(w, refreshToken)
 	created(w, map[string]any{
-		"access_token":  accessToken,
-		"refresh_token": refreshToken,
-		"token_type":    "Bearer",
-		"expires_in":    int(authn.AccessTokenTTL.Seconds()),
+		"access_token": accessToken,
+		"token_type":   "Bearer",
+		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
 		"user": map[string]any{
 			"id":           user.ID,
 			"email":        user.Email,

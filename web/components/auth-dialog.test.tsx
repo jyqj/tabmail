@@ -15,7 +15,7 @@ const { toastSuccess, toastError, issueTokenMock, loginMock, registerMock, logou
     current: null as {
       level: "public" | "admin" | "mailbox" | "user";
       user: { email: string; display_name: string; role: "admin" | "user" } | null;
-      refreshToken: string | null;
+      refreshToken: null;
       mailboxAddress: string | null;
       loginWithTokens: ReturnType<typeof vi.fn>;
       setMailboxAuth: ReturnType<typeof vi.fn>;
@@ -137,7 +137,6 @@ describe("AuthDialog", () => {
     });
     expect(authStateRef.current?.loginWithTokens).toHaveBeenCalledWith(
       "access-token",
-      "refresh-token",
       expect.objectContaining({ email: "user@mail.test" })
     );
     expect(toastSuccess).toHaveBeenCalledWith("Welcome, User");

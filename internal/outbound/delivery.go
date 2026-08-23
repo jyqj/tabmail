@@ -30,6 +30,11 @@ func DeliverRelay(ctx context.Context, cfg config.Outbound, from string, to []st
 	if err != nil {
 		return fmt.Errorf("connect relay %s: %w", addr, err)
 	}
+	if deadline, ok := ctx.Deadline(); ok {
+		_ = conn.SetDeadline(deadline)
+	} else {
+		_ = conn.SetDeadline(time.Now().Add(2 * time.Minute))
+	}
 
 	client, err := smtp.NewClient(conn, cfg.RelayHost)
 	if err != nil {
@@ -74,6 +79,11 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 			conn, err := net.DialTimeout("tcp", addr, 30*time.Second)
 			if err != nil {
 				continue
+			}
+			if deadline, ok := ctx.Deadline(); ok {
+				_ = conn.SetDeadline(deadline)
+			} else {
+				_ = conn.SetDeadline(time.Now().Add(2 * time.Minute))
 			}
 			client, err := smtp.NewClient(conn, mx)
 			if err != nil {
