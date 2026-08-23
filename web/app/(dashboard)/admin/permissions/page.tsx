@@ -71,6 +71,7 @@ import { useCRUDPage } from "@/hooks/use-crud-page";
 import { useAuth } from "@/contexts/auth-context";
 import { isSuperAdminLevel } from "@/lib/permissions";
 import { useI18n } from "@/lib/i18n";
+import { safeConfirm } from "@/lib/utils";
 
 const GLOBAL_PROFILE_SCOPE = "__global__";
 
@@ -104,11 +105,6 @@ const defaultForm: PermissionFormData = {
   can_create_api_keys: false,
 };
 
-function confirmAction(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function")
-    return true;
-  return window.confirm(message) !== false;
-}
 
 function formatQuota(value: number): string {
   return value === 0 ? "∞" : String(value);
@@ -450,7 +446,7 @@ export default function PermissionsPage() {
       toast.error(t("permissions.systemCannotDelete"));
       return;
     }
-    if (!confirmAction(t("permissions.confirmDelete")))
+    if (!safeConfirm(t("permissions.confirmDelete")))
       return;
     try {
       await deletePermissionProfile(profile.id);

@@ -13,14 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/crud/data-table";
 import {
   Dialog,
   DialogContent,
@@ -73,6 +67,7 @@ import {
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import { safeConfirm } from "@/lib/utils";
 import { useAPI } from "@/hooks/use-api";
 
 const overrideFields = [
@@ -98,14 +93,6 @@ const emptyOverrideForm: TenantOverrideForm = {
   daily_quota: "",
 };
 
-function confirmAction(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
-  try {
-    return window.confirm(message) !== false;
-  } catch {
-    return true;
-  }
-}
 
 export default function TenantsPage() {
   const { t } = useI18n();
@@ -166,7 +153,7 @@ export default function TenantsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirmAction(t("tenants.confirmDelete"))) return;
+    if (!safeConfirm(t("tenants.confirmDelete"))) return;
     try {
       await deleteTenant(id);
       toast.success(t("tenants.tenantDeleted"));
@@ -206,7 +193,7 @@ export default function TenantsPage() {
   };
 
   const handleRevokeKey = async (keyId: string) => {
-    if (!confirmAction(t("tenants.confirmRevokeKey"))) return;
+    if (!safeConfirm(t("tenants.confirmRevokeKey"))) return;
     try {
       await revokeAPIKey(keysTenantId, keyId);
       setKeys((prev) => prev.filter((k) => k.id !== keyId));
@@ -318,30 +305,20 @@ export default function TenantsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : tenants.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">{t("tenants.noTenants")}</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("tenants.name")}</TableHead>
-                    <TableHead>{t("tenants.plan")}</TableHead>
-                    <TableHead>{t("tenants.role")}</TableHead>
-                    <TableHead>{t("common.created")}</TableHead>
-                    <TableHead className="w-10" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tenants.map((tenant) => (
+            <DataTable
+              loading={loading}
+              isEmpty={tenants.length === 0}
+              emptyIcon={Users}
+              emptyText={t("tenants.noTenants")}
+              columns={[
+                { key: "name", header: t("tenants.name") },
+                { key: "plan", header: t("tenants.plan") },
+                { key: "role", header: t("tenants.role") },
+                { key: "created", header: t("common.created") },
+                { key: "actions", className: "w-10" },
+              ]}
+            >
+              {tenants.map((tenant) => (
                     <TableRow key={tenant.id}>
                       <TableCell className="font-medium">{tenant.name}</TableCell>
                       <TableCell>
@@ -398,10 +375,8 @@ export default function TenantsPage() {
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+              ))}
+            </DataTable>
           </CardContent>
         </Card>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,30 +12,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { DataTable } from "@/components/crud/data-table";
+import { DialogTrigger } from "@/components/ui/dialog";
+import { FormDialog } from "@/components/crud/form-dialog";
 import { listPlans, createPlan, deletePlan, updatePlan } from "@/lib/api";
 import type { Plan } from "@/lib/types";
 import { Plus, Trash2, CreditCard, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
+import { safeConfirm } from "@/lib/utils";
 import { useCRUDPage } from "@/hooks/use-crud-page";
 
 interface PlanFormData {
@@ -60,10 +47,6 @@ const defaultForm: PlanFormData = {
   daily_quota: "1000",
 };
 
-function confirmAction(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
-  return window.confirm(message) !== false;
-}
 
 export default function PlansPage() {
   const { t } = useI18n();
@@ -123,7 +106,7 @@ export default function PlansPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirmAction(t("plans.confirmDelete"))) return;
+    if (!safeConfirm(t("plans.confirmDelete"))) return;
     try {
       await deletePlan(id);
       toast.success(t("plans.deleted"));
@@ -180,43 +163,28 @@ export default function PlansPage() {
         title={t("plans.title")}
         description={t("plans.count", { count: total })}
         actions={
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
-              <Plus className="h-3.5 w-3.5" />
-              {t("plans.createPlan")}
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>{t("plans.createTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("plans.createDesc")}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
-                {fields.map((f) => (
-                  <div key={f.key} className="space-y-1.5">
-                    <Label className="text-xs">{f.label}</Label>
-                    <Input
-                      type={f.type || "text"}
-                      value={form[f.key]}
-                      onChange={(e) =>
-                        setForm((prev) => ({ ...prev, [f.key]: e.target.value }))
-                      }
-                      placeholder={f.label}
-                    />
-                  </div>
-                ))}
-              </div>
-              <DialogFooter>
-                <Button
-                  onClick={handleCreate}
-                  disabled={creating || !form.name.trim()}
-                >
-                  {creating ? t("plans.creating") : t("plans.create")}
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <FormDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            trigger={
+              <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
+                <Plus className="h-3.5 w-3.5" />
+                {t("plans.createPlan")}
+              </DialogTrigger>
+            }
+            title={t("plans.createTitle")}
+            description={t("plans.createDesc")}
+            footer={
+              <Button
+                onClick={handleCreate}
+                disabled={creating || !form.name.trim()}
+              >
+                {creating ? t("plans.creating") : t("plans.create")}
+              </Button>
+            }
+          >
+            <PlanFormFields fields={fields} value={form} onChange={setForm} />
+          </FormDialog>
         }
       />
 
@@ -229,35 +197,25 @@ export default function PlansPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 2 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : plans.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">{t("plans.noPlans")}</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{t("tenants.name")}</TableHead>
-                      <TableHead className="text-right">{t("admin.domains")}</TableHead>
-                      <TableHead className="text-right">{t("plans.colMbPerDomain")}</TableHead>
-                      <TableHead className="text-right">{t("plans.colMsgPerMb")}</TableHead>
-                      <TableHead className="text-right">{t("plans.retention")}</TableHead>
-                      <TableHead className="text-right">{t("plans.colRpm")}</TableHead>
-                      <TableHead className="text-right">{t("plans.colDaily")}</TableHead>
-                      <TableHead>{t("plans.created")}</TableHead>
-                      <TableHead className="w-20" />
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {plans.map((p) => (
+            <DataTable
+              loading={loading}
+              isEmpty={plans.length === 0}
+              emptyIcon={CreditCard}
+              emptyText={t("plans.noPlans")}
+              skeletonRows={2}
+              columns={[
+                { key: "name", header: t("tenants.name") },
+                { key: "domains", header: t("admin.domains"), className: "text-right" },
+                { key: "mbPerDomain", header: t("plans.colMbPerDomain"), className: "text-right" },
+                { key: "msgPerMb", header: t("plans.colMsgPerMb"), className: "text-right" },
+                { key: "retention", header: t("plans.retention"), className: "text-right" },
+                { key: "rpm", header: t("plans.colRpm"), className: "text-right" },
+                { key: "daily", header: t("plans.colDaily"), className: "text-right" },
+                { key: "created", header: t("plans.created") },
+                { key: "actions", className: "w-20" },
+              ]}
+            >
+              {plans.map((p) => (
                       <TableRow key={p.id}>
                         <TableCell className="font-medium">{p.name}</TableCell>
                         <TableCell className="text-right tabular-nums">
@@ -304,50 +262,58 @@ export default function PlansPage() {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+              ))}
+            </DataTable>
           </CardContent>
         </Card>
       </div>
 
       {editingPlan && (
-        <Dialog open={editOpen} onOpenChange={setEditOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>{t("plans.editPlan")}</DialogTitle>
-              <DialogDescription>
-                {t("plans.editDesc")}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
-              {fields.map((f) => (
-                <div key={f.key} className="space-y-1.5">
-                  <Label className="text-xs">{f.label}</Label>
-                  <Input
-                    type={f.type || "text"}
-                    value={editForm[f.key]}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, [f.key]: e.target.value }))
-                    }
-                    placeholder={f.label}
-                  />
-                </div>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button
-                onClick={handleEdit}
-                disabled={saving || !editForm.name.trim()}
-              >
-                {saving ? t("plans.saving") : t("plans.save")}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <FormDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          title={t("plans.editPlan")}
+          description={t("plans.editDesc")}
+          footer={
+            <Button
+              onClick={handleEdit}
+              disabled={saving || !editForm.name.trim()}
+            >
+              {saving ? t("plans.saving") : t("plans.save")}
+            </Button>
+          }
+        >
+          <PlanFormFields fields={fields} value={editForm} onChange={setEditForm} />
+        </FormDialog>
       )}
+    </div>
+  );
+}
+
+function PlanFormFields({
+  fields,
+  value,
+  onChange,
+}: {
+  fields: { key: keyof PlanFormData; label: string; type?: string }[];
+  value: PlanFormData;
+  onChange: Dispatch<SetStateAction<PlanFormData>>;
+}) {
+  return (
+    <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
+      {fields.map((f) => (
+        <div key={f.key} className="space-y-1.5">
+          <Label className="text-xs">{f.label}</Label>
+          <Input
+            type={f.type || "text"}
+            value={value[f.key]}
+            onChange={(e) =>
+              onChange((prev) => ({ ...prev, [f.key]: e.target.value }))
+            }
+            placeholder={f.label}
+          />
+        </div>
+      ))}
     </div>
   );
 }

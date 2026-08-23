@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { TableCell, TableRow } from "@/components/ui/table";
+import { DataTable, DataTablePagination } from "@/components/crud/data-table";
 import {
   Dialog,
   DialogContent,
@@ -59,8 +53,6 @@ import {
 } from "@/lib/api";
 import type {
   AdminUser,
-  DomainZone,
-  PermissionProfile,
   EffectivePermission,
   UserPermissionOverride,
 } from "@/lib/types";
@@ -80,6 +72,10 @@ import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 import { useAuth } from "@/contexts/auth-context";
 import { canManageTenantUsers } from "@/lib/permissions";
+import { safeConfirm } from "@/lib/utils";
+import { useCRUDPage } from "@/hooks/use-crud-page";
+
+const USERS_PER_PAGE = 20;
 
 const NONE_PROFILE = "__none__";
 
@@ -107,32 +103,42 @@ const emptyOverrideForm: PermOverrideForm = {
   can_create_api_keys: null,
 };
 
-function confirmAction(message: string) {
-  if (typeof window === "undefined" || typeof window.confirm !== "function") return true;
-  try {
-    return window.confirm(message) !== false;
-  } catch {
-    return true;
-  }
-}
-
 export default function UsersPage() {
   const { t } = useI18n();
   const { level } = useAuth();
   // UX-only gate; the backend authz seam is authoritative.
   const isPlatformAdmin = canManageTenantUsers(level);
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+
+  const {
+    data: usersRes,
+    isLoading: loading,
+    mutate: mutateUsers,
+  } = useCRUDPage(
+    ["admin-users", page],
+    () => listUsers({ page, per_page: USERS_PER_PAGE }),
+    "admin.usersLoadFailed",
+  );
+  const { data: profilesRes } = useCRUDPage(
+    "admin-users-permission-profiles",
+    () => listPermissionProfiles(),
+    "admin.permProfilesLoadFailed",
+  );
+  const { data: domainsRes } = useCRUDPage(
+    "admin-users-domains",
+    () => listDomains(),
+    "domains.loadFailed",
+  );
+
+  const users = usersRes?.data ?? [];
+  const total = usersRes?.meta?.total ?? users.length;
+  const profiles = profilesRes?.data ?? [];
+  const domains = domainsRes?.data ?? [];
 
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviting, setInviting] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteResult, setInviteResult] = useState<{ invite_code: string; email: string } | null>(null);
-
-  // Permission profiles list
-  const [profiles, setProfiles] = useState<PermissionProfile[]>([]);
-  const [domains, setDomains] = useState<DomainZone[]>([]);
 
   // Permission management dialog
   const [permUser, setPermUser] = useState<AdminUser | null>(null);
@@ -141,42 +147,6 @@ export default function UsersPage() {
   const [permProfileId, setPermProfileId] = useState<string>(NONE_PROFILE);
   const [permSaving, setPermSaving] = useState(false);
   const [permResetting, setPermResetting] = useState(false);
-
-  const fetchUsers = useCallback(async () => {
-    try {
-      const res = await listUsers();
-      setUsers(res.data ?? []);
-      setTotal(res.meta?.total ?? res.data?.length ?? 0);
-    } catch {
-      toast.error(t("admin.usersLoadFailed"));
-    } finally {
-      setLoading(false);
-    }
-  }, [t]);
-
-  const fetchProfiles = useCallback(async () => {
-    try {
-      const res = await listPermissionProfiles();
-      setProfiles(res.data ?? []);
-    } catch {
-      toast.error(t("admin.permProfilesLoadFailed"));
-    }
-  }, [t]);
-
-  const fetchDomains = useCallback(async () => {
-    try {
-      const res = await listDomains();
-      setDomains(res.data ?? []);
-    } catch {
-      toast.error(t("domains.loadFailed"));
-    }
-  }, [t]);
-
-  useEffect(() => {
-    fetchUsers();
-    fetchProfiles();
-    fetchDomains();
-  }, [fetchUsers, fetchProfiles, fetchDomains]);
 
   const profileName = (profileId?: string) => {
     if (!profileId) return null;
@@ -208,18 +178,18 @@ export default function UsersPage() {
       toast.success(
         user.is_active ? t("admin.userDeactivated") : t("admin.userActivated")
       );
-      fetchUsers();
+      mutateUsers();
     } catch {
       toast.error(t("admin.updateFailed"));
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirmAction(t("admin.confirmDeleteUser"))) return;
+    if (!safeConfirm(t("admin.confirmDeleteUser"))) return;
     try {
       await deleteUser(id);
       toast.success(t("admin.userDeleted"));
-      fetchUsers();
+      mutateUsers();
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || t("admin.deleteFailed"));
@@ -248,7 +218,7 @@ export default function UsersPage() {
     try {
       await updateUser(permUser.id, { permission_profile_id: newProfileId });
       toast.success(t("admin.permProfileUpdated"));
-      fetchUsers();
+      mutateUsers();
       // Refresh effective permissions
       const res = await getUserPermission(permUser.id);
       setPermEffective(res.data);
@@ -426,32 +396,22 @@ export default function UsersPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {loading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-12 w-full" />
-                ))}
-              </div>
-            ) : users.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">{t("admin.noUsers")}</p>
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("admin.email")}</TableHead>
-                    <TableHead>{t("admin.displayName")}</TableHead>
-                    <TableHead>{t("admin.role")}</TableHead>
-                    <TableHead>{t("admin.permProfile")}</TableHead>
-                    <TableHead>{t("admin.status")}</TableHead>
-                    <TableHead>{t("admin.lastLogin")}</TableHead>
-                    <TableHead className="w-10" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user) => (
+            <DataTable
+              loading={loading}
+              isEmpty={users.length === 0}
+              emptyIcon={Users}
+              emptyText={t("admin.noUsers")}
+              columns={[
+                { key: "email", header: t("admin.email") },
+                { key: "displayName", header: t("admin.displayName") },
+                { key: "role", header: t("admin.role") },
+                { key: "profile", header: t("admin.permProfile") },
+                { key: "status", header: t("admin.status") },
+                { key: "lastLogin", header: t("admin.lastLogin") },
+                { key: "actions", className: "w-10" },
+              ]}
+            >
+              {users.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell className="font-medium">{user.email}</TableCell>
                       <TableCell>{user.display_name}</TableCell>
@@ -532,9 +492,18 @@ export default function UsersPage() {
                         </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              ))}
+            </DataTable>
+            {total > USERS_PER_PAGE && (
+              <DataTablePagination
+                page={page}
+                perPage={USERS_PER_PAGE}
+                total={total}
+                onPageChange={setPage}
+                label={t("admin.pageOf", { page, total })}
+                previousText={t("admin.previous")}
+                nextText={t("admin.next")}
+              />
             )}
           </CardContent>
         </Card>
