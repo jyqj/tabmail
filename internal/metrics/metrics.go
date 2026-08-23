@@ -121,13 +121,13 @@ func ObserveRetentionSweepDuration(d time.Duration) {
 func SMTPDeliverySucceeded(tenantID, mailbox string) {
 	smtpDeliveriesSucceeded.Add(1)
 	withCounter(c.tenants, tenantID, func(dc *deliveryCounter) { dc.deliveriesOK++ })
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.deliveriesOK++ })
+	withMailboxCounter(mailbox, func(dc *deliveryCounter) { dc.deliveriesOK++ })
 }
 
 func SMTPDeliveryFailed(tenantID, mailbox string) {
 	smtpDeliveriesFailed.Add(1)
 	withCounter(c.tenants, tenantID, func(dc *deliveryCounter) { dc.deliveriesFailed++ })
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.deliveriesFailed++ })
+	withMailboxCounter(mailbox, func(dc *deliveryCounter) { dc.deliveriesFailed++ })
 }
 
 func TenantRecipientAccepted(tenantID string) {
@@ -139,11 +139,11 @@ func TenantRecipientRejected(tenantID string) {
 }
 
 func MailboxRecipientAccepted(mailbox string) {
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.accepted++ })
+	withMailboxCounter(mailbox, func(dc *deliveryCounter) { dc.accepted++ })
 }
 
 func MailboxRecipientRejected(mailbox string) {
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.rejected++ })
+	withMailboxCounter(mailbox, func(dc *deliveryCounter) { dc.rejected++ })
 }
 
 func Snapshot(webhooksEnabled bool, deadLetterSize int) models.MetricsSnapshot {
@@ -190,6 +190,12 @@ func TopMailboxDelivery(limit int) []models.DeliveryStats {
 	return topDeliveryStats(c.mailboxes, limit)
 }
 
+func trackedMailboxCount() int {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	return len(c.mailboxes)
+}
+
 func withCounter(m map[string]*deliveryCounter, key string, fn func(*deliveryCounter)) {
 	if key == "" {
 		return
@@ -202,6 +208,61 @@ func withCounter(m map[string]*deliveryCounter, key string, fn func(*deliveryCou
 		m[key] = dc
 	}
 	fn(dc)
+}
+
+// The tenant map is bounded by the number of tenants, but mailbox keys are
+// recipient addresses taken straight off the wire: any sender can grow the map
+// without limit by addressing random local parts. Cap it. Only the busiest
+// entries are ever reported, so discarding the quietest ones loses nothing an
+// operator would look at, and the eviction count is exported so a truncated
+// top-N is never silently misleading.
+const (
+	maxTrackedMailboxes = 2048
+	// Evicting down to a fraction of the cap keeps the O(n log n) sweep
+	// amortized rather than running it on every new key once full.
+	mailboxesRetainedOnEvict = maxTrackedMailboxes * 3 / 4
+)
+
+var mailboxCountersEvicted atomic.Int64
+
+func withMailboxCounter(mailbox string, fn func(*deliveryCounter)) {
+	if mailbox == "" {
+		return
+	}
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	dc := c.mailboxes[mailbox]
+	if dc == nil {
+		if len(c.mailboxes) >= maxTrackedMailboxes {
+			evictQuietestMailboxes()
+		}
+		dc = &deliveryCounter{}
+		c.mailboxes[mailbox] = dc
+	}
+	fn(dc)
+}
+
+// evictQuietestMailboxes drops the least active counters until the map is back
+// to mailboxesRetainedOnEvict entries. Callers must hold c.mu.
+func evictQuietestMailboxes() {
+	type ranked struct {
+		key   string
+		total int64
+	}
+	entries := make([]ranked, 0, len(c.mailboxes))
+	for key, dc := range c.mailboxes {
+		entries = append(entries, ranked{key, dc.accepted + dc.rejected + dc.deliveriesOK + dc.deliveriesFailed})
+	}
+	sort.Slice(entries, func(i, j int) bool { return entries[i].total < entries[j].total })
+
+	drop := len(entries) - mailboxesRetainedOnEvict
+	if drop <= 0 {
+		return
+	}
+	for _, entry := range entries[:drop] {
+		delete(c.mailboxes, entry.key)
+	}
+	mailboxCountersEvicted.Add(int64(drop))
 }
 
 func recordPoint() {
@@ -286,6 +347,8 @@ func RenderPrometheus(snapshot models.MetricsSnapshot, extras map[string]float64
 	writeGauge("tabmail_ingest_jobs_dead_total", ingestJobsDead.Load())
 	writeHistogram(&b, "tabmail_ingest_job_latency_seconds", ingestLatencyHistogram)
 	writeHistogram(&b, "tabmail_retention_sweep_duration_seconds", retentionSweepHistogram)
+	writeGauge("tabmail_mailbox_counters_tracked", trackedMailboxCount())
+	writeGauge("tabmail_mailbox_counters_evicted_total", mailboxCountersEvicted.Load())
 
 	keys := make([]string, 0, len(extras))
 	for k := range extras {

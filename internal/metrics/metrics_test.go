@@ -1,12 +1,46 @@
 package metrics
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 	"time"
 
 	"tabmail/internal/models"
 )
+
+func TestMailboxCountersAreBounded(t *testing.T) {
+	t.Cleanup(func() {
+		c.mu.Lock()
+		c.mailboxes = map[string]*deliveryCounter{}
+		c.mu.Unlock()
+		mailboxCountersEvicted.Store(0)
+	})
+
+	// A busy mailbox must survive a flood of one-off recipients, which is
+	// what an address-scanning sender produces.
+	const busy = "real@mail.test"
+	for i := 0; i < 50; i++ {
+		MailboxRecipientAccepted(busy)
+	}
+	for i := 0; i < maxTrackedMailboxes*2; i++ {
+		MailboxRecipientRejected(fmt.Sprintf("scan-%d@mail.test", i))
+	}
+
+	if got := trackedMailboxCount(); got > maxTrackedMailboxes {
+		t.Fatalf("tracked mailboxes = %d, want <= %d", got, maxTrackedMailboxes)
+	}
+	if mailboxCountersEvicted.Load() == 0 {
+		t.Fatal("expected evictions to be counted")
+	}
+
+	c.mu.Lock()
+	_, kept := c.mailboxes[busy]
+	c.mu.Unlock()
+	if !kept {
+		t.Fatalf("the busiest mailbox was evicted ahead of one-off recipients")
+	}
+}
 
 func TestRenderPrometheusIncludesHistograms(t *testing.T) {
 	ObserveIngestJobLatency(1500 * time.Millisecond)
