@@ -131,6 +131,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
 	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger)
+	ua := handlers.NewUserAdminHandler(st, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
 	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
 	si := handlers.NewSendIdentityHandler(st, cfg.Logger)
@@ -249,9 +250,9 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Delete("/admin/users/{id}/permissions", perm.DeleteUserPermissionOverride)
 
 			// -- User management --
-			r.Get("/admin/users", auth.ListUsers)
-			r.Patch("/admin/users/{id}", auth.UpdateUserByAdmin)
-			r.Delete("/admin/users/{id}", auth.DeleteUserByAdmin)
+			r.Get("/admin/users", ua.ListUsers)
+			r.Patch("/admin/users/{id}", ua.UpdateUserByAdmin)
+			r.Delete("/admin/users/{id}", ua.DeleteUserByAdmin)
 		})
 
 		// -- Super admin only --
@@ -276,7 +277,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
 			r.Get("/admin/webhooks/deliveries", adm.ListWebhookDeliveries)
 
-			r.Post("/admin/invite", auth.InviteAdmin)
+			r.Post("/admin/invite", ua.InviteAdmin)
 
 			r.Get("/admin/plans", adm.ListPlans)
 			r.Post("/admin/plans", adm.CreatePlan)
