@@ -9,10 +9,14 @@ RUN npm run build
 
 FROM node:22-alpine
 WORKDIR /app
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+# `output: "standalone"` traces the server and only the node_modules it loads
+# into .next/standalone, so the runtime image skips the full install. The static
+# and public assets are not traced and have to be copied alongside it.
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/next.config.ts ./
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
