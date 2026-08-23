@@ -1,6 +1,9 @@
 -- TabMail baseline schema.
--- Pre-launch: executed by postgres.New on fresh databases.
--- All columns declared inline; no ALTER TABLE patches.
+-- Pre-launch: executed by postgres.New on every start, so it must be
+-- declarative and correct against a fresh database. All columns are declared
+-- inline; no ALTER TABLE patches, backfills, or DROP TABLE cleanups belong
+-- here. See legacy_cleanup.sql for one-off fixes to older development
+-- databases.
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -519,41 +522,6 @@ VALUES
     ('00000000-0000-0000-0000-000000000010', 'admin', 'Full access, no limits', TRUE, 0, 0, 0, 0, TRUE, TRUE, TRUE, TRUE),
     ('00000000-0000-0000-0000-000000000011', 'default', 'Standard user with receive-only access', FALSE, 0, 500, 10, 1, FALSE, FALSE, TRUE, TRUE)
 ON CONFLICT (id) DO NOTHING;
-
--- ============================================================
--- Data migrations (idempotent, for existing databases)
--- ============================================================
-
--- Add tenant_id to permission_profiles for tenant scoping
-ALTER TABLE permission_profiles ADD COLUMN IF NOT EXISTS tenant_id UUID REFERENCES tenants(id) ON DELETE CASCADE;
--- Drop legacy unique constraint on name (replaced by partial indexes)
-DO $$ BEGIN
-    IF EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'permission_profiles_name_key') THEN
-        ALTER TABLE permission_profiles DROP CONSTRAINT permission_profiles_name_key;
-    END IF;
-END $$;
-
--- Backfill mailbox message counts
-UPDATE mailboxes m
-SET message_count = sub.count
-FROM (
-    SELECT mailbox_id, COUNT(*)::BIGINT AS count
-    FROM messages
-    GROUP BY mailbox_id
-) sub
-WHERE m.id = sub.mailbox_id
-  AND m.message_count = 0;
-
--- Backfill send identities for existing zones
-INSERT INTO send_identities (tenant_id, zone_id, address, identity_type, verified)
-SELECT tenant_id, id, '*@' || domain, 'domain_wildcard', (is_verified AND mx_verified)
-FROM domain_zones
-ON CONFLICT DO NOTHING;
-
--- Migration: remove grant tables
-DROP TABLE IF EXISTS send_as_grants CASCADE;
-DROP TABLE IF EXISTS mailbox_grants CASCADE;
-DROP TABLE IF EXISTS zone_grants CASCADE;
 
 -- ============================================================
 -- Webhook endpoints (tenant-level)
