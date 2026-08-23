@@ -60,6 +60,7 @@ docker compose up -d --build
 
 ```bash
 export TABMAIL_MAILBOX_TOKEN_SECRET='change-this-mailbox-token-secret'
+export TABMAIL_JWT_SECRET='change-this-jwt-secret'
 export POSTGRES_USER='tabmail'
 export POSTGRES_PASSWORD='change-this-postgres-password'
 export POSTGRES_DB='tabmail'

@@ -160,7 +160,7 @@ curl http://127.0.0.1:8080/metrics
 - 默认 compose **只暴露 HTTP / SMTP**
 - 应用启动时会自动初始化当前 PostgreSQL schema 快照
 - PostgreSQL / Redis **不再直暴露宿主机端口**
-- 必须先提供真实的 `TABMAIL_MAILBOX_TOKEN_SECRET` / `POSTGRES_PASSWORD` / `TABMAIL_REDIS_PASSWORD`
+- 必须先提供真实的 `TABMAIL_MAILBOX_TOKEN_SECRET` / `TABMAIL_JWT_SECRET` / `POSTGRES_PASSWORD` / `TABMAIL_REDIS_PASSWORD`
 - 生产推荐使用 `docker-compose.prod.yml`
 
 ### 2. 本地开发
@@ -169,6 +169,7 @@ curl http://127.0.0.1:8080/metrics
 
 ```bash
 TABMAIL_MAILBOX_TOKEN_SECRET='replace-with-a-real-mailbox-secret' \
+TABMAIL_JWT_SECRET='replace-with-a-real-jwt-secret' \
 go run ./cmd/tabmail
 ```
 
@@ -187,6 +188,7 @@ psql "$TABMAIL_DB_DSN" -c '\dt'
 | `TABMAIL_ROLE` | 进程角色：`all / api / smtp / worker / retention` |
 | `TABMAIL_OBJECTSTORE` | 对象存储后端：`fs / s3` |
 | `TABMAIL_MAILBOX_TOKEN_SECRET` | mailbox bearer token 签名密钥 |
+| `TABMAIL_JWT_SECRET` | 用户 JWT 签名密钥（必须与 mailbox token 密钥不同） |
 | `TABMAIL_AUTO_CREATE_ROUTE_RPM` | 单路由自动建箱 RPM |
 | `TABMAIL_AUTO_CREATE_TENANT_RPM` | 单租户自动建箱 RPM |
 | `TABMAIL_DB_DSN` | PostgreSQL DSN |

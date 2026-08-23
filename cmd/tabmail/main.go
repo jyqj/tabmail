@@ -163,7 +163,7 @@ func main() {
 		NamingMode:         namingMode,
 		StripPlus:          cfg.StripPlusTag,
 		DefaultPolicy:      defaultPolicy,
-		JWTSecret:          cfg.EffectiveJWTSecret(),
+		JWTSecret:          cfg.JWTSecret,
 		MailboxTokenSecret: cfg.MailboxTokenSecret,
 		ExpectedMXHost:     cfg.SMTP.Domain,
 		PublicTenantID:     publicTenantID,

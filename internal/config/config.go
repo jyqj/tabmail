@@ -20,7 +20,7 @@ type Root struct {
 	LogLevel            string `default:"info" desc:"debug, info, warn, error"`
 	ObjectStore         string `split_words:"true" default:"fs" desc:"Object store backend: fs or s3"`
 	DataDir             string `default:"/data" desc:"Base directory for raw .eml storage"`
-	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens and JWT"`
+	MailboxTokenSecret  string `split_words:"true" required:"true" desc:"Signing secret for mailbox bearer tokens"`
 	AutoCreateRouteRPM  int    `split_words:"true" default:"60" desc:"Per-route auto-create RPM (0=disable)"`
 	AutoCreateTenantRPM int    `split_words:"true" default:"300" desc:"Per-tenant auto-create RPM (0=disable)"`
 	MailboxNaming       string `default:"full" desc:"Mailbox naming: full, local, or domain"`
@@ -28,7 +28,7 @@ type Root struct {
 	MonitorHistory      int    `default:"50" desc:"Number of recent events to keep for monitor replay (0=disable)"`
 
 	// Auth
-	JWTSecret           string `split_words:"true" default:"" desc:"JWT signing secret (defaults to MailboxTokenSecret if empty)"`
+	JWTSecret           string `split_words:"true" default:"" desc:"JWT signing secret for user sessions (required, must differ from MailboxTokenSecret)"`
 	OpenRegistration    bool   `split_words:"true" default:"true" desc:"Allow public user registration"`
 	BootstrapAdminEmail string `split_words:"true" default:"" desc:"Bootstrap admin email (created on first start if no admins exist)"`
 	BootstrapAdminPass  string `split_words:"true" default:"" desc:"Bootstrap admin password"`
@@ -43,14 +43,6 @@ type Root struct {
 	Webhook  Webhook
 	Ingest   Ingest
 	Outbound Outbound
-}
-
-// EffectiveJWTSecret returns the JWT secret, falling back to MailboxTokenSecret.
-func (c *Root) EffectiveJWTSecret() string {
-	if c.JWTSecret != "" {
-		return c.JWTSecret
-	}
-	return c.MailboxTokenSecret
 }
 
 type SMTP struct {
@@ -179,6 +171,12 @@ func (c *Root) Validate() error {
 	}
 	if err := validateSecret("TABMAIL_MAILBOX_TOKEN_SECRET", c.MailboxTokenSecret, 16); err != nil {
 		return err
+	}
+	if err := validateSecret("TABMAIL_JWT_SECRET", c.JWTSecret, 16); err != nil {
+		return err
+	}
+	if strings.TrimSpace(c.JWTSecret) == strings.TrimSpace(c.MailboxTokenSecret) {
+		return fmt.Errorf("config: TABMAIL_JWT_SECRET must differ from TABMAIL_MAILBOX_TOKEN_SECRET")
 	}
 	if strings.TrimSpace(c.DB.DSN) == "" {
 		return fmt.Errorf("config: TABMAIL_DB_DSN is required")

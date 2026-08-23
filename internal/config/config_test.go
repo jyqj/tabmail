@@ -20,6 +20,7 @@ func TestValidateAcceptsProductionLikeConfig(t *testing.T) {
 		ObjectStore:        "fs",
 		DataDir:            "/data",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
+		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
 	}
@@ -31,12 +32,38 @@ func TestValidateAcceptsProductionLikeConfig(t *testing.T) {
 	}
 }
 
+func TestValidateRequiresDistinctJWTSecret(t *testing.T) {
+	cfg := &Root{
+		Role:               "all",
+		ObjectStore:        "fs",
+		DataDir:            "/data",
+		MailboxTokenSecret: "mailbox-token-secret-123456",
+		JWTSecret:          "mailbox-token-secret-123456",
+		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
+		Redis:              Redis{Addr: "redis:6379"},
+	}
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected identical JWT and mailbox token secrets to be rejected")
+	}
+
+	cfg.JWTSecret = ""
+	if err := cfg.Validate(); err == nil {
+		t.Fatal("expected missing JWT secret to be rejected")
+	}
+
+	cfg.JWTSecret = "jwt-secret-123456789012345"
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("unexpected validate error: %v", err)
+	}
+}
+
 func TestValidateNormalizesAndRejectsDKIMFailPolicy(t *testing.T) {
 	cfg := &Root{
 		Role:               "worker",
 		ObjectStore:        "fs",
 		DataDir:            "/data",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
+		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
 		Outbound:           Outbound{DKIMFailPolicy: " FAIL_OPEN "},
@@ -59,6 +86,7 @@ func TestValidateRequiresS3FieldsWhenEnabled(t *testing.T) {
 		Role:               "all",
 		ObjectStore:        "s3",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
+		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
 	}
@@ -72,6 +100,7 @@ func TestValidateAcceptsS3Config(t *testing.T) {
 		Role:               "all",
 		ObjectStore:        "s3",
 		MailboxTokenSecret: "mailbox-token-secret-123456",
+		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
 		S3: S3{
