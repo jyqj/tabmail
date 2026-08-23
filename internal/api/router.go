@@ -291,6 +291,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"ok"}`))
 	})
+	metricsHandler := metrics.Handler()
 	r.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		counts := metricsCounts.Get(time.Now(), func() metricsDBCounts {
 			webhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), "dead")
@@ -304,16 +305,15 @@ func NewRouter(cfg RouterConfig) http.Handler {
 				ingestProcessing: ingestProcessing,
 			}
 		})
-		snapshot := metrics.Snapshot(cfg.Dispatcher != nil && cfg.Dispatcher.Enabled(), counts.webhookDead)
-		body := metrics.RenderPrometheus(snapshot, map[string]float64{
-			"tabmail_webhooks_backlog":         float64(counts.webhookPending),
-			"tabmail_ingest_backlog":           float64(counts.ingestReady + counts.ingestProcessing),
-			"tabmail_ingest_queue_depth":       float64(counts.ingestReady + counts.ingestProcessing),
-			"tabmail_ingest_queue_ready_depth": float64(counts.ingestReady),
-			"tabmail_ingest_queue_inflight":    float64(counts.ingestProcessing),
+		// The queue depths live in the database, so they are refreshed from the
+		// cached counts here rather than by the collectors themselves.
+		metrics.SetBacklogs(metrics.Backlogs{
+			WebhookDeadLetters: counts.webhookDead,
+			WebhooksPending:    counts.webhookPending,
+			IngestReady:        counts.ingestReady,
+			IngestProcessing:   counts.ingestProcessing,
 		})
-		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-		_, _ = w.Write([]byte(body))
+		metricsHandler.ServeHTTP(w, r)
 	})
 
 	return r
