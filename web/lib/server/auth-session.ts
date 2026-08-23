@@ -64,6 +64,7 @@ export function splitRefreshToken(payload: unknown): SessionSplit {
   if (typeof token !== "string" || token === "") {
     return { body: payload, refreshToken: null };
   }
-  const { refresh_token: _stripped, ...rest } = data;
+  const rest = { ...data };
+  delete rest.refresh_token;
   return { body: { ...envelope, data: rest }, refreshToken: token };
 }
