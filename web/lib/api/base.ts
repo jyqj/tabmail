@@ -22,6 +22,60 @@ export function getBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 }
 
+// Session endpoints must stay same-origin in the browser so the Next route
+// handlers in app/api/v1/auth can manage the httpOnly refresh cookie, even
+// when NEXT_PUBLIC_API_URL points the rest of the API at the backend
+// directly.
+const SAME_ORIGIN_SESSION_PATHS = new Set([
+  "/api/v1/auth/login",
+  "/api/v1/auth/register",
+  "/api/v1/auth/accept-invite",
+  "/api/v1/auth/refresh",
+  "/api/v1/auth/logout",
+]);
+
+function requestBaseUrl(path: string): string {
+  if (typeof window !== "undefined" && SAME_ORIGIN_SESSION_PATHS.has(path)) {
+    return "";
+  }
+  return getBaseUrl();
+}
+
+// ---------------------------------------------------------------------------
+// Access token (memory only)
+//
+// The access token is short-lived and intentionally never persisted: XSS on
+// any page cannot read a token that only exists in this module. Sessions
+// survive reloads through the httpOnly refresh cookie managed by the
+// /api/v1/auth route handlers, which browser JavaScript cannot touch either.
+// The only session marker left in localStorage is the non-credential
+// "tabmail_user" profile used to decide whether a silent refresh is worth
+// attempting.
+// ---------------------------------------------------------------------------
+
+let inMemoryAccessToken: string | null = null;
+
+export function getAccessToken(): string | null {
+  return inMemoryAccessToken;
+}
+
+export function setAccessToken(token: string | null) {
+  inMemoryAccessToken = token && token.trim() ? token.trim() : null;
+  notifyAuthChange();
+}
+
+function hasUserSessionMarker(): boolean {
+  return Boolean(getStoredKey("tabmail_user"));
+}
+
+function clearUserSession() {
+  setAccessToken(null);
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("tabmail_user");
+  }
+  notifyAuthChange();
+}
+
 function getStoredKey(key: string): string | null {
   if (typeof window === "undefined") return null;
   return localStorage.getItem(key);
@@ -88,8 +142,17 @@ export function clearMailboxAPIKeyAuth() {
 }
 
 function requestUsedAccessToken(headers: Record<string, string>): boolean {
-  const accessToken = getStoredKey("tabmail_access_token");
+  const accessToken = getAccessToken();
   return Boolean(accessToken && headers.Authorization === `Bearer ${accessToken}`);
+}
+
+// shouldAttemptRefresh decides whether a 401 is worth a cookie-based refresh:
+// either the request carried the (now stale) access token, or a stored user
+// session went out with no credential at all because the in-memory token was
+// lost to a reload. Mailbox-token and API-key requests never trigger it.
+function shouldAttemptRefresh(headers: Record<string, string>): boolean {
+  if (requestUsedAccessToken(headers)) return true;
+  return !headers.Authorization && !headers["X-API-Key"] && !getAccessToken() && hasUserSessionMarker();
 }
 
 function hasStoredAdminSession(): boolean {
@@ -110,7 +173,7 @@ export function buildHeaders(path: string, extra?: Record<string, string>) {
   const headers: Record<string, string> = { ...(extra || {}) };
   if (hasExplicitAuthHeader(headers)) return headers;
 
-  const accessToken = getStoredKey("tabmail_access_token");
+  const accessToken = getAccessToken();
   const tenantId = getStoredKey("tabmail_tenant_id");
   const mailboxToken = getStoredKey("tabmail_mailbox_token");
   const mailboxAddress = getStoredKey("tabmail_mailbox_address");
@@ -140,7 +203,7 @@ export function buildHeaders(path: string, extra?: Record<string, string>) {
 }
 
 export async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
-  const base = getBaseUrl();
+  const base = requestBaseUrl(path);
   const url = new URL(
     `${base}${path}`,
     typeof window !== "undefined" ? window.location.origin : undefined
@@ -163,8 +226,8 @@ export async function request<T>(path: string, opts: RequestOptions = {}): Promi
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
 
-  // Auto-refresh on 401 if we have a refresh token
-  if (res.status === 401 && requestUsedAccessToken(headers) && getStoredKey("tabmail_refresh_token")) {
+  // Auto-refresh on 401 through the httpOnly cookie session
+  if (res.status === 401 && shouldAttemptRefresh(headers)) {
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       // Retry with new token
@@ -209,37 +272,38 @@ async function tryRefreshToken(): Promise<boolean> {
   return refreshPromise;
 }
 
-async function doRefreshToken(): Promise<boolean> {
-  const refreshToken = getStoredKey("tabmail_refresh_token");
-  if (!refreshToken) return false;
+// bootstrapSession restores a reloaded tab: when a stored user profile exists
+// but the in-memory access token is gone, exchange the httpOnly refresh
+// cookie for a fresh token. Resolves true when a usable token is in place.
+export function bootstrapSession(): Promise<boolean> {
+  if (getAccessToken()) return Promise.resolve(true);
+  if (!hasUserSessionMarker()) return Promise.resolve(false);
+  return tryRefreshToken();
+}
 
+async function doRefreshToken(): Promise<boolean> {
+  if (typeof window === "undefined") return false;
   try {
-    const base = getBaseUrl();
-    const res = await fetch(`${base}/api/v1/auth/refresh`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
+    // Always same-origin: the refresh token lives in an httpOnly cookie that
+    // only the Next /api/v1/auth route handlers can read and rotate.
+    const res = await fetch("/api/v1/auth/refresh", { method: "POST" });
 
     if (!res.ok) {
-      // Refresh failed — clear tokens
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("tabmail_access_token");
-        localStorage.removeItem("tabmail_refresh_token");
-        localStorage.removeItem("tabmail_user");
-        window.dispatchEvent(new Event("tabmail-auth-change"));
-      }
+      // The session is gone server-side; drop the stale local marker so the
+      // UI stops presenting a logged-in state.
+      clearUserSession();
       return false;
     }
 
     const data = await res.json();
-    if (typeof window !== "undefined" && data?.data) {
-      localStorage.setItem("tabmail_access_token", data.data.access_token);
-      localStorage.setItem("tabmail_refresh_token", data.data.refresh_token);
-      window.dispatchEvent(new Event("tabmail-auth-change"));
+    if (data?.data?.access_token) {
+      setAccessToken(data.data.access_token);
+      return true;
     }
-    return true;
+    return false;
   } catch {
+    // Network failure: keep local state so a transient outage does not log
+    // the user out.
     return false;
   }
 }
@@ -257,8 +321,8 @@ export async function streamEvents(
     });
 
     if (!res.ok || !res.body) {
-      // If 401 and we have tokens, try refresh then reconnect once
-      if (res.status === 401 && requestUsedAccessToken(buildHeaders(path)) && getStoredKey("tabmail_refresh_token")) {
+      // If 401 and a user session exists, try refresh then reconnect once
+      if (res.status === 401 && shouldAttemptRefresh(buildHeaders(path))) {
         const refreshed = await tryRefreshToken();
         if (refreshed) {
           const retryRes = await fetch(`${getBaseUrl()}${path}`, {

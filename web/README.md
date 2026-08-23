@@ -46,6 +46,9 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:8080
 - 浏览器请求优先走当前站点 rewrite
 - docs 页会回退到 `http://localhost:8080/docs`
 
+无论是否设置，`/api/v1/auth/*` 会话端点始终走同源的 Next Route Handler：
+refresh token 保存在 httpOnly cookie 中，只有这些 Route Handler 能读写。
+
 ## 鉴权模式
 
 前端支持 2 种交互式连接方式：

@@ -15,7 +15,6 @@ const { toastSuccess, toastError, issueTokenMock, loginMock, registerMock, logou
     current: null as {
       level: "public" | "admin" | "mailbox" | "user";
       user: { email: string; display_name: string; role: "admin" | "user" } | null;
-      refreshToken: string | null;
       mailboxAddress: string | null;
       loginWithTokens: ReturnType<typeof vi.fn>;
       setMailboxAuth: ReturnType<typeof vi.fn>;
@@ -92,7 +91,6 @@ describe("AuthDialog", () => {
     authStateRef.current = {
       level: "public",
       user: null,
-      refreshToken: null,
       mailboxAddress: null,
       loginWithTokens: vi.fn(),
       setMailboxAuth: vi.fn(),
@@ -107,10 +105,11 @@ describe("AuthDialog", () => {
   });
 
   it("支持账号登录并写入 JWT", async () => {
+    // The refresh token never reaches the browser: the /api/v1/auth/login
+    // route handler moves it into an httpOnly cookie before responding.
     loginMock.mockResolvedValue({
       data: {
         access_token: "access-token",
-        refresh_token: "refresh-token",
         user: {
           id: "user-1",
           email: "user@mail.test",
@@ -137,7 +136,6 @@ describe("AuthDialog", () => {
     });
     expect(authStateRef.current?.loginWithTokens).toHaveBeenCalledWith(
       "access-token",
-      "refresh-token",
       expect.objectContaining({ email: "user@mail.test" })
     );
     expect(toastSuccess).toHaveBeenCalledWith("Welcome, User");
@@ -147,7 +145,6 @@ describe("AuthDialog", () => {
     authStateRef.current = {
       level: "mailbox",
       user: null,
-      refreshToken: null,
       mailboxAddress: "user@mail.test",
       loginWithTokens: vi.fn(),
       setMailboxAuth: vi.fn(),

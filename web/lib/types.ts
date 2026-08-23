@@ -342,9 +342,11 @@ export interface UpdateUserRequest {
   permission_profile_id?: string | null;
 }
 
+// Session responses as seen by the browser: the Next /api/v1/auth route
+// handlers move refresh_token into an httpOnly cookie before the payload
+// reaches client JavaScript.
 export interface LoginResponse {
   access_token: string;
-  refresh_token: string;
   token_type: string;
   expires_in: number;
   user: AuthUser;
@@ -352,7 +354,6 @@ export interface LoginResponse {
 
 export interface RefreshResponse {
   access_token: string;
-  refresh_token: string;
   token_type: string;
   expires_in: number;
 }

@@ -2,6 +2,7 @@ import React from "react";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
+import { getAccessToken, setAccessToken } from "@/lib/api/base";
 import { AuthProvider, useAuth } from "./auth-context";
 
 function AuthProbe() {
@@ -17,7 +18,7 @@ function AuthProbe() {
 
       <button
         onClick={() =>
-          auth.loginWithTokens(" access-token ", " refresh-token ", {
+          auth.loginWithTokens(" access-token ", {
             id: "user-1",
             email: "user@mail.test",
             display_name: "User",
@@ -39,6 +40,7 @@ function AuthProbe() {
 describe("auth-context", () => {
   beforeEach(() => {
     localStorage.clear();
+    setAccessToken(null);
   });
 
   afterEach(() => {
@@ -68,8 +70,12 @@ describe("auth-context", () => {
     await waitFor(() => {
       expect(screen.getByTestId("level")).toHaveTextContent("user");
     });
-    expect(localStorage.getItem("tabmail_access_token")).toBe(" access-token ");
-    expect(localStorage.getItem("tabmail_refresh_token")).toBe(" refresh-token ");
+    // The access token stays in memory only; localStorage keeps the profile
+    // marker but never any credential.
+    expect(getAccessToken()).toBe("access-token");
+    expect(localStorage.getItem("tabmail_access_token")).toBeNull();
+    expect(localStorage.getItem("tabmail_refresh_token")).toBeNull();
+    expect(localStorage.getItem("tabmail_user")).toContain("user@mail.test");
 
     fireEvent.click(screen.getByRole("button", { name: "set-tenant" }));
     await waitFor(() => {
@@ -81,6 +87,8 @@ describe("auth-context", () => {
     await waitFor(() => {
       expect(screen.getByTestId("level")).toHaveTextContent("public");
     });
+    expect(getAccessToken()).toBeNull();
+    expect(localStorage.getItem("tabmail_user")).toBeNull();
     expect(localStorage.getItem("tabmail_tenant_id")).toBeNull();
 
     fireEvent.click(screen.getByRole("button", { name: "set-mailbox" }));
