@@ -163,6 +163,8 @@ export interface Meta {
   total: number;
   page: number;
   per_page: number;
+  /** Opaque keyset cursor for the next page; absent when the list ends. */
+  next_cursor?: string;
 }
 
 export interface APIResponse<T> {

@@ -322,7 +322,9 @@ CREATE TABLE IF NOT EXISTS messages (
     received_at     TIMESTAMPTZ  NOT NULL DEFAULT now(),
     expires_at      TIMESTAMPTZ  NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_messages_mailbox_rcvd   ON messages(mailbox_id, received_at DESC);
+-- id is part of the key so keyset pagination on (received_at DESC, id DESC)
+-- can walk the index without a sort tiebreak.
+CREATE INDEX IF NOT EXISTS idx_messages_mailbox_rcvd_id ON messages(mailbox_id, received_at DESC, id DESC);
 CREATE INDEX IF NOT EXISTS idx_messages_tenant_expires ON messages(tenant_id, expires_at);
 CREATE INDEX IF NOT EXISTS idx_messages_expires        ON messages(expires_at);
 CREATE INDEX IF NOT EXISTS idx_messages_raw_object_key ON messages(raw_object_key) WHERE raw_object_key IS NOT NULL;

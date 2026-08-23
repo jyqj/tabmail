@@ -117,3 +117,89 @@ func seededMessageServiceWithStore(t *testing.T, st *testutil.FakeStore, tenant 
 func ptrUUID(id uuid.UUID) *uuid.UUID {
 	return &id
 }
+
+func TestCursorRoundTrip(t *testing.T) {
+	msg := &models.Message{ID: uuid.New(), ReceivedAt: time.Now().Truncate(time.Microsecond)}
+	token := EncodeCursor(msg)
+	if token == "" {
+		t.Fatal("expected non-empty cursor token")
+	}
+	cursor, err := DecodeCursor(token)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !cursor.ReceivedAt.Equal(msg.ReceivedAt) || cursor.ID != msg.ID {
+		t.Fatalf("cursor did not round-trip: %#v vs %#v", cursor, msg)
+	}
+}
+
+func TestDecodeCursorRejectsMalformedTokens(t *testing.T) {
+	for _, token := range []string{"", "!!!", "bm90LWEtY3Vyc29y", "MTIzNA"} {
+		if _, err := DecodeCursor(token); err == nil {
+			t.Fatalf("expected error for token %q", token)
+		} else if appErr, ok := app.As(err); !ok || appErr.Kind != app.KindBadRequest {
+			t.Fatalf("expected bad-request app error for token %q, got %v", token, err)
+		}
+	}
+}
+
+func TestListMessagesKeysetWalksAllPages(t *testing.T) {
+	ctx := context.Background()
+	st, svc, tenant, mailbox := seededMessageService(t, models.AccessPublic, nil)
+
+	base := time.Now().Truncate(time.Microsecond)
+	const totalMessages = 7
+	for i := range totalMessages {
+		if err := st.CreateMessage(ctx, &models.Message{
+			TenantID:   tenant.ID,
+			MailboxID:  mailbox.ID,
+			ZoneID:     mailbox.ZoneID,
+			Subject:    "m",
+			ReceivedAt: base.Add(time.Duration(i) * time.Second),
+			ExpiresAt:  base.Add(24 * time.Hour),
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	viewer := Viewer{AuthMode: AuthModePublic}
+
+	var seen []uuid.UUID
+	var cursor *models.MessageCursor
+	const pageSize = 3
+	for page := 0; ; page++ {
+		items, total, next, err := svc.ListMessagesKeyset(ctx, mailbox.FullAddress, viewer, cursor, pageSize)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if total != totalMessages {
+			t.Fatalf("expected total %d, got %d", totalMessages, total)
+		}
+		for _, m := range items {
+			seen = append(seen, m.ID)
+		}
+		if next == "" {
+			break
+		}
+		if len(items) != pageSize {
+			t.Fatalf("expected a full page before a next cursor, got %d items", len(items))
+		}
+		cursor, err = DecodeCursor(next)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if page > totalMessages {
+			t.Fatal("cursor never terminated")
+		}
+	}
+
+	if len(seen) != totalMessages {
+		t.Fatalf("expected %d messages across pages, got %d", totalMessages, len(seen))
+	}
+	unique := map[uuid.UUID]struct{}{}
+	for _, id := range seen {
+		unique[id] = struct{}{}
+	}
+	if len(unique) != totalMessages {
+		t.Fatalf("expected no duplicates across pages, got %d unique of %d", len(unique), len(seen))
+	}
+}

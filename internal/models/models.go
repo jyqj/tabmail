@@ -473,6 +473,14 @@ func (p Page) Normalize() Page {
 	return p
 }
 
+// MessageCursor marks a position in a mailbox's message list ordered by
+// (received_at DESC, id DESC). Keyset listings return rows strictly after
+// this position, so deep pages stay cheap where OFFSET would rescan.
+type MessageCursor struct {
+	ReceivedAt time.Time
+	ID         uuid.UUID
+}
+
 // ============================================================
 // Permission Profile
 // ============================================================

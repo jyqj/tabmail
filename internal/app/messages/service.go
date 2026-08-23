@@ -30,6 +30,8 @@ type storeRepo interface {
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
+	ListMessagesKeyset(ctx context.Context, mailboxID uuid.UUID, before *models.MessageCursor, limit int) ([]*models.Message, error)
+	CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	MarkSeen(ctx context.Context, id uuid.UUID) error
@@ -242,6 +244,29 @@ func (s *Service) ListMessages(ctx context.Context, address string, viewer Viewe
 		return nil, 0, app.Internal(err)
 	}
 	return items, total, nil
+}
+
+// ListMessagesKeyset lists messages after the cursor position. It returns the
+// page, the mailbox's total message count (an O(1) counter read, not a scan),
+// and the cursor for the next page — empty when this page ends the list.
+func (s *Service) ListMessagesKeyset(ctx context.Context, address string, viewer Viewer, cursor *models.MessageCursor, limit int) ([]*models.Message, int, string, error) {
+	mb, err := s.ResolveMailbox(ctx, address, viewer)
+	if err != nil {
+		return nil, 0, "", err
+	}
+	items, err := s.store.ListMessagesKeyset(ctx, mb.ID, cursor, limit)
+	if err != nil {
+		return nil, 0, "", app.Internal(err)
+	}
+	total, err := s.store.CountMessages(ctx, mb.ID)
+	if err != nil {
+		return nil, 0, "", app.Internal(err)
+	}
+	next := ""
+	if len(items) == limit && limit > 0 {
+		next = EncodeCursor(items[len(items)-1])
+	}
+	return items, total, next, nil
 }
 
 func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) (*models.MessageDetail, error) {

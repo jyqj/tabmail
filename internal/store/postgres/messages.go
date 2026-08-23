@@ -108,23 +108,64 @@ func (s *PgStore) ListMessages(ctx context.Context, mailboxID uuid.UUID, pg mode
 	rows, err := s.pool.Query(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at
-		FROM messages WHERE mailbox_id=$1 ORDER BY received_at DESC LIMIT $2 OFFSET $3`,
+		FROM messages WHERE mailbox_id=$1 ORDER BY received_at DESC, id DESC LIMIT $2 OFFSET $3`,
 		mailboxID, pg.PerPage, pg.Offset())
 	if err != nil {
 		return nil, 0, err
 	}
 	defer rows.Close()
+	out, err := scanMessages(rows)
+	if err != nil {
+		return nil, 0, err
+	}
+	return out, total, nil
+}
+
+// ListMessagesKeyset walks the (mailbox_id, received_at DESC, id DESC) index
+// from the cursor position, so page depth never turns into an OFFSET rescan.
+func (s *PgStore) ListMessagesKeyset(ctx context.Context, mailboxID uuid.UUID, before *models.MessageCursor, limit int) ([]*models.Message, error) {
+	if limit <= 0 {
+		limit = 30
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	var rows pgx.Rows
+	var err error
+	if before == nil {
+		rows, err = s.pool.Query(ctx, `
+			SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
+			       raw_object_key,headers_json,received_at,expires_at
+			FROM messages WHERE mailbox_id=$1
+			ORDER BY received_at DESC, id DESC LIMIT $2`,
+			mailboxID, limit)
+	} else {
+		rows, err = s.pool.Query(ctx, `
+			SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
+			       raw_object_key,headers_json,received_at,expires_at
+			FROM messages WHERE mailbox_id=$1 AND (received_at, id) < ($2, $3)
+			ORDER BY received_at DESC, id DESC LIMIT $4`,
+			mailboxID, before.ReceivedAt, before.ID, limit)
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	return scanMessages(rows)
+}
+
+func scanMessages(rows pgx.Rows) ([]*models.Message, error) {
 	var out []*models.Message
 	for rows.Next() {
 		m := &models.Message{}
 		if err := rows.Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender,
 			&m.Recipients, &m.Subject, &m.Size, &m.Seen, &m.RawObjectKey,
 			&m.HeadersJSON, &m.ReceivedAt, &m.ExpiresAt); err != nil {
-			return nil, 0, err
+			return nil, err
 		}
 		out = append(out, m)
 	}
-	return out, total, rows.Err()
+	return out, rows.Err()
 }
 
 func (s *PgStore) MarkSeen(ctx context.Context, id uuid.UUID) error {

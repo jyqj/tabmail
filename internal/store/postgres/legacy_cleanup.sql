@@ -43,3 +43,7 @@ ON CONFLICT DO NOTHING;
 DROP TABLE IF EXISTS send_as_grants CASCADE;
 DROP TABLE IF EXISTS mailbox_grants CASCADE;
 DROP TABLE IF EXISTS zone_grants CASCADE;
+
+-- idx_messages_mailbox_rcvd was superseded by idx_messages_mailbox_rcvd_id,
+-- which adds id so keyset pagination can walk the index directly.
+DROP INDEX IF EXISTS idx_messages_mailbox_rcvd;

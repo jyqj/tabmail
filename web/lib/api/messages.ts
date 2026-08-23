@@ -11,9 +11,13 @@ function encodeAddress(addr: string): string {
   return encodeURIComponent(addr).replace(/%40/gi, "@");
 }
 
-export function listMessages(address: string, page = 1, perPage = 30) {
+export function listMessages(address: string, page = 1, perPage = 30, cursor?: string) {
+  const params: Record<string, string | number> = { page, per_page: perPage };
+  // Keyset continuation: pass meta.next_cursor from the previous page. The
+  // backend then ignores `page` and resumes after the cursor position.
+  if (cursor) params.cursor = cursor;
   return request<APIListResponse<Message>>(`/api/v1/mailbox/${encodeAddress(address)}`, {
-    params: { page, per_page: perPage },
+    params,
   });
 }
 

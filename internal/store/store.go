@@ -147,6 +147,10 @@ type MessageStore interface {
 	CreateMessage(ctx context.Context, m *models.Message) error
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
+	// Keyset variant of ListMessages: returns up to limit messages strictly
+	// after the cursor position in (received_at DESC, id DESC) order. A nil
+	// cursor starts from the newest message.
+	ListMessagesKeyset(ctx context.Context, mailboxID uuid.UUID, before *models.MessageCursor, limit int) ([]*models.Message, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error

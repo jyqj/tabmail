@@ -166,6 +166,12 @@ components:
         total: { type: integer }
         page: { type: integer }
         per_page: { type: integer }
+        next_cursor:
+          type: string
+          description: >-
+            Opaque cursor for the next page of a keyset listing. Present when
+            more results may follow; absent when the list ends or the endpoint
+            only paginates by offset.
 
     Plan:
       type: object
@@ -786,6 +792,15 @@ components:
         minimum: 1
         maximum: 100
       description: Items per page
+    CursorParam:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: >-
+        Opaque keyset cursor from a previous response's meta.next_cursor.
+        When present, page is ignored and results continue after the cursor
+        position; per_page still bounds the page size.
 
 paths:
   /api/v1/token:
@@ -1186,6 +1201,7 @@ paths:
           example: "user@mail.example.com"
         - $ref: "#/components/parameters/PageParam"
         - $ref: "#/components/parameters/PerPageParam"
+        - $ref: "#/components/parameters/CursorParam"
       responses:
         "200":
           description: OK

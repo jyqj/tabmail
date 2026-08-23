@@ -23,6 +23,9 @@ type meta struct {
 	Total   int `json:"total"`
 	Page    int `json:"page"`
 	PerPage int `json:"per_page"`
+	// NextCursor continues a keyset listing; empty when the list ends or the
+	// endpoint only paginates by offset.
+	NextCursor string `json:"next_cursor,omitempty"`
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -43,6 +46,13 @@ func okList(w http.ResponseWriter, data any, total, page, perPage int) {
 	writeJSON(w, http.StatusOK, envelope{
 		Data: data,
 		Meta: &meta{Total: total, Page: page, PerPage: perPage},
+	})
+}
+
+func okListCursor(w http.ResponseWriter, data any, total, page, perPage int, nextCursor string) {
+	writeJSON(w, http.StatusOK, envelope{
+		Data: data,
+		Meta: &meta{Total: total, Page: page, PerPage: perPage, NextCursor: nextCursor},
 	})
 }
 

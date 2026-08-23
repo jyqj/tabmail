@@ -78,6 +78,36 @@ func (v *fakeTenantView) GetMessage(_ context.Context, id uuid.UUID) (*models.Me
 func (s *FakeStore) ListMessages(_ context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	list := s.mailboxMessagesNewestFirst(mailboxID)
+	return paginateMessages(list, pg), len(list), nil
+}
+
+func (s *FakeStore) ListMessagesKeyset(_ context.Context, mailboxID uuid.UUID, before *models.MessageCursor, limit int) ([]*models.Message, error) {
+	if limit <= 0 {
+		limit = 30
+	}
+	if limit > 100 {
+		limit = 100
+	}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	list := s.mailboxMessagesNewestFirst(mailboxID)
+	out := make([]*models.Message, 0, limit)
+	for _, m := range list {
+		if before != nil && !messageBeforeCursor(m, before) {
+			continue
+		}
+		out = append(out, m)
+		if len(out) == limit {
+			break
+		}
+	}
+	return out, nil
+}
+
+// mailboxMessagesNewestFirst returns copies ordered by (received_at DESC,
+// id DESC), matching the postgres keyset ordering. Callers must hold s.mu.
+func (s *FakeStore) mailboxMessagesNewestFirst(mailboxID uuid.UUID) []*models.Message {
 	var list []*models.Message
 	for _, m := range s.messages {
 		if m.MailboxID == mailboxID {
@@ -85,8 +115,25 @@ func (s *FakeStore) ListMessages(_ context.Context, mailboxID uuid.UUID, pg mode
 			list = append(list, &cp)
 		}
 	}
-	sort.Slice(list, func(i, j int) bool { return list[i].ReceivedAt.After(list[j].ReceivedAt) })
-	return paginateMessages(list, pg), len(list), nil
+	sort.Slice(list, func(i, j int) bool {
+		if list[i].ReceivedAt.Equal(list[j].ReceivedAt) {
+			return list[i].ID.String() > list[j].ID.String()
+		}
+		return list[i].ReceivedAt.After(list[j].ReceivedAt)
+	})
+	return list
+}
+
+// messageBeforeCursor mirrors the SQL row comparison
+// (received_at, id) < (cursor.received_at, cursor.id).
+func messageBeforeCursor(m *models.Message, cursor *models.MessageCursor) bool {
+	if m.ReceivedAt.Before(cursor.ReceivedAt) {
+		return true
+	}
+	if m.ReceivedAt.Equal(cursor.ReceivedAt) {
+		return m.ID.String() < cursor.ID.String()
+	}
+	return false
 }
 
 func (s *FakeStore) MarkSeen(_ context.Context, id uuid.UUID) error {
