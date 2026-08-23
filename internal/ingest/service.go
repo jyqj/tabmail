@@ -478,8 +478,30 @@ func (s *Service) reserveTenantDaily(ctx context.Context, tenantID uuid.UUID, li
 		}
 		return count < limit, nil
 	}
-	key := fmt.Sprintf("smtp:quota:tenant:%s:%s", tenantID, time.Now().UTC().Format("20060102"))
-	res, err := s.rdb.Eval(ctx, `
+	key := tenantDailyQuotaKey(tenantID)
+	res, err := reserveTenantDailyScript.Run(ctx, s.rdb, []string{key}, limit, int((25 * time.Hour).Seconds())).Int()
+	if err != nil {
+		return false, err
+	}
+	return res == 1, nil
+}
+
+func (s *Service) releaseTenantDaily(ctx context.Context, tenantID uuid.UUID) error {
+	if s.rdb == nil {
+		return nil
+	}
+	_, err := releaseTenantDailyScript.Run(ctx, s.rdb, []string{tenantDailyQuotaKey(tenantID)}).Result()
+	return err
+}
+
+func tenantDailyQuotaKey(tenantID uuid.UUID) string {
+	return fmt.Sprintf("smtp:quota:tenant:%s:%s", tenantID, time.Now().UTC().Format("20060102"))
+}
+
+// Scripts are registered once so calls go out as EVALSHA and only fall back to
+// EVAL when the server has evicted the script.
+var (
+	reserveTenantDailyScript = redis.NewScript(`
 local current = redis.call("GET", KEYS[1])
 if current and tonumber(current) >= tonumber(ARGV[1]) then
   return 0
@@ -493,19 +515,9 @@ if next > tonumber(ARGV[1]) then
   return 0
 end
 return 1
-`, []string{key}, limit, int((25 * time.Hour).Seconds())).Int()
-	if err != nil {
-		return false, err
-	}
-	return res == 1, nil
-}
+`)
 
-func (s *Service) releaseTenantDaily(ctx context.Context, tenantID uuid.UUID) error {
-	if s.rdb == nil {
-		return nil
-	}
-	key := fmt.Sprintf("smtp:quota:tenant:%s:%s", tenantID, time.Now().UTC().Format("20060102"))
-	_, err := s.rdb.Eval(ctx, `
+	releaseTenantDailyScript = redis.NewScript(`
 local current = redis.call("GET", KEYS[1])
 if not current then
   return 0
@@ -515,9 +527,8 @@ if tonumber(current) <= 1 then
   return 0
 end
 return redis.call("DECR", KEYS[1])
-`, []string{key}).Result()
-	return err
-}
+`)
+)
 
 func resolveRetention(st interface {
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)

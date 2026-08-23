@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -55,7 +57,48 @@ type Service struct {
 	dispatcher    *hooks.Dispatcher
 	defaultPolicy models.SMTPPolicy
 	settings      settingsManager
+	statsCounts   *statsCountCache
 	logger        zerolog.Logger
+}
+
+// statsCountsTTL bounds how stale the whole-table COUNT(*) figures behind
+// /admin/stats may be. They are dashboard numbers, never authorization input,
+// so a few seconds of staleness is a cheap trade for skipping three full
+// table scans per poll.
+const statsCountsTTL = 10 * time.Second
+
+type statsCounts struct {
+	domains   int
+	mailboxes int
+	messages  int
+}
+
+type statsCountCache struct {
+	mu        sync.Mutex
+	ttl       time.Duration
+	expiresAt time.Time
+	value     statsCounts
+}
+
+func newStatsCountCache(ttl time.Duration) *statsCountCache {
+	return &statsCountCache{ttl: ttl}
+}
+
+// get returns the cached counts, calling load when they have expired. Failed
+// loads are not cached.
+func (c *statsCountCache) get(now time.Time, load func() (statsCounts, error)) (statsCounts, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if now.Before(c.expiresAt) {
+		return c.value, nil
+	}
+	value, err := load()
+	if err != nil {
+		return statsCounts{}, err
+	}
+	c.value = value
+	c.expiresAt = now.Add(c.ttl)
+	return value, nil
 }
 
 type settingsManager interface {
@@ -135,7 +178,14 @@ func normalizeAPIKeyScopes(scopes []string) ([]string, error) {
 }
 
 func NewService(s Store, dispatcher *hooks.Dispatcher, defaultPolicy models.SMTPPolicy, sm settingsManager, logger zerolog.Logger) *Service {
-	return &Service{store: s, dispatcher: dispatcher, defaultPolicy: defaultPolicy, settings: sm, logger: logger.With().Str("service", "admin").Logger()}
+	return &Service{
+		store:         s,
+		dispatcher:    dispatcher,
+		defaultPolicy: defaultPolicy,
+		settings:      sm,
+		statsCounts:   newStatsCountCache(statsCountsTTL),
+		logger:        logger.With().Str("service", "admin").Logger(),
+	}
 }
 
 // ListSettings returns all system settings.
@@ -479,15 +529,21 @@ func (s *Service) Stats(ctx context.Context) (*models.SystemStats, error) {
 	if err != nil {
 		return nil, app.Internal(err)
 	}
-	domains, err := s.store.CountAllZones(ctx)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	mailboxes, err := s.store.CountAllMailboxes(ctx)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	messages, err := s.store.CountAllMessages(ctx)
+	counts, err := s.statsCounts.get(time.Now(), func() (statsCounts, error) {
+		domains, err := s.store.CountAllZones(ctx)
+		if err != nil {
+			return statsCounts{}, err
+		}
+		mailboxes, err := s.store.CountAllMailboxes(ctx)
+		if err != nil {
+			return statsCounts{}, err
+		}
+		messages, err := s.store.CountAllMessages(ctx)
+		if err != nil {
+			return statsCounts{}, err
+		}
+		return statsCounts{domains: domains, mailboxes: mailboxes, messages: messages}, nil
+	})
 	if err != nil {
 		return nil, app.Internal(err)
 	}
@@ -506,9 +562,9 @@ func (s *Service) Stats(ctx context.Context) (*models.SystemStats, error) {
 	return &models.SystemStats{
 		TenantsCount:    len(tenants),
 		PlansCount:      len(plans),
-		DomainsCount:    domains,
-		MailboxesCount:  mailboxes,
-		MessagesCount:   messages,
+		DomainsCount:    counts.domains,
+		MailboxesCount:  counts.mailboxes,
+		MessagesCount:   counts.messages,
 		Metrics:         metrics.Snapshot(webhooksEnabled, deadLetterSize),
 		RecentAudit:     audit,
 		TenantDelivery:  metrics.TopTenantDelivery(10),
