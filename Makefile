@@ -1,4 +1,4 @@
-.PHONY: build run dev test vet lint web-lint web-test web-build contract-check i18n-check check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
+.PHONY: build run dev test vet lint web-lint web-test web-build contract-check i18n-check route-check check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
 
 BINARY  := tabmail
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -38,9 +38,13 @@ contract-check:
 i18n-check:
 	python3 scripts/check_i18n_keys.py
 
+# Fails when openapi.yaml drifts from the routes registered by NewRouter.
+route-check:
+	$(GORUN) test -count=1 -run TestOpenAPIMatchesRoutes ./internal/api
+
 lint: vet web-lint
 
-check: test vet contract-check i18n-check web-lint web-test web-build
+check: test vet route-check contract-check i18n-check web-lint web-test web-build
 
 
 backup-db:

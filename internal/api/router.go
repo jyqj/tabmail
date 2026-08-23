@@ -51,7 +51,7 @@ func newMetricsDBCountCache(ttl time.Duration) *metricsDBCountCache {
 func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) metricsDBCounts {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c != nil && now.Before(c.expiresAt) {
+	if now.Before(c.expiresAt) {
 		return c.value
 	}
 	value := load()
@@ -246,9 +246,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/admin/tenants/{id}/keys", adm.ListAPIKeys)
 			r.Delete("/admin/tenants/{id}/keys/{keyId}", adm.DeleteAPIKey)
 
-			r.Get("/admin/stats", adm.Stats)
-			r.Get("/admin/status", adm.Stats)
-			r.Get("/admin/monitor/events", mon.StreamAll)
+		r.Get("/admin/stats", adm.Stats)
+		r.Get("/admin/monitor/events", mon.StreamAll)
 			r.Get("/admin/monitor/history", mon.History)
 			r.Get("/admin/audit", adm.ListAudit)
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)

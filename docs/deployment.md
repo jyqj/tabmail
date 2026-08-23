@@ -321,7 +321,6 @@ GET /api/v1/domains/{id}/verification-status
 - `http://127.0.0.1:8080/redoc`
 - `http://127.0.0.1:8080/metrics`
 - `http://127.0.0.1:8080/api/v1/admin/stats`
-- `http://127.0.0.1:8080/api/v1/admin/status`
 - `http://127.0.0.1:8080/api/v1/admin/monitor/events`
 - `http://127.0.0.1:8080/api/v1/admin/monitor/history`
 - `http://127.0.0.1:8080/api/v1/admin/policy`

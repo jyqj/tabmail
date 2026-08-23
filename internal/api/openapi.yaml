@@ -111,8 +111,10 @@ tags:
     description: Permission profile management (admin only)
   - name: Admin
     description: Administrative operations
-  - name: Grants
-    description: Mailbox grants, zone grants, send identities, and send-as grants
+  - name: Send Identities
+    description: Verified sender identities for outbound mail
+  - name: Webhooks
+    description: Tenant webhook endpoint management
   - name: System
     description: Health, metrics, and documentation
 
@@ -660,30 +662,6 @@ components:
         can_create_api_keys:
           type: boolean
 
-    # -- Grant Schemas ────────────────────────────────
-    MailboxGrant:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        tenant_id: { type: string, format: uuid }
-        mailbox_id: { type: string, format: uuid }
-        principal_type: { type: string, enum: [user, api_key] }
-        principal_id: { type: string, format: uuid }
-        role: { type: string, enum: [owner, manager, writer, reader] }
-        created_at: { type: string, format: date-time }
-
-    ZoneGrant:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        tenant_id: { type: string, format: uuid }
-        zone_id: { type: string, format: uuid }
-        principal_type: { type: string, enum: [user, api_key] }
-        principal_id: { type: string, format: uuid }
-        role: { type: string, enum: [owner, admin, editor, viewer] }
-        created_by: { type: string, format: uuid, nullable: true }
-        created_at: { type: string, format: date-time }
-
     SendIdentity:
       type: object
       properties:
@@ -696,33 +674,6 @@ components:
         verified: { type: boolean }
         created_at: { type: string, format: date-time }
 
-    SendAsGrant:
-      type: object
-      properties:
-        id: { type: string, format: uuid }
-        tenant_id: { type: string, format: uuid }
-        identity_id: { type: string, format: uuid }
-        principal_type: { type: string, enum: [user, api_key] }
-        principal_id: { type: string, format: uuid }
-        daily_quota: { type: integer, description: "0 = unlimited" }
-        created_at: { type: string, format: date-time }
-
-    CreateMailboxGrantRequest:
-      type: object
-      required: [principal_type, principal_id, role]
-      properties:
-        principal_type: { type: string, enum: [user, api_key] }
-        principal_id: { type: string, format: uuid }
-        role: { type: string, enum: [owner, manager, writer, reader] }
-
-    CreateZoneGrantRequest:
-      type: object
-      required: [principal_type, principal_id, role]
-      properties:
-        principal_type: { type: string, enum: [user, api_key] }
-        principal_id: { type: string, format: uuid }
-        role: { type: string, enum: [owner, admin, editor, viewer] }
-
     CreateSendIdentityRequest:
       type: object
       required: [zone_id, address]
@@ -730,13 +681,62 @@ components:
         zone_id: { type: string, format: uuid }
         address: { type: string, example: "noreply@mail.example.com" }
 
-    CreateSendAsGrantRequest:
+    WebhookEndpoint:
       type: object
-      required: [principal_type, principal_id]
       properties:
-        principal_type: { type: string, enum: [user, api_key] }
-        principal_id: { type: string, format: uuid }
-        daily_quota: { type: integer, default: 0, description: "0 = unlimited" }
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        url: { type: string, format: uri }
+        event_types:
+          type: array
+          items: { type: string }
+        is_active: { type: boolean }
+        created_by: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    OutboundAttempt:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        job_id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        adapter: { type: string }
+        attempt: { type: integer }
+        smtp_code: { type: integer }
+        smtp_response: { type: string }
+        remote_host: { type: string }
+        started_at: { type: string, format: date-time }
+        finished_at: { type: string, format: date-time }
+        error: { type: string }
+
+    SuppressionEntry:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        tenant_id: { type: string, format: uuid }
+        address: { type: string }
+        reason: { type: string }
+        source_job_id: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    RouteExplanation:
+      type: object
+      properties:
+        accepted: { type: boolean }
+        tenant_id: { type: string, format: uuid }
+        zone_id: { type: string, format: uuid }
+        zone_domain: { type: string }
+        route_id: { type: string, format: uuid }
+        route_type: { type: string, enum: [exact, wildcard, deep_wildcard, sequence] }
+        mailbox_id: { type: string, format: uuid }
+        mailbox_address: { type: string }
+        auto_create_mailbox: { type: boolean }
+        would_create_mailbox: { type: boolean }
+        reason_code: { type: string }
+        steps:
+          type: array
+          items: { type: string }
 
   responses:
     BadRequest:
@@ -1070,84 +1070,39 @@ paths:
       responses:
         "204": { description: Deleted }
 
-  # ── Domain Grants ────────────────────────────────────
-  /api/v1/domains/{id}/grants:
-    get:
-      tags: [Grants]
-      summary: List grants for a domain zone
-      operationId: listZoneGrants
-      description: List all grants assigned to a domain zone.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Domain zone ID
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: "#/components/schemas/ZoneGrant" }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
+  /api/v1/domains/{id}/routes/explain:
     post:
-      tags: [Grants]
-      summary: Create a grant for a domain zone
-      operationId: createZoneGrant
-      description: Assign a role-based grant to a user or API key for a domain zone.
+      tags: [Domain Routes]
+      summary: Explain how an address resolves
+      operationId: explainRoute
+      description: |
+        Dry-run the resolver for an address and return the matched mailbox or
+        route with the reason. The address must resolve inside the given zone.
       security: [{ APIKey: [] }, { BearerAuth: [] }]
       parameters:
         - name: id
           in: path
           required: true
           schema: { type: string, format: uuid }
-          description: Domain zone ID
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateZoneGrantRequest"
+              type: object
+              required: [address]
+              properties:
+                address: { type: string, example: "user@mail.example.com" }
       responses:
-        "201":
-          description: Created
+        "200":
+          description: Resolution explanation
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  data: { $ref: "#/components/schemas/ZoneGrant" }
+                  data: { $ref: '#/components/schemas/RouteExplanation' }
         "400": { $ref: '#/components/responses/BadRequest' }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  /api/v1/domains/{id}/grants/{grantId}:
-    delete:
-      tags: [Grants]
-      summary: Delete a domain zone grant
-      operationId: deleteZoneGrant
-      description: Remove a grant from a domain zone.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Domain zone ID
-        - name: grantId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Grant ID
-      responses:
-        "204": { description: Deleted }
         "403": { $ref: '#/components/responses/Forbidden' }
         "404": { $ref: '#/components/responses/NotFound' }
 
@@ -1215,87 +1170,6 @@ paths:
           schema: { type: string, format: uuid }
       responses:
         "204": { description: Deleted }
-
-  # ── Mailbox Grants ──────────────────────────────────
-  /api/v1/mailboxes/{mailboxId}/grants:
-    get:
-      tags: [Grants]
-      summary: List grants for a mailbox
-      operationId: listMailboxGrants
-      description: List all grants assigned to a mailbox.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: mailboxId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Mailbox ID
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: "#/components/schemas/MailboxGrant" }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-    post:
-      tags: [Grants]
-      summary: Create a grant for a mailbox
-      operationId: createMailboxGrant
-      description: Assign a role-based grant to a user or API key for a mailbox.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: mailboxId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Mailbox ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateMailboxGrantRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: { $ref: "#/components/schemas/MailboxGrant" }
-        "400": { $ref: '#/components/responses/BadRequest' }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  /api/v1/mailboxes/{mailboxId}/grants/{id}:
-    delete:
-      tags: [Grants]
-      summary: Delete a mailbox grant
-      operationId: deleteMailboxGrant
-      description: Remove a grant from a mailbox.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: mailboxId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Mailbox ID
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Grant ID
-      responses:
-        "204": { description: Deleted }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
 
   # ── Messages ────────────────────────────────────────
   /api/v1/mailbox/{address}:
@@ -1445,6 +1319,79 @@ paths:
             message/rfc822:
               schema: { type: string, format: binary }
 
+  # ── Break-glass (admin, audited) ────────────────────
+  /api/v1/mailbox/{address}/{id}/break-glass:
+    post:
+      tags: [Messages]
+      summary: Read a message via audited break-glass access
+      operationId: breakGlassReadMessage
+      description: |
+        Read message content the caller would not otherwise be able to see.
+        Admin only; every call is written to the audit log with the supplied reason.
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, description: Justification recorded in the audit log }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/Message' }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/mailbox/{address}/{id}/break-glass/source:
+    post:
+      tags: [Messages]
+      summary: Read raw RFC 822 source via audited break-glass access
+      operationId: breakGlassReadMessageSource
+      security: [{ BearerAuth: [] }]
+      parameters:
+        - name: address
+          in: path
+          required: true
+          schema: { type: string }
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, description: Justification recorded in the audit log }
+      responses:
+        "200":
+          description: Raw email
+          content:
+            message/rfc822:
+              schema: { type: string, format: binary }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
   # ── User API Keys ───────────────────────────────────
   /api/v1/keys:
     post:
@@ -1509,10 +1456,10 @@ paths:
         "404":
           $ref: '#/components/responses/NotFound'
 
-  # ── Send Identities & Send-As Grants ────────────────
+  # ── Send Identities ─────────────────────────────────
   /api/v1/send-identities:
     get:
-      tags: [Grants]
+      tags: [Send Identities]
       summary: List send identities
       operationId: listSendIdentities
       description: List all send identities for the current tenant.
@@ -1530,7 +1477,7 @@ paths:
                     items: { $ref: "#/components/schemas/SendIdentity" }
         "403": { $ref: '#/components/responses/Forbidden' }
     post:
-      tags: [Grants]
+      tags: [Send Identities]
       summary: Create a send identity (admin only)
       operationId: createSendIdentity
       description: |
@@ -1557,7 +1504,7 @@ paths:
 
   /api/v1/send-identities/{id}:
     delete:
-      tags: [Grants]
+      tags: [Send Identities]
       summary: Delete a send identity (admin only)
       operationId: deleteSendIdentity
       description: Delete a send identity. Admin access required.
@@ -1568,86 +1515,6 @@ paths:
           required: true
           schema: { type: string, format: uuid }
           description: Send identity ID
-      responses:
-        "204": { description: Deleted }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  /api/v1/send-identities/{id}/grants:
-    get:
-      tags: [Grants]
-      summary: List send-as grants for a send identity
-      operationId: listSendAsGrants
-      description: List all send-as grants for a specific send identity.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Send identity ID
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: "#/components/schemas/SendAsGrant" }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-    post:
-      tags: [Grants]
-      summary: Create a send-as grant
-      operationId: createSendAsGrant
-      description: Grant a user or API key permission to send as a specific identity.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Send identity ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateSendAsGrantRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: { $ref: "#/components/schemas/SendAsGrant" }
-        "400": { $ref: '#/components/responses/BadRequest' }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  /api/v1/send-identities/{id}/grants/{grantId}:
-    delete:
-      tags: [Grants]
-      summary: Delete a send-as grant
-      operationId: deleteSendAsGrant
-      description: Remove a send-as grant from a send identity.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Send identity ID
-        - name: grantId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Grant ID
       responses:
         "204": { description: Deleted }
         "403": { $ref: '#/components/responses/Forbidden' }
@@ -1790,6 +1657,206 @@ paths:
                 $ref: '#/components/schemas/OutboundJob'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  /api/v1/outbound/{id}/attempts:
+    get:
+      tags: [Sending]
+      summary: List delivery attempts for an outbound job
+      operationId: listOutboundAttempts
+      security:
+        - BearerAuth: []
+        - APIKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/OutboundAttempt' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  /api/v1/outbound/{id}/retry:
+    post:
+      tags: [Sending]
+      summary: Retry a dead or failed outbound job
+      operationId: retryOutboundJob
+      description: Re-enqueue an outbound job. Only jobs in `dead` or `failed` state can be retried.
+      security:
+        - BearerAuth: []
+        - APIKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: Requeued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/OutboundJob' }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "404": { $ref: '#/components/responses/NotFound' }
+
+  # ── Suppression List ────────────────────────────────
+  /api/v1/suppression:
+    get:
+      tags: [Sending]
+      summary: List suppressed recipient addresses
+      operationId: listSuppressions
+      description: Addresses that hard-bounced and are blocked from further delivery.
+      security:
+        - BearerAuth: []
+        - APIKey: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/SuppressionEntry' }
+                  meta: { $ref: '#/components/schemas/Meta' }
+
+  /api/v1/suppression/{id}:
+    delete:
+      tags: [Sending]
+      summary: Remove an address from the suppression list
+      operationId: deleteSuppression
+      security:
+        - BearerAuth: []
+        - APIKey: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+
+  # ── Webhook Endpoints ───────────────────────────────
+  /api/v1/webhook-endpoints:
+    get:
+      tags: [Webhooks]
+      summary: List webhook endpoints
+      operationId: listWebhookEndpoints
+      description: |
+        List the tenant's webhook endpoints. Requires admin access or an API key
+        with the `webhooks:read` scope.
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/WebhookEndpoint' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [Webhooks]
+      summary: Create a webhook endpoint
+      operationId: createWebhookEndpoint
+      description: |
+        Register an HTTPS endpoint for event delivery. Loopback, private, and
+        link-local hosts are rejected.
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url: { type: string, format: uri, example: "https://hooks.example.com/tabmail" }
+                secret: { type: string, description: HMAC signing secret; write-only }
+                event_types:
+                  type: array
+                  items: { type: string }
+                  description: Empty means all event types.
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/WebhookEndpoint' }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+
+  /api/v1/webhook-endpoints/{id}:
+    patch:
+      tags: [Webhooks]
+      summary: Update a webhook endpoint
+      operationId: updateWebhookEndpoint
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url: { type: string, format: uri }
+                event_types:
+                  type: array
+                  items: { type: string }
+                is_active: { type: boolean }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { $ref: '#/components/schemas/WebhookEndpoint' }
+        "400": { $ref: '#/components/responses/BadRequest' }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Webhooks]
+      summary: Delete a webhook endpoint
+      operationId: deleteWebhookEndpoint
+      security: [{ APIKey: [] }, { BearerAuth: [] }]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "204": { description: Deleted }
+        "403": { $ref: '#/components/responses/Forbidden' }
+        "404": { $ref: '#/components/responses/NotFound' }
 
   # ── Admin: Domain Resources ─────────────────────────
   /api/v1/admin/domains:
@@ -2296,16 +2363,6 @@ paths:
                 type: object
                 properties:
                   data: { $ref: "#/components/schemas/SystemStats" }
-
-  /api/v1/admin/status:
-    get:
-      tags: [Admin]
-      summary: System status alias
-      operationId: getStatus
-      security: [{ BearerAuth: [] }]
-      responses:
-        "200":
-          description: OK
 
   /api/v1/admin/policy:
     get:
