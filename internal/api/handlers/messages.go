@@ -27,6 +27,8 @@ type messageStore interface {
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
+	ListMessagesKeyset(ctx context.Context, mailboxID uuid.UUID, before *models.MessageCursor, limit int) ([]*models.Message, error)
+	CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	MarkSeen(ctx context.Context, id uuid.UUID) error
@@ -48,7 +50,7 @@ func NewMessageHandler(s messageStore, obj store.ObjectStore, hub *realtime.Hub,
 }
 
 func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
-	actor := authz.ActorFromContext(r.Context())
+	actor := middleware.ActorFromContext(r.Context())
 	var userID *uuid.UUID
 	if actor.Type == authz.PrincipalUser {
 		id := actor.ID
@@ -79,14 +81,38 @@ func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
 	}
 }
 
+// ListMessages serves both pagination styles. Without a cursor parameter it
+// keeps the page/per_page contract unchanged; with one it walks the keyset
+// index and hands back a next_cursor for the following page.
 func (h *MessageHandler) ListMessages(w http.ResponseWriter, r *http.Request) {
 	pg := pageFromReq(r)
+	if raw := strings.TrimSpace(r.URL.Query().Get("cursor")); raw != "" {
+		cursor, err := messageapp.DecodeCursor(raw)
+		if err != nil {
+			respondAppError(w, h.logger, err)
+			return
+		}
+		items, total, next, err := h.service.ListMessagesKeyset(r.Context(), chi.URLParam(r, "address"), h.resolveViewer(r), cursor, pg.PerPage)
+		if err != nil {
+			respondAppError(w, h.logger, err)
+			return
+		}
+		// page 0 signals that offsets do not apply to a cursor response.
+		okListCursor(w, items, total, 0, pg.PerPage, next)
+		return
+	}
 	items, total, err := h.service.ListMessages(r.Context(), chi.URLParam(r, "address"), h.resolveViewer(r), pg)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
-	okList(w, items, total, pg.Page, pg.PerPage)
+	// Offer a keyset entry point: a client that starts with page 1 can follow
+	// next_cursor instead of paging by offset.
+	next := ""
+	if len(items) == pg.PerPage {
+		next = messageapp.EncodeCursor(items[len(items)-1])
+	}
+	okListCursor(w, items, total, pg.Page, pg.PerPage, next)
 }
 
 func (h *MessageHandler) GetMessage(w http.ResponseWriter, r *http.Request) {

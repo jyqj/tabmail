@@ -3,7 +3,13 @@ import React from "react";
 import { beforeEach, vi } from "vitest";
 import { SWRConfig } from "swr";
 
-import { I18nProvider } from "@/lib/i18n";
+// Non-default catalogs are code split, so assertions on English copy would race
+// the dynamic import unless the catalog is resolved before the first render.
+// The locale has to be in the cookie before the module loads, because that is
+// when the i18n store adopts it.
+document.cookie = "tabmail-locale=en; path=/";
+const { I18nProvider, preloadLocale } = await import("@/lib/i18n");
+await preloadLocale("en");
 
 vi.mock("@testing-library/react", async () => {
   const actual = await vi.importActual<typeof import("@testing-library/react")>("@testing-library/react");
@@ -24,6 +30,6 @@ vi.mock("@testing-library/react", async () => {
 
 beforeEach(() => {
   window.localStorage.clear();
-  window.localStorage.setItem("tabmail-locale", "en");
+  document.cookie = "tabmail-locale=en; path=/";
 });
 

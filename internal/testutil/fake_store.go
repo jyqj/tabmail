@@ -44,6 +44,7 @@ type FakeStore struct {
 	outboundAttempts map[uuid.UUID]*models.OutboundAttempt
 	suppressions     map[uuid.UUID]*models.SuppressionEntry
 	users            map[uuid.UUID]*models.User
+	refreshTokens    map[uuid.UUID]*models.RefreshToken
 	settings         map[string]*models.SystemSetting
 
 	sendIdentities map[uuid.UUID]*models.SendIdentity
@@ -67,6 +68,7 @@ func NewFakeStore() *FakeStore {
 		outboundJobs:     map[uuid.UUID]*models.OutboundJob{},
 		outboundAttempts: map[uuid.UUID]*models.OutboundAttempt{},
 		suppressions:     map[uuid.UUID]*models.SuppressionEntry{},
+		refreshTokens:    map[uuid.UUID]*models.RefreshToken{},
 		sendIdentities:   map[uuid.UUID]*models.SendIdentity{},
 	}
 }

@@ -28,11 +28,12 @@ type Root struct {
 	MonitorHistory      int    `default:"50" desc:"Number of recent events to keep for monitor replay (0=disable)"`
 
 	// Auth
-	JWTSecret           string `split_words:"true" default:"" desc:"JWT signing secret (defaults to MailboxTokenSecret if empty)"`
-	OpenRegistration    bool   `split_words:"true" default:"true" desc:"Allow public user registration"`
-	BootstrapAdminEmail string `split_words:"true" default:"" desc:"Bootstrap admin email (created on first start if no admins exist)"`
-	BootstrapAdminPass  string `split_words:"true" default:"" desc:"Bootstrap admin password"`
-	DefaultPlanID       string `split_words:"true" default:"00000000-0000-0000-0000-000000000001" desc:"Default plan for new user registrations"`
+	JWTSecret           string        `split_words:"true" default:"" desc:"JWT signing secret (defaults to MailboxTokenSecret if empty)"`
+	OpenRegistration    bool          `split_words:"true" default:"true" desc:"Allow public user registration"`
+	FailedLoginDelay    time.Duration `split_words:"true" default:"500ms" desc:"Delay applied to failed logins when the Redis login throttle is unreachable"`
+	BootstrapAdminEmail string        `split_words:"true" default:"" desc:"Bootstrap admin email (created on first start if no admins exist)"`
+	BootstrapAdminPass  string        `split_words:"true" default:"" desc:"Bootstrap admin password"`
+	DefaultPlanID       string        `split_words:"true" default:"00000000-0000-0000-0000-000000000001" desc:"Default plan for new user registrations"`
 
 	SMTP     SMTP
 	HTTP     HTTP
@@ -129,6 +130,7 @@ type Ingest struct {
 	PollInterval time.Duration `split_words:"true" default:"1s" desc:"Ingest worker polling interval"`
 	BatchSize    int           `split_words:"true" default:"100" desc:"Ingest worker batch size"`
 	MaxRetries   int           `split_words:"true" default:"5" desc:"Max ingest job retry attempts before dead-lettering"`
+	Concurrency  int           `default:"8" desc:"Parallel workers per claimed ingest batch"`
 }
 
 type Outbound struct {

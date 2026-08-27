@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useSettings, type Settings } from "@/lib/settings";
 import { useI18n, type Locale } from "@/lib/i18n";
 import { useTheme } from "next-themes";
@@ -71,6 +72,14 @@ export function SettingsPanel() {
   const { settings, update } = useSettings();
   const { locale, setLocale, t } = useI18n();
   const { theme, setTheme } = useTheme();
+  const router = useRouter();
+
+  // Server Components translate their copy from the locale cookie, so pages
+  // that render on the server need a refresh to catch up with the new choice.
+  const changeLocale = (next: Locale) => {
+    setLocale(next);
+    router.refresh();
+  };
 
   return (
     <Sheet>
@@ -99,7 +108,7 @@ export function SettingsPanel() {
                 { value: "en", label: "English" },
               ]}
               value={locale}
-              onChange={(v) => setLocale(v as Locale)}
+              onChange={(v) => changeLocale(v as Locale)}
             />
           </div>
 

@@ -88,6 +88,9 @@ curl http://127.0.0.1:8080/metrics
 - `tabmail_smtp_messages_rejected_total`
 - `tabmail_smtp_deliveries_failed_total`
 
+指标由 prometheus/client_golang 暴露，除上述 `tabmail_*` 之外还包含标准的
+`go_*`（goroutine、GC、内存）与 `process_*`（CPU、文件描述符、常驻内存）运行时指标。
+
 ### 2.7 查看数据库结构
 
 ```bash

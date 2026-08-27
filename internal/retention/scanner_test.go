@@ -118,6 +118,37 @@ func TestScannerSweepKeepsObjectReferencedByActiveIngestJob(t *testing.T) {
 	}
 }
 
+func TestScannerSweepDeletesExpiredRefreshTokens(t *testing.T) {
+	ctx := context.Background()
+	store := testutil.NewFakeStore()
+	obj := testutil.NewMemoryObjectStore()
+
+	expired := &models.RefreshToken{
+		ID:        uuid.New(),
+		UserID:    uuid.New(),
+		TokenHash: "expired-hash",
+		ExpiresAt: time.Now().Add(-time.Hour),
+	}
+	valid := &models.RefreshToken{
+		ID:        uuid.New(),
+		UserID:    uuid.New(),
+		TokenHash: "valid-hash",
+		ExpiresAt: time.Now().Add(time.Hour),
+	}
+	for _, rt := range []*models.RefreshToken{expired, valid} {
+		if err := store.CreateRefreshToken(ctx, rt); err != nil {
+			t.Fatalf("seed refresh token: %v", err)
+		}
+	}
+
+	sc := New(store, obj, config.Storage{RetentionBatchSize: 10}, zerolog.Nop())
+	sc.sweep(ctx)
+
+	if got := store.CountRefreshTokens(); got != 1 {
+		t.Fatalf("expected 1 remaining refresh token, got %d", got)
+	}
+}
+
 func TestScannerSweepPurgesOldDoneIngestJobsAndDeletesOrphanObject(t *testing.T) {
 	ctx := context.Background()
 	store := testutil.NewFakeStore()

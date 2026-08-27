@@ -5,11 +5,13 @@ import "errors"
 type ErrorKind string
 
 const (
-	KindBadRequest ErrorKind = "bad_request"
-	KindForbidden  ErrorKind = "forbidden"
-	KindNotFound   ErrorKind = "not_found"
-	KindConflict   ErrorKind = "conflict"
-	KindInternal   ErrorKind = "internal"
+	KindBadRequest   ErrorKind = "bad_request"
+	KindUnauthorized ErrorKind = "unauthorized"
+	KindForbidden    ErrorKind = "forbidden"
+	KindNotFound     ErrorKind = "not_found"
+	KindConflict     ErrorKind = "conflict"
+	KindRateLimited  ErrorKind = "rate_limited"
+	KindInternal     ErrorKind = "internal"
 )
 
 type Error struct {
@@ -33,10 +35,12 @@ func (e *Error) Error() string {
 
 func (e *Error) Unwrap() error { return e.Err }
 
-func BadRequest(msg string) error { return &Error{Kind: KindBadRequest, Message: msg} }
-func Forbidden(msg string) error  { return &Error{Kind: KindForbidden, Message: msg} }
-func NotFound(msg string) error   { return &Error{Kind: KindNotFound, Message: msg} }
-func Conflict(msg string) error   { return &Error{Kind: KindConflict, Message: msg} }
+func BadRequest(msg string) error   { return &Error{Kind: KindBadRequest, Message: msg} }
+func Unauthorized(msg string) error { return &Error{Kind: KindUnauthorized, Message: msg} }
+func Forbidden(msg string) error    { return &Error{Kind: KindForbidden, Message: msg} }
+func NotFound(msg string) error     { return &Error{Kind: KindNotFound, Message: msg} }
+func Conflict(msg string) error     { return &Error{Kind: KindConflict, Message: msg} }
+func RateLimited(msg string) error  { return &Error{Kind: KindRateLimited, Message: msg} }
 func Internal(err error) error {
 	if err == nil {
 		return nil

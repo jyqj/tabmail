@@ -30,6 +30,8 @@ type storeRepo interface {
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
+	ListMessagesKeyset(ctx context.Context, mailboxID uuid.UUID, before *models.MessageCursor, limit int) ([]*models.Message, error)
+	CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error)
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
 	MarkSeen(ctx context.Context, id uuid.UUID) error
@@ -68,6 +70,11 @@ func NewService(s storeRepo, obj store.ObjectStore, hub *realtime.Hub, dispatche
 	return &Service{store: s, obj: obj, hub: hub, dispatcher: dispatcher, namingMode: namingMode, stripPlus: stripPlus, tokenSecret: tokenSecret, logger: logger.With().Str("service", "messages").Logger()}
 }
 
+// ResolveMailbox maps an address to a mailbox the viewer may read. Authenticated
+// callers are looked up in their tenant first, but a global fallback is retained
+// so explicitly-public mailboxes remain reachable. Administrator bypass is
+// tenant-bound: even a platform administrator must select the target tenant via
+// X-Tenant-ID before protected mailbox data becomes visible.
 func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Viewer) (*models.Mailbox, error) {
 	addr := strings.ToLower(strings.TrimSpace(address))
 	if addr == "" {
@@ -77,11 +84,8 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	if err != nil {
 		return nil, app.BadRequest("invalid address")
 	}
+
 	var mb *models.Mailbox
-	// For public/mailbox-token access, don't restrict lookup to the public tenant.
-	// For authenticated users/API keys, try tenant-local lookup first, then fall
-	// back to global lookup so public/token mailboxes in other tenants remain
-	// reachable; the access-mode checks below are the security boundary.
 	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic {
 		mb, err = s.store.ForTenant(viewer.Tenant.ID).GetMailboxByAddress(ctx, mailboxKey)
 		if err == nil && mb == nil {
@@ -96,19 +100,30 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	if mb == nil {
 		return nil, app.NotFound("mailbox not found")
 	}
-	if viewer.IsSuperAdmin || viewer.IsAdmin {
+	if viewerIsAdminForMailbox(viewer, mb) {
 		return mb, nil
+	}
+	// A global fallback exists only so public mailboxes remain reachable. Do
+	// not confirm the existence or state of protected cross-tenant mailboxes.
+	if viewer.Tenant != nil && mb.TenantID != viewer.Tenant.ID && mb.AccessMode != models.AccessPublic {
+		mailboxCapability := viewer.AuthMode == AuthModePublic &&
+			mb.AccessMode == models.AccessToken &&
+			strings.TrimSpace(viewer.BearerToken) != ""
+		if !mailboxCapability {
+			return nil, app.NotFound("mailbox not found")
+		}
 	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
 		return nil, accessDeniedOrNotFound(viewer, "mailbox expired")
 	}
-	canManage, err := s.canAccessMailbox(ctx, mb, viewer, false)
+	canManage, err := s.canAccessMailbox(ctx, mb, viewer)
 	if err != nil {
 		return nil, err
 	}
 	if canManage {
 		return mb, nil
 	}
+
 	switch mb.AccessMode {
 	case models.AccessPublic:
 		return mb, nil
@@ -139,6 +154,8 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	return mb, nil
 }
 
+// ResolveMailboxForWrite never performs a cross-tenant fallback. Platform
+// administrators must explicitly impersonate the target tenant before a write.
 func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, viewer Viewer) (*models.Mailbox, error) {
 	if viewer.AuthMode == AuthModePublic {
 		return nil, app.Forbidden("authentication required for write operations")
@@ -151,27 +168,23 @@ func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, vi
 	if err != nil {
 		return nil, app.BadRequest("invalid address")
 	}
-	var mb *models.Mailbox
-	// Public viewers were rejected above, so the unscoped branch only runs for
-	// tenant-less (super-admin) viewers where no tenant filter exists.
-	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic {
-		mb, err = s.store.ForTenant(viewer.Tenant.ID).GetMailboxByAddress(ctx, mailboxKey)
-	} else {
-		mb, err = s.store.GetMailboxByAddress(ctx, mailboxKey)
+	if viewer.Tenant == nil {
+		return nil, app.Forbidden("tenant context required for write operations")
 	}
+	mb, err := s.store.ForTenant(viewer.Tenant.ID).GetMailboxByAddress(ctx, mailboxKey)
 	if err != nil {
 		return nil, app.Internal(err)
 	}
 	if mb == nil {
 		return nil, app.NotFound("mailbox not found")
 	}
-	if viewer.IsSuperAdmin || viewer.IsAdmin {
+	if viewerIsAdminForMailbox(viewer, mb) {
 		return mb, nil
 	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
 		return nil, app.Forbidden("mailbox expired")
 	}
-	canManage, err := s.canAccessMailbox(ctx, mb, viewer, true)
+	canManage, err := s.canAccessMailbox(ctx, mb, viewer)
 	if err != nil {
 		return nil, err
 	}
@@ -181,11 +194,11 @@ func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, vi
 	return nil, app.Forbidden("write access requires mailbox owner or admin")
 }
 
-func (s *Service) canAccessMailbox(ctx context.Context, mb *models.Mailbox, viewer Viewer, requireWrite bool) (bool, error) {
+func (s *Service) canAccessMailbox(ctx context.Context, mb *models.Mailbox, viewer Viewer) (bool, error) {
 	if mb == nil {
 		return false, nil
 	}
-	if viewer.IsSuperAdmin || viewer.IsAdmin {
+	if viewerIsAdminForMailbox(viewer, mb) {
 		return true, nil
 	}
 	if viewer.Tenant == nil || mb.TenantID != viewer.Tenant.ID {
@@ -201,16 +214,20 @@ func (s *Service) canAccessMailbox(ctx context.Context, mb *models.Mailbox, view
 	if err != nil {
 		return false, app.Internal(err)
 	}
-	if zone == nil {
-		return false, nil
-	}
-	if zone.OwnerUserID == nil {
+	if zone == nil || zone.OwnerUserID == nil {
 		return false, nil
 	}
 	if viewer.UserID != nil && *viewer.UserID == *zone.OwnerUserID {
 		return true, nil
 	}
 	return viewer.OwnerUserID != nil && *viewer.OwnerUserID == *zone.OwnerUserID, nil
+}
+
+func viewerIsAdminForMailbox(viewer Viewer, mb *models.Mailbox) bool {
+	return mb != nil &&
+		viewer.Tenant != nil &&
+		mb.TenantID == viewer.Tenant.ID &&
+		(viewer.IsSuperAdmin || viewer.IsAdmin)
 }
 
 func viewerZoneAllowed(viewer Viewer, zoneID uuid.UUID) bool {
@@ -244,6 +261,29 @@ func (s *Service) ListMessages(ctx context.Context, address string, viewer Viewe
 	return items, total, nil
 }
 
+// ListMessagesKeyset lists messages after the cursor position. It returns the
+// page, the mailbox's total message count (an O(1) counter read, not a scan),
+// and the cursor for the next page — empty when this page ends the list.
+func (s *Service) ListMessagesKeyset(ctx context.Context, address string, viewer Viewer, cursor *models.MessageCursor, limit int) ([]*models.Message, int, string, error) {
+	mb, err := s.ResolveMailbox(ctx, address, viewer)
+	if err != nil {
+		return nil, 0, "", err
+	}
+	items, err := s.store.ListMessagesKeyset(ctx, mb.ID, cursor, limit)
+	if err != nil {
+		return nil, 0, "", app.Internal(err)
+	}
+	total, err := s.store.CountMessages(ctx, mb.ID)
+	if err != nil {
+		return nil, 0, "", app.Internal(err)
+	}
+	next := ""
+	if len(items) == limit && limit > 0 {
+		next = EncodeCursor(items[len(items)-1])
+	}
+	return items, total, next, nil
+}
+
 func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) (*models.MessageDetail, error) {
 	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
 	if err != nil {
@@ -253,28 +293,41 @@ func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uu
 		return nil, app.NotFound("message not found")
 	}
 	detail := &models.MessageDetail{Message: *msg}
-	if !s.canReadMessageContent(ctx, mb, viewer) {
+	if !s.canReadMessageContent(mb, viewer) {
 		detail.BodyRedacted = true
 		detail.BodyAccess = "break_glass_required"
 		return detail, nil
 	}
-	if msg.RawObjectKey != "" {
-		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
-		if err == nil {
-			defer rc.Close()
-			if env, err := enmime.ReadEnvelope(rc); err == nil {
-				detail.TextBody = env.Text
-				if env.HTML != "" {
-					if cleaned, err := sanitize.HTML(env.HTML); err == nil {
-						detail.HTMLBody = cleaned
-					} else {
-						detail.HTMLBody = env.HTML
-					}
-				}
-			}
-		}
-	}
+	s.populateMessageBodies(ctx, msg, detail)
 	return detail, nil
+}
+
+func (s *Service) populateMessageBodies(ctx context.Context, msg *models.Message, detail *models.MessageDetail) {
+	if msg == nil || detail == nil || msg.RawObjectKey == "" {
+		return
+	}
+	rc, err := s.obj.Get(ctx, msg.RawObjectKey)
+	if err != nil {
+		return
+	}
+	defer rc.Close()
+	env, err := enmime.ReadEnvelope(rc)
+	if err != nil {
+		return
+	}
+	detail.TextBody = env.Text
+	if env.HTML == "" {
+		return
+	}
+	cleaned, err := sanitize.HTML(env.HTML)
+	if err != nil {
+		// Sanitizer failure is a security failure, not a reason to return raw
+		// attacker-controlled HTML to API clients.
+		detail.HTMLBody = ""
+		detail.BodyAccess = "sanitize_failed"
+		return
+	}
+	detail.HTMLBody = cleaned
 }
 
 func (s *Service) GetRawSource(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) (io.ReadCloser, error) {
@@ -285,7 +338,7 @@ func (s *Service) GetRawSource(ctx context.Context, address string, msgID uuid.U
 	if msg.MailboxID != mb.ID {
 		return nil, app.NotFound("message not found")
 	}
-	if !s.canReadMessageContent(ctx, mb, viewer) {
+	if !s.canReadMessageContent(mb, viewer) {
 		return nil, app.Forbidden("message source access requires break-glass")
 	}
 	if msg.RawObjectKey == "" {
@@ -374,8 +427,8 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 	return nil
 }
 
-// BreakGlassRead allows an admin to read a message body with an audited
-// reason. The access is logged and the full message detail is returned.
+// BreakGlassRead allows a tenant administrator to read a message body with an
+// audited reason. Platform administrators must first select the target tenant.
 func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer, actor string, reason string) (*models.MessageDetail, error) {
 	if !viewer.IsSuperAdmin && !viewer.IsAdmin {
 		return nil, app.Forbidden("break-glass is only available to admin users")
@@ -386,6 +439,9 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
 	if err != nil {
 		return nil, err
+	}
+	if !viewerIsAdminForMailbox(viewer, mb) {
+		return nil, app.Forbidden("break-glass requires administrator access to the mailbox tenant")
 	}
 	if msg.MailboxID != mb.ID {
 		return nil, app.NotFound("message not found")
@@ -399,26 +455,12 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 		Details:      app.MustJSON(map[string]any{"mailbox": mb.FullAddress, "reason": reason, "scope": "body"}),
 	})
 	detail := &models.MessageDetail{Message: *msg}
-	if msg.RawObjectKey != "" {
-		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
-		if err == nil {
-			defer rc.Close()
-			if env, err := enmime.ReadEnvelope(rc); err == nil {
-				detail.TextBody = env.Text
-				if env.HTML != "" {
-					if cleaned, err := sanitize.HTML(env.HTML); err == nil {
-						detail.HTMLBody = cleaned
-					} else {
-						detail.HTMLBody = env.HTML
-					}
-				}
-			}
-		}
-	}
+	s.populateMessageBodies(ctx, msg, detail)
 	return detail, nil
 }
 
-// BreakGlassSource allows an admin to read raw message source with an audited reason.
+// BreakGlassSource allows an administrator scoped to the mailbox tenant to
+// read raw message source with an audited reason.
 func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer, actor string, reason string) (io.ReadCloser, error) {
 	if !viewer.IsSuperAdmin && !viewer.IsAdmin {
 		return nil, app.Forbidden("break-glass is only available to admin users")
@@ -429,6 +471,9 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
 	if err != nil {
 		return nil, err
+	}
+	if !viewerIsAdminForMailbox(viewer, mb) {
+		return nil, app.Forbidden("break-glass requires administrator access to the mailbox tenant")
 	}
 	if msg.MailboxID != mb.ID {
 		return nil, app.NotFound("message not found")
@@ -452,19 +497,12 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 	return rc, nil
 }
 
-// canReadMessageContent checks whether the viewer has permission to read
-// message body / raw source. Admin roles require break-glass access for
-// content; non-admin viewers who passed mailbox resolution can read content.
-func (s *Service) canReadMessageContent(ctx context.Context, mb *models.Mailbox, viewer Viewer) bool {
-	if mb == nil {
-		return false
-	}
-	// Non-admin viewers who resolved the mailbox successfully can read content.
-	if !viewer.IsSuperAdmin && !viewer.IsAdmin {
-		return true
-	}
-	// Admin users need break-glass for content — deny direct content access.
-	return false
+// canReadMessageContent requires tenant administrators to use the audited
+// break-glass path for mailboxes they administer. Cross-tenant public mailboxes
+// remain ordinary public resources rather than inheriting the viewer's admin
+// role.
+func (s *Service) canReadMessageContent(mb *models.Mailbox, viewer Viewer) bool {
+	return !viewerIsAdminForMailbox(viewer, mb)
 }
 
 func (s *Service) lookupMessageForWrite(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) (*models.Mailbox, *models.Message, error) {
@@ -472,12 +510,10 @@ func (s *Service) lookupMessageForWrite(ctx context.Context, address string, msg
 	if err != nil {
 		return nil, nil, err
 	}
-	var msg *models.Message
-	if viewer.Tenant != nil {
-		msg, err = s.store.ForTenant(viewer.Tenant.ID).GetMessage(ctx, msgID)
-	} else {
-		msg, err = s.store.GetMessage(ctx, msgID)
+	if viewer.Tenant == nil {
+		return nil, nil, app.Forbidden("tenant context required for write operations")
 	}
+	msg, err := s.store.ForTenant(viewer.Tenant.ID).GetMessage(ctx, msgID)
 	if err != nil {
 		return nil, nil, app.Internal(err)
 	}
@@ -493,9 +529,7 @@ func (s *Service) lookupMessage(ctx context.Context, address string, msgID uuid.
 		return nil, nil, err
 	}
 	var msg *models.Message
-	// For cross-tenant public access, use the resolved mailbox rather than the
-	// viewer's tenant (which would miss or mask the message).
-	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic && mb.TenantID == viewer.Tenant.ID {
+	if viewer.Tenant != nil && mb.TenantID == viewer.Tenant.ID {
 		msg, err = s.store.ForTenant(viewer.Tenant.ID).GetMessage(ctx, msgID)
 	} else {
 		msg, err = s.store.GetMessage(ctx, msgID)

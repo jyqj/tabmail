@@ -32,7 +32,7 @@ export default function AdminSettingsPage() {
     "system-settings",
     () => listSettings(),
   );
-  const settings = settingsRes?.data ?? [];
+  const settings = useMemo(() => settingsRes?.data ?? [], [settingsRes]);
 
   useEffect(() => { if (settingsError) toast.error("Failed to load settings"); }, [settingsError]);
 

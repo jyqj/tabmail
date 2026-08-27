@@ -169,6 +169,7 @@ func main() {
 		PublicTenantID:     publicTenantID,
 		DefaultPlanID:      defaultPlanID,
 		OpenRegistration:   cfg.OpenRegistration,
+		FailedLoginDelay:   cfg.FailedLoginDelay,
 		Settings:           settingsMgr,
 		HTTP:               cfg.HTTP,
 		OutboundService:    outboundSvc,

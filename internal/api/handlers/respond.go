@@ -23,6 +23,9 @@ type meta struct {
 	Total   int `json:"total"`
 	Page    int `json:"page"`
 	PerPage int `json:"per_page"`
+	// NextCursor continues a keyset listing; empty when the list ends or the
+	// endpoint only paginates by offset.
+	NextCursor string `json:"next_cursor,omitempty"`
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
@@ -46,6 +49,13 @@ func okList(w http.ResponseWriter, data any, total, page, perPage int) {
 	})
 }
 
+func okListCursor(w http.ResponseWriter, data any, total, page, perPage int, nextCursor string) {
+	writeJSON(w, http.StatusOK, envelope{
+		Data: data,
+		Meta: &meta{Total: total, Page: page, PerPage: perPage, NextCursor: nextCursor},
+	})
+}
+
 func noContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -60,6 +70,14 @@ func errNotFound(w http.ResponseWriter, msg string) {
 
 func errForbidden(w http.ResponseWriter, msg string) {
 	writeJSON(w, http.StatusForbidden, envelope{Error: &apiErr{Code: "FORBIDDEN", Message: msg}})
+}
+
+func errUnauthorized(w http.ResponseWriter, msg string) {
+	writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: msg}})
+}
+
+func errRateLimited(w http.ResponseWriter, msg string) {
+	writeJSON(w, http.StatusTooManyRequests, envelope{Error: &apiErr{Code: "RATE_LIMITED", Message: msg}})
 }
 
 func errInternal(w http.ResponseWriter) {

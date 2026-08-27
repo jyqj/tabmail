@@ -104,10 +104,16 @@ vi.mock("@/components/inbox/message-list", () => ({
     messages,
     selectedId,
     onSelect,
+    hasMore,
+    loadingMore,
+    onLoadMore,
   }: {
     messages: Array<{ id: string; subject: string }>;
     selectedId: string | null;
     onSelect: (msg: { id: string; subject: string; seen?: boolean }) => void;
+    hasMore?: boolean;
+    loadingMore?: boolean;
+    onLoadMore?: () => void;
   }) => (
     <div>
       {messages.map((msg) => (
@@ -115,6 +121,11 @@ vi.mock("@/components/inbox/message-list", () => ({
           {msg.subject}
         </button>
       ))}
+      {hasMore && (
+        <button disabled={loadingMore} onClick={onLoadMore}>
+          load-more
+        </button>
+      )}
     </div>
   ),
 }));
@@ -262,5 +273,44 @@ describe("InboxPage", () => {
     
     expect(screen.queryByText("inbox.authTitle")).not.toBeInTheDocument();
     expect(toastSuccess).toHaveBeenCalledWith("toast.tokenIssued");
+  });
+
+  it("meta.next_cursor 存在时通过游标加载更多消息", async () => {
+    const baseMessage = {
+      sender: "sender@test.dev",
+      recipients: ["user@mail.test"],
+      size: 12,
+      seen: true,
+      received_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 3600_000).toISOString(),
+    };
+    listMessagesMock.mockImplementation(
+      async (_addr: string, _page: number, _perPage: number, cursor?: string) =>
+        cursor === "CURSOR-1"
+          ? {
+              data: [{ ...baseMessage, id: "msg-2", subject: "Second Page" }],
+              meta: { total: 2, page: 1, per_page: 30 },
+            }
+          : {
+              data: [{ ...baseMessage, id: "msg-1", subject: "First Page" }],
+              meta: { total: 2, page: 1, per_page: 30, next_cursor: "CURSOR-1" },
+            },
+    );
+
+    render(<InboxPage />);
+
+    expect(await screen.findByRole("button", { name: "First Page" })).toBeInTheDocument();
+    expect(listMessagesMock).toHaveBeenCalledWith("user@mail.test", 1, 30, undefined);
+
+    fireEvent.click(screen.getByRole("button", { name: "load-more" }));
+
+    expect(await screen.findByRole("button", { name: "Second Page" })).toBeInTheDocument();
+    expect(listMessagesMock).toHaveBeenCalledWith("user@mail.test", 1, 30, "CURSOR-1");
+    // Both pages stay visible, and the final page (no next_cursor) removes
+    // the load-more control.
+    expect(screen.getByRole("button", { name: "First Page" })).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "load-more" })).not.toBeInTheDocument();
+    });
   });
 });

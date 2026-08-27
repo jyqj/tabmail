@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
 
 	"tabmail/internal/models"
 )
@@ -24,8 +23,7 @@ func TestRouterWebhookEndpointScopesAndJWTAccess(t *testing.T) {
 	st.RegisterAPIKey("webhook-write", tenant, []string{"webhooks:write"})
 	st.RegisterAPIKey("domain-read", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	expectStatus(t, router, http.MethodGet, "/api/v1/webhook-endpoints", nil, map[string]string{
@@ -66,8 +64,7 @@ func TestRouterWebhookEndpointURLAndFieldSanitization(t *testing.T) {
 	}
 	st.RegisterAPIKey("webhook-write", tenant, []string{"webhooks:write"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 	headers := map[string]string{"X-API-Key": "webhook-write"}
 

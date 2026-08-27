@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"net/mail"
 	"strings"
 	"time"
 
@@ -65,14 +66,27 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if body.From == "" {
-		errBadRequest(w, "from is required")
+	fromAddress, err := normalizeEnvelopeAddress(body.From)
+	if err != nil {
+		errBadRequest(w, "invalid from address")
 		return
 	}
-	if len(body.To) == 0 {
-		errBadRequest(w, "at least one recipient in to is required")
+	to, err := normalizeEnvelopeAddresses(body.To)
+	if err != nil || len(to) == 0 {
+		errBadRequest(w, "at least one valid recipient in to is required")
 		return
 	}
+	cc, err := normalizeEnvelopeAddresses(body.CC)
+	if err != nil {
+		errBadRequest(w, "invalid cc address")
+		return
+	}
+	bcc, err := normalizeEnvelopeAddresses(body.BCC)
+	if err != nil {
+		errBadRequest(w, "invalid bcc address")
+		return
+	}
+	to, cc, bcc = dedupeRecipientGroups(to, cc, bcc)
 
 	ctx := r.Context()
 	tenant := middleware.TenantFromCtx(ctx)
@@ -80,12 +94,9 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 
 	// Resolve caller identity for job attribution and quota tracking.
-	// actor.Permission is populated by middleware.PermissionLoader for JWT
-	// users and by the auth middleware for API keys (owner permission or
-	// zone-restricted synthetic permission).
 	var apiKeyID *uuid.UUID
 	if actor.Type == authz.PrincipalAPIKey {
 		keyID := actor.ID
@@ -94,12 +105,7 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 	userID := actor.EffectiveUserID()
 
 	// Validate the from address domain belongs to this tenant and is verified.
-	fromDomain := extractDomainFromAddress(body.From)
-	if fromDomain == "" {
-		errBadRequest(w, "invalid from address")
-		return
-	}
-
+	fromDomain := extractDomainFromAddress(fromAddress)
 	zone, err := h.store.GetZoneByDomain(ctx, fromDomain)
 	if err != nil {
 		h.logger.Err(err).Str("domain", fromDomain).Msg("looking up zone by domain")
@@ -112,9 +118,9 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Authorize sending from this zone through the authz seam: tenant
-	// isolation, CanSend flag, and zone allowlist. OwnerUserID is
-	// intentionally NOT set — sending must not require zone ownership,
-	// so tenant users can send from shared zones.
+	// isolation, CanSend flag, and zone allowlist. Sending from a shared zone
+	// does not require zone ownership, but it does require a verified send
+	// identity below.
 	if err := h.az.Authorize(ctx, actor, authz.ActionSendFrom, authz.Resource{
 		Type:     "zone",
 		ID:       zone.ID,
@@ -133,37 +139,32 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "from domain is not verified")
 		return
 	}
-
 	if !zone.MXVerified {
 		errBadRequest(w, "from domain MX is not verified")
 		return
 	}
 
-	quota := store.OutboundQuotaReservation{}
-	todayStart := time.Now().UTC().Truncate(24 * time.Hour)
-
-	// Verify the From address corresponds to an existing mailbox or
-	// a matching route in the zone.
-	mailbox, err := h.store.ForTenant(tenant.ID).GetMailboxByAddress(ctx, body.From)
+	// SendIdentity is the authoritative send-as asset. A mailbox or inbound
+	// route no longer implicitly grants outbound authority; administrators
+	// explicitly create exact or domain-wildcard identities, and domain
+	// verification keeps their verified state in sync.
+	identity, err := h.store.FindSendIdentityForAddress(ctx, tenant.ID, fromAddress)
 	if err != nil {
-		h.logger.Err(err).Str("from", body.From).Msg("looking up mailbox by address")
+		h.logger.Err(err).Str("from", fromAddress).Msg("looking up send identity")
 		errInternal(w)
 		return
 	}
-	if mailbox == nil {
-		routes, err := h.store.FindMatchingRoutes(ctx, fromDomain, &tenant.ID)
-		if err != nil {
-			h.logger.Err(err).Str("domain", fromDomain).Msg("finding matching routes for send-as")
-			errInternal(w)
-			return
-		}
-		if len(routes) == 0 {
-			errBadRequest(w, "from address does not exist as a mailbox")
-			return
-		}
+	if identity == nil || identity.TenantID != tenant.ID || identity.ZoneID != zone.ID {
+		errForbidden(w, "from address is not an authorized send identity")
+		return
+	}
+	if !identity.Verified {
+		errBadRequest(w, "send identity is not verified")
+		return
 	}
 
-	// Reserve user daily quota atomically with job creation.
+	quota := store.OutboundQuotaReservation{}
+	todayStart := time.Now().UTC().Truncate(24 * time.Hour)
 	if actor.Permission != nil && actor.Permission.DailySendQuota > 0 {
 		quota.UserDaily = &store.OutboundUserDailyQuota{
 			UserID: userID,
@@ -172,8 +173,8 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Check suppression list — block sending to suppressed addresses.
-	for _, rcpt := range append(append(body.To, body.CC...), body.BCC...) {
+	// Check suppression list against canonical envelope recipients.
+	for _, rcpt := range append(append(append([]string{}, to...), cc...), bcc...) {
 		suppressed, err := h.store.IsSuppressed(ctx, tenant.ID, rcpt)
 		if err != nil {
 			h.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
@@ -186,16 +187,19 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Build and submit the outbound job.
+	if h.outbound == nil {
+		errInternal(w)
+		return
+	}
 	job, err := h.outbound.Submit(ctx, outbound.SendRequest{
 		TenantID: tenant.ID,
 		UserID:   userID,
 		APIKeyID: apiKeyID,
 		ZoneID:   zone.ID,
-		From:     body.From,
-		To:       body.To,
-		CC:       body.CC,
-		BCC:      body.BCC,
+		From:     fromAddress,
+		To:       to,
+		CC:       cc,
+		BCC:      bcc,
 		Subject:  body.Subject,
 		TextBody: body.TextBody,
 		HTMLBody: body.HTMLBody,
@@ -381,7 +385,7 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 }
 
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.IsSuperAdmin || actor.IsAdmin {
 		return h.store.ListOutboundJobs(ctx, tenantID, pg)
 	}
@@ -401,7 +405,7 @@ func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.O
 		return false
 	}
 
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if actor.IsSuperAdmin || actor.IsAdmin {
 		return true
 	}
@@ -428,11 +432,60 @@ func (h *OutboundHandler) writeOutboundJobAccessError(w http.ResponseWriter, err
 	}
 }
 
-// extractDomainFromAddress extracts the domain part from an email address.
+func normalizeEnvelopeAddresses(items []string) ([]string, error) {
+	if len(items) == 0 {
+		return []string{}, nil
+	}
+	out := make([]string, 0, len(items))
+	seen := make(map[string]struct{}, len(items))
+	for _, raw := range items {
+		address, err := normalizeEnvelopeAddress(raw)
+		if err != nil {
+			return nil, err
+		}
+		if _, ok := seen[address]; ok {
+			continue
+		}
+		seen[address] = struct{}{}
+		out = append(out, address)
+	}
+	return out, nil
+}
+
+func dedupeRecipientGroups(to, cc, bcc []string) ([]string, []string, []string) {
+	seen := make(map[string]struct{}, len(to)+len(cc)+len(bcc))
+	filter := func(items []string) []string {
+		out := make([]string, 0, len(items))
+		for _, address := range items {
+			if _, exists := seen[address]; exists {
+				continue
+			}
+			seen[address] = struct{}{}
+			out = append(out, address)
+		}
+		return out
+	}
+	return filter(to), filter(cc), filter(bcc)
+}
+
+func normalizeEnvelopeAddress(raw string) (string, error) {
+	parsed, err := mail.ParseAddress(strings.TrimSpace(raw))
+	if err != nil || strings.TrimSpace(parsed.Address) == "" {
+		return "", errors.New("invalid email address")
+	}
+	address := strings.ToLower(strings.TrimSpace(parsed.Address))
+	if extractDomainFromAddress(address) == "" {
+		return "", errors.New("invalid email address")
+	}
+	return address, nil
+}
+
+// extractDomainFromAddress extracts and normalizes the domain part from an
+// already-canonical envelope address.
 func extractDomainFromAddress(addr string) string {
 	idx := strings.LastIndex(addr, "@")
 	if idx < 0 || idx == len(addr)-1 {
 		return ""
 	}
-	return addr[idx+1:]
+	return strings.TrimSuffix(strings.ToLower(strings.TrimSpace(addr[idx+1:])), ".")
 }

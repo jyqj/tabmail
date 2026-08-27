@@ -3,7 +3,8 @@
 
 Checks:
   1. zh/en message catalogs define the same keys.
-  2. literal t("key") / t('key') usages are present in both catalogs.
+  2. neither catalog defines a key twice (the later one silently wins).
+  3. literal t("key") / t('key') usages are present in both catalogs.
 
 Dynamic usages such as t(`faq.q${n}`) are intentionally not expanded here.
 """
@@ -17,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 I18N_FILE = ROOT / "web" / "lib" / "i18n.tsx"
+MESSAGES_DIR = ROOT / "web" / "lib" / "messages"
 SCAN_DIRS = [
     ROOT / "web" / "app",
     ROOT / "web" / "components",
@@ -29,9 +31,9 @@ STATIC_T_RE = re.compile(r"""\bt\s*\(\s*(["'])([^"']+)\1""")
 
 
 def extract_object(source: str, name: str) -> str:
-    marker = re.search(rf"const\s+{name}\s*:\s*Messages\s*=\s*{{", source)
+    marker = re.search(rf"export\s+const\s+{name}\s*:\s*Messages\s*=\s*{{", source)
     if not marker:
-        raise RuntimeError(f"missing const {name}: Messages object")
+        raise RuntimeError(f"missing export const {name}: Messages object")
 
     start = marker.end() - 1
     depth = 0
@@ -80,9 +82,19 @@ def extract_object(source: str, name: str) -> str:
     raise RuntimeError(f"unterminated const {name}: Messages object")
 
 
-def catalog_keys(name: str) -> set[str]:
-    source = I18N_FILE.read_text(encoding="utf-8")
-    return set(KEY_RE.findall(extract_object(source, name)))
+def catalog_key_list(name: str) -> list[str]:
+    source = (MESSAGES_DIR / f"{name}.ts").read_text(encoding="utf-8")
+    return KEY_RE.findall(extract_object(source, name))
+
+
+def duplicate_keys(keys: list[str]) -> list[str]:
+    seen: set[str] = set()
+    dupes: set[str] = set()
+    for key in keys:
+        if key in seen:
+            dupes.add(key)
+        seen.add(key)
+    return sorted(dupes)
 
 
 def iter_source_files() -> list[Path]:
@@ -92,6 +104,8 @@ def iter_source_files() -> list[Path]:
             continue
         for path in base.rglob("*"):
             if any(part in SKIP_DIRS for part in path.parts):
+                continue
+            if path.parent == MESSAGES_DIR:
                 continue
             if path.suffix in {".ts", ".tsx"} and path != I18N_FILE:
                 out.append(path)
@@ -119,22 +133,28 @@ def print_key_list(title: str, keys: list[str], locations: dict[str, list[str]] 
 
 
 def main() -> int:
-    zh = catalog_keys("zh")
-    en = catalog_keys("en")
+    zh_keys = catalog_key_list("zh")
+    en_keys = catalog_key_list("en")
+    zh = set(zh_keys)
+    en = set(en_keys)
     used = used_static_keys()
     used_keys = set(used)
 
+    dupe_zh = duplicate_keys(zh_keys)
+    dupe_en = duplicate_keys(en_keys)
     missing_en = sorted(zh - en)
     missing_zh = sorted(en - zh)
     used_missing_zh = sorted(used_keys - zh)
     used_missing_en = sorted(used_keys - en)
 
+    print_key_list("Keys defined more than once in zh:", dupe_zh)
+    print_key_list("Keys defined more than once in en:", dupe_en)
     print_key_list("Keys present in zh but missing in en:", missing_en)
     print_key_list("Keys present in en but missing in zh:", missing_zh)
     print_key_list("Static t(...) keys missing in zh:", used_missing_zh, used)
     print_key_list("Static t(...) keys missing in en:", used_missing_en, used)
 
-    if missing_en or missing_zh or used_missing_zh or used_missing_en:
+    if dupe_zh or dupe_en or missing_en or missing_zh or used_missing_zh or used_missing_en:
         return 1
 
     print(f"i18n keys OK: zh={len(zh)} en={len(en)} static_usages={len(used_keys)}")

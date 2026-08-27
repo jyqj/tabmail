@@ -39,7 +39,6 @@ export function AuthDialog() {
     level,
     user,
     mailboxAddress,
-    refreshToken,
     loginWithTokens,
     logout,
   } = useAuth();
@@ -63,7 +62,7 @@ export function AuthDialog() {
     setLoginLoading(true);
     try {
       const res = await login(loginEmail.trim(), loginPassword);
-      loginWithTokens(res.data.access_token, res.data.refresh_token, res.data.user);
+      loginWithTokens(res.data.access_token, res.data.user);
       setLoginEmail("");
       setLoginPassword("");
       setOpen(false);
@@ -85,7 +84,7 @@ export function AuthDialog() {
     setRegLoading(true);
     try {
       const res = await register(regEmail.trim(), regPassword, regName.trim() || undefined);
-      loginWithTokens(res.data.access_token, res.data.refresh_token, res.data.user);
+      loginWithTokens(res.data.access_token, res.data.user);
       setRegEmail("");
       setRegPassword("");
       setRegName("");
@@ -101,9 +100,9 @@ export function AuthDialog() {
 
   const handleLogout = async () => {
     try {
-      if (refreshToken) {
-        await logoutSession(refreshToken).catch(() => {});
-      }
+      // The refresh token travels in an httpOnly cookie; the logout route
+      // handler forwards it for revocation and clears the cookie.
+      await logoutSession().catch(() => {});
     } finally {
       logout();
     }

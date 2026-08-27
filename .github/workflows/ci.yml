@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GO_VERSION: "1.25"
+  NODE_VERSION: "22"
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    services:
+      # Backs the internal/store/postgres integration tests, which skip
+      # themselves when TABMAIL_TEST_DATABASE_URL is not set (e.g. locally).
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tabmail
+          POSTGRES_PASSWORD: tabmail
+          POSTGRES_DB: tabmail
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tabmail"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TABMAIL_TEST_DATABASE_URL: postgres://tabmail:tabmail@localhost:5432/tabmail?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: go.sum
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install web dependencies
+        run: npm ci
+        working-directory: web
+
+      - name: make check
+        run: make check
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: go.sum
+
+      - name: make build
+        run: make build

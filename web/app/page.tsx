@@ -1,16 +1,9 @@
-"use client";
-
-import { useState, useCallback, useRef, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { TabMailLogo } from "@/components/tabmail-logo";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useI18n } from "@/lib/i18n";
-import { listOpenDomains, suggestOpenAddress } from "@/lib/api";
+import { getServerI18n } from "@/lib/i18n-server";
 import {
-  Mail,
   ArrowRight,
   Globe,
   Zap,
@@ -18,113 +11,27 @@ import {
   Clock,
   Layers,
   Code2,
-  Loader2,
   Terminal,
   Copy,
   Link as LinkIcon,
-  RefreshCw,
   BookOpen,
-  ChevronDown,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { AddressSearch, FaqItem, ScrollReveal, TryItButton } from "./home-interactive";
 
-function useScrollReveal() {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === "undefined") {
-      el.querySelectorAll(".tm-fade-in").forEach((child) => child.classList.add("visible"));
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
-    );
-    el.querySelectorAll(".tm-fade-in").forEach((child) => observer.observe(child));
-    return () => observer.disconnect();
-  }, []);
-  return ref;
-}
+const FEATURES = [
+  { icon: Globe, titleKey: "home.feat.domains", descKey: "home.feat.domainsDesc" },
+  { icon: ShieldCheck, titleKey: "home.feat.access", descKey: "home.feat.accessDesc" },
+  { icon: Clock, titleKey: "home.feat.cleanup", descKey: "home.feat.cleanupDesc" },
+  { icon: Layers, titleKey: "home.feat.tenancy", descKey: "home.feat.tenancyDesc" },
+  { icon: Zap, titleKey: "home.feat.perf", descKey: "home.feat.perfDesc" },
+  { icon: Code2, titleKey: "home.feat.api", descKey: "home.feat.apiDesc" },
+];
 
-function FAQItem({ question, answer }: { question: string; answer: string }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="border-b border-border/40 last:border-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-4 py-5 text-left cursor-pointer group"
-      >
-        <span className="text-[14px] font-medium group-hover:text-primary transition-colors">{question}</span>
-        <ChevronDown className={cn("h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-300", open && "rotate-180")} />
-      </button>
-      <div className={cn(
-        "grid transition-all duration-300 ease-out",
-        open ? "grid-rows-[1fr] opacity-100 pb-5" : "grid-rows-[0fr] opacity-0"
-      )}>
-        <div className="overflow-hidden">
-          <p className="text-sm text-muted-foreground leading-relaxed pr-8">{answer}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default async function HomePage() {
+  const { t } = await getServerI18n();
 
-export default function HomePage() {
-  const router = useRouter();
-  const { t } = useI18n();
-  const [address, setAddress] = useState("");
-  const heroInputRef = useRef<HTMLInputElement>(null);
-  const featuresRef = useScrollReveal();
-  const stepsRef = useScrollReveal();
-
-  const go = useCallback(() => {
-    const target = address.trim();
-    if (!target) return;
-    router.push(`/inbox/${encodeURIComponent(target)}`);
-  }, [address, router]);
-
-  const [randomLoading, setRandomLoading] = useState(false);
-
-  const handleRandom = async () => {
-    setRandomLoading(true);
-    try {
-      const domains = await listOpenDomains();
-      const verified = (domains.data ?? []).filter((d) => d.is_verified && d.mx_verified);
-      if (verified.length === 0) {
-        toast.error(t("home.noDomains"));
-        return;
-      }
-      const domain = verified[Math.floor(Math.random() * verified.length)];
-      const res = await suggestOpenAddress(domain.id, { subdomain: domain.allow_random_subdomains });
-      const addr = res.data.address;
-      setAddress(addr);
-      router.push(`/inbox/${encodeURIComponent(addr)}`);
-    } catch {
-      toast.error(t("home.randomFailed"));
-    } finally {
-      setRandomLoading(false);
-    }
-  };
-
-  const FEATURES = [
-    { icon: Globe, titleKey: "home.feat.domains", descKey: "home.feat.domainsDesc" },
-    { icon: ShieldCheck, titleKey: "home.feat.access", descKey: "home.feat.accessDesc" },
-    { icon: Clock, titleKey: "home.feat.cleanup", descKey: "home.feat.cleanupDesc" },
-    { icon: Layers, titleKey: "home.feat.tenancy", descKey: "home.feat.tenancyDesc" },
-    { icon: Zap, titleKey: "home.feat.perf", descKey: "home.feat.perfDesc" },
-    { icon: Code2, titleKey: "home.feat.api", descKey: "home.feat.apiDesc" },
-  ];
-
-  const STEPS = [
+  const steps = [
     { n: "01", title: t("home.step01"), desc: t("home.step01Desc") },
     { n: "02", title: t("home.step02"), desc: t("home.step02Desc") },
     { n: "03", title: t("home.step03"), desc: t("home.step03Desc") },
@@ -161,62 +68,36 @@ export default function HomePage() {
               {t("home.desc")}
             </p>
 
-            <div className="tm-reveal tm-reveal-4 flex items-center gap-2 mt-8 max-w-[540px]">
-              <Input
-                ref={heroInputRef}
-                className="h-[42px] text-sm flex-1 bg-card border-border rounded-lg focus-visible:ring-1 focus-visible:ring-primary/40 font-mono"
-                placeholder={t("home.placeholder")}
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && go()}
-              />
-              <Button
-                className="h-[42px] px-5 gap-2 text-sm font-medium rounded-lg"
-                onClick={go}
-                disabled={!address.trim()}
-              >
-                {t("home.openInbox")}
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Button>
-            </div>
-
-            <div className="tm-reveal tm-reveal-5 flex items-center gap-5 mt-3.5 text-xs text-muted-foreground">
-              <button
-                onClick={handleRandom}
-                disabled={randomLoading}
-                className="flex items-center gap-1.5 hover:text-foreground transition-colors cursor-pointer disabled:opacity-50"
-              >
-                {randomLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
-                {randomLoading ? t("home.generating") : t("home.random")}
-              </button>
-              <span className="flex items-center gap-1.5 opacity-60">
-                <Code2 className="h-3 w-3" />
-                {t("home.curlHint") || "直接 curl"}
-              </span>
-              <span className="flex items-center gap-1.5 opacity-60">
-                <ShieldCheck className="h-3 w-3" />
-                {t("home.noRegister") || "不需要注册"}
-              </span>
-            </div>
-
+            <AddressSearch
+              labels={{
+                placeholder: t("home.placeholder"),
+                openInbox: t("home.openInbox"),
+                random: t("home.random"),
+                generating: t("home.generating"),
+                curlHint: t("home.curlHint"),
+                noRegister: t("home.noRegister"),
+                noDomains: t("home.noDomains"),
+                randomFailed: t("home.randomFailed"),
+              }}
+            />
           </div>
         </section>
 
         {/* How it works — code-first */}
         <section className="py-8 md:py-14">
-          <div ref={stepsRef} className="mx-auto max-w-[1180px] px-6 md:px-12">
+          <ScrollReveal className="mx-auto max-w-[1180px] px-6 md:px-12">
             <div className="flex flex-col lg:flex-row gap-10 items-stretch">
               {/* Left: steps */}
               <div className="flex-1">
                 <div className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground mb-2">
-                  {t("home.howItWorks") || "三步上线"}
+                  {t("home.howItWorks")}
                 </div>
                 <h2 className="text-[28px] sm:text-[32px] font-semibold leading-tight tracking-[-0.025em]">
                   {t("home.threeSteps")}
                 </h2>
 
                 <ol className="mt-7 list-none p-0">
-                  {STEPS.map((s) => (
+                  {steps.map((s) => (
                     <li key={s.n} className="flex gap-4 py-4 border-t border-border group tm-fade-in">
                       <div className="font-mono text-[13px] font-semibold text-primary w-9 shrink-0 group-hover:translate-x-0.5 transition-transform">{s.n}</div>
                       <div className="flex-1 min-w-0">
@@ -234,9 +115,9 @@ export default function HomePage() {
                 <div className="rounded-lg border border-border bg-card overflow-hidden shadow-sm">
                   <div className="flex items-center h-8 px-3 border-b border-border bg-muted/40 gap-2">
                     <Terminal className="h-3 w-3 text-muted-foreground/70" />
-                    <span className="font-mono text-[11px] text-muted-foreground/70">{t("home.curlTitle") || "curl · 拉取最新邮件"}</span>
+                    <span className="font-mono text-[11px] text-muted-foreground/70">{t("home.curlTitle")}</span>
                     <div className="flex-1" />
-                    <button className="p-1 rounded hover:bg-muted transition-colors" title="Copy">
+                    <button type="button" className="p-1 rounded hover:bg-muted transition-colors" title="Copy">
                       <Copy className="h-3 w-3 text-muted-foreground/50" />
                     </button>
                   </div>
@@ -265,12 +146,12 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
         </section>
 
         {/* Features */}
         <section className="py-16 md:py-24">
-          <div ref={featuresRef} className="mx-auto max-w-[1180px] px-6 md:px-12">
+          <ScrollReveal className="mx-auto max-w-[1180px] px-6 md:px-12">
             <div className="text-center mb-14 tm-fade-in">
               <p className="font-mono text-[10px] font-medium uppercase tracking-[0.14em] text-primary mb-3">
                 {t("home.features")}
@@ -299,7 +180,7 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-          </div>
+          </ScrollReveal>
         </section>
 
         {/* CTA */}
@@ -315,17 +196,7 @@ export default function HomePage() {
               {t("home.ctaDesc")}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Button
-                size="lg"
-                className="h-11 px-6 gap-2 text-sm font-semibold w-full sm:w-auto bg-white text-primary hover:bg-white/90 border-0 shadow-lg shadow-black/10"
-                onClick={() => {
-                  heroInputRef.current?.focus();
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }}
-              >
-                <Mail className="h-4 w-4" />
-                {t("home.ctaTry")}
-              </Button>
+              <TryItButton label={t("home.ctaTry")} />
               <Button
                 variant="outline"
                 size="lg"
@@ -352,7 +223,7 @@ export default function HomePage() {
             </div>
             <div>
               {(["1", "2", "3", "4", "5"] as const).map((n) => (
-                <FAQItem key={n} question={t(`faq.q${n}`)} answer={t(`faq.a${n}`)} />
+                <FaqItem key={n} question={t(`faq.q${n}`)} answer={t(`faq.a${n}`)} />
               ))}
             </div>
           </div>

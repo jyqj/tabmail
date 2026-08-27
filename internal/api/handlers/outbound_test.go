@@ -226,12 +226,12 @@ func TestSendDoesNotRequireZoneOwnership(t *testing.T) {
 		MXVerified:  true,
 	})
 
-	// userA does not own the zone: authorization must still pass (send.from
-	// carries no ownership rule), so the request reaches the later
-	// mailbox-existence check instead of being rejected with 403.
+	// userA does not own the zone. Zone authorization still has no ownership
+	// rule, but outbound authority is now represented by a SendIdentity. With
+	// no matching identity, the request is rejected at that explicit boundary.
 	rr := doOutboundSendRequest(t, f.st, h, `{"from":"noone@shared.example.test","to":["rcpt@example.org"]}`, outboundUserHeaders(t, f.userA))
-	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "from address does not exist as a mailbox") {
-		t.Fatalf("non-owner same-tenant send should pass authz, got %d body=%s", rr.Code, rr.Body.String())
+	if rr.Code != http.StatusForbidden || !strings.Contains(rr.Body.String(), "authorized send identity") {
+		t.Fatalf("missing shared send identity expected 403, got %d body=%s", rr.Code, rr.Body.String())
 	}
 
 	// Cross-tenant zone: denied by the seam's tenant isolation.

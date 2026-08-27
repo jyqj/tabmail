@@ -58,7 +58,11 @@ type UserStore interface {
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
 	RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error
-	DeleteExpiredRefreshTokens(ctx context.Context) error
+	// DeleteExpiredRefreshTokens drops session rows whose expiry has passed
+	// (the retention role calls it on a schedule) and reports how many went.
+	// Revoked-but-unexpired rows stay: the auth service reads them to detect
+	// refresh-token reuse.
+	DeleteExpiredRefreshTokens(ctx context.Context) (int, error)
 
 	// --- Admin invitations -----------------------------------------------
 	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error
@@ -147,6 +151,10 @@ type MessageStore interface {
 	CreateMessage(ctx context.Context, m *models.Message) error
 	GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error)
 	ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error)
+	// Keyset variant of ListMessages: returns up to limit messages strictly
+	// after the cursor position in (received_at DESC, id DESC) order. A nil
+	// cursor starts from the newest message.
+	ListMessagesKeyset(ctx context.Context, mailboxID uuid.UUID, before *models.MessageCursor, limit int) ([]*models.Message, error)
 	MarkSeen(ctx context.Context, id uuid.UUID) error
 	DeleteMessage(ctx context.Context, id uuid.UUID) error
 	PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error

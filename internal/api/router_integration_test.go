@@ -33,8 +33,7 @@ const publicTenantID = "00000000-0000-0000-0000-000000000001"
 
 func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 
 	router := testRouter(st, obj, rdb)
 
@@ -86,8 +85,7 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 		ExpiresAt:    time.Now().Add(24 * time.Hour),
 	})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	tokenResp := doJSON(t, router, http.MethodPost, "/api/v1/token", map[string]any{
@@ -119,8 +117,7 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 
 func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 
 	router := testRouter(st, obj, rdb)
 
@@ -158,8 +155,7 @@ func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 
 func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 	st, obj, _ := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 
 	job := &models.IngestJob{
 		ID:            uuid.New(),
@@ -212,8 +208,7 @@ func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 
 func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 	st, obj, _ := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 
 	if err := st.CreateIngestJob(context.Background(), &models.IngestJob{
 		ID:            uuid.New(),
@@ -263,8 +258,7 @@ func TestRouter_SuggestAddressReturnsStructuredMailboxAddress(t *testing.T) {
 	}
 	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	domainID := findTenantZone(t, st, tenantID)
@@ -301,8 +295,7 @@ func TestRouter_SuggestAddressSupportsRandomSubdomain(t *testing.T) {
 	}
 	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read", "domains:write"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	domainID := findTenantZone(t, st, tenantID)
@@ -340,8 +333,7 @@ func TestRouter_SuggestSubdomainRequiresDomainWriteScope(t *testing.T) {
 	}
 	st.RegisterAPIKey("read-key", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	domainID := findTenantZone(t, st, tenantID)
@@ -379,8 +371,7 @@ func TestRouter_UserSeesOnlyOwnedDomains(t *testing.T) {
 	st.SeedZone(ownedZone)
 	st.SeedZone(otherZone)
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains", nil)
@@ -438,8 +429,7 @@ func TestRouter_UserCannotDeleteMessagesInAnotherUsersDomain(t *testing.T) {
 		ExpiresAt:  time.Now().Add(24 * time.Hour),
 	})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	req := httptest.NewRequest(http.MethodDelete, "/api/v1/mailbox/inbox@owned-records.test/"+msgID.String(), nil)
@@ -550,8 +540,7 @@ func TestRouter_APIKeyCannotUseInteractiveAuthRoutes(t *testing.T) {
 	}
 	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 	router := testRouter(st, obj, rdb)
 
 	for _, tc := range []struct {
@@ -595,8 +584,7 @@ func (s *countingStore) CountIngestJobsByState(ctx context.Context, states ...st
 func TestRouter_MetricsDBCountsAreLightlyCached(t *testing.T) {
 	base, obj, _ := seededStores(t)
 	st := &countingStore{FakeStore: base}
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
-	t.Cleanup(func() { _ = rdb.Close() })
+	rdb := testRedis(t)
 
 	router := testRouter(st, obj, rdb)
 
@@ -665,6 +653,21 @@ func findTenantZone(t *testing.T, st *testutil.FakeStore, tenantID uuid.UUID) uu
 		t.Fatalf("list zones: %v", err)
 	}
 	return zones[0].ID
+}
+
+// testRedis returns a client backed by an in-process Redis. Pointing the
+// client at a closed port instead costs seconds per call in go-redis dial
+// retries, and leaves the rate limiter's Lua scripts untested.
+func testRedis(t *testing.T) *redis.Client {
+	t.Helper()
+	mr, err := miniredis.Run()
+	if err != nil {
+		t.Fatalf("start miniredis: %v", err)
+	}
+	t.Cleanup(mr.Close)
+	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	t.Cleanup(func() { _ = rdb.Close() })
+	return rdb
 }
 
 func testRouter(st store.Store, obj *testutil.MemoryObjectStore, rdb *redis.Client) http.Handler {

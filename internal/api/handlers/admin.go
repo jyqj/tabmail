@@ -331,7 +331,7 @@ func (h *AdminHandler) UserCreateAPIKey(w http.ResponseWriter, r *http.Request) 
 	var callerPerm *models.EffectivePermission
 	var callerUserID *uuid.UUID
 
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if !actor.IsSuperAdmin && !actor.IsAdmin {
 		if actor.Permission != nil && !actor.Permission.CanCreateAPIKeys {
 			errForbidden(w, "API key creation not allowed")
@@ -370,7 +370,7 @@ func (h *AdminHandler) UserListAPIKeys(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Non-admin users only see their own keys
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if !actor.IsSuperAdmin && !actor.IsAdmin {
 		if actor.Type == authz.PrincipalUser {
 			items, err := h.service.ListAPIKeysByOwner(ctx, tenant.ID, actor.ID)
@@ -406,7 +406,7 @@ func (h *AdminHandler) UserDeleteAPIKey(w http.ResponseWriter, r *http.Request) 
 
 	// Non-admin callers pass their user ID for ownership check
 	var callerUserID *uuid.UUID
-	actor := authz.ActorFromContext(ctx)
+	actor := middleware.ActorFromContext(ctx)
 	if !actor.IsSuperAdmin && !actor.IsAdmin {
 		if actor.Type == authz.PrincipalUser {
 			id := actor.ID

@@ -5,7 +5,6 @@ import { formatDistanceToNow } from "date-fns";
 import { ClipboardList } from "lucide-react";
 
 import { listAudit } from "@/lib/api";
-import type { AuditEntry } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";

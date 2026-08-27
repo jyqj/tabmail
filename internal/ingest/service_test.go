@@ -2,6 +2,9 @@ package ingest
 
 import (
 	"context"
+	"fmt"
+	"io"
+	"sync"
 	"testing"
 	"time"
 
@@ -13,6 +16,7 @@ import (
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
+	"tabmail/internal/store"
 	"tabmail/internal/testutil"
 )
 
@@ -250,6 +254,146 @@ func newDurableCleanupService(t *testing.T, maxMessageBytes int, seedRoute bool)
 		config.Ingest{Durable: true, BatchSize: 10},
 		zerolog.Nop(),
 	)
+}
+
+// gateObjectStore blocks Get until `want` goroutines are inside it at the same
+// time, proving the batch really runs in parallel. Sequential processing would
+// leave the first reader stuck alone until the timeout fails its job.
+type gateObjectStore struct {
+	inner   store.ObjectStore
+	want    int
+	timeout time.Duration
+
+	mu      sync.Mutex
+	arrived int
+	release chan struct{}
+}
+
+func newGateObjectStore(inner store.ObjectStore, want int, timeout time.Duration) *gateObjectStore {
+	return &gateObjectStore{inner: inner, want: want, timeout: timeout, release: make(chan struct{})}
+}
+
+func (g *gateObjectStore) Get(ctx context.Context, key string) (io.ReadCloser, error) {
+	g.mu.Lock()
+	g.arrived++
+	if g.arrived == g.want {
+		close(g.release)
+	}
+	g.mu.Unlock()
+	select {
+	case <-g.release:
+	case <-time.After(g.timeout):
+		return nil, fmt.Errorf("gate timed out waiting for %d concurrent readers", g.want)
+	}
+	return g.inner.Get(ctx, key)
+}
+
+func (g *gateObjectStore) Put(ctx context.Context, key string, r io.Reader, size int64) error {
+	return g.inner.Put(ctx, key, r, size)
+}
+func (g *gateObjectStore) Delete(ctx context.Context, key string) error {
+	return g.inner.Delete(ctx, key)
+}
+func (g *gateObjectStore) Exists(ctx context.Context, key string) (bool, error) {
+	return g.inner.Exists(ctx, key)
+}
+
+func TestProcessBatchRunsJobsInParallel(t *testing.T) {
+	st := testutil.NewFakeStore()
+	const workers = 3
+	obj := newGateObjectStore(testutil.NewMemoryObjectStore(), workers, 5*time.Second)
+
+	planID := uuid.New()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.SeedPlan(&models.Plan{
+		ID:                    planID,
+		Name:                  "parallel-test",
+		MaxDomains:            10,
+		MaxMailboxesPerDomain: 100,
+		MaxMessagesPerMailbox: 1000,
+		MaxMessageBytes:       1024 * 1024,
+		RetentionHours:        24,
+		RPMLimit:              1000,
+		DailyQuota:            1000,
+	})
+	st.SeedTenant(&models.Tenant{ID: tenantID, Name: "tenant-a", PlanID: planID})
+	st.SeedZone(&models.DomainZone{
+		ID:         zoneID,
+		TenantID:   tenantID,
+		Domain:     "mail.test",
+		IsVerified: true,
+		MXVerified: true,
+		TXTRecord:  "tabmail-verify=test",
+	})
+	st.SeedRoute(&models.DomainRoute{
+		ID:                uuid.New(),
+		ZoneID:            zoneID,
+		RouteType:         models.RouteExact,
+		MatchValue:        "mail.test",
+		AutoCreateMailbox: true,
+		AccessModeDefault: models.AccessPublic,
+	})
+
+	resolverSvc := resolver.New(st, policy.NamingFull, true)
+	svc := NewService(
+		st,
+		obj,
+		resolverSvc,
+		realtime.NewHub(10, st),
+		hooks.New(hooks.Config{}, zerolog.Nop()),
+		models.SMTPPolicy{DefaultAccept: true, DefaultStore: true},
+		24,
+		nil,
+		config.Ingest{Durable: true, BatchSize: 10, Concurrency: workers},
+		zerolog.Nop(),
+	)
+
+	for i := range workers {
+		rcpt := fmt.Sprintf("user%d@mail.test", i)
+		res, err := svc.Accept(context.Background(), Envelope{
+			Source:     "smtp",
+			MailFrom:   "sender@example.org",
+			Recipients: []string{rcpt},
+		}, []byte(fmt.Sprintf("Subject: parallel %d\r\n\r\nhello", i)), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !res.Queued {
+			t.Fatalf("expected durable accept to queue, got %#v", res)
+		}
+	}
+
+	if err := svc.processBatch(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i := range workers {
+		rcpt := fmt.Sprintf("user%d@mail.test", i)
+		mb, err := st.GetMailboxByAddress(context.Background(), rcpt)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if mb == nil {
+			t.Fatalf("expected mailbox %s after parallel batch", rcpt)
+		}
+		_, total, err := st.ListMessages(context.Background(), mb.ID, models.Page{Page: 1, PerPage: 10})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if total != 1 {
+			t.Fatalf("expected 1 message in %s, got %d", rcpt, total)
+		}
+	}
+	jobs, _, err := st.ListIngestJobs(context.Background(), models.Page{Page: 1, PerPage: 10}, "", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, job := range jobs {
+		if job.State != "done" {
+			t.Fatalf("expected all jobs done, got %s state=%s", job.ID, job.State)
+		}
+	}
 }
 
 func TestRetryBackoffUsesPrecisePowersOfTwo(t *testing.T) {

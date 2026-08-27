@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const nextConfig: NextConfig = {
+  // Emit .next/standalone so the runtime image can ship a traced server plus
+  // only the node_modules it actually loads, instead of the full install.
+  output: "standalone",
   async rewrites() {
     return [
       { source: "/api/v1/:path*", destination: `${apiUrl}/api/v1/:path*` },

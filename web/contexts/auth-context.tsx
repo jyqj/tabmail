@@ -12,13 +12,14 @@ import {
 } from "react";
 import type { AuthUser, EffectivePermission } from "@/lib/types";
 import type { PermissionLevel } from "@/lib/permissions";
+import { bootstrapSession, getAccessToken, setAccessToken } from "@/lib/api/base";
 
 type AuthLevel = PermissionLevel;
 
 interface AuthSnapshot {
-  // JWT auth (new)
+  // JWT auth: the access token lives only in memory (see lib/api/base.ts);
+  // the refresh token lives in an httpOnly cookie the client cannot read.
   accessToken: string | null;
-  refreshToken: string | null;
   user: AuthUser | null;
   tenantId: string | null;
   // Mailbox auth
@@ -33,7 +34,7 @@ interface AuthState extends AuthSnapshot {
   permissionsLoading: boolean;
   permissionsError: boolean;
   // JWT auth
-  loginWithTokens: (accessToken: string, refreshToken: string, user: AuthUser) => void;
+  loginWithTokens: (accessToken: string, user: AuthUser) => void;
   setTenantId: (id: string | null) => void;
   setMailboxAuth: (address: string | null, token: string | null) => void;
   clearMailboxAuth: () => void;
@@ -43,6 +44,7 @@ interface AuthState extends AuthSnapshot {
 const AuthContext = createContext<AuthState | null>(null);
 const AUTH_EVENT = "tabmail-auth-change";
 let cachedSnapshot: AuthSnapshot | null = null;
+let cachedRawUser: string | null = null;
 
 function parseUser(raw: string | null): AuthUser | null {
   if (!raw) return null;
@@ -55,20 +57,13 @@ function parseUser(raw: string | null): AuthUser | null {
 
 function readSnapshot(): AuthSnapshot {
   if (typeof window === "undefined") {
-    return {
-      accessToken: null,
-      refreshToken: null,
-      user: null,
-      tenantId: null,
-      mailboxToken: null,
-      mailboxAddress: null,
-    };
+    return serverSnapshot;
   }
 
+  const rawUser = localStorage.getItem("tabmail_user");
   const nextSnapshot: AuthSnapshot = {
-    accessToken: localStorage.getItem("tabmail_access_token"),
-    refreshToken: localStorage.getItem("tabmail_refresh_token"),
-    user: parseUser(localStorage.getItem("tabmail_user")),
+    accessToken: getAccessToken(),
+    user: parseUser(rawUser),
     tenantId: localStorage.getItem("tabmail_tenant_id"),
     mailboxToken: localStorage.getItem("tabmail_mailbox_token"),
     mailboxAddress: localStorage.getItem("tabmail_mailbox_address"),
@@ -77,7 +72,7 @@ function readSnapshot(): AuthSnapshot {
   if (
     cachedSnapshot &&
     cachedSnapshot.accessToken === nextSnapshot.accessToken &&
-    cachedSnapshot.refreshToken === nextSnapshot.refreshToken &&
+    cachedRawUser === rawUser &&
     cachedSnapshot.tenantId === nextSnapshot.tenantId &&
     cachedSnapshot.mailboxToken === nextSnapshot.mailboxToken &&
     cachedSnapshot.mailboxAddress === nextSnapshot.mailboxAddress
@@ -86,6 +81,7 @@ function readSnapshot(): AuthSnapshot {
   }
 
   cachedSnapshot = nextSnapshot;
+  cachedRawUser = rawUser;
   return nextSnapshot;
 }
 
@@ -115,7 +111,6 @@ function setStorageItem(key: string, value: string | null) {
 
 const serverSnapshot: AuthSnapshot = {
   accessToken: null,
-  refreshToken: null,
   user: null,
   tenantId: null,
   mailboxToken: null,
@@ -139,6 +134,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     hydrated ? readSnapshot : () => serverSnapshot,
     () => serverSnapshot,
   );
+
+  // A reloaded tab has a stored user profile but no in-memory access token:
+  // silently exchange the httpOnly refresh cookie for a fresh one. On failure
+  // bootstrapSession clears the stale profile and the UI settles on public.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (snapshot.user && !snapshot.accessToken) {
+      void bootstrapSession();
+    }
+    // Run once when hydration completes; token arrival re-renders via the
+    // auth-change event, not this effect.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
 
   // Load permissions when a JWT user session is present
   useEffect(() => {
@@ -192,9 +200,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [snapshot.accessToken, snapshot.user]);
 
-  const loginWithTokens = useCallback((accessToken: string, refreshToken: string, user: AuthUser) => {
-    setStorageItem("tabmail_access_token", accessToken);
-    setStorageItem("tabmail_refresh_token", refreshToken);
+  const loginWithTokens = useCallback((accessToken: string, user: AuthUser) => {
+    setAccessToken(accessToken);
     localStorage.setItem("tabmail_user", JSON.stringify(user));
     setStorageItem("tabmail_tenant_id", user.tenant_id);
     notify();
@@ -218,8 +225,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(() => {
-    setStorageItem("tabmail_access_token", null);
-    setStorageItem("tabmail_refresh_token", null);
+    setAccessToken(null);
     localStorage.removeItem("tabmail_user");
     setStorageItem("tabmail_tenant_id", null);
     setStorageItem("tabmail_mailbox_address", null);
@@ -230,7 +236,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     notify();
   }, []);
 
-  const level: AuthLevel = snapshot.accessToken && snapshot.user
+  // A stored user profile counts as a session even while the bootstrap
+  // refresh is still in flight; requests self-heal through the 401-refresh
+  // path, and a failed bootstrap clears the profile.
+  const level: AuthLevel = snapshot.user
     ? (snapshot.user.role === "super_admin"
         ? "super_admin"
         : snapshot.user.role === "admin"

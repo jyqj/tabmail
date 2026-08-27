@@ -39,7 +39,7 @@ import {
   deleteSendIdentity,
   listDomains,
 } from "@/lib/api";
-import type { SendIdentity, DomainZone } from "@/lib/types";
+import type { DomainZone } from "@/lib/types";
 import {
   Plus,
   Trash2,
@@ -65,7 +65,7 @@ export default function SendIdentitiesPage() {
   const { data: response, isLoading: loading, mutate } = useCRUDPage(
     "send-identities",
     () => listSendIdentities(),
-    "grants.sendIdentity.loadFailed",
+    "sendIdentities.loadFailed",
   );
   const identities = response?.data ?? [];
   const total = identities.length;
@@ -90,57 +90,57 @@ export default function SendIdentitiesPage() {
       setNewAddress("");
       setNewZoneId("");
       setDialogOpen(false);
-      toast.success(t("grants.sendIdentity.created"));
+      toast.success(t("sendIdentities.created"));
       mutate();
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      toast.error(apiErr?.error?.message || t("grants.sendIdentity.createFailed"));
+      toast.error(apiErr?.error?.message || t("sendIdentities.createFailed"));
     } finally {
       setCreating(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!safeConfirm(t("grants.sendIdentity.confirmDelete"))) return;
+    if (!safeConfirm(t("sendIdentities.confirmDelete"))) return;
     try {
       await deleteSendIdentity(id);
-      toast.success(t("grants.sendIdentity.deleted"));
+      toast.success(t("sendIdentities.deleted"));
       mutate();
     } catch {
-      toast.error(t("grants.sendIdentity.deleteFailed"));
+      toast.error(t("sendIdentities.deleteFailed"));
     }
   };
 
   const identityTypeLabels: Record<string, string> = {
-    exact: t("grants.sendIdentity.type.exact"),
-    domain_wildcard: t("grants.sendIdentity.type.domainWildcard"),
+    exact: t("sendIdentities.type.exact"),
+    domain_wildcard: t("sendIdentities.type.domainWildcard"),
   };
 
   return (
     <div className="flex flex-col">
       <PageHeader
-        title={t("grants.sendIdentity.title")}
-        description={t("grants.sendIdentity.total", { count: total })}
+        title={t("sendIdentities.title")}
+        description={t("sendIdentities.total", { count: total })}
         actions={
           isAdmin ? (
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger render={<Button size="sm" className="gap-1.5" />}>
                 <Plus className="h-3.5 w-3.5" />
-                {t("grants.sendIdentity.create")}
+                {t("sendIdentities.create")}
               </DialogTrigger>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>{t("grants.sendIdentity.create")}</DialogTitle>
+                  <DialogTitle>{t("sendIdentities.createTitle")}</DialogTitle>
                   <DialogDescription>
-                    {t("grants.sendIdentity.createDesc")}
+                    {t("sendIdentities.createDesc")}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label>{t("grants.sendIdentity.zone")}</Label>
+                    <Label>{t("sendIdentities.zone")}</Label>
                     <Select value={newZoneId} onValueChange={(v) => v && setNewZoneId(v)}>
                       <SelectTrigger>
-                        <SelectValue placeholder={t("grants.sendIdentity.zonePlaceholder")} />
+                        <SelectValue placeholder={t("sendIdentities.zonePlaceholder")} />
                       </SelectTrigger>
                       <SelectContent>
                         {zones.map((zone) => (
@@ -152,21 +152,21 @@ export default function SendIdentitiesPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label>{t("grants.sendIdentity.address")}</Label>
+                    <Label>{t("sendIdentities.address")}</Label>
                     <Input
-                      placeholder={t("grants.sendIdentity.addressPlaceholder")}
+                      placeholder={t("sendIdentities.addressPlaceholder")}
                       value={newAddress}
                       onChange={(e) => setNewAddress(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                     />
                     <p className="text-xs text-muted-foreground">
-                      {t("grants.sendIdentity.wildcardHint")}
+                      {t("sendIdentities.wildcardHint")}
                     </p>
                   </div>
                 </div>
                 <DialogFooter>
                   <Button onClick={handleCreate} disabled={creating || !newAddress.trim() || !newZoneId}>
-                    {creating ? t("grants.creating") : t("grants.create")}
+                    {creating ? t("sendIdentities.creating") : t("sendIdentities.create")}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -180,10 +180,10 @@ export default function SendIdentitiesPage() {
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Send className="h-4 w-4 text-primary" />
-              {t("grants.sendIdentity.listTitle")}
+              {t("sendIdentities.listTitle")}
             </CardTitle>
             <CardDescription>
-              {t("grants.sendIdentity.listDesc")}
+              {t("sendIdentities.listDesc")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -196,9 +196,9 @@ export default function SendIdentitiesPage() {
             ) : identities.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Send className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">{t("grants.sendIdentity.empty")}</p>
+                <p className="text-sm">{t("sendIdentities.empty")}</p>
                 <p className="text-xs mt-1">
-                  {isAdmin ? t("grants.sendIdentity.emptyAdminHint") : t("grants.sendIdentity.emptyUserHint")}
+                  {isAdmin ? t("sendIdentities.emptyAdminHint") : t("sendIdentities.emptyUserHint")}
                 </p>
               </div>
             ) : (
@@ -217,12 +217,12 @@ export default function SendIdentitiesPage() {
                             {identity.verified ? (
                               <Badge variant="default" className="gap-1 bg-green-600 hover:bg-green-700 text-[10px]">
                                 <CheckCircle2 className="h-3 w-3" />
-                                {t("grants.sendIdentity.verified")}
+                                {t("sendIdentities.verified")}
                               </Badge>
                             ) : (
                               <Badge variant="secondary" className="gap-1 text-[10px]">
                                 <XCircle className="h-3 w-3" />
-                                {t("grants.sendIdentity.unverified")}
+                                {t("sendIdentities.unverified")}
                               </Badge>
                             )}
                             {zone && (
@@ -232,7 +232,7 @@ export default function SendIdentitiesPage() {
                             )}
                           </div>
                           <p className="text-xs text-muted-foreground mt-0.5">
-                            {t("grants.sendIdentity.createdAt", {
+                            {t("sendIdentities.createdAt", {
                               time: formatDistanceToNow(new Date(identity.created_at), {
                                 addSuffix: true,
                                 locale: dateFnsLocale,

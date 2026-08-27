@@ -165,9 +165,12 @@ func (s *PgStore) RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID)
 	return err
 }
 
-func (s *PgStore) DeleteExpiredRefreshTokens(ctx context.Context) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM refresh_tokens WHERE expires_at < now()`)
-	return err
+func (s *PgStore) DeleteExpiredRefreshTokens(ctx context.Context) (int, error) {
+	tag, err := s.pool.Exec(ctx, `DELETE FROM refresh_tokens WHERE expires_at < now()`)
+	if err != nil {
+		return 0, err
+	}
+	return int(tag.RowsAffected()), nil
 }
 
 // ================================================================

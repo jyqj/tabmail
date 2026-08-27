@@ -1,10 +1,12 @@
+// Package authz holds the authorization policy. It is deliberately free of
+// transport concerns: callers build an Actor from wherever their identity
+// lives (see middleware.ActorFromContext for the HTTP path) and pass it in.
 package authz
 
 import (
 	"context"
 
 	"github.com/google/uuid"
-	"tabmail/internal/api/middleware"
 	"tabmail/internal/models"
 )
 
@@ -176,48 +178,6 @@ func New(st Store) *Authorizer {
 	return &Authorizer{store: st}
 }
 
-// ActorFromContext extracts an Actor from the request context using the
-// existing middleware helpers, so callers don't need to build it manually.
-//
-// API key identity is checked first so that an API key with an owner is
-// correctly identified as PrincipalAPIKey (not PrincipalUser). The owner's
-// user ID is stored in OwnerUserID for fallback grant checks.
-func ActorFromContext(ctx context.Context) Actor {
-	actor := Actor{}
-
-	keyID := middleware.APIKeyIDFromCtx(ctx)
-	user := middleware.UserFromCtx(ctx)
-
-	if keyID != nil {
-		// API key is the primary identity — even when the key has an owner.
-		actor.Type = PrincipalAPIKey
-		actor.ID = *keyID
-		if ownerID := middleware.OwnerUserIDFromCtx(ctx); ownerID != nil {
-			actor.OwnerUserID = ownerID
-		} else {
-			// Only ownerless integration keys are tenant-wide. User-owned API keys
-			// keep the API-key principal for audit/grants, but inherit ownership via
-			// OwnerUserID rather than becoming broad tenant credentials.
-			actor.TenantWide = true
-		}
-	} else if user != nil {
-		actor.Type = PrincipalUser
-		actor.ID = user.ID
-		actor.TenantID = user.TenantID
-		actor.Role = user.Role
-	}
-
-	if tenant := middleware.TenantFromCtx(ctx); tenant != nil {
-		actor.TenantID = tenant.ID
-	}
-
-	actor.IsSuperAdmin = middleware.IsSuperAdmin(ctx)
-	actor.IsAdmin = middleware.IsAdmin(ctx)
-	actor.Permission = middleware.PermissionFromCtx(ctx)
-
-	return actor
-}
-
 // Authorize checks whether the actor can perform the action on the resource.
 func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, res Resource) error {
 	// super_admin can do everything.
@@ -307,12 +267,6 @@ func (a *Authorizer) Authorize(_ context.Context, actor Actor, action Action, re
 	default:
 		return ErrForbidden("unknown action")
 	}
-}
-
-// AuthorizeFromContext is a convenience wrapper that extracts the Actor from
-// the context and delegates to Authorize.
-func (a *Authorizer) AuthorizeFromContext(ctx context.Context, action Action, res Resource) error {
-	return a.Authorize(ctx, ActorFromContext(ctx), action, res)
 }
 
 // ---------------------------------------------------------------------------

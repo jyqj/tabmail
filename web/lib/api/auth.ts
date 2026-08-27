@@ -36,9 +36,12 @@ export function register(email: string, password: string, displayName?: string) 
   });
 }
 
-export function logoutSession(refreshToken?: string) {
+// The refresh token lives in an httpOnly cookie: the Next route handler at
+// /api/v1/auth/logout reads it, forwards it to the backend for revocation,
+// and clears the cookie.
+export function logoutSession() {
   return request<unknown>("/api/v1/auth/logout", {
     method: "POST",
-    body: refreshToken ? { refresh_token: refreshToken } : {},
+    body: {},
   });
 }

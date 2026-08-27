@@ -2,6 +2,7 @@ package api
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"sync"
@@ -51,7 +52,7 @@ func newMetricsDBCountCache(ttl time.Duration) *metricsDBCountCache {
 func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) metricsDBCounts {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if c != nil && now.Before(c.expiresAt) {
+	if now.Before(c.expiresAt) {
 		return c.value
 	}
 	value := load()
@@ -75,6 +76,7 @@ type RouterConfig struct {
 	PublicTenantID     string
 	DefaultPlanID      uuid.UUID
 	OpenRegistration   bool
+	FailedLoginDelay   time.Duration
 	Settings           *settings.Manager
 	HTTP               config.HTTP
 	RateLimiter        *middleware.RateLimiter
@@ -108,7 +110,10 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
-	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.Logger)
+	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, handlers.AuthHandlerConfig{
+		Throttle:         cfg.RateLimiter,
+		FailedLoginDelay: cfg.FailedLoginDelay,
+	}, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
 	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
 	si := handlers.NewSendIdentityHandler(st, cfg.Logger)
@@ -247,7 +252,6 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Delete("/admin/tenants/{id}/keys/{keyId}", adm.DeleteAPIKey)
 
 			r.Get("/admin/stats", adm.Stats)
-			r.Get("/admin/status", adm.Stats)
 			r.Get("/admin/monitor/events", mon.StreamAll)
 			r.Get("/admin/monitor/history", mon.History)
 			r.Get("/admin/audit", adm.ListAudit)
@@ -287,6 +291,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write([]byte(`{"status":"ok"}`))
 	})
+	metricsHandler := metrics.Handler()
 	r.Get("/metrics", func(w http.ResponseWriter, r *http.Request) {
 		counts := metricsCounts.Get(time.Now(), func() metricsDBCounts {
 			webhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), "dead")
@@ -300,40 +305,60 @@ func NewRouter(cfg RouterConfig) http.Handler {
 				ingestProcessing: ingestProcessing,
 			}
 		})
-		snapshot := metrics.Snapshot(cfg.Dispatcher != nil && cfg.Dispatcher.Enabled(), counts.webhookDead)
-		body := metrics.RenderPrometheus(snapshot, map[string]float64{
-			"tabmail_webhooks_backlog":         float64(counts.webhookPending),
-			"tabmail_ingest_backlog":           float64(counts.ingestReady + counts.ingestProcessing),
-			"tabmail_ingest_queue_depth":       float64(counts.ingestReady + counts.ingestProcessing),
-			"tabmail_ingest_queue_ready_depth": float64(counts.ingestReady),
-			"tabmail_ingest_queue_inflight":    float64(counts.ingestProcessing),
+		// The queue depths live in the database, so they are refreshed from the
+		// cached counts here rather than by the collectors themselves.
+		metrics.SetBacklogs(metrics.Backlogs{
+			WebhookDeadLetters: counts.webhookDead,
+			WebhooksPending:    counts.webhookPending,
+			IngestReady:        counts.ingestReady,
+			IngestProcessing:   counts.ingestProcessing,
 		})
-		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
-		_, _ = w.Write([]byte(body))
+		metricsHandler.ServeHTTP(w, r)
 	})
 
 	return r
 }
 
-func serveSwaggerUI(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(`<!DOCTYPE html>
+// The docs viewers load from a CDN, so the versions are pinned exactly and
+// guarded by subresource integrity: `@5` and `latest` would let a third party
+// ship new script into an operator's browser at any time. Update the version
+// and the hash together; the browser refuses to run the file if they disagree.
+const (
+	swaggerUIVersion   = "5.32.14"
+	swaggerUICSSSRI    = "sha384-fgyWYkUAamzuI8mJFu/xpRP0JWCJRwkwUwsYDoOYVHUJ8NQE5cENn8ib3ppwFFSX"
+	swaggerUIBundleSRI = "sha384-Dt83RhU85ZmX7werw9uTFCzmauXUoSyx3pdzTQMABtsnFmooJy4Vz9/ACh7n5m1A"
+
+	redocVersion = "2.5.3"
+	redocSRI     = "sha384-xiEssMQFSpSfLbzRZCGfxxIM5QDb2DTrU6vyoZdp2sV1L6pmOMy6MpTtUoLbpC96"
+)
+
+var swaggerUIPage = fmt.Sprintf(`<!DOCTYPE html>
 <html><head><title>TabMail API</title>
-<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@%[1]s/swagger-ui.css"
+      integrity="%[2]s" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head><body>
 <div id="swagger-ui"></div>
-<script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script src="https://unpkg.com/swagger-ui-dist@%[1]s/swagger-ui-bundle.js"
+        integrity="%[3]s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>SwaggerUIBundle({url:"/openapi.yaml",dom_id:"#swagger-ui",deepLinking:true})</script>
-</body></html>`))
-}
+</body></html>`, swaggerUIVersion, swaggerUICSSSRI, swaggerUIBundleSRI)
 
-func serveRedoc(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write([]byte(`<!DOCTYPE html>
+var redocPage = fmt.Sprintf(`<!DOCTYPE html>
 <html><head><title>TabMail API</title>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 </head><body>
 <redoc spec-url="/openapi.yaml"></redoc>
-<script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
-</body></html>`))
+<script src="https://cdn.redoc.ly/redoc/v%[1]s/bundles/redoc.standalone.js"
+        integrity="%[2]s" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</body></html>`, redocVersion, redocSRI)
+
+func serveSwaggerUI(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(swaggerUIPage))
+}
+
+func serveRedoc(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(redocPage))
 }

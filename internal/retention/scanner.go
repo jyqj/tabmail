@@ -16,6 +16,7 @@ type retentionStore interface {
 	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
 	CountRawObjectReferences(ctx context.Context, objectKey string) (int, error)
 	PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error)
+	DeleteExpiredRefreshTokens(ctx context.Context) (int, error)
 }
 
 type Scanner struct {
@@ -87,6 +88,20 @@ func (sc *Scanner) sweep(ctx context.Context) {
 	}
 
 	sc.purgeIngestJobs(ctx)
+	sc.purgeRefreshTokens(ctx)
+}
+
+// purgeRefreshTokens drops session rows past their expiry. Revoked rows are
+// kept until they expire so refresh-token reuse detection still sees them.
+func (sc *Scanner) purgeRefreshTokens(ctx context.Context) {
+	n, err := sc.store.DeleteExpiredRefreshTokens(ctx)
+	if err != nil {
+		sc.logger.Warn().Err(err).Msg("deleting expired refresh tokens")
+		return
+	}
+	if n > 0 {
+		sc.logger.Info().Int("deleted", n).Msg("expired refresh tokens cleaned up")
+	}
 }
 
 const ingestJobRetention = 7 * 24 * time.Hour
