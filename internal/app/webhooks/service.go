@@ -1,14 +1,12 @@
 // Package webhooksapp holds the tenant webhook endpoint flows behind the
 // /webhook-endpoints routes. The handlers in internal/api/handlers only decode
-// requests and shape responses; the destination validation that keeps a tenant
-// from pointing TabMail at a private address lives here.
+// requests and shape responses; destination validation is shared with the
+// delivery worker through internal/netpolicy so SSRF rules cannot drift.
 package webhooksapp
 
 import (
 	"context"
 	"errors"
-	"net/netip"
-	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -19,6 +17,7 @@ import (
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
+	"tabmail/internal/netpolicy"
 )
 
 type storeRepo interface {
@@ -215,60 +214,8 @@ func tenantScope(caller Caller) (uuid.UUID, error) {
 
 var eventTypeRE = regexp.MustCompile(`^[a-z0-9][a-z0-9._:-]{0,63}$`)
 
-// TODO: Dispatcher still uses configured static webhook URLs. When tenant
-// endpoints are wired, re-validate the resolved destination IP at dispatch time
-// to avoid DNS rebinding/private-network SSRF.
 func validateEndpointURL(raw string) (string, error) {
-	raw = strings.TrimSpace(raw)
-	if raw == "" {
-		return "", errors.New("url is required")
-	}
-	if len(raw) > 2048 {
-		return "", errors.New("url is too long")
-	}
-	if containsControlRune(raw) {
-		return "", errors.New("url contains invalid control characters")
-	}
-
-	parsed, err := url.Parse(raw)
-	if err != nil {
-		return "", errors.New("invalid url")
-	}
-	if !strings.EqualFold(parsed.Scheme, "https") {
-		return "", errors.New("webhook url must use https")
-	}
-	if parsed.User != nil {
-		return "", errors.New("webhook url must not contain credentials")
-	}
-	host := strings.TrimSpace(parsed.Hostname())
-	if host == "" {
-		return "", errors.New("webhook url host is required")
-	}
-	if strings.Contains(host, "%") {
-		return "", errors.New("webhook url host is not allowed")
-	}
-	normalizedHost := strings.TrimSuffix(strings.ToLower(host), ".")
-	if normalizedHost == "localhost" || strings.HasSuffix(normalizedHost, ".localhost") {
-		return "", errors.New("webhook url host is not allowed")
-	}
-	for _, candidate := range []string{host, normalizedHost} {
-		if addr, err := netip.ParseAddr(candidate); err == nil {
-			addr = addr.Unmap()
-			if addr.IsLoopback() || addr.IsPrivate() || addr.IsLinkLocalUnicast() || addr.IsUnspecified() || addr.IsMulticast() {
-				return "", errors.New("webhook url host is not allowed")
-			}
-			break
-		}
-		if candidate != normalizedHost {
-			continue
-		}
-		if ipLikeHostname(candidate) {
-			return "", errors.New("webhook url host is not allowed")
-		}
-	}
-
-	parsed.Scheme = "https"
-	return parsed.String(), nil
+	return netpolicy.NormalizeWebhookURL(raw)
 }
 
 func sanitizeEventTypes(raw []string) ([]string, error) {
@@ -313,10 +260,4 @@ func sanitizeSecret(raw string) (*string, error) {
 
 func containsControlRune(s string) bool {
 	return strings.ContainsFunc(s, unicode.IsControl)
-}
-
-func ipLikeHostname(host string) bool {
-	return strings.Count(host, ".") == 3 && strings.IndexFunc(host, func(r rune) bool {
-		return (r < '0' || r > '9') && r != '.'
-	}) == -1
 }

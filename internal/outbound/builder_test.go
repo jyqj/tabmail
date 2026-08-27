@@ -120,9 +120,9 @@ func TestBuildMIME_InternalMetadataKeysNotInHeaders(t *testing.T) {
 		TextBody:        "Hello world",
 		MessageIDHeader: "<test@example.com>",
 		HeadersJSON: mustJSON(t, map[string]any{
-			"_to":     []string{"to@example.com"},
-			"_cc":     []string{},
-			"_custom": "should-not-appear",
+			"_to":      []string{"to@example.com"},
+			"_cc":      []string{},
+			"_custom":  "should-not-appear",
 			"X-Custom": "should-appear",
 		}),
 	}
@@ -158,7 +158,7 @@ func TestBuildMIME_HeaderNameInjectionBlocked(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			hdrs := map[string]any{
-				"_to": []string{"to@example.com"},
+				"_to":  []string{"to@example.com"},
 				tt.key: "injected-value",
 			}
 			job := &models.OutboundJob{
@@ -188,12 +188,12 @@ func TestBuildMIME_ForbiddenHeadersBlocked(t *testing.T) {
 		TextBody:        "Hello world",
 		MessageIDHeader: "<test@example.com>",
 		HeadersJSON: mustJSON(t, map[string]any{
-			"_to":                  []string{"to@example.com"},
-			"From":                 "evil@attacker.com",
-			"Bcc":                  "hidden@attacker.com",
-			"DKIM-Signature":       "forged",
-			"Return-Path":          "bounce@attacker.com",
-			"X-Custom-Legit":       "this-is-fine",
+			"_to":            []string{"to@example.com"},
+			"From":           "evil@attacker.com",
+			"Bcc":            "hidden@attacker.com",
+			"DKIM-Signature": "forged",
+			"Return-Path":    "bounce@attacker.com",
+			"X-Custom-Legit": "this-is-fine",
 		}),
 	}
 	mime, err := BuildMIME(job)

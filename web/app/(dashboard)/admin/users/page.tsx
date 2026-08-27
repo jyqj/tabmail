@@ -52,7 +52,7 @@ import { UserPermissionDialog } from "./user-permission-dialog";
 
 export default function UsersPage() {
   const { t } = useI18n();
-  const { level } = useAuth();
+  const { level, user: currentUser } = useAuth();
   // UX-only gate; the backend authz seam is authoritative.
   const isPlatformAdmin = canManageTenantUsers(level);
 
@@ -84,22 +84,32 @@ export default function UsersPage() {
     return profiles.find((p) => p.id === profileId)?.name ?? null;
   };
 
+  // Tenant administrators may manage ordinary members only. Platform
+  // administrators may manage any account in the explicitly selected tenant.
+  const canManagePermissions = (target: AdminUser) =>
+    isPlatformAdmin || target.role === "user";
+  const canMutateLifecycle = (target: AdminUser) =>
+    target.id !== currentUser?.id && (isPlatformAdmin || target.role === "user");
+
   const handleToggleActive = async (user: AdminUser) => {
+    if (!canMutateLifecycle(user)) return;
     try {
       await updateUser(user.id, { is_active: !user.is_active });
       toast.success(
         user.is_active ? t("admin.userDeactivated") : t("admin.userActivated")
       );
       mutate();
-    } catch {
-      toast.error(t("admin.updateFailed"));
+    } catch (e: unknown) {
+      const err = e as { error?: { message?: string } };
+      toast.error(err?.error?.message || t("admin.updateFailed"));
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (user: AdminUser) => {
+    if (!canMutateLifecycle(user)) return;
     if (!safeConfirm(t("admin.confirmDeleteUser"))) return;
     try {
-      await deleteUser(id);
+      await deleteUser(user.id);
       toast.success(t("admin.userDeleted"));
       mutate();
     } catch (e: unknown) {
@@ -186,6 +196,7 @@ export default function UsersPage() {
                           <Switch
                             size="sm"
                             checked={user.is_active}
+                            disabled={!canMutateLifecycle(user)}
                             onCheckedChange={() => handleToggleActive(user)}
                           />
                           <span className="text-xs text-muted-foreground">
@@ -206,10 +217,12 @@ export default function UsersPage() {
                             <MoreHorizontal className="h-4 w-4" />
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setPermUser(user)}>
-                              <SlidersHorizontal className="h-4 w-4 mr-2" />
-                              {t("admin.permManage")}
-                            </DropdownMenuItem>
+                            {canManagePermissions(user) && (
+                              <DropdownMenuItem onClick={() => setPermUser(user)}>
+                                <SlidersHorizontal className="h-4 w-4 mr-2" />
+                                {t("admin.permManage")}
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               onClick={() => {
                                 navigator.clipboard.writeText(user.id);
@@ -219,14 +232,18 @@ export default function UsersPage() {
                               <Copy className="h-4 w-4 mr-2" />
                               {t("admin.copyId")}
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(user.id)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              {t("admin.deleteUser")}
-                            </DropdownMenuItem>
+                            {canMutateLifecycle(user) && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleDelete(user)}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash2 className="h-4 w-4 mr-2" />
+                                  {t("admin.deleteUser")}
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

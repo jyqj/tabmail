@@ -6,6 +6,8 @@ package sendidentitiesapp
 
 import (
 	"context"
+	"errors"
+	"net/mail"
 	"strings"
 
 	"github.com/google/uuid"
@@ -57,13 +59,16 @@ type CreateRequest struct {
 	Address string
 }
 
-// Create registers a send identity on one of the tenant's zones. An address
-// starting with "*@" registers a domain wildcard, anything else an exact
-// address. A zone in another tenant reports as missing rather than forbidden,
-// so the route never confirms that a zone id exists elsewhere.
+// Create registers a send identity on one of the tenant's zones. Send identity
+// mutation is an administrative operation because the identity becomes an
+// authorization boundary for outbound mail. Exact and wildcard addresses are
+// canonicalized and must belong to the selected zone.
 func (s *Service) Create(ctx context.Context, actor authz.Actor, req CreateRequest) (*models.SendIdentity, error) {
 	if actor.TenantID == uuid.Nil {
 		return nil, app.Forbidden("authentication required")
+	}
+	if !actor.IsSuperAdmin && !actor.IsAdmin {
+		return nil, app.Forbidden("send identity management requires admin access")
 	}
 	zone, err := s.store.GetZone(ctx, req.ZoneID)
 	if err != nil {
@@ -73,10 +78,12 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, req CreateReque
 		return nil, app.NotFound("zone not found")
 	}
 
-	address := strings.TrimSpace(req.Address)
-	identityType := models.SendIdentityExact
-	if strings.HasPrefix(address, "*@") {
-		identityType = models.SendIdentityDomainWildcard
+	address, identityType, domain, err := normalizeIdentityAddress(req.Address)
+	if err != nil {
+		return nil, app.BadRequest(err.Error())
+	}
+	if domain != normalizeDomain(zone.Domain) {
+		return nil, app.BadRequest("send identity address must belong to the selected zone")
 	}
 
 	si := &models.SendIdentity{
@@ -84,19 +91,26 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, req CreateReque
 		ZoneID:       req.ZoneID,
 		Address:      address,
 		IdentityType: identityType,
-		Verified:     zone.IsVerified,
+		Verified:     zone.IsVerified && zone.MXVerified,
 	}
 	if err := s.store.CreateSendIdentity(ctx, si); err != nil {
-		return nil, app.BadRequest("failed to create send identity: " + err.Error())
+		lower := strings.ToLower(err.Error())
+		if strings.Contains(lower, "duplicate") || strings.Contains(lower, "unique") || strings.Contains(lower, "23505") {
+			return nil, app.Conflict("send identity already exists")
+		}
+		return nil, app.Internal(err)
 	}
 	return si, nil
 }
 
-// Delete removes a send identity owned by the caller's tenant, keeping
-// NotFound semantics for identities that live in other tenants.
+// Delete removes a send identity owned by the caller's tenant. Like creation,
+// deletion is administrative because it changes who can submit outbound mail.
 func (s *Service) Delete(ctx context.Context, actor authz.Actor, id uuid.UUID) error {
 	if actor.TenantID == uuid.Nil {
 		return app.Forbidden("authentication required")
+	}
+	if !actor.IsSuperAdmin && !actor.IsAdmin {
+		return app.Forbidden("send identity management requires admin access")
 	}
 	si, err := s.store.GetSendIdentity(ctx, id)
 	if err != nil {
@@ -111,9 +125,47 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, id uuid.UUID) e
 	return nil
 }
 
+func normalizeIdentityAddress(raw string) (string, models.SendIdentityType, string, error) {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return "", "", "", errors.New("address is required")
+	}
+	if strings.HasPrefix(raw, "*@") {
+		domain := normalizeDomain(strings.TrimPrefix(raw, "*@"))
+		if !validMailboxDomain(domain) {
+			return "", "", "", errors.New("invalid wildcard send identity")
+		}
+		return "*@" + domain, models.SendIdentityDomainWildcard, domain, nil
+	}
+
+	parsed, err := mail.ParseAddress(raw)
+	if err != nil || strings.TrimSpace(parsed.Address) == "" {
+		return "", "", "", errors.New("invalid send identity address")
+	}
+	address := strings.ToLower(strings.TrimSpace(parsed.Address))
+	idx := strings.LastIndex(address, "@")
+	if idx <= 0 || idx == len(address)-1 {
+		return "", "", "", errors.New("invalid send identity address")
+	}
+	domain := normalizeDomain(address[idx+1:])
+	address = address[:idx+1] + domain
+	return address, models.SendIdentityExact, domain, nil
+}
+
+func normalizeDomain(domain string) string {
+	return strings.TrimSuffix(strings.ToLower(strings.TrimSpace(domain)), ".")
+}
+
+func validMailboxDomain(domain string) bool {
+	if domain == "" || strings.ContainsAny(domain, " *@<>") {
+		return false
+	}
+	parsed, err := mail.ParseAddress("probe@" + domain)
+	return err == nil && strings.EqualFold(parsed.Address, "probe@"+domain)
+}
+
 // filterByAllowedZones narrows identities through the authz seam. ZoneAllowed
-// treats admins and an absent/empty allowlist as all-zones-allowed, matching
-// the behavior the handler previously implemented inline.
+// treats admins and an absent/empty allowlist as all-zones-allowed.
 func filterByAllowedZones(actor authz.Actor, items []*models.SendIdentity) []*models.SendIdentity {
 	out := make([]*models.SendIdentity, 0, len(items))
 	for _, si := range items {

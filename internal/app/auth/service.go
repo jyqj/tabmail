@@ -346,21 +346,29 @@ func (s *Service) UpdateUser(ctx context.Context, actor authz.Actor, tenant *mod
 	if user == nil || user.TenantID != tenant.ID {
 		return nil, app.NotFound("user not found")
 	}
+	if !authz.CanManageTenantMember(actor, user.TenantID, user.Role) {
+		return nil, app.Forbidden("tenant admins may manage ordinary members only")
+	}
 
 	if req.Role != nil {
 		newRole := models.UserRole(*req.Role)
 		switch newRole {
 		case models.RoleSuperAdmin, models.RoleAdmin, models.RoleUser:
-			// Only super_admin can promote to super_admin
-			if newRole == models.RoleSuperAdmin && !actor.IsSuperAdmin {
-				return nil, app.Forbidden("only super admin can assign super_admin role")
-			}
-			user.Role = newRole
 		default:
 			return nil, app.BadRequest("invalid role, must be super_admin, admin or user")
 		}
+		if !actor.IsSuperAdmin && newRole != models.RoleUser {
+			return nil, app.Forbidden("tenant admins cannot assign administrator roles")
+		}
+		if actor.ID == user.ID && newRole != user.Role {
+			return nil, app.Forbidden("cannot change your own role")
+		}
+		user.Role = newRole
 	}
 	if req.IsActive != nil {
+		if actor.ID == user.ID && !*req.IsActive {
+			return nil, app.Forbidden("cannot deactivate yourself")
+		}
 		user.IsActive = *req.IsActive
 	}
 	if req.DisplayName != nil {
@@ -395,7 +403,10 @@ func (s *Service) DeleteUser(ctx context.Context, tenant *models.Tenant, caller 
 	if tenant == nil {
 		return app.Forbidden("no tenant context")
 	}
-	if caller != nil && caller.ID == userID {
+	if caller == nil {
+		return app.Forbidden("authenticated administrator required")
+	}
+	if caller.ID == userID {
 		return app.BadRequest("cannot delete yourself")
 	}
 	user, err := s.store.GetUser(ctx, userID)
@@ -404,6 +415,17 @@ func (s *Service) DeleteUser(ctx context.Context, tenant *models.Tenant, caller 
 	}
 	if user == nil || user.TenantID != tenant.ID {
 		return app.NotFound("user not found")
+	}
+	actor := authz.Actor{
+		Type:         authz.PrincipalUser,
+		ID:           caller.ID,
+		TenantID:     tenant.ID,
+		Role:         caller.Role,
+		IsSuperAdmin: caller.Role == models.RoleSuperAdmin,
+		IsAdmin:      caller.Role == models.RoleAdmin || caller.Role == models.RoleSuperAdmin,
+	}
+	if !authz.CanManageTenantMember(actor, user.TenantID, user.Role) {
+		return app.Forbidden("tenant admins may manage ordinary members only")
 	}
 	if err := s.store.DeleteUser(ctx, userID); err != nil {
 		return app.Internal(err)

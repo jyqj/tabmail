@@ -38,7 +38,6 @@ func NewPermissionHandler(s permissionStore, l zerolog.Logger) *PermissionHandle
 	}
 }
 
-// ListProfiles handles GET /api/v1/admin/permissions
 func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request) {
 	items, err := h.service.ListProfiles(
 		r.Context(),
@@ -52,7 +51,6 @@ func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request)
 	ok(w, items)
 }
 
-// CreateProfile handles POST /api/v1/admin/permissions
 func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Name              string      `json:"name"`
@@ -99,7 +97,6 @@ func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request
 	created(w, profile)
 }
 
-// UpdateProfile handles PATCH /api/v1/admin/permissions/{id}
 func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -150,7 +147,6 @@ func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request
 	ok(w, profile)
 }
 
-// DeleteProfile handles DELETE /api/v1/admin/permissions/{id}
 func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -170,14 +166,18 @@ func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request
 	noContent(w)
 }
 
-// GetUserPermission handles GET /api/v1/admin/users/{id}/permissions
 func (h *PermissionHandler) GetUserPermission(w http.ResponseWriter, r *http.Request) {
 	userID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
 		return
 	}
-	perm, err := h.service.UserPermission(r.Context(), middleware.TenantFromCtx(r.Context()), userID)
+	perm, err := h.service.UserPermissionForActor(
+		r.Context(),
+		middleware.ActorFromContext(r.Context()),
+		middleware.TenantFromCtx(r.Context()),
+		userID,
+	)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -185,7 +185,6 @@ func (h *PermissionHandler) GetUserPermission(w http.ResponseWriter, r *http.Req
 	ok(w, perm)
 }
 
-// SetUserPermissionOverride handles PUT /api/v1/admin/users/{id}/permissions
 func (h *PermissionHandler) SetUserPermissionOverride(w http.ResponseWriter, r *http.Request) {
 	userID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
@@ -197,7 +196,13 @@ func (h *PermissionHandler) SetUserPermissionOverride(w http.ResponseWriter, r *
 		errBadRequest(w, "invalid body")
 		return
 	}
-	override, err := h.service.SetUserOverride(r.Context(), middleware.TenantFromCtx(r.Context()), userID, body)
+	override, err := h.service.SetUserOverrideForActor(
+		r.Context(),
+		middleware.ActorFromContext(r.Context()),
+		middleware.TenantFromCtx(r.Context()),
+		userID,
+		body,
+	)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -205,14 +210,18 @@ func (h *PermissionHandler) SetUserPermissionOverride(w http.ResponseWriter, r *
 	ok(w, override)
 }
 
-// DeleteUserPermissionOverride handles DELETE /api/v1/admin/users/{id}/permissions
 func (h *PermissionHandler) DeleteUserPermissionOverride(w http.ResponseWriter, r *http.Request) {
 	userID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
 		return
 	}
-	err = h.service.DeleteUserOverride(r.Context(), middleware.TenantFromCtx(r.Context()), userID)
+	err = h.service.DeleteUserOverrideForActor(
+		r.Context(),
+		middleware.ActorFromContext(r.Context()),
+		middleware.TenantFromCtx(r.Context()),
+		userID,
+	)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -220,7 +229,6 @@ func (h *PermissionHandler) DeleteUserPermissionOverride(w http.ResponseWriter, 
 	noContent(w)
 }
 
-// MyPermissions handles GET /api/v1/auth/me/permissions
 func (h *PermissionHandler) MyPermissions(w http.ResponseWriter, r *http.Request) {
 	perm, err := h.service.OwnPermission(r.Context(), middleware.UserFromCtx(r.Context()))
 	if err != nil {

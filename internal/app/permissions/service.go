@@ -38,8 +38,6 @@ func NewService(s storeRepo, logger zerolog.Logger) *Service {
 	return &Service{store: s, logger: logger.With().Str("service", "permissions").Logger()}
 }
 
-// CreateProfileRequest is a full profile description. Every field is supplied,
-// so absent booleans mean false rather than "unchanged".
 type CreateProfileRequest struct {
 	Name              string
 	Description       string
@@ -55,7 +53,6 @@ type CreateProfileRequest struct {
 	CanCreateAPIKeys  bool
 }
 
-// UpdateProfileRequest describes a partial update: a nil field is left as it is.
 type UpdateProfileRequest struct {
 	Name              *string
 	Description       *string
@@ -70,8 +67,6 @@ type UpdateProfileRequest struct {
 	CanCreateAPIKeys  *bool
 }
 
-// ListProfiles returns the profiles visible to the caller: a platform admin
-// sees every profile, a tenant admin sees the system ones plus its own.
 func (s *Service) ListProfiles(ctx context.Context, actor authz.Actor, tenant *models.Tenant) ([]*models.PermissionProfile, error) {
 	var tenantID *uuid.UUID
 	if !actor.IsSuperAdmin {
@@ -80,7 +75,6 @@ func (s *Service) ListProfiles(ctx context.Context, actor authz.Actor, tenant *m
 		}
 		tenantID = &tenant.ID
 	}
-
 	items, err := s.store.ListPermissionProfiles(ctx, tenantID)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -88,14 +82,10 @@ func (s *Service) ListProfiles(ctx context.Context, actor authz.Actor, tenant *m
 	return items, nil
 }
 
-// CreateProfile stores a new profile. A platform admin may create a system
-// profile (no tenant) or scope one to a tenant it names; a tenant admin can
-// only ever create a profile inside its own tenant.
 func (s *Service) CreateProfile(ctx context.Context, actor authz.Actor, tenant *models.Tenant, req CreateProfileRequest) (*models.PermissionProfile, error) {
 	if req.Name == "" {
 		return nil, app.BadRequest("name is required")
 	}
-
 	var profileTenantID *uuid.UUID
 	if actor.IsSuperAdmin {
 		profileTenantID = req.TenantID
@@ -105,29 +95,18 @@ func (s *Service) CreateProfile(ctx context.Context, actor authz.Actor, tenant *
 		}
 		profileTenantID = &tenant.ID
 	}
-
 	if err := s.validateZoneScope(ctx, req.AllowedZoneIDs, profileTenantID); err != nil {
 		return nil, err
 	}
-
 	now := time.Now()
 	profile := &models.PermissionProfile{
-		ID:                uuid.New(),
-		TenantID:          profileTenantID,
-		Name:              req.Name,
-		Description:       req.Description,
-		CanSend:           req.CanSend,
-		DailySendQuota:    req.DailySendQuota,
-		DailyReceiveQuota: req.DailyReceiveQuota,
-		MaxMailboxes:      req.MaxMailboxes,
-		MaxDomains:        req.MaxDomains,
-		AllowedZoneIDs:    req.AllowedZoneIDs,
-		CanCreateDomains:  req.CanCreateDomains,
-		CanCreateRoutes:   req.CanCreateRoutes,
-		CanCreateAPIKeys:  req.CanCreateAPIKeys,
-		IsSystem:          false,
-		CreatedAt:         now,
-		UpdatedAt:         now,
+		ID: uuid.New(), TenantID: profileTenantID, Name: req.Name,
+		Description: req.Description, CanSend: req.CanSend,
+		DailySendQuota: req.DailySendQuota, DailyReceiveQuota: req.DailyReceiveQuota,
+		MaxMailboxes: req.MaxMailboxes, MaxDomains: req.MaxDomains,
+		AllowedZoneIDs: req.AllowedZoneIDs, CanCreateDomains: req.CanCreateDomains,
+		CanCreateRoutes: req.CanCreateRoutes, CanCreateAPIKeys: req.CanCreateAPIKeys,
+		IsSystem: false, CreatedAt: now, UpdatedAt: now,
 	}
 	if err := s.store.CreatePermissionProfile(ctx, profile); err != nil {
 		return nil, app.Internal(err)
@@ -140,7 +119,6 @@ func (s *Service) UpdateProfile(ctx context.Context, actor authz.Actor, tenant *
 	if err != nil {
 		return nil, err
 	}
-
 	if req.Name != nil {
 		existing.Name = *req.Name
 	}
@@ -174,11 +152,9 @@ func (s *Service) UpdateProfile(ctx context.Context, actor authz.Actor, tenant *
 	if req.CanCreateAPIKeys != nil {
 		existing.CanCreateAPIKeys = *req.CanCreateAPIKeys
 	}
-
 	if err := s.validateZoneScope(ctx, req.AllowedZoneIDs, existing.TenantID); err != nil {
 		return nil, err
 	}
-
 	if err := s.store.UpdatePermissionProfile(ctx, existing); err != nil {
 		return nil, app.Internal(err)
 	}
@@ -189,7 +165,6 @@ func (s *Service) DeleteProfile(ctx context.Context, actor authz.Actor, tenant *
 	if _, err := s.writableProfile(ctx, actor, tenant, id, "cannot delete system profile"); err != nil {
 		return err
 	}
-
 	var deleteTenantID *uuid.UUID
 	if !actor.IsSuperAdmin && tenant != nil {
 		deleteTenantID = &tenant.ID
@@ -200,7 +175,8 @@ func (s *Service) DeleteProfile(ctx context.Context, actor authz.Actor, tenant *
 	return nil
 }
 
-// UserPermission resolves the effective permission of a user in the caller's tenant.
+// UserPermission resolves a user's effective permission within a tenant. It is
+// retained for internal callers that already performed target authorization.
 func (s *Service) UserPermission(ctx context.Context, tenant *models.Tenant, userID uuid.UUID) (*models.EffectivePermission, error) {
 	if _, err := s.tenantUser(ctx, tenant, userID); err != nil {
 		return nil, err
@@ -208,7 +184,16 @@ func (s *Service) UserPermission(ctx context.Context, tenant *models.Tenant, use
 	return s.effectivePermission(ctx, userID)
 }
 
-// OwnPermission resolves the calling user's own effective permission.
+// UserPermissionForActor is the HTTP/admin boundary. It prevents tenant
+// administrators from using the permission endpoint as a side channel for
+// peer administrators.
+func (s *Service) UserPermissionForActor(ctx context.Context, actor authz.Actor, tenant *models.Tenant, userID uuid.UUID) (*models.EffectivePermission, error) {
+	if _, err := s.manageableTenantUser(ctx, actor, tenant, userID); err != nil {
+		return nil, err
+	}
+	return s.effectivePermission(ctx, userID)
+}
+
 func (s *Service) OwnPermission(ctx context.Context, caller *models.User) (*models.EffectivePermission, error) {
 	if caller == nil {
 		return nil, app.Forbidden("user context required")
@@ -216,15 +201,22 @@ func (s *Service) OwnPermission(ctx context.Context, caller *models.User) (*mode
 	return s.effectivePermission(ctx, caller.ID)
 }
 
-// SetUserOverride stores the per-user exceptions layered on top of a profile.
-// The override is returned as stored, with UserID taken from the path rather
-// than from the body.
 func (s *Service) SetUserOverride(ctx context.Context, tenant *models.Tenant, userID uuid.UUID, override models.UserPermissionOverride) (*models.UserPermissionOverride, error) {
 	if _, err := s.tenantUser(ctx, tenant, userID); err != nil {
 		return nil, err
 	}
-	override.UserID = userID
+	return s.storeUserOverride(ctx, tenant, userID, override)
+}
 
+func (s *Service) SetUserOverrideForActor(ctx context.Context, actor authz.Actor, tenant *models.Tenant, userID uuid.UUID, override models.UserPermissionOverride) (*models.UserPermissionOverride, error) {
+	if _, err := s.manageableTenantUser(ctx, actor, tenant, userID); err != nil {
+		return nil, err
+	}
+	return s.storeUserOverride(ctx, tenant, userID, override)
+}
+
+func (s *Service) storeUserOverride(ctx context.Context, tenant *models.Tenant, userID uuid.UUID, override models.UserPermissionOverride) (*models.UserPermissionOverride, error) {
+	override.UserID = userID
 	for _, zoneID := range override.AllowedZoneIDs {
 		zone, err := s.store.GetZone(ctx, zoneID)
 		if err != nil {
@@ -234,7 +226,6 @@ func (s *Service) SetUserOverride(ctx context.Context, tenant *models.Tenant, us
 			return nil, app.BadRequest(fmt.Sprintf("zone %s not found or does not belong to tenant", zoneID))
 		}
 	}
-
 	if err := s.store.UpsertUserPermissionOverride(ctx, &override); err != nil {
 		return nil, app.Internal(err)
 	}
@@ -245,15 +236,23 @@ func (s *Service) DeleteUserOverride(ctx context.Context, tenant *models.Tenant,
 	if _, err := s.tenantUser(ctx, tenant, userID); err != nil {
 		return err
 	}
+	return s.deleteUserOverride(ctx, userID)
+}
+
+func (s *Service) DeleteUserOverrideForActor(ctx context.Context, actor authz.Actor, tenant *models.Tenant, userID uuid.UUID) error {
+	if _, err := s.manageableTenantUser(ctx, actor, tenant, userID); err != nil {
+		return err
+	}
+	return s.deleteUserOverride(ctx, userID)
+}
+
+func (s *Service) deleteUserOverride(ctx context.Context, userID uuid.UUID) error {
 	if err := s.store.DeleteUserPermissionOverride(ctx, userID); err != nil {
 		return app.Internal(err)
 	}
 	return nil
 }
 
-// writableProfile loads a profile the caller is allowed to change. A profile in
-// another tenant reports as missing rather than forbidden so the endpoint does
-// not confirm that an id exists elsewhere.
 func (s *Service) writableProfile(ctx context.Context, actor authz.Actor, tenant *models.Tenant, id uuid.UUID, systemMsg string) (*models.PermissionProfile, error) {
 	existing, err := s.store.GetPermissionProfile(ctx, id)
 	if err != nil {
@@ -276,9 +275,6 @@ func (s *Service) writableProfile(ctx context.Context, actor authz.Actor, tenant
 	return existing, nil
 }
 
-// validateZoneScope rejects zone ids that the profile's tenant does not own.
-// A global profile is reusable across tenants, so it cannot carry tenant-local
-// zone ids at all.
 func (s *Service) validateZoneScope(ctx context.Context, zoneIDs []uuid.UUID, tenantID *uuid.UUID) error {
 	if len(zoneIDs) == 0 {
 		return nil
@@ -298,8 +294,6 @@ func (s *Service) validateZoneScope(ctx context.Context, zoneIDs []uuid.UUID, te
 	return nil
 }
 
-// tenantUser loads a user that the caller's tenant owns, reporting anyone else
-// as missing.
 func (s *Service) tenantUser(ctx context.Context, tenant *models.Tenant, userID uuid.UUID) (*models.User, error) {
 	if tenant == nil {
 		return nil, app.Forbidden("no tenant context")
@@ -310,6 +304,17 @@ func (s *Service) tenantUser(ctx context.Context, tenant *models.Tenant, userID 
 	}
 	if user == nil || user.TenantID != tenant.ID {
 		return nil, app.NotFound("user not found")
+	}
+	return user, nil
+}
+
+func (s *Service) manageableTenantUser(ctx context.Context, actor authz.Actor, tenant *models.Tenant, userID uuid.UUID) (*models.User, error) {
+	user, err := s.tenantUser(ctx, tenant, userID)
+	if err != nil {
+		return nil, err
+	}
+	if !authz.CanManageTenantMember(actor, user.TenantID, user.Role) {
+		return nil, app.Forbidden("tenant admins may manage ordinary members only")
 	}
 	return user, nil
 }

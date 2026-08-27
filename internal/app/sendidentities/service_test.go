@@ -129,6 +129,18 @@ func TestListReturnsEmptySliceNotNil(t *testing.T) {
 	}
 }
 
+func TestCreateRequiresAdmin(t *testing.T) {
+	st := newIdentityTestStore()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true, MXVerified: true}
+
+	svc := NewService(st, zerolog.Nop())
+	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID}
+	_, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "x@mail.test"})
+	requireKind(t, err, app.KindForbidden)
+}
+
 func TestCreateHidesForeignZoneAsNotFound(t *testing.T) {
 	st := newIdentityTestStore()
 	zoneID := uuid.New()
@@ -140,47 +152,67 @@ func TestCreateHidesForeignZoneAsNotFound(t *testing.T) {
 	requireKind(t, err, app.KindNotFound)
 }
 
-func TestCreateDetectsWildcardAndInheritsVerification(t *testing.T) {
+func TestCreateCanonicalizesAndBindsIdentityToZone(t *testing.T) {
 	st := newIdentityTestStore()
 	tenantID := uuid.New()
 	zoneID := uuid.New()
-	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true}
+	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "Mail.Test.", IsVerified: true, MXVerified: true}
 
 	svc := NewService(st, zerolog.Nop())
 	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
 
-	wildcard, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: " *@mail.test "})
+	wildcard, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: " *@MAIL.TEST. "})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if wildcard.IdentityType != models.SendIdentityDomainWildcard {
-		t.Fatalf("expected wildcard identity type, got %q", wildcard.IdentityType)
-	}
-	if wildcard.Address != "*@mail.test" {
-		t.Fatalf("expected trimmed address, got %q", wildcard.Address)
+	if wildcard.IdentityType != models.SendIdentityDomainWildcard || wildcard.Address != "*@mail.test" {
+		t.Fatalf("unexpected wildcard identity: %#v", wildcard)
 	}
 	if !wildcard.Verified {
-		t.Fatal("expected identity to inherit zone verification")
+		t.Fatal("expected identity to require both TXT and MX verification")
 	}
 
-	exact, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "team@mail.test"})
+	exact, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "Team <TEAM@MAIL.TEST>"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if exact.IdentityType != models.SendIdentityExact {
-		t.Fatalf("expected exact identity type, got %q", exact.IdentityType)
+	if exact.IdentityType != models.SendIdentityExact || exact.Address != "team@mail.test" {
+		t.Fatalf("unexpected canonical exact identity: %#v", exact)
+	}
+
+	_, err = svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "x@other.test"})
+	requireKind(t, err, app.KindBadRequest)
+}
+
+func TestCreateIdentityIsUnverifiedUntilMXAlsoPasses(t *testing.T) {
+	st := newIdentityTestStore()
+	tenantID := uuid.New()
+	zoneID := uuid.New()
+	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true, MXVerified: false}
+
+	svc := NewService(st, zerolog.Nop())
+	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
+	identity, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "x@mail.test"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if identity.Verified {
+		t.Fatal("identity must remain unverified until both domain checks pass")
 	}
 }
 
-func TestDeleteHidesForeignIdentityAsNotFound(t *testing.T) {
+func TestDeleteRequiresAdminAndHidesForeignIdentity(t *testing.T) {
 	st := newIdentityTestStore()
+	tenantID := uuid.New()
 	id := uuid.New()
-	st.identities[id] = &models.SendIdentity{ID: id, TenantID: uuid.New(), Address: "x@other.test"}
+	st.identities[id] = &models.SendIdentity{ID: id, TenantID: tenantID, Address: "x@mail.test"}
 
 	svc := NewService(st, zerolog.Nop())
-	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: uuid.New(), IsAdmin: true}
-	err := svc.Delete(context.Background(), actor, id)
-	requireKind(t, err, app.KindNotFound)
+	user := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID}
+	requireKind(t, svc.Delete(context.Background(), user, id), app.KindForbidden)
+
+	admin := authz.Actor{Type: authz.PrincipalUser, TenantID: uuid.New(), IsAdmin: true}
+	requireKind(t, svc.Delete(context.Background(), admin, id), app.KindNotFound)
 	if len(st.deleted) != 0 {
 		t.Fatalf("expected no deletions, got %v", st.deleted)
 	}
