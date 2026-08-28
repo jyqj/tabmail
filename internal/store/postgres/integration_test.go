@@ -9,9 +9,11 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -550,6 +552,53 @@ func TestIntegrationClaimIngestJobsLease(t *testing.T) {
 	}
 }
 
+func TestIntegrationConsumeRefreshTokenIsSingleUse(t *testing.T) {
+	st := newTestStore(t)
+	ctx := context.Background()
+	tenant := seedTenant(t, st)
+	user := &models.User{
+		TenantID: tenant.ID, Email: "single-use-" + uuid.NewString() + "@mail.test",
+		PasswordHash: "x", Role: models.RoleUser, IsActive: true,
+	}
+	if err := st.CreateUser(ctx, user); err != nil {
+		t.Fatal(err)
+	}
+	token := &models.RefreshToken{UserID: user.ID, TokenHash: "consume-" + uuid.NewString(), ExpiresAt: time.Now().Add(time.Hour)}
+	if err := st.CreateRefreshToken(ctx, token); err != nil {
+		t.Fatal(err)
+	}
+
+	results := make(chan bool, 2)
+	errs := make(chan error, 2)
+	var wg sync.WaitGroup
+	for range 2 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			consumed, err := st.ConsumeRefreshToken(ctx, token.ID)
+			results <- consumed
+			errs <- err
+		}()
+	}
+	wg.Wait()
+	close(results)
+	close(errs)
+	for err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	successes := 0
+	for consumed := range results {
+		if consumed {
+			successes++
+		}
+	}
+	if successes != 1 {
+		t.Fatalf("refresh token must be consumed exactly once, got %d successes", successes)
+	}
+}
+
 func TestIntegrationDeleteExpiredRefreshTokens(t *testing.T) {
 	st := newTestStore(t)
 	ctx := context.Background()
@@ -596,4 +645,141 @@ func TestIntegrationDeleteExpiredRefreshTokens(t *testing.T) {
 	if rt, err := st.GetRefreshToken(ctx, "hash-valid"); err != nil || rt == nil {
 		t.Fatalf("expected the valid token to remain, rt=%#v err=%v", rt, err)
 	}
+}
+
+func TestIntegrationWithinTxRollsBackMutationAuditAndOutboxTogether(t *testing.T) {
+	st := newTestStore(t)
+	ctx := context.Background()
+	tenant := seedTenant(t, st)
+	zone := &models.DomainZone{
+		ID:         uuid.New(),
+		TenantID:   tenant.ID,
+		Domain:     uuid.NewString() + ".rollback.test",
+		TXTRecord:  "tabmail-verify=rollback",
+		IsVerified: true,
+		MXVerified: true,
+	}
+	eventType := "integration.rollback." + uuid.NewString()
+	boom := fmt.Errorf("force rollback")
+
+	err := st.WithinTx(ctx, func(txCtx context.Context) error {
+		if err := st.CreateZone(txCtx, zone); err != nil {
+			return err
+		}
+		if err := st.InsertAudit(txCtx, &models.AuditEntry{
+			TenantID: tenantIDPtr(tenant.ID), Actor: "integration", Action: eventType,
+			ResourceType: "domain_zone", ResourceID: tenantIDPtr(zone.ID),
+		}); err != nil {
+			return err
+		}
+		if err := st.CreateOutboxEvent(txCtx, &models.OutboxEvent{
+			ID: uuid.New(), EventType: eventType, Payload: []byte(`{"tenant_id":"` + tenant.ID.String() + `"}`),
+			OccurredAt: time.Now().UTC(), State: "pending",
+		}); err != nil {
+			return err
+		}
+		return boom
+	})
+	if !errors.Is(err, boom) {
+		t.Fatalf("expected rollback sentinel, got %v", err)
+	}
+	if got, err := st.GetZone(ctx, zone.ID); err != nil || got != nil {
+		t.Fatalf("zone escaped rollback: zone=%#v err=%v", got, err)
+	}
+	var audits int
+	if err := st.pool.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE action=$1`, eventType).Scan(&audits); err != nil {
+		t.Fatal(err)
+	}
+	if audits != 0 {
+		t.Fatalf("audit escaped rollback: %d", audits)
+	}
+	var events int
+	if err := st.pool.QueryRow(ctx, `SELECT count(*) FROM outbox_events WHERE event_type=$1`, eventType).Scan(&events); err != nil {
+		t.Fatal(err)
+	}
+	if events != 0 {
+		t.Fatalf("outbox event escaped rollback: %d", events)
+	}
+}
+
+func TestIntegrationTenantScopedViewJoinsTransactionContext(t *testing.T) {
+	st := newTestStore(t)
+	ctx := context.Background()
+	tenant := seedTenant(t, st)
+	zone := seedZone(t, st, tenant.ID)
+	mailbox := &models.Mailbox{
+		ID: uuid.New(), TenantID: tenant.ID, ZoneID: zone.ID,
+		LocalPart: "tx-visible", ResolvedDomain: zone.Domain,
+		FullAddress: "tx-visible@" + zone.Domain, AccessMode: models.AccessPublic,
+	}
+	boom := fmt.Errorf("rollback tenant view")
+
+	err := st.WithinTx(ctx, func(txCtx context.Context) error {
+		if err := st.CreateMailbox(txCtx, mailbox); err != nil {
+			return err
+		}
+		got, err := st.ForTenant(tenant.ID).GetMailboxByAddress(txCtx, mailbox.FullAddress)
+		if err != nil {
+			return err
+		}
+		if got == nil || got.ID != mailbox.ID {
+			return fmt.Errorf("tenant-scoped read did not see uncommitted mailbox: %#v", got)
+		}
+		return boom
+	})
+	if !errors.Is(err, boom) {
+		t.Fatalf("expected rollback sentinel, got %v", err)
+	}
+	got, err := st.ForTenant(tenant.ID).GetMailboxByAddress(ctx, mailbox.FullAddress)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got != nil {
+		t.Fatalf("mailbox survived rollback: %#v", got)
+	}
+}
+
+func TestIntegrationNestedWithinTxUsesSavepoint(t *testing.T) {
+	st := newTestStore(t)
+	ctx := context.Background()
+	plan := &models.Plan{
+		ID: uuid.New(), Name: "outer-" + uuid.NewString(), MaxDomains: 1,
+		MaxMailboxesPerDomain: 1, MaxMessagesPerMailbox: 1, MaxMessageBytes: 1024,
+		RetentionHours: 1, RPMLimit: 1, DailyQuota: 1,
+	}
+	inner := &models.Plan{
+		ID: uuid.New(), Name: "inner-" + uuid.NewString(), MaxDomains: 1,
+		MaxMailboxesPerDomain: 1, MaxMessagesPerMailbox: 1, MaxMessageBytes: 1024,
+		RetentionHours: 1, RPMLimit: 1, DailyQuota: 1,
+	}
+	innerBoom := fmt.Errorf("inner rollback")
+
+	if err := st.WithinTx(ctx, func(txCtx context.Context) error {
+		if err := st.CreatePlan(txCtx, plan); err != nil {
+			return err
+		}
+		err := st.WithinTx(txCtx, func(innerCtx context.Context) error {
+			if err := st.CreatePlan(innerCtx, inner); err != nil {
+				return err
+			}
+			return innerBoom
+		})
+		if !errors.Is(err, innerBoom) {
+			return fmt.Errorf("unexpected nested error: %w", err)
+		}
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := st.GetPlan(ctx, plan.ID); err != nil || got == nil {
+		t.Fatalf("outer row missing: plan=%#v err=%v", got, err)
+	}
+	if got, err := st.GetPlan(ctx, inner.ID); err != nil || got != nil {
+		t.Fatalf("inner row escaped savepoint rollback: plan=%#v err=%v", got, err)
+	}
+}
+
+func tenantIDPtr(id uuid.UUID) *uuid.UUID {
+	value := id
+	return &value
 }

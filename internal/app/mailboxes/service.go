@@ -20,6 +20,7 @@ import (
 )
 
 type storeRepo interface {
+	store.Transactor
 	app.AuditStore
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
@@ -179,7 +180,7 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.
 		}
 		expiresAt = &parsed
 	}
-	mb := &models.Mailbox{TenantID: tenant.ID, ZoneID: zone.ID, LocalPart: local, ResolvedDomain: domain, FullAddress: mailboxKey, AccessMode: am, RetentionHoursOverride: req.RetentionHoursOverride, ExpiresAt: expiresAt}
+	mb := &models.Mailbox{ID: uuid.New(), TenantID: tenant.ID, ZoneID: zone.ID, LocalPart: local, ResolvedDomain: domain, FullAddress: mailboxKey, AccessMode: am, RetentionHoursOverride: req.RetentionHoursOverride, ExpiresAt: expiresAt}
 	if req.Password != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -188,15 +189,19 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.
 		s := string(hash)
 		mb.PasswordHash = &s
 	}
-	if err := s.store.CreateMailbox(ctx, mb); err != nil {
-		if strings.Contains(strings.ToLower(err.Error()), "duplicate") || strings.Contains(strings.ToLower(err.Error()), "unique") {
-			return nil, app.Conflict("address already exists")
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(tenant.ID), Actor: actor.AuditLabel(), Action: "mailbox.create", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "access_mode": mb.AccessMode, "retention_hours_override": mb.RetentionHoursOverride, "expires_at": mb.ExpiresAt})}
+	event := hooks.Event{Type: "mailbox.created", TenantID: tenant.ID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "access_mode": mb.AccessMode}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		if err := s.store.CreateMailbox(txCtx, mb); err != nil {
+			lower := strings.ToLower(err.Error())
+			if strings.Contains(lower, "duplicate") || strings.Contains(lower, "unique") || strings.Contains(lower, "23505") {
+				return app.Conflict("address already exists")
+			}
+			return err
 		}
-		return nil, app.Internal(err)
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(tenant.ID), Actor: actor.AuditLabel(), Action: "mailbox.create", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "access_mode": mb.AccessMode, "retention_hours_override": mb.RetentionHoursOverride, "expires_at": mb.ExpiresAt})})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "mailbox.created", TenantID: tenant.ID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "access_mode": mb.AccessMode}})
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 	return mb, nil
 }
@@ -235,24 +240,28 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, tenant *models.
 	if err != nil {
 		return app.Internal(err)
 	}
-	if err := s.store.DeleteMailbox(ctx, id); err != nil {
-		return app.Internal(err)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor.AuditLabel(), Action: "mailbox.delete", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})}
+	event := hooks.Event{Type: "mailbox.deleted", TenantID: mb.TenantID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "deleted_objects": len(keys)}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteMailbox(txCtx, id)
+	}); err != nil {
+		return err
 	}
+
+	// Object storage is outside PostgreSQL. Cleanup is deliberately post-commit:
+	// a blob failure may leave reclaimable garbage, but can no longer resurrect
+	// a mailbox whose audit/outbox transaction rolled back.
 	for _, key := range uniqueStrings(keys) {
 		refs, err := s.store.CountRawObjectReferences(ctx, key)
 		if err != nil {
 			s.logger.Warn().Err(err).Str("key", key).Msg("count object references during mailbox delete")
 			continue
 		}
-		if refs == 0 {
+		if refs == 0 && s.obj != nil {
 			if err := s.obj.Delete(ctx, key); err != nil {
 				s.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during mailbox delete")
 			}
 		}
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor.AuditLabel(), Action: "mailbox.delete", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "mailbox.deleted", TenantID: mb.TenantID.String(), Mailbox: mb.FullAddress, OccurredAt: time.Now().UTC(), Metadata: map[string]any{"mailbox_id": mb.ID.String(), "deleted_objects": len(keys)}})
 	}
 	return nil
 }
@@ -341,7 +350,9 @@ func (s *Service) IssueToken(ctx context.Context, address, password, actor strin
 	if err != nil {
 		return nil, app.Internal(err)
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.issue_token", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "ttl_seconds": int(ttl.Seconds())})})
+	if err := app.InsertAuditRequired(ctx, s.store, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.issue_token", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "ttl_seconds": int(ttl.Seconds())})}); err != nil {
+		return nil, app.Internal(err)
+	}
 	return &TokenIssueResult{Token: token, ExpiresIn: int(ttl.Seconds())}, nil
 }
 

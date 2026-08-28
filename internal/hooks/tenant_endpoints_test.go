@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -139,3 +140,41 @@ func (s *tenantEndpointStore) ListDeadWebhookDeliveries(context.Context, int) ([
 	return nil, nil
 }
 func (s *tenantEndpointStore) CountDeadWebhookDeliveries(context.Context) (int, error) { return 0, nil }
+
+type enqueueContextKey struct{}
+
+type enqueueContextStore struct {
+	*tenantEndpointStore
+	want any
+	saw  bool
+	err  error
+}
+
+func (s *enqueueContextStore) CreateOutboxEvent(ctx context.Context, event *models.OutboxEvent) error {
+	s.saw = ctx.Value(enqueueContextKey{}) == s.want
+	if s.err != nil {
+		return s.err
+	}
+	return s.tenantEndpointStore.CreateOutboxEvent(ctx, event)
+}
+
+func TestEnqueueUsesCallerContextAndPropagatesPersistenceFailure(t *testing.T) {
+	base := newTenantEndpointStore()
+	store := &enqueueContextStore{tenantEndpointStore: base, want: "transaction"}
+	d := New(Config{}, zerolog.Nop()).BindStore(store)
+	ctx := context.WithValue(context.Background(), enqueueContextKey{}, "transaction")
+	if err := d.Enqueue(ctx, Event{Type: "asset.updated", TenantID: uuid.NewString()}); err != nil {
+		t.Fatal(err)
+	}
+	if !store.saw {
+		t.Fatal("outbox insert did not receive the caller transaction context")
+	}
+	if len(base.outbox) != 1 {
+		t.Fatalf("expected one outbox row, got %d", len(base.outbox))
+	}
+
+	store.err = errors.New("outbox unavailable")
+	if err := d.Enqueue(ctx, Event{Type: "asset.updated", TenantID: uuid.NewString()}); err == nil {
+		t.Fatal("expected persistence failure to be returned")
+	}
+}

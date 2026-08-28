@@ -9,11 +9,16 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app"
 	permissionsapp "tabmail/internal/app/permissions"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type permissionStore interface {
+	store.Transactor
+	app.AuditStore
 	ListPermissionProfiles(ctx context.Context, tenantID *uuid.UUID) ([]*models.PermissionProfile, error)
 	CreatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error
 	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
@@ -31,9 +36,9 @@ type PermissionHandler struct {
 	logger  zerolog.Logger
 }
 
-func NewPermissionHandler(s permissionStore, l zerolog.Logger) *PermissionHandler {
+func NewPermissionHandler(s permissionStore, dispatcher *hooks.Dispatcher, l zerolog.Logger) *PermissionHandler {
 	return &PermissionHandler{
-		service: permissionsapp.NewService(s, l),
+		service: permissionsapp.NewService(s, dispatcher, l),
 		logger:  l.With().Str("handler", "permissions").Logger(),
 	}
 }

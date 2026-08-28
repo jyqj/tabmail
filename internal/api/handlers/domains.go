@@ -21,6 +21,7 @@ import (
 )
 
 type domainStore interface {
+	store.Transactor
 	app.AuditStore
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
 	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)

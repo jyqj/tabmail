@@ -126,6 +126,18 @@ func (s *FakeStore) GetRefreshToken(_ context.Context, _ string) (*models.Refres
 
 func (s *FakeStore) RevokeRefreshToken(_ context.Context, _ uuid.UUID) error { return nil }
 
+func (s *FakeStore) ConsumeRefreshToken(_ context.Context, id uuid.UUID) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	rt := s.refreshTokens[id]
+	if rt == nil || rt.RevokedAt != nil || !rt.ExpiresAt.After(time.Now()) {
+		return false, nil
+	}
+	now := time.Now()
+	rt.RevokedAt = &now
+	return true, nil
+}
+
 func (s *FakeStore) RevokeUserRefreshTokens(_ context.Context, _ uuid.UUID) error { return nil }
 
 func (s *FakeStore) DeleteExpiredRefreshTokens(_ context.Context) (int, error) {
@@ -158,4 +170,6 @@ func (s *FakeStore) GetAdminInvitationByCode(_ context.Context, _ string) (*mode
 	return nil, nil
 }
 
-func (s *FakeStore) MarkInvitationAccepted(_ context.Context, _ uuid.UUID) error { return nil }
+func (s *FakeStore) AcceptAdminInvitation(_ context.Context, _ uuid.UUID) (bool, error) {
+	return true, nil
+}

@@ -17,9 +17,11 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type Store interface {
+	store.Transactor
 	app.AuditStore
 	GetSetting(ctx context.Context, key string) (*models.SystemSetting, error)
 	UpsertSetting(ctx context.Context, key, value, description string) error
@@ -202,50 +204,43 @@ func (s *Service) ListSettings(ctx context.Context) ([]*models.SystemSetting, er
 
 // UpdateSetting updates a single system setting.
 func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor string) error {
-	if key == "" {
-		return app.BadRequest("key is required")
+	if err := validateSettingValue(key, value); err != nil {
+		return err
 	}
-	// Validate known keys
-	switch key {
-	case models.SettingAutoCreateRouteRPM, models.SettingAutoCreateTenantRPM,
-		models.SettingMonitorHistory, models.SettingFallbackRetentionH,
-		models.SettingPublicIPRPM:
-		// Must be a valid int
-		if _, err := fmt.Sscanf(value, "%d", new(int)); err != nil {
-			return app.BadRequest("value must be an integer for " + key)
-		}
-	case models.SettingStripPlusTag, models.SettingOpenRegistration:
-		// Must be a valid bool
-		if value != "true" && value != "false" {
-			return app.BadRequest("value must be true or false for " + key)
-		}
-	case models.SettingMailboxNaming:
-		switch value {
-		case "full", "local", "domain":
-		default:
-			return app.BadRequest("value must be full, local, or domain for " + key)
-		}
+	audit := models.AuditEntry{Actor: actor, Action: "setting.update", ResourceType: "system_setting", Details: app.MustJSON(map[string]any{"key": key, "value": value})}
+	event := hooks.Event{Type: "setting.updated", OccurredAt: time.Now().UTC(), Metadata: map[string]any{"key": key}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpsertSetting(txCtx, key, value, "")
+	}); err != nil {
+		return err
 	}
-
-	if err := s.settings.Set(ctx, key, value, ""); err != nil {
-		return app.Internal(err)
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "setting.update",
-		ResourceType: "system_setting",
-		Actor:        actor,
-		Details:      app.MustJSON(map[string]any{"key": key, "value": value}),
-	})
+	s.settings.Invalidate()
 	return nil
 }
 
 // BulkUpdateSettings updates multiple settings at once.
 func (s *Service) BulkUpdateSettings(ctx context.Context, updates map[string]string, actor string) error {
+	keys := make([]string, 0, len(updates))
 	for key, value := range updates {
-		if err := s.UpdateSetting(ctx, key, value, actor); err != nil {
+		if err := validateSettingValue(key, value); err != nil {
 			return err
 		}
+		keys = append(keys, key)
 	}
+	sort.Strings(keys)
+	audit := models.AuditEntry{Actor: actor, Action: "setting.bulk_update", ResourceType: "system_setting", Details: app.MustJSON(map[string]any{"updates": updates})}
+	event := hooks.Event{Type: "settings.updated", OccurredAt: time.Now().UTC(), Metadata: map[string]any{"keys": keys}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		for _, key := range keys {
+			if err := s.store.UpsertSetting(txCtx, key, updates[key], ""); err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	s.settings.Invalidate()
 	return nil
 }
 
@@ -257,18 +252,15 @@ func (s *Service) CreateTenant(ctx context.Context, name string, planID uuid.UUI
 	if plan == nil {
 		return nil, app.BadRequest("plan_id does not exist")
 	}
-	t := &models.Tenant{Name: name, PlanID: planID}
-	if err := s.store.CreateTenant(ctx, t); err != nil {
-		return nil, app.Internal(err)
+	tenant := &models.Tenant{ID: uuid.New(), Name: name, PlanID: planID}
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(tenant.ID), Action: "tenant.create", ResourceType: "tenant", ResourceID: app.UUIDPtr(tenant.ID), Actor: actor, Details: app.MustJSON(map[string]any{"name": tenant.Name, "plan_id": tenant.PlanID})}
+	event := hooks.Event{Type: "tenant.created", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"tenant_id": tenant.ID.String(), "name": tenant.Name, "plan_id": tenant.PlanID.String()}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.CreateTenant(txCtx, tenant)
+	}); err != nil {
+		return nil, err
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "tenant.create",
-		ResourceType: "tenant",
-		ResourceID:   app.UUIDPtr(t.ID),
-		Actor:        actor,
-		Details:      app.MustJSON(map[string]any{"name": t.Name, "plan_id": t.PlanID}),
-	})
-	return t, nil
+	return tenant, nil
 }
 
 func (s *Service) UpdateTenantOverride(ctx context.Context, tenantID uuid.UUID, body models.TenantOverride, actor string) (*models.TenantOverride, error) {
@@ -280,73 +272,75 @@ func (s *Service) UpdateTenantOverride(ctx context.Context, tenantID uuid.UUID, 
 		return nil, app.NotFound("tenant not found")
 	}
 	body.TenantID = tenantID
-	if err := s.store.UpsertOverride(ctx, &body); err != nil {
-		return nil, app.Internal(err)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(tenantID), Action: "tenant.override.upsert", ResourceType: "tenant_override", ResourceID: app.UUIDPtr(tenantID), Actor: actor, Details: app.MustJSON(body)}
+	event := hooks.Event{Type: "tenant.override.updated", TenantID: tenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"tenant_id": tenantID.String()}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpsertOverride(txCtx, &body)
+	}); err != nil {
+		return nil, err
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		TenantID:     app.UUIDPtr(tenantID),
-		Action:       "tenant.override.upsert",
-		ResourceType: "tenant_override",
-		ResourceID:   app.UUIDPtr(body.ID),
-		Actor:        actor,
-		Details:      app.MustJSON(body),
-	})
 	return &body, nil
 }
 
 func (s *Service) DeleteTenant(ctx context.Context, id uuid.UUID, actor string) error {
-	if err := s.store.DeleteTenant(ctx, id); err != nil {
+	tenant, err := s.store.GetTenant(ctx, id)
+	if err != nil {
 		return app.Internal(err)
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "tenant.delete",
-		ResourceType: "tenant",
-		ResourceID:   app.UUIDPtr(id),
-		Actor:        actor,
-		Details:      app.MustJSON(map[string]any{"tenant_id": id}),
+	if tenant == nil {
+		return app.NotFound("tenant not found")
+	}
+	audit := models.AuditEntry{Action: "tenant.delete", ResourceType: "tenant", ResourceID: app.UUIDPtr(id), Actor: actor, Details: app.MustJSON(map[string]any{"tenant_id": id, "name": tenant.Name})}
+	event := hooks.Event{Type: "tenant.deleted", TenantID: id.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"tenant_id": id.String(), "name": tenant.Name}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteTenant(txCtx, id)
 	})
-	return nil
 }
 
-func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
-	if err := s.store.CreatePlan(ctx, p); err != nil {
-		return nil, app.Internal(err)
+func (s *Service) CreatePlan(ctx context.Context, plan *models.Plan, actor string) (*models.Plan, error) {
+	if plan == nil {
+		return nil, app.BadRequest("plan is required")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "plan.create",
-		ResourceType: "plan",
-		ResourceID:   app.UUIDPtr(p.ID),
-		Actor:        actor,
-		Details:      app.MustJSON(map[string]any{"name": p.Name}),
-	})
-	return p, nil
+	if plan.ID == uuid.Nil {
+		plan.ID = uuid.New()
+	}
+	audit := models.AuditEntry{Action: "plan.create", ResourceType: "plan", ResourceID: app.UUIDPtr(plan.ID), Actor: actor, Details: app.MustJSON(map[string]any{"name": plan.Name})}
+	event := hooks.Event{Type: "plan.created", OccurredAt: time.Now().UTC(), Metadata: map[string]any{"plan_id": plan.ID.String(), "name": plan.Name}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.CreatePlan(txCtx, plan)
+	}); err != nil {
+		return nil, err
+	}
+	return plan, nil
 }
 
-func (s *Service) UpdatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
-	if err := s.store.UpdatePlan(ctx, p); err != nil {
-		return nil, app.Internal(err)
+func (s *Service) UpdatePlan(ctx context.Context, plan *models.Plan, actor string) (*models.Plan, error) {
+	if plan == nil || plan.ID == uuid.Nil {
+		return nil, app.BadRequest("valid plan is required")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "plan.update",
-		ResourceType: "plan",
-		ResourceID:   app.UUIDPtr(p.ID),
-		Actor:        actor,
-		Details:      app.MustJSON(p),
-	})
-	return p, nil
+	audit := models.AuditEntry{Action: "plan.update", ResourceType: "plan", ResourceID: app.UUIDPtr(plan.ID), Actor: actor, Details: app.MustJSON(plan)}
+	event := hooks.Event{Type: "plan.updated", OccurredAt: time.Now().UTC(), Metadata: map[string]any{"plan_id": plan.ID.String(), "name": plan.Name}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpdatePlan(txCtx, plan)
+	}); err != nil {
+		return nil, err
+	}
+	return plan, nil
 }
 
 func (s *Service) DeletePlan(ctx context.Context, id uuid.UUID, actor string) error {
-	if err := s.store.DeletePlan(ctx, id); err != nil {
+	plan, err := s.store.GetPlan(ctx, id)
+	if err != nil {
 		return app.Internal(err)
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "plan.delete",
-		ResourceType: "plan",
-		ResourceID:   app.UUIDPtr(id),
-		Actor:        actor,
+	if plan == nil {
+		return app.NotFound("plan not found")
+	}
+	audit := models.AuditEntry{Action: "plan.delete", ResourceType: "plan", ResourceID: app.UUIDPtr(id), Actor: actor, Details: app.MustJSON(map[string]any{"name": plan.Name})}
+	event := hooks.Event{Type: "plan.deleted", OccurredAt: time.Now().UTC(), Metadata: map[string]any{"plan_id": id.String(), "name": plan.Name}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeletePlan(txCtx, id)
 	})
-	return nil
 }
 
 func (s *Service) CreateAPIKey(ctx context.Context, tenantID uuid.UUID, label string, scopes []string, actor string, callerPerm *models.EffectivePermission, callerUserID *uuid.UUID, allowedZoneIDs []uuid.UUID) (*APIKeyIssueResult, error) {
@@ -450,17 +444,16 @@ func (s *Service) CreateAPIKey(ctx context.Context, tenantID uuid.UUID, label st
 	} else if callerPerm != nil && len(callerPerm.AllowedZoneIDs) > 0 {
 		k.AllowedZoneIDs = append([]uuid.UUID(nil), callerPerm.AllowedZoneIDs...)
 	}
-	if err := s.store.CreateAPIKey(ctx, k); err != nil {
-		return nil, app.Internal(err)
+	if k.ID == uuid.Nil {
+		k.ID = uuid.New()
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		TenantID:     app.UUIDPtr(tenantID),
-		Action:       "api_key.create",
-		ResourceType: "tenant_api_key",
-		ResourceID:   app.UUIDPtr(k.ID),
-		Actor:        actor,
-		Details:      app.MustJSON(map[string]any{"label": k.Label, "key_prefix": k.KeyPrefix, "scopes": k.Scopes, "owner_user_id": callerUserID}),
-	})
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(tenantID), Action: "api_key.create", ResourceType: "tenant_api_key", ResourceID: app.UUIDPtr(k.ID), Actor: actor, Details: app.MustJSON(map[string]any{"label": k.Label, "key_prefix": k.KeyPrefix, "scopes": k.Scopes, "owner_user_id": callerUserID})}
+	event := hooks.Event{Type: "api_key.created", TenantID: tenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"api_key_id": k.ID.String(), "key_prefix": k.KeyPrefix, "scopes": k.Scopes}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.CreateAPIKey(txCtx, k)
+	}); err != nil {
+		return nil, err
+	}
 	return &APIKeyIssueResult{
 		ID:        k.ID,
 		Key:       raw,
@@ -496,28 +489,23 @@ func (s *Service) DeleteAPIKeyForTenant(ctx context.Context, tenantID uuid.UUID,
 		return app.NotFound("api key not found")
 	}
 	if key.TenantID != tenantID {
-		return app.Forbidden("api key belongs to another tenant")
+		return app.NotFound("api key not found")
 	}
-	// Non-admin callers can only delete their own keys
-	if callerUserID != nil {
-		if key.OwnerUserID == nil || *key.OwnerUserID != *callerUserID {
-			return app.Forbidden("cannot delete api key owned by another user")
-		}
+	if callerUserID != nil && (key.OwnerUserID == nil || *key.OwnerUserID != *callerUserID) {
+		return app.Forbidden("cannot delete api key owned by another user")
 	}
-	return s.DeleteAPIKey(ctx, keyID, actor)
+	return s.deleteAPIKey(ctx, key, actor)
 }
 
 func (s *Service) DeleteAPIKey(ctx context.Context, keyID uuid.UUID, actor string) error {
-	if err := s.store.DeleteAPIKey(ctx, keyID); err != nil {
+	key, err := s.store.GetAPIKey(ctx, keyID)
+	if err != nil {
 		return app.Internal(err)
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "api_key.delete",
-		ResourceType: "tenant_api_key",
-		ResourceID:   app.UUIDPtr(keyID),
-		Actor:        actor,
-	})
-	return nil
+	if key == nil {
+		return app.NotFound("api key not found")
+	}
+	return s.deleteAPIKey(ctx, key, actor)
 }
 
 func (s *Service) Stats(ctx context.Context) (*models.SystemStats, error) {
@@ -618,16 +606,50 @@ func (s *Service) GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 }
 
 func (s *Service) UpdateSMTPPolicy(ctx context.Context, policy *models.SMTPPolicy, actor string) (*models.SMTPPolicy, error) {
-	if err := s.store.UpsertSMTPPolicy(ctx, policy); err != nil {
-		return nil, app.Internal(err)
+	if policy == nil {
+		return nil, app.BadRequest("policy is required")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		Action:       "smtp_policy.update",
-		ResourceType: "smtp_policy",
-		Actor:        actor,
-		Details:      app.MustJSON(policy),
-	})
+	audit := models.AuditEntry{Action: "smtp_policy.update", ResourceType: "smtp_policy", Actor: actor, Details: app.MustJSON(policy)}
+	event := hooks.Event{Type: "smtp_policy.updated", OccurredAt: time.Now().UTC()}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpsertSMTPPolicy(txCtx, policy)
+	}); err != nil {
+		return nil, err
+	}
 	return policy, nil
+}
+
+func (s *Service) deleteAPIKey(ctx context.Context, key *models.TenantAPIKey, actor string) error {
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(key.TenantID), Action: "api_key.delete", ResourceType: "tenant_api_key", ResourceID: app.UUIDPtr(key.ID), Actor: actor, Details: app.MustJSON(map[string]any{"key_prefix": key.KeyPrefix, "label": key.Label})}
+	event := hooks.Event{Type: "api_key.deleted", TenantID: key.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"api_key_id": key.ID.String(), "key_prefix": key.KeyPrefix}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteAPIKey(txCtx, key.ID)
+	})
+}
+
+func validateSettingValue(key, value string) error {
+	if key == "" {
+		return app.BadRequest("key is required")
+	}
+	switch key {
+	case models.SettingAutoCreateRouteRPM, models.SettingAutoCreateTenantRPM,
+		models.SettingMonitorHistory, models.SettingFallbackRetentionH,
+		models.SettingPublicIPRPM:
+		if _, err := fmt.Sscanf(value, "%d", new(int)); err != nil {
+			return app.BadRequest("value must be an integer for " + key)
+		}
+	case models.SettingStripPlusTag, models.SettingOpenRegistration:
+		if value != "true" && value != "false" {
+			return app.BadRequest("value must be true or false for " + key)
+		}
+	case models.SettingMailboxNaming:
+		switch value {
+		case "full", "local", "domain":
+		default:
+			return app.BadRequest("value must be full, local, or domain for " + key)
+		}
+	}
+	return nil
 }
 
 func generateKey() string {

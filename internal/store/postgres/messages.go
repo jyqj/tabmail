@@ -14,7 +14,7 @@ func (s *PgStore) CreateMessage(ctx context.Context, m *models.Message) error {
 		m.ID = uuid.New()
 	}
 	m.ReceivedAt = time.Now()
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func (s *PgStore) CreateMessageWithQuota(ctx context.Context, m *models.Message,
 		m.ID = uuid.New()
 	}
 	m.ReceivedAt = time.Now()
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -70,7 +70,7 @@ func (s *PgStore) CreateMessageWithQuota(ctx context.Context, m *models.Message,
 
 func (s *PgStore) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error) {
 	m := &models.Message{}
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at
 		FROM messages WHERE id=$1`, id).
@@ -85,7 +85,7 @@ func (s *PgStore) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message
 
 func (v *pgTenantView) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message, error) {
 	m := &models.Message{}
-	err := v.store.pool.QueryRow(ctx, `
+	err := v.store.db(ctx).QueryRow(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at
 		FROM messages WHERE id=$1 AND tenant_id=$2`, id, v.tenantID).
@@ -101,11 +101,11 @@ func (v *pgTenantView) GetMessage(ctx context.Context, id uuid.UUID) (*models.Me
 func (s *PgStore) ListMessages(ctx context.Context, mailboxID uuid.UUID, pg models.Page) ([]*models.Message, int, error) {
 	pg = pg.Normalize()
 	var total int
-	if err := s.pool.QueryRow(ctx,
+	if err := s.db(ctx).QueryRow(ctx,
 		`SELECT count(*) FROM messages WHERE mailbox_id=$1`, mailboxID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at
 		FROM messages WHERE mailbox_id=$1 ORDER BY received_at DESC, id DESC LIMIT $2 OFFSET $3`,
@@ -133,14 +133,14 @@ func (s *PgStore) ListMessagesKeyset(ctx context.Context, mailboxID uuid.UUID, b
 	var rows pgx.Rows
 	var err error
 	if before == nil {
-		rows, err = s.pool.Query(ctx, `
+		rows, err = s.db(ctx).Query(ctx, `
 			SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 			       raw_object_key,headers_json,received_at,expires_at
 			FROM messages WHERE mailbox_id=$1
 			ORDER BY received_at DESC, id DESC LIMIT $2`,
 			mailboxID, limit)
 	} else {
-		rows, err = s.pool.Query(ctx, `
+		rows, err = s.db(ctx).Query(ctx, `
 			SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 			       raw_object_key,headers_json,received_at,expires_at
 			FROM messages WHERE mailbox_id=$1 AND (received_at, id) < ($2, $3)
@@ -169,12 +169,12 @@ func scanMessages(rows pgx.Rows) ([]*models.Message, error) {
 }
 
 func (s *PgStore) MarkSeen(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE messages SET seen=TRUE WHERE id=$1`, id)
+	_, err := s.db(ctx).Exec(ctx, `UPDATE messages SET seen=TRUE WHERE id=$1`, id)
 	return err
 }
 
 func (s *PgStore) DeleteMessage(ctx context.Context, id uuid.UUID) error {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -196,7 +196,7 @@ func (s *PgStore) DeleteMessage(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s *PgStore) PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (s *PgStore) PurgeMailbox(ctx context.Context, mailboxID uuid.UUID) error {
 
 func (s *PgStore) CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, error) {
 	var n int
-	err := s.pool.QueryRow(ctx,
+	err := s.db(ctx).QueryRow(ctx,
 		`SELECT message_count FROM mailboxes WHERE id=$1`, mailboxID).Scan(&n)
 	if err == pgx.ErrNoRows {
 		return 0, nil
@@ -223,14 +223,14 @@ func (s *PgStore) CountMessages(ctx context.Context, mailboxID uuid.UUID) (int, 
 
 func (s *PgStore) CountMessagesByObjectKey(ctx context.Context, objectKey string) (int, error) {
 	var n int
-	err := s.pool.QueryRow(ctx,
+	err := s.db(ctx).QueryRow(ctx,
 		`SELECT count(*) FROM messages WHERE raw_object_key=$1`, objectKey).Scan(&n)
 	return n, err
 }
 
 func (s *PgStore) CountRawObjectReferences(ctx context.Context, objectKey string) (int, error) {
 	var n int
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT
 			(SELECT count(*) FROM messages WHERE raw_object_key = $1) +
 			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND state IN ('pending','retry','processing'))`, objectKey).Scan(&n)
@@ -239,19 +239,19 @@ func (s *PgStore) CountRawObjectReferences(ctx context.Context, objectKey string
 
 func (s *PgStore) CountAllMessages(ctx context.Context) (int, error) {
 	var n int
-	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM messages`).Scan(&n)
+	err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM messages`).Scan(&n)
 	return n, err
 }
 
 func (s *PgStore) CountTenantMessagesSince(ctx context.Context, tenantID uuid.UUID, since time.Time) (int, error) {
 	var n int
-	err := s.pool.QueryRow(ctx,
+	err := s.db(ctx).QueryRow(ctx,
 		`SELECT count(*) FROM messages WHERE tenant_id=$1 AND received_at >= $2`, tenantID, since).Scan(&n)
 	return n, err
 }
 
 func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error) {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -302,7 +302,7 @@ func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, l
 }
 
 func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT raw_object_key FROM messages
 		WHERE expires_at < $1 AND raw_object_key IS NOT NULL AND raw_object_key != ''
 		ORDER BY expires_at, id
@@ -323,7 +323,7 @@ func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, l
 }
 
 func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error) {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return 0, nil, err
 	}

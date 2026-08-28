@@ -29,6 +29,7 @@ import (
 )
 
 type serviceStore interface {
+	store.Transactor
 	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int) (bool, error)
@@ -52,6 +53,8 @@ type AcceptResult struct {
 	Queued    bool
 	Delivered int
 }
+
+var errMailboxMessageQuota = errors.New("mailbox message quota exceeded")
 
 type Service struct {
 	store              serviceStore
@@ -369,6 +372,7 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte, rcptChe
 
 		retH := resolveRetention(s.store, ctx, result, s.fallbackRetentionH)
 		msg := &models.Message{
+			ID:           uuid.New(),
 			TenantID:     mb.TenantID,
 			MailboxID:    mb.ID,
 			ZoneID:       mb.ZoneID,
@@ -390,42 +394,39 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte, rcptChe
 				Msg("tenant daily quota exceeded")
 			continue
 		}
-		ok, err := s.store.CreateMessageWithQuota(ctx, msg, cfg.MaxMessagesPerMailbox)
+		event := hooks.Event{
+			Type: "message.received", Mailbox: mb.FullAddress, MessageID: msg.ID.String(),
+			TenantID: mb.TenantID.String(), Sender: env.MailFrom,
+			Recipients: []string{addr}, Subject: subject, OccurredAt: time.Now().UTC(),
+		}
+		stored := false
+		err = s.store.WithinTx(ctx, func(txCtx context.Context) error {
+			ok, err := s.store.CreateMessageWithQuota(txCtx, msg, cfg.MaxMessagesPerMailbox)
+			if err != nil {
+				return err
+			}
+			if !ok {
+				return errMailboxMessageQuota
+			}
+			stored = true
+			if s.dispatcher != nil {
+				return s.dispatcher.Enqueue(txCtx, event)
+			}
+			return nil
+		})
 		if err != nil {
 			_ = s.releaseTenantDaily(ctx, mb.TenantID)
-			metrics.SMTPDeliveryFailed(mb.TenantID.String(), mb.FullAddress)
-			s.logger.Err(err).Str("mailbox", mb.FullAddress).Msg("storing message metadata")
-			continue
-		}
-		if !ok {
-			_ = s.releaseTenantDaily(ctx, mb.TenantID)
-			s.logger.Warn().
-				Str("mailbox", mb.FullAddress).
-				Int("limit", cfg.MaxMessagesPerMailbox).
-				Msg("mailbox message quota exceeded")
+			if errors.Is(err, errMailboxMessageQuota) {
+				s.logger.Warn().Str("mailbox", mb.FullAddress).Int("limit", cfg.MaxMessagesPerMailbox).Msg("mailbox message quota exceeded")
+			} else {
+				metrics.SMTPDeliveryFailed(mb.TenantID.String(), mb.FullAddress)
+				s.logger.Err(err).Str("mailbox", mb.FullAddress).Bool("message_staged", stored).Msg("commit message and outbox event")
+			}
 			continue
 		}
 		metrics.SMTPDeliverySucceeded(mb.TenantID.String(), mb.FullAddress)
 		if s.hub != nil {
-			s.hub.Publish(realtime.Event{
-				Type:      realtime.EventMessage,
-				Mailbox:   mb.FullAddress,
-				MessageID: msg.ID.String(),
-				Sender:    env.MailFrom,
-				Subject:   subject,
-				Size:      int64(len(raw)),
-			})
-		}
-		if s.dispatcher != nil {
-			s.dispatcher.Publish(hooks.Event{
-				Type:       "message.received",
-				Mailbox:    mb.FullAddress,
-				MessageID:  msg.ID.String(),
-				TenantID:   mb.TenantID.String(),
-				Sender:     env.MailFrom,
-				Recipients: []string{addr},
-				Subject:    subject,
-			})
+			s.hub.Publish(realtime.Event{Type: realtime.EventMessage, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: env.MailFrom, Subject: subject, Size: int64(len(raw))})
 		}
 		successes++
 		s.logger.Info().

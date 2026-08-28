@@ -26,6 +26,7 @@ const (
 )
 
 type storeRepo interface {
+	store.Transactor
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
@@ -374,21 +375,26 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 	if msg.MailboxID != mb.ID {
 		return app.NotFound("message not found")
 	}
-	if err := s.store.DeleteMessage(ctx, msgID); err != nil {
-		return app.Internal(err)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "message.delete", ResourceType: "message", ResourceID: app.UUIDPtr(msg.ID), Details: app.MustJSON(map[string]any{"mailbox": mb.FullAddress})}
+	event := hooks.Event{Type: "message.deleted", Mailbox: mb.FullAddress, MessageID: msg.ID.String(), TenantID: mb.TenantID.String()}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteMessage(txCtx, msgID)
+	}); err != nil {
+		return err
 	}
+
 	if msg.RawObjectKey != "" {
 		refs, err := s.store.CountRawObjectReferences(ctx, msg.RawObjectKey)
-		if err == nil && refs == 0 {
-			_ = s.obj.Delete(ctx, msg.RawObjectKey)
+		if err != nil {
+			s.logger.Warn().Err(err).Str("key", msg.RawObjectKey).Msg("count object references after message delete")
+		} else if refs == 0 && s.obj != nil {
+			if err := s.obj.Delete(ctx, msg.RawObjectKey); err != nil {
+				s.logger.Warn().Err(err).Str("key", msg.RawObjectKey).Msg("delete orphan raw object after message delete")
+			}
 		}
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "message.delete", ResourceType: "message", ResourceID: app.UUIDPtr(msg.ID), Details: app.MustJSON(map[string]any{"mailbox": mb.FullAddress})})
 	if s.hub != nil {
 		s.hub.Publish(realtime.Event{Type: realtime.EventDelete, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: msg.Sender, Subject: msg.Subject, Size: msg.Size})
-	}
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "message.deleted", Mailbox: mb.FullAddress, MessageID: msg.ID.String(), TenantID: mb.TenantID.String()})
 	}
 	return nil
 }
@@ -402,27 +408,28 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 	if err != nil {
 		return app.Internal(err)
 	}
-	if err := s.store.PurgeMailbox(ctx, mb.ID); err != nil {
-		return app.Internal(err)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.purge", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})}
+	event := hooks.Event{Type: "mailbox.purged", Mailbox: mb.FullAddress, TenantID: mb.TenantID.String()}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.PurgeMailbox(txCtx, mb.ID)
+	}); err != nil {
+		return err
 	}
+
 	for _, key := range uniqueStrings(keys) {
 		refs, err := s.store.CountRawObjectReferences(ctx, key)
 		if err != nil {
 			s.logger.Warn().Err(err).Str("key", key).Msg("count object references during purge")
 			continue
 		}
-		if refs == 0 {
+		if refs == 0 && s.obj != nil {
 			if err := s.obj.Delete(ctx, key); err != nil {
 				s.logger.Warn().Err(err).Str("key", key).Msg("delete raw object during purge")
 			}
 		}
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.purge", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
 	if s.hub != nil {
 		s.hub.Publish(realtime.Event{Type: realtime.EventPurge, Mailbox: mb.FullAddress})
-	}
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "mailbox.purged", Mailbox: mb.FullAddress, TenantID: mb.TenantID.String()})
 	}
 	return nil
 }
@@ -446,14 +453,16 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	if msg.MailboxID != mb.ID {
 		return nil, app.NotFound("message not found")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	if err := app.InsertAuditRequired(ctx, s.store, models.AuditEntry{
 		TenantID:     app.UUIDPtr(mb.TenantID),
 		Actor:        actor,
 		Action:       "message.break_glass_read",
 		ResourceType: "message",
 		ResourceID:   app.UUIDPtr(msg.ID),
 		Details:      app.MustJSON(map[string]any{"mailbox": mb.FullAddress, "reason": reason, "scope": "body"}),
-	})
+	}); err != nil {
+		return nil, app.Internal(err)
+	}
 	detail := &models.MessageDetail{Message: *msg}
 	s.populateMessageBodies(ctx, msg, detail)
 	return detail, nil
@@ -481,14 +490,16 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 	if msg.RawObjectKey == "" {
 		return nil, app.NotFound("raw source not available")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	if err := app.InsertAuditRequired(ctx, s.store, models.AuditEntry{
 		TenantID:     app.UUIDPtr(mb.TenantID),
 		Actor:        actor,
 		Action:       "message.break_glass_read",
 		ResourceType: "message",
 		ResourceID:   app.UUIDPtr(msg.ID),
 		Details:      app.MustJSON(map[string]any{"mailbox": mb.FullAddress, "reason": reason, "scope": "source"}),
-	})
+	}); err != nil {
+		return nil, app.Internal(err)
+	}
 	rc, err := s.obj.Get(ctx, msg.RawObjectKey)
 	if err != nil {
 		s.logger.Err(err).Str("key", msg.RawObjectKey).Msg("get object")

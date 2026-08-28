@@ -29,7 +29,7 @@ func (s *PgStore) CreateUser(ctx context.Context, u *models.User) error {
 	now := time.Now()
 	u.CreatedAt = now
 	u.UpdatedAt = now
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO users (id, tenant_id, email, password_hash, display_name, role, is_active, permission_profile_id, created_at, updated_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
 		u.ID, u.TenantID, strings.ToLower(strings.TrimSpace(u.Email)),
@@ -60,21 +60,21 @@ func scanUser(row pgx.Row) (*models.User, error) {
 }
 
 func (s *PgStore) GetUser(ctx context.Context, id uuid.UUID) (*models.User, error) {
-	return scanUser(s.pool.QueryRow(ctx, userSelect+` WHERE id = $1`, id))
+	return scanUser(s.db(ctx).QueryRow(ctx, userSelect+` WHERE id = $1`, id))
 }
 
 func (s *PgStore) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	return scanUser(s.pool.QueryRow(ctx, userSelect+` WHERE LOWER(email) = LOWER($1)`, strings.TrimSpace(email)))
+	return scanUser(s.db(ctx).QueryRow(ctx, userSelect+` WHERE LOWER(email) = LOWER($1)`, strings.TrimSpace(email)))
 }
 
 func (s *PgStore) ListUsers(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.User, int, error) {
 	pg = pg.Normalize()
 	var total int
-	err := s.pool.QueryRow(ctx, `SELECT COUNT(*) FROM users WHERE tenant_id = $1`, tenantID).Scan(&total)
+	err := s.db(ctx).QueryRow(ctx, `SELECT COUNT(*) FROM users WHERE tenant_id = $1`, tenantID).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx,
+	rows, err := s.db(ctx).Query(ctx,
 		userSelect+` WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`, tenantID, pg.PerPage, pg.Offset())
 	if err != nil {
 		return nil, 0, err
@@ -93,7 +93,7 @@ func (s *PgStore) ListUsers(ctx context.Context, tenantID uuid.UUID, pg models.P
 
 func (s *PgStore) UpdateUser(ctx context.Context, u *models.User) error {
 	u.UpdatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE users SET email = $2, display_name = $3, role = $4, is_active = $5,
 			permission_profile_id = $6, updated_at = $7
 		WHERE id = $1`,
@@ -103,12 +103,12 @@ func (s *PgStore) UpdateUser(ctx context.Context, u *models.User) error {
 }
 
 func (s *PgStore) UpdateUserPassword(ctx context.Context, id uuid.UUID, passwordHash string) error {
-	_, err := s.pool.Exec(ctx, `UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1`, id, passwordHash)
+	_, err := s.db(ctx).Exec(ctx, `UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1`, id, passwordHash)
 	return err
 }
 
 func (s *PgStore) DeleteUser(ctx context.Context, id uuid.UUID) error {
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func (s *PgStore) DeleteUser(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s *PgStore) TouchUserLogin(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE users SET last_login_at = now() WHERE id = $1`, id)
+	_, err := s.db(ctx).Exec(ctx, `UPDATE users SET last_login_at = now() WHERE id = $1`, id)
 	return err
 }
 
@@ -136,7 +136,7 @@ func (s *PgStore) CreateRefreshToken(ctx context.Context, rt *models.RefreshToke
 		rt.ID = uuid.New()
 	}
 	rt.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at)
 		VALUES ($1, $2, $3, $4, $5)`,
 		rt.ID, rt.UserID, rt.TokenHash, rt.ExpiresAt, rt.CreatedAt)
@@ -145,7 +145,7 @@ func (s *PgStore) CreateRefreshToken(ctx context.Context, rt *models.RefreshToke
 
 func (s *PgStore) GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error) {
 	rt := &models.RefreshToken{}
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT id, user_id, token_hash, expires_at, created_at, revoked_at
 		FROM refresh_tokens WHERE token_hash = $1`, tokenHash).
 		Scan(&rt.ID, &rt.UserID, &rt.TokenHash, &rt.ExpiresAt, &rt.CreatedAt, &rt.RevokedAt)
@@ -156,17 +156,33 @@ func (s *PgStore) GetRefreshToken(ctx context.Context, tokenHash string) (*model
 }
 
 func (s *PgStore) RevokeRefreshToken(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1`, id)
+	_, err := s.db(ctx).Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1`, id)
 	return err
 }
 
+func (s *PgStore) ConsumeRefreshToken(ctx context.Context, id uuid.UUID) (bool, error) {
+	var revokedAt time.Time
+	err := s.db(ctx).QueryRow(ctx, `
+		UPDATE refresh_tokens
+		SET revoked_at = now()
+		WHERE id = $1 AND revoked_at IS NULL AND expires_at > now()
+		RETURNING revoked_at`, id).Scan(&revokedAt)
+	if err == pgx.ErrNoRows {
+		return false, nil
+	}
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
 func (s *PgStore) RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL`, userID)
+	_, err := s.db(ctx).Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL`, userID)
 	return err
 }
 
 func (s *PgStore) DeleteExpiredRefreshTokens(ctx context.Context) (int, error) {
-	tag, err := s.pool.Exec(ctx, `DELETE FROM refresh_tokens WHERE expires_at < now()`)
+	tag, err := s.db(ctx).Exec(ctx, `DELETE FROM refresh_tokens WHERE expires_at < now()`)
 	if err != nil {
 		return 0, err
 	}
@@ -182,7 +198,7 @@ func (s *PgStore) CreateAdminInvitation(ctx context.Context, inv *models.AdminIn
 		inv.ID = uuid.New()
 	}
 	inv.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO admin_invitations (id, email, invite_code, invited_by, expires_at, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6)`,
 		inv.ID, strings.ToLower(strings.TrimSpace(inv.Email)), hashInviteCode(inv.InviteCode),
@@ -193,7 +209,7 @@ func (s *PgStore) CreateAdminInvitation(ctx context.Context, inv *models.AdminIn
 func (s *PgStore) GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error) {
 	inv := &models.AdminInvitation{}
 	var invitedBy pgtype.UUID
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT id, email, invite_code, invited_by, expires_at, accepted_at, created_at
 		FROM admin_invitations WHERE invite_code = $1`, hashInviteCode(code)).
 		Scan(&inv.ID, &inv.Email, &inv.InviteCode, &invitedBy,
@@ -211,7 +227,15 @@ func (s *PgStore) GetAdminInvitationByCode(ctx context.Context, code string) (*m
 	return inv, nil
 }
 
-func (s *PgStore) MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE admin_invitations SET accepted_at = now() WHERE id = $1`, id)
-	return err
+func (s *PgStore) AcceptAdminInvitation(ctx context.Context, id uuid.UUID) (bool, error) {
+	var acceptedAt time.Time
+	err := s.db(ctx).QueryRow(ctx, `
+		UPDATE admin_invitations
+		SET accepted_at = now()
+		WHERE id = $1 AND accepted_at IS NULL AND expires_at > now()
+		RETURNING accepted_at`, id).Scan(&acceptedAt)
+	if err == pgx.ErrNoRows {
+		return false, nil
+	}
+	return err == nil, err
 }

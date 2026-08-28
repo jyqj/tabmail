@@ -205,6 +205,7 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		HTMLBody: body.HTMLBody,
 		Headers:  body.Headers,
 		Quota:    quota,
+		Actor:    actor.AuditLabel(),
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {

@@ -10,6 +10,14 @@ import (
 	"tabmail/internal/models"
 )
 
+// Transactor defines the application-level Unit of Work boundary. Repository
+// methods join the transaction only when called with the context supplied to
+// fn. Implementations must roll back on callback errors and return commit
+// failures to the caller.
+type Transactor interface {
+	WithinTx(ctx context.Context, fn func(context.Context) error) error
+}
+
 var (
 	ErrOutboundDailyQuotaExceeded = errors.New("outbound daily quota exceeded")
 	ErrSendAsDailyQuotaExceeded   = errors.New("send-as daily quota exceeded")
@@ -57,6 +65,9 @@ type UserStore interface {
 	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
+	// ConsumeRefreshToken atomically revokes one active, unexpired token.
+	// The bool is false when the token was already consumed or expired.
+	ConsumeRefreshToken(ctx context.Context, id uuid.UUID) (bool, error)
 	RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error
 	// DeleteExpiredRefreshTokens drops session rows whose expiry has passed
 	// (the retention role calls it on a schedule) and reports how many went.
@@ -67,7 +78,7 @@ type UserStore interface {
 	// --- Admin invitations -----------------------------------------------
 	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error
 	GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error)
-	MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error
+	AcceptAdminInvitation(ctx context.Context, id uuid.UUID) (bool, error)
 }
 
 // PlanStore persists subscription plans.
@@ -316,6 +327,7 @@ type LifecycleStore interface {
 
 // Store is the primary persistence interface for TabMail.
 type Store interface {
+	Transactor
 	UserStore
 	PlanStore
 	TenantStore

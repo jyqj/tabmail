@@ -9,7 +9,7 @@ import (
 )
 
 func (s *PgStore) CreateWebhookEndpoint(ctx context.Context, ep *models.WebhookEndpoint) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO webhook_endpoints (id,tenant_id,url,secret,event_types,is_active,created_by,created_at,updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
 		ep.ID, ep.TenantID, ep.URL, ep.Secret, ep.EventTypes, ep.IsActive, ep.CreatedBy, ep.CreatedAt, ep.UpdatedAt)
@@ -17,7 +17,7 @@ func (s *PgStore) CreateWebhookEndpoint(ctx context.Context, ep *models.WebhookE
 }
 
 func (s *PgStore) ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) ([]*models.WebhookEndpoint, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,tenant_id,url,event_types,is_active,created_by,created_at,updated_at
 		FROM webhook_endpoints WHERE tenant_id=$1 ORDER BY created_at`, tenantID)
 	if err != nil {
@@ -37,7 +37,7 @@ func (s *PgStore) ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) 
 
 func (s *PgStore) GetWebhookEndpoint(ctx context.Context, id uuid.UUID) (*models.WebhookEndpoint, error) {
 	ep := &models.WebhookEndpoint{}
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT id,tenant_id,url,event_types,is_active,created_by,created_at,updated_at
 		FROM webhook_endpoints WHERE id=$1`, id).
 		Scan(&ep.ID, &ep.TenantID, &ep.URL, &ep.EventTypes, &ep.IsActive, &ep.CreatedBy, &ep.CreatedAt, &ep.UpdatedAt)
@@ -48,13 +48,13 @@ func (s *PgStore) GetWebhookEndpoint(ctx context.Context, id uuid.UUID) (*models
 }
 
 func (s *PgStore) UpdateWebhookEndpoint(ctx context.Context, ep *models.WebhookEndpoint) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE webhook_endpoints SET url=$2, event_types=$3, is_active=$4, updated_at=now()
 		WHERE id=$1`, ep.ID, ep.URL, ep.EventTypes, ep.IsActive)
 	return err
 }
 
 func (s *PgStore) DeleteWebhookEndpoint(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM webhook_endpoints WHERE id=$1`, id)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM webhook_endpoints WHERE id=$1`, id)
 	return err
 }

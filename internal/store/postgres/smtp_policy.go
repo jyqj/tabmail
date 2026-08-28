@@ -10,7 +10,7 @@ import (
 
 func (s *PgStore) GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error) {
 	p := &models.SMTPPolicy{}
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT default_accept,accept_domains,reject_domains,default_store,store_domains,discard_domains,reject_origin_domains,updated_at
 		FROM smtp_policies WHERE id=TRUE`).
 		Scan(&p.DefaultAccept, &p.AcceptDomains, &p.RejectDomains, &p.DefaultStore, &p.StoreDomains, &p.DiscardDomains, &p.RejectOriginDomains, &p.UpdatedAt)
@@ -27,7 +27,7 @@ func (s *PgStore) UpsertSMTPPolicy(ctx context.Context, p *models.SMTPPolicy) er
 	store := nonNil(p.StoreDomains)
 	discard := nonNil(p.DiscardDomains)
 	rejectOrigin := nonNil(p.RejectOriginDomains)
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO smtp_policies (id,default_accept,accept_domains,reject_domains,default_store,store_domains,discard_domains,reject_origin_domains,updated_at)
 		VALUES (TRUE,$1,$2,$3,$4,$5,$6,$7,$8)
 		ON CONFLICT (id) DO UPDATE SET

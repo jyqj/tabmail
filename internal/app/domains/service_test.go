@@ -19,6 +19,9 @@ func newDomainTestStore() *domainTestStore {
 	return &domainTestStore{zones: map[uuid.UUID]*models.DomainZone{}}
 }
 
+func (s *domainTestStore) WithinTx(ctx context.Context, fn func(context.Context) error) error {
+	return fn(ctx)
+}
 func (s *domainTestStore) InsertAudit(context.Context, *models.AuditEntry) error    { return nil }
 func (s *domainTestStore) GetUser(context.Context, uuid.UUID) (*models.User, error) { return nil, nil }
 func (s *domainTestStore) GetAPIKey(context.Context, uuid.UUID) (*models.TenantAPIKey, error) {

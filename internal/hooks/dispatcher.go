@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -136,9 +137,16 @@ func (d *Dispatcher) BindStore(st dispatcherStore) *Dispatcher {
 	return d
 }
 
-func (d *Dispatcher) Publish(event Event) {
-	if !d.Enabled() {
-		return
+// Enqueue records an event in the durable outbox using the supplied context.
+// When called inside store.WithinTx, the event joins the same database
+// transaction as the asset mutation and audit entry. Direct static-only mode is
+// retained for tests and legacy deployments that bind no store.
+func (d *Dispatcher) Enqueue(ctx context.Context, event Event) error {
+	if d == nil || !d.Enabled() {
+		return nil
+	}
+	if ctx == nil {
+		ctx = context.Background()
 	}
 	if event.OccurredAt.IsZero() {
 		event.OccurredAt = time.Now().UTC()
@@ -146,11 +154,10 @@ func (d *Dispatcher) Publish(event Event) {
 	body, err := json.Marshal(event)
 	if err != nil {
 		metrics.WebhookFailed()
-		return
+		return fmt.Errorf("marshal webhook event: %w", err)
 	}
 	if d.store != nil {
-		metrics.WebhookQueued()
-		if err := d.store.CreateOutboxEvent(context.Background(), &models.OutboxEvent{
+		if err := d.store.CreateOutboxEvent(ctx, &models.OutboxEvent{
 			ID:         uuid.New(),
 			EventType:  event.Type,
 			Payload:    body,
@@ -158,9 +165,10 @@ func (d *Dispatcher) Publish(event Event) {
 			State:      "pending",
 		}); err != nil {
 			metrics.WebhookFailed()
-			d.logger.Warn().Err(err).Str("event_type", event.Type).Msg("persist webhook outbox event")
+			return fmt.Errorf("persist webhook outbox event: %w", err)
 		}
-		return
+		metrics.WebhookQueued()
+		return nil
 	}
 	for _, targetURL := range d.urls {
 		metrics.WebhookQueued()
@@ -171,6 +179,16 @@ func (d *Dispatcher) Publish(event Event) {
 			Payload:   body,
 			CreatedAt: time.Now().UTC(),
 		})
+	}
+	return nil
+}
+
+// Publish is the best-effort compatibility entry point for asynchronous
+// producers. Transactional application mutations use Enqueue and propagate its
+// error instead of logging and continuing.
+func (d *Dispatcher) Publish(event Event) {
+	if err := d.Enqueue(context.Background(), event); err != nil && d != nil {
+		d.logger.Warn().Err(err).Str("event_type", event.Type).Msg("publish webhook event")
 	}
 }
 

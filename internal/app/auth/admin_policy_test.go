@@ -36,12 +36,12 @@ func TestTenantAdminMayManageOrdinaryMemberOnly(t *testing.T) {
 	_, err = svc.UpdateUser(context.Background(), actor, tenant, peerAdmin.ID, UpdateUserRequest{IsActive: &active})
 	requireKind(t, err, app.KindForbidden)
 
-	if err := svc.DeleteUser(context.Background(), tenant, admin, peerAdmin.ID); err == nil {
+	if err := svc.DeleteUser(context.Background(), actor, tenant, peerAdmin.ID); err == nil {
 		t.Fatal("tenant admin must not delete a peer administrator")
 	} else {
 		requireKind(t, err, app.KindForbidden)
 	}
-	if err := svc.DeleteUser(context.Background(), tenant, admin, member.ID); err != nil {
+	if err := svc.DeleteUser(context.Background(), actor, tenant, member.ID); err != nil {
 		t.Fatalf("tenant admin should delete an ordinary member: %v", err)
 	}
 }

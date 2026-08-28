@@ -16,7 +16,7 @@ func (s *PgStore) CreateMonitorEvent(ctx context.Context, e *models.MonitorEvent
 	if e.At.IsZero() {
 		e.At = time.Now().UTC()
 	}
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO monitor_events (id,type,mailbox,message_id,sender,subject,size,at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
 		e.ID, e.Type, e.Mailbox, e.MessageID, e.Sender, e.Subject, e.Size, e.At)
@@ -43,13 +43,13 @@ func (s *PgStore) ListMonitorEvents(ctx context.Context, pg models.Page, eventTy
 
 	var total int
 	countQuery := `SELECT count(*) FROM monitor_events` + where
-	if err := s.pool.QueryRow(ctx, countQuery, filters...).Scan(&total); err != nil {
+	if err := s.db(ctx).QueryRow(ctx, countQuery, filters...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 
 	args := append(filters, pg.PerPage, pg.Offset())
 	query := `SELECT id,type,mailbox,message_id,sender,subject,size,at FROM monitor_events` + where + fmt.Sprintf(" ORDER BY at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2)
-	rows, err := s.pool.Query(ctx, query, args...)
+	rows, err := s.db(ctx).Query(ctx, query, args...)
 	if err != nil {
 		return nil, 0, err
 	}

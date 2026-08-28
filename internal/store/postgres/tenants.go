@@ -15,7 +15,7 @@ func (s *PgStore) CreateTenant(ctx context.Context, t *models.Tenant) error {
 		t.ID = uuid.New()
 	}
 	t.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx,
+	_, err := s.db(ctx).Exec(ctx,
 		`INSERT INTO tenants (id,name,plan_id,is_super,created_at) VALUES ($1,$2,$3,$4,$5)`,
 		t.ID, t.Name, t.PlanID, t.IsSuper, t.CreatedAt)
 	return err
@@ -23,7 +23,7 @@ func (s *PgStore) CreateTenant(ctx context.Context, t *models.Tenant) error {
 
 func (s *PgStore) GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error) {
 	t := &models.Tenant{}
-	err := s.pool.QueryRow(ctx,
+	err := s.db(ctx).QueryRow(ctx,
 		`SELECT id,name,plan_id,is_super,created_at FROM tenants WHERE id=$1`, id).
 		Scan(&t.ID, &t.Name, &t.PlanID, &t.IsSuper, &t.CreatedAt)
 	if err == pgx.ErrNoRows {
@@ -33,7 +33,7 @@ func (s *PgStore) GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, 
 }
 
 func (s *PgStore) ListTenants(ctx context.Context) ([]*models.Tenant, error) {
-	rows, err := s.pool.Query(ctx,
+	rows, err := s.db(ctx).Query(ctx,
 		`SELECT id,name,plan_id,is_super,created_at FROM tenants ORDER BY created_at`)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (s *PgStore) ListTenants(ctx context.Context) ([]*models.Tenant, error) {
 }
 
 func (s *PgStore) DeleteTenant(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM tenants WHERE id=$1`, id)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM tenants WHERE id=$1`, id)
 	return err
 }
 
@@ -60,7 +60,7 @@ func (s *PgStore) UpsertOverride(ctx context.Context, o *models.TenantOverride) 
 		o.ID = uuid.New()
 	}
 	o.UpdatedAt = time.Now()
-	return s.pool.QueryRow(ctx, `
+	return s.db(ctx).QueryRow(ctx, `
 		INSERT INTO tenant_overrides (id,tenant_id,max_domains,max_mailboxes_per_domain,
 			max_messages_per_mailbox,max_message_bytes,retention_hours,rpm_limit,daily_quota,updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
@@ -81,7 +81,7 @@ func (s *PgStore) UpsertOverride(ctx context.Context, o *models.TenantOverride) 
 
 func (s *PgStore) GetOverride(ctx context.Context, tenantID uuid.UUID) (*models.TenantOverride, error) {
 	o := &models.TenantOverride{}
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT id,tenant_id,max_domains,max_mailboxes_per_domain,max_messages_per_mailbox,
 		       max_message_bytes,retention_hours,rpm_limit,daily_quota,updated_at
 		FROM tenant_overrides WHERE tenant_id=$1`, tenantID).
@@ -96,7 +96,7 @@ func (s *PgStore) GetOverride(ctx context.Context, tenantID uuid.UUID) (*models.
 // EffectiveConfig resolves plan + override → flat config.
 func (s *PgStore) EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error) {
 	ec := &models.EffectiveConfig{}
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT
 			COALESCE(o.max_domains,             p.max_domains),
 			COALESCE(o.max_mailboxes_per_domain,p.max_mailboxes_per_domain),

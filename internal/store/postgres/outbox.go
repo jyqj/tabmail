@@ -24,7 +24,7 @@ func (s *PgStore) CreateOutboxEvent(ctx context.Context, e *models.OutboxEvent) 
 	}
 	e.CreatedAt = now
 	e.UpdatedAt = now
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO outbox_events (id,event_type,payload,occurred_at,state,attempts,last_error,next_attempt_at,created_at,updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
 		e.ID, e.EventType, e.Payload, e.OccurredAt, e.State, e.Attempts, e.LastError, e.NextAttemptAt, e.CreatedAt, e.UpdatedAt)
@@ -37,7 +37,7 @@ func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit in
 	}
 	now = now.UTC()
 	leaseUntil := now.Add(claimLeaseDuration)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		WITH cte AS (
 			SELECT id
 			FROM outbox_events
@@ -69,7 +69,7 @@ func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit in
 }
 
 func (s *PgStore) MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE outbox_events
 		SET state='done', claimed_at=NULL, lease_until=NULL, updated_at=$2
 		WHERE id=$1`, id, time.Now().UTC())
@@ -77,7 +77,7 @@ func (s *PgStore) MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error {
 }
 
 func (s *PgStore) MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE outbox_events
 		SET state='retry', last_error=$2, next_attempt_at=$3, claimed_at=NULL, lease_until=NULL, updated_at=$4
 		WHERE id=$1`, id, lastError, nextAttemptAt.UTC(), time.Now().UTC())
