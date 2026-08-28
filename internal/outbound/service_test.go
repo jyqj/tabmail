@@ -10,15 +10,55 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/config"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 	"tabmail/internal/testutil"
 )
 
+func TestSubmitCommitsJobAuditAndOutboxTogether(t *testing.T) {
+	ctx := context.Background()
+	st := testutil.NewFakeStore()
+	dispatcher := hooks.New(hooks.Config{}, zerolog.Nop()).BindStore(st)
+	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, dispatcher, zerolog.Nop())
+	tenantID := uuid.New()
+	userID := uuid.New()
+	req := quotaTestSendRequest(tenantID, userID)
+	req.Actor = "user:" + userID.String()
+
+	job, err := svc.Submit(ctx, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	items, total, err := st.ListOutboundJobs(ctx, tenantID, models.Page{Page: 1, PerPage: 10})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if total != 1 || len(items) != 1 || items[0].ID != job.ID {
+		t.Fatalf("expected committed outbound job %s, got total=%d items=%#v", job.ID, total, items)
+	}
+
+	audits, err := st.ListAuditEntries(ctx, 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(audits) != 1 || audits[0].Action != "outbound.submit" || audits[0].ResourceID == nil || *audits[0].ResourceID != job.ID {
+		t.Fatalf("unexpected outbound audit: %#v", audits)
+	}
+
+	events, err := st.ClaimOutboxEvents(ctx, time.Now().UTC().Add(time.Second), 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 1 || events[0].EventType != "outbound.submitted" {
+		t.Fatalf("unexpected outbound outbox events: %#v", events)
+	}
+}
+
 func TestSubmitReservesUserDailyQuotaWithJobCreation(t *testing.T) {
 	ctx := context.Background()
 	st := testutil.NewFakeStore()
-	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, zerolog.Nop())
+	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, nil, zerolog.Nop())
 	tenantID := uuid.New()
 	userID := uuid.New()
 	req := quotaTestSendRequest(tenantID, userID)
@@ -46,7 +86,7 @@ func TestSubmitReservesUserDailyQuotaWithJobCreation(t *testing.T) {
 func TestSubmitReservesSendAsDailyQuotaWithJobCreation(t *testing.T) {
 	ctx := context.Background()
 	st := testutil.NewFakeStore()
-	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, zerolog.Nop())
+	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, nil, zerolog.Nop())
 	tenantID := uuid.New()
 	userID := uuid.New()
 	identity := &models.SendIdentity{

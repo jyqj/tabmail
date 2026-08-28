@@ -67,7 +67,7 @@ func registeredEndpoints(t *testing.T) map[string]bool {
 	t.Helper()
 	handler := NewRouter(RouterConfig{
 		// A non-nil outbound service is required for the /send routes to register.
-		OutboundService: outbound.NewService(config.Outbound{}, nil, zerolog.Nop()),
+		OutboundService: outbound.NewService(config.Outbound{}, nil, nil, zerolog.Nop()),
 	})
 	routes, ok := handler.(chi.Routes)
 	if !ok {

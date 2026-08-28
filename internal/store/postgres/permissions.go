@@ -21,7 +21,7 @@ func (s *PgStore) CreatePermissionProfile(ctx context.Context, p *models.Permiss
 	now := time.Now()
 	p.CreatedAt = now
 	p.UpdatedAt = now
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO permission_profiles (id, tenant_id, name, description, can_send, daily_send_quota, daily_receive_quota,
 			max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
 			can_create_api_keys, is_system, created_at, updated_at)
@@ -33,11 +33,11 @@ func (s *PgStore) CreatePermissionProfile(ctx context.Context, p *models.Permiss
 }
 
 func (s *PgStore) GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error) {
-	return scanPermProfile(s.pool.QueryRow(ctx, permProfileSelect+` WHERE id=$1`, id))
+	return scanPermProfile(s.db(ctx).QueryRow(ctx, permProfileSelect+` WHERE id=$1`, id))
 }
 
 func (s *PgStore) GetPermissionProfileByName(ctx context.Context, name string) (*models.PermissionProfile, error) {
-	return scanPermProfile(s.pool.QueryRow(ctx, permProfileSelect+` WHERE name=$1`, name))
+	return scanPermProfile(s.db(ctx).QueryRow(ctx, permProfileSelect+` WHERE name=$1`, name))
 }
 
 func (s *PgStore) ListPermissionProfiles(ctx context.Context, tenantID *uuid.UUID) ([]*models.PermissionProfile, error) {
@@ -46,9 +46,9 @@ func (s *PgStore) ListPermissionProfiles(ctx context.Context, tenantID *uuid.UUI
 		err  error
 	)
 	if tenantID != nil {
-		rows, err = s.pool.Query(ctx, permProfileSelect+` WHERE tenant_id = $1 OR tenant_id IS NULL ORDER BY name`, *tenantID)
+		rows, err = s.db(ctx).Query(ctx, permProfileSelect+` WHERE tenant_id = $1 OR tenant_id IS NULL ORDER BY name`, *tenantID)
 	} else {
-		rows, err = s.pool.Query(ctx, permProfileSelect+` ORDER BY name`)
+		rows, err = s.db(ctx).Query(ctx, permProfileSelect+` ORDER BY name`)
 	}
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func (s *PgStore) ListPermissionProfiles(ctx context.Context, tenantID *uuid.UUI
 
 func (s *PgStore) UpdatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error {
 	p.UpdatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE permission_profiles SET name=$2, description=$3, can_send=$4, daily_send_quota=$5,
 			daily_receive_quota=$6, max_mailboxes=$7, max_domains=$8, allowed_zone_ids=$9,
 			can_create_domains=$10, can_create_routes=$11, can_create_api_keys=$12, updated_at=$13
@@ -80,10 +80,10 @@ func (s *PgStore) UpdatePermissionProfile(ctx context.Context, p *models.Permiss
 
 func (s *PgStore) DeletePermissionProfile(ctx context.Context, id uuid.UUID, tenantID *uuid.UUID) error {
 	if tenantID != nil {
-		_, err := s.pool.Exec(ctx, `DELETE FROM permission_profiles WHERE id=$1 AND (tenant_id = $2 OR tenant_id IS NULL)`, id, *tenantID)
+		_, err := s.db(ctx).Exec(ctx, `DELETE FROM permission_profiles WHERE id=$1 AND (tenant_id = $2 OR tenant_id IS NULL)`, id, *tenantID)
 		return err
 	}
-	_, err := s.pool.Exec(ctx, `DELETE FROM permission_profiles WHERE id=$1`, id)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM permission_profiles WHERE id=$1`, id)
 	return err
 }
 
@@ -117,7 +117,7 @@ func (s *PgStore) UpsertUserPermissionOverride(ctx context.Context, o *models.Us
 		o.ID = uuid.New()
 	}
 	o.UpdatedAt = time.Now()
-	return s.pool.QueryRow(ctx, `
+	return s.db(ctx).QueryRow(ctx, `
 		INSERT INTO user_permission_overrides (id, user_id, can_send, daily_send_quota, daily_receive_quota,
 			max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
 			can_create_api_keys, updated_at)
@@ -141,14 +141,14 @@ func (s *PgStore) UpsertUserPermissionOverride(ctx context.Context, o *models.Us
 }
 
 func (s *PgStore) DeleteUserPermissionOverride(ctx context.Context, userID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM user_permission_overrides WHERE user_id=$1`, userID)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM user_permission_overrides WHERE user_id=$1`, userID)
 	return err
 }
 
 func (s *PgStore) EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error) {
 	ep := &models.EffectivePermission{}
 	var allowedZones []uuid.UUID
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT
 			COALESCE(o.can_send,            p.can_send,            FALSE),
 			COALESCE(o.daily_send_quota,    p.daily_send_quota,    0),

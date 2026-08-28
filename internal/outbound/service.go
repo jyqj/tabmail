@@ -12,8 +12,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
+	"tabmail/internal/app"
 	"tabmail/internal/config"
 	tabdkim "tabmail/internal/dkim"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
@@ -24,6 +26,7 @@ const maxRetryDelay = 1 * time.Hour
 type Service struct {
 	cfg      config.Outbound
 	store    store.Store
+	events   app.EventEnqueuer
 	adapter  DeliveryAdapter
 	logger   zerolog.Logger
 	stopCh   chan struct{}
@@ -32,7 +35,7 @@ type Service struct {
 }
 
 // NewService creates a new outbound service.
-func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Service {
+func NewService(cfg config.Outbound, st store.Store, events app.EventEnqueuer, logger zerolog.Logger) *Service {
 	var adapter DeliveryAdapter
 	switch cfg.Mode {
 	case "direct":
@@ -43,6 +46,7 @@ func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Ser
 	return &Service{
 		cfg:     cfg,
 		store:   st,
+		events:  events,
 		adapter: adapter,
 		logger:  logger.With().Str("component", "outbound").Logger(),
 		stopCh:  make(chan struct{}),
@@ -64,6 +68,7 @@ type SendRequest struct {
 	HTMLBody string
 	Headers  map[string]string
 	Quota    store.OutboundQuotaReservation
+	Actor    string
 }
 
 // Submit enqueues an outbound email job after validation.
@@ -152,7 +157,29 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		NextAttemptAt:   now,
 	}
 
-	if err := s.createOutboundJob(ctx, job, req.Quota); err != nil {
+	audit := models.AuditEntry{
+		TenantID:     app.UUIDPtr(req.TenantID),
+		Actor:        outboundActorLabel(req),
+		Action:       "outbound.submit",
+		ResourceType: "outbound_job",
+		ResourceID:   app.UUIDPtr(job.ID),
+		Details: app.MustJSON(map[string]any{
+			"zone_id": job.ZoneID, "mail_from": job.MailFrom,
+			"recipient_count": len(job.RcptTo), "message_id": job.MessageIDHeader,
+		}),
+	}
+	event := hooks.Event{
+		Type:       "outbound.submitted",
+		TenantID:   req.TenantID.String(),
+		Sender:     job.MailFrom,
+		Recipients: append([]string(nil), job.RcptTo...),
+		Subject:    job.Subject,
+		OccurredAt: now,
+		Metadata:   map[string]any{"outbound_job_id": job.ID.String(), "zone_id": job.ZoneID.String()},
+	}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.events, audit, &event, func(txCtx context.Context) error {
+		return s.createOutboundJob(txCtx, job, req.Quota)
+	}); err != nil {
 		return nil, fmt.Errorf("enqueue outbound job: %w", err)
 	}
 
@@ -163,6 +190,22 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		Msg("outbound job enqueued")
 
 	return job, nil
+}
+
+func outboundActorLabel(req SendRequest) string {
+	if actor := strings.TrimSpace(req.Actor); actor != "" {
+		return actor
+	}
+	if req.UserID != nil {
+		return "user:" + req.UserID.String()
+	}
+	if req.APIKeyID != nil {
+		return "api_key:" + req.APIKeyID.String()
+	}
+	if req.TenantID != uuid.Nil {
+		return req.TenantID.String()
+	}
+	return "unknown"
 }
 
 func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation) error {

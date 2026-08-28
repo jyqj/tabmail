@@ -13,7 +13,7 @@ func (s *PgStore) InsertAudit(ctx context.Context, e *models.AuditEntry) error {
 		e.ID = uuid.New()
 	}
 	e.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
 		e.ID, e.TenantID, e.Actor, e.Action, e.ResourceType, e.ResourceID, e.Details, e.CreatedAt)
@@ -24,7 +24,7 @@ func (s *PgStore) ListAuditEntries(ctx context.Context, limit int) ([]*models.Au
 	if limit <= 0 {
 		limit = 20
 	}
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,tenant_id,actor,action,resource_type,resource_id,details,created_at
 		FROM audit_log
 		ORDER BY created_at DESC
@@ -47,11 +47,11 @@ func (s *PgStore) ListAuditEntries(ctx context.Context, limit int) ([]*models.Au
 func (s *PgStore) ListAuditEntriesPaged(ctx context.Context, pg models.Page) ([]*models.AuditEntry, int, error) {
 	pg = pg.Normalize()
 	var total int
-	err := s.pool.QueryRow(ctx, `SELECT COUNT(*) FROM audit_log`).Scan(&total)
+	err := s.db(ctx).QueryRow(ctx, `SELECT COUNT(*) FROM audit_log`).Scan(&total)
 	if err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,tenant_id,actor,action,resource_type,resource_id,details,created_at
 		FROM audit_log
 		ORDER BY created_at DESC

@@ -15,6 +15,7 @@ type identityTestStore struct {
 	identities map[uuid.UUID]*models.SendIdentity
 	zones      map[uuid.UUID]*models.DomainZone
 	deleted    []uuid.UUID
+	audits     []*models.AuditEntry
 }
 
 func newIdentityTestStore() *identityTestStore {
@@ -22,6 +23,16 @@ func newIdentityTestStore() *identityTestStore {
 		identities: map[uuid.UUID]*models.SendIdentity{},
 		zones:      map[uuid.UUID]*models.DomainZone{},
 	}
+}
+
+func (s *identityTestStore) WithinTx(ctx context.Context, fn func(context.Context) error) error {
+	return fn(ctx)
+}
+
+func (s *identityTestStore) InsertAudit(_ context.Context, entry *models.AuditEntry) error {
+	cp := *entry
+	s.audits = append(s.audits, &cp)
+	return nil
 }
 
 func (s *identityTestStore) CreateSendIdentity(_ context.Context, si *models.SendIdentity) error {
@@ -81,7 +92,7 @@ func requireKind(t *testing.T, err error, want app.ErrorKind) {
 }
 
 func TestListRequiresTenant(t *testing.T) {
-	svc := NewService(newIdentityTestStore(), zerolog.Nop())
+	svc := NewService(newIdentityTestStore(), nil, zerolog.Nop())
 	_, err := svc.List(context.Background(), authz.Actor{}, uuid.Nil)
 	requireKind(t, err, app.KindForbidden)
 }
@@ -94,7 +105,7 @@ func TestListFiltersNonAdminByAllowedZones(t *testing.T) {
 	st.identities[uuid.New()] = &models.SendIdentity{ID: uuid.New(), TenantID: tenantID, ZoneID: allowedZone, Address: "a@allowed.test"}
 	st.identities[uuid.New()] = &models.SendIdentity{ID: uuid.New(), TenantID: tenantID, ZoneID: blockedZone, Address: "b@blocked.test"}
 
-	svc := NewService(st, zerolog.Nop())
+	svc := NewService(st, nil, zerolog.Nop())
 	actor := authz.Actor{
 		Type:       authz.PrincipalUser,
 		TenantID:   tenantID,
@@ -119,7 +130,7 @@ func TestListFiltersNonAdminByAllowedZones(t *testing.T) {
 }
 
 func TestListReturnsEmptySliceNotNil(t *testing.T) {
-	svc := NewService(newIdentityTestStore(), zerolog.Nop())
+	svc := NewService(newIdentityTestStore(), nil, zerolog.Nop())
 	items, err := svc.List(context.Background(), authz.Actor{IsAdmin: true}, uuid.New())
 	if err != nil {
 		t.Fatal(err)
@@ -135,7 +146,7 @@ func TestCreateRequiresAdmin(t *testing.T) {
 	zoneID := uuid.New()
 	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true, MXVerified: true}
 
-	svc := NewService(st, zerolog.Nop())
+	svc := NewService(st, nil, zerolog.Nop())
 	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID}
 	_, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "x@mail.test"})
 	requireKind(t, err, app.KindForbidden)
@@ -146,7 +157,7 @@ func TestCreateHidesForeignZoneAsNotFound(t *testing.T) {
 	zoneID := uuid.New()
 	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: uuid.New(), Domain: "other.test"}
 
-	svc := NewService(st, zerolog.Nop())
+	svc := NewService(st, nil, zerolog.Nop())
 	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: uuid.New(), IsAdmin: true}
 	_, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "x@other.test"})
 	requireKind(t, err, app.KindNotFound)
@@ -158,7 +169,7 @@ func TestCreateCanonicalizesAndBindsIdentityToZone(t *testing.T) {
 	zoneID := uuid.New()
 	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "Mail.Test.", IsVerified: true, MXVerified: true}
 
-	svc := NewService(st, zerolog.Nop())
+	svc := NewService(st, nil, zerolog.Nop())
 	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
 
 	wildcard, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: " *@MAIL.TEST. "})
@@ -190,7 +201,7 @@ func TestCreateIdentityIsUnverifiedUntilMXAlsoPasses(t *testing.T) {
 	zoneID := uuid.New()
 	st.zones[zoneID] = &models.DomainZone{ID: zoneID, TenantID: tenantID, Domain: "mail.test", IsVerified: true, MXVerified: false}
 
-	svc := NewService(st, zerolog.Nop())
+	svc := NewService(st, nil, zerolog.Nop())
 	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
 	identity, err := svc.Create(context.Background(), actor, CreateRequest{ZoneID: zoneID, Address: "x@mail.test"})
 	if err != nil {
@@ -207,7 +218,7 @@ func TestDeleteRequiresAdminAndHidesForeignIdentity(t *testing.T) {
 	id := uuid.New()
 	st.identities[id] = &models.SendIdentity{ID: id, TenantID: tenantID, Address: "x@mail.test"}
 
-	svc := NewService(st, zerolog.Nop())
+	svc := NewService(st, nil, zerolog.Nop())
 	user := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID}
 	requireKind(t, svc.Delete(context.Background(), user, id), app.KindForbidden)
 
@@ -224,7 +235,7 @@ func TestDeleteRemovesOwnedIdentity(t *testing.T) {
 	id := uuid.New()
 	st.identities[id] = &models.SendIdentity{ID: id, TenantID: tenantID, Address: "x@mail.test"}
 
-	svc := NewService(st, zerolog.Nop())
+	svc := NewService(st, nil, zerolog.Nop())
 	actor := authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, IsAdmin: true}
 	if err := svc.Delete(context.Background(), actor, id); err != nil {
 		t.Fatal(err)

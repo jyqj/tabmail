@@ -595,6 +595,11 @@ psql "$TABMAIL_DB_DSN" -c 'select type, mailbox, sender, subject, at from monito
 psql "$TABMAIL_DB_DSN" -c 'select action, actor, resource_type, created_at from audit_log order by created_at desc limit 20;'
 ```
 
+资产写入使用 transactional outbox。排查“业务数据存在但 Webhook 尚未发送”时，
+同时检查 `audit_log`、`outbox_events` 和 `webhook_deliveries`；业务数据与前两者
+应当同事务出现，后者由 worker 异步展开。详细不变量见
+`docs/unit-of-work-and-outbox.md`。
+
 ---
 
 ## 11. 建议的运维习惯

@@ -21,7 +21,7 @@ import (
 
 func (s *PgStore) CreateOutboundJob(ctx context.Context, job *models.OutboundJob) error {
 	prepareOutboundJob(job)
-	return insertOutboundJob(ctx, s.pool, job)
+	return insertOutboundJob(ctx, s.db(ctx), job)
 }
 
 func (s *PgStore) CreateOutboundJobWithQuota(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation) error {
@@ -30,7 +30,7 @@ func (s *PgStore) CreateOutboundJobWithQuota(ctx context.Context, job *models.Ou
 	}
 	prepareOutboundJob(job)
 
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -166,17 +166,17 @@ func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
 }
 
 func (s *PgStore) GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.OutboundJob, error) {
-	return scanOutboundJob(s.pool.QueryRow(ctx, outboundJobSelect+` WHERE id=$1`, id))
+	return scanOutboundJob(s.db(ctx).QueryRow(ctx, outboundJobSelect+` WHERE id=$1`, id))
 }
 
 func (s *PgStore) ListOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
 	pg = pg.Normalize()
 	var total int
-	if err := s.pool.QueryRow(ctx,
+	if err := s.db(ctx).QueryRow(ctx,
 		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1`, tenantID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx,
+	rows, err := s.db(ctx).Query(ctx,
 		outboundJobSelect+` WHERE tenant_id=$1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
 		tenantID, pg.PerPage, pg.Offset())
 	if err != nil {
@@ -200,7 +200,7 @@ func (s *PgStore) ClaimOutboundJobs(ctx context.Context, now time.Time, limit in
 	}
 	now = now.UTC()
 	leaseUntil := now.Add(claimLeaseDuration)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		WITH cte AS (
 			SELECT id
 			FROM outbound_jobs
@@ -244,13 +244,13 @@ func (s *PgStore) MarkOutboundJobSent(ctx context.Context, id uuid.UUID, deliver
 	var tag pgconn.CommandTag
 	var err error
 	if deliveryToken != nil {
-		tag, err = s.pool.Exec(ctx, `
+		tag, err = s.db(ctx).Exec(ctx, `
 			UPDATE outbound_jobs
 			SET state='sent', smtp_code=$2, smtp_response=$3, message_id_header=$4,
 				claimed_at=NULL, lease_until=NULL, delivery_token=NULL, updated_at=$5
 			WHERE id=$1 AND delivery_token=$6`, id, smtpCode, smtpResponse, messageID, now, *deliveryToken)
 	} else {
-		tag, err = s.pool.Exec(ctx, `
+		tag, err = s.db(ctx).Exec(ctx, `
 			UPDATE outbound_jobs
 			SET state='sent', smtp_code=$2, smtp_response=$3, message_id_header=$4,
 				claimed_at=NULL, lease_until=NULL, delivery_token=NULL, updated_at=$5
@@ -270,13 +270,13 @@ func (s *PgStore) MarkOutboundJobRetry(ctx context.Context, id uuid.UUID, delive
 	var tag pgconn.CommandTag
 	var err error
 	if deliveryToken != nil {
-		tag, err = s.pool.Exec(ctx, `
+		tag, err = s.db(ctx).Exec(ctx, `
 			UPDATE outbound_jobs
 			SET state='retry', last_error=$2, next_attempt_at=$3,
 				claimed_at=NULL, lease_until=NULL, delivery_token=NULL, updated_at=$4
 			WHERE id=$1 AND delivery_token=$5`, id, lastError, nextAttemptAt.UTC(), now, *deliveryToken)
 	} else {
-		tag, err = s.pool.Exec(ctx, `
+		tag, err = s.db(ctx).Exec(ctx, `
 			UPDATE outbound_jobs
 			SET state='retry', last_error=$2, next_attempt_at=$3,
 				claimed_at=NULL, lease_until=NULL, delivery_token=NULL, updated_at=$4
@@ -300,12 +300,12 @@ func (s *PgStore) MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliv
 	var tag pgconn.CommandTag
 	var err error
 	if deliveryToken != nil {
-		tag, err = s.pool.Exec(ctx, `
+		tag, err = s.db(ctx).Exec(ctx, `
 			UPDATE outbound_jobs
 			SET state=$2, last_error=$3, claimed_at=NULL, lease_until=NULL, delivery_token=NULL, updated_at=$4
 			WHERE id=$1 AND delivery_token=$5`, id, state, lastError, now, *deliveryToken)
 	} else {
-		tag, err = s.pool.Exec(ctx, `
+		tag, err = s.db(ctx).Exec(ctx, `
 			UPDATE outbound_jobs
 			SET state=$2, last_error=$3, claimed_at=NULL, lease_until=NULL, delivery_token=NULL, updated_at=$4
 			WHERE id=$1`, id, state, lastError, now)
@@ -322,11 +322,11 @@ func (s *PgStore) MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliv
 func (s *PgStore) ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID, userID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
 	pg = pg.Normalize()
 	var total int
-	if err := s.pool.QueryRow(ctx,
+	if err := s.db(ctx).QueryRow(ctx,
 		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND user_id=$2`, tenantID, userID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx,
+	rows, err := s.db(ctx).Query(ctx,
 		outboundJobSelect+` WHERE tenant_id=$1 AND user_id=$2 ORDER BY created_at DESC LIMIT $3 OFFSET $4`,
 		tenantID, userID, pg.PerPage, pg.Offset())
 	if err != nil {
@@ -347,11 +347,11 @@ func (s *PgStore) ListOutboundJobsByUser(ctx context.Context, tenantID uuid.UUID
 func (s *PgStore) ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UUID, apiKeyID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
 	pg = pg.Normalize()
 	var total int
-	if err := s.pool.QueryRow(ctx,
+	if err := s.db(ctx).QueryRow(ctx,
 		`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND api_key_id=$2`, tenantID, apiKeyID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx,
+	rows, err := s.db(ctx).Query(ctx,
 		outboundJobSelect+` WHERE tenant_id=$1 AND api_key_id=$2 ORDER BY created_at DESC LIMIT $3 OFFSET $4`,
 		tenantID, apiKeyID, pg.PerPage, pg.Offset())
 	if err != nil {
@@ -370,7 +370,7 @@ func (s *PgStore) ListOutboundJobsByAPIKey(ctx context.Context, tenantID uuid.UU
 }
 
 func (s *PgStore) CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error) {
-	return countOutboundSinceQuery(ctx, s.pool, tenantID, userID, since)
+	return countOutboundSinceQuery(ctx, s.db(ctx), tenantID, userID, since)
 }
 
 func countOutboundSinceQuery(ctx context.Context, querier outboundJobQuerier, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error) {
@@ -391,7 +391,7 @@ func countOutboundSinceQuery(ctx context.Context, querier outboundJobQuerier, te
 // for a specific send identity since the given time.
 // It joins outbound_jobs with send_identities to match the mail_from address.
 func (s *PgStore) CountOutboundByIdentitySince(ctx context.Context, tenantID uuid.UUID, principalType string, principalID uuid.UUID, identityID uuid.UUID, since time.Time) (int, error) {
-	return countOutboundByIdentitySinceQuery(ctx, s.pool, tenantID, principalType, principalID, identityID, since)
+	return countOutboundByIdentitySinceQuery(ctx, s.db(ctx), tenantID, principalType, principalID, identityID, since)
 }
 
 func countOutboundByIdentitySinceQuery(ctx context.Context, querier outboundJobQuerier, tenantID uuid.UUID, principalType string, principalID uuid.UUID, identityID uuid.UUID, since time.Time) (int, error) {
@@ -423,7 +423,7 @@ func countOutboundByIdentitySinceQuery(ctx context.Context, querier outboundJobQ
 
 func (s *PgStore) RequeueOutboundJob(ctx context.Context, id uuid.UUID) error {
 	now := time.Now().UTC()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE outbound_jobs
 		SET state='pending', last_error='', next_attempt_at=$2,
 			claimed_at=NULL, lease_until=NULL, delivery_token=NULL, updated_at=$2
@@ -439,7 +439,7 @@ func (s *PgStore) CreateOutboundAttempt(ctx context.Context, a *models.OutboundA
 	if a.ID == uuid.Nil {
 		a.ID = uuid.New()
 	}
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO outbound_attempts (id, job_id, tenant_id, adapter, attempt, smtp_code, smtp_response, remote_host, started_at, finished_at, error)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
 		a.ID, a.JobID, a.TenantID, a.Adapter, a.Attempt, a.SMTPCode, a.SMTPResponse, a.RemoteHost, a.StartedAt, a.FinishedAt, a.Error)
@@ -447,7 +447,7 @@ func (s *PgStore) CreateOutboundAttempt(ctx context.Context, a *models.OutboundA
 }
 
 func (s *PgStore) ListOutboundAttempts(ctx context.Context, jobID uuid.UUID) ([]*models.OutboundAttempt, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id, job_id, tenant_id, adapter, attempt, smtp_code, smtp_response, remote_host, started_at, finished_at, error
 		FROM outbound_attempts WHERE job_id=$1 ORDER BY attempt`, jobID)
 	if err != nil {
@@ -473,7 +473,7 @@ func (s *PgStore) AddSuppression(ctx context.Context, e *models.SuppressionEntry
 	if e.ID == uuid.Nil {
 		e.ID = uuid.New()
 	}
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO suppression_list (id, tenant_id, address, reason, source_job_id, created_at)
 		VALUES ($1,$2,LOWER($3),$4,$5,$6)
 		ON CONFLICT (tenant_id, address) DO NOTHING`,
@@ -483,7 +483,7 @@ func (s *PgStore) AddSuppression(ctx context.Context, e *models.SuppressionEntry
 
 func (s *PgStore) IsSuppressed(ctx context.Context, tenantID uuid.UUID, address string) (bool, error) {
 	var exists bool
-	err := s.pool.QueryRow(ctx,
+	err := s.db(ctx).QueryRow(ctx,
 		`SELECT EXISTS(SELECT 1 FROM suppression_list WHERE tenant_id=$1 AND address=LOWER($2))`,
 		tenantID, address).Scan(&exists)
 	return exists, err
@@ -492,11 +492,11 @@ func (s *PgStore) IsSuppressed(ctx context.Context, tenantID uuid.UUID, address 
 func (s *PgStore) ListSuppressions(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.SuppressionEntry, int, error) {
 	pg = pg.Normalize()
 	var total int
-	if err := s.pool.QueryRow(ctx,
+	if err := s.db(ctx).QueryRow(ctx,
 		`SELECT count(*) FROM suppression_list WHERE tenant_id=$1`, tenantID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id, tenant_id, address, reason, source_job_id, created_at
 		FROM suppression_list WHERE tenant_id=$1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`,
 		tenantID, pg.PerPage, pg.Offset())
@@ -516,6 +516,6 @@ func (s *PgStore) ListSuppressions(ctx context.Context, tenantID uuid.UUID, pg m
 }
 
 func (s *PgStore) DeleteSuppression(ctx context.Context, tenantID uuid.UUID, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`, id, tenantID)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`, id, tenantID)
 	return err
 }

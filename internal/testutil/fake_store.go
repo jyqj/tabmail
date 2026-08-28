@@ -99,6 +99,16 @@ func (s *FakeStore) SeedMessage(m *models.Message) {
 
 func (s *FakeStore) Close() error { return nil }
 
+// WithinTx keeps unit tests lightweight while matching the production store's
+// callback contract. DB-backed integration tests cover rollback and commit
+// semantics; service tests can still inject callback errors deterministically.
+func (s *FakeStore) WithinTx(ctx context.Context, fn func(context.Context) error) error {
+	if fn == nil {
+		return errors.New("transaction callback is required")
+	}
+	return fn(ctx)
+}
+
 // ForTenant returns a read view whose lookups are filtered to tenantID; rows
 // belonging to another tenant read as not found (nil, nil), matching the
 // postgres implementation.

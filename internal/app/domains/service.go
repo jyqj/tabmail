@@ -16,9 +16,11 @@ import (
 	"tabmail/internal/models"
 	"tabmail/internal/permissions"
 	"tabmail/internal/policy"
+	storepkg "tabmail/internal/store"
 )
 
 type store interface {
+	storepkg.Transactor
 	app.AuditStore
 	ListZones(ctx context.Context, tenantID uuid.UUID) ([]*models.DomainZone, error)
 	ListAllZones(ctx context.Context) ([]*models.DomainZone, error)
@@ -224,6 +226,7 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 		return nil, app.Forbidden(fmt.Sprintf("domain limit reached (%d)", cfg.MaxDomains))
 	}
 	zone := &models.DomainZone{
+		ID:          uuid.New(),
 		TenantID:    tenant.ID,
 		OwnerUserID: ownerUserID,
 		Domain:      domain,
@@ -240,25 +243,16 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	zone.DKIMPrivateKeyPEM = &privPEM
 	zone.DKIMSelector = tabdkim.DefaultSelector
 	zone.DKIMEnabled = false
-	if err := s.store.CreateZone(ctx, zone); err != nil {
-		errLower := strings.ToLower(err.Error())
-		if strings.Contains(errLower, "duplicate") || strings.Contains(errLower, "unique") || strings.Contains(errLower, "23505") {
-			return nil, app.Conflict("domain already exists")
-		}
-		return nil, app.Internal(err)
-	}
-	// Auto-create domain_wildcard send identity for this zone.
+	// A zone and its wildcard send identity form one asset aggregate. Persist
+	// both, the audit record, and the integration event atomically so callers
+	// never observe a half-created domain.
 	si := &models.SendIdentity{
 		TenantID:     tenant.ID,
-		ZoneID:       zone.ID,
 		Address:      "*@" + zone.Domain,
 		IdentityType: models.SendIdentityDomainWildcard,
 		Verified:     false, // will be verified when zone passes verification
 	}
-	if err := s.store.CreateSendIdentity(ctx, si); err != nil {
-		s.logger.Warn().Err(err).Msg("creating domain wildcard send identity")
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	audit := models.AuditEntry{
 		TenantID:     app.UUIDPtr(tenant.ID),
 		Actor:        actor.AuditLabel(),
 		Action:       "domain.create",
@@ -268,9 +262,23 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 			"domain": zone.Domain, "txt_record": zone.TXTRecord, "parent_zone_id": zone.ParentZoneID,
 			"visibility": zone.Visibility, "allow_random_subdomains": zone.AllowRandomSubdomains,
 		}),
-	})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "domain.created", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String()}})
+	}
+	event := hooks.Event{Type: "domain.created", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String()}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		if err := s.store.CreateZone(txCtx, zone); err != nil {
+			errLower := strings.ToLower(err.Error())
+			if strings.Contains(errLower, "duplicate") || strings.Contains(errLower, "unique") || strings.Contains(errLower, "23505") {
+				return app.Conflict("domain already exists")
+			}
+			return err
+		}
+		si.ZoneID = zone.ID
+		if err := s.store.CreateSendIdentity(txCtx, si); err != nil {
+			return fmt.Errorf("create domain wildcard send identity: %w", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 	return zone, nil
 }
@@ -301,17 +309,20 @@ func (s *Service) UpdateZoneAccess(ctx context.Context, actor authz.Actor, tenan
 	if zone.AllowRandomSubdomains && (!zone.IsVerified || !zone.MXVerified) {
 		return nil, app.BadRequest("random subdomains can only be enabled after TXT and MX verification")
 	}
-	if err := s.store.UpdateZone(ctx, zone); err != nil {
-		return nil, app.Internal(err)
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	audit := models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
 		Action:       "domain.access.update",
 		ResourceType: "domain_zone",
 		ResourceID:   app.UUIDPtr(zone.ID),
 		Details:      app.MustJSON(map[string]any{"domain": zone.Domain, "visibility": zone.Visibility, "allow_random_subdomains": zone.AllowRandomSubdomains}),
-	})
+	}
+	event := hooks.Event{Type: "domain.access.updated", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String(), "visibility": zone.Visibility, "allow_random_subdomains": zone.AllowRandomSubdomains}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpdateZone(txCtx, zone)
+	}); err != nil {
+		return nil, err
+	}
 	return zone, nil
 }
 
@@ -320,21 +331,18 @@ func (s *Service) DeleteZone(ctx context.Context, actor authz.Actor, zoneID uuid
 	if err != nil {
 		return err
 	}
-	if err := s.store.DeleteZone(ctx, zoneID); err != nil {
-		return app.Internal(err)
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	audit := models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
 		Action:       "domain.delete",
 		ResourceType: "domain_zone",
 		ResourceID:   app.UUIDPtr(zone.ID),
 		Details:      app.MustJSON(map[string]any{"domain": zone.Domain}),
-	})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "domain.deleted", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String()}})
 	}
-	return nil
+	event := hooks.Event{Type: "domain.deleted", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String()}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteZone(txCtx, zoneID)
+	})
 }
 
 func (s *Service) ManagedZone(ctx context.Context, actor authz.Actor, zoneID uuid.UUID) (*models.DomainZone, error) {
@@ -360,24 +368,26 @@ func (s *Service) TriggerVerify(ctx context.Context, actor authz.Actor, zoneID u
 	} else {
 		zone.VerifiedAt = nil
 	}
-	if err := s.store.UpdateZone(ctx, zone); err != nil {
-		return nil, VerificationChecks{}, app.Internal(err)
-	}
-	// Sync send identity verified status with zone verification
 	verified := zone.IsVerified && zone.MXVerified
-	if err := s.store.UpdateSendIdentitiesVerifiedByZone(ctx, zone.ID, verified); err != nil {
-		s.logger.Warn().Err(err).Msg("syncing send identity verified status")
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	audit := models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
 		Action:       "domain.verify",
 		ResourceType: "domain_zone",
 		ResourceID:   app.UUIDPtr(zone.ID),
 		Details:      app.MustJSON(map[string]any{"domain": zone.Domain, "is_verified": zone.IsVerified, "mx_verified": zone.MXVerified}),
-	})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "domain.verified", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String(), "is_verified": zone.IsVerified, "mx_verified": zone.MXVerified}})
+	}
+	event := hooks.Event{Type: "domain.verified", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String(), "is_verified": zone.IsVerified, "mx_verified": zone.MXVerified}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		if err := s.store.UpdateZone(txCtx, zone); err != nil {
+			return err
+		}
+		if err := s.store.UpdateSendIdentitiesVerifiedByZone(txCtx, zone.ID, verified); err != nil {
+			return fmt.Errorf("sync send identity verification: %w", err)
+		}
+		return nil
+	}); err != nil {
+		return nil, VerificationChecks{}, err
 	}
 	return zone, checks, nil
 }
@@ -525,20 +535,20 @@ func (s *Service) CreateRoute(ctx context.Context, actor authz.Actor, zoneID uui
 	if input.RouteType == models.RouteDeepWildcard && !strings.HasPrefix(normalizeDNSName(input.MatchValue), "**.") {
 		return nil, app.BadRequest("deep_wildcard routes must use a **.suffix pattern")
 	}
-	route := &models.DomainRoute{ZoneID: zoneID, RouteType: input.RouteType, MatchValue: normalizeDNSName(input.MatchValue), RangeStart: input.RangeStart, RangeEnd: input.RangeEnd, AutoCreateMailbox: autoCreate, RetentionHoursOverride: input.RetentionHoursOverride, AccessModeDefault: am}
-	if err := s.store.CreateRoute(ctx, route); err != nil {
-		return nil, app.Internal(err)
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	route := &models.DomainRoute{ID: uuid.New(), ZoneID: zoneID, RouteType: input.RouteType, MatchValue: normalizeDNSName(input.MatchValue), RangeStart: input.RangeStart, RangeEnd: input.RangeEnd, AutoCreateMailbox: autoCreate, RetentionHoursOverride: input.RetentionHoursOverride, AccessModeDefault: am}
+	audit := models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
 		Action:       "route.create",
 		ResourceType: "domain_route",
 		ResourceID:   app.UUIDPtr(route.ID),
 		Details:      app.MustJSON(map[string]any{"zone_id": zone.ID, "match_value": route.MatchValue, "route_type": route.RouteType}),
-	})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "route.created", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"zone_id": zone.ID.String(), "route_id": route.ID.String(), "route_type": route.RouteType, "match_value": route.MatchValue}})
+	}
+	event := hooks.Event{Type: "route.created", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"zone_id": zone.ID.String(), "route_id": route.ID.String(), "route_type": route.RouteType, "match_value": route.MatchValue}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.CreateRoute(txCtx, route)
+	}); err != nil {
+		return nil, err
 	}
 	return route, nil
 }
@@ -555,21 +565,18 @@ func (s *Service) DeleteRoute(ctx context.Context, actor authz.Actor, routeID uu
 	if err != nil {
 		return err
 	}
-	if err := s.store.DeleteRoute(ctx, routeID); err != nil {
-		return app.Internal(err)
-	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	audit := models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
 		Action:       "route.delete",
 		ResourceType: "domain_route",
 		ResourceID:   app.UUIDPtr(route.ID),
 		Details:      app.MustJSON(map[string]any{"match_value": route.MatchValue}),
-	})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "route.deleted", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"route_id": route.ID.String(), "route_type": route.RouteType, "match_value": route.MatchValue}})
 	}
-	return nil
+	event := hooks.Event{Type: "route.deleted", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"route_id": route.ID.String(), "route_type": route.RouteType, "match_value": route.MatchValue}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteRoute(txCtx, routeID)
+	})
 }
 
 // ownedZone loads the zone and authorizes the action against it through the

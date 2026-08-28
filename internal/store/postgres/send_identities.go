@@ -17,7 +17,7 @@ func (s *PgStore) CreateSendIdentity(ctx context.Context, si *models.SendIdentit
 	}
 	si.Address = strings.ToLower(strings.TrimSpace(si.Address))
 	si.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO send_identities (id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
 		si.ID, si.TenantID, si.ZoneID, si.MailboxID, si.Address, si.IdentityType, si.Verified, si.CreatedAt)
@@ -26,7 +26,7 @@ func (s *PgStore) CreateSendIdentity(ctx context.Context, si *models.SendIdentit
 
 func (s *PgStore) GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.SendIdentity, error) {
 	si := &models.SendIdentity{}
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities WHERE id = $1`, id).
 		Scan(&si.ID, &si.TenantID, &si.ZoneID, &si.MailboxID, &si.Address, &si.IdentityType, &si.Verified, &si.CreatedAt)
@@ -37,7 +37,7 @@ func (s *PgStore) GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.Se
 }
 
 func (s *PgStore) ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities WHERE tenant_id = $1 ORDER BY created_at`, tenantID)
 	if err != nil {
@@ -56,7 +56,7 @@ func (s *PgStore) ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([
 }
 
 func (s *PgStore) ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities WHERE zone_id = $1 ORDER BY created_at`, zoneID)
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *PgStore) ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID
 
 func (s *PgStore) FindSendIdentityForAddress(ctx context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error) {
 	address = strings.ToLower(strings.TrimSpace(address))
-	row := s.pool.QueryRow(ctx, `
+	row := s.db(ctx).QueryRow(ctx, `
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities
 		WHERE tenant_id = $1 AND LOWER(address) = $2 AND identity_type = 'exact'`, tenantID, address)
@@ -94,7 +94,7 @@ func (s *PgStore) FindSendIdentityForAddress(ctx context.Context, tenantID uuid.
 		return nil, nil
 	}
 	wildcardAddr := "*@" + address[idx+1:]
-	row = s.pool.QueryRow(ctx, `
+	row = s.db(ctx).QueryRow(ctx, `
 		SELECT id, tenant_id, zone_id, mailbox_id, address, identity_type, verified, created_at
 		FROM send_identities
 		WHERE tenant_id = $1 AND LOWER(address) = $2 AND identity_type = 'domain_wildcard'`, tenantID, wildcardAddr)
@@ -110,11 +110,11 @@ func (s *PgStore) FindSendIdentityForAddress(ctx context.Context, tenantID uuid.
 }
 
 func (s *PgStore) UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error {
-	_, err := s.pool.Exec(ctx, `UPDATE send_identities SET verified = $1 WHERE zone_id = $2`, verified, zoneID)
+	_, err := s.db(ctx).Exec(ctx, `UPDATE send_identities SET verified = $1 WHERE zone_id = $2`, verified, zoneID)
 	return err
 }
 
 func (s *PgStore) DeleteSendIdentity(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM send_identities WHERE id = $1`, id)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM send_identities WHERE id = $1`, id)
 	return err
 }

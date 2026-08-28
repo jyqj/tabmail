@@ -9,11 +9,16 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app"
 	sendidentitiesapp "tabmail/internal/app/sendidentities"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type sendIdentityStore interface {
+	store.Transactor
+	app.AuditStore
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
 	GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.SendIdentity, error)
 	ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error)
@@ -28,9 +33,9 @@ type SendIdentityHandler struct {
 }
 
 // NewSendIdentityHandler creates a new SendIdentityHandler.
-func NewSendIdentityHandler(st sendIdentityStore, logger zerolog.Logger) *SendIdentityHandler {
+func NewSendIdentityHandler(st sendIdentityStore, dispatcher *hooks.Dispatcher, logger zerolog.Logger) *SendIdentityHandler {
 	return &SendIdentityHandler{
-		service: sendidentitiesapp.NewService(st, logger),
+		service: sendidentitiesapp.NewService(st, dispatcher, logger),
 		logger:  logger.With().Str("handler", "send_identities").Logger(),
 	}
 }

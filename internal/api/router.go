@@ -110,13 +110,13 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
-	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, handlers.AuthHandlerConfig{
+	auth := handlers.NewAuthHandler(st, cfg.Dispatcher, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, handlers.AuthHandlerConfig{
 		Throttle:         cfg.RateLimiter,
 		FailedLoginDelay: cfg.FailedLoginDelay,
 	}, cfg.Logger)
-	perm := handlers.NewPermissionHandler(st, cfg.Logger)
-	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
-	si := handlers.NewSendIdentityHandler(st, cfg.Logger)
+	perm := handlers.NewPermissionHandler(st, cfg.Dispatcher, cfg.Logger)
+	wh := handlers.NewWebhookEndpointHandler(st, cfg.Dispatcher, cfg.Logger)
+	si := handlers.NewSendIdentityHandler(st, cfg.Dispatcher, cfg.Logger)
 	var oh *handlers.OutboundHandler
 	if cfg.OutboundService != nil {
 		oh = handlers.NewOutboundHandler(cfg.OutboundService, st, cfg.Logger)

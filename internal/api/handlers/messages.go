@@ -23,6 +23,7 @@ import (
 )
 
 type messageStore interface {
+	store.Transactor
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)

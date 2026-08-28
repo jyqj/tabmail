@@ -37,6 +37,10 @@ Every tenant-scoped read must begin with a tenant-scoped repository whenever a
 tenant context exists. Global lookups are reserved for public projections,
 SMTP-time address resolution, and explicit platform operations.
 
+Every user-visible asset mutation is a Unit of Work: aggregate state, its audit
+obligation, and its durable outbox event commit together. See
+[`unit-of-work-and-outbox.md`](unit-of-work-and-outbox.md).
+
 ## Mandatory invariants
 
 ### Tenant isolation

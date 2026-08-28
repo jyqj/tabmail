@@ -15,6 +15,7 @@ TabMail 是一个**面向多租户、自托管、API 优先**的域名邮箱接�
 - SMTP policy
 - retention / 自动清理
 - webhook 事件投递
+- 资产写入 / 审计 / outbox 的事务一致性
 - OpenAPI / Swagger / ReDoc
 
 ---
@@ -420,6 +421,8 @@ Authorization: Bearer <mailbox-token>
 - `docs/deployment.md`
 - `docs/api-examples.md`
 - `docs/operations.md`
+- `docs/authorization-and-assets.md`
+- `docs/unit-of-work-and-outbox.md`
 
 ---
 

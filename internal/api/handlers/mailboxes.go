@@ -18,6 +18,7 @@ import (
 )
 
 type mailboxStore interface {
+	store.Transactor
 	app.AuditStore
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)

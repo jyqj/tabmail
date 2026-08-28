@@ -16,10 +16,21 @@ type webhookTestStore struct {
 	endpoints map[uuid.UUID]*models.WebhookEndpoint
 	deleted   []uuid.UUID
 	listErr   error
+	audits    []*models.AuditEntry
 }
 
 func newWebhookTestStore() *webhookTestStore {
 	return &webhookTestStore{endpoints: map[uuid.UUID]*models.WebhookEndpoint{}}
+}
+
+func (s *webhookTestStore) WithinTx(ctx context.Context, fn func(context.Context) error) error {
+	return fn(ctx)
+}
+
+func (s *webhookTestStore) InsertAudit(_ context.Context, entry *models.AuditEntry) error {
+	cp := *entry
+	s.audits = append(s.audits, &cp)
+	return nil
 }
 
 func (s *webhookTestStore) CreateWebhookEndpoint(_ context.Context, ep *models.WebhookEndpoint) error {
@@ -67,7 +78,7 @@ func (s *webhookTestStore) DeleteWebhookEndpoint(_ context.Context, id uuid.UUID
 }
 
 func newTestService(store *webhookTestStore) *Service {
-	return NewService(store, zerolog.Nop())
+	return NewService(store, nil, zerolog.Nop())
 }
 
 func requireKind(t *testing.T, err error, want app.ErrorKind) {

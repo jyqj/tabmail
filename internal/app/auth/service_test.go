@@ -23,6 +23,7 @@ type authTestStore struct {
 	invitations   map[string]*models.AdminInvitation
 	revokedAll    []uuid.UUID
 	touched       []uuid.UUID
+	audits        []*models.AuditEntry
 }
 
 func newAuthTestStore() *authTestStore {
@@ -33,6 +34,10 @@ func newAuthTestStore() *authTestStore {
 		profiles:      map[uuid.UUID]*models.PermissionProfile{},
 		invitations:   map[string]*models.AdminInvitation{},
 	}
+}
+
+func (s *authTestStore) WithinTx(ctx context.Context, fn func(context.Context) error) error {
+	return fn(ctx)
 }
 
 func (s *authTestStore) addUser(u *models.User) *models.User {
@@ -138,6 +143,18 @@ func (s *authTestStore) RevokeRefreshToken(_ context.Context, id uuid.UUID) erro
 	return nil
 }
 
+func (s *authTestStore) ConsumeRefreshToken(_ context.Context, id uuid.UUID) (bool, error) {
+	for _, rt := range s.refreshTokens {
+		if rt.ID != id || rt.RevokedAt != nil || !rt.ExpiresAt.After(time.Now()) {
+			continue
+		}
+		now := time.Now()
+		rt.RevokedAt = &now
+		return true, nil
+	}
+	return false, nil
+}
+
 func (s *authTestStore) RevokeUserRefreshTokens(_ context.Context, userID uuid.UUID) error {
 	s.revokedAll = append(s.revokedAll, userID)
 	for _, rt := range s.refreshTokens {
@@ -185,17 +202,23 @@ func (s *authTestStore) GetAdminInvitationByCode(_ context.Context, code string)
 	return &cp, nil
 }
 
-func (s *authTestStore) MarkInvitationAccepted(_ context.Context, id uuid.UUID) error {
+func (s *authTestStore) AcceptAdminInvitation(_ context.Context, id uuid.UUID) (bool, error) {
 	for _, inv := range s.invitations {
-		if inv.ID == id {
-			now := time.Now()
-			inv.AcceptedAt = &now
+		if inv.ID != id || inv.AcceptedAt != nil || !inv.ExpiresAt.After(time.Now()) {
+			continue
 		}
+		now := time.Now()
+		inv.AcceptedAt = &now
+		return true, nil
 	}
-	return nil
+	return false, nil
 }
 
-func (s *authTestStore) InsertAudit(context.Context, *models.AuditEntry) error { return nil }
+func (s *authTestStore) InsertAudit(_ context.Context, entry *models.AuditEntry) error {
+	cp := *entry
+	s.audits = append(s.audits, &cp)
+	return nil
+}
 
 func (s *authTestStore) GetPermissionProfile(_ context.Context, id uuid.UUID) (*models.PermissionProfile, error) {
 	p, found := s.profiles[id]
@@ -224,7 +247,7 @@ func newTestService(t *testing.T, s storeRepo, cfg Config) *Service {
 	if cfg.JWTSecret == "" {
 		cfg.JWTSecret = "test-secret"
 	}
-	return NewService(s, cfg, zerolog.Nop())
+	return NewService(s, nil, cfg, zerolog.Nop())
 }
 
 func seedUser(t *testing.T, store *authTestStore, password string) *models.User {
@@ -486,7 +509,7 @@ func TestDeleteUserRefusesSelfDeletion(t *testing.T) {
 	tenant := &models.Tenant{ID: user.TenantID}
 	svc := newTestService(t, store, Config{})
 
-	err := svc.DeleteUser(context.Background(), tenant, user, user.ID)
+	err := svc.DeleteUser(context.Background(), authz.Actor{Type: authz.PrincipalUser, ID: user.ID, TenantID: tenant.ID, Role: models.RoleAdmin, IsAdmin: true}, tenant, user.ID)
 	requireKind(t, err, app.KindBadRequest)
 	if _, found := store.users[user.ID]; !found {
 		t.Fatal("expected the user to survive")

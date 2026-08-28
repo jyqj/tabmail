@@ -13,10 +13,14 @@ import (
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type storeRepo interface {
+	store.Transactor
+	app.AuditStore
 	ListPermissionProfiles(ctx context.Context, tenantID *uuid.UUID) ([]*models.PermissionProfile, error)
 	CreatePermissionProfile(ctx context.Context, p *models.PermissionProfile) error
 	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
@@ -30,12 +34,13 @@ type storeRepo interface {
 }
 
 type Service struct {
-	store  storeRepo
-	logger zerolog.Logger
+	store      storeRepo
+	dispatcher *hooks.Dispatcher
+	logger     zerolog.Logger
 }
 
-func NewService(s storeRepo, logger zerolog.Logger) *Service {
-	return &Service{store: s, logger: logger.With().Str("service", "permissions").Logger()}
+func NewService(s storeRepo, dispatcher *hooks.Dispatcher, logger zerolog.Logger) *Service {
+	return &Service{store: s, dispatcher: dispatcher, logger: logger.With().Str("service", "permissions").Logger()}
 }
 
 type CreateProfileRequest struct {
@@ -108,8 +113,17 @@ func (s *Service) CreateProfile(ctx context.Context, actor authz.Actor, tenant *
 		CanCreateRoutes: req.CanCreateRoutes, CanCreateAPIKeys: req.CanCreateAPIKeys,
 		IsSystem: false, CreatedAt: now, UpdatedAt: now,
 	}
-	if err := s.store.CreatePermissionProfile(ctx, profile); err != nil {
-		return nil, app.Internal(err)
+	audit := models.AuditEntry{
+		TenantID: profileTenantID,
+		Actor:    actor.AuditLabel(), Action: "permission_profile.create",
+		ResourceType: "permission_profile", ResourceID: app.UUIDPtr(profile.ID),
+		Details: app.MustJSON(map[string]any{"name": profile.Name, "tenant_id": profile.TenantID}),
+	}
+	event := hooks.Event{Type: "permission_profile.created", TenantID: tenantIDString(profileTenantID), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"profile_id": profile.ID.String(), "name": profile.Name}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.CreatePermissionProfile(txCtx, profile)
+	}); err != nil {
+		return nil, err
 	}
 	return profile, nil
 }
@@ -155,24 +169,40 @@ func (s *Service) UpdateProfile(ctx context.Context, actor authz.Actor, tenant *
 	if err := s.validateZoneScope(ctx, req.AllowedZoneIDs, existing.TenantID); err != nil {
 		return nil, err
 	}
-	if err := s.store.UpdatePermissionProfile(ctx, existing); err != nil {
-		return nil, app.Internal(err)
+	audit := models.AuditEntry{
+		TenantID: existing.TenantID,
+		Actor:    actor.AuditLabel(), Action: "permission_profile.update",
+		ResourceType: "permission_profile", ResourceID: app.UUIDPtr(existing.ID),
+		Details: app.MustJSON(map[string]any{"name": existing.Name}),
+	}
+	event := hooks.Event{Type: "permission_profile.updated", TenantID: tenantIDString(existing.TenantID), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"profile_id": existing.ID.String(), "name": existing.Name}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpdatePermissionProfile(txCtx, existing)
+	}); err != nil {
+		return nil, err
 	}
 	return existing, nil
 }
 
 func (s *Service) DeleteProfile(ctx context.Context, actor authz.Actor, tenant *models.Tenant, id uuid.UUID) error {
-	if _, err := s.writableProfile(ctx, actor, tenant, id, "cannot delete system profile"); err != nil {
+	existing, err := s.writableProfile(ctx, actor, tenant, id, "cannot delete system profile")
+	if err != nil {
 		return err
 	}
 	var deleteTenantID *uuid.UUID
 	if !actor.IsSuperAdmin && tenant != nil {
 		deleteTenantID = &tenant.ID
 	}
-	if err := s.store.DeletePermissionProfile(ctx, id, deleteTenantID); err != nil {
-		return app.Internal(err)
+	audit := models.AuditEntry{
+		TenantID: existing.TenantID,
+		Actor:    actor.AuditLabel(), Action: "permission_profile.delete",
+		ResourceType: "permission_profile", ResourceID: app.UUIDPtr(existing.ID),
+		Details: app.MustJSON(map[string]any{"name": existing.Name}),
 	}
-	return nil
+	event := hooks.Event{Type: "permission_profile.deleted", TenantID: tenantIDString(existing.TenantID), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"profile_id": existing.ID.String(), "name": existing.Name}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeletePermissionProfile(txCtx, id, deleteTenantID)
+	})
 }
 
 // UserPermission resolves a user's effective permission within a tenant. It is
@@ -205,17 +235,17 @@ func (s *Service) SetUserOverride(ctx context.Context, tenant *models.Tenant, us
 	if _, err := s.tenantUser(ctx, tenant, userID); err != nil {
 		return nil, err
 	}
-	return s.storeUserOverride(ctx, tenant, userID, override)
+	return s.storeUserOverride(ctx, tenant, userID, override, "system")
 }
 
 func (s *Service) SetUserOverrideForActor(ctx context.Context, actor authz.Actor, tenant *models.Tenant, userID uuid.UUID, override models.UserPermissionOverride) (*models.UserPermissionOverride, error) {
 	if _, err := s.manageableTenantUser(ctx, actor, tenant, userID); err != nil {
 		return nil, err
 	}
-	return s.storeUserOverride(ctx, tenant, userID, override)
+	return s.storeUserOverride(ctx, tenant, userID, override, actor.AuditLabel())
 }
 
-func (s *Service) storeUserOverride(ctx context.Context, tenant *models.Tenant, userID uuid.UUID, override models.UserPermissionOverride) (*models.UserPermissionOverride, error) {
+func (s *Service) storeUserOverride(ctx context.Context, tenant *models.Tenant, userID uuid.UUID, override models.UserPermissionOverride, actorLabel string) (*models.UserPermissionOverride, error) {
 	override.UserID = userID
 	for _, zoneID := range override.AllowedZoneIDs {
 		zone, err := s.store.GetZone(ctx, zoneID)
@@ -226,8 +256,16 @@ func (s *Service) storeUserOverride(ctx context.Context, tenant *models.Tenant, 
 			return nil, app.BadRequest(fmt.Sprintf("zone %s not found or does not belong to tenant", zoneID))
 		}
 	}
-	if err := s.store.UpsertUserPermissionOverride(ctx, &override); err != nil {
-		return nil, app.Internal(err)
+	audit := models.AuditEntry{
+		TenantID: app.UUIDPtr(tenant.ID), Actor: actorLabel,
+		Action: "user_permission_override.upsert", ResourceType: "user", ResourceID: app.UUIDPtr(userID),
+		Details: app.MustJSON(map[string]any{"allowed_zone_ids": override.AllowedZoneIDs}),
+	}
+	event := hooks.Event{Type: "user_permission_override.updated", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"user_id": userID.String()}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpsertUserPermissionOverride(txCtx, &override)
+	}); err != nil {
+		return nil, err
 	}
 	return &override, nil
 }
@@ -236,21 +274,25 @@ func (s *Service) DeleteUserOverride(ctx context.Context, tenant *models.Tenant,
 	if _, err := s.tenantUser(ctx, tenant, userID); err != nil {
 		return err
 	}
-	return s.deleteUserOverride(ctx, userID)
+	return s.deleteUserOverride(ctx, tenant, userID, "system")
 }
 
 func (s *Service) DeleteUserOverrideForActor(ctx context.Context, actor authz.Actor, tenant *models.Tenant, userID uuid.UUID) error {
 	if _, err := s.manageableTenantUser(ctx, actor, tenant, userID); err != nil {
 		return err
 	}
-	return s.deleteUserOverride(ctx, userID)
+	return s.deleteUserOverride(ctx, tenant, userID, actor.AuditLabel())
 }
 
-func (s *Service) deleteUserOverride(ctx context.Context, userID uuid.UUID) error {
-	if err := s.store.DeleteUserPermissionOverride(ctx, userID); err != nil {
-		return app.Internal(err)
+func (s *Service) deleteUserOverride(ctx context.Context, tenant *models.Tenant, userID uuid.UUID, actorLabel string) error {
+	audit := models.AuditEntry{
+		TenantID: app.UUIDPtr(tenant.ID), Actor: actorLabel,
+		Action: "user_permission_override.delete", ResourceType: "user", ResourceID: app.UUIDPtr(userID),
 	}
-	return nil
+	event := hooks.Event{Type: "user_permission_override.deleted", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"user_id": userID.String()}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteUserPermissionOverride(txCtx, userID)
+	})
 }
 
 func (s *Service) writableProfile(ctx context.Context, actor authz.Actor, tenant *models.Tenant, id uuid.UUID, systemMsg string) (*models.PermissionProfile, error) {
@@ -325,4 +367,11 @@ func (s *Service) effectivePermission(ctx context.Context, userID uuid.UUID) (*m
 		return nil, app.Internal(err)
 	}
 	return perm, nil
+}
+
+func tenantIDString(id *uuid.UUID) string {
+	if id == nil {
+		return ""
+	}
+	return id.String()
 }

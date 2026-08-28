@@ -18,6 +18,7 @@ import (
 
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app"
 	"tabmail/internal/autocreate"
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
@@ -150,7 +151,7 @@ func main() {
 	// --- Outbound service ---
 	var outboundSvc *outbound.Service
 	if cfg.Outbound.Enabled {
-		outboundSvc = outbound.NewService(cfg.Outbound, pg, logger)
+		outboundSvc = outbound.NewService(cfg.Outbound, pg, dispatcher, logger)
 	}
 
 	defaultPlanID, _ := uuid.Parse(cfg.DefaultPlanID)
@@ -260,45 +261,55 @@ func bootstrapAdmin(ctx context.Context, st store.Store, cfg *config.Root, logge
 		return
 	}
 
-	// Check if the bootstrap admin already exists
-	existing, err := st.GetUserByEmail(ctx, cfg.BootstrapAdminEmail)
-	if err != nil {
-		logger.Warn().Err(err).Msg("bootstrap: failed to check existing users")
-		return
-	}
-	if existing != nil {
-		return
-	}
-
+	email := strings.ToLower(strings.TrimSpace(cfg.BootstrapAdminEmail))
 	hash, err := bcrypt.GenerateFromPassword([]byte(cfg.BootstrapAdminPass), bcrypt.DefaultCost)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("bootstrap: hash password")
 	}
 
-	// Use the "pro" plan for admin tenant
 	proPlanID, _ := uuid.Parse("00000000-0000-0000-0000-000000000002")
-	tenant := &models.Tenant{
-		Name:    cfg.BootstrapAdminEmail,
-		PlanID:  proPlanID,
-		IsSuper: true,
-	}
-	if err := st.CreateTenant(ctx, tenant); err != nil {
-		logger.Fatal().Err(err).Msg("bootstrap: create admin tenant")
-	}
-
-	email := strings.ToLower(strings.TrimSpace(cfg.BootstrapAdminEmail))
+	tenant := &models.Tenant{ID: uuid.New(), Name: email, PlanID: proPlanID, IsSuper: true}
 	user := &models.User{
-		TenantID:     tenant.ID,
-		Email:        email,
-		PasswordHash: string(hash),
-		DisplayName:  "Admin",
-		Role:         models.RoleSuperAdmin,
-		IsActive:     true,
+		ID: uuid.New(), TenantID: tenant.ID, Email: email, PasswordHash: string(hash),
+		DisplayName: "Admin", Role: models.RoleSuperAdmin, IsActive: true,
 	}
-	if err := st.CreateUser(ctx, user); err != nil {
-		logger.Fatal().Err(err).Msg("bootstrap: create admin user")
+	created := false
+	err = st.WithinTx(ctx, func(txCtx context.Context) error {
+		existing, err := st.GetUserByEmail(txCtx, email)
+		if err != nil {
+			return err
+		}
+		if existing != nil {
+			return nil
+		}
+		if err := st.CreateTenant(txCtx, tenant); err != nil {
+			return err
+		}
+		if err := st.CreateUser(txCtx, user); err != nil {
+			return err
+		}
+		if err := app.InsertAuditRequired(txCtx, st, models.AuditEntry{
+			TenantID: app.UUIDPtr(tenant.ID), Actor: "bootstrap", Action: "user.bootstrap",
+			ResourceType: "user", ResourceID: app.UUIDPtr(user.ID),
+			Details: app.MustJSON(map[string]any{"email": email, "tenant_id": tenant.ID}),
+		}); err != nil {
+			return err
+		}
+		created = true
+		return nil
+	})
+	if err != nil {
+		// Multiple process roles can start together. If another process won the
+		// unique-email race, this transaction rolled back its temporary tenant;
+		// the now-existing account is the desired outcome.
+		if existing, lookupErr := st.GetUserByEmail(ctx, email); lookupErr == nil && existing != nil {
+			return
+		}
+		logger.Fatal().Err(err).Msg("bootstrap: create admin aggregate")
 	}
-	logger.Info().Str("email", email).Msg("bootstrap: admin user created")
+	if created {
+		logger.Info().Str("email", email).Msg("bootstrap: admin user created")
+	}
 }
 
 func setLogLevel(l *zerolog.Logger, level string) {

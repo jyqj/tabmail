@@ -22,7 +22,7 @@ func (s *PgStore) CreateIngestJob(ctx context.Context, job *models.IngestJob) er
 	}
 	job.CreatedAt = now
 	job.UpdatedAt = now
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO ingest_jobs (id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,created_at,updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
 		job.ID, job.Source, job.RemoteIP, job.MailFrom, job.Recipients, job.RawObjectKey, job.Metadata, job.State, job.Attempts, job.LastError, job.NextAttemptAt, job.CreatedAt, job.UpdatedAt)
@@ -35,7 +35,7 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 	}
 	now = now.UTC()
 	leaseUntil := now.Add(claimLeaseDuration)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		WITH cte AS (
 			SELECT id
 			FROM ingest_jobs
@@ -67,7 +67,7 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 }
 
 func (s *PgStore) MarkIngestJobDone(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE ingest_jobs
 		SET state='done', claimed_at=NULL, lease_until=NULL, updated_at=$2
 		WHERE id=$1`, id, time.Now().UTC())
@@ -79,7 +79,7 @@ func (s *PgStore) MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastErro
 	if dead {
 		state = "dead"
 	}
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE ingest_jobs
 		SET state=$2, last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=$5
 		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
@@ -106,11 +106,11 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 	}
 
 	var total int
-	if err := s.pool.QueryRow(ctx, `SELECT count(*) FROM ingest_jobs`+where, filters...).Scan(&total); err != nil {
+	if err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM ingest_jobs`+where, filters...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,created_at,updated_at
 		FROM ingest_jobs`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
@@ -129,7 +129,7 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 }
 
 func (s *PgStore) PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		DELETE FROM ingest_jobs
 		WHERE id IN (
 			SELECT id FROM ingest_jobs
@@ -160,10 +160,10 @@ func (s *PgStore) PurgeOldIngestJobs(ctx context.Context, before time.Time, limi
 func (s *PgStore) CountIngestJobsByState(ctx context.Context, states ...string) (int, error) {
 	if len(states) == 0 {
 		var total int
-		err := s.pool.QueryRow(ctx, `SELECT count(*) FROM ingest_jobs`).Scan(&total)
+		err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM ingest_jobs`).Scan(&total)
 		return total, err
 	}
 	var total int
-	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM ingest_jobs WHERE state = ANY($1)`, states).Scan(&total)
+	err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM ingest_jobs WHERE state = ANY($1)`, states).Scan(&total)
 	return total, err
 }

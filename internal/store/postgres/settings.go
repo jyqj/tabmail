@@ -10,7 +10,7 @@ import (
 
 func (s *PgStore) GetSetting(ctx context.Context, key string) (*models.SystemSetting, error) {
 	ss := &models.SystemSetting{}
-	err := s.pool.QueryRow(ctx,
+	err := s.db(ctx).QueryRow(ctx,
 		`SELECT key, value, description, updated_at FROM system_settings WHERE key = $1`, key).
 		Scan(&ss.Key, &ss.Value, &ss.Description, &ss.UpdatedAt)
 	if err == pgx.ErrNoRows {
@@ -20,7 +20,7 @@ func (s *PgStore) GetSetting(ctx context.Context, key string) (*models.SystemSet
 }
 
 func (s *PgStore) UpsertSetting(ctx context.Context, key, value, description string) error {
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO system_settings (key, value, description, updated_at)
 		VALUES ($1, $2, $3, $4)
 		ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, description = EXCLUDED.description, updated_at = EXCLUDED.updated_at`,
@@ -29,7 +29,7 @@ func (s *PgStore) UpsertSetting(ctx context.Context, key, value, description str
 }
 
 func (s *PgStore) ListSettings(ctx context.Context) ([]*models.SystemSetting, error) {
-	rows, err := s.pool.Query(ctx,
+	rows, err := s.db(ctx).Query(ctx,
 		`SELECT key, value, description, updated_at FROM system_settings ORDER BY key`)
 	if err != nil {
 		return nil, err

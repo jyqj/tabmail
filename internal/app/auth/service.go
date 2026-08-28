@@ -17,7 +17,9 @@ import (
 	"tabmail/internal/app"
 	"tabmail/internal/authn"
 	"tabmail/internal/authz"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 // MinPasswordLength is the shortest password the service accepts.
@@ -26,6 +28,8 @@ const MinPasswordLength = 8
 const inviteTTL = 72 * time.Hour
 
 type storeRepo interface {
+	store.Transactor
+	app.AuditStore
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	CreateUser(ctx context.Context, u *models.User) error
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
@@ -37,13 +41,13 @@ type storeRepo interface {
 	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
+	ConsumeRefreshToken(ctx context.Context, id uuid.UUID) (bool, error)
 	RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error
 	CreateTenant(ctx context.Context, t *models.Tenant) error
 	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
 	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error
 	GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error)
-	MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error
-	InsertAudit(ctx context.Context, e *models.AuditEntry) error
+	AcceptAdminInvitation(ctx context.Context, id uuid.UUID) (bool, error)
 	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
 }
 
@@ -74,13 +78,14 @@ type Config struct {
 }
 
 type Service struct {
-	store  storeRepo
-	cfg    Config
-	logger zerolog.Logger
+	store      storeRepo
+	dispatcher *hooks.Dispatcher
+	cfg        Config
+	logger     zerolog.Logger
 }
 
-func NewService(s storeRepo, cfg Config, logger zerolog.Logger) *Service {
-	return &Service{store: s, cfg: cfg, logger: logger.With().Str("service", "auth").Logger()}
+func NewService(s storeRepo, dispatcher *hooks.Dispatcher, cfg Config, logger zerolog.Logger) *Service {
+	return &Service{store: s, dispatcher: dispatcher, cfg: cfg, logger: logger.With().Str("service", "auth").Logger()}
 }
 
 // Session is the token pair handed back by every flow that authenticates a
@@ -99,7 +104,6 @@ func (s *Service) Login(ctx context.Context, email, password string) (*Session, 
 	if email == "" || password == "" {
 		return nil, app.BadRequest("email and password are required")
 	}
-
 	if s.cfg.Throttle != nil && s.cfg.Throttle.LoginAttemptsExceeded(ctx, email) {
 		return nil, app.RateLimited("too many failed login attempts, try again later")
 	}
@@ -120,13 +124,23 @@ func (s *Service) Login(ctx context.Context, email, password string) (*Session, 
 		return nil, errInvalidCredentials
 	}
 
-	session, err := s.issueSession(ctx, user)
+	session, refresh, err := s.prepareSession(user)
 	if err != nil {
 		return nil, err
 	}
-
-	// Logins are already throttled, so this runs inline rather than in a
-	// detached goroutine; a failed bookkeeping write must not fail the login.
+	if err := app.WithinTransaction(ctx, s.store, func(txCtx context.Context) error {
+		if err := s.store.CreateRefreshToken(txCtx, refresh); err != nil {
+			return err
+		}
+		return app.InsertAuditRequired(txCtx, s.store, models.AuditEntry{
+			TenantID: app.UUIDPtr(user.TenantID), Actor: "user:" + user.ID.String(),
+			Action: "session.login", ResourceType: "refresh_token", ResourceID: app.UUIDPtr(refresh.ID),
+		})
+	}); err != nil {
+		return nil, err
+	}
+	// last_login_at is operational metadata, not part of the credential
+	// issuance invariant. Keep login available if this best-effort write fails.
 	if err := s.store.TouchUserLogin(ctx, user.ID); err != nil {
 		s.logger.Warn().Err(err).Str("user_id", user.ID.String()).Msg("login: record last login")
 	}
@@ -149,27 +163,43 @@ func (s *Service) Register(ctx context.Context, email, password, displayName str
 	if len(password) < MinPasswordLength {
 		return nil, app.BadRequest("password must be at least 8 characters")
 	}
-
-	existing, err := s.store.GetUserByEmail(ctx, email)
-	if err != nil {
+	if existing, err := s.store.GetUserByEmail(ctx, email); err != nil {
 		return nil, app.Internal(err)
-	}
-	if existing != nil {
+	} else if existing != nil {
 		return nil, app.Conflict("email already registered")
 	}
 
-	user, err := s.createUserWithTenant(ctx, email, password, displayName, models.RoleUser)
+	tenant, user, session, refresh, err := s.prepareProvisionedSession(email, password, displayName, models.RoleUser)
 	if err != nil {
 		return nil, err
 	}
-	return s.issueSession(ctx, user)
+	audit := models.AuditEntry{
+		TenantID: app.UUIDPtr(tenant.ID), Actor: "user:" + user.ID.String(),
+		Action: "user.register", ResourceType: "user", ResourceID: app.UUIDPtr(user.ID),
+		Details: app.MustJSON(map[string]any{"email": user.Email, "role": user.Role}),
+	}
+	event := hooks.Event{Type: "user.registered", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"user_id": user.ID.String(), "role": user.Role}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		if err := s.store.CreateTenant(txCtx, tenant); err != nil {
+			return err
+		}
+		if err := s.store.CreateUser(txCtx, user); err != nil {
+			if isUniqueViolation(err) {
+				return app.Conflict("email already registered")
+			}
+			return err
+		}
+		return s.store.CreateRefreshToken(txCtx, refresh)
+	}); err != nil {
+		return nil, err
+	}
+	return session, nil
 }
 
 func (s *Service) Refresh(ctx context.Context, refreshToken string) (*Session, error) {
 	if refreshToken == "" {
 		return nil, app.BadRequest("refresh_token is required")
 	}
-
 	rt, err := s.store.GetRefreshToken(ctx, authn.HashToken(refreshToken))
 	if err != nil {
 		return nil, app.Internal(err)
@@ -177,42 +207,83 @@ func (s *Service) Refresh(ctx context.Context, refreshToken string) (*Session, e
 	if rt == nil || rt.ExpiresAt.Before(time.Now()) {
 		return nil, app.Unauthorized("invalid or expired refresh token")
 	}
-	if rt.RevokedAt != nil {
-		// A revoked token was reused — possible token theft. Revoke all tokens for this user.
-		s.logger.Warn().Str("user_id", rt.UserID.String()).Msg("refresh: revoked token reuse detected, revoking all user tokens")
-		_ = s.store.RevokeUserRefreshTokens(ctx, rt.UserID)
-		return nil, app.Unauthorized("invalid or expired refresh token")
-	}
-
-	// Revoke old refresh token (rotation)
-	_ = s.store.RevokeRefreshToken(ctx, rt.ID)
-
 	user, err := s.store.GetUser(ctx, rt.UserID)
 	if err != nil || user == nil || !user.IsActive {
 		return nil, app.Unauthorized("user not found or inactive")
 	}
-
-	session, err := s.issueSession(ctx, user)
+	if rt.RevokedAt != nil {
+		s.logger.Warn().Str("user_id", rt.UserID.String()).Msg("refresh: revoked token reuse detected, revoking all user tokens")
+		if err := s.revokeRefreshFamily(ctx, user.TenantID, rt, "already_revoked"); err != nil {
+			return nil, err
+		}
+		return nil, app.Unauthorized("invalid or expired refresh token")
+	}
+	session, replacement, err := s.prepareSession(user)
 	if err != nil {
 		return nil, err
+	}
+	reused := false
+	if err := app.WithinTransaction(ctx, s.store, func(txCtx context.Context) error {
+		consumed, err := s.store.ConsumeRefreshToken(txCtx, rt.ID)
+		if err != nil {
+			return err
+		}
+		if !consumed {
+			reused = true
+			if err := s.store.RevokeUserRefreshTokens(txCtx, rt.UserID); err != nil {
+				return err
+			}
+			return app.InsertAuditRequired(txCtx, s.store, models.AuditEntry{
+				TenantID: app.UUIDPtr(user.TenantID), Actor: "user:" + user.ID.String(),
+				Action: "session.refresh_reuse", ResourceType: "refresh_token", ResourceID: app.UUIDPtr(rt.ID),
+				Details: app.MustJSON(map[string]any{"reason": "concurrent_or_replayed"}),
+			})
+		}
+		if err := s.store.CreateRefreshToken(txCtx, replacement); err != nil {
+			return err
+		}
+		return app.InsertAuditRequired(txCtx, s.store, models.AuditEntry{
+			TenantID: app.UUIDPtr(user.TenantID), Actor: "user:" + user.ID.String(),
+			Action: "session.refresh", ResourceType: "refresh_token", ResourceID: app.UUIDPtr(replacement.ID),
+			Details: app.MustJSON(map[string]any{"rotated_from": rt.ID}),
+		})
+	}); err != nil {
+		return nil, err
+	}
+	if reused {
+		s.logger.Warn().Str("user_id", rt.UserID.String()).Msg("refresh: concurrent or replayed token use detected, revoked token family")
+		return nil, app.Unauthorized("invalid or expired refresh token")
 	}
 	session.User = nil
 	return session, nil
 }
 
 // Logout revokes the presented refresh token, or every token the caller holds
-// when no specific token is given. It never reports a failure: a logout that
-// cannot find its token has still achieved what the caller asked for.
-func (s *Service) Logout(ctx context.Context, refreshToken string, caller *models.User) {
-	if refreshToken != "" {
-		if rt, err := s.store.GetRefreshToken(ctx, authn.HashToken(refreshToken)); err == nil && rt != nil {
-			_ = s.store.RevokeRefreshToken(ctx, rt.ID)
+// when no specific token is given. The revocation and audit record share one
+// transaction; a token owned by another user is deliberately ignored.
+func (s *Service) Logout(ctx context.Context, refreshToken string, caller *models.User) error {
+	if caller == nil {
+		return app.Unauthorized("not logged in")
+	}
+	return app.WithinTransaction(ctx, s.store, func(txCtx context.Context) error {
+		if refreshToken != "" {
+			rt, err := s.store.GetRefreshToken(txCtx, authn.HashToken(refreshToken))
+			if err != nil {
+				return err
+			}
+			if rt != nil && rt.UserID == caller.ID {
+				if err := s.store.RevokeRefreshToken(txCtx, rt.ID); err != nil {
+					return err
+				}
+			}
+		} else if err := s.store.RevokeUserRefreshTokens(txCtx, caller.ID); err != nil {
+			return err
 		}
-		return
-	}
-	if caller != nil {
-		_ = s.store.RevokeUserRefreshTokens(ctx, caller.ID)
-	}
+		return app.InsertAuditRequired(txCtx, s.store, models.AuditEntry{
+			TenantID: app.UUIDPtr(caller.TenantID), Actor: "user:" + caller.ID.String(),
+			Action: "session.logout", ResourceType: "user", ResourceID: app.UUIDPtr(caller.ID),
+		})
+	})
 }
 
 func (s *Service) ChangePassword(ctx context.Context, caller *models.User, oldPassword, newPassword string) error {
@@ -232,12 +303,14 @@ func (s *Service) ChangePassword(ctx context.Context, caller *models.User, oldPa
 	if err != nil {
 		return app.Internal(err)
 	}
-	if err := s.store.UpdateUserPassword(ctx, caller.ID, string(hash)); err != nil {
-		return app.Internal(err)
-	}
-	// Revoke all refresh tokens to force re-login
-	_ = s.store.RevokeUserRefreshTokens(ctx, caller.ID)
-	return nil
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(caller.TenantID), Actor: "user:" + caller.ID.String(), Action: "user.password.change", ResourceType: "user", ResourceID: app.UUIDPtr(caller.ID)}
+	event := hooks.Event{Type: "user.password.changed", TenantID: caller.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"user_id": caller.ID.String()}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		if err := s.store.UpdateUserPassword(txCtx, caller.ID, string(hash)); err != nil {
+			return err
+		}
+		return s.store.RevokeUserRefreshTokens(txCtx, caller.ID)
+	})
 }
 
 // InviteAdmin mints an invitation code. Accepting it creates a super_admin, so
@@ -247,34 +320,29 @@ func (s *Service) InviteAdmin(ctx context.Context, email string, inviter *models
 	if email == "" {
 		return nil, app.BadRequest("email is required")
 	}
-
-	existing, err := s.store.GetUserByEmail(ctx, email)
-	if err != nil {
+	if existing, err := s.store.GetUserByEmail(ctx, email); err != nil {
 		return nil, app.Internal(err)
-	}
-	if existing != nil {
+	} else if existing != nil {
 		return nil, app.Conflict("email already registered")
 	}
-
 	code, err := generateInviteCode()
 	if err != nil {
 		return nil, app.Internal(err)
 	}
-
 	var inviterID *uuid.UUID
+	actorLabel := "platform"
 	if inviter != nil {
 		id := inviter.ID
 		inviterID = &id
+		actorLabel = "user:" + inviter.ID.String()
 	}
-
-	inv := &models.AdminInvitation{
-		Email:      email,
-		InviteCode: code,
-		InvitedBy:  inviterID,
-		ExpiresAt:  time.Now().Add(inviteTTL),
-	}
-	if err := s.store.CreateAdminInvitation(ctx, inv); err != nil {
-		return nil, app.Internal(err)
+	inv := &models.AdminInvitation{ID: uuid.New(), Email: email, InviteCode: code, InvitedBy: inviterID, ExpiresAt: time.Now().Add(inviteTTL)}
+	audit := models.AuditEntry{Actor: actorLabel, Action: "admin_invitation.create", ResourceType: "admin_invitation", ResourceID: app.UUIDPtr(inv.ID), Details: app.MustJSON(map[string]any{"email": email, "expires_at": inv.ExpiresAt})}
+	event := hooks.Event{Type: "admin_invitation.created", OccurredAt: time.Now().UTC(), Metadata: map[string]any{"invitation_id": inv.ID.String(), "email": email, "expires_at": inv.ExpiresAt}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.CreateAdminInvitation(txCtx, inv)
+	}); err != nil {
+		return nil, err
 	}
 	return inv, nil
 }
@@ -286,7 +354,6 @@ func (s *Service) AcceptInvite(ctx context.Context, inviteCode, password, displa
 	if len(password) < MinPasswordLength {
 		return nil, app.BadRequest("password must be at least 8 characters")
 	}
-
 	inv, err := s.store.GetAdminInvitationByCode(ctx, inviteCode)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -294,23 +361,40 @@ func (s *Service) AcceptInvite(ctx context.Context, inviteCode, password, displa
 	if inv == nil || inv.AcceptedAt != nil || inv.ExpiresAt.Before(time.Now()) {
 		return nil, app.BadRequest("invalid or expired invitation")
 	}
-
-	existing, err := s.store.GetUserByEmail(ctx, inv.Email)
-	if err != nil {
+	if existing, err := s.store.GetUserByEmail(ctx, inv.Email); err != nil {
 		return nil, app.Internal(err)
-	}
-	if existing != nil {
+	} else if existing != nil {
 		return nil, app.Conflict("email already registered")
 	}
 
-	// Admin users get their own tenant (power comes from User.Role, not Tenant.IsSuper)
-	user, err := s.createUserWithTenant(ctx, inv.Email, password, displayName, models.RoleSuperAdmin)
+	tenant, user, session, refresh, err := s.prepareProvisionedSession(inv.Email, password, displayName, models.RoleSuperAdmin)
 	if err != nil {
 		return nil, err
 	}
-
-	_ = s.store.MarkInvitationAccepted(ctx, inv.ID)
-	return s.issueSession(ctx, user)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(tenant.ID), Actor: "user:" + user.ID.String(), Action: "admin_invitation.accept", ResourceType: "admin_invitation", ResourceID: app.UUIDPtr(inv.ID), Details: app.MustJSON(map[string]any{"user_id": user.ID, "tenant_id": tenant.ID})}
+	event := hooks.Event{Type: "admin_invitation.accepted", TenantID: tenant.ID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"invitation_id": inv.ID.String(), "user_id": user.ID.String()}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		claimed, err := s.store.AcceptAdminInvitation(txCtx, inv.ID)
+		if err != nil {
+			return err
+		}
+		if !claimed {
+			return app.BadRequest("invalid or expired invitation")
+		}
+		if err := s.store.CreateTenant(txCtx, tenant); err != nil {
+			return err
+		}
+		if err := s.store.CreateUser(txCtx, user); err != nil {
+			if isUniqueViolation(err) {
+				return app.Conflict("email already registered")
+			}
+			return err
+		}
+		return s.store.CreateRefreshToken(txCtx, refresh)
+	}); err != nil {
+		return nil, err
+	}
+	return session, nil
 }
 
 func (s *Service) ListUsers(ctx context.Context, tenant *models.Tenant, pg models.Page) ([]*models.User, int, error) {
@@ -349,7 +433,7 @@ func (s *Service) UpdateUser(ctx context.Context, actor authz.Actor, tenant *mod
 	if !authz.CanManageTenantMember(actor, user.TenantID, user.Role) {
 		return nil, app.Forbidden("tenant admins may manage ordinary members only")
 	}
-
+	beforeRole, beforeActive, beforeProfile := user.Role, user.IsActive, user.PermissionProfileID
 	if req.Role != nil {
 		newRole := models.UserRole(*req.Role)
 		switch newRole {
@@ -392,21 +476,24 @@ func (s *Service) UpdateUser(ctx context.Context, actor authz.Actor, tenant *mod
 			user.PermissionProfileID = &profileID
 		}
 	}
-
-	if err := s.store.UpdateUser(ctx, user); err != nil {
-		return nil, app.Internal(err)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(user.TenantID), Actor: actor.AuditLabel(), Action: "user.update", ResourceType: "user", ResourceID: app.UUIDPtr(user.ID), Details: app.MustJSON(map[string]any{"before_role": beforeRole, "role": user.Role, "before_active": beforeActive, "is_active": user.IsActive, "before_profile_id": beforeProfile, "permission_profile_id": user.PermissionProfileID})}
+	event := hooks.Event{Type: "user.updated", TenantID: user.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"user_id": user.ID.String(), "role": user.Role, "is_active": user.IsActive}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpdateUser(txCtx, user)
+	}); err != nil {
+		return nil, err
 	}
 	return user, nil
 }
 
-func (s *Service) DeleteUser(ctx context.Context, tenant *models.Tenant, caller *models.User, userID uuid.UUID) error {
+func (s *Service) DeleteUser(ctx context.Context, actor authz.Actor, tenant *models.Tenant, userID uuid.UUID) error {
 	if tenant == nil {
 		return app.Forbidden("no tenant context")
 	}
-	if caller == nil {
+	if actor.Type != authz.PrincipalUser {
 		return app.Forbidden("authenticated administrator required")
 	}
-	if caller.ID == userID {
+	if actor.ID == userID {
 		return app.BadRequest("cannot delete yourself")
 	}
 	user, err := s.store.GetUser(ctx, userID)
@@ -416,81 +503,60 @@ func (s *Service) DeleteUser(ctx context.Context, tenant *models.Tenant, caller 
 	if user == nil || user.TenantID != tenant.ID {
 		return app.NotFound("user not found")
 	}
-	actor := authz.Actor{
-		Type:         authz.PrincipalUser,
-		ID:           caller.ID,
-		TenantID:     tenant.ID,
-		Role:         caller.Role,
-		IsSuperAdmin: caller.Role == models.RoleSuperAdmin,
-		IsAdmin:      caller.Role == models.RoleAdmin || caller.Role == models.RoleSuperAdmin,
-	}
 	if !authz.CanManageTenantMember(actor, user.TenantID, user.Role) {
 		return app.Forbidden("tenant admins may manage ordinary members only")
 	}
-	if err := s.store.DeleteUser(ctx, userID); err != nil {
-		return app.Internal(err)
-	}
-	return nil
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(user.TenantID), Actor: actor.AuditLabel(), Action: "user.delete", ResourceType: "user", ResourceID: app.UUIDPtr(user.ID), Details: app.MustJSON(map[string]any{"email": user.Email, "role": user.Role})}
+	event := hooks.Event{Type: "user.deleted", TenantID: user.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"user_id": user.ID.String(), "role": user.Role}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteUser(txCtx, userID)
+	})
+}
+
+func (s *Service) revokeRefreshFamily(ctx context.Context, tenantID uuid.UUID, rt *models.RefreshToken, reason string) error {
+	return app.WithinTransaction(ctx, s.store, func(txCtx context.Context) error {
+		if err := s.store.RevokeUserRefreshTokens(txCtx, rt.UserID); err != nil {
+			return err
+		}
+		return app.InsertAuditRequired(txCtx, s.store, models.AuditEntry{
+			TenantID: app.UUIDPtr(tenantID), Actor: "user:" + rt.UserID.String(), Action: "session.refresh_reuse",
+			ResourceType: "refresh_token", ResourceID: app.UUIDPtr(rt.ID),
+			Details: app.MustJSON(map[string]any{"reason": reason}),
+		})
+	})
 }
 
 // createUserWithTenant provisions the tenant a new account owns and the account
 // itself. Registration and invitation acceptance differ only in the role.
-func (s *Service) createUserWithTenant(ctx context.Context, email, password, displayName string, role models.UserRole) (*models.User, error) {
+func (s *Service) prepareProvisionedSession(email, password, displayName string, role models.UserRole) (*models.Tenant, *models.User, *Session, *models.RefreshToken, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, app.Internal(err)
+		return nil, nil, nil, nil, app.Internal(err)
 	}
-
-	tenant := &models.Tenant{Name: email, PlanID: s.cfg.DefaultPlanID}
-	if err := s.store.CreateTenant(ctx, tenant); err != nil {
-		return nil, app.Internal(err)
-	}
-
+	tenant := &models.Tenant{ID: uuid.New(), Name: email, PlanID: s.cfg.DefaultPlanID}
 	displayName = strings.TrimSpace(displayName)
 	if displayName == "" {
 		displayName = strings.Split(email, "@")[0]
 	}
-
-	user := &models.User{
-		TenantID:     tenant.ID,
-		Email:        email,
-		PasswordHash: string(hash),
-		DisplayName:  displayName,
-		Role:         role,
-		IsActive:     true,
+	user := &models.User{ID: uuid.New(), TenantID: tenant.ID, Email: email, PasswordHash: string(hash), DisplayName: displayName, Role: role, IsActive: true}
+	session, refresh, err := s.prepareSession(user)
+	if err != nil {
+		return nil, nil, nil, nil, err
 	}
-	if err := s.store.CreateUser(ctx, user); err != nil {
-		return nil, app.Internal(err)
-	}
-	return user, nil
+	return tenant, user, session, refresh, nil
 }
 
-func (s *Service) issueSession(ctx context.Context, user *models.User) (*Session, error) {
+func (s *Service) prepareSession(user *models.User) (*Session, *models.RefreshToken, error) {
 	accessToken, err := authn.IssueAccessToken(s.cfg.JWTSecret, user)
 	if err != nil {
-		return nil, app.Internal(err)
+		return nil, nil, app.Internal(err)
 	}
-
 	rawRefresh, refreshHash, err := authn.GenerateRefreshToken()
 	if err != nil {
-		return nil, app.Internal(err)
+		return nil, nil, app.Internal(err)
 	}
-
-	rt := &models.RefreshToken{
-		UserID:    user.ID,
-		TokenHash: refreshHash,
-		ExpiresAt: time.Now().Add(authn.RefreshTokenTTL),
-	}
-	if err := s.store.CreateRefreshToken(ctx, rt); err != nil {
-		return nil, app.Internal(err)
-	}
-
-	return &Session{
-		AccessToken:  accessToken,
-		RefreshToken: rawRefresh,
-		ExpiresIn:    int(authn.AccessTokenTTL.Seconds()),
-		User:         user,
-	}, nil
+	refresh := &models.RefreshToken{ID: uuid.New(), UserID: user.ID, TokenHash: refreshHash, ExpiresAt: time.Now().Add(authn.RefreshTokenTTL)}
+	return &Session{AccessToken: accessToken, RefreshToken: rawRefresh, ExpiresIn: int(authn.AccessTokenTTL.Seconds()), User: user}, refresh, nil
 }
 
 // penalizeFailedLogin counts the attempt against the account's throttle window.
@@ -503,6 +569,14 @@ func (s *Service) penalizeFailedLogin(ctx context.Context, email string) {
 	if s.cfg.FailedLoginDelay > 0 {
 		time.Sleep(s.cfg.FailedLoginDelay)
 	}
+}
+
+func isUniqueViolation(err error) bool {
+	if err == nil {
+		return false
+	}
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, "duplicate") || strings.Contains(message, "unique") || strings.Contains(message, "23505")
 }
 
 func normalizeEmail(email string) string {

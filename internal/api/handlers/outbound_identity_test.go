@@ -32,7 +32,7 @@ func TestSendIdentityIsAuthoritativeForOutboundSubmission(t *testing.T) {
 	zone := &models.DomainZone{ID: uuid.New(), TenantID: tenant.ID, OwnerUserID: &zoneOwner, Domain: "shared.example.test", IsVerified: true, MXVerified: true}
 	st.SeedZone(zone)
 
-	svc := outbound.NewService(config.Outbound{Enabled: false}, st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: false}, st, nil, zerolog.Nop())
 	h := NewOutboundHandler(svc, st, zerolog.Nop())
 	body := `{"from":"Sender <NOONE@SHARED.EXAMPLE.TEST>","to":["Recipient <RCPT@EXAMPLE.ORG>"],"subject":"hello","text_body":"body"}`
 

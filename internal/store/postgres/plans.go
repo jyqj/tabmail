@@ -15,7 +15,7 @@ func (s *PgStore) CreatePlan(ctx context.Context, p *models.Plan) error {
 	}
 	now := time.Now()
 	p.CreatedAt, p.UpdatedAt = now, now
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		INSERT INTO plans (id,name,max_domains,max_mailboxes_per_domain,max_messages_per_mailbox,
 		                   max_message_bytes,retention_hours,rpm_limit,daily_quota,created_at,updated_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
@@ -26,7 +26,7 @@ func (s *PgStore) CreatePlan(ctx context.Context, p *models.Plan) error {
 
 func (s *PgStore) GetPlan(ctx context.Context, id uuid.UUID) (*models.Plan, error) {
 	p := &models.Plan{}
-	err := s.pool.QueryRow(ctx, `SELECT id,name,max_domains,max_mailboxes_per_domain,
+	err := s.db(ctx).QueryRow(ctx, `SELECT id,name,max_domains,max_mailboxes_per_domain,
 		max_messages_per_mailbox,max_message_bytes,retention_hours,rpm_limit,daily_quota,
 		created_at,updated_at FROM plans WHERE id=$1`, id).Scan(
 		&p.ID, &p.Name, &p.MaxDomains, &p.MaxMailboxesPerDomain, &p.MaxMessagesPerMailbox,
@@ -39,7 +39,7 @@ func (s *PgStore) GetPlan(ctx context.Context, id uuid.UUID) (*models.Plan, erro
 }
 
 func (s *PgStore) ListPlans(ctx context.Context) ([]*models.Plan, error) {
-	rows, err := s.pool.Query(ctx, `SELECT id,name,max_domains,max_mailboxes_per_domain,
+	rows, err := s.db(ctx).Query(ctx, `SELECT id,name,max_domains,max_mailboxes_per_domain,
 		max_messages_per_mailbox,max_message_bytes,retention_hours,rpm_limit,daily_quota,
 		created_at,updated_at FROM plans ORDER BY name`)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *PgStore) ListPlans(ctx context.Context) ([]*models.Plan, error) {
 
 func (s *PgStore) UpdatePlan(ctx context.Context, p *models.Plan) error {
 	p.UpdatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE plans SET name=$2,max_domains=$3,max_mailboxes_per_domain=$4,
 		max_messages_per_mailbox=$5,max_message_bytes=$6,retention_hours=$7,
 		rpm_limit=$8,daily_quota=$9,updated_at=$10 WHERE id=$1`,
@@ -71,6 +71,6 @@ func (s *PgStore) UpdatePlan(ctx context.Context, p *models.Plan) error {
 }
 
 func (s *PgStore) DeletePlan(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM plans WHERE id=$1`, id)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM plans WHERE id=$1`, id)
 	return err
 }

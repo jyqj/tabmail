@@ -8,11 +8,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app"
 	webhooksapp "tabmail/internal/app/webhooks"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type webhookEndpointStore interface {
+	store.Transactor
+	app.AuditStore
 	CreateWebhookEndpoint(ctx context.Context, ep *models.WebhookEndpoint) error
 	ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) ([]*models.WebhookEndpoint, error)
 	GetWebhookEndpoint(ctx context.Context, id uuid.UUID) (*models.WebhookEndpoint, error)
@@ -25,9 +30,9 @@ type WebhookEndpointHandler struct {
 	logger  zerolog.Logger
 }
 
-func NewWebhookEndpointHandler(s webhookEndpointStore, l zerolog.Logger) *WebhookEndpointHandler {
+func NewWebhookEndpointHandler(s webhookEndpointStore, dispatcher *hooks.Dispatcher, l zerolog.Logger) *WebhookEndpointHandler {
 	return &WebhookEndpointHandler{
-		service: webhooksapp.NewService(s, l),
+		service: webhooksapp.NewService(s, dispatcher, l),
 		logger:  l.With().Str("handler", "webhook_endpoints").Logger(),
 	}
 }

@@ -9,15 +9,20 @@ import (
 	"errors"
 	"net/mail"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type storeRepo interface {
+	store.Transactor
+	app.AuditStore
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
 	GetSendIdentity(ctx context.Context, id uuid.UUID) (*models.SendIdentity, error)
 	ListSendIdentities(ctx context.Context, tenantID uuid.UUID) ([]*models.SendIdentity, error)
@@ -26,12 +31,13 @@ type storeRepo interface {
 }
 
 type Service struct {
-	store  storeRepo
-	logger zerolog.Logger
+	store      storeRepo
+	dispatcher *hooks.Dispatcher
+	logger     zerolog.Logger
 }
 
-func NewService(s storeRepo, logger zerolog.Logger) *Service {
-	return &Service{store: s, logger: logger.With().Str("service", "send_identities").Logger()}
+func NewService(s storeRepo, dispatcher *hooks.Dispatcher, logger zerolog.Logger) *Service {
+	return &Service{store: s, dispatcher: dispatcher, logger: logger.With().Str("service", "send_identities").Logger()}
 }
 
 // List returns the tenant's send identities. Admins see all identities;
@@ -87,18 +93,26 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, req CreateReque
 	}
 
 	si := &models.SendIdentity{
+		ID:           uuid.New(),
 		TenantID:     actor.TenantID,
 		ZoneID:       req.ZoneID,
 		Address:      address,
 		IdentityType: identityType,
 		Verified:     zone.IsVerified && zone.MXVerified,
 	}
-	if err := s.store.CreateSendIdentity(ctx, si); err != nil {
-		lower := strings.ToLower(err.Error())
-		if strings.Contains(lower, "duplicate") || strings.Contains(lower, "unique") || strings.Contains(lower, "23505") {
-			return nil, app.Conflict("send identity already exists")
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(actor.TenantID), Actor: actor.AuditLabel(), Action: "send_identity.create", ResourceType: "send_identity", ResourceID: app.UUIDPtr(si.ID), Details: app.MustJSON(map[string]any{"zone_id": si.ZoneID, "address": si.Address, "identity_type": si.IdentityType, "verified": si.Verified})}
+	event := hooks.Event{Type: "send_identity.created", TenantID: actor.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"send_identity_id": si.ID.String(), "zone_id": si.ZoneID.String(), "address": si.Address, "identity_type": si.IdentityType, "verified": si.Verified}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		if err := s.store.CreateSendIdentity(txCtx, si); err != nil {
+			lower := strings.ToLower(err.Error())
+			if strings.Contains(lower, "duplicate") || strings.Contains(lower, "unique") || strings.Contains(lower, "23505") {
+				return app.Conflict("send identity already exists")
+			}
+			return err
 		}
-		return nil, app.Internal(err)
+		return nil
+	}); err != nil {
+		return nil, err
 	}
 	return si, nil
 }
@@ -119,10 +133,11 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, id uuid.UUID) e
 	if si == nil || si.TenantID != actor.TenantID {
 		return app.NotFound("send identity not found")
 	}
-	if err := s.store.DeleteSendIdentity(ctx, id); err != nil {
-		return app.Internal(err)
-	}
-	return nil
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(si.TenantID), Actor: actor.AuditLabel(), Action: "send_identity.delete", ResourceType: "send_identity", ResourceID: app.UUIDPtr(si.ID), Details: app.MustJSON(map[string]any{"zone_id": si.ZoneID, "address": si.Address, "identity_type": si.IdentityType})}
+	event := hooks.Event{Type: "send_identity.deleted", TenantID: si.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"send_identity_id": si.ID.String(), "zone_id": si.ZoneID.String(), "address": si.Address, "identity_type": si.IdentityType}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteSendIdentity(txCtx, id)
+	})
 }
 
 func normalizeIdentityAddress(raw string) (string, models.SendIdentityType, string, error) {

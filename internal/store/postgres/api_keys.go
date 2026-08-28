@@ -24,7 +24,7 @@ func (s *PgStore) CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) erro
 	if len(k.AllowedZoneIDs) > 0 {
 		zoneIDs = k.AllowedZoneIDs
 	}
-	_, err = s.pool.Exec(ctx, `
+	_, err = s.db(ctx).Exec(ctx, `
 		INSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
 		k.ID, k.TenantID, k.KeyHash, k.KeyPrefix, k.Label, scopesJSON, k.OwnerUserID, zoneIDs, k.ExpiresAt, k.CreatedAt)
@@ -32,7 +32,7 @@ func (s *PgStore) CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) erro
 }
 
 func (s *PgStore) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
 		FROM tenant_api_keys WHERE tenant_id=$1 ORDER BY created_at`, tenantID)
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *PgStore) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*model
 }
 
 func (s *PgStore) ListAPIKeysByOwner(ctx context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error) {
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
 		FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2 ORDER BY created_at`, tenantID, ownerUserID)
 	if err != nil {
@@ -81,7 +81,7 @@ func (s *PgStore) GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAP
 	k := &models.TenantAPIKey{}
 	var scopesJSON []byte
 	var ownerID pgtype.UUID
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
 		FROM tenant_api_keys WHERE id=$1`, id).
 		Scan(&k.ID, &k.TenantID, &k.KeyPrefix, &k.Label,
@@ -105,7 +105,7 @@ func (s *PgStore) GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAP
 }
 
 func (s *PgStore) DeleteAPIKey(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM tenant_api_keys WHERE id=$1`, id)
+	_, err := s.db(ctx).Exec(ctx, `DELETE FROM tenant_api_keys WHERE id=$1`, id)
 	return err
 }
 
@@ -117,7 +117,7 @@ func (s *PgStore) ResolveAPIKey(ctx context.Context, rawKey string) (*models.Ten
 	var scopesJSON []byte
 	var allowedZoneIDs []uuid.UUID
 	var ownerUserID pgtype.UUID
-	err := s.pool.QueryRow(ctx, `
+	err := s.db(ctx).QueryRow(ctx, `
 		SELECT k.id, k.scopes, k.allowed_zone_ids, k.owner_user_id, t.id, t.name, t.plan_id, t.is_super, t.created_at
 		FROM tenant_api_keys k
 		JOIN tenants t ON t.id = k.tenant_id
@@ -145,11 +145,11 @@ func (s *PgStore) ResolveAPIKey(ctx context.Context, rawKey string) (*models.Ten
 
 func (s *PgStore) TouchAPIKey(ctx context.Context, id uuid.UUID, ip string) error {
 	if ip == "" {
-		_, err := s.pool.Exec(ctx,
+		_, err := s.db(ctx).Exec(ctx,
 			`UPDATE tenant_api_keys SET last_used_at=now() WHERE id=$1`, id)
 		return err
 	}
-	_, err := s.pool.Exec(ctx,
+	_, err := s.db(ctx).Exec(ctx,
 		`UPDATE tenant_api_keys SET last_used_at=now(), last_used_ip=$2 WHERE id=$1`, id, ip)
 	return err
 }

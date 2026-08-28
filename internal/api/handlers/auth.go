@@ -14,10 +14,14 @@ import (
 	"tabmail/internal/api/middleware"
 	appcore "tabmail/internal/app"
 	authapp "tabmail/internal/app/auth"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 )
 
 type authStore interface {
+	store.Transactor
+	appcore.AuditStore
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	CreateUser(ctx context.Context, u *models.User) error
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
@@ -29,13 +33,13 @@ type authStore interface {
 	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
+	ConsumeRefreshToken(ctx context.Context, id uuid.UUID) (bool, error)
 	RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error
 	CreateTenant(ctx context.Context, t *models.Tenant) error
 	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
 	CreateAdminInvitation(ctx context.Context, inv *models.AdminInvitation) error
 	GetAdminInvitationByCode(ctx context.Context, code string) (*models.AdminInvitation, error)
-	MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error
-	InsertAudit(ctx context.Context, e *models.AuditEntry) error
+	AcceptAdminInvitation(ctx context.Context, id uuid.UUID) (bool, error)
 	GetPermissionProfile(ctx context.Context, id uuid.UUID) (*models.PermissionProfile, error)
 }
 
@@ -55,8 +59,8 @@ type AuthHandler struct {
 	logger  zerolog.Logger
 }
 
-func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings authapp.SettingsReader, authCfg AuthHandlerConfig, l zerolog.Logger) *AuthHandler {
-	service := authapp.NewService(s, authapp.Config{
+func NewAuthHandler(s authStore, dispatcher *hooks.Dispatcher, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings authapp.SettingsReader, authCfg AuthHandlerConfig, l zerolog.Logger) *AuthHandler {
+	service := authapp.NewService(s, dispatcher, authapp.Config{
 		JWTSecret:        jwtSecret,
 		DefaultPlanID:    defaultPlanID,
 		OpenRegistration: openRegistration,
@@ -128,12 +132,12 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		RefreshToken string `json:"refresh_token"`
 	}
 	if err := decodeBody(r, &req); err != nil {
-		// Even without body, revoke all tokens for the logged-in user
-		h.service.Logout(r.Context(), "", caller)
-		noContent(w)
+		req.RefreshToken = ""
+	}
+	if err := h.service.Logout(r.Context(), req.RefreshToken, caller); err != nil {
+		h.respondAuthError(w, err)
 		return
 	}
-	h.service.Logout(r.Context(), req.RefreshToken, caller)
 	noContent(w)
 }
 
@@ -275,8 +279,8 @@ func (h *AuthHandler) DeleteUserByAdmin(w http.ResponseWriter, r *http.Request) 
 	}
 	err = h.service.DeleteUser(
 		r.Context(),
+		middleware.ActorFromContext(r.Context()),
 		middleware.TenantFromCtx(r.Context()),
-		middleware.UserFromCtx(r.Context()),
 		userID,
 	)
 	if err != nil {

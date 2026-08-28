@@ -20,6 +20,7 @@ type permTestStore struct {
 	deleted    []uuid.UUID
 	listScope  []*uuid.UUID
 	getZoneErr error
+	audits     []*models.AuditEntry
 }
 
 func newPermTestStore() *permTestStore {
@@ -29,6 +30,16 @@ func newPermTestStore() *permTestStore {
 		zones:     map[uuid.UUID]*models.DomainZone{},
 		overrides: map[uuid.UUID]*models.UserPermissionOverride{},
 	}
+}
+
+func (s *permTestStore) WithinTx(ctx context.Context, fn func(context.Context) error) error {
+	return fn(ctx)
+}
+
+func (s *permTestStore) InsertAudit(_ context.Context, entry *models.AuditEntry) error {
+	cp := *entry
+	s.audits = append(s.audits, &cp)
+	return nil
 }
 
 func (s *permTestStore) ListPermissionProfiles(_ context.Context, tenantID *uuid.UUID) ([]*models.PermissionProfile, error) {
@@ -114,7 +125,7 @@ func (s *permTestStore) GetZone(_ context.Context, id uuid.UUID) (*models.Domain
 }
 
 func newTestService(store *permTestStore) *Service {
-	return NewService(store, zerolog.Nop())
+	return NewService(store, nil, zerolog.Nop())
 }
 
 func requireKind(t *testing.T, err error, want app.ErrorKind) {

@@ -16,11 +16,15 @@ import (
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/netpolicy"
+	"tabmail/internal/store"
 )
 
 type storeRepo interface {
+	store.Transactor
+	app.AuditStore
 	CreateWebhookEndpoint(ctx context.Context, ep *models.WebhookEndpoint) error
 	ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) ([]*models.WebhookEndpoint, error)
 	GetWebhookEndpoint(ctx context.Context, id uuid.UUID) (*models.WebhookEndpoint, error)
@@ -46,12 +50,13 @@ const (
 )
 
 type Service struct {
-	store  storeRepo
-	logger zerolog.Logger
+	store      storeRepo
+	dispatcher *hooks.Dispatcher
+	logger     zerolog.Logger
 }
 
-func NewService(s storeRepo, logger zerolog.Logger) *Service {
-	return &Service{store: s, logger: logger.With().Str("service", "webhooks").Logger()}
+func NewService(s storeRepo, dispatcher *hooks.Dispatcher, logger zerolog.Logger) *Service {
+	return &Service{store: s, dispatcher: dispatcher, logger: logger.With().Str("service", "webhooks").Logger()}
 }
 
 // CreateRequest is the endpoint a tenant wants TabMail to call.
@@ -120,8 +125,12 @@ func (s *Service) Create(ctx context.Context, caller Caller, req CreateRequest) 
 		UpdatedAt:  now,
 	}
 	ep.Secret = secret
-	if err := s.store.CreateWebhookEndpoint(ctx, ep); err != nil {
-		return nil, app.Internal(err)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(tenantID), Actor: caller.Actor.AuditLabel(), Action: "webhook_endpoint.create", ResourceType: "webhook_endpoint", ResourceID: app.UUIDPtr(ep.ID), Details: app.MustJSON(map[string]any{"url": ep.URL, "event_types": ep.EventTypes, "is_active": ep.IsActive})}
+	event := hooks.Event{Type: "webhook_endpoint.created", TenantID: tenantID.String(), OccurredAt: now.UTC(), Metadata: map[string]any{"webhook_endpoint_id": ep.ID.String(), "url": ep.URL, "event_types": ep.EventTypes, "is_active": ep.IsActive}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.CreateWebhookEndpoint(txCtx, ep)
+	}); err != nil {
+		return nil, err
 	}
 	return ep, nil
 }
@@ -150,20 +159,26 @@ func (s *Service) Update(ctx context.Context, caller Caller, id uuid.UUID, req U
 		existing.IsActive = *req.IsActive
 	}
 
-	if err := s.store.UpdateWebhookEndpoint(ctx, existing); err != nil {
-		return nil, app.Internal(err)
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(existing.TenantID), Actor: caller.Actor.AuditLabel(), Action: "webhook_endpoint.update", ResourceType: "webhook_endpoint", ResourceID: app.UUIDPtr(existing.ID), Details: app.MustJSON(map[string]any{"url": existing.URL, "event_types": existing.EventTypes, "is_active": existing.IsActive})}
+	event := hooks.Event{Type: "webhook_endpoint.updated", TenantID: existing.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"webhook_endpoint_id": existing.ID.String(), "url": existing.URL, "event_types": existing.EventTypes, "is_active": existing.IsActive}}
+	if err := app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.UpdateWebhookEndpoint(txCtx, existing)
+	}); err != nil {
+		return nil, err
 	}
 	return existing, nil
 }
 
 func (s *Service) Delete(ctx context.Context, caller Caller, id uuid.UUID) error {
-	if _, err := s.ownedEndpoint(ctx, caller, id); err != nil {
+	existing, err := s.ownedEndpoint(ctx, caller, id)
+	if err != nil {
 		return err
 	}
-	if err := s.store.DeleteWebhookEndpoint(ctx, id); err != nil {
-		return app.Internal(err)
-	}
-	return nil
+	audit := models.AuditEntry{TenantID: app.UUIDPtr(existing.TenantID), Actor: caller.Actor.AuditLabel(), Action: "webhook_endpoint.delete", ResourceType: "webhook_endpoint", ResourceID: app.UUIDPtr(existing.ID), Details: app.MustJSON(map[string]any{"url": existing.URL, "event_types": existing.EventTypes, "is_active": existing.IsActive})}
+	event := hooks.Event{Type: "webhook_endpoint.deleted", TenantID: existing.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"webhook_endpoint_id": existing.ID.String(), "url": existing.URL}}
+	return app.CommitMutation(ctx, s.store, s.store, s.dispatcher, audit, &event, func(txCtx context.Context) error {
+		return s.store.DeleteWebhookEndpoint(txCtx, id)
+	})
 }
 
 // ownedEndpoint loads an endpoint the caller may write to. An endpoint in

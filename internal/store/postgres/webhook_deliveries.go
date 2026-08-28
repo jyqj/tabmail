@@ -13,7 +13,7 @@ func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.Out
 	if event == nil || len(urls) == 0 {
 		return nil
 	}
-	tx, err := s.pool.Begin(ctx)
+	tx, err := s.db(ctx).Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func (s *PgStore) ClaimWebhookDeliveries(ctx context.Context, now time.Time, lim
 	}
 	now = now.UTC()
 	leaseUntil := now.Add(claimLeaseDuration)
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		WITH cte AS (
 			SELECT id
 			FROM webhook_deliveries
@@ -71,7 +71,7 @@ func (s *PgStore) ClaimWebhookDeliveries(ctx context.Context, now time.Time, lim
 
 func (s *PgStore) MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error {
 	now := time.Now().UTC()
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE webhook_deliveries
 		SET state='delivered', delivered_at=$2, claimed_at=NULL, lease_until=NULL, updated_at=$2
 		WHERE id=$1`, id, now)
@@ -83,7 +83,7 @@ func (s *PgStore) MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, la
 	if dead {
 		state = "dead"
 	}
-	_, err := s.pool.Exec(ctx, `
+	_, err := s.db(ctx).Exec(ctx, `
 		UPDATE webhook_deliveries
 		SET state=$2, last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=$5
 		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
@@ -94,7 +94,7 @@ func (s *PgStore) ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]m
 	if limit <= 0 {
 		limit = 20
 	}
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,url,event_type,payload,attempts,last_error,created_at,last_tried_at
 		FROM webhook_deliveries
 		WHERE state='dead'
@@ -123,7 +123,7 @@ func (s *PgStore) ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]m
 
 func (s *PgStore) CountDeadWebhookDeliveries(ctx context.Context) (int, error) {
 	var total int
-	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries WHERE state='dead'`).Scan(&total)
+	err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries WHERE state='dead'`).Scan(&total)
 	return total, err
 }
 
@@ -146,11 +146,11 @@ func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, sta
 	}
 
 	var total int
-	if err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries`+where, filters...).Scan(&total); err != nil {
+	if err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries`+where, filters...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
-	rows, err := s.pool.Query(ctx, `
+	rows, err := s.db(ctx).Query(ctx, `
 		SELECT id,event_id,url,event_type,payload,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,last_tried_at,delivered_at,created_at,updated_at
 		FROM webhook_deliveries`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
@@ -171,10 +171,10 @@ func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, sta
 func (s *PgStore) CountWebhookDeliveriesByState(ctx context.Context, states ...string) (int, error) {
 	if len(states) == 0 {
 		var total int
-		err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries`).Scan(&total)
+		err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries`).Scan(&total)
 		return total, err
 	}
 	var total int
-	err := s.pool.QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries WHERE state = ANY($1)`, states).Scan(&total)
+	err := s.db(ctx).QueryRow(ctx, `SELECT count(*) FROM webhook_deliveries WHERE state = ANY($1)`, states).Scan(&total)
 	return total, err
 }
