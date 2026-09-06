@@ -1,0 +1,20 @@
+name: Source formatter fixture
+on:
+  push:
+    branches: ['feat/enterprise-mail-governance']
+    paths: ['.github/workflows/formatter-kit.yml']
+permissions:
+  contents: read
+jobs:
+  formatter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm pack prettier@3.5.3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formatter-kit
+          path: prettier-3.5.3.tgz
+          retention-days: 1
