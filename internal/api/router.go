@@ -101,6 +101,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 
 	r.Use(middleware.Auth(st, cfg.JWTSecret, cfg.PublicTenantID))
 	r.Use(middleware.PermissionLoader(st))
+	r.Use(handlers.CompanyGuard(st))
 	r.Use(cfg.RateLimiter.Middleware)
 
 	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
@@ -118,6 +119,27 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	}
 
 	r.Route("/api/v1", func(r chi.Router) {
+		if company := handlers.NewCompanyHandler(st, cfg.NamingMode == policy.NamingFull && !cfg.StripPlus, cfg.Dispatcher.Enabled(), cfg.Logger); company != nil {
+			r.Post("/company/activate-account", company.Activate)
+			r.Group(func(r chi.Router) {
+				r.Use(middleware.RequireAuth)
+				r.Get("/company", company.State)
+				r.Post("/company", company.Enable)
+				r.Get("/company/employees", company.Members)
+				r.Post("/company/employees", company.Provision)
+				r.Patch("/company/employees/{id}", company.UpdateMember)
+				r.Post("/company/employees/{id}/invite", company.Reinvite)
+				r.Get("/company/mailboxes", company.Mailboxes)
+				r.Post("/company/mailboxes", company.CreateMailbox)
+				r.Get("/company/grants", company.Grants)
+				r.Put("/company/grants", company.SetGrant)
+				r.Get("/company/templates", company.Templates)
+				r.Post("/company/templates", company.SaveTemplate)
+				r.Patch("/company/templates/{id}", company.TemplateStatus)
+				r.Post("/company/templates/preview", company.Preview)
+			})
+		}
+
 		// -- Auth (public, no auth required) --
 		r.Post("/auth/login", auth.Login)
 		r.Post("/auth/register", auth.Register)

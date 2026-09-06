@@ -11,6 +11,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/enterprise"
 	"tabmail/internal/hooks"
 	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
@@ -66,6 +67,18 @@ func NewService(s storeRepo, obj store.ObjectStore, dispatcher *hooks.Dispatcher
 }
 
 func (s *Service) List(ctx context.Context, actor authz.Actor, tenant *models.Tenant, pg models.Page) ([]*models.Mailbox, int, error) {
+	if tenant != nil {
+		company, err := enterprise.Lookup(ctx, s.store, tenant.ID)
+		if err != nil {
+			return nil, 0, app.Internal(err)
+		}
+		if company != nil {
+			if actor.Type != authz.PrincipalUser {
+				return nil, 0, app.Forbidden("employee session required")
+			}
+			return s.store.(enterprise.Reader).ListCompanyMailboxes(ctx, tenant.ID, actor.ID, pg)
+		}
+	}
 	isAdmin := actor.IsSuperAdmin || actor.IsAdmin
 	if err := app.EnsureTenantScope(tenant, isAdmin); err != nil {
 		return nil, 0, err

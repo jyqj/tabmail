@@ -1,6 +1,6 @@
 -- TabMail baseline schema.
--- Pre-launch: executed by postgres.New on fresh databases.
--- All columns declared inline; no ALTER TABLE patches.
+-- Frozen migration version 1, applied once by the versioned migration runner.
+-- After release, add a new migration rather than editing this baseline.
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
@@ -550,10 +550,7 @@ SELECT tenant_id, id, '*@' || domain, 'domain_wildcard', (is_verified AND mx_ver
 FROM domain_zones
 ON CONFLICT DO NOTHING;
 
--- Migration: remove grant tables
-DROP TABLE IF EXISTS send_as_grants CASCADE;
-DROP TABLE IF EXISTS mailbox_grants CASCADE;
-DROP TABLE IF EXISTS zone_grants CASCADE;
+-- Historical grant tables are preserved. Enterprise grants use their own migration.
 
 -- ============================================================
 -- Webhook endpoints (tenant-level)

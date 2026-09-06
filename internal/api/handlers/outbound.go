@@ -12,7 +12,9 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/enterprise"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/store"
@@ -43,14 +45,16 @@ func NewOutboundHandler(svc *outbound.Service, st store.Store, logger zerolog.Lo
 
 // sendRequest is the JSON body for POST /api/v1/send.
 type sendRequest struct {
-	From     string            `json:"from"`
-	To       []string          `json:"to"`
-	CC       []string          `json:"cc"`
-	BCC      []string          `json:"bcc"`
-	Subject  string            `json:"subject"`
-	TextBody string            `json:"text_body"`
-	HTMLBody string            `json:"html_body"`
-	Headers  map[string]string `json:"headers"`
+	TemplateID *uuid.UUID        `json:"template_id"`
+	Variables  map[string]string `json:"variables"`
+	From       string            `json:"from"`
+	To         []string          `json:"to"`
+	CC         []string          `json:"cc"`
+	BCC        []string          `json:"bcc"`
+	Subject    string            `json:"subject"`
+	TextBody   string            `json:"text_body"`
+	HTMLBody   string            `json:"html_body"`
+	Headers    map[string]string `json:"headers"`
 }
 
 // maxSendBodyBytes limits the JSON request body for outbound send to 2 MB.
@@ -188,6 +192,7 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 
 	// Build and submit the outbound job.
 	job, err := h.outbound.Submit(ctx, outbound.SendRequest{
+		TemplateID: body.TemplateID, Variables: body.Variables,
 		TenantID: tenant.ID,
 		UserID:   userID,
 		APIKeyID: apiKeyID,
@@ -203,6 +208,14 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		Quota:    quota,
 	})
 	if err != nil {
+		if errors.Is(err, enterprise.ErrQuota) {
+			writeJSON(w, http.StatusTooManyRequests, envelope{Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: err.Error()}})
+			return
+		}
+		if _, yes := app.As(err); yes {
+			respondAppError(w, h.logger, err)
+			return
+		}
 		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
 			writeJSON(w, http.StatusTooManyRequests, envelope{
 				Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: "send-as daily quota exceeded"},
@@ -282,6 +295,12 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 	if job.State != models.OutboundDead && job.State != models.OutboundFailed {
 		errBadRequest(w, "only dead or failed jobs can be retried")
 		return
+	}
+	if repo, ok := h.store.(enterprise.Repository); ok {
+		if err := repo.ValidateCompanyJob(ctx, job); err != nil {
+			respondAppError(w, h.logger, err)
+			return
+		}
 	}
 	if err := h.store.RequeueOutboundJob(ctx, jobID); err != nil {
 		h.logger.Err(err).Str("job_id", jobID.String()).Msg("requeue outbound job")
@@ -374,6 +393,14 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 	if err != nil {
 		return nil, err
 	}
+	company, companyErr := enterprise.Lookup(ctx, h.store, tenant.ID)
+	if companyErr != nil {
+		return nil, companyErr
+	}
+	actor := authz.ActorFromContext(ctx)
+	if company != nil && (job == nil || job.UserID == nil || *job.UserID != actor.ID) {
+		return nil, errOutboundJobNotFound
+	}
 	if !canAccessOutboundJob(ctx, tenant.ID, job) {
 		return nil, errOutboundJobNotFound
 	}
@@ -382,7 +409,11 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
 	actor := authz.ActorFromContext(ctx)
-	if actor.IsSuperAdmin || actor.IsAdmin {
+	company, err := enterprise.Lookup(ctx, h.store, tenantID)
+	if err != nil {
+		return nil, 0, err
+	}
+	if (actor.IsSuperAdmin || actor.IsAdmin) && company == nil {
 		return h.store.ListOutboundJobs(ctx, tenantID, pg)
 	}
 

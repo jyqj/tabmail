@@ -193,6 +193,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [snapshot.accessToken, snapshot.user]);
 
   const loginWithTokens = useCallback((accessToken: string, refreshToken: string, user: AuthUser) => {
+    // A new employee session must not inherit temporary mailbox credentials.
+    for (const key of ["tabmail_mailbox_token","tabmail_mailbox_address","tabmail_mailbox_api_key","tabmail_mailbox_api_key_address"]) localStorage.removeItem(key);
     setStorageItem("tabmail_access_token", accessToken);
     setStorageItem("tabmail_refresh_token", refreshToken);
     localStorage.setItem("tabmail_user", JSON.stringify(user));

@@ -3,6 +3,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useCompany } from "@/hooks/use-company";
 import { SiteHeader } from "@/components/site-header";
 import { TabMailLogo } from "@/components/tabmail-logo";
 import { Button } from "@/components/ui/button";
@@ -80,6 +81,10 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 export default function HomePage() {
   const router = useRouter();
+  const company = useCompany();
+  useEffect(() => {
+    if (company.data?.data.company && company.data.data.member?.is_active) router.replace("/mail");
+  }, [company.data, router]);
   const { t } = useI18n();
   const [address, setAddress] = useState("");
   const heroInputRef = useRef<HTMLInputElement>(null);

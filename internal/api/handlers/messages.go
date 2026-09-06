@@ -133,10 +133,19 @@ func (h *MessageHandler) StreamMailbox(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-r.Context().Done():
 			return
-		case event := <-ch:
+		case event, open := <-ch:
+			if !open {
+				return
+			}
+			if _, err := h.service.ResolveMailbox(r.Context(), mb.FullAddress, h.resolveViewer(r)); err != nil {
+				return
+			}
 			writeSSE(w, string(event.Type), event)
 			flusher.Flush()
 		case <-ticker.C:
+			if _, err := h.service.ResolveMailbox(r.Context(), mb.FullAddress, h.resolveViewer(r)); err != nil {
+				return
+			}
 			writeSSE(w, "ping", realtime.Event{Type: realtime.EventPing, Mailbox: mb.FullAddress})
 			flusher.Flush()
 		}

@@ -49,7 +49,7 @@ func New(ctx context.Context, cfg config.DB) (*PgStore, error) {
 		pool.Close()
 		return nil, fmt.Errorf("postgres: ping: %w", err)
 	}
-	if _, err := pool.Exec(ctx, schemaSQL); err != nil {
+	if err := applyMigrations(ctx, pool); err != nil {
 		pool.Close()
 		return nil, fmt.Errorf("postgres: initialize schema: %w", err)
 	}
@@ -1105,7 +1105,7 @@ func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, l
 		WITH doomed AS (
 			SELECT id, mailbox_id
 			FROM messages
-			WHERE expires_at < $1
+			WHERE expires_at < $1 AND NOT retention_exempt
 			ORDER BY expires_at, id
 			LIMIT $2
 		),
@@ -1148,7 +1148,7 @@ func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, l
 func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT raw_object_key FROM messages
-		WHERE expires_at < $1 AND raw_object_key IS NOT NULL AND raw_object_key != ''
+		WHERE expires_at < $1 AND NOT retention_exempt AND raw_object_key IS NOT NULL AND raw_object_key != ''
 		ORDER BY expires_at, id
 		LIMIT $2`, before, limit)
 	if err != nil {
@@ -1177,7 +1177,7 @@ func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before
 		WITH doomed AS (
 			SELECT id, mailbox_id, raw_object_key
 			FROM messages
-			WHERE expires_at < $1
+			WHERE expires_at < $1 AND NOT retention_exempt
 			ORDER BY expires_at, id
 			LIMIT $2
 		),

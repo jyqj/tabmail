@@ -10,6 +10,7 @@ import (
 	"github.com/jhillyerd/enmime/v2"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
+	"tabmail/internal/enterprise"
 	"tabmail/internal/hooks"
 	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
@@ -96,6 +97,33 @@ func (s *Service) ResolveMailbox(ctx context.Context, address string, viewer Vie
 	if mb == nil {
 		return nil, app.NotFound("mailbox not found")
 	}
+	company, companyErr := enterprise.Lookup(ctx, s.store, mb.TenantID)
+	if companyErr != nil {
+		return nil, app.Internal(companyErr)
+	}
+	if company != nil {
+		if viewer.Tenant == nil || viewer.Tenant.ID != mb.TenantID || viewer.AuthMode == AuthModeAPIKey || viewer.UserID == nil {
+			return nil, app.Forbidden("employee session in this company required")
+		}
+		member, err := s.store.(enterprise.Reader).GetCompanyMember(ctx, mb.TenantID, *viewer.UserID)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
+		if member == nil || !member.Active {
+			return nil, app.Forbidden("active employee required")
+		}
+		if member.Role == "admin" {
+			return mb, nil
+		} // metadata only; content checked separately
+		_, err = enterprise.CheckMailbox(ctx, s.store, mb.TenantID, viewer.UserID, mb.ID, false)
+		if err != nil {
+			return nil, err
+		}
+		return mb, nil
+	}
+	if viewer.IsAdmin && !viewer.IsSuperAdmin && (viewer.Tenant == nil || viewer.Tenant.ID != mb.TenantID) {
+		return nil, app.Forbidden("tenant boundary")
+	}
 	if viewer.IsSuperAdmin || viewer.IsAdmin {
 		return mb, nil
 	}
@@ -164,6 +192,18 @@ func (s *Service) ResolveMailboxForWrite(ctx context.Context, address string, vi
 	}
 	if mb == nil {
 		return nil, app.NotFound("mailbox not found")
+	}
+	if company, err := enterprise.Lookup(ctx, s.store, mb.TenantID); err != nil {
+		return nil, app.Internal(err)
+	} else if company != nil {
+		if viewer.Tenant == nil || viewer.Tenant.ID != mb.TenantID || viewer.AuthMode == AuthModeAPIKey {
+			return nil, app.Forbidden("employee session required")
+		}
+		_, err = enterprise.CheckMailbox(ctx, s.store, mb.TenantID, viewer.UserID, mb.ID, true)
+		if err != nil {
+			return nil, err
+		}
+		return mb, nil
 	}
 	if viewer.IsSuperAdmin || viewer.IsAdmin {
 		return mb, nil
@@ -268,7 +308,7 @@ func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uu
 					if cleaned, err := sanitize.HTML(env.HTML); err == nil {
 						detail.HTMLBody = cleaned
 					} else {
-						detail.HTMLBody = env.HTML
+						return nil, app.Internal(err)
 					}
 				}
 			}
@@ -390,14 +430,16 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	if msg.MailboxID != mb.ID {
 		return nil, app.NotFound("message not found")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	if auditErr := s.store.InsertAudit(ctx, &models.AuditEntry{
 		TenantID:     app.UUIDPtr(mb.TenantID),
 		Actor:        actor,
 		Action:       "message.break_glass_read",
 		ResourceType: "message",
 		ResourceID:   app.UUIDPtr(msg.ID),
 		Details:      app.MustJSON(map[string]any{"mailbox": mb.FullAddress, "reason": reason, "scope": "body"}),
-	})
+	}); auditErr != nil {
+		return nil, app.Internal(auditErr)
+	}
 	detail := &models.MessageDetail{Message: *msg}
 	if msg.RawObjectKey != "" {
 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
@@ -409,7 +451,7 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 					if cleaned, err := sanitize.HTML(env.HTML); err == nil {
 						detail.HTMLBody = cleaned
 					} else {
-						detail.HTMLBody = env.HTML
+						return nil, app.Internal(err)
 					}
 				}
 			}
@@ -436,14 +478,16 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 	if msg.RawObjectKey == "" {
 		return nil, app.NotFound("raw source not available")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	if auditErr := s.store.InsertAudit(ctx, &models.AuditEntry{
 		TenantID:     app.UUIDPtr(mb.TenantID),
 		Actor:        actor,
 		Action:       "message.break_glass_read",
 		ResourceType: "message",
 		ResourceID:   app.UUIDPtr(msg.ID),
 		Details:      app.MustJSON(map[string]any{"mailbox": mb.FullAddress, "reason": reason, "scope": "source"}),
-	})
+	}); auditErr != nil {
+		return nil, app.Internal(auditErr)
+	}
 	rc, err := s.obj.Get(ctx, msg.RawObjectKey)
 	if err != nil {
 		s.logger.Err(err).Str("key", msg.RawObjectKey).Msg("get object")
@@ -458,6 +502,15 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 func (s *Service) canReadMessageContent(ctx context.Context, mb *models.Mailbox, viewer Viewer) bool {
 	if mb == nil {
 		return false
+	}
+	if company, err := enterprise.Lookup(ctx, s.store, mb.TenantID); err != nil {
+		return false
+	} else if company != nil {
+		if viewer.Tenant == nil || viewer.Tenant.ID != mb.TenantID || viewer.AuthMode == AuthModeAPIKey {
+			return false
+		}
+		_, err = enterprise.CheckMailbox(ctx, s.store, mb.TenantID, viewer.UserID, mb.ID, false)
+		return err == nil
 	}
 	// Non-admin viewers who resolved the mailbox successfully can read content.
 	if !viewer.IsSuperAdmin && !viewer.IsAdmin {
