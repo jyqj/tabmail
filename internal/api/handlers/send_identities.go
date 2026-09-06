@@ -68,6 +68,10 @@ func (h *SendIdentityHandler) List(w http.ResponseWriter, r *http.Request) {
 // Create handles POST /api/v1/send-identities — create a new send identity.
 // Only admin users can create send identities.
 func (h *SendIdentityHandler) Create(w http.ResponseWriter, r *http.Request) {
+	if !middleware.IsAdmin(r.Context()) {
+		errForbidden(w, "administrator required to manage sender identities")
+		return
+	}
 	var body struct {
 		ZoneID  string `json:"zone_id"`
 		Address string `json:"address"`
@@ -133,6 +137,10 @@ func (h *SendIdentityHandler) Create(w http.ResponseWriter, r *http.Request) {
 // Delete handles DELETE /api/v1/send-identities/{id} — delete a send identity.
 // Only admin users can delete send identities.
 func (h *SendIdentityHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	if !middleware.IsAdmin(r.Context()) {
+		errForbidden(w, "administrator required to manage sender identities")
+		return
+	}
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid id")

@@ -141,7 +141,10 @@ func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error 
 	if err := w.Close(); err != nil {
 		return fmt.Errorf("close data: %w", err)
 	}
-	return client.Quit()
+	// DATA completion is the acceptance boundary; a failed QUIT must not
+	// turn an accepted message into a retry and duplicate its delivery.
+	_ = client.Quit()
+	return nil
 }
 
 func groupByDomain(addrs []string) map[string][]string {

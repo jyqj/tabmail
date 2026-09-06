@@ -4,8 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import HomePage from "./page";
 
-const { pushMock, listDomainsMock, suggestAddressMock } = vi.hoisted(() => ({
+const { pushMock, replaceMock, companyMock, listDomainsMock, suggestAddressMock } = vi.hoisted(() => ({
   pushMock: vi.fn(),
+  replaceMock: vi.fn(),
+  companyMock: vi.fn(),
   listDomainsMock: vi.fn(),
   suggestAddressMock: vi.fn(),
 }));
@@ -13,8 +15,11 @@ const { pushMock, listDomainsMock, suggestAddressMock } = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: pushMock,
+    replace: replaceMock,
   }),
 }));
+
+vi.mock("@/hooks/use-company", () => ({ useCompany: companyMock }));
 
 vi.mock("next/link", () => ({
   default: ({ href, children }: { href: string; children: React.ReactNode }) => (
@@ -61,8 +66,15 @@ vi.mock("@/components/ui/card", () => ({
 }));
 
 describe("home page", () => {
+  it("redirects active company employees to their workbench", async () => {
+    companyMock.mockReturnValue({ data: { data: { company: { tenant_id: "tenant" }, member: { is_active: true } } } });
+    render(<HomePage />);
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/mail"));
+  });
   beforeEach(() => {
     pushMock.mockReset();
+    replaceMock.mockReset();
+    companyMock.mockReturnValue({data:{data:{company:null,member:null}}});
     listDomainsMock.mockReset();
     suggestAddressMock.mockReset();
     listDomainsMock.mockResolvedValue({

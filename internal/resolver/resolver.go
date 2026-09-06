@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/enterprise"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 )
@@ -111,6 +112,13 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		return &Result{Zone: zone, Mailbox: mb}, nil
 	}
 
+	company, companyErr := enterprise.Lookup(ctx, rv.store, zone.TenantID)
+	if companyErr != nil {
+		return nil, companyErr
+	}
+	if company != nil {
+		return nil, nil
+	} // company addresses must be explicitly provisioned
 	routes, err := rv.listRoutes(ctx, zone.ID)
 	if err != nil {
 		return nil, err

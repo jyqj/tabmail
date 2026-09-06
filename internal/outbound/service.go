@@ -12,8 +12,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
+	"tabmail/internal/app"
 	"tabmail/internal/config"
 	tabdkim "tabmail/internal/dkim"
+	"tabmail/internal/enterprise"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
@@ -51,19 +53,21 @@ func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Ser
 
 // SendRequest is the validated input for submitting an outbound email.
 type SendRequest struct {
-	TenantID uuid.UUID
-	UserID   *uuid.UUID
-	APIKeyID *uuid.UUID
-	ZoneID   uuid.UUID
-	From     string
-	To       []string
-	CC       []string
-	BCC      []string
-	Subject  string
-	TextBody string
-	HTMLBody string
-	Headers  map[string]string
-	Quota    store.OutboundQuotaReservation
+	TemplateID *uuid.UUID
+	Variables  map[string]string
+	TenantID   uuid.UUID
+	UserID     *uuid.UUID
+	APIKeyID   *uuid.UUID
+	ZoneID     uuid.UUID
+	From       string
+	To         []string
+	CC         []string
+	BCC        []string
+	Subject    string
+	TextBody   string
+	HTMLBody   string
+	Headers    map[string]string
+	Quota      store.OutboundQuotaReservation
 }
 
 // Submit enqueues an outbound email job after validation.
@@ -72,6 +76,13 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		return nil, fmt.Errorf("outbound sending is disabled")
 	}
 
+	company, err := s.prepareCompanySend(ctx, &req)
+	if err != nil {
+		return nil, err
+	}
+	if !company && (req.TemplateID != nil || len(req.Variables) > 0) {
+		return nil, app.BadRequest("templates require company mode")
+	}
 	// Validate all email addresses using RFC 5322 parsing.
 	if _, err := mail.ParseAddress(req.From); err != nil {
 		return nil, fmt.Errorf("invalid from address %q: %w", req.From, err)
@@ -152,7 +163,13 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		NextAttemptAt:   now,
 	}
 
-	if err := s.createOutboundJob(ctx, job, req.Quota); err != nil {
+	var enqueueErr error
+	if company {
+		enqueueErr = s.store.(enterprise.Repository).CreateCompanyJob(ctx, job, req.TemplateID)
+	} else {
+		enqueueErr = s.createOutboundJob(ctx, job, req.Quota)
+	}
+	if err := enqueueErr; err != nil {
 		return nil, fmt.Errorf("enqueue outbound job: %w", err)
 	}
 
@@ -211,6 +228,16 @@ func (s *Service) processJobs(ctx context.Context) {
 func (s *Service) deliverJob(ctx context.Context, job *models.OutboundJob) {
 	log := s.logger.With().Str("job_id", job.ID.String()).Logger()
 
+	if repo, ok := s.store.(enterprise.Repository); ok {
+		if err := repo.ValidateCompanyJob(ctx, job); err != nil {
+			if ae, yes := app.As(err); yes && (ae.Kind == app.KindForbidden || ae.Kind == app.KindBadRequest) {
+				_ = s.store.MarkOutboundJobFailed(ctx, job.ID, job.DeliveryToken, "company authorization revoked: "+err.Error(), true)
+			} else {
+				s.failOrRetry(ctx, job, "company authorization unavailable")
+			}
+			return
+		}
+	}
 	// Build MIME message.
 	mime, err := BuildMIME(job)
 	if err != nil {

@@ -1,8 +1,13 @@
 openapi: "3.1.0"
 info:
   title: TabMail API
-  version: "2.0"
+  version: "2.1-company-preview"
   description: |
+    This branch adds opt-in single-domain company governance, employee mailbox grants,
+    and controlled template sending. Company mode disables public automation and
+    legacy integration keys; use employee JWT sessions. Deployment and limitations:
+    docs/enterprise/README.md. The automation guide below applies to legacy tenants.
+
     TabMail is a multi-tenant, API-first disposable email service with both
     inbound (SMTP receive) and outbound (SMTP send) capabilities.
 
@@ -95,6 +100,8 @@ servers:
     description: Current host
 
 tags:
+  - name: Company
+    description: Opt-in single-domain employee mail governance (preview).
   - name: Auth
     description: Authentication and user session management
   - name: Domains
@@ -137,6 +144,156 @@ components:
       bearerFormat: JWT
       description: JWT access token from /auth/login
   schemas:
+    Company:
+      type: object
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        primary_zone_id:
+          type: string
+          format: uuid
+        domain:
+          type: string
+        name:
+          type: string
+        owner_id:
+          type: string
+          format: uuid
+        created_at:
+          type: string
+          format: date-time
+    CompanyMember:
+      type: object
+      properties:
+        user_id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        display_name:
+          type: string
+        company_role:
+          type: string
+          enum:
+          - admin
+          - employee
+          - restricted
+          - viewer
+        is_active:
+          type: boolean
+        daily_send_quota:
+          type: integer
+          minimum: 1
+          maximum: 10000
+    CompanyState:
+      type: object
+      properties:
+        company:
+          anyOf:
+          - $ref: '#/components/schemas/Company'
+          - type: 'null'
+        member:
+          anyOf:
+          - $ref: '#/components/schemas/CompanyMember'
+          - type: 'null'
+    CompanyGrant:
+      type: object
+      properties:
+        mailbox_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        address:
+          type: string
+          readOnly: true
+        can_read:
+          type: boolean
+        can_organize:
+          type: boolean
+        can_send:
+          type: boolean
+        template_only:
+          type: boolean
+      required:
+      - mailbox_id
+      - user_id
+    CompanyTemplateDraft:
+      type: object
+      properties:
+        family_id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 120
+        subject:
+          type: string
+          maxLength: 998
+        text_body:
+          type: string
+        html_body:
+          type: string
+        variables:
+          type: object
+          maxProperties: 32
+          additionalProperties:
+            type: integer
+            minimum: 1
+            maximum: 4000
+          description: Required scalar variable names mapped to maximum character lengths. {{.employee_name}} and {{.company_name}}
+            are server-controlled and cannot be declared or supplied.
+        mailbox_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            format: uuid
+      required:
+      - name
+      - subject
+      - mailbox_ids
+    CompanyTemplate:
+      allOf:
+      - $ref: '#/components/schemas/CompanyTemplateDraft'
+      - type: object
+        properties:
+          id:
+            type: string
+            format: uuid
+          tenant_id:
+            type: string
+            format: uuid
+          family_id:
+            type: string
+            format: uuid
+          version:
+            type: integer
+            minimum: 1
+          status:
+            type: string
+            enum:
+            - draft
+            - published
+            - retired
+          created_at:
+            type: string
+            format: date-time
+    CompanyInvitation:
+      type: object
+      properties:
+        member:
+          $ref: '#/components/schemas/CompanyMember'
+        activation_token:
+          type: string
+          description: One-time 72-hour activation code. Returned once; not emailed automatically. Store/deliver securely.
+        expires_at:
+          type: string
+          format: date-time
     Error:
       type: object
       properties:
@@ -788,6 +945,629 @@ components:
       description: Items per page
 
 paths:
+  /api/v1/company:
+    get:
+      tags:
+      - Company
+      summary: Get current company and live employee membership
+      operationId: getCompany
+      security:
+      - BearerAuth: []
+      description: Returns null company/member before activation. This is an employee JWT session, not an integration
+        key.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyState'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Company
+      summary: Explicitly enable single-primary-domain company governance
+      operationId: enableCompany
+      security:
+      - BearerAuth: []
+      description: Requires an active tenant-local administrator, exactly one verified domain, full mailbox naming
+        and disabled plus stripping. Revokes legacy keys, blocks pending old sends, closes public registration, removes
+        public/token mailbox access, and protects retained mail. Existing users become viewers except the owner; old
+        mailbox access is never inferred. Back up and quiesce workers/retention before activation. Primary domain
+        changes are not supported.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Company'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                primary_zone_id:
+                  type: string
+                  format: uuid
+                name:
+                  type: string
+                  maxLength: 120
+                confirm_lockdown:
+                  type: boolean
+                  enum:
+                  - true
+              required:
+              - primary_zone_id
+              - name
+              - confirm_lockdown
+  /api/v1/company/activate-account:
+    post:
+      tags:
+      - Company
+      summary: Consume an employee activation code
+      operationId: activateCompanyEmployee
+      security: []
+      description: Single-use, expires after 72 hours. Creates no new company. After success use normal login; no
+        tokens are returned here.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  minLength: 64
+                  maxLength: 64
+                password:
+                  type: string
+                  minLength: 12
+                  maxLength: 72
+                  description: 12–72 UTF-8 bytes, not just characters.
+              required:
+              - token
+              - password
+  /api/v1/company/employees:
+    get:
+      tags:
+      - Company
+      summary: List company employees
+      operationId: listCompanyEmployees
+      security:
+      - BearerAuth: []
+      description: Active company administrator required.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyMember'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    post:
+      tags:
+      - Company
+      summary: Provision pending employee, personal mailbox and activation code
+      operationId: provisionCompanyEmployee
+      security:
+      - BearerAuth: []
+      description: Active company administrator required. Only the company owner may appoint administrators. Existing
+        addresses are never claimed automatically. Creation, own-mailbox grants, invitation and audit commit atomically.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyInvitation'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                local_part:
+                  type: string
+                  maxLength: 64
+                display_name:
+                  type: string
+                  maxLength: 120
+                company_role:
+                  type: string
+                  enum:
+                  - admin
+                  - employee
+                  - restricted
+                  - viewer
+                daily_send_quota:
+                  type: integer
+                  minimum: 1
+                  maximum: 10000
+              required:
+              - local_part
+              - display_name
+              - company_role
+              - daily_send_quota
+  /api/v1/company/employees/{id}:
+    patch:
+      tags:
+      - Company
+      summary: Set employee role, active state and daily submission quota
+      operationId: updateCompanyEmployee
+      security:
+      - BearerAuth: []
+      description: Active company administrator required. All three fields are required. Owner/self changes are rejected.
+        Only owner can manage administrators. Pending accounts cannot be enabled without activation. Suspension revokes
+        credentials and blocks pending sends; it does not delete mail.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      updated:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company_role:
+                  type: string
+                  enum:
+                  - admin
+                  - employee
+                  - restricted
+                  - viewer
+                is_active:
+                  type: boolean
+                daily_send_quota:
+                  type: integer
+                  minimum: 1
+                  maximum: 10000
+              required:
+              - company_role
+              - is_active
+              - daily_send_quota
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/employees/{id}/invite:
+    post:
+      tags:
+      - Company
+      summary: Reissue activation code for a pending employee
+      operationId: reinviteCompanyEmployee
+      security:
+      - BearerAuth: []
+      description: Active company administrator required. Invalidates previous codes. Not a password reset for activated
+        employees.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      activation_token:
+                        type: string
+                      expires_at:
+                        type: string
+                        format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/mailboxes:
+    get:
+      tags:
+      - Company
+      summary: List employee-authorized mailboxes or administrator metadata
+      operationId: listCompanyMailboxes
+      security:
+      - BearerAuth: []
+      description: Read/send grants are applied before pagination and count. Administrators use all=true for mailbox
+        administration; it does not grant body or send access.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Mailbox'
+                  meta:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - name: all
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: Administrators may request company-wide metadata. Employees receive only their authorized resources.
+    post:
+      tags:
+      - Company
+      summary: Provision a shared company mailbox
+      operationId: createCompanySharedMailbox
+      security:
+      - BearerAuth: []
+      description: Active company administrator required. No read or send grant is implied. Assign members explicitly.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Mailbox'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                local_part:
+                  type: string
+                  maxLength: 64
+              required:
+              - local_part
+  /api/v1/company/grants:
+    get:
+      tags:
+      - Company
+      summary: List independent mailbox grants
+      operationId: listCompanyMailboxGrants
+      security:
+      - BearerAuth: []
+      description: ''
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyGrant'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - name: all
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: Administrators may request company-wide metadata. Employees receive only their authorized resources.
+    put:
+      tags:
+      - Company
+      summary: Replace an employee mailbox grant
+      operationId: replaceCompanyMailboxGrant
+      security:
+      - BearerAuth: []
+      description: Active company administrator required. Flags omitted become false. Organize requires read. Viewers
+        cannot send or organize. Non-owner administrators cannot grant themselves access. Same-tenant membership/mailbox
+        checks and audit are transactional.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      updated:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyGrant'
+  /api/v1/company/templates:
+    get:
+      tags:
+      - Company
+      summary: List available immutable template versions
+      operationId: listCompanyTemplates
+      security:
+      - BearerAuth: []
+      description: Employees see only published versions available through explicit send grants. Administrators use
+        all=true to include drafts and retired versions.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      parameters:
+      - name: all
+        in: query
+        schema:
+          type: boolean
+          default: false
+        description: Administrators may request company-wide metadata. Employees receive only their authorized resources.
+    post:
+      tags:
+      - Company
+      summary: Create a new immutable draft template version
+      operationId: createCompanyTemplateVersion
+      security:
+      - BearerAuth: []
+      description: Active company administrator required. Each save creates a new version; family_id appends to a
+        company-local family. Only scalar {{.name}} placeholders are accepted. Subject plus a text or HTML body is
+        required. Template availability never grants sender permission.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyTemplate'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyTemplateDraft'
+  /api/v1/company/templates/{id}:
+    patch:
+      tags:
+      - Company
+      summary: Publish or retire a specific template version
+      operationId: transitionCompanyTemplate
+      security:
+      - BearerAuth: []
+      description: Active company administrator required. Draft can be published or retired; published can be retired.
+        Retired cannot be republished. Retiring blocks unsent jobs that reference that version at the next authorization
+        check.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      updated:
+                        type: boolean
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  enum:
+                  - published
+                  - retired
+              required:
+              - status
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/templates/preview:
+    post:
+      tags:
+      - Company
+      summary: Render a server-side template preview
+      operationId: previewCompanyTemplate
+      security:
+      - BearerAuth: []
+      description: Employees require the published version and exact sender grant. Administrators may preview drafts
+        without acquiring send permission. System identity variables are derived from the session.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      subject:
+                        type: string
+                      text_body:
+                        type: string
+                      html_body:
+                        type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_id:
+                  type: string
+                  format: uuid
+                mailbox_id:
+                  type: string
+                  format: uuid
+                variables:
+                  type: object
+                  additionalProperties:
+                    type: string
+              required:
+              - template_id
+              - mailbox_id
   /api/v1/token:
     post:
       tags: [Mailboxes]
@@ -1071,87 +1851,6 @@ paths:
         "204": { description: Deleted }
 
   # ── Domain Grants ────────────────────────────────────
-  /api/v1/domains/{id}/grants:
-    get:
-      tags: [Grants]
-      summary: List grants for a domain zone
-      operationId: listZoneGrants
-      description: List all grants assigned to a domain zone.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Domain zone ID
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: "#/components/schemas/ZoneGrant" }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-    post:
-      tags: [Grants]
-      summary: Create a grant for a domain zone
-      operationId: createZoneGrant
-      description: Assign a role-based grant to a user or API key for a domain zone.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Domain zone ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateZoneGrantRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: { $ref: "#/components/schemas/ZoneGrant" }
-        "400": { $ref: '#/components/responses/BadRequest' }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  /api/v1/domains/{id}/grants/{grantId}:
-    delete:
-      tags: [Grants]
-      summary: Delete a domain zone grant
-      operationId: deleteZoneGrant
-      description: Remove a grant from a domain zone.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Domain zone ID
-        - name: grantId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Grant ID
-      responses:
-        "204": { description: Deleted }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  # ── Mailboxes ───────────────────────────────────────
   /api/v1/mailboxes:
     get:
       tags: [Mailboxes]
@@ -1217,87 +1916,6 @@ paths:
         "204": { description: Deleted }
 
   # ── Mailbox Grants ──────────────────────────────────
-  /api/v1/mailboxes/{mailboxId}/grants:
-    get:
-      tags: [Grants]
-      summary: List grants for a mailbox
-      operationId: listMailboxGrants
-      description: List all grants assigned to a mailbox.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: mailboxId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Mailbox ID
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: "#/components/schemas/MailboxGrant" }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-    post:
-      tags: [Grants]
-      summary: Create a grant for a mailbox
-      operationId: createMailboxGrant
-      description: Assign a role-based grant to a user or API key for a mailbox.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: mailboxId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Mailbox ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateMailboxGrantRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: { $ref: "#/components/schemas/MailboxGrant" }
-        "400": { $ref: '#/components/responses/BadRequest' }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  /api/v1/mailboxes/{mailboxId}/grants/{id}:
-    delete:
-      tags: [Grants]
-      summary: Delete a mailbox grant
-      operationId: deleteMailboxGrant
-      description: Remove a grant from a mailbox.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: mailboxId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Mailbox ID
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Grant ID
-      responses:
-        "204": { description: Deleted }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  # ── Messages ────────────────────────────────────────
   /api/v1/mailbox/{address}:
     get:
       tags: [Messages]
@@ -1573,87 +2191,6 @@ paths:
         "403": { $ref: '#/components/responses/Forbidden' }
         "404": { $ref: '#/components/responses/NotFound' }
 
-  /api/v1/send-identities/{id}/grants:
-    get:
-      tags: [Grants]
-      summary: List send-as grants for a send identity
-      operationId: listSendAsGrants
-      description: List all send-as grants for a specific send identity.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Send identity ID
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items: { $ref: "#/components/schemas/SendAsGrant" }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-    post:
-      tags: [Grants]
-      summary: Create a send-as grant
-      operationId: createSendAsGrant
-      description: Grant a user or API key permission to send as a specific identity.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Send identity ID
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateSendAsGrantRequest"
-      responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data: { $ref: "#/components/schemas/SendAsGrant" }
-        "400": { $ref: '#/components/responses/BadRequest' }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  /api/v1/send-identities/{id}/grants/{grantId}:
-    delete:
-      tags: [Grants]
-      summary: Delete a send-as grant
-      operationId: deleteSendAsGrant
-      description: Remove a send-as grant from a send identity.
-      security: [{ APIKey: [] }, { BearerAuth: [] }]
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Send identity ID
-        - name: grantId
-          in: path
-          required: true
-          schema: { type: string, format: uuid }
-          description: Grant ID
-      responses:
-        "204": { description: Deleted }
-        "403": { $ref: '#/components/responses/Forbidden' }
-        "404": { $ref: '#/components/responses/NotFound' }
-
-  # ── Sending ─────────────────────────────────────────
   /api/v1/send:
     post:
       tags: [Sending]
@@ -1666,6 +2203,13 @@ paths:
         The sender (`from`) domain must be a verified domain zone owned by
         the caller's tenant.
 
+        Company mode additionally requires an active employee JWT and an explicit
+        grant for the exact From mailbox. Restricted employees and template-only
+        grants must use a published scoped template. API keys and custom headers
+        are disabled in company mode. The same checks apply to retry and delivery.
+        A 201 response means queued, not delivered. Daily company quotas count
+        submissions per employee at UTC day boundaries, including administrators.
+
         **Rate limiting**: Subject to daily send quota configured in the
         user's permission profile.
       security:
@@ -1677,8 +2221,26 @@ paths:
           application/json:
             schema:
               type: object
-              required: [from, to, subject]
+              required: [from, to]
+              oneOf:
+                - required: [template_id]
+                  not:
+                    anyOf:
+                      - required: [subject]
+                      - required: [text_body]
+                      - required: [html_body]
+                - required: [subject]
+                  not:
+                    required: [template_id]
               properties:
+                template_id:
+                  type: string
+                  format: uuid
+                  description: Published company template version; omit subject/body and supply only variables.
+                variables:
+                  type: object
+                  additionalProperties: { type: string }
+                  description: Required scalar values; system employee_name/company_name may not be overridden.
                 from:
                   type: string
                   format: email

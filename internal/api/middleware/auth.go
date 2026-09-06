@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"tabmail/internal/authn"
+	"tabmail/internal/enterprise"
 	"tabmail/internal/models"
 )
 
@@ -145,6 +146,31 @@ func PermissionLoader(st permStore) func(http.Handler) http.Handler {
 				return
 			}
 
+			// Company policies take precedence over legacy administrator bypasses.
+			if user := UserFromCtx(ctx); user != nil {
+				tenant := TenantFromCtx(ctx)
+				if tenant != nil {
+					company, err := enterprise.Lookup(ctx, st, tenant.ID)
+					if err != nil {
+						writeError(w, 500, "INTERNAL", "company lookup failed")
+						return
+					}
+					if company != nil {
+						member, err := st.(enterprise.Reader).GetCompanyMember(ctx, tenant.ID, user.ID)
+						if err != nil {
+							writeError(w, 500, "INTERNAL", "company permissions unavailable")
+							return
+						}
+						if member == nil || !member.Active {
+							writeError(w, 403, "FORBIDDEN", "active employee required")
+							return
+						}
+						ctx = context.WithValue(ctx, ctxPermission, &models.EffectivePermission{CanSend: member.Role != "viewer", DailySendQuota: member.DailyQuota, AllowedZoneIDs: []uuid.UUID{company.PrimaryZoneID}})
+						next.ServeHTTP(w, r.WithContext(ctx))
+						return
+					}
+				}
+			}
 			// super_admin / admin gets unlimited
 			if mode == AuthModeSuperAdmin || mode == AuthModeAdmin {
 				ctx = context.WithValue(ctx, ctxPermission, &models.EffectivePermission{

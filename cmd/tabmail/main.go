@@ -60,6 +60,17 @@ func main() {
 	}
 	defer pg.Close()
 	logger.Info().Msg("connected to PostgreSQL and initialized schema")
+	if enabled, err := pg.HasCompanies(ctx); err != nil {
+		logger.Fatal().Err(err).Msg("checking company configuration")
+	} else if enabled && (strings.ToLower(strings.TrimSpace(cfg.MailboxNaming)) != "full" || cfg.StripPlusTag) {
+		logger.Fatal().Msg("company mode requires TABMAIL_MAILBOXNAMING=full and TABMAIL_STRIPPLUSTAG=false for every process role")
+	}
+
+	if enabled, err := pg.HasCompanies(ctx); err != nil {
+		logger.Fatal().Err(err).Msg("checking company integration configuration")
+	} else if enabled && strings.TrimSpace(cfg.Webhook.URLs) != "" {
+		logger.Fatal().Msg("company mode requires legacy TABMAIL_WEBHOOK_URLS to be disabled")
+	}
 
 	// --- Redis ---
 	rdb := redis.NewClient(&redis.Options{

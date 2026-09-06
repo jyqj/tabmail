@@ -1,0 +1,28 @@
+name: PostgreSQL validation fixture
+on:
+  push:
+    branches: ['feat/enterprise-mail-governance']
+    paths: ['.github/workflows/postgres-kit.yml']
+permissions:
+  contents: read
+jobs:
+  fixture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Export PostgreSQL test binaries without data or credentials
+        run: |
+          docker run --rm --entrypoint bash postgres:16-bookworm -ec '
+            mkdir -p /tmp/kit/bin /tmp/kit/lib /tmp/kit/share
+            cp -a /usr/lib/postgresql/16/bin/. /tmp/kit/bin/
+            cp -a /usr/lib/postgresql/16/lib/. /tmp/kit/lib/
+            cp -a /usr/share/postgresql/16/. /tmp/kit/share/
+            for lib in /usr/lib/x86_64-linux-gnu/*.so*; do
+              case "$lib" in *libc.so*|*libpthread.so*|*libdl.so*|*libm.so*|*librt.so*|*ld-linux*) ;; *) cp -L "$lib" /tmp/kit/lib/ ;; esac
+            done
+            tar -czf - -C /tmp/kit .
+          ' > postgres-kit.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: postgres-kit
+          path: postgres-kit.tar.gz
+          retention-days: 1

@@ -1,0 +1,109 @@
+name: Apply and validate company checkpoint
+
+on:
+  push:
+    branches: ['feat/enterprise-mail-governance']
+    paths:
+      - '.github/workflows/enterprise-checkpoint.yml'
+      - '.github/checkpoint/**'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: company-checkpoint-publish
+  cancel-in-progress: false
+
+jobs:
+  validate-and-publish:
+    if: github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/feat/enterprise-mail-governance'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test-only-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TABMAIL_TEST_DB_DSN: postgres://postgres:test-only-password@localhost:5432/tabmail_test?sslmode=disable
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - name: Apply exact checksum-verified business diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import lzma
+          import pathlib
+          import shutil
+          import subprocess
+          root = pathlib.Path('.github/checkpoint')
+          parts = sorted(root.glob('part-*.xzpart'))
+          assert len(parts) == 5, 'incomplete checkpoint'
+          patch = lzma.decompress(b''.join(p.read_bytes() for p in parts))
+          expected = '4f781277c989cf74db115ba7fb57137eb44e0364be07071554e50c4a223ca7e0'
+          assert hashlib.sha256(patch).hexdigest() == expected, 'checkpoint checksum mismatch'
+          subprocess.run(['git', 'apply', '--check'], input=patch, check=True)
+          subprocess.run(['git', 'apply'], input=patch, check=True)
+          shutil.rmtree(root)
+          PY
+          git diff --check
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Backend race tests with real PostgreSQL, vet and build
+        shell: bash
+        run: |
+          set -euo pipefail
+          go test -race -count=1 -timeout=180s ./... 2>&1 | tee "$RUNNER_TEMP/company-go-tests.log"
+          go vet ./... 2>&1 | tee "$RUNNER_TEMP/company-go-vet.log"
+          go build -o "$RUNNER_TEMP/tabmail-checkpoint" ./cmd/tabmail
+      - name: Frontend tests, lint, types and production build
+        working-directory: web
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci
+          npm test -- --run 2>&1 | tee "$RUNNER_TEMP/company-web-tests.log"
+          npm run lint 2>&1 | tee "$RUNNER_TEMP/company-web-lint.log"
+          ./node_modules/.bin/tsc --noEmit 2>&1 | tee "$RUNNER_TEMP/company-web-types.log"
+          npm run build 2>&1 | tee "$RUNNER_TEMP/company-web-build.log"
+      - name: Publish tested source only to the requested branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/feat/enterprise-mail-governance'
+          git fetch origin refs/heads/feat/enterprise-mail-governance
+          test "$(git rev-parse FETCH_HEAD)" = "$GITHUB_SHA"
+          git add --all
+          test -z "$(git diff --cached --name-only -- .github/workflows)"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'feat(company): implement employee mailbox governance and controlled templates'
+          git push origin HEAD:refs/heads/feat/enterprise-mail-governance
+          git rev-parse HEAD | tee "$RUNNER_TEMP/company-delivered-sha.txt"
+          git show --stat --oneline HEAD >> "$GITHUB_STEP_SUMMARY"
+          echo 'All backend, PostgreSQL and frontend gates passed before this business commit was pushed. No main merge or production deployment.' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: company-checkpoint-validation
+          path: |
+            ${{ runner.temp }}/company-*.log
+            ${{ runner.temp }}/company-delivered-sha.txt
+          retention-days: 7

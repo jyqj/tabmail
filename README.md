@@ -1,5 +1,7 @@
 # TabMail
 
+> **公司模式预览**：本分支新增单主域名员工邮箱、显式 read/send 授权与管理员模板。见 [公司治理部署与使用](docs/enterprise/README.md) 和 [实施/验收状态](docs/enterprise/STATUS.md)。默认不会自动开启，也不是完整企业邮件产品上线声明。
+
 TabMail 是一个**面向多租户、自托管、API 优先**的域名邮箱接收服务。
 
 它提供：
@@ -172,7 +174,7 @@ TABMAIL_MAILBOX_TOKEN_SECRET='replace-with-a-real-mailbox-secret' \
 go run ./cmd/tabmail
 ```
 
-当前未上线阶段不维护版本化 migration；`cmd/tabmail` 启动时会按内置 `internal/store/postgres/schema.sql` 自动创建/补齐当前表结构。
+本分支启动时执行带事务锁和校验和的版本迁移。`schema.sql` 是冻结的版本 1，后续变化追加到迁移目录；参见公司治理文档。
 
 ```bash
 psql "$TABMAIL_DB_DSN" -c '\dt'
@@ -269,10 +271,11 @@ TABMAIL_S3_FORCE_PATH_STYLE=true
 
 ## 数据库初始化
 
-当前项目未上线，不保留版本化数据库迁移链。数据库初始化集中在一个当前态 schema 快照：
+本分支数据库采用版本化迁移；历史基线只应用一次，不在每次启动重复运行数据迁移：
 
 - `internal/store/postgres/schema.sql`
-- `internal/store/postgres/postgres.go` 启动时自动执行
+- `internal/store/postgres/migrations/0002_company.sql`
+- `internal/store/postgres/migrations.go` 启动时串行执行、记录版本并校验已应用迁移
 
 查看当前库表：
 

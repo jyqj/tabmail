@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useCompany } from "@/hooks/use-company";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import {
@@ -46,6 +47,9 @@ import {
 
 export function AppSidebar() {
   const pathname = usePathname();
+ const companyState = useCompany();
+ const corporate = Boolean(companyState.data?.data.company);
+ const corporateAdmin = companyState.data?.data.member?.company_role === "admin";
   const { level, logout, permissions } = useAuth();
   const { t } = useI18n();
   // UX-only gates; the backend authz seam is authoritative.
@@ -71,7 +75,10 @@ export function AppSidebar() {
     webhookPermissions?.scopes?.some((scope) => scope.startsWith("webhooks:")) === true ||
     webhookPermissions?.webhook_scopes?.some((scope) => scope.startsWith("webhooks:")) === true;
 
-  const consoleItems = [
+  const consoleItems = corporate ? [
+    {href:"/mail",label:"公司邮件",icon:Inbox},
+    ...(corporateAdmin?[{href:"/company",label:"公司治理",icon:Users}]:[]),
+  ] : [
     { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
     { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
     // Fail closed while permissions are loading/unavailable.
@@ -95,6 +102,7 @@ export function AppSidebar() {
 
   // Shared admin items (accessible by both super_admin and admin)
   const sharedAdminItems = [
+ {href:"/company",label:"公司治理",icon:Users},
     { href: "/admin/users", label: t("sidebar.users"), icon: Users },
     { href: "/admin/permissions", label: t("sidebar.permissions"), icon: Shield },
     { href: "/admin/domains", label: t("sidebar.domainResources"), icon: Globe },
@@ -168,7 +176,7 @@ export function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        {adminLevel && (
+        {adminLevel && !corporate && (
           <>
             <SidebarSeparator className="my-2 bg-border/40" />
             <SidebarGroup>
