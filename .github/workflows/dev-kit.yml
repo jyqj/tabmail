@@ -1,0 +1,40 @@
+name: Refactor validation kit
+on:
+  push:
+    branches: ['feat/enterprise-mail-governance']
+    paths: ['.github/workflows/dev-kit.yml']
+permissions:
+  contents: read
+jobs:
+  kit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Assemble dependency-only kit (no credentials or repository data)
+        run: |
+          go mod vendor
+          mkdir -p kit
+          cp -a "$(go env GOROOT)" kit/go
+          mv vendor kit/vendor
+          tar -czf backend-kit.tar.gz -C kit .
+          cd web
+          npm ci
+          tar -czf ../frontend-kit.tar.gz node_modules
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backend-kit
+          path: backend-kit.tar.gz
+          retention-days: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: frontend-kit
+          path: frontend-kit.tar.gz
+          retention-days: 1
