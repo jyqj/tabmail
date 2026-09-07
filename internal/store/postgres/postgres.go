@@ -1077,7 +1077,7 @@ func (s *PgStore) CountRawObjectReferences(ctx context.Context, objectKey string
 	err := s.pool.QueryRow(ctx, `
 		SELECT
 			(SELECT count(*) FROM messages WHERE raw_object_key = $1) +
-			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND state IN ('pending','retry','processing'))`, objectKey).Scan(&n)
+			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND (recovery_managed OR state IN ('pending','retry','processing','dead')))`, objectKey).Scan(&n)
 	return n, err
 }
 
@@ -1629,8 +1629,8 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 		WITH cte AS (
 			SELECT id
 			FROM ingest_jobs
-			WHERE (state IN ('pending','retry') AND next_attempt_at <= $1)
-			   OR (state = 'processing' AND (lease_until IS NULL OR lease_until <= $1))
+			WHERE NOT recovery_managed AND ((state IN ('pending','retry') AND next_attempt_at <= $1)
+			   OR (state = 'processing' AND (lease_until IS NULL OR lease_until <= $1)))
 			ORDER BY created_at
 			LIMIT $2
 			FOR UPDATE SKIP LOCKED
@@ -1660,7 +1660,7 @@ func (s *PgStore) MarkIngestJobDone(ctx context.Context, id uuid.UUID) error {
 	_, err := s.pool.Exec(ctx, `
 		UPDATE ingest_jobs
 		SET state='done', claimed_at=NULL, lease_until=NULL, updated_at=$2
-		WHERE id=$1`, id, time.Now().UTC())
+		WHERE id=$1 AND NOT recovery_managed`, id, time.Now().UTC())
 	return err
 }
 
@@ -1672,7 +1672,7 @@ func (s *PgStore) MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastErro
 	_, err := s.pool.Exec(ctx, `
 		UPDATE ingest_jobs
 		SET state=$2, last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=$5
-		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
+		WHERE id=$1 AND NOT recovery_managed`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
 	return err
 }
 
@@ -1723,7 +1723,7 @@ func (s *PgStore) PurgeOldIngestJobs(ctx context.Context, before time.Time, limi
 		DELETE FROM ingest_jobs
 		WHERE id IN (
 			SELECT id FROM ingest_jobs
-			WHERE state IN ('done','dead') AND updated_at < $1
+			WHERE state = 'done' AND updated_at < $1
 			ORDER BY updated_at
 			LIMIT $2
 		)

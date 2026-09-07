@@ -20,18 +20,8 @@ func New(root string) (*FileStore, error) {
 	return &FileStore{root: root}, nil
 }
 
-func (f *FileStore) Put(_ context.Context, key string, r io.Reader, _ int64) error {
-	path := filepath.Join(f.root, key)
-	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-		return err
-	}
-	out, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-	defer out.Close()
-	_, err = io.Copy(out, r)
-	return err
+func (f *FileStore) Put(ctx context.Context, key string, r io.Reader, _ int64) error {
+	return f.putAtomic(ctx, key, r)
 }
 
 func (f *FileStore) Get(_ context.Context, key string) (io.ReadCloser, error) {

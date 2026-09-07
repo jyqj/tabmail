@@ -7,7 +7,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math/rand/v2"
 	"strings"
 	"sync"
@@ -28,6 +27,8 @@ import (
 )
 
 type serviceStore interface {
+	GetMailbox(context.Context, uuid.UUID) (*models.Mailbox, error)
+	GetZone(context.Context, uuid.UUID) (*models.DomainZone, error)
 	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int) (bool, error)
@@ -119,26 +120,7 @@ func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte, rcptChec
 		return AcceptResult{}, nil
 	}
 	if s.durable {
-		objKey, err := s.persistRaw(ctx, raw)
-		if err != nil {
-			return AcceptResult{}, err
-		}
-		job := &models.IngestJob{
-			ID:            uuid.New(),
-			Source:        strings.TrimSpace(env.Source),
-			RemoteIP:      strings.TrimSpace(env.RemoteIP),
-			MailFrom:      strings.TrimSpace(env.MailFrom),
-			Recipients:    append([]string(nil), env.Recipients...),
-			RawObjectKey:  objKey,
-			Metadata:      env.Metadata,
-			State:         "pending",
-			NextAttemptAt: time.Now().UTC(),
-		}
-		if err := s.store.CreateIngestJob(ctx, job); err != nil {
-			s.deleteRawObjectIfOrphaned(ctx, objKey, "create_ingest_job_failed")
-			return AcceptResult{}, err
-		}
-		return AcceptResult{Queued: true}, nil
+		return s.acceptDurable(ctx, env, raw)
 	}
 	delivered, err := s.deliver(ctx, env, raw, rcptChecks)
 	if err != nil {
@@ -165,81 +147,10 @@ func (s *Service) Run(ctx context.Context) {
 	}
 }
 
-func (s *Service) processBatch(ctx context.Context) error {
-	jobs, err := s.store.ClaimIngestJobs(ctx, time.Now().UTC(), s.batchSize)
-	if err != nil {
-		return err
-	}
-	for _, job := range jobs {
-		result, err := s.processJob(ctx, job)
-		if err != nil {
-			dead := job.Attempts >= s.maxRetries
-			backoff := retryBackoff(job.Attempts)
-			nextAttempt := time.Now().UTC().Add(backoff)
-			if markErr := s.store.MarkIngestJobRetry(ctx, job.ID, err.Error(), nextAttempt, dead); markErr != nil {
-				return markErr
-			}
-			if dead {
-				metrics.IngestJobDead()
-				metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
-				s.deleteRawObjectIfOrphaned(ctx, job.RawObjectKey, "dead_ingest_job")
-			} else {
-				metrics.IngestJobRetried()
-			}
-			continue
-		}
-		if err := s.store.MarkIngestJobDone(ctx, job.ID); err != nil {
-			return err
-		}
-		if result.delivered == 0 {
-			s.deleteRawObjectIfOrphaned(ctx, result.rawObjectKey, "zero_delivery_ingest_job")
-		}
-		metrics.IngestJobProcessed()
-		metrics.ObserveIngestJobLatency(time.Since(job.CreatedAt))
-	}
-	return nil
-}
-
-type processJobResult struct {
-	rawObjectKey string
-	delivered    int
-}
-
 func retryBackoff(attempts int) time.Duration {
 	exp := max(attempts-1, 0)
 	exp = min(exp, 8)
 	return time.Duration(1<<exp)*time.Second + time.Duration(rand.IntN(1000))*time.Millisecond
-}
-
-func (s *Service) processJob(ctx context.Context, job *models.IngestJob) (processJobResult, error) {
-	if job == nil {
-		return processJobResult{}, nil
-	}
-	result := processJobResult{rawObjectKey: job.RawObjectKey}
-	rc, err := s.obj.Get(ctx, job.RawObjectKey)
-	if err != nil {
-		return result, fmt.Errorf("get raw object: %w", err)
-	}
-	defer rc.Close()
-	raw, err := io.ReadAll(rc)
-	if err != nil {
-		return result, fmt.Errorf("read raw object: %w", err)
-	}
-	delivered, err := s.deliver(ctx, Envelope{
-		Source:     job.Source,
-		RemoteIP:   job.RemoteIP,
-		MailFrom:   job.MailFrom,
-		Recipients: append([]string(nil), job.Recipients...),
-		Metadata:   job.Metadata,
-	}, raw, nil)
-	if err != nil {
-		return result, err
-	}
-	result.delivered = delivered
-	if delivered == 0 {
-		s.logger.Warn().Str("job_id", job.ID.String()).Msg("ingest job processed with zero deliveries")
-	}
-	return result, nil
 }
 
 func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte, rcptChecks map[string]*resolver.Result) (int, error) {

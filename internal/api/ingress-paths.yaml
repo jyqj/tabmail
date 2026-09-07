@@ -1,0 +1,77 @@
+  /api/v1/admin/ingest/jobs/{id}/recipients:
+    get:
+      operationId: listIngressRecipients
+      summary: Inspect a durable receipt's immutable mailbox outcomes (platform admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: No-store envelope containing per-mailbox outcomes; may span tenants
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [job_id, mailbox_id, tenant_id, zone_id, address, state, attempts, last_error]
+                      properties:
+                        job_id: {type: string, format: uuid}
+                        mailbox_id: {type: string, format: uuid}
+                        tenant_id: {type: string, format: uuid}
+                        zone_id: {type: string, format: uuid}
+                        address: {type: string}
+                        state: {type: string, enum: [pending, delivered, held]}
+                        message_id: {type: string, format: uuid}
+                        attempts: {type: integer, minimum: 0}
+                        last_error: {type: string}
+        '400': {description: Invalid receipt ID}
+        '403': {description: Platform-admin interactive session required}
+        '404': {description: Receipt missing or has no trustworthy ledger}
+  /api/v1/admin/ingest/jobs/{id}/retry:
+    post:
+      operationId: retryHeldIngress
+      summary: Audited retry of held destinations; delivered tombstones are never replayed
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: {type: string, minLength: 1, maxLength: 2000}
+      responses:
+        '200':
+          description: Held subset requeued; no content or routing changes permitted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [requeued]
+                    properties:
+                      requeued: {type: boolean}
+        '400': {description: Invalid ID, malformed body or empty reason}
+        '403': {description: Platform-admin interactive session required}
+        '404': {description: Unknown receipt}
+        '409': {description: Non-held receipt or legacy receipt without trustworthy ledger}
+        '500': {description: Database or audit failure; mutation rolled back}

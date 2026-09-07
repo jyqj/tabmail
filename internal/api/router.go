@@ -2,7 +2,6 @@ package api
 
 import (
 	"embed"
-	"io/fs"
 	"net/http"
 	"sync"
 	"time"
@@ -27,7 +26,7 @@ import (
 	"tabmail/internal/store"
 )
 
-//go:embed openapi.yaml
+//go:embed openapi.yaml ingress-paths.yaml
 var openapiSpec embed.FS
 
 type metricsDBCounts struct {
@@ -274,6 +273,11 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/admin/monitor/history", mon.History)
 			r.Get("/admin/audit", adm.ListAudit)
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
+			if ledger, available := st.(store.IngressLedger); available {
+				recovery := handlers.IngressHandler{Ledger: ledger, Logger: cfg.Logger}
+				r.Get("/admin/ingest/jobs/{id}/recipients", recovery.Targets)
+				r.Post("/admin/ingest/jobs/{id}/retry", recovery.Retry)
+			}
 			r.Get("/admin/webhooks/deliveries", adm.ListWebhookDeliveries)
 
 			r.Post("/admin/invite", auth.InviteAdmin)
@@ -294,7 +298,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 
 	// --- Documentation ---
 	r.Get("/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
-		data, err := fs.ReadFile(openapiSpec, "openapi.yaml")
+		data, err := openAPIDocument()
 		if err != nil {
 			http.Error(w, "spec not found", http.StatusNotFound)
 			return
