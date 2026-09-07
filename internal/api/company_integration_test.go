@@ -382,7 +382,7 @@ func TestCompanyGovernanceRealPostgres(t *testing.T) {
 		if n != 1 {
 			t.Fatal("historical grants dropped")
 		}
-		must(t, pool.QueryRow(ctx, `SELECT count(*) FROM tabmail_schema_migrations`).Scan(&n))
+		must(t, pool.QueryRow(ctx, `SELECT count(*) FROM tabmail_schema_migrations WHERE version IN (1,2)`).Scan(&n))
 		if n != 2 {
 			t.Fatal("migration records missing")
 		}

@@ -30,15 +30,30 @@ func applyMigrations(ctx context.Context, pool *pgxpool.Pool) error {
 	if err = tx.QueryRow(ctx, `SELECT COALESCE(max(version),0) FROM tabmail_schema_migrations`).Scan(&latest); err != nil {
 		return err
 	}
-	if latest > 2 {
+	if latest > 4 {
 		return fmt.Errorf("database schema %d is newer than this binary", latest)
 	}
 	company, err := migrationFiles.ReadFile("migrations/0002_company.sql")
 	if err != nil {
 		return err
 	}
-	for i, sql := range []string{schemaSQL, string(company)} {
-		version := i + 1
+	ingress, err := migrationFiles.ReadFile("migrations/0004_ingress_recovery.sql")
+	if err != nil {
+		return err
+	}
+	// A reserved gap is not permission to run against an unknown schema.
+	var unknown bool
+	if err = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tabmail_schema_migrations WHERE version NOT IN (1,2,4))`).Scan(&unknown); err != nil {
+		return err
+	}
+	if unknown {
+		return fmt.Errorf("database contains an unsupported migration; integrate its code before upgrading")
+	}
+	for _, migration := range []struct {
+		version int
+		sql     string
+	}{{1, schemaSQL}, {2, string(company)}, {4, string(ingress)}} {
+		version, sql := migration.version, migration.sql
 		sum := fmt.Sprintf("%x", sha256.Sum256([]byte(sql)))
 		var exists bool
 		if err = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tabmail_schema_migrations WHERE version=$1)`, version).Scan(&exists); err != nil {
