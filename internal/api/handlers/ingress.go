@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/go-chi/chi/v5"
@@ -56,17 +57,56 @@ func (h IngressHandler) Retry(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "invalid receipt id")
 		return
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, 4096)
+	r.Body = http.MaxBytesReader(w, r.Body, 16*1024)
 	var body struct {
-		Reason string `json:"reason"`
+		Reason            string  `json:"reason"`
+		ObservedUpdatedAt *string `json:"observed_updated_at"`
 	}
 	if err = decodeBody(r, &body); err != nil || strings.TrimSpace(body.Reason) == "" || utf8.RuneCountInString(body.Reason) > 2000 {
 		errBadRequest(w, "reason is required")
 		return
 	}
-	if err = h.Ledger.RetryIngress(r.Context(), id, actorFromRequest(r), body.Reason); err != nil {
+	if body.ObservedUpdatedAt != nil {
+		observed, parseErr := time.Parse(time.RFC3339Nano, *body.ObservedUpdatedAt)
+		inspector, available := h.Ledger.(store.IngressInspector)
+		if parseErr != nil || observed.IsZero() {
+			errBadRequest(w, "invalid observed_updated_at")
+			return
+		}
+		if !available {
+			errInternal(w)
+			return
+		}
+		err = inspector.RetryReviewedIngress(r.Context(), id, actorFromRequest(r), body.Reason, observed)
+	} else {
+		err = h.Ledger.RetryIngress(r.Context(), id, actorFromRequest(r), body.Reason)
+	}
+	if err != nil {
 		respondAppError(w, h.Logger, err)
 		return
 	}
 	ok(w, map[string]bool{"requeued": true})
+}
+
+// Inspect returns one consistent operator view, including explicit retry eligibility.
+func (h IngressHandler) Inspect(w http.ResponseWriter, r *http.Request) {
+	if !h.allowed(w, r) {
+		return
+	}
+	id, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid receipt id")
+		return
+	}
+	inspector, okInspector := h.Ledger.(store.IngressInspector)
+	if !okInspector {
+		errInternal(w)
+		return
+	}
+	snapshot, err := inspector.InspectIngress(r.Context(), id)
+	if err != nil {
+		respondAppError(w, h.Logger, err)
+		return
+	}
+	ok(w, snapshot)
 }

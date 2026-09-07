@@ -56,6 +56,10 @@
               required: [reason]
               properties:
                 reason: {type: string, minLength: 1, maxLength: 2000}
+                observed_updated_at:
+                  type: string
+                  format: date-time
+                  description: Optional optimistic review revision from inspection; a changed receipt returns 409 without mutation.
       responses:
         '200':
           description: Held subset requeued; no content or routing changes permitted
@@ -73,5 +77,50 @@
         '400': {description: Invalid ID, malformed body or empty reason}
         '403': {description: Platform-admin interactive session required}
         '404': {description: Unknown receipt}
-        '409': {description: Non-held receipt or legacy receipt without trustworthy ledger}
+        '409': {description: Stale reviewed snapshot, non-held receipt or legacy receipt without trustworthy ledger}
         '500': {description: Database or audit failure; mutation rolled back}
+
+  /api/v1/admin/ingest/jobs/{id}:
+    get:
+      operationId: inspectIngressRecovery
+      summary: Consistent operator snapshot with explicit recovery eligibility
+      description: Platform-only metadata; no raw content, storage keys or claim tokens. All fields and targets share one read-only repeatable snapshot. expected_bytes is accepted metadata, not an object health check.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Current receipt including legacy/non-retryable cases; Cache-Control no-store
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: object
+                    required: [id, state, recovery_managed, attempts, last_error, created_at, updated_at, next_attempt_at, expected_bytes, can_retry, retry_block_reason, targets]
+                    properties:
+                      id: {type: string, format: uuid}
+                      state: {type: string, enum: [pending, processing, retry, done, dead]}
+                      recovery_managed: {type: boolean}
+                      attempts: {type: integer, minimum: 0}
+                      last_error: {type: string}
+                      created_at: {type: string, format: date-time}
+                      updated_at: {type: string, format: date-time}
+                      next_attempt_at: {type: string, format: date-time}
+                      expected_bytes: {type: [integer, 'null'], minimum: 0}
+                      can_retry: {type: boolean}
+                      retry_block_reason: {type: string, enum: ['', legacy_receipt, missing_ledger, not_held, no_held_targets]}
+                      targets:
+                        type: array
+                        items:
+                          $ref: '#/paths/~1api~1v1~1admin~1ingest~1jobs~1{id}~1recipients/get/responses/200/content/application~1json/schema/properties/data/items'
+        '400': {description: Invalid receipt ID}
+        '403': {description: Platform-super-admin interactive session required}
+        '404': {description: Receipt no longer exists}
+        '500': {description: Snapshot could not be read; no stale data returned}

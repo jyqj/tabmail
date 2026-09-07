@@ -278,6 +278,10 @@ func (s *PgStore) FinishIngress(ctx context.Context, c *store.IngressClaim, maxA
 // Only the existing platform-admin surface may call this. It never re-resolves
 // addresses or replays delivered records. Legacy receipts need separate review.
 func (s *PgStore) RetryIngress(ctx context.Context, id uuid.UUID, actor, reason string) error {
+	return s.retryIngress(ctx, id, actor, reason, nil)
+}
+
+func (s *PgStore) retryIngress(ctx context.Context, id uuid.UUID, actor, reason string, observed *time.Time) error {
 	if strings.TrimSpace(actor) == "" || strings.TrimSpace(reason) == "" {
 		return app.BadRequest("actor and reason required")
 	}
@@ -288,12 +292,16 @@ func (s *PgStore) RetryIngress(ctx context.Context, id uuid.UUID, actor, reason 
 	defer tx.Rollback(ctx)
 	var managed bool
 	var state string
-	err = tx.QueryRow(ctx, `SELECT recovery_managed,state FROM ingest_jobs WHERE id=$1 FOR UPDATE`, id).Scan(&managed, &state)
+	var updated time.Time
+	err = tx.QueryRow(ctx, `SELECT recovery_managed,state,updated_at FROM ingest_jobs WHERE id=$1 FOR UPDATE`, id).Scan(&managed, &state, &updated)
 	if err == pgx.ErrNoRows {
 		return app.NotFound("receipt not found")
 	}
 	if err != nil {
 		return err
+	}
+	if observed != nil && !updated.Equal(*observed) {
+		return app.Conflict("receipt changed since inspection; refresh before retrying")
 	}
 	if !managed || state != "dead" {
 		return app.Conflict("only held ledger receipts can be retried")
