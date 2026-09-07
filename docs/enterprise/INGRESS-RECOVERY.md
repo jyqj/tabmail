@@ -71,11 +71,10 @@ no-store caching. The IDs are frozen destination snapshots, not permission grant
 A missing or legacy receipt without a ledger returns 404.
 
 `POST /api/v1/admin/ingest/jobs/{id}/retry` takes `{"reason":"storage restored"}`.
-The reason is required and at most 2000 characters (request body at most 4096 bytes).
+The reason is required and at most 2000 characters (request body at most 16 KiB).
 Only held ledger receipts can be requeued. The mutation and audit commit together;
 audit failure rolls everything back. No content, recipient or mailbox reassignment
-is accepted. Successful targets are untouched. This is an API operation; this PR
-does not add an administrator recovery form or change employee UI surfaces.
+is accepted. Successful targets are untouched. The follow-up operator console is documented in `INGRESS-OPERATIONS.md`; employee UI surfaces and their privileges are unchanged.
 
 ## Migration and deployment boundary
 
@@ -118,7 +117,7 @@ not claimed by local unit/integration tests.
 
 Issue #6 stays open: the separate outbound increment is not on this remote base;
 SMTP final-ack uncertainty across distinct submissions is not exactly-once delivery.
-Automated DSN/bounce generation, bounded quarantine/orphan disposal, operator UI,
+Automated DSN/bounce generation, bounded quarantine/orphan disposal,
 legacy object-reference coordination and global audit/outbox coverage remain.
 Department managers, approvals, drafts/replies/attachments, SSO/MFA and cookie
 sessions remain tracked in Issue #4. This is not a production-readiness declaration.

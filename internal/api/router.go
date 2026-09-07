@@ -275,6 +275,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/admin/ingest/jobs", adm.ListIngestJobs)
 			if ledger, available := st.(store.IngressLedger); available {
 				recovery := handlers.IngressHandler{Ledger: ledger, Logger: cfg.Logger}
+				r.Get("/admin/ingest/jobs/{id}", recovery.Inspect)
 				r.Get("/admin/ingest/jobs/{id}/recipients", recovery.Targets)
 				r.Post("/admin/ingest/jobs/{id}/retry", recovery.Retry)
 			}

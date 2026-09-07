@@ -244,6 +244,7 @@ func (h *AdminHandler) ListAudit(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AdminHandler) ListIngestJobs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-store")
 	pg := pageFromReq(r)
 	items, total, err := h.service.ListIngestJobs(r.Context(), pg, r.URL.Query().Get("state"), r.URL.Query().Get("source"), r.URL.Query().Get("recipient"))
 	if err != nil {
