@@ -1,0 +1,70 @@
+name: Company mail P0
+on:
+  push:
+    branches: [feat/company-mail-p0]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: company-p0-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build
+        run: go build ./...
+      - name: Race tests with PostgreSQL
+        run: |
+          set -o pipefail
+          go test -json -race -count=1 -timeout=180s ./... | tee go-test.jsonl
+      - name: Vet
+        run: go vet ./...
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-p0-test-evidence
+          path: go-test.jsonl
+          retention-days: 14
+      - name: Assemble offline reproduction inputs
+        if: github.event_name == 'push'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/reproduction/source" "$RUNNER_TEMP/reproduction/archive"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/reproduction/source"
+          git archive archive/ingress-operations-console | tar -x -C "$RUNNER_TEMP/reproduction/archive"
+          go mod vendor
+          mv vendor "$RUNNER_TEMP/reproduction/source/vendor"
+          cp -a "$(go env GOROOT)" "$RUNNER_TEMP/reproduction/go"
+          git rev-parse HEAD > "$RUNNER_TEMP/reproduction/COMMIT"
+          tar -czf "$RUNNER_TEMP/company-p0-reproduction.tar.gz" -C "$RUNNER_TEMP/reproduction" .
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: company-p0-reproduction
+          path: ${{ runner.temp }}/company-p0-reproduction.tar.gz
+          retention-days: 3
