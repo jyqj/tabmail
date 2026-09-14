@@ -16,7 +16,22 @@
 | TestP0ZeroRetentionMeansNullExpiry | 0 小时仍生成到期时间 |
 | TestP0BaselineDoesNotDropHistoricalGrants | baseline 会删除三个历史授权表 |
 
-上述七项在修复后本地已通过。零留存测试使用实际计划更新，而不是重复 SeedMailbox，以免测试配置未真正生效。所有新增测试仍保留在源代码中。
+上述七项在修复后本地及远端均已通过。零留存测试使用实际计划更新，而不是重复 SeedMailbox，以免测试配置未真正生效。所有新增测试仍保留在源代码中。
+
+## 远端业务树验证
+
+发布门禁 [34883934079](https://github.com/jyqj/tabmail/actions/runs/34883934079) 实际应用并校验业务补丁后，再分别验证旧树红灯和新树绿灯；不是借用旧主线 CI。业务补丁 SHA-256：`0fc0af2e608651f2be5f72af06e51a2d1877b415a484d9d8e71feda08868aeae`。
+
+- 旧业务树：七项回归测试精确失败，失败名称均与预期一致。
+- 新业务树：`go build ./...`、`go vet ./...`、`go test -json -race -count=1 -timeout=180s ./...` 通过。
+- 真 PostgreSQL 16：**231 项顶层测试 / 347 项含子测试 / 30 个有测试的包，0 失败、0 测试跳过**。无测试文件的包不计为测试或跳过的测试。
+- Go / TypeScript 字段契约：16 个共享类型通过。
+- 门禁完成后才发布业务提交 `0732eedeee9bcc2fb6427733506e7eadf432944d`，并移除临时补丁传输目录；没有合并 main 或部署。
+- 日志保存在该 run 的 `p0-publication-evidence` artifact（编号 `10364656101`）。原件为 JSONL，包含红灯与绿灯结果。
+
+首次真库门禁 34883457498 揭示了 FakeStore 不能暴露的 `outbound_state` 枚举转换问题；该次验证失败且没有发布业务代码。修正 SQL 显式转换后，完整门禁重新运行通过。
+
+最终分支保留普通、只读的 `company-p0.yml` CI，覆盖后端与前端；一次性发布门禁被移除。此处的业务树门禁结果不冒充尚未结束的最终分支 / PR CI，最终结果在 PR 检查与验收评论中记录。
 
 ## 验证层次与限制
 
