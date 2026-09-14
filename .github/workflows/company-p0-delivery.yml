@@ -48,6 +48,11 @@ jobs:
           parts[fix['part']]=text
           patch=zlib.decompress(base64.b64decode(''.join(parts),validate=True))
           assert hashlib.sha256(patch).hexdigest()=='072714246bb9ceb8eb7a2e94e26cf6da2b368daf5c9fecaa7297473373462020','transport mismatch'
+          delta=json.loads((root/'business-fix.json').read_text())
+          for old,new in delta['patch_replacements']:
+              assert patch.count(old.encode())==1
+              patch=patch.replace(old.encode(),new.encode())
+          assert hashlib.sha256(patch).hexdigest()==delta['sha256']=='0fc0af2e608651f2be5f72af06e51a2d1877b415a484d9d8e71feda08868aeae'
           for line in patch.decode().splitlines():
               if line.startswith('diff --git '):
                   a,b=line.split()[2:]
@@ -136,6 +141,11 @@ jobs:
           parts[fix['part']]=text
           patch=zlib.decompress(base64.b64decode(''.join(parts),validate=True))
           assert hashlib.sha256(patch).hexdigest()=='072714246bb9ceb8eb7a2e94e26cf6da2b368daf5c9fecaa7297473373462020'
+          delta=json.loads((root/'business-fix.json').read_text())
+          for old,new in delta['patch_replacements']:
+              assert patch.count(old.encode())==1
+              patch=patch.replace(old.encode(),new.encode())
+          assert hashlib.sha256(patch).hexdigest()==delta['sha256']=='0fc0af2e608651f2be5f72af06e51a2d1877b415a484d9d8e71feda08868aeae'
           subprocess.run(['git','apply','--check','-'],input=patch,check=True)
           subprocess.run(['git','apply','-'],input=patch,check=True)
           PY
@@ -143,6 +153,6 @@ jobs:
           git rm -r -- scripts/company-p0-transfer
           git config user.name 'TabMail P0 validation'
           git config user.email 'p0-validation@users.noreply.github.com'
-          git commit -m 'feat: company mailbox P0 authorization and durable recovery' -m 'Verified patch SHA256 072714246bb9ceb8eb7a2e94e26cf6da2b368daf5c9fecaa7297473373462020. Seven red regressions, build, vet and PostgreSQL race gate passed before publishing. No main merge or deployment.'
+          git commit -m 'feat: company mailbox P0 authorization and durable recovery' -m 'Verified patch SHA256 0fc0af2e608651f2be5f72af06e51a2d1877b415a484d9d8e71feda08868aeae. Seven red regressions, build, vet and PostgreSQL race gate passed before publishing. No main merge or deployment.'
           git push origin HEAD:refs/heads/feat/company-mail-p0
           git rev-parse HEAD
