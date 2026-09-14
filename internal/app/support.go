@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -47,4 +48,15 @@ func EnsureTenantScope(tenant *models.Tenant, isAdmin bool) error {
 		return BadRequest("admin requests to tenant-scoped endpoints must include X-Tenant-ID")
 	}
 	return nil
+}
+
+// InsertAuditRequired fails closed for access that depends on durable evidence.
+func InsertAuditRequired(ctx context.Context, s AuditStore, entry models.AuditEntry) error {
+	if s == nil {
+		return errors.New("audit store unavailable")
+	}
+	if entry.Details == nil {
+		entry.Details = json.RawMessage(`{}`)
+	}
+	return s.InsertAudit(ctx, &entry)
 }

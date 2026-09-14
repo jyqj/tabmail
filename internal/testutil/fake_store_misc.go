@@ -189,6 +189,9 @@ func (s *FakeStore) ClaimIngestJobs(_ context.Context, now time.Time, limit int)
 	}
 	var jobs []*models.IngestJob
 	for _, job := range s.ingestJobs {
+		if s.ingressClaims[job.ID] != nil {
+			continue
+		}
 		claimable := (job.State == "pending" || job.State == "retry") && !job.NextAttemptAt.After(now)
 		expiredLease := job.State == "processing" && (job.LeaseUntil == nil || !job.LeaseUntil.After(now))
 		if claimable || expiredLease {
@@ -220,7 +223,7 @@ func (s *FakeStore) ClaimIngestJobs(_ context.Context, now time.Time, limit int)
 func (s *FakeStore) MarkIngestJobDone(_ context.Context, id uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if job, ok := s.ingestJobs[id]; ok {
+	if job, ok := s.ingestJobs[id]; ok && s.ingressClaims[id] == nil {
 		job.State = "done"
 		job.ClaimedAt = nil
 		job.LeaseUntil = nil
@@ -232,7 +235,7 @@ func (s *FakeStore) MarkIngestJobDone(_ context.Context, id uuid.UUID) error {
 func (s *FakeStore) MarkIngestJobRetry(_ context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if job, ok := s.ingestJobs[id]; ok {
+	if job, ok := s.ingestJobs[id]; ok && s.ingressClaims[id] == nil {
 		job.State = "retry"
 		if dead {
 			job.State = "dead"
@@ -252,7 +255,7 @@ func (s *FakeStore) PurgeOldIngestJobs(_ context.Context, before time.Time, limi
 	var toDelete []uuid.UUID
 	var keys []string
 	for id, job := range s.ingestJobs {
-		if (job.State == "done" || job.State == "dead") && job.UpdatedAt.Before(before) {
+		if job.State == "done" && job.UpdatedAt.Before(before) {
 			toDelete = append(toDelete, id)
 			if job.RawObjectKey != "" {
 				keys = append(keys, job.RawObjectKey)
@@ -264,6 +267,8 @@ func (s *FakeStore) PurgeOldIngestJobs(_ context.Context, before time.Time, limi
 	}
 	for _, id := range toDelete {
 		delete(s.ingestJobs, id)
+		delete(s.ingressClaims, id)
+		delete(s.ingressTargets, id)
 	}
 	return len(toDelete), keys, nil
 }

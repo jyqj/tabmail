@@ -115,6 +115,7 @@ export interface SuggestedAddress {
 }
 
 export interface Mailbox {
+  owner_user_id?: string;
   id: string;
   tenant_id: string;
   zone_id: string;
@@ -149,7 +150,9 @@ export interface Message {
   headers?: Record<string, string>;
   raw_object_key?: string;
   received_at: string;
-  expires_at: string;
+  expires_at: string | null;
+  otp_code?: string;
+  otp_confidence?: number;
 }
 
 export interface MessageDetail extends Message {
@@ -481,6 +484,8 @@ export interface EffectivePermission {
 export type OutboundState = "pending" | "processing" | "sent" | "retry" | "failed" | "dead";
 
 export interface OutboundJob {
+  delivered_domains: string[];
+  in_flight_domain?: string;
   id: string;
   tenant_id: string;
   user_id?: string;

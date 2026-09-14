@@ -160,7 +160,7 @@ func (s *FakeStore) CountRawObjectReferences(_ context.Context, objectKey string
 		}
 	}
 	for _, job := range s.ingestJobs {
-		if job.RawObjectKey == objectKey && (job.State == "pending" || job.State == "retry" || job.State == "processing") {
+		if job.RawObjectKey == objectKey && (s.ingressClaims[job.ID] != nil || job.State == "pending" || job.State == "retry" || job.State == "processing" || job.State == "dead") {
 			n++
 		}
 	}
@@ -177,7 +177,7 @@ func (s *FakeStore) ReleaseRawObjectIfUnreferenced(ctx context.Context, key stri
 		}
 	}
 	for _, job := range s.ingestJobs {
-		if job.RawObjectKey == key && (job.State == "pending" || job.State == "retry" || job.State == "processing") {
+		if job.RawObjectKey == key && (s.ingressClaims[job.ID] != nil || job.State == "pending" || job.State == "retry" || job.State == "processing" || job.State == "dead") {
 			n++
 		}
 	}
@@ -286,16 +286,16 @@ func (s *FakeStore) DeleteExpiredMessages(_ context.Context, before time.Time, l
 
 	expired := make([]*models.Message, 0, len(s.messages))
 	for _, m := range s.messages {
-		if m.ExpiresAt.Before(before) {
+		if m.ExpiresAt != nil && m.ExpiresAt.Before(before) && (s.mailboxes[m.MailboxID] == nil || s.mailboxes[m.MailboxID].OwnerUserID == nil) {
 			cp := *m
 			expired = append(expired, &cp)
 		}
 	}
 	sort.Slice(expired, func(i, j int) bool {
-		if expired[i].ExpiresAt.Equal(expired[j].ExpiresAt) {
+		if expired[i].ExpiresAt.Equal(*expired[j].ExpiresAt) {
 			return expired[i].ID.String() < expired[j].ID.String()
 		}
-		return expired[i].ExpiresAt.Before(expired[j].ExpiresAt)
+		return expired[i].ExpiresAt.Before(*expired[j].ExpiresAt)
 	})
 
 	n := 0
@@ -318,16 +318,16 @@ func (s *FakeStore) ListExpiredObjectKeys(_ context.Context, before time.Time, l
 
 	expired := make([]*models.Message, 0, len(s.messages))
 	for _, m := range s.messages {
-		if m.ExpiresAt.Before(before) && m.RawObjectKey != "" {
+		if m.ExpiresAt != nil && m.ExpiresAt.Before(before) && (s.mailboxes[m.MailboxID] == nil || s.mailboxes[m.MailboxID].OwnerUserID == nil) && m.RawObjectKey != "" {
 			cp := *m
 			expired = append(expired, &cp)
 		}
 	}
 	sort.Slice(expired, func(i, j int) bool {
-		if expired[i].ExpiresAt.Equal(expired[j].ExpiresAt) {
+		if expired[i].ExpiresAt.Equal(*expired[j].ExpiresAt) {
 			return expired[i].ID.String() < expired[j].ID.String()
 		}
-		return expired[i].ExpiresAt.Before(expired[j].ExpiresAt)
+		return expired[i].ExpiresAt.Before(*expired[j].ExpiresAt)
 	})
 
 	var out []string
@@ -346,16 +346,16 @@ func (s *FakeStore) DeleteExpiredMessagesReturningKeys(_ context.Context, before
 
 	var expired []*models.Message
 	for _, m := range s.messages {
-		if m.ExpiresAt.Before(before) {
+		if m.ExpiresAt != nil && m.ExpiresAt.Before(before) && (s.mailboxes[m.MailboxID] == nil || s.mailboxes[m.MailboxID].OwnerUserID == nil) {
 			cp := *m
 			expired = append(expired, &cp)
 		}
 	}
 	sort.Slice(expired, func(i, j int) bool {
-		if expired[i].ExpiresAt.Equal(expired[j].ExpiresAt) {
+		if expired[i].ExpiresAt.Equal(*expired[j].ExpiresAt) {
 			return expired[i].ID.String() < expired[j].ID.String()
 		}
-		return expired[i].ExpiresAt.Before(expired[j].ExpiresAt)
+		return expired[i].ExpiresAt.Before(*expired[j].ExpiresAt)
 	})
 	if len(expired) > limit {
 		expired = expired[:limit]

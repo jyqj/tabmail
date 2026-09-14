@@ -62,7 +62,7 @@ func TestResolveMailboxOwnerBoundAPIKeyOwnerFallbackAndAllowedZones(t *testing.T
 		OwnerUserID:   &ownerID,
 	}
 	if _, err := svc.ResolveMailboxForWrite(ctx, mailbox.FullAddress, viewer); err != nil {
-		t.Fatalf("owner-bound API key should inherit zone owner fallback: %v", err)
+		t.Fatalf("owner-bound API key should inherit exact personal mailbox ownership: %v", err)
 	}
 
 	otherZoneID := uuid.New()
@@ -100,6 +100,7 @@ func seededMessageServiceWithStore(t *testing.T, st *testutil.FakeStore, tenant 
 	}
 	st.SeedZone(zone)
 	mailbox := &models.Mailbox{
+		OwnerUserID:    ownerUserID,
 		ID:             uuid.New(),
 		TenantID:       tenant.ID,
 		ZoneID:         zoneID,

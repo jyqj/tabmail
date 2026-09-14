@@ -138,8 +138,8 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.
 	if am == models.AccessToken && strings.TrimSpace(req.Password) == "" {
 		return nil, app.BadRequest("password is required when access_mode=token")
 	}
-	if req.RetentionHoursOverride != nil && *req.RetentionHoursOverride <= 0 {
-		return nil, app.BadRequest("retention_hours_override must be greater than 0")
+	if req.RetentionHoursOverride != nil && *req.RetentionHoursOverride < 0 {
+		return nil, app.BadRequest("retention_hours_override must be non-negative (0 means permanent)")
 	}
 	var expiresAt *time.Time
 	if req.ExpiresAt != nil && strings.TrimSpace(*req.ExpiresAt) != "" {

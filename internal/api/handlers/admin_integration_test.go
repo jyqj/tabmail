@@ -281,7 +281,7 @@ func TestAdminHandlerStatsSummarizesStoreCounts(t *testing.T) {
 		Subject:    "hello",
 		Recipients: []string{"user@mail.test"},
 		ReceivedAt: time.Now(),
-		ExpiresAt:  time.Now().Add(24 * time.Hour),
+		ExpiresAt:  models.MessageExpiry(nil, 24, time.Now()),
 	})
 
 	rr := doAdminRequest(t, st, http.MethodGet, "/api/v1/admin/stats", nil, nil, h.Stats)

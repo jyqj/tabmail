@@ -38,5 +38,5 @@ func (s *FakeStore) UpsertUserPermissionOverride(_ context.Context, _ *models.Us
 func (s *FakeStore) DeleteUserPermissionOverride(_ context.Context, _ uuid.UUID) error { return nil }
 
 func (s *FakeStore) EffectivePermission(_ context.Context, _ uuid.UUID) (*models.EffectivePermission, error) {
-	return nil, nil
+	return &models.EffectivePermission{CanSend: true, CanCreateDomains: true, CanCreateRoutes: true, CanCreateAPIKeys: true}, nil
 }

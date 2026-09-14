@@ -23,6 +23,7 @@ func TestSubmitReservesUserDailyQuotaWithJobCreation(t *testing.T) {
 	tenantID := uuid.New()
 	userID := uuid.New()
 	req := quotaTestSendRequest(tenantID, userID)
+	seedQuotaSender(t, st, &req)
 	req.Quota.UserDaily = &store.OutboundUserDailyQuota{
 		UserID: &userID,
 		Since:  time.Now().Add(-time.Hour),
@@ -62,6 +63,7 @@ func TestSubmitReservesSendAsDailyQuotaWithJobCreation(t *testing.T) {
 		t.Fatal(err)
 	}
 	req := quotaTestSendRequest(tenantID, userID)
+	seedQuotaSender(t, st, &req)
 	req.Quota.SendAsDaily = &store.OutboundSendAsDailyQuota{
 		PrincipalType: "user",
 		PrincipalID:   userID,
@@ -95,4 +97,17 @@ func quotaTestSendRequest(tenantID, userID uuid.UUID) SendRequest {
 		Subject:  "quota test",
 		TextBody: "hello",
 	}
+}
+
+func seedQuotaSender(t *testing.T, st *testutil.FakeStore, req *SendRequest) {
+	t.Helper()
+	ctx := context.Background()
+	st.SeedTenant(&models.Tenant{ID: req.TenantID})
+	if err := st.CreateUser(ctx, &models.User{ID: *req.UserID, TenantID: req.TenantID, Email: req.From, Role: models.RoleUser, IsActive: true}); err != nil {
+		t.Fatal(err)
+	}
+	st.SeedZone(&models.DomainZone{ID: req.ZoneID, TenantID: req.TenantID, Domain: "example.test", IsVerified: true, MXVerified: true})
+	mb := &models.Mailbox{ID: uuid.New(), TenantID: req.TenantID, ZoneID: req.ZoneID, FullAddress: req.From, OwnerUserID: req.UserID, AccessMode: models.AccessAPIKey}
+	st.SeedMailbox(mb)
+	req.SenderMailboxID = &mb.ID
 }

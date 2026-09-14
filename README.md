@@ -19,6 +19,18 @@ TabMail 是一个**面向多租户、自托管、API 优先**的域名邮箱接�
 
 ---
 
+## 公司邮箱化（P0 基础）
+
+公司专用模式的阶段路线、边界和升级顺序见 [公司邮箱化路线图](docs/company-mail/ROADMAP.md)，本轮实际验证结果见 [验证记录](docs/company-mail/VALIDATION.md)。P0 不是完整公司邮箱产品，不包含员工开通、模板治理或新工作台。
+
+当前用户及个人 API Key 发信必须有精确 mailbox owner / `mailbox_grants.can_send`；域名白名单不再授予任意 From。无主租户集成 Key 保留既有发送身份路径。`template_only` 在 P1 不可变发布模板治理接入前拒绝发送，不能靠提供旧模板名称绕过。正常管理员读信仍需 owner/read grant，例外读取必须成功持久化审计。
+
+`retention_hours=0` 现在表示永久保存（SQL NULL），不再表示立即过期；个人 owner 邮箱的既有与新邮件不会被临时套餐 TTL 清理。共享公司邮箱的显式长期策略由 P1 提供，不能把全部无主邮箱自动认定为公司资源。
+
+升级前联合备份并停止所有旧 SMTP/API/worker/retention 写入端。新增 Goose 00002；历史同名 `mailbox_grants` 表或归档自研迁移数据库需要人工核对，系统不猜测转换，不删除授权。旧未完成入站任务和不确定的出站任务保留待审。数据库与原件必须协调恢复，不支持自动破坏性 Down 或新旧 worker 混跑。
+
+出站 `delivered_domains` 记录下一跳已接受的域，`in_flight_domain` 留在 failed 任务上表示投递结果不确定，禁止直接重试。按域进度不是端到端 exactly-once。生产收信应保持 `TABMAIL_INGEST_DURABLE=true`；非持久化兼容路径不提供同等恢复保证。保留失败原件会增加空间占用，必须监测容量；清理/恢复管理界面属于后续阶段。
+
 ## 适用场景
 
 适合：
@@ -112,7 +124,7 @@ TabMail 是一个**面向多租户、自托管、API 优先**的域名邮箱接�
 - **同一封原始邮件只存一份**
 - **按原始内容 SHA-256 做跨会话去重**
 - 对象删除时按引用计数清理，避免共享 `.eml` 被误删
-- durable ingest 启用后，SMTP `250 OK: queued` 仅表示邮件已入队；worker 后续异步投递，零投递 / dead job 会在无 message 引用时释放 raw object
+- durable ingest 启用后，SMTP `250 OK: queued` 表示原件和固定目标台账已持久化，不代表已入箱。worker 按邮箱恢复；dead / held 原件保留待审，不因零投递自动删除。成功目标的幂等记录保留到完成任务清理。
 
 存储分层：
 

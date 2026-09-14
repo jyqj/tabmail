@@ -26,6 +26,22 @@ var migrationsFS embed.FS
 func Migrate(ctx context.Context, connConfig *pgx.ConnConfig) error {
 	db := stdlib.OpenDB(*connConfig)
 	defer db.Close()
+	var custom, gooseTable bool
+	if err := db.QueryRowContext(ctx, `SELECT to_regclass('tabmail_schema_migrations') IS NOT NULL,to_regclass('goose_db_version') IS NOT NULL`).Scan(&custom, &gooseTable); err != nil {
+		return err
+	}
+	if custom && !gooseTable {
+		return fmt.Errorf("custom archived migration database requires an explicitly reviewed conversion before Goose")
+	}
+	if gooseTable {
+		var unknown int
+		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM goose_db_version WHERE is_applied AND version_id NOT IN (0,1,2)`).Scan(&unknown); err != nil {
+			return err
+		}
+		if unknown > 0 {
+			return fmt.Errorf("unknown installed migration version; mixed archived/new binaries are unsupported")
+		}
+	}
 
 	fsys, err := fs.Sub(migrationsFS, "migrations")
 	if err != nil {

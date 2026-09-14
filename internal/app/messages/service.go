@@ -9,6 +9,7 @@ import (
 	"github.com/jhillyerd/enmime/v2"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
+	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -25,6 +26,7 @@ const (
 )
 
 type storeRepo interface {
+	authz.MailboxGrantReader
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
@@ -89,6 +91,18 @@ func (s *Service) ListMessages(ctx context.Context, address string, viewer Viewe
 	if err != nil {
 		return nil, 0, app.Internal(err)
 	}
+	allowed, authErr := s.canReadMessageContent(ctx, mb, viewer)
+	if authErr != nil {
+		return nil, 0, authErr
+	}
+	if !allowed {
+		for i, m := range items {
+			cp := *m
+			cp.OTPCode = ""
+			cp.OTPConfidence = 0
+			items[i] = &cp
+		}
+	}
 	return items, total, nil
 }
 
@@ -101,7 +115,13 @@ func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uu
 		return nil, app.NotFound("message not found")
 	}
 	detail := &models.MessageDetail{Message: *msg}
-	if !s.canReadMessageContent(ctx, mb, viewer) {
+	allowed, authErr := s.canReadMessageContent(ctx, mb, viewer)
+	if authErr != nil {
+		return nil, authErr
+	}
+	if !allowed {
+		detail.OTPCode = ""
+		detail.OTPConfidence = 0
 		detail.BodyRedacted = true
 		detail.BodyAccess = "break_glass_required"
 		return detail, nil
@@ -134,7 +154,11 @@ func (s *Service) GetRawSource(ctx context.Context, address string, msgID uuid.U
 	if msg.MailboxID != mb.ID {
 		return nil, app.NotFound("message not found")
 	}
-	if !s.canReadMessageContent(ctx, mb, viewer) {
+	allowed, authErr := s.canReadMessageContent(ctx, mb, viewer)
+	if authErr != nil {
+		return nil, authErr
+	}
+	if !allowed {
 		return nil, app.Forbidden("message source access requires break-glass")
 	}
 	if msg.RawObjectKey == "" {
@@ -227,14 +251,16 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	if msg.MailboxID != mb.ID {
 		return nil, app.NotFound("message not found")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	if err := app.InsertAuditRequired(ctx, s.store, models.AuditEntry{
 		TenantID:     app.UUIDPtr(mb.TenantID),
 		Actor:        actor,
 		Action:       "message.break_glass_read",
 		ResourceType: "message",
 		ResourceID:   app.UUIDPtr(msg.ID),
 		Details:      app.MustJSON(map[string]any{"mailbox": mb.FullAddress, "reason": reason, "scope": "body"}),
-	})
+	}); err != nil {
+		return nil, app.Internal(err)
+	}
 	detail := &models.MessageDetail{Message: *msg}
 	if msg.RawObjectKey != "" {
 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
@@ -274,14 +300,16 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 	if msg.RawObjectKey == "" {
 		return nil, app.NotFound("raw source not available")
 	}
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	if err := app.InsertAuditRequired(ctx, s.store, models.AuditEntry{
 		TenantID:     app.UUIDPtr(mb.TenantID),
 		Actor:        actor,
 		Action:       "message.break_glass_read",
 		ResourceType: "message",
 		ResourceID:   app.UUIDPtr(msg.ID),
 		Details:      app.MustJSON(map[string]any{"mailbox": mb.FullAddress, "reason": reason, "scope": "source"}),
-	})
+	}); err != nil {
+		return nil, app.Internal(err)
+	}
 	rc, err := s.obj.Get(ctx, msg.RawObjectKey)
 	if err != nil {
 		s.logger.Err(err).Str("key", msg.RawObjectKey).Msg("get object")
@@ -293,16 +321,14 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 // canReadMessageContent checks whether the viewer has permission to read
 // message body / raw source. Admin roles require break-glass access for
 // content; non-admin viewers who passed mailbox resolution can read content.
-func (s *Service) canReadMessageContent(ctx context.Context, mb *models.Mailbox, viewer Viewer) bool {
+func (s *Service) canReadMessageContent(ctx context.Context, mb *models.Mailbox, viewer Viewer) (bool, error) {
 	if mb == nil {
-		return false
+		return false, nil
 	}
-	// Non-admin viewers who resolved the mailbox successfully can read content.
 	if !viewer.IsTenantAdmin() {
-		return true
+		return true, nil
 	}
-	// Admin users need break-glass for content — deny direct content access.
-	return false
+	return s.resolver.canAccess(ctx, mb, viewer, false)
 }
 
 func (s *Service) lookupMessageForWrite(ctx context.Context, address string, msgID uuid.UUID, viewer Viewer) (*models.Mailbox, *models.Message, error) {

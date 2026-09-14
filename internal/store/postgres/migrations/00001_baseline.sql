@@ -601,9 +601,9 @@ FROM domain_zones
 ON CONFLICT DO NOTHING;
 
 -- Migration: remove grant tables
-DROP TABLE IF EXISTS send_as_grants CASCADE;
-DROP TABLE IF EXISTS mailbox_grants CASCADE;
-DROP TABLE IF EXISTS zone_grants CASCADE;
+-- Historical send_as_grants is preserved; incompatible layouts require review.
+-- Historical mailbox_grants is preserved; incompatible layouts require review.
+-- Historical zone_grants is preserved; incompatible layouts require review.
 
 -- ============================================================
 -- Webhook endpoints (tenant-level)

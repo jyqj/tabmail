@@ -246,6 +246,7 @@ func (a AccessMode) Valid() bool {
 }
 
 type Mailbox struct {
+	OwnerUserID            *uuid.UUID `json:"owner_user_id,omitempty" db:"owner_user_id"`
 	ID                     uuid.UUID  `json:"id" db:"id"`
 	TenantID               uuid.UUID  `json:"tenant_id" db:"tenant_id"`
 	ZoneID                 uuid.UUID  `json:"zone_id" db:"zone_id"`
@@ -278,7 +279,7 @@ type Message struct {
 	RawObjectKey  string          `json:"raw_object_key,omitempty" db:"raw_object_key"`
 	HeadersJSON   json.RawMessage `json:"headers,omitempty" db:"headers_json"`
 	ReceivedAt    time.Time       `json:"received_at" db:"received_at"`
-	ExpiresAt     time.Time       `json:"expires_at" db:"expires_at"`
+	ExpiresAt     *time.Time      `json:"expires_at" db:"expires_at"`
 	OTPCode       string          `json:"otp_code,omitempty" db:"otp_code"`
 	OTPConfidence float32         `json:"otp_confidence,omitempty" db:"otp_confidence"`
 }
@@ -662,6 +663,14 @@ const (
 )
 
 type OutboundJob struct {
+	DeliveredDomains []string `json:"delivered_domains" db:"delivered_domains"`
+	InFlightDomain   string   `json:"in_flight_domain,omitempty" db:"in_flight_domain"`
+	// Immutable submission provenance is not cleared when users/keys are deleted.
+	SenderUserID    *uuid.UUID `json:"-" db:"sender_user_id"`
+	SenderKeyID     *uuid.UUID `json:"-" db:"sender_key_id"`
+	SenderMailboxID *uuid.UUID `json:"-" db:"sender_mailbox_id"`
+	TemplateName    *string    `json:"-" db:"template_name"`
+
 	ID              uuid.UUID       `json:"id" db:"id"`
 	TenantID        uuid.UUID       `json:"tenant_id" db:"tenant_id"`
 	UserID          *uuid.UUID      `json:"user_id,omitempty" db:"user_id"`

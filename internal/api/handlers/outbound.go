@@ -95,6 +95,12 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 	}
 	userID := actor.EffectiveUserID()
 
+	canonical, addressErr := authz.CanonicalSender(body.From)
+	if addressErr != nil {
+		errBadRequest(w, addressErr.Error())
+		return
+	}
+	body.From = canonical
 	// Validate the from address domain belongs to this tenant and is verified.
 	fromDomain := extractDomainFromAddress(body.From)
 	if fromDomain == "" {
@@ -163,6 +169,16 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
+	if !actor.TenantWide {
+		if err := authz.CheckMailboxSender(ctx, h.store, actor, mailbox, body.TemplateName != nil); err != nil {
+			if authz.IsAuthzError(err) {
+				errForbidden(w, err.Error())
+			} else {
+				errInternal(w)
+			}
+			return
+		}
+	}
 	if mailbox == nil {
 		identity, err := h.store.FindSendIdentityForAddress(ctx, tenant.ID, body.From)
 		if err != nil {
@@ -176,6 +192,10 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if mailbox != nil && mailbox.ExpiresAt != nil && !mailbox.ExpiresAt.After(time.Now()) {
+		errForbidden(w, "sender mailbox expired")
+		return
+	}
 	// Reserve user daily quota atomically with job creation.
 	if actor.Permission != nil && actor.Permission.DailySendQuota > 0 {
 		quota.UserDaily = &store.OutboundUserDailyQuota{
@@ -201,21 +221,22 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 
 	// Build and submit the outbound job.
 	job, err := h.outbound.Submit(ctx, outbound.SendRequest{
-		TenantID:     tenant.ID,
-		UserID:       userID,
-		APIKeyID:     apiKeyID,
-		ZoneID:       zone.ID,
-		From:         body.From,
-		To:           body.To,
-		CC:           body.CC,
-		BCC:          body.BCC,
-		Subject:      body.Subject,
-		TextBody:     body.TextBody,
-		HTMLBody:     body.HTMLBody,
-		Headers:      body.Headers,
-		TemplateName: body.TemplateName,
-		TemplateVars: body.TemplateVars,
-		Quota:        quota,
+		TenantID:        tenant.ID,
+		SenderMailboxID: mailboxID(mailbox),
+		UserID:          userID,
+		APIKeyID:        apiKeyID,
+		ZoneID:          zone.ID,
+		From:            body.From,
+		To:              body.To,
+		CC:              body.CC,
+		BCC:             body.BCC,
+		Subject:         body.Subject,
+		TextBody:        body.TextBody,
+		HTMLBody:        body.HTMLBody,
+		Headers:         body.Headers,
+		TemplateName:    body.TemplateName,
+		TemplateVars:    body.TemplateVars,
+		Quota:           quota,
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
@@ -228,6 +249,10 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 			writeJSON(w, http.StatusTooManyRequests, envelope{
 				Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: "daily send quota exceeded"},
 			})
+			return
+		}
+		if authz.IsAuthzError(err) {
+			errForbidden(w, err.Error())
 			return
 		}
 		h.logger.Err(err).Msg("submitting outbound job")
@@ -298,7 +323,25 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "only dead or failed jobs can be retried")
 		return
 	}
+	if h.outbound == nil {
+		errInternal(w)
+		return
+	}
+	if err := h.outbound.ValidateJobAuthorization(ctx, job); err != nil {
+		if errors.Is(err, store.ErrOutboundUncertain) {
+			errConflict(w, err.Error())
+		} else if authz.IsAuthzError(err) {
+			errForbidden(w, err.Error())
+		} else {
+			errInternal(w)
+		}
+		return
+	}
 	if err := h.store.RequeueOutboundJob(ctx, jobID); err != nil {
+		if errors.Is(err, store.ErrOutboundNotRetryable) {
+			errConflict(w, err.Error())
+			return
+		}
 		h.logger.Err(err).Str("job_id", jobID.String()).Msg("requeue outbound job")
 		errInternal(w)
 		return
@@ -431,4 +474,12 @@ func extractDomainFromAddress(addr string) string {
 		return ""
 	}
 	return addr[idx+1:]
+}
+
+func mailboxID(m *models.Mailbox) *uuid.UUID {
+	if m == nil {
+		return nil
+	}
+	id := m.ID
+	return &id
 }

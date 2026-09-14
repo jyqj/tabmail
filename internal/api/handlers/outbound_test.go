@@ -39,11 +39,17 @@ type outboundAccessFixture struct {
 
 func TestOutboundJobAccessCheckCoversGetRetryAndAttempts(t *testing.T) {
 	f := newOutboundAccessFixture(t)
-	h := NewOutboundHandler(nil, f.st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, zerolog.Nop())
+	h := NewOutboundHandler(svc, f.st, zerolog.Nop())
+	zone := &models.DomainZone{ID: uuid.New(), TenantID: f.tenantID, Domain: "retry.test", IsVerified: true, MXVerified: true}
+	f.st.SeedZone(zone)
+	mb := &models.Mailbox{ID: uuid.New(), TenantID: f.tenantID, ZoneID: zone.ID, FullAddress: "a@retry.test", OwnerUserID: &f.userA.ID, AccessMode: models.AccessAPIKey}
+	f.st.SeedMailbox(mb)
 
 	ownerJobID := uuid.New()
 	if err := f.st.CreateOutboundJob(context.Background(), &models.OutboundJob{
-		ID:        ownerJobID,
+		ID:           ownerJobID,
+		SenderUserID: &f.userA.ID, SenderMailboxID: &mb.ID, ZoneID: zone.ID, MailFrom: mb.FullAddress,
 		TenantID:  f.tenantID,
 		UserID:    &f.userA.ID,
 		State:     models.OutboundDead,
@@ -215,7 +221,7 @@ func TestDeleteSuppressionIsTenantScoped(t *testing.T) {
 	}
 }
 
-func TestSendDoesNotRequireZoneOwnership(t *testing.T) {
+func TestSendRequiresExactPermissionOnSharedZone(t *testing.T) {
 	f := newOutboundAccessFixture(t)
 	h := NewOutboundHandler(nil, f.st, zerolog.Nop())
 
@@ -228,12 +234,10 @@ func TestSendDoesNotRequireZoneOwnership(t *testing.T) {
 		MXVerified:  true,
 	})
 
-	// userA does not own the zone: authorization must still pass (send.from
-	// carries no ownership rule), so the request reaches the later send-as
-	// check (no mailbox, no send identity) instead of being rejected with 403.
+	// Domain sharing alone must never authorize arbitrary employee From addresses.
 	rr := doOutboundSendRequest(t, f.st, h, `{"from":"noone@shared.example.test","to":["rcpt@example.org"]}`, outboundUserHeaders(t, f.userA))
-	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "not an authorized mailbox or verified send identity") {
-		t.Fatalf("non-owner same-tenant send should pass authz, got %d body=%s", rr.Code, rr.Body.String())
+	if rr.Code != http.StatusForbidden || !strings.Contains(rr.Body.String(), "exact mailbox") {
+		t.Fatalf("same-tenant user without exact permission must be denied, got %d body=%s", rr.Code, rr.Body.String())
 	}
 
 	// Cross-tenant zone: denied by the seam's tenant isolation.
@@ -250,7 +254,9 @@ func TestSendDoesNotRequireZoneOwnership(t *testing.T) {
 	}
 }
 
-// TestSendAuthorizesViaVerifiedSendIdentity pins the behavior change that made
+// TestSendAuthorizesViaVerifiedSendIdentity pins ownerless integration compatibility.
+// Human and user-owned-key sends instead require mailbox owner/grant rights.
+// This preserves the behavior that made
 // SendIdentity the authoritative send-as gate: a From address with no mailbox
 // is accepted when a verified send identity (here the *@domain wildcard) covers
 // it, and rejected when that identity is unverified — even on a verified zone,
@@ -282,7 +288,7 @@ func TestSendAuthorizesViaVerifiedSendIdentity(t *testing.T) {
 
 	rr := doOutboundSendRequest(t, f.st, h,
 		`{"from":"anyone@mail.example.test","to":["rcpt@example.org"],"subject":"hi","text_body":"x"}`,
-		outboundUserHeaders(t, f.userA))
+		map[string]string{"X-API-Key": f.apiKeyARaw})
 	if rr.Code != http.StatusCreated {
 		t.Fatalf("verified send identity should authorize send-as (201), got %d body=%s", rr.Code, rr.Body.String())
 	}
@@ -308,7 +314,7 @@ func TestSendAuthorizesViaVerifiedSendIdentity(t *testing.T) {
 	}
 	rr = doOutboundSendRequest(t, f.st, h,
 		`{"from":"anyone@unverified.example.test","to":["rcpt@example.org"],"subject":"hi","text_body":"x"}`,
-		outboundUserHeaders(t, f.userA))
+		map[string]string{"X-API-Key": f.apiKeyARaw})
 	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "not an authorized mailbox or verified send identity") {
 		t.Fatalf("unverified send identity should be rejected, got %d body=%s", rr.Code, rr.Body.String())
 	}

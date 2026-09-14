@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"tabmail/internal/app"
+	"tabmail/internal/authz"
 	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -15,6 +16,7 @@ import (
 
 // mailboxLookup is the slice of the store the mailbox resolver needs.
 type mailboxLookup interface {
+	authz.MailboxGrantReader
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	ForTenant(tenantID uuid.UUID) store.TenantScoped
@@ -46,17 +48,14 @@ func (r *mailboxResolver) Resolve(ctx context.Context, address string, viewer Vi
 		return nil, app.BadRequest("invalid address")
 	}
 	var mb *models.Mailbox
-	// For public/mailbox-token access, don't restrict lookup to the public tenant.
-	// For authenticated users/API keys, try tenant-local lookup first, then fall
-	// back to global lookup so public/token mailboxes in other tenants remain
-	// reachable; the access-mode checks below are the security boundary.
+	// Authenticated principals never fall back outside their selected tenant.
+	// Public/mailbox-token callers retain the legacy resource visibility path.
 	if viewer.Tenant != nil && viewer.AuthMode != AuthModePublic {
 		mb, err = r.store.ForTenant(viewer.Tenant.ID).GetMailboxByAddress(ctx, mailboxKey)
-		if err == nil && mb == nil {
-			mb, err = r.store.GetMailboxByAddress(ctx, mailboxKey)
-		}
-	} else {
+	} else if viewer.AuthMode == AuthModePublic {
 		mb, err = r.store.GetMailboxByAddress(ctx, mailboxKey)
+	} else {
+		return nil, app.NotFound("mailbox not found")
 	}
 	if err != nil {
 		return nil, app.Internal(err)
@@ -65,6 +64,9 @@ func (r *mailboxResolver) Resolve(ctx context.Context, address string, viewer Vi
 		return nil, app.NotFound("mailbox not found")
 	}
 	if viewer.IsTenantAdmin() {
+		if viewer.Tenant == nil || mb.TenantID != viewer.Tenant.ID {
+			return nil, app.NotFound("mailbox not found")
+		}
 		return mb, nil
 	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
@@ -76,6 +78,9 @@ func (r *mailboxResolver) Resolve(ctx context.Context, address string, viewer Vi
 	}
 	if canManage {
 		return mb, nil
+	}
+	if mb.OwnerUserID != nil {
+		return nil, accessDeniedOrNotFound(viewer, "personal mailbox permission required")
 	}
 	switch mb.AccessMode {
 	case models.AccessPublic:
@@ -136,6 +141,9 @@ func (r *mailboxResolver) ResolveForWrite(ctx context.Context, address string, v
 		return nil, app.NotFound("mailbox not found")
 	}
 	if viewer.IsTenantAdmin() {
+		if viewer.Tenant == nil || mb.TenantID != viewer.Tenant.ID {
+			return nil, app.NotFound("mailbox not found")
+		}
 		return mb, nil
 	}
 	if mb.ExpiresAt != nil && mb.ExpiresAt.Before(time.Now()) {
@@ -155,9 +163,6 @@ func (r *mailboxResolver) canAccess(ctx context.Context, mb *models.Mailbox, vie
 	if mb == nil {
 		return false, nil
 	}
-	if viewer.IsTenantAdmin() {
-		return true, nil
-	}
 	if viewer.Tenant == nil || mb.TenantID != viewer.Tenant.ID {
 		return false, nil
 	}
@@ -167,20 +172,15 @@ func (r *mailboxResolver) canAccess(ctx context.Context, mb *models.Mailbox, vie
 	if viewer.TenantWide {
 		return true, nil
 	}
-	zone, err := r.store.GetZone(ctx, mb.ZoneID)
+	user := viewer.UserID
+	if viewer.AuthMode == AuthModeAPIKey {
+		user = viewer.OwnerUserID
+	}
+	g, err := authz.MailboxRights(ctx, r.store, viewer.Tenant.ID, user, mb)
 	if err != nil {
 		return false, app.Internal(err)
 	}
-	if zone == nil {
-		return false, nil
-	}
-	if zone.OwnerUserID == nil {
-		return false, nil
-	}
-	if viewer.UserID != nil && *viewer.UserID == *zone.OwnerUserID {
-		return true, nil
-	}
-	return viewer.OwnerUserID != nil && *viewer.OwnerUserID == *zone.OwnerUserID, nil
+	return g != nil && g.CanRead && (!requireWrite || g.CanOrganize), nil
 }
 
 func viewerZoneAllowed(viewer Viewer, zoneID uuid.UUID) bool {

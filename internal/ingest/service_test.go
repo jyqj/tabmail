@@ -11,7 +11,6 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
-	"tabmail/internal/rawobject"
 	"tabmail/internal/realtime"
 	"tabmail/internal/resolver"
 	"tabmail/internal/testutil"
@@ -83,8 +82,8 @@ func TestServiceDurableAcceptAndProcess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if mb != nil {
-		t.Fatalf("expected mailbox not materialized before worker, got %#v", mb)
+	if mb == nil {
+		t.Fatal("durable acknowledgement requires a fixed mailbox identity")
 	}
 
 	svc.ProcessBatch(context.Background())
@@ -117,79 +116,35 @@ func TestServiceDurableAcceptAndProcess(t *testing.T) {
 	}
 }
 
-func TestServiceDurableZeroDeliveryDeletesRawObject(t *testing.T) {
+func TestServiceDurableRejectsUnknownDestinationBeforeAcceptance(t *testing.T) {
 	st, obj, svc := newDurableCleanupService(t, 1024*1024, false)
-	raw := []byte("Subject: route gone\r\n\r\nhello")
-	key := rawobject.Key(raw)
-
-	res, err := svc.Accept(context.Background(), Envelope{
-		Source:     "smtp",
-		MailFrom:   "sender@example.org",
-		Recipients: []string{"user@mail.test"},
-	}, raw)
-	if err != nil {
-		t.Fatal(err)
+	result, err := svc.Accept(context.Background(), Envelope{Source: "smtp", Recipients: []string{"user@mail.test"}}, []byte("Subject: unknown\r\n\r\nhello"))
+	if err == nil || result.Queued {
+		t.Fatal("unresolved recipient must not be acknowledged")
 	}
-	if !res.Queued {
-		t.Fatalf("expected durable accept to queue, got %#v", res)
-	}
-	if ok, err := obj.Exists(context.Background(), key); err != nil || !ok {
-		t.Fatalf("expected raw object queued before worker, ok=%v err=%v", ok, err)
-	}
-
-	svc.ProcessBatch(context.Background())
-	if ok, err := obj.Exists(context.Background(), key); err != nil || ok {
-		t.Fatalf("expected zero-delivery raw object to be deleted, ok=%v err=%v", ok, err)
-	}
-	jobs, total, err := st.ListIngestJobs(context.Background(), models.Page{Page: 1, PerPage: 10}, "", "", "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if total != 1 || len(jobs) != 1 || jobs[0].State != "done" {
-		t.Fatalf("expected completed ingest job after zero-delivery cleanup, total=%d jobs=%#v", total, jobs)
-	}
-	refs, err := st.CountRawObjectReferences(context.Background(), key)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if refs != 0 {
-		t.Fatalf("expected no raw references after zero-delivery cleanup, got %d", refs)
+	jobs, _, err := st.ListIngestJobs(context.Background(), models.Page{Page: 1, PerPage: 10}, "", "", "")
+	if err != nil || len(jobs) != 0 || obj.Count() != 0 {
+		t.Fatalf("partial acceptance: jobs=%d objects=%d err=%v", len(jobs), obj.Count(), err)
 	}
 }
 
-func TestServiceDurableSizeFailureDeletesRawObject(t *testing.T) {
+func TestServiceDurableSizeFailureRetainsRawObject(t *testing.T) {
 	st, obj, svc := newDurableCleanupService(t, 8, true)
-	raw := []byte("Subject: too big\r\n\r\nhello world")
-	key := rawobject.Key(raw)
-
-	res, err := svc.Accept(context.Background(), Envelope{
-		Source:     "smtp",
-		MailFrom:   "sender@example.org",
-		Recipients: []string{"user@mail.test"},
-	}, raw)
+	_, err := svc.Accept(context.Background(), Envelope{Source: "smtp", Recipients: []string{"user@mail.test"}}, []byte("Subject: oversized\r\n\r\nhello world"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !res.Queued {
-		t.Fatalf("expected durable accept to queue, got %#v", res)
-	}
-
 	svc.ProcessBatch(context.Background())
-	if ok, err := obj.Exists(context.Background(), key); err != nil || ok {
-		t.Fatalf("expected size-failed raw object to be deleted, ok=%v err=%v", ok, err)
+	jobs, _, err := st.ListIngestJobs(context.Background(), models.Page{Page: 1, PerPage: 10}, "", "", "")
+	if err != nil || len(jobs) != 1 || jobs[0].State != "dead" {
+		t.Fatalf("must hold permanently rejected accepted receipt: %#v %v", jobs, err)
 	}
-	mb, err := st.GetMailboxByAddress(context.Background(), "user@mail.test")
-	if err != nil {
-		t.Fatal(err)
+	if exists, err := obj.Exists(context.Background(), jobs[0].RawObjectKey); err != nil || !exists {
+		t.Fatal("original lost")
 	}
-	if mb != nil {
-		_, total, err := st.ListMessages(context.Background(), mb.ID, models.Page{Page: 1, PerPage: 10})
-		if err != nil {
-			t.Fatal(err)
-		}
-		if total != 0 {
-			t.Fatalf("expected no message after size failure, got %d", total)
-		}
+	refs, err := st.CountRawObjectReferences(context.Background(), jobs[0].RawObjectKey)
+	if err != nil || refs == 0 {
+		t.Fatalf("unprotected original: refs=%d err=%v", refs, err)
 	}
 }
 
@@ -322,9 +277,9 @@ func intPtr(v int) *int { return &v }
 // skipped to fallback — matching the pre-P5 EffectiveConfig semantics.
 func TestResolveRetentionPureFunction(t *testing.T) {
 	cases := []struct {
-		name                          string
-		mailbox, route, tenant        *int
-		fallback, want                int
+		name                   string
+		mailbox, route, tenant *int
+		fallback, want         int
 	}{
 		{"mailbox wins over everything", intPtr(99), intPtr(48), intPtr(24), 12, 99},
 		{"route wins when mailbox unset", nil, intPtr(48), intPtr(24), 12, 48},
@@ -418,7 +373,7 @@ func TestAcceptWithResolvedReusesRCPTResult(t *testing.T) {
 	reusedMB := *seededMB
 	reusedMB.RetentionHoursOverride = intPtr(99)
 	supplied := &resolver.Result{
-		Zone: &models.DomainZone{ID: seededMB.ZoneID, TenantID: seededMB.TenantID, Domain: "mail.test", IsVerified: true, MXVerified: true},
+		Zone:    &models.DomainZone{ID: seededMB.ZoneID, TenantID: seededMB.TenantID, Domain: "mail.test", IsVerified: true, MXVerified: true},
 		Mailbox: &reusedMB,
 	}
 
@@ -507,4 +462,3 @@ func TestAcceptWithResolvedDoesNotReuseAutoCreateResult(t *testing.T) {
 		t.Fatal("expected mailbox auto-created despite non-reusable WithResolved")
 	}
 }
-
