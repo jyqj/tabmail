@@ -39,6 +39,8 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: web/package-lock.json
+      - name: Validate workspace patch syntax
+        run: python3 -m py_compile .release-blockers/*.py
       - name: Red regressions on unchanged main
         run: |
           set -euo pipefail
@@ -49,7 +51,6 @@ jobs:
           go test -json -count=1 -timeout=180s ./internal/api -run '^TestReleaseBlocker' > /tmp/release-red.jsonl 2>&1
           status=$?
           set -e
-          cat /tmp/release-red.jsonl
           test "$status" -ne 0
           python3 - <<'PY'
           import json
@@ -64,7 +65,7 @@ jobs:
           PY
       - name: Apply exact business changes
         run: |
-          python3 .release-blockers/finalize.py
+          python3 .release-blockers/followups.py
           git diff --name-only "$BASE_SHA" -- '*.go' | xargs -r gofmt -w
           git diff --check
       - name: Go build
@@ -72,7 +73,17 @@ jobs:
       - name: PostgreSQL race tests
         run: |
           set -o pipefail
-          go test -json -race -count=1 -timeout=180s ./... | tee /tmp/release-green.jsonl
+          go test -json -race -count=1 -timeout=180s ./... > /tmp/release-green.jsonl 2>&1 || { cat /tmp/release-green.jsonl; exit 1; }
+          python3 - <<'PY'
+          import json
+          tests=[]
+          for line in open('/tmp/release-green.jsonl'):
+              try: e=json.loads(line)
+              except ValueError: continue
+              if e.get('Test') and e.get('Action') in ('pass','fail','skip'): tests.append(e)
+          assert not any(e['Action']!='pass' for e in tests), 'failed or skipped tests'
+          print('PASS',len(tests),'tests including subtests;',sum('/' not in e['Test'] for e in tests),'top-level tests')
+          PY
       - name: Vet and shared DTO contract
         run: |
           go vet ./...
@@ -109,6 +120,10 @@ jobs:
           git push origin HEAD:refs/heads/fix/company-mail-release-blockers
           git rev-parse HEAD HEAD^{tree}
           git diff --stat "$BASE_SHA" HEAD
+      - name: Collect reproducible workspace and evidence
+        if: always()
+        run: |
+          tar --exclude='web/node_modules' --exclude='web/.next' -czf /tmp/release-workspace.tgz internal web scripts docs go.mod go.sum docker-compose.prod.yml .env.example
       - name: Preserve validation evidence
         if: always()
         uses: actions/upload-artifact@v4
@@ -118,4 +133,5 @@ jobs:
             /tmp/release-red.jsonl
             /tmp/release-green.jsonl
             /tmp/release-web-tests.txt
+            /tmp/release-workspace.tgz
           retention-days: 14
