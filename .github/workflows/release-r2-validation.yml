@@ -1,0 +1,138 @@
+name: Release R2 staged validation
+on:
+  push:
+    branches: [work/release-blockers-r2-validation]
+permissions:
+  contents: write
+concurrency:
+  group: release-r2-staged-validation
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+      BASE_SHA: 6434118298387cb85fa473a4e6d78ff35c14102e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare isolated business worktree
+        run: |
+          python3 -m py_compile .r2/*.py
+          git worktree add --detach "$RUNNER_TEMP/r2-candidate" "$BASE_SHA"
+          mkdir -p "$RUNNER_TEMP/r2-evidence"
+          cd "$RUNNER_TEMP/r2-candidate"
+          python3 "$GITHUB_WORKSPACE/.r2/tests.py" red
+      - name: Verify six original red regressions
+        run: |
+          cd "$RUNNER_TEMP/r2-candidate"
+          set +e
+          go test -json -count=1 -run '^TestR2Red' ./internal/... > "$RUNNER_TEMP/r2-evidence/red.jsonl" 2>&1
+          status=$?
+          set -e
+          cat "$RUNNER_TEMP/r2-evidence/red.jsonl"
+          test "$status" -ne 0
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          failed=set()
+          for line in Path(os.environ['RUNNER_TEMP']+'/r2-evidence/red.jsonl').read_text().splitlines():
+            try:r=json.loads(line)
+            except ValueError:continue
+            if r.get('Action')=='fail' and r.get('Test') and '/' not in r['Test']:failed.add(r['Test'])
+          expected={'TestR2RedAdminCannotManagePeer','TestR2RedMailboxDefaultPrivate','TestR2RedOutboundAdminContent','TestR2RedWorkerTokenNeverSerialized','TestR2RedRefreshRevocationFailure','TestR2RedProductionCompanyDefaults'}
+          assert failed==expected,(failed,expected)
+          print('Six red regressions verified:',sorted(failed))
+          PY
+      - name: Apply exact business transformations
+        run: |
+          cd "$RUNNER_TEMP/r2-candidate"
+          python3 "$GITHUB_WORKSPACE/.r2/core.py"
+          python3 "$GITHUB_WORKSPACE/.r2/content.py"
+          python3 "$GITHUB_WORKSPACE/.r2/tests.py" green
+          python3 "$GITHUB_WORKSPACE/.r2/finalize.py"
+          git checkout "$BASE_SHA" -- .github
+          git ls-files -m --others --exclude-standard -z '*.go' | xargs -0 -r gofmt -w
+          git diff --check
+      - name: Build and vet
+        run: |
+          cd "$RUNNER_TEMP/r2-candidate"
+          go build ./...
+          go vet ./...
+      - name: Race tests including PostgreSQL
+        run: |
+          set -o pipefail
+          cd "$RUNNER_TEMP/r2-candidate"
+          go test -json -race -count=1 -timeout=240s ./... | tee "$RUNNER_TEMP/r2-evidence/green.jsonl"
+          python3 scripts/check_contract_drift.py
+      - name: Frontend types tests lint build
+        run: |
+          cd "$RUNNER_TEMP/r2-candidate/web"
+          npm ci
+          npx tsc --noEmit
+          npm test
+          npm run lint
+          npm run build
+      - name: Verify production Compose and actual web image
+        run: |
+          cd "$RUNNER_TEMP/r2-candidate"
+          python3 scripts/verify_production_config.py --build | tee "$RUNNER_TEMP/r2-evidence/deployment.log"
+      - name: Record verification evidence
+        run: |
+          cd "$RUNNER_TEMP/r2-candidate"
+          python3 - <<'PY'
+          import json,os
+          from pathlib import Path
+          rows=[]
+          for line in Path(os.environ['RUNNER_TEMP']+'/r2-evidence/green.jsonl').read_text().splitlines():
+            try:rows.append(json.loads(line))
+            except ValueError:pass
+          passed=[r for r in rows if r.get('Action')=='pass' and r.get('Test')]
+          skipped=[r for r in rows if r.get('Action')=='skip' and r.get('Test')]
+          failed=[r for r in rows if r.get('Action')=='fail']
+          assert not skipped and not failed,('skipped',skipped,'failed',failed)
+          text=f'''# R2 validation evidence\n\nBase: `{os.environ['BASE_SHA']}`.\nActions run: https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}\n\nSix regressions were executed against the unchanged base business code and failed by their expected names (not compilation failures). The exact candidate business tree then passed:\n\n- Go build and vet.\n- PostgreSQL 16 race suite: {len(passed)} tests including subtests, {sum('/' not in r['Test'] for r in passed)} top-level tests; zero failures, zero skipped tests.\n- Go/TypeScript field contract check.\n- Frontend TypeScript, Vitest, lint and production build.\n- Resolved production Compose defaults and an actual Docker web build; the built routes manifest points to tabmail-api:8080 and not tabmail:8080.\n\nThe run artifacts contain red/green JSONL and deployment logs. Candidate publication occurs only after all gates above. This is not a production deployment, browser login acceptance test or public mail delivery test.\n'''
+          Path('docs/company-mail/RELEASE-BLOCKERS-R2-VALIDATION.md').write_text(text)
+          print(text)
+          PY
+      - name: Publish verified candidate (never main)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/r2-candidate"
+          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$BASE_SHA"
+          git diff --check
+          git config user.name 'TabMail release validation'
+          git config user.email 'release-validation@users.noreply.github.com'
+          git add internal web scripts docker-compose.prod.yml .env.example docs/company-mail
+          git commit -m 'fix: close company-mail release blockers with guarded membership, content policy and atomic sessions'
+          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
+          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/fix/company-release-blockers-r2
+          echo "VERIFIED_CANDIDATE_SHA=$(git rev-parse HEAD)"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: release-r2-validation-evidence
+          path: ${{ runner.temp }}/r2-evidence
+          retention-days: 14
