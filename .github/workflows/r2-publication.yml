@@ -28,15 +28,9 @@ jobs:
       GOSUMDB: sum.golang.org
       TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
       BASE_SHA: 6434118298387cb85fa473a4e6d78ff35c14102e
-      EXPECTED_TREE: 4c2ec35c3bc39e7a8e65d7b9b65cfcb9d8e0fe3c
+      EXPECTED_TREE: 2955517940d0c0ad87d241cda36228040b3f8205
       NEXT_TELEMETRY_DISABLED: '1'
     steps:
-      - name: Reclaim unused hosted-runner SDK space
-        run: |
-          set -euo pipefail
-          df -h /
-          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /opt/ghc /usr/local/.ghcup
-          df -h /
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -58,6 +52,10 @@ jobs:
           assert hashlib.sha256(source).hexdigest() == '9cf9e7d7d099d0b8dc8a68c8834f04ebd19e4db4d9cc1492cd3a2221b2cec8f1', 'transfer integrity mismatch'
           exec(compile(source,'.release-blockers/finish_r2.py','exec'))
           PY
+          mkdir -p web/public
+          printf '# Keep the public directory available to the production Docker COPY step.\n' > web/public/.gitkeep
+          printf 'node_modules\n.next\n.git\n*.log\n.env*\ntsconfig.tsbuildinfo\n' > web/.dockerignore
+          git add web/public/.gitkeep web/.dockerignore
           test "$(git write-tree)" = "$EXPECTED_TREE"
       - name: Verify six red regressions on unchanged baseline
         run: |
@@ -97,11 +95,10 @@ jobs:
           npm test | tee /tmp/r2-web-tests.txt
           npm run lint
           npm run build
-      - name: Remove disposable host build caches before isolated Docker build
+      - name: Clean generated build caches only
         run: |
           set -euo pipefail
           git worktree remove --force /tmp/tabmail-r2-red
-          rm -rf web/node_modules web/.next
           go clean -cache -modcache
           npm cache clean --force
           df -h /
@@ -113,7 +110,7 @@ jobs:
           cp .env.example /tmp/tabmail-release.env
           echo 'TABMAIL_OUTBOUND_RELAY_HOST=relay.example.invalid' >> /tmp/tabmail-release.env
           docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml config --format json | python3 scripts/check_release_deploy.py | tee /tmp/r2-deploy.txt
-          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml build web
+          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml build web 2>&1 | tee /tmp/r2-docker-build.txt
           docker run --rm --entrypoint node tabmail-prod-web -e 'const fs=require("fs"); const s=fs.readFileSync(".next/routes-manifest.json","utf8"); if(!s.includes("http://tabmail-api:8080") || s.includes("http://tabmail:8080")) throw new Error("wrong baked-in API origin"); console.log("PASS: production standalone rewrite targets tabmail-api:8080");' | tee -a /tmp/r2-deploy.txt
       - name: Publish only the exact tested tree to this feature branch
         run: |
@@ -137,5 +134,6 @@ jobs:
             /tmp/r2-green.jsonl
             /tmp/r2-web-tests.txt
             /tmp/r2-deploy.txt
+            /tmp/r2-docker-build.txt
             /tmp/r2-published-ref.txt
           retention-days: 14
