@@ -1,0 +1,121 @@
+name: Release blocker publication gate
+on:
+  push:
+    branches: [fix/company-mail-release-blockers]
+permissions:
+  contents: write
+concurrency:
+  group: release-blocker-publication
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+      BASE_SHA: 6434118298387cb85fa473a4e6d78ff35c14102e
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Red regressions on unchanged main
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/tabmail-release-red "$BASE_SHA"
+          cp internal/api/release_blockers_regression_test.go /tmp/tabmail-release-red/internal/api/
+          cd /tmp/tabmail-release-red
+          set +e
+          go test -json -count=1 -timeout=180s ./internal/api -run '^TestReleaseBlocker' > /tmp/release-red.jsonl 2>&1
+          status=$?
+          set -e
+          cat /tmp/release-red.jsonl
+          test "$status" -ne 0
+          python3 - <<'PY'
+          import json
+          expected={'TestReleaseBlockerAdminCannotManagePeer','TestReleaseBlockerPrivateMailboxDefault','TestReleaseBlockerOutboundMetadataOnly','TestReleaseBlockerDeliveryTokenNeverSerialized','TestReleaseBlockerRefreshFailsClosed','TestReleaseBlockerLogoutFailsClosed'}
+          failed=set()
+          for line in open('/tmp/release-red.jsonl'):
+              try: e=json.loads(line)
+              except ValueError: continue
+              if e.get('Action')=='fail' and e.get('Test'): failed.add(e['Test'].split('/')[0])
+          assert failed==expected,(failed,expected)
+          print('CONFIRMED SIX EXPECTED RED REGRESSIONS')
+          PY
+      - name: Apply exact business changes
+        run: |
+          python3 .release-blockers/finalize.py
+          git diff --name-only "$BASE_SHA" -- '*.go' | xargs -r gofmt -w
+          git diff --check
+      - name: Go build
+        run: go build ./...
+      - name: PostgreSQL race tests
+        run: |
+          set -o pipefail
+          go test -json -race -count=1 -timeout=180s ./... | tee /tmp/release-green.jsonl
+      - name: Vet and shared DTO contract
+        run: |
+          go vet ./...
+          python3 scripts/check_contract_drift.py
+      - name: Frontend dependencies
+        run: npm ci
+        working-directory: web
+      - name: Frontend types, tests, lint and build
+        working-directory: web
+        run: |
+          set -o pipefail
+          npx tsc --noEmit
+          npm test | tee /tmp/release-web-tests.txt
+          npm run lint
+          npm run build
+      - name: Company compose and standalone image
+        run: |
+          set -euo pipefail
+          cp .env.example /tmp/tabmail-release.env
+          echo 'TABMAIL_OUTBOUND_RELAY_HOST=relay.example.invalid' >> /tmp/tabmail-release.env
+          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml config --format json | python3 scripts/check_release_deploy.py
+          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml build web
+          docker run --rm --entrypoint node tabmail-prod-web -e 'const fs=require("fs"); const s=fs.readFileSync(".next/routes-manifest.json","utf8"); if(!s.includes("http://tabmail-api:8080") || s.includes("http://tabmail:8080")) throw new Error("wrong baked-in API origin"); console.log("PASS: production standalone rewrite targets tabmail-api:8080");'
+      - name: Publish tested business tree to this branch only
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/fix/company-mail-release-blockers
+          git config user.name 'Tabmail release validation'
+          git config user.email 'release-validation@users.noreply.github.com'
+          git rm -r .release-blockers
+          git add internal web scripts docker-compose.prod.yml .env.example
+          git diff --cached --check
+          git commit -m 'fix: close company-mail release blockers A-E with verified regressions'
+          git push origin HEAD:refs/heads/fix/company-mail-release-blockers
+          git rev-parse HEAD HEAD^{tree}
+          git diff --stat "$BASE_SHA" HEAD
+      - name: Preserve validation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-blocker-evidence
+          path: |
+            /tmp/release-red.jsonl
+            /tmp/release-green.jsonl
+            /tmp/release-web-tests.txt
+          retention-days: 14
