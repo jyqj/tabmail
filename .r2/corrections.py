@@ -2,7 +2,9 @@ from patchutil import *
 import json
 
 p='web/app/(dashboard)/console/mailboxes/page.tsx'
-replace(p,'useState<"public" | "api_key" | "token">("public")','useState<"public" | "api_key" | "token">("token")')
+assert 'useState<AccessMode>("token")' in read(p)
+replace(p,'placeholder={t("mailboxes.inheritDefault")}','placeholder={t("mailboxes.retentionPermanentHint")}')
+replace(p,'Number.isNaN(retentionHours)','!Number.isInteger(retentionHours)')
 p='internal/store/postgres/migrate.go'
 replace(p,'version_id NOT IN (0,1,2)','version_id NOT IN (0,1,2,3)')
 p='internal/store/postgres/outbound.go'
