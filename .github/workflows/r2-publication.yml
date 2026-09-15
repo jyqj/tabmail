@@ -1,0 +1,125 @@
+name: R2 exact-tree publication gate
+on:
+  push:
+    branches: [fix/company-mail-release-blockers-r2]
+    paths: [.release-blockers/finish_r2.b64, .github/workflows/r2-publication.yml]
+permissions:
+  contents: write
+concurrency:
+  group: r2-exact-publication
+  cancel-in-progress: false
+jobs:
+  validate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+      BASE_SHA: 6434118298387cb85fa473a4e6d78ff35c14102e
+      EXPECTED_TREE: 4c2ec35c3bc39e7a8e65d7b9b65cfcb9d8e0fe3c
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Materialize and check the reviewed business tree
+        run: |
+          test "$GITHUB_REF" = refs/heads/fix/company-mail-release-blockers-r2
+          python3 - <<'PY'
+          import base64, hashlib, zlib
+          from pathlib import Path
+          source=zlib.decompress(base64.b64decode(Path('.release-blockers/finish_r2.b64').read_bytes().strip(), validate=True))
+          assert hashlib.sha256(source).hexdigest() == '9cf9e7d7d099d0b8dc8a68c8834f04ebd19e4db4d9cc1492cd3a2221b2cec8f1', 'transfer integrity mismatch'
+          exec(compile(source,'.release-blockers/finish_r2.py','exec'))
+          PY
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+      - name: Verify six red regressions on unchanged baseline
+        run: |
+          set -euo pipefail
+          git worktree add --detach /tmp/tabmail-r2-red "$BASE_SHA"
+          cp internal/api/release_blockers_regression_test.go /tmp/tabmail-r2-red/internal/api/
+          cd /tmp/tabmail-r2-red
+          set +e
+          go test -json -count=1 -timeout=180s ./internal/api -run '^TestReleaseBlocker' > /tmp/r2-red.jsonl 2>&1
+          status=$?
+          set -e
+          test "$status" -ne 0
+          python3 - <<'PY'
+          import json
+          expected={'TestReleaseBlockerAdminCannotManagePeer','TestReleaseBlockerPrivateMailboxDefault','TestReleaseBlockerOutboundMetadataOnly','TestReleaseBlockerDeliveryTokenNeverSerialized','TestReleaseBlockerRefreshFailsClosed','TestReleaseBlockerLogoutFailsClosed'}
+          failed=set()
+          for line in open('/tmp/r2-red.jsonl'):
+              try: e=json.loads(line)
+              except ValueError: continue
+              if e.get('Action')=='fail' and e.get('Test'): failed.add(e['Test'].split('/')[0])
+          assert failed==expected,(failed,expected)
+          print('PASS: six expected baseline red regressions')
+          PY
+      - name: Build, real PostgreSQL race tests, vet and DTO contracts
+        run: |
+          set -euo pipefail
+          go build ./...
+          go test -json -race -count=1 -timeout=180s ./... | tee /tmp/r2-green.jsonl
+          go vet ./...
+          python3 scripts/check_contract_drift.py
+      - name: Frontend dependencies, types, tests, lint and build
+        working-directory: web
+        run: |
+          set -euo pipefail
+          npm ci
+          npx tsc --noEmit
+          npm test | tee /tmp/r2-web-tests.txt
+          npm run lint
+          npm run build
+      - name: Company Compose and actual standalone image
+        run: |
+          set -euo pipefail
+          cp .env.example /tmp/tabmail-release.env
+          echo 'TABMAIL_OUTBOUND_RELAY_HOST=relay.example.invalid' >> /tmp/tabmail-release.env
+          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml config --format json | python3 scripts/check_release_deploy.py | tee /tmp/r2-deploy.txt
+          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml build web
+          docker run --rm --entrypoint node tabmail-prod-web -e 'const fs=require("fs"); const s=fs.readFileSync(".next/routes-manifest.json","utf8"); if(!s.includes("http://tabmail-api:8080") || s.includes("http://tabmail:8080")) throw new Error("wrong baked-in API origin"); console.log("PASS: production standalone rewrite targets tabmail-api:8080");' | tee -a /tmp/r2-deploy.txt
+      - name: Publish only the exact tested tree to this feature branch
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = refs/heads/fix/company-mail-release-blockers-r2
+          test "$(git write-tree)" = "$EXPECTED_TREE"
+          git diff --exit-code
+          git config user.name 'Tabmail release validation'
+          git config user.email 'release-validation@users.noreply.github.com'
+          git commit -m 'fix: close company-mail release blockers A-E with verified PostgreSQL and deployment gates'
+          git push origin HEAD:refs/heads/fix/company-mail-release-blockers-r2
+          git rev-parse HEAD HEAD^{tree} | tee /tmp/r2-published-ref.txt
+          git diff --stat "$BASE_SHA" HEAD
+      - name: Preserve test and publication evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-mail-r2-evidence
+          path: |
+            /tmp/r2-red.jsonl
+            /tmp/r2-green.jsonl
+            /tmp/r2-web-tests.txt
+            /tmp/r2-deploy.txt
+            /tmp/r2-published-ref.txt
+          retention-days: 14

@@ -1,7 +1,7 @@
-name: Company mail P0
+name: Company mail security and release checks
 on:
   push:
-    branches: [feat/company-mail-p0]
+    branches: [main, fix/company-mail-release-blockers-r2]
   pull_request:
     branches: [main]
 permissions:
@@ -74,3 +74,22 @@ jobs:
         working-directory: web
       - run: npm run build
         working-directory: web
+
+  production-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate company Compose contract
+        run: |
+          set -euo pipefail
+          cp .env.example /tmp/tabmail-release.env
+          echo 'TABMAIL_OUTBOUND_RELAY_HOST=relay.example.invalid' >> /tmp/tabmail-release.env
+          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml config --format json | python3 scripts/check_release_deploy.py
+      - name: Build production standalone image and inspect baked API origin
+        run: |
+          set -euo pipefail
+          docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml build web
+          docker run --rm --entrypoint node tabmail-prod-web -e 'const fs=require("fs"); const s=fs.readFileSync(".next/routes-manifest.json","utf8"); if(!s.includes("http://tabmail-api:8080") || s.includes("http://tabmail:8080")) throw new Error("wrong baked-in API origin"); console.log("PASS: production standalone rewrite targets tabmail-api:8080");'
