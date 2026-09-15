@@ -75,28 +75,18 @@ edit(page,'useState<AccessMode>("public")','useState<AccessMode>("token")')
 edit(page,'Number.isNaN(retentionHours) || retentionHours <= 0','!Number.isInteger(retentionHours) || retentionHours < 0')
 edit(page,'min="1"','min="0"')
 edit(page,'placeholder={t("mailboxes.inheritDefault")}','placeholder={t("mailboxes.retentionPermanentHint")}')
-# A successful public-mode creation must not silently make the next one public.
 edit(page,'setNewAddress("");','setNewAddress("");\n      setNewAccessMode("token");')
 for lang in ['zh','en']:
- p=ROOT/f'web/locales/{lang}.json';s=p.read_text();obj=json.loads(s)
+ p=ROOT/f'web/locales/{lang}.json';obj=json.loads(p.read_text())
  assert 'mailboxes.retentionError' in obj
  obj['mailboxes.retentionError']='保留小时数必须为非负整数，0 表示永久保留' if lang=='zh' else 'Retention hours must be a non-negative integer; 0 means permanent retention'
  obj['mailboxes.retentionPermanentHint']='0 = 永久保留；留空继承默认值' if lang=='zh' else '0 = permanent; leave blank to inherit'
  obj['outbound.contentRedacted']='仅显示任务元数据；正文和密送信息需要发件人身份或邮箱阅读授权。' if lang=='zh' else 'Metadata only. Content and BCC require sender identity or mailbox read permission.'
  p.write_text(json.dumps(obj,ensure_ascii=False,indent=2)+'\n')
 p=ROOT/'web/lib/types.ts';s=p.read_text();m=re.search(r'(export (?:interface|type) OutboundJob(?:\s*=)?\s*\{)(.*?)(\n\})',s,re.S);assert m
- body=m.group(2);body=re.sub(r'\n\s*delivery_token\??:[^\n]+','',body)
- body='\n  content_redacted?: boolean;'+body
- s=s[:m.start(2)]+body+s[m.end(2):];p.write_text(s)
-p=ROOT/'web/app/(dashboard)/console/outbound/page.tsx';s=p.read_text()
- # Insert a notice immediately inside the detail dialog's header content.
-needle='{detailJob && ('
-if needle in s:
- # The type contract is updated here; exact presentation is completed by
- # the view test patch once the dialog's existing fragment is inspected.
- pass
-# Explicit owner input is available to API administrators; employee provisioning
-# and its management UI remain P1, as requested.
+body=m.group(2);body=re.sub(r'\n\s*delivery_token\??:[^\n]+','',body)
+body='\n  content_redacted?: boolean;'+body
+s=s[:m.start(2)]+body+s[m.end(2):];p.write_text(s)
 p=ROOT/'web/lib/api/mailboxes.ts'
 if p.exists():
  s=p.read_text();needle='address: string;'
@@ -125,13 +115,7 @@ edit(p,'  web:\n    build: ./web','''  web:
       context: ./web
       args:
         INTERNAL_API_URL: "http://tabmail-api:8080"''')
-# Supply the redis healthcheck's password in its own container, not only in
-# Compose interpolation. This previously caused an authenticated healthcheck
-# to use an empty value (and could echo it to logs).
 edit(p,'    image: redis:7-alpine\n    command:','    image: redis:7-alpine\n    environment:\n      REDISCLI_AUTH: "${TABMAIL_REDIS_PASSWORD:?set TABMAIL_REDIS_PASSWORD}"\n    command:')
-edit(p,'redis-cli -a \\"$${TABMAIL_REDIS_PASSWORD}\\" ping','redis-cli ping') if 'redis-cli -a \\"$${TABMAIL_REDIS_PASSWORD}\\" ping' in (ROOT/p).read_text() else None
-# Match the literal YAML source without exposing any deployment values.
-s=(ROOT/p).read_text();s=s.replace('test: ["CMD-SHELL", "redis-cli -a \\"$${TABMAIL_REDIS_PASSWORD}\\" ping"]','test: ["CMD-SHELL", "redis-cli ping"]');(ROOT/p).write_text(s)
 p=ROOT/'.env.example';p.write_text(p.read_text()+'''
 # --- Company-only deployment (docker-compose.prod.yml) ---
 # Settings are seeded only on first start. For an existing database also turn
@@ -153,14 +137,12 @@ TABMAIL_OUTBOUND_REQUIRE_TLS=true
 # Compose passes INTERNAL_API_URL as a web build argument. Rebuild the web image
 # after changing that destination; runtime environment alone is insufficient.
 ''')
-# OpenAPI: preserve formatting rather than rewriting the full specification.
 p=ROOT/'internal/api/openapi.yaml';s=p.read_text()
 m=re.search(r'^    OutboundJob:\n(?:(?!^    \w).)*',s,re.M|re.S)
 if m:
  block=m.group();block=re.sub(r'^        delivery_token:\n(?:^          .*\n)*','',block,flags=re.M)
  block=block.replace('      properties:\n','      properties:\n        content_redacted:\n          type: boolean\n          description: Content and BCC have been removed for a metadata-only viewer.\n',1)
  s=s[:m.start()]+block+s[m.end():]
-# Omitted access mode is now private; public must be explicit.
 s=s.replace('default: public','default: token')
 p.write_text(s)
 print('Applied C and E workspace changes')
