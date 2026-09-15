@@ -1,0 +1,28 @@
+name: R2 source review
+on:
+  push:
+    branches: [fix/company-mail-release-blockers-r2]
+    paths: [.github/workflows/r2-source-review.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Archive exact source and local history without credentials
+        run: |
+          git bundle create /tmp/tabmail-r2.bundle --all
+          git archive --format=tar.gz HEAD > /tmp/tabmail-r2-source.tar.gz
+          git rev-parse HEAD HEAD^{tree} > /tmp/tabmail-r2-ref.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tabmail-r2-source
+          path: |
+            /tmp/tabmail-r2.bundle
+            /tmp/tabmail-r2-source.tar.gz
+            /tmp/tabmail-r2-ref.txt
+          retention-days: 3
