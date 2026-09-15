@@ -10,7 +10,9 @@ import (
 	"time"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -19,6 +21,7 @@ import (
 
 // userAdminStore is the subset of the store the user-admin handler needs.
 type userAdminStore interface {
+	store.MemberGuardStore
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
 	UpdateUser(ctx context.Context, u *models.User) error
@@ -167,11 +170,17 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	actor := middleware.ActorFromContext(r.Context())
+	if !authz.CanManageTenantMember(actor, tenant.ID, user.Role) {
+		errForbidden(w, "cannot manage this member role")
+		return
+	}
+	patch := models.UserAdminPatch{}
 	var req struct {
-		Role                *string          `json:"role"`
-		IsActive            *bool            `json:"is_active"`
-		DisplayName         *string          `json:"display_name"`
-		PermissionProfileID *json.RawMessage `json:"permission_profile_id"`
+		Role                *string         `json:"role"`
+		IsActive            *bool           `json:"is_active"`
+		DisplayName         *string         `json:"display_name"`
+		PermissionProfileID json.RawMessage `json:"permission_profile_id"`
 	}
 	if err := decodeBody(r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
@@ -187,25 +196,26 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 				errForbidden(w, "only super admin can assign super_admin role")
 				return
 			}
-			user.Role = newRole
+			patch.Role = &newRole
 		default:
 			errBadRequest(w, "invalid role, must be super_admin, admin or user")
 			return
 		}
 	}
 	if req.IsActive != nil {
-		user.IsActive = *req.IsActive
+		patch.IsActive = req.IsActive
 	}
 	if req.DisplayName != nil {
-		user.DisplayName = *req.DisplayName
+		patch.DisplayName = req.DisplayName
 	}
 	if req.PermissionProfileID != nil {
-		raw := strings.TrimSpace(string(*req.PermissionProfileID))
+		patch.SetPermissionProfile = true
+		raw := strings.TrimSpace(string(req.PermissionProfileID))
 		if raw == "" || raw == "null" {
-			user.PermissionProfileID = nil
+			patch.PermissionProfileID = nil
 		} else {
 			var profileID uuid.UUID
-			if err := json.Unmarshal(*req.PermissionProfileID, &profileID); err != nil {
+			if err := json.Unmarshal(req.PermissionProfileID, &profileID); err != nil {
 				errBadRequest(w, "invalid permission_profile_id")
 				return
 			}
@@ -223,14 +233,15 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 				errForbidden(w, "permission profile belongs to a different tenant")
 				return
 			}
-			user.PermissionProfileID = &profileID
+			patch.PermissionProfileID = &profileID
 		}
 	}
-	if err := h.store.UpdateUser(r.Context(), user); err != nil {
-		h.logger.Err(err).Msg("update user")
-		errInternal(w)
+	updated, err := h.store.UpdateUserGuarded(r.Context(), actor, tenant.ID, userID, patch)
+	if err != nil {
+		h.writeMemberError(w, err)
 		return
 	}
+	user = updated
 	ok(w, map[string]any{
 		"id": user.ID, "email": user.Email, "display_name": user.DisplayName,
 		"role": user.Role, "is_active": user.IsActive, "tenant_id": user.TenantID,
@@ -268,9 +279,13 @@ func (h *UserAdminHandler) DeleteUserByAdmin(w http.ResponseWriter, r *http.Requ
 		errNotFound(w, "user not found")
 		return
 	}
-	if err := h.store.DeleteUser(r.Context(), userID); err != nil {
-		h.logger.Err(err).Msg("delete user")
-		errInternal(w)
+	actor := middleware.ActorFromContext(r.Context())
+	if !authz.CanManageTenantMember(actor, tenant.ID, user.Role) {
+		errForbidden(w, "cannot manage this member role")
+		return
+	}
+	if err := h.store.DeleteUserGuarded(r.Context(), actor, tenant.ID, userID); err != nil {
+		h.writeMemberError(w, err)
 		return
 	}
 	noContent(w)

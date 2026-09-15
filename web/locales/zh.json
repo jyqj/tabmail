@@ -625,7 +625,7 @@
   "mailboxes.deleted": "邮箱已删除",
   "mailboxes.deleteFailed": "删除失败",
   "mailboxes.loadFailed": "加载邮箱失败",
-  "mailboxes.retentionError": "保留时长必须大于 0",
+  "mailboxes.retentionError": "保留小时数必须为非负整数，0 表示永久保留",
   "mailboxes.expiresError": "到期时间必须晚于当前时间",
   "mailboxes.copied": "已复制",
   "mailboxes.confirmDelete": "确定要删除此邮箱吗？此操作不可撤销。",
@@ -1336,5 +1336,7 @@
   "permissions.systemCannotDelete": "系统模板不可删除",
   "admin.pageOf": "第 {page} 页 · 共 {total} 人",
   "admin.previous": "上一页",
-  "admin.next": "下一页"
+  "admin.next": "下一页",
+  "mailboxes.retentionPermanentHint": "0 = 永久保留；留空继承默认值",
+  "outbound.contentRedacted": "仅显示任务元数据；正文和密送信息需要发件人身份或邮箱阅读授权。"
 }

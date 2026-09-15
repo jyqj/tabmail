@@ -34,6 +34,7 @@ type User struct {
 }
 
 type RefreshToken struct {
+	FamilyID  uuid.UUID  `json:"-" db:"family_id"`
 	ID        uuid.UUID  `json:"id" db:"id"`
 	UserID    uuid.UUID  `json:"user_id" db:"user_id"`
 	TokenHash string     `json:"-" db:"token_hash"`
@@ -663,6 +664,7 @@ const (
 )
 
 type OutboundJob struct {
+	ContentRedacted  bool     `json:"content_redacted"`
 	DeliveredDomains []string `json:"delivered_domains" db:"delivered_domains"`
 	InFlightDomain   string   `json:"in_flight_domain,omitempty" db:"in_flight_domain"`
 	// Immutable submission provenance is not cleared when users/keys are deleted.
@@ -696,7 +698,7 @@ type OutboundJob struct {
 	SMTPCode        *int            `json:"smtp_code,omitempty" db:"smtp_code"`
 	SMTPResponse    string          `json:"smtp_response,omitempty" db:"smtp_response"`
 	MessageIDHeader string          `json:"message_id_header,omitempty" db:"message_id_header"`
-	DeliveryToken   *uuid.UUID      `json:"delivery_token,omitempty" db:"delivery_token"`
+	DeliveryToken   *uuid.UUID      `json:"-" db:"delivery_token"`
 	CreatedAt       time.Time       `json:"created_at" db:"created_at"`
 	UpdatedAt       time.Time       `json:"updated_at" db:"updated_at"`
 }

@@ -5,6 +5,8 @@ import (
 	"embed"
 	"fmt"
 	"io/fs"
+	"strconv"
+	"strings"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/stdlib"
@@ -34,8 +36,26 @@ func Migrate(ctx context.Context, connConfig *pgx.ConnConfig) error {
 		return fmt.Errorf("custom archived migration database requires an explicitly reviewed conversion before Goose")
 	}
 	if gooseTable {
+		// Derive the allowlist from this binary, not a manually maintained list:
+		// adding a migration must never make the next process restart fail.
+		entries, err := fs.ReadDir(migrationsFS, "migrations")
+		if err != nil {
+			return fmt.Errorf("postgres: read migration versions: %w", err)
+		}
+		versions := []string{"0"}
+		for _, entry := range entries {
+			if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".sql") {
+				continue
+			}
+			prefix, _, ok := strings.Cut(entry.Name(), "_")
+			version, err := strconv.ParseInt(prefix, 10, 64)
+			if !ok || err != nil || version <= 0 {
+				return fmt.Errorf("postgres: invalid embedded migration %q", entry.Name())
+			}
+			versions = append(versions, strconv.FormatInt(version, 10))
+		}
 		var unknown int
-		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM goose_db_version WHERE is_applied AND version_id NOT IN (0,1,2)`).Scan(&unknown); err != nil {
+		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM goose_db_version WHERE is_applied AND version_id NOT IN (`+strings.Join(versions, ",")+`)`).Scan(&unknown); err != nil {
 			return err
 		}
 		if unknown > 0 {

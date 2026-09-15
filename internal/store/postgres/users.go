@@ -137,20 +137,23 @@ func (s *PgStore) CreateRefreshToken(ctx context.Context, rt *models.RefreshToke
 	if rt.ID == uuid.Nil {
 		rt.ID = uuid.New()
 	}
+	if rt.FamilyID == uuid.Nil {
+		rt.FamilyID = rt.ID
+	}
 	rt.CreatedAt = time.Now()
 	_, err := s.pool.Exec(ctx, `
-		INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at)
-		VALUES ($1, $2, $3, $4, $5)`,
-		rt.ID, rt.UserID, rt.TokenHash, rt.ExpiresAt, rt.CreatedAt)
+		INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)
+		VALUES ($1, $2, $3, $4, $5, $6)`,
+		rt.ID, rt.UserID, rt.TokenHash, rt.ExpiresAt, rt.CreatedAt, rt.FamilyID)
 	return err
 }
 
 func (s *PgStore) GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error) {
 	rt := &models.RefreshToken{}
 	err := s.pool.QueryRow(ctx, `
-		SELECT id, user_id, token_hash, expires_at, created_at, revoked_at
+		SELECT id, user_id, token_hash, expires_at, created_at, revoked_at, family_id
 		FROM refresh_tokens WHERE token_hash = $1`, tokenHash).
-		Scan(&rt.ID, &rt.UserID, &rt.TokenHash, &rt.ExpiresAt, &rt.CreatedAt, &rt.RevokedAt)
+		Scan(&rt.ID, &rt.UserID, &rt.TokenHash, &rt.ExpiresAt, &rt.CreatedAt, &rt.RevokedAt, &rt.FamilyID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -158,18 +161,58 @@ func (s *PgStore) GetRefreshToken(ctx context.Context, tokenHash string) (*model
 }
 
 func (s *PgStore) RevokeRefreshToken(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1`, id)
+	_, err := s.pool.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL`, id)
 	return err
 }
 
 func (s *PgStore) RevokeUserRefreshTokens(ctx context.Context, userID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `UPDATE refresh_tokens SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL`, userID)
-	return err
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var id uuid.UUID
+	err = tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 FOR UPDATE`, userID).Scan(&id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if _, err = tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND revoked_at IS NULL`, userID); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
 }
 
 func (s *PgStore) DeleteExpiredRefreshTokens(ctx context.Context) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM refresh_tokens WHERE expires_at < now()`)
-	return err
+	// Retain spent ancestors as replay evidence while a descendant can still
+	// refresh. Cleanup uses the same family lock as rotation/logout; otherwise
+	// a concurrent rotation could create a leaf after the expiration snapshot.
+	rows, err := s.pool.Query(ctx, `SELECT DISTINCT family_id FROM refresh_tokens WHERE expires_at <= clock_timestamp()`)
+	if err != nil {
+		return err
+	}
+	var families []uuid.UUID
+	for rows.Next() {
+		var id uuid.UUID
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return err
+		}
+		families = append(families, id)
+	}
+	err = rows.Err()
+	rows.Close()
+	if err != nil {
+		return err
+	}
+	for _, family := range families {
+		if err := s.deleteExpiredRefreshFamily(ctx, family); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // ================================================================

@@ -32,6 +32,8 @@ func newMailboxTestStore() *mailboxTestStore {
 	return &mailboxTestStore{zones: map[uuid.UUID]*models.DomainZone{}, mailboxes: map[uuid.UUID]*models.Mailbox{}}
 }
 
+func (s *mailboxTestStore) GetUser(context.Context, uuid.UUID) (*models.User, error) { return nil, nil }
+
 func (s *mailboxTestStore) InsertAudit(context.Context, *models.AuditEntry) error { return nil }
 func (s *mailboxTestStore) GetZone(_ context.Context, id uuid.UUID) (*models.DomainZone, error) {
 	if z := s.zones[id]; z != nil {

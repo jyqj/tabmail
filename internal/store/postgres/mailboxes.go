@@ -91,48 +91,43 @@ func (s *PgStore) ListMailboxesScoped(ctx context.Context, scope authz.ZoneListF
 		return []*models.Mailbox{}, 0, nil
 	}
 	args := []any{scope.TenantID}
-	// countWhere is built against bare mailboxes columns; rowWhere against the
-	// mailboxSelect "m" alias. They carry the same $N placeholders so a single
-	// args slice serves both.
-	countClauses := []string{"tenant_id=$1"}
-	rowClauses := []string{"m.tenant_id=$1"}
+	clauses := []string{"m.tenant_id=$1"}
 	n := 1
 	if !scope.AllZones {
 		n++
-		countClauses = append(countClauses, "zone_id = ANY($"+strconv.Itoa(n)+")")
-		rowClauses = append(rowClauses, "m.zone_id = ANY($"+strconv.Itoa(n)+")")
+		clauses = append(clauses, "m.zone_id=ANY($"+strconv.Itoa(n)+")")
 		args = append(args, scope.ZoneIDs)
 	}
-	// Owner dimension for the regular-user path: restrict to zones owned by
-	// the user. Only applied when OwnerUserID is set (admins / tenant-wide keys
-	// get nil). The caller also feeds resolved owned-zone IDs into ZoneIDs, so
-	// this is a defense-in-depth guard.
-	if scope.OwnerUserID != nil {
-		n++
-		countClauses = append(countClauses, "zone_id IN (SELECT id FROM domain_zones WHERE owner_user_id = $"+strconv.Itoa(n)+")")
-		rowClauses = append(rowClauses, "m.zone_id IN (SELECT id FROM domain_zones WHERE owner_user_id = $"+strconv.Itoa(n)+")")
-		args = append(args, *scope.OwnerUserID)
+	if scope.OwnerUserID != nil || scope.GrantedUserID != nil {
+		rights := []string{}
+		if scope.OwnerUserID != nil {
+			n++
+			args = append(args, *scope.OwnerUserID)
+			rights = append(rights, "m.zone_id IN (SELECT z.id FROM domain_zones z WHERE z.tenant_id=m.tenant_id AND z.owner_user_id=$"+strconv.Itoa(n)+")")
+		}
+		if scope.GrantedUserID != nil {
+			n++
+			args = append(args, *scope.GrantedUserID)
+			u := "$" + strconv.Itoa(n)
+			rights = append(rights, `((m.expires_at IS NULL OR m.expires_at>clock_timestamp()) AND (m.owner_user_id=`+u+` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=`+u+` AND g.can_read)))`)
+		}
+		clauses = append(clauses, "("+strings.Join(rights, " OR ")+")")
 	}
+	where := strings.Join(clauses, " AND ")
 	var total int
-	if err := s.pool.QueryRow(ctx,
-		"SELECT count(*) FROM mailboxes WHERE "+strings.Join(countClauses, " AND "), args...).Scan(&total); err != nil {
+	if err := s.pool.QueryRow(ctx, "SELECT count(*) FROM mailboxes m WHERE "+where, args...).Scan(&total); err != nil {
 		return nil, 0, err
 	}
-	rowArgs := append(args, pg.PerPage, pg.Offset())
-	rows, err := s.pool.Query(ctx,
-		mailboxSelect+" WHERE "+strings.Join(rowClauses, " AND ")+
-			" ORDER BY m.created_at DESC LIMIT $"+strconv.Itoa(n+1)+" OFFSET $"+strconv.Itoa(n+2),
-		rowArgs...)
+	args = append(args, pg.PerPage, pg.Offset())
+	rows, err := s.pool.Query(ctx, mailboxSelect+" WHERE "+where+" ORDER BY m.created_at DESC,m.id LIMIT $"+strconv.Itoa(n+1)+" OFFSET $"+strconv.Itoa(n+2), args...)
 	if err != nil {
 		return nil, 0, err
 	}
 	defer rows.Close()
-	var out []*models.Mailbox
+	out := []*models.Mailbox{}
 	for rows.Next() {
-		m := &models.Mailbox{}
-		if err := rows.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
-			&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
-			&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt, &m.OwnerUserID); err != nil {
+		m, err := s.scanMailbox(rows)
+		if err != nil {
 			return nil, 0, err
 		}
 		out = append(out, m)

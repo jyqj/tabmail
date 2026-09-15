@@ -385,6 +385,7 @@ export default function OutboundPage() {
             </DialogHeader>
             {detailJob && (
               <div className="space-y-3 py-2 text-sm">
+                {detailJob.content_redacted && <p role="status" className="text-muted-foreground">{t("outbound.contentRedacted")}</p>}
                 <DetailRow
                   label={t("outbound.state")}
                   value={

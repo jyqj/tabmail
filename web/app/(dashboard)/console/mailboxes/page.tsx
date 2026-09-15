@@ -83,7 +83,7 @@ export default function MailboxesPage() {
   const [creating, setCreating] = useState(false);
 
   const [newAddress, setNewAddress] = useState("");
-  const [newAccessMode, setNewAccessMode] = useState<AccessMode>("public");
+  const [newAccessMode, setNewAccessMode] = useState<AccessMode>("token");
   const [newPassword, setNewPassword] = useState("");
   const [newRetentionHours, setNewRetentionHours] = useState("");
   const [newExpiresAt, setNewExpiresAt] = useState("");
@@ -91,7 +91,7 @@ export default function MailboxesPage() {
   const handleCreate = async () => {
     if (!newAddress.trim()) return;
     const retentionHours = Number(newRetentionHours);
-    if (newRetentionHours.trim() && (Number.isNaN(retentionHours) || retentionHours <= 0)) {
+    if (newRetentionHours.trim() && (!Number.isInteger(retentionHours) || retentionHours < 0)) {
       toast.error(t("mailboxes.retentionError"));
       return;
     }
@@ -114,6 +114,7 @@ export default function MailboxesPage() {
         expires_at: expiresAtISO,
       });
       setNewAddress("");
+      setNewAccessMode("token");
       setNewPassword("");
       setNewRetentionHours("");
       setNewExpiresAt("");
@@ -200,8 +201,8 @@ export default function MailboxesPage() {
                   <Label>{t("mailboxes.retentionHoursOverride")}</Label>
                   <Input
                     type="number"
-                    min="1"
-                    placeholder={t("mailboxes.inheritDefault")}
+                    min="0"
+                    placeholder={t("mailboxes.retentionPermanentHint")}
                     value={newRetentionHours}
                     onChange={(e) => setNewRetentionHours(e.target.value)}
                   />
