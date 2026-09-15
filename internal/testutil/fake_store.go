@@ -22,6 +22,7 @@ type resolvedAPIKey struct {
 }
 
 type FakeStore struct {
+	refreshTokens  map[string]*models.RefreshToken
 	mu             sync.Mutex
 	mailboxGrants  map[[2]uuid.UUID]*models.MailboxGrant
 	ingressClaims  map[uuid.UUID]*store.IngressClaim

@@ -202,6 +202,19 @@ func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerL
 		// Unknown principal: return empty rather than the whole tenant.
 		return []*models.OutboundJob{}, 0, nil
 	}
+
+	if scope.ReaderUserID != nil && !scope.AllInTenant {
+		n++
+		u := "$" + strconv.Itoa(n)
+		args = append(args, *scope.ReaderUserID)
+		shared := `sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE m.tenant_id=$1 AND (m.expires_at IS NULL OR m.expires_at>clock_timestamp()) AND (m.owner_user_id=` + u + ` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=` + u + ` AND g.can_read)))`
+		where[len(where)-1] = "(" + where[len(where)-1] + " OR " + shared + ")"
+	}
+	if len(scope.AllowedZoneIDs) > 0 {
+		n++
+		where = append(where, "zone_id=ANY($"+strconv.Itoa(n)+")")
+		args = append(args, scope.AllowedZoneIDs)
+	}
 	whereSQL := strings.Join(where, " AND ")
 	var total int
 	if err := s.pool.QueryRow(ctx,

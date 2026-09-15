@@ -20,6 +20,7 @@ import (
 )
 
 type mailboxStore interface {
+	GetUser(context.Context, uuid.UUID) (*models.User, error)
 	app.AuditStore
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
@@ -60,6 +61,7 @@ func (h *MailboxHandler) List(w http.ResponseWriter, r *http.Request) {
 
 func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var body struct {
+		OwnerUserID            *uuid.UUID        `json:"owner_user_id,omitempty"`
 		Address                string            `json:"address"`
 		Password               string            `json:"password,omitempty"`
 		AccessMode             models.AccessMode `json:"access_mode,omitempty"`
@@ -74,6 +76,7 @@ func (h *MailboxHandler) Create(w http.ResponseWriter, r *http.Request) {
 	tenant := middleware.TenantFromCtx(r.Context())
 	item, err := h.service.Create(r.Context(), actor, tenant, mailboxapp.CreateRequest{
 		Address:                body.Address,
+		OwnerUserID:            body.OwnerUserID,
 		Password:               body.Password,
 		AccessMode:             body.AccessMode,
 		RetentionHoursOverride: body.RetentionHoursOverride,

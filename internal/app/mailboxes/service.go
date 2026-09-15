@@ -20,6 +20,7 @@ import (
 )
 
 type storeRepo interface {
+	GetUser(context.Context, uuid.UUID) (*models.User, error)
 	app.AuditStore
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
@@ -48,6 +49,7 @@ type Service struct {
 }
 
 type CreateRequest struct {
+	OwnerUserID            *uuid.UUID
 	Address                string
 	Password               string
 	AccessMode             models.AccessMode
@@ -74,6 +76,9 @@ func (s *Service) List(ctx context.Context, actor authz.Actor, tenant *models.Te
 	// This replaces the previous accessibleZoneIDs ∩ ZoneAllowed in-memory
 	// computation; the store's owner_user_id subquery reproduces it exactly.
 	scope := authz.ZoneListScope(actor, tenant.ID)
+	if !actor.IsTenantAdmin() && !actor.TenantWide {
+		scope.GrantedUserID = actor.EffectiveUserID()
+	}
 	items, total, err := s.store.ListMailboxesScoped(ctx, scope, pg)
 	if err != nil {
 		return nil, 0, app.Internal(err)
@@ -128,15 +133,43 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.
 	if !tenant.IsSuper && count >= cfg.MaxMailboxesPerDomain {
 		return nil, app.Forbidden(fmt.Sprintf("mailbox limit reached (%d)", cfg.MaxMailboxesPerDomain))
 	}
+
+	ownerID := req.OwnerUserID
+	if ownerID != nil {
+		owner, err := s.store.GetUser(ctx, *ownerID)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
+		if owner == nil || owner.TenantID != tenant.ID || owner.Role != models.RoleUser || !owner.IsActive {
+			return nil, app.BadRequest("owner must be an active employee in this company")
+		}
+		uid := actor.EffectiveUserID()
+		if !actor.IsTenantAdmin() && (uid == nil || *uid != *ownerID) {
+			return nil, app.Forbidden("only a company administrator may assign another employee")
+		}
+	} else if uid := actor.EffectiveUserID(); uid != nil {
+		owner, err := s.store.GetUser(ctx, *uid)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
+		if owner != nil && owner.IsActive && owner.TenantID == tenant.ID {
+			ownerID = uid
+		} else if !actor.IsSuperAdmin {
+			return nil, app.Forbidden("mailbox creator is not an active company member")
+		}
+	}
 	am := req.AccessMode
 	if am == "" {
-		am = models.AccessPublic
+		am = models.AccessToken
 	}
 	if !am.Valid() {
 		return nil, app.BadRequest("invalid access_mode")
 	}
-	if am == models.AccessToken && strings.TrimSpace(req.Password) == "" {
-		return nil, app.BadRequest("password is required when access_mode=token")
+	if am != models.AccessToken && req.Password != "" {
+		return nil, app.BadRequest("password is only supported for token mailboxes")
+	}
+	if am == models.AccessToken && ownerID == nil && strings.TrimSpace(req.Password) == "" {
+		return nil, app.BadRequest("password is required for an ownerless token mailbox")
 	}
 	if req.RetentionHoursOverride != nil && *req.RetentionHoursOverride < 0 {
 		return nil, app.BadRequest("retention_hours_override must be non-negative (0 means permanent)")
@@ -152,7 +185,7 @@ func (s *Service) Create(ctx context.Context, actor authz.Actor, tenant *models.
 		}
 		expiresAt = &parsed
 	}
-	mb := &models.Mailbox{TenantID: tenant.ID, ZoneID: zone.ID, LocalPart: local, ResolvedDomain: domain, FullAddress: mailboxKey, AccessMode: am, RetentionHoursOverride: req.RetentionHoursOverride, ExpiresAt: expiresAt}
+	mb := &models.Mailbox{OwnerUserID: ownerID, TenantID: tenant.ID, ZoneID: zone.ID, LocalPart: local, ResolvedDomain: domain, FullAddress: mailboxKey, AccessMode: am, RetentionHoursOverride: req.RetentionHoursOverride, ExpiresAt: expiresAt}
 	if req.Password != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 		if err != nil {
@@ -228,6 +261,9 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, tenant *models.
 // scoped store method, so quota accounting cannot diverge from list visibility.
 func (s *Service) countUserMailboxes(ctx context.Context, actor authz.Actor, tenant *models.Tenant) (int, error) {
 	scope := authz.ZoneListScope(actor, tenant.ID)
+	if !actor.IsTenantAdmin() && !actor.TenantWide {
+		scope.GrantedUserID = actor.EffectiveUserID()
+	}
 	_, total, err := s.store.ListMailboxesScoped(ctx, scope, models.Page{Page: 1, PerPage: 1})
 	if err != nil {
 		return 0, app.Internal(err)

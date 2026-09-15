@@ -131,6 +131,7 @@ export interface Mailbox {
 
 export interface MailboxCreateInput {
   address: string;
+  owner_user_id?: string;
   access_mode?: AccessMode;
   password?: string;
   retention_hours_override?: number;
@@ -484,6 +485,7 @@ export interface EffectivePermission {
 export type OutboundState = "pending" | "processing" | "sent" | "retry" | "failed" | "dead";
 
 export interface OutboundJob {
+  content_redacted?: boolean;
   delivered_domains: string[];
   in_flight_domain?: string;
   id: string;

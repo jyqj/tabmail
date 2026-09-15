@@ -225,10 +225,12 @@ func ListScope(actor Actor) OwnerScope {
 //     dimension; the caller resolves owned-zone IDs for the mailbox path and
 //     injects them via ZoneIDs.
 type ZoneListFilter struct {
-	TenantID    uuid.UUID
-	AllZones    bool
-	ZoneIDs     []uuid.UUID
-	OwnerUserID *uuid.UUID
+	// GrantedUserID is used only by mailbox queries, never zone management.
+	GrantedUserID *uuid.UUID
+	TenantID      uuid.UUID
+	AllZones      bool
+	ZoneIDs       []uuid.UUID
+	OwnerUserID   *uuid.UUID
 }
 
 // OwnerListFilter is the owner-scoped list query shape for resources that carry
@@ -237,10 +239,12 @@ type ZoneListFilter struct {
 // exactly one of UserID / APIKeyID is set. TenantID is always set and must be
 // applied as WHERE tenant_id = $1.
 type OwnerListFilter struct {
-	TenantID    uuid.UUID
-	AllInTenant bool
-	UserID      *uuid.UUID
-	APIKeyID    *uuid.UUID
+	ReaderUserID   *uuid.UUID
+	AllowedZoneIDs []uuid.UUID
+	TenantID       uuid.UUID
+	AllInTenant    bool
+	UserID         *uuid.UUID
+	APIKeyID       *uuid.UUID
 }
 
 // ZoneListScope resolves the zone-scoped list filter for an actor within a

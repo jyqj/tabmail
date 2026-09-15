@@ -9,6 +9,7 @@ import (
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -17,6 +18,7 @@ import (
 
 // authStore is the subset of the store the session-lifecycle handler needs.
 type authStore interface {
+	store.RefreshRotationStore
 	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
 	CreateUser(ctx context.Context, u *models.User) error
 	GetUser(ctx context.Context, id uuid.UUID) (*models.User, error)
@@ -266,54 +268,42 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		RefreshToken string `json:"refresh_token"`
 	}
 	_ = decodeBody(r, &req)
-
-	rawToken := refreshTokenFromRequest(r, req.RefreshToken)
-	if rawToken == "" {
+	raw := refreshTokenFromRequest(r, req.RefreshToken)
+	if raw == "" {
 		errBadRequest(w, "refresh_token is required")
 		return
 	}
-
-	tokenHash := authn.HashToken(rawToken)
-	rt, err := h.store.GetRefreshToken(r.Context(), tokenHash)
+	nextRaw, nextHash, err := authn.GenerateRefreshToken()
 	if err != nil {
-		h.logger.Err(err).Msg("refresh: lookup token")
 		errInternal(w)
 		return
 	}
-	if rt == nil || rt.ExpiresAt.Before(time.Now()) {
+	next := &models.RefreshToken{TokenHash: nextHash, ExpiresAt: time.Now().Add(authn.RefreshTokenTTL)}
+	rotated, familyRevoked, err := h.store.RotateRefreshToken(r.Context(), authn.HashToken(raw), next)
+	if err != nil || !rotated {
+		if err != nil {
+			h.logger.Error().Err(err).Msg("refresh: atomic rotation failed")
+		}
+		if familyRevoked {
+			h.logger.Warn().Msg("refresh: replay revoked token family")
+		}
+		h.clearRefreshCookie(w)
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid or expired refresh token"}})
 		return
 	}
-	if rt.RevokedAt != nil {
-		// A revoked token was reused — possible token theft. Revoke all tokens for this user.
-		h.logger.Warn().Str("user_id", rt.UserID.String()).Msg("refresh: revoked token reuse detected, revoking all user tokens")
-		_ = h.store.RevokeUserRefreshTokens(r.Context(), rt.UserID)
-		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid or expired refresh token"}})
-		return
-	}
-
-	// Revoke old refresh token (rotation)
-	_ = h.store.RevokeRefreshToken(r.Context(), rt.ID)
-
-	user, err := h.store.GetUser(r.Context(), rt.UserID)
+	user, err := h.store.GetUser(r.Context(), next.UserID)
 	if err != nil || user == nil || !user.IsActive {
-		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "user not found or inactive"}})
+		h.clearRefreshCookie(w)
+		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "user unavailable"}})
 		return
 	}
-
-	accessToken, refreshToken, err := h.issueTokenPair(r.Context(), user)
+	access, err := authn.IssueAccessToken(h.jwtSecret, user)
 	if err != nil {
-		h.logger.Err(err).Msg("refresh: issue tokens")
 		errInternal(w)
 		return
 	}
-
-	h.setRefreshCookie(w, refreshToken)
-	ok(w, map[string]any{
-		"access_token": accessToken,
-		"token_type":   "Bearer",
-		"expires_in":   int(authn.AccessTokenTTL.Seconds()),
-	})
+	h.setRefreshCookie(w, nextRaw)
+	ok(w, map[string]any{"access_token": access, "token_type": "Bearer", "expires_in": int(authn.AccessTokenTTL.Seconds())})
 }
 
 // Logout handles POST /api/v1/auth/logout
@@ -322,16 +312,17 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		RefreshToken string `json:"refresh_token"`
 	}
 	_ = decodeBody(r, &req)
-
-	rawToken := refreshTokenFromRequest(r, req.RefreshToken)
-	if rawToken != "" {
-		tokenHash := authn.HashToken(rawToken)
-		rt, err := h.store.GetRefreshToken(r.Context(), tokenHash)
-		if err == nil && rt != nil {
-			_ = h.store.RevokeRefreshToken(r.Context(), rt.ID)
-		}
+	raw := refreshTokenFromRequest(r, req.RefreshToken)
+	var err error
+	if raw != "" {
+		err = h.store.RevokeRefreshTokenByHash(r.Context(), authn.HashToken(raw))
 	} else if user := middleware.UserFromCtx(r.Context()); user != nil {
-		_ = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
+		err = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
+	}
+	if err != nil {
+		h.logger.Error().Err(err).Msg("logout: revocation failed")
+		errInternal(w)
+		return
 	}
 	h.clearRefreshCookie(w)
 	noContent(w)
@@ -507,7 +498,11 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Revoke all refresh tokens to force re-login
-	_ = h.store.RevokeUserRefreshTokens(r.Context(), user.ID)
+	if err := h.store.RevokeUserRefreshTokens(r.Context(), user.ID); err != nil {
+		h.logger.Error().Err(err).Msg("password change: session revocation failed")
+		errInternal(w)
+		return
+	}
 	ok(w, map[string]string{"status": "password changed"})
 }
 

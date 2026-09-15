@@ -227,7 +227,7 @@ describe("console/mailboxes page", () => {
     fireEvent.change(screen.getByPlaceholderText("Enter mailbox password"), {
       target: { value: "Passw0rd!" },
     });
-    fireEvent.change(screen.getByPlaceholderText("Inherit tenant default"), {
+    fireEvent.change(screen.getByPlaceholderText("0 = permanent; leave blank to inherit"), {
       target: { value: "12" },
     });
     fireEvent.change(screen.getByPlaceholderText("Optional"), {
@@ -287,5 +287,26 @@ describe("console/mailboxes page", () => {
       expect(listMailboxesMock).toHaveBeenCalledTimes(2);
     });
     expect(toastSuccess).toHaveBeenCalledWith("Mailbox deleted");
+  });
+
+  it("uses a private default and accepts permanent retention", async () => {
+    listMailboxesMock.mockResolvedValue({ data: [], meta: { total: 0 } });
+    createMailboxMock.mockResolvedValue({ data: {} });
+    render(<MailboxesPage />);
+    expect(screen.getByTestId("select-root")).toHaveAttribute("data-value", "token");
+    expect(screen.getByRole("spinbutton")).toHaveAttribute("min", "0");
+    fireEvent.change(screen.getByPlaceholderText("mail.example.com"), { target: { value: "permanent@mail.test" } });
+    fireEvent.change(screen.getByRole("spinbutton"), { target: { value: "0" } });
+    fireEvent.click(screen.getByRole("button", { name: "Create" }));
+    await waitFor(() => expect(createMailboxMock).toHaveBeenCalledWith(expect.objectContaining({ access_mode: "token", retention_hours_override: 0 })));
+  });
+  it.each(["-1", "1.5"])("rejects invalid retention %s", async (value) => {
+    listMailboxesMock.mockResolvedValue({ data: [], meta: { total: 0 } });
+    render(<MailboxesPage />);
+    fireEvent.change(screen.getByPlaceholderText("mail.example.com"), { target: { value: "invalid@mail.test" } });
+    fireEvent.change(screen.getByRole("spinbutton"), { target: { value } });
+    fireEvent.click(screen.getByRole("button", { name: "Create" }));
+    expect(createMailboxMock).not.toHaveBeenCalled();
+    expect(toastError).toHaveBeenCalledWith("Retention hours must be a non-negative integer; 0 means permanent retention");
   });
 });

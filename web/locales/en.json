@@ -625,7 +625,7 @@
   "mailboxes.deleted": "Mailbox deleted",
   "mailboxes.deleteFailed": "Failed to delete",
   "mailboxes.loadFailed": "Failed to load mailboxes",
-  "mailboxes.retentionError": "Retention must be greater than 0",
+  "mailboxes.retentionError": "Retention hours must be a non-negative integer; 0 means permanent retention",
   "mailboxes.expiresError": "Expiration must be in the future",
   "mailboxes.copied": "Copied",
   "mailboxes.confirmDelete": "Delete this mailbox? This action cannot be undone.",
@@ -1336,5 +1336,7 @@
   "permissions.systemCannotDelete": "System profiles cannot be deleted",
   "admin.pageOf": "Page {page} · {total} users",
   "admin.previous": "Previous",
-  "admin.next": "Next"
+  "admin.next": "Next",
+  "mailboxes.retentionPermanentHint": "0 = permanent; leave blank to inherit",
+  "outbound.contentRedacted": "Metadata only. Content and BCC require sender identity or mailbox read permission."
 }

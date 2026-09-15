@@ -555,6 +555,9 @@ components:
     OutboundJob:
       type: object
       properties:
+        content_redacted:
+          type: boolean
+          description: Content and BCC have been removed for a metadata-only viewer.
         id:
           type: string
           format: uuid
@@ -1197,9 +1200,10 @@ paths:
               required: [address]
               properties:
                 address: { type: string, example: "user@mail.example.com" }
-                password: { type: string }
-                access_mode: { type: string, enum: [public, token, api_key], default: public }
-                retention_hours_override: { type: integer, nullable: true, example: 24 }
+                owner_user_id: { type: string, format: uuid, description: "Active employee in the same tenant; only administrators may assign another employee. Defaults to the caller's effective user when in this tenant." }
+                password: { type: string, description: "Only for token mode; required for ownerless mailboxes, optional for account-owned mailboxes." }
+                access_mode: { type: string, enum: [public, token, api_key], default: token }
+                retention_hours_override: { type: integer, minimum: 0, nullable: true, example: 0, description: "0 means permanent retention; omitted inherits policy." }
                 expires_at: { type: string, format: date-time, nullable: true }
       responses:
         "201":

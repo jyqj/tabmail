@@ -278,7 +278,7 @@ func (h *OutboundHandler) GetJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok(w, job)
+	h.writeOutboundView(w, r, job)
 }
 
 // ListJobs handles GET /api/v1/outbound — list outbound jobs for the tenant.
@@ -297,6 +297,14 @@ func (h *OutboundHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.writeOutboundJobAccessError(w, err, "listing outbound jobs")
 		return
+	}
+	for i, job := range items {
+		view, viewErr := h.redactOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
+		if viewErr != nil {
+			errInternal(w)
+			return
+		}
+		items[i] = view
 	}
 	okList(w, items, total, pg.Page, pg.PerPage)
 }
@@ -327,6 +335,14 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
+	if err := h.authorizeOutboundRetry(ctx, job); err != nil {
+		if authz.IsAuthzError(err) {
+			errForbidden(w, err.Error())
+		} else {
+			errInternal(w)
+		}
+		return
+	}
 	if err := h.outbound.ValidateJobAuthorization(ctx, job); err != nil {
 		if errors.Is(err, store.ErrOutboundUncertain) {
 			errConflict(w, err.Error())
@@ -348,7 +364,7 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 	}
 	updatedJob, _ := h.store.GetOutboundJob(ctx, jobID)
 	if updatedJob != nil {
-		ok(w, updatedJob)
+		h.writeOutboundView(w, r, updatedJob)
 	} else {
 		ok(w, map[string]string{"status": "requeued"})
 	}
@@ -367,7 +383,8 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	if _, err := h.getAccessibleOutboundJob(ctx, jobID); err != nil {
+	job, err := h.getAccessibleOutboundJob(ctx, jobID)
+	if err != nil {
 		h.writeOutboundJobAccessError(w, err, "getting outbound job for attempts")
 		return
 	}
@@ -379,6 +396,23 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 	}
 	if attempts == nil {
 		attempts = []*models.OutboundAttempt{}
+	}
+	allowed, err := h.outboundContentAllowed(ctx, middleware.ActorFromContext(ctx), job)
+	if err != nil {
+		errInternal(w)
+		return
+	}
+	if !allowed {
+		for i, a := range attempts {
+			cp := *a
+			if cp.Error != "" {
+				cp.Error = "Delivery details restricted"
+			}
+			if cp.SMTPResponse != "" {
+				cp.SMTPResponse = "Protocol response restricted"
+			}
+			attempts[i] = &cp
+		}
 	}
 	ok(w, attempts)
 }
@@ -432,8 +466,17 @@ func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uu
 	if err != nil {
 		return nil, err
 	}
-	if !canAccessOutboundJob(ctx, tenant.ID, job) {
+	if job != nil && !middleware.ActorFromContext(ctx).Permission.AllowsZone(job.ZoneID) {
 		return nil, errOutboundJobNotFound
+	}
+	if !canAccessOutboundJob(ctx, tenant.ID, job) {
+		allowed, err := h.outboundContentAllowed(ctx, middleware.ActorFromContext(ctx), job)
+		if err != nil {
+			return nil, err
+		}
+		if !allowed {
+			return nil, errOutboundJobNotFound
+		}
 	}
 	return job, nil
 }
@@ -444,6 +487,11 @@ func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenant
 	// TenantID and the mutually-exclusive owner dimension, so tenant isolation
 	// and the owner rule are both enforced in SQL.
 	scope := authz.OwnerListScope(middleware.ActorFromContext(ctx), tenantID)
+	actor := middleware.ActorFromContext(ctx)
+	scope.ReaderUserID = actor.EffectiveUserID()
+	if actor.Permission != nil {
+		scope.AllowedZoneIDs = actor.Permission.AllowedZoneIDs
+	}
 	return h.store.ListOutboundJobsScoped(ctx, scope, pg)
 }
 
