@@ -1,0 +1,36 @@
+name: Temporary company mail source snapshot
+on:
+  push:
+    branches: [fix/company-mail-completion-r3]
+    paths: [.github/workflows/company-r3-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Export tracked source and public dependencies only
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/tabmail-snapshot/source
+          git archive HEAD | tar -x -C /tmp/tabmail-snapshot/source
+          go mod vendor
+          mv vendor /tmp/tabmail-snapshot/source/vendor
+          npm ci --ignore-scripts --prefix web
+          mv web/node_modules /tmp/tabmail-snapshot/source/web/node_modules
+          tar -czf /tmp/tabmail-source.tar.gz -C /tmp/tabmail-snapshot source
+      - uses: actions/upload-artifact@v4
+        with:
+          name: company-r3-source
+          path: /tmp/tabmail-source.tar.gz
+          retention-days: 1
