@@ -5,7 +5,9 @@ RUN npm ci
 COPY . .
 ARG INTERNAL_API_URL=http://tabmail:8080
 ENV INTERNAL_API_URL=${INTERNAL_API_URL}
-RUN npm run build
+# public is optional in Next.js, but the standalone runtime COPY needs a
+# directory even when this checkout only has app-router assets.
+RUN mkdir -p public && npm run build
 
 FROM node:22-alpine
 WORKDIR /app

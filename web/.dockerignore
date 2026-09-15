@@ -1,0 +1,12 @@
+# Never copy host dependencies or cached builds over the image's npm ci.
+node_modules
+.next
+out
+coverage
+.git
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+.DS_Store
