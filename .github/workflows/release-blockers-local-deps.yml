@@ -1,0 +1,40 @@
+name: Release blockers local dependencies
+on:
+  push:
+    branches: [feat/company-mail-release-blockers]
+    paths: [.github/workflows/release-blockers-local-deps.yml]
+permissions:
+  contents: read
+jobs:
+  dependencies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - name: Package locked frontend dependencies
+        run: tar -C web -czf /tmp/tabmail-node-modules.tar.gz node_modules
+      - name: Package disposable PostgreSQL binaries
+        run: |
+          docker run --rm postgres:16-bookworm bash -ec '
+            mkdir -p /tmp/pg-review/usr/lib/postgresql /tmp/pg-review/usr/share/postgresql /tmp/pg-review/deps
+            cp -a /usr/lib/postgresql/16 /tmp/pg-review/usr/lib/postgresql/
+            cp -a /usr/share/postgresql/16 /tmp/pg-review/usr/share/postgresql/
+            ldd /usr/lib/postgresql/16/bin/{postgres,initdb,pg_ctl,psql} | awk "/=> \\// {print \$3}" | sort -u | grep -Ev "/(libc[.]so|libpthread[.]so|libdl[.]so|librt[.]so|libm[.]so|ld-linux)" | xargs -r cp -Lt /tmp/pg-review/deps
+            tar -C /tmp/pg-review -czf - .
+          ' > /tmp/tabmail-postgres.tar.gz
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-blockers-local-dependencies
+          path: |
+            /tmp/tabmail-node-modules.tar.gz
+            /tmp/tabmail-postgres.tar.gz
+          retention-days: 3
