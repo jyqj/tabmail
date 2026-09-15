@@ -1,0 +1,24 @@
+name: R3 temporary development tools
+on:
+  push:
+    branches: [fix/company-mail-complete-r3]
+    paths: [.github/workflows/company-r3-dev-kit.yml]
+permissions:
+  contents: read
+jobs:
+  tools:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          mkdir -p /tmp/r3-tools
+          npm install --prefix /tmp/r3-tools --ignore-scripts --no-audit --no-fund prettier@3.6.2 @playwright/test@1.56.1
+          tar -czf /tmp/r3-tools.tar.gz -C /tmp/r3-tools .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r3-development-tools
+          path: /tmp/r3-tools.tar.gz
+          retention-days: 2
