@@ -10,30 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - run: git archive HEAD > /tmp/source.tar
+      - name: Export a disposable database runtime, not application data
+        run: |
+          docker run --rm --entrypoint bash postgres:16-bookworm -ec '
+            libs=$(ldd /usr/lib/postgresql/16/bin/postgres /usr/lib/postgresql/16/bin/initdb /usr/lib/postgresql/16/bin/psql | awk "/=> \\// {print \$3}" | sort -u | grep -Ev "/(libc\\.so|libm\\.so|libpthread\\.so|libdl\\.so|librt\\.so|libresolv\\.so)")
+            tar -chzPf - /usr/lib/postgresql/16 /usr/share/postgresql/16 $libs
+          ' > /tmp/postgres-runtime.tar.gz
       - uses: actions/upload-artifact@v4
         with:
-          name: company-mail-source-r3
-          path: /tmp/source.tar
-          retention-days: 1
-      - uses: actions/setup-go@v5
-        with:
-          go-version-file: go.mod
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: |
-          mkdir -p /tmp/workbench
-          go mod download
-          tar -czf /tmp/workbench/go-root.tar.gz -C "$(go env GOROOT)" .
-          tar -czf /tmp/workbench/go-modules.tar.gz -C "$(go env GOPATH)/pkg" mod
-          cd web && npm ci
-          tar -czf /tmp/workbench/node-modules.tar.gz node_modules
-      - uses: actions/upload-artifact@v4
-        with:
-          name: company-mail-workbench-r3
-          path: /tmp/workbench
+          name: company-mail-postgres-r3
+          path: /tmp/postgres-runtime.tar.gz
           retention-days: 1
