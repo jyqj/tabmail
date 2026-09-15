@@ -20,6 +20,11 @@ for locale in ['zh','en']:
  messages['mailboxes.retentionPermanentHint']='0 = 永久保留；留空继承默认值' if locale=='zh' else '0 = permanent; empty inherits default'
  Path(p).write_text(json.dumps(messages,ensure_ascii=False,indent=2)+'\n')
 
+# Build the real image from sources rather than copying host dependencies or
+# build output. This repository currently has no public/ asset directory.
+replace('web/Dockerfile','RUN npm run build','RUN mkdir -p public && npm run build')
+write('web/.dockerignore','node_modules\n.next\n.git\ncoverage\n*.log\n.env*\n!.env.example\n')
+
 p='internal/api/release_r2_regression_test.go'
 Path(p).write_text(read(p)+r'''
 func TestR2SuperAdminSelectedTenantAndOwnerValidation(t *testing.T) {
