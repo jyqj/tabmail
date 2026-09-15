@@ -3,7 +3,7 @@ on:
   push:
     branches: [work/release-blockers-r2-validation]
 permissions:
-  contents: write
+  contents: read
 concurrency:
   group: release-r2-staged-validation
   cancel-in-progress: true
@@ -72,6 +72,7 @@ jobs:
           python3 "$GITHUB_WORKSPACE/.r2/content.py"
           python3 "$GITHUB_WORKSPACE/.r2/tests.py" green
           python3 "$GITHUB_WORKSPACE/.r2/finalize.py"
+          python3 "$GITHUB_WORKSPACE/.r2/corrections.py"
           git checkout "$BASE_SHA" -- .github
           git ls-files -m --others --exclude-standard -z '*.go' | xargs -0 -r gofmt -w
           git diff --check
@@ -96,6 +97,7 @@ jobs:
           npm run build
       - name: Verify production Compose and actual web image
         run: |
+          set -o pipefail
           cd "$RUNNER_TEMP/r2-candidate"
           python3 scripts/verify_production_config.py --build | tee "$RUNNER_TEMP/r2-evidence/deployment.log"
       - name: Record verification evidence
@@ -112,24 +114,31 @@ jobs:
           skipped=[r for r in rows if r.get('Action')=='skip' and r.get('Test')]
           failed=[r for r in rows if r.get('Action')=='fail']
           assert not skipped and not failed,('skipped',skipped,'failed',failed)
-          text=f'''# R2 validation evidence\n\nBase: `{os.environ['BASE_SHA']}`.\nActions run: https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}\n\nSix regressions were executed against the unchanged base business code and failed by their expected names (not compilation failures). The exact candidate business tree then passed:\n\n- Go build and vet.\n- PostgreSQL 16 race suite: {len(passed)} tests including subtests, {sum('/' not in r['Test'] for r in passed)} top-level tests; zero failures, zero skipped tests.\n- Go/TypeScript field contract check.\n- Frontend TypeScript, Vitest, lint and production build.\n- Resolved production Compose defaults and an actual Docker web build; the built routes manifest points to tabmail-api:8080 and not tabmail:8080.\n\nThe run artifacts contain red/green JSONL and deployment logs. Candidate publication occurs only after all gates above. This is not a production deployment, browser login acceptance test or public mail delivery test.\n'''
+          text=f'''# R2 validation evidence\n\nBase: `{os.environ['BASE_SHA']}`.\nActions run: https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}\n\nSix regressions were executed against unchanged base business code and failed by their expected names (not compilation failures). The candidate business tree passed:\n\n- Go build and vet.\n- PostgreSQL 16 race suite: {len(passed)} tests including subtests, {sum('/' not in r['Test'] for r in passed)} top-level tests; zero failures, zero skipped tests.\n- Go/TypeScript field contract check.\n- Frontend TypeScript, Vitest, lint and production build.\n- Resolved production Compose defaults and actual Docker web build; the built routes manifest points to tabmail-api:8080 and not tabmail:8080.\n\nArtifacts include red/green JSONL, deployment logs and checked source files. This read-only workflow does not publish branches, open PRs, merge or deploy. It is not a production login or public mail delivery test.\n'''
           Path('docs/company-mail/RELEASE-BLOCKERS-R2-VALIDATION.md').write_text(text)
           print(text)
           PY
-      - name: Publish verified candidate (never main)
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Export candidate source (read-only)
+        if: always()
         run: |
-          cd "$RUNNER_TEMP/r2-candidate"
-          test "$(git ls-remote origin refs/heads/main | cut -f1)" = "$BASE_SHA"
-          git diff --check
-          git config user.name 'TabMail release validation'
-          git config user.email 'release-validation@users.noreply.github.com'
-          git add internal web scripts docker-compose.prod.yml .env.example docs/company-mail
-          git commit -m 'fix: close company-mail release blockers with guarded membership, content policy and atomic sessions'
-          auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
-          git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/fix/company-release-blockers-r2
-          echo "VERIFIED_CANDIDATE_SHA=$(git rev-parse HEAD)"
+          if test -d "$RUNNER_TEMP/r2-candidate"; then
+            cd "$RUNNER_TEMP/r2-candidate"
+            git add internal web scripts docker-compose.prod.yml .env.example docs/company-mail
+            git diff --cached --binary > "$RUNNER_TEMP/r2-evidence/candidate.patch"
+            git ls-files -m --others --exclude-standard
+            python3 - <<'PY'
+          import hashlib,json,os,subprocess,tarfile
+          from pathlib import Path
+          paths=subprocess.check_output(['git','diff','--cached','--name-only','-z']).decode().split('\0')
+          paths=[p for p in paths if p and Path(p).is_file()]
+          root=Path(os.environ['RUNNER_TEMP'])/'r2-evidence'
+          with tarfile.open(root/'candidate-source.tar.gz','w:gz') as tf:
+            for p in paths:tf.add(p,arcname=p)
+          manifest={p:{'sha256':hashlib.sha256(Path(p).read_bytes()).hexdigest(),'size':Path(p).stat().st_size} for p in paths}
+          (root/'candidate-manifest.json').write_text(json.dumps(manifest,indent=2))
+          print(json.dumps(manifest,indent=2))
+          PY
+          fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
