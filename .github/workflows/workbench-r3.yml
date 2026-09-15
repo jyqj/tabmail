@@ -1,0 +1,33 @@
+name: Company mail isolated workbench
+on:
+  push:
+    branches: [work/company-mail-completion-r3]
+    paths: [.github/workflows/workbench-r3.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          mkdir -p /tmp/workbench
+          git archive HEAD > /tmp/workbench/source.tar
+          go mod download
+          tar -czf /tmp/workbench/go-modules.tar.gz -C "$(go env GOPATH)/pkg" mod
+          cd web && npm ci
+          tar -czf /tmp/workbench/node-modules.tar.gz node_modules
+      - uses: actions/upload-artifact@v4
+        with:
+          name: company-mail-workbench-r3
+          path: /tmp/workbench
+          retention-days: 1
