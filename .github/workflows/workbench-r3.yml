@@ -13,6 +13,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - run: git archive HEAD > /tmp/source.tar
+      - uses: actions/upload-artifact@v4
+        with:
+          name: company-mail-source-r3
+          path: /tmp/source.tar
+          retention-days: 1
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
@@ -21,8 +27,8 @@ jobs:
           node-version: '22'
       - run: |
           mkdir -p /tmp/workbench
-          git archive HEAD > /tmp/workbench/source.tar
           go mod download
+          tar -czf /tmp/workbench/go-root.tar.gz -C "$(go env GOROOT)" .
           tar -czf /tmp/workbench/go-modules.tar.gz -C "$(go env GOPATH)/pkg" mod
           cd web && npm ci
           tar -czf /tmp/workbench/node-modules.tar.gz node_modules
