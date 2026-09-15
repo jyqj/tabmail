@@ -259,6 +259,7 @@ components:
         id: { type: string, format: uuid }
         tenant_id: { type: string, format: uuid }
         zone_id: { type: string, format: uuid }
+        owner_user_id: { type: [string, "null"], format: uuid, description: "Personal mailbox owner; explicit grants authorize shared access" }
         local_part: { type: string }
         resolved_domain: { type: string }
         full_address: { type: string }
@@ -280,7 +281,9 @@ components:
         seen: { type: boolean }
         headers: { type: object }
         received_at: { type: string, format: date-time }
-        expires_at: { type: string, format: date-time }
+        expires_at: { type: [string, "null"], format: date-time, description: "NULL means permanent retention; owner mailboxes do not inherit temporary-plan TTL" }
+        otp_code: { type: string, description: "Omitted when content access is redacted" }
+        otp_confidence: { type: number }
 
     MessageDetail:
       allOf:
@@ -566,6 +569,13 @@ components:
             type: string
         subject:
           type: string
+        delivered_domains:
+          type: array
+          items: { type: string }
+          description: Domains accepted by the next hop; normal retries skip these domains
+        in_flight_domain:
+          type: string
+          description: Nonempty on a failed job means acceptance is uncertain and blind retry is forbidden
         state:
           $ref: '#/components/schemas/OutboundState'
         attempts:

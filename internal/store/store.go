@@ -333,6 +333,10 @@ type LifecycleStore interface {
 
 // Store is the primary persistence interface for TabMail.
 type Store interface {
+	OutboundProgress
+	authz.MailboxGrantReader
+	SetMailboxGrant(context.Context, *models.MailboxGrant) error
+
 	UserStore
 	PlanStore
 	TenantStore

@@ -5,9 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math/rand/v2"
-	"strings"
+	"sync"
 	"time"
 
 	"tabmail/internal/classify"
@@ -30,6 +29,11 @@ import (
 )
 
 type serviceStore interface {
+	store.IngressLedger
+	GetMailbox(context.Context, uuid.UUID) (*models.Mailbox, error)
+	GetZone(context.Context, uuid.UUID) (*models.DomainZone, error)
+	GetRoute(context.Context, uuid.UUID) (*models.DomainRoute, error)
+
 	GetSMTPPolicy(ctx context.Context) (*models.SMTPPolicy, error)
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CreateMessageWithQuota(ctx context.Context, m *models.Message, maxMessages int, ensureObject func(context.Context) error) (bool, error)
@@ -134,6 +138,7 @@ func deliveredCount(outcomes []RecipientOutcome) int {
 }
 
 type Service struct {
+	workerMu           sync.Mutex
 	store              serviceStore
 	obj                store.ObjectStore
 	objects            *rawobject.Store
@@ -218,30 +223,19 @@ func (s *Service) Accept(ctx context.Context, env Envelope, raw []byte, opts ...
 		return AcceptResult{}, nil
 	}
 	if s.durable {
-		objKey, err := s.objects.Put(ctx, raw)
-		if err != nil {
-			return AcceptResult{}, err
-		}
-		job := &models.IngestJob{
-			ID:            uuid.New(),
-			Source:        strings.TrimSpace(env.Source),
-			RemoteIP:      strings.TrimSpace(env.RemoteIP),
-			MailFrom:      strings.TrimSpace(env.MailFrom),
-			Recipients:    append([]string(nil), env.Recipients...),
-			RawObjectKey:  objKey,
-			Metadata:      env.Metadata,
-			State:         "pending",
-			NextAttemptAt: time.Now().UTC(),
-		}
-		if err := s.objects.StoreIngestJob(ctx, job, raw); err != nil {
-			s.deleteRawObjectIfOrphaned(ctx, objKey, "create_ingest_job_failed")
-			return AcceptResult{}, err
-		}
-		return AcceptResult{Queued: true}, nil
+		return s.acceptDurable(ctx, env, raw)
 	}
 	outcomes, err := s.deliverResolved(ctx, env, raw, applyAcceptOptions(opts).resolved)
 	if err != nil {
 		return AcceptResult{}, err
+	}
+	for _, outcome := range outcomes {
+		if outcome.Status == RecipientError {
+			return AcceptResult{}, fmt.Errorf("recipient delivery failed: %s", outcome.Reason)
+		}
+	}
+	if deliveredCount(outcomes) == 0 {
+		return AcceptResult{}, fmt.Errorf("no recipients stored")
 	}
 	return AcceptResult{Delivered: deliveredCount(outcomes)}, nil
 }
@@ -265,6 +259,8 @@ func (s *Service) ProcessBatch(ctx context.Context) {
 // ensureWorker lazily builds the workqueue.Worker backing Run/ProcessBatch. It
 // is idempotent.
 func (s *Service) ensureWorker() *workqueue.Worker[*ingestJob] {
+	s.workerMu.Lock()
+	defer s.workerMu.Unlock()
 	if s.worker != nil {
 		return s.worker
 	}
@@ -294,34 +290,12 @@ func (s *Service) ensureWorker() *workqueue.Worker[*ingestJob] {
 // ingestHooks.OnDone can release the raw object when nobody was delivered.
 // A nil error marks the job done.
 func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*ingestJob]) error {
-	if job == nil || job.Payload == nil || job.Payload.IngestJob == nil {
-		return nil
+	if job == nil || job.Payload == nil || job.Payload.claim == nil {
+		return fmt.Errorf("durable receipt claim missing")
 	}
-	m := job.Payload.IngestJob
-	rc, err := s.obj.Get(ctx, m.RawObjectKey)
-	if err != nil {
-		return fmt.Errorf("get raw object: %w", err)
-	}
-	defer rc.Close()
-	raw, err := io.ReadAll(rc)
-	if err != nil {
-		return fmt.Errorf("read raw object: %w", err)
-	}
-	outcomes, err := s.deliverResolved(ctx, Envelope{
-		Source:     m.Source,
-		RemoteIP:   m.RemoteIP,
-		MailFrom:   m.MailFrom,
-		Recipients: append([]string(nil), m.Recipients...),
-		Metadata:   m.Metadata,
-	}, raw, nil)
-	if err != nil {
-		return err
-	}
-	job.Payload.delivered = deliveredCount(outcomes)
-	if job.Payload.delivered == 0 {
-		s.logger.Warn().Str("job_id", m.ID.String()).Msg("ingest job processed with zero deliveries")
-	}
-	return nil
+	work, cancel := context.WithTimeout(ctx, time.Minute)
+	defer cancel()
+	return s.processReceipt(work, s.store, job.Payload.claim)
 }
 
 // deliver is the zero-option entry kept for direct unit-test calls. It always
@@ -450,7 +424,7 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 			Size:         int64(len(raw)),
 			RawObjectKey: objKey,
 			HeadersJSON:  headersJSON,
-			ExpiresAt:    now.Add(time.Duration(retH) * time.Hour),
+			ExpiresAt:    models.MessageExpiry(mb, retH, now),
 		}
 		// OTP signal extraction. Reuses the already-parsed envelope (no extra
 		// decode). OTPCode/OTPConfidence stay zero-value when nothing is found,

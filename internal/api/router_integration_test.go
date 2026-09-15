@@ -126,7 +126,7 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 		Subject:      "hello",
 		RawObjectKey: "raw/1.eml",
 		ReceivedAt:   time.Now(),
-		ExpiresAt:    time.Now().Add(24 * time.Hour),
+		ExpiresAt:    models.MessageExpiry(nil, 24, time.Now()),
 	})
 
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
@@ -487,7 +487,7 @@ func TestRouter_UserCannotDeleteMessagesInAnotherUsersDomain(t *testing.T) {
 		Recipients: []string{"inbox@owned-records.test"},
 		Subject:    "owned record",
 		ReceivedAt: time.Now(),
-		ExpiresAt:  time.Now().Add(24 * time.Hour),
+		ExpiresAt:  models.MessageExpiry(nil, 24, time.Now()),
 	})
 
 	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})

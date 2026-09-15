@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"net/mail"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
+	"tabmail/internal/authz"
 	"tabmail/internal/config"
 	tabdkim "tabmail/internal/dkim"
 	"tabmail/internal/models"
@@ -23,6 +25,7 @@ const maxRetryDelay = 1 * time.Hour
 
 // Service manages outbound email submission and background delivery.
 type Service struct {
+	workerMu sync.Mutex
 	cfg      config.Outbound
 	store    store.Store
 	adapter  DeliveryAdapter
@@ -58,21 +61,22 @@ func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Ser
 
 // SendRequest is the validated input for submitting an outbound email.
 type SendRequest struct {
-	TenantID      uuid.UUID
-	UserID        *uuid.UUID
-	APIKeyID      *uuid.UUID
-	ZoneID        uuid.UUID
-	From          string
-	To            []string
-	CC            []string
-	BCC           []string
-	Subject       string
-	TextBody      string
-	HTMLBody      string
-	Headers       map[string]string
-	TemplateName  *string           // optional; nil keeps the legacy bare-string path
-	TemplateVars  map[string]string // used only when TemplateName is non-nil
-	Quota         store.OutboundQuotaReservation
+	SenderMailboxID *uuid.UUID
+	TenantID        uuid.UUID
+	UserID          *uuid.UUID
+	APIKeyID        *uuid.UUID
+	ZoneID          uuid.UUID
+	From            string
+	To              []string
+	CC              []string
+	BCC             []string
+	Subject         string
+	TextBody        string
+	HTMLBody        string
+	Headers         map[string]string
+	TemplateName    *string           // optional; nil keeps the legacy bare-string path
+	TemplateVars    map[string]string // used only when TemplateName is non-nil
+	Quota           store.OutboundQuotaReservation
 }
 
 // Submit enqueues an outbound email job after validation.
@@ -103,6 +107,20 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		req.HTMLBody = rendered.HTMLBody
 	}
 
+	canonical, err := authz.CanonicalSender(req.From)
+	if err != nil {
+		return nil, err
+	}
+	req.From = canonical
+	for _, group := range [][]string{req.To, req.CC, req.BCC} {
+		for i, a := range group {
+			parsed, parseErr := mail.ParseAddress(a)
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			group[i] = strings.ToLower(parsed.Address)
+		}
+	}
 	// Validate all email addresses using RFC 5322 parsing.
 	if _, err := mail.ParseAddress(req.From); err != nil {
 		return nil, fmt.Errorf("invalid from address %q: %w", req.From, err)
@@ -162,28 +180,36 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 
 	now := time.Now().UTC()
 	job := &models.OutboundJob{
-		ID:              uuid.New(),
-		TenantID:        req.TenantID,
-		UserID:          req.UserID,
-		APIKeyID:        req.APIKeyID,
-		MailFrom:        req.From,
-		RcptTo:          allRcpt,
-		To:              req.To,
-		CC:              req.CC,
-		BCC:             req.BCC,
-		Subject:         req.Subject,
-		TextBody:        req.TextBody,
-		HTMLBody:        req.HTMLBody,
-		HeadersJSON:     headersJSON,
-		ZoneID:          req.ZoneID,
-		State:           models.OutboundPending,
-		MaxAttempts:     s.cfg.MaxRetries,
-		MessageIDHeader: msgID,
-		CreatedAt:       now,
-		UpdatedAt:       now,
-		NextAttemptAt:   now,
+		SenderUserID:     req.UserID,
+		SenderKeyID:      req.APIKeyID,
+		SenderMailboxID:  req.SenderMailboxID,
+		TemplateName:     req.TemplateName,
+		DeliveredDomains: []string{},
+		ID:               uuid.New(),
+		TenantID:         req.TenantID,
+		UserID:           req.UserID,
+		APIKeyID:         req.APIKeyID,
+		MailFrom:         req.From,
+		RcptTo:           allRcpt,
+		To:               req.To,
+		CC:               req.CC,
+		BCC:              req.BCC,
+		Subject:          req.Subject,
+		TextBody:         req.TextBody,
+		HTMLBody:         req.HTMLBody,
+		HeadersJSON:      headersJSON,
+		ZoneID:           req.ZoneID,
+		State:            models.OutboundPending,
+		MaxAttempts:      s.cfg.MaxRetries,
+		MessageIDHeader:  msgID,
+		CreatedAt:        now,
+		UpdatedAt:        now,
+		NextAttemptAt:    now,
 	}
 
+	if err := s.ValidateJobAuthorization(ctx, job); err != nil {
+		return nil, err
+	}
 	if err := s.createOutboundJob(ctx, job, req.Quota); err != nil {
 		return nil, fmt.Errorf("enqueue outbound job: %w", err)
 	}
@@ -230,13 +256,15 @@ func (s *Service) Shutdown() { s.Stop() }
 
 // ensureWorker builds the workqueue.Worker once. Idempotent.
 func (s *Service) ensureWorker() *workqueue.Worker[*outboundJob] {
+	s.workerMu.Lock()
+	defer s.workerMu.Unlock()
 	if s.worker != nil {
 		return s.worker
 	}
 	policy := workqueue.ExponentialCappedBackoff[*outboundJob]{
-		Base:         s.cfg.RetryDelay,
-		Cap:          maxRetryDelay,
-		MaxAttempts:  func(j *workqueue.Job[*outboundJob]) int { return j.Payload.MaxAttempts },
+		Base:        s.cfg.RetryDelay,
+		Cap:         maxRetryDelay,
+		MaxAttempts: func(j *workqueue.Job[*outboundJob]) int { return j.Payload.MaxAttempts },
 	}
 	s.worker = workqueue.NewWorker[*outboundJob](
 		newOutboundStore(s.store),
@@ -261,9 +289,16 @@ func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*outboundJo
 	if job == nil || job.Payload == nil || job.Payload.OutboundJob == nil {
 		return nil
 	}
+	ctx, cancel := context.WithTimeout(ctx, time.Minute)
+	defer cancel()
 	out := job.Payload.OutboundJob
 	log := s.logger.With().Str("job_id", out.ID.String()).Logger()
-
+	if err := s.ValidateJobAuthorization(ctx, out); err != nil {
+		if authz.IsAuthzError(err) {
+			return s.store.MarkOutboundJobFailed(ctx, out.ID, job.Lease.Token, "authorization revoked: "+err.Error(), false)
+		}
+		return err // transient database failures remain retryable, without sending
+	}
 	// Build MIME message from the structurally-stored recipients.
 	mime, err := Build(messageFromJob(out))
 	if err != nil {
@@ -307,64 +342,7 @@ func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*outboundJo
 		}
 	}
 
-	// Deliver via configured adapter.
-	result, deliverErr := s.adapter.Deliver(ctx, out, mime)
-
-	// Record the attempt.
-	if result != nil {
-		attempt := &models.OutboundAttempt{
-			ID:           uuid.New(),
-			JobID:        out.ID,
-			TenantID:     out.TenantID,
-			Adapter:      result.Adapter,
-			Attempt:      out.Attempts,
-			SMTPCode:     result.SMTPCode,
-			SMTPResponse: result.SMTPResponse,
-			RemoteHost:   result.RemoteHost,
-			StartedAt:    result.StartedAt,
-			FinishedAt:   result.FinishedAt,
-			Error:        result.Error,
-		}
-		if storeErr := s.store.CreateOutboundAttempt(ctx, attempt); storeErr != nil {
-			log.Warn().Err(storeErr).Msg("recording delivery attempt")
-		}
-	}
-
-	if deliverErr != nil {
-		log.Warn().Err(deliverErr).Int("attempt", out.Attempts+1).Msg("delivery failed")
-		// Hard bounce (5xx) → add recipients to suppression list.
-		if result != nil && result.SMTPCode >= 500 && result.SMTPCode < 600 {
-			for _, rcpt := range out.RcptTo {
-				_ = s.store.AddSuppression(ctx, &models.SuppressionEntry{
-					ID:          uuid.New(),
-					TenantID:    out.TenantID,
-					Address:     rcpt,
-					Reason:      "hard_bounce",
-					SourceJobID: &out.ID,
-					CreatedAt:   time.Now(),
-				})
-			}
-			log.Info().Int("smtp_code", result.SMTPCode).Msg("hard bounce: recipients added to suppression list")
-		}
-		return fmt.Errorf("%s", deliverErr.Error())
-	}
-
-	smtpCode := 250
-	smtpResponse := "OK"
-	if result != nil && result.SMTPCode > 0 {
-		smtpCode = result.SMTPCode
-		smtpResponse = result.SMTPResponse
-	}
-	if err := s.store.MarkOutboundJobSent(ctx, out.ID, job.Lease.Token, smtpCode, smtpResponse, out.MessageIDHeader); err != nil {
-		if isTokenMismatch(err) {
-			log.Warn().Msg("delivery token mismatch on mark-sent; job was re-claimed by another worker, skipping")
-			return nil
-		}
-		log.Error().Err(err).Msg("marking job sent")
-		return nil
-	}
-	log.Info().Msg("outbound delivered")
-	return nil
+	return s.deliverDomains(ctx, out, job.Lease.Token, mime)
 }
 
 func (s *Service) dkimFailClosed() bool {

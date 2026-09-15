@@ -3,10 +3,13 @@ package outbound
 import (
 	"context"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net"
 	"net/smtp"
+	"net/textproto"
 	"strings"
+	"tabmail/internal/store"
 	"time"
 
 	"tabmail/internal/config"
@@ -65,11 +68,12 @@ func DeliverRelay(ctx context.Context, cfg config.Outbound, from string, to []st
 // preventing MITM downgrade attacks.
 func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, requireTLS bool) error {
 	byDomain := groupByDomain(to)
-	var lastErr error
+	var failures []error
 	for domain, rcpts := range byDomain {
+		var lastErr error
 		mxs, err := lookupMX(ctx, domain)
 		if err != nil {
-			lastErr = fmt.Errorf("mx lookup %s: %w", domain, err)
+			failures = append(failures, fmt.Errorf("mx lookup %s: %w", domain, err))
 			continue
 		}
 		delivered := false
@@ -104,6 +108,11 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 						lastErr = fmt.Errorf("reconnect to %s after TLS failure: %w", host, err2)
 						continue
 					}
+					if deadline, ok := ctx.Deadline(); ok {
+						_ = conn2.SetDeadline(deadline)
+					} else {
+						_ = conn2.SetDeadline(time.Now().Add(2 * time.Minute))
+					}
 					client, err = smtp.NewClient(conn2, mx)
 					if err != nil {
 						conn2.Close()
@@ -118,6 +127,9 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 
 			if err := sendSMTP(client, from, rcpts, mime); err != nil {
 				client.Close()
+				if errors.Is(err, store.ErrOutboundUncertain) {
+					return err
+				}
 				lastErr = err
 				continue
 			}
@@ -125,11 +137,14 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 			delivered = true
 			break
 		}
-		if !delivered && lastErr == nil {
-			lastErr = fmt.Errorf("all MX hosts failed for %s", domain)
+		if !delivered {
+			if lastErr == nil {
+				lastErr = fmt.Errorf("all MX hosts failed for %s", domain)
+			}
+			failures = append(failures, lastErr)
 		}
 	}
-	return lastErr
+	return errors.Join(failures...)
 }
 
 func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error {
@@ -149,9 +164,15 @@ func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error 
 		return fmt.Errorf("write data: %w", err)
 	}
 	if err := w.Close(); err != nil {
-		return fmt.Errorf("close data: %w", err)
+		var reply *textproto.Error
+		if errors.As(err, &reply) {
+			return fmt.Errorf("close data: %w", err)
+		}
+		return fmt.Errorf("%w: DATA final reply: %v", store.ErrOutboundUncertain, err)
 	}
-	return client.Quit()
+	// DATA final reply was successful; QUIT is merely connection cleanup.
+	_ = client.Quit()
+	return nil
 }
 
 func groupByDomain(addrs []string) map[string][]string {

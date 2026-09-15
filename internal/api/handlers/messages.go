@@ -24,6 +24,7 @@ import (
 )
 
 type messageStore interface {
+	authz.MailboxGrantReader
 	app.AuditStore
 	GetMailboxByAddress(ctx context.Context, address string) (*models.Mailbox, error)
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
@@ -133,10 +134,21 @@ func (h *MessageHandler) StreamMailbox(w http.ResponseWriter, r *http.Request) {
 		select {
 		case <-r.Context().Done():
 			return
-		case event := <-ch:
+		case event, open := <-ch:
+			if !open {
+				return
+			}
+			current, err := h.service.ResolveMailbox(r.Context(), mb.FullAddress, h.resolveViewer(r))
+			if err != nil || current.ID != mb.ID {
+				return
+			}
 			writeSSE(w, string(event.Type), event)
 			flusher.Flush()
 		case <-ticker.C:
+			current, err := h.service.ResolveMailbox(r.Context(), mb.FullAddress, h.resolveViewer(r))
+			if err != nil || current.ID != mb.ID {
+				return
+			}
 			writeSSE(w, "ping", realtime.Event{Type: realtime.EventPing, Mailbox: mb.FullAddress})
 			flusher.Flush()
 		}

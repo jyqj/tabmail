@@ -26,7 +26,7 @@ func TestScannerSweepDeletesExpiredMessagesAndObjectsAcrossBatches(t *testing.T)
 		TenantID:     uuid.New(),
 		ZoneID:       uuid.New(),
 		RawObjectKey: "raw/a.eml",
-		ExpiresAt:    time.Now().Add(-2 * time.Hour),
+		ExpiresAt:    p0Time(time.Now().Add(-2 * time.Hour)),
 	}
 	expiredB := &models.Message{
 		ID:           uuid.New(),
@@ -34,7 +34,7 @@ func TestScannerSweepDeletesExpiredMessagesAndObjectsAcrossBatches(t *testing.T)
 		TenantID:     uuid.New(),
 		ZoneID:       uuid.New(),
 		RawObjectKey: "raw/b.eml",
-		ExpiresAt:    time.Now().Add(-time.Hour),
+		ExpiresAt:    p0Time(time.Now().Add(-time.Hour)),
 	}
 	active := &models.Message{
 		ID:           uuid.New(),
@@ -42,7 +42,7 @@ func TestScannerSweepDeletesExpiredMessagesAndObjectsAcrossBatches(t *testing.T)
 		TenantID:     uuid.New(),
 		ZoneID:       uuid.New(),
 		RawObjectKey: "raw/active.eml",
-		ExpiresAt:    time.Now().Add(2 * time.Hour),
+		ExpiresAt:    p0Time(time.Now().Add(2 * time.Hour)),
 	}
 	store.SeedMessage(expiredA)
 	store.SeedMessage(expiredB)
@@ -96,7 +96,7 @@ func TestScannerSweepKeepsObjectReferencedByActiveIngestJob(t *testing.T) {
 		TenantID:     uuid.New(),
 		ZoneID:       uuid.New(),
 		RawObjectKey: key,
-		ExpiresAt:    time.Now().Add(-time.Hour),
+		ExpiresAt:    p0Time(time.Now().Add(-time.Hour)),
 	}
 	store.SeedMessage(expired)
 	if err := store.CreateIngestJob(ctx, &models.IngestJob{
@@ -196,3 +196,5 @@ func TestScannerSweepPurgesOldDoneIngestJobsAndDeletesOrphanObject(t *testing.T)
 		t.Fatalf("expected orphan object %s to be deleted after old ingest job purge", key)
 	}
 }
+
+func p0Time(t time.Time) *time.Time { return &t }

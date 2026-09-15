@@ -1,0 +1,76 @@
+name: Company mail P0
+on:
+  push:
+    branches: [feat/company-mail-p0]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: company-p0-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Build
+        run: go build ./...
+      - name: Race tests with PostgreSQL
+        run: |
+          set -o pipefail
+          go test -json -race -count=1 -timeout=180s ./... | tee go-test.jsonl
+      - name: DTO field contract
+        run: python3 scripts/check_contract_drift.py
+      - name: Vet
+        run: go vet ./...
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-p0-test-evidence
+          path: go-test.jsonl
+          retention-days: 14
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+        working-directory: web
+      - run: npx tsc --noEmit
+        working-directory: web
+      - run: npm test
+        working-directory: web
+      - run: npm run lint
+        working-directory: web
+      - run: npm run build
+        working-directory: web

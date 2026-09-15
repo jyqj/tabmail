@@ -324,7 +324,7 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 						writeError(w, http.StatusInternalServerError, "INTERNAL", "api key owner lookup failed")
 						return
 					}
-					if owner == nil || !owner.IsActive {
+					if owner == nil || !owner.IsActive || owner.TenantID != tenant.ID {
 						writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "api key owner not found or inactive")
 						return
 					}

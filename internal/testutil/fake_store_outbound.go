@@ -96,22 +96,6 @@ func (s *FakeStore) ListOutboundJobsScoped(_ context.Context, scope authz.OwnerL
 	return s.listOutboundJobsLocked(pg, pred)
 }
 
-func (s *FakeStore) ClaimOutboundJobs(_ context.Context, _ time.Time, _ int) ([]*models.OutboundJob, error) {
-	return nil, nil
-}
-
-func (s *FakeStore) MarkOutboundJobSent(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ int, _, _ string) error {
-	return nil
-}
-
-func (s *FakeStore) MarkOutboundJobRetry(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ string, _ time.Time) error {
-	return nil
-}
-
-func (s *FakeStore) MarkOutboundJobFailed(_ context.Context, _ uuid.UUID, _ *uuid.UUID, _ string, _ bool) error {
-	return nil
-}
-
 func (s *FakeStore) CountOutboundSince(_ context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -128,8 +112,8 @@ func (s *FakeStore) RequeueOutboundJob(_ context.Context, id uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	job := s.outboundJobs[id]
-	if job == nil || (job.State != models.OutboundDead && job.State != models.OutboundFailed) {
-		return nil
+	if job == nil || job.InFlightDomain != "" || (job.State != models.OutboundDead && job.State != models.OutboundFailed) {
+		return store.ErrOutboundNotRetryable
 	}
 	now := time.Now()
 	job.State = models.OutboundPending
@@ -365,6 +349,7 @@ func cloneOutboundJob(job *models.OutboundJob) *models.OutboundJob {
 		return nil
 	}
 	cp := *job
+	cp.DeliveredDomains = append([]string(nil), job.DeliveredDomains...)
 	if job.UserID != nil {
 		id := *job.UserID
 		cp.UserID = &id

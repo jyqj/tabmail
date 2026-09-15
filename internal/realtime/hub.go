@@ -101,13 +101,13 @@ func (h *Hub) Publish(event Event) {
 		h.history.Value = event
 		h.history = h.history.Next()
 	}
-	mailboxListeners := make([]chan Event, 0, len(h.listeners[event.Mailbox]))
-	for _, ch := range h.listeners[event.Mailbox] {
-		mailboxListeners = append(mailboxListeners, ch)
-	}
-	globalListeners := make([]chan Event, 0, len(h.listeners[""]))
-	for _, ch := range h.listeners[""] {
-		globalListeners = append(globalListeners, ch)
+	for _, listeners := range []map[int]chan Event{h.listeners[event.Mailbox], h.listeners[""]} {
+		for _, ch := range listeners {
+			select {
+			case ch <- event:
+			default:
+			}
+		}
 	}
 	h.mu.Unlock()
 
@@ -121,17 +121,5 @@ func (h *Hub) Publish(event Event) {
 			Size:      event.Size,
 			At:        event.At,
 		})
-	}
-	for _, ch := range mailboxListeners {
-		select {
-		case ch <- event:
-		default:
-		}
-	}
-	for _, ch := range globalListeners {
-		select {
-		case ch <- event:
-		default:
-		}
 	}
 }
