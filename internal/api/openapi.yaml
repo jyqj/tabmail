@@ -555,6 +555,15 @@ components:
     OutboundJob:
       type: object
       properties:
+        to: { type: array, items: { type: string } }
+        cc: { type: array, items: { type: string } }
+        bcc: { type: array, items: { type: string }, description: "Omitted when content_redacted is true." }
+        text_body: { type: string, description: "Omitted for metadata-only viewers." }
+        html_body: { type: string, description: "Omitted for metadata-only viewers." }
+        headers: { type: object, additionalProperties: { type: string }, description: "Omitted for metadata-only viewers." }
+        content_redacted:
+          type: boolean
+          description: Content and BCC have been removed for a metadata-only viewer.
         id:
           type: string
           format: uuid
@@ -1197,9 +1206,10 @@ paths:
               required: [address]
               properties:
                 address: { type: string, example: "user@mail.example.com" }
-                password: { type: string }
-                access_mode: { type: string, enum: [public, token, api_key], default: public }
-                retention_hours_override: { type: integer, nullable: true, example: 24 }
+                owner_user_id: { type: string, format: uuid, description: "Active employee in this company; only administrators may assign another employee. Omitted ownership defaults to the current same-company user." }
+                password: { type: string, description: "Required for ownerless token mailboxes; owned mailboxes may use the owner session instead." }
+                access_mode: { type: string, enum: [public, token, api_key], default: token }
+                retention_hours_override: { type: integer, minimum: 0, nullable: true, example: 0, description: "0 means permanent retention; omit to inherit. Owner mailboxes remain permanent." }
                 expires_at: { type: string, format: date-time, nullable: true }
       responses:
         "201":

@@ -35,7 +35,7 @@ func Migrate(ctx context.Context, connConfig *pgx.ConnConfig) error {
 	}
 	if gooseTable {
 		var unknown int
-		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM goose_db_version WHERE is_applied AND version_id NOT IN (0,1,2)`).Scan(&unknown); err != nil {
+		if err := db.QueryRowContext(ctx, `SELECT count(*) FROM goose_db_version WHERE is_applied AND version_id NOT IN (0,1,2,3)`).Scan(&unknown); err != nil {
 			return err
 		}
 		if unknown > 0 {

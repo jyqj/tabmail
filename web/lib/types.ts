@@ -130,6 +130,7 @@ export interface Mailbox {
 }
 
 export interface MailboxCreateInput {
+  owner_user_id?: string;
   address: string;
   access_mode?: AccessMode;
   password?: string;
@@ -484,6 +485,10 @@ export interface EffectivePermission {
 export type OutboundState = "pending" | "processing" | "sent" | "retry" | "failed" | "dead";
 
 export interface OutboundJob {
+  content_redacted: boolean;
+  to?: string[];
+  cc?: string[];
+  bcc?: string[];
   delivered_domains: string[];
   in_flight_domain?: string;
   id: string;

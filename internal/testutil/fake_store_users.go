@@ -108,18 +108,6 @@ func (s *FakeStore) DeleteUser(_ context.Context, id uuid.UUID) error {
 
 func (s *FakeStore) TouchUserLogin(_ context.Context, _ uuid.UUID) error { return nil }
 
-func (s *FakeStore) CreateRefreshToken(_ context.Context, _ *models.RefreshToken) error { return nil }
-
-func (s *FakeStore) GetRefreshToken(_ context.Context, _ string) (*models.RefreshToken, error) {
-	return nil, nil
-}
-
-func (s *FakeStore) RevokeRefreshToken(_ context.Context, _ uuid.UUID) error { return nil }
-
-func (s *FakeStore) RevokeUserRefreshTokens(_ context.Context, _ uuid.UUID) error { return nil }
-
-func (s *FakeStore) DeleteExpiredRefreshTokens(_ context.Context) error { return nil }
-
 func (s *FakeStore) CreateAdminInvitation(_ context.Context, _ *models.AdminInvitation) error {
 	return nil
 }

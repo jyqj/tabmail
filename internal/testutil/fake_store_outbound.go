@@ -83,6 +83,18 @@ func (s *FakeStore) ListOutboundJobsScoped(_ context.Context, scope authz.OwnerL
 		if job.TenantID != scope.TenantID {
 			return false
 		}
+		if !models.ZoneAllowed(scope.AllowedZoneIDs, job.ZoneID) {
+			return false
+		}
+		if scope.ReaderUserID != nil && job.SenderMailboxID != nil {
+			mb := s.mailboxes[*job.SenderMailboxID]
+			if mb != nil && mb.TenantID == scope.TenantID && (mb.ExpiresAt == nil || mb.ExpiresAt.After(time.Now())) {
+				g := s.mailboxGrants[[2]uuid.UUID{mb.ID, *scope.ReaderUserID}]
+				if (mb.OwnerUserID != nil && *mb.OwnerUserID == *scope.ReaderUserID) || (g != nil && g.CanRead && g.TenantID == scope.TenantID) {
+					return true
+				}
+			}
+		}
 		switch {
 		case scope.AllInTenant:
 			return true

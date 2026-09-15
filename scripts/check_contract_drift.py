@@ -11,6 +11,7 @@ GO_MODELS = ROOT / "internal/models/models.go"
 TS_TYPES = ROOT / "web/lib/types.ts"
 
 SHARED_TYPES = [
+    "OutboundJob",
     "Plan",
     "Tenant",
     "TenantOverride",

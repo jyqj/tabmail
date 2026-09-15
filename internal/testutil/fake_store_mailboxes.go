@@ -118,8 +118,14 @@ func (s *FakeStore) ListMailboxesScoped(_ context.Context, scope authz.ZoneListF
 				continue
 			}
 		}
-		if ownerZones != nil {
-			if _, ok := ownerZones[m.ZoneID]; !ok {
+
+		if ownerZones != nil || scope.GrantedUserID != nil {
+			_, visible := ownerZones[m.ZoneID]
+			if scope.GrantedUserID != nil && (m.ExpiresAt == nil || m.ExpiresAt.After(time.Now())) {
+				g := s.mailboxGrants[[2]uuid.UUID{m.ID, *scope.GrantedUserID}]
+				visible = visible || (m.OwnerUserID != nil && *m.OwnerUserID == *scope.GrantedUserID) || (g != nil && g.CanRead && g.TenantID == scope.TenantID)
+			}
+			if !visible {
 				continue
 			}
 		}
