@@ -60,10 +60,11 @@ const resolverCacheTTL = 15 * time.Second
 
 // Resolver maps an incoming email address to a mailbox, auto-creating if allowed.
 type Resolver struct {
-	store      resolverStore
-	namingMode policy.NamingMode
-	stripPlus  bool
-	limiter    autoCreateLimiter
+	companyOnly bool
+	store       resolverStore
+	namingMode  policy.NamingMode
+	stripPlus   bool
+	limiter     autoCreateLimiter
 	// zoneCache uses negative caching so the parent-domain walk in findZone
 	// does not re-hit the store for every level on each lookup.
 	zoneCache  *configcache.ConfigCache[string, *models.DomainZone]
@@ -171,6 +172,11 @@ func (rv *Resolver) resolve(ctx context.Context, address string, materialize boo
 		return &Result{Zone: zone, Mailbox: mb}, nil
 	}
 
+	// Company recipients must be provisioned explicitly. Never turn a legacy
+	// wildcard route into an employee mailbox implicitly.
+	if rv.companyOnly {
+		return nil, nil
+	}
 	routes, err := rv.listRoutes(ctx, zone.ID)
 	if err != nil {
 		return nil, err
@@ -424,3 +430,6 @@ func matchSeqNum(compiled *regexp.Regexp, candidate1, candidate2 string) int {
 	}
 	return -1
 }
+
+// SetCompanyOnly must be called before serving traffic.
+func (rv *Resolver) SetCompanyOnly(enabled bool) { rv.companyOnly = enabled }

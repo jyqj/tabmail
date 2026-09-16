@@ -38,9 +38,11 @@ type messageStore interface {
 }
 
 type MessageHandler struct {
-	service *messageapp.Service
-	hub     *realtime.Hub
-	logger  zerolog.Logger
+	revalidate  func(*http.Request) (*http.Request, error)
+	eventReader mailboxEventReader
+	service     *messageapp.Service
+	hub         *realtime.Hub
+	logger      zerolog.Logger
 }
 
 func NewMessageHandler(s messageStore, obj store.ObjectStore, objects *rawobject.Store, hub *realtime.Hub, dispatcher *hooks.Dispatcher, namingMode policy.NamingMode, stripPlus bool, tokenSecret string, l zerolog.Logger) *MessageHandler {
@@ -110,6 +112,10 @@ func (h *MessageHandler) StreamMailbox(w http.ResponseWriter, r *http.Request) {
 		respondAppError(w, h.logger, err)
 		return
 	}
+	if h.eventReader != nil {
+		h.streamDurable(w, r, mb)
+		return
+	}
 	flusher, ok := w.(http.Flusher)
 	if !ok {
 		errInternal(w)
@@ -138,14 +144,30 @@ func (h *MessageHandler) StreamMailbox(w http.ResponseWriter, r *http.Request) {
 			if !open {
 				return
 			}
-			current, err := h.service.ResolveMailbox(r.Context(), mb.FullAddress, h.resolveViewer(r))
+			fresh := r
+			if h.revalidate != nil {
+				var err error
+				fresh, err = h.revalidate(r)
+				if err != nil {
+					return
+				}
+			}
+			current, err := h.service.ResolveMailbox(fresh.Context(), mb.FullAddress, h.resolveViewer(fresh))
 			if err != nil || current.ID != mb.ID {
 				return
 			}
 			writeSSE(w, string(event.Type), event)
 			flusher.Flush()
 		case <-ticker.C:
-			current, err := h.service.ResolveMailbox(r.Context(), mb.FullAddress, h.resolveViewer(r))
+			fresh := r
+			if h.revalidate != nil {
+				var err error
+				fresh, err = h.revalidate(r)
+				if err != nil {
+					return
+				}
+			}
+			current, err := h.service.ResolveMailbox(fresh.Context(), mb.FullAddress, h.resolveViewer(fresh))
 			if err != nil || current.ID != mb.ID {
 				return
 			}
@@ -262,6 +284,7 @@ func mailboxBearerToken(r *http.Request) string {
 }
 
 func writeSSE(w http.ResponseWriter, event string, payload any) {
+	_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(35 * time.Second))
 	data, _ := json.Marshal(payload)
 	_, _ = io.WriteString(w, "event: "+event+"\n")
 	_, _ = io.WriteString(w, "data: "+string(data)+"\n\n")

@@ -148,9 +148,15 @@ func (s *PgStore) DeleteUserPermissionOverride(ctx context.Context, userID uuid.
 }
 
 func (s *PgStore) EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error) {
+	return effectivePermission(ctx, s.pool, userID)
+}
+
+func effectivePermission(ctx context.Context, query interface {
+	QueryRow(context.Context, string, ...any) pgx.Row
+}, userID uuid.UUID) (*models.EffectivePermission, error) {
 	ep := &models.EffectivePermission{}
 	var allowedZones []uuid.UUID
-	err := s.pool.QueryRow(ctx, `
+	err := query.QueryRow(ctx, `
 		SELECT
 			COALESCE(o.can_send,            p.can_send,            FALSE),
 			COALESCE(o.daily_send_quota,    p.daily_send_quota,    0),

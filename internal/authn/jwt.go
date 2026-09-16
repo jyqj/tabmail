@@ -23,12 +23,13 @@ var (
 
 // AccessClaims represents the payload of an access token.
 type AccessClaims struct {
-	UserID   uuid.UUID       `json:"uid"`
-	TenantID uuid.UUID       `json:"tid"`
-	Role     models.UserRole `json:"role"`
-	Email    string          `json:"email"`
-	IssuedAt int64           `json:"iat"`
-	Exp      int64           `json:"exp"`
+	SessionVersion int64           `json:"sv,omitempty"`
+	UserID         uuid.UUID       `json:"uid"`
+	TenantID       uuid.UUID       `json:"tid"`
+	Role           models.UserRole `json:"role"`
+	Email          string          `json:"email"`
+	IssuedAt       int64           `json:"iat"`
+	Exp            int64           `json:"exp"`
 }
 
 const (
@@ -40,12 +41,13 @@ const (
 func IssueAccessToken(secret string, user *models.User) (string, error) {
 	now := time.Now()
 	claims := AccessClaims{
-		UserID:   user.ID,
-		TenantID: user.TenantID,
-		Role:     user.Role,
-		Email:    user.Email,
-		IssuedAt: now.Unix(),
-		Exp:      now.Add(AccessTokenTTL).Unix(),
+		SessionVersion: user.SessionVersion,
+		UserID:         user.ID,
+		TenantID:       user.TenantID,
+		Role:           user.Role,
+		Email:          user.Email,
+		IssuedAt:       now.Unix(),
+		Exp:            now.Add(AccessTokenTTL).Unix(),
 	}
 	body, err := json.Marshal(claims)
 	if err != nil {

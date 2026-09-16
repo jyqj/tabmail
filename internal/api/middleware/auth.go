@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 
@@ -244,7 +245,7 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 						writeError(w, http.StatusInternalServerError, "INTERNAL", "user lookup failed")
 						return
 					}
-					if user == nil || !user.IsActive {
+					if user == nil || !user.IsActive || user.SessionVersion != claims.SessionVersion {
 						writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "user not found or inactive")
 						return
 					}
@@ -288,6 +289,10 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 						ctx = context.WithValue(ctx, ctxAuthMode, AuthModeUser)
 					}
 					next.ServeHTTP(w, r.WithContext(ctx))
+					return
+				}
+				if errors.Is(err, authn.ErrTokenExpired) {
+					writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "access token expired")
 					return
 				}
 				// Not a valid JWT — fall through (could be a mailbox bearer token,
@@ -399,6 +404,11 @@ func intersectAllowedZones(ownerZones, keyZones []uuid.UUID) []uuid.UUID {
 // RequireAdmin accepts super_admin and admin. Rejects others with 403.
 func RequireAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if AuthModeFromCtx(r.Context()) == AuthModePublic {
+			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+			return
+		}
+
 		mode := AuthModeFromCtx(r.Context())
 		if mode != AuthModeSuperAdmin && mode != AuthModeAdmin {
 			writeError(w, http.StatusForbidden, "FORBIDDEN", "admin access required")
@@ -411,6 +421,11 @@ func RequireAdmin(next http.Handler) http.Handler {
 // RequireSuperAdmin accepts only super_admin. Rejects others with 403.
 func RequireSuperAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if AuthModeFromCtx(r.Context()) == AuthModePublic {
+			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+			return
+		}
+
 		if !IsSuperAdmin(r.Context()) {
 			writeError(w, http.StatusForbidden, "FORBIDDEN", "super admin access required")
 			return
@@ -437,6 +452,11 @@ func RequireAuth(next http.Handler) http.Handler {
 // RequireTenantKeyOrAdmin allows super_admin, admin, user (JWT), or API key authenticated requests.
 func RequireTenantKeyOrAdmin(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if AuthModeFromCtx(r.Context()) == AuthModePublic {
+			writeError(w, http.StatusUnauthorized, "UNAUTHORIZED", "authentication required")
+			return
+		}
+
 		switch AuthModeFromCtx(r.Context()) {
 		case AuthModeSuperAdmin, AuthModeAdmin, AuthModeAPIKey, AuthModeUser:
 			next.ServeHTTP(w, r)

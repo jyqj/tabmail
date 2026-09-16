@@ -1,8 +1,10 @@
 package api
 
 import (
+	"context"
 	"crypto/subtle"
 	"embed"
+	"encoding/json"
 	"io/fs"
 	"net/http"
 	"strings"
@@ -17,6 +19,7 @@ import (
 
 	"tabmail/internal/api/handlers"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/company"
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
 	"tabmail/internal/metrics"
@@ -71,6 +74,9 @@ func (c *metricsDBCountCache) Get(now time.Time, load func() metricsDBCounts) me
 
 // RouterConfig bundles all parameters for NewRouter.
 type RouterConfig struct {
+	CompanyOnly        bool
+	Readiness          func(context.Context) error
+	RuntimeConfig      map[string]any
 	Store              store.Store
 	ObjectStore        store.ObjectStore
 	RawObjects         *rawobject.Store
@@ -124,13 +130,40 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	r.Use(middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID))
 	r.Use(middleware.PermissionLoader(cached))
 	r.Use(cfg.RateLimiter.Middleware)
+	if cfg.CompanyOnly {
+		r.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				p := r.URL.Path
+				if p == "/api/v1/token" || strings.HasPrefix(p, "/api/v1/resources/") {
+					w.Header().Set("Content-Type", "application/json")
+					w.WriteHeader(http.StatusForbidden)
+					_, _ = w.Write([]byte(`{"error":{"code":"COMPANY_ONLY","message":"public mailbox access is disabled"}}`))
+					return
+				}
+				if strings.HasPrefix(p, "/api/v1/mailbox/") && middleware.AuthModeFromCtx(r.Context()) == middleware.AuthModePublic {
+					middleware.RequireAuth(next).ServeHTTP(w, r)
+					return
+				}
+				next.ServeHTTP(w, r)
+			})
+		})
+	}
 
 	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
 	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
+	refreshStream := func(r *http.Request) (*http.Request, error) {
+		return middleware.RevalidateRequest(r, st, cfg.JWTSecret, cfg.PublicTenantID)
+	}
+	msg.SetStreamRevalidator(refreshStream)
+	mon.SetStreamRevalidator(refreshStream)
+	if reader, ok := st.(company.Repository); ok {
+		msg.SetMailboxEventReader(reader)
+	}
 	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger)
+	auth.SetCompanyOnly(cfg.CompanyOnly)
 	ua := handlers.NewUserAdminHandler(st, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
 	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
@@ -141,6 +174,9 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	}
 
 	r.Route("/api/v1", func(r chi.Router) {
+		if repo, ok := st.(company.Repository); ok {
+			handlers.NewCompanyHandler(repo, st, cfg.ObjectStore, msg, oh, cfg.Logger).Routes(r)
+		}
 		// -- Auth (public, no auth required) --
 		r.Post("/auth/login", auth.Login)
 		r.Post("/auth/register", auth.Register)
@@ -288,6 +324,10 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Patch("/admin/policy", adm.UpdateSMTPPolicy)
 
 			// -- System settings (platform admin only) --
+			r.Get("/admin/runtime-config", func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_ = json.NewEncoder(w).Encode(map[string]any{"data": cfg.RuntimeConfig})
+			})
 			r.Get("/admin/settings", adm.ListSettings)
 			r.Patch("/admin/settings", adm.UpdateSettings)
 		})
@@ -338,18 +378,53 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			}
 		})
 		snapshot := metrics.Snapshot(cfg.Dispatcher != nil && cfg.Dispatcher.Enabled(), counts.webhookDead)
-		body := metrics.RenderPrometheus(snapshot, map[string]float64{
+		values := map[string]float64{
 			"tabmail_webhooks_backlog":         float64(counts.webhookPending),
 			"tabmail_ingest_backlog":           float64(counts.ingestReady + counts.ingestProcessing),
 			"tabmail_ingest_queue_depth":       float64(counts.ingestReady + counts.ingestProcessing),
 			"tabmail_ingest_queue_ready_depth": float64(counts.ingestReady),
 			"tabmail_ingest_queue_inflight":    float64(counts.ingestProcessing),
-		})
+		}
+		if health, ok := st.(interface {
+			CompanyMetrics(context.Context) (map[string]float64, error)
+		}); ok {
+			extra, err := health.CompanyMetrics(r.Context())
+			if err != nil {
+				values["tabmail_operational_metrics_error"] = 1
+			} else {
+				values["tabmail_operational_metrics_error"] = 0
+				for k, v := range extra {
+					values[k] = v
+				}
+			}
+		}
+		body := metrics.RenderPrometheus(snapshot, values)
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
 		_, _ = w.Write([]byte(body))
 	})
 
-	return r
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		// Health endpoints must not depend on identity-store lookups before
+		// reporting their own dependency status.
+		if req.Method == http.MethodGet && (req.URL.Path == "/health" || req.URL.Path == "/ready") {
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Cache-Control", "no-store")
+			if req.URL.Path == "/health" {
+				_, _ = w.Write([]byte(`{"status":"ok"}`))
+				return
+			}
+			ctx, cancel := context.WithTimeout(req.Context(), 5*time.Second)
+			defer cancel()
+			if cfg.Readiness == nil || cfg.Readiness(ctx) != nil {
+				w.WriteHeader(http.StatusServiceUnavailable)
+				_, _ = w.Write([]byte(`{"status":"not_ready"}`))
+				return
+			}
+			_, _ = w.Write([]byte(`{"status":"ready"}`))
+			return
+		}
+		r.ServeHTTP(w, req)
+	})
 }
 
 // metricsAuthorized allows a request to scrape /metrics when it carries the

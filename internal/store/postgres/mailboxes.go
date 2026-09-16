@@ -23,14 +23,20 @@ func (s *PgStore) CreateMailbox(ctx context.Context, m *models.Mailbox) error {
 	if m.ID == uuid.Nil {
 		m.ID = uuid.New()
 	}
+	if m.Kind == "" {
+		m.Kind = "legacy"
+		if m.OwnerUserID != nil {
+			m.Kind = "personal"
+		}
+	}
 	m.CreatedAt = time.Now()
 	_, err := s.pool.Exec(ctx, `
 		INSERT INTO mailboxes (id,tenant_id,zone_id,route_id,local_part,resolved_domain,
-			full_address,access_mode,password_hash,message_count,retention_hours_override,expires_at,created_at,owner_user_id)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+			full_address,access_mode,password_hash,message_count,retention_hours_override,expires_at,created_at,owner_user_id,mailbox_kind)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
 		m.ID, m.TenantID, m.ZoneID, m.RouteID, m.LocalPart, m.ResolvedDomain,
 		m.FullAddress, m.AccessMode, m.PasswordHash, m.MessageCount, m.RetentionHoursOverride,
-		m.ExpiresAt, m.CreatedAt, m.OwnerUserID)
+		m.ExpiresAt, m.CreatedAt, m.OwnerUserID, m.Kind)
 	return err
 }
 
@@ -65,14 +71,14 @@ func (v *pgTenantView) GetMailboxByAddress(ctx context.Context, addr string) (*m
 
 const mailboxSelect = `SELECT m.id,m.tenant_id,m.zone_id,m.route_id,m.local_part,
 	m.resolved_domain,m.full_address,m.access_mode,m.password_hash,m.message_count,
-	m.retention_hours_override,m.expires_at,m.created_at,m.owner_user_id
+	m.retention_hours_override,m.expires_at,m.created_at,m.owner_user_id,m.mailbox_kind
 	FROM mailboxes m`
 
 func (s *PgStore) scanMailbox(row pgx.Row) (*models.Mailbox, error) {
 	m := &models.Mailbox{}
 	err := row.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
 		&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
-		&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt, &m.OwnerUserID)
+		&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt, &m.OwnerUserID, &m.Kind)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}

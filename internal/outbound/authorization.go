@@ -4,6 +4,7 @@ import (
 	"context"
 	"strings"
 	"tabmail/internal/authz"
+	"tabmail/internal/company"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 	"time"
@@ -94,8 +95,11 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 	if mb != nil && mb.ExpiresAt != nil && !mb.ExpiresAt.After(time.Now()) {
 		return authz.ErrForbidden("sender mailbox expired")
 	}
+	if a.TenantWide && mb != nil && (mb.OwnerUserID != nil || mb.Kind == "shared") {
+		return authz.ErrForbidden("company mailbox requires employee sender")
+	}
 	if !a.TenantWide {
-		if err := authz.CheckMailboxSender(ctx, s.store, a, mb, j.TemplateName != nil); err != nil {
+		if err := authz.CheckMailboxSender(ctx, s.store, a, mb, j.TemplateVersionID != nil); err != nil {
 			return err
 		}
 	}
@@ -107,6 +111,21 @@ func (s *Service) ValidateJobAuthorization(ctx context.Context, j *models.Outbou
 		if identity == nil || !identity.Verified {
 			return authz.ErrForbidden("sender identity revoked")
 		}
+	}
+	if j.TemplateVersionID != nil {
+		if j.SenderMailboxID == nil {
+			return authz.ErrForbidden("template sender mailbox missing")
+		}
+		repo, ok := s.store.(company.Repository)
+		if !ok {
+			return authz.ErrForbidden("published template governance unavailable")
+		}
+		if _, _, _, err := repo.TemplateForSend(ctx, j.TenantID, j.SenderUserID, j.SenderKeyID, *j.SenderMailboxID, *j.TemplateVersionID); err != nil {
+			return err
+		}
+	}
+	if j.ContentDigest != "" && j.ContentDigest != contentDigest(j) {
+		return authz.ErrForbidden("queued content integrity mismatch")
 	}
 	return nil
 }

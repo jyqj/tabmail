@@ -37,7 +37,7 @@ const testMetricsToken = "metrics-test-token"
 // reference only same-origin assets, and those assets must actually be served.
 func TestRouter_DocsAssetsSelfHosted(t *testing.T) {
 	st, obj, _ := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 
 	router := testRouter(st, obj, rdb)
@@ -76,7 +76,7 @@ func TestRouter_DocsAssetsSelfHosted(t *testing.T) {
 
 func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 
 	router := testRouter(st, obj, rdb)
@@ -86,8 +86,8 @@ func TestRouter_PublicCannotManageDomains(t *testing.T) {
 	rr := httptest.NewRecorder()
 	router.ServeHTTP(rr, req)
 
-	if rr.Code != http.StatusForbidden {
-		t.Fatalf("expected 403, got %d body=%s", rr.Code, rr.Body.String())
+	if rr.Code != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d body=%s", rr.Code, rr.Body.String())
 	}
 
 	_ = tenantID
@@ -129,7 +129,7 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 		ExpiresAt:    models.MessageExpiry(nil, 24, time.Now()),
 	})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -162,7 +162,7 @@ func TestRouter_MailboxTokenFlow(t *testing.T) {
 
 func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 
 	router := testRouter(st, obj, rdb)
@@ -201,7 +201,7 @@ func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
 
 func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 	st, obj, _ := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 
 	job := &models.IngestJob{
@@ -255,7 +255,7 @@ func TestRouter_AdminCanListIngestJobsAndWebhookDeliveries(t *testing.T) {
 
 func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 	st, obj, _ := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 
 	if err := st.CreateIngestJob(context.Background(), &models.IngestJob{
@@ -315,7 +315,7 @@ func TestRouter_SuggestAddressReturnsStructuredMailboxAddress(t *testing.T) {
 	}
 	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -353,7 +353,7 @@ func TestRouter_SuggestAddressSupportsRandomSubdomain(t *testing.T) {
 	}
 	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read", "domains:write"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -392,7 +392,7 @@ func TestRouter_SuggestSubdomainRequiresDomainWriteScope(t *testing.T) {
 	}
 	st.RegisterAPIKey("read-key", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -431,7 +431,7 @@ func TestRouter_UserSeesOnlyOwnedDomains(t *testing.T) {
 	st.SeedZone(ownedZone)
 	st.SeedZone(otherZone)
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -490,7 +490,7 @@ func TestRouter_UserCannotDeleteMessagesInAnotherUsersDomain(t *testing.T) {
 		ExpiresAt:  models.MessageExpiry(nil, 24, time.Now()),
 	})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -602,7 +602,7 @@ func TestRouter_APIKeyCannotUseInteractiveAuthRoutes(t *testing.T) {
 	}
 	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -647,7 +647,7 @@ func (s *countingStore) CountIngestJobsByState(ctx context.Context, states ...st
 func TestRouter_MetricsDBCountsAreLightlyCached(t *testing.T) {
 	base, obj, _ := seededStores(t)
 	st := &countingStore{FakeStore: base}
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 
 	router := testRouter(st, obj, rdb)

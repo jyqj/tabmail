@@ -97,11 +97,11 @@ func (s *PgStore) GetMessage(ctx context.Context, id uuid.UUID) (*models.Message
 	err := s.pool.QueryRow(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at,
-		       otp_code,otp_confidence
+		       otp_code,otp_confidence,deleted_at,purge_after,archived_at
 		FROM messages WHERE id=$1`, id).
 		Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients,
 			&m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON,
-			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence)
+			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence, &m.DeletedAt, &m.PurgeAfter, &m.ArchivedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -113,11 +113,11 @@ func (v *pgTenantView) GetMessage(ctx context.Context, id uuid.UUID) (*models.Me
 	err := v.store.pool.QueryRow(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at,
-		       otp_code,otp_confidence
+		       otp_code,otp_confidence,deleted_at,purge_after,archived_at
 		FROM messages WHERE id=$1 AND tenant_id=$2`, id, v.tenantID).
 		Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients,
 			&m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON,
-			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence)
+			&m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence, &m.DeletedAt, &m.PurgeAfter, &m.ArchivedAt)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -128,14 +128,14 @@ func (s *PgStore) ListMessages(ctx context.Context, mailboxID uuid.UUID, pg mode
 	pg = pg.Normalize()
 	var total int
 	if err := s.pool.QueryRow(ctx,
-		`SELECT count(*) FROM messages WHERE mailbox_id=$1`, mailboxID).Scan(&total); err != nil {
+		`SELECT count(*) FROM messages WHERE mailbox_id=$1 AND deleted_at IS NULL`, mailboxID).Scan(&total); err != nil {
 		return nil, 0, err
 	}
 	rows, err := s.pool.Query(ctx, `
 		SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,
 		       raw_object_key,headers_json,received_at,expires_at,
-		       otp_code,otp_confidence
-		FROM messages WHERE mailbox_id=$1 ORDER BY received_at DESC LIMIT $2 OFFSET $3`,
+		       otp_code,otp_confidence,deleted_at,purge_after,archived_at
+		FROM messages WHERE mailbox_id=$1 AND deleted_at IS NULL ORDER BY received_at DESC LIMIT $2 OFFSET $3`,
 		mailboxID, pg.PerPage, pg.Offset())
 	if err != nil {
 		return nil, 0, err
@@ -147,7 +147,7 @@ func (s *PgStore) ListMessages(ctx context.Context, mailboxID uuid.UUID, pg mode
 		if err := rows.Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender,
 			&m.Recipients, &m.Subject, &m.Size, &m.Seen, &m.RawObjectKey,
 			&m.HeadersJSON, &m.ReceivedAt, &m.ExpiresAt,
-			&m.OTPCode, &m.OTPConfidence); err != nil {
+			&m.OTPCode, &m.OTPConfidence, &m.DeletedAt, &m.PurgeAfter, &m.ArchivedAt); err != nil {
 			return nil, 0, err
 		}
 		out = append(out, m)
@@ -220,6 +220,7 @@ func (s *PgStore) CountRawObjectReferences(ctx context.Context, objectKey string
 	err := s.pool.QueryRow(ctx, `
 		SELECT
 			(SELECT count(*) FROM messages WHERE raw_object_key = $1) +
+            (SELECT count(*) FROM mail_attachments WHERE object_key = $1) +
 			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND (recovery_managed OR state IN ('pending','retry','processing','dead')))`, objectKey).Scan(&n)
 	return n, err
 }
@@ -244,6 +245,7 @@ func (s *PgStore) ReleaseRawObjectIfUnreferenced(ctx context.Context, key string
 	if err := tx.QueryRow(ctx, `
 		SELECT
 			(SELECT count(*) FROM messages WHERE raw_object_key = $1) +
+            (SELECT count(*) FROM mail_attachments WHERE object_key = $1) +
 			(SELECT count(*) FROM ingest_jobs WHERE raw_object_key = $1 AND (recovery_managed OR state IN ('pending','retry','processing','dead')))`, key).Scan(&n); err != nil {
 		return false, err
 	}
@@ -339,7 +341,7 @@ func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, l
 		WITH doomed AS (
 			SELECT id, mailbox_id
 			FROM messages
-			WHERE expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND mb.owner_user_id IS NOT NULL)
+			WHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))
 			ORDER BY expires_at, id
 			LIMIT $2
 		),
@@ -384,7 +386,7 @@ func (s *PgStore) DeleteExpiredMessages(ctx context.Context, before time.Time, l
 func (s *PgStore) ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error) {
 	rows, err := s.pool.Query(ctx, `
 		SELECT raw_object_key FROM messages
-		WHERE expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND mb.owner_user_id IS NOT NULL) AND raw_object_key IS NOT NULL AND raw_object_key != ''
+		WHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0))))) AND raw_object_key IS NOT NULL AND raw_object_key != ''
 		ORDER BY expires_at, id
 		LIMIT $2`, before, limit)
 	if err != nil {
@@ -413,7 +415,7 @@ func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before
 		WITH doomed AS (
 			SELECT id, mailbox_id, raw_object_key
 			FROM messages
-			WHERE expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND mb.owner_user_id IS NOT NULL)
+			WHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))
 			ORDER BY expires_at, id
 			LIMIT $2
 		),

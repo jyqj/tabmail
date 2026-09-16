@@ -2,9 +2,11 @@ package outbound
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"mime/quotedprintable"
 	"net/textproto"
@@ -59,16 +61,22 @@ var forbiddenCustomHeaders = map[string]struct{}{
 // construct an unsafe or BCC-leaking message. The persistence row carries
 // recipients structurally (To/CC/BCC), so the builder never reverse-engineers
 // them from a header blob.
+type Attachment struct {
+	Filename, ContentType string
+	Data                  []byte
+}
+
 type Message struct {
-	From      string
-	To        []string
-	CC        []string
-	BCC       []string
-	Subject   string
-	TextBody  string
-	HTMLBody  string
-	Headers   map[string]string
-	MessageID string
+	Attachments []Attachment
+	From        string
+	To          []string
+	CC          []string
+	BCC         []string
+	Subject     string
+	TextBody    string
+	HTMLBody    string
+	Headers     map[string]string
+	MessageID   string
 }
 
 // EnvelopeRecipients returns the full RCPT TO set (To + CC + BCC) used for the
@@ -108,10 +116,66 @@ func Build(m Message) ([]byte, error) {
 		writeHeader(&buf, k, v)
 	}
 
-	if err := writeBody(&buf, m); err != nil {
+	if err := writeMessageBody(&buf, m); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
+}
+
+// MIME attachments are immutable byte snapshots, never URLs fetched by the
+// mailer. Names are encoded as MIME parameters, not concatenated headers.
+func writeMessageBody(buf *bytes.Buffer, m Message) error {
+	if len(m.Attachments) == 0 {
+		return writeBody(buf, m)
+	}
+	if len(m.Attachments) > 10 {
+		return fmt.Errorf("too many attachments")
+	}
+	w := multipart.NewWriter(buf)
+	writeHeader(buf, "Content-Type", mime.FormatMediaType("multipart/mixed", map[string]string{"boundary": w.Boundary()}))
+	buf.WriteString("\r\n")
+	body := bytes.Buffer{}
+	if err := writeBody(&body, m); err != nil {
+		return err
+	}
+	parts := bytes.SplitN(body.Bytes(), []byte("\r\n\r\n"), 2)
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid MIME body")
+	}
+	hdr := textproto.MIMEHeader{}
+	for _, line := range strings.Split(string(parts[0]), "\r\n") {
+		k, v, ok := strings.Cut(line, ":")
+		if ok {
+			hdr.Add(k, strings.TrimSpace(v))
+		}
+	}
+	p, err := w.CreatePart(hdr)
+	if err != nil {
+		return err
+	}
+	if _, err = p.Write(parts[1]); err != nil {
+		return err
+	}
+	total := 0
+	for _, a := range m.Attachments {
+		total += len(a.Data)
+		if total > 20*1024*1024 || len(a.Filename) == 0 || len(a.Filename) > 200 || strings.ContainsAny(a.Filename, "\r\n/\\\x00") {
+			return fmt.Errorf("invalid attachment")
+		}
+		p, err = w.CreatePart(textproto.MIMEHeader{"Content-Type": {mime.FormatMediaType("application/octet-stream", map[string]string{"name": a.Filename})}, "Content-Disposition": {mime.FormatMediaType("attachment", map[string]string{"filename": a.Filename})}, "Content-Transfer-Encoding": {"base64"}})
+		if err != nil {
+			return err
+		}
+		encoded := base64.StdEncoding.EncodeToString(a.Data)
+		for len(encoded) > 0 {
+			n := min(76, len(encoded))
+			if _, err = io.WriteString(p, encoded[:n]+"\r\n"); err != nil {
+				return err
+			}
+			encoded = encoded[n:]
+		}
+	}
+	return w.Close()
 }
 
 // writeBody renders the text and/or HTML body, surfacing any encoding error.

@@ -20,6 +20,7 @@ const (
 )
 
 type User struct {
+	SessionVersion      int64      `json:"-" db:"session_version"`
 	ID                  uuid.UUID  `json:"id" db:"id"`
 	TenantID            uuid.UUID  `json:"tenant_id" db:"tenant_id"`
 	Email               string     `json:"email" db:"email"`
@@ -247,6 +248,7 @@ func (a AccessMode) Valid() bool {
 }
 
 type Mailbox struct {
+	Kind                   string     `json:"kind" db:"mailbox_kind"`
 	OwnerUserID            *uuid.UUID `json:"owner_user_id,omitempty" db:"owner_user_id"`
 	ID                     uuid.UUID  `json:"id" db:"id"`
 	TenantID               uuid.UUID  `json:"tenant_id" db:"tenant_id"`
@@ -268,6 +270,9 @@ type Mailbox struct {
 // ============================================================
 
 type Message struct {
+	DeletedAt     *time.Time      `json:"deleted_at,omitempty" db:"deleted_at"`
+	PurgeAfter    *time.Time      `json:"purge_after,omitempty" db:"purge_after"`
+	ArchivedAt    *time.Time      `json:"archived_at,omitempty" db:"archived_at"`
 	ID            uuid.UUID       `json:"id" db:"id"`
 	TenantID      uuid.UUID       `json:"tenant_id" db:"tenant_id"`
 	MailboxID     uuid.UUID       `json:"mailbox_id" db:"mailbox_id"`
@@ -664,9 +669,18 @@ const (
 )
 
 type OutboundJob struct {
-	ContentRedacted  bool     `json:"content_redacted"`
-	DeliveredDomains []string `json:"delivered_domains" db:"delivered_domains"`
-	InFlightDomain   string   `json:"in_flight_domain,omitempty" db:"in_flight_domain"`
+	TemplateVersionID *uuid.UUID  `json:"template_version_id,omitempty" db:"template_version_id"`
+	ContentDigest     string      `json:"-" db:"content_digest"`
+	SubmitActor       string      `json:"-" db:"submit_actor"`
+	IdempotencyKey    string      `json:"-" db:"idempotency_key"`
+	RequestHash       string      `json:"-" db:"request_hash"`
+	RecipientLedger   bool        `json:"-" db:"recipient_ledger"`
+	AttachmentIDs     []uuid.UUID `json:"attachment_ids,omitempty"`
+
+	DeliveryUncertain bool     `json:"delivery_uncertain"`
+	ContentRedacted   bool     `json:"content_redacted"`
+	DeliveredDomains  []string `json:"delivered_domains" db:"delivered_domains"`
+	InFlightDomain    string   `json:"in_flight_domain,omitempty" db:"in_flight_domain"`
 	// Immutable submission provenance is not cleared when users/keys are deleted.
 	SenderUserID    *uuid.UUID `json:"-" db:"sender_user_id"`
 	SenderKeyID     *uuid.UUID `json:"-" db:"sender_key_id"`

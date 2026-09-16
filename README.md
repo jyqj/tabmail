@@ -1,35 +1,47 @@
-# TabMail
+# TabMail — 公司专用邮箱
 
-TabMail 是一个**面向多租户、自托管、API 优先**的域名邮箱接收服务。
+面向已开通员工的浏览器邮箱：个人／共享邮箱、多级权限、管理员发送模板，以及可追溯的收发与故障恢复。保留 Go、PostgreSQL、对象存储和现有工作队列，不另建平行身份或投递系统。
 
-它提供：
+## 公司工作流
 
-- SMTP 收件
-- 多租户套餐 / 限额 / API Key
-- 域名绑定与 DNS 验证
-- 路由规则：`exact / wildcard / deep_wildcard / sequence`
-- 自动创建 mailbox
-- public / mailbox token / tenant API key / JWT user-admin 访问模型
-- Web 收件箱与管理台
-- SSE 实时 monitor
-- SMTP policy
-- retention / 自动清理
-- webhook 事件投递
-- OpenAPI / Swagger / ReDoc
+| 使用者 | 入口 | 能力 |
+|---|---|---|
+| 员工 | `/mail` | 收件、回复／回复全部／转发、附件、版本草稿、归档、搜索、30 天回收站、发送与逐收件人状态 |
+| 员工 | `/account` | 修改密码并撤销旧会话 |
+| 公司管理员 | `/company` | 选择已验证主域名、邀请／激活员工、分配个人与共享邮箱、独立读／整理／代发授权、停用和交接 |
+| 公司管理员 | `/company/templates` | 模板变量校验与预览、不可变发布版本、使用授权、停用、限定模板发送 |
+| 平台管理员 | `/company/recovery` | 有理由、有审计的入站恢复和出站不确定结果核对；查看运行配置 |
+
+角色为 `super_admin → admin → user`；管理员同级保护、最后管理员并发保护、邮箱 owner/grant 和正文权限分离保持不变。公司管理员不自动取得员工邮件正文。模板使用权不授予其他 From 身份。
+
+## 首次部署
+
+参见 [R3 公司邮箱发布手册](docs/company-mail/RELEASE-R3.md)。生产入口为 `docker-compose.prod.yml`，明确启用 `TABMAIL_COMPANY_ONLY=true`、完整地址命名和持久化收件。该模式在服务端关闭开放注册、旧超管邀请激活入口、公开临时邮箱入口和自动创建未知公司邮箱；不会被旧数据库中的 `open_registration=true` 重新开启。
+
+配置真实 secrets、HTTPS 同源反向代理、有效 SMTP relay 和已验证的主域名／MX／DKIM，然后由 bootstrap 平台管理员建立公司配置。员工通过一次性链接开通，不使用开放注册。SMTP TLS 可由上游邮件网关提供，或使用 `docker-compose.smtp-tls.yml` 挂载有效证书。
+
+```sh
+cp .env.example .env
+# 编辑真实 secrets、relay、域名、HTTPS origin 和代理范围；示例值不能投产。
+docker compose --env-file .env -f docker-compose.prod.yml config
+docker compose --env-file .env -f docker-compose.prod.yml up -d --build
+```
+
+**现有安装先停止全部旧写入角色并联合备份，再升级全部角色。** 本版本新增 Goose `00005_company_workflows.sql`，不修改已发布 `00001`–`00004`。不允许新旧写入端混跑，不执行破坏性的 Down。文件对象存储的协调快照／空目标恢复见 `scripts/company_snapshot.py`；S3 需要协调数据库快照与对象版本恢复。
+
+## 发送和数据保留的含义
+
+发送 API 返回 201 表示任务已创建，`sent` 仅表示下一跳已接受，不代表进入对方收件箱或已读。`Idempotency-Key` 防止相同操作重复创建任务，逐收件人账本防止重试已知成功目标；SMTP 最终确认丢失仍然是不确定结果，必须核查证据，不能承诺端到端 exactly-once。
+
+个人邮箱永久保留；共享邮箱默认永久保留，也可以显式设置留存期。普通删除进入 30 天回收站。入站恢复原件和必要完成账本保留，不因普通删信而破坏幂等性。搜索目前针对主题、发件人和收件人，不是正文全文索引。
+
+验证命令、自动化证据和仍需运营者执行的公网验收见 [R3 发布手册](docs/company-mail/RELEASE-R3.md)。此前 P0/R2 文档保留为历史记录，不能代替本版本的操作说明。
 
 ---
 
-## 公司邮箱化（P0 基础）
+# 兼容平台能力参考
 
-公司专用模式的阶段路线、边界和升级顺序见 [公司邮箱化路线图](docs/company-mail/ROADMAP.md)，本轮实际验证结果见 [验证记录](docs/company-mail/VALIDATION.md)。P0 不是完整公司邮箱产品，不包含员工开通、模板治理或新工作台。
-
-当前用户及个人 API Key 发信必须有精确 mailbox owner / `mailbox_grants.can_send`；域名白名单不再授予任意 From。无主租户集成 Key 保留既有发送身份路径。`template_only` 在 P1 不可变发布模板治理接入前拒绝发送，不能靠提供旧模板名称绕过。正常管理员读信仍需 owner/read grant，例外读取必须成功持久化审计。
-
-`retention_hours=0` 现在表示永久保存（SQL NULL），不再表示立即过期；个人 owner 邮箱的既有与新邮件不会被临时套餐 TTL 清理。共享公司邮箱的显式长期策略由 P1 提供，不能把全部无主邮箱自动认定为公司资源。
-
-升级前联合备份并停止所有旧 SMTP/API/worker/retention 写入端。新增 Goose 00002；历史同名 `mailbox_grants` 表或归档自研迁移数据库需要人工核对，系统不猜测转换，不删除授权。旧未完成入站任务和不确定的出站任务保留待审。数据库与原件必须协调恢复，不支持自动破坏性 Down 或新旧 worker 混跑。
-
-出站 `delivered_domains` 记录下一跳已接受的域，`in_flight_domain` 留在 failed 任务上表示投递结果不确定，禁止直接重试。按域进度不是端到端 exactly-once。生产收信应保持 `TABMAIL_INGEST_DURABLE=true`；非持久化兼容路径不提供同等恢复保证。保留失败原件会增加空间占用，必须监测容量；清理/恢复管理界面属于后续阶段。
+以下内容介绍保留的底层多租户／路由／API 功能，**不是公司员工的日常使用流程**。临时邮箱、公开访问和开放注册只属于兼容模式；公司生产配置不得因此重新启用这些入口。
 
 ## 适用场景
 

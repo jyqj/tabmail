@@ -12,7 +12,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
+	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/company"
 	"tabmail/internal/config"
 	tabdkim "tabmail/internal/dkim"
 	"tabmail/internal/models"
@@ -31,6 +33,7 @@ type Service struct {
 	adapter  DeliveryAdapter
 	logger   zerolog.Logger
 	template *template.Service
+	objects  store.ObjectStore
 	// worker drives the background delivery loop. Built lazily in StartWorker
 	// so a disabled service stays a no-op.
 	worker *workqueue.Worker[*outboundJob]
@@ -61,30 +64,89 @@ func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Ser
 
 // SendRequest is the validated input for submitting an outbound email.
 type SendRequest struct {
-	SenderMailboxID *uuid.UUID
-	TenantID        uuid.UUID
-	UserID          *uuid.UUID
-	APIKeyID        *uuid.UUID
-	ZoneID          uuid.UUID
-	From            string
-	To              []string
-	CC              []string
-	BCC             []string
-	Subject         string
-	TextBody        string
-	HTMLBody        string
-	Headers         map[string]string
-	TemplateName    *string           // optional; nil keeps the legacy bare-string path
-	TemplateVars    map[string]string // used only when TemplateName is non-nil
-	Quota           store.OutboundQuotaReservation
+	SenderMailboxID   *uuid.UUID
+	TenantID          uuid.UUID
+	UserID            *uuid.UUID
+	APIKeyID          *uuid.UUID
+	ZoneID            uuid.UUID
+	From              string
+	To                []string
+	CC                []string
+	BCC               []string
+	Subject           string
+	TextBody          string
+	HTMLBody          string
+	Headers           map[string]string
+	TemplateVersionID *uuid.UUID
+	AttachmentIDs     []uuid.UUID
+	IdempotencyKey    string
+	TemplateName      *string           // optional; nil keeps the legacy bare-string path
+	TemplateVars      map[string]string // used only when TemplateName is non-nil
+	Quota             store.OutboundQuotaReservation
 }
 
 // Submit enqueues an outbound email job after validation.
 func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.OutboundJob, error) {
+	req.To = append([]string{}, req.To...)
+	req.CC = append([]string{}, req.CC...)
+	req.BCC = append([]string{}, req.BCC...)
 	if !s.cfg.Enabled {
 		return nil, fmt.Errorf("outbound sending is disabled")
 	}
 
+	canonical, err := authz.CanonicalSender(req.From)
+	if err != nil {
+		return nil, err
+	}
+	req.From = canonical
+	for _, group := range [][]string{req.To, req.CC, req.BCC} {
+		for i, a := range group {
+			parsed, parseErr := mail.ParseAddress(a)
+			if parseErr != nil {
+				return nil, parseErr
+			}
+			group[i] = strings.ToLower(parsed.Address)
+		}
+	}
+	if len(req.IdempotencyKey) > 128 || strings.ContainsAny(req.IdempotencyKey, "\r\n") {
+		return nil, app.BadRequest("idempotency key must be at most 128 bytes")
+	}
+	actor, hash := submissionActor(req.UserID, req.APIKeyID), requestDigest(req)
+	if req.IdempotencyKey != "" {
+		repo, ok := s.store.(interface {
+			FindOutboundSubmission(context.Context, uuid.UUID, string, string, string) (*models.OutboundJob, error)
+		})
+		if !ok {
+			return nil, app.BadRequest("idempotent submission unavailable")
+		}
+		old, e := repo.FindOutboundSubmission(ctx, req.TenantID, actor, req.IdempotencyKey, hash)
+		if e != nil {
+			return nil, e
+		}
+		if old != nil {
+			return old, nil
+		}
+	}
+	if req.TemplateVersionID != nil {
+		if req.TemplateName != nil {
+			return nil, app.BadRequest("select a published version or legacy name, not both")
+		}
+		if req.SenderMailboxID == nil {
+			return nil, app.BadRequest("published templates require an employee mailbox")
+		}
+		repo, ok := s.store.(company.Repository)
+		if !ok {
+			return nil, app.BadRequest("published templates unavailable")
+		}
+		v, employee, name, e := repo.TemplateForSend(ctx, req.TenantID, req.UserID, req.APIKeyID, *req.SenderMailboxID, *req.TemplateVersionID)
+		if e != nil {
+			return nil, e
+		}
+		req.Subject, req.TextBody, req.HTMLBody, e = company.Render(v.Snapshot, req.TemplateVars, employee, name, req.From)
+		if e != nil {
+			return nil, e
+		}
+	}
 	// Template path (opt-in). When TemplateName is set the caller wants the
 	// Subject/Text/HTML populated by rendering a tenant template; we do that
 	// up front so the existing validators below run against the rendered
@@ -107,20 +169,6 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		req.HTMLBody = rendered.HTMLBody
 	}
 
-	canonical, err := authz.CanonicalSender(req.From)
-	if err != nil {
-		return nil, err
-	}
-	req.From = canonical
-	for _, group := range [][]string{req.To, req.CC, req.BCC} {
-		for i, a := range group {
-			parsed, parseErr := mail.ParseAddress(a)
-			if parseErr != nil {
-				return nil, parseErr
-			}
-			group[i] = strings.ToLower(parsed.Address)
-		}
-	}
 	// Validate all email addresses using RFC 5322 parsing.
 	if _, err := mail.ParseAddress(req.From); err != nil {
 		return nil, fmt.Errorf("invalid from address %q: %w", req.From, err)
@@ -180,10 +228,11 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 
 	now := time.Now().UTC()
 	job := &models.OutboundJob{
-		SenderUserID:     req.UserID,
-		SenderKeyID:      req.APIKeyID,
-		SenderMailboxID:  req.SenderMailboxID,
-		TemplateName:     req.TemplateName,
+		SenderUserID:      req.UserID,
+		SenderKeyID:       req.APIKeyID,
+		SenderMailboxID:   req.SenderMailboxID,
+		TemplateName:      req.TemplateName,
+		TemplateVersionID: req.TemplateVersionID, AttachmentIDs: append([]uuid.UUID(nil), req.AttachmentIDs...), IdempotencyKey: req.IdempotencyKey, SubmitActor: actor, RequestHash: hash,
 		DeliveredDomains: []string{},
 		ID:               uuid.New(),
 		TenantID:         req.TenantID,
@@ -207,6 +256,10 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		NextAttemptAt:    now,
 	}
 
+	if _, ok := s.store.(recipientStore); ok {
+		job.RecipientLedger = true
+	}
+	job.ContentDigest = contentDigest(job)
 	if err := s.ValidateJobAuthorization(ctx, job); err != nil {
 		return nil, err
 	}
@@ -300,7 +353,7 @@ func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*outboundJo
 		return err // transient database failures remain retryable, without sending
 	}
 	// Build MIME message from the structurally-stored recipients.
-	mime, err := Build(messageFromJob(out))
+	mime, err := s.buildQueuedMIME(ctx, out)
 	if err != nil {
 		log.Error().Err(err).Msg("building MIME")
 		return fmt.Errorf("mime build: %s", err)
@@ -342,6 +395,9 @@ func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*outboundJo
 		}
 	}
 
+	if out.RecipientLedger {
+		return s.deliverRecipients(ctx, out, job.Lease.Token, mime)
+	}
 	return s.deliverDomains(ctx, out, job.Lease.Token, mime)
 }
 

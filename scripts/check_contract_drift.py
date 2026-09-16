@@ -102,12 +102,29 @@ def main() -> int:
               f"  only in TS: {only_ts or '[]'}"
           )
 
+    company_go = parse_go_struct_fields((ROOT / "internal/company/types.go").read_text())
+    company_ts = parse_ts_interface_fields((ROOT / "web/lib/company.ts").read_text())
+    company_pairs = {
+        "Settings": "CompanySettings", "Invitation": "Invitation",
+        "MailboxAccess": "WorkMailbox", "Variable": "TemplateVariable",
+        "TemplateDraft": "TemplateDraft", "Template": "MailTemplate",
+        "TemplateVersion": "TemplateVersion", "DraftPayload": "DraftPayload",
+        "Draft": "MailDraft", "Attachment": "MailAttachment",
+        "Recipient": "RecipientResult", "RecoveryTarget": "RecoveryTarget",
+        "RecoveryReceipt": "Receipt",
+    }
+    for go_name, ts_name in company_pairs.items():
+        go_fields = company_go.get(go_name, set())
+        ts_fields = company_ts.get(ts_name, set())
+        if not go_fields or go_fields != ts_fields:
+            errors.append(f"[company-drift] {go_name}/{ts_name}: Go-only={sorted(go_fields-ts_fields)}, TS-only={sorted(ts_fields-go_fields)}")
+
     if errors:
         print("Contract drift detected between internal/models/models.go and web/lib/types.ts:\n")
         print("\n".join(errors))
         return 1
 
-    print(f"Contract check passed for {len(SHARED_TYPES)} shared model types.")
+    print(f"Contract check passed for {len(SHARED_TYPES)} shared models and {len(company_pairs)} company DTOs.")
     return 0
 
 

@@ -39,6 +39,7 @@ type settingsReader interface {
 
 // AuthHandler handles authentication endpoints.
 type AuthHandler struct {
+	companyOnly             bool
 	store                   authStore
 	jwtSecret               string
 	defaultPlanID           uuid.UUID
@@ -164,6 +165,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 // Register handles POST /api/v1/auth/register
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	if h.companyOnly {
+		errForbidden(w, "company accounts require an employee invitation")
+		return
+	}
 	open := h.defaultOpenRegistration
 	if h.settings != nil {
 		open = h.settings.GetBool(r.Context(), models.SettingOpenRegistration, h.defaultOpenRegistration)
@@ -280,10 +285,14 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	}
 	next := &models.RefreshToken{TokenHash: nextHash, ExpiresAt: time.Now().Add(authn.RefreshTokenTTL)}
 	rotated, familyRevoked, err := h.store.RotateRefreshToken(r.Context(), authn.HashToken(raw), next)
-	if err != nil || !rotated {
-		if err != nil {
-			h.logger.Error().Err(err).Msg("refresh: atomic rotation failed")
-		}
+	if err != nil {
+		h.logger.Error().Err(err).Msg("refresh: atomic rotation failed")
+		// A rolled-back database operation is not evidence of an invalid session.
+		// Preserve the current cookie so a later explicit retry can recover.
+		errInternal(w)
+		return
+	}
+	if !rotated {
 		if familyRevoked {
 			h.logger.Warn().Msg("refresh: replay revoked token family")
 		}
@@ -291,8 +300,17 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid or expired refresh token"}})
 		return
 	}
+	// Rotation committed: always return the descendant cookie, including when a
+	// subsequent read temporarily fails. Never strand the browser on its consumed
+	// ancestor or issue an access token without a current active user.
+	h.setRefreshCookie(w, nextRaw)
 	user, err := h.store.GetUser(r.Context(), next.UserID)
-	if err != nil || user == nil || !user.IsActive {
+	if err != nil {
+		errInternal(w)
+		return
+	}
+	if user == nil || !user.IsActive {
+		_ = h.store.RevokeRefreshTokenByHash(r.Context(), nextHash)
 		h.clearRefreshCookie(w)
 		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "user unavailable"}})
 		return
@@ -302,8 +320,10 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
-	h.setRefreshCookie(w, nextRaw)
-	ok(w, map[string]any{"access_token": access, "token_type": "Bearer", "expires_in": int(authn.AccessTokenTTL.Seconds())})
+	ok(w, map[string]any{
+		"access_token": access, "token_type": "Bearer", "expires_in": int(authn.AccessTokenTTL.Seconds()),
+		"user": map[string]any{"id": user.ID, "email": user.Email, "display_name": user.DisplayName, "role": user.Role, "tenant_id": user.TenantID},
+	})
 }
 
 // Logout handles POST /api/v1/auth/logout
@@ -349,6 +369,10 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 
 // AcceptInvite handles POST /api/v1/auth/accept-invite
 func (h *AuthHandler) AcceptInvite(w http.ResponseWriter, r *http.Request) {
+	if h.companyOnly {
+		errForbidden(w, "legacy platform invitations are disabled in company mode")
+		return
+	}
 	var req struct {
 		InviteCode  string `json:"invite_code"`
 		Password    string `json:"password"`
@@ -469,18 +493,31 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "old_password and new_password are required")
 		return
 	}
-	if len(req.NewPassword) < 8 {
-		errBadRequest(w, "new password must be at least 8 characters")
+	if len(req.NewPassword) < 12 || len(req.NewPassword) > 72 {
+		errBadRequest(w, "new password must be 12-72 bytes")
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword)); err != nil {
-		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "incorrect old password"}})
+		writeJSON(w, http.StatusForbidden, envelope{Error: &apiErr{Code: "INVALID_PASSWORD", Message: "incorrect old password"}})
 		return
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.NewPassword), bcrypt.DefaultCost)
 	if err != nil {
 		h.logger.Err(err).Msg("change-password: hash")
 		errInternal(w)
+		return
+	}
+	if atomic, supported := h.store.(interface {
+		ChangePasswordAtomic(context.Context, uuid.UUID, string, string) error
+	}); supported {
+		if err = atomic.ChangePasswordAtomic(r.Context(), user.ID, user.PasswordHash, string(hash)); err != nil {
+			h.logger.Err(err).Msg("atomic password change")
+			errInternal(w)
+			return
+		}
+		h.clearRefreshCookie(w)
+		okResponse := map[string]string{"status": "password changed; sign in again"}
+		ok(w, okResponse)
 		return
 	}
 	// Need to update password_hash directly
@@ -532,3 +569,6 @@ func (h *AuthHandler) issueTokenPair(ctx context.Context, user *models.User) (ac
 func (h *AuthHandler) updatePasswordHash(ctx context.Context, userID uuid.UUID, hash string) error {
 	return h.store.UpdateUserPassword(ctx, userID, hash)
 }
+
+// SetCompanyOnly is startup-only; stored open_registration cannot override it.
+func (h *AuthHandler) SetCompanyOnly(enabled bool) { h.companyOnly = enabled }

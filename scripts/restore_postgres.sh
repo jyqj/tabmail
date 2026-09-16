@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+[[ "${TABMAIL_ALLOW_DESTRUCTIVE_RESTORE:-}" == "yes" ]] || { echo "Use company_snapshot.py for an empty-target company restore. Legacy destructive restore requires TABMAIL_ALLOW_DESTRUCTIVE_RESTORE=yes." >&2; exit 1; }
+
 : "${TABMAIL_DB_DSN:?TABMAIL_DB_DSN is required}"
 
 dump_file="${1:-}"

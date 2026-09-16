@@ -115,6 +115,7 @@ export interface SuggestedAddress {
 }
 
 export interface Mailbox {
+  kind?: "personal" | "shared" | "legacy";
   owner_user_id?: string;
   id: string;
   tenant_id: string;
@@ -139,6 +140,9 @@ export interface MailboxCreateInput {
 }
 
 export interface Message {
+  deleted_at?: string;
+  purge_after?: string;
+  archived_at?: string;
   id: string;
   tenant_id: string;
   mailbox_id: string;
@@ -482,9 +486,18 @@ export interface EffectivePermission {
 // Outbound
 // ============================================================
 
-export type OutboundState = "pending" | "processing" | "sent" | "retry" | "failed" | "dead";
+export type OutboundState =
+  | "pending"
+  | "processing"
+  | "sent"
+  | "retry"
+  | "failed"
+  | "dead";
 
 export interface OutboundJob {
+  template_version_id?: string;
+  attachment_ids?: string[];
+  delivery_uncertain?: boolean;
   content_redacted?: boolean;
   delivered_domains: string[];
   in_flight_domain?: string;
@@ -514,6 +527,9 @@ export interface OutboundJob {
 }
 
 export interface SendEmailRequest {
+  template_version_id?: string;
+  template_vars?: Record<string, string>;
+  attachment_ids?: string[];
   from: string;
   to: string[];
   cc?: string[];

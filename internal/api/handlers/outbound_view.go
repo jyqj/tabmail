@@ -54,11 +54,14 @@ func (h *OutboundHandler) redactOutboundJob(ctx context.Context, actor authz.Act
 	cp.DeliveryToken = nil
 	cp.RawMIME = nil
 	cp.ContentRedacted = !allowed
+	cp.DeliveryUncertain = job.InFlightDomain != "" && job.State != models.OutboundProcessing
 	if !allowed {
 		cp.TextBody = ""
 		cp.HTMLBody = ""
 		cp.BCC = nil
 		cp.HeadersJSON = nil
+		cp.AttachmentIDs = nil
+		cp.InFlightDomain = ""
 		cp.RcptTo = append(append([]string{}, job.To...), job.CC...)
 		if cp.LastError != "" {
 			cp.LastError = "Delivery details restricted; inspect status and SMTP code"
@@ -86,7 +89,7 @@ func (h *OutboundHandler) authorizeOutboundRetry(ctx context.Context, job *model
 		if err != nil {
 			return err
 		}
-		return authz.CheckMailboxSender(ctx, h.store, actor, mb, job.TemplateName != nil)
+		return authz.CheckMailboxSender(ctx, h.store, actor, mb, job.TemplateVersionID != nil)
 	}
 	uid := actor.EffectiveUserID()
 	if uid != nil && job.SenderUserID != nil && *uid == *job.SenderUserID {

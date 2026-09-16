@@ -81,7 +81,7 @@ func (s *Service) processReceipt(ctx context.Context, ledger store.IngressLedger
 		if env != nil {
 			subject = env.GetHeader("Subject")
 			hm := map[string]string{}
-			for _, k := range []string{"From", "To", "Cc", "Date", "Message-Id", "Reply-To", "Content-Type"} {
+			for _, k := range []string{"From", "To", "Cc", "Date", "Message-Id", "In-Reply-To", "References", "Reply-To", "Content-Type"} {
 				if v := env.GetHeader(k); v != "" {
 					hm[k] = v
 				}

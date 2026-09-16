@@ -65,6 +65,11 @@ func (sc *Scanner) sweep(ctx context.Context) {
 	now := time.Now()
 	total := 0
 
+	if metadata, ok := sc.store.(interface{ SweepCompanyMetadata(context.Context) error }); ok {
+		if err := metadata.SweepCompanyMetadata(ctx); err != nil {
+			sc.logger.Warn().Err(err).Msg("company metadata housekeeping")
+		}
+	}
 	sc.retryFailedKeys(ctx)
 	sc.reapExhausted(ctx)
 

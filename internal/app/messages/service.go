@@ -128,9 +128,16 @@ func (s *Service) GetMessageDetail(ctx context.Context, address string, msgID uu
 	}
 	if msg.RawObjectKey != "" {
 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
 		if err == nil {
 			defer rc.Close()
-			if env, err := enmime.ReadEnvelope(rc); err == nil {
+			env, parseErr := enmime.ReadEnvelope(rc)
+			if parseErr != nil {
+				return nil, app.Internal(parseErr)
+			}
+			if env != nil {
 				detail.TextBody = env.Text
 				if env.HTML != "" {
 					if cleaned, err := sanitize.HTML(env.HTML); err == nil {
@@ -194,6 +201,13 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 	if msg.MailboxID != mb.ID {
 		return app.NotFound("message not found")
 	}
+	if mb.OwnerUserID != nil || (mb.Kind != "" && mb.Kind != "legacy") {
+		if lifecycle, ok := s.store.(interface {
+			TrashCompanyMessages(context.Context, uuid.UUID, uuid.UUID, *uuid.UUID, string) error
+		}); ok {
+			return app.Internal(lifecycle.TrashCompanyMessages(ctx, mb.TenantID, mb.ID, &msgID, actor))
+		}
+	}
 	if err := s.store.DeleteMessage(ctx, msgID); err != nil {
 		return app.Internal(err)
 	}
@@ -212,6 +226,13 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 	mb, err := s.ResolveMailboxForWrite(ctx, address, viewer)
 	if err != nil {
 		return err
+	}
+	if mb.OwnerUserID != nil || (mb.Kind != "" && mb.Kind != "legacy") {
+		if lifecycle, ok := s.store.(interface {
+			TrashCompanyMessages(context.Context, uuid.UUID, uuid.UUID, *uuid.UUID, string) error
+		}); ok {
+			return app.Internal(lifecycle.TrashCompanyMessages(ctx, mb.TenantID, mb.ID, nil, actor))
+		}
 	}
 	keys, err := s.store.ListMailboxObjectKeys(ctx, mb.ID)
 	if err != nil {
@@ -264,9 +285,16 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	detail := &models.MessageDetail{Message: *msg}
 	if msg.RawObjectKey != "" {
 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
-		if err == nil {
+		if err != nil {
+			return nil, app.Internal(err)
+		}
+		{
 			defer rc.Close()
-			if env, err := enmime.ReadEnvelope(rc); err == nil {
+			env, err := enmime.ReadEnvelope(rc)
+			if err != nil {
+				return nil, app.Internal(err)
+			}
+			{
 				detail.TextBody = env.Text
 				if env.HTML != "" {
 					if cleaned, err := sanitize.HTML(env.HTML); err == nil {

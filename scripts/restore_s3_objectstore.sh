@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+[[ "${TABMAIL_ALLOW_DESTRUCTIVE_RESTORE:-}" == "yes" ]] || { echo "Use company_snapshot.py for an empty-target company restore. Legacy destructive restore requires TABMAIL_ALLOW_DESTRUCTIVE_RESTORE=yes." >&2; exit 1; }
+
 : "${TABMAIL_S3_BUCKET:?TABMAIL_S3_BUCKET is required}"
 : "${TABMAIL_S3_ACCESS_KEY:?TABMAIL_S3_ACCESS_KEY is required}"
 : "${TABMAIL_S3_SECRET_KEY:?TABMAIL_S3_SECRET_KEY is required}"

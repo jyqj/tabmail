@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -121,6 +122,7 @@ func main() {
 	}
 	autoCreateLimiter := autocreate.NewLimiter(rdb, cfg.AutoCreateRouteRPM, cfg.AutoCreateTenantRPM)
 	res := resolver.New(pg, namingMode, cfg.StripPlusTag, autoCreateLimiter)
+	res.SetCompanyOnly(cfg.CompanyOnly)
 	hub := realtime.NewHub(cfg.MonitorHistory, pg)
 	dispatcher := hooks.New(hooks.Config{
 		URLs:         cfg.Webhook.URLs,
@@ -160,13 +162,76 @@ func main() {
 		// set template_name get tenant-scoped, html/template-escaped rendering;
 		// callers that omit it stay on the byte-identical bare-string path.
 		outboundSvc.SetTemplateService(template.NewService(pg))
+		outboundSvc.SetObjectStore(obj)
 	}
 
 	defaultPlanID, _ := uuid.Parse(cfg.DefaultPlanID)
 
 	authCache := middleware.NewCachedAuthStore(pg, pg.EffectiveConfig)
 
+	// Readiness probes a small per-process object through the configured backend;
+	// it never reads employees' mail. Failed probes are logged without secrets.
+	instanceID := uuid.NewString()
+	role := strings.ToLower(strings.TrimSpace(cfg.Role))
+	if role == "" {
+		role = "all"
+	}
+	heartbeat := func() {
+		if err := pg.Heartbeat(ctx, instanceID, role); err != nil {
+			logger.Error().Err(err).Msg("worker heartbeat failed")
+		}
+	}
+	heartbeat()
+	go func() {
+		t := time.NewTicker(30 * time.Second)
+		defer t.Stop()
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-t.C:
+				heartbeat()
+			}
+		}
+	}()
+	probePrefix := "readiness-" + instanceID + "-"
 	routerCfg := api.RouterConfig{
+		CompanyOnly: cfg.CompanyOnly,
+		Readiness: func(probe context.Context) error {
+			probeKey := probePrefix + uuid.NewString() + ".probe"
+			if err := pg.Readiness(probe); err != nil {
+				return err
+			}
+			if err := rdb.Ping(probe).Err(); err != nil {
+				return err
+			}
+			if err := pg.CheckWorkers(probe, cfg.Outbound.Enabled); err != nil {
+				return err
+			}
+			if err := obj.Put(probe, probeKey, strings.NewReader("ready"), 5); err != nil {
+				return err
+			}
+			rc, err := obj.Get(probe, probeKey)
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(io.Discard, rc)
+			closeErr := rc.Close()
+			if err != nil {
+				return err
+			}
+			if closeErr != nil {
+				return closeErr
+			}
+			return obj.Delete(probe, probeKey)
+		},
+		RuntimeConfig: map[string]any{
+			"company_only": cfg.CompanyOnly, "role": role, "object_store": cfg.ObjectStore,
+			"outbound_enabled": cfg.Outbound.Enabled, "outbound_mode": cfg.Outbound.Mode,
+			"restart_required":        []string{"company_only", "mailbox_naming", "strip_plus_tag", "monitor_history", "auto_create_route_rpm", "auto_create_tenant_rpm", "fallback_retention_hours", "http_public_ip_rpm", "SMTP/TLS/relay/object-store environment"},
+			"database_policy":         "SMTP policy and permission decisions are read at execution; other startup-seeded settings require a coordinated restart with matching environment values",
+			"registration_at_startup": !cfg.CompanyOnly && settingsMgr.GetBool(ctx, models.SettingOpenRegistration, cfg.OpenRegistration),
+		},
 		Store:              pg,
 		ObjectStore:        obj,
 		RawObjects:         objects,
@@ -265,53 +330,27 @@ func main() {
 	logger.Info().Msg("shutdown complete")
 }
 
-// bootstrapAdmin creates the bootstrap admin user if they don't already exist.
-// Skips only when the bootstrap email is already registered, so existing
-// non-admin users no longer block admin creation.
-func bootstrapAdmin(ctx context.Context, st store.Store, cfg *config.Root, logger zerolog.Logger) {
-	if cfg.BootstrapAdminEmail == "" || cfg.BootstrapAdminPass == "" {
+// Bootstrap is serialized across API/SMTP/worker/retention startup. It never
+// resets an existing account or creates an orphan tenant on duplicate races.
+func bootstrapAdmin(ctx context.Context, st *postgres.PgStore, cfg *config.Root, logger zerolog.Logger) {
+	email := strings.ToLower(strings.TrimSpace(cfg.BootstrapAdminEmail))
+	if email == "" || cfg.BootstrapAdminPass == "" {
 		return
 	}
-
-	// Check if the bootstrap admin already exists
-	existing, err := st.GetUserByEmail(ctx, cfg.BootstrapAdminEmail)
-	if err != nil {
-		logger.Warn().Err(err).Msg("bootstrap: failed to check existing users")
-		return
+	if len(cfg.BootstrapAdminPass) < 12 || len(cfg.BootstrapAdminPass) > 72 {
+		logger.Fatal().Msg("bootstrap password must be 12-72 bytes")
 	}
-	if existing != nil {
-		return
-	}
-
 	hash, err := bcrypt.GenerateFromPassword([]byte(cfg.BootstrapAdminPass), bcrypt.DefaultCost)
 	if err != nil {
-		logger.Fatal().Err(err).Msg("bootstrap: hash password")
+		logger.Fatal().Err(err).Msg("bootstrap password hash")
 	}
-
-	// Use the "pro" plan for admin tenant
-	proPlanID, _ := uuid.Parse("00000000-0000-0000-0000-000000000002")
-	tenant := &models.Tenant{
-		Name:    cfg.BootstrapAdminEmail,
-		PlanID:  proPlanID,
-		IsSuper: true,
+	created, err := st.BootstrapCompanyAdmin(ctx, email, string(hash))
+	if err != nil {
+		logger.Fatal().Err(err).Msg("atomic bootstrap failed")
 	}
-	if err := st.CreateTenant(ctx, tenant); err != nil {
-		logger.Fatal().Err(err).Msg("bootstrap: create admin tenant")
+	if created {
+		logger.Info().Str("email", email).Msg("bootstrap administrator created")
 	}
-
-	email := strings.ToLower(strings.TrimSpace(cfg.BootstrapAdminEmail))
-	user := &models.User{
-		TenantID:     tenant.ID,
-		Email:        email,
-		PasswordHash: string(hash),
-		DisplayName:  "Admin",
-		Role:         models.RoleSuperAdmin,
-		IsActive:     true,
-	}
-	if err := st.CreateUser(ctx, user); err != nil {
-		logger.Fatal().Err(err).Msg("bootstrap: create admin user")
-	}
-	logger.Info().Str("email", email).Msg("bootstrap: admin user created")
 }
 
 func setLogLevel(l *zerolog.Logger, level string) {

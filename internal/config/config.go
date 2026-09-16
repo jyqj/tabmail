@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -16,6 +17,7 @@ const (
 )
 
 type Root struct {
+	CompanyOnly         bool   `split_words:"true" default:"false" desc:"Company-only mode disables public registration, mailbox tokens and catch-all provisioning"`
 	Role                string `default:"all" desc:"Process role: all, api, smtp, retention"`
 	LogLevel            string `default:"info" desc:"debug, info, warn, error"`
 	ObjectStore         string `split_words:"true" default:"fs" desc:"Object store backend: fs or s3"`
@@ -69,7 +71,7 @@ type HTTP struct {
 	Addr             string   `default:"0.0.0.0:8080" desc:"HTTP API listen address"`
 	BasePath         string   `default:"" desc:"URL path prefix (e.g. /api)"`
 	AllowedOrigins   []string `split_words:"true" default:"http://127.0.0.1:3000,http://localhost:3000" desc:"Allowed CORS origins"`
-	AllowedHeaders   []string `split_words:"true" default:"Authorization,Content-Type,X-API-Key,X-Tenant-ID" desc:"Allowed CORS headers"`
+	AllowedHeaders   []string `split_words:"true" default:"Authorization,Content-Type,X-API-Key,X-Tenant-ID,Idempotency-Key,Last-Event-ID" desc:"Allowed CORS headers"`
 	AllowCredentials bool     `split_words:"true" default:"false" desc:"Allow credentialed CORS requests"`
 	CookieSecure     bool     `split_words:"true" default:"false" desc:"Set Secure flag on refresh-token httpOnly cookie (enable when API is served over HTTPS)"`
 	TrustedProxies   []string `split_words:"true" default:"127.0.0.1/32,::1/128" desc:"Trusted proxy CIDRs/IPs for X-Real-IP/X-Forwarded-For"`
@@ -155,6 +157,13 @@ func Load() (*Root, error) {
 	if err := envconfig.Process(envPrefix, c); err != nil {
 		return nil, fmt.Errorf("config: %w", err)
 	}
+	// Canonical split_words spelling wins. Retain the historical documented
+	// spelling only as an explicit compatibility alias.
+	if _, present := os.LookupEnv("TABMAIL_OBJECT_STORE"); !present {
+		if legacy := strings.TrimSpace(os.Getenv("TABMAIL_OBJECTSTORE")); legacy != "" {
+			c.ObjectStore = legacy
+		}
+	}
 	if err := c.Validate(); err != nil {
 		return nil, err
 	}
@@ -164,6 +173,9 @@ func Load() (*Root, error) {
 func (c *Root) Validate() error {
 	if c == nil {
 		return fmt.Errorf("config: nil root config")
+	}
+	if c.CompanyOnly && (c.MailboxNaming != "full" || !c.Ingest.Durable) {
+		return fmt.Errorf("config: company mode requires full mailbox naming and durable ingress")
 	}
 	role := strings.ToLower(strings.TrimSpace(c.Role))
 	switch role {
@@ -189,23 +201,26 @@ func (c *Root) Validate() error {
 	switch strings.ToLower(strings.TrimSpace(c.ObjectStore)) {
 	case "", "fs":
 		if strings.TrimSpace(c.DataDir) == "" {
-			return fmt.Errorf("config: TABMAIL_DATADIR is required when TABMAIL_OBJECTSTORE=fs")
+			return fmt.Errorf("config: TABMAIL_DATADIR is required when TABMAIL_OBJECT_STORE=fs")
 		}
 	case "s3":
 		if strings.TrimSpace(c.S3.Endpoint) == "" {
-			return fmt.Errorf("config: TABMAIL_S3_ENDPOINT is required when TABMAIL_OBJECTSTORE=s3")
+			return fmt.Errorf("config: TABMAIL_S3_ENDPOINT is required when TABMAIL_OBJECT_STORE=s3")
 		}
 		if strings.TrimSpace(c.S3.Bucket) == "" {
-			return fmt.Errorf("config: TABMAIL_S3_BUCKET is required when TABMAIL_OBJECTSTORE=s3")
+			return fmt.Errorf("config: TABMAIL_S3_BUCKET is required when TABMAIL_OBJECT_STORE=s3")
 		}
 		if strings.TrimSpace(c.S3.AccessKey) == "" {
-			return fmt.Errorf("config: TABMAIL_S3_ACCESS_KEY is required when TABMAIL_OBJECTSTORE=s3")
+			return fmt.Errorf("config: TABMAIL_S3_ACCESS_KEY is required when TABMAIL_OBJECT_STORE=s3")
 		}
 		if strings.TrimSpace(c.S3.SecretKey) == "" {
-			return fmt.Errorf("config: TABMAIL_S3_SECRET_KEY is required when TABMAIL_OBJECTSTORE=s3")
+			return fmt.Errorf("config: TABMAIL_S3_SECRET_KEY is required when TABMAIL_OBJECT_STORE=s3")
 		}
 	default:
-		return fmt.Errorf("config: TABMAIL_OBJECTSTORE must be one of fs or s3")
+		return fmt.Errorf("config: TABMAIL_OBJECT_STORE must be one of fs or s3")
+	}
+	if c.SMTP.ForceTLS && !c.SMTP.TLSEnabled {
+		return fmt.Errorf("config: SMTP implicit TLS requires TLS enabled")
 	}
 	if c.SMTP.TLSEnabled {
 		if strings.TrimSpace(c.SMTP.TLSCert) == "" || strings.TrimSpace(c.SMTP.TLSKey) == "" {
