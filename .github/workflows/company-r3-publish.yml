@@ -1,0 +1,86 @@
+name: R3 verified source materialization
+on:
+  push:
+    branches: [fix/company-mail-complete-r3]
+    paths: [.github/workflows/company-r3-publish.yml]
+permissions:
+  contents: write
+concurrency:
+  group: r3-source-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/fix/company-mail-complete-r3'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Install pinned decoder
+        run: python3 -m pip install --disable-pip-version-check Brotli==1.1.0
+      - name: Validate manifest and produce exact source tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, brotli, hashlib, json, pathlib, subprocess
+          root = pathlib.Path.cwd()
+          pieces = sorted((root / '.github/r3-transfer').glob('*.b64'))
+          assert [x.name for x in pieces] == [f'{i:02}.b64' for i in range(12)]
+          raw = brotli.decompress(base64.b64decode(''.join(x.read_text() for x in pieces), validate=True))
+          assert hashlib.sha256(raw).hexdigest() == '0cf4d2aefe03624908964bd4dbd404ccfb8b965bbc2de06f44ef5bf7b0a79c33', 'source transfer hash mismatch'
+          manifest = json.loads(raw)
+          base = '20a7aabac8d6825fb6932f13f01562ad2290477b'
+          expected = '49ce3335db526c0a3a5e1ccdb260cf4a4171aecb'
+          assert manifest['base_commit'] == base and manifest['expected_tree'] == expected
+          assert len(manifest['files']) == 102
+          assert subprocess.check_output(['git','rev-parse',base+'^{tree}'], text=True).strip() == manifest['base_tree']
+          subprocess.run(['git','read-tree','--reset','-u',base], check=True)
+          for item in manifest['files']:
+              name = pathlib.PurePosixPath(item['path'])
+              assert not name.is_absolute() and '..' not in name.parts and '.git' not in name.parts
+              dest = root / name
+              before = dest.read_bytes() if dest.exists() else b''
+              if item['base_sha256'] is not None:
+                  assert hashlib.sha256(before).hexdigest() == item['base_sha256'], item['path']
+              else:
+                  assert not dest.exists(), item['path']
+              lines = before.decode('utf-8').splitlines(keepends=True)
+              for start, end, replacement in sorted(item['edits'], reverse=True):
+                  assert 0 <= start <= end <= len(lines), item['path']
+                  lines[start:end] = [replacement]
+              after = ''.join(lines).encode('utf-8')
+              assert hashlib.sha256(after).hexdigest() == item['sha256'], item['path']
+              assert hashlib.sha1(f'blob {len(after)}\0'.encode()+after).hexdigest() == item['git_sha'], item['path']
+              dest.parent.mkdir(parents=True, exist_ok=True)
+              dest.write_bytes(after)
+              assert item['mode'] in ('100644', '100755')
+              dest.chmod(int(item['mode'],8) & 0o777)
+          subprocess.run(['git','add','-A'], check=True)
+          tree = subprocess.check_output(['git','write-tree'], text=True).strip()
+          assert tree == expected, f'wrong source tree: {tree}'
+          print(f'PASS: 102 source files, manifest SHA256, per-file SHA256/Git hashes, tree {tree}')
+          pathlib.Path('/tmp/r3-publication.txt').write_text(f'base={base}\ntree={tree}\nfiles=102\nmanifest_sha256={hashlib.sha256(raw).hexdigest()}\n')
+          PY
+      - name: Commit and fast-forward the implementation branch, never main
+        shell: bash
+        env:
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          branch=fix/company-mail-complete-r3
+          remote=$(git ls-remote origin "refs/heads/$branch" | cut -f1)
+          test "$remote" = "$SOURCE_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'feat: company mailbox workflow, templates, session safety and delivery recovery' -m 'Restore and verify 102 source files against the approved baseline. Remove all temporary transfer and toolchain workflows. PR and main merge are performed separately through the GitHub connector after CI.'
+          git push origin "HEAD:refs/heads/$branch"
+          git rev-parse HEAD | tee -a /tmp/r3-publication.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: r3-publication-receipt
+          path: /tmp/r3-publication.txt
+          retention-days: 14
