@@ -129,6 +129,33 @@ export interface RecoveryTarget {
   state: string;
   error?: string;
 }
+export type SubmissionStatus =
+  | "submitted"
+  | "waiting"
+  | "sending"
+  | "partially_accepted"
+  | "accepted"
+  | "needs_attention";
+export interface SubmissionRecipient {
+  address: string;
+  state: string;
+}
+// Employee-facing projection of an outbound submission. Queue-internal fields
+// (attempts, leases, SMTP responses) stay in the recovery/operations surface.
+export interface Submission {
+  id: string;
+  mailbox_id: string;
+  from: string;
+  subject: string;
+  recipients: SubmissionRecipient[];
+  status: SubmissionStatus;
+  template_version_id?: string;
+  draft_consumed: boolean;
+  attachment_count: number;
+  created_at: string;
+  content_redacted: boolean;
+  delivery_uncertain: boolean;
+}
 export interface Receipt {
   id: string;
   state: string;
@@ -176,6 +203,15 @@ export function workMessage(id: string, message: string) {
   return company<MessageDetail>(
     `${workPath(id)}/messages/${encodeURIComponent(message)}`,
   );
+}
+export function submissions(page: number) {
+  return request<APIListResponse<Submission>>(
+    "/api/v1/company/submissions",
+    { params: { page, per_page: 30 } },
+  );
+}
+export function submission(id: string) {
+  return company<Submission>(`/submissions/${encodeURIComponent(id)}`);
 }
 export async function allEmployees(): Promise<AdminUser[]> {
   const users: AdminUser[] = [];

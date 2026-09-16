@@ -65,6 +65,7 @@ func (h *CompanyHandler) Routes(r chi.Router) {
 		r.Get("/templates/{id}/grants", h.TemplateGrants)
 		r.Put("/templates/{id}/grants", h.TemplateGrant)
 		r.Get("/mailboxes/{id}/templates", h.UsableTemplates)
+		r.Get("/mailboxes/{id}/events", h.MailboxEvents)
 		r.Get("/mailboxes/{id}/messages", h.Messages)
 		r.Get("/mailboxes/{id}/messages/{message}", h.Message)
 		r.Post("/mailboxes/{id}/messages/{message}/actions", h.MessageAction)
@@ -380,6 +381,26 @@ func (h *CompanyHandler) Preview(w http.ResponseWriter, r *http.Request) {
 	subject, text, html, e := company.Render(draft, v.Vars, employee, name, mb.Mailbox.FullAddress)
 	h.result(w, map[string]string{"subject": subject, "text_body": text, "html_body": html}, e)
 }
+// MailboxEvents serves GET /api/v1/company/mailboxes/{id}/events — the
+// company-side SSE stream for one mailbox. Access is decided by company grants
+// (read permission); the platform durable stream then carries the events.
+func (h *CompanyHandler) MailboxEvents(w http.ResponseWriter, r *http.Request) {
+	id, ok := companyID(w, r, "id")
+	if !ok {
+		return
+	}
+	mb, e := h.repo.GetWorkMailbox(r.Context(), companyActor(r), id)
+	if e != nil {
+		h.result(w, nil, e)
+		return
+	}
+	if !mb.CanRead || h.messages.eventReader == nil {
+		errForbidden(w, "mailbox read permission required")
+		return
+	}
+	h.messages.streamDurable(w, r, &mb.Mailbox)
+}
+
 func (h *CompanyHandler) Messages(w http.ResponseWriter, r *http.Request) {
 	id, ok := companyID(w, r, "id")
 	if !ok {

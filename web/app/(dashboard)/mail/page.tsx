@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import { request, streamEvents } from "@/lib/api/base";
-import type { APIListResponse, APIResponse, OutboundJob } from "@/lib/types";
+import type { APIError } from "@/lib/types";
 import {
   company,
   workMailboxes,
@@ -11,10 +12,12 @@ import {
   workMessage,
   workPath,
   downloadCompanyFile,
+  submissions,
+  submission,
   type DraftPayload,
   type MailDraft,
   type WorkMailbox,
-  type RecipientResult,
+  type Submission,
   type InboundAttachment,
 } from "@/lib/company";
 import {
@@ -29,23 +32,65 @@ import {
 } from "@/components/company/common";
 import { Compose } from "@/components/company/compose";
 
-type Folder = "inbox" | "archive" | "trash" | "drafts" | "sent";
+const FOLDERS = ["inbox", "archive", "trash", "drafts", "sent"] as const;
+type Folder = (typeof FOLDERS)[number];
+
 export default function MailPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="mx-auto w-full max-w-7xl space-y-5 p-4 md:p-7">
+          <p className="text-muted-foreground">Loading…</p>
+        </main>
+      }
+    >
+      <MailWorkbench />
+    </Suspense>
+  );
+}
+
+function MailWorkbench() {
   const t = useText();
-  const [mailboxId, setMailboxId] = useState("");
-  const [folder, setFolder] = useState<Folder>("inbox");
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [selected, setSelected] = useState("");
   const [editor, setEditor] = useState<{
     draft: MailDraft;
     key: string;
   } | null>(null);
+
+  // mailboxId / folder / search / page live in the URL query so refresh,
+  // back/forward and deep links restore the exact workbench state. `selected`
+  // stays a component-local detail view.
+  const folderParam = searchParams.get("folder") ?? "";
+  const folder: Folder = (FOLDERS as readonly string[]).includes(folderParam)
+    ? (folderParam as Folder)
+    : "inbox";
+  const search = searchParams.get("q") ?? "";
+  const pageRaw = Number.parseInt(searchParams.get("page") ?? "1", 10);
+  const page = Number.isInteger(pageRaw) && pageRaw >= 1 ? pageRaw : 1;
+  const mailboxParam = searchParams.get("mailbox") ?? "";
+  // Keep URL canonical: drop values that equal the rendered defaults.
+  const setQuery = (patch: Record<string, string | null>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of Object.entries(patch)) {
+      const drop =
+        value === null ||
+        value === "" ||
+        (key === "folder" && value === "inbox") ||
+        (key === "page" && value === "1");
+      if (drop) params.delete(key);
+      else params.set(key, value);
+    }
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  };
   const boxes = useAPI("work-mailboxes", workMailboxes, {
     refreshInterval: 25000,
   });
   const mailbox =
-    boxes.data?.find((v) => v.mailbox.id === mailboxId) ?? boxes.data?.[0];
+    boxes.data?.find((v) => v.mailbox.id === mailboxParam) ?? boxes.data?.[0];
   const messages = useAPI(
     mailbox?.can_read && ["inbox", "archive", "trash"].includes(folder)
       ? ["work-messages", mailbox.mailbox.id, folder, search, page]
@@ -57,23 +102,18 @@ export default function MailPage() {
     company<MailDraft[]>("/drafts"),
   );
   const sent = useAPI(
-    folder === "sent" ? ["work-sent", page] : null,
-    () =>
-      request<APIListResponse<OutboundJob>>("/api/v1/outbound", {
-        params: { page, per_page: 30 },
-      }),
+    folder === "sent" ? ["work-submissions", page] : null,
+    () => submissions(page),
     { refreshInterval: 10000 },
   );
   const { busy, run } = useAction();
   const mutate = messages.mutate;
-  const eventAddress = mailbox?.can_read
-    ? mailbox.mailbox.full_address
-    : undefined;
+  const eventMailboxId = mailbox?.can_read ? mailbox.mailbox.id : undefined;
   useEffect(() => {
-    if (!eventAddress) return;
+    if (!eventMailboxId) return;
     const abort = new AbortController();
     void streamEvents(
-      `/api/v1/mailbox/${encodeURIComponent(eventAddress)}/events`,
+      `/api/v1/company/mailboxes/${encodeURIComponent(eventMailboxId)}/events`,
       {
         signal: abort.signal,
         onEvent: (event) => {
@@ -84,7 +124,7 @@ export default function MailPage() {
       /* Polling remains the authoritative convergence fallback. */
     });
     return () => abort.abort();
-  }, [eventAddress, mutate]);
+  }, [eventMailboxId, mutate]);
   function start(payload?: DraftPayload, mb = mailbox) {
     if (!mb?.can_send) return;
     setEditor({
@@ -141,7 +181,7 @@ export default function MailPage() {
           onClose={() => setEditor(null)}
           onSent={() => {
             setEditor(null);
-            setFolder("sent");
+            setQuery({ folder: "sent", page: null });
             setSelected("");
             void sent.mutate();
             void drafts.mutate();
@@ -158,9 +198,8 @@ export default function MailPage() {
                     className={inputClass}
                     value={mailbox?.mailbox.id ?? ""}
                     onChange={(e) => {
-                      setMailboxId(e.target.value);
+                      setQuery({ mailbox: e.target.value, page: null });
                       setSelected("");
-                      setPage(1);
                     }}
                   >
                     {(boxes.data ?? []).map((v) => (
@@ -199,23 +238,29 @@ export default function MailPage() {
             aria-label={t("邮件文件夹", "Mail folders")}
             className="flex flex-wrap gap-2"
           >
-            {(["inbox", "archive", "trash", "drafts", "sent"] as Folder[]).map(
-              (v) => (
-                <ActionButton
-                  aria-pressed={folder === v}
-                  className={folder === v ? "bg-muted" : ""}
-                  key={v}
-                  onClick={() => {
-                    setFolder(v);
-                    setSelected("");
-                    setPage(1);
-                  }}
-                >
-                  {label(v)}
-                </ActionButton>
-              ),
-            )}
+            {FOLDERS.map((v) => (
+              <ActionButton
+                aria-pressed={folder === v}
+                className={folder === v ? "bg-muted" : ""}
+                key={v}
+                onClick={() => {
+                  setQuery({
+                    folder: v === "inbox" ? null : v,
+                    page: null,
+                  });
+                  setSelected("");
+                }}
+              >
+                {label(v)}
+              </ActionButton>
+            ))}
           </nav>
+          {["inbox", "archive", "trash"].includes(folder) && (
+            <p className="text-sm text-muted-foreground">
+              {t("范围：当前邮箱", "Scope: current mailbox")} ·{" "}
+              {mailbox?.mailbox.full_address ?? "—"}
+            </p>
+          )}
           {folder === "trash" && (
             <p className="text-sm text-muted-foreground">
               {t(
@@ -239,8 +284,7 @@ export default function MailPage() {
                     value={search}
                     maxLength={200}
                     onChange={(e) => {
-                      setSearch(e.target.value);
-                      setPage(1);
+                      setQuery({ q: e.target.value || null, page: null });
                       setSelected("");
                     }}
                   />
@@ -279,6 +323,7 @@ export default function MailPage() {
                           <p
                             className={`truncate ${m.seen ? "" : "font-semibold"}`}
                           >
+                            {m.starred ? "★ " : ""}
                             {m.subject || t("无主题", "No subject")}
                           </p>
                           <p className="mt-1 truncate text-xs text-muted-foreground">
@@ -291,7 +336,7 @@ export default function MailPage() {
                       ))
                     )}
                   </section>
-                  {selected ? (
+                  {selected && mailbox ? (
                     <MessagePane
                       key={`${mailbox.mailbox.id}:${selected}`}
                       mailbox={mailbox}
@@ -313,6 +358,12 @@ export default function MailPage() {
           )}
           {folder === "drafts" && (
             <Section title={label(folder)}>
+              <p className="text-sm text-muted-foreground">
+                {t(
+                  "范围：我的全部草稿（跨邮箱），不受上方“当前邮箱”选择影响。",
+                  "Scope: all my drafts across mailboxes — the current mailbox selector above does not apply.",
+                )}
+              </p>
               <LoadError
                 error={drafts.error}
                 onRetry={() => void drafts.mutate()}
@@ -369,6 +420,12 @@ export default function MailPage() {
             <Section title={label(folder)}>
               <p className="text-sm text-muted-foreground">
                 {t(
+                  "范围：我发起的提交（跨邮箱），不受上方“当前邮箱”选择影响。",
+                  "Scope: my submissions across mailboxes — the current mailbox selector above does not apply.",
+                )}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {t(
                   "“下一跳已接受”不代表收件人已收到或阅读。不确定的投递需要运维核查，不能盲目重发。",
                   "Accepted by next hop does not mean delivered to the inbox or read. Uncertain outcomes require operator review.",
                 )}
@@ -377,24 +434,25 @@ export default function MailPage() {
                 error={sent.error}
                 onRetry={() => void sent.mutate()}
               />
-              {(sent.data?.data ?? []).map((j) => (
-                <div key={j.id} className="border-b py-3">
+              {(sent.data?.data ?? []).map((s) => (
+                <div key={s.id} className="border-b py-3">
                   <button
                     className="w-full text-left"
-                    onClick={() => setSelected(selected === j.id ? "" : j.id)}
+                    onClick={() =>
+                      setSelected(selected === s.id ? "" : s.id)
+                    }
                   >
-                    <p className="font-medium">{j.subject}</p>
-                    <p className="text-sm">
-                      {j.mail_from} ·{" "}
-                      {j.delivery_uncertain
-                        ? t("结果不确定", "Uncertain")
-                        : j.state === "sent"
-                          ? t("下一跳已接受", "Accepted by next hop")
-                          : j.state}
+                    <p className="font-medium">
+                      {s.subject || t("无主题", "No subject")}
                     </p>
-                    <p className="text-xs text-muted-foreground">{j.id}</p>
+                    <p className="text-sm">
+                      {s.from} · <StatusBadge status={s.status} />
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(s.created_at).toLocaleString()} · {s.id}
+                    </p>
                   </button>
-                  {selected === j.id && <SentPane id={j.id} />}
+                  {selected === s.id && <SubmissionPane id={s.id} />}
                 </div>
               ))}
               {!sent.isLoading && !sent.data?.data.length && (
@@ -407,7 +465,7 @@ export default function MailPage() {
               <ActionButton
                 disabled={page <= 1}
                 onClick={() => {
-                  setPage((v) => v - 1);
+                  setQuery({ page: String(page - 1) });
                   setSelected("");
                 }}
               >
@@ -419,7 +477,7 @@ export default function MailPage() {
               <ActionButton
                 disabled={page * 30 >= (total ?? 0)}
                 onClick={() => {
-                  setPage((v) => v + 1);
+                  setQuery({ page: String(page + 1) });
                   setSelected("");
                 }}
               >
@@ -432,6 +490,166 @@ export default function MailPage() {
     </main>
   );
 }
+
+const STATUS_LABELS: Record<
+  Submission["status"],
+  { zh: string; en: string; className: string }
+> = {
+  submitted: {
+    zh: "已入队",
+    en: "Submitted",
+    className: "bg-muted text-foreground",
+  },
+  waiting: {
+    zh: "等待中",
+    en: "Waiting",
+    className: "bg-muted text-foreground",
+  },
+  sending: {
+    zh: "发送中",
+    en: "Sending",
+    className: "bg-muted text-foreground",
+  },
+  partially_accepted: {
+    zh: "部分已接受",
+    en: "Partially accepted",
+    className: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+  },
+  accepted: {
+    zh: "下一跳已接受",
+    en: "Accepted by next hop",
+    className:
+      "bg-green-100 text-green-900 dark:bg-green-950 dark:text-green-200",
+  },
+  needs_attention: {
+    zh: "需要处理",
+    en: "Needs attention",
+    className: "bg-destructive text-destructive-foreground",
+  },
+};
+
+function StatusBadge({ status }: { status: Submission["status"] }) {
+  const t = useText();
+  const s = STATUS_LABELS[status] ?? STATUS_LABELS.submitted;
+  return (
+    <span className={`rounded px-1.5 py-0.5 text-xs ${s.className}`}>
+      {t(s.zh, s.en)}
+    </span>
+  );
+}
+
+const RECIPIENT_STATE_LABELS: Record<string, [string, string]> = {
+  pending: ["待处理", "Pending"],
+  accepted: ["已接受", "Accepted"],
+  temporary: ["临时失败", "Temporary failure"],
+  permanent: ["永久失败", "Permanent failure"],
+  uncertain: ["结果不确定", "Uncertain"],
+};
+
+function SubmissionPane({ id }: { id: string }) {
+  const t = useText();
+  const { busy, run } = useAction();
+  const detail = useAPI(["submission", id], () => submission(id), {
+    refreshInterval: 10000,
+  });
+  const s = detail.error ? undefined : detail.data;
+  return (
+    <div className="mt-4 space-y-3 rounded-md border p-4">
+      <LoadError
+        error={detail.error}
+        onRetry={() => void detail.mutate()}
+      />
+      {s && (
+        <>
+          <p className="text-sm break-words">
+            {s.from} →{" "}
+            {(s.recipients ?? []).map((v) => v.address).join(", ") || "—"}
+          </p>
+          <p className="text-sm">
+            <StatusBadge status={s.status} />
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {t("附件", "Attachments")}: {s.attachment_count}
+            {s.draft_consumed
+              ? ` · ${t("来自草稿", "from a draft")}`
+              : ""}
+            {s.template_version_id
+              ? ` · ${t("模板版本", "Template version")}: ${s.template_version_id}`
+              : ""}
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr>
+                  <th>{t("收件人", "Recipient")}</th>
+                  <th>{t("结果", "Outcome")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(s.recipients ?? []).map((v) => {
+                  const l = RECIPIENT_STATE_LABELS[v.state] ?? [
+                    v.state,
+                    v.state,
+                  ];
+                  return (
+                    <tr key={v.address}>
+                      <td className="py-2 break-all">{v.address}</td>
+                      <td>{t(l[0], l[1])}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          {s.status === "needs_attention" && (
+            <ActionButton
+              disabled={busy}
+              onClick={() =>
+                run(async () => {
+                  try {
+                    await request(`/api/v1/outbound/${id}/retry`, {
+                      method: "POST",
+                      body: {},
+                    });
+                    toast.success(
+                      t("已请求安全重试", "Safe retry requested"),
+                    );
+                    void detail.mutate();
+                  } catch (e) {
+                    if ((e as APIError)?.error?.code === "CONFLICT") {
+                      toast.error(
+                        t(
+                          "结果不确定，已禁止重试。请到恢复中心核实下一跳记录后再处理。",
+                          "Uncertain outcome: retry is blocked. Review next-hop evidence in the recovery center.",
+                        ),
+                      );
+                      return;
+                    }
+                    throw e;
+                  }
+                })
+              }
+            >
+              {t(
+                "重试未成功目标（服务端重新鉴权）",
+                "Retry unfinished recipients (re-authorized by server)",
+              )}
+            </ActionButton>
+          )}
+          {s.delivery_uncertain && (
+            <p role="status" className="text-sm">
+              {t(
+                "结果不确定，已禁止重试。请联系平台运维核实下一跳记录后再处理。",
+                "Uncertain outcome: retry is blocked. Ask an operator to verify next-hop evidence.",
+              )}
+            </p>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
 function MessagePane({
   mailbox,
   id,
@@ -462,6 +680,7 @@ function MessagePane({
       {detail.data && !detail.error && (
         <>
           <p className="text-sm break-words">
+            {detail.data.starred ? "★ " : ""}
             {detail.data.sender} → {(detail.data.recipients ?? []).join(", ")}
           </p>
           <div className="flex flex-wrap gap-2">
@@ -575,132 +794,5 @@ function MessagePane({
         </>
       )}
     </Section>
-  );
-}
-function SentPane({ id }: { id: string }) {
-  const t = useText();
-  const { busy, run } = useAction();
-  const detail = useAPI(
-    ["sent-detail", id],
-    () =>
-      request<APIResponse<OutboundJob>>(`/api/v1/outbound/${id}`).then(
-        (r) => r.data,
-      ),
-    { refreshInterval: 10000 },
-  );
-  const recipients = useAPI(
-    ["recipient-results", id],
-    () => company<RecipientResult[]>(`/outbound/${id}/recipients`),
-    { refreshInterval: 10000 },
-  );
-  const j = detail.error ? undefined : detail.data;
-  return (
-    <div className="mt-4 space-y-3 rounded-md border p-4">
-      <LoadError
-        error={detail.error || recipients.error}
-        onRetry={() => {
-          void detail.mutate();
-          void recipients.mutate();
-        }}
-      />
-      {j && (
-        <>
-          {j.content_redacted ? (
-            <p>
-              {t(
-                "你只有运行元数据权限，正文与密送信息已隐藏。",
-                "Content and Bcc are hidden; you only have operational metadata access.",
-              )}
-            </p>
-          ) : (
-            <>
-              <pre className="whitespace-pre-wrap text-sm">{j.text_body}</pre>
-              {j.html_body && <MailHTML html={j.html_body} />}
-              <p className="text-xs">
-                {t("模板版本", "Template version")}:{" "}
-                {j.template_version_id ?? "—"}
-              </p>
-              {(j.attachment_ids ?? []).map((a, i) => (
-                <ActionButton
-                  disabled={busy}
-                  key={a}
-                  onClick={() =>
-                    run(() =>
-                      downloadCompanyFile(
-                        `/attachments/${a}`,
-                        `attachment-${i + 1}`,
-                      ),
-                    )
-                  }
-                >
-                  {t("附件", "Attachment")} {i + 1}
-                </ActionButton>
-              ))}
-            </>
-          )}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr>
-                  <th>{t("收件人", "Recipient")}</th>
-                  <th>{t("结果", "Outcome")}</th>
-                  <th>SMTP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(recipients.data ?? []).map((v) => (
-                  <tr key={v.address}>
-                    <td className="py-2 break-all">{v.address}</td>
-                    <td>
-                      {v.state}
-                      {v.diagnostic && (
-                        <p className="max-w-sm text-xs text-muted-foreground break-words">
-                          {v.diagnostic}
-                        </p>
-                      )}
-                    </td>
-                    <td>{v.smtp_code || "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {j.last_error && (
-            <p className="text-sm text-destructive break-words">
-              {j.last_error}
-            </p>
-          )}
-          {["failed", "dead", "retry"].includes(j.state) && (
-            <ActionButton
-              disabled={busy || j.delivery_uncertain || j.content_redacted}
-              onClick={() =>
-                run(async () => {
-                  await request(`/api/v1/outbound/${id}/retry`, {
-                    method: "POST",
-                    body: {},
-                  });
-                  toast.success(t("已请求安全重试", "Safe retry requested"));
-                  void detail.mutate();
-                  void recipients.mutate();
-                })
-              }
-            >
-              {t(
-                "重试未成功目标（服务端重新鉴权）",
-                "Retry unfinished recipients (re-authorized by server)",
-              )}
-            </ActionButton>
-          )}
-          {j.delivery_uncertain && (
-            <p role="status" className="text-sm">
-              {t(
-                "结果不确定，已禁止重试。请联系平台运维核实下一跳记录后再处理。",
-                "Uncertain outcome: retry is blocked. Ask an operator to verify next-hop evidence.",
-              )}
-            </p>
-          )}
-        </>
-      )}
-    </div>
   );
 }

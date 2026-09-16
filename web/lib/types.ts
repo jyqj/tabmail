@@ -118,6 +118,7 @@ export interface Message {
   subject: string;
   size: number;
   seen: boolean;
+  starred: boolean;
   headers?: Record<string, string>;
   raw_object_key?: string;
   received_at: string;
