@@ -1,13 +1,12 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
-import { request } from "@/lib/api/base";
-import type { APIResponse, SendEmailResponse } from "@/lib/types";
 import {
   addresses,
   company,
   downloadCompanyFile,
+  submitDraft,
   workPath,
   type MailAttachment,
   type MailDraft,
@@ -45,10 +44,13 @@ export function Compose({
   const [mailboxId, setMailboxId] = useState(initial.mailbox_id);
   const [names, setNames] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<RenderedTemplate | null>(null);
-  const [pending, setPending] = useState<{ key: string; body: unknown } | null>(
-    null,
-  );
-  const nonce = useRef("");
+  // A pending submission pins the exact key/draft revision so retries are
+  // byte-identical; the server consumes that revision atomically with the job.
+  const [pending, setPending] = useState<{
+    key: string;
+    draftId: string;
+    revision: number;
+  } | null>(null);
   const from = mailboxes.find((v) => v.mailbox.id === mailboxId);
   const templates = useAPI(["usable-templates", mailboxId], () =>
     company<TemplateVersion[]>(`${workPath(mailboxId)}/templates`),
@@ -73,7 +75,7 @@ export function Compose({
     setPayload((v) => ({ ...v, ...patch }));
     setPreview(null);
   }
-  async function save() {
+  async function save(silent = false) {
     const value = await company<MailDraft>(
       draft.id ? `/drafts/${draft.id}` : "/drafts",
       {
@@ -88,7 +90,7 @@ export function Compose({
     );
     setDraft(value);
     setPayload(value.payload);
-    toast.success(t("草稿已保存", "Draft saved"));
+    if (!silent) toast.success(t("草稿已保存", "Draft saved"));
     return value;
   }
   async function send() {
@@ -100,71 +102,51 @@ export function Compose({
           "Select an authorized published template",
         ),
       );
-    const body = {
-      from: from.mailbox.full_address,
-      to: payload.to,
-      cc: payload.cc ?? [],
-      bcc: payload.bcc ?? [],
-      subject: payload.subject,
-      text_body: payload.text_body,
-      html_body: payload.html_body ?? "",
-      headers: payload.headers ?? {},
-      template_version_id: payload.template_version_id,
-      template_vars: payload.template_vars ?? {},
-      attachment_ids: payload.attachment_ids ?? [],
-    };
     let snapshot = pending;
     if (!snapshot) {
-      if (!nonce.current) nonce.current = crypto.randomUUID();
-      let key = nonce.current;
-      if (draft.id) {
-        const bytes = await crypto.subtle.digest(
-          "SHA-256",
-          new TextEncoder().encode(JSON.stringify(body)),
-        );
-        key = `${draft.id}.${draft.revision}.${Array.from(new Uint8Array(bytes))
-          .map((b) => b.toString(16).padStart(2, "0"))
-          .join("")}`;
-      }
-      snapshot = { key, body };
+      // The server submits the persisted draft inside the enqueue transaction,
+      // so unsaved edits must be flushed first.
+      const saved = await save(true);
+      if (!saved.id) throw new Error(t("草稿未保存", "Draft not saved"));
+      snapshot = {
+        key: `${saved.id}.${saved.revision}`,
+        draftId: saved.id,
+        revision: saved.revision,
+      };
       setPending(snapshot);
     }
     try {
-      const res = await request<APIResponse<SendEmailResponse>>(
-        "/api/v1/send",
-        {
-          method: "POST",
-          headers: { "Idempotency-Key": snapshot.key },
-          body: snapshot.body,
-        },
-      );
-      if (draft.id) {
-        try {
-          await company(`/drafts/${draft.id}`, {
-            method: "DELETE",
-            params: { revision: draft.revision },
-          });
-        } catch {
-          toast.warning(
-            t(
-              "邮件已入队，但草稿清理失败，请在草稿箱核对",
-              "Mail queued; draft cleanup failed. Review the draft list.",
-            ),
-          );
-        }
-      }
+      const job = await submitDraft(snapshot.draftId, snapshot.revision, snapshot.key);
       toast.success(
-        `${t("已加入发送队列，不代表已送达：", "Queued, not yet delivered: ")}${res.data.id}`,
+        `${t("已加入发送队列，不代表已送达：", "Queued, not yet delivered: ")}${job.id}`,
       );
       onSent();
     } catch (e) {
-      const code = (e as { error?: { code?: string } })?.error?.code;
+      const err = e as { error?: { code?: string }; data?: { revision?: number } };
+      if (err?.error?.code === "CONFLICT") {
+        setPending(null);
+        if (err.data?.revision) {
+          throw new Error(
+            t(
+              `草稿已在其他窗口更新到版本 ${err.data.revision}，请刷新后重试`,
+              `Draft moved to revision ${err.data.revision} elsewhere; refresh and retry`,
+            ),
+          );
+        }
+        throw new Error(
+          t(
+            "该草稿已在其他窗口提交，请在发件状态中查看",
+            "This draft was already submitted elsewhere; check its send status",
+          ),
+        );
+      }
+      const code = err?.error?.code;
       if (
         [
           "BAD_REQUEST",
           "FORBIDDEN",
           "QUOTA_EXCEEDED",
-          "CONFLICT",
+          "NOT_FOUND",
           "UNAUTHORIZED",
         ].includes(code ?? "")
       )

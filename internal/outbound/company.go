@@ -21,6 +21,12 @@ func submissionActor(user, key *uuid.UUID) string {
 	return ""
 }
 func requestDigest(req SendRequest) string {
+	var draftID *uuid.UUID
+	var draftRevision int
+	if req.Draft != nil {
+		id := req.Draft.ID
+		draftID, draftRevision = &id, req.Draft.Revision
+	}
 	return company.Digest(struct {
 		From                string
 		To, CC, BCC         []string
@@ -30,7 +36,9 @@ func requestDigest(req SendRequest) string {
 		Version             *uuid.UUID
 		Vars                map[string]string
 		Attachments         []uuid.UUID
-	}{req.From, req.To, req.CC, req.BCC, req.Subject, req.TextBody, req.HTMLBody, req.Headers, req.TemplateName, req.TemplateVersionID, req.TemplateVars, req.AttachmentIDs})
+		DraftID             *uuid.UUID
+		DraftRevision       int
+	}{req.From, req.To, req.CC, req.BCC, req.Subject, req.TextBody, req.HTMLBody, req.Headers, req.TemplateName, req.TemplateVersionID, req.TemplateVars, req.AttachmentIDs, draftID, draftRevision})
 }
 func contentDigest(j *models.OutboundJob) string {
 	return company.Digest(struct {

@@ -77,6 +77,7 @@ func (h *CompanyHandler) Routes(r chi.Router) {
 		r.Get("/drafts", h.Drafts)
 		r.Post("/drafts", h.SaveDraft)
 		r.Put("/drafts/{id}", h.SaveDraft)
+		r.Post("/drafts/{id}/submit", h.SubmitDraft)
 		r.Delete("/drafts/{id}", h.DeleteDraft)
 		r.Get("/recovery", h.Recovery)
 		r.Post("/recovery/{id}/inspect", h.InspectReceipt)
@@ -623,6 +624,115 @@ func (h *CompanyHandler) DeleteDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.result(w, map[string]bool{"deleted": true}, h.repo.DeleteMailDraft(r.Context(), companyActor(r), id, rev))
+}
+
+// submitDraftRequest is the JSON body for POST /company/drafts/{id}/submit.
+type submitDraftRequest struct {
+	ExpectedRevision int `json:"expected_revision"`
+}
+
+// SubmitDraft handles POST /company/drafts/{id}/submit — submit the draft as
+// an outbound job and consume the draft inside the enqueue transaction. The
+// Idempotency-Key header is required; a repeated key replays the original job
+// with 200 instead of creating a second one.
+func (h *CompanyHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) {
+	id, idOK := companyID(w, r, "id")
+	if !idOK {
+		return
+	}
+	body, bodyOK := companyBody[submitDraftRequest](w, r)
+	if !bodyOK {
+		return
+	}
+	key := strings.TrimSpace(r.Header.Get("Idempotency-Key"))
+	if key == "" {
+		errBadRequest(w, "idempotency key header is required")
+		return
+	}
+	if len(key) > 128 || strings.ContainsAny(key, "\r\n") {
+		errBadRequest(w, "idempotency key must be at most 128 bytes without CR/LF")
+		return
+	}
+	if body.ExpectedRevision < 1 {
+		errBadRequest(w, "expected_revision is required")
+		return
+	}
+
+	actor := companyActor(r)
+	draft, e := h.repo.GetMailDraft(r.Context(), actor, id)
+	if e != nil {
+		if authz.IsAuthzError(e) {
+			e = app.Forbidden(e.Error())
+		}
+		// A missing draft is only a plain 404 when no submission consumed it;
+		// otherwise it is a replay (same key) or an already-consumed conflict.
+		if appErr, isApp := app.As(e); isApp && appErr.Kind == app.KindNotFound {
+			consumed, replay, e2 := h.outbound.ConsumedDraftSubmission(r.Context(), actor.TenantID, id, &actor.ID, key)
+			if e2 != nil {
+				h.logger.Err(e2).Msg("looking up consumed draft submission")
+				errInternal(w)
+				return
+			}
+			if consumed != nil {
+				if replay {
+					ok(w, consumed)
+				} else {
+					errConflict(w, "draft was already submitted; check its send status instead of retrying")
+				}
+				return
+			}
+		}
+		respondAppError(w, h.logger, e)
+		return
+	}
+	if draft.Revision != body.ExpectedRevision {
+		// The draft still exists with a newer revision: tell the caller what to
+		// refresh to, instead of a bare conflict.
+		writeJSON(w, http.StatusConflict, envelope{
+			Data:  map[string]any{"revision": draft.Revision},
+			Error: &apiErr{Code: "CONFLICT", Message: "draft revision changed; refresh the draft before retrying"},
+		})
+		return
+	}
+	mb, e := h.store.GetMailbox(r.Context(), draft.MailboxID)
+	if e != nil {
+		h.logger.Err(e).Msg("loading draft mailbox")
+		errInternal(w)
+		return
+	}
+	if mb == nil || mb.TenantID != actor.TenantID {
+		errConflict(w, "draft mailbox is no longer available")
+		return
+	}
+
+	job, replayed, submitted := h.outbound.submitAuthorized(w, r, outboundSubmitInput{
+		From:              mb.FullAddress,
+		To:                draft.Payload.To,
+		CC:                draft.Payload.CC,
+		BCC:               draft.Payload.BCC,
+		Subject:           draft.Payload.Subject,
+		TextBody:          draft.Payload.TextBody,
+		HTMLBody:          draft.Payload.HTMLBody,
+		Headers:           draft.Payload.Headers,
+		TemplateVersionID: draft.Payload.TemplateVersionID,
+		TemplateVars:      draft.Payload.TemplateVars,
+		AttachmentIDs:     draft.Payload.AttachmentIDs,
+		IdempotencyKey:    key,
+		Draft: &store.DraftConsumption{
+			TenantID: actor.TenantID,
+			UserID:   actor.ID,
+			ID:       draft.ID,
+			Revision: draft.Revision,
+		},
+	})
+	if !submitted {
+		return
+	}
+	if replayed {
+		ok(w, job)
+		return
+	}
+	created(w, job)
 }
 func (h *CompanyHandler) Recovery(w http.ResponseWriter, r *http.Request) {
 	page := pageFromReq(r)

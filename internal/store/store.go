@@ -14,7 +14,22 @@ import (
 var (
 	ErrOutboundDailyQuotaExceeded = errors.New("outbound daily quota exceeded")
 	ErrSendAsDailyQuotaExceeded   = errors.New("send-as daily quota exceeded")
+	// ErrDraftAlreadyConsumed is returned when the draft deletion inside the
+	// enqueue transaction affects no row: the draft revision was consumed by a
+	// concurrent submission or changed underneath the caller. The whole
+	// transaction (including the outbound job) is rolled back.
+	ErrDraftAlreadyConsumed = errors.New("mail draft already consumed or changed")
 )
+
+// DraftConsumption pins the mail draft a submission consumes atomically. The
+// (tenant, user, id, revision) tuple is the single-consumption primitive: the
+// delete inside the enqueue transaction only matches an unconsumed revision.
+type DraftConsumption struct {
+	TenantID uuid.UUID
+	UserID   uuid.UUID
+	ID       uuid.UUID
+	Revision int
+}
 
 // OutboundQuotaReservation describes quota limits that must be checked in the
 // same critical section as outbound job creation.

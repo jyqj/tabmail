@@ -686,6 +686,10 @@ type OutboundJob struct {
 	SenderKeyID     *uuid.UUID `json:"-" db:"sender_key_id"`
 	SenderMailboxID *uuid.UUID `json:"-" db:"sender_mailbox_id"`
 	TemplateName    *string    `json:"-" db:"template_name"`
+	// DraftID records the mail draft consumed by this submission. The draft row
+	// is deleted in the same transaction, so this is an intentionally dangling
+	// provenance marker (no FK).
+	DraftID *uuid.UUID `json:"-" db:"draft_id"`
 
 	ID              uuid.UUID       `json:"id" db:"id"`
 	TenantID        uuid.UUID       `json:"tenant_id" db:"tenant_id"`

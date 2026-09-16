@@ -90,33 +90,64 @@ type SendRequest struct {
 	TemplateName      *string           // optional; nil keeps the legacy bare-string path
 	TemplateVars      map[string]string // used only when TemplateName is non-nil
 	Quota             store.OutboundQuotaReservation
+	// Draft, when non-nil, makes the enqueue transaction also consume (delete)
+	// this exact mail-draft revision atomically; a concurrent or repeated
+	// consumption rolls the whole enqueue back with store.ErrDraftAlreadyConsumed.
+	Draft *store.DraftConsumption
 }
 
 // Submit enqueues an outbound email job after validation.
 func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.OutboundJob, error) {
+	job, _, err := s.SubmitWithReplay(ctx, req)
+	return job, err
+}
+
+// ConsumedDraftSubmission classifies a missing draft for the submit endpoint.
+// When a job consumed this draft it returns that job and whether the current
+// request (same submit actor and idempotency key) is a replay of it; a draft
+// that was never submitted yields (nil, false, nil).
+func (s *Service) ConsumedDraftSubmission(ctx context.Context, tenantID, draftID uuid.UUID, userID *uuid.UUID, key string) (*models.OutboundJob, bool, error) {
+	repo, ok := s.store.(interface {
+		FindOutboundJobByDraft(context.Context, uuid.UUID, uuid.UUID) (*models.OutboundJob, error)
+	})
+	if !ok {
+		return nil, false, nil
+	}
+	job, err := repo.FindOutboundJobByDraft(ctx, tenantID, draftID)
+	if err != nil || job == nil {
+		return nil, false, err
+	}
+	return job, job.SubmitActor == submissionActor(userID, nil) && job.IdempotencyKey == key, nil
+}
+
+// SubmitWithReplay is Submit with an idempotent-replay signal: replayed is true when the
+// (submit_actor, idempotency_key) pair already owned a job with the same
+// request hash and that original job was returned unchanged. HTTP callers use
+// it to answer 201 for a fresh submission and 200 for a replay.
+func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*models.OutboundJob, bool, error) {
 	req.To = append([]string{}, req.To...)
 	req.CC = append([]string{}, req.CC...)
 	req.BCC = append([]string{}, req.BCC...)
 	if !s.cfg.Enabled {
-		return nil, fmt.Errorf("outbound sending is disabled")
+		return nil, false, fmt.Errorf("outbound sending is disabled")
 	}
 
 	canonical, err := authz.CanonicalSender(req.From)
 	if err != nil {
-		return nil, err
+		return nil, false, err
 	}
 	req.From = canonical
 	for _, group := range [][]string{req.To, req.CC, req.BCC} {
 		for i, a := range group {
 			parsed, parseErr := mail.ParseAddress(a)
 			if parseErr != nil {
-				return nil, parseErr
+				return nil, false, parseErr
 			}
 			group[i] = strings.ToLower(parsed.Address)
 		}
 	}
 	if len(req.IdempotencyKey) > 128 || strings.ContainsAny(req.IdempotencyKey, "\r\n") {
-		return nil, app.BadRequest("idempotency key must be at most 128 bytes")
+		return nil, false, app.BadRequest("idempotency key must be at most 128 bytes")
 	}
 	actor, hash := submissionActor(req.UserID, req.APIKeyID), requestDigest(req)
 	if req.IdempotencyKey != "" {
@@ -124,33 +155,33 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 			FindOutboundSubmission(context.Context, uuid.UUID, string, string, string) (*models.OutboundJob, error)
 		})
 		if !ok {
-			return nil, app.BadRequest("idempotent submission unavailable")
+			return nil, false, app.BadRequest("idempotent submission unavailable")
 		}
 		old, e := repo.FindOutboundSubmission(ctx, req.TenantID, actor, req.IdempotencyKey, hash)
 		if e != nil {
-			return nil, e
+			return nil, false, e
 		}
 		if old != nil {
-			return old, nil
+			return old, true, nil
 		}
 	}
 	if req.TemplateVersionID != nil {
 		if req.TemplateName != nil {
-			return nil, app.BadRequest("select a published version or legacy name, not both")
+			return nil, false, app.BadRequest("select a published version or legacy name, not both")
 		}
 		if req.SenderMailboxID == nil {
-			return nil, app.BadRequest("published templates require an employee mailbox")
+			return nil, false, app.BadRequest("published templates require an employee mailbox")
 		}
 		if s.governance == nil {
-			return nil, app.BadRequest("published templates unavailable")
+			return nil, false, app.BadRequest("published templates unavailable")
 		}
 		v, employee, name, e := s.governance.TemplateForSend(ctx, req.TenantID, req.UserID, req.APIKeyID, *req.SenderMailboxID, *req.TemplateVersionID)
 		if e != nil {
-			return nil, e
+			return nil, false, e
 		}
 		req.Subject, req.TextBody, req.HTMLBody, e = company.Render(v.Snapshot, req.TemplateVars, employee, name, req.From)
 		if e != nil {
-			return nil, e
+			return nil, false, e
 		}
 	}
 	// Template path (opt-in). When TemplateName is set the caller wants the
@@ -160,7 +191,7 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 	// configuration error, not a silent fall-through to bare strings.
 	if req.TemplateName != nil && *req.TemplateName != "" {
 		if s.template == nil {
-			return nil, fmt.Errorf("template support is not configured")
+			return nil, false, fmt.Errorf("template support is not configured")
 		}
 		rendered, err := s.template.Render(template.RenderInput{
 			TenantID: req.TenantID,
@@ -168,7 +199,7 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 			Vars:     req.TemplateVars,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("render template %q: %w", *req.TemplateName, err)
+			return nil, false, fmt.Errorf("render template %q: %w", *req.TemplateName, err)
 		}
 		req.Subject = rendered.Subject
 		req.TextBody = rendered.TextBody
@@ -177,21 +208,21 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 
 	// Validate all email addresses using RFC 5322 parsing.
 	if _, err := mail.ParseAddress(req.From); err != nil {
-		return nil, fmt.Errorf("invalid from address %q: %w", req.From, err)
+		return nil, false, fmt.Errorf("invalid from address %q: %w", req.From, err)
 	}
 	for _, addr := range req.To {
 		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, fmt.Errorf("invalid to address %q: %w", addr, err)
+			return nil, false, fmt.Errorf("invalid to address %q: %w", addr, err)
 		}
 	}
 	for _, addr := range req.CC {
 		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, fmt.Errorf("invalid cc address %q: %w", addr, err)
+			return nil, false, fmt.Errorf("invalid cc address %q: %w", addr, err)
 		}
 	}
 	for _, addr := range req.BCC {
 		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, fmt.Errorf("invalid bcc address %q: %w", addr, err)
+			return nil, false, fmt.Errorf("invalid bcc address %q: %w", addr, err)
 		}
 	}
 
@@ -202,19 +233,19 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 	allRcpt = append(allRcpt, req.BCC...)
 
 	if len(allRcpt) == 0 {
-		return nil, fmt.Errorf("at least one recipient required")
+		return nil, false, fmt.Errorf("at least one recipient required")
 	}
 	if len(allRcpt) > 50 {
-		return nil, fmt.Errorf("too many recipients (max 50)")
+		return nil, false, fmt.Errorf("too many recipients (max 50)")
 	}
 	if req.Subject == "" {
-		return nil, fmt.Errorf("subject is required")
+		return nil, false, fmt.Errorf("subject is required")
 	}
 	if len(req.Subject) > 998 {
-		return nil, fmt.Errorf("subject too long (max 998 chars)")
+		return nil, false, fmt.Errorf("subject too long (max 998 chars)")
 	}
 	if req.TextBody == "" && req.HTMLBody == "" {
-		return nil, fmt.Errorf("text_body or html_body required")
+		return nil, false, fmt.Errorf("text_body or html_body required")
 	}
 
 	// Build Message-ID header.
@@ -227,18 +258,23 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 	if len(req.Headers) > 0 {
 		b, err := json.Marshal(req.Headers)
 		if err != nil {
-			return nil, fmt.Errorf("invalid headers: %w", err)
+			return nil, false, fmt.Errorf("invalid headers: %w", err)
 		}
 		headersJSON = b
 	}
 
 	now := time.Now().UTC()
+	var draftID *uuid.UUID
+	if req.Draft != nil {
+		id := req.Draft.ID
+		draftID = &id
+	}
 	job := &models.OutboundJob{
 		SenderUserID:      req.UserID,
 		SenderKeyID:       req.APIKeyID,
 		SenderMailboxID:   req.SenderMailboxID,
 		TemplateName:      req.TemplateName,
-		TemplateVersionID: req.TemplateVersionID, AttachmentIDs: append([]uuid.UUID(nil), req.AttachmentIDs...), IdempotencyKey: req.IdempotencyKey, SubmitActor: actor, RequestHash: hash,
+		TemplateVersionID: req.TemplateVersionID, AttachmentIDs: append([]uuid.UUID(nil), req.AttachmentIDs...), IdempotencyKey: req.IdempotencyKey, SubmitActor: actor, RequestHash: hash, DraftID: draftID,
 		DeliveredDomains: []string{},
 		ID:               uuid.New(),
 		TenantID:         req.TenantID,
@@ -267,10 +303,11 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 	}
 	job.ContentDigest = contentDigest(job)
 	if err := s.ValidateJobAuthorization(ctx, job); err != nil {
-		return nil, err
+		return nil, false, err
 	}
-	if err := s.createOutboundJob(ctx, job, req.Quota); err != nil {
-		return nil, fmt.Errorf("enqueue outbound job: %w", err)
+	replayed, err := s.createOutboundJob(ctx, job, req.Quota, req.Draft)
+	if err != nil {
+		return nil, false, fmt.Errorf("enqueue outbound job: %w", err)
 	}
 
 	s.logger.Info().
@@ -279,14 +316,23 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		Int("rcpt_count", len(allRcpt)).
 		Msg("outbound job enqueued")
 
-	return job, nil
+	return job, replayed, nil
 }
 
-func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation) error {
-	if quota.HasLimits() {
-		return s.store.CreateOutboundJobWithQuota(ctx, job, quota)
+func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption) (bool, error) {
+	if draft != nil {
+		repo, ok := s.store.(interface {
+			CreateOutboundJobConsumeDraft(context.Context, *models.OutboundJob, store.OutboundQuotaReservation, store.DraftConsumption) (bool, error)
+		})
+		if !ok {
+			return false, app.BadRequest("draft submission unavailable")
+		}
+		return repo.CreateOutboundJobConsumeDraft(ctx, job, quota, *draft)
 	}
-	return s.store.CreateOutboundJob(ctx, job)
+	if quota.HasLimits() {
+		return false, s.store.CreateOutboundJobWithQuota(ctx, job, quota)
+	}
+	return false, s.store.CreateOutboundJob(ctx, job)
 }
 
 // StartWorker begins the background delivery worker loop. It is the

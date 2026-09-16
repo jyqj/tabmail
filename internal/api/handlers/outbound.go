@@ -79,11 +79,69 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	job, replayed, ok := h.submitAuthorized(w, r, outboundSubmitInput{
+		From:              body.From,
+		To:                body.To,
+		CC:                body.CC,
+		BCC:               body.BCC,
+		Subject:           body.Subject,
+		TextBody:          body.TextBody,
+		HTMLBody:          body.HTMLBody,
+		Headers:           body.Headers,
+		TemplateVersionID: body.TemplateVersionID,
+		TemplateName:      body.TemplateName,
+		TemplateVars:      body.TemplateVars,
+		AttachmentIDs:     body.AttachmentIDs,
+		IdempotencyKey:    strings.TrimSpace(r.Header.Get("Idempotency-Key")),
+	})
+	if !ok {
+		return
+	}
+	// Legacy /send contract: always 201 (replays included). The draft submit
+	// endpoint distinguishes 201 fresh vs 200 replay via the same helper.
+	_ = replayed
+	created(w, job)
+}
+
+// ConsumedDraftSubmission classifies an already-missing draft (see
+// outbound.Service.ConsumedDraftSubmission) for the company draft submit
+// endpoint.
+func (h *OutboundHandler) ConsumedDraftSubmission(ctx context.Context, tenantID, draftID uuid.UUID, userID *uuid.UUID, key string) (*models.OutboundJob, bool, error) {
+	return h.outbound.ConsumedDraftSubmission(ctx, tenantID, draftID, userID, key)
+}
+
+// outboundSubmitInput carries the caller-supplied message fields shared by the
+// legacy /send endpoint and the company draft submit endpoint.
+type outboundSubmitInput struct {
+	From              string
+	To                []string
+	CC                []string
+	BCC               []string
+	Subject           string
+	TextBody          string
+	HTMLBody          string
+	Headers           map[string]string
+	TemplateVersionID *uuid.UUID
+	TemplateName      *string
+	TemplateVars      map[string]string
+	AttachmentIDs     []uuid.UUID
+	IdempotencyKey    string
+	// Draft pins the mail draft this submission consumes atomically; nil for
+	// the legacy /send path.
+	Draft *store.DraftConsumption
+}
+
+// submitAuthorized runs the full send authorization chain (zone lookup,
+// ActionSendFrom, verified/MX, DKIM policy, ResolveSendAuthorization, quota,
+// suppression) and enqueues the job. It writes the HTTP error response itself
+// and returns ok=false on failure. On success it returns the job and whether
+// the response is an idempotent replay of an earlier submission.
+func (h *OutboundHandler) submitAuthorized(w http.ResponseWriter, r *http.Request, in outboundSubmitInput) (*models.OutboundJob, bool, bool) {
 	ctx := r.Context()
 	tenant := middleware.TenantFromCtx(ctx)
 	if tenant == nil {
 		errForbidden(w, "authentication required")
-		return
+		return nil, false, false
 	}
 	actor := middleware.ActorFromContext(ctx)
 
@@ -98,28 +156,28 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 	}
 	userID := actor.EffectiveUserID()
 
-	canonical, addressErr := authz.CanonicalSender(body.From)
+	canonical, addressErr := authz.CanonicalSender(in.From)
 	if addressErr != nil {
 		errBadRequest(w, addressErr.Error())
-		return
+		return nil, false, false
 	}
-	body.From = canonical
+	in.From = canonical
 	// Validate the from address domain belongs to this tenant and is verified.
-	fromDomain := extractDomainFromAddress(body.From)
+	fromDomain := extractDomainFromAddress(in.From)
 	if fromDomain == "" {
 		errBadRequest(w, "invalid from address")
-		return
+		return nil, false, false
 	}
 
 	zone, err := h.store.GetZoneByDomain(ctx, fromDomain)
 	if err != nil {
 		h.logger.Err(err).Str("domain", fromDomain).Msg("looking up zone by domain")
 		errInternal(w)
-		return
+		return nil, false, false
 	}
 	if zone == nil {
 		errBadRequest(w, "from domain is not registered")
-		return
+		return nil, false, false
 	}
 
 	// Authorize sending from this zone through the authz seam: tenant
@@ -137,24 +195,24 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		} else {
 			errInternal(w)
 		}
-		return
+		return nil, false, false
 	}
 
 	if !zone.IsVerified {
 		errBadRequest(w, "from domain is not verified")
-		return
+		return nil, false, false
 	}
 
 	if !zone.MXVerified {
 		errBadRequest(w, "from domain MX is not verified")
-		return
+		return nil, false, false
 	}
 
 	// Reject synchronously when the zone's DKIM policy cannot be satisfied,
 	// rather than accepting a job that would only ever be driven to dead.
 	if reason := h.outbound.DKIMSendBlockReason(zone); reason != "" {
 		errBadRequest(w, reason)
-		return
+		return nil, false, false
 	}
 
 	quota := store.OutboundQuotaReservation{}
@@ -170,29 +228,29 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 	// The decision tree lives in outbound.ResolveSendAuthorization, the same
 	// function ValidateJobAuthorization re-runs before every delivery attempt;
 	// only the error precedence and wording below are HTTP-side.
-	res, err := outbound.ResolveSendAuthorization(ctx, h.store, actor, tenant.ID, body.From, body.TemplateVersionID != nil)
+	res, err := outbound.ResolveSendAuthorization(ctx, h.store, actor, tenant.ID, in.From, in.TemplateVersionID != nil)
 	if err != nil {
-		h.logger.Err(err).Str("from", body.From).Msg("resolving send authorization")
+		h.logger.Err(err).Str("from", in.From).Msg("resolving send authorization")
 		errInternal(w)
-		return
+		return nil, false, false
 	}
 	switch {
 	case res.TenantWideBlocked:
 		errForbidden(w, "company mailbox sends require an employee-owned credential")
-		return
+		return nil, false, false
 	case res.MailboxSenderErr != nil:
 		if authz.IsAuthzError(res.MailboxSenderErr) {
 			errForbidden(w, res.MailboxSenderErr.Error())
 		} else {
 			errInternal(w)
 		}
-		return
+		return nil, false, false
 	case res.IdentityUnverified:
 		errBadRequest(w, "from address is not an authorized mailbox or verified send identity")
-		return
+		return nil, false, false
 	case res.MailboxExpired:
 		errForbidden(w, "sender mailbox expired")
-		return
+		return nil, false, false
 	}
 	mailbox := res.Mailbox
 
@@ -206,66 +264,71 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check suppression list — block sending to suppressed addresses.
-	for _, rcpt := range append(append(body.To, body.CC...), body.BCC...) {
+	for _, rcpt := range append(append(in.To, in.CC...), in.BCC...) {
 		suppressed, err := h.store.IsSuppressed(ctx, tenant.ID, rcpt)
 		if err != nil {
 			h.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
 			errInternal(w)
-			return
+			return nil, false, false
 		}
 		if suppressed {
 			errBadRequest(w, "recipient "+rcpt+" is suppressed (hard bounce); remove from suppression list to retry")
-			return
+			return nil, false, false
 		}
 	}
 
 	// Build and submit the outbound job.
-	job, err := h.outbound.Submit(ctx, outbound.SendRequest{
+	job, replayed, err := h.outbound.SubmitWithReplay(ctx, outbound.SendRequest{
 		TenantID:          tenant.ID,
 		SenderMailboxID:   mailboxID(mailbox),
 		UserID:            userID,
 		APIKeyID:          apiKeyID,
 		ZoneID:            zone.ID,
-		From:              body.From,
-		To:                body.To,
-		CC:                body.CC,
-		BCC:               body.BCC,
-		Subject:           body.Subject,
-		TextBody:          body.TextBody,
-		HTMLBody:          body.HTMLBody,
-		Headers:           body.Headers,
-		TemplateName:      body.TemplateName,
-		TemplateVersionID: body.TemplateVersionID, AttachmentIDs: body.AttachmentIDs, IdempotencyKey: strings.TrimSpace(r.Header.Get("Idempotency-Key")),
-		TemplateVars: body.TemplateVars,
+		From:              in.From,
+		To:                in.To,
+		CC:                in.CC,
+		BCC:               in.BCC,
+		Subject:           in.Subject,
+		TextBody:          in.TextBody,
+		HTMLBody:          in.HTMLBody,
+		Headers:           in.Headers,
+		TemplateName:      in.TemplateName,
+		TemplateVersionID: in.TemplateVersionID, AttachmentIDs: in.AttachmentIDs, IdempotencyKey: in.IdempotencyKey,
+		TemplateVars: in.TemplateVars,
 		Quota:        quota,
+		Draft:        in.Draft,
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
 			writeJSON(w, http.StatusTooManyRequests, envelope{
 				Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: "send-as daily quota exceeded"},
 			})
-			return
+			return nil, false, false
 		}
 		if errors.Is(err, store.ErrOutboundDailyQuotaExceeded) {
 			writeJSON(w, http.StatusTooManyRequests, envelope{
 				Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: "daily send quota exceeded"},
 			})
-			return
+			return nil, false, false
+		}
+		if errors.Is(err, store.ErrDraftAlreadyConsumed) {
+			errConflict(w, "draft was already submitted or consumed in another window; check send status instead of retrying")
+			return nil, false, false
 		}
 		if authz.IsAuthzError(err) {
 			errForbidden(w, err.Error())
-			return
+			return nil, false, false
 		}
 		if _, ok := app.As(err); ok {
 			respondAppError(w, h.logger, err)
-			return
+			return nil, false, false
 		}
 		h.logger.Err(err).Msg("submitting outbound job")
 		errBadRequest(w, err.Error())
-		return
+		return nil, false, false
 	}
 
-	created(w, job)
+	return job, replayed, true
 }
 
 // GetJob handles GET /api/v1/outbound/{id} — get a single outbound job.

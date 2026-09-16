@@ -103,6 +103,12 @@ export interface MailAttachment {
   content_type: string;
   state: string;
 }
+export interface DraftSubmission {
+  id: string;
+  message_id: string;
+  state: string;
+  created_at: string;
+}
 export interface InboundAttachment {
   index: number;
   filename: string;
@@ -132,6 +138,20 @@ export interface Receipt {
   targets: RecoveryTarget[];
 }
 export const workPath = (id: string) => `/mailboxes/${encodeURIComponent(id)}`;
+export function submitDraft(
+  id: string,
+  revision: number,
+  idempotencyKey: string,
+) {
+  return company<DraftSubmission>(
+    `/drafts/${encodeURIComponent(id)}/submit`,
+    {
+      method: "POST",
+      headers: { "Idempotency-Key": idempotencyKey },
+      body: { expected_revision: revision },
+    },
+  );
+}
 export async function company<T>(
   path: string,
   opts: RequestOptions = {},

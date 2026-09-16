@@ -244,6 +244,24 @@ func (s *PgStore) ListMailDrafts(ctx context.Context, a authz.Actor) ([]company.
 	})
 	return out, e
 }
+func (s *PgStore) GetMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.Draft, error) {
+	v := &company.Draft{}
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		var raw []byte
+		e := tx.QueryRow(ctx, `SELECT id,mailbox_id,payload,revision,updated_at FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND id=$3`, a.TenantID, a.ID, id).Scan(&v.ID, &v.MailboxID, &raw, &v.Revision, &v.UpdatedAt)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.NotFound("draft not found")
+		}
+		if e != nil {
+			return e
+		}
+		return json.Unmarshal(raw, &v.Payload)
+	})
+	if e != nil {
+		return nil, e
+	}
+	return v, nil
+}
 func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Draft) (*company.Draft, error) {
 	raw, e := json.Marshal(v.Payload)
 	if e != nil {

@@ -29,86 +29,118 @@ func (s *PgStore) CreateOutboundJob(ctx context.Context, job *models.OutboundJob
 }
 
 func (s *PgStore) CreateOutboundJobWithQuota(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation) error {
+	_, err := s.enqueueOutboundJobTx(ctx, job, quota, nil)
+	return err
+}
+
+// CreateOutboundJobConsumeDraft enqueues the job and, inside the same
+// transaction, consumes the pinned mail draft by deleting its exact revision.
+// RowsAffected != 1 rolls the whole transaction back with
+// store.ErrDraftAlreadyConsumed, so a draft revision can only ever produce one
+// job. The transaction performs no SMTP, upload or other network I/O.
+// The returned replayed flag reports an idempotent hit: the (submit_actor,
+// idempotency_key) pair already owned a job with the same request hash, and the
+// original job was returned without re-attempting the draft consumption.
+func (s *PgStore) CreateOutboundJobConsumeDraft(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft store.DraftConsumption) (bool, error) {
+	return s.enqueueOutboundJobTx(ctx, job, quota, &draft)
+}
+
+func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption) (bool, error) {
 	prepareOutboundJob(job)
+	if draft != nil {
+		// The store owns the provenance marker so any caller of the consume
+		// variant records it, not just outbound.Service.
+		id := draft.ID
+		job.DraftID = &id
+	}
 
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
-		return err
+		return false, err
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	if job.IdempotencyKey != "" {
 		if len(job.IdempotencyKey) > 128 || job.SubmitActor == "" || job.RequestHash == "" {
-			return app.BadRequest("invalid submission identity")
+			return false, app.BadRequest("invalid submission identity")
 		}
 		if _, err = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "send-idempotency:"+job.TenantID.String()+":"+job.SubmitActor+":"+job.IdempotencyKey); err != nil {
-			return err
+			return false, err
 		}
 		old, e := scanOutboundJob(tx.QueryRow(ctx, outboundJobSelect+` WHERE tenant_id=$1 AND submit_actor=$2 AND idempotency_key=$3`, job.TenantID, job.SubmitActor, job.IdempotencyKey))
 		if e != nil {
-			return e
+			return false, e
 		}
 		if old != nil {
 			if old.RequestHash != job.RequestHash {
-				return app.Conflict("idempotency key was already used for a different request")
+				return false, app.Conflict("idempotency key was already used for a different request")
 			}
 			*job = *old
-			return tx.Commit(ctx)
+			return true, tx.Commit(ctx)
 		}
 	}
 	if len(job.AttachmentIDs) > 0 {
 		if job.SenderUserID == nil || job.SenderMailboxID == nil {
-			return app.Forbidden("attachments require an employee mailbox")
+			return false, app.Forbidden("attachments require an employee mailbox")
 		}
 		if err = validateAttachmentIDs(ctx, tx, job.TenantID, *job.SenderUserID, *job.SenderMailboxID, job.AttachmentIDs); err != nil {
-			return err
+			return false, err
 		}
 	}
 	if err := lockOutboundQuotaKeys(ctx, tx, job, quota); err != nil {
-		return err
+		return false, err
 	}
 
 	if q := quota.UserDaily; q != nil && q.Limit > 0 {
 		count, err := countOutboundSinceQuery(ctx, tx, job.TenantID, q.UserID, q.Since)
 		if err != nil {
-			return err
+			return false, err
 		}
 		if count >= q.Limit {
-			return store.ErrOutboundDailyQuotaExceeded
+			return false, store.ErrOutboundDailyQuotaExceeded
 		}
 	}
 
 	if q := quota.SendAsDaily; q != nil && q.Limit > 0 {
 		count, err := countOutboundByIdentitySinceQuery(ctx, tx, job.TenantID, q.PrincipalType, q.PrincipalID, q.IdentityID, q.Since)
 		if err != nil {
-			return err
+			return false, err
 		}
 		if count >= q.Limit {
-			return store.ErrSendAsDailyQuotaExceeded
+			return false, store.ErrSendAsDailyQuotaExceeded
 		}
 	}
 
 	if err := insertOutboundJob(ctx, tx, job); err != nil {
-		return err
+		return false, err
 	}
 	if job.RecipientLedger {
 		for _, addr := range job.RcptTo {
 			if _, err = tx.Exec(ctx, `INSERT INTO outbound_recipients(tenant_id,job_id,address) VALUES($1,$2,$3) ON CONFLICT DO NOTHING`, job.TenantID, job.ID, addr); err != nil {
-				return err
+				return false, err
 			}
 		}
 	}
 	for _, id := range job.AttachmentIDs {
 		if _, err = tx.Exec(ctx, `INSERT INTO outbound_attachments(tenant_id,job_id,attachment_id) VALUES($1,$2,$3)`, job.TenantID, job.ID, id); err != nil {
-			return err
+			return false, err
 		}
 	}
 	if job.SubmitActor != "" {
 		if _, err = tx.Exec(ctx, `INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'outbound.submit','outbound_job',$3,jsonb_build_object('template_version_id',$4::text,'content_digest',$5::text))`, job.TenantID, job.SubmitActor, job.ID, job.TemplateVersionID, job.ContentDigest); err != nil {
-			return err
+			return false, err
 		}
 	}
-	return tx.Commit(ctx)
+	if draft != nil {
+		tag, e := tx.Exec(ctx, `DELETE FROM mail_drafts WHERE id=$1 AND tenant_id=$2 AND user_id=$3 AND revision=$4`, draft.ID, draft.TenantID, draft.UserID, draft.Revision)
+		if e != nil {
+			return false, e
+		}
+		if tag.RowsAffected() != 1 {
+			return false, store.ErrDraftAlreadyConsumed
+		}
+	}
+	return false, tx.Commit(ctx)
 }
 
 func prepareOutboundJob(job *models.OutboundJob) {
@@ -136,14 +168,14 @@ func insertOutboundJob(ctx context.Context, execer outboundJobExecer, job *model
 			text_body, html_body, headers_json, raw_mime, zone_id, state, attempts, max_attempts,
 			last_error, next_attempt_at, smtp_code, smtp_response, message_id_header, created_at, updated_at,
 			sender_user_id,sender_key_id,sender_mailbox_id,template_name,delivered_domains,in_flight_domain,
-            to_addrs, cc_addrs, bcc_addrs,template_version_id,content_digest,submit_actor,idempotency_key,request_hash,recipient_ledger,attachment_ids)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38)`,
+            to_addrs, cc_addrs, bcc_addrs,template_version_id,content_digest,submit_actor,idempotency_key,request_hash,recipient_ledger,attachment_ids,draft_id)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39)`,
 		job.ID, job.TenantID, job.UserID, job.APIKeyID, job.MailFrom, job.RcptTo, job.Subject,
 		job.TextBody, job.HTMLBody, job.HeadersJSON, job.RawMIME, job.ZoneID, job.State,
 		job.Attempts, job.MaxAttempts, job.LastError, job.NextAttemptAt, job.SMTPCode,
 		job.SMTPResponse, job.MessageIDHeader, job.CreatedAt, job.UpdatedAt,
 		job.SenderUserID, job.SenderKeyID, job.SenderMailboxID, job.TemplateName, nonNil(job.DeliveredDomains), job.InFlightDomain,
-		nonNil(job.To), nonNil(job.CC), nonNil(job.BCC), job.TemplateVersionID, job.ContentDigest, job.SubmitActor, job.IdempotencyKey, job.RequestHash, job.RecipientLedger, uuidSliceParam(job.AttachmentIDs))
+		nonNil(job.To), nonNil(job.CC), nonNil(job.BCC), job.TemplateVersionID, job.ContentDigest, job.SubmitActor, job.IdempotencyKey, job.RequestHash, job.RecipientLedger, uuidSliceParam(job.AttachmentIDs), job.DraftID)
 	return err
 }
 
@@ -179,7 +211,7 @@ func quotaDay(since time.Time) string {
 const outboundJobSelect = `SELECT id, tenant_id, user_id, api_key_id, mail_from, rcpt_to, subject,
 	text_body, html_body, headers_json, raw_mime, zone_id, state, attempts, max_attempts,
 	last_error, next_attempt_at, claimed_at, lease_until, smtp_code, smtp_response,
-	message_id_header, delivery_token, created_at, updated_at, to_addrs, cc_addrs, bcc_addrs,delivered_domains,in_flight_domain,sender_user_id,sender_key_id,sender_mailbox_id,template_name,template_version_id,content_digest,submit_actor,idempotency_key,request_hash,recipient_ledger,attachment_ids
+	message_id_header, delivery_token, created_at, updated_at, to_addrs, cc_addrs, bcc_addrs,delivered_domains,in_flight_domain,sender_user_id,sender_key_id,sender_mailbox_id,template_name,template_version_id,content_digest,submit_actor,idempotency_key,request_hash,recipient_ledger,attachment_ids,draft_id
 	FROM outbound_jobs`
 
 func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
@@ -192,7 +224,7 @@ func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
 		&job.TextBody, &job.HTMLBody, &job.HeadersJSON, &job.RawMIME, &job.ZoneID, &job.State,
 		&job.Attempts, &job.MaxAttempts, &job.LastError, &job.NextAttemptAt, &job.ClaimedAt,
 		&job.LeaseUntil, &smtpCode, &job.SMTPResponse, &job.MessageIDHeader, &deliveryToken, &job.CreatedAt, &job.UpdatedAt,
-		&job.To, &job.CC, &job.BCC, &job.DeliveredDomains, &job.InFlightDomain, &job.SenderUserID, &job.SenderKeyID, &job.SenderMailboxID, &job.TemplateName, &job.TemplateVersionID, &job.ContentDigest, &job.SubmitActor, &job.IdempotencyKey, &job.RequestHash, &job.RecipientLedger, &job.AttachmentIDs)
+		&job.To, &job.CC, &job.BCC, &job.DeliveredDomains, &job.InFlightDomain, &job.SenderUserID, &job.SenderKeyID, &job.SenderMailboxID, &job.TemplateName, &job.TemplateVersionID, &job.ContentDigest, &job.SubmitActor, &job.IdempotencyKey, &job.RequestHash, &job.RecipientLedger, &job.AttachmentIDs, &job.DraftID)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -217,6 +249,13 @@ func scanOutboundJob(row pgx.Row) (*models.OutboundJob, error) {
 
 func (s *PgStore) GetOutboundJob(ctx context.Context, id uuid.UUID) (*models.OutboundJob, error) {
 	return scanOutboundJob(s.pool.QueryRow(ctx, outboundJobSelect+` WHERE id=$1`, id))
+}
+
+// FindOutboundJobByDraft returns the single job that consumed the draft (a
+// draft revision can produce at most one job), or nil when the draft was never
+// submitted.
+func (s *PgStore) FindOutboundJobByDraft(ctx context.Context, tenantID, draftID uuid.UUID) (*models.OutboundJob, error) {
+	return scanOutboundJob(s.pool.QueryRow(ctx, outboundJobSelect+` WHERE tenant_id=$1 AND draft_id=$2`, tenantID, draftID))
 }
 
 // ListOutboundJobsScoped applies the OwnerListFilter in SQL: tenant isolation
@@ -302,7 +341,7 @@ func (s *PgStore) ClaimOutboundJobs(ctx context.Context, _ time.Time, _ int) ([]
  FROM candidate WHERE j.id=candidate.id RETURNING j.id,j.tenant_id,j.user_id,j.api_key_id,j.mail_from,j.rcpt_to,j.subject,
  j.text_body,j.html_body,j.headers_json,j.raw_mime,j.zone_id,j.state,j.attempts,j.max_attempts,j.last_error,j.next_attempt_at,
  j.claimed_at,j.lease_until,j.smtp_code,j.smtp_response,j.message_id_header,j.delivery_token,j.created_at,j.updated_at,
- j.to_addrs,j.cc_addrs,j.bcc_addrs,j.delivered_domains,j.in_flight_domain,j.sender_user_id,j.sender_key_id,j.sender_mailbox_id,j.template_name,j.template_version_id,j.content_digest,j.submit_actor,j.idempotency_key,j.request_hash,j.recipient_ledger,j.attachment_ids`)
+ j.to_addrs,j.cc_addrs,j.bcc_addrs,j.delivered_domains,j.in_flight_domain,j.sender_user_id,j.sender_key_id,j.sender_mailbox_id,j.template_name,j.template_version_id,j.content_digest,j.submit_actor,j.idempotency_key,j.request_hash,j.recipient_ledger,j.attachment_ids,j.draft_id`)
 	if err != nil {
 		return nil, err
 	}

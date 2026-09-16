@@ -187,6 +187,7 @@ type Repository interface {
 	ListUsableTemplates(context.Context, authz.Actor, uuid.UUID) ([]TemplateVersion, error)
 	TemplateForSend(context.Context, uuid.UUID, *uuid.UUID, *uuid.UUID, uuid.UUID, uuid.UUID) (*TemplateVersion, string, string, error)
 	ListMailDrafts(context.Context, authz.Actor) ([]Draft, error)
+	GetMailDraft(context.Context, authz.Actor, uuid.UUID) (*Draft, error)
 	SaveMailDraft(context.Context, authz.Actor, Draft) (*Draft, error)
 	DeleteMailDraft(context.Context, authz.Actor, uuid.UUID, int) error
 	ReserveMailAttachment(context.Context, authz.Actor, Attachment) (*Attachment, error)
