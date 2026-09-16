@@ -270,18 +270,21 @@ type Mailbox struct {
 // ============================================================
 
 type Message struct {
-	DeletedAt     *time.Time      `json:"deleted_at,omitempty" db:"deleted_at"`
-	PurgeAfter    *time.Time      `json:"purge_after,omitempty" db:"purge_after"`
-	ArchivedAt    *time.Time      `json:"archived_at,omitempty" db:"archived_at"`
-	ID            uuid.UUID       `json:"id" db:"id"`
-	TenantID      uuid.UUID       `json:"tenant_id" db:"tenant_id"`
-	MailboxID     uuid.UUID       `json:"mailbox_id" db:"mailbox_id"`
-	ZoneID        uuid.UUID       `json:"zone_id" db:"zone_id"`
-	Sender        string          `json:"sender" db:"sender"`
-	Recipients    []string        `json:"recipients" db:"recipients"`
-	Subject       string          `json:"subject" db:"subject"`
-	Size          int64           `json:"size" db:"size"`
-	Seen          bool            `json:"seen" db:"seen"`
+	DeletedAt  *time.Time `json:"deleted_at,omitempty" db:"deleted_at"`
+	PurgeAfter *time.Time `json:"purge_after,omitempty" db:"purge_after"`
+	ArchivedAt *time.Time `json:"archived_at,omitempty" db:"archived_at"`
+	ID         uuid.UUID  `json:"id" db:"id"`
+	TenantID   uuid.UUID  `json:"tenant_id" db:"tenant_id"`
+	MailboxID  uuid.UUID  `json:"mailbox_id" db:"mailbox_id"`
+	ZoneID     uuid.UUID  `json:"zone_id" db:"zone_id"`
+	Sender     string     `json:"sender" db:"sender"`
+	Recipients []string   `json:"recipients" db:"recipients"`
+	Subject    string     `json:"subject" db:"subject"`
+	Size       int64      `json:"size" db:"size"`
+	Seen       bool       `json:"seen" db:"seen"`
+	// Starred is the per-user flag merged from message_user_states by the
+	// company workbench queries; legacy mailbox paths leave it false.
+	Starred       bool            `json:"starred" db:"starred"`
 	RawObjectKey  string          `json:"raw_object_key,omitempty" db:"raw_object_key"`
 	HeadersJSON   json.RawMessage `json:"headers,omitempty" db:"headers_json"`
 	ReceivedAt    time.Time       `json:"received_at" db:"received_at"`

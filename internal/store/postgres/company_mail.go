@@ -16,11 +16,15 @@ import (
 	"tabmail/internal/models"
 )
 
-const workMessageSelect = `SELECT id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size,seen,raw_object_key,headers_json,received_at,expires_at,otp_code,otp_confidence,deleted_at,purge_after,archived_at FROM messages`
+// The workbench reads merged state: a member's sparse message_user_states row
+// overrides the shared baseline in messages.seen; the extra join parameter
+// ($6) is the acting user (uuid.Nil matches nothing for token principals).
+const workMessageSelect = `SELECT m.id,m.tenant_id,m.mailbox_id,m.zone_id,m.sender,m.recipients,m.subject,m.size,COALESCE(mus.seen,m.seen),COALESCE(mus.starred,false),m.raw_object_key,m.headers_json,m.received_at,m.expires_at,m.otp_code,m.otp_confidence,m.deleted_at,m.purge_after,m.archived_at FROM messages m
+ LEFT JOIN message_user_states mus ON mus.tenant_id=m.tenant_id AND mus.mailbox_id=m.mailbox_id AND mus.message_id=m.id AND mus.user_id=$6`
 
 func scanWorkMessage(row pgx.Row) (*models.Message, error) {
 	m := &models.Message{}
-	e := row.Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients, &m.Subject, &m.Size, &m.Seen, &m.RawObjectKey, &m.HeadersJSON, &m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence, &m.DeletedAt, &m.PurgeAfter, &m.ArchivedAt)
+	e := row.Scan(&m.ID, &m.TenantID, &m.MailboxID, &m.ZoneID, &m.Sender, &m.Recipients, &m.Subject, &m.Size, &m.Seen, &m.Starred, &m.RawObjectKey, &m.HeadersJSON, &m.ReceivedAt, &m.ExpiresAt, &m.OTPCode, &m.OTPConfidence, &m.DeletedAt, &m.PurgeAfter, &m.ArchivedAt)
 	return m, e
 }
 func (s *PgStore) ListWorkMessages(ctx context.Context, a authz.Actor, id uuid.UUID, folder, query string, page models.Page) ([]*models.Message, int, error) {
@@ -29,15 +33,15 @@ func (s *PgStore) ListWorkMessages(ctx context.Context, a authz.Actor, id uuid.U
 	if len(query) > 256 {
 		return nil, 0, app.BadRequest("search query too long")
 	}
-	where := `deleted_at IS NULL AND archived_at IS NULL`
+	where := `m.deleted_at IS NULL AND m.archived_at IS NULL`
 	switch folder {
 	case "", "inbox":
 	case "archive":
-		where = `deleted_at IS NULL AND archived_at IS NOT NULL`
+		where = `m.deleted_at IS NULL AND m.archived_at IS NOT NULL`
 	case "trash":
-		where = `deleted_at IS NOT NULL`
+		where = `m.deleted_at IS NOT NULL`
 	case "all":
-		where = `deleted_at IS NULL`
+		where = `m.deleted_at IS NULL`
 	default:
 		return nil, 0, app.BadRequest("invalid folder")
 	}
@@ -53,11 +57,15 @@ func (s *PgStore) ListWorkMessages(ctx context.Context, a authz.Actor, id uuid.U
 		if !v.CanRead {
 			return app.Forbidden("mailbox read permission required")
 		}
-		filter := `tenant_id=$1 AND mailbox_id=$2 AND ` + where + ` AND ($3='%%' OR subject ILIKE $3 OR sender ILIKE $3 OR array_to_string(recipients,',') ILIKE $3)`
-		if e = tx.QueryRow(ctx, `SELECT count(*) FROM messages WHERE `+filter, a.TenantID, id, pattern).Scan(&total); e != nil {
+		viewer := uuid.Nil
+		if uid := a.EffectiveUserID(); uid != nil {
+			viewer = *uid
+		}
+		filter := `m.tenant_id=$1 AND m.mailbox_id=$2 AND ` + where + ` AND ($3='%%' OR m.subject ILIKE $3 OR m.sender ILIKE $3 OR array_to_string(m.recipients,',') ILIKE $3)`
+		if e = tx.QueryRow(ctx, `SELECT count(*) FROM messages m WHERE `+filter, a.TenantID, id, pattern).Scan(&total); e != nil {
 			return e
 		}
-		rows, e := tx.Query(ctx, workMessageSelect+` WHERE `+filter+` ORDER BY received_at DESC,id DESC LIMIT $4 OFFSET $5`, a.TenantID, id, pattern, page.PerPage, page.Offset())
+		rows, e := tx.Query(ctx, workMessageSelect+` WHERE `+filter+` ORDER BY m.received_at DESC,m.id DESC LIMIT $4 OFFSET $5`, a.TenantID, id, pattern, page.PerPage, page.Offset(), viewer)
 		if e != nil {
 			return e
 		}
@@ -110,23 +118,77 @@ func messageOutbox(ctx context.Context, tx pgx.Tx, tenant, id uuid.UUID, address
 	_, e = tx.Exec(ctx, `INSERT INTO outbox_events(id,event_type,payload) VALUES($1,$2,$3)`, uuid.New(), eventType, raw)
 	return e
 }
+
+// MutateWorkMessage splits message actions into two authorization domains:
+//   - personal state (seen/unseen/starred/unstarred) needs only CanRead and
+//     writes the actor's own message_user_states row, so one member's read
+//     state never becomes everyone's;
+//   - shared organizing (trash/archive/unarchive/restore) still requires
+//     CanRead+CanOrganize and mutates the message row for the whole mailbox.
+//
+// The one exception is the personal-mailbox owner: their seen/unseen keeps
+// the historical messages.seen fast path so the company workbench and the
+// legacy mailbox route stay consistent for the owner's own mailbox.
 func (s *PgStore) MutateWorkMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID, action string) error {
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		v, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
 		}
-		if !v.CanRead || !v.CanOrganize {
-			return app.Forbidden("mailbox organize permission required")
-		}
-		if e = messageMutation(ctx, tx, a.TenantID, mailbox, id, action); e != nil {
-			return e
+		switch action {
+		case "seen", "unseen", "starred", "unstarred":
+			if !v.CanRead {
+				return app.Forbidden("mailbox read permission required")
+			}
+			if e = s.writePersonalMessageState(ctx, tx, a, v, mailbox, id, action); e != nil {
+				return e
+			}
+		default:
+			if !v.CanRead || !v.CanOrganize {
+				return app.Forbidden("mailbox organize permission required")
+			}
+			if e = messageMutation(ctx, tx, a.TenantID, mailbox, id, action); e != nil {
+				return e
+			}
 		}
 		if e = companyAudit(ctx, tx, a, "message."+action, "message", id, map[string]any{"mailbox_id": mailbox}); e != nil {
 			return e
 		}
 		return messageOutbox(ctx, tx, a.TenantID, id, v.Mailbox.FullAddress, action)
 	})
+}
+
+// writePersonalMessageState records the actor's own read/star preference. The
+// owner fast path keeps messages.seen authoritative for a personal mailbox;
+// every other case writes the sparse per-user row and emits the mailbox
+// invalidation event itself, because no messages row changes and the change
+// trigger therefore does not fire.
+func (s *PgStore) writePersonalMessageState(ctx context.Context, tx pgx.Tx, a authz.Actor, v *company.MailboxAccess, mailbox, id uuid.UUID, action string) error {
+	uid := a.EffectiveUserID()
+	if uid == nil {
+		return app.Forbidden("mailbox read permission required")
+	}
+	if (action == "seen" || action == "unseen") && v.Mailbox.Kind == "personal" && v.Mailbox.OwnerUserID != nil && *v.Mailbox.OwnerUserID == *uid {
+		return messageMutation(ctx, tx, a.TenantID, mailbox, id, action)
+	}
+	// $7 marks a seen-toggle: only that dimension is written, the other keeps
+	// whatever the member previously recorded (insert defaults it to false).
+	seenToggle := action == "seen" || action == "unseen"
+	tag, e := tx.Exec(ctx, `INSERT INTO message_user_states(tenant_id,mailbox_id,message_id,user_id,seen,starred)
+		SELECT $1,$2,$3,$4,CASE WHEN $7 THEN $5 ELSE FALSE END,CASE WHEN $7 THEN FALSE ELSE $6 END FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3
+		ON CONFLICT (mailbox_id,message_id,user_id) DO UPDATE SET
+		  seen=CASE WHEN $7 THEN $5 ELSE message_user_states.seen END,
+		  starred=CASE WHEN $7 THEN message_user_states.starred ELSE $6 END,
+		  updated_at=now()`,
+		a.TenantID, mailbox, id, *uid, action == "seen", action == "starred", seenToggle)
+	if e != nil {
+		return e
+	}
+	if tag.RowsAffected() != 1 {
+		return app.NotFound("message unavailable for this action")
+	}
+	_, e = tx.Exec(ctx, `INSERT INTO mailbox_event_log(tenant_id,mailbox_id,event_type,message_id) VALUES($1,$2,'changed',$3)`, a.TenantID, mailbox, id)
+	return e
 }
 
 // Legacy company-mail DELETE routes use this seam after their resource check.

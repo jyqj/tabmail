@@ -195,6 +195,8 @@ type Repository interface {
 	GetWorkAttachment(context.Context, authz.Actor, uuid.UUID) (*Attachment, error)
 	ListWorkMessages(context.Context, authz.Actor, uuid.UUID, string, string, models.Page) ([]*models.Message, int, error)
 	MutateWorkMessage(context.Context, authz.Actor, uuid.UUID, uuid.UUID, string) error
+	ListSubmissions(context.Context, authz.Actor, models.Page) ([]Submission, int, error)
+	GetSubmission(context.Context, authz.Actor, uuid.UUID) (*Submission, error)
 	ListMailboxEvents(context.Context, uuid.UUID, uuid.UUID, int64, int) ([]MailEvent, int64, error)
 	ListRecoveryReceipts(context.Context, authz.Actor, models.Page) ([]RecoveryReceipt, int, error)
 	InspectRecoveryReceipt(context.Context, authz.Actor, uuid.UUID, string) (*RecoveryReceipt, error)

@@ -333,6 +333,9 @@ components:
           type: integer
         seen:
           type: boolean
+        starred:
+          type: boolean
+          description: Per-user flag merged from message_user_states; legacy mailbox paths report false
         headers:
           type: object
         received_at:
@@ -358,6 +361,50 @@ components:
             type: string
           html_body:
             type: string
+    Submission:
+      type: object
+      description: Employee-facing projection of an outbound submission; queue
+        internals (attempts, lease, SMTP responses, delivery tokens) are excluded.
+      properties:
+        id:
+          type: string
+          format: uuid
+        mailbox_id:
+          type: string
+          format: uuid
+        from:
+          type: string
+        subject:
+          type: string
+        recipients:
+          type: array
+          items:
+            type: object
+            properties:
+              address:
+                type: string
+              state:
+                type: string
+                enum: [pending, accepted, temporary, permanent, uncertain]
+        status:
+          type: string
+          enum: [submitted, waiting, sending, partially_accepted, accepted, needs_attention]
+        template_version_id:
+          type:
+          - string
+          - 'null'
+          format: uuid
+        draft_consumed:
+          type: boolean
+        attachment_count:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        content_redacted:
+          type: boolean
+        delivery_uncertain:
+          type: boolean
     APIKeyScope:
       type: string
       enum:
@@ -5448,6 +5495,76 @@ paths:
         name: revision
         required: true
         schema: *id003
+  /api/v1/company/submissions:
+    get:
+      tags:
+      - Company mail
+      summary: List Submissions
+      description: Employee-facing projection of outbound submissions the caller
+        sent or that originate from a mailbox the caller can read. Queue
+        internals (attempts, lease, SMTP responses) are never included; the
+        diagnostic view stays in the recovery surface.
+      operationId: companySubmissionsList
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+      - in: query
+        name: per_page
+        schema:
+          type: integer
+          default: 30
+      responses:
+        '200':
+          description: Operation completed. Creating a send task is not delivery confirmation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Submission'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        '401':
+          description: Missing/expired/revoked identity; refresh only when permitted
+        '500':
+          description: Operation failed; do not assume it committed
+  /api/v1/company/submissions/{id}:
+    get:
+      tags:
+      - Company mail
+      summary: Get Submission
+      operationId: companySubmissionsGet
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Operation completed. Creating a send task is not delivery confirmation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Submission'
+        '401':
+          description: Missing/expired/revoked identity; refresh only when permitted
+        '404':
+          description: Submission not found or outside the caller's scope
+        '500':
+          description: Operation failed; do not assume it committed
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema: *id001
   /api/v1/company/recovery:
     get:
       tags:

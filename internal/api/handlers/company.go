@@ -79,6 +79,8 @@ func (h *CompanyHandler) Routes(r chi.Router) {
 		r.Put("/drafts/{id}", h.SaveDraft)
 		r.Post("/drafts/{id}/submit", h.SubmitDraft)
 		r.Delete("/drafts/{id}", h.DeleteDraft)
+		r.Get("/submissions", h.Submissions)
+		r.Get("/submissions/{id}", h.Submission)
 		r.Get("/recovery", h.Recovery)
 		r.Post("/recovery/{id}/inspect", h.InspectReceipt)
 		r.Post("/recovery/{id}/retry", h.RetryReceipt)
@@ -390,6 +392,28 @@ func (h *CompanyHandler) Messages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	okList(w, v, total, page.Page, page.PerPage)
+}
+
+// Submissions serves GET /api/v1/company/submissions — the employee-facing
+// projection of their own and their readable mailboxes' outbound submissions.
+func (h *CompanyHandler) Submissions(w http.ResponseWriter, r *http.Request) {
+	page := pageFromReq(r)
+	v, total, e := h.repo.ListSubmissions(r.Context(), companyActor(r), page)
+	if e != nil {
+		h.result(w, nil, e)
+		return
+	}
+	okList(w, v, total, page.Page, page.PerPage)
+}
+
+// Submission serves GET /api/v1/company/submissions/{id}.
+func (h *CompanyHandler) Submission(w http.ResponseWriter, r *http.Request) {
+	id, ok := companyID(w, r, "id")
+	if !ok {
+		return
+	}
+	v, e := h.repo.GetSubmission(r.Context(), companyActor(r), id)
+	h.result(w, v, e)
 }
 func (h *CompanyHandler) mailboxForRead(w http.ResponseWriter, r *http.Request) (*company.MailboxAccess, uuid.UUID, bool) {
 	mbID, ok := companyID(w, r, "id")
