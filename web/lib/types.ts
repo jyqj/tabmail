@@ -431,6 +431,9 @@ export interface OutboundJob {
   api_key_id?: string;
   mail_from: string;
   rcpt_to: string[];
+  to?: string[];
+  cc?: string[];
+  bcc?: string[];
   subject: string;
   text_body?: string;
   html_body?: string;

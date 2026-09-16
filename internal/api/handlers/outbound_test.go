@@ -18,6 +18,7 @@ import (
 	"tabmail/internal/config"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
+	"tabmail/internal/store"
 	"tabmail/internal/testutil"
 )
 
@@ -414,4 +415,52 @@ func outboundDataLen(t *testing.T, rr *httptest.ResponseRecorder) int {
 		t.Fatal(err)
 	}
 	return len(body.Data)
+}
+
+// TestSubmitDraftPathRejectsLegacyTemplateName pins the company draft submit
+// invariant: draft submissions converge on submitAuthorized and must never be
+// able to trigger the legacy name-based template renderer. company.DraftPayload
+// has no template_name field, so the guard only fires if a future caller wires
+// TemplateName into the draft path.
+func TestSubmitDraftPathRejectsLegacyTemplateName(t *testing.T) {
+	f := newOutboundAccessFixture(t)
+	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, testutil.DeniedTemplateGovernance{}, zerolog.Nop())
+	h := NewOutboundHandler(svc, f.st, zerolog.Nop())
+	name := "legacy-template"
+	headers := outboundUserHeaders(t, f.userA)
+
+	rr := doOutboundHandlerRequest(t, f.st, func(w http.ResponseWriter, r *http.Request) {
+		h.submitAuthorized(w, r, outboundSubmitInput{
+			From:         "a@retry.test",
+			To:           []string{"rcpt@example.org"},
+			TemplateName: &name,
+			Draft: &store.DraftConsumption{
+				TenantID: f.tenantID,
+				UserID:   f.userA.ID,
+				ID:       uuid.New(),
+				Revision: 1,
+			},
+		})
+	}, http.MethodPost, "/api/v1/company/drafts/x/submit", nil, headers)
+	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "template_version_id, not template_name") {
+		t.Fatalf("draft path with template_name must be rejected, got %d body=%s", rr.Code, rr.Body.String())
+	}
+
+	// Without a template name the draft path must pass the guard (it fails
+	// later in the send chain, not on the template_name invariant).
+	rr = doOutboundHandlerRequest(t, f.st, func(w http.ResponseWriter, r *http.Request) {
+		h.submitAuthorized(w, r, outboundSubmitInput{
+			From: "a@retry.test",
+			To:   []string{"rcpt@example.org"},
+			Draft: &store.DraftConsumption{
+				TenantID: f.tenantID,
+				UserID:   f.userA.ID,
+				ID:       uuid.New(),
+				Revision: 1,
+			},
+		})
+	}, http.MethodPost, "/api/v1/company/drafts/x/submit", nil, headers)
+	if strings.Contains(rr.Body.String(), "template_version_id, not template_name") {
+		t.Fatalf("draft path without template_name must not hit the guard, got %d body=%s", rr.Code, rr.Body.String())
+	}
 }

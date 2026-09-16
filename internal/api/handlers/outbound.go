@@ -137,6 +137,14 @@ type outboundSubmitInput struct {
 // and returns ok=false on failure. On success it returns the job and whether
 // the response is an idempotent replay of an earlier submission.
 func (h *OutboundHandler) submitAuthorized(w http.ResponseWriter, r *http.Request, in outboundSubmitInput) (*models.OutboundJob, bool, bool) {
+	// The company draft submit path must never reach the legacy name-based
+	// renderer: company.DraftPayload has no template_name field, so draft
+	// submissions can only reference a published template version. This guard
+	// pins that invariant where both entry points converge.
+	if in.Draft != nil && in.TemplateName != nil {
+		errBadRequest(w, "draft submissions must use template_version_id, not template_name")
+		return nil, false, false
+	}
 	ctx := r.Context()
 	tenant := middleware.TenantFromCtx(ctx)
 	if tenant == nil {

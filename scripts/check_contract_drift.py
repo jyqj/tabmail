@@ -17,7 +17,6 @@ SHARED_TYPES = [
     "TenantAPIKey",
     "EffectiveConfig",
     "DomainZone",
-    "DomainRoute",
     "Mailbox",
     "Message",
     "MonitorEvent",
@@ -27,6 +26,7 @@ SHARED_TYPES = [
     "WebhookDelivery",
     "IngestJob",
     "SystemStats",
+    "OutboundJob",
 ]
 
 
@@ -102,7 +102,11 @@ def main() -> int:
               f"  only in TS: {only_ts or '[]'}"
           )
 
-    company_go = parse_go_struct_fields((ROOT / "internal/company/types.go").read_text())
+    company_go: dict[str, set[str]] = {}
+    for company_file in sorted((ROOT / "internal/company").glob("*.go")):
+        if company_file.name.endswith("_test.go"):
+            continue
+        company_go.update(parse_go_struct_fields(company_file.read_text()))
     company_ts = parse_ts_interface_fields((ROOT / "web/lib/company.ts").read_text())
     company_pairs = {
         "Settings": "CompanySettings", "Invitation": "Invitation",
@@ -112,6 +116,7 @@ def main() -> int:
         "Draft": "MailDraft", "Attachment": "MailAttachment",
         "Recipient": "RecipientResult", "RecoveryTarget": "RecoveryTarget",
         "RecoveryReceipt": "Receipt",
+        "Submission": "Submission", "SubmissionRecipient": "SubmissionRecipient",
     }
     for go_name, ts_name in company_pairs.items():
         go_fields = company_go.get(go_name, set())
