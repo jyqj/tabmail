@@ -166,43 +166,36 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 	// longer gate sending. This makes the send_identities feature (manual
 	// exact identities, the auto-created *@domain wildcard, and its Verified
 	// flag) actually enforce send-as.
-	mailbox, err := h.store.ForTenant(tenant.ID).GetMailboxByAddress(ctx, body.From)
+	//
+	// The decision tree lives in outbound.ResolveSendAuthorization, the same
+	// function ValidateJobAuthorization re-runs before every delivery attempt;
+	// only the error precedence and wording below are HTTP-side.
+	res, err := outbound.ResolveSendAuthorization(ctx, h.store, actor, tenant.ID, body.From, body.TemplateVersionID != nil)
 	if err != nil {
-		h.logger.Err(err).Str("from", body.From).Msg("looking up mailbox by address")
+		h.logger.Err(err).Str("from", body.From).Msg("resolving send authorization")
 		errInternal(w)
 		return
 	}
-	if actor.TenantWide && mailbox != nil && (mailbox.OwnerUserID != nil || mailbox.Kind == "shared") {
+	switch {
+	case res.TenantWideBlocked:
 		errForbidden(w, "company mailbox sends require an employee-owned credential")
 		return
-	}
-	if !actor.TenantWide {
-		if err := authz.CheckMailboxSender(ctx, h.store, actor, mailbox, body.TemplateVersionID != nil); err != nil {
-			if authz.IsAuthzError(err) {
-				errForbidden(w, err.Error())
-			} else {
-				errInternal(w)
-			}
-			return
-		}
-	}
-	if mailbox == nil {
-		identity, err := h.store.FindSendIdentityForAddress(ctx, tenant.ID, body.From)
-		if err != nil {
-			h.logger.Err(err).Str("from", body.From).Msg("finding send identity for send-as")
+	case res.MailboxSenderErr != nil:
+		if authz.IsAuthzError(res.MailboxSenderErr) {
+			errForbidden(w, res.MailboxSenderErr.Error())
+		} else {
 			errInternal(w)
-			return
 		}
-		if identity == nil || !identity.Verified {
-			errBadRequest(w, "from address is not an authorized mailbox or verified send identity")
-			return
-		}
-	}
-
-	if mailbox != nil && mailbox.ExpiresAt != nil && !mailbox.ExpiresAt.After(time.Now()) {
+		return
+	case res.IdentityUnverified:
+		errBadRequest(w, "from address is not an authorized mailbox or verified send identity")
+		return
+	case res.MailboxExpired:
 		errForbidden(w, "sender mailbox expired")
 		return
 	}
+	mailbox := res.Mailbox
+
 	// Reserve user daily quota atomically with job creation.
 	if actor.Permission != nil && actor.Permission.DailySendQuota > 0 {
 		quota.UserDaily = &store.OutboundUserDailyQuota{

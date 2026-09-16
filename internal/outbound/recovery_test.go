@@ -47,7 +47,7 @@ func recoverySendFixture(t *testing.T) (*testutil.FakeStore, *Service, SendReque
 	req := quotaTestSendRequest(uuid.New(), uuid.New())
 	seedQuotaSender(t, st, &req)
 	req.To = []string{"alice@a.test", "bob@b.test"}
-	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 5, RetryDelay: time.Nanosecond}, st, zerolog.Nop())
+	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 5, RetryDelay: time.Nanosecond}, st, nopGovernance{}, zerolog.Nop())
 	adapter := &domainFixtureAdapter{calls: map[string]int{}}
 	svc.adapter = adapter
 	return st, svc, req, adapter

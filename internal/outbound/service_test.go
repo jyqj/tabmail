@@ -19,7 +19,7 @@ import (
 func TestSubmitReservesUserDailyQuotaWithJobCreation(t *testing.T) {
 	ctx := context.Background()
 	st := testutil.NewFakeStore()
-	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, zerolog.Nop())
+	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, nopGovernance{}, zerolog.Nop())
 	tenantID := uuid.New()
 	userID := uuid.New()
 	req := quotaTestSendRequest(tenantID, userID)
@@ -48,7 +48,7 @@ func TestSubmitReservesUserDailyQuotaWithJobCreation(t *testing.T) {
 func TestSubmitReservesSendAsDailyQuotaWithJobCreation(t *testing.T) {
 	ctx := context.Background()
 	st := testutil.NewFakeStore()
-	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, zerolog.Nop())
+	svc := NewService(config.Outbound{Enabled: true, MaxRetries: 3}, st, nopGovernance{}, zerolog.Nop())
 	tenantID := uuid.New()
 	userID := uuid.New()
 	identity := &models.SendIdentity{

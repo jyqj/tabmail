@@ -27,13 +27,14 @@ const maxRetryDelay = 1 * time.Hour
 
 // Service manages outbound email submission and background delivery.
 type Service struct {
-	workerMu sync.Mutex
-	cfg      config.Outbound
-	store    store.Store
-	adapter  DeliveryAdapter
-	logger   zerolog.Logger
-	template *template.Service
-	objects  store.ObjectStore
+	workerMu   sync.Mutex
+	cfg        config.Outbound
+	store      store.Store
+	adapter    DeliveryAdapter
+	logger     zerolog.Logger
+	template   *template.Service
+	objects    store.ObjectStore
+	governance TemplateGovernance
 	// worker drives the background delivery loop. Built lazily in StartWorker
 	// so a disabled service stays a no-op.
 	worker *workqueue.Worker[*outboundJob]
@@ -45,8 +46,13 @@ type Service struct {
 // service is set.
 func (s *Service) SetTemplateService(ts *template.Service) { s.template = ts }
 
-// NewService creates a new outbound service.
-func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Service {
+// NewService creates a new outbound service. gov is the published-template
+// governance dependency (the production Postgres store implements it); a nil
+// gov fails construction instead of degrading at send time.
+func NewService(cfg config.Outbound, st store.Store, gov TemplateGovernance, logger zerolog.Logger) *Service {
+	if gov == nil {
+		panic("outbound: template governance dependency is required (pass the store that implements TemplateForSend)")
+	}
 	var adapter DeliveryAdapter
 	switch cfg.Mode {
 	case "direct":
@@ -55,10 +61,11 @@ func NewService(cfg config.Outbound, st store.Store, logger zerolog.Logger) *Ser
 		adapter = NewRelayAdapter(cfg)
 	}
 	return &Service{
-		cfg:     cfg,
-		store:   st,
-		adapter: adapter,
-		logger:  logger.With().Str("component", "outbound").Logger(),
+		cfg:        cfg,
+		store:      st,
+		adapter:    adapter,
+		governance: gov,
+		logger:     logger.With().Str("component", "outbound").Logger(),
 	}
 }
 
@@ -134,11 +141,10 @@ func (s *Service) Submit(ctx context.Context, req SendRequest) (*models.Outbound
 		if req.SenderMailboxID == nil {
 			return nil, app.BadRequest("published templates require an employee mailbox")
 		}
-		repo, ok := s.store.(company.Repository)
-		if !ok {
+		if s.governance == nil {
 			return nil, app.BadRequest("published templates unavailable")
 		}
-		v, employee, name, e := repo.TemplateForSend(ctx, req.TenantID, req.UserID, req.APIKeyID, *req.SenderMailboxID, *req.TemplateVersionID)
+		v, employee, name, e := s.governance.TemplateForSend(ctx, req.TenantID, req.UserID, req.APIKeyID, *req.SenderMailboxID, *req.TemplateVersionID)
 		if e != nil {
 			return nil, e
 		}

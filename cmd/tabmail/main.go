@@ -157,7 +157,7 @@ func main() {
 	// --- Outbound service ---
 	var outboundSvc *outbound.Service
 	if cfg.Outbound.Enabled {
-		outboundSvc = outbound.NewService(cfg.Outbound, pg, logger)
+		outboundSvc = outbound.NewService(cfg.Outbound, pg, pg, logger)
 		// Wire the optional template renderer. With it attached, callers that
 		// set template_name get tenant-scoped, html/template-escaped rendering;
 		// callers that omit it stay on the byte-identical bare-string path.
@@ -252,6 +252,7 @@ func main() {
 		OutboundService:    outboundSvc,
 		Resolver:           res,
 		IngestInvalidator:  ingestSvc,
+		CompanyRepository:  pg,
 		Logger:             logger,
 	}
 

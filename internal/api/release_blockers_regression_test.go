@@ -33,7 +33,7 @@ func rbRouter(t *testing.T, st store.Store, obj *testutil.MemoryObjectStore) htt
 	mr := miniredis.RunT(t)
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	t.Cleanup(func() { _ = rdb.Close() })
-	return api.NewRouter(api.RouterConfig{Store: st, ObjectStore: obj, JWTSecret: "jwt-test-secret", MailboxTokenSecret: "mailbox-secret", PublicTenantID: publicTenantID, NamingMode: policy.NamingFull, StripPlus: true, HTTP: config.HTTP{CookieSecure: true}, RateLimiter: middleware.NewRateLimiter(rdb, st, 10000, nil), OutboundService: outbound.NewService(config.Outbound{Enabled: true}, st, zerolog.Nop()), Logger: zerolog.Nop()})
+	return api.NewRouter(api.RouterConfig{Store: st, ObjectStore: obj, JWTSecret: "jwt-test-secret", MailboxTokenSecret: "mailbox-secret", PublicTenantID: publicTenantID, NamingMode: policy.NamingFull, StripPlus: true, HTTP: config.HTTP{CookieSecure: true}, RateLimiter: middleware.NewRateLimiter(rdb, st, 10000, nil), OutboundService: outbound.NewService(config.Outbound{Enabled: true}, st, testutil.DeniedTemplateGovernance{}, zerolog.Nop()), Logger: zerolog.Nop()})
 }
 func rbRequest(t *testing.T, h http.Handler, user *models.User, method, path, body string, cookie *http.Cookie) *httptest.ResponseRecorder {
 	t.Helper()

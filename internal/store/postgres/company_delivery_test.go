@@ -118,7 +118,7 @@ func TestR3RealSMTPRecipientIsolationAndUncertainRecovery(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	port := smtp.ln.Addr().(*net.TCPAddr).Port
-	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", RelayHost: "127.0.0.1", RelayPort: port, RelayTLS: "none", MaxRetries: 3, RetryDelay: time.Millisecond, PollInterval: 5 * time.Millisecond, BatchSize: 10}, f.st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", RelayHost: "127.0.0.1", RelayPort: port, RelayTLS: "none", MaxRetries: 3, RetryDelay: time.Millisecond, PollInterval: 5 * time.Millisecond, BatchSize: 10}, f.st, f.st, zerolog.Nop())
 	svc.StartWorker(ctx)
 	t.Cleanup(func() { cancel(); svc.Stop() })
 	req := outbound.SendRequest{TenantID: f.tenant.ID, UserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, ZoneID: f.zone.ID, From: f.personal.FullAddress, To: []string{"bad@recipient.test", "good@recipient.test", "temporary@recipient.test"}, BCC: []string{"hidden@recipient.test"}, Subject: "SMTP isolation", TextBody: "Actual MIME body", IdempotencyKey: "smtp-isolation"}

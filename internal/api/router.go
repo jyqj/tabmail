@@ -98,7 +98,15 @@ type RouterConfig struct {
 	OutboundService    *outbound.Service
 	Resolver           *resolver.Resolver
 	IngestInvalidator  policyInvalidatorProvider
-	Logger             zerolog.Logger
+	// CompanyRepository is the company workflow surface. The production
+	// assembly (cmd/tabmail/main.go) always passes the Postgres store, which
+	// implements company.Repository at compile time. Nil explicitly disables
+	// the /company routes and the durable mailbox event stream — an affordance
+	// for legacy test adapters whose store cannot implement the interface,
+	// never a runtime fallback: a missing dependency is a wiring decision,
+	// not a silent capability loss.
+	CompanyRepository company.Repository
+	Logger            zerolog.Logger
 }
 
 // policyInvalidatorProvider narrows the ingest.Service to the method the admin
@@ -159,8 +167,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	}
 	msg.SetStreamRevalidator(refreshStream)
 	mon.SetStreamRevalidator(refreshStream)
-	if reader, ok := st.(company.Repository); ok {
-		msg.SetMailboxEventReader(reader)
+	if cfg.CompanyRepository != nil {
+		msg.SetMailboxEventReader(cfg.CompanyRepository)
 	}
 	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger)
 	auth.SetCompanyOnly(cfg.CompanyOnly)
@@ -174,8 +182,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	}
 
 	r.Route("/api/v1", func(r chi.Router) {
-		if repo, ok := st.(company.Repository); ok {
-			handlers.NewCompanyHandler(repo, st, cfg.ObjectStore, msg, oh, cfg.Logger).Routes(r)
+		if cfg.CompanyRepository != nil {
+			handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, msg, oh, cfg.Logger).Routes(r)
 		}
 		// -- Auth (public, no auth required) --
 		r.Post("/auth/login", auth.Login)

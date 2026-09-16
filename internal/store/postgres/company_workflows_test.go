@@ -418,7 +418,7 @@ func TestR3SubmissionIdempotencyTemplateOnlyAndCodec(t *testing.T) {
 	must(t, e)
 	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: true, TemplateOnly: true}))
 	must(t, f.st.SetTemplateGrant(ctx, f.a, company.TemplateGrant{TemplateID: tpl.ID, MailboxID: f.shared.ID, UserID: f.employee.ID}, true))
-	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", MaxRetries: 5}, f.st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", MaxRetries: 5}, f.st, f.st, zerolog.Nop())
 	req := outbound.SendRequest{TenantID: f.tenant.ID, UserID: &f.employee.ID, SenderMailboxID: &f.shared.ID, ZoneID: f.zone.ID, From: f.shared.FullAddress, To: []string{"client@client.test"}, Subject: "Spoofed", TextBody: "Cannot bypass template", Headers: map[string]string{"References": "<thread@test>", "In-Reply-To": "<parent@test>"}, IdempotencyKey: "test-send"}
 	if _, e = svc.Submit(ctx, req); e == nil {
 		t.Fatal("template-only accepted freeform")

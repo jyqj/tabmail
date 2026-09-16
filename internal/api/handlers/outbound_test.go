@@ -39,7 +39,7 @@ type outboundAccessFixture struct {
 
 func TestOutboundJobAccessCheckCoversGetRetryAndAttempts(t *testing.T) {
 	f := newOutboundAccessFixture(t)
-	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, testutil.DeniedTemplateGovernance{}, zerolog.Nop())
 	h := NewOutboundHandler(svc, f.st, zerolog.Nop())
 	zone := &models.DomainZone{ID: uuid.New(), TenantID: f.tenantID, Domain: "retry.test", IsVerified: true, MXVerified: true}
 	f.st.SeedZone(zone)
@@ -263,7 +263,7 @@ func TestSendRequiresExactPermissionOnSharedZone(t *testing.T) {
 // so a stale/un-synced Verified flag cannot bypass the gate.
 func TestSendAuthorizesViaVerifiedSendIdentity(t *testing.T) {
 	f := newOutboundAccessFixture(t)
-	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, testutil.DeniedTemplateGovernance{}, zerolog.Nop())
 	h := NewOutboundHandler(svc, f.st, zerolog.Nop())
 
 	zoneID := uuid.New()

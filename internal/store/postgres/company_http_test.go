@@ -38,7 +38,7 @@ func companyRouter(t *testing.T, f *companyFixture, obj *testutil.MemoryObjectSt
 	mr := miniredis.RunT(t)
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	t.Cleanup(func() { rdb.Close() })
-	return api.NewRouter(api.RouterConfig{Store: f.st, ObjectStore: obj, RawObjects: rawobject.NewStore(obj, f.st), JWTSecret: companyTestJWT, MailboxTokenSecret: "test-only-mailbox-secret", PublicTenantID: "00000000-0000-0000-0000-000000000001", NamingMode: policy.NamingFull, CompanyOnly: true, HTTP: config.HTTP{}, RateLimiter: middleware.NewRateLimiter(rdb, f.st, 10000, nil), OutboundService: svc, Logger: zerolog.Nop(), Readiness: f.st.Readiness})
+	return api.NewRouter(api.RouterConfig{Store: f.st, CompanyRepository: f.st, ObjectStore: obj, RawObjects: rawobject.NewStore(obj, f.st), JWTSecret: companyTestJWT, MailboxTokenSecret: "test-only-mailbox-secret", PublicTenantID: "00000000-0000-0000-0000-000000000001", NamingMode: policy.NamingFull, CompanyOnly: true, HTTP: config.HTTP{}, RateLimiter: middleware.NewRateLimiter(rdb, f.st, 10000, nil), OutboundService: svc, Logger: zerolog.Nop(), Readiness: f.st.Readiness})
 }
 func r3Token(t *testing.T, u *models.User) string {
 	t.Helper()
@@ -79,7 +79,7 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 	defer cancel()
 	obj := testutil.NewMemoryObjectStore()
 	smtp := newLocalSMTP(t)
-	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", RelayHost: "127.0.0.1", RelayPort: smtp.ln.Addr().(*net.TCPAddr).Port, RelayTLS: "none", PollInterval: 5 * time.Millisecond, RetryDelay: time.Millisecond, MaxRetries: 3}, f.st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", RelayHost: "127.0.0.1", RelayPort: smtp.ln.Addr().(*net.TCPAddr).Port, RelayTLS: "none", PollInterval: 5 * time.Millisecond, RetryDelay: time.Millisecond, MaxRetries: 3}, f.st, f.st, zerolog.Nop())
 	svc.SetObjectStore(obj)
 	h := companyRouter(t, f, obj, svc)
 	admin, employee := r3Token(t, f.admin), r3Token(t, f.employee)

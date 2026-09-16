@@ -51,7 +51,7 @@ func TestR3BrowserJourney(t *testing.T) {
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.personal.ID, ZoneID: f.zone.ID, Sender: "client@recipient.test", Recipients: []string{f.personal.FullAddress}, Subject: "Browser welcome", RawObjectKey: "browser.eml", Size: int64(len(raw))}
 	must(t, f.st.CreateMessage(ctx, m))
 	smtp := newLocalSMTP(t)
-	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", RelayHost: "127.0.0.1", RelayPort: smtp.ln.Addr().(*net.TCPAddr).Port, RelayTLS: "none", PollInterval: 10 * time.Millisecond, RetryDelay: time.Millisecond, MaxRetries: 3}, f.st, zerolog.Nop())
+	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", RelayHost: "127.0.0.1", RelayPort: smtp.ln.Addr().(*net.TCPAddr).Port, RelayTLS: "none", PollInterval: 10 * time.Millisecond, RetryDelay: time.Millisecond, MaxRetries: 3}, f.st, f.st, zerolog.Nop())
 	svc.SetObjectStore(obj)
 	svc.StartWorker(ctx)
 	defer svc.Stop()
