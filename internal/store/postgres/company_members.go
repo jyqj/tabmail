@@ -17,17 +17,36 @@ import (
 	"tabmail/internal/models"
 )
 
-// One company lock orders administrative mutations. Interactive identity and
-// effective permissions are reloaded inside the transaction, never trusted
-// from the HTTP handshake. Normal resource access is separate from management.
+// companyTx orders administrative mutations on one company lock. Interactive
+// identity and effective permissions are reloaded inside the transaction,
+// never trusted from the HTTP handshake. Normal resource access is separate
+// from management.
 func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
+	return s.companyTxScope(ctx, actor, admin, true, f)
+}
+
+// companyReadTx is the lock-free counterpart of companyTx for pure reads and
+// single-row CAS writes: it never takes the tenants row lock, so mailbox
+// reads, drafts, attachments and the outbound template hot path no longer
+// queue behind company-wide administration or ingress quota serialization.
+// The interactive identity reload and the non-admin effective-permission load
+// are security semantics and must not be skipped. Anything that must exclude
+// concurrent administration (multi-row invariants, grant clearing vs
+// offboarding, MAX(version)+1 publication) stays on companyTx.
+func (s *PgStore) companyReadTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
+	return s.companyTxScope(ctx, actor, admin, false, f)
+}
+
+func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin, lock bool, f func(pgx.Tx, authz.Actor) error) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
-	if err = lockMemberTenant(ctx, tx, actor.TenantID); err != nil {
-		return err
+	if lock {
+		if err = lockMemberTenant(ctx, tx, actor.TenantID); err != nil {
+			return err
+		}
 	}
 	actor, err = currentMemberActor(ctx, tx, actor, actor.TenantID)
 	if err != nil {
@@ -155,7 +174,7 @@ func scanInvitation(row pgx.Row) (company.Invitation, error) {
 }
 func (s *PgStore) ListEmployeeInvitations(ctx context.Context, a authz.Actor) ([]company.Invitation, error) {
 	out := []company.Invitation{}
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		rows, e := tx.Query(ctx, `SELECT id,email,mailbox_address,display_name,expires_at,consumed_at,revoked_at,created_at FROM employee_invitations WHERE tenant_id=$1 ORDER BY created_at DESC LIMIT 200`, a.TenantID)
 		if e != nil {
 			return e
@@ -292,9 +311,88 @@ func (s *PgStore) mailboxAccessTx(ctx context.Context, tx pgx.Tx, a authz.Actor,
 	v.CanRead, v.CanOrganize, v.CanSend, v.TemplateOnly, v.CanManage = d.CanRead, d.CanOrganize, d.CanSend, d.TemplateOnly, d.CanManage
 	return v, nil
 }
+
+// mailboxAccessBatch resolves access decisions for a batch of mailboxes with
+// three queries instead of three per mailbox (the ListWorkMailboxes and
+// ListMailDrafts N+1). Semantics match mailboxAccessTx: the decision still
+// comes from authz.EvaluateMailboxAccess, intrinsic owner rights ignore
+// grants, and mailboxes that no longer exist are simply absent from the map —
+// callers treat absence as no access.
+func (s *PgStore) mailboxAccessBatch(ctx context.Context, tx pgx.Tx, a authz.Actor, ids []uuid.UUID) (map[uuid.UUID]*company.MailboxAccess, error) {
+	out := make(map[uuid.UUID]*company.MailboxAccess, len(ids))
+	if len(ids) == 0 {
+		return out, nil
+	}
+	mbs := map[uuid.UUID]*models.Mailbox{}
+	rows, e := tx.Query(ctx, mailboxSelect+` WHERE m.tenant_id=$1 AND m.id=ANY($2::uuid[])`, a.TenantID, ids)
+	if e != nil {
+		return nil, e
+	}
+	for rows.Next() {
+		mb, e := s.scanMailbox(rows)
+		if e != nil {
+			rows.Close()
+			return nil, e
+		}
+		mbs[mb.ID] = mb
+	}
+	if e = rows.Err(); e != nil {
+		rows.Close()
+		return nil, e
+	}
+	rows.Close()
+	revs := map[uuid.UUID]int64{}
+	rows, e = tx.Query(ctx, `SELECT id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=ANY($2::uuid[])`, a.TenantID, ids)
+	if e != nil {
+		return nil, e
+	}
+	for rows.Next() {
+		var id uuid.UUID
+		var rev int64
+		if e = rows.Scan(&id, &rev); e != nil {
+			rows.Close()
+			return nil, e
+		}
+		revs[id] = rev
+	}
+	if e = rows.Err(); e != nil {
+		rows.Close()
+		return nil, e
+	}
+	rows.Close()
+	grants := map[uuid.UUID]*models.MailboxGrant{}
+	rows, e = tx.Query(ctx, `SELECT mailbox_id,tenant_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2 AND mailbox_id=ANY($3::uuid[])`, a.TenantID, a.ID, ids)
+	if e != nil {
+		return nil, e
+	}
+	for rows.Next() {
+		g := &models.MailboxGrant{}
+		if e = rows.Scan(&g.MailboxID, &g.TenantID, &g.UserID, &g.CanRead, &g.CanOrganize, &g.CanSend, &g.TemplateOnly); e != nil {
+			rows.Close()
+			return nil, e
+		}
+		grants[g.MailboxID] = g
+	}
+	if e = rows.Err(); e != nil {
+		rows.Close()
+		return nil, e
+	}
+	rows.Close()
+	uid := a.EffectiveUserID()
+	for id, mb := range mbs {
+		owner := uid != nil && mb.OwnerUserID != nil && *mb.OwnerUserID == *uid
+		var grant *models.MailboxGrant
+		if !owner {
+			grant = grants[id]
+		}
+		d := authz.EvaluateMailboxAccess(a, mb, grant)
+		out[id] = &company.MailboxAccess{Mailbox: *mb, Revision: revs[id], CanRead: d.CanRead, CanOrganize: d.CanOrganize, CanSend: d.CanSend, TemplateOnly: d.TemplateOnly, CanManage: d.CanManage}
+	}
+	return out, nil
+}
 func (s *PgStore) ListWorkMailboxes(ctx context.Context, a authz.Actor) ([]company.MailboxAccess, error) {
 	out := []company.MailboxAccess{}
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		// Management listing scope: administrators see every company
 		// mailbox; employees see their own or granted ones. The per-entry
 		// rights still come from the single mailboxAccessTx decision.
@@ -316,12 +414,14 @@ func (s *PgStore) ListWorkMailboxes(ctx context.Context, a authz.Actor) ([]compa
 		if e != nil {
 			return e
 		}
+		access, e := s.mailboxAccessBatch(ctx, tx, a, ids)
+		if e != nil {
+			return e
+		}
 		for _, id := range ids {
-			v, e := s.mailboxAccessTx(ctx, tx, a, id)
-			if e != nil {
-				return e
+			if v, ok := access[id]; ok {
+				out = append(out, *v)
 			}
-			out = append(out, *v)
 		}
 		return nil
 	})
@@ -519,7 +619,7 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 
 func (s *PgStore) GetWorkMailbox(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.MailboxAccess, error) {
 	var v *company.MailboxAccess
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		var e error
 		v, e = s.mailboxAccessTx(ctx, tx, a, id)
 		if e != nil {

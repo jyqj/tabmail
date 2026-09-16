@@ -45,7 +45,7 @@ func (s *PgStore) ListWorkMessages(ctx context.Context, a authz.Actor, id uuid.U
 	pattern := "%" + strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(query) + "%"
 	out := []*models.Message{}
 	total := 0
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		v, e := s.mailboxAccessTx(ctx, tx, a, id)
 		if e != nil {
 			return e
@@ -111,7 +111,7 @@ func messageOutbox(ctx context.Context, tx pgx.Tx, tenant, id uuid.UUID, address
 	return e
 }
 func (s *PgStore) MutateWorkMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID, action string) error {
-	return s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		v, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
@@ -194,7 +194,7 @@ func (s *PgStore) ListMailboxEvents(ctx context.Context, tenant, mailbox uuid.UU
 
 func (s *PgStore) ListMailDrafts(ctx context.Context, a authz.Actor) ([]company.Draft, error) {
 	out := []company.Draft{}
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		rows, e := tx.Query(ctx, `SELECT id,mailbox_id,payload,revision,updated_at FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 ORDER BY updated_at DESC LIMIT 200`, a.TenantID, a.ID)
 		if e != nil {
 			return e
@@ -217,15 +217,23 @@ func (s *PgStore) ListMailDrafts(ctx context.Context, a authz.Actor) ([]company.
 		if e != nil {
 			return e
 		}
+		mbIDs := []uuid.UUID{}
+		seen := map[uuid.UUID]bool{}
+		for _, v := range out {
+			if !seen[v.MailboxID] {
+				seen[v.MailboxID] = true
+				mbIDs = append(mbIDs, v.MailboxID)
+			}
+		}
+		access, e := s.mailboxAccessBatch(ctx, tx, a, mbIDs)
+		if e != nil {
+			return e
+		}
 		filtered := []company.Draft{}
 		for _, v := range out {
-			rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
-			if e != nil {
-				var ae *app.Error
-				if errors.As(e, &ae) && ae.Kind == app.KindNotFound {
-					continue
-				}
-				return e
+			rights, ok := access[v.MailboxID]
+			if !ok {
+				continue
 			}
 			if rights.CanSend {
 				filtered = append(filtered, v)
@@ -244,7 +252,7 @@ func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Dr
 	if len(raw) > 2*1024*1024 || len(v.Payload.AttachmentIDs) > 10 {
 		return nil, app.BadRequest("draft too large")
 	}
-	e = s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e = s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
 		if e != nil {
 			return e
@@ -271,7 +279,7 @@ func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Dr
 	return &v, e
 }
 func (s *PgStore) DeleteMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID, revision int) error {
-	return s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		tag, e := tx.Exec(ctx, `DELETE FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND revision=$4`, a.TenantID, a.ID, id, revision)
 		if e != nil {
 			return e
@@ -317,13 +325,19 @@ func (s *PgStore) ReserveMailAttachment(ctx context.Context, a authz.Actor, v co
 	v.ObjectKey = "attachment-" + v.ID.String()
 	v.State = "uploading"
 	v.ContentType = "application/octet-stream"
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
 		if e != nil {
 			return e
 		}
 		if !rights.CanSend {
 			return app.Forbidden("mailbox send permission required")
+		}
+		// The company lock no longer serializes this path; the per-uploader
+		// advisory key makes the sum-and-insert budget check atomic against
+		// concurrent reservations by the same employee.
+		if _, e = tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, "attachment-budget:"+a.TenantID.String()+":"+a.ID.String()); e != nil {
+			return e
 		}
 		var bytes int64
 		e = tx.QueryRow(ctx, `SELECT COALESCE(sum(size),0) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2 AND created_at>now()-interval '1 day'`, a.TenantID, a.ID).Scan(&bytes)
@@ -342,7 +356,7 @@ func (s *PgStore) FinishMailAttachment(ctx context.Context, a authz.Actor, id uu
 	if len(sha) != 64 {
 		return app.BadRequest("invalid checksum")
 	}
-	return s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		var mailbox uuid.UUID
 		e := tx.QueryRow(ctx, `SELECT mailbox_id FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND state='uploading'`, a.TenantID, a.ID, id).Scan(&mailbox)
 		if errors.Is(e, pgx.ErrNoRows) {
@@ -364,7 +378,7 @@ func (s *PgStore) FinishMailAttachment(ctx context.Context, a authz.Actor, id uu
 }
 func (s *PgStore) GetWorkAttachment(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.Attachment, error) {
 	v := &company.Attachment{}
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		e := tx.QueryRow(ctx, `SELECT id,mailbox_id,user_id,object_key,filename,content_type,size,sha256,state FROM mail_attachments WHERE tenant_id=$1 AND id=$2 AND state='ready'`, a.TenantID, id).Scan(&v.ID, &v.MailboxID, &v.UserID, &v.ObjectKey, &v.Filename, &v.ContentType, &v.Size, &v.SHA256, &v.State)
 		if errors.Is(e, pgx.ErrNoRows) {
 			return app.NotFound("attachment not found")

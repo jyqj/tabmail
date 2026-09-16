@@ -18,6 +18,11 @@ var _ store.MemberGuardStore = (*PgStore)(nil)
 
 // Lock the company before the target: locking only the two target rows allows
 // two concurrent removals to both observe another active administrator.
+// Since companyReadTx, ordinary mailbox reads and single-row CAS writes no
+// longer take this lock: ingress quota serialization (the tenants FOR UPDATE
+// in DeliverIngress) and company administration mutual exclusion are
+// deliberately decoupled from company-wide read traffic — reads proceed
+// while either holds the company row. Only companyTx callers wait here.
 func lockMemberTenant(ctx context.Context, tx pgx.Tx, tenant uuid.UUID) error {
 	var id uuid.UUID
 	err := tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR UPDATE`, tenant).Scan(&id)

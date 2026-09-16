@@ -41,7 +41,7 @@ func scanCompanyVersion(row pgx.Row) (company.TemplateVersion, error) {
 }
 func (s *PgStore) ListMailTemplates(ctx context.Context, a authz.Actor) ([]company.Template, error) {
 	out := []company.Template{}
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		rows, e := tx.Query(ctx, companyTemplateSelect+` WHERE tenant_id=$1 ORDER BY name LIMIT 500`, a.TenantID)
 		if e != nil {
 			return e
@@ -67,7 +67,7 @@ func (s *PgStore) SaveMailTemplate(ctx context.Context, a authz.Actor, v company
 		return nil, e
 	}
 	raw, _ := json.Marshal(v.Draft)
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		if v.ID == uuid.Nil {
 			if v.Revision != 0 {
 				return app.Conflict("new template revision must be zero")
@@ -118,7 +118,7 @@ func (s *PgStore) PublishMailTemplate(ctx context.Context, a authz.Actor, id uui
 	return &out, e
 }
 func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id uuid.UUID, revision int, retired bool) error {
-	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		tag, e := tx.Exec(ctx, `UPDATE mail_templates SET retired=$4,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND id=$2 AND revision=$3`, a.TenantID, id, revision, retired)
 		if e != nil {
 			return e
@@ -131,7 +131,7 @@ func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id 
 }
 func (s *PgStore) ListTemplateVersions(ctx context.Context, a authz.Actor, id uuid.UUID) ([]company.TemplateVersion, error) {
 	out := []company.TemplateVersion{}
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		rows, e := tx.Query(ctx, companyVersionSelect+` WHERE v.tenant_id=$1 AND v.template_id=$2 ORDER BY v.version DESC LIMIT 200`, a.TenantID, id)
 		if e != nil {
 			return e
@@ -150,7 +150,7 @@ func (s *PgStore) ListTemplateVersions(ctx context.Context, a authz.Actor, id uu
 }
 func (s *PgStore) ListTemplateGrants(ctx context.Context, a authz.Actor, id uuid.UUID) ([]company.TemplateGrant, error) {
 	out := []company.TemplateGrant{}
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		rows, e := tx.Query(ctx, `SELECT template_id,mailbox_id,user_id FROM mail_template_grants WHERE tenant_id=$1 AND template_id=$2 ORDER BY mailbox_id,user_id`, a.TenantID, id)
 		if e != nil {
 			return e
@@ -196,7 +196,7 @@ func (s *PgStore) SetTemplateGrant(ctx context.Context, a authz.Actor, g company
 }
 func (s *PgStore) ListUsableTemplates(ctx context.Context, a authz.Actor, mailbox uuid.UUID) ([]company.TemplateVersion, error) {
 	out := []company.TemplateVersion{}
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		access, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
@@ -230,7 +230,7 @@ func (s *PgStore) TemplateForSend(ctx context.Context, tenant uuid.UUID, user, k
 	a := authz.Actor{Type: authz.PrincipalUser, ID: *user, TenantID: tenant}
 	var out company.TemplateVersion
 	var employee, companyName string
-	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		access, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
