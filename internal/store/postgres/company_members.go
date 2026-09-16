@@ -371,6 +371,24 @@ func (s *PgStore) CreateWorkMailbox(ctx context.Context, a authz.Actor, in compa
 	})
 	return out, e
 }
+// Mailbox administration follows the member hierarchy: a mailbox owner can
+// always manage their own mailbox, and an administrator can only reassign or
+// regrant mailboxes owned by members they can manage. Shared mailboxes have
+// no owner and stay administrable by any company administrator.
+func guardMailboxOwner(ctx context.Context, tx pgx.Tx, a authz.Actor, owner *uuid.UUID) error {
+	if owner == nil || *owner == a.ID {
+		return nil
+	}
+	var role models.UserRole
+	if e := tx.QueryRow(ctx, `SELECT role FROM users WHERE id=$1 AND tenant_id=$2`, *owner, a.TenantID).Scan(&role); e != nil {
+		return e
+	}
+	if !authz.CanManageTenantMember(a, a.TenantID, role) {
+		return app.Forbidden("mailbox owner is outside your management scope")
+	}
+	return nil
+}
+
 func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, owner uuid.UUID, revision int64, reason string) error {
 	if !meaningfulReason(reason) {
 		return app.BadRequest("handover reason must be 8-1000 bytes")
@@ -391,6 +409,9 @@ func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, ow
 		}
 		if rev != revision || kind != "personal" {
 			return app.Conflict("only unchanged personal mailboxes can be handed over")
+		}
+		if e = guardMailboxOwner(ctx, tx, a, old); e != nil {
+			return e
 		}
 		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$3,lifecycle_revision=lifecycle_revision+1 WHERE tenant_id=$1 AND id=$2`, a.TenantID, id, owner); e != nil {
 			return e
@@ -470,6 +491,9 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 		}
 		if v.Mailbox.OwnerUserID != nil && *v.Mailbox.OwnerUserID == g.UserID {
 			return app.BadRequest("owner rights are intrinsic; use handover")
+		}
+		if e = guardMailboxOwner(ctx, tx, a, v.Mailbox.OwnerUserID); e != nil {
+			return e
 		}
 		if e = activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
 			return e

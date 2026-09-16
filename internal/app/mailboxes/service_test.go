@@ -207,6 +207,27 @@ func TestDeleteTenantAdminUsesTenantScopedMailboxLookup(t *testing.T) {
 	}
 }
 
+func TestDeleteRejectsCompanyMailboxes(t *testing.T) {
+	for _, kind := range []string{"personal", "shared"} {
+		ctx := context.Background()
+		st := newMailboxTestStore()
+		tenant := &models.Tenant{ID: uuid.New(), Name: "tenant"}
+		zone := &models.DomainZone{ID: uuid.New(), TenantID: tenant.ID, Domain: "tenant.example"}
+		mb := &models.Mailbox{ID: uuid.New(), TenantID: tenant.ID, ZoneID: zone.ID, LocalPart: "inbox", ResolvedDomain: zone.Domain, FullAddress: "inbox@tenant.example", Kind: kind}
+		st.zones[zone.ID] = zone
+		st.mailboxes[mb.ID] = mb
+
+		svc := NewService(st, nil, nil, nil, policy.NamingFull, false, "secret", zerolog.Nop())
+		err := svc.Delete(ctx, adminActor(tenant.ID), tenant, mb.ID)
+		if appErr, ok := app.As(err); !ok || appErr.Kind != app.KindForbidden {
+			t.Fatalf("kind %s: expected forbidden, got %#v", kind, err)
+		}
+		if st.mailboxes[mb.ID] == nil {
+			t.Fatalf("kind %s: company mailbox must not be deleted via legacy path", kind)
+		}
+	}
+}
+
 func TestDeleteTenantAdminRejectsCrossTenantMailboxID(t *testing.T) {
 	ctx := context.Background()
 	st := newMailboxTestStore()

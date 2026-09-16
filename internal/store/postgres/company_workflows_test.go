@@ -221,6 +221,39 @@ func TestR3OffboardingAndOptimisticHandover(t *testing.T) {
 		t.Fatal("employee offboarded admin")
 	}
 }
+// Mailbox administration follows the member hierarchy: an administrator can
+// reassign or regrant a mailbox only when they manage its owner (or own it
+// themselves). Personal mailboxes owned by a peer administrator are protected.
+func TestMailboxAdministrationFollowsMemberHierarchy(t *testing.T) {
+	f := seedCompany(t)
+	ctx := context.Background()
+	peer := &models.User{TenantID: f.tenant.ID, Email: "peer-admin@contact.test", DisplayName: "Peer Admin", Role: models.RoleAdmin, IsActive: true, PasswordHash: "not-a-production-password"}
+	must(t, f.st.CreateUser(ctx, peer))
+	peerMailbox, e := f.st.CreateWorkMailbox(ctx, f.a, company.MailboxInput{LocalPart: "peer", Kind: "personal", OwnerUserID: &peer.ID})
+	must(t, e)
+	super := &models.User{TenantID: f.tenant.ID, Email: "super@contact.test", DisplayName: "Super Admin", Role: models.RoleSuperAdmin, IsActive: true, PasswordHash: "not-a-production-password"}
+	must(t, f.st.CreateUser(ctx, super))
+	superActor := authz.Actor{Type: authz.PrincipalUser, ID: super.ID, TenantID: f.tenant.ID, Role: models.RoleSuperAdmin, IsSuperAdmin: true}
+
+	v, e := f.st.GetWorkMailbox(ctx, f.a, peerMailbox.ID)
+	must(t, e)
+	if f.st.TransferWorkMailbox(ctx, f.a, peerMailbox.ID, f.other.ID, v.Revision, "Attempt over peer admin") == nil {
+		t.Fatal("admin handed over a peer administrator's mailbox")
+	}
+	if f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: peerMailbox.ID, UserID: f.employee.ID, CanRead: true}) == nil {
+		t.Fatal("admin regranted a peer administrator's mailbox")
+	}
+	must(t, f.st.TransferWorkMailbox(ctx, superActor, peerMailbox.ID, f.other.ID, v.Revision, "Super admin mediated handover"))
+
+	own, e := f.st.CreateWorkMailbox(ctx, f.a, company.MailboxInput{LocalPart: "admin-own", Kind: "personal", OwnerUserID: &f.admin.ID})
+	must(t, e)
+	ov, e := f.st.GetWorkMailbox(ctx, f.a, own.ID)
+	must(t, e)
+	must(t, f.st.TransferWorkMailbox(ctx, f.a, own.ID, f.other.ID, ov.Revision, "Administrator own mailbox handover"))
+
+	// Managing employee mailboxes stays within a company administrator's scope.
+	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true}))
+}
 func TestR3SoftDeleteRestoreRetentionAndEvents(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()

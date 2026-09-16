@@ -225,6 +225,12 @@ func (s *Service) Delete(ctx context.Context, actor authz.Actor, tenant *models.
 	if mb == nil {
 		return app.NotFound("mailbox not found")
 	}
+	// Company mailboxes leave the platform only through the governed company
+	// lifecycle (handover, offboarding); the legacy path must not bypass it
+	// with a cascade delete of every message.
+	if mb.Kind == "personal" || mb.Kind == "shared" {
+		return app.Forbidden("company mailboxes are managed through handover; direct delete is disabled")
+	}
 	zone, err := s.store.GetZone(ctx, mb.ZoneID)
 	if err != nil {
 		return app.Internal(err)
