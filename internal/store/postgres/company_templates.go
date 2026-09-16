@@ -204,7 +204,7 @@ func (s *PgStore) ListUsableTemplates(ctx context.Context, a authz.Actor, mailbo
 		if !access.CanSend {
 			return app.Forbidden("mailbox send permission required")
 		}
-		rows, e := tx.Query(ctx, companyVersionSelect+` WHERE v.tenant_id=$1 AND NOT t.retired AND v.revoked_at IS NULL AND v.version=(SELECT max(w.version) FROM mail_template_versions w WHERE w.template_id=v.template_id AND w.revoked_at IS NULL) AND ($4 OR EXISTS(SELECT 1 FROM mail_template_grants g WHERE g.template_id=v.template_id AND g.tenant_id=$1 AND g.mailbox_id=$2 AND g.user_id=$3)) ORDER BY t.name`, a.TenantID, mailbox, a.ID, a.IsAdmin || a.IsSuperAdmin)
+		rows, e := tx.Query(ctx, companyVersionSelect+` WHERE v.tenant_id=$1 AND NOT t.retired AND v.revoked_at IS NULL AND v.version=(SELECT max(w.version) FROM mail_template_versions w WHERE w.template_id=v.template_id AND w.revoked_at IS NULL) AND ($4 OR EXISTS(SELECT 1 FROM mail_template_grants g WHERE g.template_id=v.template_id AND g.tenant_id=$1 AND g.mailbox_id=$2 AND g.user_id=$3)) ORDER BY t.name`, a.TenantID, mailbox, a.ID, a.IsTenantAdmin())
 		if e != nil {
 			return e
 		}
@@ -248,7 +248,7 @@ func (s *PgStore) TemplateForSend(ctx context.Context, tenant uuid.UUID, user, k
 				return authz.ErrForbidden("template sending key revoked")
 			}
 		}
-		out, e = scanCompanyVersion(tx.QueryRow(ctx, companyVersionSelect+` WHERE v.tenant_id=$1 AND v.id=$2 AND NOT t.retired AND v.revoked_at IS NULL AND ($5 OR EXISTS(SELECT 1 FROM mail_template_grants g WHERE g.tenant_id=$1 AND g.template_id=v.template_id AND g.mailbox_id=$3 AND g.user_id=$4))`, tenant, version, mailbox, *user, a.IsAdmin || a.IsSuperAdmin))
+		out, e = scanCompanyVersion(tx.QueryRow(ctx, companyVersionSelect+` WHERE v.tenant_id=$1 AND v.id=$2 AND NOT t.retired AND v.revoked_at IS NULL AND ($5 OR EXISTS(SELECT 1 FROM mail_template_grants g WHERE g.tenant_id=$1 AND g.template_id=v.template_id AND g.mailbox_id=$3 AND g.user_id=$4))`, tenant, version, mailbox, *user, a.IsTenantAdmin()))
 		if errors.Is(e, pgx.ErrNoRows) {
 			return authz.ErrForbidden("published template unavailable or not granted")
 		}

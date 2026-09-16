@@ -189,6 +189,58 @@ func TestR3SharedMailboxRightsAndGrantAuditRollback(t *testing.T) {
 		t.Fatal("admin role implied employee content or send-as rights")
 	}
 }
+
+// Administrative visibility never substitutes for content access: a company
+// administrator may list and inspect mailbox metadata, but message content
+// stays owner-or-grant only — the role itself unlocks nothing until an
+// explicit grant is recorded.
+func TestAdminVisibilityIsNotContentAccess(t *testing.T) {
+	f := seedCompany(t)
+	ctx := context.Background()
+
+	// The admin list reaches the employee mailbox, but every content right
+	// on it is zero.
+	rows, e := f.st.ListWorkMailboxes(ctx, f.a)
+	must(t, e)
+	var listed *company.MailboxAccess
+	for i := range rows {
+		if rows[i].Mailbox.ID == f.personal.ID {
+			listed = &rows[i]
+		}
+	}
+	if listed == nil {
+		t.Fatal("admin listing missed a managed member mailbox")
+	}
+	if listed.CanRead || listed.CanOrganize || listed.CanSend || listed.TemplateOnly {
+		t.Fatalf("admin listing implied content rights: %+v", listed)
+	}
+
+	v, e := f.st.GetWorkMailbox(ctx, f.a, f.personal.ID)
+	must(t, e)
+	if v.CanRead || v.CanOrganize || v.CanSend || v.TemplateOnly {
+		t.Fatalf("admin detail implied content rights: %+v", v)
+	}
+	if _, _, e = f.st.ListWorkMessages(ctx, f.a, f.personal.ID, "inbox", "", models.Page{}); e == nil {
+		t.Fatal("admin read employee mailbox content without a grant")
+	}
+	if e = f.st.MutateWorkMessage(ctx, f.a, f.personal.ID, uuid.New(), "trash"); e == nil {
+		t.Fatal("admin organized employee mailbox without a grant")
+	}
+
+	// An explicit grant — not the role — is what unlocks content.
+	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.admin.ID, CanRead: true}))
+	if _, _, e = f.st.ListWorkMessages(ctx, f.a, f.personal.ID, "inbox", "", models.Page{}); e != nil {
+		t.Fatal("granted administrator could not read mailbox", e)
+	}
+
+	// Shared mailboxes have no owner: administration still shows the record
+	// without granting content.
+	sv, e := f.st.GetWorkMailbox(ctx, f.a, f.shared.ID)
+	must(t, e)
+	if sv.CanRead || sv.CanSend {
+		t.Fatalf("shared mailbox content implied by administration: %+v", sv)
+	}
+}
 func TestR3OffboardingAndOptimisticHandover(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()

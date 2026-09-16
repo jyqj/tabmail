@@ -344,7 +344,7 @@ func (h *CompanyHandler) Preview(w http.ResponseWriter, r *http.Request) {
 	var draft company.TemplateDraft
 	var employee, name string
 	if v.Draft != nil {
-		if !a.IsAdmin && !a.IsSuperAdmin {
+		if !a.IsTenantAdmin() {
 			errForbidden(w, "template editing requires administrator")
 			return
 		}

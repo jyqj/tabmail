@@ -52,6 +52,9 @@ type MailboxAccess struct {
 	CanSend      bool           `json:"can_send"`
 	TemplateOnly bool           `json:"template_only"`
 	Revision     int64          `json:"revision"`
+	// CanManage is administrative visibility only (authz.MailboxDecision):
+	// it never confers content access and is deliberately not serialized.
+	CanManage bool `json:"-"`
 }
 type Variable struct {
 	Name      string   `json:"name"`

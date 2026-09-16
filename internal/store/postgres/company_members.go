@@ -33,10 +33,10 @@ func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, 
 	if err != nil {
 		return err
 	}
-	if admin && !actor.IsAdmin && !actor.IsSuperAdmin {
+	if admin && !actor.IsTenantAdmin() {
 		return app.Forbidden("company administrator required")
 	}
-	if !actor.IsAdmin && !actor.IsSuperAdmin {
+	if !actor.IsTenantAdmin() {
 		actor.Permission, err = effectivePermission(ctx, tx, actor.ID)
 		if err != nil {
 			return err
@@ -258,6 +258,10 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	}
 	return tx.Commit(ctx)
 }
+// mailboxAccessTx fetches the mailbox, its revision and the actor's grant,
+// then defers every semantic decision to authz.EvaluateMailboxAccess — the
+// single interpretation of admin roles, expiry, zone allowlists and the
+// profile-level send veto. The store must not re-derive those rules inline.
 func (s *PgStore) mailboxAccessTx(ctx context.Context, tx pgx.Tx, a authz.Actor, id uuid.UUID) (*company.MailboxAccess, error) {
 	mb, e := s.scanMailbox(tx.QueryRow(ctx, mailboxSelect+` WHERE m.tenant_id=$1 AND m.id=$2`, a.TenantID, id))
 	if e != nil {
@@ -270,31 +274,31 @@ func (s *PgStore) mailboxAccessTx(ctx context.Context, tx pgx.Tx, a authz.Actor,
 	if e = tx.QueryRow(ctx, `SELECT lifecycle_revision FROM mailboxes WHERE id=$1`, id).Scan(&v.Revision); e != nil {
 		return nil, e
 	}
-	if mb.ExpiresAt != nil && !mb.ExpiresAt.After(time.Now()) {
-		return v, nil
-	}
-	if a.Permission != nil && !models.ZoneAllowed(a.Permission.AllowedZoneIDs, mb.ZoneID) {
-		return v, nil
-	}
-	if mb.OwnerUserID != nil && *mb.OwnerUserID == a.ID {
-		v.CanRead = true
-		v.CanOrganize = true
-		v.CanSend = true
-	} else {
-		e = tx.QueryRow(ctx, `SELECT can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, id, a.ID).Scan(&v.CanRead, &v.CanOrganize, &v.CanSend, &v.TemplateOnly)
-		if e != nil && !errors.Is(e, pgx.ErrNoRows) {
+	uid := a.EffectiveUserID()
+	owner := uid != nil && mb.OwnerUserID != nil && *mb.OwnerUserID == *uid
+	var grant *models.MailboxGrant
+	if !owner {
+		g := &models.MailboxGrant{}
+		e = tx.QueryRow(ctx, `SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, id, a.ID).Scan(&g.TenantID, &g.MailboxID, &g.UserID, &g.CanRead, &g.CanOrganize, &g.CanSend, &g.TemplateOnly)
+		if errors.Is(e, pgx.ErrNoRows) {
+			grant = nil
+		} else if e != nil {
 			return nil, e
+		} else {
+			grant = g
 		}
 	}
-	if !a.IsAdmin && !a.IsSuperAdmin && (a.Permission == nil || !a.Permission.CanSend) {
-		v.CanSend = false
-	}
+	d := authz.EvaluateMailboxAccess(a, mb, grant)
+	v.CanRead, v.CanOrganize, v.CanSend, v.TemplateOnly, v.CanManage = d.CanRead, d.CanOrganize, d.CanSend, d.TemplateOnly, d.CanManage
 	return v, nil
 }
 func (s *PgStore) ListWorkMailboxes(ctx context.Context, a authz.Actor) ([]company.MailboxAccess, error) {
 	out := []company.MailboxAccess{}
 	e := s.companyTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		rows, e := tx.Query(ctx, `SELECT id FROM mailboxes WHERE tenant_id=$1 AND ($2 OR owner_user_id=$3 OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.mailbox_id=mailboxes.id AND g.user_id=$3 AND (g.can_read OR g.can_send))) ORDER BY full_address LIMIT 500`, a.TenantID, a.IsAdmin || a.IsSuperAdmin, a.ID)
+		// Management listing scope: administrators see every company
+		// mailbox; employees see their own or granted ones. The per-entry
+		// rights still come from the single mailboxAccessTx decision.
+		rows, e := tx.Query(ctx, `SELECT id FROM mailboxes WHERE tenant_id=$1 AND ($2 OR owner_user_id=$3 OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.mailbox_id=mailboxes.id AND g.user_id=$3 AND (g.can_read OR g.can_send))) ORDER BY full_address LIMIT 500`, a.TenantID, a.IsTenantAdmin(), a.ID)
 		if e != nil {
 			return e
 		}
@@ -521,7 +525,10 @@ func (s *PgStore) GetWorkMailbox(ctx context.Context, a authz.Actor, id uuid.UUI
 		if e != nil {
 			return e
 		}
-		if !v.CanRead && !v.CanSend && !a.IsAdmin && !a.IsSuperAdmin {
+		// Management visibility: an administrator may inspect mailbox
+		// metadata without holding content rights; employees need read or
+		// send. Content itself is gated separately on CanRead/CanSend.
+		if !v.CanRead && !v.CanSend && !v.CanManage {
 			return app.NotFound("mailbox not found")
 		}
 		return nil

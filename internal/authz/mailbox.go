@@ -37,6 +37,59 @@ func MailboxRights(ctx context.Context, st MailboxGrantReader, tenant uuid.UUID,
 	return g, nil
 }
 
+// MailboxDecision is the unified verdict for one actor on one work mailbox.
+// Content rights (read/organize/send/template_only) derive only from mailbox
+// ownership or an explicit grant; CanManage is management visibility — the
+// right to see the mailbox's metadata in administrative listings and detail
+// views — and never implies content access. Company-mail paths surface both
+// halves through this single function so the store and handlers cannot drift.
+type MailboxDecision struct {
+	CanRead      bool
+	CanOrganize  bool
+	CanSend      bool
+	TemplateOnly bool
+	CanManage    bool
+}
+
+// EvaluateMailboxAccess is the single decision point for company-mailbox
+// access. It consolidates the rules previously re-derived in the store's
+// mailboxAccessTx, GetWorkMailbox and ListWorkMailboxes:
+//
+//   - an expired mailbox yields no content rights;
+//   - a permission profile restricted to other zones yields no content rights
+//     (a non-nil profile is authoritative, for admins too);
+//   - the effective owner holds read/organize/send intrinsically;
+//   - otherwise a matching grant carries the flags verbatim (a grant that
+//     does not match the actor/mailbox/tenant is ignored);
+//   - a non-admin whose profile lacks can_send (or has no profile) cannot
+//     send — admins keep granted send rights;
+//   - tenant admins always retain CanManage visibility.
+//
+// The actor carries its profile via Actor.Permission, mirroring how companyTx
+// reloads effective permissions inside the transaction.
+func EvaluateMailboxAccess(actor Actor, mb *models.Mailbox, grant *models.MailboxGrant) MailboxDecision {
+	d := MailboxDecision{CanManage: actor.IsTenantAdmin()}
+	if mb == nil || mb.TenantID != actor.TenantID {
+		return MailboxDecision{CanManage: d.CanManage}
+	}
+	if mb.ExpiresAt != nil && !mb.ExpiresAt.After(time.Now()) {
+		return d
+	}
+	if actor.Permission != nil && !models.ZoneAllowed(actor.Permission.AllowedZoneIDs, mb.ZoneID) {
+		return d
+	}
+	uid := actor.EffectiveUserID()
+	if uid != nil && mb.OwnerUserID != nil && *mb.OwnerUserID == *uid {
+		d.CanRead, d.CanOrganize, d.CanSend = true, true, true
+	} else if grant != nil && grant.TenantID == mb.TenantID && grant.MailboxID == mb.ID && uid != nil && grant.UserID == *uid {
+		d.CanRead, d.CanOrganize, d.CanSend, d.TemplateOnly = grant.CanRead, grant.CanOrganize, grant.CanSend, grant.TemplateOnly
+	}
+	if !actor.IsTenantAdmin() && (actor.Permission == nil || !actor.Permission.CanSend) {
+		d.CanSend = false
+	}
+	return d
+}
+
 // CanonicalSender ports the archive's plain-address requirement. Authorization
 // and the SMTP envelope must use the same representation, not display names.
 func CanonicalSender(s string) (string, error) {
