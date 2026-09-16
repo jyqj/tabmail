@@ -19,7 +19,6 @@ export default function DashboardLayout({
   useEffect(() => {
     if (!hydrated) return;
     if (level === "public") router.replace("/");
-    if (level === "mailbox") router.replace("/");
     // Regular users cannot access admin pages
     if (
       level === "user" &&
@@ -57,7 +56,7 @@ export default function DashboardLayout({
     );
   }
 
-  if (level === "public" || level === "mailbox") return null;
+  if (level === "public") return null;
   if (
     level === "user" &&
     ["/admin", "/company", "/console"].some((prefix) =>

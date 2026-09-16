@@ -65,21 +65,6 @@ func TestReleaseBlockerAdminCannotManagePeer(t *testing.T) {
 		}
 	}
 }
-func TestReleaseBlockerPrivateMailboxDefault(t *testing.T) {
-	st, obj, tenant := seededStores(t)
-	actor := seedUserForTest(t, st, tenant, models.RoleAdmin)
-	w := rbRequest(t, rbRouter(t, st, obj), actor, "POST", "/api/v1/mailboxes", `{"address":"private@mail.test","password":"disposable-mailbox-password","retention_hours_override":0}`, nil)
-	if w.Code != 201 {
-		t.Fatalf("create: %d %s", w.Code, w.Body.String())
-	}
-	m, err := st.GetMailboxByAddress(context.Background(), "private@mail.test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if m == nil || m.AccessMode != models.AccessToken || m.OwnerUserID == nil || *m.OwnerUserID != actor.ID {
-		t.Fatalf("not private and owned: %+v", m)
-	}
-}
 func TestReleaseBlockerOutboundMetadataOnly(t *testing.T) {
 	st, obj, tenant := seededStores(t)
 	actor := seedUserForTest(t, st, tenant, models.RoleAdmin)

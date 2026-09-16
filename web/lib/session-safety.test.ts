@@ -115,7 +115,7 @@ describe("credential and identity boundaries", () => {
       )
       .mockResolvedValueOnce(json(202, { data: { id: "one-job" } }));
     vi.stubGlobal("fetch", f);
-    await request("/api/v1/send", {
+    await request("/api/v1/company/drafts/x/submit", {
       method: "POST",
       headers: { "Idempotency-Key": "same" },
       body: { subject: "unchanged" },

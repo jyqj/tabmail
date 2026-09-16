@@ -2,7 +2,6 @@ package api_test
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -217,67 +216,6 @@ func TestReleaseSharedOutboundReadIsNotRetry(t *testing.T) {
 	stored, _ := st.GetOutboundJob(ctx, j.ID)
 	if stored.TextBody != j.TextBody || len(stored.BCC) != 1 {
 		t.Fatal("redaction mutated stored mail")
-	}
-}
-func TestReleaseMailboxOwnerAndGrantList(t *testing.T) {
-	st, obj, tenant := seededStores(t)
-	admin := seedUserForTest(t, st, tenant, models.RoleAdmin)
-	employee := seedUserForTest(t, st, tenant, models.RoleUser)
-	reader := seedUserForTest(t, st, tenant, models.RoleUser)
-	stranger := seedUserForTest(t, st, tenant, models.RoleUser)
-	h := rbRouter(t, st, obj)
-	body := `{"address":"employee@mail.test","owner_user_id":"` + employee.ID.String() + `","retention_hours_override":0}`
-	w := rbRequest(t, h, admin, "POST", "/api/v1/mailboxes", body, nil)
-	if w.Code != 201 {
-		t.Fatalf("owner create %d %s", w.Code, w.Body.String())
-	}
-	mb, _ := st.GetMailboxByAddress(context.Background(), "employee@mail.test")
-	if mb.OwnerUserID == nil || *mb.OwnerUserID != employee.ID || mb.AccessMode != models.AccessToken {
-		t.Fatal("ownership/default lost")
-	}
-	if err := st.SetMailboxGrant(context.Background(), &models.MailboxGrant{TenantID: tenant, MailboxID: mb.ID, UserID: reader.ID, CanRead: true}); err != nil {
-		t.Fatal(err)
-	}
-	for _, u := range []*models.User{employee, reader} {
-		w := rbRequest(t, h, u, "GET", "/api/v1/mailboxes", "", nil)
-		if w.Code != 200 || !strings.Contains(w.Body.String(), mb.ID.String()) {
-			t.Fatalf("assigned mailbox undiscoverable: %d %s", w.Code, w.Body.String())
-		}
-	}
-	if w := rbRequest(t, h, stranger, "GET", "/api/v1/mailboxes", "", nil); strings.Contains(w.Body.String(), mb.ID.String()) {
-		t.Fatal("ungranted mailbox discovered")
-	}
-	if w := rbRequest(t, h, nil, "GET", "/api/v1/mailbox/employee@mail.test", "", nil); w.Code != 404 {
-		t.Fatalf("anonymous personal access %d", w.Code)
-	}
-}
-func TestReleaseMailboxRejectsInvalidOwner(t *testing.T) {
-	for _, mode := range []string{"other-company", "admin", "inactive", "missing"} {
-		t.Run(mode, func(t *testing.T) {
-			st, obj, tenant := seededStores(t)
-			admin := seedUserForTest(t, st, tenant, models.RoleAdmin)
-			owner := seedUserForTest(t, st, tenant, models.RoleUser)
-			switch mode {
-			case "other-company":
-				owner.TenantID = uuid.MustParse(publicTenantID)
-			case "admin":
-				owner.Role = models.RoleAdmin
-			case "inactive":
-				owner.IsActive = false
-			case "missing":
-				owner.ID = uuid.New()
-			}
-			if mode != "missing" {
-				if err := st.UpdateUser(context.Background(), owner); err != nil {
-					t.Fatal(err)
-				}
-			}
-			body, _ := json.Marshal(map[string]any{"address": "badowner@mail.test", "owner_user_id": owner.ID})
-			w := rbRequest(t, rbRouter(t, st, obj), admin, "POST", "/api/v1/mailboxes", string(body), nil)
-			if w.Code != 400 {
-				t.Fatalf("invalid owner status %d %s", w.Code, w.Body.String())
-			}
-		})
 	}
 }
 

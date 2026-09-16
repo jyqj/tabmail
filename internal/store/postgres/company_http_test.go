@@ -1,7 +1,6 @@
 package postgres_test
 
 import (
-	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -55,7 +54,7 @@ func r3HTTP(t *testing.T, h http.Handler, token, method, path string, body any, 
 	if token != "" {
 		r.Header.Set("Authorization", "Bearer "+token)
 	}
-	if path == "/api/v1/send" {
+	if strings.HasPrefix(path, "/api/v1/company/drafts/") && strings.HasSuffix(path, "/submit") {
 		r.Header.Set("Idempotency-Key", "http-workflow")
 	}
 	w := httptest.NewRecorder()
@@ -83,7 +82,7 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 	svc.SetObjectStore(obj)
 	h := companyRouter(t, f, obj, svc)
 	admin, employee := r3Token(t, f.admin), r3Token(t, f.employee)
-	for _, path := range []string{"/api/v1/company/mailboxes", "/api/v1/mailboxes", "/api/v1/admin/users"} {
+	for _, path := range []string{"/api/v1/company/mailboxes", "/api/v1/admin/users"} {
 		r3HTTP(t, h, "", "GET", path, nil, 401)
 	}
 	r3HTTP(t, h, "", "POST", "/api/v1/auth/register", map[string]string{"email": "public@test", "password": "test-long-password"}, 403)
@@ -134,13 +133,13 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 	saved := r3Data[company.Draft](t, r3HTTP(t, h, employee, "POST", "/api/v1/company/drafts", draft, 200))
 	draft.ID = saved.ID
 	r3HTTP(t, h, employee, "PUT", "/api/v1/company/drafts/"+saved.ID.String(), draft, 409)
-	body := map[string]any{"from": f.shared.FullAddress, "to": draft.Payload.To, "bcc": draft.Payload.BCC, "template_version_id": version.ID, "template_vars": draft.Payload.TemplateVars, "attachment_ids": draft.Payload.AttachmentIDs}
+	submitPath := "/api/v1/company/drafts/" + saved.ID.String() + "/submit"
 	sent := r3Data[struct {
 		ID uuid.UUID `json:"id"`
-	}](t, r3HTTP(t, h, employee, "POST", "/api/v1/send", body, 201))
+	}](t, r3HTTP(t, h, employee, "POST", submitPath, map[string]any{"expected_revision": saved.Revision}, 201))
 	again := r3Data[struct {
 		ID uuid.UUID `json:"id"`
-	}](t, r3HTTP(t, h, employee, "POST", "/api/v1/send", body, 201))
+	}](t, r3HTTP(t, h, employee, "POST", submitPath, map[string]any{"expected_revision": saved.Revision}, 200))
 	if sent.ID != again.ID {
 		t.Fatal("HTTP duplicate send")
 	}
@@ -196,45 +195,3 @@ func TestR3PasswordChangeInvalidatesExistingAccess(t *testing.T) {
 	r3HTTP(t, h, token, "GET", "/api/v1/company/mailboxes", nil, 401)
 }
 
-func TestR3LongLivedStreamSeesIndependentDatabaseWritesAndRevocation(t *testing.T) {
-	f := seedCompany(t)
-	h := companyRouter(t, f, testutil.NewMemoryObjectStore(), nil)
-	server := httptest.NewServer(h)
-	defer server.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
-	defer cancel()
-	req, e := http.NewRequestWithContext(ctx, "GET", server.URL+"/api/v1/mailbox/"+f.personal.FullAddress+"/events", nil)
-	must(t, e)
-	req.Header.Set("Authorization", "Bearer "+r3Token(t, f.employee))
-	resp, e := http.DefaultClient.Do(req)
-	must(t, e)
-	defer resp.Body.Close()
-	if resp.StatusCode != 200 {
-		t.Fatal(resp.Status)
-	}
-	rd := bufio.NewReader(resp.Body)
-	until := func(needle string) {
-		t.Helper()
-		for {
-			line, e := rd.ReadString('\n')
-			if e != nil {
-				t.Fatal(e)
-			}
-			if strings.Contains(line, needle) {
-				return
-			}
-		}
-	}
-	until("event: ready")
-	// Independent DB connection simulates a different worker process, with no Hub.
-	id := uuid.New()
-	_, e = f.pool.Exec(ctx, `INSERT INTO messages(id,tenant_id,mailbox_id,zone_id,sender,recipients,subject,size) VALUES($1,$2,$3,$4,'client@recipient.test',$5,'Stream probe',1)`, id, f.tenant.ID, f.personal.ID, f.zone.ID, []string{f.personal.FullAddress})
-	must(t, e)
-	until(id.String())
-	_, e = f.st.UpdateUserGuarded(ctx, f.a, f.tenant.ID, f.employee.ID, models.UserAdminPatch{IsActive: func() *bool { v := false; return &v }()})
-	must(t, e)
-	_, e = io.ReadAll(rd)
-	if e != nil {
-		t.Fatalf("stream did not close before context timeout: %v", e)
-	}
-}

@@ -325,13 +325,6 @@ type OutboundStore interface {
 	FindSendIdentityForAddress(ctx context.Context, tenantID uuid.UUID, address string) (*models.SendIdentity, error)
 	UpdateSendIdentitiesVerifiedByZone(ctx context.Context, zoneID uuid.UUID, verified bool) error
 	DeleteSendIdentity(ctx context.Context, id uuid.UUID) error
-
-	// --- Outbound templates ----------------------------------------------------
-	CreateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error
-	GetOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) (*models.OutboundTemplate, error)
-	ListOutboundTemplates(ctx context.Context, tenantID uuid.UUID) ([]*models.OutboundTemplate, error)
-	UpdateOutboundTemplate(ctx context.Context, t *models.OutboundTemplate) error
-	DeleteOutboundTemplate(ctx context.Context, tenantID uuid.UUID, name string) error
 }
 
 // SettingsStore persists system settings.

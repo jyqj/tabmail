@@ -35,7 +35,7 @@ import { TabMailLogo } from "@/components/tabmail-logo";
 type AuthMode = "login" | "register";
 
 export function AuthDialog() {
-  const { level, user, mailboxAddress, loginWithTokens, logout } = useAuth();
+  const { level, user, loginWithTokens, logout } = useAuth();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -101,7 +101,7 @@ export function AuthDialog() {
   const handleLogout = () => logout();
 
   const handleCopy = () => {
-    const value = user?.email || mailboxAddress || "";
+    const value = user?.email || "";
     if (!value) return;
     navigator.clipboard.writeText(value);
     setCopied(true);
@@ -126,16 +126,7 @@ export function AuthDialog() {
                 {user.display_name || user.email}
               </span>
             </>
-          ) : (
-            <>
-              <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-                {t("auth.level.mailbox")}
-              </span>
-              <code className="text-[11px] text-muted-foreground max-w-[100px] sm:max-w-[140px] truncate">
-                {(mailboxAddress || "").slice(0, 24)}
-              </code>
-            </>
-          )}
+          ) : null}
           <button
             onClick={handleCopy}
             className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"

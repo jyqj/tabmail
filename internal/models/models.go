@@ -594,21 +594,6 @@ type SendIdentity struct {
 	CreatedAt    time.Time        `json:"created_at" db:"created_at"`
 }
 
-// OutboundTemplate is a tenant-scoped email template. The SubjectTmpl, TextTmpl
-// and HTMLTmpl fields hold Go template source; the template package parses them
-// once at load time and re-renders per message with caller-supplied Vars. The
-// HTML part is always rendered through html/template for automatic escaping.
-type OutboundTemplate struct {
-	ID          uuid.UUID `json:"id" db:"id"`
-	TenantID    uuid.UUID `json:"tenant_id" db:"tenant_id"`
-	Name        string    `json:"name" db:"name"`
-	SubjectTmpl string    `json:"subject_tmpl" db:"subject_tmpl"`
-	TextTmpl    string    `json:"text_tmpl,omitempty" db:"text_tmpl"`
-	HTMLTmpl    string    `json:"html_tmpl,omitempty" db:"html_tmpl"`
-	CreatedAt   time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at" db:"updated_at"`
-}
-
 // ============================================================
 // Webhook Endpoints (tenant-level)
 // ============================================================

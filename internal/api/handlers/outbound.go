@@ -42,67 +42,6 @@ func NewOutboundHandler(svc *outbound.Service, st store.Store, logger zerolog.Lo
 	}
 }
 
-// sendRequest is the JSON body for POST /api/v1/send.
-type sendRequest struct {
-	From              string            `json:"from"`
-	To                []string          `json:"to"`
-	CC                []string          `json:"cc"`
-	BCC               []string          `json:"bcc"`
-	Subject           string            `json:"subject"`
-	TextBody          string            `json:"text_body"`
-	HTMLBody          string            `json:"html_body"`
-	Headers           map[string]string `json:"headers"`
-	TemplateVersionID *uuid.UUID        `json:"template_version_id"`
-	AttachmentIDs     []uuid.UUID       `json:"attachment_ids"`
-	TemplateName      *string           `json:"template_name"`
-	TemplateVars      map[string]string `json:"template_vars"`
-}
-
-// maxSendBodyBytes limits the JSON request body for outbound send to 2 MB.
-const maxSendBodyBytes = 2 * 1024 * 1024
-
-// Send handles POST /api/v1/send — submit an outbound email.
-func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(w, r.Body, maxSendBodyBytes)
-	var body sendRequest
-	if err := decodeBody(r, &body); err != nil {
-		errBadRequest(w, "invalid request body")
-		return
-	}
-
-	if body.From == "" {
-		errBadRequest(w, "from is required")
-		return
-	}
-	if len(body.To) == 0 {
-		errBadRequest(w, "at least one recipient in to is required")
-		return
-	}
-
-	job, replayed, ok := h.submitAuthorized(w, r, outboundSubmitInput{
-		From:              body.From,
-		To:                body.To,
-		CC:                body.CC,
-		BCC:               body.BCC,
-		Subject:           body.Subject,
-		TextBody:          body.TextBody,
-		HTMLBody:          body.HTMLBody,
-		Headers:           body.Headers,
-		TemplateVersionID: body.TemplateVersionID,
-		TemplateName:      body.TemplateName,
-		TemplateVars:      body.TemplateVars,
-		AttachmentIDs:     body.AttachmentIDs,
-		IdempotencyKey:    strings.TrimSpace(r.Header.Get("Idempotency-Key")),
-	})
-	if !ok {
-		return
-	}
-	// Legacy /send contract: always 201 (replays included). The draft submit
-	// endpoint distinguishes 201 fresh vs 200 replay via the same helper.
-	_ = replayed
-	created(w, job)
-}
-
 // ConsumedDraftSubmission classifies an already-missing draft (see
 // outbound.Service.ConsumedDraftSubmission) for the company draft submit
 // endpoint.
@@ -110,8 +49,8 @@ func (h *OutboundHandler) ConsumedDraftSubmission(ctx context.Context, tenantID,
 	return h.outbound.ConsumedDraftSubmission(ctx, tenantID, draftID, userID, key)
 }
 
-// outboundSubmitInput carries the caller-supplied message fields shared by the
-// legacy /send endpoint and the company draft submit endpoint.
+// outboundSubmitInput carries the caller-supplied message fields for the
+// company draft submit endpoint.
 type outboundSubmitInput struct {
 	From              string
 	To                []string
@@ -122,12 +61,10 @@ type outboundSubmitInput struct {
 	HTMLBody          string
 	Headers           map[string]string
 	TemplateVersionID *uuid.UUID
-	TemplateName      *string
 	TemplateVars      map[string]string
 	AttachmentIDs     []uuid.UUID
 	IdempotencyKey    string
-	// Draft pins the mail draft this submission consumes atomically; nil for
-	// the legacy /send path.
+	// Draft pins the mail draft this submission consumes atomically.
 	Draft *store.DraftConsumption
 }
 
@@ -137,14 +74,6 @@ type outboundSubmitInput struct {
 // and returns ok=false on failure. On success it returns the job and whether
 // the response is an idempotent replay of an earlier submission.
 func (h *OutboundHandler) submitAuthorized(w http.ResponseWriter, r *http.Request, in outboundSubmitInput) (*models.OutboundJob, bool, bool) {
-	// The company draft submit path must never reach the legacy name-based
-	// renderer: company.DraftPayload has no template_name field, so draft
-	// submissions can only reference a published template version. This guard
-	// pins that invariant where both entry points converge.
-	if in.Draft != nil && in.TemplateName != nil {
-		errBadRequest(w, "draft submissions must use template_version_id, not template_name")
-		return nil, false, false
-	}
 	ctx := r.Context()
 	tenant := middleware.TenantFromCtx(ctx)
 	if tenant == nil {
@@ -300,7 +229,6 @@ func (h *OutboundHandler) submitAuthorized(w http.ResponseWriter, r *http.Reques
 		TextBody:          in.TextBody,
 		HTMLBody:          in.HTMLBody,
 		Headers:           in.Headers,
-		TemplateName:      in.TemplateName,
 		TemplateVersionID: in.TemplateVersionID, AttachmentIDs: in.AttachmentIDs, IdempotencyKey: in.IdempotencyKey,
 		TemplateVars: in.TemplateVars,
 		Quota:        quota,

@@ -36,7 +36,6 @@ import (
 	"tabmail/internal/store/fileobj"
 	"tabmail/internal/store/postgres"
 	"tabmail/internal/store/s3obj"
-	"tabmail/internal/template"
 )
 
 var version = "dev"
@@ -158,10 +157,6 @@ func main() {
 	var outboundSvc *outbound.Service
 	if cfg.Outbound.Enabled {
 		outboundSvc = outbound.NewService(cfg.Outbound, pg, pg, logger)
-		// Wire the optional template renderer. With it attached, callers that
-		// set template_name get tenant-scoped, html/template-escaped rendering;
-		// callers that omit it stay on the byte-identical bare-string path.
-		outboundSvc.SetTemplateService(template.NewService(pg))
 		outboundSvc.SetObjectStore(obj)
 	}
 

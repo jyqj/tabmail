@@ -23,7 +23,6 @@ import {
   LayoutDashboard,
   BookOpen,
   Menu,
-  Inbox,
 } from "lucide-react";
 import { TabMailLogo } from "@/components/tabmail-logo";
 import { cn } from "@/lib/utils";
@@ -56,9 +55,6 @@ export function SiteHeader() {
   const navItems = [
     ...(level === "user" || level === "super_admin" || level === "admin"
       ? [{ href: "/mail", label: t("header.mail"), icon: LayoutDashboard }]
-      : []),
-    ...(level === "mailbox"
-      ? [{ href: "/", label: t("header.inbox"), icon: Inbox }]
       : []),
     { href: "/docs", label: t("header.docs"), icon: BookOpen },
   ];

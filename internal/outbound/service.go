@@ -19,7 +19,6 @@ import (
 	tabdkim "tabmail/internal/dkim"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
-	"tabmail/internal/template"
 	"tabmail/internal/workqueue"
 )
 
@@ -32,19 +31,12 @@ type Service struct {
 	store      store.Store
 	adapter    DeliveryAdapter
 	logger     zerolog.Logger
-	template   *template.Service
 	objects    store.ObjectStore
 	governance TemplateGovernance
 	// worker drives the background delivery loop. Built lazily in StartWorker
 	// so a disabled service stays a no-op.
 	worker *workqueue.Worker[*outboundJob]
 }
-
-// SetTemplateService wires the optional template renderer. Pass nil (or skip
-// the call) to keep the legacy bare-string send path byte-for-byte unchanged;
-// Submit only consults templates when req.TemplateName is non-nil AND a
-// service is set.
-func (s *Service) SetTemplateService(ts *template.Service) { s.template = ts }
 
 // NewService creates a new outbound service. gov is the published-template
 // governance dependency (the production Postgres store implements it); a nil
@@ -87,8 +79,7 @@ type SendRequest struct {
 	TemplateVersionID *uuid.UUID
 	AttachmentIDs     []uuid.UUID
 	IdempotencyKey    string
-	TemplateName      *string           // optional; nil keeps the legacy bare-string path
-	TemplateVars      map[string]string // used only when TemplateName is non-nil
+	TemplateVars      map[string]string // values for the published-template render path
 	Quota             store.OutboundQuotaReservation
 	// Draft, when non-nil, makes the enqueue transaction also consume (delete)
 	// this exact mail-draft revision atomically; a concurrent or repeated
@@ -166,9 +157,6 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		}
 	}
 	if req.TemplateVersionID != nil {
-		if req.TemplateName != nil {
-			return nil, false, app.BadRequest("select a published version or legacy name, not both")
-		}
 		if req.SenderMailboxID == nil {
 			return nil, false, app.BadRequest("published templates require an employee mailbox")
 		}
@@ -183,27 +171,6 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		if e != nil {
 			return nil, false, e
 		}
-	}
-	// Template path (opt-in). When TemplateName is set the caller wants the
-	// Subject/Text/HTML populated by rendering a tenant template; we do that
-	// up front so the existing validators below run against the rendered
-	// values. A nil template service with a non-nil TemplateName is a
-	// configuration error, not a silent fall-through to bare strings.
-	if req.TemplateName != nil && *req.TemplateName != "" {
-		if s.template == nil {
-			return nil, false, fmt.Errorf("template support is not configured")
-		}
-		rendered, err := s.template.Render(template.RenderInput{
-			TenantID: req.TenantID,
-			Name:     *req.TemplateName,
-			Vars:     req.TemplateVars,
-		})
-		if err != nil {
-			return nil, false, fmt.Errorf("render template %q: %w", *req.TemplateName, err)
-		}
-		req.Subject = rendered.Subject
-		req.TextBody = rendered.TextBody
-		req.HTMLBody = rendered.HTMLBody
 	}
 
 	// Validate all email addresses using RFC 5322 parsing.
@@ -273,7 +240,9 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		SenderUserID:      req.UserID,
 		SenderKeyID:       req.APIKeyID,
 		SenderMailboxID:   req.SenderMailboxID,
-		TemplateName:      req.TemplateName,
+		// TemplateName is intentionally no longer written: the legacy
+		// name-based render path is gone. The column stays for provenance of
+		// pre-existing jobs rendered by the retired /api/v1/send path.
 		TemplateVersionID: req.TemplateVersionID, AttachmentIDs: append([]uuid.UUID(nil), req.AttachmentIDs...), IdempotencyKey: req.IdempotencyKey, SubmitActor: actor, RequestHash: hash, DraftID: draftID,
 		DeliveredDomains: []string{},
 		ID:               uuid.New(),

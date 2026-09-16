@@ -9,15 +9,11 @@ const keys = [
   EPOCH,
   "tabmail_user",
   "tabmail_tenant_id",
-  "tabmail_mailbox_address",
-  "tabmail_mailbox_token",
-  "tabmail_mailbox_api_key_address",
-  "tabmail_mailbox_api_key",
 ];
 const pending = new Set<AbortController>();
 
-// Token rotation does not change the identity scope; account/tenant/mailbox
-// changes do. Do not include bearer credentials in SWR keys or diagnostics.
+// Token rotation does not change the identity scope; account/tenant changes
+// do. Do not include bearer credentials in SWR keys or diagnostics.
 export function sessionScope(): string {
   if (typeof window === "undefined") return "server";
   const raw = localStorage.getItem("tabmail_user");
@@ -32,10 +28,6 @@ export function sessionScope(): string {
     user?.id,
     user?.role,
     localStorage.getItem("tabmail_tenant_id"),
-    localStorage.getItem("tabmail_mailbox_address"),
-    Boolean(localStorage.getItem("tabmail_mailbox_token")),
-    localStorage.getItem("tabmail_mailbox_api_key_address"),
-    Boolean(localStorage.getItem("tabmail_mailbox_api_key")),
   ]);
 }
 

@@ -32,13 +32,12 @@ func requestDigest(req SendRequest) string {
 		To, CC, BCC         []string
 		Subject, Text, HTML string
 		Headers             map[string]string
-		TemplateName        *string
 		Version             *uuid.UUID
 		Vars                map[string]string
 		Attachments         []uuid.UUID
 		DraftID             *uuid.UUID
 		DraftRevision       int
-	}{req.From, req.To, req.CC, req.BCC, req.Subject, req.TextBody, req.HTMLBody, req.Headers, req.TemplateName, req.TemplateVersionID, req.TemplateVars, req.AttachmentIDs, draftID, draftRevision})
+	}{req.From, req.To, req.CC, req.BCC, req.Subject, req.TextBody, req.HTMLBody, req.Headers, req.TemplateVersionID, req.TemplateVars, req.AttachmentIDs, draftID, draftRevision})
 }
 func contentDigest(j *models.OutboundJob) string {
 	return company.Digest(struct {

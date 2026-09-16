@@ -29,8 +29,6 @@ interface AuthSnapshot {
   accessToken: string | null;
   user: AuthUser | null;
   tenantId: string | null;
-  mailboxToken: string | null;
-  mailboxAddress: string | null;
 }
 
 interface AuthState extends AuthSnapshot {
@@ -41,8 +39,6 @@ interface AuthState extends AuthSnapshot {
   permissionsError: boolean;
   loginWithTokens: (accessToken: string, user: AuthUser) => void;
   setTenantId: (id: string | null) => void;
-  setMailboxAuth: (address: string | null, token: string | null) => void;
-  clearMailboxAuth: () => void;
   logout: () => void;
 }
 
@@ -65,8 +61,6 @@ function readSnapshot(): AuthSnapshot {
       accessToken: null,
       user: null,
       tenantId: null,
-      mailboxToken: null,
-      mailboxAddress: null,
     };
   }
 
@@ -74,17 +68,13 @@ function readSnapshot(): AuthSnapshot {
     accessToken: localStorage.getItem("tabmail_access_token"),
     user: parseUser(localStorage.getItem("tabmail_user")),
     tenantId: localStorage.getItem("tabmail_tenant_id"),
-    mailboxToken: localStorage.getItem("tabmail_mailbox_token"),
-    mailboxAddress: localStorage.getItem("tabmail_mailbox_address"),
   };
 
   if (
     cachedSnapshot &&
     JSON.stringify(cachedSnapshot.user) === JSON.stringify(nextSnapshot.user) &&
     cachedSnapshot.accessToken === nextSnapshot.accessToken &&
-    cachedSnapshot.tenantId === nextSnapshot.tenantId &&
-    cachedSnapshot.mailboxToken === nextSnapshot.mailboxToken &&
-    cachedSnapshot.mailboxAddress === nextSnapshot.mailboxAddress
+    cachedSnapshot.tenantId === nextSnapshot.tenantId
   ) {
     return cachedSnapshot;
   }
@@ -121,8 +111,6 @@ const serverSnapshot: AuthSnapshot = {
   accessToken: null,
   user: null,
   tenantId: null,
-  mailboxToken: null,
-  mailboxAddress: null,
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -203,24 +191,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     advanceSession();
   }, []);
 
-  const setMailboxAuth = useCallback(
-    (address: string | null, token: string | null) => {
-      setStorageItem(
-        "tabmail_mailbox_address",
-        address?.trim().toLowerCase() || null,
-      );
-      setStorageItem("tabmail_mailbox_token", token?.trim() || null);
-      advanceSession();
-    },
-    [],
-  );
-
-  const clearMailboxAuth = useCallback(() => {
-    setStorageItem("tabmail_mailbox_address", null);
-    setStorageItem("tabmail_mailbox_token", null);
-    advanceSession();
-  }, []);
-
   const logout = useCallback(async () => {
     const before = sessionScope();
     if (localStorage.getItem("tabmail_access_token")) {
@@ -240,8 +210,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setStorageItem("tabmail_access_token", null);
     localStorage.removeItem("tabmail_user");
     setStorageItem("tabmail_tenant_id", null);
-    setStorageItem("tabmail_mailbox_address", null);
-    setStorageItem("tabmail_mailbox_token", null);
     setPermissions(null);
     setPermissionsError(false);
     permsFetchedForToken.current = null;
@@ -255,9 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         : snapshot.user.role === "admin"
           ? "admin"
           : "user"
-      : snapshot.mailboxToken
-        ? "mailbox"
-        : "public";
+      : "public";
 
   return (
     <AuthContext.Provider
@@ -270,8 +236,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         permissionsError,
         loginWithTokens,
         setTenantId,
-        setMailboxAuth,
-        clearMailboxAuth,
         logout,
       }}
     >

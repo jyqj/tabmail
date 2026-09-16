@@ -15,7 +15,6 @@ describe("api/base", () => {
   it("使用 JWT 并附带 tenant id", () => {
     localStorage.setItem("tabmail_access_token", "access-token");
     localStorage.setItem("tabmail_tenant_id", "tenant-1");
-    localStorage.setItem("tabmail_mailbox_token", "mailbox-token");
 
     expect(buildHeaders("/api/v1/domains")).toEqual({
       Authorization: "Bearer access-token",
@@ -23,20 +22,6 @@ describe("api/base", () => {
     });
   });
 
-  it("目标 mailbox 路径上优先使用 mailbox token，避免被 JWT 抢占", () => {
-    localStorage.setItem("tabmail_access_token", "access-token");
-    localStorage.setItem("tabmail_tenant_id", "tenant-1");
-    localStorage.setItem("tabmail_mailbox_token", "mailbox-token");
-    localStorage.setItem("tabmail_mailbox_address", "user@mail.test");
-
-    expect(buildHeaders("/api/v1/mailbox/user%40mail.test")).toEqual({
-      Authorization: "Bearer mailbox-token",
-    });
-    expect(buildHeaders("/api/v1/mailbox/other%40mail.test")).toEqual({
-      Authorization: "Bearer access-token",
-      "X-Tenant-ID": "tenant-1",
-    });
-  });
 
   it("request 会拼接 query 参数并返回文本响应", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
@@ -47,14 +32,14 @@ describe("api/base", () => {
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await request<string>("/api/v1/mailbox/user%40mail.test/source", {
+    const result = await request<string>("/api/v1/outbound/x/source", {
       params: { page: 2, per_page: 10 },
     });
 
     expect(result).toBe("raw message");
     expect(fetchMock).toHaveBeenCalledTimes(1);
     const url = fetchMock.mock.calls[0][0] as string;
-    expect(url).toContain("/api/v1/mailbox/user%40mail.test/source");
+    expect(url).toContain("/api/v1/outbound/x/source");
     expect(url).toContain("page=2");
     expect(url).toContain("per_page=10");
   });

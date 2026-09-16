@@ -12,12 +12,9 @@ const { toastSuccess, toastError, loginMock, registerMock, logoutSessionMock, au
   logoutSessionMock: vi.fn(),
   authStateRef: {
     current: null as {
-      level: "public" | "admin" | "mailbox" | "user";
+      level: "public" | "admin" | "user";
       user: { email: string; display_name: string; role: "admin" | "user" } | null;
-      refreshToken: null;
-      mailboxAddress: string | null;
       loginWithTokens: ReturnType<typeof vi.fn>;
-      setMailboxAuth: ReturnType<typeof vi.fn>;
       logout: ReturnType<typeof vi.fn>;
     } | null,
   },
@@ -90,10 +87,7 @@ describe("AuthDialog", () => {
     authStateRef.current = {
       level: "public",
       user: null,
-      refreshToken: null,
-      mailboxAddress: null,
       loginWithTokens: vi.fn(),
-      setMailboxAuth: vi.fn(),
       logout: vi.fn(),
     };
     loginMock.mockReset();
@@ -139,20 +133,4 @@ describe("AuthDialog", () => {
     expect(toastSuccess).toHaveBeenCalledWith("Welcome, User");
   });
 
-  it("mailbox 登录态显示单邮箱身份", () => {
-    authStateRef.current = {
-      level: "mailbox",
-      user: null,
-      refreshToken: null,
-      mailboxAddress: "user@mail.test",
-      loginWithTokens: vi.fn(),
-      setMailboxAuth: vi.fn(),
-      logout: vi.fn(),
-    };
-
-    render(<AuthDialog />);
-
-    expect(screen.getByText("auth.level.mailbox")).toBeInTheDocument();
-    expect(screen.getByText("user@mail.test")).toBeInTheDocument();
-  });
 });

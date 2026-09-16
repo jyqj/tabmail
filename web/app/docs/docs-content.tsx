@@ -228,25 +228,9 @@ function NoteBox({ children, variant = "info" }: { children: ReactNode; variant?
 function QuickstartTab({ t, copy }: { t: TFn; copy: CopyFn }) {
   const curl = {
     health: `curl "$BASE_URL/health"`,
-    token: `curl -X POST "$BASE_URL/api/v1/token" \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-    "address": "secure@mail.example.com",
-    "password": "Passw0rd!"
-  }'`,
-    domain: `curl -X POST "$BASE_URL/api/v1/domains" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{ "domain": "mail.example.com" }'`,
-    deep: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-    "route_type": "deep_wildcard",
-    "match_value": "**.mail.example.com",
-    "auto_create_mailbox": true,
-    "access_mode_default": "public"
-  }'`,
+
+
+
   };
   return (
     <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -260,9 +244,6 @@ function QuickstartTab({ t, copy }: { t: TFn; copy: CopyFn }) {
       </Card>
       <div className="grid gap-4">
         <CodeCard t={t} title={t("docs.health")} description={t("docs.healthDesc")} code={curl.health} onCopy={() => copy(curl.health, `${t("docs.health")} curl`)} />
-        <CodeCard t={t} title={t("docs.mailboxTokenTitle")} description={t("docs.mailboxTokenDesc")} code={curl.token} onCopy={() => copy(curl.token, `${t("docs.mailboxTokenTitle")} curl`)} />
-        <CodeCard t={t} title={t("docs.createDomainTitle")} description={t("docs.createDomainDesc")} code={curl.domain} onCopy={() => copy(curl.domain, `${t("docs.createDomainTitle")} curl`)} />
-        <CodeCard t={t} title={t("docs.deepWildcardTitle")} description={t("docs.deepWildcardDesc")} code={curl.deep} onCopy={() => copy(curl.deep, `${t("docs.deepWildcardTitle")} curl`)} />
       </div>
     </div>
   );
@@ -435,16 +416,10 @@ docker compose up -d --build`;
 /* ─── Domains Tab ─── */
 function DomainsTab({ t, copy }: { t: TFn; copy: CopyFn }) {
   const c = (code: string, label: string) => () => copy(code, label);
-  const bindCmd = `curl -X POST "$BASE_URL/api/v1/domains" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{ "domain": "mail.example.com" }'`;
-  const verifyCmd = `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/verify" \\
-  -H "X-API-Key: $TENANT_API_KEY"`;
-  const suggestCmd = `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address" \\
-  -H "X-API-Key: $TENANT_API_KEY"`;
-  const suggestSubdomainCmd = `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address?subdomain=true" \\
-  -H "X-API-Key: $TENANT_API_KEY"`;
+
+
+
+
   const testSmtp = `nc 127.0.0.1 2525
 EHLO localhost
 MAIL FROM:<sender@test.com>
@@ -463,8 +438,6 @@ QUIT`;
         <div className="grid gap-3">
           {([1,2,3,4,5,6] as const).map(n => (
             <StepCard key={n} step={n} title={t(`guide.domains.step${n}`)} desc={t(`guide.domains.step${n}Desc`)}>
-              {n === 2 && <div className="mt-3"><CodeCard t={t} title={t("guide.api.bindDomain")} description="" code={bindCmd} onCopy={c(bindCmd, "bind domain")} /></div>}
-              {n === 4 && <div className="mt-3"><CodeCard t={t} title={t("guide.api.verifyDomain")} description="" code={verifyCmd} onCopy={c(verifyCmd, "verify")} /></div>}
               {n === 6 && <div className="mt-3"><CodeCard t={t} title="SMTP Test" description="" code={testSmtp} onCopy={c(testSmtp, "smtp test")} /></div>}
             </StepCard>
           ))}
@@ -513,9 +486,7 @@ QUIT`;
 
       <SubSection title={t("guide.domains.randomTitle")} desc={t("guide.domains.randomDesc")}>
         <div className="space-y-4">
-          <CodeCard t={t} title={t("guide.api.suggestAddress")} description="" code={suggestCmd} onCopy={c(suggestCmd, "suggest address")} />
           <NoteBox>{t("guide.domains.randomNote")}</NoteBox>
-          <CodeCard t={t} title={t("guide.api.suggestSubdomainAddress")} description="" code={suggestSubdomainCmd} onCopy={c(suggestSubdomainCmd, "suggest subdomain address")} />
           <NoteBox>{t("guide.domains.randomSubdomainNote")}</NoteBox>
         </div>
       </SubSection>
@@ -546,82 +517,29 @@ function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
   -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN" \\
   -H 'Content-Type: application/json' \\
   -d '{ "label": "default key", "scopes": ["domains:read","domains:write","routes:read","routes:write","mailboxes:read","mailboxes:write","messages:read","messages:write"] }'`,
-    bindDomain: `curl -X POST "$BASE_URL/api/v1/domains" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{ "domain": "mail.example.com" }'`,
+
     listDomains: `curl "$BASE_URL/api/v1/domains" \\
   -H "X-API-Key: $TENANT_API_KEY"`,
-    verifyDomain: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/verify" \\
-  -H "X-API-Key: $TENANT_API_KEY"`,
-    checkVerification: `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/verification-status" \\
-  -H "X-API-Key: $TENANT_API_KEY"`,
-    suggestAddress: `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address" \\
-  -H "X-API-Key: $TENANT_API_KEY"`,
-    suggestSubdomainAddress: `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/suggest-address?subdomain=true" \\
-  -H "X-API-Key: $TENANT_API_KEY"`,
-    createWildcard: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-    "route_type": "wildcard",
-    "match_value": "*.mail.example.com",
-    "auto_create_mailbox": true,
-    "access_mode_default": "public"
-  }'`,
-    createSequence: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-    "route_type": "sequence",
-    "match_value": "box-{n}.mail.example.com",
-    "range_start": 1, "range_end": 1000,
-    "auto_create_mailbox": true,
-    "access_mode_default": "token"
-  }'`,
-    createDeepWildcard: `curl -X POST "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-    "route_type": "deep_wildcard",
-    "match_value": "**.mail.example.com",
-    "auto_create_mailbox": true,
-    "access_mode_default": "public"
-  }'`,
-    listRoutes: `curl "$BASE_URL/api/v1/domains/$DOMAIN_ID/routes" \\
-  -H "X-API-Key: $TENANT_API_KEY"`,
-    createPublicMailbox: `curl -X POST "$BASE_URL/api/v1/mailboxes" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{ "address": "demo@mail.example.com", "access_mode": "public" }'`,
-    createTokenMailbox: `curl -X POST "$BASE_URL/api/v1/mailboxes" \\
-  -H "X-API-Key: $TENANT_API_KEY" \\
-  -H 'Content-Type: application/json' \\
-  -d '{
-    "address": "secure@mail.example.com",
-    "password": "Passw0rd!",
-    "access_mode": "token"
-  }'`,
-    getToken: `curl -X POST "$BASE_URL/api/v1/token" \\
-  -H 'Content-Type: application/json' \\
-  -d '{ "address": "secure@mail.example.com", "password": "Passw0rd!" }'`,
-    listMailboxes: `curl "$BASE_URL/api/v1/mailboxes" \\
-  -H "X-API-Key: $TENANT_API_KEY"`,
-    listMessages: `curl "$BASE_URL/api/v1/mailbox/demo@mail.example.com"`,
-    listMessagesByToken: `curl "$BASE_URL/api/v1/mailbox/secure@mail.example.com" \\
-  -H "Authorization: Bearer $MAILBOX_TOKEN"`,
-    listMessagesByApiKey: `curl "$BASE_URL/api/v1/mailbox/secure@mail.example.com" \\
-  -H "X-API-Key: $TENANT_API_KEY"`,
-    viewMessage: `curl "$BASE_URL/api/v1/mailbox/secure@mail.example.com/$MESSAGE_ID" \\
-  -H "Authorization: Bearer $MAILBOX_TOKEN"`,
-    viewSource: `curl "$BASE_URL/api/v1/mailbox/secure@mail.example.com/$MESSAGE_ID/source" \\
-  -H "Authorization: Bearer $MAILBOX_TOKEN"`,
-    markRead: `curl -X PATCH "$BASE_URL/api/v1/mailbox/secure@mail.example.com/$MESSAGE_ID" \\
-  -H "Authorization: Bearer $MAILBOX_TOKEN"`,
-    deleteMessage: `curl -X DELETE "$BASE_URL/api/v1/mailbox/secure@mail.example.com/$MESSAGE_ID" \\
-  -H "Authorization: Bearer $MAILBOX_TOKEN"`,
-    purgeMailbox: `curl -X DELETE "$BASE_URL/api/v1/mailbox/secure@mail.example.com" \\
-  -H "Authorization: Bearer $MAILBOX_TOKEN"`,
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     systemStats: `curl "$BASE_URL/api/v1/admin/stats" \\
   -H "Authorization: Bearer $ADMIN_ACCESS_TOKEN"`,
     monitorHistory: `curl "$BASE_URL/api/v1/admin/monitor/history?page=1&per_page=20&type=message" \\
@@ -657,31 +575,11 @@ function ApiTab({ t, copy }: { t: TFn; copy: CopyFn }) {
       { key: "guide.api.createApiKey", cmdKey: "createApiKey", note: "guide.api.createApiKeyNote" },
     ]},
     { id: "s2", sidebarKey: "guide.api.sidebarS2", titleKey: "guide.api.s2Title", descKey: "guide.api.s2Desc", items: [
-      { key: "guide.api.bindDomain", cmdKey: "bindDomain" },
+
       { key: "guide.api.listDomains", cmdKey: "listDomains" },
-      { key: "guide.api.verifyDomain", cmdKey: "verifyDomain" },
-      { key: "guide.api.checkVerification", cmdKey: "checkVerification" },
-      { key: "guide.api.suggestAddress", cmdKey: "suggestAddress" },
-      { key: "guide.api.suggestSubdomainAddress", cmdKey: "suggestSubdomainAddress" },
-      { key: "guide.api.createWildcard", cmdKey: "createWildcard" },
-      { key: "guide.api.createSequence", cmdKey: "createSequence" },
-      { key: "guide.api.createDeepWildcard", cmdKey: "createDeepWildcard" },
-      { key: "guide.api.listRoutes", cmdKey: "listRoutes" },
+
     ]},
-    { id: "s3", sidebarKey: "guide.api.sidebarS3", titleKey: "guide.api.s3Title", descKey: "guide.api.s3Desc", items: [
-      { key: "guide.api.createPublicMailbox", cmdKey: "createPublicMailbox" },
-      { key: "guide.api.createTokenMailbox", cmdKey: "createTokenMailbox" },
-      { key: "guide.api.getToken", cmdKey: "getToken" },
-      { key: "guide.api.listMailboxes", cmdKey: "listMailboxes" },
-      { key: "guide.api.listMessages", cmdKey: "listMessages" },
-      { key: "guide.api.listMessagesByToken", cmdKey: "listMessagesByToken" },
-      { key: "guide.api.listMessagesByApiKey", cmdKey: "listMessagesByApiKey" },
-      { key: "guide.api.viewMessage", cmdKey: "viewMessage" },
-      { key: "guide.api.viewSource", cmdKey: "viewSource" },
-      { key: "guide.api.markRead", cmdKey: "markRead" },
-      { key: "guide.api.deleteMessage", cmdKey: "deleteMessage" },
-      { key: "guide.api.purgeMailbox", cmdKey: "purgeMailbox" },
-    ]},
+
     { id: "s4", sidebarKey: "guide.api.sidebarS4", titleKey: "guide.api.s4Title", descKey: "guide.api.s4Desc", items: [
       { key: "guide.api.systemStats", cmdKey: "systemStats" },
       { key: "guide.api.monitorHistory", cmdKey: "monitorHistory" },

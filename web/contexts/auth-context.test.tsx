@@ -24,8 +24,6 @@ function AuthProbe() {
       <div data-testid="level">{auth.level}</div>
       <div data-testid="accessToken">{auth.accessToken ?? ""}</div>
       <div data-testid="tenantId">{auth.tenantId ?? ""}</div>
-      <div data-testid="mailboxAddress">{auth.mailboxAddress ?? ""}</div>
-      <div data-testid="mailboxToken">{auth.mailboxToken ?? ""}</div>
 
       <button
         onClick={() =>
@@ -41,14 +39,6 @@ function AuthProbe() {
         set-jwt
       </button>
       <button onClick={() => auth.setTenantId(" tenant-1 ")}>set-tenant</button>
-      <button
-        onClick={() =>
-          auth.setMailboxAuth("User@Mail.Test ", " mailbox-token ")
-        }
-      >
-        set-mailbox
-      </button>
-      <button onClick={() => auth.clearMailboxAuth()}>clear-mailbox</button>
       <button onClick={() => auth.logout()}>logout</button>
     </div>
   );
@@ -72,10 +62,9 @@ describe("auth-context", () => {
 
     expect(screen.getByTestId("level")).toHaveTextContent("public");
     expect(screen.getByTestId("accessToken")).toHaveTextContent("");
-    expect(screen.getByTestId("mailboxToken")).toHaveTextContent("");
   });
 
-  it("支持 JWT / tenant / mailbox 状态写入与清理", async () => {
+  it("支持 JWT / tenant 状态写入与清理", async () => {
     render(
       <AuthProvider>
         <AuthProbe />
@@ -99,21 +88,5 @@ describe("auth-context", () => {
       expect(screen.getByTestId("level")).toHaveTextContent("public");
     });
     expect(localStorage.getItem("tabmail_tenant_id")).toBeNull();
-
-    fireEvent.click(screen.getByRole("button", { name: "set-mailbox" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("level")).toHaveTextContent("mailbox");
-    });
-    expect(localStorage.getItem("tabmail_mailbox_address")).toBe(
-      "user@mail.test",
-    );
-    expect(localStorage.getItem("tabmail_mailbox_token")).toBe("mailbox-token");
-
-    fireEvent.click(screen.getByRole("button", { name: "clear-mailbox" }));
-    await waitFor(() => {
-      expect(screen.getByTestId("level")).toHaveTextContent("public");
-    });
-    expect(localStorage.getItem("tabmail_mailbox_address")).toBeNull();
-    expect(localStorage.getItem("tabmail_mailbox_token")).toBeNull();
   });
 });

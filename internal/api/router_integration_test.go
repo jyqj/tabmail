@@ -14,7 +14,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
-	"golang.org/x/crypto/bcrypt"
 
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
@@ -71,131 +70,6 @@ func TestRouter_DocsAssetsSelfHosted(t *testing.T) {
 		if rr.Body.Len() < 1024 {
 			t.Fatalf("%s: suspiciously small body (%d bytes)", asset, rr.Body.Len())
 		}
-	}
-}
-
-func TestRouter_PublicCannotManageDomains(t *testing.T) {
-	st, obj, tenantID := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
-	t.Cleanup(func() { _ = rdb.Close() })
-
-	router := testRouter(st, obj, rdb)
-
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/domains", bytes.NewBufferString(`{"domain":"mail.example.com"}`))
-	req.Header.Set("Content-Type", "application/json")
-	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
-
-	if rr.Code != http.StatusUnauthorized {
-		t.Fatalf("expected 401, got %d body=%s", rr.Code, rr.Body.String())
-	}
-
-	_ = tenantID
-}
-
-func TestRouter_MailboxTokenFlow(t *testing.T) {
-	st, obj, tenantID := seededStores(t)
-
-	hash, err := bcrypt.GenerateFromPassword([]byte("Passw0rd!"), bcrypt.DefaultCost)
-	if err != nil {
-		t.Fatal(err)
-	}
-	zoneID := findTenantZone(t, st, tenantID)
-	mb := &models.Mailbox{
-		ID:             uuid.New(),
-		TenantID:       tenantID,
-		ZoneID:         zoneID,
-		LocalPart:      "secure",
-		ResolvedDomain: "mail.test",
-		FullAddress:    "secure@mail.test",
-		AccessMode:     models.AccessToken,
-	}
-	s := string(hash)
-	mb.PasswordHash = &s
-	st.SeedMailbox(mb)
-	if err := obj.Put(context.Background(), "raw/1.eml", bytes.NewBufferString("Subject: hello\r\n\r\nhello body"), 0); err != nil {
-		t.Fatal(err)
-	}
-	st.SeedMessage(&models.Message{
-		ID:           uuid.New(),
-		TenantID:     tenantID,
-		MailboxID:    mb.ID,
-		ZoneID:       zoneID,
-		Sender:       "sender@example.org",
-		Recipients:   []string{mb.FullAddress},
-		Subject:      "hello",
-		RawObjectKey: "raw/1.eml",
-		ReceivedAt:   time.Now(),
-		ExpiresAt:    models.MessageExpiry(nil, 24, time.Now()),
-	})
-
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
-	t.Cleanup(func() { _ = rdb.Close() })
-	router := testRouter(st, obj, rdb)
-
-	tokenResp := doJSON(t, router, http.MethodPost, "/api/v1/token", map[string]any{
-		"address":  mb.FullAddress,
-		"password": "Passw0rd!",
-	}, nil)
-	token := tokenResp["data"].(map[string]any)["token"].(string)
-	if token == "" {
-		t.Fatal("expected mailbox token")
-	}
-
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/mailbox/"+mb.FullAddress, nil)
-	req.Header.Set("Authorization", "Bearer "+token)
-	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
-	if rr.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d body=%s", rr.Code, rr.Body.String())
-	}
-
-	var body map[string]any
-	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
-		t.Fatal(err)
-	}
-	items, ok := body["data"].([]any)
-	if !ok || len(items) != 1 {
-		t.Fatalf("expected 1 message, got %#v", body["data"])
-	}
-}
-
-func TestRouter_CreateMailboxSupportsRetentionAndExpiry(t *testing.T) {
-	st, obj, tenantID := seededStores(t)
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
-	t.Cleanup(func() { _ = rdb.Close() })
-
-	router := testRouter(st, obj, rdb)
-
-	expiresAt := time.Now().Add(2 * time.Hour).UTC().Truncate(time.Second)
-	body := doJSON(t, router, http.MethodPost, "/api/v1/mailboxes", map[string]any{
-		"address":                  "retained@mail.test",
-		"access_mode":              "token",
-		"password":                 "Passw0rd!",
-		"retention_hours_override": 6,
-		"expires_at":               expiresAt.Format(time.RFC3339),
-	}, adminHeaders(t, st, tenantID))
-
-	data := body["data"].(map[string]any)
-	if data["retention_hours_override"].(float64) != 6 {
-		t.Fatalf("expected retention override 6, got %#v", data["retention_hours_override"])
-	}
-	if data["expires_at"].(string) == "" {
-		t.Fatalf("expected expires_at in response, got %#v", data)
-	}
-
-	mb, err := st.GetMailboxByAddress(context.Background(), "retained@mail.test")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if mb == nil {
-		t.Fatal("expected mailbox to be created")
-	}
-	if mb.RetentionHoursOverride == nil || *mb.RetentionHoursOverride != 6 {
-		t.Fatalf("unexpected retention override: %#v", mb.RetentionHoursOverride)
-	}
-	if mb.ExpiresAt == nil || !mb.ExpiresAt.UTC().Equal(expiresAt) {
-		t.Fatalf("unexpected expires_at: %#v", mb.ExpiresAt)
 	}
 }
 
@@ -307,105 +181,6 @@ func TestRouter_MetricsExposeQueueDepthAndHistograms(t *testing.T) {
 	}
 }
 
-func TestRouter_SuggestAddressReturnsStructuredMailboxAddress(t *testing.T) {
-	st, obj, tenantID := seededStores(t)
-	tenant, err := st.GetTenant(context.Background(), tenantID)
-	if err != nil || tenant == nil {
-		t.Fatalf("get tenant: %v tenant=%#v", err, tenant)
-	}
-	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read"})
-
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
-	t.Cleanup(func() { _ = rdb.Close() })
-	router := testRouter(st, obj, rdb)
-
-	domainID := findTenantZone(t, st, tenantID)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains/"+domainID.String()+"/suggest-address", nil)
-	req.Header.Set("X-API-Key", "tenant-key")
-	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
-	if rr.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d body=%s", rr.Code, rr.Body.String())
-	}
-	var body map[string]map[string]any
-	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
-		t.Fatal(err)
-	}
-	data := body["data"]
-	address, _ := data["address"].(string)
-	if !strings.HasSuffix(address, "@mail.test") {
-		t.Fatalf("unexpected address: %#v", address)
-	}
-	local, _ := data["local_part"].(string)
-	if len(local) != 22 {
-		t.Fatalf("unexpected local part length: %q", local)
-	}
-	if data["algorithm"] != policy.AddressSuggestionAlgorithm {
-		t.Fatalf("unexpected algorithm: %#v", data["algorithm"])
-	}
-}
-
-func TestRouter_SuggestAddressSupportsRandomSubdomain(t *testing.T) {
-	st, obj, tenantID := seededStores(t)
-	tenant, err := st.GetTenant(context.Background(), tenantID)
-	if err != nil || tenant == nil {
-		t.Fatalf("get tenant: %v tenant=%#v", err, tenant)
-	}
-	st.RegisterAPIKey("tenant-key", tenant, []string{"domains:read", "domains:write"})
-
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
-	t.Cleanup(func() { _ = rdb.Close() })
-	router := testRouter(st, obj, rdb)
-
-	domainID := findTenantZone(t, st, tenantID)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains/"+domainID.String()+"/suggest-address?subdomain=true", nil)
-	req.Header.Set("X-API-Key", "tenant-key")
-	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
-	if rr.Code != http.StatusOK {
-		t.Fatalf("expected 200, got %d body=%s", rr.Code, rr.Body.String())
-	}
-	var body map[string]map[string]any
-	if err := json.Unmarshal(rr.Body.Bytes(), &body); err != nil {
-		t.Fatal(err)
-	}
-	data := body["data"]
-	domain, _ := data["domain"].(string)
-	subLabel, _ := data["subdomain_label"].(string)
-	address, _ := data["address"].(string)
-	if !strings.HasSuffix(domain, ".mail.test") || subLabel == "" {
-		t.Fatalf("unexpected subdomain suggestion payload: %#v", data)
-	}
-	if !strings.Contains(address, "@"+domain) {
-		t.Fatalf("expected address to use randomized subdomain %q, got %q", domain, address)
-	}
-	if data["mode"] != "subdomain" {
-		t.Fatalf("unexpected mode: %#v", data["mode"])
-	}
-}
-
-func TestRouter_SuggestSubdomainRequiresDomainWriteScope(t *testing.T) {
-	st, obj, tenantID := seededStores(t)
-	tenant, err := st.GetTenant(context.Background(), tenantID)
-	if err != nil || tenant == nil {
-		t.Fatalf("get tenant: %v tenant=%#v", err, tenant)
-	}
-	st.RegisterAPIKey("read-key", tenant, []string{"domains:read"})
-
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
-	t.Cleanup(func() { _ = rdb.Close() })
-	router := testRouter(st, obj, rdb)
-
-	domainID := findTenantZone(t, st, tenantID)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/domains/"+domainID.String()+"/suggest-address?subdomain=true", nil)
-	req.Header.Set("X-API-Key", "read-key")
-	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
-	if rr.Code != http.StatusForbidden {
-		t.Fatalf("expected 403, got %d body=%s", rr.Code, rr.Body.String())
-	}
-}
-
 func TestRouter_UserSeesOnlyOwnedDomains(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
 	owner := seedUserForTest(t, st, tenantID, models.RoleUser)
@@ -453,60 +228,6 @@ func TestRouter_UserSeesOnlyOwnedDomains(t *testing.T) {
 	}
 }
 
-func TestRouter_UserCannotDeleteMessagesInAnotherUsersDomain(t *testing.T) {
-	st, obj, tenantID := seededStores(t)
-	owner := seedUserForTest(t, st, tenantID, models.RoleUser)
-	other := seedUserForTest(t, st, tenantID, models.RoleUser)
-	zoneID := uuid.New()
-	st.SeedZone(&models.DomainZone{
-		ID:          zoneID,
-		TenantID:    tenantID,
-		OwnerUserID: &owner.ID,
-		Domain:      "owned-records.test",
-		IsVerified:  true,
-		MXVerified:  true,
-		TXTRecord:   "tabmail-verify-records",
-	})
-	mailboxID := uuid.New()
-	st.SeedMailbox(&models.Mailbox{
-		ID:             mailboxID,
-		TenantID:       tenantID,
-		ZoneID:         zoneID,
-		LocalPart:      "inbox",
-		ResolvedDomain: "owned-records.test",
-		FullAddress:    "inbox@owned-records.test",
-		AccessMode:     models.AccessPublic,
-	})
-	msgID := uuid.New()
-	st.SeedMessage(&models.Message{
-		ID:         msgID,
-		TenantID:   tenantID,
-		MailboxID:  mailboxID,
-		ZoneID:     zoneID,
-		Sender:     "sender@example.test",
-		Recipients: []string{"inbox@owned-records.test"},
-		Subject:    "owned record",
-		ReceivedAt: time.Now(),
-		ExpiresAt:  models.MessageExpiry(nil, 24, time.Now()),
-	})
-
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
-	t.Cleanup(func() { _ = rdb.Close() })
-	router := testRouter(st, obj, rdb)
-
-	req := httptest.NewRequest(http.MethodDelete, "/api/v1/mailbox/inbox@owned-records.test/"+msgID.String(), nil)
-	req.Header.Set("Authorization", "Bearer "+issueAccessTokenForExistingUser(t, other))
-	rr := httptest.NewRecorder()
-	router.ServeHTTP(rr, req)
-	if rr.Code != http.StatusForbidden {
-		t.Fatalf("expected 403, got %d body=%s", rr.Code, rr.Body.String())
-	}
-	msg, err := st.GetMessage(context.Background(), msgID)
-	if err != nil || msg == nil {
-		t.Fatalf("message should remain after forbidden delete, err=%v msg=%#v", err, msg)
-	}
-}
-
 func TestRouter_ImpersonationRespectsTenantRateLimit(t *testing.T) {
 	st, obj, tenantID := seededStores(t)
 	plan, err := st.GetPlan(context.Background(), uuid.MustParse("00000000-0000-0000-0000-000000000010"))
@@ -531,7 +252,7 @@ func TestRouter_ImpersonationRespectsTenantRateLimit(t *testing.T) {
 	router := testRouter(st, obj, rdb)
 
 	mkReq := func() *httptest.ResponseRecorder {
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/mailboxes", nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/keys", nil)
 		setAdminAuth(t, st, req, tenantID)
 		rr := httptest.NewRecorder()
 		router.ServeHTTP(rr, req)
@@ -577,7 +298,7 @@ func TestRouter_UserJWTRespectsTenantRateLimit(t *testing.T) {
 	token := issueAccessTokenForTest(t, st, tenantID, models.RoleUser)
 
 	mkReq := func() *httptest.ResponseRecorder {
-		req := httptest.NewRequest(http.MethodGet, "/api/v1/mailboxes", nil)
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/keys", nil)
 		req.Header.Set("Authorization", "Bearer "+token)
 		rr := httptest.NewRecorder()
 		router.ServeHTTP(rr, req)

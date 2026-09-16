@@ -138,27 +138,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	r.Use(middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID))
 	r.Use(middleware.PermissionLoader(cached))
 	r.Use(cfg.RateLimiter.Middleware)
-	if cfg.CompanyOnly {
-		r.Use(func(next http.Handler) http.Handler {
-			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				p := r.URL.Path
-				if p == "/api/v1/token" || strings.HasPrefix(p, "/api/v1/resources/") {
-					w.Header().Set("Content-Type", "application/json")
-					w.WriteHeader(http.StatusForbidden)
-					_, _ = w.Write([]byte(`{"error":{"code":"COMPANY_ONLY","message":"public mailbox access is disabled"}}`))
-					return
-				}
-				if strings.HasPrefix(p, "/api/v1/mailbox/") && middleware.AuthModeFromCtx(r.Context()) == middleware.AuthModePublic {
-					middleware.RequireAuth(next).ServeHTTP(w, r)
-					return
-				}
-				next.ServeHTTP(w, r)
-			})
-		})
-	}
 
 	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
-	mh := handlers.NewMailboxHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.RateLimiter, cfg.Logger)
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
@@ -174,8 +155,6 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	auth.SetCompanyOnly(cfg.CompanyOnly)
 	ua := handlers.NewUserAdminHandler(st, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
-	wh := handlers.NewWebhookEndpointHandler(st, cfg.Logger)
-	si := handlers.NewSendIdentityHandler(st, cfg.Logger)
 	var oh *handlers.OutboundHandler
 	if cfg.OutboundService != nil {
 		oh = handlers.NewOutboundHandler(cfg.OutboundService, st, cfg.Logger)
@@ -189,7 +168,6 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		r.Post("/auth/login", auth.Login)
 		r.Post("/auth/register", auth.Register)
 		r.Post("/auth/refresh", auth.Refresh)
-		r.Post("/auth/accept-invite", auth.AcceptInvite)
 
 		// -- Auth (requires login) --
 		r.Group(func(r chi.Router) {
@@ -200,50 +178,15 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/auth/me/permissions", perm.MyPermissions)
 		})
 
-		// -- Mailbox token issuance --
-		r.Post("/token", mh.IssueToken)
-
-		// -- Open resources (public or authenticated based on resource visibility) --
-		r.Get("/resources/domains", dh.ListOpenZones)
-		r.Get("/resources/domains/{id}/suggest-address", dh.SuggestOpenAddress)
-
 		// -- Tenant resources (requires API key, JWT user, or admin) --
 		r.Group(func(r chi.Router) {
 			r.Use(middleware.RequireTenantKeyOrAdmin)
 
 			// -- Domains / Zones --
 			r.With(middleware.RequireScopes("domains:read")).Get("/domains", dh.ListZones)
-			r.With(middleware.RequireScopes("domains:write")).Post("/domains", dh.CreateZone)
-			r.With(middleware.RequireScopes("domains:write")).Delete("/domains/{id}", dh.DeleteZone)
-			r.With(middleware.RequireScopes("domains:write")).Post("/domains/{id}/verify", dh.TriggerVerify)
-			r.With(middleware.RequireScopes("domains:read")).Get("/domains/{id}/verification-status", dh.VerificationStatus)
-			r.With(middleware.RequireScopes("domains:read")).Get("/domains/{id}/suggest-address", dh.SuggestAddress)
-
-			// -- Domain routes --
-			r.With(middleware.RequireScopes("routes:read", "domains:read")).Get("/domains/{id}/routes", dh.ListRoutes)
-			r.With(middleware.RequireScopes("routes:write", "domains:write")).Post("/domains/{id}/routes", dh.CreateRoute)
-			r.With(middleware.RequireScopes("routes:write", "domains:write")).Delete("/domains/{id}/routes/{routeId}", dh.DeleteRoute)
-			r.With(middleware.RequireScopes("routes:read", "domains:read")).Post("/domains/{id}/routes/explain", dh.ExplainRoute)
-
-			// -- Mailboxes --
-			r.With(middleware.RequireScopes("mailboxes:read")).Get("/mailboxes", mh.List)
-			r.With(middleware.RequireScopes("mailboxes:write")).Post("/mailboxes", mh.Create)
-			r.With(middleware.RequireScopes("mailboxes:write")).Delete("/mailboxes/{id}", mh.Delete)
-
-			// -- Webhook endpoints (tenant-level) --
-			r.With(middleware.RequireScopes("webhooks:read")).Get("/webhook-endpoints", wh.List)
-			r.With(middleware.RequireScopes("webhooks:write")).Post("/webhook-endpoints", wh.Create)
-			r.With(middleware.RequireScopes("webhooks:write")).Patch("/webhook-endpoints/{id}", wh.Update)
-			r.With(middleware.RequireScopes("webhooks:write")).Delete("/webhook-endpoints/{id}", wh.Delete)
-
-			// -- Send Identities --
-			r.With(middleware.RequireScopes("send:read")).Get("/send-identities", si.List)
-			r.With(middleware.RequireScopes("send:write")).Post("/send-identities", si.Create)
-			r.With(middleware.RequireScopes("send:write")).Delete("/send-identities/{id}", si.Delete)
 
 			// -- Outbound / Sending --
 			if oh != nil {
-				r.With(middleware.RequireScopes("send:write")).Post("/send", oh.Send)
 				r.With(middleware.RequireScopes("send:read")).Get("/outbound", oh.ListJobs)
 				r.With(middleware.RequireScopes("send:read")).Get("/outbound/{id}", oh.GetJob)
 				r.With(middleware.RequireScopes("send:read")).Get("/outbound/{id}/attempts", oh.ListAttempts)
@@ -261,19 +204,6 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Get("/keys", adm.UserListAPIKeys)
 			r.Delete("/keys/{keyId}", adm.UserDeleteAPIKey)
 		})
-
-		// -- Messages (mailbox-centric, public access for public mailboxes) --
-		r.With(middleware.RequireScopes("messages:read")).Get("/mailbox/{address}", msg.ListMessages)
-		r.With(middleware.RequireScopes("messages:read")).Get("/mailbox/{address}/events", msg.StreamMailbox)
-		r.With(middleware.RequireScopes("messages:write")).Delete("/mailbox/{address}", msg.PurgeMailbox)
-		r.With(middleware.RequireScopes("messages:read")).Get("/mailbox/{address}/{id}", msg.GetMessage)
-		r.With(middleware.RequireScopes("messages:read")).Get("/mailbox/{address}/{id}/source", msg.GetSource)
-		r.With(middleware.RequireScopes("messages:write")).Patch("/mailbox/{address}/{id}", msg.MarkSeen)
-		r.With(middleware.RequireScopes("messages:write")).Delete("/mailbox/{address}/{id}", msg.DeleteMessage)
-
-		// -- Break-glass: admin audited access to message content --
-		r.With(middleware.RequireAdmin).Post("/mailbox/{address}/{id}/break-glass", msg.BreakGlassRead)
-		r.With(middleware.RequireAdmin).Post("/mailbox/{address}/{id}/break-glass/source", msg.BreakGlassSource)
 
 		// -- Admin (tenant-level, accessible by super_admin and admin) --
 		r.Group(func(r chi.Router) {

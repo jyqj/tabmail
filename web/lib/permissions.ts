@@ -18,10 +18,10 @@ import type { EffectivePermission } from "@/lib/types";
 // - user              -> allowed iff permissions?.can_<x> === true
 // - permissions null  -> (still loading or fetch failed) treated as NOT
 //                        allowed for users — fail closed
-// - public / mailbox  -> never allowed for these account capabilities
+// - public           -> never allowed for these account capabilities
 // ============================================================
 
-export type PermissionLevel = "public" | "mailbox" | "user" | "admin" | "super_admin";
+export type PermissionLevel = "public" | "user" | "admin" | "super_admin";
 
 /** True for tenant admins and platform super admins. */
 export function isAdminLevel(level: PermissionLevel): boolean {

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 	"time"
 
@@ -18,11 +17,12 @@ import (
 	"tabmail/internal/config"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
-	"tabmail/internal/store"
 	"tabmail/internal/testutil"
 )
 
 const outboundTestJWTSecret = "jwt-test-secret"
+
+const publicTenantIDForTests = "00000000-0000-0000-0000-000000000001"
 
 type outboundAccessFixture struct {
 	st            *testutil.FakeStore
@@ -222,116 +222,6 @@ func TestDeleteSuppressionIsTenantScoped(t *testing.T) {
 	}
 }
 
-func TestSendRequiresExactPermissionOnSharedZone(t *testing.T) {
-	f := newOutboundAccessFixture(t)
-	h := NewOutboundHandler(nil, f.st, zerolog.Nop())
-
-	f.st.SeedZone(&models.DomainZone{
-		ID:          uuid.New(),
-		TenantID:    f.tenantID,
-		OwnerUserID: &f.userB.ID,
-		Domain:      "shared.example.test",
-		IsVerified:  true,
-		MXVerified:  true,
-	})
-
-	// Domain sharing alone must never authorize arbitrary employee From addresses.
-	rr := doOutboundSendRequest(t, f.st, h, `{"from":"noone@shared.example.test","to":["rcpt@example.org"]}`, outboundUserHeaders(t, f.userA))
-	if rr.Code != http.StatusForbidden || !strings.Contains(rr.Body.String(), "exact mailbox") {
-		t.Fatalf("same-tenant user without exact permission must be denied, got %d body=%s", rr.Code, rr.Body.String())
-	}
-
-	// Cross-tenant zone: denied by the seam's tenant isolation.
-	f.st.SeedZone(&models.DomainZone{
-		ID:         uuid.New(),
-		TenantID:   f.otherTenantID,
-		Domain:     "other.example.test",
-		IsVerified: true,
-		MXVerified: true,
-	})
-	rr = doOutboundSendRequest(t, f.st, h, `{"from":"x@other.example.test","to":["rcpt@example.org"]}`, outboundUserHeaders(t, f.userA))
-	if rr.Code != http.StatusForbidden {
-		t.Fatalf("cross-tenant send expected 403, got %d body=%s", rr.Code, rr.Body.String())
-	}
-}
-
-// TestSendAuthorizesViaVerifiedSendIdentity pins ownerless integration compatibility.
-// Human and user-owned-key sends instead require mailbox owner/grant rights.
-// This preserves the behavior that made
-// SendIdentity the authoritative send-as gate: a From address with no mailbox
-// is accepted when a verified send identity (here the *@domain wildcard) covers
-// it, and rejected when that identity is unverified — even on a verified zone,
-// so a stale/un-synced Verified flag cannot bypass the gate.
-func TestSendAuthorizesViaVerifiedSendIdentity(t *testing.T) {
-	f := newOutboundAccessFixture(t)
-	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, testutil.DeniedTemplateGovernance{}, zerolog.Nop())
-	h := NewOutboundHandler(svc, f.st, zerolog.Nop())
-
-	zoneID := uuid.New()
-	f.st.SeedZone(&models.DomainZone{
-		ID:         zoneID,
-		TenantID:   f.tenantID,
-		Domain:     "mail.example.test",
-		IsVerified: true,
-		MXVerified: true,
-	})
-	// No mailbox exists for anyone@mail.example.test; only a verified wildcard
-	// send identity authorizes sending from it.
-	if err := f.st.CreateSendIdentity(context.Background(), &models.SendIdentity{
-		TenantID:     f.tenantID,
-		ZoneID:       zoneID,
-		Address:      "*@mail.example.test",
-		IdentityType: models.SendIdentityDomainWildcard,
-		Verified:     true,
-	}); err != nil {
-		t.Fatalf("seed verified identity: %v", err)
-	}
-
-	rr := doOutboundSendRequest(t, f.st, h,
-		`{"from":"anyone@mail.example.test","to":["rcpt@example.org"],"subject":"hi","text_body":"x"}`,
-		map[string]string{"X-API-Key": f.apiKeyARaw})
-	if rr.Code != http.StatusCreated {
-		t.Fatalf("verified send identity should authorize send-as (201), got %d body=%s", rr.Code, rr.Body.String())
-	}
-
-	// An unverified identity must NOT authorize send-as, even on a verified
-	// zone (pins that the gate checks the Verified flag, not just existence).
-	unverifiedZone := uuid.New()
-	f.st.SeedZone(&models.DomainZone{
-		ID:         unverifiedZone,
-		TenantID:   f.tenantID,
-		Domain:     "unverified.example.test",
-		IsVerified: true,
-		MXVerified: true,
-	})
-	if err := f.st.CreateSendIdentity(context.Background(), &models.SendIdentity{
-		TenantID:     f.tenantID,
-		ZoneID:       unverifiedZone,
-		Address:      "*@unverified.example.test",
-		IdentityType: models.SendIdentityDomainWildcard,
-		Verified:     false,
-	}); err != nil {
-		t.Fatalf("seed unverified identity: %v", err)
-	}
-	rr = doOutboundSendRequest(t, f.st, h,
-		`{"from":"anyone@unverified.example.test","to":["rcpt@example.org"],"subject":"hi","text_body":"x"}`,
-		map[string]string{"X-API-Key": f.apiKeyARaw})
-	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "not an authorized mailbox or verified send identity") {
-		t.Fatalf("unverified send identity should be rejected, got %d body=%s", rr.Code, rr.Body.String())
-	}
-}
-
-func doOutboundSendRequest(t *testing.T, st *testutil.FakeStore, h *OutboundHandler, body string, headers map[string]string) *httptest.ResponseRecorder {
-	t.Helper()
-	req := httptest.NewRequest(http.MethodPost, "/api/v1/send", strings.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	for k, v := range headers {
-		req.Header.Set(k, v)
-	}
-	rr := httptest.NewRecorder()
-	middleware.Auth(st, outboundTestJWTSecret, publicTenantIDForTests)(http.HandlerFunc(h.Send)).ServeHTTP(rr, req)
-	return rr
-}
 
 func newOutboundAccessFixture(t *testing.T) outboundAccessFixture {
 	t.Helper()
@@ -417,50 +307,7 @@ func outboundDataLen(t *testing.T, rr *httptest.ResponseRecorder) int {
 	return len(body.Data)
 }
 
-// TestSubmitDraftPathRejectsLegacyTemplateName pins the company draft submit
-// invariant: draft submissions converge on submitAuthorized and must never be
-// able to trigger the legacy name-based template renderer. company.DraftPayload
-// has no template_name field, so the guard only fires if a future caller wires
-// TemplateName into the draft path.
-func TestSubmitDraftPathRejectsLegacyTemplateName(t *testing.T) {
-	f := newOutboundAccessFixture(t)
-	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, testutil.DeniedTemplateGovernance{}, zerolog.Nop())
-	h := NewOutboundHandler(svc, f.st, zerolog.Nop())
-	name := "legacy-template"
-	headers := outboundUserHeaders(t, f.userA)
 
-	rr := doOutboundHandlerRequest(t, f.st, func(w http.ResponseWriter, r *http.Request) {
-		h.submitAuthorized(w, r, outboundSubmitInput{
-			From:         "a@retry.test",
-			To:           []string{"rcpt@example.org"},
-			TemplateName: &name,
-			Draft: &store.DraftConsumption{
-				TenantID: f.tenantID,
-				UserID:   f.userA.ID,
-				ID:       uuid.New(),
-				Revision: 1,
-			},
-		})
-	}, http.MethodPost, "/api/v1/company/drafts/x/submit", nil, headers)
-	if rr.Code != http.StatusBadRequest || !strings.Contains(rr.Body.String(), "template_version_id, not template_name") {
-		t.Fatalf("draft path with template_name must be rejected, got %d body=%s", rr.Code, rr.Body.String())
-	}
-
-	// Without a template name the draft path must pass the guard (it fails
-	// later in the send chain, not on the template_name invariant).
-	rr = doOutboundHandlerRequest(t, f.st, func(w http.ResponseWriter, r *http.Request) {
-		h.submitAuthorized(w, r, outboundSubmitInput{
-			From: "a@retry.test",
-			To:   []string{"rcpt@example.org"},
-			Draft: &store.DraftConsumption{
-				TenantID: f.tenantID,
-				UserID:   f.userA.ID,
-				ID:       uuid.New(),
-				Revision: 1,
-			},
-		})
-	}, http.MethodPost, "/api/v1/company/drafts/x/submit", nil, headers)
-	if strings.Contains(rr.Body.String(), "template_version_id, not template_name") {
-		t.Fatalf("draft path without template_name must not hit the guard, got %d body=%s", rr.Code, rr.Body.String())
-	}
+func withRouteContext(r *http.Request, rctx *chi.Context) context.Context {
+	return context.WithValue(r.Context(), chi.RouteCtxKey, rctx)
 }
