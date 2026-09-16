@@ -139,7 +139,7 @@ func TestReleaseBlockerRefreshFailsClosed(t *testing.T) {
 	u := seedUserForTest(t, st, tenant, models.RoleUser)
 	failing := rbFailedRotation{st, models.RefreshToken{ID: uuid.New(), UserID: u.ID, TokenHash: authn.HashToken("disposable-refresh"), ExpiresAt: time.Now().Add(time.Hour)}}
 	w := rbRequest(t, rbRouter(t, failing, obj), nil, "POST", "/api/v1/auth/refresh", `{"refresh_token":"disposable-refresh"}`, nil)
-	if w.Code != 401 || strings.Contains(w.Body.String(), "access_token") {
+	if w.Code != 500 || strings.Contains(w.Body.String(), "access_token") {
 		t.Fatalf("revoke failure issued tokens: %d %s", w.Code, w.Body.String())
 	}
 }

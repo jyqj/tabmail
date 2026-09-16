@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
-const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const apiUrl =
+  process.env.INTERNAL_API_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:8080";
 
 const nextConfig: NextConfig = {
   output: "standalone",
@@ -8,10 +11,14 @@ const nextConfig: NextConfig = {
     return [
       { source: "/api/v1/:path*", destination: `${apiUrl}/api/v1/:path*` },
       { source: "/health", destination: `${apiUrl}/health` },
+      { source: "/ready", destination: `${apiUrl}/ready` },
       { source: "/openapi.yaml", destination: `${apiUrl}/openapi.yaml` },
       { source: "/backend-docs", destination: `${apiUrl}/docs` },
       { source: "/backend-redoc", destination: `${apiUrl}/redoc` },
-      { source: "/docs-assets/:path*", destination: `${apiUrl}/docs-assets/:path*` },
+      {
+        source: "/docs-assets/:path*",
+        destination: `${apiUrl}/docs-assets/:path*`,
+      },
     ];
   },
 };

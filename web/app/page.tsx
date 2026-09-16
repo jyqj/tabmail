@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { HomeContent } from "./home-content";
 
 export const metadata: Metadata = {
-  title: "TabMail — Self-hosted temp mail",
+  title: "TabMail — Company Mail",
   description:
-    "Self-hosted disposable email with custom domains, multi-tenant isolation, and a clean REST API.",
+    "Private company email with employee and shared mailboxes, explicit permissions, administrator templates and traceable delivery.",
 };
 
 // Server Component shell: static metadata lives here; the interactive,

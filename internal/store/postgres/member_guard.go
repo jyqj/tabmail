@@ -111,8 +111,21 @@ func (s *PgStore) UpdateUserGuarded(ctx context.Context, actor authz.Actor, tena
 			return nil, authz.ErrForbidden("permission profile unavailable in this company")
 		}
 	}
+	if old.IsActive != next.IsActive || old.Role != next.Role {
+		next.SessionVersion++
+	}
+	if old.IsActive && !next.IsActive {
+		// User lock serializes against refresh rotation's FOR SHARE. Do not take
+		// family locks here: family->user is rotation's fixed lock order.
+		if _, err = tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND revoked_at IS NULL`, target); err != nil {
+			return nil, err
+		}
+		if _, err = tx.Exec(ctx, `DELETE FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2`, tenant, target); err != nil {
+			return nil, err
+		}
+	}
 	next.UpdatedAt = time.Now().UTC()
-	tag, err := tx.Exec(ctx, `UPDATE users SET display_name=$3,role=$4,is_active=$5,permission_profile_id=$6,updated_at=$7 WHERE id=$1 AND tenant_id=$2`, target, tenant, next.DisplayName, next.Role, next.IsActive, next.PermissionProfileID, next.UpdatedAt)
+	tag, err := tx.Exec(ctx, `UPDATE users SET display_name=$3,role=$4,is_active=$5,permission_profile_id=$6,updated_at=$7,session_version=$8 WHERE id=$1 AND tenant_id=$2`, target, tenant, next.DisplayName, next.Role, next.IsActive, next.PermissionProfileID, next.UpdatedAt, next.SessionVersion)
 	if err != nil {
 		return nil, err
 	}

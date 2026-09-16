@@ -10,6 +10,16 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { SWRConfig } from "swr";
+import { logoutSession } from "@/lib/api/auth";
+import { toast } from "sonner";
+import {
+  installSession,
+  advanceSession,
+  clearSessionCredentials,
+  useSessionScope,
+  sessionScope,
+} from "@/lib/session";
 import type { AuthUser, EffectivePermission } from "@/lib/types";
 import type { PermissionLevel } from "@/lib/permissions";
 
@@ -70,6 +80,7 @@ function readSnapshot(): AuthSnapshot {
 
   if (
     cachedSnapshot &&
+    JSON.stringify(cachedSnapshot.user) === JSON.stringify(nextSnapshot.user) &&
     cachedSnapshot.accessToken === nextSnapshot.accessToken &&
     cachedSnapshot.tenantId === nextSnapshot.tenantId &&
     cachedSnapshot.mailboxToken === nextSnapshot.mailboxToken &&
@@ -115,8 +126,11 @@ const serverSnapshot: AuthSnapshot = {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const scope = useSessionScope();
   const [hydrated, setHydrated] = useState(false);
-  const [permissions, setPermissions] = useState<EffectivePermission | null>(null);
+  const [permissions, setPermissions] = useState<EffectivePermission | null>(
+    null,
+  );
   const [permissionsLoading, setPermissionsLoading] = useState(false);
   const [permissionsError, setPermissionsError] = useState(false);
   const permsFetchedForToken = useRef<string | null>(null);
@@ -140,8 +154,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       permsFetchedForToken.current = null;
       return;
     }
-    if (permsFetchedForToken.current === token) return;
-    permsFetchedForToken.current = token;
+    if (permsFetchedForToken.current === token + scope) return;
+    permsFetchedForToken.current = token + scope;
 
     let cancelled = false;
     setPermissionsLoading(true);
@@ -174,35 +188,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [snapshot.accessToken, snapshot.user]);
+  }, [snapshot.accessToken, snapshot.user, scope]);
 
   const loginWithTokens = useCallback((accessToken: string, user: AuthUser) => {
-    setStorageItem("tabmail_access_token", accessToken);
-    localStorage.setItem("tabmail_user", JSON.stringify(user));
-    setStorageItem("tabmail_tenant_id", user.tenant_id);
-    notify();
+    installSession(accessToken, user);
   }, []);
 
   const setTenantId = useCallback((id: string | null) => {
     setStorageItem("tabmail_tenant_id", id?.trim() || null);
-    notify();
+    advanceSession();
   }, []);
 
-  const setMailboxAuth = useCallback((address: string | null, token: string | null) => {
-    setStorageItem("tabmail_mailbox_address", address?.trim().toLowerCase() || null);
-    setStorageItem("tabmail_mailbox_token", token?.trim() || null);
-    notify();
-  }, []);
+  const setMailboxAuth = useCallback(
+    (address: string | null, token: string | null) => {
+      setStorageItem(
+        "tabmail_mailbox_address",
+        address?.trim().toLowerCase() || null,
+      );
+      setStorageItem("tabmail_mailbox_token", token?.trim() || null);
+      advanceSession();
+    },
+    [],
+  );
 
   const clearMailboxAuth = useCallback(() => {
     setStorageItem("tabmail_mailbox_address", null);
     setStorageItem("tabmail_mailbox_token", null);
-    notify();
+    advanceSession();
   }, []);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const before = sessionScope();
+    if (localStorage.getItem("tabmail_access_token")) {
+      try {
+        await logoutSession();
+      } catch (error) {
+        if (before !== sessionScope()) return;
+        const code = (error as { error?: { code?: string } })?.error?.code;
+        if (code !== "UNAUTHORIZED") {
+          toast.error("退出失败，请重试。会话尚未撤销。");
+          return;
+        }
+      }
+    }
+    if (before !== sessionScope()) return;
+    clearSessionCredentials();
     setStorageItem("tabmail_access_token", null);
     localStorage.removeItem("tabmail_user");
     setStorageItem("tabmail_tenant_id", null);
@@ -214,15 +248,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     notify();
   }, []);
 
-  const level: AuthLevel = snapshot.accessToken && snapshot.user
-    ? (snapshot.user.role === "super_admin"
+  const level: AuthLevel =
+    snapshot.accessToken && snapshot.user
+      ? snapshot.user.role === "super_admin"
         ? "super_admin"
         : snapshot.user.role === "admin"
-        ? "admin"
-        : "user")
-    : snapshot.mailboxToken
-    ? "mailbox"
-    : "public";
+          ? "admin"
+          : "user"
+      : snapshot.mailboxToken
+        ? "mailbox"
+        : "public";
 
   return (
     <AuthContext.Provider
@@ -240,7 +275,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
       }}
     >
-      {children}
+      <SWRConfig key={scope} value={{ provider: () => new Map() }}>
+        {children}
+      </SWRConfig>
     </AuthContext.Provider>
   );
 }

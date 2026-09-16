@@ -1,0 +1,14 @@
+# Optional direct inbound TLS termination. Alternatively terminate SMTP TLS at
+# your hardened ingress MTA and forward only over a private trusted network.
+# docker compose -f docker-compose.prod.yml -f docker-compose.smtp-tls.yml up -d
+services:
+  tabmail-smtp:
+    environment:
+      TABMAIL_SMTP_TLSENABLED: "true"
+      TABMAIL_SMTP_TLSCERT: /run/smtp-tls/cert.pem
+      TABMAIL_SMTP_TLSKEY: /run/smtp-tls/key.pem
+    volumes:
+      - type: bind
+        source: ${TABMAIL_SMTP_CERT_DIR:?set TABMAIL_SMTP_CERT_DIR with cert.pem and key.pem}
+        target: /run/smtp-tls
+        read_only: true

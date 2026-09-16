@@ -79,7 +79,7 @@ func (r *mailboxResolver) Resolve(ctx context.Context, address string, viewer Vi
 	if canManage {
 		return mb, nil
 	}
-	if mb.OwnerUserID != nil {
+	if mb.OwnerUserID != nil || mb.Kind == "shared" {
 		return nil, accessDeniedOrNotFound(viewer, "personal mailbox permission required")
 	}
 	switch mb.AccessMode {
@@ -170,7 +170,7 @@ func (r *mailboxResolver) canAccess(ctx context.Context, mb *models.Mailbox, vie
 		return false, app.Forbidden("zone not in allowed list")
 	}
 	if viewer.TenantWide {
-		return true, nil
+		return mb.OwnerUserID == nil && (mb.Kind == "" || mb.Kind == "legacy"), nil
 	}
 	user := viewer.UserID
 	if viewer.AuthMode == AuthModeAPIKey {

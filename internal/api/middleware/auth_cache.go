@@ -14,8 +14,8 @@ const authCacheTTL = 10 * time.Second
 // CachedAuthStore wraps a store with short-lived TTL caches for the hot
 // authentication path (user/tenant/permission/config lookups).
 type CachedAuthStore struct {
-	inner authStore
-	users *configcache.ConfigCache[uuid.UUID, *models.User]
+	inner   authStore
+	users   *configcache.ConfigCache[uuid.UUID, *models.User]
 	tenants *configcache.ConfigCache[uuid.UUID, *models.Tenant]
 	perms   *configcache.ConfigCache[uuid.UUID, *models.EffectivePermission]
 	configs *configcache.ConfigCache[uuid.UUID, *models.EffectiveConfig]
@@ -33,7 +33,7 @@ func NewCachedAuthStore(st authStore, configLoader func(context.Context, uuid.UU
 }
 
 func (c *CachedAuthStore) GetUser(ctx context.Context, id uuid.UUID) (*models.User, error) {
-	return c.users.Get(ctx, id)
+	return c.inner.GetUser(ctx, id)
 }
 
 func (c *CachedAuthStore) GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error) {
@@ -41,7 +41,7 @@ func (c *CachedAuthStore) GetTenant(ctx context.Context, id uuid.UUID) (*models.
 }
 
 func (c *CachedAuthStore) EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error) {
-	return c.perms.Get(ctx, userID)
+	return c.inner.EffectivePermission(ctx, userID)
 }
 
 func (c *CachedAuthStore) EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error) {

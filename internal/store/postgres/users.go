@@ -40,14 +40,14 @@ func (s *PgStore) CreateUser(ctx context.Context, u *models.User) error {
 }
 
 const userSelect = `SELECT id, tenant_id, email, password_hash, display_name, role, is_active,
-	       permission_profile_id, created_at, updated_at, last_login_at
+	       permission_profile_id, created_at, updated_at, last_login_at, session_version
 	FROM users`
 
 func scanUser(row pgx.Row) (*models.User, error) {
 	u := &models.User{}
 	var profileID pgtype.UUID
 	err := row.Scan(&u.ID, &u.TenantID, &u.Email, &u.PasswordHash, &u.DisplayName,
-		&u.Role, &u.IsActive, &profileID, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt)
+		&u.Role, &u.IsActive, &profileID, &u.CreatedAt, &u.UpdatedAt, &u.LastLoginAt, &u.SessionVersion)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -105,7 +105,7 @@ func (s *PgStore) UpdateUser(ctx context.Context, u *models.User) error {
 }
 
 func (s *PgStore) UpdateUserPassword(ctx context.Context, id uuid.UUID, passwordHash string) error {
-	_, err := s.pool.Exec(ctx, `UPDATE users SET password_hash = $2, updated_at = now() WHERE id = $1`, id, passwordHash)
+	_, err := s.pool.Exec(ctx, `UPDATE users SET password_hash = $2, session_version=session_version+1, updated_at = now() WHERE id = $1`, id, passwordHash)
 	return err
 }
 
@@ -256,4 +256,27 @@ func (s *PgStore) GetAdminInvitationByCode(ctx context.Context, code string) (*m
 func (s *PgStore) MarkInvitationAccepted(ctx context.Context, id uuid.UUID) error {
 	_, err := s.pool.Exec(ctx, `UPDATE admin_invitations SET accepted_at = now() WHERE id = $1`, id)
 	return err
+}
+
+func (s *PgStore) ChangePasswordAtomic(ctx context.Context, id uuid.UUID, expectedHash, nextHash string) error {
+	tx, e := s.pool.Begin(ctx)
+	if e != nil {
+		return e
+	}
+	defer tx.Rollback(ctx)
+	var tenant uuid.UUID
+	e = tx.QueryRow(ctx, `UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active RETURNING tenant_id`, id, expectedHash, nextHash).Scan(&tenant)
+	if e == pgx.ErrNoRows {
+		return errors.New("password or account changed during reauthentication")
+	}
+	if e != nil {
+		return e
+	}
+	if _, e = tx.Exec(ctx, `UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL`, id); e != nil {
+		return e
+	}
+	if _, e = tx.Exec(ctx, `INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'user.password_change','user',$3,'{}')`, tenant, "user:"+id.String(), id); e != nil {
+		return e
+	}
+	return tx.Commit(ctx)
 }

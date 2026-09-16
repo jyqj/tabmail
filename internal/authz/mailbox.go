@@ -48,7 +48,7 @@ func CanonicalSender(s string) (string, error) {
 	return strings.ToLower(a.Address), nil
 }
 
-func CheckMailboxSender(ctx context.Context, st MailboxGrantReader, actor Actor, mb *models.Mailbox, hasTemplate bool) error {
+func CheckMailboxSender(ctx context.Context, st MailboxGrantReader, actor Actor, mb *models.Mailbox, hasPublishedTemplate bool) error {
 	if actor.IsGlobalAdmin() {
 		return nil
 	}
@@ -59,10 +59,11 @@ func CheckMailboxSender(ctx context.Context, st MailboxGrantReader, actor Actor,
 	if g == nil || !g.CanSend {
 		return ErrForbidden("exact mailbox send_as permission required")
 	}
-	// P0 has a rendered-template path but no published/versioned policy yet.
-	// Do not pretend that merely naming a legacy template satisfies template_only.
-	if g.TemplateOnly {
-		return ErrForbidden("template_only requires P1 published-template governance")
+	// Only the immutable published-version path may satisfy template-only.
+	// Its usage grant/provenance is checked before enqueue and every attempt.
+	if g.TemplateOnly && !hasPublishedTemplate {
+		return ErrForbidden("a granted published template version is required")
 	}
+
 	return nil
 }

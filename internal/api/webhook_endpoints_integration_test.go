@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
@@ -24,7 +25,7 @@ func TestRouterWebhookEndpointScopesAndJWTAccess(t *testing.T) {
 	st.RegisterAPIKey("webhook-write", tenant, []string{"webhooks:write"})
 	st.RegisterAPIKey("domain-read", tenant, []string{"domains:read"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 
@@ -66,7 +67,7 @@ func TestRouterWebhookEndpointURLAndFieldSanitization(t *testing.T) {
 	}
 	st.RegisterAPIKey("webhook-write", tenant, []string{"webhooks:write"})
 
-	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0"})
+	rdb := redis.NewClient(&redis.Options{Addr: "127.0.0.1:0", MaxRetries: -1, DialerRetries: 1, DialerRetryTimeout: time.Millisecond, DialTimeout: time.Millisecond, PoolTimeout: time.Millisecond})
 	t.Cleanup(func() { _ = rdb.Close() })
 	router := testRouter(st, obj, rdb)
 	headers := map[string]string{"X-API-Key": "webhook-write"}

@@ -40,3 +40,29 @@ groups:
         annotations:
           summary: "TabMail SMTP delivery failure 增长过快"
           description: "过去 10 分钟 SMTP 投递失败超过 10 次，请检查对象存储、数据库或 resolver。"
+  - name: company-mail
+    rules:
+      - alert: TabmailUncertainDelivery
+        expr: tabmail_outbound_uncertain > 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "Outbound acceptance is uncertain; inspect evidence before retrying"
+      - alert: TabmailRecoveryRequired
+        expr: tabmail_ingress_recovery_backlog > 0
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Inbound originals are held; use the audited recovery center"
+      - alert: TabmailOutboundStalled
+        expr: tabmail_outbound_oldest_seconds > 300
+        for: 5m
+        labels: {severity: warning}
+        annotations:
+          summary: "Outbound queue is not progressing"
+      - alert: TabmailOperationalMetricsUnavailable
+        expr: tabmail_operational_metrics_error > 0
+        for: 1m
+        labels: {severity: critical}
+        annotations:
+          summary: "Queue health queries failed; do not interpret missing counts as zero"

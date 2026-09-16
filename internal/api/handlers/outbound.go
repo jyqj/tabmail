@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
@@ -43,16 +44,18 @@ func NewOutboundHandler(svc *outbound.Service, st store.Store, logger zerolog.Lo
 
 // sendRequest is the JSON body for POST /api/v1/send.
 type sendRequest struct {
-	From         string            `json:"from"`
-	To           []string          `json:"to"`
-	CC           []string          `json:"cc"`
-	BCC          []string          `json:"bcc"`
-	Subject      string            `json:"subject"`
-	TextBody     string            `json:"text_body"`
-	HTMLBody     string            `json:"html_body"`
-	Headers      map[string]string `json:"headers"`
-	TemplateName *string           `json:"template_name"`
-	TemplateVars map[string]string `json:"template_vars"`
+	From              string            `json:"from"`
+	To                []string          `json:"to"`
+	CC                []string          `json:"cc"`
+	BCC               []string          `json:"bcc"`
+	Subject           string            `json:"subject"`
+	TextBody          string            `json:"text_body"`
+	HTMLBody          string            `json:"html_body"`
+	Headers           map[string]string `json:"headers"`
+	TemplateVersionID *uuid.UUID        `json:"template_version_id"`
+	AttachmentIDs     []uuid.UUID       `json:"attachment_ids"`
+	TemplateName      *string           `json:"template_name"`
+	TemplateVars      map[string]string `json:"template_vars"`
 }
 
 // maxSendBodyBytes limits the JSON request body for outbound send to 2 MB.
@@ -169,8 +172,12 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
+	if actor.TenantWide && mailbox != nil && (mailbox.OwnerUserID != nil || mailbox.Kind == "shared") {
+		errForbidden(w, "company mailbox sends require an employee-owned credential")
+		return
+	}
 	if !actor.TenantWide {
-		if err := authz.CheckMailboxSender(ctx, h.store, actor, mailbox, body.TemplateName != nil); err != nil {
+		if err := authz.CheckMailboxSender(ctx, h.store, actor, mailbox, body.TemplateVersionID != nil); err != nil {
 			if authz.IsAuthzError(err) {
 				errForbidden(w, err.Error())
 			} else {
@@ -221,22 +228,23 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 
 	// Build and submit the outbound job.
 	job, err := h.outbound.Submit(ctx, outbound.SendRequest{
-		TenantID:        tenant.ID,
-		SenderMailboxID: mailboxID(mailbox),
-		UserID:          userID,
-		APIKeyID:        apiKeyID,
-		ZoneID:          zone.ID,
-		From:            body.From,
-		To:              body.To,
-		CC:              body.CC,
-		BCC:             body.BCC,
-		Subject:         body.Subject,
-		TextBody:        body.TextBody,
-		HTMLBody:        body.HTMLBody,
-		Headers:         body.Headers,
-		TemplateName:    body.TemplateName,
-		TemplateVars:    body.TemplateVars,
-		Quota:           quota,
+		TenantID:          tenant.ID,
+		SenderMailboxID:   mailboxID(mailbox),
+		UserID:            userID,
+		APIKeyID:          apiKeyID,
+		ZoneID:            zone.ID,
+		From:              body.From,
+		To:                body.To,
+		CC:                body.CC,
+		BCC:               body.BCC,
+		Subject:           body.Subject,
+		TextBody:          body.TextBody,
+		HTMLBody:          body.HTMLBody,
+		Headers:           body.Headers,
+		TemplateName:      body.TemplateName,
+		TemplateVersionID: body.TemplateVersionID, AttachmentIDs: body.AttachmentIDs, IdempotencyKey: strings.TrimSpace(r.Header.Get("Idempotency-Key")),
+		TemplateVars: body.TemplateVars,
+		Quota:        quota,
 	})
 	if err != nil {
 		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
@@ -253,6 +261,10 @@ func (h *OutboundHandler) Send(w http.ResponseWriter, r *http.Request) {
 		}
 		if authz.IsAuthzError(err) {
 			errForbidden(w, err.Error())
+			return
+		}
+		if _, ok := app.As(err); ok {
+			respondAppError(w, h.logger, err)
 			return
 		}
 		h.logger.Err(err).Msg("submitting outbound job")

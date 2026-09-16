@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { login, register, logoutSession } from "@/lib/api";
+import { login, register } from "@/lib/api";
 import {
   Dialog,
   DialogContent,
@@ -35,13 +35,7 @@ import { TabMailLogo } from "@/components/tabmail-logo";
 type AuthMode = "login" | "register";
 
 export function AuthDialog() {
-  const {
-    level,
-    user,
-    mailboxAddress,
-    loginWithTokens,
-    logout,
-  } = useAuth();
+  const { level, user, mailboxAddress, loginWithTokens, logout } = useAuth();
   const { t } = useI18n();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -66,7 +60,9 @@ export function AuthDialog() {
       setLoginEmail("");
       setLoginPassword("");
       setOpen(false);
-      toast.success(`Welcome, ${res.data.user.display_name || res.data.user.email}`);
+      toast.success(
+        `Welcome, ${res.data.user.display_name || res.data.user.email}`,
+      );
     } catch (e: unknown) {
       const err = e as { error?: { message?: string } };
       toast.error(err?.error?.message || "Login failed");
@@ -83,7 +79,11 @@ export function AuthDialog() {
     }
     setRegLoading(true);
     try {
-      const res = await register(regEmail.trim(), regPassword, regName.trim() || undefined);
+      const res = await register(
+        regEmail.trim(),
+        regPassword,
+        regName.trim() || undefined,
+      );
       loginWithTokens(res.data.access_token, res.data.user);
       setRegEmail("");
       setRegPassword("");
@@ -98,13 +98,7 @@ export function AuthDialog() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      await logoutSession().catch(() => {});
-    } finally {
-      logout();
-    }
-  };
+  const handleLogout = () => logout();
 
   const handleCopy = () => {
     const value = user?.email || mailboxAddress || "";
@@ -122,7 +116,11 @@ export function AuthDialog() {
           {user ? (
             <>
               <span className="text-[11px] font-semibold uppercase tracking-wide text-primary">
-                {user.role === "super_admin" ? "Super Admin" : user.role === "admin" ? "Admin" : "User"}
+                {user.role === "super_admin"
+                  ? "Super Admin"
+                  : user.role === "admin"
+                    ? "Admin"
+                    : "User"}
               </span>
               <span className="text-[11px] text-muted-foreground max-w-[100px] sm:max-w-[180px] truncate">
                 {user.display_name || user.email}
@@ -142,10 +140,19 @@ export function AuthDialog() {
             onClick={handleCopy}
             className="shrink-0 text-muted-foreground hover:text-foreground transition-colors"
           >
-            {copied ? <Check className="h-3 w-3 text-emerald-500" /> : <Copy className="h-3 w-3" />}
+            {copied ? (
+              <Check className="h-3 w-3 text-emerald-500" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
           </button>
         </div>
-        <Button variant="ghost" size="icon" onClick={handleLogout} className="h-8 w-8">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleLogout}
+          className="h-8 w-8"
+        >
           <LogOut className="h-3.5 w-3.5" />
         </Button>
       </div>
@@ -158,8 +165,10 @@ export function AuthDialog() {
     { icon: Code2, text: t("auth.feat3") },
   ];
 
-  const inputBase = "h-11 pl-10 text-sm bg-background border-border/80 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all";
-  const iconBase = "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none";
+  const inputBase =
+    "h-11 pl-10 text-sm bg-background border-border/80 rounded-lg focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-all";
+  const iconBase =
+    "absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60 pointer-events-none";
 
   return (
     <Dialog
@@ -172,7 +181,9 @@ export function AuthDialog() {
         }
       }}
     >
-      <DialogTrigger render={<Button variant="outline" size="sm" className="gap-1.5" />}>
+      <DialogTrigger
+        render={<Button variant="outline" size="sm" className="gap-1.5" />}
+      >
         <LogIn className="h-3.5 w-3.5" />
         {t("auth.connect")}
       </DialogTrigger>
@@ -182,7 +193,9 @@ export function AuthDialog() {
         className="sm:max-w-[840px] p-0 overflow-hidden gap-0 ring-1 ring-border/60 shadow-2xl shadow-black/10"
       >
         <DialogTitle className="sr-only">{t("auth.title")}</DialogTitle>
-        <DialogDescription className="sr-only">{t("auth.desc")}</DialogDescription>
+        <DialogDescription className="sr-only">
+          {t("auth.desc")}
+        </DialogDescription>
 
         <div className="grid sm:grid-cols-[320px_1fr] min-h-[480px]">
           {/* ── Left: Brand panel ── */}
@@ -240,7 +253,12 @@ export function AuthDialog() {
               className="absolute top-4 right-4 flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground/50 hover:text-foreground hover:bg-muted/80 transition-colors"
             >
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                <path
+                  d="M1 1l12 12M13 1L1 13"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
               </svg>
             </button>
 
@@ -249,10 +267,14 @@ export function AuthDialog() {
             {/* Title */}
             <div className="mb-7">
               <h3 className="text-xl font-semibold tracking-tight">
-                {mode === "login" ? t("auth.loginTitle") : t("auth.registerTitle")}
+                {mode === "login"
+                  ? t("auth.loginTitle")
+                  : t("auth.registerTitle")}
               </h3>
               <p className="text-[13px] text-muted-foreground mt-1.5 leading-relaxed">
-                {mode === "login" ? t("auth.loginSubtitle") : t("auth.registerSubtitle")}
+                {mode === "login"
+                  ? t("auth.loginSubtitle")
+                  : t("auth.registerSubtitle")}
               </p>
             </div>
 
@@ -261,7 +283,10 @@ export function AuthDialog() {
               <div className="flex-1 flex flex-col">
                 <div className="space-y-4 flex-1">
                   <div className="space-y-1.5">
-                    <label htmlFor="auth-login-email" className="text-[13px] font-medium text-foreground/80">
+                    <label
+                      htmlFor="auth-login-email"
+                      className="text-[13px] font-medium text-foreground/80"
+                    >
                       {t("auth.email")}
                     </label>
                     <div className="relative">
@@ -279,7 +304,10 @@ export function AuthDialog() {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label htmlFor="auth-login-password" className="text-[13px] font-medium text-foreground/80">
+                    <label
+                      htmlFor="auth-login-password"
+                      className="text-[13px] font-medium text-foreground/80"
+                    >
                       {t("auth.password")}
                     </label>
                     <div className="relative">
@@ -299,14 +327,22 @@ export function AuthDialog() {
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
                         tabIndex={-1}
                       >
-                        {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPwd ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
                   <Button
                     className="w-full h-11 mt-2 gap-2 text-[13px] font-semibold shadow-sm"
                     onClick={handleLogin}
-                    disabled={loginLoading || !loginEmail.trim() || !loginPassword.trim()}
+                    disabled={
+                      loginLoading ||
+                      !loginEmail.trim() ||
+                      !loginPassword.trim()
+                    }
                   >
                     {loginLoading ? t("auth.loggingIn") : t("auth.loginBtn")}
                     {!loginLoading && <ArrowRight className="h-3.5 w-3.5" />}
@@ -316,7 +352,10 @@ export function AuthDialog() {
                   <p className="text-[13px] text-muted-foreground">
                     {t("auth.noAccount")}{" "}
                     <button
-                      onClick={() => { setMode("register"); setShowPwd(false); }}
+                      onClick={() => {
+                        setMode("register");
+                        setShowPwd(false);
+                      }}
                       className="text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer"
                     >
                       {t("auth.registerLink")}
@@ -331,7 +370,10 @@ export function AuthDialog() {
               <div className="flex-1 flex flex-col">
                 <div className="space-y-4 flex-1">
                   <div className="space-y-1.5">
-                    <label htmlFor="auth-register-email" className="text-[13px] font-medium text-foreground/80">
+                    <label
+                      htmlFor="auth-register-email"
+                      className="text-[13px] font-medium text-foreground/80"
+                    >
                       {t("auth.email")}
                     </label>
                     <div className="relative">
@@ -349,7 +391,10 @@ export function AuthDialog() {
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-baseline justify-between">
-                      <label htmlFor="auth-register-name" className="text-[13px] font-medium text-foreground/80">
+                      <label
+                        htmlFor="auth-register-name"
+                        className="text-[13px] font-medium text-foreground/80"
+                      >
                         {t("auth.displayName")}
                       </label>
                       <span className="text-[11px] text-muted-foreground/50">
@@ -369,7 +414,10 @@ export function AuthDialog() {
                   </div>
                   <div className="space-y-1.5">
                     <div className="flex items-baseline justify-between">
-                      <label htmlFor="auth-register-password" className="text-[13px] font-medium text-foreground/80">
+                      <label
+                        htmlFor="auth-register-password"
+                        className="text-[13px] font-medium text-foreground/80"
+                      >
                         {t("auth.password")}
                       </label>
                       <span className="text-[11px] text-muted-foreground/50">
@@ -393,14 +441,20 @@ export function AuthDialog() {
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-muted-foreground transition-colors"
                         tabIndex={-1}
                       >
-                        {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        {showPwd ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
                       </button>
                     </div>
                   </div>
                   <Button
                     className="w-full h-11 mt-2 gap-2 text-[13px] font-semibold shadow-sm"
                     onClick={handleRegister}
-                    disabled={regLoading || !regEmail.trim() || regPassword.length < 8}
+                    disabled={
+                      regLoading || !regEmail.trim() || regPassword.length < 8
+                    }
                   >
                     {regLoading ? t("auth.registering") : t("auth.registerBtn")}
                     {!regLoading && <ArrowRight className="h-3.5 w-3.5" />}
@@ -410,7 +464,10 @@ export function AuthDialog() {
                   <p className="text-[13px] text-muted-foreground">
                     {t("auth.hasAccount")}{" "}
                     <button
-                      onClick={() => { setMode("login"); setShowPwd(false); }}
+                      onClick={() => {
+                        setMode("login");
+                        setShowPwd(false);
+                      }}
                       className="text-primary hover:text-primary/80 font-medium transition-colors cursor-pointer"
                     >
                       {t("auth.loginLink")}

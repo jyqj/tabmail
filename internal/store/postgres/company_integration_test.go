@@ -69,7 +69,7 @@ func TestP0PostgresOwnerGrantAndPermanentRetention(t *testing.T) {
 	if n != 0 {
 		t.Fatal("owner's existing mail expired")
 	}
-	_, err = pool.Exec(ctx, `UPDATE mailboxes SET owner_user_id=NULL WHERE id=$1`, mb.ID)
+	_, err = pool.Exec(ctx, `UPDATE mailboxes SET owner_user_id=NULL,mailbox_kind='legacy' WHERE id=$1`, mb.ID)
 	must(t, err)
 	n, _, err = st.DeleteExpiredMessagesReturningKeys(ctx, time.Now(), 100)
 	must(t, err)
@@ -174,7 +174,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 			}
 			var version int
 			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
-			want := 4
+			want := 5
 			if conflict {
 				want = 1
 			}

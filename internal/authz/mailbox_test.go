@@ -44,8 +44,11 @@ func TestP0MailboxGrantActionsAreIndependent(t *testing.T) {
 	g.CanSend = true
 	g.TemplateOnly = true
 	_ = st.SetMailboxGrant(ctx, g)
-	if err := authz.CheckMailboxSender(ctx, st, a, mb, true); err == nil {
+	if err := authz.CheckMailboxSender(ctx, st, a, mb, false); err == nil {
 		t.Fatal("legacy template name bypassed published-template restriction")
+	}
+	if err := authz.CheckMailboxSender(ctx, st, a, mb, true); err != nil {
+		t.Fatal("published-template path was rejected", err)
 	}
 	mb.OwnerUserID = &uid
 	rights, err = authz.MailboxRights(ctx, st, tenant, &uid, mb)

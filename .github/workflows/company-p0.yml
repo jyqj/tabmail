@@ -35,6 +35,11 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: PostgreSQL client for coordinated restore rehearsal
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client-16
+          echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
       - name: Build
         run: go build ./...
       - name: Race tests with PostgreSQL
@@ -93,3 +98,61 @@ jobs:
           set -euo pipefail
           docker compose --env-file /tmp/tabmail-release.env -f docker-compose.prod.yml build web
           docker run --rm --entrypoint node tabmail-prod-web -e 'const fs=require("fs"); const s=fs.readFileSync(".next/routes-manifest.json","utf8"); if(!s.includes("http://tabmail-api:8080") || s.includes("http://tabmail:8080")) throw new Error("wrong baked-in API origin"); console.log("PASS: production standalone rewrite targets tabmail-api:8080");'
+
+  browser-journey:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+      INTERNAL_API_URL: http://127.0.0.1:18080
+      TABMAIL_BROWSER_E2E: '1'
+      TABMAIL_E2E_BROWSER_MODULE: /tmp/tabmail-browser/node_modules/@playwright/test
+      TABMAIL_BROWSER_EVIDENCE: /tmp/tabmail-browser-evidence
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Install pinned isolated browser driver
+        run: |
+          npm install --prefix /tmp/tabmail-browser --ignore-scripts --no-audit --no-fund @playwright/test@1.56.1
+          /tmp/tabmail-browser/node_modules/.bin/playwright install --with-deps chromium
+      - name: Build the actual frontend
+        working-directory: web
+        run: npm ci && npm run build
+      - name: Exercise the production UI against the real API and loopback SMTP
+        run: |
+          set -euo pipefail
+          (cd web && npm run start -- --hostname 127.0.0.1 --port 3000) >/tmp/tabmail-next.log 2>&1 &
+          web_pid=$!
+          trap 'kill "$web_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 60); do curl -sf http://localhost:3000 >/dev/null && break; sleep 1; done
+          curl -sf http://localhost:3000 >/dev/null
+          go test -v -count=1 -timeout=180s -run '^TestR3BrowserJourney$' ./internal/store/postgres | tee /tmp/tabmail-browser.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: company-browser-evidence
+          path: |
+            /tmp/tabmail-next.log
+            /tmp/tabmail-browser.log
+            /tmp/tabmail-browser-evidence
+          retention-days: 14

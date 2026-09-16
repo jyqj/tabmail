@@ -164,3 +164,32 @@ func TestValidateNormalizesAndRejectsRelayTLS(t *testing.T) {
 		t.Fatal("expected misspelled RelayTLS to be rejected (would silently downgrade to plaintext)")
 	}
 }
+
+func TestCompanyModeAndObjectStoreCompatibility(t *testing.T) {
+	t.Setenv("TABMAIL_JWT_SECRET", "test-only-long-jwt-secret")
+	t.Setenv("TABMAIL_MAILBOX_TOKEN_SECRET", "test-only-long-mailbox-secret")
+	t.Setenv("TABMAIL_COMPANY_ONLY", "true")
+	t.Setenv("TABMAIL_OBJECTSTORE", "fs")
+	c, e := Load()
+	if e != nil {
+		t.Fatal(e)
+	}
+	if !c.CompanyOnly || c.MailboxNaming != "full" || !c.Ingest.Durable {
+		t.Fatal("unsafe company defaults")
+	}
+	t.Setenv("TABMAIL_MAILBOXNAMING", "local")
+	if _, e = Load(); e == nil {
+		t.Fatal("company local-address merging accepted")
+	}
+	t.Setenv("TABMAIL_MAILBOXNAMING", "full")
+	t.Setenv("TABMAIL_INGEST_DURABLE", "false")
+	if _, e = Load(); e == nil {
+		t.Fatal("company non-durable acceptance enabled")
+	}
+	t.Setenv("TABMAIL_INGEST_DURABLE", "true")
+	t.Setenv("TABMAIL_OBJECTSTORE", "bad-legacy")
+	t.Setenv("TABMAIL_OBJECT_STORE", "fs")
+	if _, e = Load(); e != nil {
+		t.Fatal("canonical object setting did not win", e)
+	}
+}

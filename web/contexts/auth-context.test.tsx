@@ -1,7 +1,19 @@
 import React from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/lib/api/auth", () => ({
+  logoutSession: vi.fn().mockResolvedValue({}),
+}));
+vi.mock("@/lib/api/permissions", () => ({
+  getMyPermissions: vi.fn().mockResolvedValue({ data: { can_send: true } }),
+}));
 import { AuthProvider, useAuth } from "./auth-context";
 
 function AuthProbe() {
@@ -29,7 +41,13 @@ function AuthProbe() {
         set-jwt
       </button>
       <button onClick={() => auth.setTenantId(" tenant-1 ")}>set-tenant</button>
-      <button onClick={() => auth.setMailboxAuth("User@Mail.Test ", " mailbox-token ")}>set-mailbox</button>
+      <button
+        onClick={() =>
+          auth.setMailboxAuth("User@Mail.Test ", " mailbox-token ")
+        }
+      >
+        set-mailbox
+      </button>
       <button onClick={() => auth.clearMailboxAuth()}>clear-mailbox</button>
       <button onClick={() => auth.logout()}>logout</button>
     </div>
@@ -49,7 +67,7 @@ describe("auth-context", () => {
     render(
       <AuthProvider>
         <AuthProbe />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     expect(screen.getByTestId("level")).toHaveTextContent("public");
@@ -61,7 +79,7 @@ describe("auth-context", () => {
     render(
       <AuthProvider>
         <AuthProbe />
-      </AuthProvider>
+      </AuthProvider>,
     );
 
     fireEvent.click(screen.getByRole("button", { name: "set-jwt" }));
@@ -86,7 +104,9 @@ describe("auth-context", () => {
     await waitFor(() => {
       expect(screen.getByTestId("level")).toHaveTextContent("mailbox");
     });
-    expect(localStorage.getItem("tabmail_mailbox_address")).toBe("user@mail.test");
+    expect(localStorage.getItem("tabmail_mailbox_address")).toBe(
+      "user@mail.test",
+    );
     expect(localStorage.getItem("tabmail_mailbox_token")).toBe("mailbox-token");
 
     fireEvent.click(screen.getByRole("button", { name: "clear-mailbox" }));

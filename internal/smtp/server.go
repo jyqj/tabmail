@@ -3,6 +3,7 @@ package smtp
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"io"
 	"net"
 	"sync"
@@ -20,9 +21,10 @@ import (
 
 // Server wraps go-smtp with TabMail's domain resolution and storage.
 type Server struct {
-	inner  *gosmtp.Server
-	cfg    config.SMTP
-	logger zerolog.Logger
+	initErr error
+	inner   *gosmtp.Server
+	cfg     config.SMTP
+	logger  zerolog.Logger
 }
 
 func NewServer(
@@ -46,20 +48,27 @@ func NewServer(
 	s.MaxMessageBytes = int64(cfg.MaxMessageBytes)
 	s.MaxRecipients = cfg.MaxRecipients
 	s.AllowInsecureAuth = true
-	if cfg.TLSEnabled && cfg.TLSCert != "" && cfg.TLSKey != "" {
+	var initErr error
+	if cfg.ForceTLS && !cfg.TLSEnabled {
+		initErr = fmt.Errorf("implicit TLS requires TLS configuration")
+	}
+	if cfg.TLSEnabled {
 		cert, err := tls.LoadX509KeyPair(cfg.TLSCert, cfg.TLSKey)
 		if err != nil {
-			logger.Error().Err(err).Msg("loading TLS cert, disabling STARTTLS")
+			initErr = fmt.Errorf("loading SMTP TLS certificate: %w", err)
 		} else {
 			s.TLSConfig = &tls.Config{Certificates: []tls.Certificate{cert}}
 			s.AllowInsecureAuth = false
 		}
 	}
 
-	return &Server{inner: s, cfg: cfg, logger: logger}
+	return &Server{inner: s, cfg: cfg, logger: logger, initErr: initErr}
 }
 
 func (s *Server) Start(_ context.Context) error {
+	if s.initErr != nil {
+		return s.initErr
+	}
 	s.logger.Info().Str("addr", s.cfg.Addr).Msg("SMTP server starting")
 	if s.cfg.ForceTLS && s.inner.TLSConfig != nil {
 		ln, err := net.Listen("tcp", s.cfg.Addr)

@@ -22,6 +22,7 @@ import {
   SidebarFooter,
   SidebarSeparator,
 } from "@/components/ui/sidebar";
+import { useText } from "@/components/company/common";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +49,7 @@ export function AppSidebar() {
   const pathname = usePathname();
   const { level, logout, permissions } = useAuth();
   const { t } = useI18n();
+  const c = useText();
   // UX-only gates; the backend authz seam is authoritative.
   const adminLevel = isAdminLevel(level);
   const showAPIKeys = canCreateAPIKeys(level, permissions);
@@ -68,26 +70,72 @@ export function AppSidebar() {
     webhookPermissions?.can_create_webhooks === true ||
     webhookPermissions?.can_manage_webhook_endpoints === true ||
     webhookPermissions?.can_create_webhook_endpoints === true ||
-    webhookPermissions?.scopes?.some((scope) => scope.startsWith("webhooks:")) === true ||
-    webhookPermissions?.webhook_scopes?.some((scope) => scope.startsWith("webhooks:")) === true;
+    webhookPermissions?.scopes?.some((scope) =>
+      scope.startsWith("webhooks:"),
+    ) === true ||
+    webhookPermissions?.webhook_scopes?.some((scope) =>
+      scope.startsWith("webhooks:"),
+    ) === true;
 
   const consoleItems = [
-    { href: "/console/domains", label: t("sidebar.domains"), icon: Globe },
-    { href: "/console/mailboxes", label: t("sidebar.mailboxes"), icon: Inbox },
-    // Fail closed while permissions are loading/unavailable.
-    ...(showAPIKeys
-      ? [{ href: "/console/keys", label: t("sidebar.apiKeys"), icon: Settings2 }]
-      : []),
-    ...(showSend
-      ? [{ href: "/console/outbound", label: t("sidebar.outbound"), icon: Send }]
-      : []),
-    ...(showSend
-      ? [{ href: "/console/send-identities", label: t("sidebar.sendIdentities"), icon: KeyRound }]
-      : []),
-    // Fail closed: current EffectivePermission has no webhook flag, so plain
-    // users do not see this unless a future explicit capability is present.
-    ...(canUseWebhooks
-      ? [{ href: "/console/webhooks", label: t("sidebar.webhookEndpoints"), icon: Webhook }]
+    { href: "/mail", label: c("我的邮箱", "My mail"), icon: Mail },
+    {
+      href: "/account",
+      label: c("账号安全", "Account security"),
+      icon: Shield,
+    },
+    ...(adminLevel
+      ? [
+          {
+            href: "/console/domains",
+            label: t("sidebar.domains"),
+            icon: Globe,
+          },
+          {
+            href: "/console/mailboxes",
+            label: t("sidebar.mailboxes"),
+            icon: Inbox,
+          },
+          // Fail closed while permissions are loading/unavailable.
+          ...(showAPIKeys
+            ? [
+                {
+                  href: "/console/keys",
+                  label: t("sidebar.apiKeys"),
+                  icon: Settings2,
+                },
+              ]
+            : []),
+          ...(showSend
+            ? [
+                {
+                  href: "/console/outbound",
+                  label: t("sidebar.outbound"),
+                  icon: Send,
+                },
+              ]
+            : []),
+          ...(showSend
+            ? [
+                {
+                  href: "/console/send-identities",
+                  label: t("sidebar.sendIdentities"),
+                  icon: KeyRound,
+                },
+              ]
+            : []),
+          // Fail closed: current EffectivePermission has no webhook flag, so plain
+          // users do not see this unless a future explicit capability is present.
+          ...(canUseWebhooks
+            ? [
+                {
+                  href: "/console/webhooks",
+                  label: t("sidebar.webhookEndpoints"),
+                  icon: Webhook,
+                },
+              ]
+            : []),
+        ]
       : []),
   ];
 
@@ -95,13 +143,36 @@ export function AppSidebar() {
 
   // Shared admin items (accessible by both super_admin and admin)
   const sharedAdminItems = [
+    {
+      href: "/company",
+      label: c("员工与邮箱", "Employees and mailboxes"),
+      icon: Users,
+    },
+    {
+      href: "/company/templates",
+      label: c("发送模板", "Mail templates"),
+      icon: ClipboardList,
+    },
     { href: "/admin/users", label: t("sidebar.users"), icon: Users },
-    { href: "/admin/permissions", label: t("sidebar.permissions"), icon: Shield },
-    { href: "/admin/domains", label: t("sidebar.domainResources"), icon: Globe },
+    {
+      href: "/admin/permissions",
+      label: t("sidebar.permissions"),
+      icon: Shield,
+    },
+    {
+      href: "/admin/domains",
+      label: t("sidebar.domainResources"),
+      icon: Globe,
+    },
   ];
 
   // Platform-only operations expose global telemetry/audit data.
   const platformOpsItems = [
+    {
+      href: "/company/recovery",
+      label: c("恢复中心", "Recovery center"),
+      icon: Boxes,
+    },
     { href: "/admin", label: t("sidebar.statistics"), icon: BarChart3 },
     { href: "/admin/monitor", label: t("sidebar.monitor"), icon: Radar },
     { href: "/admin/audit", label: t("sidebar.audit"), icon: ClipboardList },
@@ -111,7 +182,11 @@ export function AppSidebar() {
 
   // Platform-only admin items (only super_admin)
   const platformAdminItems = [
-    { href: "/admin/policy", label: t("sidebar.smtpPolicy"), icon: SlidersHorizontal },
+    {
+      href: "/admin/policy",
+      label: t("sidebar.smtpPolicy"),
+      icon: SlidersHorizontal,
+    },
     { href: "/admin/tenants", label: t("sidebar.tenants"), icon: Users },
     { href: "/admin/plans", label: t("sidebar.plans"), icon: CreditCard },
     { href: "/admin/settings", label: t("sidebar.settings"), icon: Settings2 },
@@ -128,7 +203,9 @@ export function AppSidebar() {
           <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-[0_0_15px_rgba(var(--color-primary),0.5)]">
             <Mail className="h-4 w-4" />
           </div>
-          <span className="font-heading text-lg font-bold tracking-tight">TabMail</span>
+          <span className="font-heading text-lg font-bold tracking-tight">
+            TabMail
+          </span>
         </div>
       </SidebarHeader>
 
@@ -136,8 +213,8 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton 
-                render={<Link href="/" />} 
+              <SidebarMenuButton
+                render={<Link href="/" />}
                 isActive={pathname === "/"}
                 className="transition-all hover:bg-muted/50 data-[active=true]:bg-primary/10 data-[active=true]:text-primary data-[active=true]:font-medium data-[active=true]:border-l-2 data-[active=true]:border-l-primary"
               >
@@ -151,7 +228,9 @@ export function AppSidebar() {
         <SidebarSeparator className="my-2 bg-border/40" />
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1">{t("sidebar.console")}</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 mb-1">
+            {t("sidebar.console")}
+          </SidebarGroupLabel>
           <SidebarMenu>
             {consoleItems.map((item) => (
               <SidebarMenuItem key={item.href}>
@@ -182,7 +261,7 @@ export function AppSidebar() {
                     <SidebarMenuButton
                       render={<Link href={item.href} />}
                       isActive={
-                        item.href === "/admin"
+                        item.href === "/admin" || item.href === "/company"
                           ? pathname === "/admin"
                           : pathname.startsWith(item.href)
                       }
@@ -202,7 +281,12 @@ export function AppSidebar() {
       <SidebarFooter className="p-4 border-t border-border/40 bg-background/40">
         <div className="flex items-center justify-between px-2">
           <ThemeToggle />
-          <Button variant="ghost" size="icon" onClick={logout} className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={logout}
+            className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors"
+          >
             <LogOut className="h-4 w-4" />
           </Button>
         </div>

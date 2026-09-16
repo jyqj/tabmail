@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+	"tabmail/internal/api/middleware"
 	"tabmail/internal/models"
 	"tabmail/internal/realtime"
 )
@@ -15,9 +16,10 @@ type monitorStore interface {
 }
 
 type MonitorHandler struct {
-	store  monitorStore
-	hub    *realtime.Hub
-	logger zerolog.Logger
+	revalidate func(*http.Request) (*http.Request, error)
+	store      monitorStore
+	hub        *realtime.Hub
+	logger     zerolog.Logger
 }
 
 func NewMonitorHandler(store monitorStore, hub *realtime.Hub, logger zerolog.Logger) *MonitorHandler {
@@ -35,34 +37,57 @@ func (h *MonitorHandler) StreamAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-cache, no-transform")
 	w.Header().Set("Connection", "keep-alive")
 
-	if h.hub == nil {
-		writeSSE(w, "ping", realtime.Event{Type: realtime.EventPing})
+	// Read the shared monitor journal, not this API process's local Hub.
+	// The history endpoint is the source of truth; resync covers journal gaps.
+	seen := map[string]bool{}
+	poll := func(initial bool) bool {
+		fresh := r
+		if h.revalidate != nil {
+			var e error
+			fresh, e = h.revalidate(r)
+			if e != nil {
+				return false
+			}
+		}
+		if !middleware.IsSuperAdmin(fresh.Context()) {
+			return false
+		}
+		rows, _, e := h.store.ListMonitorEvents(fresh.Context(), models.Page{Page: 1, PerPage: 100}, "", "", "")
+		if e != nil {
+			return false
+		}
+		next := map[string]bool{}
+		for i := len(rows) - 1; i >= 0; i-- {
+			v := rows[i]
+			key := v.ID.String()
+			next[key] = true
+			if !initial && !seen[key] {
+				writeSSE(w, v.Type, realtime.Event{Type: realtime.EventType(v.Type), Mailbox: v.Mailbox, MessageID: v.MessageID, Sender: v.Sender, Subject: v.Subject, Size: v.Size, At: v.At})
+			}
+		}
+		seen = next
+		writeSSE(w, "resync", map[string]bool{"history": true})
 		flusher.Flush()
-		<-r.Context().Done()
+		return true
+	}
+	if !poll(true) {
 		return
 	}
-
-	ch, unsubscribe := h.hub.Subscribe("")
-	defer unsubscribe()
-
-	writeSSE(w, "ready", realtime.Event{Type: realtime.EventPing})
+	writeSSE(w, "ready", map[string]bool{"ready": true})
 	flusher.Flush()
-
-	ticker := time.NewTicker(25 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 	defer ticker.Stop()
-
 	for {
 		select {
 		case <-r.Context().Done():
 			return
-		case event := <-ch:
-			writeSSE(w, string(event.Type), event)
-			flusher.Flush()
 		case <-ticker.C:
-			writeSSE(w, "ping", realtime.Event{Type: realtime.EventPing})
-			flusher.Flush()
+			if !poll(false) {
+				return
+			}
 		}
 	}
+
 }
 
 func (h *MonitorHandler) History(w http.ResponseWriter, r *http.Request) {

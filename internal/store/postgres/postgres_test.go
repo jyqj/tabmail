@@ -13,10 +13,14 @@ import (
 
 // capturingExecer records the bound args of an Exec call so tests can assert how
 // values are coalesced before they reach Postgres.
-type capturingExecer struct{ args []any }
+type capturingExecer struct {
+	args  []any
+	query string
+}
 
-func (c *capturingExecer) Exec(_ context.Context, _ string, args ...any) (pgconn.CommandTag, error) {
+func (c *capturingExecer) Exec(_ context.Context, query string, args ...any) (pgconn.CommandTag, error) {
 	c.args = args
+	c.query = query
 	return pgconn.CommandTag{}, nil
 }
 
@@ -39,10 +43,22 @@ func TestInsertOutboundJobCoalescesNilRecipientArrays(t *testing.T) {
 	if n < 3 {
 		t.Fatalf("expected bound args, got %d", n)
 	}
-	for i, name := range []string{"to_addrs", "cc_addrs", "bcc_addrs"} {
-		arr, ok := rec.args[n-3+i].([]string)
+	start, end := strings.Index(rec.query, "("), strings.Index(rec.query, ")")
+	columns := strings.Split(rec.query[start+1:end], ",")
+	for _, name := range []string{"to_addrs", "cc_addrs", "bcc_addrs"} {
+		index := -1
+		for i, column := range columns {
+			if strings.TrimSpace(column) == name {
+				index = i
+				break
+			}
+		}
+		if index < 0 {
+			t.Fatalf("missing %s", name)
+		}
+		arr, ok := rec.args[index].([]string)
 		if !ok {
-			t.Fatalf("%s arg is %T, want []string", name, rec.args[n-3+i])
+			t.Fatalf("%s arg is %T, want []string", name, rec.args[index])
 		}
 		if arr == nil {
 			t.Fatalf("%s must be a non-nil slice to avoid a NOT NULL violation", name)

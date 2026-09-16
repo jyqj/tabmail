@@ -24,7 +24,7 @@ type MailboxGrant struct {
 // MessageExpiry uses nil, not year 1 or now(), to express permanent retention.
 // Owned mailboxes ignore legacy hourly plans, including existing message TTLs.
 func MessageExpiry(mb *Mailbox, hours int, now time.Time) *time.Time {
-	if hours == 0 || (mb != nil && mb.OwnerUserID != nil) {
+	if hours == 0 || (mb != nil && (mb.OwnerUserID != nil || (mb.Kind == "shared" && mb.RetentionHoursOverride == nil))) {
 		return nil
 	}
 	t := now.Add(time.Duration(hours) * time.Hour)

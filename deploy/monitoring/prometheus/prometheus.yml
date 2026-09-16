@@ -13,9 +13,7 @@ scrape_configs:
       type: Bearer
       credentials: replace-with-metrics-scrape-token
     static_configs:
-      - targets:
-          - tabmail:8080
-          - tabmail-api:8080
-          - tabmail-smtp:8080
-          - tabmail-worker:8080
-          - tabmail-retention:8080
+      # Split production roles expose HTTP only on the API. Worker health and
+      # queue outcomes below are database-derived, not process-local counters.
+      # For the monolithic development compose use tabmail:8080 instead.
+      - targets: [tabmail-api:8080]
