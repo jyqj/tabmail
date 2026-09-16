@@ -4,10 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AuthDialog } from "./auth-dialog";
 
-const { toastSuccess, toastError, issueTokenMock, loginMock, registerMock, logoutSessionMock, authStateRef } = vi.hoisted(() => ({
+const { toastSuccess, toastError, loginMock, registerMock, logoutSessionMock, authStateRef } = vi.hoisted(() => ({
   toastSuccess: vi.fn(),
   toastError: vi.fn(),
-  issueTokenMock: vi.fn(),
   loginMock: vi.fn(),
   registerMock: vi.fn(),
   logoutSessionMock: vi.fn(),
@@ -35,7 +34,6 @@ vi.mock("@/lib/i18n", () => ({
 }));
 
 vi.mock("@/lib/api", () => ({
-  issueToken: (...args: unknown[]) => issueTokenMock(...args),
   login: (...args: unknown[]) => loginMock(...args),
   register: (...args: unknown[]) => registerMock(...args),
   logoutSession: (...args: unknown[]) => logoutSessionMock(...args),
@@ -98,7 +96,6 @@ describe("AuthDialog", () => {
       setMailboxAuth: vi.fn(),
       logout: vi.fn(),
     };
-    issueTokenMock.mockReset();
     loginMock.mockReset();
     registerMock.mockReset();
     logoutSessionMock.mockReset();
@@ -157,6 +154,5 @@ describe("AuthDialog", () => {
 
     expect(screen.getByText("auth.level.mailbox")).toBeInTheDocument();
     expect(screen.getByText("user@mail.test")).toBeInTheDocument();
-    expect(issueTokenMock).not.toHaveBeenCalled();
   });
 });

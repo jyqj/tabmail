@@ -55,7 +55,7 @@ export function SiteHeader() {
 
   const navItems = [
     ...(level === "user" || level === "super_admin" || level === "admin"
-      ? [{ href: "/console/domains", label: t("header.console"), icon: LayoutDashboard }]
+      ? [{ href: "/mail", label: t("header.mail"), icon: LayoutDashboard }]
       : []),
     ...(level === "mailbox"
       ? [{ href: "/", label: t("header.inbox"), icon: Inbox }]

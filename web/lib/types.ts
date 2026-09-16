@@ -87,32 +87,7 @@ export interface DomainZone {
   verified_at: string | null;
 }
 
-export type RouteType = "exact" | "wildcard" | "deep_wildcard" | "sequence";
 export type AccessMode = "public" | "token" | "api_key";
-
-export interface DomainRoute {
-  id: string;
-  zone_id: string;
-  route_type: RouteType;
-  match_value: string;
-  range_start: number | null;
-  range_end: number | null;
-  auto_create_mailbox: boolean;
-  retention_hours_override: number | null;
-  access_mode_default: AccessMode;
-  created_at: string;
-}
-
-export interface SuggestedAddress {
-  zone_id: string;
-  base_domain: string;
-  domain: string;
-  subdomain_label?: string;
-  local_part: string;
-  address: string;
-  mode: "mailbox" | "subdomain";
-  algorithm: string;
-}
 
 export interface Mailbox {
   kind?: "personal" | "shared" | "legacy";
@@ -128,15 +103,6 @@ export interface Mailbox {
   retention_hours_override: number | null;
   expires_at: string | null;
   created_at: string;
-}
-
-export interface MailboxCreateInput {
-  address: string;
-  owner_user_id?: string;
-  access_mode?: AccessMode;
-  password?: string;
-  retention_hours_override?: number;
-  expires_at?: string;
 }
 
 export interface Message {
@@ -187,40 +153,6 @@ export interface APIError {
     code: string;
     message: string;
   };
-}
-
-export interface DNSCheck {
-  status: "pass" | "fail" | string;
-  details?: string[];
-}
-
-export interface VerificationChecks {
-  txt: DNSCheck;
-  mx: DNSCheck;
-  spf: DNSCheck;
-  dkim: DNSCheck;
-  dmarc: DNSCheck;
-}
-
-export interface VerificationStatus {
-  txt_expected: string;
-  expected_mx: string;
-  is_verified?: boolean;
-  mx_verified?: boolean;
-  dkim_record?: string;
-  dkim_host?: string;
-  dkim_enabled?: boolean;
-  checks: VerificationChecks;
-}
-
-export interface DomainVerificationResult {
-  id: string;
-  domain: string;
-  txt_record: string;
-  is_verified: boolean;
-  mx_verified: boolean;
-  checks: VerificationChecks;
-  hint: string;
 }
 
 export interface SystemStats {
@@ -312,11 +244,6 @@ export interface AuditEntry {
   created_at: string;
 }
 
-export interface MailboxTokenResponse {
-  token: string;
-  expires_in: number;
-}
-
 export type UserRole = "super_admin" | "admin" | "user";
 
 export interface AuthUser {
@@ -361,10 +288,6 @@ export interface RefreshResponse {
   refresh_token?: string;
   token_type: string;
   expires_in: number;
-}
-
-export interface MarkSeenResponse {
-  seen: boolean;
 }
 
 export interface SystemSetting {
@@ -526,20 +449,6 @@ export interface OutboundJob {
   updated_at: string;
 }
 
-export interface SendEmailRequest {
-  template_version_id?: string;
-  template_vars?: Record<string, string>;
-  attachment_ids?: string[];
-  from: string;
-  to: string[];
-  cc?: string[];
-  bcc?: string[];
-  subject: string;
-  text_body?: string;
-  html_body?: string;
-  headers?: Record<string, string>;
-}
-
 export interface SendEmailResponse {
   id: string;
   message_id: string;
@@ -547,15 +456,3 @@ export interface SendEmailResponse {
   created_at: string;
 }
 
-export type SendIdentityType = "exact" | "domain_wildcard";
-
-export interface SendIdentity {
-  id: string;
-  tenant_id: string;
-  zone_id: string;
-  mailbox_id?: string;
-  address: string;
-  identity_type: SendIdentityType;
-  verified: boolean;
-  created_at: string;
-}

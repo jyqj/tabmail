@@ -4,8 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import {
-  canCreateAPIKeys,
-  canSend,
   isAdminLevel,
   isSuperAdminLevel,
 } from "@/lib/permissions";
@@ -28,7 +26,6 @@ import { Button } from "@/components/ui/button";
 import {
   Mail,
   Globe,
-  Inbox,
   Users,
   CreditCard,
   BarChart3,
@@ -41,41 +38,15 @@ import {
   Webhook,
   Boxes,
   Settings2,
-  Send,
-  KeyRound,
 } from "lucide-react";
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const { level, logout, permissions } = useAuth();
+  const { level, logout } = useAuth();
   const { t } = useI18n();
   const c = useText();
   // UX-only gates; the backend authz seam is authoritative.
   const adminLevel = isAdminLevel(level);
-  const showAPIKeys = canCreateAPIKeys(level, permissions);
-  const showSend = canSend(level, permissions);
-  const webhookPermissions = permissions as
-    | (typeof permissions & {
-        can_manage_webhooks?: boolean;
-        can_create_webhooks?: boolean;
-        can_manage_webhook_endpoints?: boolean;
-        can_create_webhook_endpoints?: boolean;
-        scopes?: string[];
-        webhook_scopes?: string[];
-      })
-    | null;
-  const canUseWebhooks =
-    adminLevel ||
-    webhookPermissions?.can_manage_webhooks === true ||
-    webhookPermissions?.can_create_webhooks === true ||
-    webhookPermissions?.can_manage_webhook_endpoints === true ||
-    webhookPermissions?.can_create_webhook_endpoints === true ||
-    webhookPermissions?.scopes?.some((scope) =>
-      scope.startsWith("webhooks:"),
-    ) === true ||
-    webhookPermissions?.webhook_scopes?.some((scope) =>
-      scope.startsWith("webhooks:"),
-    ) === true;
 
   const consoleItems = [
     { href: "/mail", label: c("我的邮箱", "My mail"), icon: Mail },
@@ -84,59 +55,6 @@ export function AppSidebar() {
       label: c("账号安全", "Account security"),
       icon: Shield,
     },
-    ...(adminLevel
-      ? [
-          {
-            href: "/console/domains",
-            label: t("sidebar.domains"),
-            icon: Globe,
-          },
-          {
-            href: "/console/mailboxes",
-            label: t("sidebar.mailboxes"),
-            icon: Inbox,
-          },
-          // Fail closed while permissions are loading/unavailable.
-          ...(showAPIKeys
-            ? [
-                {
-                  href: "/console/keys",
-                  label: t("sidebar.apiKeys"),
-                  icon: Settings2,
-                },
-              ]
-            : []),
-          ...(showSend
-            ? [
-                {
-                  href: "/console/outbound",
-                  label: t("sidebar.outbound"),
-                  icon: Send,
-                },
-              ]
-            : []),
-          ...(showSend
-            ? [
-                {
-                  href: "/console/send-identities",
-                  label: t("sidebar.sendIdentities"),
-                  icon: KeyRound,
-                },
-              ]
-            : []),
-          // Fail closed: current EffectivePermission has no webhook flag, so plain
-          // users do not see this unless a future explicit capability is present.
-          ...(canUseWebhooks
-            ? [
-                {
-                  href: "/console/webhooks",
-                  label: t("sidebar.webhookEndpoints"),
-                  icon: Webhook,
-                },
-              ]
-            : []),
-        ]
-      : []),
   ];
 
   const isPlatformAdmin = isSuperAdminLevel(level);

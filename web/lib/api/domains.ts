@@ -1,22 +1,8 @@
-import type {
-  AccessMode,
-  APIResponse,
-  DomainVerificationResult,
-  DomainRoute,
-  DomainZone,
-  ResourceVisibility,
-  RouteType,
-  SuggestedAddress,
-  VerificationStatus,
-} from "../types";
+import type { APIResponse, DomainZone, ResourceVisibility } from "../types";
 import { request } from "./base";
 
 export function listDomains() {
   return request<APIResponse<DomainZone[]>>("/api/v1/domains");
-}
-
-export function listOpenDomains() {
-  return request<APIResponse<DomainZone[]>>("/api/v1/resources/domains");
 }
 
 export function listAdminDomains() {
@@ -30,86 +16,5 @@ export function updateAdminDomainAccess(
   return request<APIResponse<DomainZone>>(`/api/v1/admin/domains/${id}`, {
     method: "PATCH",
     body,
-  });
-}
-
-export function createDomain(domain: string) {
-  return request<APIResponse<DomainZone>>("/api/v1/domains", {
-    method: "POST",
-    body: { domain },
-  });
-}
-
-export function deleteDomain(id: string) {
-  return request<void>(`/api/v1/domains/${id}`, { method: "DELETE" });
-}
-
-export function verifyDomain(id: string) {
-  return request<APIResponse<DomainVerificationResult>>(`/api/v1/domains/${id}/verify`, {
-    method: "POST",
-  });
-}
-
-export function getVerificationStatus(id: string) {
-  return request<APIResponse<VerificationStatus>>(`/api/v1/domains/${id}/verification-status`);
-}
-
-export function suggestAddress(id: string, opts?: { subdomain?: boolean }) {
-  const qs = opts?.subdomain ? "?subdomain=true" : "";
-  return request<APIResponse<SuggestedAddress>>(`/api/v1/domains/${id}/suggest-address${qs}`);
-}
-
-export function suggestOpenAddress(id: string, opts?: { subdomain?: boolean }) {
-  const qs = opts?.subdomain ? "?subdomain=true" : "";
-  return request<APIResponse<SuggestedAddress>>(`/api/v1/resources/domains/${id}/suggest-address${qs}`);
-}
-
-export function listRoutes(domainId: string) {
-  return request<APIResponse<DomainRoute[]>>(`/api/v1/domains/${domainId}/routes`);
-}
-
-export function createRoute(
-  domainId: string,
-  body: {
-    route_type: RouteType;
-    match_value: string;
-    range_start?: number;
-    range_end?: number;
-    auto_create_mailbox?: boolean;
-    retention_hours_override?: number;
-    access_mode_default?: AccessMode;
-  }
-) {
-  return request<APIResponse<DomainRoute>>(`/api/v1/domains/${domainId}/routes`, {
-    method: "POST",
-    body,
-  });
-}
-
-export function deleteRoute(domainId: string, routeId: string) {
-  return request<void>(`/api/v1/domains/${domainId}/routes/${routeId}`, {
-    method: "DELETE",
-  });
-}
-
-export interface RouteExplainResult {
-  accepted: boolean;
-  tenant_id?: string;
-  zone_id?: string;
-  zone_domain?: string;
-  route_id?: string;
-  route_type?: string;
-  mailbox_id?: string;
-  mailbox_address?: string;
-  auto_create_mailbox: boolean;
-  would_create_mailbox: boolean;
-  reason_code: string;
-  steps: string[];
-}
-
-export function explainRoute(domainId: string, address: string) {
-  return request<APIResponse<RouteExplainResult>>(`/api/v1/domains/${domainId}/routes/explain`, {
-    method: "POST",
-    body: { address },
   });
 }

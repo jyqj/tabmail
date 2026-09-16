@@ -93,7 +93,7 @@ export default function CompanyPage() {
       />
       <Section title={t("公司主域名", "Company primary domain")}>
         <p className="text-sm">
-          <Link className="underline" href="/console/domains">
+          <Link className="underline" href="/admin/domains">
             {t(
               "先添加域名并完成 DNS 验证",
               "Add a domain and complete DNS verification first",
