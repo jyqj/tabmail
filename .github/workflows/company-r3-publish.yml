@@ -63,9 +63,9 @@ jobs:
           tree = subprocess.check_output(['git','write-tree'], text=True).strip()
           assert tree == expected, f'wrong source tree: {tree}'
           print(f'PASS: 102 source files, manifest SHA256, per-file SHA256/Git hashes, tree {tree}')
-          pathlib.Path('/tmp/r3-publication.txt').write_text(f'base={base}\ntree={tree}\nfiles=102\nmanifest_sha256={hashlib.sha256(raw).hexdigest()}\n')
+          pathlib.Path('/tmp/r3-publication.txt').write_text(f'base={base}\ntarget_tree={tree}\nfiles=102\nmanifest_sha256={hashlib.sha256(raw).hexdigest()}\n')
           PY
-      - name: Commit and fast-forward the implementation branch, never main
+      - name: Commit application source without changing workflows
         shell: bash
         env:
           SOURCE_SHA: ${{ github.sha }}
@@ -74,12 +74,17 @@ jobs:
           branch=fix/company-mail-complete-r3
           remote=$(git ls-remote origin "refs/heads/$branch" | cut -f1)
           test "$remote" = "$SOURCE_SHA"
+          # GITHUB_TOKEN has contents:write, not workflows permission. Workflow
+          # changes and removal are performed separately with the GitHub connector.
+          git checkout HEAD -- .github/workflows
+          test -z "$(git diff --cached --name-only -- .github/workflows)"
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'feat: company mailbox workflow, templates, session safety and delivery recovery' -m 'Restore and verify 102 source files against the approved baseline. Remove all temporary transfer and toolchain workflows. PR and main merge are performed separately through the GitHub connector after CI.'
+          git commit -m 'feat: company mailbox workflow, templates, session safety and delivery recovery' -m 'Restore hash-verified application source and remove temporary source-transfer files. CI workflow update and temporary-workflow removal are performed separately through the authorized GitHub connector. Never push main.'
           git push origin "HEAD:refs/heads/$branch"
           git rev-parse HEAD | tee -a /tmp/r3-publication.txt
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: r3-publication-receipt
           path: /tmp/r3-publication.txt
