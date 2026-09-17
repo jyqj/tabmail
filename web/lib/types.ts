@@ -103,6 +103,8 @@ export interface Mailbox {
   retention_hours_override: number | null;
   expires_at: string | null;
   created_at: string;
+  /** Effective send policy: COALESCE(mailbox override, company default). */
+  send_policy?: "free" | "template_required" | "disabled";
 }
 
 export interface Message {
