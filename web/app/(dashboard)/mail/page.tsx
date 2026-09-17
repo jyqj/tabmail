@@ -14,6 +14,8 @@ import {
   downloadCompanyFile,
   submissions,
   submission,
+  submissionContent,
+  submissionAttachments,
   type DraftPayload,
   type MailDraft,
   type WorkMailbox,
@@ -546,12 +548,13 @@ const RECIPIENT_STATE_LABELS: Record<string, [string, string]> = {
   uncertain: ["结果不确定", "Uncertain"],
 };
 
-function SubmissionPane({ id }: { id: string }) {
+export function SubmissionPane({ id }: { id: string }) {
   const t = useText();
   const { busy, run } = useAction();
   const detail = useAPI(["submission", id], () => submission(id), {
     refreshInterval: 10000,
   });
+  const [showContent, setShowContent] = useState(false);
   const s = detail.error ? undefined : detail.data;
   return (
     <div className="mt-4 space-y-3 rounded-md border p-4">
@@ -577,6 +580,17 @@ function SubmissionPane({ id }: { id: string }) {
               ? ` · ${t("模板版本", "Template version")}: ${s.template_version_id}`
               : ""}
           </p>
+          <div className="flex gap-2">
+            <ActionButton
+              aria-expanded={showContent}
+              onClick={() => setShowContent((v) => !v)}
+            >
+              {showContent
+                ? t("收起内容", "Hide content")
+                : t("查看内容", "View content")}
+            </ActionButton>
+          </div>
+          {showContent && <SubmissionContentView id={id} />}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
@@ -646,6 +660,81 @@ function SubmissionPane({ id }: { id: string }) {
           )}
         </>
       )}
+    </div>
+  );
+}
+
+// SubmissionContentView renders the actual sent body and the pinned
+// attachments of one submission. It reuses the message pane's safe rendering
+// conventions: plain text in a pre, HTML only through the sandboxed MailHTML
+// view, and downloads through the per-submission server endpoint (storage
+// keys never reach the client).
+function SubmissionContentView({ id }: { id: string }) {
+  const t = useText();
+  const { busy, run } = useAction();
+  const content = useAPI(["submission-content", id], () =>
+    submissionContent(id),
+  );
+  const files = useAPI(["submission-attachments", id], () =>
+    submissionAttachments(id),
+  );
+  const c = content.error ? undefined : content.data;
+  return (
+    <div className="space-y-3 border-t pt-3">
+      <LoadError
+        error={content.error}
+        onRetry={() => void content.mutate()}
+      />
+      {content.isLoading && (
+        <p className="text-sm text-muted-foreground">
+          {t("加载中…", "Loading…")}
+        </p>
+      )}
+      {c && (
+        <>
+          {c.content_redacted ? (
+            <p role="status" className="text-sm">
+              {t("正文内容对你不可见。", "The message body is not visible to you.")}
+            </p>
+          ) : (
+            <>
+              {c.text_body && (
+                <pre className="whitespace-pre-wrap break-words text-sm leading-7">
+                  {c.text_body}
+                </pre>
+              )}
+              {c.html_body && (
+                <details>
+                  <summary className="cursor-pointer">
+                    {t(
+                      "安全 HTML 视图（外部资源已阻止）",
+                      "Safe HTML view (external resources blocked)",
+                    )}
+                  </summary>
+                  <MailHTML html={c.html_body} />
+                </details>
+              )}
+            </>
+          )}
+        </>
+      )}
+      <LoadError error={files.error} onRetry={() => void files.mutate()} />
+      {(files.data ?? []).map((f) => (
+        <ActionButton
+          key={f.id}
+          disabled={busy}
+          onClick={() =>
+            run(() =>
+              downloadCompanyFile(
+                `/submissions/${encodeURIComponent(id)}/attachments/${encodeURIComponent(f.id)}/download`,
+                f.filename,
+              ),
+            )
+          }
+        >
+          {f.filename} · {Math.ceil(f.size / 1024)} KiB
+        </ActionButton>
+      ))}
     </div>
   );
 }

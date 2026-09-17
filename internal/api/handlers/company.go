@@ -117,6 +117,11 @@ func (h *CompanyHandler) Routes(r chi.Router) {
 		r.Delete("/drafts/{id}", h.DeleteDraft)
 		r.Get("/submissions", h.Submissions)
 		r.Get("/submissions/{id}", h.Submission)
+		// Sent-message content and its pinned attachments. The store reuses the
+		// submission metadata scope, so out-of-scope viewers collapse to 404.
+		r.Get("/submissions/{id}/content", h.SubmissionContent)
+		r.Get("/submissions/{id}/attachments", h.SubmissionAttachments)
+		r.Get("/submissions/{id}/attachments/{aid}/download", h.SubmissionAttachmentDownload)
 		r.Get("/recovery", h.Recovery)
 		r.Post("/recovery/{id}/inspect", h.InspectReceipt)
 		r.Post("/recovery/{id}/retry", h.RetryReceipt)
@@ -499,6 +504,61 @@ func (h *CompanyHandler) Submission(w http.ResponseWriter, r *http.Request) {
 	}
 	v, e := h.repo.GetSubmission(r.Context(), companyActor(r), id)
 	h.result(w, v, e)
+}
+
+// SubmissionContent serves GET /api/v1/company/submissions/{id}/content — the
+// actual sent subject, from, recipients and body. BCC and queue internals are
+// never projected; custom headers arrive already filtered by the store.
+func (h *CompanyHandler) SubmissionContent(w http.ResponseWriter, r *http.Request) {
+	id, ok := companyID(w, r, "id")
+	if !ok {
+		return
+	}
+	v, e := h.repo.GetSubmissionContent(r.Context(), companyActor(r), id)
+	h.result(w, v, e)
+}
+
+// SubmissionAttachments serves GET /api/v1/company/submissions/{id}/attachments.
+func (h *CompanyHandler) SubmissionAttachments(w http.ResponseWriter, r *http.Request) {
+	id, ok := companyID(w, r, "id")
+	if !ok {
+		return
+	}
+	v, e := h.repo.ListSubmissionAttachments(r.Context(), companyActor(r), id)
+	h.result(w, v, e)
+}
+
+// SubmissionAttachmentDownload serves GET
+// /api/v1/company/submissions/{id}/attachments/{aid}/download. The store
+// proves the attachment is pinned to this readable submission and finished;
+// the object key stays server-side and only verified bytes are streamed.
+func (h *CompanyHandler) SubmissionAttachmentDownload(w http.ResponseWriter, r *http.Request) {
+	id, ok := companyID(w, r, "id")
+	if !ok {
+		return
+	}
+	aid, ok := companyID(w, r, "aid")
+	if !ok {
+		return
+	}
+	v, e := h.repo.GetSubmissionAttachment(r.Context(), companyActor(r), id, aid)
+	if e != nil {
+		h.result(w, nil, e)
+		return
+	}
+	rc, e := h.objects.Get(r.Context(), v.ObjectKey)
+	if e != nil {
+		h.result(w, nil, app.Internal(e))
+		return
+	}
+	defer rc.Close()
+	raw, e := io.ReadAll(io.LimitReader(rc, v.Size+1))
+	if e != nil || int64(len(raw)) != v.Size || company.Hash(string(raw)) != v.SHA256 {
+		errInternal(w)
+		return
+	}
+	downloadHeaders(w, safeFilename(v.Filename), "application/octet-stream")
+	_, _ = w.Write(raw)
 }
 func (h *CompanyHandler) mailboxForRead(w http.ResponseWriter, r *http.Request) (*company.MailboxAccess, uuid.UUID, bool) {
 	mbID, ok := companyID(w, r, "id")

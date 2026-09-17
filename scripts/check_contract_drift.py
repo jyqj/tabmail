@@ -117,6 +117,7 @@ def main() -> int:
         "Recipient": "RecipientResult", "RecoveryTarget": "RecoveryTarget",
         "RecoveryReceipt": "Receipt",
         "Submission": "Submission", "SubmissionRecipient": "SubmissionRecipient",
+        "SubmissionContent": "SubmissionContent", "SubmissionAttachment": "SubmissionAttachment",
         "Domain": "CompanyDomain", "DNSCheck": "DomainDNSCheck",
         "DomainVerificationChecks": "DomainVerificationChecks",
         "DomainVerification": "DomainVerification",

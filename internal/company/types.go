@@ -249,11 +249,15 @@ type MailReadService interface {
 }
 
 // SubmissionReader is the outbound submission surface for administrators:
-// list/inspect submissions, their per-recipient delivery state, and the
-// reconcile repair action recorded against a submission.
+// list/inspect submissions, their per-recipient delivery state, the sent
+// message content and its pinned attachments, and the reconcile repair action
+// recorded against a submission.
 type SubmissionReader interface {
 	ListSubmissions(context.Context, authz.Actor, models.Page) ([]Submission, int, error)
 	GetSubmission(context.Context, authz.Actor, uuid.UUID) (*Submission, error)
+	GetSubmissionContent(context.Context, authz.Actor, uuid.UUID) (*SubmissionContent, error)
+	ListSubmissionAttachments(context.Context, authz.Actor, uuid.UUID) ([]SubmissionAttachment, error)
+	GetSubmissionAttachment(context.Context, authz.Actor, uuid.UUID, uuid.UUID) (*SubmissionAttachment, error)
 	ListOutboundRecipients(context.Context, uuid.UUID, uuid.UUID) ([]Recipient, error)
 	ReconcileOutbound(context.Context, authz.Actor, uuid.UUID, time.Time, []Recipient, string) error
 }

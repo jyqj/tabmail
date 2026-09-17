@@ -162,6 +162,30 @@ export interface Submission {
   content_redacted: boolean;
   delivery_uncertain: boolean;
 }
+// The actual sent message for a readable submission. Recipients are the
+// structural To/CC columns; BCC and queue internals are never projected, and
+// custom headers arrive already filtered to the wire-safe subset.
+export interface SubmissionContent {
+  id: string;
+  subject: string;
+  from: string;
+  to: string[];
+  cc?: string[];
+  headers?: Record<string, string>;
+  text_body?: string;
+  html_body?: string;
+  created_at: string;
+  content_redacted: boolean;
+}
+// Metadata of an attachment pinned to a sent submission. Storage keys stay
+// server-side; downloads go through the per-submission download endpoint.
+export interface SubmissionAttachment {
+  id: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  state: string;
+}
 export interface Receipt {
   id: string;
   state: string;
@@ -291,6 +315,16 @@ export function submissions(page: number) {
 }
 export function submission(id: string) {
   return company<Submission>(`/submissions/${encodeURIComponent(id)}`);
+}
+export function submissionContent(id: string) {
+  return company<SubmissionContent>(
+    `/submissions/${encodeURIComponent(id)}/content`,
+  );
+}
+export function submissionAttachments(id: string) {
+  return company<SubmissionAttachment[]>(
+    `/submissions/${encodeURIComponent(id)}/attachments`,
+  );
 }
 export async function allEmployees(): Promise<AdminUser[]> {
   const users: AdminUser[] = [];

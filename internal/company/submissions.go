@@ -38,6 +38,45 @@ type Submission struct {
 	DeliveryUncertain bool `json:"delivery_uncertain"`
 }
 
+// SubmissionContent is the sent-message body projection for a submission the
+// actor may read. Recipients come from the structural To/CC columns — BCC is
+// envelope-only and is never projected. Custom headers pass through the
+// outbound safe-display filter, so stored-but-blocked header names (for
+// example a caller-supplied "Bcc") never reach a viewer.
+//
+// ContentRedacted is always false here, matching company.Submission: the
+// company surface only admits interactive member identities, and submissionScope
+// already encodes the content authority rule (submitter or current reader of
+// the sender mailbox), so every viewer that can fetch this DTO holds content
+// authority by construction. Out-of-scope viewers get the same 404 collapse as
+// the metadata endpoints.
+type SubmissionContent struct {
+	ID              uuid.UUID         `json:"id"`
+	Subject         string            `json:"subject"`
+	MailFrom        string            `json:"from"`
+	To              []string          `json:"to"`
+	CC              []string          `json:"cc,omitempty"`
+	Headers         map[string]string `json:"headers,omitempty"`
+	TextBody        string            `json:"text_body,omitempty"`
+	HTMLBody        string            `json:"html_body,omitempty"`
+	CreatedAt       time.Time         `json:"created_at"`
+	ContentRedacted bool              `json:"content_redacted"`
+}
+
+// SubmissionAttachment is the metadata projection of an attachment pinned to a
+// sent submission via outbound_attachments. ObjectKey and SHA256 never
+// serialize (json:"-"): the storage key is internal and the download handler
+// consumes them server-side only.
+type SubmissionAttachment struct {
+	ID          uuid.UUID `json:"id"`
+	Filename    string    `json:"filename"`
+	ContentType string    `json:"content_type"`
+	Size        int64     `json:"size"`
+	State       string    `json:"state"`
+	ObjectKey   string    `json:"-"`
+	SHA256      string    `json:"-"`
+}
+
 // User-facing submission statuses (the Status field above).
 const (
 	SubmissionSubmitted         = "submitted"

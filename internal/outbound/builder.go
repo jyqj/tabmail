@@ -269,6 +269,30 @@ func sanitizeHeaderValue(v string) string {
 	return strings.NewReplacer("\r", "", "\n", "").Replace(v)
 }
 
+// SafeDisplayHeaders projects the stored custom-header map onto the subset
+// that is safe to show to a message reader: exactly the validity and
+// forbidden-name rules Build applies on the wire, so a caller-supplied header
+// that was blocked at send time (for example "Bcc") is also never shown to a
+// viewer of the sent content. The storage row keeps the raw caller map; this
+// is the only sanctioned read-side projection.
+func SafeDisplayHeaders(raw json.RawMessage) map[string]string {
+	in := parseCustomHeaders(raw)
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[string]string, len(in))
+	for k, v := range in {
+		if _, blocked := forbiddenCustomHeaders[strings.ToLower(k)]; blocked {
+			continue
+		}
+		if !isValidHeaderName(k) {
+			continue
+		}
+		out[k] = v
+	}
+	return out
+}
+
 func writeHeader(buf *bytes.Buffer, key, value string) {
 	io.WriteString(buf, key)
 	io.WriteString(buf, ": ")

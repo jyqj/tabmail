@@ -2,6 +2,8 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"strconv"
 	"strings"
 
@@ -11,6 +13,7 @@ import (
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/models"
+	"tabmail/internal/outbound"
 )
 
 // The employee submission view projects outbound jobs the actor may see:
@@ -183,6 +186,100 @@ func (s *PgStore) GetSubmission(ctx context.Context, a authz.Actor, id uuid.UUID
 		applySubmissionOutcome(sv, state, inFlight)
 		*v = *sv
 		return nil
+	})
+	if e != nil {
+		return nil, e
+	}
+	return v, nil
+}
+
+// The content and attachment projections reuse the metadata scope verbatim:
+// the same tenant-isolated submitter-or-readable-mailbox predicate governs who
+// may read what was actually sent. Authorization failures collapse to 404 like
+// every other submission lookup, so existence is not disclosed.
+const submissionContentSelect = `SELECT s.id,s.subject,s.mail_from,s.to_addrs,s.cc_addrs,s.headers_json,s.text_body,s.html_body,s.created_at FROM outbound_jobs s`
+
+func (s *PgStore) GetSubmissionContent(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.SubmissionContent, error) {
+	v := &company.SubmissionContent{}
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		where, args := submissionScope(a, 2)
+		var to, cc []string
+		var headers json.RawMessage
+		e := tx.QueryRow(ctx, submissionContentSelect+` WHERE `+where+` AND s.id=$1`, append([]any{id}, args...)...).
+			Scan(&v.ID, &v.Subject, &v.MailFrom, &to, &cc, &headers, &v.TextBody, &v.HTMLBody, &v.CreatedAt)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.NotFound("submission not found")
+		}
+		if e != nil {
+			return e
+		}
+		v.To = append([]string{}, to...)
+		v.CC = append([]string{}, cc...)
+		// The stored custom-header map keeps the raw caller input; readers only
+		// ever see the same filtered subset the wire message carried.
+		v.Headers = outbound.SafeDisplayHeaders(headers)
+		return nil
+	})
+	if e != nil {
+		return nil, e
+	}
+	return v, nil
+}
+
+const submissionAttachmentSelect = `SELECT a.id,a.filename,a.content_type,a.size,a.state,a.object_key,a.sha256
+ FROM outbound_jobs s
+ JOIN outbound_attachments x ON x.tenant_id=s.tenant_id AND x.job_id=s.id
+ JOIN mail_attachments a ON a.tenant_id=x.tenant_id AND a.id=x.attachment_id`
+
+func (s *PgStore) ListSubmissionAttachments(ctx context.Context, a authz.Actor, id uuid.UUID) ([]company.SubmissionAttachment, error) {
+	out := []company.SubmissionAttachment{}
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		where, args := submissionScope(a, 2)
+		// An invisible submission collapses to 404 like the metadata view,
+		// rather than answering an empty list for a job that does not exist
+		// for this actor.
+		var one bool
+		e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM outbound_jobs s WHERE `+where+` AND s.id=$1)`, append([]any{id}, args...)...).Scan(&one)
+		if e != nil {
+			return e
+		}
+		if !one {
+			return app.NotFound("submission not found")
+		}
+		rows, e := tx.Query(ctx, submissionAttachmentSelect+` WHERE `+where+` AND s.id=$1 ORDER BY a.id`, append([]any{id}, args...)...)
+		if e != nil {
+			return e
+		}
+		defer rows.Close()
+		for rows.Next() {
+			v := company.SubmissionAttachment{}
+			if e := rows.Scan(&v.ID, &v.Filename, &v.ContentType, &v.Size, &v.State, &v.ObjectKey, &v.SHA256); e != nil {
+				return e
+			}
+			out = append(out, v)
+		}
+		return rows.Err()
+	})
+	if e != nil {
+		return nil, e
+	}
+	return out, nil
+}
+
+// GetSubmissionAttachment resolves one pinned attachment of a readable
+// submission for download. The attachment must be linked to that job
+// (outbound_attachments) and finished ('ready'); the object key never leaves
+// the store layer's return value unserialized.
+func (s *PgStore) GetSubmissionAttachment(ctx context.Context, a authz.Actor, jobID, attachmentID uuid.UUID) (*company.SubmissionAttachment, error) {
+	v := &company.SubmissionAttachment{}
+	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		where, args := submissionScope(a, 3)
+		e := tx.QueryRow(ctx, submissionAttachmentSelect+` WHERE `+where+` AND s.id=$1 AND a.id=$2 AND a.state='ready'`, append([]any{jobID, attachmentID}, args...)...).
+			Scan(&v.ID, &v.Filename, &v.ContentType, &v.Size, &v.State, &v.ObjectKey, &v.SHA256)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.NotFound("attachment not found")
+		}
+		return e
 	})
 	if e != nil {
 		return nil, e

@@ -537,3 +537,33 @@ func TestR3AttachmentCleanupRespectsLiveDraftReferences(t *testing.T) {
 		t.Fatal("operational metrics missing")
 	}
 }
+
+// The 7-day attachment expiry must not collect attachments that a sent
+// submission still references: the sent asset is the employee's record of what
+// went out, so the outbound_attachments pin exempts the row from the sweep.
+func TestP4AttachmentCleanupRespectsSentJobReferences(t *testing.T) {
+	f := seedCompany(t)
+	ctx := context.Background()
+	a, e := f.st.ReserveMailAttachment(ctx, f.u, company.Attachment{MailboxID: f.personal.ID, Filename: "sent.txt", Size: 3})
+	must(t, e)
+	must(t, f.st.FinishMailAttachment(ctx, f.u, a.ID, company.Hash("abc")))
+	job := &models.OutboundJob{TenantID: f.tenant.ID, ZoneID: f.zone.ID, UserID: &f.employee.ID, SenderUserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, MailFrom: f.personal.FullAddress, RcptTo: []string{"dest@client.test"}, To: []string{"dest@client.test"}, Subject: "pinned", AttachmentIDs: []uuid.UUID{a.ID}, State: models.OutboundSent}
+	must(t, f.st.CreateOutboundJob(ctx, job))
+	_, e = f.pool.Exec(ctx, `UPDATE mail_attachments SET expires_at=now()-interval '1 day' WHERE id=$1`, a.ID)
+	must(t, e)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	var count int
+	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM mail_attachments WHERE id=$1`, a.ID).Scan(&count))
+	if count != 1 {
+		t.Fatal("sent-job attachment collected despite outbound pin")
+	}
+	// Once the job (and with it the pin, via cascade) is gone, the expired
+	// orphan is collected on the next sweep.
+	_, e = f.pool.Exec(ctx, `DELETE FROM outbound_jobs WHERE id=$1`, job.ID)
+	must(t, e)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM mail_attachments WHERE id=$1`, a.ID).Scan(&count))
+	if count != 0 {
+		t.Fatal("expired orphan retained after job removal")
+	}
+}
