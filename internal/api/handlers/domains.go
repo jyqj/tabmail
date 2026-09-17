@@ -67,6 +67,11 @@ func NewDomainHandler(s domainStore, obj store.ObjectStore, objects *rawobject.S
 	return &DomainHandler{service: service, store: s, objectStore: obj, objects: objects, resolver: res, logger: l.With().Str("handler", "domains").Logger()}
 }
 
+// Service exposes the domain application service so narrow surfaces (the
+// company domain onboarding routes) reuse the same instance — one cache
+// invalidator, one DNS resolver configuration.
+func (h *DomainHandler) Service() *domainapp.Service { return h.service }
+
 func (h *DomainHandler) ListZones(w http.ResponseWriter, r *http.Request) {
 	actor := middleware.ActorFromContext(r.Context())
 	tenant := middleware.TenantFromCtx(r.Context())

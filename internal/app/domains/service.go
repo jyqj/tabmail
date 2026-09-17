@@ -687,6 +687,28 @@ func (s *Service) expectedMX() string {
 	return s.expectedMXHost
 }
 
+// ZoneDNSRequirements returns the DNS records an administrator must publish
+// for the zone, derived locally without live lookups: the ownership TXT value,
+// the expected MX host, and the DKIM record host/value when a signing key
+// exists. The company domain wizard uses it to render setup instructions; live
+// verification stays in VerificationStatus / TriggerVerify.
+func (s *Service) ZoneDNSRequirements(zone *models.DomainZone) (txtRecord, expectedMX, dkimHost, dkimRecord string) {
+	txtRecord = zone.TXTRecord
+	expectedMX = s.expectedMX()
+	if zone.DKIMPrivateKeyPEM == nil || strings.TrimSpace(*zone.DKIMPrivateKeyPEM) == "" {
+		return
+	}
+	selector := zone.DKIMSelector
+	if selector == "" {
+		selector = tabdkim.DefaultSelector
+	}
+	if pubB64, err := tabdkim.PublicKeyFromPEM(*zone.DKIMPrivateKeyPEM); err == nil {
+		dkimHost = tabdkim.DNSRecordName(selector, zone.Domain)
+		dkimRecord = tabdkim.DNSTXTValue(pubB64)
+	}
+	return
+}
+
 func (s *Service) findParentZone(ctx context.Context, domain string) (*models.DomainZone, error) {
 	parts := strings.Split(domain, ".")
 	for i := 1; i < len(parts)-1; i++ {

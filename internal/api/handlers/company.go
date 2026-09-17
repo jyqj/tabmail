@@ -33,11 +33,12 @@ type CompanyHandler struct {
 	objects  store.ObjectStore
 	messages *MessageHandler
 	outbound *OutboundHandler
+	domains  *CompanyDomainHandler
 	logger   zerolog.Logger
 }
 
-func NewCompanyHandler(repo company.Repository, st store.Store, obj store.ObjectStore, m *MessageHandler, o *OutboundHandler, l zerolog.Logger) *CompanyHandler {
-	return &CompanyHandler{repo: repo, store: st, objects: obj, messages: m, outbound: o, logger: l.With().Str("handler", "company").Logger()}
+func NewCompanyHandler(repo company.Repository, st store.Store, obj store.ObjectStore, m *MessageHandler, o *OutboundHandler, d *CompanyDomainHandler, l zerolog.Logger) *CompanyHandler {
+	return &CompanyHandler{repo: repo, store: st, objects: obj, messages: m, outbound: o, domains: d, logger: l.With().Str("handler", "company").Logger()}
 }
 func (h *CompanyHandler) Routes(r chi.Router) {
 	r.Post("/company/activate", h.Activate)
@@ -88,6 +89,15 @@ func (h *CompanyHandler) Routes(r chi.Router) {
 		r.Get("/outbound/{id}/recipients", h.Recipients)
 		r.Post("/outbound/{id}/reconcile", h.Reconcile)
 		r.With(middleware.RequireSuperAdmin).Post("/outbound/{id}/inspect", h.InspectOutbound)
+		// Company domain onboarding (tenant administrators only). The handler
+		// re-checks actor.IsTenantAdmin at the service boundary.
+		if h.domains != nil {
+			r.With(middleware.RequireAdmin).Post("/domains", h.domains.Create)
+			r.With(middleware.RequireAdmin).Get("/domains", h.domains.List)
+			r.With(middleware.RequireAdmin).Post("/domains/{id}/verify", h.domains.Verify)
+			r.With(middleware.RequireAdmin).Get("/domains/{id}/verification", h.domains.Verification)
+			r.With(middleware.RequireAdmin).Delete("/domains/{id}", h.domains.Delete)
+		}
 	})
 }
 func companyID(w http.ResponseWriter, r *http.Request, name string) (uuid.UUID, bool) {

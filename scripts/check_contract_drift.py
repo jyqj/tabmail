@@ -117,6 +117,9 @@ def main() -> int:
         "Recipient": "RecipientResult", "RecoveryTarget": "RecoveryTarget",
         "RecoveryReceipt": "Receipt",
         "Submission": "Submission", "SubmissionRecipient": "SubmissionRecipient",
+        "Domain": "CompanyDomain", "DNSCheck": "DomainDNSCheck",
+        "DomainVerificationChecks": "DomainVerificationChecks",
+        "DomainVerification": "DomainVerification",
     }
     for go_name, ts_name in company_pairs.items():
         go_fields = company_go.get(go_name, set())

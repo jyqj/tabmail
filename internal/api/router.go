@@ -162,7 +162,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 
 	r.Route("/api/v1", func(r chi.Router) {
 		if cfg.CompanyRepository != nil {
-			handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, msg, oh, cfg.Logger).Routes(r)
+			cdh := handlers.NewCompanyDomainHandler(dh.Service(), cfg.CompanyRepository, cfg.Logger)
+			handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, msg, oh, cdh, cfg.Logger).Routes(r)
 		}
 		// -- Auth (public, no auth required) --
 		r.Post("/auth/login", auth.Login)

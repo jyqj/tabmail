@@ -164,6 +164,43 @@ export interface Receipt {
   raw_size: number;
   targets: RecoveryTarget[];
 }
+// Company domain onboarding wizard. Only what the administrator needs: the
+// verification summary and the DNS records to publish — no platform fields.
+export interface DomainDNSCheck {
+  status: string;
+  details?: string[];
+}
+export interface DomainVerificationChecks {
+  txt: DomainDNSCheck;
+  mx: DomainDNSCheck;
+  spf: DomainDNSCheck;
+  dkim: DomainDNSCheck;
+  dmarc: DomainDNSCheck;
+}
+export interface CompanyDomain {
+  id: string;
+  domain: string;
+  is_verified: boolean;
+  mx_verified: boolean;
+  dkim_enabled: boolean;
+  txt_record: string;
+  expected_mx: string;
+  dkim_host?: string;
+  dkim_record?: string;
+  created_at: string;
+}
+export interface DomainVerification {
+  id: string;
+  domain: string;
+  is_verified: boolean;
+  mx_verified: boolean;
+  dkim_enabled: boolean;
+  txt_record: string;
+  expected_mx: string;
+  dkim_host?: string;
+  dkim_record?: string;
+  checks: DomainVerificationChecks;
+}
 export const workPath = (id: string) => `/mailboxes/${encodeURIComponent(id)}`;
 export function submitDraft(
   id: string,
