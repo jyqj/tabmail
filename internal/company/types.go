@@ -215,6 +215,14 @@ type TemplateAdminService interface {
 	SaveMailTemplate(context.Context, authz.Actor, Template) (*Template, error)
 	PublishMailTemplate(context.Context, authz.Actor, uuid.UUID, int) (*TemplateVersion, error)
 	SetMailTemplateRetired(context.Context, authz.Actor, uuid.UUID, int, bool) error
+	// RevokeMailTemplateVersion is the emergency one-way revoke of a single
+	// published version: every not-yet-started delivery attempt of that version
+	// is stopped, while already-delivered outcomes, history and sibling versions
+	// are untouched. revision is the template CAS the caller read; a first-time
+	// revoke requires it and bumps the template revision, an already-revoked
+	// version is an idempotent no-op. There is no unrevoke — fixing a mistake
+	// means publishing a new version.
+	RevokeMailTemplateVersion(context.Context, authz.Actor, uuid.UUID, int, int) error
 	ListTemplateVersions(context.Context, authz.Actor, uuid.UUID) ([]TemplateVersion, error)
 	ListTemplateGrants(context.Context, authz.Actor, uuid.UUID) ([]TemplateGrant, error)
 	SetTemplateGrant(context.Context, authz.Actor, TemplateGrant, bool) error

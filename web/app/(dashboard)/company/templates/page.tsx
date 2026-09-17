@@ -83,6 +83,16 @@ export default function TemplatesPage() {
   async function onSaved() {
     await templates.mutate();
   }
+  // After an emergency version revoke the template revision has moved, so the
+  // selected copy must be re-synced before any further retire/publish CAS.
+  async function onVersionRevoked() {
+    const list = await templates.mutate();
+    if (edit) {
+      const fresh = (list ?? []).find((tpl) => tpl.id === edit.id);
+      if (fresh) setEdit(fresh);
+    }
+    setVersionKey((k) => k + 1);
+  }
   async function onPublished(value: MailTemplate) {
     await company(`/templates/${value.id}/publish`, {
       method: "POST",
@@ -158,7 +168,11 @@ export default function TemplatesPage() {
           />
         </TabsContent>
         <TabsContent value="versions">
-          <TemplateVersionsView template={edit} refreshKey={versionKey} />
+          <TemplateVersionsView
+            template={edit}
+            refreshKey={versionKey}
+            onRevoked={onVersionRevoked}
+          />
         </TabsContent>
         <TabsContent value="grants">
           <TemplateGrantsView

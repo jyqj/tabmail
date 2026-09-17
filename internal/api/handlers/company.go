@@ -97,6 +97,7 @@ func (h *CompanyHandler) Routes(r chi.Router) {
 		r.Post("/templates/{id}/publish", h.Publish)
 		r.Post("/templates/{id}/retire", h.Retire)
 		r.Get("/templates/{id}/versions", h.Versions)
+		r.Post("/templates/{id}/versions/{version}/revoke", h.RevokeTemplateVersion)
 		r.Get("/templates/{id}/grants", h.TemplateGrants)
 		r.Put("/templates/{id}/grants", h.TemplateGrant)
 		r.Get("/mailboxes/{id}/templates", h.UsableTemplates)
@@ -365,6 +366,32 @@ func (h *CompanyHandler) Versions(w http.ResponseWriter, r *http.Request) {
 	}
 	v, e := h.repo.ListTemplateVersions(r.Context(), companyActor(r), id)
 	h.result(w, v, e)
+}
+
+// RevokeTemplateVersion handles POST
+// /company/templates/{id}/versions/{version}/revoke — the emergency one-way
+// revoke of one published version. Semantically distinct from template-level
+// retire: the revoke stops every not-yet-started delivery attempt of that
+// single version while delivered outcomes and sibling versions stay untouched.
+// The administrator guard lives inside the store transaction, matching the
+// other template governance routes.
+func (h *CompanyHandler) RevokeTemplateVersion(w http.ResponseWriter, r *http.Request) {
+	id, ok := companyID(w, r, "id")
+	if !ok {
+		return
+	}
+	version, e := strconv.Atoi(chi.URLParam(r, "version"))
+	if e != nil || version < 1 {
+		errBadRequest(w, "invalid version")
+		return
+	}
+	v, ok := companyBody[struct {
+		Revision int `json:"revision"`
+	}](w, r)
+	if !ok {
+		return
+	}
+	h.result(w, map[string]bool{"revoked": true}, h.repo.RevokeMailTemplateVersion(r.Context(), companyActor(r), id, version, v.Revision))
 }
 func (h *CompanyHandler) TemplateGrants(w http.ResponseWriter, r *http.Request) {
 	id, ok := companyID(w, r, "id")

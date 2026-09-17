@@ -409,6 +409,121 @@ func TestR3TemplateImmutableVersionsAndCurrentGrants(t *testing.T) {
 		t.Fatal("retired template usable")
 	}
 }
+// Revoke is the emergency stop for a single published version: it blocks the
+// next delivery attempt of jobs already queued against that version, leaves
+// delivered recipient outcomes and sibling versions untouched, and is refused
+// for every new submission. Template-level retire is a different lever and is
+// not exercised here (see TestR3TemplateImmutableVersionsAndCurrentGrants).
+func TestR3TemplateVersionRevocationStopsUndeliveredSends(t *testing.T) {
+	f := seedCompany(t)
+	ctx := context.Background()
+	tpl, e := f.st.SaveMailTemplate(ctx, f.a, company.Template{Name: "Blast", Draft: templateDraft()})
+	must(t, e)
+	v1, e := f.st.PublishMailTemplate(ctx, f.a, tpl.ID, tpl.Revision)
+	must(t, e)
+	if v1.Version != 1 {
+		t.Fatalf("unexpected first version %d", v1.Version)
+	}
+	tpl.Revision++
+	tpl.Draft.TextBody = "Changed body"
+	tpl, e = f.st.SaveMailTemplate(ctx, f.a, *tpl)
+	must(t, e)
+	v2, e := f.st.PublishMailTemplate(ctx, f.a, tpl.ID, tpl.Revision)
+	must(t, e)
+	if v2.Version != 2 {
+		t.Fatalf("unexpected second version %d", v2.Version)
+	}
+	must(t, f.st.SetTemplateGrant(ctx, f.a, company.TemplateGrant{TemplateID: tpl.ID, MailboxID: f.personal.ID, UserID: f.employee.ID}, true))
+	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", MaxRetries: 5}, f.st, f.st, zerolog.Nop())
+	req := outbound.SendRequest{TenantID: f.tenant.ID, UserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, ZoneID: f.zone.ID, From: f.personal.FullAddress, To: []string{"one@client.test", "two@client.test"}, TemplateVersionID: &v2.ID, TemplateVars: map[string]string{"customer": "Client"}, IdempotencyKey: "revoke-send"}
+	j, e := svc.Submit(ctx, req)
+	must(t, e)
+	ledger, e := f.st.ListOutboundRecipients(ctx, f.tenant.ID, j.ID)
+	must(t, e)
+	if len(ledger) != 2 {
+		t.Fatalf("recipient ledger incomplete: %d", len(ledger))
+	}
+	// One recipient has already been delivered when the emergency revoke lands.
+	if _, e = f.pool.Exec(ctx, `UPDATE outbound_recipients SET state='accepted',attempts=1 WHERE job_id=$1 AND address=$2`, j.ID, ledger[0].Address); e != nil {
+		t.Fatal(e)
+	}
+	before, e := f.st.ListOutboundRecipients(ctx, f.tenant.ID, j.ID)
+	must(t, e)
+	must(t, svc.ValidateJobAuthorization(ctx, j))
+
+	kind := func(err error) app.ErrorKind {
+		t.Helper()
+		parsed, ok := app.As(err)
+		if !ok {
+			t.Fatalf("expected app error, got %v", err)
+		}
+		return parsed.Kind
+	}
+	// First-time revoke requires the current template revision (CAS).
+	if k := kind(f.st.RevokeMailTemplateVersion(ctx, f.a, tpl.ID, 2, tpl.Revision)); k != app.KindConflict {
+		t.Fatalf("stale revision: %v", k)
+	}
+	currentRevision := tpl.Revision + 1 // publish bumped it
+	must(t, f.st.RevokeMailTemplateVersion(ctx, f.a, tpl.ID, 2, currentRevision))
+	if _, _, _, e = f.st.TemplateForSend(ctx, f.tenant.ID, &f.employee.ID, nil, f.personal.ID, v2.ID); e == nil {
+		t.Fatal("revoked version usable")
+	}
+	// The queued job's next delivery attempt is blocked by the revoke.
+	if e = svc.ValidateJobAuthorization(ctx, j); e == nil {
+		t.Fatal("revoked version still deliverable")
+	}
+	// Sibling versions of the same template are unaffected.
+	if _, _, _, e = f.st.TemplateForSend(ctx, f.tenant.ID, &f.employee.ID, nil, f.personal.ID, v1.ID); e != nil {
+		t.Fatal("sibling version collateral damage", e)
+	}
+	// Delivered and undelivered ledger rows are byte-identical to the revoke.
+	after, e := f.st.ListOutboundRecipients(ctx, f.tenant.ID, j.ID)
+	must(t, e)
+	if len(after) != len(before) {
+		t.Fatalf("ledger row count changed: %d -> %d", len(before), len(after))
+	}
+	for i := range after {
+		if after[i].Address != before[i].Address || after[i].State != before[i].State || after[i].Attempts != before[i].Attempts {
+			t.Fatalf("ledger row %d changed: %+v -> %+v", i, before[i], after[i])
+		}
+	}
+	// New submissions against the revoked version are refused.
+	req.IdempotencyKey = "revoke-send-after"
+	if _, e = svc.Submit(ctx, req); e == nil {
+		t.Fatal("revoked version accepted for a new submission")
+	}
+	// Repeating the revoke is an idempotent no-op, even with a stale revision,
+	// and must not append a second audit row.
+	must(t, f.st.RevokeMailTemplateVersion(ctx, f.a, tpl.ID, 2, currentRevision))
+	var audits int
+	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE action='template.version.revoke' AND resource_id=$1 AND details->>'version'='2'`, tpl.ID).Scan(&audits))
+	if audits != 1 {
+		t.Fatalf("audit rows=%d", audits)
+	}
+	// The usable list keeps only the surviving sibling version.
+	usable, e := f.st.ListUsableTemplates(ctx, f.u, f.personal.ID)
+	must(t, e)
+	if len(usable) != 1 || usable[0].ID != v1.ID {
+		t.Fatalf("usable list wrong after revoke: %+v", usable)
+	}
+	// Only administrators may revoke.
+	if k := kind(f.st.RevokeMailTemplateVersion(ctx, f.u, tpl.ID, 1, currentRevision)); k != app.KindForbidden {
+		t.Fatalf("employee revoke: %v", k)
+	}
+	// Cross-tenant and unknown versions collapse to not-found: a real foreign
+	// administrator passes the membership reload but cannot see the row.
+	foreignTenant := &models.Tenant{Name: "Foreign", PlanID: uuid.MustParse("00000000-0000-0000-0000-000000000002")}
+	must(t, f.st.CreateTenant(ctx, foreignTenant))
+	foreignAdmin := &models.User{TenantID: foreignTenant.ID, Email: "foreign-admin@contact.test", DisplayName: "Foreign Admin", Role: models.RoleAdmin, IsActive: true, PasswordHash: "not-a-production-password"}
+	must(t, f.st.CreateUser(ctx, foreignAdmin))
+	foreign := authz.Actor{Type: authz.PrincipalUser, ID: foreignAdmin.ID, TenantID: foreignTenant.ID, Role: models.RoleAdmin, IsAdmin: true}
+	if k := kind(f.st.RevokeMailTemplateVersion(ctx, foreign, tpl.ID, 2, currentRevision)); k != app.KindNotFound {
+		t.Fatalf("cross-tenant revoke: %v", k)
+	}
+	if k := kind(f.st.RevokeMailTemplateVersion(ctx, f.a, tpl.ID, 99, currentRevision)); k != app.KindNotFound {
+		t.Fatalf("unknown version revoke: %v", k)
+	}
+}
 func TestR3SubmissionIdempotencyTemplateOnlyAndCodec(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()

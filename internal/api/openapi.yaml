@@ -4033,6 +4033,65 @@ paths:
         name: id
         required: true
         schema: *id001
+  /api/v1/company/templates/{id}/versions/{version}/revoke:
+    post:
+      tags:
+      - Company mail
+      summary: Revoke template version
+      operationId: companyTemplateVersionRevokePost
+      security:
+      - BearerAuth: []
+      description: |-
+        Emergency one-way revoke of a single published version. Stops every
+        not-yet-started delivery attempt of that version; already-delivered
+        outcomes, history and sibling versions are untouched. Irreversible —
+        publish a new version to correct a mistake.
+      responses:
+        '200':
+          description: Operation completed. Creating a send task is not delivery confirmation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      revoked:
+                        type: boolean
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing/expired/revoked identity; refresh only when permitted
+        '403':
+          description: Current identity lacks required role or resource grant
+        '404':
+          description: Template version not found
+        '409':
+          description: Stale revision, concurrent change or unsafe retry
+        '500':
+          description: Operation failed; do not assume it committed
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema: *id001
+      - in: path
+        name: version
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revision: *id003
+              required:
+              - revision
+              additionalProperties: false
   /api/v1/company/templates/{id}/grants:
     get:
       tags:

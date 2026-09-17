@@ -268,6 +268,19 @@ export function setMailboxSendPolicy(
     { method: "PUT", body: { send_policy: policy || null } },
   );
 }
+// Emergency one-way revoke of a single published template version. Distinct
+// from template-level retire: stops every not-yet-started delivery of that
+// version; delivered outcomes, history and sibling versions are untouched.
+export function revokeTemplateVersion(
+  templateId: string,
+  version: number,
+  revision: number,
+) {
+  return company<{ revoked: boolean }>(
+    `/templates/${encodeURIComponent(templateId)}/versions/${version}/revoke`,
+    { method: "POST", body: { revision } },
+  );
+}
 export function submitDraft(
   id: string,
   revision: number,

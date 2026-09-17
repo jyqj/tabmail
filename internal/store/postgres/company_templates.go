@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -127,6 +128,46 @@ func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id 
 			return app.Conflict("template changed")
 		}
 		return companyAudit(ctx, tx, a, "template.retire", "template", id, map[string]any{"retired": retired})
+	})
+}
+// RevokeMailTemplateVersion is the emergency one-way revoke of a single
+// published version. It mirrors SetMailTemplateRetired's CAS style but targets
+// one version row: sibling versions keep working, already-delivered recipient
+// outcomes and history are untouched, and the read paths (TemplateForSend,
+// ListUsableTemplates) already exclude revoked rows. A first-time revoke
+// requires the current template revision and bumps it so concurrent
+// publish/retire callers conflict instead of stacking on a half-revoked
+// surface; an already-revoked version is an idempotent no-op that skips the
+// revision CAS — the emergency stop must stay confirmable without a fresh
+// reload. There is no unrevoke.
+func (s *PgStore) RevokeMailTemplateVersion(ctx context.Context, a authz.Actor, id uuid.UUID, version, revision int) error {
+	return s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+		var revoked *time.Time
+		e := tx.QueryRow(ctx, `SELECT v.revoked_at FROM mail_template_versions v JOIN mail_templates t ON t.id=v.template_id AND t.tenant_id=v.tenant_id WHERE v.tenant_id=$1 AND v.template_id=$2 AND v.version=$3 FOR UPDATE OF v`, a.TenantID, id, version).Scan(&revoked)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.NotFound("template version not found")
+		}
+		if e != nil {
+			return e
+		}
+		if revoked != nil {
+			return nil
+		}
+		tag, e := tx.Exec(ctx, `UPDATE mail_template_versions SET revoked_at=now() WHERE tenant_id=$1 AND template_id=$2 AND version=$3 AND revoked_at IS NULL`, a.TenantID, id, version)
+		if e != nil {
+			return e
+		}
+		if tag.RowsAffected() != 1 {
+			return app.Conflict("template version changed; reload before retrying")
+		}
+		rt, e := tx.Exec(ctx, `UPDATE mail_templates SET revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND id=$2 AND revision=$3`, a.TenantID, id, revision)
+		if e != nil {
+			return e
+		}
+		if rt.RowsAffected() != 1 {
+			return app.Conflict("template changed")
+		}
+		return companyAudit(ctx, tx, a, "template.version.revoke", "template", id, map[string]any{"version": version})
 	})
 }
 func (s *PgStore) ListTemplateVersions(ctx context.Context, a authz.Actor, id uuid.UUID) ([]company.TemplateVersion, error) {
