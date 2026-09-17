@@ -202,6 +202,30 @@ export interface DomainVerification {
   checks: DomainVerificationChecks;
 }
 export const workPath = (id: string) => `/mailboxes/${encodeURIComponent(id)}`;
+export const companyDomains = () =>
+  company<CompanyDomain[]>("/domains").then((v) => v ?? []);
+export function addCompanyDomain(domain: string) {
+  return company<CompanyDomain>("/domains", {
+    method: "POST",
+    body: { domain },
+  });
+}
+export function verifyCompanyDomain(id: string) {
+  return company<DomainVerification>(
+    `/domains/${encodeURIComponent(id)}/verify`,
+    { method: "POST" },
+  );
+}
+export function companyDomainVerification(id: string) {
+  return company<DomainVerification>(
+    `/domains/${encodeURIComponent(id)}/verification`,
+  );
+}
+export function deleteCompanyDomain(id: string) {
+  return company<void>(`/domains/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
 export function submitDraft(
   id: string,
   revision: number,

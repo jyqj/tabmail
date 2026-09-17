@@ -420,8 +420,8 @@ function MailWorkbench() {
             <Section title={label(folder)}>
               <p className="text-sm text-muted-foreground">
                 {t(
-                  "范围：我发起的提交（跨邮箱），不受上方“当前邮箱”选择影响。",
-                  "Scope: my submissions across mailboxes — the current mailbox selector above does not apply.",
+                  "范围：我的提交，以及我有阅读权邮箱的提交（跨邮箱），不受上方“当前邮箱”选择影响。",
+                  "Scope: my submissions and those from mailboxes I can read, across mailboxes — the current mailbox selector above does not apply.",
                 )}
               </p>
               <p className="text-sm text-muted-foreground">

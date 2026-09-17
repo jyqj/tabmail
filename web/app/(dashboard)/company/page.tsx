@@ -17,6 +17,7 @@ import {
   type WorkGrant,
 } from "@/lib/company";
 import { EmployeeField } from "@/components/company/employee-field";
+import { CompanyDomainsSection } from "@/components/company/domains";
 import {
   ActionButton,
   Field,
@@ -91,15 +92,8 @@ export default function CompanyPage() {
           void refresh();
         }}
       />
+      <CompanyDomainsSection />
       <Section title={t("公司主域名", "Company primary domain")}>
-        <p className="text-sm">
-          <Link className="underline" href="/admin/domains">
-            {t(
-              "先添加域名并完成 DNS 验证",
-              "Add a domain and complete DNS verification first",
-            )}
-          </Link>
-        </p>
         <div className="grid gap-4 md:grid-cols-2">
           <Field label={t("公司名称", "Company name")}>
             {(id) => (
