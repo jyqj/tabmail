@@ -8,12 +8,18 @@ import type {
 } from "./types";
 import { request, type RequestOptions } from "./api/base";
 
+// Outbound send policy vocabulary shared by the company default and the
+// per-mailbox override. Kept in sync with authz.MailSendPolicy on the server.
+export type MailSendPolicy = "free" | "template_required" | "disabled";
+
 export interface CompanySettings {
   tenant_id?: string;
   name: string;
   primary_zone_id: string;
   domain?: string;
   revision: number;
+  /** Company-wide default send policy. Omitted on input = leave unchanged. */
+  mail_send_policy?: MailSendPolicy;
 }
 export interface WorkMailbox {
   mailbox: Mailbox;
@@ -225,6 +231,18 @@ export function deleteCompanyDomain(id: string) {
   return company<void>(`/domains/${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
+}
+// Store or clear the mailbox-level send-policy override. An empty policy is
+// sent as null so the server clears the override and the mailbox inherits the
+// company default again.
+export function setMailboxSendPolicy(
+  id: string,
+  policy: MailSendPolicy | "",
+) {
+  return company<{ updated: boolean }>(
+    `/mailboxes/${encodeURIComponent(id)}/send-policy`,
+    { method: "PUT", body: { send_policy: policy || null } },
+  );
 }
 export function submitDraft(
   id: string,

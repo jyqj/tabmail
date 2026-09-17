@@ -19,6 +19,11 @@ import {
 import { EmployeeField } from "@/components/company/employee-field";
 import { CompanyDomainsSection } from "@/components/company/domains";
 import {
+  CompanyMailSendPolicyField,
+  MailboxSendPolicyEditor,
+  sendPolicyDescription,
+} from "@/components/company/send-policy";
+import {
   ActionButton,
   Field,
   inputClass,
@@ -94,7 +99,7 @@ export default function CompanyPage() {
       />
       <CompanyDomainsSection />
       <Section title={t("公司主域名", "Company primary domain")}>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 md:grid-cols-3">
           <Field label={t("公司名称", "Company name")}>
             {(id) => (
               <input
@@ -129,7 +134,31 @@ export default function CompanyPage() {
               </select>
             )}
           </Field>
+          <CompanyMailSendPolicyField
+            value={config.mail_send_policy ?? "free"}
+            onChange={(policy) =>
+              setEditing({ ...config, mail_send_policy: policy })
+            }
+          />
         </div>
+        <p className="text-sm text-muted-foreground">
+          {t(
+            "发送策略约束该公司所有邮箱的对外发送（管理员与属主同样受限）：",
+            "The send policy governs outbound sending for every company mailbox (admins and owners included): ",
+          )}
+          {t("自由撰写", "free-form writing")}
+          {" = "}
+          {sendPolicyDescription(t, "free")}
+          {"; "}
+          {t("仅限已发布模板", "templates only")}
+          {" = "}
+          {sendPolicyDescription(t, "template_required")}
+          {"; "}
+          {t("暂停发送", "sending disabled")}
+          {" = "}
+          {sendPolicyDescription(t, "disabled")}
+          {"。"}
+        </p>
         <ActionButton
           disabled={busy || !config.name.trim() || !config.primary_zone_id}
           onClick={() =>
@@ -495,6 +524,13 @@ export default function CompanyPage() {
             key={`${mailbox.mailbox.id}:${mailbox.revision}`}
             mailbox={mailbox}
             employees={active}
+            refresh={() => boxes.mutate()}
+          />
+        )}
+        {mailbox && (
+          <MailboxSendPolicyEditor
+            key={`send-policy:${mailbox.mailbox.id}:${mailbox.revision}`}
+            mailbox={mailbox}
             refresh={() => boxes.mutate()}
           />
         )}

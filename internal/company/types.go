@@ -22,6 +22,12 @@ type Settings struct {
 	PrimaryZoneID uuid.UUID `json:"primary_zone_id"`
 	Domain        string    `json:"domain"`
 	Revision      int       `json:"revision"`
+	// MailSendPolicy is the tenant-wide outbound send policy default for every
+	// company mailbox (free | template_required | disabled); per-mailbox
+	// overrides live on mailboxes.send_policy. On input an empty value keeps
+	// the current default unchanged, mirroring the "absent field = no change"
+	// convention clients get by omitting optional JSON fields.
+	MailSendPolicy string `json:"mail_send_policy,omitempty"`
 }
 type InvitationInput struct {
 	Email               string     `json:"email"`
@@ -177,6 +183,10 @@ type Repository interface {
 	OffboardEmployee(context.Context, authz.Actor, uuid.UUID, uuid.UUID, string) error
 	ListWorkGrants(context.Context, authz.Actor, uuid.UUID) ([]models.MailboxGrant, error)
 	SetWorkGrant(context.Context, authz.Actor, models.MailboxGrant) error
+	// SetWorkMailboxSendPolicy stores the mailbox-level send-policy override.
+	// A nil policy clears the override so the mailbox inherits the company
+	// default again.
+	SetWorkMailboxSendPolicy(context.Context, authz.Actor, uuid.UUID, *string) error
 	ListMailTemplates(context.Context, authz.Actor) ([]Template, error)
 	SaveMailTemplate(context.Context, authz.Actor, Template) (*Template, error)
 	PublishMailTemplate(context.Context, authz.Actor, uuid.UUID, int) (*TemplateVersion, error)

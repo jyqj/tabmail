@@ -309,6 +309,13 @@ components:
         created_at:
           type: string
           format: date-time
+        send_policy:
+          type: string
+          enum:
+          - free
+          - template_required
+          - disabled
+          description: Effective send policy, COALESCE(mailbox override, company default).
     Message:
       type: object
       properties:
@@ -1159,6 +1166,13 @@ components:
           type: string
         revision:
           type: integer
+        mail_send_policy:
+          type: string
+          enum:
+          - free
+          - template_required
+          - disabled
+          description: Company-wide default outbound send policy. In requests an omitted or empty value leaves the current default unchanged.
     CompanyInvitationInput:
       type: object
       properties:
@@ -3703,6 +3717,58 @@ paths:
                   type: boolean
               required:
               - user_id
+              additionalProperties: false
+  /api/v1/company/mailboxes/{id}/send-policy:
+    put:
+      tags:
+      - Company mail
+      summary: Mailbox Send Policy
+      description: Store or clear the mailbox-level outbound send-policy override. A null or empty send_policy clears the override so the mailbox inherits the company default again; the effective value keeps flowing on the mailbox views.
+      operationId: companyMailboxSendPolicyPut
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Operation completed. Creating a send task is not delivery confirmation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: {}
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing/expired/revoked identity; refresh only when permitted
+        '403':
+          description: Current identity lacks required role or resource grant
+        '404':
+          description: Mailbox not found in this company
+        '409':
+          description: Stale revision, concurrent change or unsafe retry
+        '500':
+          description: Operation failed; do not assume it committed
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema: *id001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                send_policy:
+                  type:
+                  - string
+                  - 'null'
+                  enum:
+                  - free
+                  - template_required
+                  - disabled
+                  description: Null or empty inherits the company default.
               additionalProperties: false
   /api/v1/company/templates:
     get:

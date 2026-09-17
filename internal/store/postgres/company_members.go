@@ -81,16 +81,34 @@ func companyAudit(ctx context.Context, tx pgx.Tx, a authz.Actor, action, kind st
 func meaningfulReason(s string) bool { n := len(strings.TrimSpace(s)); return n >= 8 && n <= 1000 }
 func (s *PgStore) GetCompanySettings(ctx context.Context, tenant uuid.UUID) (*company.Settings, error) {
 	c := &company.Settings{}
-	e := s.pool.QueryRow(ctx, `SELECT c.tenant_id,c.name,c.primary_zone_id,z.domain,c.revision FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id WHERE c.tenant_id=$1`, tenant).Scan(&c.TenantID, &c.Name, &c.PrimaryZoneID, &c.Domain, &c.Revision)
+	e := s.pool.QueryRow(ctx, `SELECT c.tenant_id,c.name,c.primary_zone_id,z.domain,c.revision,t.mail_send_policy FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id JOIN tenants t ON t.id=c.tenant_id WHERE c.tenant_id=$1`, tenant).Scan(&c.TenantID, &c.Name, &c.PrimaryZoneID, &c.Domain, &c.Revision, &c.MailSendPolicy)
 	if errors.Is(e, pgx.ErrNoRows) {
 		return nil, nil
 	}
 	return c, e
 }
+// validSendPolicy reports whether s is one of the three policy words stored in
+// the migration CHECK constraints. The empty string is handled by callers: it
+// means "no change / inherit" in both update paths.
+func validSendPolicy(s string) bool {
+	switch authz.MailSendPolicy(s) {
+	case authz.SendPolicyFree, authz.SendPolicyTemplateRequired, authz.SendPolicyDisabled:
+		return true
+	}
+	return false
+}
+const sendPolicyValues = "free, template_required, disabled"
 func (s *PgStore) ConfigureCompany(ctx context.Context, a authz.Actor, c company.Settings) (*company.Settings, error) {
 	c.Name = strings.TrimSpace(c.Name)
 	if len(c.Name) < 1 || len(c.Name) > 120 {
 		return nil, app.BadRequest("company name must be 1-120 bytes")
+	}
+	// PATCH-style for this one field: an empty value leaves the tenant default
+	// untouched, so clients that do not manage the policy can keep sending the
+	// settings body they loaded. A non-empty value must be one of the three
+	// policy words — the same set the database CHECK constraints accept.
+	if c.MailSendPolicy != "" && !validSendPolicy(c.MailSendPolicy) {
+		return nil, app.BadRequest("mail_send_policy must be one of " + sendPolicyValues + "; an empty value leaves it unchanged")
 	}
 	c.TenantID = a.TenantID
 	err := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
@@ -112,7 +130,14 @@ func (s *PgStore) ConfigureCompany(ctx context.Context, a authz.Actor, c company
 		if e = tx.QueryRow(ctx, `INSERT INTO company_settings(tenant_id,name,primary_zone_id) VALUES($1,$2,$3) ON CONFLICT(tenant_id) DO UPDATE SET name=EXCLUDED.name,primary_zone_id=EXCLUDED.primary_zone_id,revision=company_settings.revision+1,updated_at=now() RETURNING revision`, a.TenantID, c.Name, c.PrimaryZoneID).Scan(&c.Revision); e != nil {
 			return e
 		}
-		return companyAudit(ctx, tx, a, "company.configure", "company", a.TenantID, map[string]any{"name": c.Name, "primary_zone_id": c.PrimaryZoneID, "revision": c.Revision})
+		details := map[string]any{"name": c.Name, "primary_zone_id": c.PrimaryZoneID, "revision": c.Revision}
+		if c.MailSendPolicy != "" {
+			if _, e = tx.Exec(ctx, `UPDATE tenants SET mail_send_policy=$2 WHERE id=$1`, a.TenantID, c.MailSendPolicy); e != nil {
+				return e
+			}
+			details["mail_send_policy"] = c.MailSendPolicy
+		}
+		return companyAudit(ctx, tx, a, "company.configure", "company", a.TenantID, details)
 	})
 	if err != nil {
 		return nil, err
@@ -614,6 +639,38 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 			return e
 		}
 		return companyAudit(ctx, tx, a, "mailbox.grant", "mailbox", g.MailboxID, map[string]any{"user_id": g.UserID, "read": g.CanRead, "organize": g.CanOrganize, "send": g.CanSend, "template_only": g.TemplateOnly})
+	})
+}
+
+// SetWorkMailboxSendPolicy stores or clears the mailbox-level send-policy
+// override. A nil (or empty) policy clears mailboxes.send_policy so the
+// mailbox inherits the tenant default again; otherwise the value must be one
+// of the three policy words. It runs on the same companyTx tenant lock and
+// member-hierarchy guard as SetWorkGrant — company-wide administration
+// (offboarding, grants, policy) stays serialized against one company, and an
+// administrator can only retune mailboxes owned by members it can manage.
+// The lifecycle revision is bumped like every other administrative mailbox
+// change so concurrent handover/convert CAS calls observe the policy change.
+func (s *PgStore) SetWorkMailboxSendPolicy(ctx context.Context, a authz.Actor, id uuid.UUID, policy *string) error {
+	override := ""
+	if policy != nil {
+		override = strings.TrimSpace(*policy)
+	}
+	if override != "" && !validSendPolicy(override) {
+		return app.BadRequest("send_policy must be one of " + sendPolicyValues + "; null inherits the company default")
+	}
+	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+		v, e := s.mailboxAccessTx(ctx, tx, a, id)
+		if e != nil {
+			return e
+		}
+		if e = guardMailboxOwner(ctx, tx, a, v.Mailbox.OwnerUserID); e != nil {
+			return e
+		}
+		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET send_policy=NULLIF($2,''),lifecycle_revision=lifecycle_revision+1 WHERE id=$1`, id, override); e != nil {
+			return e
+		}
+		return companyAudit(ctx, tx, a, "mailbox.send_policy", "mailbox", id, map[string]any{"send_policy": override})
 	})
 }
 

@@ -56,6 +56,10 @@ func (h *CompanyHandler) Routes(r chi.Router) {
 		r.Post("/mailboxes/{id}/convert-shared", h.ConvertShared)
 		r.Get("/mailboxes/{id}/grants", h.Grants)
 		r.Put("/mailboxes/{id}/grants", h.Grant)
+		// Mailbox send-policy override (tenant administrators only). The
+		// handler's repo call re-checks actor.IsTenantAdmin inside the
+		// transaction, mirroring the double guard on the domain routes.
+		r.With(middleware.RequireAdmin).Put("/mailboxes/{id}/send-policy", h.MailboxSendPolicy)
 		r.Get("/templates", h.Templates)
 		r.Post("/templates", h.SaveTemplate)
 		r.Put("/templates/{id}", h.SaveTemplate)
@@ -250,6 +254,25 @@ func (h *CompanyHandler) Grant(w http.ResponseWriter, r *http.Request) {
 	v.MailboxID = id
 	v.TenantID = companyActor(r).TenantID
 	h.result(w, map[string]bool{"updated": true}, h.repo.SetWorkGrant(r.Context(), companyActor(r), v))
+}
+
+// MailboxSendPolicy handles PUT /company/mailboxes/{id}/send-policy — the
+// administrative per-mailbox override of the outbound send policy. A null (or
+// empty) send_policy clears the override so the mailbox inherits the company
+// default again; the effective value keeps flowing to clients on the mailbox
+// views through Mailbox.SendPolicy.
+func (h *CompanyHandler) MailboxSendPolicy(w http.ResponseWriter, r *http.Request) {
+	id, ok := companyID(w, r, "id")
+	if !ok {
+		return
+	}
+	v, ok := companyBody[struct {
+		Policy *string `json:"send_policy"`
+	}](w, r)
+	if !ok {
+		return
+	}
+	h.result(w, map[string]bool{"updated": true}, h.repo.SetWorkMailboxSendPolicy(r.Context(), companyActor(r), id, v.Policy))
 }
 func (h *CompanyHandler) Templates(w http.ResponseWriter, r *http.Request) {
 	v, e := h.repo.ListMailTemplates(r.Context(), companyActor(r))
