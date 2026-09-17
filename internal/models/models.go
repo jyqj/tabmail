@@ -263,6 +263,11 @@ type Mailbox struct {
 	RetentionHoursOverride *int       `json:"retention_hours_override,omitempty" db:"retention_hours_override"`
 	ExpiresAt              *time.Time `json:"expires_at,omitempty" db:"expires_at"`
 	CreatedAt              time.Time  `json:"created_at" db:"created_at"`
+	// SendPolicy is the mailbox's EFFECTIVE send policy as resolved by the
+	// store: COALESCE(mailboxes.send_policy, tenants.mail_send_policy). It is
+	// populated by the store's canonical mailbox select; a nil value (struct
+	// built outside the store) reads as 'free' in the authz decisions.
+	SendPolicy *string `json:"send_policy,omitempty" db:"send_policy"`
 }
 
 // ============================================================

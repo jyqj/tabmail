@@ -40,6 +40,7 @@ func TestResolveSendAuthorization(t *testing.T) {
 		actor              authz.Actor
 		address            string
 		setup              func(t *testing.T, st *testutil.FakeStore)
+		hasTemplate        bool
 		wantMailbox        bool
 		wantIdentity       bool
 		wantExpired        bool
@@ -147,6 +148,69 @@ func TestResolveSendAuthorization(t *testing.T) {
 			wantWorkerFailure:  "sender identity revoked",
 			wantWorkerAuthzErr: true,
 		},
+		// The effective send policy rides on the mailbox row and binds the
+		// owner exactly like a grant holder; no role bypasses the gate.
+		{
+			name:    "owner blocked by disabled company policy",
+			actor:   authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, ID: ownerID},
+			address: "owner@send.test",
+			setup: func(t *testing.T, st *testutil.FakeStore) {
+				policy := "disabled"
+				st.SeedMailbox(&models.Mailbox{ID: uuid.New(), TenantID: tenantID, ZoneID: zone.ID, FullAddress: "owner@send.test", OwnerUserID: &ownerID, SendPolicy: &policy})
+			},
+			wantMailbox:        true,
+			wantSenderDenied:   true,
+			wantWorkerFailure:  "mailbox sending disabled by company policy",
+			wantWorkerAuthzErr: true,
+		},
+		{
+			name:    "owner free-form send under template_required demands the published template",
+			actor:   authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, ID: ownerID},
+			address: "owner@send.test",
+			setup: func(t *testing.T, st *testutil.FakeStore) {
+				policy := "template_required"
+				st.SeedMailbox(&models.Mailbox{ID: uuid.New(), TenantID: tenantID, ZoneID: zone.ID, FullAddress: "owner@send.test", OwnerUserID: &ownerID, SendPolicy: &policy})
+			},
+			wantMailbox:        true,
+			wantSenderDenied:   true,
+			wantWorkerFailure:  "a granted published template version is required",
+			wantWorkerAuthzErr: true,
+		},
+		{
+			name:    "owner template-path send under template_required passes",
+			actor:   authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, ID: ownerID},
+			address: "owner@send.test",
+			setup: func(t *testing.T, st *testutil.FakeStore) {
+				policy := "template_required"
+				st.SeedMailbox(&models.Mailbox{ID: uuid.New(), TenantID: tenantID, ZoneID: zone.ID, FullAddress: "owner@send.test", OwnerUserID: &ownerID, SendPolicy: &policy})
+			},
+			hasTemplate: true,
+			wantMailbox: true,
+		},
+		{
+			name:    "global admin without rights is denied on a company mailbox",
+			actor:   authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, ID: ownerID, IsSuperAdmin: true},
+			address: "owner@send.test",
+			setup: func(t *testing.T, st *testutil.FakeStore) {
+				other := uuid.New()
+				st.SeedMailbox(&models.Mailbox{ID: uuid.New(), TenantID: tenantID, ZoneID: zone.ID, FullAddress: "owner@send.test", OwnerUserID: &other})
+			},
+			wantMailbox:        true,
+			wantSenderDenied:   true,
+			wantWorkerFailure:  "exact mailbox send_as permission required",
+			wantWorkerAuthzErr: true,
+		},
+		{
+			name:    "global admin keeps the verified-identity fallback on a mailbox-less address",
+			actor:   authz.Actor{Type: authz.PrincipalUser, TenantID: tenantID, ID: ownerID, IsSuperAdmin: true},
+			address: "alias@send.test",
+			setup: func(t *testing.T, st *testutil.FakeStore) {
+				if err := st.CreateSendIdentity(context.Background(), &models.SendIdentity{ID: uuid.New(), TenantID: tenantID, ZoneID: zone.ID, Address: "alias@send.test", IdentityType: models.SendIdentityExact, Verified: true}); err != nil {
+					t.Fatal(err)
+				}
+			},
+			wantIdentity: true,
+		},
 	}
 
 	for _, tc := range cases {
@@ -155,7 +219,7 @@ func TestResolveSendAuthorization(t *testing.T) {
 			st := testutil.NewFakeStore()
 			st.SeedZone(zone)
 			tc.setup(t, st)
-			res, err := ResolveSendAuthorization(context.Background(), st, tc.actor, tenantID, tc.address, false)
+			res, err := ResolveSendAuthorization(context.Background(), st, tc.actor, tenantID, tc.address, tc.hasTemplate)
 			if err != nil {
 				t.Fatalf("ResolveSendAuthorization: %v", err)
 			}
@@ -223,5 +287,56 @@ func TestValidateJobAuthorizationUsesSharedResolver(t *testing.T) {
 	}
 	if !authz.IsAuthzError(err) {
 		t.Fatalf("expected authz error, got %T: %v", err, err)
+	}
+}
+
+// TestValidateJobAuthorizationPicksUpPolicyChange proves the worker side
+// inherits send-policy changes with no code of its own: a free-form job
+// enqueued under the 'free' default passes its first re-validation, and once
+// the mailbox's effective policy flips (template_required, then disabled)
+// the NEXT delivery attempt is refused by the same shared decision tree —
+// ValidateJobAuthorization re-runs ResolveSendAuthorization every attempt.
+func TestValidateJobAuthorizationPicksUpPolicyChange(t *testing.T) {
+	tenantID := uuid.New()
+	zone := &models.DomainZone{ID: uuid.New(), TenantID: tenantID, Domain: "policy.test", IsVerified: true, MXVerified: true}
+	ownerID := uuid.New()
+	st := testutil.NewFakeStore()
+	st.SeedZone(zone)
+	mb := &models.Mailbox{ID: uuid.New(), TenantID: tenantID, ZoneID: zone.ID, FullAddress: "owner@policy.test", OwnerUserID: &ownerID}
+	st.SeedMailbox(mb)
+	if err := st.CreateUser(context.Background(), &models.User{ID: ownerID, TenantID: tenantID, Email: "owner@policy.test", IsActive: true, Role: models.RoleUser}); err != nil {
+		t.Fatal(err)
+	}
+
+	svc := NewService(config.Outbound{Enabled: true}, st, nopGovernance{}, zerolog.Nop())
+	job := &models.OutboundJob{
+		ID: uuid.New(), TenantID: tenantID, SenderUserID: &ownerID, SenderMailboxID: &mb.ID, ZoneID: zone.ID,
+		MailFrom: "owner@policy.test", RcptTo: []string{"rcpt@example.test"},
+		Subject: "s", TextBody: "b", State: models.OutboundPending,
+	}
+	if err := svc.ValidateJobAuthorization(context.Background(), job); err != nil {
+		t.Fatalf("free policy must let the enqueued free-form job pass: %v", err)
+	}
+
+	if err := st.SetMailboxSendPolicy(context.Background(), mb.ID, "template_required"); err != nil {
+		t.Fatal(err)
+	}
+	err := svc.ValidateJobAuthorization(context.Background(), job)
+	if err == nil || err.Error() != "a granted published template version is required" {
+		t.Fatalf("next attempt after template_required flip = %v, want template refusal", err)
+	}
+	if !authz.IsAuthzError(err) {
+		t.Fatalf("policy refusal must be an authz error, got %T: %v", err, err)
+	}
+
+	if err := st.SetMailboxSendPolicy(context.Background(), mb.ID, "disabled"); err != nil {
+		t.Fatal(err)
+	}
+	err = svc.ValidateJobAuthorization(context.Background(), job)
+	if err == nil || err.Error() != "mailbox sending disabled by company policy" {
+		t.Fatalf("next attempt after disabled flip = %v, want policy refusal", err)
+	}
+	if !authz.IsAuthzError(err) {
+		t.Fatalf("policy refusal must be an authz error, got %T: %v", err, err)
 	}
 }

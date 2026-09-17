@@ -69,16 +69,22 @@ func (v *pgTenantView) GetMailboxByAddress(ctx context.Context, addr string) (*m
 	return v.store.scanMailbox(v.store.pool.QueryRow(ctx, mailboxSelect+` WHERE m.full_address=$1 AND m.tenant_id=$2`, addr, v.tenantID))
 }
 
+// mailboxSelect is the canonical mailbox read: every row carries its EFFECTIVE
+// send policy (COALESCE of the mailbox override over the tenant default), the
+// single place that resolution happens so the authz decisions never re-derive
+// it. The tenants join is total — mailboxes.tenant_id is a NOT NULL FK.
 const mailboxSelect = `SELECT m.id,m.tenant_id,m.zone_id,m.route_id,m.local_part,
 	m.resolved_domain,m.full_address,m.access_mode,m.password_hash,m.message_count,
-	m.retention_hours_override,m.expires_at,m.created_at,m.owner_user_id,m.mailbox_kind
-	FROM mailboxes m`
+	m.retention_hours_override,m.expires_at,m.created_at,m.owner_user_id,m.mailbox_kind,
+	COALESCE(m.send_policy,t.mail_send_policy)
+	FROM mailboxes m JOIN tenants t ON t.id=m.tenant_id`
 
 func (s *PgStore) scanMailbox(row pgx.Row) (*models.Mailbox, error) {
 	m := &models.Mailbox{}
 	err := row.Scan(&m.ID, &m.TenantID, &m.ZoneID, &m.RouteID, &m.LocalPart,
 		&m.ResolvedDomain, &m.FullAddress, &m.AccessMode, &m.PasswordHash, &m.MessageCount,
-		&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt, &m.OwnerUserID, &m.Kind)
+		&m.RetentionHoursOverride, &m.ExpiresAt, &m.CreatedAt, &m.OwnerUserID, &m.Kind,
+		&m.SendPolicy)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}

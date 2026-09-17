@@ -13,6 +13,31 @@ type MailboxGrantReader interface {
 	GetMailboxGrant(context.Context, uuid.UUID, uuid.UUID, uuid.UUID) (*models.MailboxGrant, error)
 }
 
+// MailSendPolicy is the outbound send policy attached to a company (tenant
+// default) or to one mailbox (override). The effective value reaches the
+// decisions below on the Mailbox row itself — the store resolves
+// COALESCE(mailboxes.send_policy, tenants.mail_send_policy) in its canonical
+// mailbox select, so there is exactly one source and no extra query.
+type MailSendPolicy string
+
+const (
+	SendPolicyFree             MailSendPolicy = "free"
+	SendPolicyTemplateRequired MailSendPolicy = "template_required"
+	SendPolicyDisabled         MailSendPolicy = "disabled"
+)
+
+// MailboxSendPolicy resolves the effective policy carried on a Mailbox. A nil
+// or empty value (struct built outside the store) reads as 'free'; real rows
+// always carry the COALESCE'd value because tenants.mail_send_policy is NOT
+// NULL DEFAULT 'free' and both columns are CHECK-constrained to the three
+// known values.
+func MailboxSendPolicy(mb *models.Mailbox) MailSendPolicy {
+	if mb == nil || mb.SendPolicy == nil || *mb.SendPolicy == "" {
+		return SendPolicyFree
+	}
+	return MailSendPolicy(*mb.SendPolicy)
+}
+
 // MailboxRights follows the archived CheckMailbox/CheckSender model: bind the
 // actor to one canonical mailbox, then check independent actions. An admin
 // role does not itself confer normal content access. Tenant-wide integration
@@ -61,6 +86,9 @@ type MailboxDecision struct {
 //   - the effective owner holds read/organize/send intrinsically;
 //   - otherwise a matching grant carries the flags verbatim (a grant that
 //     does not match the actor/mailbox/tenant is ignored);
+//   - the mailbox's effective send policy binds every actor, owner included:
+//     'disabled' removes CanSend outright, 'template_required' turns any send
+//     right — intrinsic or granted — into a template-only one;
 //   - a non-admin whose profile lacks can_send (or has no profile) cannot
 //     send — admins keep granted send rights;
 //   - tenant admins always retain CanManage visibility.
@@ -78,11 +106,18 @@ func EvaluateMailboxAccess(actor Actor, mb *models.Mailbox, grant *models.Mailbo
 	if actor.Permission != nil && !models.ZoneAllowed(actor.Permission.AllowedZoneIDs, mb.ZoneID) {
 		return d
 	}
+	policy := MailboxSendPolicy(mb)
 	uid := actor.EffectiveUserID()
 	if uid != nil && mb.OwnerUserID != nil && *mb.OwnerUserID == *uid {
-		d.CanRead, d.CanOrganize, d.CanSend = true, true, true
+		d.CanRead, d.CanOrganize = true, true
+		d.CanSend = policy != SendPolicyDisabled
+		d.TemplateOnly = policy == SendPolicyTemplateRequired
 	} else if grant != nil && grant.TenantID == mb.TenantID && grant.MailboxID == mb.ID && uid != nil && grant.UserID == *uid {
 		d.CanRead, d.CanOrganize, d.CanSend, d.TemplateOnly = grant.CanRead, grant.CanOrganize, grant.CanSend, grant.TemplateOnly
+		d.TemplateOnly = d.TemplateOnly || policy == SendPolicyTemplateRequired
+		if policy == SendPolicyDisabled {
+			d.CanSend = false
+		}
 	}
 	if !actor.IsTenantAdmin() && (actor.Permission == nil || !actor.Permission.CanSend) {
 		d.CanSend = false
@@ -101,19 +136,37 @@ func CanonicalSender(s string) (string, error) {
 	return strings.ToLower(a.Address), nil
 }
 
+// CheckMailboxSender is the send verdict for one actor on one mailbox address.
+// No role bypasses it any more: the exact send right is demanded of owners,
+// tenant admins and global admins alike, and the mailbox's effective send
+// policy (carried on Mailbox.SendPolicy by the store) binds them all —
+// 'disabled' refuses the send outright, 'template_required' admits only the
+// immutable published-version path. Its usage grant/provenance is checked
+// before enqueue and every attempt.
 func CheckMailboxSender(ctx context.Context, st MailboxGrantReader, actor Actor, mb *models.Mailbox, hasPublishedTemplate bool) error {
-	if actor.IsGlobalAdmin() {
-		return nil
-	}
 	g, err := MailboxRights(ctx, st, actor.TenantID, actor.EffectiveUserID(), mb)
 	if err != nil {
 		return err
 	}
 	if g == nil || !g.CanSend {
+		// No mailbox exists at this address: there is no mailbox for a policy
+		// to gate, so a global admin keeps the verified-identity fallback it
+		// always used. A real mailbox demands the exact send right of every
+		// actor — management visibility never implies sending.
+		if mb == nil && actor.IsGlobalAdmin() {
+			return nil
+		}
 		return ErrForbidden("exact mailbox send_as permission required")
 	}
+	switch MailboxSendPolicy(mb) {
+	case SendPolicyDisabled:
+		return ErrForbidden("mailbox sending disabled by company policy")
+	case SendPolicyTemplateRequired:
+		if !hasPublishedTemplate {
+			return ErrForbidden("a granted published template version is required")
+		}
+	}
 	// Only the immutable published-version path may satisfy template-only.
-	// Its usage grant/provenance is checked before enqueue and every attempt.
 	if g.TemplateOnly && !hasPublishedTemplate {
 		return ErrForbidden("a granted published template version is required")
 	}

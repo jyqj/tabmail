@@ -12,6 +12,20 @@ import (
 	"tabmail/internal/models"
 )
 
+// SetMailboxSendPolicy flips the effective send policy carried on a seeded
+// mailbox — the test-side stand-in for the company/mailbox policy write path
+// (the production store resolves the effective value in mailboxSelect).
+func (s *FakeStore) SetMailboxSendPolicy(_ context.Context, id uuid.UUID, policy string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	m, ok := s.mailboxes[id]
+	if !ok {
+		return errors.New("mailbox not found")
+	}
+	m.SendPolicy = &policy
+	return nil
+}
+
 func (s *FakeStore) CreateMailbox(_ context.Context, m *models.Mailbox) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
