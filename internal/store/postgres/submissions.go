@@ -84,6 +84,10 @@ func loadSubmissionRecipients(ctx context.Context, tx pgx.Tx, tenant uuid.UUID, 
 // zone allowlist. argBase names the first free placeholder so callers can
 // prepend their own arguments.
 func submissionScope(a authz.Actor, argBase int) (string, []any) {
+	// The tenant conjunct is independent and must survive every branch below:
+	// replacing it (instead of appending) dropped the top-level tenant bound
+	// and let rows from other tenants that reference this principal's user or
+	// mailbox ids leak into the listing.
 	where := []string{"s.tenant_id=$" + strconv.Itoa(argBase)}
 	args := []any{a.TenantID}
 	n := argBase
@@ -92,17 +96,17 @@ func submissionScope(a authz.Actor, argBase int) (string, []any) {
 		n++
 		u := "$" + strconv.Itoa(n)
 		args = append(args, *uid)
-		where[len(where)-1] = `(s.user_id=` + u + ` OR s.sender_user_id=` + u + ` OR s.sender_mailbox_id IN (
-			SELECT m.id FROM mailboxes m WHERE m.tenant_id=$` + strconv.Itoa(argBase) + `
+		where = append(where, `(s.user_id=`+u+` OR s.sender_user_id=`+u+` OR s.sender_mailbox_id IN (
+			SELECT m.id FROM mailboxes m WHERE m.tenant_id=$`+strconv.Itoa(argBase)+`
 			 AND (m.expires_at IS NULL OR m.expires_at>clock_timestamp())
-			 AND (m.owner_user_id=` + u + ` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=` + u + ` AND g.can_read))))`
+			 AND (m.owner_user_id=`+u+` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=`+u+` AND g.can_read))))`)
 	} else if a.Type == authz.PrincipalAPIKey {
 		n++
-		where[len(where)-1] = `s.api_key_id=$` + strconv.Itoa(n)
+		where = append(where, `s.api_key_id=$`+strconv.Itoa(n))
 		args = append(args, a.ID)
 	} else {
 		// Unknown principal: visible rows stay empty rather than broadening.
-		where[len(where)-1] = `FALSE`
+		where = append(where, `FALSE`)
 	}
 	if a.Permission != nil && len(a.Permission.AllowedZoneIDs) > 0 {
 		n++
