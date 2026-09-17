@@ -4,31 +4,27 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
-	"tabmail/internal/app"
+	"tabmail/internal/app/submissions"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/store"
 )
 
-var (
-	errOutboundJobAuthRequired = errors.New("authentication required")
-	errOutboundJobNotFound     = errors.New("outbound job not found")
-)
-
-// OutboundHandler serves the outbound (send) API endpoints.
+// OutboundHandler serves the outbound (send) API endpoints. The submission
+// orchestration and job accessibility/redaction rules live in the
+// submissions use-case service; the handler only parses requests and maps
+// outcomes to HTTP responses.
 type OutboundHandler struct {
 	outbound *outbound.Service
 	store    store.Store
-	az       *authz.Authorizer
+	subs     *submissions.Service
 	logger   zerolog.Logger
 }
 
@@ -37,234 +33,9 @@ func NewOutboundHandler(svc *outbound.Service, st store.Store, logger zerolog.Lo
 	return &OutboundHandler{
 		outbound: svc,
 		store:    st,
-		az:       authz.New(st),
+		subs:     submissions.NewService(nil, st, svc, logger),
 		logger:   logger.With().Str("handler", "outbound").Logger(),
 	}
-}
-
-// ConsumedDraftSubmission classifies an already-missing draft (see
-// outbound.Service.ConsumedDraftSubmission) for the company draft submit
-// endpoint.
-func (h *OutboundHandler) ConsumedDraftSubmission(ctx context.Context, tenantID, draftID uuid.UUID, userID *uuid.UUID, key string) (*models.OutboundJob, bool, error) {
-	return h.outbound.ConsumedDraftSubmission(ctx, tenantID, draftID, userID, key)
-}
-
-// outboundSubmitInput carries the caller-supplied message fields for the
-// company draft submit endpoint.
-type outboundSubmitInput struct {
-	From              string
-	To                []string
-	CC                []string
-	BCC               []string
-	Subject           string
-	TextBody          string
-	HTMLBody          string
-	Headers           map[string]string
-	TemplateVersionID *uuid.UUID
-	TemplateVars      map[string]string
-	AttachmentIDs     []uuid.UUID
-	IdempotencyKey    string
-	// Draft pins the mail draft this submission consumes atomically.
-	Draft *store.DraftConsumption
-}
-
-// submitAuthorized runs the full send authorization chain (zone lookup,
-// ActionSendFrom, verified/MX, DKIM policy, ResolveSendAuthorization, quota,
-// suppression) and enqueues the job. It writes the HTTP error response itself
-// and returns ok=false on failure. On success it returns the job and whether
-// the response is an idempotent replay of an earlier submission.
-func (h *OutboundHandler) submitAuthorized(w http.ResponseWriter, r *http.Request, in outboundSubmitInput) (*models.OutboundJob, bool, bool) {
-	ctx := r.Context()
-	tenant := middleware.TenantFromCtx(ctx)
-	if tenant == nil {
-		errForbidden(w, "authentication required")
-		return nil, false, false
-	}
-	actor := middleware.ActorFromContext(ctx)
-
-	// Resolve caller identity for job attribution and quota tracking.
-	// actor.Permission is populated by middleware.PermissionLoader for JWT
-	// users and by the auth middleware for API keys (owner permission or
-	// zone-restricted synthetic permission).
-	var apiKeyID *uuid.UUID
-	if actor.Type == authz.PrincipalAPIKey {
-		keyID := actor.ID
-		apiKeyID = &keyID
-	}
-	userID := actor.EffectiveUserID()
-
-	canonical, addressErr := authz.CanonicalSender(in.From)
-	if addressErr != nil {
-		errBadRequest(w, addressErr.Error())
-		return nil, false, false
-	}
-	in.From = canonical
-	// Validate the from address domain belongs to this tenant and is verified.
-	fromDomain := extractDomainFromAddress(in.From)
-	if fromDomain == "" {
-		errBadRequest(w, "invalid from address")
-		return nil, false, false
-	}
-
-	zone, err := h.store.GetZoneByDomain(ctx, fromDomain)
-	if err != nil {
-		h.logger.Err(err).Str("domain", fromDomain).Msg("looking up zone by domain")
-		errInternal(w)
-		return nil, false, false
-	}
-	if zone == nil {
-		errBadRequest(w, "from domain is not registered")
-		return nil, false, false
-	}
-
-	// Authorize sending from this zone through the authz seam: tenant
-	// isolation, CanSend flag, and zone allowlist. OwnerUserID is
-	// intentionally NOT set — sending must not require zone ownership,
-	// so tenant users can send from shared zones.
-	if err := h.az.Authorize(ctx, actor, authz.ActionSendFrom, authz.Resource{
-		Type:     "zone",
-		ID:       zone.ID,
-		TenantID: zone.TenantID,
-		ZoneID:   zone.ID,
-	}); err != nil {
-		if authz.IsAuthzError(err) {
-			errForbidden(w, err.Error())
-		} else {
-			errInternal(w)
-		}
-		return nil, false, false
-	}
-
-	if !zone.IsVerified {
-		errBadRequest(w, "from domain is not verified")
-		return nil, false, false
-	}
-
-	if !zone.MXVerified {
-		errBadRequest(w, "from domain MX is not verified")
-		return nil, false, false
-	}
-
-	// Reject synchronously when the zone's DKIM policy cannot be satisfied,
-	// rather than accepting a job that would only ever be driven to dead.
-	if reason := h.outbound.DKIMSendBlockReason(zone); reason != "" {
-		errBadRequest(w, reason)
-		return nil, false, false
-	}
-
-	quota := store.OutboundQuotaReservation{}
-	todayStart := time.Now().UTC().Truncate(24 * time.Hour)
-
-	// The From address must be a real mailbox in this tenant or a verified
-	// send identity — the two authorized send-as paths. Inbound domain routes
-	// govern ingress delivery, not outbound From authorization, so they no
-	// longer gate sending. This makes the send_identities feature (manual
-	// exact identities, the auto-created *@domain wildcard, and its Verified
-	// flag) actually enforce send-as.
-	//
-	// The decision tree lives in outbound.ResolveSendAuthorization, the same
-	// function ValidateJobAuthorization re-runs before every delivery attempt;
-	// only the error precedence and wording below are HTTP-side.
-	res, err := outbound.ResolveSendAuthorization(ctx, h.store, actor, tenant.ID, in.From, in.TemplateVersionID != nil)
-	if err != nil {
-		h.logger.Err(err).Str("from", in.From).Msg("resolving send authorization")
-		errInternal(w)
-		return nil, false, false
-	}
-	switch {
-	case res.TenantWideBlocked:
-		errForbidden(w, "company mailbox sends require an employee-owned credential")
-		return nil, false, false
-	case res.MailboxSenderErr != nil:
-		if authz.IsAuthzError(res.MailboxSenderErr) {
-			errForbidden(w, res.MailboxSenderErr.Error())
-		} else {
-			errInternal(w)
-		}
-		return nil, false, false
-	case res.IdentityUnverified:
-		errBadRequest(w, "from address is not an authorized mailbox or verified send identity")
-		return nil, false, false
-	case res.MailboxExpired:
-		errForbidden(w, "sender mailbox expired")
-		return nil, false, false
-	}
-	mailbox := res.Mailbox
-
-	// Reserve user daily quota atomically with job creation.
-	if actor.Permission != nil && actor.Permission.DailySendQuota > 0 {
-		quota.UserDaily = &store.OutboundUserDailyQuota{
-			UserID: userID,
-			Since:  todayStart,
-			Limit:  actor.Permission.DailySendQuota,
-		}
-	}
-
-	// Check suppression list — block sending to suppressed addresses.
-	for _, rcpt := range append(append(in.To, in.CC...), in.BCC...) {
-		suppressed, err := h.store.IsSuppressed(ctx, tenant.ID, rcpt)
-		if err != nil {
-			h.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
-			errInternal(w)
-			return nil, false, false
-		}
-		if suppressed {
-			errBadRequest(w, "recipient "+rcpt+" is suppressed (hard bounce); remove from suppression list to retry")
-			return nil, false, false
-		}
-	}
-
-	// Build and submit the outbound job.
-	job, replayed, err := h.outbound.SubmitWithReplay(ctx, outbound.SendRequest{
-		TenantID:          tenant.ID,
-		SenderMailboxID:   mailboxID(mailbox),
-		UserID:            userID,
-		APIKeyID:          apiKeyID,
-		ZoneID:            zone.ID,
-		From:              in.From,
-		To:                in.To,
-		CC:                in.CC,
-		BCC:               in.BCC,
-		Subject:           in.Subject,
-		TextBody:          in.TextBody,
-		HTMLBody:          in.HTMLBody,
-		Headers:           in.Headers,
-		TemplateVersionID: in.TemplateVersionID, AttachmentIDs: in.AttachmentIDs, IdempotencyKey: in.IdempotencyKey,
-		TemplateVars: in.TemplateVars,
-		Quota:        quota,
-		Draft:        in.Draft,
-	})
-	if err != nil {
-		if errors.Is(err, store.ErrSendAsDailyQuotaExceeded) {
-			writeJSON(w, http.StatusTooManyRequests, envelope{
-				Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: "send-as daily quota exceeded"},
-			})
-			return nil, false, false
-		}
-		if errors.Is(err, store.ErrOutboundDailyQuotaExceeded) {
-			writeJSON(w, http.StatusTooManyRequests, envelope{
-				Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: "daily send quota exceeded"},
-			})
-			return nil, false, false
-		}
-		if errors.Is(err, store.ErrDraftAlreadyConsumed) {
-			errConflict(w, "draft was already submitted or consumed in another window; check send status instead of retrying")
-			return nil, false, false
-		}
-		if authz.IsAuthzError(err) {
-			errForbidden(w, err.Error())
-			return nil, false, false
-		}
-		if _, ok := app.As(err); ok {
-			respondAppError(w, h.logger, err)
-			return nil, false, false
-		}
-		h.logger.Err(err).Msg("submitting outbound job")
-		errBadRequest(w, err.Error())
-		return nil, false, false
-	}
-
-	return job, replayed, true
 }
 
 // GetJob handles GET /api/v1/outbound/{id} — get a single outbound job.
@@ -276,9 +47,9 @@ func (h *OutboundHandler) GetJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	job, err := h.getAccessibleOutboundJob(ctx, jobID)
+	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
-		h.writeOutboundJobAccessError(w, err, "getting outbound job")
+		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job")
 		return
 	}
 
@@ -299,11 +70,11 @@ func (h *OutboundHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
 
 	items, total, err := h.listAccessibleOutboundJobs(ctx, tenant.ID, pg)
 	if err != nil {
-		h.writeOutboundJobAccessError(w, err, "listing outbound jobs")
+		writeOutboundJobAccessError(w, h.logger, err, "listing outbound jobs")
 		return
 	}
 	for i, job := range items {
-		view, viewErr := h.redactOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
+		view, viewErr := h.subs.RedactOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
 		if viewErr != nil {
 			errInternal(w)
 			return
@@ -326,9 +97,9 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	job, err := h.getAccessibleOutboundJob(ctx, jobID)
+	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
-		h.writeOutboundJobAccessError(w, err, "getting outbound job for retry")
+		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job for retry")
 		return
 	}
 	if job.State != models.OutboundDead && job.State != models.OutboundFailed {
@@ -387,9 +158,9 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	job, err := h.getAccessibleOutboundJob(ctx, jobID)
+	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
-		h.writeOutboundJobAccessError(w, err, "getting outbound job for attempts")
+		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job for attempts")
 		return
 	}
 	attempts, err := h.store.ListOutboundAttempts(ctx, jobID)
@@ -401,7 +172,7 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 	if attempts == nil {
 		attempts = []*models.OutboundAttempt{}
 	}
-	allowed, err := h.outboundContentAllowed(ctx, middleware.ActorFromContext(ctx), job)
+	allowed, err := h.subs.ContentAllowed(ctx, middleware.ActorFromContext(ctx), job)
 	if err != nil {
 		errInternal(w)
 		return
@@ -460,31 +231,6 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 	noContent(w)
 }
 
-func (h *OutboundHandler) getAccessibleOutboundJob(ctx context.Context, jobID uuid.UUID) (*models.OutboundJob, error) {
-	tenant := middleware.TenantFromCtx(ctx)
-	if tenant == nil {
-		return nil, errOutboundJobAuthRequired
-	}
-
-	job, err := h.store.GetOutboundJob(ctx, jobID)
-	if err != nil {
-		return nil, err
-	}
-	if job != nil && !middleware.ActorFromContext(ctx).Permission.AllowsZone(job.ZoneID) {
-		return nil, errOutboundJobNotFound
-	}
-	if !canAccessOutboundJob(ctx, tenant.ID, job) {
-		allowed, err := h.outboundContentAllowed(ctx, middleware.ActorFromContext(ctx), job)
-		if err != nil {
-			return nil, err
-		}
-		if !allowed {
-			return nil, errOutboundJobNotFound
-		}
-	}
-	return job, nil
-}
-
 func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
 	// ActionOutboundRead defers row scope to the query level; the authz seam
 	// resolves which owned rows this actor may see. The OwnerListFilter pins
@@ -499,39 +245,17 @@ func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenant
 	return h.store.ListOutboundJobsScoped(ctx, scope, pg)
 }
 
-func canAccessOutboundJob(ctx context.Context, tenantID uuid.UUID, job *models.OutboundJob) bool {
-	if job == nil || job.TenantID != tenantID {
-		return false
-	}
-	// Same owner rule as listAccessibleOutboundJobs, via the single authz seam.
-	return authz.CanAccessOwned(middleware.ActorFromContext(ctx), job.UserID, job.APIKeyID)
-}
-
-func (h *OutboundHandler) writeOutboundJobAccessError(w http.ResponseWriter, err error, logMsg string) {
+// writeOutboundJobAccessError maps the submissions service's job-visibility
+// sentinels to the responses the outbound and company endpoints have always
+// produced.
+func writeOutboundJobAccessError(w http.ResponseWriter, logger zerolog.Logger, err error, logMsg string) {
 	switch {
-	case errors.Is(err, errOutboundJobAuthRequired):
+	case errors.Is(err, submissions.ErrOutboundJobAuthRequired):
 		errForbidden(w, "authentication required")
-	case errors.Is(err, errOutboundJobNotFound):
+	case errors.Is(err, submissions.ErrOutboundJobNotFound):
 		errNotFound(w, "outbound job not found")
 	default:
-		h.logger.Err(err).Msg(logMsg)
+		logger.Err(err).Msg(logMsg)
 		errInternal(w)
 	}
-}
-
-// extractDomainFromAddress extracts the domain part from an email address.
-func extractDomainFromAddress(addr string) string {
-	idx := strings.LastIndex(addr, "@")
-	if idx < 0 || idx == len(addr)-1 {
-		return ""
-	}
-	return addr[idx+1:]
-}
-
-func mailboxID(m *models.Mailbox) *uuid.UUID {
-	if m == nil {
-		return nil
-	}
-	id := m.ID
-	return &id
 }

@@ -19,6 +19,7 @@ import (
 
 	"tabmail/internal/api/handlers"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app/submissions"
 	"tabmail/internal/company"
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
@@ -159,11 +160,16 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	if cfg.OutboundService != nil {
 		oh = handlers.NewOutboundHandler(cfg.OutboundService, st, cfg.Logger)
 	}
+	// The submissions use-case service backs the company draft submit flow and
+	// both handlers' outbound-job accessibility views. A nil OutboundService is
+	// a wiring decision (outbound disabled), preserved as an explicit
+	// capability flag on the service, never a runtime panic.
+	subs := submissions.NewService(cfg.CompanyRepository, st, cfg.OutboundService, cfg.Logger)
 
 	r.Route("/api/v1", func(r chi.Router) {
 		if cfg.CompanyRepository != nil {
 			cdh := handlers.NewCompanyDomainHandler(dh.Service(), cfg.CompanyRepository, cfg.Logger)
-			handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, msg, oh, cdh, cfg.Logger).Routes(r)
+			handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, msg, subs, cdh, cfg.Logger).Routes(r)
 		}
 		// -- Auth (public, no auth required) --
 		r.Post("/auth/login", auth.Login)

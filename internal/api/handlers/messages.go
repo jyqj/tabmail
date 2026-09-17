@@ -84,6 +84,32 @@ func (h *MessageHandler) resolveViewer(r *http.Request) messageapp.Viewer {
 	}
 }
 
+// The exported surface below is the narrow mailboxMessageSurface consumed by
+// CompanyHandler, so the company endpoints never depend on another handler
+// directly.
+
+// ResolveViewer resolves the authenticated viewer for a request.
+func (h *MessageHandler) ResolveViewer(r *http.Request) messageapp.Viewer { return h.resolveViewer(r) }
+
+// GetMessageDetail loads the reader-facing detail view for one message.
+func (h *MessageHandler) GetMessageDetail(ctx context.Context, address string, msgID uuid.UUID, viewer messageapp.Viewer) (*models.MessageDetail, error) {
+	return h.service.GetMessageDetail(ctx, address, msgID, viewer)
+}
+
+// GetRawSource streams the raw RFC 822 source for one message.
+func (h *MessageHandler) GetRawSource(ctx context.Context, address string, msgID uuid.UUID, viewer messageapp.Viewer) (io.ReadCloser, error) {
+	return h.service.GetRawSource(ctx, address, msgID, viewer)
+}
+
+// MailboxEventStreamAvailable reports whether the durable mailbox event
+// reader is wired in.
+func (h *MessageHandler) MailboxEventStreamAvailable() bool { return h.eventReader != nil }
+
+// StreamMailboxEvents serves the durable SSE stream for one mailbox.
+func (h *MessageHandler) StreamMailboxEvents(w http.ResponseWriter, r *http.Request, mb *models.Mailbox) {
+	h.streamDurable(w, r, mb)
+}
+
 func mailboxBearerToken(r *http.Request) string {
 	auth := strings.TrimSpace(r.Header.Get("Authorization"))
 	if auth == "" {

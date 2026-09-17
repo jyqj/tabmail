@@ -21,24 +21,38 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
+	messageapp "tabmail/internal/app/messages"
+	"tabmail/internal/app/submissions"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
 
+// mailboxMessageSurface narrows CompanyHandler's dependency on the message
+// infrastructure to exactly what the company endpoints use: viewer resolution,
+// message detail/raw source reads, and the durable mailbox event stream. The
+// *MessageHandler satisfies it; handlers no longer call other handlers.
+type mailboxMessageSurface interface {
+	ResolveViewer(r *http.Request) messageapp.Viewer
+	GetMessageDetail(ctx context.Context, address string, msgID uuid.UUID, viewer messageapp.Viewer) (*models.MessageDetail, error)
+	GetRawSource(ctx context.Context, address string, msgID uuid.UUID, viewer messageapp.Viewer) (io.ReadCloser, error)
+	MailboxEventStreamAvailable() bool
+	StreamMailboxEvents(w http.ResponseWriter, r *http.Request, mb *models.Mailbox)
+}
+
 type CompanyHandler struct {
 	repo     company.Repository
 	store    store.Store
 	objects  store.ObjectStore
-	messages *MessageHandler
-	outbound *OutboundHandler
+	messages mailboxMessageSurface
+	subs     *submissions.Service
 	domains  *CompanyDomainHandler
 	logger   zerolog.Logger
 }
 
-func NewCompanyHandler(repo company.Repository, st store.Store, obj store.ObjectStore, m *MessageHandler, o *OutboundHandler, d *CompanyDomainHandler, l zerolog.Logger) *CompanyHandler {
-	return &CompanyHandler{repo: repo, store: st, objects: obj, messages: m, outbound: o, domains: d, logger: l.With().Str("handler", "company").Logger()}
+func NewCompanyHandler(repo company.Repository, st store.Store, obj store.ObjectStore, m mailboxMessageSurface, subs *submissions.Service, d *CompanyDomainHandler, l zerolog.Logger) *CompanyHandler {
+	return &CompanyHandler{repo: repo, store: st, objects: obj, messages: m, subs: subs, domains: d, logger: l.With().Str("handler", "company").Logger()}
 }
 func (h *CompanyHandler) Routes(r chi.Router) {
 	r.Post("/company/activate", h.Activate)
@@ -414,6 +428,7 @@ func (h *CompanyHandler) Preview(w http.ResponseWriter, r *http.Request) {
 	subject, text, html, e := company.Render(draft, v.Vars, employee, name, mb.Mailbox.FullAddress)
 	h.result(w, map[string]string{"subject": subject, "text_body": text, "html_body": html}, e)
 }
+
 // MailboxEvents serves GET /api/v1/company/mailboxes/{id}/events — the
 // company-side SSE stream for one mailbox. Access is decided by company grants
 // (read permission); the platform durable stream then carries the events.
@@ -427,11 +442,11 @@ func (h *CompanyHandler) MailboxEvents(w http.ResponseWriter, r *http.Request) {
 		h.result(w, nil, e)
 		return
 	}
-	if !mb.CanRead || h.messages.eventReader == nil {
+	if !mb.CanRead || h.messages == nil || !h.messages.MailboxEventStreamAvailable() {
 		errForbidden(w, "mailbox read permission required")
 		return
 	}
-	h.messages.streamDurable(w, r, &mb.Mailbox)
+	h.messages.StreamMailboxEvents(w, r, &mb.Mailbox)
 }
 
 func (h *CompanyHandler) Messages(w http.ResponseWriter, r *http.Request) {
@@ -494,7 +509,7 @@ func (h *CompanyHandler) Message(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	v, e := h.messages.service.GetMessageDetail(r.Context(), mb.Mailbox.FullAddress, id, h.messages.resolveViewer(r))
+	v, e := h.messages.GetMessageDetail(r.Context(), mb.Mailbox.FullAddress, id, h.messages.ResolveViewer(r))
 	if v != nil {
 		v.RawObjectKey = ""
 	}
@@ -522,7 +537,7 @@ func (h *CompanyHandler) Source(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	rc, e := h.messages.service.GetRawSource(r.Context(), mb.Mailbox.FullAddress, id, h.messages.resolveViewer(r))
+	rc, e := h.messages.GetRawSource(r.Context(), mb.Mailbox.FullAddress, id, h.messages.ResolveViewer(r))
 	if e != nil {
 		h.result(w, nil, e)
 		return
@@ -542,7 +557,7 @@ func (h *CompanyHandler) inboundEnvelope(w http.ResponseWriter, r *http.Request)
 	if !ok {
 		return nil, false
 	}
-	rc, e := h.messages.service.GetRawSource(r.Context(), mb.Mailbox.FullAddress, id, h.messages.resolveViewer(r))
+	rc, e := h.messages.GetRawSource(r.Context(), mb.Mailbox.FullAddress, id, h.messages.ResolveViewer(r))
 	if e != nil {
 		h.result(w, nil, e)
 		return nil, false
@@ -709,10 +724,43 @@ type submitDraftRequest struct {
 	ExpectedRevision int `json:"expected_revision"`
 }
 
+// writeSubmitFailure maps a submissions service failure to the exact HTTP
+// response the draft submit endpoint has always produced. Order, status codes
+// and body shapes are pinned by the integration tests.
+func writeSubmitFailure(w http.ResponseWriter, logger zerolog.Logger, f *submissions.Failure) {
+	switch f.Kind {
+	case submissions.FailureAuthRequired:
+		errForbidden(w, "authentication required")
+	case submissions.FailureBadRequest:
+		errBadRequest(w, f.Message)
+	case submissions.FailureForbidden:
+		errForbidden(w, f.Message)
+	case submissions.FailureInternal:
+		errInternal(w)
+	case submissions.FailureQuota:
+		writeJSON(w, http.StatusTooManyRequests, envelope{
+			Error: &apiErr{Code: "QUOTA_EXCEEDED", Message: f.Message},
+		})
+	case submissions.FailureConflict:
+		errConflict(w, f.Message)
+	case submissions.FailureRevisionConflict:
+		writeJSON(w, http.StatusConflict, envelope{
+			Data:  map[string]any{"revision": f.Revision},
+			Error: &apiErr{Code: "CONFLICT", Message: "draft revision changed; refresh the draft before retrying"},
+		})
+	case submissions.FailureApp:
+		respondAppError(w, logger, f.Err)
+	default:
+		errBadRequest(w, f.Message)
+	}
+}
+
 // SubmitDraft handles POST /company/drafts/{id}/submit — submit the draft as
 // an outbound job and consume the draft inside the enqueue transaction. The
 // Idempotency-Key header is required; a repeated key replays the original job
-// with 200 instead of creating a second one.
+// with 200 instead of creating a second one. The orchestration lives in the
+// submissions use-case service; this handler parses the request and maps the
+// outcome.
 func (h *CompanyHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) {
 	id, idOK := companyID(w, r, "id")
 	if !idOK {
@@ -736,74 +784,9 @@ func (h *CompanyHandler) SubmitDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	actor := companyActor(r)
-	draft, e := h.repo.GetMailDraft(r.Context(), actor, id)
-	if e != nil {
-		if authz.IsAuthzError(e) {
-			e = app.Forbidden(e.Error())
-		}
-		// A missing draft is only a plain 404 when no submission consumed it;
-		// otherwise it is a replay (same key) or an already-consumed conflict.
-		if appErr, isApp := app.As(e); isApp && appErr.Kind == app.KindNotFound {
-			consumed, replay, e2 := h.outbound.ConsumedDraftSubmission(r.Context(), actor.TenantID, id, &actor.ID, key)
-			if e2 != nil {
-				h.logger.Err(e2).Msg("looking up consumed draft submission")
-				errInternal(w)
-				return
-			}
-			if consumed != nil {
-				if replay {
-					ok(w, consumed)
-				} else {
-					errConflict(w, "draft was already submitted; check its send status instead of retrying")
-				}
-				return
-			}
-		}
-		respondAppError(w, h.logger, e)
-		return
-	}
-	if draft.Revision != body.ExpectedRevision {
-		// The draft still exists with a newer revision: tell the caller what to
-		// refresh to, instead of a bare conflict.
-		writeJSON(w, http.StatusConflict, envelope{
-			Data:  map[string]any{"revision": draft.Revision},
-			Error: &apiErr{Code: "CONFLICT", Message: "draft revision changed; refresh the draft before retrying"},
-		})
-		return
-	}
-	mb, e := h.store.GetMailbox(r.Context(), draft.MailboxID)
-	if e != nil {
-		h.logger.Err(e).Msg("loading draft mailbox")
-		errInternal(w)
-		return
-	}
-	if mb == nil || mb.TenantID != actor.TenantID {
-		errConflict(w, "draft mailbox is no longer available")
-		return
-	}
-
-	job, replayed, submitted := h.outbound.submitAuthorized(w, r, outboundSubmitInput{
-		From:              mb.FullAddress,
-		To:                draft.Payload.To,
-		CC:                draft.Payload.CC,
-		BCC:               draft.Payload.BCC,
-		Subject:           draft.Payload.Subject,
-		TextBody:          draft.Payload.TextBody,
-		HTMLBody:          draft.Payload.HTMLBody,
-		Headers:           draft.Payload.Headers,
-		TemplateVersionID: draft.Payload.TemplateVersionID,
-		TemplateVars:      draft.Payload.TemplateVars,
-		AttachmentIDs:     draft.Payload.AttachmentIDs,
-		IdempotencyKey:    key,
-		Draft: &store.DraftConsumption{
-			TenantID: actor.TenantID,
-			UserID:   actor.ID,
-			ID:       draft.ID,
-			Revision: draft.Revision,
-		},
-	})
-	if !submitted {
+	job, replayed, failure := h.subs.SubmitDraft(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id, body.ExpectedRevision, key)
+	if failure != nil {
+		writeSubmitFailure(w, h.logger, failure)
 		return
 	}
 	if replayed {
@@ -880,16 +863,16 @@ func (h *CompanyHandler) Recipients(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if h.outbound == nil {
+	if h.subs == nil || !h.subs.OutboundEnabled() {
 		errNotFound(w, "outbound disabled")
 		return
 	}
-	j, e := h.outbound.getAccessibleOutboundJob(r.Context(), id)
+	j, e := h.subs.AccessibleOutboundJob(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
 	if e != nil {
-		h.outbound.writeOutboundJobAccessError(w, e, "listing recipient outcomes")
+		writeOutboundJobAccessError(w, h.logger, e, "listing recipient outcomes")
 		return
 	}
-	view, e := h.outbound.redactOutboundJob(r.Context(), companyActor(r), j)
+	view, e := h.subs.RedactOutboundJob(r.Context(), companyActor(r), j)
 	if e != nil {
 		h.result(w, nil, e)
 		return
@@ -945,13 +928,13 @@ func (h *CompanyHandler) InspectOutbound(w http.ResponseWriter, r *http.Request)
 		errBadRequest(w, "inspection reason must be 8-1000 bytes")
 		return
 	}
-	if h.outbound == nil {
+	if h.subs == nil || !h.subs.OutboundEnabled() {
 		errNotFound(w, "outbound disabled")
 		return
 	}
-	j, e := h.outbound.getAccessibleOutboundJob(r.Context(), id)
+	j, e := h.subs.AccessibleOutboundJob(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
 	if e != nil {
-		h.outbound.writeOutboundJobAccessError(w, e, "inspecting outbound")
+		writeOutboundJobAccessError(w, h.logger, e, "inspecting outbound")
 		return
 	}
 	a := companyActor(r)
