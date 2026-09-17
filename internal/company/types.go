@@ -166,27 +166,51 @@ func ValidLocalPart(s string) bool {
 func Hash(s string) string { v := sha256.Sum256([]byte(s)); return hex.EncodeToString(v[:]) }
 func Digest(v any) string  { b, _ := json.Marshal(v); return Hash(string(b)) }
 
-// Repository is the optional production workflow surface. Legacy test adapters
-// need not invent fake transactions to expose endpoints they cannot implement.
-type Repository interface {
+// The Repository surface is partitioned into role interfaces so consumers can
+// depend on the business capability they use instead of the whole workflow
+// face. The roles are a strict partition: Repository embeds all of them and
+// adds nothing, so every implementation of the roles is a Repository and vice
+// versa (asserted in types_iface_test.go).
+
+// SettingsService is the company-level configuration surface: read and
+// reconfigure tenant settings, plus the production readiness probe the
+// assembly uses to gate company routes on a live store.
+type SettingsService interface {
 	GetCompanySettings(context.Context, uuid.UUID) (*Settings, error)
 	ConfigureCompany(context.Context, authz.Actor, Settings) (*Settings, error)
+	Readiness(context.Context) error
+}
+
+// EmployeeService is the employee lifecycle: invite, list/revoke invitations,
+// activate, and offboard.
+type EmployeeService interface {
 	InviteEmployee(context.Context, authz.Actor, InvitationInput, string) (*Invitation, error)
 	ListEmployeeInvitations(context.Context, authz.Actor) ([]Invitation, error)
 	RevokeEmployeeInvitation(context.Context, authz.Actor, uuid.UUID) error
 	ActivateEmployee(context.Context, string, string) error
+	OffboardEmployee(context.Context, authz.Actor, uuid.UUID, uuid.UUID, string) error
+}
+
+// MailboxAdminService is company mailbox administration: query and create
+// work mailboxes, convert/transfer ownership, and manage grants and the
+// per-mailbox send policy.
+type MailboxAdminService interface {
 	GetWorkMailbox(context.Context, authz.Actor, uuid.UUID) (*MailboxAccess, error)
 	ListWorkMailboxes(context.Context, authz.Actor) ([]MailboxAccess, error)
 	CreateWorkMailbox(context.Context, authz.Actor, MailboxInput) (*models.Mailbox, error)
 	ConvertSharedMailbox(context.Context, authz.Actor, uuid.UUID, int64, string) error
 	TransferWorkMailbox(context.Context, authz.Actor, uuid.UUID, uuid.UUID, int64, string) error
-	OffboardEmployee(context.Context, authz.Actor, uuid.UUID, uuid.UUID, string) error
 	ListWorkGrants(context.Context, authz.Actor, uuid.UUID) ([]models.MailboxGrant, error)
 	SetWorkGrant(context.Context, authz.Actor, models.MailboxGrant) error
 	// SetWorkMailboxSendPolicy stores the mailbox-level send-policy override.
 	// A nil policy clears the override so the mailbox inherits the company
 	// default again.
 	SetWorkMailboxSendPolicy(context.Context, authz.Actor, uuid.UUID, *string) error
+}
+
+// TemplateAdminService is template governance for administrators: CRUD,
+// publish/retire, version history, per-mailbox grants, and the usable list.
+type TemplateAdminService interface {
 	ListMailTemplates(context.Context, authz.Actor) ([]Template, error)
 	SaveMailTemplate(context.Context, authz.Actor, Template) (*Template, error)
 	PublishMailTemplate(context.Context, authz.Actor, uuid.UUID, int) (*TemplateVersion, error)
@@ -195,7 +219,18 @@ type Repository interface {
 	ListTemplateGrants(context.Context, authz.Actor, uuid.UUID) ([]TemplateGrant, error)
 	SetTemplateGrant(context.Context, authz.Actor, TemplateGrant, bool) error
 	ListUsableTemplates(context.Context, authz.Actor, uuid.UUID) ([]TemplateVersion, error)
+}
+
+// TemplateSendReader is the narrow published-template lookup the outbound
+// engine depends on. It is structurally identical to outbound.TemplateGovernance,
+// which stays the dependency interface on the outbound side.
+type TemplateSendReader interface {
 	TemplateForSend(context.Context, uuid.UUID, *uuid.UUID, *uuid.UUID, uuid.UUID, uuid.UUID) (*TemplateVersion, string, string, error)
+}
+
+// DraftService is the draft workspace: draft CRUD plus the attachment
+// reserve/finish handshake and attachment lookup.
+type DraftService interface {
 	ListMailDrafts(context.Context, authz.Actor) ([]Draft, error)
 	GetMailDraft(context.Context, authz.Actor, uuid.UUID) (*Draft, error)
 	SaveMailDraft(context.Context, authz.Actor, Draft) (*Draft, error)
@@ -203,15 +238,44 @@ type Repository interface {
 	ReserveMailAttachment(context.Context, authz.Actor, Attachment) (*Attachment, error)
 	FinishMailAttachment(context.Context, authz.Actor, uuid.UUID, string) error
 	GetWorkAttachment(context.Context, authz.Actor, uuid.UUID) (*Attachment, error)
+}
+
+// MailReadService is the mailbox content surface: list and mutate messages,
+// and replay the durable mailbox event stream.
+type MailReadService interface {
 	ListWorkMessages(context.Context, authz.Actor, uuid.UUID, string, string, models.Page) ([]*models.Message, int, error)
 	MutateWorkMessage(context.Context, authz.Actor, uuid.UUID, uuid.UUID, string) error
+	ListMailboxEvents(context.Context, uuid.UUID, uuid.UUID, int64, int) ([]MailEvent, int64, error)
+}
+
+// SubmissionReader is the outbound submission surface for administrators:
+// list/inspect submissions, their per-recipient delivery state, and the
+// reconcile repair action recorded against a submission.
+type SubmissionReader interface {
 	ListSubmissions(context.Context, authz.Actor, models.Page) ([]Submission, int, error)
 	GetSubmission(context.Context, authz.Actor, uuid.UUID) (*Submission, error)
-	ListMailboxEvents(context.Context, uuid.UUID, uuid.UUID, int64, int) ([]MailEvent, int64, error)
+	ListOutboundRecipients(context.Context, uuid.UUID, uuid.UUID) ([]Recipient, error)
+	ReconcileOutbound(context.Context, authz.Actor, uuid.UUID, time.Time, []Recipient, string) error
+}
+
+// RecoveryService is the durable recovery-receipt surface: list, inspect,
+// and retry failed receipt replays.
+type RecoveryService interface {
 	ListRecoveryReceipts(context.Context, authz.Actor, models.Page) ([]RecoveryReceipt, int, error)
 	InspectRecoveryReceipt(context.Context, authz.Actor, uuid.UUID, string) (*RecoveryReceipt, error)
 	RetryRecoveryReceipt(context.Context, authz.Actor, uuid.UUID, time.Time, []uuid.UUID, string, string) error
-	ListOutboundRecipients(context.Context, uuid.UUID, uuid.UUID) ([]Recipient, error)
-	ReconcileOutbound(context.Context, authz.Actor, uuid.UUID, time.Time, []Recipient, string) error
-	Readiness(context.Context) error
+}
+
+// Repository is the optional production workflow surface. Legacy test adapters
+// need not invent fake transactions to expose endpoints they cannot implement.
+type Repository interface {
+	SettingsService
+	EmployeeService
+	MailboxAdminService
+	TemplateAdminService
+	TemplateSendReader
+	DraftService
+	MailReadService
+	SubmissionReader
+	RecoveryService
 }

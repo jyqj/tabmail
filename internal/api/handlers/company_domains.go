@@ -20,11 +20,11 @@ import (
 // (visibility, random subdomains, routes, address suggestion).
 type CompanyDomainHandler struct {
 	service *domainapp.Service
-	repo    company.Repository
+	repo    company.SettingsService
 	logger  zerolog.Logger
 }
 
-func NewCompanyDomainHandler(service *domainapp.Service, repo company.Repository, l zerolog.Logger) *CompanyDomainHandler {
+func NewCompanyDomainHandler(service *domainapp.Service, repo company.SettingsService, l zerolog.Logger) *CompanyDomainHandler {
 	return &CompanyDomainHandler{service: service, repo: repo, logger: l.With().Str("handler", "company_domains").Logger()}
 }
 

@@ -41,8 +41,24 @@ type mailboxMessageSurface interface {
 	StreamMailboxEvents(w http.ResponseWriter, r *http.Request, mb *models.Mailbox)
 }
 
+// companyWorkspace is the role composition the company endpoints consume.
+// They span nearly every business role of the company workflow surface, so the
+// handler depends on the named role interfaces rather than the monolithic
+// company.Repository — the production store satisfies it unchanged.
+type companyWorkspace interface {
+	company.SettingsService
+	company.EmployeeService
+	company.MailboxAdminService
+	company.TemplateAdminService
+	company.TemplateSendReader
+	company.DraftService
+	company.MailReadService
+	company.SubmissionReader
+	company.RecoveryService
+}
+
 type CompanyHandler struct {
-	repo     company.Repository
+	repo     companyWorkspace
 	store    store.Store
 	objects  store.ObjectStore
 	messages mailboxMessageSurface
@@ -51,7 +67,7 @@ type CompanyHandler struct {
 	logger   zerolog.Logger
 }
 
-func NewCompanyHandler(repo company.Repository, st store.Store, obj store.ObjectStore, m mailboxMessageSurface, subs *submissions.Service, d *CompanyDomainHandler, l zerolog.Logger) *CompanyHandler {
+func NewCompanyHandler(repo companyWorkspace, st store.Store, obj store.ObjectStore, m mailboxMessageSurface, subs *submissions.Service, d *CompanyDomainHandler, l zerolog.Logger) *CompanyHandler {
 	return &CompanyHandler{repo: repo, store: st, objects: obj, messages: m, subs: subs, domains: d, logger: l.With().Str("handler", "company").Logger()}
 }
 func (h *CompanyHandler) Routes(r chi.Router) {

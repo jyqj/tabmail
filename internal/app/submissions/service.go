@@ -104,7 +104,7 @@ type SubmitInput struct {
 // documents): every method that needs them guards the nil and behaves exactly
 // like the disabled mode the handlers previously implemented.
 type Service struct {
-	repo     company.Repository
+	repo     company.DraftService
 	store    store.Store
 	outbound *outbound.Service
 	az       *authz.Authorizer
@@ -113,7 +113,7 @@ type Service struct {
 
 // NewService creates a new submissions service. It panics when the store is
 // missing; nil repo/outbound selects the documented disabled mode instead.
-func NewService(repo company.Repository, st store.Store, out *outbound.Service, logger zerolog.Logger) *Service {
+func NewService(repo company.DraftService, st store.Store, out *outbound.Service, logger zerolog.Logger) *Service {
 	if st == nil {
 		panic("submissions: store dependency is required")
 	}
