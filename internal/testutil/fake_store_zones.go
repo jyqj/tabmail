@@ -222,13 +222,6 @@ func (s *FakeStore) ListRoutes(_ context.Context, zoneID uuid.UUID) ([]*models.D
 	return out, nil
 }
 
-func (s *FakeStore) DeleteRoute(_ context.Context, id uuid.UUID) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	delete(s.routes, id)
-	return nil
-}
-
 func (s *FakeStore) FindMatchingRoutes(ctx context.Context, domain string, tenantID *uuid.UUID) ([]*models.DomainRoute, error) {
 	zone, _ := s.GetZoneByDomain(ctx, domain)
 	if zone == nil {

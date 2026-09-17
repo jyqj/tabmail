@@ -141,10 +141,8 @@ type ZoneStore interface {
 	CountAllZones(ctx context.Context) (int, error)
 
 	// --- Domain routes ---------------------------------------------------
-	CreateRoute(ctx context.Context, r *models.DomainRoute) error
 	GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error)
 	ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error)
-	DeleteRoute(ctx context.Context, id uuid.UUID) error
 	// Returns all routes whose zone domain matches the given address domain.
 	// If tenantID is non-nil, only routes belonging to that tenant are returned.
 	FindMatchingRoutes(ctx context.Context, domain string, tenantID *uuid.UUID) ([]*models.DomainRoute, error)

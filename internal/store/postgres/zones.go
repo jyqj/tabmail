@@ -200,20 +200,6 @@ func (s *PgStore) CountAllZones(ctx context.Context) (int, error) {
 // Domain routes
 // ================================================================
 
-func (s *PgStore) CreateRoute(ctx context.Context, r *models.DomainRoute) error {
-	if r.ID == uuid.Nil {
-		r.ID = uuid.New()
-	}
-	r.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
-		INSERT INTO domain_routes (id,zone_id,route_type,match_value,range_start,range_end,
-			auto_create_mailbox,retention_hours_override,access_mode_default,created_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-		r.ID, r.ZoneID, r.RouteType, r.MatchValue, r.RangeStart, r.RangeEnd,
-		r.AutoCreateMailbox, r.RetentionHoursOverride, r.AccessModeDefault, r.CreatedAt)
-	return err
-}
-
 func (s *PgStore) GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error) {
 	r := &models.DomainRoute{}
 	err := s.pool.QueryRow(ctx, `
@@ -248,11 +234,6 @@ func (s *PgStore) ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.D
 		out = append(out, r)
 	}
 	return out, rows.Err()
-}
-
-func (s *PgStore) DeleteRoute(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM domain_routes WHERE id=$1`, id)
-	return err
 }
 
 func (s *PgStore) FindMatchingRoutes(ctx context.Context, domain string, tenantID *uuid.UUID) ([]*models.DomainRoute, error) {

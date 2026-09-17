@@ -140,7 +140,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	r.Use(middleware.PermissionLoader(cached))
 	r.Use(cfg.RateLimiter.Middleware)
 
-	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.NamingMode, cfg.MailboxTokenSecret, cfg.Resolver, cfg.Logger)
+	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.Resolver, cfg.Logger)
 	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
@@ -217,7 +217,6 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			r.Use(middleware.RequireAdmin) // super_admin or admin
 
 			r.Get("/admin/domains", dh.AdminListZones)
-			r.Patch("/admin/domains/{id}", dh.AdminUpdateZoneAccess)
 
 			// -- Permission profiles --
 			r.Get("/admin/permissions", perm.ListProfiles)

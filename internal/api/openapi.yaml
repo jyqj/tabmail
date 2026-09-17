@@ -245,30 +245,6 @@ components:
         created_at:
           type: string
           format: date-time
-    SuggestedAddress:
-      type: object
-      properties:
-        zone_id:
-          type: string
-          format: uuid
-        base_domain:
-          type: string
-        domain:
-          type: string
-        subdomain_label:
-          type: string
-          nullable: true
-        local_part:
-          type: string
-        address:
-          type: string
-        mode:
-          type: string
-          enum:
-          - mailbox
-          - subdomain
-        algorithm:
-          type: string
     Mailbox:
       type: object
       properties:
@@ -1982,52 +1958,6 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/DomainZone'
-  /api/v1/admin/domains/{id}:
-    patch:
-      tags:
-      - Admin
-      summary: Update domain resource visibility and random subdomain policy
-      operationId: adminUpdateDomainAccess
-      security:
-      - BearerAuth: []
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-          format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                visibility:
-                  type: string
-                  enum:
-                  - private
-                  - authenticated
-                  - public
-                allow_random_subdomains:
-                  type: boolean
-      responses:
-        '200':
-          description: Updated
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/DomainZone'
-        '400':
-          description: Invalid visibility or random-subdomain state
-        '403':
-          description: Admin access required
-        '404':
-          description: Not found
   /api/v1/admin/permissions:
     get:
       tags:

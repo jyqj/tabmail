@@ -1,4 +1,4 @@
-import type { APIResponse, DomainZone, ResourceVisibility } from "../types";
+import type { APIResponse, DomainZone } from "../types";
 import { request } from "./base";
 
 export function listDomains() {
@@ -7,14 +7,4 @@ export function listDomains() {
 
 export function listAdminDomains() {
   return request<APIResponse<DomainZone[]>>("/api/v1/admin/domains");
-}
-
-export function updateAdminDomainAccess(
-  id: string,
-  body: { visibility?: ResourceVisibility; allow_random_subdomains?: boolean }
-) {
-  return request<APIResponse<DomainZone>>(`/api/v1/admin/domains/${id}`, {
-    method: "PATCH",
-    body,
-  });
 }

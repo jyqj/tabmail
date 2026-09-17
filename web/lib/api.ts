@@ -39,7 +39,6 @@ export {
 export {
   listAdminDomains,
   listDomains,
-  updateAdminDomainAccess,
 } from "./api/domains";
 export {
   createPermissionProfile,

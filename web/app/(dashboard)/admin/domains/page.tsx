@@ -1,22 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useCRUDPage } from "@/hooks/use-crud-page";
-import { listAdminDomains, updateAdminDomainAccess } from "@/lib/api";
+import { listAdminDomains } from "@/lib/api";
 import type { DomainZone, ResourceVisibility } from "@/lib/types";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -26,12 +17,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Globe, RefreshCw } from "lucide-react";
-import { toast } from "sonner";
 import { useI18n } from "@/lib/i18n";
-
-function canEnableRandomSubdomains(zone: DomainZone) {
-  return zone.is_verified && zone.mx_verified;
-}
 
 export default function AdminDomainsPage() {
   const { t } = useI18n();
@@ -41,25 +27,10 @@ export default function AdminDomainsPage() {
     "adminDomains.loadFailed",
   );
   const zones = response?.data ?? [];
-  const [saving, setSaving] = useState<Record<string, boolean>>({});
   const visibilityLabels: Record<ResourceVisibility, string> = {
     private: t("adminDomains.visibilityPrivate"),
     authenticated: t("adminDomains.visibilityAuthenticated"),
     public: t("adminDomains.visibilityPublic"),
-  };
-
-  const patchZone = async (zone: DomainZone, patch: { visibility?: ResourceVisibility; allow_random_subdomains?: boolean }) => {
-    setSaving((prev) => ({ ...prev, [zone.id]: true }));
-    try {
-      await updateAdminDomainAccess(zone.id, patch);
-      toast.success(t("adminDomains.updated"));
-      mutate();
-    } catch (e: unknown) {
-      const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || t("adminDomains.updateFailed"));
-    } finally {
-      setSaving((prev) => ({ ...prev, [zone.id]: false }));
-    }
   };
 
   return (
@@ -104,11 +75,10 @@ export default function AdminDomainsPage() {
                     <TableHead>{t("adminDomains.parent")}</TableHead>
                     <TableHead>{t("adminDomains.verification")}</TableHead>
                     <TableHead>{t("adminDomains.visibility")}</TableHead>
-                    <TableHead>{t("adminDomains.randomSubdomains")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {zones.map((zone) => (
+                  {zones.map((zone: DomainZone) => (
                     <TableRow key={zone.id}>
                       <TableCell>
                         <div className="font-medium">{zone.domain}</div>
@@ -131,33 +101,9 @@ export default function AdminDomainsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Select
-                          value={zone.visibility}
-                          disabled={saving[zone.id]}
-                          onValueChange={(value) => patchZone(zone, { visibility: value as ResourceVisibility })}
-                        >
-                          <SelectTrigger className="h-8 w-[150px]">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="private">{visibilityLabels.private}</SelectItem>
-                            <SelectItem value="authenticated">{visibilityLabels.authenticated}</SelectItem>
-                            <SelectItem value="public">{visibilityLabels.public}</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Switch
-                            size="sm"
-                            checked={zone.allow_random_subdomains}
-                            disabled={saving[zone.id] || !canEnableRandomSubdomains(zone)}
-                            onCheckedChange={(checked) => patchZone(zone, { allow_random_subdomains: checked })}
-                          />
-                          <span className="text-xs text-muted-foreground">
-                            {canEnableRandomSubdomains(zone) ? t("adminDomains.configurable") : t("adminDomains.needTxtMx")}
-                          </span>
-                        </div>
+                        <Badge variant="secondary" className="text-[10px]">
+                          {visibilityLabels[zone.visibility]}
+                        </Badge>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -31,10 +31,6 @@ type store interface {
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
-	ListRoutes(ctx context.Context, zoneID uuid.UUID) ([]*models.DomainRoute, error)
-	CreateRoute(ctx context.Context, r *models.DomainRoute) error
-	GetRoute(ctx context.Context, id uuid.UUID) (*models.DomainRoute, error)
-	DeleteRoute(ctx context.Context, id uuid.UUID) error
 	// Send identities
 	CreateSendIdentity(ctx context.Context, si *models.SendIdentity) error
 	ListSendIdentitiesByZone(ctx context.Context, zoneID uuid.UUID) ([]*models.SendIdentity, error)
@@ -55,8 +51,6 @@ type Service struct {
 	az             *authz.Authorizer
 	dispatcher     *hooks.Dispatcher
 	expectedMXHost string
-	namingMode     policy.NamingMode
-	addressSecret  string
 	// resolverInv drops resolver caches after zone/route writes. May be nil
 	// (e.g. in tests or when the resolver is not wired in); the resolver TTL
 	// still bounds drift.
@@ -90,32 +84,6 @@ type VerificationStatus struct {
 	DKIMEnabled bool               `json:"dkim_enabled"`
 }
 
-type CreateRouteInput struct {
-	RouteType              models.RouteType
-	MatchValue             string
-	RangeStart             *int
-	RangeEnd               *int
-	AutoCreateMailbox      *bool
-	RetentionHoursOverride *int
-	AccessModeDefault      models.AccessMode
-}
-
-type ZoneAccessInput struct {
-	Visibility            models.ResourceVisibility
-	AllowRandomSubdomains *bool
-}
-
-type SuggestedAddress struct {
-	ZoneID         uuid.UUID `json:"zone_id"`
-	BaseDomain     string    `json:"base_domain"`
-	Domain         string    `json:"domain"`
-	SubdomainLabel string    `json:"subdomain_label,omitempty"`
-	LocalPart      string    `json:"local_part"`
-	Address        string    `json:"address"`
-	Mode           string    `json:"mode"`
-	Algorithm      string    `json:"algorithm"`
-}
-
 const dnsLookupTimeout = 3 * time.Second
 
 func lookupTXTWithTimeout(name string) ([]string, error) {
@@ -130,14 +98,12 @@ func lookupMXWithTimeout(name string) ([]*net.MX, error) {
 	return net.DefaultResolver.LookupMX(ctx, name)
 }
 
-func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, namingMode policy.NamingMode, addressSecret string, resolverInv ResolverInvalidator, logger zerolog.Logger) *Service {
+func NewService(s store, dispatcher *hooks.Dispatcher, expectedMXHost string, resolverInv ResolverInvalidator, logger zerolog.Logger) *Service {
 	return &Service{
 		store:          s,
 		az:             authz.New(s),
 		dispatcher:     dispatcher,
 		expectedMXHost: normalizeDNSName(expectedMXHost),
-		namingMode:     namingMode,
-		addressSecret:  strings.TrimSpace(addressSecret),
 		resolverInv:    resolverInv,
 		lookupTXT:      lookupTXTWithTimeout,
 		lookupMX:       lookupMXWithTimeout,
@@ -321,47 +287,6 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	return zone, nil
 }
 
-func (s *Service) UpdateZoneAccess(ctx context.Context, actor authz.Actor, tenant *models.Tenant, zoneID uuid.UUID, input ZoneAccessInput) (*models.DomainZone, error) {
-	if !actor.IsTenantAdmin() {
-		return nil, app.Forbidden("admin access required")
-	}
-	zone, err := s.store.GetZone(ctx, zoneID)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	if zone == nil {
-		return nil, app.NotFound("zone not found")
-	}
-	if tenant != nil && zone.TenantID != tenant.ID {
-		return nil, app.NotFound("zone not found")
-	}
-	if input.Visibility != "" {
-		if !input.Visibility.Valid() {
-			return nil, app.BadRequest("invalid visibility")
-		}
-		zone.Visibility = input.Visibility
-	}
-	if input.AllowRandomSubdomains != nil {
-		zone.AllowRandomSubdomains = *input.AllowRandomSubdomains
-	}
-	if zone.AllowRandomSubdomains && (!zone.IsVerified || !zone.MXVerified) {
-		return nil, app.BadRequest("random subdomains can only be enabled after TXT and MX verification")
-	}
-	if err := s.store.UpdateZone(ctx, zone); err != nil {
-		return nil, app.Internal(err)
-	}
-	s.invalidateZone(zone.Domain)
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		TenantID:     app.UUIDPtr(zone.TenantID),
-		Actor:        actor.AuditLabel(),
-		Action:       "domain.access.update",
-		ResourceType: "domain_zone",
-		ResourceID:   app.UUIDPtr(zone.ID),
-		Details:      app.MustJSON(map[string]any{"domain": zone.Domain, "visibility": zone.Visibility, "allow_random_subdomains": zone.AllowRandomSubdomains}),
-	})
-	return zone, nil
-}
-
 func (s *Service) DeleteZone(ctx context.Context, actor authz.Actor, zoneID uuid.UUID) error {
 	zone, err := s.ownedZone(ctx, actor, zoneID, authz.ActionZoneDelete)
 	if err != nil {
@@ -460,168 +385,6 @@ func (s *Service) VerificationStatus(ctx context.Context, actor authz.Actor, zon
 		DKIMHost:    dkimHost,
 		DKIMEnabled: checks.DKIM.Status == "pass" && zone.DKIMPrivateKeyPEM != nil,
 	}, nil
-}
-
-func (s *Service) ListRoutes(ctx context.Context, actor authz.Actor, zoneID uuid.UUID) ([]*models.DomainRoute, error) {
-	if _, err := s.ownedZone(ctx, actor, zoneID, authz.ActionRouteRead); err != nil {
-		return nil, err
-	}
-	items, err := s.store.ListRoutes(ctx, zoneID)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	return items, nil
-}
-
-func (s *Service) SuggestAddress(ctx context.Context, actor authz.Actor, zoneID uuid.UUID, canManage bool, useSubdomain bool) (*SuggestedAddress, error) {
-	zone, err := s.ownedZone(ctx, actor, zoneID, authz.ActionZoneRead)
-	if err != nil {
-		return nil, err
-	}
-	if useSubdomain && !canManage {
-		return nil, app.Forbidden("full domain permission is required to generate random subdomains")
-	}
-	return s.suggestForZone(zone, useSubdomain, canManage || actor.IsTenantAdmin())
-}
-
-func (s *Service) SuggestOpenAddress(ctx context.Context, zoneID uuid.UUID, includeAuthenticated bool, useSubdomain bool) (*SuggestedAddress, error) {
-	zone, err := s.store.GetZone(ctx, zoneID)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	if zone == nil {
-		return nil, app.NotFound("zone not found")
-	}
-	if zone.Visibility != models.VisibilityPublic && !(includeAuthenticated && zone.Visibility == models.VisibilityAuthenticated) {
-		return nil, app.Forbidden("domain is not open for this viewer")
-	}
-	if useSubdomain && !zone.AllowRandomSubdomains {
-		return nil, app.Forbidden("random subdomains are not enabled for this domain")
-	}
-	return s.suggestForZone(zone, useSubdomain, zone.AllowRandomSubdomains)
-}
-
-func (s *Service) suggestForZone(zone *models.DomainZone, useSubdomain bool, canGenerateSubdomain bool) (*SuggestedAddress, error) {
-	if s.namingMode != policy.NamingFull {
-		return nil, app.BadRequest("random address suggestion requires TABMAIL_MAILBOXNAMING=full")
-	}
-	if !zone.IsVerified || !zone.MXVerified {
-		return nil, app.Forbidden("domain must pass TXT and MX verification before address generation")
-	}
-	resolvedDomain := zone.Domain
-	subdomainLabel := ""
-	if useSubdomain {
-		if !canGenerateSubdomain {
-			return nil, app.Forbidden("random subdomains are not enabled for this viewer")
-		}
-		label, fqdn, err := policy.GenerateSuggestedSubdomainAddress(time.Now().UTC(), zone.Domain, s.addressSecret)
-		if err != nil {
-			return nil, app.Internal(err)
-		}
-		subdomainLabel = label
-		resolvedDomain = fqdn
-	}
-	local, address, err := policy.GenerateSuggestedAddress(time.Now().UTC(), resolvedDomain, s.addressSecret)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	return &SuggestedAddress{
-		ZoneID:         zone.ID,
-		BaseDomain:     zone.Domain,
-		Domain:         resolvedDomain,
-		SubdomainLabel: subdomainLabel,
-		LocalPart:      local,
-		Address:        address,
-		Mode:           map[bool]string{true: "subdomain", false: "mailbox"}[useSubdomain],
-		Algorithm:      policy.AddressSuggestionAlgorithm,
-	}, nil
-}
-
-func (s *Service) CreateRoute(ctx context.Context, actor authz.Actor, zoneID uuid.UUID, input CreateRouteInput) (*models.DomainRoute, error) {
-	// ActionRouteManage enforces the CanCreateRoutes flag plus the zone
-	// allowlist and ownership inside the authz seam.
-	zone, err := s.ownedZone(ctx, actor, zoneID, authz.ActionRouteManage)
-	if err != nil {
-		return nil, err
-	}
-	if input.RouteType == "" || input.MatchValue == "" {
-		return nil, app.BadRequest("route_type and match_value are required")
-	}
-	if !input.RouteType.Valid() {
-		return nil, app.BadRequest("invalid route_type")
-	}
-	autoCreate := true
-	if input.AutoCreateMailbox != nil {
-		autoCreate = *input.AutoCreateMailbox
-	}
-	am := input.AccessModeDefault
-	if am == "" {
-		am = models.AccessPublic
-	}
-	if !am.Valid() {
-		return nil, app.BadRequest("invalid access_mode_default")
-	}
-	if autoCreate && am == models.AccessToken {
-		return nil, app.BadRequest("token access routes cannot auto-create mailboxes because each token mailbox needs its own password")
-	}
-	if input.RetentionHoursOverride != nil && *input.RetentionHoursOverride <= 0 {
-		return nil, app.BadRequest("retention_hours_override must be greater than 0")
-	}
-	if input.RouteType == models.RouteSequence {
-		if input.RangeStart == nil || input.RangeEnd == nil || *input.RangeStart > *input.RangeEnd {
-			return nil, app.BadRequest("sequence routes require valid range_start and range_end")
-		}
-	}
-	if input.RouteType == models.RouteDeepWildcard && !strings.HasPrefix(normalizeDNSName(input.MatchValue), "**.") {
-		return nil, app.BadRequest("deep_wildcard routes must use a **.suffix pattern")
-	}
-	route := &models.DomainRoute{ZoneID: zoneID, RouteType: input.RouteType, MatchValue: normalizeDNSName(input.MatchValue), RangeStart: input.RangeStart, RangeEnd: input.RangeEnd, AutoCreateMailbox: autoCreate, RetentionHoursOverride: input.RetentionHoursOverride, AccessModeDefault: am}
-	if err := s.store.CreateRoute(ctx, route); err != nil {
-		return nil, app.Internal(err)
-	}
-	s.invalidateRoutes(route.ZoneID)
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		TenantID:     app.UUIDPtr(zone.TenantID),
-		Actor:        actor.AuditLabel(),
-		Action:       "route.create",
-		ResourceType: "domain_route",
-		ResourceID:   app.UUIDPtr(route.ID),
-		Details:      app.MustJSON(map[string]any{"zone_id": zone.ID, "match_value": route.MatchValue, "route_type": route.RouteType}),
-	})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "route.created", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"zone_id": zone.ID.String(), "route_id": route.ID.String(), "route_type": route.RouteType, "match_value": route.MatchValue}})
-	}
-	return route, nil
-}
-
-func (s *Service) DeleteRoute(ctx context.Context, actor authz.Actor, routeID uuid.UUID) error {
-	route, err := s.store.GetRoute(ctx, routeID)
-	if err != nil {
-		return app.Internal(err)
-	}
-	if route == nil {
-		return app.NotFound("route not found")
-	}
-	zone, err := s.ownedZone(ctx, actor, route.ZoneID, authz.ActionRouteDelete)
-	if err != nil {
-		return err
-	}
-	if err := s.store.DeleteRoute(ctx, routeID); err != nil {
-		return app.Internal(err)
-	}
-	s.invalidateRoutes(route.ZoneID)
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
-		TenantID:     app.UUIDPtr(zone.TenantID),
-		Actor:        actor.AuditLabel(),
-		Action:       "route.delete",
-		ResourceType: "domain_route",
-		ResourceID:   app.UUIDPtr(route.ID),
-		Details:      app.MustJSON(map[string]any{"match_value": route.MatchValue}),
-	})
-	if s.dispatcher != nil {
-		s.dispatcher.Publish(hooks.Event{Type: "route.deleted", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"route_id": route.ID.String(), "route_type": route.RouteType, "match_value": route.MatchValue}})
-	}
-	return nil
 }
 
 // ownedZone loads the zone and authorizes the action against it through the
