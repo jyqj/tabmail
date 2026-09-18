@@ -236,38 +236,64 @@ type TemplateSendReader interface {
 	TemplateForSend(context.Context, uuid.UUID, *uuid.UUID, *uuid.UUID, uuid.UUID, uuid.UUID) (*TemplateVersion, string, string, error)
 }
 
-// DraftService is the draft workspace: draft CRUD plus the attachment
-// reserve/finish handshake and attachment lookup.
-type DraftService interface {
+// DraftWorkspace owns draft revisions, not attachment storage.
+type DraftWorkspace interface {
 	ListMailDrafts(context.Context, authz.Actor) ([]Draft, error)
 	GetMailDraft(context.Context, authz.Actor, uuid.UUID) (*Draft, error)
 	SaveMailDraft(context.Context, authz.Actor, Draft) (*Draft, error)
 	DeleteMailDraft(context.Context, authz.Actor, uuid.UUID, int) error
+}
+
+// AttachmentRepository owns the authorized reserve/finish handshake.
+type AttachmentRepository interface {
 	ReserveMailAttachment(context.Context, authz.Actor, Attachment) (*Attachment, error)
 	FinishMailAttachment(context.Context, authz.Actor, uuid.UUID, string) error
 	GetWorkAttachment(context.Context, authz.Actor, uuid.UUID) (*Attachment, error)
 }
 
+// DraftService preserves the aggregate production adapter.
+type DraftService interface {
+	DraftWorkspace
+	AttachmentRepository
+}
+
 // MailReadService is the mailbox content surface: list and mutate messages,
 // and replay the durable mailbox event stream.
 type MailReadService interface {
+	// GetWorkMessage returns internal metadata only after current member, tenant,
+	// exact mailbox identity and read rights have been checked in one transaction.
+	GetWorkMessage(context.Context, authz.Actor, uuid.UUID, uuid.UUID) (*models.Message, error)
 	ListWorkMessages(context.Context, authz.Actor, uuid.UUID, string, string, models.Page) ([]*models.Message, int, error)
 	MutateWorkMessage(context.Context, authz.Actor, uuid.UUID, uuid.UUID, string) error
 	ListMailboxEvents(context.Context, uuid.UUID, uuid.UUID, int64, int) ([]MailEvent, int64, error)
 }
 
-// SubmissionReader is the outbound submission surface for administrators:
-// list/inspect submissions, their per-recipient delivery state, the sent
-// message content and its pinned attachments, and the reconcile repair action
-// recorded against a submission.
-type SubmissionReader interface {
+// SubmissionReceipts is the employee's own/readable-mailbox operation history.
+// Receipt visibility alone never grants sent-content access.
+type SubmissionReceipts interface {
 	ListSubmissions(context.Context, authz.Actor, models.Page) ([]Submission, int, error)
 	GetSubmission(context.Context, authz.Actor, uuid.UUID) (*Submission, error)
+}
+
+// SubmissionContentReader requires a CURRENT read right on the sender mailbox.
+// An author, owner or administrator is not exempt from revocation.
+type SubmissionContentReader interface {
 	GetSubmissionContent(context.Context, authz.Actor, uuid.UUID) (*SubmissionContent, error)
 	ListSubmissionAttachments(context.Context, authz.Actor, uuid.UUID) ([]SubmissionAttachment, error)
 	GetSubmissionAttachment(context.Context, authz.Actor, uuid.UUID, uuid.UUID) (*SubmissionAttachment, error)
+}
+
+// DeliveryRecovery is an operations capability, not an employee content port.
+type DeliveryRecovery interface {
 	ListOutboundRecipients(context.Context, uuid.UUID, uuid.UUID) ([]Recipient, error)
 	ReconcileOutbound(context.Context, authz.Actor, uuid.UUID, time.Time, []Recipient, string) error
+}
+
+// SubmissionReader preserves the aggregate production adapter.
+type SubmissionReader interface {
+	SubmissionReceipts
+	SubmissionContentReader
+	DeliveryRecovery
 }
 
 // RecoveryService is the durable recovery-receipt surface: list, inspect,

@@ -21,6 +21,12 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
   page.setDefaultTimeout(15000);
   page.on("dialog", (dialog) => dialog.accept());
   const errors = [];
+  let legacySendRequests = 0;
+  page.on("request", (request) => {
+    if (request.method() === "POST" && new URL(request.url()).pathname === "/api/v1/send") {
+      legacySendRequests++;
+    }
+  });
   page.on("pageerror", (error) => errors.push(String(error)));
   async function login(email) {
     await page.goto(origin);
@@ -77,15 +83,37 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
     ).toBeVisible();
     const send = page.waitForResponse(
       (r) =>
-        r.url().endsWith("/api/v1/send") && r.request().method() === "POST",
+        /^\/api\/v1\/company\/drafts\/[0-9a-f-]{36}\/submit$/.test(new URL(r.url()).pathname) &&
+        r.request().method() === "POST",
     );
     await page.getByRole("button", { name: "Send", exact: true }).click();
-    assert.equal((await send).status(), 201);
-    await expect(
-      page.getByRole("button", { name: /Re: Browser welcome/ }),
-    ).toBeVisible();
+    const submitted = await send;
+    assert.equal(submitted.status(), 201);
+    assert.ok(submitted.request().headers()["idempotency-key"]);
+    assert.ok(submitted.request().postDataJSON().expected_revision >= 1);
+    assert.equal(legacySendRequests, 0, "retired send endpoint must never be used");
+    const submittedID = (await submitted.json()).data.id;
+    assert.ok(submittedID, "submission must return a durable identity");
+    const sentRow = page.getByRole("button", { name: /Re: Browser welcome/ });
+    await expect(sentRow).toBeVisible();
+    await sentRow.click();
+    const sentContent = page.waitForResponse((response) =>
+      new URL(response.url()).pathname === `/api/v1/company/submissions/${submittedID}/content`,
+    );
+    await page.getByRole("button", { name: "View content", exact: true }).click();
+    assert.equal((await sentContent).status(), 200);
+    await expect(page.getByText("Private browser journey body.", { exact: false })).toBeVisible();
+    const downloadReady = page.waitForEvent("download");
+    await page.getByRole("button", { name: /browser\.txt/ }).click();
+    const download = await downloadReady;
+    assert.equal(download.suggestedFilename(), "browser.txt");
+    const reader = await download.createReadStream();
+    assert.ok(reader, "sent attachment must be downloadable");
+    const chunks = [];
+    for await (const chunk of reader) chunks.push(chunk);
+    assert.equal(Buffer.concat(chunks).toString(), "Browser attachment bytes");
     console.log(
-      "PASS: employee read -> RFC reply -> draft -> attachment -> queued send",
+      "PASS: employee read -> RFC reply -> draft -> attachment -> atomic submit -> sent content and verified download",
     );
 
     await logout();

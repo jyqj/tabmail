@@ -18,9 +18,13 @@ import (
 
 // The workbench reads merged state: a member's sparse message_user_states row
 // overrides the shared baseline in messages.seen; the extra join parameter
-// ($6) is the acting user (uuid.Nil matches nothing for token principals).
-const workMessageSelect = `SELECT m.id,m.tenant_id,m.mailbox_id,m.zone_id,m.sender,m.recipients,m.subject,m.size,COALESCE(mus.seen,m.seen),COALESCE(mus.starred,false),m.raw_object_key,m.headers_json,m.received_at,m.expires_at,m.otp_code,m.otp_confidence,m.deleted_at,m.purge_after,m.archived_at FROM messages m
- LEFT JOIN message_user_states mus ON mus.tenant_id=m.tenant_id AND mus.mailbox_id=m.mailbox_id AND mus.message_id=m.id AND mus.user_id=$6`
+// is the acting user (uuid.Nil matches nothing for token principals).
+const workMessageColumns = `SELECT m.id,m.tenant_id,m.mailbox_id,m.zone_id,m.sender,m.recipients,m.subject,m.size,COALESCE(mus.seen,m.seen),COALESCE(mus.starred,false),m.raw_object_key,m.headers_json,m.received_at,m.expires_at,m.otp_code,m.otp_confidence,m.deleted_at,m.purge_after,m.archived_at FROM messages m`
+
+// viewerParameter is a server-owned SQL placeholder, never request input.
+func workMessageSelect(viewerParameter string) string {
+	return workMessageColumns + ` LEFT JOIN message_user_states mus ON mus.tenant_id=m.tenant_id AND mus.mailbox_id=m.mailbox_id AND mus.message_id=m.id AND mus.user_id=` + viewerParameter
+}
 
 func scanWorkMessage(row pgx.Row) (*models.Message, error) {
 	m := &models.Message{}
@@ -65,7 +69,7 @@ func (s *PgStore) ListWorkMessages(ctx context.Context, a authz.Actor, id uuid.U
 		if e = tx.QueryRow(ctx, `SELECT count(*) FROM messages m WHERE `+filter, a.TenantID, id, pattern).Scan(&total); e != nil {
 			return e
 		}
-		rows, e := tx.Query(ctx, workMessageSelect+` WHERE `+filter+` ORDER BY m.received_at DESC,m.id DESC LIMIT $4 OFFSET $5`, a.TenantID, id, pattern, page.PerPage, page.Offset(), viewer)
+		rows, e := tx.Query(ctx, workMessageSelect("$6")+` WHERE `+filter+` ORDER BY m.received_at DESC,m.id DESC LIMIT $4 OFFSET $5`, a.TenantID, id, pattern, page.PerPage, page.Offset(), viewer)
 		if e != nil {
 			return e
 		}

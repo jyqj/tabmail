@@ -44,12 +44,10 @@ type Submission struct {
 // outbound safe-display filter, so stored-but-blocked header names (for
 // example a caller-supplied "Bcc") never reach a viewer.
 //
-// ContentRedacted is always false here, matching company.Submission: the
-// company surface only admits interactive member identities, and submissionScope
-// already encodes the content authority rule (submitter or current reader of
-// the sender mailbox), so every viewer that can fetch this DTO holds content
-// authority by construction. Out-of-scope viewers get the same 404 collapse as
-// the metadata endpoints.
+// ContentRedacted is false for successful content reads: current sender-mailbox
+// read permission is required. Historical authors may retain a submission
+// receipt after revocation, but content/list/download return the same 404 as
+// an unknown submission. Administrator status is not a content bypass.
 type SubmissionContent struct {
 	ID              uuid.UUID         `json:"id"`
 	Subject         string            `json:"subject"`

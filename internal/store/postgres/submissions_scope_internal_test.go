@@ -72,3 +72,29 @@ func TestSubmissionScopeKeepsTenantConjunct(t *testing.T) {
 		t.Fatalf("zone allowlist predicate wrong: %s %v", where, args)
 	}
 }
+
+func TestSubmissionContentScopeNeverUsesHistoricalAuthorship(t *testing.T) {
+	tenant, user := uuid.New(), uuid.New()
+	actors := []authz.Actor{
+		{Type: authz.PrincipalUser, ID: user, TenantID: tenant, Role: models.RoleUser},
+		{Type: authz.PrincipalUser, ID: user, TenantID: tenant, Role: models.RoleSuperAdmin, IsSuperAdmin: true},
+		{Type: authz.PrincipalAPIKey, ID: uuid.New(), TenantID: tenant, OwnerUserID: &user},
+	}
+	for _, a := range actors {
+		for _, base := range []int{1, 2, 3} {
+			where, args := submissionContentScope(a, base)
+			if len(args) != 2 || args[0] != tenant || args[1] != user {
+				t.Fatalf("scope arguments: %v", args)
+			}
+			if strings.Contains(where, "s.user_id=") || strings.Contains(where, "s.sender_user_id=") || !strings.Contains(where, "g.can_read") || !strings.Contains(where, "m.expires_at") {
+				t.Fatalf("historical authorship bypass: %s", where)
+			}
+		}
+	}
+	for _, a := range []authz.Actor{{TenantID: tenant}, {Type: authz.PrincipalAPIKey, ID: uuid.New(), TenantID: tenant, TenantWide: true}} {
+		where, args := submissionContentScope(a, 1)
+		if where != "s.tenant_id=$1 AND FALSE" || len(args) != 1 {
+			t.Fatalf("principal without user gained content: %s", where)
+		}
+	}
+}

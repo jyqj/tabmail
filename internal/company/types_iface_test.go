@@ -2,7 +2,7 @@ package company
 
 // roleComposition restates Repository purely as the embedding of the role
 // interfaces. The paired assertions below prove the roles are an exact
-// partition of the original 42-method surface: no method lost, none added.
+// composition of the current surface: the aggregate adds no hidden methods.
 type roleComposition interface {
 	SettingsService
 	EmployeeService

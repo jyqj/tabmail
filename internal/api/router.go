@@ -19,6 +19,7 @@ import (
 
 	"tabmail/internal/api/handlers"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app/companymail"
 	"tabmail/internal/app/submissions"
 	"tabmail/internal/company"
 	"tabmail/internal/config"
@@ -141,17 +142,12 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	r.Use(cfg.RateLimiter.Middleware)
 
 	dh := handlers.NewDomainHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Dispatcher, cfg.ExpectedMXHost, cfg.Resolver, cfg.Logger)
-	msg := handlers.NewMessageHandler(st, cfg.ObjectStore, cfg.RawObjects, cfg.Hub, cfg.Dispatcher, cfg.NamingMode, cfg.StripPlus, cfg.MailboxTokenSecret, cfg.Logger)
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
 	refreshStream := func(r *http.Request) (*http.Request, error) {
 		return middleware.RevalidateRequest(r, st, cfg.JWTSecret, cfg.PublicTenantID)
 	}
-	msg.SetStreamRevalidator(refreshStream)
 	mon.SetStreamRevalidator(refreshStream)
-	if cfg.CompanyRepository != nil {
-		msg.SetMailboxEventReader(cfg.CompanyRepository)
-	}
 	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger)
 	auth.SetCompanyOnly(cfg.CompanyOnly)
 	ua := handlers.NewUserAdminHandler(st, cfg.Logger)
@@ -169,7 +165,11 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	r.Route("/api/v1", func(r chi.Router) {
 		if cfg.CompanyRepository != nil {
 			cdh := handlers.NewCompanyDomainHandler(dh.Service(), cfg.CompanyRepository, cfg.Logger)
-			handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, msg, subs, cdh, cfg.Logger).Routes(r)
+			mailService := companymail.NewService(cfg.CompanyRepository, cfg.ObjectStore)
+			workbench := handlers.NewCompanyMailHandler(cfg.CompanyRepository, mailService, subs, cfg.Logger)
+			events := handlers.NewMailboxEventHandler(cfg.CompanyRepository, refreshStream, cfg.Logger)
+			admin := handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, subs, cfg.Logger)
+			handlers.RegisterCompanyRoutes(r, admin, workbench, events, cdh)
 		}
 		// -- Auth (public, no auth required) --
 		r.Post("/auth/login", auth.Login)
