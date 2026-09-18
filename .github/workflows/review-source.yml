@@ -1,0 +1,29 @@
+name: Pull request source evidence
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: review-source-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Archive only tracked source (no credentials or runtime data)
+        run: |
+          git rev-parse HEAD > source-commit.txt
+          git archive --format=tar --output=source.tar HEAD
+      - uses: actions/upload-artifact@v4
+        with:
+          name: review-source
+          path: |
+            source.tar
+            source-commit.txt
+          retention-days: 7
