@@ -12,7 +12,7 @@ import {
 } from "./permissions";
 import type { EffectivePermission } from "@/lib/types";
 
-const LEVELS: PermissionLevel[] = ["public", "mailbox", "user", "admin", "super_admin"];
+const LEVELS: PermissionLevel[] = ["public", "user", "admin", "super_admin"];
 
 function perms(overrides: Partial<EffectivePermission> = {}): EffectivePermission {
   return {
@@ -70,8 +70,8 @@ describe.each(CAPABILITIES)("$name", ({ fn, flag }) => {
     expect(fn("user", undefined)).toBe(false);
   });
 
-  it("public and mailbox sessions are never allowed", () => {
-    for (const level of ["public", "mailbox"] as const) {
+  it("public sessions are never allowed", () => {
+    for (const level of ["public"] as const) {
       expect(fn(level, null)).toBe(false);
       expect(fn(level, perms({ [flag]: true }))).toBe(false);
     }

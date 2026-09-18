@@ -2,10 +2,15 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog"
+	"io"
 	"net/http"
 	"strconv"
+	"tabmail/internal/api/middleware"
+	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/models"
 	"tabmail/internal/realtime"
@@ -13,17 +18,43 @@ import (
 )
 
 type mailboxEventReader interface {
+	GetWorkMailbox(context.Context, authz.Actor, uuid.UUID) (*company.MailboxAccess, error)
 	ListMailboxEvents(context.Context, uuid.UUID, uuid.UUID, int64, int) ([]company.MailEvent, int64, error)
 }
 
-func (h *MessageHandler) SetStreamRevalidator(f func(*http.Request) (*http.Request, error)) {
-	h.revalidate = f
+// MailboxEventHandler has no content service and no legacy/public resolver.
+// A subscription is scoped by immutable mailbox ID and current CanRead rights.
+type MailboxEventHandler struct {
+	eventReader mailboxEventReader
+	revalidate  func(*http.Request) (*http.Request, error)
+	logger      zerolog.Logger
 }
-func (h *MessageHandler) SetMailboxEventReader(st mailboxEventReader) { h.eventReader = st }
+
+func NewMailboxEventHandler(reader mailboxEventReader, revalidate func(*http.Request) (*http.Request, error), logger zerolog.Logger) *MailboxEventHandler {
+	return &MailboxEventHandler{eventReader: reader, revalidate: revalidate, logger: logger}
+}
+
+func (h *MailboxEventHandler) Events(w http.ResponseWriter, r *http.Request) {
+	id, valid := companyID(w, r, "id")
+	if !valid {
+		return
+	}
+	mb, err := h.eventReader.GetWorkMailbox(r.Context(), companyActor(r), id)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	if mb == nil || !mb.CanRead || mb.Mailbox.ID != id || mb.Mailbox.TenantID != companyActor(r).TenantID {
+		errForbidden(w, "mailbox read permission required")
+		return
+	}
+	h.streamDurable(w, r, &mb.Mailbox)
+}
+
 func (h *MonitorHandler) SetStreamRevalidator(f func(*http.Request) (*http.Request, error)) {
 	h.revalidate = f
 }
-func (h *MessageHandler) streamDurable(w http.ResponseWriter, r *http.Request, mb *models.Mailbox) {
+func (h *MailboxEventHandler) streamDurable(w http.ResponseWriter, r *http.Request, mb *models.Mailbox) {
 	_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(35 * time.Second))
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -49,12 +80,13 @@ func (h *MessageHandler) streamDurable(w http.ResponseWriter, r *http.Request, m
 		var err error
 		if h.revalidate != nil {
 			fresh, err = h.revalidate(r)
-			if err != nil {
+			if err != nil || fresh == nil {
 				return false
 			}
 		}
-		current, err := h.service.ResolveMailbox(fresh.Context(), mb.FullAddress, h.resolveViewer(fresh))
-		if err != nil || current.ID != mb.ID {
+		actor := middleware.ActorFromContext(fresh.Context())
+		current, err := h.eventReader.GetWorkMailbox(fresh.Context(), actor, mb.ID)
+		if err != nil || current == nil || !current.CanRead || current.Mailbox.ID != mb.ID || current.Mailbox.TenantID != mb.TenantID || actor.TenantID != mb.TenantID {
 			return false
 		}
 		events, next, err := h.eventReader.ListMailboxEvents(fresh.Context(), mb.TenantID, mb.ID, cursor, 200)
@@ -95,4 +127,11 @@ func (h *MessageHandler) streamDurable(w http.ResponseWriter, r *http.Request, m
 			flusher.Flush()
 		}
 	}
+}
+
+func writeSSE(w http.ResponseWriter, event string, payload any) {
+	_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(35 * time.Second))
+	data, _ := json.Marshal(payload)
+	_, _ = io.WriteString(w, "event: "+event+"\n")
+	_, _ = io.WriteString(w, "data: "+string(data)+"\n\n")
 }

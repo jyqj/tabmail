@@ -87,6 +87,17 @@ func loadSubmissionRecipients(ctx context.Context, tx pgx.Tx, tenant uuid.UUID, 
 // zone allowlist. argBase names the first free placeholder so callers can
 // prepend their own arguments.
 func submissionScope(a authz.Actor, argBase int) (string, []any) {
+	return submissionScopeFor(a, argBase, true)
+}
+
+func submissionContentScope(a authz.Actor, argBase int) (string, []any) {
+	return submissionScopeFor(a, argBase, false)
+}
+
+// allowSubmitter grants an operation receipt, NEVER a body or attachment.
+// Both predicates keep independent tenant and zone constraints. Missing,
+// expired or no-longer-readable mailboxes fail closed for sent content.
+func submissionScopeFor(a authz.Actor, argBase int, allowSubmitter bool) (string, []any) {
 	// The tenant conjunct is independent and must survive every branch below:
 	// replacing it (instead of appending) dropped the top-level tenant bound
 	// and let rows from other tenants that reference this principal's user or
@@ -99,11 +110,16 @@ func submissionScope(a authz.Actor, argBase int) (string, []any) {
 		n++
 		u := "$" + strconv.Itoa(n)
 		args = append(args, *uid)
-		where = append(where, `(s.user_id=`+u+` OR s.sender_user_id=`+u+` OR s.sender_mailbox_id IN (
-			SELECT m.id FROM mailboxes m WHERE m.tenant_id=$`+strconv.Itoa(argBase)+`
+		readable := `s.sender_mailbox_id IN (
+			SELECT m.id FROM mailboxes m WHERE m.tenant_id=$` + strconv.Itoa(argBase) + `
 			 AND (m.expires_at IS NULL OR m.expires_at>clock_timestamp())
-			 AND (m.owner_user_id=`+u+` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=`+u+` AND g.can_read))))`)
-	} else if a.Type == authz.PrincipalAPIKey {
+			 AND (m.owner_user_id=` + u + ` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=` + u + ` AND g.can_read)))`
+		if allowSubmitter {
+			where = append(where, `(s.user_id=`+u+` OR s.sender_user_id=`+u+` OR `+readable+`)`)
+		} else {
+			where = append(where, readable)
+		}
+	} else if allowSubmitter && a.Type == authz.PrincipalAPIKey {
 		n++
 		where = append(where, `s.api_key_id=$`+strconv.Itoa(n))
 		args = append(args, a.ID)
@@ -193,16 +209,15 @@ func (s *PgStore) GetSubmission(ctx context.Context, a authz.Actor, id uuid.UUID
 	return v, nil
 }
 
-// The content and attachment projections reuse the metadata scope verbatim:
-// the same tenant-isolated submitter-or-readable-mailbox predicate governs who
-// may read what was actually sent. Authorization failures collapse to 404 like
-// every other submission lookup, so existence is not disclosed.
+// Content and attachment projections require current mailbox read rights.
+// Historical submitter identity only permits the separate operation receipt.
+// Denial collapses to 404, including after grants or ownership are revoked.
 const submissionContentSelect = `SELECT s.id,s.subject,s.mail_from,s.to_addrs,s.cc_addrs,s.headers_json,s.text_body,s.html_body,s.created_at FROM outbound_jobs s`
 
 func (s *PgStore) GetSubmissionContent(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.SubmissionContent, error) {
 	v := &company.SubmissionContent{}
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		where, args := submissionScope(a, 2)
+		where, args := submissionContentScope(a, 2)
 		var to, cc []string
 		var headers json.RawMessage
 		e := tx.QueryRow(ctx, submissionContentSelect+` WHERE `+where+` AND s.id=$1`, append([]any{id}, args...)...).
@@ -234,7 +249,7 @@ const submissionAttachmentSelect = `SELECT a.id,a.filename,a.content_type,a.size
 func (s *PgStore) ListSubmissionAttachments(ctx context.Context, a authz.Actor, id uuid.UUID) ([]company.SubmissionAttachment, error) {
 	out := []company.SubmissionAttachment{}
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		where, args := submissionScope(a, 2)
+		where, args := submissionContentScope(a, 2)
 		// An invisible submission collapses to 404 like the metadata view,
 		// rather than answering an empty list for a job that does not exist
 		// for this actor.
@@ -273,7 +288,7 @@ func (s *PgStore) ListSubmissionAttachments(ctx context.Context, a authz.Actor, 
 func (s *PgStore) GetSubmissionAttachment(ctx context.Context, a authz.Actor, jobID, attachmentID uuid.UUID) (*company.SubmissionAttachment, error) {
 	v := &company.SubmissionAttachment{}
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		where, args := submissionScope(a, 3)
+		where, args := submissionContentScope(a, 3)
 		e := tx.QueryRow(ctx, submissionAttachmentSelect+` WHERE `+where+` AND s.id=$1 AND a.id=$2 AND a.state='ready'`, append([]any{jobID, attachmentID}, args...)...).
 			Scan(&v.ID, &v.Filename, &v.ContentType, &v.Size, &v.State, &v.ObjectKey, &v.SHA256)
 		if errors.Is(e, pgx.ErrNoRows) {
