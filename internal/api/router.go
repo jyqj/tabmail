@@ -39,7 +39,7 @@ import (
 var openapiSpec embed.FS
 
 // docsAssets holds the vendored Swagger UI / ReDoc bundles so /docs and
-// /redoc work without loading script from third-party CDs.
+// /redoc work without loading script from third-party CDNs.
 //
 //go:embed docsassets/*.js docsassets/*.css
 var docsAssets embed.FS
