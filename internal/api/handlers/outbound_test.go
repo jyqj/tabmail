@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -193,7 +194,21 @@ func TestDeleteSuppressionIsTenantScoped(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	rr := doOutboundHandlerRequest(t, f.st, h.DeleteSuppression, http.MethodDelete, "/api/v1/suppression/"+suppressionID.String(), map[string]string{"id": suppressionID.String()}, outboundUserHeaders(t, f.userA))
+	deleteSuppression := func(t *testing.T, user *models.User) *httptest.ResponseRecorder {
+		t.Helper()
+		req := httptest.NewRequest(http.MethodDelete, "/api/v1/suppression/"+suppressionID.String(), strings.NewReader(`{"reason":"cleanup"}`))
+		for k, v := range outboundUserHeaders(t, user) {
+			req.Header.Set(k, v)
+		}
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", suppressionID.String())
+		req = req.WithContext(withRouteContext(req, rctx))
+		rr := httptest.NewRecorder()
+		middleware.Auth(f.st, outboundTestJWTSecret, publicTenantIDForTests)(http.HandlerFunc(h.DeleteSuppression)).ServeHTTP(rr, req)
+		return rr
+	}
+
+	rr := deleteSuppression(t, f.tenantAdmin)
 	if rr.Code != http.StatusNoContent {
 		t.Fatalf("cross-tenant delete expected 204, got %d body=%s", rr.Code, rr.Body.String())
 	}
@@ -205,11 +220,11 @@ func TestDeleteSuppressionIsTenantScoped(t *testing.T) {
 		t.Fatal("cross-tenant delete removed suppression from another tenant")
 	}
 
-	otherTenantUser := &models.User{ID: uuid.New(), TenantID: f.otherTenantID, Email: "other@example.test", Role: models.RoleUser, IsActive: true}
-	if err := f.st.CreateUser(context.Background(), otherTenantUser); err != nil {
+	otherTenantAdmin := &models.User{ID: uuid.New(), TenantID: f.otherTenantID, Email: "other-admin@example.test", Role: models.RoleAdmin, IsActive: true}
+	if err := f.st.CreateUser(context.Background(), otherTenantAdmin); err != nil {
 		t.Fatal(err)
 	}
-	rr = doOutboundHandlerRequest(t, f.st, h.DeleteSuppression, http.MethodDelete, "/api/v1/suppression/"+suppressionID.String(), map[string]string{"id": suppressionID.String()}, outboundUserHeaders(t, otherTenantUser))
+	rr = deleteSuppression(t, otherTenantAdmin)
 	if rr.Code != http.StatusNoContent {
 		t.Fatalf("same-tenant delete expected 204, got %d body=%s", rr.Code, rr.Body.String())
 	}

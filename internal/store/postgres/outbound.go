@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sort"
@@ -553,5 +554,62 @@ func (s *PgStore) ListSuppressions(ctx context.Context, tenantID uuid.UUID, pg m
 func (s *PgStore) DeleteSuppression(ctx context.Context, tenantID uuid.UUID, id uuid.UUID) error {
 	_, err := s.pool.Exec(ctx, `DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`, id, tenantID)
 	return err
+}
+
+// DeleteSuppressionAudited removes the suppression entry and persists the
+// audit row in one transaction — an audit failure rolls the delete back, the
+// same fail-closed semantics as app.InsertAuditRequired. The suppressed
+// address is read inside the transaction and merged into the audit details,
+// since the handler only carries the id.
+func (s *PgStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var address string
+	if err := tx.QueryRow(ctx,
+		`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,
+		id, tenantID).Scan(&address); err != nil && !errors.Is(err, pgx.ErrNoRows) {
+		return err
+	}
+	if _, err := tx.Exec(ctx, `DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`, id, tenantID); err != nil {
+		return err
+	}
+	if entry.ID == uuid.Nil {
+		entry.ID = uuid.New()
+	}
+	if entry.CreatedAt.IsZero() {
+		entry.CreatedAt = time.Now()
+	}
+	details, err := mergeAuditDetail(entry.Details, "address", address)
+	if err != nil {
+		return err
+	}
+	entry.Details = details
+	if _, err := tx.Exec(ctx, `
+		INSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+		entry.ID, entry.TenantID, entry.Actor, entry.Action, entry.ResourceType, entry.ResourceID, entry.Details, entry.CreatedAt); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+// mergeAuditDetail decodes an audit entry's details JSON, sets one key, and
+// re-encodes it. An empty object is treated as the zero form.
+func mergeAuditDetail(details json.RawMessage, key string, value string) (json.RawMessage, error) {
+	m := map[string]any{}
+	if len(details) > 0 {
+		if err := json.Unmarshal(details, &m); err != nil {
+			return nil, err
+		}
+	}
+	m[key] = value
+	b, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
 

@@ -96,6 +96,8 @@ var allowedAPIKeyScopes = []string{
 	"messages:write",
 	"send:read",
 	"send:write",
+	"suppression:read",
+	"suppression:manage",
 	"webhooks:read",
 	"webhooks:write",
 }

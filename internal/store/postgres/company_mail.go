@@ -474,17 +474,24 @@ func (s *PgStore) GetWorkAttachment(ctx context.Context, a authz.Actor, id uuid.
 		if e != nil {
 			return e
 		}
-		if v.UserID == a.ID && rights.CanSend {
-			return nil
-		}
 		var sent bool
 		if e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM outbound_attachments WHERE tenant_id=$1 AND attachment_id=$2)`, a.TenantID, id).Scan(&sent); e != nil {
 			return e
 		}
-		if !sent || !rights.CanRead {
-			return app.Forbidden("attachment read permission required")
+		// Once an attachment is pinned to a submitted job, its bytes follow the
+		// sent-envelope rule: only a CURRENT read right opens them — including
+		// for the original uploader, whose grant may have since been reduced to
+		// send-only.
+		if sent {
+			if !rights.CanRead {
+				return app.Forbidden("attachment read permission required")
+			}
+			return nil
 		}
-		return nil
+		if v.UserID == a.ID && rights.CanSend {
+			return nil
+		}
+		return app.Forbidden("attachment read permission required")
 	})
 	return v, e
 }

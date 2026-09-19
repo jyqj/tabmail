@@ -189,12 +189,17 @@ func TestReleaseSharedOutboundReadIsNotRetry(t *testing.T) {
 	if err := st.SetMailboxGrant(ctx, grant); err != nil {
 		t.Fatal(err)
 	}
-	for _, who := range []*models.User{sender, reader} {
-		for _, p := range []string{path, "/api/v1/outbound"} {
-			w := rbRequest(t, h, who, "GET", p, "", nil)
-			if w.Code != 200 || !strings.Contains(w.Body.String(), j.TextBody) || !strings.Contains(w.Body.String(), `"content_redacted":false`) {
-				t.Fatalf("authorized history %d %s", w.Code, w.Body.String())
-			}
+	// A current read grant sees full content. The sender keeps only the
+	// operation receipt: without a CURRENT read grant on the sending mailbox
+	// the body stays redacted even for the historical submitter.
+	for _, p := range []string{path, "/api/v1/outbound"} {
+		w := rbRequest(t, h, reader, "GET", p, "", nil)
+		if w.Code != 200 || !strings.Contains(w.Body.String(), j.TextBody) || !strings.Contains(w.Body.String(), `"content_redacted":false`) {
+			t.Fatalf("granted reader history %d %s", w.Code, w.Body.String())
+		}
+		w = rbRequest(t, h, sender, "GET", p, "", nil)
+		if w.Code != 200 || strings.Contains(w.Body.String(), j.TextBody) || !strings.Contains(w.Body.String(), `"content_redacted":true`) {
+			t.Fatalf("sender receipt without read grant %d %s", w.Code, w.Body.String())
 		}
 	}
 	if w := rbRequest(t, h, reader, "POST", path+"/retry", "{}", nil); w.Code != 403 {

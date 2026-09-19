@@ -403,9 +403,12 @@ func (s *Service) AccessibleOutboundJob(ctx context.Context, tenant *models.Tena
 }
 
 // ContentAllowed decides whether the actor may see a job's content and
-// protocol details. Never derive content authority from an administrative
-// role: a task's durable sender identity or a CURRENT read grant for its
-// original mailbox is required.
+// protocol details. Content authority rests solely on a CURRENT read grant
+// for the job's original sender mailbox, matching the store layer's
+// submissionScopeFor(allowSubmitter=false). Never derive content authority
+// from an administrative role or from historical sender identity; the
+// latter is kept only for receipt visibility via AccessibleOutboundJob's
+// owner rule.
 func (s *Service) ContentAllowed(ctx context.Context, actor authz.Actor, job *models.OutboundJob) (bool, error) {
 	if job == nil || actor.TenantID != job.TenantID || !actor.Permission.AllowsZone(job.ZoneID) {
 		return false, nil
@@ -420,9 +423,6 @@ func (s *Service) ContentAllowed(ctx context.Context, actor authz.Actor, job *mo
 	}
 	if u == nil || !u.IsActive || (u.TenantID != job.TenantID && !(actor.IsSuperAdmin && u.Role == models.RoleSuperAdmin)) {
 		return false, nil
-	}
-	if job.SenderUserID != nil && *job.SenderUserID == *uid {
-		return true, nil
 	}
 	if job.SenderMailboxID == nil {
 		return false, nil

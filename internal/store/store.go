@@ -256,6 +256,9 @@ type SuppressionStore interface {
 	IsSuppressed(ctx context.Context, tenantID uuid.UUID, address string) (bool, error)
 	ListSuppressions(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.SuppressionEntry, int, error)
 	DeleteSuppression(ctx context.Context, tenantID uuid.UUID, id uuid.UUID) error
+	// DeleteSuppressionAudited removes the entry and writes the audit row in
+	// one transaction; a failed audit rolls the delete back.
+	DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error
 }
 
 // IngestStore persists ingest jobs.

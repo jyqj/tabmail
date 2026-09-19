@@ -45,9 +45,11 @@ func TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation(t *testi
 			t.Fatalf("revoked author content must be 404: %v", v)
 		}
 	}
-	// Existing workspace upload ownership remains separate from sent-envelope read.
-	_, e = f.st.GetWorkAttachment(ctx, f.u, attachment.ID)
-	must(t, e)
+	// Once pinned to a sent job, even the uploader reads the bytes only through
+	// a current read right: the residual send-only grant stays closed.
+	if _, e = f.st.GetWorkAttachment(ctx, f.u, attachment.ID); e == nil {
+		t.Fatal("sent attachment bytes leaked to send-only uploader")
+	}
 	// The new mailbox reader inherits company history, without becoming its author.
 	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.other.ID, CanRead: true}))
 	successor := authz.Actor{Type: authz.PrincipalUser, ID: f.other.ID, TenantID: f.tenant.ID, Role: models.RoleUser}

@@ -198,8 +198,8 @@ func NewRouter(cfg RouterConfig) http.Handler {
 				r.With(middleware.RequireScopes("send:read")).Get("/outbound/{id}", oh.GetJob)
 				r.With(middleware.RequireScopes("send:read")).Get("/outbound/{id}/attempts", oh.ListAttempts)
 				r.With(middleware.RequireScopes("send:write")).Post("/outbound/{id}/retry", oh.RetryJob)
-				r.With(middleware.RequireScopes("send:read")).Get("/suppression", oh.ListSuppressions)
-				r.With(middleware.RequireScopes("send:write")).Delete("/suppression/{id}", oh.DeleteSuppression)
+				r.With(middleware.RequireScopes("suppression:read")).Get("/suppression", oh.ListSuppressions)
+				r.With(middleware.RequireScopes("suppression:manage")).Delete("/suppression/{id}", oh.DeleteSuppression)
 			}
 
 		})

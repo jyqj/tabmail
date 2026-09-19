@@ -2,6 +2,7 @@ package testutil
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"sort"
 	"strings"
@@ -354,6 +355,54 @@ func (s *FakeStore) DeleteSuppression(_ context.Context, tenantID uuid.UUID, id 
 		delete(s.suppressions, id)
 	}
 	return nil
+}
+
+// DeleteSuppressionAudited mirrors the PgStore contract: the delete and the
+// audit row land together, with the suppressed address merged into the audit
+// details. The audit write happens first; if it fails the suppression stays,
+// so a caller relying on the fake sees the same fail-closed outcome.
+func (s *FakeStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error {
+	s.mu.Lock()
+	address := ""
+	if e := s.suppressions[id]; e != nil && e.TenantID == tenantID {
+		address = e.Address
+	}
+	if entry.ID == uuid.Nil {
+		entry.ID = uuid.New()
+	}
+	if entry.CreatedAt.IsZero() {
+		entry.CreatedAt = time.Now()
+	}
+	s.mu.Unlock()
+	details, err := mergeSuppressionAuditDetail(entry.Details, address)
+	if err != nil {
+		return err
+	}
+	entry.Details = details
+	if err := s.InsertAudit(ctx, &entry); err != nil {
+		return err
+	}
+	s.mu.Lock()
+	delete(s.suppressions, id)
+	s.mu.Unlock()
+	return nil
+}
+
+// mergeSuppressionAuditDetail decodes an audit entry's details JSON, records
+// the suppressed address, and re-encodes it.
+func mergeSuppressionAuditDetail(details json.RawMessage, address string) (json.RawMessage, error) {
+	m := map[string]any{}
+	if len(details) > 0 {
+		if err := json.Unmarshal(details, &m); err != nil {
+			return nil, err
+		}
+	}
+	m["address"] = address
+	b, err := json.Marshal(m)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
 
 func cloneOutboundJob(job *models.OutboundJob) *models.OutboundJob {

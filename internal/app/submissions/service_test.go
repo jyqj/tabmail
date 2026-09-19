@@ -230,4 +230,59 @@ func TestRedactOutboundJobByAuthority(t *testing.T) {
 	}
 }
 
+// TestRedactOutboundJobAfterGrantRevocation pins the content-authority split:
+// content follows only a CURRENT read grant on the sender mailbox, while
+// receipt visibility for the historical sender survives via the owner rule.
+func TestRedactOutboundJobAfterGrantRevocation(t *testing.T) {
+	f := newSubmissionFixture(t)
+	job := &models.OutboundJob{
+		ID: uuid.New(), TenantID: f.tenant.ID, ZoneID: f.zone.ID, MailFrom: f.mb.FullAddress,
+		UserID: &f.other.ID, SenderUserID: &f.other.ID, SenderMailboxID: &f.mb.ID,
+		State: models.OutboundSent, Subject: "s", TextBody: "secret", HTMLBody: "<b>secret</b>",
+		To: []string{"to@example.test"}, BCC: []string{"bcc@example.test"},
+		AttachmentIDs: []uuid.UUID{uuid.New()},
+	}
+	if err := f.st.CreateOutboundJob(context.Background(), job); err != nil {
+		t.Fatal(err)
+	}
+	if err := f.st.SetMailboxGrant(context.Background(), &models.MailboxGrant{
+		TenantID: f.tenant.ID, MailboxID: f.mb.ID, UserID: f.other.ID, CanRead: true,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	grantedView, err := f.svc.RedactOutboundJob(context.Background(), userActor(f.other), job)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if grantedView.ContentRedacted || grantedView.TextBody != "secret" {
+		t.Fatalf("current read grant must admit content: %+v", grantedView)
+	}
+
+	if err := f.st.SetMailboxGrant(context.Background(), &models.MailboxGrant{
+		TenantID: f.tenant.ID, MailboxID: f.mb.ID, UserID: f.other.ID,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	revokedView, err := f.svc.RedactOutboundJob(context.Background(), userActor(f.other), job)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !revokedView.ContentRedacted {
+		t.Fatal("revoked read grant must redact content despite historical sender identity")
+	}
+	if revokedView.TextBody != "" || revokedView.HTMLBody != "" || revokedView.BCC != nil || revokedView.AttachmentIDs != nil {
+		t.Fatalf("redacted view leaked content: %+v", revokedView)
+	}
+	if revokedView.Subject != "s" || len(revokedView.To) != 1 || revokedView.To[0] != "to@example.test" || revokedView.State != models.OutboundSent {
+		t.Fatalf("receipt fields must survive redaction: %+v", revokedView)
+	}
+
+	visible, err := f.svc.AccessibleOutboundJob(context.Background(), f.tenant, userActor(f.other), job.ID)
+	if err != nil || visible == nil || visible.ID != job.ID {
+		t.Fatalf("historical sender must keep receipt visibility after revocation, got job=%v err=%v", visible, err)
+	}
+}
+
 func ptrUUID(id uuid.UUID) *uuid.UUID { return &id }

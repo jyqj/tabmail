@@ -2,14 +2,17 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app"
 	"tabmail/internal/app/submissions"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
@@ -192,12 +195,30 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 	ok(w, attempts)
 }
 
+// requireSuppressionAdmin is the authoritative boundary for the suppression
+// management surface. RequireScopes passes JWT modes straight through, so an
+// ordinary employee JWT would reach these handlers unchecked; here we inspect
+// the resolved actor and demand tenant-admin authority from interactive users.
+// API keys are deliberately skipped — the scope middleware is their gate.
+// Modeled on the company_domains.go guard.
+func (h *OutboundHandler) requireSuppressionAdmin(w http.ResponseWriter, r *http.Request) bool {
+	actor := middleware.ActorFromContext(r.Context())
+	if actor.Type != authz.PrincipalUser || actor.IsTenantAdmin() {
+		return true
+	}
+	errForbidden(w, "tenant administrator required")
+	return false
+}
+
 // ListSuppressions handles GET /api/v1/suppression — list suppressed addresses.
 func (h *OutboundHandler) ListSuppressions(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	tenant := middleware.TenantFromCtx(ctx)
 	if tenant == nil {
 		errForbidden(w, "authentication required")
+		return
+	}
+	if !h.requireSuppressionAdmin(w, r) {
 		return
 	}
 	pg := pageFromReq(r)
@@ -210,7 +231,10 @@ func (h *OutboundHandler) ListSuppressions(w http.ResponseWriter, r *http.Reques
 	okList(w, items, total, pg.Page, pg.PerPage)
 }
 
-// DeleteSuppression handles DELETE /api/v1/suppression/{id} — remove a suppressed address.
+// DeleteSuppression handles DELETE /api/v1/suppression/{id} — remove a
+// suppressed address. The removal is destructive for future deliveries, so it
+// demands a non-empty reason in the body and lands with the audit row in one
+// transaction; a failed audit fails the whole request.
 func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	tenant := middleware.TenantFromCtx(ctx)
@@ -218,12 +242,34 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 		errForbidden(w, "authentication required")
 		return
 	}
+	if !h.requireSuppressionAdmin(w, r) {
+		return
+	}
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid id")
 		return
 	}
-	if err := h.store.DeleteSuppression(ctx, tenant.ID, id); err != nil {
+	var body struct {
+		Reason string `json:"reason"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || strings.TrimSpace(body.Reason) == "" {
+		errBadRequest(w, "reason is required")
+		return
+	}
+	actor := middleware.ActorFromContext(ctx)
+	entry := models.AuditEntry{
+		TenantID:     &tenant.ID,
+		Actor:        actor.AuditLabel(),
+		Action:       "suppression.delete",
+		ResourceType: "suppression",
+		ResourceID:   &id,
+		Details: app.MustJSON(map[string]any{
+			"suppression_id": id.String(),
+			"reason":         strings.TrimSpace(body.Reason),
+		}),
+	}
+	if err := h.store.DeleteSuppressionAudited(ctx, tenant.ID, id, entry); err != nil {
 		h.logger.Err(err).Msg("deleting suppression")
 		errInternal(w)
 		return

@@ -351,7 +351,15 @@ func (h *CompanyMailHandler) SubmitDraft(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	if replayed {
-		ok(w, job)
+		// A replay must not reopen the sent envelope: the original submitter's
+		// read grant may have been revoked since, so the receipt goes through
+		// the same redacted view as the submission read endpoints.
+		view, rerr := h.subs.RedactOutboundJob(r.Context(), companyActor(r), job)
+		if rerr != nil {
+			respondAppError(w, h.logger, rerr)
+			return
+		}
+		ok(w, view)
 		return
 	}
 	created(w, job)
