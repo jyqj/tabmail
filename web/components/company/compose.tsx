@@ -11,6 +11,7 @@ import {
   type MailAttachment,
   type MailDraft,
   type DraftPayload,
+  type DraftTemplateVersionStatus,
   type RenderedTemplate,
   type TemplateVersion,
   type WorkMailbox,
@@ -25,6 +26,30 @@ import {
   useAction,
   useText,
 } from "./common";
+
+// Interaction notices for server-declared ineligible pins, keyed by the
+// backend eligibility status. usable and missing are absent on purpose:
+// usable needs no notice and missing renders normally (see above).
+const INELIGIBLE_NOTICES: Partial<
+  Record<DraftTemplateVersionStatus, [string, string]>
+> = {
+  revoked: [
+    "该模板版本已被紧急撤销，请换用其他版本",
+    "This template version has been emergency-revoked; pick another version",
+  ],
+  retired: [
+    "模板已退役，请更换模板",
+    "This template has been retired; choose another template",
+  ],
+  unauthorized: [
+    "当前邮箱无该模板使用授权",
+    "This mailbox is not authorized to use this template",
+  ],
+  corrupt: [
+    "模板版本内容校验失败，请换用其他版本",
+    "Template version failed content verification; pick another version",
+  ],
+};
 
 export function Compose({
   mailboxes,
@@ -58,7 +83,25 @@ export function Compose({
   const version = templates.data?.find(
     (v) => v.id === payload.template_version_id,
   );
-  const invalidVersion = Boolean(payload.template_version_id && !version);
+  // Eligibility comes from the server only. A saved draft carries the
+  // resolved status for its pinned version; a pin picked fresh from the
+  // usable-templates list is usable by construction until the next save
+  // resolves it authoritatively. "missing" is deliberately not an error: the
+  // payload stays editable and savable, and the server rejects a bad send.
+  const eligibility =
+    draft.template_version?.id === payload.template_version_id
+      ? draft.template_version
+      : undefined;
+  const status = eligibility?.status;
+  const ineligible =
+    Boolean(status) &&
+    status !== "usable" &&
+    status !== "missing";
+  const invalidVersion = Boolean(payload.template_version_id) &&
+    (ineligible || (!eligibility && !version));
+  const notice = status
+    ? INELIGIBLE_NOTICES[status as Exclude<DraftTemplateVersionStatus, "usable" | "missing">]
+    : undefined;
   const locked = busy || Boolean(pending);
   const dirty =
     JSON.stringify(payload) !== JSON.stringify(draft.payload) ||
@@ -75,7 +118,7 @@ export function Compose({
     setPayload((v) => ({ ...v, ...patch }));
     setPreview(null);
   }
-  async function save(silent = false) {
+  async function save(next: DraftPayload = payload, silent = false) {
     const value = await company<MailDraft>(
       draft.id ? `/drafts/${draft.id}` : "/drafts",
       {
@@ -83,7 +126,7 @@ export function Compose({
         body: {
           id: draft.id,
           mailbox_id: mailboxId,
-          payload,
+          payload: next,
           revision: draft.revision,
         },
       },
@@ -106,7 +149,7 @@ export function Compose({
     if (!snapshot) {
       // The server submits the persisted draft inside the enqueue transaction,
       // so unsaved edits must be flushed first.
-      const saved = await save(true);
+      const saved = await save(undefined, true);
       if (!saved.id) throw new Error(t("草稿未保存", "Draft not saved"));
       snapshot = {
         key: `${saved.id}.${saved.revision}`,
@@ -266,12 +309,14 @@ export function Compose({
                 ? t("必须选择模板", "Template required")
                 : t("自由撰写", "Free composition")}
             </option>
-            {invalidVersion && (
+            {payload.template_version_id && !version && (
               <option value={payload.template_version_id}>
-                {t(
-                  "此版本不可用，请重新选择",
-                  "Version unavailable; select another",
-                )}
+                {status === "missing" && eligibility?.name
+                  ? `${eligibility.name}${eligibility.version ? ` · v${eligibility.version}` : ""}`
+                  : t(
+                      "此版本不可用，请重新选择",
+                      "Version unavailable; select another",
+                    )}
               </option>
             )}
             {(templates.data ?? []).map((v) => (
@@ -282,6 +327,31 @@ export function Compose({
           </select>
         )}
       </Field>
+      {/* Server-declared ineligible pin: disable sending but never lock the
+          editors, and offer an unpin that clears the reference server-side.
+          The send path re-authorizes the version regardless. */}
+      {ineligible && notice && (
+        <div className="flex flex-wrap items-center gap-3 rounded-md border border-amber-500 p-3 text-sm">
+          <p>{t(notice[0], notice[1])}</p>
+          <ActionButton
+            disabled={locked}
+            onClick={() =>
+              run(async () => {
+                const next = {
+                  ...payload,
+                  template_version_id: undefined,
+                  template_vars: {},
+                };
+                setPayload(next);
+                setPreview(null);
+                await save(next);
+              })
+            }
+          >
+            {t("解除模板固定", "Unpin template")}
+          </ActionButton>
+        </div>
+      )}
       {version ? (
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">

@@ -383,7 +383,9 @@ func (s *FakeStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.
 		return err
 	}
 	s.mu.Lock()
-	delete(s.suppressions, id)
+	if e := s.suppressions[id]; e != nil && e.TenantID == tenantID {
+		delete(s.suppressions, id)
+	}
 	s.mu.Unlock()
 	return nil
 }

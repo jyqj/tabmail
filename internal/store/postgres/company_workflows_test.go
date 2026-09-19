@@ -682,3 +682,130 @@ func TestP4AttachmentCleanupRespectsSentJobReferences(t *testing.T) {
 		t.Fatal("expired orphan retained after job removal")
 	}
 }
+
+// The draft surface labels a pinned template version's eligibility with the
+// exact predicates TemplateForSend enforces (current grant, NOT retired, not
+// revoked, snapshot integrity) at the fixed priority
+// missing > revoked > corrupt > retired > unauthorized. Snapshot content is
+// embedded only in the usable state, an unknown version_id is a normal labeled
+// input rather than a save error, and every non-usable status keeps
+// TemplateForSend's single denial message byte-identical.
+func TestR3DraftTemplateVersionEligibilityContract(t *testing.T) {
+	f := seedCompany(t)
+	ctx := context.Background()
+	publish := func(name string) (*company.Template, *company.TemplateVersion) {
+		t.Helper()
+		tpl, e := f.st.SaveMailTemplate(ctx, f.a, company.Template{Name: name, Draft: templateDraft()})
+		must(t, e)
+		v, e := f.st.PublishMailTemplate(ctx, f.a, tpl.ID, tpl.Revision)
+		must(t, e)
+		return tpl, v
+	}
+	grant := func(tplID uuid.UUID) {
+		t.Helper()
+		must(t, f.st.SetTemplateGrant(ctx, f.a, company.TemplateGrant{TemplateID: tplID, MailboxID: f.personal.ID, UserID: f.employee.ID}, true))
+	}
+	save := func(v *company.TemplateVersion) *company.Draft {
+		t.Helper()
+		payload := company.DraftPayload{Subject: "Draft"}
+		if v != nil {
+			payload.TemplateVersionID = &v.ID
+		}
+		d, e := f.st.SaveMailDraft(ctx, f.u, company.Draft{MailboxID: f.personal.ID, Payload: payload})
+		must(t, e)
+		return d
+	}
+	checkStatus := func(d *company.Draft, status string, wantSnapshot bool) {
+		t.Helper()
+		tv := d.TemplateVersion
+		if tv == nil || tv.Status != status || tv.ID != *d.Payload.TemplateVersionID {
+			t.Fatalf("draft eligibility wrong: want %s got %+v", status, tv)
+		}
+		if wantSnapshot != (tv.Snapshot != nil) {
+			t.Fatalf("snapshot presence wrong for %s: %+v", status, tv)
+		}
+	}
+	findDraft := func(list []company.Draft, id uuid.UUID) *company.Draft {
+		t.Helper()
+		for i := range list {
+			if list[i].ID == id {
+				return &list[i]
+			}
+		}
+		t.Fatal("draft missing from list")
+		return nil
+	}
+	denial := func(v uuid.UUID) string {
+		t.Helper()
+		_, _, _, e := f.st.TemplateForSend(ctx, f.tenant.ID, &f.employee.ID, nil, f.personal.ID, v)
+		if e == nil {
+			t.Fatal("expected TemplateForSend denial")
+		}
+		return e.Error()
+	}
+
+	// usable: the granted, live version carries its snapshot in every read path.
+	tpl1, v1 := publish("Contract Usable")
+	grant(tpl1.ID)
+	d1 := save(v1)
+	checkStatus(d1, company.TemplateVersionUsable, true)
+	if d1.TemplateVersion.Name != tpl1.Name || d1.TemplateVersion.Version != 1 || d1.TemplateVersion.TemplateID != tpl1.ID {
+		t.Fatalf("usable metadata missing: %+v", d1.TemplateVersion)
+	}
+	got, e := f.st.GetMailDraft(ctx, f.u, d1.ID)
+	must(t, e)
+	checkStatus(got, company.TemplateVersionUsable, true)
+	list, e := f.st.ListMailDrafts(ctx, f.u)
+	must(t, e)
+	checkStatus(findDraft(list, d1.ID), company.TemplateVersionUsable, true)
+
+	// revoked: emergency stop wins over the still-present grant, content is
+	// withheld from the draft, and the send denial text is unchanged.
+	tpl2, v2 := publish("Contract Revoked")
+	grant(tpl2.ID)
+	d2 := save(v2)
+	checkStatus(d2, company.TemplateVersionUsable, true)
+	must(t, f.st.RevokeMailTemplateVersion(ctx, f.a, tpl2.ID, v2.Version, tpl2.Revision+1))
+	list2, e := f.st.ListMailDrafts(ctx, f.u)
+	must(t, e)
+	checkStatus(findDraft(list2, d2.ID), company.TemplateVersionRevoked, false)
+	got, e = f.st.GetMailDraft(ctx, f.u, d2.ID)
+	must(t, e)
+	checkStatus(got, company.TemplateVersionRevoked, false)
+	if got.TemplateVersion.Name != tpl2.Name {
+		t.Fatalf("revoked metadata dropped: %+v", got.TemplateVersion)
+	}
+	if msg := denial(v2.ID); msg != "published template unavailable or not granted" {
+		t.Fatalf("revoked send denial changed: %q", msg)
+	}
+
+	// retired: template-level retire with the grant still in place.
+	tpl3, v3 := publish("Contract Retired")
+	grant(tpl3.ID)
+	d3 := save(v3)
+	must(t, f.st.SetMailTemplateRetired(ctx, f.a, tpl3.ID, tpl3.Revision+1, true))
+	list3, e := f.st.ListMailDrafts(ctx, f.u)
+	must(t, e)
+	checkStatus(findDraft(list3, d3.ID), company.TemplateVersionRetired, false)
+	if msg := denial(v3.ID); msg != "published template unavailable or not granted" {
+		t.Fatalf("retired send denial changed: %q", msg)
+	}
+
+	// unauthorized: no grant ever — the draft still saves, only labeled.
+	_, v4 := publish("Contract Unauthorized")
+	d4 := save(v4)
+	checkStatus(d4, company.TemplateVersionUnauthorized, false)
+	if msg := denial(v4.ID); msg != "published template unavailable or not granted" {
+		t.Fatalf("unauthorized send denial changed: %q", msg)
+	}
+
+	// missing: an unknown version_id is normal draft input, never an error.
+	missingID := uuid.MustParse("00000000-0000-0000-0000-00000000dead")
+	missing := &company.TemplateVersion{ID: missingID}
+	d5 := save(missing)
+	checkStatus(d5, company.TemplateVersionMissing, false)
+	if msg := denial(missingID); msg != "published template unavailable or not granted" {
+		t.Fatalf("missing send denial changed: %q", msg)
+	}
+}
+

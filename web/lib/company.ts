@@ -94,10 +94,31 @@ export interface DraftPayload {
   template_vars?: Record<string, string>;
   attachment_ids?: string[];
 }
+// Server-resolved eligibility of a draft's pinned template version. The
+// status is the single source of truth handed down by the backend — the
+// client never re-derives the rule. It is an interaction label only: every
+// send is re-authorized server-side (TemplateForSend). Snapshot is embedded
+// only in the "usable" state.
+export type DraftTemplateVersionStatus =
+  | "missing"
+  | "revoked"
+  | "corrupt"
+  | "retired"
+  | "unauthorized"
+  | "usable";
+export interface DraftTemplateVersion {
+  id: string;
+  template_id?: string;
+  name?: string;
+  version?: number;
+  status: DraftTemplateVersionStatus;
+  snapshot?: TemplateDraft;
+}
 export interface MailDraft {
   id?: string;
   mailbox_id: string;
   payload: DraftPayload;
+  template_version?: DraftTemplateVersion;
   revision: number;
   updated_at?: string;
 }
@@ -148,6 +169,15 @@ export interface SubmissionRecipient {
 }
 // Employee-facing projection of an outbound submission. Queue-internal fields
 // (attempts, leases, SMTP responses) stay in the recovery/operations surface.
+// Interaction hints projected by the server for one submission receipt. They
+// express what the interface may offer — they are never authorization
+// credentials, and every action re-runs the full authorization chain
+// server-side. Omitted on stale cached data.
+export interface SubmissionCapabilities {
+  view_content: boolean;
+  retry: boolean;
+  retry_block_reason?: string;
+}
 export interface Submission {
   id: string;
   mailbox_id: string;
@@ -161,6 +191,7 @@ export interface Submission {
   created_at: string;
   content_redacted: boolean;
   delivery_uncertain: boolean;
+  capabilities?: SubmissionCapabilities;
 }
 // The actual sent message for a readable submission. Recipients are the
 // structural To/CC columns; BCC and queue internals are never projected, and

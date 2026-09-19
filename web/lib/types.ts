@@ -155,6 +155,8 @@ export interface APIError {
   error: {
     code: string;
     message: string;
+    /** Machine-readable qualifier (e.g. CONFLICT reason: delivery_uncertain). */
+    reason?: string;
   };
 }
 

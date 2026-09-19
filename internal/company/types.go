@@ -110,12 +110,39 @@ type DraftPayload struct {
 	TemplateVars      map[string]string `json:"template_vars,omitempty"`
 	AttachmentIDs     []uuid.UUID       `json:"attachment_ids,omitempty"`
 }
+// Draft template version eligibility states, resolved by the store with the
+// fixed priority missing > revoked > retired > unauthorized > corrupt. They
+// are interaction-only labels for the compose surface: they are never an
+// authorization decision and every execution re-resolves and re-authorizes
+// against the live version row (TemplateForSend).
+const (
+	TemplateVersionMissing      = "missing"
+	TemplateVersionRevoked      = "revoked"
+	TemplateVersionCorrupt      = "corrupt"
+	TemplateVersionRetired      = "retired"
+	TemplateVersionUnauthorized = "unauthorized"
+	TemplateVersionUsable       = "usable"
+)
+
+// DraftTemplateVersion surfaces a draft's pinned template version eligibility.
+// Snapshot is embedded only in the usable state — a revoked or retired
+// version's content never leaves the store, matching the Preview denial.
+type DraftTemplateVersion struct {
+	ID         uuid.UUID      `json:"id"`
+	TemplateID uuid.UUID      `json:"template_id,omitempty"`
+	Name       string         `json:"name,omitempty"`
+	Version    int            `json:"version,omitempty"`
+	Status     string         `json:"status"`
+	Snapshot   *TemplateDraft `json:"snapshot,omitempty"`
+}
+
 type Draft struct {
-	ID        uuid.UUID    `json:"id"`
-	MailboxID uuid.UUID    `json:"mailbox_id"`
-	Payload   DraftPayload `json:"payload"`
-	Revision  int          `json:"revision"`
-	UpdatedAt time.Time    `json:"updated_at"`
+	ID              uuid.UUID             `json:"id"`
+	MailboxID       uuid.UUID             `json:"mailbox_id"`
+	Payload         DraftPayload          `json:"payload"`
+	TemplateVersion *DraftTemplateVersion `json:"template_version,omitempty"`
+	Revision        int                   `json:"revision"`
+	UpdatedAt       time.Time             `json:"updated_at"`
 }
 type Attachment struct {
 	ID          uuid.UUID `json:"id"`

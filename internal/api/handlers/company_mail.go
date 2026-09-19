@@ -196,7 +196,17 @@ func (h *CompanyMailHandler) Submission(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	v, err := h.repo.GetSubmission(r.Context(), companyActor(r), id)
-	h.result(w, v, err)
+	if err != nil {
+		h.result(w, v, err)
+		return
+	}
+	// Interaction hints only: every capability is re-authorized server-side
+	// on the actual action, and a degraded computation must never turn a
+	// visible receipt into an error.
+	if h.subs != nil && h.subs.OutboundEnabled() {
+		v.Capabilities = h.subs.OutboundCapabilities(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
+	}
+	h.result(w, v, nil)
 }
 
 func (h *CompanyMailHandler) SubmissionContent(w http.ResponseWriter, r *http.Request) {

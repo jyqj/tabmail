@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -306,9 +307,88 @@ func (s *PgStore) ListMailDrafts(ctx context.Context, a authz.Actor) ([]company.
 			}
 		}
 		out = filtered
-		return nil
+		return s.fillDraftTemplateVersions(ctx, tx, a, out)
 	})
 	return out, e
+}
+
+// draftVersionRef is one (version,mailbox) eligibility lookup for a draft.
+type draftVersionRef struct {
+	version, mailbox uuid.UUID
+}
+
+// fillDraftTemplateVersions attaches eligibility labels to drafts that pin a
+// template version. Labels come from the same shared predicate and classifier
+// as TemplateForSend (a missing version is a normal draft input: it is
+// labeled, never rejected); snapshot content is embedded only in the usable
+// state. One unnest join resolves every distinct (version,mailbox) pair.
+func (s *PgStore) fillDraftTemplateVersions(ctx context.Context, tx pgx.Tx, a authz.Actor, drafts []company.Draft) error {
+	refs := []draftVersionRef{}
+	seen := map[draftVersionRef]bool{}
+	for i := range drafts {
+		if drafts[i].Payload.TemplateVersionID == nil {
+			continue
+		}
+		r := draftVersionRef{*drafts[i].Payload.TemplateVersionID, drafts[i].MailboxID}
+		if !seen[r] {
+			seen[r] = true
+			refs = append(refs, r)
+		}
+	}
+	if len(refs) == 0 {
+		return nil
+	}
+	versions := make([]uuid.UUID, len(refs))
+	mailboxes := make([]uuid.UUID, len(refs))
+	for i, r := range refs {
+		versions[i], mailboxes[i] = r.version, r.mailbox
+	}
+	// $1 tenant, $2 admin, $3 user, $4 versions, $5 mailboxes.
+	rows, e := tx.Query(ctx, companyVersionColumns+fmt.Sprintf(templateVersionEligibilityTail, "2", "1", "x.mailbox_id", "3")+`, x.mailbox_id
+		FROM unnest($4::uuid[],$5::uuid[]) AS x(version_id,mailbox_id)
+		JOIN mail_template_versions v ON v.tenant_id=$1 AND v.id=x.version_id
+		JOIN mail_templates t ON t.tenant_id=v.tenant_id AND t.id=v.template_id`,
+		// Eligibility is evaluated as the bare employee principal, matching
+		// templateVersionStatusTx and TemplateForSend: no admin bypass, or a
+		// list could label a version usable that the send path then refuses.
+		// Only the scope fields (tenant, user) come from a.
+		a.TenantID, false, a.ID, versions, mailboxes)
+	if e != nil {
+		return e
+	}
+	defer rows.Close()
+	statuses := map[draftVersionRef]string{}
+	rowsByKey := map[draftVersionRef]*company.TemplateVersion{}
+	for rows.Next() {
+		var v company.TemplateVersion
+		var raw []byte
+		var retired, granted bool
+		var mailbox uuid.UUID
+		if e := rows.Scan(&v.ID, &v.TemplateID, &v.Name, &v.Version, &raw, &v.ContentHash, &v.PublishedAt, &v.RevokedAt, &retired, &granted, &mailbox); e != nil {
+			return e
+		}
+		if e := json.Unmarshal(raw, &v.Snapshot); e != nil {
+			return e
+		}
+		key := draftVersionRef{v.ID, mailbox}
+		statuses[key] = classifyTemplateVersion(&v, retired, granted)
+		rowsByKey[key] = &v
+	}
+	if e = rows.Err(); e != nil {
+		return e
+	}
+	for i := range drafts {
+		if drafts[i].Payload.TemplateVersionID == nil {
+			continue
+		}
+		key := draftVersionRef{*drafts[i].Payload.TemplateVersionID, drafts[i].MailboxID}
+		status, ok := statuses[key]
+		if !ok {
+			status = company.TemplateVersionMissing
+		}
+		drafts[i].TemplateVersion = newDraftTemplateVersion(key.version, status, rowsByKey[key])
+	}
+	return nil
 }
 func (s *PgStore) GetMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.Draft, error) {
 	v := &company.Draft{}
@@ -321,7 +401,10 @@ func (s *PgStore) GetMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID)
 		if e != nil {
 			return e
 		}
-		return json.Unmarshal(raw, &v.Payload)
+		if e = json.Unmarshal(raw, &v.Payload); e != nil {
+			return e
+		}
+		return fillDraftTemplateVersion(ctx, tx, a.TenantID, a.ID, v)
 	})
 	if e != nil {
 		return nil, e
@@ -352,15 +435,38 @@ func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Dr
 				return app.Conflict("new draft revision must be zero")
 			}
 			v.ID = uuid.New()
-			return tx.QueryRow(ctx, `INSERT INTO mail_drafts(id,tenant_id,user_id,mailbox_id,payload) VALUES($1,$2,$3,$4,$5) RETURNING revision,updated_at`, v.ID, a.TenantID, a.ID, v.MailboxID, raw).Scan(&v.Revision, &v.UpdatedAt)
+			if e = tx.QueryRow(ctx, `INSERT INTO mail_drafts(id,tenant_id,user_id,mailbox_id,payload) VALUES($1,$2,$3,$4,$5) RETURNING revision,updated_at`, v.ID, a.TenantID, a.ID, v.MailboxID, raw).Scan(&v.Revision, &v.UpdatedAt); e != nil {
+				return e
+			}
+		} else {
+			e = tx.QueryRow(ctx, `UPDATE mail_drafts SET mailbox_id=$4,payload=$5,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND revision=$6 RETURNING revision,updated_at`, a.TenantID, a.ID, v.ID, v.MailboxID, raw, v.Revision).Scan(&v.Revision, &v.UpdatedAt)
+			if errors.Is(e, pgx.ErrNoRows) {
+				return app.Conflict("draft changed in another tab")
+			}
+			if e != nil {
+				return e
+			}
 		}
-		e = tx.QueryRow(ctx, `UPDATE mail_drafts SET mailbox_id=$4,payload=$5,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND revision=$6 RETURNING revision,updated_at`, a.TenantID, a.ID, v.ID, v.MailboxID, raw, v.Revision).Scan(&v.Revision, &v.UpdatedAt)
-		if errors.Is(e, pgx.ErrNoRows) {
-			return app.Conflict("draft changed in another tab")
-		}
-		return e
+		// Saving never validates template_version_id (a missing or revoked
+		// version is a normal state the label surfaces); the eligibility label
+		// is display-only and every send re-authorizes.
+		return fillDraftTemplateVersion(ctx, tx, a.TenantID, a.ID, &v)
 	})
 	return &v, e
+}
+
+// fillDraftTemplateVersion resolves one draft's pinned version eligibility in
+// the open transaction using the shared templateVersionStatusTx predicate.
+func fillDraftTemplateVersion(ctx context.Context, tx pgx.Tx, tenant, user uuid.UUID, d *company.Draft) error {
+	if d.Payload.TemplateVersionID == nil {
+		return nil
+	}
+	status, tv, e := templateVersionStatusTx(ctx, tx, tenant, user, d.MailboxID, *d.Payload.TemplateVersionID)
+	if e != nil {
+		return e
+	}
+	d.TemplateVersion = newDraftTemplateVersion(*d.Payload.TemplateVersionID, status, tv)
+	return nil
 }
 func (s *PgStore) DeleteMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID, revision int) error {
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {

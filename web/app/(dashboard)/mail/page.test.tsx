@@ -7,19 +7,26 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { toast } from "sonner";
 
-import { SubmissionPane } from "./page";
+import { MessagePane, SubmissionPane } from "./page";
 
 const {
   submissionMock,
   submissionContentMock,
   submissionAttachmentsMock,
   downloadFileMock,
+  workMessageMock,
+  companyMock,
+  requestMock,
 } = vi.hoisted(() => ({
   submissionMock: vi.fn(),
   submissionContentMock: vi.fn(),
   submissionAttachmentsMock: vi.fn(),
   downloadFileMock: vi.fn(),
+  workMessageMock: vi.fn(),
+  companyMock: vi.fn(),
+  requestMock: vi.fn(),
 }));
 
 vi.mock("sonner", () => ({
@@ -37,9 +44,17 @@ vi.mock("@/lib/company", async (importOriginal) => ({
   submissionAttachments: (...args: unknown[]) =>
     submissionAttachmentsMock(...args),
   downloadCompanyFile: (...args: unknown[]) => downloadFileMock(...args),
+  workMessage: (...args: unknown[]) => workMessageMock(...args),
+  company: (...args: unknown[]) => companyMock(...args),
 }));
 
-import type { Submission } from "@/lib/company";
+vi.mock("@/lib/api/base", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api/base")>()),
+  request: (...args: unknown[]) => requestMock(...args),
+}));
+
+import type { Submission, WorkMailbox } from "@/lib/company";
+import type { MessageDetail } from "@/lib/types";
 
 const baseSubmission = (over: Partial<Submission> = {}): Submission => ({
   id: "job-1",
@@ -127,5 +142,180 @@ describe("SubmissionPane sent-content view", () => {
     await screen.findByText(/worker@company\.test/);
     await waitFor(() => expect(submissionContentMock).not.toHaveBeenCalled());
     expect(screen.queryByText("see attached")).toBeNull();
+  });
+});
+
+const baseMailbox = (over: Partial<WorkMailbox> = {}): WorkMailbox => ({
+  mailbox: {
+    id: "mb-1",
+    tenant_id: "tenant-1",
+    zone_id: "zone-1",
+    local_part: "shared",
+    resolved_domain: "company.test",
+    full_address: "shared@company.test",
+    access_mode: "public",
+    retention_hours_override: null,
+    expires_at: null,
+    created_at: new Date().toISOString(),
+  },
+  can_read: true,
+  can_organize: false,
+  can_send: false,
+  template_only: false,
+  revision: 0,
+  ...over,
+});
+
+const baseMessage = (over: Partial<MessageDetail> = {}): MessageDetail => ({
+  id: "msg-1",
+  tenant_id: "tenant-1",
+  mailbox_id: "mb-1",
+  zone_id: "zone-1",
+  sender: "sender@client.test",
+  recipients: ["shared@company.test"],
+  subject: "invoice attached",
+  size: 128,
+  seen: false,
+  starred: false,
+  received_at: new Date().toISOString(),
+  expires_at: null,
+  text_body: "see invoice",
+  html_body: "",
+  ...over,
+});
+
+describe("MessagePane personal-state vs shared-organizing actions", () => {
+  beforeEach(() => {
+    workMessageMock.mockReset().mockResolvedValue(baseMessage());
+    companyMock.mockReset().mockResolvedValue([]);
+  });
+
+  afterEach(() => cleanup());
+
+  it("shows personal-state actions but not organizing actions to a read-only member", async () => {
+    render(
+      <MessagePane
+        mailbox={baseMailbox({ can_read: true, can_organize: false })}
+        id="msg-1"
+        onMutation={() => {}}
+        onCompose={() => {}}
+      />,
+    );
+    await screen.findByText(/sender@client\.test/);
+    expect(
+      screen.getByRole("button", { name: "Mark read" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Star" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Archive" })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Move to trash" }),
+    ).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Mark read" }));
+    await waitFor(() =>
+      expect(companyMock).toHaveBeenCalledWith(
+        "/mailboxes/mb-1/messages/msg-1/actions",
+        expect.objectContaining({ method: "POST", body: { action: "seen" } }),
+      ),
+    );
+  });
+
+  it("shows both action groups to an organizer", async () => {
+    render(
+      <MessagePane
+        mailbox={baseMailbox({ can_read: true, can_organize: true })}
+        id="msg-1"
+        onMutation={() => {}}
+        onCompose={() => {}}
+      />,
+    );
+    await screen.findByText(/sender@client\.test/);
+    expect(
+      screen.getByRole("button", { name: "Mark read" }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Star" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Archive" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Move to trash" }),
+    ).toBeInTheDocument();
+  });
+});
+
+describe("SubmissionPane capabilities", () => {
+  beforeEach(() => {
+    submissionMock.mockReset();
+    submissionContentMock.mockReset().mockResolvedValue(undefined);
+    submissionAttachmentsMock.mockReset().mockResolvedValue([]);
+    downloadFileMock.mockReset().mockResolvedValue(undefined);
+    requestMock.mockReset();
+    vi.mocked(toast.success).mockClear();
+    vi.mocked(toast.error).mockClear();
+  });
+
+  afterEach(() => cleanup());
+
+  it("shows content but not retry when the server grants view only", async () => {
+    submissionMock.mockResolvedValue(
+      baseSubmission({
+        capabilities: {
+          view_content: true,
+          retry: false,
+          retry_block_reason: "sender_authority",
+        },
+      }),
+    );
+    render(<SubmissionPane id="job-1" />);
+    await screen.findByText(/worker@company\.test/);
+    expect(
+      screen.getByRole("button", { name: "View content" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Retry unfinished recipients/ }),
+    ).toBeNull();
+  });
+
+  it("shows retry but not content when the server grants retry only", async () => {
+    submissionMock.mockResolvedValue(
+      baseSubmission({
+        capabilities: { view_content: false, retry: true },
+      }),
+    );
+    render(<SubmissionPane id="job-1" />);
+    await screen.findByText(/worker@company\.test/);
+    expect(
+      screen.queryByRole("button", { name: "View content" }),
+    ).toBeNull();
+    expect(
+      screen.getByRole("button", { name: /Retry unfinished recipients/ }),
+    ).toBeInTheDocument();
+  });
+
+  it("surfaces the uncertain-outcome notice on a delivery_uncertain conflict", async () => {
+    submissionMock.mockResolvedValue(
+      baseSubmission({
+        capabilities: { view_content: true, retry: true },
+      }),
+    );
+    requestMock.mockRejectedValue({
+      error: {
+        code: "CONFLICT",
+        message: "retry blocked",
+        reason: "delivery_uncertain",
+      },
+    });
+    render(<SubmissionPane id="job-1" />);
+    await screen.findByText(/worker@company\.test/);
+    fireEvent.click(
+      screen.getByRole("button", { name: /Retry unfinished recipients/ }),
+    );
+    await waitFor(() =>
+      expect(vi.mocked(toast.error)).toHaveBeenCalledWith(
+        expect.stringContaining("Uncertain outcome"),
+      ),
+    );
+    expect(requestMock).toHaveBeenCalledWith(
+      "/api/v1/outbound/job-1/retry",
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 });

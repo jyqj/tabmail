@@ -438,6 +438,89 @@ func (s *Service) ContentAllowed(ctx context.Context, actor authz.Actor, job *mo
 	return g != nil && g.CanRead, err
 }
 
+// RetryAuthority is the single retry-authority predicate for an outbound job,
+// shared by the manual retry endpoint and the capabilities projection so the
+// two can never drift. A read grant may expose shared history, but must not
+// authorize resending it.
+func (s *Service) RetryAuthority(ctx context.Context, actor authz.Actor, job *models.OutboundJob) error {
+	if job.SenderMailboxID != nil {
+		mb, err := s.store.ForTenant(job.TenantID).GetMailbox(ctx, *job.SenderMailboxID)
+		if err != nil {
+			return err
+		}
+		return authz.CheckMailboxSender(ctx, s.store, actor, mb, job.TemplateVersionID != nil)
+	}
+	uid := actor.EffectiveUserID()
+	if uid != nil && job.SenderUserID != nil && *uid == *job.SenderUserID {
+		return nil
+	}
+	if actor.Type == authz.PrincipalAPIKey && job.SenderKeyID != nil && actor.ID == *job.SenderKeyID {
+		return nil
+	}
+	return authz.ErrForbidden("send identity authority required to retry")
+}
+
+// Capability block reasons for SubmissionCapabilities.RetryBlockReason.
+const (
+	// CapabilityUnknown marks a degraded computation: a predicate failed, so
+	// nothing may be offered and the receipt itself still succeeds.
+	CapabilityUnknown = "unknown"
+	// CapabilityDeliveryUncertain means an in-flight acceptance may have
+	// landed; retrying could duplicate the message.
+	CapabilityDeliveryUncertain = "delivery_uncertain"
+	// CapabilityStateNotRetryable means the job is not in dead/failed.
+	CapabilityStateNotRetryable = "state_not_retryable"
+	// CapabilitySenderAuthority means the actor lacks send-identity authority.
+	CapabilitySenderAuthority = "sender_authority"
+)
+
+// OutboundCapabilities computes the interaction hints for one submission
+// receipt, keyed on the same job AccessibleOutboundJob would serve. The block
+// is presentation-only: every capability is re-authorized server-side on the
+// actual action. Any lookup or predicate error degrades to an all-false block
+// with RetryBlockReason CapabilityUnknown — never an error — so the receipt
+// detail stays a 200.
+func (s *Service) OutboundCapabilities(ctx context.Context, tenant *models.Tenant, actor authz.Actor, jobID uuid.UUID) *company.SubmissionCapabilities {
+	caps := &company.SubmissionCapabilities{RetryBlockReason: CapabilityUnknown}
+	if s.outbound == nil || tenant == nil {
+		return caps
+	}
+	job, err := s.AccessibleOutboundJob(ctx, tenant, actor, jobID)
+	if err != nil || job == nil {
+		return caps
+	}
+	return s.capabilitiesForJob(ctx, actor, job)
+}
+
+// capabilitiesForJob fills the capability block for an already-resolved job.
+// Block-reason precedence: delivery uncertainty beats state, which beats
+// sender authority.
+func (s *Service) capabilitiesForJob(ctx context.Context, actor authz.Actor, job *models.OutboundJob) *company.SubmissionCapabilities {
+	caps := &company.SubmissionCapabilities{RetryBlockReason: CapabilityUnknown}
+	allowed, err := s.ContentAllowed(ctx, actor, job)
+	if err != nil {
+		return caps
+	}
+	caps.ViewContent = allowed
+	if job.DeliveryUncertain || job.InFlightDomain != "" {
+		caps.RetryBlockReason = CapabilityDeliveryUncertain
+		return caps
+	}
+	if job.State != models.OutboundDead && job.State != models.OutboundFailed {
+		caps.RetryBlockReason = CapabilityStateNotRetryable
+		return caps
+	}
+	if err := s.RetryAuthority(ctx, actor, job); err != nil {
+		if authz.IsAuthzError(err) {
+			caps.RetryBlockReason = CapabilitySenderAuthority
+		}
+		return caps
+	}
+	caps.Retry = true
+	caps.RetryBlockReason = ""
+	return caps
+}
+
 // RedactOutboundJob builds the actor-safe view of a job. Copy before
 // redacting: cached/shared store objects and delivery state must not be
 // mutated by presentation. RcptTo contains BCC; protocol errors may echo it.

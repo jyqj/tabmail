@@ -19,6 +19,9 @@ type envelope struct {
 type apiErr struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
+	// Reason optionally sub-classifies the code (e.g. the cause of a
+	// CONFLICT). Older clients ignore it.
+	Reason string `json:"reason,omitempty"`
 }
 
 type meta struct {
@@ -70,6 +73,12 @@ func errInternal(w http.ResponseWriter) {
 
 func errConflict(w http.ResponseWriter, msg string) {
 	writeJSON(w, http.StatusConflict, envelope{Error: &apiErr{Code: "CONFLICT", Message: msg}})
+}
+
+// errConflictReason writes a CONFLICT with a machine-readable reason so
+// clients can distinguish conflict causes without parsing the message.
+func errConflictReason(w http.ResponseWriter, msg, reason string) {
+	writeJSON(w, http.StatusConflict, envelope{Error: &apiErr{Code: "CONFLICT", Message: msg, Reason: reason}})
 }
 
 func pageFromReq(r *http.Request) models.Page {

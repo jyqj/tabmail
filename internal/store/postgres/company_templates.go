@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -28,7 +29,18 @@ func scanCompanyTemplate(row pgx.Row) (company.Template, error) {
 	return v, e
 }
 
-const companyVersionSelect = `SELECT v.id,v.template_id,t.name,v.version,v.snapshot,v.content_hash,v.published_at,v.revoked_at FROM mail_template_versions v JOIN mail_templates t ON t.id=v.template_id AND t.tenant_id=v.tenant_id`
+const companyVersionColumns = `SELECT v.id,v.template_id,t.name,v.version,v.snapshot,v.content_hash,v.published_at,v.revoked_at`
+const companyVersionFrom = ` FROM mail_template_versions v JOIN mail_templates t ON t.id=v.template_id AND t.tenant_id=v.tenant_id`
+const companyVersionSelect = companyVersionColumns + companyVersionFrom
+
+// templateVersionEligibilityTail is the single-source eligibility projection
+// appended to companyVersionColumns: the raw template retirement flag plus the
+// CURRENT admin-or-grant check for one (mailbox,user) pair. Revocation and
+// snapshot integrity are decided from the scanned row by
+// classifyTemplateVersion. The %s slots are parameter positions, or an SQL
+// expression for the batched unnest join. The same predicate text governs
+// TemplateForSend, so the send path and the draft surface can never drift.
+const templateVersionEligibilityTail = `, t.retired, ($%s OR EXISTS(SELECT 1 FROM mail_template_grants g WHERE g.tenant_id=$%s AND g.template_id=v.template_id AND g.mailbox_id=%s AND g.user_id=$%s))`
 
 func scanCompanyVersion(row pgx.Row) (company.TemplateVersion, error) {
 	v := company.TemplateVersion{}
@@ -262,6 +274,85 @@ func (s *PgStore) ListUsableTemplates(ctx context.Context, a authz.Actor, mailbo
 	return out, e
 }
 
+// scanTemplateVersionStatus reads a version row plus the eligibility
+// projection (retired, current admin-or-grant) appended by
+// templateVersionEligibilityTail.
+func scanTemplateVersionStatus(row pgx.Row) (company.TemplateVersion, bool, bool, error) {
+	v := company.TemplateVersion{}
+	var raw []byte
+	var retired, granted bool
+	e := row.Scan(&v.ID, &v.TemplateID, &v.Name, &v.Version, &raw, &v.ContentHash, &v.PublishedAt, &v.RevokedAt, &retired, &granted)
+	if e != nil {
+		return v, false, false, e
+	}
+	e = json.Unmarshal(raw, &v.Snapshot)
+	return v, retired, granted, e
+}
+
+// classifyTemplateVersion applies the shared eligibility priority
+// missing > revoked > retired > unauthorized > corrupt to one scanned version
+// row (missing is the no-row case, handled by the callers). Corrupt ranks
+// last so the integrity-mismatch signal stays reachable exactly where the
+// previous send-path SQL could reach it: an authorized, non-revoked,
+// non-retired version. Every other combination keeps the folded denial, so
+// callers cannot probe integrity across an authorization boundary.
+func classifyTemplateVersion(v *company.TemplateVersion, retired, granted bool) string {
+	switch {
+	case v.RevokedAt != nil:
+		return company.TemplateVersionRevoked
+	case retired:
+		return company.TemplateVersionRetired
+	case !granted:
+		return company.TemplateVersionUnauthorized
+	case v.ContentHash != company.Digest(v.Snapshot):
+		return company.TemplateVersionCorrupt
+	default:
+		return company.TemplateVersionUsable
+	}
+}
+
+// templateVersionStatusTx resolves one published version's eligibility inside
+// an open company transaction with the exact predicates TemplateForSend uses:
+// the same bare employee Actor construction (IsTenantAdmin stays false, so no
+// admin bypass — matching the send path), current admin-or-grant, NOT retired,
+// revoked_at IS NULL and snapshot integrity, classified with the fixed
+// priority missing > revoked > retired > unauthorized > corrupt. The status label is
+// interaction-only — never an authorization decision — and the version row is
+// returned with its metadata intact but the snapshot stripped unless the
+// status is usable, so revoked or retired content never leaves the store.
+func templateVersionStatusTx(ctx context.Context, tx pgx.Tx, tenant, user, mailbox, versionID uuid.UUID) (string, *company.TemplateVersion, error) {
+	a := authz.Actor{Type: authz.PrincipalUser, ID: user, TenantID: tenant}
+	v, retired, granted, e := scanTemplateVersionStatus(tx.QueryRow(ctx,
+		companyVersionColumns+fmt.Sprintf(templateVersionEligibilityTail, "5", "1", "$3", "4")+companyVersionFrom+` WHERE v.tenant_id=$1 AND v.id=$2`,
+		tenant, versionID, mailbox, user, a.IsTenantAdmin()))
+	if errors.Is(e, pgx.ErrNoRows) {
+		return company.TemplateVersionMissing, nil, nil
+	}
+	if e != nil {
+		return "", nil, e
+	}
+	status := classifyTemplateVersion(&v, retired, granted)
+	if status != company.TemplateVersionUsable {
+		v.Snapshot = company.TemplateDraft{}
+	}
+	return status, &v, nil
+}
+
+// newDraftTemplateVersion builds the interaction-only DTO view: metadata is
+// carried whenever the version row exists, snapshot content only in the
+// usable state.
+func newDraftTemplateVersion(id uuid.UUID, status string, v *company.TemplateVersion) *company.DraftTemplateVersion {
+	out := &company.DraftTemplateVersion{ID: id, Status: status}
+	if v != nil {
+		out.TemplateID, out.Name, out.Version = v.TemplateID, v.Name, v.Version
+		if status == company.TemplateVersionUsable {
+			snap := v.Snapshot
+			out.Snapshot = &snap
+		}
+	}
+	return out
+}
+
 // Validate immutable provenance and CURRENT usage/From rights. A template grant
 // never grants send-as. API keys must remain owned by this active employee.
 func (s *PgStore) TemplateForSend(ctx context.Context, tenant uuid.UUID, user, key *uuid.UUID, mailbox, version uuid.UUID) (*company.TemplateVersion, string, string, error) {
@@ -289,16 +380,20 @@ func (s *PgStore) TemplateForSend(ctx context.Context, tenant uuid.UUID, user, k
 				return authz.ErrForbidden("template sending key revoked")
 			}
 		}
-		out, e = scanCompanyVersion(tx.QueryRow(ctx, companyVersionSelect+` WHERE v.tenant_id=$1 AND v.id=$2 AND NOT t.retired AND v.revoked_at IS NULL AND ($5 OR EXISTS(SELECT 1 FROM mail_template_grants g WHERE g.tenant_id=$1 AND g.template_id=v.template_id AND g.mailbox_id=$3 AND g.user_id=$4))`, tenant, version, mailbox, *user, a.IsTenantAdmin()))
-		if errors.Is(e, pgx.ErrNoRows) {
-			return authz.ErrForbidden("published template unavailable or not granted")
-		}
+		status, v, e := templateVersionStatusTx(ctx, tx, tenant, *user, mailbox, version)
 		if e != nil {
 			return e
 		}
-		if out.ContentHash != company.Digest(out.Snapshot) {
-			return authz.ErrForbidden("published template integrity mismatch")
+		// Same external contract as the previous single filtered-row query:
+		// every unusable state collapses to one denial, and only a tampered
+		// snapshot is named separately.
+		if status != company.TemplateVersionUsable {
+			if status == company.TemplateVersionCorrupt {
+				return authz.ErrForbidden("published template integrity mismatch")
+			}
+			return authz.ErrForbidden("published template unavailable or not granted")
 		}
+		out = *v
 		if e = tx.QueryRow(ctx, `SELECT display_name FROM users WHERE id=$1`, *user).Scan(&employee); e != nil {
 			return e
 		}

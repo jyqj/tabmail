@@ -36,6 +36,26 @@ type Submission struct {
 	// submission view contract-aligned with the outbound job view.
 	ContentRedacted   bool `json:"content_redacted"`
 	DeliveryUncertain bool `json:"delivery_uncertain"`
+	// Capabilities carries interaction hints only (never authorization
+	// credentials); it is omitted when the submissions engine is not wired.
+	Capabilities *SubmissionCapabilities `json:"capabilities,omitempty"`
+}
+
+// SubmissionCapabilities is the interaction-hint block for a submission
+// receipt. These fields express what the interface may offer; the backend
+// re-runs the full authorization chain on every actual action, so a stale or
+// degraded capability can never widen access. Any degraded computation yields
+// an all-false block with RetryBlockReason "unknown" instead of an error.
+type SubmissionCapabilities struct {
+	// ViewContent mirrors the current content-read verdict; the content
+	// endpoints re-check it server-side on every call.
+	ViewContent bool `json:"view_content"`
+	// Retry reports whether a retry POST is expected to be accepted today.
+	Retry bool `json:"retry"`
+	// RetryBlockReason is a coarse enum explaining a false Retry: empty,
+	// "delivery_uncertain", "state_not_retryable", "sender_authority", or
+	// "unknown" when the computation degraded.
+	RetryBlockReason string `json:"retry_block_reason"`
 }
 
 // SubmissionContent is the sent-message body projection for a submission the

@@ -127,12 +127,19 @@ function MailWorkbench() {
     });
     return () => abort.abort();
   }, [eventMailboxId, mutate]);
+  // Composing needs a send-authorized identity: prefer the mailbox the user
+  // is reading, otherwise the first sendable non-template-only mailbox, so a
+  // reply draft is never silently dropped. The server re-authorizes the
+  // chosen identity on every draft and submit call.
   function start(payload?: DraftPayload, mb = mailbox) {
-    if (!mb?.can_send) return;
+    const from = mb?.can_send
+      ? mb
+      : boxes.data?.find((v) => v.can_send && !v.template_only);
+    if (!from) return;
     setEditor({
       key: crypto.randomUUID(),
       draft: {
-        mailbox_id: mb.mailbox.id,
+        mailbox_id: from.mailbox.id,
         revision: 0,
         payload: payload ?? { to: [], subject: "", text_body: "" },
       },
@@ -164,12 +171,7 @@ function MailWorkbench() {
         </div>
         <ActionButton
           disabled={Boolean(editor) || !boxes.data?.some((v) => v.can_send)}
-          onClick={() =>
-            start(
-              undefined,
-              mailbox?.can_send ? mailbox : boxes.data?.find((v) => v.can_send),
-            )
-          }
+          onClick={() => start()}
         >
           {t("写邮件", "Compose")}
         </ActionButton>
@@ -342,6 +344,7 @@ function MailWorkbench() {
                     <MessagePane
                       key={`${mailbox.mailbox.id}:${selected}`}
                       mailbox={mailbox}
+                      mailboxes={boxes.data ?? []}
                       id={selected}
                       onMutation={() => {
                         setSelected("");
@@ -580,16 +583,21 @@ export function SubmissionPane({ id }: { id: string }) {
               ? ` · ${t("模板版本", "Template version")}: ${s.template_version_id}`
               : ""}
           </p>
-          <div className="flex gap-2">
-            <ActionButton
-              aria-expanded={showContent}
-              onClick={() => setShowContent((v) => !v)}
-            >
-              {showContent
-                ? t("收起内容", "Hide content")
-                : t("查看内容", "View content")}
-            </ActionButton>
-          </div>
+          {/* capabilities is an interaction hint, not a credential; absent on
+              stale cached data keeps the current behavior. The content
+              endpoint re-checks read access on every call. */}
+          {s.capabilities?.view_content !== false && (
+            <div className="flex gap-2">
+              <ActionButton
+                aria-expanded={showContent}
+                onClick={() => setShowContent((v) => !v)}
+              >
+                {showContent
+                  ? t("收起内容", "Hide content")
+                  : t("查看内容", "View content")}
+              </ActionButton>
+            </div>
+          )}
           {showContent && <SubmissionContentView id={id} />}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -615,7 +623,12 @@ export function SubmissionPane({ id }: { id: string }) {
               </tbody>
             </table>
           </div>
-          {s.status === "needs_attention" && (
+          {/* capabilities.retry is the interaction hint; when absent (old
+              cached data) fall back to the status heuristic. The retry POST
+              re-authorizes server-side either way. */}
+          {(s.capabilities
+            ? s.capabilities.retry
+            : s.status === "needs_attention") && (
             <ActionButton
               disabled={busy}
               onClick={() =>
@@ -631,11 +644,17 @@ export function SubmissionPane({ id }: { id: string }) {
                     void detail.mutate();
                   } catch (e) {
                     if ((e as APIError)?.error?.code === "CONFLICT") {
+                      const reason = (e as APIError)?.error?.reason;
                       toast.error(
-                        t(
-                          "结果不确定，已禁止重试。请到恢复中心核实下一跳记录后再处理。",
-                          "Uncertain outcome: retry is blocked. Review next-hop evidence in the recovery center.",
-                        ),
+                        reason === "state_changed"
+                          ? t(
+                              "任务状态已变化，请刷新后查看。",
+                              "The task state has changed; refresh to see the latest status.",
+                            )
+                          : t(
+                              "结果不确定，已禁止重试。请到恢复中心核实下一跳记录后再处理。",
+                              "Uncertain outcome: retry is blocked. Review next-hop evidence in the recovery center.",
+                            ),
                       );
                       return;
                     }
@@ -739,19 +758,31 @@ function SubmissionContentView({ id }: { id: string }) {
   );
 }
 
-function MessagePane({
+export function MessagePane({
   mailbox,
+  mailboxes,
   id,
   onMutation,
   onCompose,
 }: {
   mailbox: WorkMailbox;
+  /** Send-identity data source; defaults to the current mailbox only. */
+  mailboxes?: WorkMailbox[];
   id: string;
   onMutation: () => void;
   onCompose: (p: DraftPayload) => void;
 }) {
   const t = useText();
   const { busy, run } = useAction();
+  // Reply/forward only needs some sendable identity to exist — the compose
+  // view owns the identity switch. The server re-authorizes every send.
+  const canCompose = (mailboxes ?? [mailbox]).some((v) => v.can_send);
+  // Same default-identity rule as start(): prefer the reading mailbox, else
+  // the first sendable non-template-only mailbox. The server re-authorizes.
+  const composeFrom =
+    (mailbox.can_send && mailbox) ||
+    (mailboxes ?? [mailbox]).find((v) => v.can_send && !v.template_only) ||
+    mailbox;
   const detail = useAPI(["work-message", mailbox.mailbox.id, id], () =>
     workMessage(mailbox.mailbox.id, id),
   );
@@ -776,13 +807,13 @@ function MessagePane({
             {(["reply", "reply_all", "forward"] as const).map((mode, i) => (
               <ActionButton
                 key={mode}
-                disabled={busy || !mailbox.can_send}
+                disabled={busy || !canCompose}
                 onClick={() =>
                   run(async () =>
                     onCompose(
                       await company<DraftPayload>(`${base}/compose`, {
                         method: "POST",
-                        body: { mode, from_mailbox_id: mailbox.mailbox.id },
+                        body: { mode, from_mailbox_id: composeFrom.mailbox.id },
                       }),
                     ),
                   )
@@ -837,6 +868,32 @@ function MessagePane({
               {f.filename} · {Math.ceil(f.size / 1024)} KiB
             </ActionButton>
           ))}
+          {/* Personal per-user state: any reader may toggle seen/starred.
+              The server still re-authorizes every action call. */}
+          {mailbox.can_read && (
+            <div className="flex flex-wrap gap-2 border-t pt-3">
+              <ActionButton
+                disabled={busy}
+                onClick={() => run(() => act(detail.data!.seen ? "unseen" : "seen"))}
+              >
+                {detail.data.seen
+                  ? t("标为未读", "Mark unread")
+                  : t("标为已读", "Mark read")}
+              </ActionButton>
+              <ActionButton
+                disabled={busy}
+                onClick={() =>
+                  run(() => act(detail.data!.starred ? "unstarred" : "starred"))
+                }
+              >
+                {detail.data.starred
+                  ? t("取消星标", "Unstar")
+                  : t("加星标", "Star")}
+              </ActionButton>
+            </div>
+          )}
+          {/* Shared-folder organizing (archive/trash/restore) stays behind
+              the organizer grant. */}
           {mailbox.can_organize && (
             <div className="flex flex-wrap gap-2 border-t pt-3">
               {detail.data.deleted_at ? (
@@ -859,16 +916,6 @@ function MessagePane({
                     {detail.data.archived_at
                       ? t("移回收件箱", "Move to inbox")
                       : t("归档", "Archive")}
-                  </ActionButton>
-                  <ActionButton
-                    disabled={busy}
-                    onClick={() =>
-                      run(() => act(detail.data!.seen ? "unseen" : "seen"))
-                    }
-                  >
-                    {detail.data.seen
-                      ? t("标为未读", "Mark unread")
-                      : t("标为已读", "Mark read")}
                   </ActionButton>
                   <ActionButton
                     disabled={busy}

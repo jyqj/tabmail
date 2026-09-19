@@ -123,7 +123,7 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.outbound.ValidateJobAuthorization(ctx, job); err != nil {
 		if errors.Is(err, store.ErrOutboundUncertain) {
-			errConflict(w, err.Error())
+			errConflictReason(w, err.Error(), "delivery_uncertain")
 		} else if authz.IsAuthzError(err) {
 			errForbidden(w, err.Error())
 		} else {
@@ -133,7 +133,7 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := h.store.RequeueOutboundJob(ctx, jobID); err != nil {
 		if errors.Is(err, store.ErrOutboundNotRetryable) {
-			errConflict(w, err.Error())
+			errConflictReason(w, err.Error(), "state_changed")
 			return
 		}
 		h.logger.Err(err).Str("job_id", jobID.String()).Msg("requeue outbound job")
