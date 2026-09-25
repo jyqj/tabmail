@@ -1,7 +1,7 @@
 name: Pull request source evidence
 on:
   pull_request:
-    branches: [main]
+    branches: [main, fix/company-mail-safety-contracts]
 permissions:
   contents: read
 concurrency:

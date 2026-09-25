@@ -41,7 +41,7 @@ func TestArchitectureConsoleUsesTenantAndCanonicalAuthority(t *testing.T) {
 	if _, e = f.st.CompanyOverview(ctx, a); e == nil {
 		t.Fatal("spoofed tenant accepted")
 	}
-	_, e = f.pool.Exec(ctx, `INSERT INTO audit_log(tenant_id,actor,action,details) VALUES($1,'fixture','employee.private_test',$2)`, f.tenant.ID, []byte(`{"reason":"documented review","text_body":"PRIVATE_AUDIT_PAYLOAD"}`))
+	_, e = f.pool.Exec(ctx, `INSERT INTO audit_log(tenant_id,actor,action,resource_type,details) VALUES($1,'fixture','employee.private_test','user',$2)`, f.tenant.ID, []byte(`{"reason":"documented review","text_body":"PRIVATE_AUDIT_PAYLOAD"}`))
 	must(t, e)
 	events, n, e := f.st.ListCompanyAudit(ctx, f.a, models.Page{PerPage: 100})
 	must(t, e)
@@ -71,11 +71,15 @@ func TestArchitectureAdministrativeOutboxFailureRollsBack(t *testing.T) {
 	}
 	after, e := f.st.GetWorkMailbox(ctx, f.a, f.shared.ID)
 	must(t, e)
-	rights, e := f.st.GetWorkMailbox(ctx, f.u, f.shared.ID)
-	must(t, e)
+	// An ungranted employee must see no mailbox, not a zero-rights DTO.
+	if _, err := f.st.GetWorkMailbox(ctx, f.u, f.shared.ID); err == nil {
+		t.Fatal("failed grant became visible to employee")
+	}
+	var grants int
+	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, f.tenant.ID, f.shared.ID, f.employee.ID).Scan(&grants))
 	var audits int
 	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM audit_log`).Scan(&audits))
-	if after.Revision != mb.Revision || rights.CanRead || audits != before {
+	if after.Revision != mb.Revision || grants != 0 || audits != before {
 		t.Fatal("partial administration committed")
 	}
 }

@@ -47,6 +47,13 @@ func TestArchitectureUpgradeBackfillsExistingEmployeeAssets(t *testing.T) {
 	must(t, st.CreateTenant(ctx, tenant))
 	user := &models.User{TenantID: tenant.ID, Email: "upgrade@contact.test", PasswordHash: "test-only", Role: models.RoleUser, IsActive: true}
 	must(t, st.CreateUser(ctx, user))
+	// Match the real pre-upgrade employee send profile. A bare user has the
+	// deliberately read-only default, independent of mailbox ownership.
+	profile := uuid.New()
+	_, e = pool.Exec(ctx, `INSERT INTO permission_profiles(id,tenant_id,name,can_send) VALUES($1,$2,'Pre-upgrade employee',true);`, profile, tenant.ID)
+	must(t, e)
+	_, e = pool.Exec(ctx, `UPDATE users SET permission_profile_id=$1 WHERE id=$2`, profile, user.ID)
+	must(t, e)
 	zone := &models.DomainZone{TenantID: tenant.ID, Domain: "upgrade.test", IsVerified: true, MXVerified: true}
 	must(t, st.CreateZone(ctx, zone))
 	mailbox := &models.Mailbox{TenantID: tenant.ID, ZoneID: zone.ID, OwnerUserID: &user.ID, Kind: "personal", FullAddress: "staff@upgrade.test", LocalPart: "staff", ResolvedDomain: zone.Domain, AccessMode: models.AccessAPIKey}
