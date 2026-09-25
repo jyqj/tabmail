@@ -54,3 +54,9 @@ type ContentIndexer interface {
 	CompleteMailIndexJob(context.Context, MailIndexJob, ParsedMessage) error
 	FailMailIndexJob(context.Context, MailIndexJob, string) error
 }
+
+// ContentIndexRecovery is administrative control of derived data only. It
+// neither grants content access nor touches SMTP acceptance/delivery records.
+type ContentIndexRecovery interface {
+	RetryFailedMailIndex(context.Context, authz.Actor, string) (int, error)
+}

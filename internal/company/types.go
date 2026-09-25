@@ -361,4 +361,5 @@ type Repository interface {
 	DraftQuery
 	MailboxIndexReader
 	ConsoleReader
+	ContentIndexRecovery
 }

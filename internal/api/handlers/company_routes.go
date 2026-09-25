@@ -27,6 +27,7 @@ func RegisterCompanyRoutes(r chi.Router, c CompanyRoutes) {
 	r.Route("/company", func(r chi.Router) {
 		r.Use(middleware.RequireAuth)
 		r.Get("/overview", c.Console.Overview)
+		r.With(middleware.RequireAdmin).Post("/index/retry", c.Console.RetryIndex)
 		r.Get("/audit", c.Console.Audit)
 		r.Get("/mailboxes/{id}/access/{user}", c.Console.Access)
 		r.Get("/settings", c.Setup.Settings)

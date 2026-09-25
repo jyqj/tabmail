@@ -19,6 +19,7 @@ type roleComposition interface {
 	DraftQuery
 	MailboxIndexReader
 	ConsoleReader
+	ContentIndexRecovery
 }
 
 // roleComposition satisfies Repository (the roles cover the whole surface).

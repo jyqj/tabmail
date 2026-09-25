@@ -6,6 +6,7 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"strings"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
@@ -96,7 +97,12 @@ func (s *PgStore) ClaimMailIndexJobs(ctx context.Context, limit int) ([]company.
 	if limit < 1 || limit > 20 {
 		limit = 5
 	}
-	rows, e := s.pool.Query(ctx, `WITH picked AS(SELECT message_id FROM mail_index_jobs WHERE (state='pending' AND next_attempt_at<=now()) OR (state='processing' AND lease_until<now()) ORDER BY next_attempt_at,message_id LIMIT $1 FOR UPDATE SKIP LOCKED)
+	// A worker that repeatedly crashes cannot hold a derived job forever. The
+	// existing token/lease predicate is rechecked under the row lock.
+	if _, e := s.pool.Exec(ctx, `UPDATE mail_index_jobs SET state='failed',lease_until=NULL,lease_token=NULL,last_error='index worker lease expired' WHERE state='processing' AND lease_until<now() AND attempts>=5`); e != nil {
+		return nil, e
+	}
+	rows, e := s.pool.Query(ctx, `WITH picked AS(SELECT message_id FROM mail_index_jobs WHERE attempts<5 AND ((state='pending' AND next_attempt_at<=now()) OR (state='processing' AND lease_until<now())) ORDER BY next_attempt_at,message_id LIMIT $1 FOR UPDATE SKIP LOCKED)
  UPDATE mail_index_jobs j SET state='processing',attempts=attempts+1,lease_token=gen_random_uuid(),lease_until=now()+interval '90 seconds' FROM picked p WHERE j.message_id=p.message_id RETURNING j.tenant_id,j.message_id,j.source_key,j.lease_token,j.lease_until`, limit)
 	if e != nil {
 		return nil, e
@@ -136,9 +142,44 @@ func (s *PgStore) CompleteMailIndexJob(ctx context.Context, j company.MailIndexJ
 func (s *PgStore) FailMailIndexJob(ctx context.Context, j company.MailIndexJob, reason string) error {
 	// Diagnostics are deliberately coarse: a malicious MIME header must never
 	// copy employee content into operational status or logs.
-	_, e := s.pool.Exec(ctx, `UPDATE mail_index_jobs SET state=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END,next_attempt_at=now()+interval '1 minute',lease_until=NULL,lease_token=NULL,last_error='content parsing failed' WHERE tenant_id=$1 AND message_id=$2 AND lease_token=$3`, j.TenantID, j.MessageID, j.Token)
-	return e
+	tag, e := s.pool.Exec(ctx, `UPDATE mail_index_jobs SET state=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END,next_attempt_at=now()+interval '1 minute',lease_until=NULL,lease_token=NULL,last_error='content parsing failed' WHERE tenant_id=$1 AND message_id=$2 AND lease_token=$3 AND source_key=$4 AND state='processing' AND lease_until>now()`, j.TenantID, j.MessageID, j.Token, j.SourceKey)
+	if e != nil {
+		return e
+	}
+	if tag.RowsAffected() != 1 {
+		return app.Conflict("index lease lost")
+	}
+	return nil
 }
 
 var _ company.ParsedContentReader = (*PgStore)(nil)
 var _ company.ContentIndexer = (*PgStore)(nil)
+
+// RetryFailedMailIndex is bounded, company-scoped, audited, and excludes live
+// leases. Repeating a request cannot retry work already requeued/processing.
+func (s *PgStore) RetryFailedMailIndex(ctx context.Context, a authz.Actor, reason string) (int, error) {
+	reason = strings.TrimSpace(reason)
+	if !meaningfulReason(reason) {
+		return 0, app.BadRequest("documented recovery reason required (8-1000 bytes)")
+	}
+	n := 0
+	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+		tag, e := tx.Exec(ctx, `WITH picked AS (
+   SELECT j.message_id FROM mail_index_jobs j JOIN messages m ON m.tenant_id=j.tenant_id AND m.id=j.message_id AND m.raw_object_key=j.source_key
+   WHERE j.tenant_id=$1 AND j.state='failed'
+   ORDER BY j.message_id LIMIT 100 FOR UPDATE OF j SKIP LOCKED
+  ) UPDATE mail_index_jobs j SET state='pending',attempts=0,next_attempt_at=now(),lease_until=NULL,lease_token=NULL,last_error=''
+  FROM picked p WHERE j.tenant_id=$1 AND j.message_id=p.message_id AND j.state='failed'`, a.TenantID)
+		if e != nil {
+			return e
+		}
+		n = int(tag.RowsAffected())
+		return companyAudit(ctx, tx, a, "company.index_retry", "company", a.TenantID, map[string]any{"reason": reason, "requeued": n, "limit": 100})
+	})
+	if e != nil {
+		return 0, e
+	}
+	return n, nil
+}
+
+var _ company.ContentIndexRecovery = (*PgStore)(nil)

@@ -5798,6 +5798,39 @@ paths:
         schema:
           type: string
           pattern: ^[a-f0-9]{64}$
+  /api/v1/company/index/retry:
+    post:
+      tags: [Company]
+      summary: Retry up to 100 failed derived indexes in the current company
+      description: Requires current company administrator authority. Does not touch SMTP or grant content access. Mutation, audit and outbox commit together.
+      security: [{BearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Trimmed documented reason, 8 to 1000 UTF-8 bytes
+      responses:
+        '200':
+          description: Queued for normal lease-fenced workers; not proof of successful parsing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    required: [requeued, limit]
+                    properties:
+                      requeued: {type: integer, minimum: 0, maximum: 100}
+                      limit: {type: integer, enum: [100]}
+        '400': {description: Invalid reason}
+        '403': {description: Current company administrator required}
   /api/v1/company/overview:
     get:
       tags:
