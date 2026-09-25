@@ -565,7 +565,9 @@ export function SubmissionPane({ id }: { id: string }) {
   useEffect(() => {
     if (canViewContent) return;
     for (const key of ["submission-content", "submission-attachments"]) {
-      void mutateCache(["session", scope, [key, id]], undefined, { revalidate: false });
+      // Invalidate request deduplication too; clearing data alone can leave a
+      // just-regranted disclosure stuck on a discarded pre-revocation promise.
+      void mutateCache(["session", scope, [key, id]], undefined, { revalidate: true });
     }
   }, [canViewContent, id, scope, mutateCache]);
   return (

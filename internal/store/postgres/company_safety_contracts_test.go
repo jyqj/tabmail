@@ -253,7 +253,7 @@ func TestPinnedTemplateDraftRemainsUsableAfterNewPublication(t *testing.T) {
 	all, err := f.st.ListMailTemplates(ctx, f.a)
 	must(t, err)
 	next := all[0]
-	next.Draft.Subject = "New {{customer}}"
+	next.Draft.Subject = "New {{.customer}}"
 	updated, err := f.st.SaveMailTemplate(ctx, f.a, next)
 	must(t, err)
 	v2, err := f.st.PublishMailTemplate(ctx, f.a, updated.ID, updated.Revision)

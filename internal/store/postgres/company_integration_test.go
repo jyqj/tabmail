@@ -174,7 +174,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 			}
 			var version int
 			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
-			want := 8 // 00008_send_policy
+			want := 9 // 00009_domain_asset_guard
 			if conflict {
 				want = 1
 			}
