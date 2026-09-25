@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { DraftWriter, draftKey, type DraftTransport } from "./draft-writer";
+import { DraftWriter, draftKey } from "./draft-writer";
 import type { MailDraft } from "@/lib/company";
 const initial: MailDraft = { mailbox_id: "box", revision: 0, payload: { to: [], subject: "first", text_body: "draft" } };
 const input = (subject: string) => ({ mailbox_id: "box", payload: { ...initial.payload, subject } });
@@ -25,9 +25,9 @@ describe("DraftWriter persistence lane", () => {
     });
     it("recovers lost initial acknowledgement by exact UUID readback", async () => {
         const write = vi.fn().mockRejectedValue(new Error("connection lost"));
-        let lane: DraftWriter;
-        const read = vi.fn(async () => ({ ...initial, id: lane.id, revision: 1, payload: input("a").payload }));
-        lane = new DraftWriter(initial, { write, read });
+        const read = vi.fn();
+        const lane = new DraftWriter(initial, { write, read });
+        read.mockResolvedValue({ ...initial, id: lane.id, revision: 1, payload: input("a").payload });
         const value = await lane.save(input("a"));
         expect(value.revision).toBe(1);
         expect(read).toHaveBeenCalledWith(lane.id);

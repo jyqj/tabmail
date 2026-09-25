@@ -67,6 +67,9 @@ func Parts(env *enmime.Envelope) []*enmime.Part {
 	return append(append([]*enmime.Part{}, env.Attachments...), env.Inlines...)
 }
 func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if key == "" || p.objects == nil {
 		return nil, errors.New("raw source unavailable")
 	}

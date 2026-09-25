@@ -30,7 +30,7 @@ func (s *PgStore) ListCompanyAudit(ctx context.Context, a authz.Actor, p models.
 		if e := tx.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE `+filter, a.TenantID).Scan(&total); e != nil {
 			return e
 		}
-		rows, e := tx.Query(ctx, `SELECT id,COALESCE(actor,''),action,resource_type,resource_id,COALESCE(details->>'reason',''),created_at FROM audit_log WHERE `+filter+` ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`, a.TenantID, p.PerPage, p.Offset())
+		rows, e := tx.Query(ctx, `SELECT id,COALESCE(actor,''),action,COALESCE(resource_type,''),resource_id,COALESCE(details->>'reason',''),created_at FROM audit_log WHERE `+filter+` ORDER BY created_at DESC,id DESC LIMIT $2 OFFSET $3`, a.TenantID, p.PerPage, p.Offset())
 		if e != nil {
 			return e
 		}

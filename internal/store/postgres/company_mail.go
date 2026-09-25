@@ -361,7 +361,7 @@ func (s *PgStore) GetMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID)
 			return e
 		}
 		if !rights.CanSend {
-			return app.NotFound("draft unavailable")
+			return app.Forbidden("mailbox send permission required")
 		}
 		return fillDraftTemplateVersion(ctx, tx, a.TenantID, a.ID, v)
 	})
@@ -566,6 +566,24 @@ func (s *PgStore) GetWorkAttachment(ctx context.Context, a authz.Actor, id uuid.
 		if sent {
 			if !rights.CanRead {
 				return app.Forbidden("attachment read permission required")
+			}
+			// Queue retention is not employee content retention. Do not let the
+			// generic workspace URL reopen an expired/purged sent mailbox item.
+			// A legacy non-archived submission keeps its established read rule.
+			var visible bool
+			e = tx.QueryRow(ctx, `SELECT EXISTS(
+                SELECT 1 FROM sent_asset_attachments x JOIN sent_mail_items i ON i.tenant_id=x.tenant_id AND i.asset_id=x.asset_id
+                 WHERE x.tenant_id=$1 AND x.attachment_id=$2 AND i.mailbox_id=$3
+                   AND (i.expires_at IS NULL OR i.expires_at>now()) AND (i.purge_after IS NULL OR i.purge_after>now())
+                UNION ALL SELECT 1 FROM outbound_attachments x WHERE x.tenant_id=$1 AND x.attachment_id=$2
+                   AND NOT EXISTS(SELECT 1 FROM sent_mail_assets a WHERE a.tenant_id=x.tenant_id AND a.id=x.job_id)
+                UNION ALL SELECT 1 FROM mail_drafts d WHERE d.tenant_id=$1 AND d.user_id=$4 AND d.mailbox_id=$3
+                   AND d.sealed_at IS NULL AND d.payload->'attachment_ids' ? $5)`, a.TenantID, id, v.MailboxID, a.ID, id.String()).Scan(&visible)
+			if e != nil {
+				return e
+			}
+			if !visible {
+				return app.NotFound("attachment content has expired")
 			}
 			return nil
 		}

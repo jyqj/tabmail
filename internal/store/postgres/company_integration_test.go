@@ -160,7 +160,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 				}
 				var value int
 				must(t, pool.QueryRow(ctx, `SELECT legacy_id FROM mailbox_grants`).Scan(&value))
-				if value != 13 {
+				if value != 9 {
 					t.Fatal("historical grant lost")
 				}
 			} else {

@@ -78,7 +78,7 @@ func TestConcurrentParseHasBoundedSharedCache(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, e := p.Document(ctx, id, "new"); e == nil {
+	if _, e := p.Document(ctx, id, "one"); e == nil {
 		t.Fatal("cancelled waiter blocked or succeeded")
 	}
 }

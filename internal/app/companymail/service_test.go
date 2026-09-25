@@ -236,7 +236,7 @@ func TestCompanyUploadReservePutFinishAndFailures(t *testing.T) {
 	}
 }
 func TestCompanyComposeRecipientRules(t *testing.T) {
-	s, _, o, a, mb, id := contentFixture()
+	s, repo, o, a, mb, id := contentFixture()
 	o.raw = []byte("From: sender@client.test\r\nReply-To: reply@client.test\r\nTo: me@company.test, reply@client.test, other@client.test\r\nCc: other@client.test, cc@client.test\r\nBcc: private@client.test\r\nSubject: hello\r\nMessage-ID: <original@client.test>\r\n\r\nbody")
 	p, e := s.Compose(context.Background(), a, mb, id, mb, "reply_all")
 	if e != nil {
@@ -246,6 +246,8 @@ func TestCompanyComposeRecipientRules(t *testing.T) {
 		t.Fatalf("unsafe reply: %+v", p)
 	}
 	o.raw = []byte("From: sender@client.test\r\nReply-To: invalid <\r\nSubject: bad\r\n\r\nbody")
+	// A different original must not reuse an immutable-object parse cache.
+	s = NewService(repo, o)
 	_, e = s.Compose(context.Background(), a, mb, id, mb, "reply")
 	expectKind(t, e, app.KindBadRequest)
 }
