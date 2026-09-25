@@ -6,7 +6,8 @@ permissions:
   contents: write
 jobs:
   repair:
-    if: github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/refactor/company-mail-architecture' && github.event.head_commit.message == 'ci: resolve published dependency fixes on the isolated architecture branch'
+    if: >-
+      github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/refactor/company-mail-architecture' && github.event.head_commit.message == 'ci: correct dependency repair workflow condition'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -22,7 +23,7 @@ jobs:
         working-directory: web
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = aa2548f18188b6d908c019984bb61fd53309cc94
+          test "$(git rev-parse HEAD^)" = 17678b3648ea77d4cd9e82985d2b5bcee622675f
           npm pkg set dependencies.next=16.3.3 devDependencies.eslint-config-next=16.3.3 devDependencies.vitest=4.1.11
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
           npm audit fix --package-lock-only --ignore-scripts --no-fund > /tmp/dependency-repair.txt 2>&1 || true
