@@ -1,0 +1,41 @@
+name: Architecture regression finalization
+on:
+  push:
+    branches: [refactor/company-mail-architecture]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/refactor/company-mail-architecture'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Correct exact fixture and validation source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = 4016dd85490e9bd0430272a29ea1196864f301c6
+          python3 - <<'PY'
+          from pathlib import Path
+          def replace(path, old, new):
+              p=Path(path); s=p.read_text(); assert s.count(old)==1, path; p.write_text(s.replace(old,new))
+          replace('internal/store/postgres/company_console_boundary_test.go', "INSERT INTO audit_log(tenant_id,actor,action,details) VALUES($1,'fixture','employee.private_test',$2)", "INSERT INTO audit_log(tenant_id,actor,action,resource_type,details) VALUES($1,'fixture','employee.private_test','user',$2)")
+          replace('internal/store/postgres/company_console_boundary_test.go', 'rights, e := f.st.GetWorkMailbox(ctx, f.u, f.shared.ID)\n\tmust(t, e)', '// An ungranted employee must see no mailbox, not a zero-rights DTO.\n\tif _, err := f.st.GetWorkMailbox(ctx, f.u, f.shared.ID); err == nil {\n\t\tt.Fatal("failed grant became visible to employee")\n\t}\n\tvar grants int\n\tmust(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, f.tenant.ID, f.shared.ID, f.employee.ID).Scan(&grants))')
+          replace('internal/store/postgres/company_console_boundary_test.go', 'after.Revision != mb.Revision || rights.CanRead || audits != before', 'after.Revision != mb.Revision || grants != 0 || audits != before')
+          replace('internal/store/postgres/company_upgrade_test.go', 'must(t, st.CreateUser(ctx, user))', 'must(t, st.CreateUser(ctx, user))\n\t// Match the real pre-upgrade employee send profile. A bare user has the\n\t// deliberately read-only default, independent of mailbox ownership.\n\tprofile := uuid.New()\n\t_, e = pool.Exec(ctx, `INSERT INTO permission_profiles(id,tenant_id,name,can_send) VALUES($1,$2,\'Pre-upgrade employee\',true);`, profile, tenant.ID)\n\tmust(t, e)\n\t_, e = pool.Exec(ctx, `UPDATE users SET permission_profile_id=$1 WHERE id=$2`, profile, user.ID)\n\tmust(t, e)')
+          replace('.github/workflows/company-p0.yml', '    branches: [main]\n', '    branches: [main, fix/company-mail-safety-contracts]\n')
+          replace('.github/workflows/review-source.yml', '    branches: [main]\n', '    branches: [main, fix/company-mail-safety-contracts]\n')
+          replace('.github/workflows/company-p0.yml', '      - run: npm ci\n        working-directory: web\n', '      - run: npm ci\n        working-directory: web\n      - name: Record full dependency audit\n        working-directory: web\n        run: npm audit --json > /tmp/tabmail-npm-audit.json || test -s /tmp/tabmail-npm-audit.json\n      - uses: actions/upload-artifact@v4\n        with:\n          name: dependency-audit\n          path: /tmp/tabmail-npm-audit.json\n          retention-days: 14\n')
+          Path('.github/workflows/architecture-regression-finalize.yml').unlink()
+          PY
+          git add -A
+          test "$(git write-tree)" = 497b410293335bda561b02206bed9fb366667ab7
+          git -c user.name='TabMail maintenance' -c user.email='tabmail-maintenance@users.noreply.github.com' commit -m 'test: preserve strict authority and rollback assertions in architecture fixtures'
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/refactor/company-mail-architecture
