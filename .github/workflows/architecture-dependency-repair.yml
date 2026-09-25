@@ -1,0 +1,52 @@
+name: Architecture dependency repair
+on:
+  push:
+    branches: [refactor/company-mail-architecture]
+permissions:
+  contents: write
+jobs:
+  repair:
+    if: github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/refactor/company-mail-architecture' && github.event.head_commit.message == 'ci: resolve published dependency fixes on the isolated architecture branch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Resolve compatible published security fixes without install scripts
+        working-directory: web
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = aa2548f18188b6d908c019984bb61fd53309cc94
+          npm pkg set dependencies.next=16.3.3 devDependencies.eslint-config-next=16.3.3 devDependencies.vitest=4.1.11
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm audit fix --package-lock-only --ignore-scripts --no-fund > /tmp/dependency-repair.txt 2>&1 || true
+          npm audit --json > /tmp/dependency-audit.json || test -s /tmp/dependency-audit.json
+          node -e 'const d=require("/tmp/dependency-audit.json"); if(!d.metadata?.vulnerabilities) throw new Error("invalid audit response"); console.log(JSON.stringify(d.metadata));'
+      - name: Commit only package manifests to the same isolated branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git diff --name-only | sort | tr '\n' ' ')" = 'web/package-lock.json web/package.json '
+          git add web/package.json web/package-lock.json
+          git -c user.name='TabMail maintenance' -c user.email='tabmail-maintenance@users.noreply.github.com' commit -m 'fix: update Next.js and vulnerable transitive dependencies'
+          git rev-parse HEAD > /tmp/dependency-commit.txt
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/refactor/company-mail-architecture
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: architecture-dependency-repair
+          path: |
+            web/package.json
+            web/package-lock.json
+            /tmp/dependency-repair.txt
+            /tmp/dependency-audit.json
+            /tmp/dependency-commit.txt
+          retention-days: 14
