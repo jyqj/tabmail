@@ -7,7 +7,7 @@ permissions:
 jobs:
   repair:
     if: >-
-      github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/refactor/company-mail-architecture' && github.event.head_commit.message == 'ci: correct dependency repair workflow condition'
+      github.repository == 'jyqj/tabmail' && github.ref == 'refs/heads/refactor/company-mail-architecture' && github.event.head_commit.message == 'ci: repair lockfile using an isolated pinned npm resolver'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -23,11 +23,14 @@ jobs:
         working-directory: web
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD^)" = 17678b3648ea77d4cd9e82985d2b5bcee622675f
-          npm pkg set dependencies.next=16.3.3 devDependencies.eslint-config-next=16.3.3 devDependencies.vitest=4.1.11
-          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
-          npm audit fix --package-lock-only --ignore-scripts --no-fund > /tmp/dependency-repair.txt 2>&1 || true
-          npm audit --json > /tmp/dependency-audit.json || test -s /tmp/dependency-audit.json
+          test "$(git rev-parse HEAD^)" = 71d417906cec968107a3fa3720e6a5389e8a9a71
+          npm install --prefix /tmp/tabmail-resolver --ignore-scripts --no-audit --no-fund npm@11.6.4
+          resolver=/tmp/tabmail-resolver/node_modules/npm/bin/npm-cli.js
+          node "$resolver" ci --ignore-scripts --no-audit --no-fund
+          node "$resolver" pkg set dependencies.next=16.3.3 devDependencies.eslint-config-next=16.3.3 devDependencies.vitest=4.1.11
+          node "$resolver" install --package-lock-only --ignore-scripts --no-audit --no-fund
+          node "$resolver" audit fix --package-lock-only --ignore-scripts --no-fund > /tmp/dependency-repair.txt 2>&1 || true
+          node "$resolver" audit --json > /tmp/dependency-audit.json || test -s /tmp/dependency-audit.json
           node -e 'const d=require("/tmp/dependency-audit.json"); if(!d.metadata?.vulnerabilities) throw new Error("invalid audit response"); console.log(JSON.stringify(d.metadata));'
       - name: Commit only package manifests to the same isolated branch
         env:
