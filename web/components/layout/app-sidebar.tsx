@@ -61,27 +61,14 @@ export function AppSidebar() {
 
   // Shared admin items (accessible by both super_admin and admin)
   const sharedAdminItems = [
-    {
-      href: "/company",
-      label: c("员工与邮箱", "Employees and mailboxes"),
-      icon: Users,
-    },
-    {
-      href: "/company/templates",
-      label: c("发送模板", "Mail templates"),
-      icon: ClipboardList,
-    },
-    { href: "/admin/users", label: t("sidebar.users"), icon: Users },
-    {
-      href: "/admin/permissions",
-      label: t("sidebar.permissions"),
-      icon: Shield,
-    },
-    {
-      href: "/admin/domains",
-      label: t("sidebar.domainResources"),
-      icon: Globe,
-    },
+    {href:"/company",label:c("公司概览","Company overview"),icon:BarChart3},
+    {href:"/company/employees",label:c("员工与交接","Employees and handover"),icon:Users},
+    {href:"/company/mailboxes",label:c("邮箱与授权","Mailboxes and grants"),icon:Mail},
+    {href:"/company/domains",label:c("域名与发送策略","Domains and sending policy"),icon:Globe},
+    {href:"/company/templates",label:c("发送模板","Mail templates"),icon:ClipboardList},
+    {href:"/company/access",label:c("成员权限","Employee permissions"),icon:Shield},
+    {href:"/company/profiles",label:c("权限配置","Permission profiles"),icon:Settings2},
+    {href:"/company/audit",label:c("公司管理审计","Company audit"),icon:ClipboardList},
   ];
 
   // Platform-only operations expose global telemetry/audit data.
@@ -100,6 +87,7 @@ export function AppSidebar() {
 
   // Platform-only admin items (only super_admin)
   const platformAdminItems = [
+    {href:"/admin/domains",label:t("sidebar.domainResources"),icon:Globe},
     {
       href: "/admin/policy",
       label: t("sidebar.smtpPolicy"),

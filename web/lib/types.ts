@@ -415,6 +415,7 @@ export interface EffectivePermission {
 // ============================================================
 
 export type OutboundState =
+  | "cancelled"
   | "pending"
   | "processing"
   | "sent"

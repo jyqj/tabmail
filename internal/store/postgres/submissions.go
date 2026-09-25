@@ -212,7 +212,7 @@ func (s *PgStore) GetSubmission(ctx context.Context, a authz.Actor, id uuid.UUID
 // Content and attachment projections require current mailbox read rights.
 // Historical submitter identity only permits the separate operation receipt.
 // Denial collapses to 404, including after grants or ownership are revoked.
-const submissionContentSelect = `SELECT s.id,s.subject,s.mail_from,s.to_addrs,s.cc_addrs,s.headers_json,s.text_body,s.html_body,s.created_at FROM outbound_jobs s`
+const submissionContentSelect = `SELECT s.id,s.subject,s.mail_from,s.to_addrs,s.cc_addrs,s.headers_json,s.text_body,s.html_body,s.created_at` + sentContentFrom
 
 func (s *PgStore) GetSubmissionContent(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.SubmissionContent, error) {
 	v := &company.SubmissionContent{}
@@ -242,8 +242,8 @@ func (s *PgStore) GetSubmissionContent(ctx context.Context, a authz.Actor, id uu
 }
 
 const submissionAttachmentSelect = `SELECT a.id,a.filename,a.content_type,a.size,a.state,a.object_key,a.sha256
- FROM outbound_jobs s
- JOIN outbound_attachments x ON x.tenant_id=s.tenant_id AND x.job_id=s.id
+` + sentContentFrom + `
+ JOIN sent_asset_attachments x ON x.tenant_id=s.tenant_id AND x.asset_id=s.id
  JOIN mail_attachments a ON a.tenant_id=x.tenant_id AND a.id=x.attachment_id`
 
 func (s *PgStore) ListSubmissionAttachments(ctx context.Context, a authz.Actor, id uuid.UUID) ([]company.SubmissionAttachment, error) {
@@ -254,7 +254,7 @@ func (s *PgStore) ListSubmissionAttachments(ctx context.Context, a authz.Actor, 
 		// rather than answering an empty list for a job that does not exist
 		// for this actor.
 		var one bool
-		e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM outbound_jobs s WHERE `+where+` AND s.id=$1)`, append([]any{id}, args...)...).Scan(&one)
+		e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1`+sentContentFrom+` WHERE `+where+` AND s.id=$1)`, append([]any{id}, args...)...).Scan(&one)
 		if e != nil {
 			return e
 		}

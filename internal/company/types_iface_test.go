@@ -13,6 +13,12 @@ type roleComposition interface {
 	MailReadService
 	SubmissionReader
 	RecoveryService
+	SentArchive
+	ParsedContentReader
+	OffboardingPlanner
+	DraftQuery
+	MailboxIndexReader
+	ConsoleReader
 }
 
 // roleComposition satisfies Repository (the roles cover the whole surface).

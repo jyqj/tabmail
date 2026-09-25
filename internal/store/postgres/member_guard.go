@@ -36,7 +36,7 @@ func currentMemberActor(ctx context.Context, tx pgx.Tx, actor authz.Actor, tenan
 	if actor.Type != authz.PrincipalUser || actor.TenantID != tenant {
 		return actor, authz.ErrForbidden("interactive company administrator required")
 	}
-	u, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1`, actor.ID))
+	u, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 FOR SHARE`, actor.ID))
 	if err != nil {
 		return actor, err
 	}

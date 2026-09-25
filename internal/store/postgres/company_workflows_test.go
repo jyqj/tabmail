@@ -674,14 +674,22 @@ func TestP4AttachmentCleanupRespectsSentJobReferences(t *testing.T) {
 	if count != 1 {
 		t.Fatal("sent-job attachment collected despite outbound pin")
 	}
-	// Once the job (and with it the pin, via cascade) is gone, the expired
-	// orphan is collected on the next sweep.
+	// Archive pins survive job removal. Only an explicitly purged mailbox item
+	// releases the last employee asset reference.
 	_, e = f.pool.Exec(ctx, `DELETE FROM outbound_jobs WHERE id=$1`, job.ID)
 	must(t, e)
 	must(t, f.st.SweepCompanyMetadata(ctx))
 	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM mail_attachments WHERE id=$1`, a.ID).Scan(&count))
+	if count != 1 {
+		t.Fatal("archive attachment was collected after job removal")
+	}
+	must(t, f.st.MutateArchivedMail(ctx, f.u, f.personal.ID, job.ID, 1, "trash"))
+	_, e = f.pool.Exec(ctx, `UPDATE sent_mail_items SET purge_after=now()-interval '1 second' WHERE asset_id=$1`, job.ID)
+	must(t, e)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM mail_attachments WHERE id=$1`, a.ID).Scan(&count))
 	if count != 0 {
-		t.Fatal("expired orphan retained after job removal")
+		t.Fatal("expired orphan retained after explicit sent asset purge")
 	}
 }
 

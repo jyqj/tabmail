@@ -11,7 +11,8 @@ import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { sessionScope } from "@/lib/session";
 
-import { MessagePane, SubmissionPane } from "./page";
+import { MessagePane } from "@/features/mail/components/message-pane";
+import { SubmissionPane } from "@/features/mail/components/submission-pane";
 
 const {
   submissionMock,

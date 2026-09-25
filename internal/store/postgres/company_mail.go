@@ -66,7 +66,7 @@ func (s *PgStore) ListWorkMessages(ctx context.Context, a authz.Actor, id uuid.U
 		if uid := a.EffectiveUserID(); uid != nil {
 			viewer = *uid
 		}
-		filter := `m.tenant_id=$1 AND m.mailbox_id=$2 AND ` + where + ` AND ($3='%%' OR m.subject ILIKE $3 OR m.sender ILIKE $3 OR array_to_string(m.recipients,',') ILIKE $3)`
+		filter := `m.tenant_id=$1 AND m.mailbox_id=$2 AND ` + where + ` AND ($3='%%' OR m.subject ILIKE $3 OR m.sender ILIKE $3 OR array_to_string(m.recipients,',') ILIKE $3 OR EXISTS(SELECT 1 FROM mail_documents d WHERE d.tenant_id=m.tenant_id AND d.message_id=m.id AND d.source_key=m.raw_object_key AND d.parser_version=1 AND d.search_text ILIKE $3))`
 		if e = tx.QueryRow(ctx, `SELECT count(*) FROM messages m WHERE `+filter, a.TenantID, id, pattern).Scan(&total); e != nil {
 			return e
 		}
@@ -260,55 +260,7 @@ func (s *PgStore) ListMailboxEvents(ctx context.Context, tenant, mailbox uuid.UU
 }
 
 func (s *PgStore) ListMailDrafts(ctx context.Context, a authz.Actor) ([]company.Draft, error) {
-	out := []company.Draft{}
-	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		rows, e := tx.Query(ctx, `SELECT id,mailbox_id,payload,revision,updated_at FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 ORDER BY updated_at DESC LIMIT 200`, a.TenantID, a.ID)
-		if e != nil {
-			return e
-		}
-		for rows.Next() {
-			v := company.Draft{}
-			var raw []byte
-			if e = rows.Scan(&v.ID, &v.MailboxID, &raw, &v.Revision, &v.UpdatedAt); e != nil {
-				rows.Close()
-				return e
-			}
-			if e = json.Unmarshal(raw, &v.Payload); e != nil {
-				rows.Close()
-				return e
-			}
-			out = append(out, v)
-		}
-		e = rows.Err()
-		rows.Close()
-		if e != nil {
-			return e
-		}
-		mbIDs := []uuid.UUID{}
-		seen := map[uuid.UUID]bool{}
-		for _, v := range out {
-			if !seen[v.MailboxID] {
-				seen[v.MailboxID] = true
-				mbIDs = append(mbIDs, v.MailboxID)
-			}
-		}
-		access, e := s.mailboxAccessBatch(ctx, tx, a, mbIDs)
-		if e != nil {
-			return e
-		}
-		filtered := []company.Draft{}
-		for _, v := range out {
-			rights, ok := access[v.MailboxID]
-			if !ok {
-				continue
-			}
-			if rights.CanSend {
-				filtered = append(filtered, v)
-			}
-		}
-		out = filtered
-		return s.fillDraftTemplateVersions(ctx, tx, a, out)
-	})
+	out, _, e := s.ListMailDraftPage(ctx, a, models.Page{Page: 1, PerPage: 200})
 	return out, e
 }
 
@@ -394,7 +346,7 @@ func (s *PgStore) GetMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID)
 	v := &company.Draft{}
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		var raw []byte
-		e := tx.QueryRow(ctx, `SELECT id,mailbox_id,payload,revision,updated_at FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND id=$3`, a.TenantID, a.ID, id).Scan(&v.ID, &v.MailboxID, &raw, &v.Revision, &v.UpdatedAt)
+		e := tx.QueryRow(ctx, `SELECT id,mailbox_id,payload,revision,updated_at FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL AND id=$3`, a.TenantID, a.ID, id).Scan(&v.ID, &v.MailboxID, &raw, &v.Revision, &v.UpdatedAt)
 		if errors.Is(e, pgx.ErrNoRows) {
 			return app.NotFound("draft not found")
 		}
@@ -403,6 +355,13 @@ func (s *PgStore) GetMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID)
 		}
 		if e = json.Unmarshal(raw, &v.Payload); e != nil {
 			return e
+		}
+		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
+		if e != nil {
+			return e
+		}
+		if !rights.CanSend {
+			return app.NotFound("draft unavailable")
 		}
 		return fillDraftTemplateVersion(ctx, tx, a.TenantID, a.ID, v)
 	})
@@ -430,16 +389,32 @@ func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Dr
 		if e = validateAttachmentIDs(ctx, tx, a.TenantID, a.ID, v.MailboxID, v.Payload.AttachmentIDs); e != nil {
 			return e
 		}
-		if v.ID == uuid.Nil {
-			if v.Revision != 0 {
-				return app.Conflict("new draft revision must be zero")
+		if v.Revision == 0 {
+			if v.ID == uuid.Nil {
+				v.ID = uuid.New()
 			}
-			v.ID = uuid.New()
-			if e = tx.QueryRow(ctx, `INSERT INTO mail_drafts(id,tenant_id,user_id,mailbox_id,payload) VALUES($1,$2,$3,$4,$5) RETURNING revision,updated_at`, v.ID, a.TenantID, a.ID, v.MailboxID, raw).Scan(&v.Revision, &v.UpdatedAt); e != nil {
+			// Tombstone first, in this same draft transaction. ON CONFLICT
+			// waits for a concurrent creation; only the original owner/input
+			// can replay and only while that exact draft still exists.
+			tag, e := tx.Exec(ctx, `INSERT INTO draft_creation_receipts(id,tenant_id,user_id,mailbox_id,payload_hash) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`, v.ID, a.TenantID, a.ID, v.MailboxID, company.Hash(string(raw)))
+			if e != nil {
 				return e
 			}
+			if tag.RowsAffected() == 0 {
+				e = tx.QueryRow(ctx, `SELECT d.revision,d.updated_at FROM draft_creation_receipts c JOIN mail_drafts d ON d.id=c.id AND d.tenant_id=c.tenant_id AND d.user_id=c.user_id WHERE c.id=$1 AND c.tenant_id=$2 AND c.user_id=$3 AND c.mailbox_id=$4 AND c.payload_hash=$5 AND d.mailbox_id=$4 AND d.revision=1 AND d.payload=$6::jsonb AND d.sealed_at IS NULL`, v.ID, a.TenantID, a.ID, v.MailboxID, company.Hash(string(raw)), raw).Scan(&v.Revision, &v.UpdatedAt)
+				if errors.Is(e, pgx.ErrNoRows) {
+					return app.Conflict("draft creation already consumed or changed")
+				}
+				if e != nil {
+					return e
+				}
+			} else {
+				if e = tx.QueryRow(ctx, `INSERT INTO mail_drafts(id,tenant_id,user_id,mailbox_id,payload) VALUES($1,$2,$3,$4,$5) RETURNING revision,updated_at`, v.ID, a.TenantID, a.ID, v.MailboxID, raw).Scan(&v.Revision, &v.UpdatedAt); e != nil {
+					return e
+				}
+			}
 		} else {
-			e = tx.QueryRow(ctx, `UPDATE mail_drafts SET mailbox_id=$4,payload=$5,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND revision=$6 RETURNING revision,updated_at`, a.TenantID, a.ID, v.ID, v.MailboxID, raw, v.Revision).Scan(&v.Revision, &v.UpdatedAt)
+			e = tx.QueryRow(ctx, `UPDATE mail_drafts SET mailbox_id=$4,payload=$5,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND revision=$6 AND sealed_at IS NULL RETURNING revision,updated_at`, a.TenantID, a.ID, v.ID, v.MailboxID, raw, v.Revision).Scan(&v.Revision, &v.UpdatedAt)
 			if errors.Is(e, pgx.ErrNoRows) {
 				return app.Conflict("draft changed in another tab")
 			}
@@ -470,7 +445,7 @@ func fillDraftTemplateVersion(ctx context.Context, tx pgx.Tx, tenant, user uuid.
 }
 func (s *PgStore) DeleteMailDraft(ctx context.Context, a authz.Actor, id uuid.UUID, revision int) error {
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		tag, e := tx.Exec(ctx, `DELETE FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND revision=$4`, a.TenantID, a.ID, id, revision)
+		tag, e := tx.Exec(ctx, `DELETE FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL AND id=$3 AND revision=$4`, a.TenantID, a.ID, id, revision)
 		if e != nil {
 			return e
 		}
@@ -581,7 +556,7 @@ func (s *PgStore) GetWorkAttachment(ctx context.Context, a authz.Actor, id uuid.
 			return e
 		}
 		var sent bool
-		if e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM outbound_attachments WHERE tenant_id=$1 AND attachment_id=$2)`, a.TenantID, id).Scan(&sent); e != nil {
+		if e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM outbound_attachments WHERE tenant_id=$1 AND attachment_id=$2 UNION ALL SELECT 1 FROM sent_asset_attachments WHERE tenant_id=$1 AND attachment_id=$2)`, a.TenantID, id).Scan(&sent); e != nil {
 			return e
 		}
 		// Once an attachment is pinned to a submitted job, its bytes follow the

@@ -48,6 +48,7 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
     await expect(
       page.getByText("Private browser journey body.", { exact: false }),
     ).toBeVisible();
+    const autosave = page.waitForResponse(r => /\/company\/drafts$/.test(new URL(r.url()).pathname) && r.request().method() === "POST");
     await page.getByRole("button", { name: "Reply", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: "Compose mail", exact: true }),
@@ -55,12 +56,11 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
     await expect(
       page.getByLabel("To (plain email addresses)", { exact: true }),
     ).toHaveValue("client@recipient.test");
-    const save = page.waitForResponse(
-      (r) =>
-        r.url().includes("/company/drafts") && r.request().method() === "POST",
-    );
+    const createdDraft = await autosave;
+    assert.equal(createdDraft.status(), 200);
+    assert.ok(createdDraft.request().postDataJSON().id, "autosave must supply a stable creation UUID");
+    assert.equal(createdDraft.request().postDataJSON().revision, 0);
     await page.getByRole("button", { name: "Save draft", exact: true }).click();
-    assert.equal((await save).status(), 200);
     await page.getByRole("button", { name: "Close", exact: true }).click();
     await page.getByRole("button", { name: "Drafts", exact: true }).click();
     await page
@@ -118,7 +118,7 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
 
     await logout();
     await login(fixture.other);
-    await expect(page.getByLabel("Current mailbox")).toContainText(
+    await expect(page.getByRole("navigation", { name: "Mailboxes", exact: true })).toContainText(
       "successor@company.test",
     );
     await expect(
@@ -139,7 +139,7 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
     const second = await context.newPage();
     await Promise.all([page.reload(), second.goto(origin + "/mail")]);
     for (const tab of [page, second]) {
-      await expect(tab.getByLabel("Current mailbox")).toContainText(
+      await expect(tab.getByRole("navigation", { name: "Mailboxes", exact: true })).toContainText(
         "successor@company.test",
       );
     }
@@ -148,7 +148,7 @@ const origin = process.env.TABMAIL_E2E_ORIGIN || "http://localhost:3000";
 
     await logout();
     await login(fixture.admin);
-    await page.goto(origin + "/company");
+    await page.goto(origin + "/company/employees");
     await page
       .getByLabel("Login email", { exact: true })
       .fill("browser-new@contact.test");

@@ -9,16 +9,14 @@ import (
 	"encoding/hex"
 	"errors"
 	"io"
-	"path/filepath"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jhillyerd/enmime/v2"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
+	"tabmail/internal/mailcontent"
 	"tabmail/internal/models"
-	"tabmail/internal/sanitize"
 )
 
 const (
@@ -44,10 +42,11 @@ type ObjectStore interface {
 type Service struct {
 	repo    Repository
 	objects ObjectStore
+	parser  *mailcontent.Parser
 }
 
 func NewService(repo Repository, objects ObjectStore) *Service {
-	return &Service{repo: repo, objects: objects}
+	return &Service{repo: repo, objects: objects, parser: mailcontent.New(objects)}
 }
 
 // File is already authorized and verified. It contains neither an object key
@@ -57,12 +56,7 @@ type File struct {
 	Content  []byte
 }
 
-type InboundAttachment struct {
-	Index       int    `json:"index"`
-	Filename    string `json:"filename"`
-	Size        int    `json:"size"`
-	ContentType string `json:"content_type"`
-}
+type InboundAttachment = company.ParsedAttachment
 
 func (s *Service) message(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*models.Message, error) {
 	m, err := s.repo.GetWorkMessage(ctx, a, mailbox, id)
@@ -87,18 +81,11 @@ func (s *Service) Message(ctx context.Context, a authz.Actor, mailbox, id uuid.U
 	if m.RawObjectKey == "" {
 		return v, nil
 	}
-	env, err := s.envelope(ctx, m.RawObjectKey)
+	doc, err := s.document(ctx, a, mailbox, m)
 	if err != nil {
 		return nil, err
 	}
-	v.TextBody = env.Text
-	if env.HTML != "" {
-		v.HTMLBody, err = sanitize.HTML(env.HTML)
-		if err != nil {
-			v.HTMLBody = ""
-			v.BodyAccess = "sanitize_failed"
-		}
-	}
+	v.TextBody, v.HTMLBody, v.BodyAccess = doc.TextBody, doc.HTMLBody, doc.BodyAccess
 	return v, nil
 }
 
@@ -128,23 +115,28 @@ func (s *Service) open(ctx context.Context, key string) (io.ReadCloser, error) {
 }
 
 func (s *Service) envelope(ctx context.Context, key string) (*enmime.Envelope, error) {
-	r, err := s.open(ctx, key)
-	if err != nil {
-		return nil, err
+	return s.parser.Envelope(ctx, key)
+}
+func (s *Service) document(ctx context.Context, a authz.Actor, mailbox uuid.UUID, m *models.Message) (*company.ParsedMessage, error) {
+	if cache, ok := s.repo.(company.ParsedContentReader); ok {
+		doc, e := cache.GetParsedMessage(ctx, a, mailbox, m.ID)
+		if e != nil {
+			return nil, e
+		}
+		if doc != nil {
+			return doc, nil
+		}
 	}
-	defer r.Close()
-	raw, err := io.ReadAll(io.LimitReader(r, MaxMessageBytes+1))
-	if err != nil {
-		return nil, app.Internal(err)
+	doc, e := s.parser.Document(ctx, m.ID, m.RawObjectKey)
+	if e != nil {
+		return nil, app.Internal(e)
 	}
-	if int64(len(raw)) > MaxMessageBytes {
-		return nil, app.BadRequest("message exceeds content viewer limit")
+	if cache, ok := s.repo.(company.ParsedContentReader); ok {
+		if e = cache.SaveParsedMessage(ctx, a, mailbox, *doc); e != nil {
+			return nil, e
+		}
 	}
-	env, err := enmime.ReadEnvelope(bytes.NewReader(raw))
-	if err != nil {
-		return nil, app.Internal(err)
-	}
-	return env, nil
+	return doc, nil
 }
 
 func (s *Service) inboundEnvelope(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*enmime.Envelope, error) {
@@ -160,30 +152,29 @@ func envelopeFiles(env *enmime.Envelope) []*enmime.Part {
 }
 
 // SafeFilename is shared by inbound, uploaded and forwarded attachments.
-func SafeFilename(name string) string {
-	name = filepath.Base(strings.ReplaceAll(name, "\\", "/"))
-	name = strings.Map(func(r rune) rune {
-		if r < 32 || r == 127 {
-			return -1
-		}
-		return r
-	}, name)
-	if name == "" || name == "." || name == ".." || len(name) > 180 {
-		return "attachment"
-	}
-	return name
-}
+func SafeFilename(name string) string { return mailcontent.SafeFilename(name) }
 
 func (s *Service) InboundAttachments(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) ([]InboundAttachment, error) {
-	env, err := s.inboundEnvelope(ctx, a, mailbox, id)
-	if err != nil {
-		return nil, err
+	m, e := s.message(ctx, a, mailbox, id)
+	if e != nil {
+		return nil, e
 	}
-	out := []InboundAttachment{}
-	for i, p := range envelopeFiles(env) {
-		out = append(out, InboundAttachment{i, SafeFilename(p.FileName), len(p.Content), p.ContentType})
+	d, e := s.document(ctx, a, mailbox, m)
+	if e != nil {
+		return nil, e
 	}
-	return out, nil
+	return d.Parts, nil
+}
+func (s *Service) InboundAttachmentByID(ctx context.Context, a authz.Actor, mailbox, message uuid.UUID, id string) (*File, error) {
+	m, e := s.message(ctx, a, mailbox, message)
+	if e != nil {
+		return nil, e
+	}
+	part, raw, e := s.parser.Attachment(ctx, message, m.RawObjectKey, id)
+	if e != nil {
+		return nil, app.NotFound("attachment not found")
+	}
+	return &File{Filename: part.Filename, Content: raw}, nil
 }
 
 func (s *Service) InboundAttachment(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID, index int) (*File, error) {

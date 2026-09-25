@@ -19,7 +19,6 @@ import (
 )
 
 type mailWorkspace interface {
-	company.DraftWorkspace
 	company.MailReadService
 	company.SubmissionReceipts
 }
@@ -254,40 +253,6 @@ func (h *CompanyMailHandler) ComposeReply(w http.ResponseWriter, r *http.Request
 	}
 	out, err := h.mail.Compose(r.Context(), companyActor(r), mailbox, message, v.FromMailbox, v.Mode)
 	h.result(w, out, err)
-}
-
-func (h *CompanyMailHandler) Drafts(w http.ResponseWriter, r *http.Request) {
-	v, e := h.repo.ListMailDrafts(r.Context(), companyActor(r))
-	h.result(w, v, e)
-}
-func (h *CompanyMailHandler) SaveDraft(w http.ResponseWriter, r *http.Request) {
-	v, ok := companyBody[company.Draft](w, r)
-	if !ok {
-		return
-	}
-	if r.Method == "PUT" {
-		id, ok := companyID(w, r, "id")
-		if !ok {
-			return
-		}
-		v.ID = id
-	} else {
-		v.ID = uuid.Nil
-	}
-	out, e := h.repo.SaveMailDraft(r.Context(), companyActor(r), v)
-	h.result(w, out, e)
-}
-func (h *CompanyMailHandler) DeleteDraft(w http.ResponseWriter, r *http.Request) {
-	id, ok := companyID(w, r, "id")
-	if !ok {
-		return
-	}
-	rev, e := strconv.Atoi(r.URL.Query().Get("revision"))
-	if e != nil {
-		errBadRequest(w, "draft revision required")
-		return
-	}
-	h.result(w, map[string]bool{"deleted": true}, h.repo.DeleteMailDraft(r.Context(), companyActor(r), id, rev))
 }
 
 // submitDraftRequest is the JSON body for POST /company/drafts/{id}/submit.

@@ -211,11 +211,17 @@ type SettingsService interface {
 
 // EmployeeService is the employee lifecycle: invite, list/revoke invitations,
 // activate, and offboard.
-type EmployeeService interface {
+type EmployeeInvitations interface {
 	InviteEmployee(context.Context, authz.Actor, InvitationInput, string) (*Invitation, error)
 	ListEmployeeInvitations(context.Context, authz.Actor) ([]Invitation, error)
 	RevokeEmployeeInvitation(context.Context, authz.Actor, uuid.UUID) error
 	ActivateEmployee(context.Context, string, string) error
+}
+
+// EmployeeService retains the internal compatibility method; public lifecycle
+// writes use OffboardingPlanner instead.
+type EmployeeService interface {
+	EmployeeInvitations
 	OffboardEmployee(context.Context, authz.Actor, uuid.UUID, uuid.UUID, string) error
 }
 
@@ -349,4 +355,10 @@ type Repository interface {
 	MailReadService
 	SubmissionReader
 	RecoveryService
+	SentArchive
+	ParsedContentReader
+	OffboardingPlanner
+	DraftQuery
+	MailboxIndexReader
+	ConsoleReader
 }

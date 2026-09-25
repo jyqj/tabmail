@@ -141,6 +141,7 @@ export interface DraftSubmission {
   created_at: string;
 }
 export interface InboundAttachment {
+  id: string;
   index: number;
   filename: string;
   size: number;
@@ -161,6 +162,7 @@ export interface RecoveryTarget {
   error?: string;
 }
 export type SubmissionStatus =
+  | "cancelled"
   | "submitted"
   | "waiting"
   | "sending"

@@ -160,7 +160,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 				}
 				var value int
 				must(t, pool.QueryRow(ctx, `SELECT legacy_id FROM mailbox_grants`).Scan(&value))
-				if value != 9 {
+				if value != 13 {
 					t.Fatal("historical grant lost")
 				}
 			} else {
@@ -174,7 +174,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 			}
 			var version int
 			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
-			want := 9 // 00009_domain_asset_guard
+			want := 13 // 00013_draft_creation_receipts
 			if conflict {
 				want = 1
 			}

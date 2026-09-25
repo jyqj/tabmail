@@ -1,7 +1,7 @@
 import React from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import CompanyPage from "@/app/(dashboard)/company/page";
+import CompanyPage from "@/app/(dashboard)/company/domains/page";
 
 const { domains, verify } = vi.hoisted(() => ({ domains: vi.fn(), verify: vi.fn() }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
