@@ -27,7 +27,7 @@ type store interface {
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
 	CreateZone(ctx context.Context, z *models.DomainZone) error
-	DeleteZone(ctx context.Context, id uuid.UUID) error
+	DeleteZone(ctx context.Context, id uuid.UUID, entry models.AuditEntry) error
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
@@ -292,19 +292,18 @@ func (s *Service) DeleteZone(ctx context.Context, actor authz.Actor, zoneID uuid
 	if err != nil {
 		return err
 	}
-	if err := s.store.DeleteZone(ctx, zoneID); err != nil {
-		return app.Internal(err)
-	}
-	s.invalidateZone(zone.Domain)
-	s.invalidateRoutes(zoneID)
-	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{
+	if err := s.store.DeleteZone(ctx, zoneID, models.AuditEntry{
 		TenantID:     app.UUIDPtr(zone.TenantID),
 		Actor:        actor.AuditLabel(),
 		Action:       "domain.delete",
 		ResourceType: "domain_zone",
 		ResourceID:   app.UUIDPtr(zone.ID),
 		Details:      app.MustJSON(map[string]any{"domain": zone.Domain}),
-	})
+	}); err != nil {
+		return app.Internal(err)
+	}
+	s.invalidateZone(zone.Domain)
+	s.invalidateRoutes(zoneID)
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "domain.deleted", TenantID: zone.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"domain": zone.Domain, "zone_id": zone.ID.String()}})
 	}

@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { Compose } from "./compose";
 
-const { companyMock } = vi.hoisted(() => ({ companyMock: vi.fn() }));
+const { companyMock, submitDraftMock } = vi.hoisted(() => ({ companyMock: vi.fn(), submitDraftMock: vi.fn() }));
 
 vi.mock("sonner", () => ({
   toast: { success: vi.fn(), error: vi.fn() },
@@ -19,6 +19,7 @@ vi.mock("sonner", () => ({
 vi.mock("@/lib/company", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/company")>()),
   company: (...args: unknown[]) => companyMock(...args),
+  submitDraft: (...args: unknown[]) => submitDraftMock(...args),
 }));
 
 import type { MailDraft, WorkMailbox } from "@/lib/company";
@@ -142,5 +143,40 @@ describe("Compose template eligibility", () => {
       screen.queryByText(/emergency-revoked|verification failed/),
     ).toBeNull();
     expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
+  });
+});
+
+
+describe("Pinned template version survives newer publication", () => {
+  afterEach(() => cleanup());
+  it("edits, previews and submits authorized v1 when the picker only contains v2", async () => {
+    const snapshot = { subject: "Hello {{customer}}", text_body: "Dear {{customer}}", html_body: "",
+      variables: [{ name: "customer", type: "text" as const, required: true, max_length: 80 }] };
+    const draft: MailDraft = {
+      id: "saved-v1", mailbox_id: "mb-1", revision: 4,
+      payload: { to: ["dest@client.test"], subject: "", text_body: "", template_version_id: "v1", template_vars: { customer: "Alice" } },
+      template_version: { id: "v1", name: "Welcome", version: 1, status: "usable", snapshot },
+    };
+    companyMock.mockReset().mockImplementation((path: string, opts?: { method?: string; body?: { payload?: MailDraft["payload"] } }) => {
+      if (path === "/mailboxes/mb-1/templates") return Promise.resolve([{ id: "v2", name: "Welcome", version: 2, snapshot }]);
+      if (path === "/templates/preview") return Promise.resolve({ subject: "Preview v1", text_body: "Dear Alice", html_body: "" });
+      if (path === "/drafts/saved-v1") return Promise.resolve({ ...draft, revision: 5, payload: opts?.body?.payload ?? draft.payload });
+      return Promise.resolve([]);
+    });
+    submitDraftMock.mockReset().mockResolvedValue({ id: "sent-job" });
+    const onSent = vi.fn();
+    render(<Compose mailboxes={[{ ...baseMailbox(), template_only: true }]} initial={draft} onClose={vi.fn()} onSent={onSent} />);
+    await screen.findByText("Welcome · v2");
+    expect(screen.getByRole("option", { name: "Welcome · v1" })).toBeInTheDocument();
+    expect(screen.getByLabelText("customer * · text")).toHaveValue("Alice");
+    expect(screen.queryByLabelText("Message")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Server preview" }));
+    await screen.findByText("Preview v1");
+    expect(companyMock).toHaveBeenCalledWith("/templates/preview", expect.objectContaining({ body: expect.objectContaining({ template_version_id: "v1" }) }));
+    fireEvent.change(screen.getByLabelText("customer * · text"), { target: { value: "Bob" } });
+    fireEvent.click(screen.getByRole("button", { name: "Send" }));
+    await waitFor(() => expect(submitDraftMock).toHaveBeenCalledWith("saved-v1", 5, "saved-v1.5"));
+    expect(companyMock).toHaveBeenCalledWith("/drafts/saved-v1", expect.objectContaining({ body: expect.objectContaining({ payload: expect.objectContaining({ template_version_id: "v1", template_vars: { customer: "Bob" } }) }) }));
+    expect(onSent).toHaveBeenCalledOnce();
   });
 });

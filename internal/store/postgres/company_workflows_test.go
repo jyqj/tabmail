@@ -150,7 +150,7 @@ func TestR3SharedMailboxRightsAndGrantAuditRollback(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()
 	g := models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}
-	must(t, f.st.SetWorkGrant(ctx, f.a, g))
+	must(t, grantCurrent(f.st, ctx, f.a, g))
 	v, e := f.st.GetWorkMailbox(ctx, f.u, f.shared.ID)
 	must(t, e)
 	if !v.CanRead || v.CanSend || v.CanOrganize {
@@ -162,7 +162,7 @@ func TestR3SharedMailboxRightsAndGrantAuditRollback(t *testing.T) {
 	_, e = f.pool.Exec(ctx, `ALTER TABLE audit_log ADD CONSTRAINT fail_grant CHECK(action<>'mailbox.grant') NOT VALID`)
 	must(t, e)
 	g.CanSend = true
-	if f.st.SetWorkGrant(ctx, f.a, g) == nil {
+	if grantCurrent(f.st, ctx, f.a, g) == nil {
 		t.Fatal("grant survived audit failure")
 	}
 	v, e = f.st.GetWorkMailbox(ctx, f.u, f.shared.ID)
@@ -179,7 +179,7 @@ func TestR3SharedMailboxRightsAndGrantAuditRollback(t *testing.T) {
 	}
 	g.CanRead = false
 	g.CanSend = false
-	must(t, f.st.SetWorkGrant(ctx, f.a, g))
+	must(t, grantCurrent(f.st, ctx, f.a, g))
 	if _, e = f.st.GetWorkMailbox(ctx, f.u, f.shared.ID); e == nil {
 		t.Fatal("revoked mailbox discoverable")
 	}
@@ -228,7 +228,7 @@ func TestAdminVisibilityIsNotContentAccess(t *testing.T) {
 	}
 
 	// An explicit grant — not the role — is what unlocks content.
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.admin.ID, CanRead: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.admin.ID, CanRead: true}))
 	if _, _, e = f.st.ListWorkMessages(ctx, f.a, f.personal.ID, "inbox", "", models.Page{}); e != nil {
 		t.Fatal("granted administrator could not read mailbox", e)
 	}
@@ -253,7 +253,7 @@ func TestR3OffboardingAndOptimisticHandover(t *testing.T) {
 	if _, e = f.st.GetWorkMailbox(ctx, f.u, f.personal.ID); e == nil {
 		t.Fatal("former owner retained mailbox access")
 	}
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanSend: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanSend: true}))
 	before := f.employee.SessionVersion
 	must(t, f.st.OffboardEmployee(ctx, f.a, f.employee.ID, f.other.ID, "Employee departure and mailbox handover"))
 	u, e := f.st.GetUser(ctx, f.employee.ID)
@@ -273,6 +273,7 @@ func TestR3OffboardingAndOptimisticHandover(t *testing.T) {
 		t.Fatal("employee offboarded admin")
 	}
 }
+
 // Mailbox administration follows the member hierarchy: an administrator can
 // reassign or regrant a mailbox only when they manage its owner (or own it
 // themselves). Personal mailboxes owned by a peer administrator are protected.
@@ -292,7 +293,7 @@ func TestMailboxAdministrationFollowsMemberHierarchy(t *testing.T) {
 	if f.st.TransferWorkMailbox(ctx, f.a, peerMailbox.ID, f.other.ID, v.Revision, "Attempt over peer admin") == nil {
 		t.Fatal("admin handed over a peer administrator's mailbox")
 	}
-	if f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: peerMailbox.ID, UserID: f.employee.ID, CanRead: true}) == nil {
+	if grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: peerMailbox.ID, UserID: f.employee.ID, CanRead: true}) == nil {
 		t.Fatal("admin regranted a peer administrator's mailbox")
 	}
 	must(t, f.st.TransferWorkMailbox(ctx, superActor, peerMailbox.ID, f.other.ID, v.Revision, "Super admin mediated handover"))
@@ -304,12 +305,12 @@ func TestMailboxAdministrationFollowsMemberHierarchy(t *testing.T) {
 	must(t, f.st.TransferWorkMailbox(ctx, f.a, own.ID, f.other.ID, ov.Revision, "Administrator own mailbox handover"))
 
 	// Managing employee mailboxes stays within a company administrator's scope.
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true}))
 }
 func TestR3SoftDeleteRestoreRetentionAndEvents(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanOrganize: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanOrganize: true}))
 	past := time.Now().Add(-time.Hour)
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.shared.ID, ZoneID: f.zone.ID, Sender: "sender@client.test", Recipients: []string{f.shared.FullAddress}, Subject: "Quarterly proposal", RawObjectKey: "test-original", ExpiresAt: &past}
 	must(t, f.st.CreateMessage(ctx, m))
@@ -409,6 +410,7 @@ func TestR3TemplateImmutableVersionsAndCurrentGrants(t *testing.T) {
 		t.Fatal("retired template usable")
 	}
 }
+
 // Revoke is the emergency stop for a single published version: it blocks the
 // next delivery attempt of jobs already queued against that version, leaves
 // delivered recipient outcomes and sibling versions untouched, and is refused
@@ -531,7 +533,7 @@ func TestR3SubmissionIdempotencyTemplateOnlyAndCodec(t *testing.T) {
 	must(t, e)
 	ver, e := f.st.PublishMailTemplate(ctx, f.a, tpl.ID, tpl.Revision)
 	must(t, e)
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: true, TemplateOnly: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: true, TemplateOnly: true}))
 	must(t, f.st.SetTemplateGrant(ctx, f.a, company.TemplateGrant{TemplateID: tpl.ID, MailboxID: f.shared.ID, UserID: f.employee.ID}, true))
 	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", MaxRetries: 5}, f.st, f.st, zerolog.Nop())
 	req := outbound.SendRequest{TenantID: f.tenant.ID, UserID: &f.employee.ID, SenderMailboxID: &f.shared.ID, ZoneID: f.zone.ID, From: f.shared.FullAddress, To: []string{"client@client.test"}, Subject: "Spoofed", TextBody: "Cannot bypass template", Headers: map[string]string{"References": "<thread@test>", "In-Reply-To": "<parent@test>"}, IdempotencyKey: "test-send"}
@@ -808,4 +810,3 @@ func TestR3DraftTemplateVersionEligibilityContract(t *testing.T) {
 		t.Fatalf("missing send denial changed: %q", msg)
 	}
 }
-

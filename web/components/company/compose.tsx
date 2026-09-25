@@ -80,7 +80,7 @@ export function Compose({
   const templates = useAPI(["usable-templates", mailboxId], () =>
     company<TemplateVersion[]>(`${workPath(mailboxId)}/templates`),
   );
-  const version = templates.data?.find(
+  const listedVersion = templates.data?.find(
     (v) => v.id === payload.template_version_id,
   );
   // Eligibility comes from the server only. A saved draft carries the
@@ -89,16 +89,25 @@ export function Compose({
   // resolves it authoritatively. "missing" is deliberately not an error: the
   // payload stays editable and savable, and the server rejects a bad send.
   const eligibility =
+    draft.mailbox_id === mailboxId &&
     draft.template_version?.id === payload.template_version_id
       ? draft.template_version
       : undefined;
+  // Saved v1 remains editable after v2 is published. The server-provided
+  // snapshot is authoritative for this pin; the picker is only for NEW pins.
+  const version = eligibility
+    ? eligibility.status === "usable" && eligibility.snapshot
+      ? { id: eligibility.id, name: eligibility.name, version: eligibility.version,
+          snapshot: eligibility.snapshot }
+      : undefined
+    : listedVersion;
   const status = eligibility?.status;
   const ineligible =
     Boolean(status) &&
     status !== "usable" &&
     status !== "missing";
   const invalidVersion = Boolean(payload.template_version_id) &&
-    (ineligible || (!eligibility && !version));
+    (ineligible || (status === "usable" && !version) || (!eligibility && !version));
   const notice = status
     ? INELIGIBLE_NOTICES[status as Exclude<DraftTemplateVersionStatus, "usable" | "missing">]
     : undefined;
@@ -309,9 +318,9 @@ export function Compose({
                 ? t("必须选择模板", "Template required")
                 : t("自由撰写", "Free composition")}
             </option>
-            {payload.template_version_id && !version && (
+            {payload.template_version_id && !listedVersion && (
               <option value={payload.template_version_id}>
-                {status === "missing" && eligibility?.name
+                {(status === "missing" || status === "usable") && eligibility?.name
                   ? `${eligibility.name}${eligibility.version ? ` · v${eligibility.version}` : ""}`
                   : t(
                       "此版本不可用，请重新选择",

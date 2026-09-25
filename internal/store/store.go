@@ -136,7 +136,7 @@ type ZoneStore interface {
 	ListPublicZones(ctx context.Context) ([]*models.DomainZone, error)
 	ListZonesByVisibilities(ctx context.Context, visibilities []models.ResourceVisibility) ([]*models.DomainZone, error)
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
-	DeleteZone(ctx context.Context, id uuid.UUID) error
+	DeleteZone(ctx context.Context, id uuid.UUID, entry models.AuditEntry) error
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
 	CountAllZones(ctx context.Context) (int, error)
 

@@ -110,6 +110,7 @@ type DraftPayload struct {
 	TemplateVars      map[string]string `json:"template_vars,omitempty"`
 	AttachmentIDs     []uuid.UUID       `json:"attachment_ids,omitempty"`
 }
+
 // Draft template version eligibility states, resolved by the store with the
 // fixed priority missing > revoked > retired > unauthorized > corrupt. They
 // are interaction-only labels for the compose surface: they are never an
@@ -221,18 +222,23 @@ type EmployeeService interface {
 // MailboxAdminService is company mailbox administration: query and create
 // work mailboxes, convert/transfer ownership, and manage grants and the
 // per-mailbox send policy.
+type MailboxGrantSnapshot struct {
+	Revision int64                 `json:"revision"`
+	Grants   []models.MailboxGrant `json:"grants"`
+}
+
 type MailboxAdminService interface {
 	GetWorkMailbox(context.Context, authz.Actor, uuid.UUID) (*MailboxAccess, error)
 	ListWorkMailboxes(context.Context, authz.Actor) ([]MailboxAccess, error)
 	CreateWorkMailbox(context.Context, authz.Actor, MailboxInput) (*models.Mailbox, error)
 	ConvertSharedMailbox(context.Context, authz.Actor, uuid.UUID, int64, string) error
 	TransferWorkMailbox(context.Context, authz.Actor, uuid.UUID, uuid.UUID, int64, string) error
-	ListWorkGrants(context.Context, authz.Actor, uuid.UUID) ([]models.MailboxGrant, error)
-	SetWorkGrant(context.Context, authz.Actor, models.MailboxGrant) error
+	ListWorkGrants(context.Context, authz.Actor, uuid.UUID) (*MailboxGrantSnapshot, error)
+	SetWorkGrant(context.Context, authz.Actor, models.MailboxGrant, int64) error
 	// SetWorkMailboxSendPolicy stores the mailbox-level send-policy override.
 	// A nil policy clears the override so the mailbox inherits the company
 	// default again.
-	SetWorkMailboxSendPolicy(context.Context, authz.Actor, uuid.UUID, *string) error
+	SetWorkMailboxSendPolicy(context.Context, authz.Actor, uuid.UUID, *string, int64) error
 }
 
 // TemplateAdminService is template governance for administrators: CRUD,

@@ -14,7 +14,7 @@ import (
 func TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanSend: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanSend: true}))
 	attachment, e := f.st.ReserveMailAttachment(ctx, f.u, company.Attachment{MailboxID: f.shared.ID, Filename: "proof.txt", Size: 3})
 	must(t, e)
 	must(t, f.st.FinishMailAttachment(ctx, f.u, attachment.ID, company.Hash("abc")))
@@ -26,7 +26,7 @@ func TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation(t *testi
 	_, e = f.st.GetSubmissionAttachment(ctx, f.u, job.ID, attachment.ID)
 	must(t, e)
 	// Keep send-only: being the author or a current sender must not imply read.
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: true}))
 	_, e = f.st.GetSubmission(ctx, f.u, job.ID)
 	must(t, e)
 	_, total, e := f.st.ListSubmissions(ctx, f.u, models.Page{})
@@ -51,7 +51,7 @@ func TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation(t *testi
 		t.Fatal("sent attachment bytes leaked to send-only uploader")
 	}
 	// The new mailbox reader inherits company history, without becoming its author.
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.other.ID, CanRead: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.other.ID, CanRead: true}))
 	successor := authz.Actor{Type: authz.PrincipalUser, ID: f.other.ID, TenantID: f.tenant.ID, Role: models.RoleUser}
 	_, e = f.st.GetSubmissionContent(ctx, successor, job.ID)
 	must(t, e)
@@ -71,7 +71,7 @@ func TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope(t *testin
 	f := seedCompany(t)
 	ctx := context.Background()
 	for _, id := range []uuid.UUID{f.employee.ID, f.other.ID} {
-		must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: id, CanRead: true}))
+		must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: id, CanRead: true}))
 	}
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.shared.ID, ZoneID: f.zone.ID, Sender: "client@example.test", Recipients: []string{f.shared.FullAddress}, Subject: "shared", RawObjectKey: "test/raw"}
 	must(t, f.st.CreateMessage(ctx, m))
@@ -101,7 +101,7 @@ func TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope(t *testin
 	if _, e := f.st.GetWorkMessage(ctx, foreign, f.shared.ID, m.ID); e == nil {
 		t.Fatal("cross-tenant message detail")
 	}
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID}))
 	if _, e := f.st.GetWorkMessage(ctx, f.u, f.shared.ID, m.ID); e == nil {
 		t.Fatal("revoked message read")
 	}

@@ -92,6 +92,9 @@ export function MailboxSendPolicyEditor({
   const t = useText();
   const { busy, run } = useAction();
   const [choice, setChoice] = useState<"" | MailSendPolicy>("");
+  const [revision, setRevision] = useState(mailbox.revision);
+  const [conflict, setConflict] = useState(false);
+  const stale = conflict || revision !== mailbox.revision;
   const effective = mailbox.mailbox.send_policy ?? "free";
   return (
     <div className="space-y-3 border-t pt-3">
@@ -119,11 +122,24 @@ export function MailboxSendPolicyEditor({
           </select>
         )}
       </Field>
+      {stale && <p role="alert">{t("邮箱已变化，请核对最新策略后重新选择。", "Mailbox changed. Review the latest policy before choosing again.")}</p>}
+      {stale && <ActionButton disabled={busy} onClick={() => {
+        setChoice(""); setRevision(mailbox.revision); setConflict(false);
+      }}>{t("核对最新版本", "Review latest version")}</ActionButton>}
       <ActionButton
-        disabled={busy}
+        disabled={busy || stale}
         onClick={() =>
           run(async () => {
-            await setMailboxSendPolicy(mailbox.mailbox.id, choice);
+            try {
+              await setMailboxSendPolicy(mailbox.mailbox.id, choice, revision);
+            } catch (error) {
+              if ((error as { error?: { code?: string } }).error?.code === "CONFLICT") {
+                setConflict(true);
+                await refresh();
+              }
+              throw error;
+            }
+            setRevision(revision + 1);
             await refresh();
             toast.success(t("发送策略已更新", "Send policy updated"));
           })

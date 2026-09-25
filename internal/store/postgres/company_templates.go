@@ -142,6 +142,7 @@ func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id 
 		return companyAudit(ctx, tx, a, "template.retire", "template", id, map[string]any{"retired": retired})
 	})
 }
+
 // RevokeMailTemplateVersion is the emergency one-way revoke of a single
 // published version. It mirrors SetMailTemplateRetired's CAS style but targets
 // one version row: sibling versions keep working, already-delivered recipient
@@ -257,17 +258,19 @@ func (s *PgStore) ListUsableTemplates(ctx context.Context, a authz.Actor, mailbo
 		if !access.CanSend {
 			return app.Forbidden("mailbox send permission required")
 		}
-		rows, e := tx.Query(ctx, companyVersionSelect+` WHERE v.tenant_id=$1 AND NOT t.retired AND v.revoked_at IS NULL AND v.version=(SELECT max(w.version) FROM mail_template_versions w WHERE w.template_id=v.template_id AND w.revoked_at IS NULL) AND ($4 OR EXISTS(SELECT 1 FROM mail_template_grants g WHERE g.template_id=v.template_id AND g.tenant_id=$1 AND g.mailbox_id=$2 AND g.user_id=$3)) ORDER BY t.name`, a.TenantID, mailbox, a.ID, a.IsTenantAdmin())
+		rows, e := tx.Query(ctx, companyVersionColumns+fmt.Sprintf(templateVersionEligibilityTail, "4", "1", "$2", "3")+companyVersionFrom+` WHERE v.tenant_id=$1 AND v.version=(SELECT max(w.version) FROM mail_template_versions w WHERE w.template_id=v.template_id AND w.revoked_at IS NULL) ORDER BY t.name`, a.TenantID, mailbox, a.ID, false)
 		if e != nil {
 			return e
 		}
 		defer rows.Close()
 		for rows.Next() {
-			v, e := scanCompanyVersion(rows)
+			v, retired, granted, e := scanTemplateVersionStatus(rows)
 			if e != nil {
 				return e
 			}
-			out = append(out, v)
+			if classifyTemplateVersion(&v, retired, granted) == company.TemplateVersionUsable {
+				out = append(out, v)
+			}
 		}
 		return rows.Err()
 	})

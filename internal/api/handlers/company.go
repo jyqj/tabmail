@@ -194,13 +194,20 @@ func (h *CompanyHandler) Grant(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	v, ok := companyBody[models.MailboxGrant](w, r)
+	v, ok := companyBody[struct {
+		models.MailboxGrant
+		Revision *int64 `json:"revision"`
+	}](w, r)
 	if !ok {
+		return
+	}
+	if v.Revision == nil || *v.Revision < 1 {
+		errBadRequest(w, "positive mailbox revision required; reload permissions")
 		return
 	}
 	v.MailboxID = id
 	v.TenantID = companyActor(r).TenantID
-	h.result(w, map[string]bool{"updated": true}, h.repo.SetWorkGrant(r.Context(), companyActor(r), v))
+	h.result(w, map[string]any{"updated": true, "revision": *v.Revision + 1}, h.repo.SetWorkGrant(r.Context(), companyActor(r), v.MailboxGrant, *v.Revision))
 }
 
 // MailboxSendPolicy handles PUT /company/mailboxes/{id}/send-policy — the
@@ -214,12 +221,17 @@ func (h *CompanyHandler) MailboxSendPolicy(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	v, ok := companyBody[struct {
-		Policy *string `json:"send_policy"`
+		Policy   *string `json:"send_policy"`
+		Revision *int64  `json:"revision"`
 	}](w, r)
 	if !ok {
 		return
 	}
-	h.result(w, map[string]bool{"updated": true}, h.repo.SetWorkMailboxSendPolicy(r.Context(), companyActor(r), id, v.Policy))
+	if v.Revision == nil || *v.Revision < 1 {
+		errBadRequest(w, "positive mailbox revision required; reload permissions")
+		return
+	}
+	h.result(w, map[string]any{"updated": true, "revision": *v.Revision + 1}, h.repo.SetWorkMailboxSendPolicy(r.Context(), companyActor(r), id, v.Policy, *v.Revision))
 }
 func (h *CompanyHandler) Templates(w http.ResponseWriter, r *http.Request) {
 	v, e := h.repo.ListMailTemplates(r.Context(), companyActor(r))

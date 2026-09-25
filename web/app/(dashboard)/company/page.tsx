@@ -4,18 +4,15 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/auth-context";
 import { useAPI } from "@/hooks/use-api";
-import { request } from "@/lib/api/base";
-import type { APIListResponse, DomainZone, AdminUser } from "@/lib/types";
 import {
   allEmployees,
+  companyDomains,
   company,
   workMailboxes,
-  workPath,
   type CompanySettings,
   type Invitation,
-  type WorkMailbox,
-  type WorkGrant,
 } from "@/lib/company";
+import { GrantEditor } from "@/components/company/grants";
 import { EmployeeField } from "@/components/company/employee-field";
 import { CompanyDomainsSection } from "@/components/company/domains";
 import {
@@ -43,11 +40,7 @@ export default function CompanyPage() {
   const [editing, setEditing] = useState<CompanySettings | null>(null);
   const config = editing ??
     settings.data ?? { name: "", primary_zone_id: "", revision: 0 };
-  const zones = useAPI("company-zones", () =>
-    request<APIListResponse<DomainZone>>("/api/v1/domains", {
-      params: { page: 1, per_page: 100 },
-    }),
-  );
+  const zones = useAPI("company-domains", companyDomains);
   const members = useAPI("company-employees", allEmployees);
   const boxes = useAPI("company-managed-mailboxes", workMailboxes);
   const invitations = useAPI("company-invitations", () =>
@@ -124,7 +117,7 @@ export default function CompanyPage() {
                 }
               >
                 <option value="">{t("请选择", "Select")}</option>
-                {(zones.data?.data ?? [])
+                {(zones.data ?? [])
                   .filter((v) => v.is_verified && v.mx_verified)
                   .map((v) => (
                     <option key={v.id} value={v.id}>
@@ -536,186 +529,5 @@ export default function CompanyPage() {
         )}
       </Section>
     </main>
-  );
-}
-
-function GrantEditor({
-  mailbox,
-  employees,
-  refresh,
-}: {
-  mailbox: WorkMailbox;
-  employees: AdminUser[];
-  refresh: () => Promise<unknown>;
-}) {
-  const t = useText();
-  const { busy, run } = useAction();
-  const grants = useAPI(["mailbox-grants", mailbox.mailbox.id], () =>
-    company<WorkGrant[]>(`${workPath(mailbox.mailbox.id)}/grants`),
-  );
-  const empty: WorkGrant = {
-    user_id: "",
-    can_read: false,
-    can_organize: false,
-    can_send: false,
-    template_only: false,
-  };
-  const [grant, setGrant] = useState(empty);
-  const [nextOwner, setNextOwner] = useState("");
-  const [reason, setReason] = useState("");
-  return (
-    <div className="space-y-4">
-      <LoadError error={grants.error} onRetry={() => void grants.mutate()} />
-      <p className="text-sm text-muted-foreground">
-        {t(
-          "属主具有内建权限；其他成员必须显式授权。全不选即撤销授权。",
-          "Owners have intrinsic rights. Other members need explicit grants; clearing all rights revokes access.",
-        )}
-      </p>
-      <EmployeeField
-        label={t("授权成员", "Grant to member")}
-        value={grant.user_id}
-        employees={employees.filter(
-          (v) => v.id !== mailbox.mailbox.owner_user_id,
-        )}
-        onChange={(id) =>
-          setGrant(
-            grants.data?.find((v) => v.user_id === id) ?? {
-              ...empty,
-              user_id: id,
-            },
-          )
-        }
-      />
-      <div className="flex flex-wrap gap-5">
-        {(
-          ["can_read", "can_organize", "can_send", "template_only"] as const
-        ).map((key, i) => (
-          <label key={key} className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={grant[key]}
-              onChange={(e) => {
-                const next = { ...grant, [key]: e.target.checked };
-                if (key === "can_organize" && next.can_organize)
-                  next.can_read = true;
-                if (key === "can_read" && !next.can_read)
-                  next.can_organize = false;
-                if (key === "template_only" && next.template_only)
-                  next.can_send = true;
-                if (key === "can_send" && !next.can_send)
-                  next.template_only = false;
-                setGrant(next);
-              }}
-            />
-            {
-              [
-                t("阅读", "Read"),
-                t("整理 / 删除", "Organize / delete"),
-                t("代发", "Send as"),
-                t("仅使用模板发送", "Template-only sending"),
-              ][i]
-            }
-          </label>
-        ))}
-      </div>
-      <ActionButton
-        disabled={busy || !grant.user_id || Boolean(grants.error)}
-        onClick={() =>
-          run(async () => {
-            await company(`${workPath(mailbox.mailbox.id)}/grants`, {
-              method: "PUT",
-              body: grant,
-            });
-            await grants.mutate();
-            await refresh();
-            toast.success(t("授权已更新", "Grant updated"));
-          })
-        }
-      >
-        {t("保存邮箱授权", "Save mailbox grant")}
-      </ActionButton>
-      {(grants.data ?? []).map((v) => (
-        <p key={v.user_id} className="text-sm">
-          {employees.find((u) => u.id === v.user_id)?.email ?? v.user_id}:{" "}
-          {v.can_read ? t("阅读 ", "read ") : ""}
-          {v.can_organize ? t("整理 ", "organize ") : ""}
-          {v.can_send ? t("代发 ", "send ") : ""}
-          {v.template_only ? t("仅模板", "template only") : ""}
-        </p>
-      ))}
-      {mailbox.mailbox.kind === "personal" && (
-        <EmployeeField
-          label={t("新属主", "New owner")}
-          value={nextOwner}
-          employees={employees.filter(
-            (v) => v.id !== mailbox.mailbox.owner_user_id,
-          )}
-          onChange={setNextOwner}
-        />
-      )}
-      {(mailbox.mailbox.kind === "personal" ||
-        mailbox.mailbox.kind === "legacy") && (
-        <>
-          <Field
-            label={t(
-              "资源变更原因（至少 8 个字符）",
-              "Resource-change reason (8+ characters)",
-            )}
-          >
-            {(id) => (
-              <input
-                id={id}
-                className={inputClass}
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-              />
-            )}
-          </Field>
-          <ActionButton
-            disabled={
-              busy ||
-              reason.trim().length < 8 ||
-              (mailbox.mailbox.kind === "personal" && !nextOwner)
-            }
-            onClick={() =>
-              run(async () => {
-                if (mailbox.mailbox.kind === "personal")
-                  await company(`${workPath(mailbox.mailbox.id)}/handover`, {
-                    method: "POST",
-                    body: {
-                      owner_user_id: nextOwner,
-                      revision: mailbox.revision,
-                      reason,
-                    },
-                  });
-                else
-                  await company(
-                    `${workPath(mailbox.mailbox.id)}/convert-shared`,
-                    {
-                      method: "POST",
-                      body: { revision: mailbox.revision, reason },
-                    },
-                  );
-                await refresh();
-                toast.success(
-                  t("邮箱生命周期已更新", "Mailbox lifecycle updated"),
-                );
-              })
-            }
-          >
-            {mailbox.mailbox.kind === "personal"
-              ? t(
-                  "移交邮箱（不删除邮件）",
-                  "Transfer mailbox (preserve messages)",
-                )
-              : t(
-                  "迁移为私有共享邮箱并永久保留",
-                  "Convert to private, permanently retained shared mailbox",
-                )}
-          </ActionButton>
-        </>
-      )}
-    </div>
   );
 }

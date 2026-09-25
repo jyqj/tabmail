@@ -8,6 +8,8 @@ import {
 } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { toast } from "sonner";
+import { useSWRConfig } from "swr";
+import { sessionScope } from "@/lib/session";
 
 import { MessagePane, SubmissionPane } from "./page";
 
@@ -317,5 +319,67 @@ describe("SubmissionPane capabilities", () => {
       "/api/v1/outbound/job-1/retry",
       expect.objectContaining({ method: "POST" }),
     );
+  });
+});
+
+
+function RefreshableSubmission() {
+  const { mutate } = useSWRConfig();
+  return <>
+    <SubmissionPane id="job-1" />
+    <button onClick={() => void mutate(["session", sessionScope(), ["submission", "job-1"]])}>Refresh receipt</button>
+    <button onClick={() => void mutate(["session", sessionScope(), ["submission-attachments", "job-1"]])}>Refresh files</button>
+  </>;
+}
+
+describe("Revocation while a sent message is open", () => {
+  beforeEach(() => {
+    submissionMock.mockReset().mockResolvedValue(baseSubmission({ capabilities: { view_content: true, retry: false } }));
+    submissionContentMock.mockReset().mockResolvedValue({ id: "job-1", text_body: "private body", content_redacted: false });
+    submissionAttachmentsMock.mockReset().mockResolvedValue([{ id: "att-1", filename: "private.csv", size: 1 }]);
+  });
+  afterEach(() => cleanup());
+
+  it("unmounts open content, clears cached bytes and requires an explicit reopen after regrant", async () => {
+    render(<RefreshableSubmission />);
+    fireEvent.click(await screen.findByRole("button", { name: "View content" }));
+    await screen.findByText("private body");
+    await screen.findByRole("button", { name: /private.csv/ });
+    submissionMock.mockResolvedValue(baseSubmission({ capabilities: { view_content: false, retry: false } }));
+    fireEvent.click(screen.getByText("Refresh receipt"));
+    await waitFor(() => expect(screen.queryByText("private body")).toBeNull());
+    expect(screen.queryByRole("button", { name: /private.csv/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /View content|Hide content/ })).toBeNull();
+    submissionContentMock.mockResolvedValue({ id: "job-1", text_body: "newly authorized body", content_redacted: false });
+    submissionAttachmentsMock.mockResolvedValue([]);
+    submissionMock.mockResolvedValue(baseSubmission({ capabilities: { view_content: true, retry: false } }));
+    fireEvent.click(screen.getByText("Refresh receipt"));
+    const view = await screen.findByRole("button", { name: "View content" });
+    expect(screen.queryByText("private body")).toBeNull();
+    fireEvent.click(view);
+    await screen.findByText("newly authorized body");
+    expect(screen.queryByText("private body")).toBeNull();
+  });
+
+  it("does not leave cached attachment metadata visible after a denied revalidation", async () => {
+    render(<RefreshableSubmission />);
+    fireEvent.click(await screen.findByRole("button", { name: "View content" }));
+    await screen.findByRole("button", { name: /private.csv/ });
+    submissionAttachmentsMock.mockRejectedValue({ error: { code: "FORBIDDEN", message: "revoked" } });
+    fireEvent.click(screen.getByText("Refresh files"));
+    await waitFor(() => expect(screen.queryByRole("button", { name: /private.csv/ })).toBeNull());
+  });
+});
+
+describe("Template-only fallback sender", () => {
+  afterEach(() => cleanup());
+  it("sends the reply preparation request with the template-only identity, not the unreadable sender", async () => {
+    workMessageMock.mockReset().mockResolvedValue(baseMessage());
+    companyMock.mockReset().mockResolvedValue([]);
+    const source = baseMailbox();
+    const sender = baseMailbox({ mailbox: { ...source.mailbox, id: "template-sender" }, can_send: true, template_only: true });
+    render(<MessagePane mailbox={source} mailboxes={[source, sender]} id="msg-1" onMutation={vi.fn()} onCompose={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: /^Reply$/ }));
+    await waitFor(() => expect(companyMock).toHaveBeenCalledWith("/mailboxes/mb-1/messages/msg-1/compose", { method: "POST", body: { mode: "reply", from_mailbox_id: "template-sender" } }));
   });
 });

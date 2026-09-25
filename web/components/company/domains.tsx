@@ -125,8 +125,8 @@ export function CompanyDomainsSection() {
                     if (
                       !safeConfirm(
                         t(
-                          "删除后该域名不再可用于公司邮箱，确认删除？",
-                          "After deletion this domain can no longer be used for company mail. Delete it?",
+                          "只能删除未使用的域名。有邮箱、邮件或恢复记录的域名会受到保护，不会连带删除邮件。确认删除？",
+                          "Only unused domains can be deleted. Mailboxes, messages and recovery records are protected; this does not delete mail. Continue?",
                         ),
                       )
                     )

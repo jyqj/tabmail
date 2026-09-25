@@ -82,7 +82,7 @@ describe("MailboxSendPolicyEditor", () => {
       screen.getByRole("button", { name: "Save send policy override" }),
     );
     await waitFor(() => {
-      expect(setPolicyMock).toHaveBeenCalledWith("mb-1", "disabled");
+      expect(setPolicyMock).toHaveBeenCalledWith("mb-1", "disabled", 3);
       expect(refresh).toHaveBeenCalled();
     });
     expect(toastSuccess).toHaveBeenCalledWith("Send policy updated");
@@ -103,7 +103,7 @@ describe("MailboxSendPolicyEditor", () => {
       screen.getByRole("button", { name: "Save send policy override" }),
     );
     await waitFor(() => {
-      expect(setPolicyMock).toHaveBeenCalledWith("mb-1", "");
+      expect(setPolicyMock).toHaveBeenCalledWith("mb-1", "", 3);
     });
   });
 });
@@ -125,5 +125,27 @@ describe("CompanyMailSendPolicyField", () => {
     ).toEqual(["free", "template_required", "disabled"]);
     fireEvent.change(select, { target: { value: "template_required" } });
     expect(onChange).toHaveBeenCalledWith("template_required");
+  });
+});
+
+
+describe("Policy optimistic concurrency", () => {
+  afterEach(() => cleanup());
+  it("does not silently rebase a pending choice when the mailbox changes", async () => {
+    function Harness() {
+      const [revision, setRevision] = React.useState(3);
+      return <>
+        <button onClick={() => setRevision(4)}>External change</button>
+        <MailboxSendPolicyEditor mailbox={{ ...workMailbox("free"), revision }} refresh={vi.fn()} />
+      </>;
+    }
+    render(<Harness />);
+    fireEvent.change(screen.getByLabelText("Send policy override"), { target: { value: "disabled" } });
+    fireEvent.click(screen.getByText("External change"));
+    expect(screen.getByRole("button", { name: "Save send policy override" })).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent("Mailbox changed");
+    fireEvent.click(screen.getByRole("button", { name: "Review latest version" }));
+    expect(screen.getByLabelText("Send policy override")).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Save send policy override" })).toBeEnabled();
   });
 });

@@ -87,6 +87,7 @@ func (s *PgStore) GetCompanySettings(ctx context.Context, tenant uuid.UUID) (*co
 	}
 	return c, e
 }
+
 // validSendPolicy reports whether s is one of the three policy words stored in
 // the migration CHECK constraints. The empty string is handled by callers: it
 // means "no change / inherit" in both update paths.
@@ -97,7 +98,9 @@ func validSendPolicy(s string) bool {
 	}
 	return false
 }
+
 const sendPolicyValues = "free, template_required, disabled"
+
 func (s *PgStore) ConfigureCompany(ctx context.Context, a authz.Actor, c company.Settings) (*company.Settings, error) {
 	c.Name = strings.TrimSpace(c.Name)
 	if len(c.Name) < 1 || len(c.Name) > 120 {
@@ -302,6 +305,7 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	}
 	return tx.Commit(ctx)
 }
+
 // mailboxAccessTx fetches the mailbox, its revision and the actor's grant,
 // then defers every semantic decision to authz.EvaluateMailboxAccess — the
 // single interpretation of admin roles, expiry, zone allowlists and the
@@ -500,6 +504,7 @@ func (s *PgStore) CreateWorkMailbox(ctx context.Context, a authz.Actor, in compa
 	})
 	return out, e
 }
+
 // Mailbox administration follows the member hierarchy: a mailbox owner can
 // always manage their own mailbox, and an administrator can only reassign or
 // regrant mailboxes owned by members they can manage. Shared mailboxes have
@@ -587,12 +592,14 @@ func (s *PgStore) OffboardEmployee(ctx context.Context, a authz.Actor, target, s
 		return companyAudit(ctx, tx, a, "employee.offboard", "user", target, map[string]any{"successor": successor, "reason": reason, "queued_sends": "reauthorized before next delivery"})
 	})
 }
-func (s *PgStore) ListWorkGrants(ctx context.Context, a authz.Actor, id uuid.UUID) ([]models.MailboxGrant, error) {
-	out := []models.MailboxGrant{}
+func (s *PgStore) ListWorkGrants(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.MailboxGrantSnapshot, error) {
+	out := &company.MailboxGrantSnapshot{Grants: []models.MailboxGrant{}}
 	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
-		if _, e := s.mailboxAccessTx(ctx, tx, a, id); e != nil {
+		access, e := s.mailboxAccessTx(ctx, tx, a, id)
+		if e != nil {
 			return e
 		}
+		out.Revision = access.Revision
 		rows, e := tx.Query(ctx, `SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by,created_at,updated_at FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 ORDER BY user_id`, a.TenantID, id)
 		if e != nil {
 			return e
@@ -603,13 +610,13 @@ func (s *PgStore) ListWorkGrants(ctx context.Context, a authz.Actor, id uuid.UUI
 			if e = rows.Scan(&g.TenantID, &g.MailboxID, &g.UserID, &g.CanRead, &g.CanOrganize, &g.CanSend, &g.TemplateOnly, &g.GrantedBy, &g.CreatedAt, &g.UpdatedAt); e != nil {
 				return e
 			}
-			out = append(out, g)
+			out.Grants = append(out.Grants, g)
 		}
 		return rows.Err()
 	})
 	return out, e
 }
-func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.MailboxGrant) error {
+func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.MailboxGrant, revision int64) error {
 	if g.CanOrganize && !g.CanRead || g.TemplateOnly && !g.CanSend {
 		return app.BadRequest("organize requires read; template-only requires send")
 	}
@@ -627,6 +634,9 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 		if e = activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
 			return e
 		}
+		if e = claimMailboxRevision(ctx, tx, a.TenantID, g.MailboxID, revision); e != nil {
+			return e
+		}
 		if !g.CanRead && !g.CanSend && !g.CanOrganize {
 			_, e = tx.Exec(ctx, `DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, g.MailboxID, g.UserID)
 		} else {
@@ -635,10 +645,7 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 		if e != nil {
 			return e
 		}
-		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET lifecycle_revision=lifecycle_revision+1 WHERE id=$1`, g.MailboxID); e != nil {
-			return e
-		}
-		return companyAudit(ctx, tx, a, "mailbox.grant", "mailbox", g.MailboxID, map[string]any{"user_id": g.UserID, "read": g.CanRead, "organize": g.CanOrganize, "send": g.CanSend, "template_only": g.TemplateOnly})
+		return companyAudit(ctx, tx, a, "mailbox.grant", "mailbox", g.MailboxID, map[string]any{"revision": revision + 1, "user_id": g.UserID, "read": g.CanRead, "organize": g.CanOrganize, "send": g.CanSend, "template_only": g.TemplateOnly})
 	})
 }
 
@@ -651,7 +658,7 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 // administrator can only retune mailboxes owned by members it can manage.
 // The lifecycle revision is bumped like every other administrative mailbox
 // change so concurrent handover/convert CAS calls observe the policy change.
-func (s *PgStore) SetWorkMailboxSendPolicy(ctx context.Context, a authz.Actor, id uuid.UUID, policy *string) error {
+func (s *PgStore) SetWorkMailboxSendPolicy(ctx context.Context, a authz.Actor, id uuid.UUID, policy *string, revision int64) error {
 	override := ""
 	if policy != nil {
 		override = strings.TrimSpace(*policy)
@@ -667,10 +674,13 @@ func (s *PgStore) SetWorkMailboxSendPolicy(ctx context.Context, a authz.Actor, i
 		if e = guardMailboxOwner(ctx, tx, a, v.Mailbox.OwnerUserID); e != nil {
 			return e
 		}
-		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET send_policy=NULLIF($2,''),lifecycle_revision=lifecycle_revision+1 WHERE id=$1`, id, override); e != nil {
+		if e = claimMailboxRevision(ctx, tx, a.TenantID, id, revision); e != nil {
 			return e
 		}
-		return companyAudit(ctx, tx, a, "mailbox.send_policy", "mailbox", id, map[string]any{"send_policy": override})
+		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3`, id, override, a.TenantID); e != nil {
+			return e
+		}
+		return companyAudit(ctx, tx, a, "mailbox.send_policy", "mailbox", id, map[string]any{"send_policy": override, "revision": revision + 1})
 	})
 }
 

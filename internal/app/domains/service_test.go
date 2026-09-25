@@ -82,8 +82,8 @@ func (s *domainTestStore) CreateZone(_ context.Context, z *models.DomainZone) er
 	s.zones[z.ID] = &cp
 	return nil
 }
-func (s *domainTestStore) DeleteZone(context.Context, uuid.UUID) error          { return nil }
-func (s *domainTestStore) UpdateZone(context.Context, *models.DomainZone) error { return nil }
+func (s *domainTestStore) DeleteZone(context.Context, uuid.UUID, models.AuditEntry) error { return nil }
+func (s *domainTestStore) UpdateZone(context.Context, *models.DomainZone) error           { return nil }
 func (s *domainTestStore) GetZone(_ context.Context, id uuid.UUID) (*models.DomainZone, error) {
 	if z := s.zones[id]; z != nil {
 		cp := *z

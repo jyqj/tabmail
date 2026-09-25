@@ -251,13 +251,13 @@ func TestSendPolicyMailboxOverrideAdminLifecycle(t *testing.T) {
 		t.Fatalf("effective policy before override = %q, want template_required", got)
 	}
 
-	must(t, f.st.SetWorkMailboxSendPolicy(ctx, f.a, f.personal.ID, sendPolicyPtr("free")))
+	must(t, policyCurrent(f.st, ctx, f.a, f.personal.ID, sendPolicyPtr("free")))
 	if got := effective(); got != "free" {
 		t.Fatalf("override must beat company default, got %q", got)
 	}
 
 	// nil clears the override; the mailbox inherits the tenant default again.
-	must(t, f.st.SetWorkMailboxSendPolicy(ctx, f.a, f.personal.ID, nil))
+	must(t, policyCurrent(f.st, ctx, f.a, f.personal.ID, nil))
 	if got := effective(); got != "template_required" {
 		t.Fatalf("cleared override must inherit the company default, got %q", got)
 	}
@@ -298,12 +298,12 @@ func TestSendPolicyAdminValidationAndGuards(t *testing.T) {
 		t.Fatalf("invalid policy error must name all three values, got: %v", e)
 	}
 	// Non-admin cannot set a mailbox override.
-	e = f.st.SetWorkMailboxSendPolicy(ctx, f.u, f.personal.ID, sendPolicyPtr("free"))
+	e = policyCurrent(f.st, ctx, f.u, f.personal.ID, sendPolicyPtr("free"))
 	wantAppKind(t, e, app.KindForbidden)
 	// Invalid override is a 400; unknown mailbox is a 404.
-	e = f.st.SetWorkMailboxSendPolicy(ctx, f.a, f.personal.ID, sendPolicyPtr("relaxed"))
+	e = policyCurrent(f.st, ctx, f.a, f.personal.ID, sendPolicyPtr("relaxed"))
 	wantAppKind(t, e, app.KindBadRequest)
-	e = f.st.SetWorkMailboxSendPolicy(ctx, f.a, uuid.New(), sendPolicyPtr("free"))
+	e = policyCurrent(f.st, ctx, f.a, uuid.New(), sendPolicyPtr("free"))
 	wantAppKind(t, e, app.KindNotFound)
 	// An invalid default must not have leaked into storage.
 	s, e := f.st.GetCompanySettings(ctx, f.tenant.ID)
@@ -326,7 +326,7 @@ func TestSendPolicyAdminHTTPJourney(t *testing.T) {
 
 	r3HTTP(t, h, employee, "PUT", policyPath, map[string]any{"send_policy": "free"}, 403)
 	r3HTTP(t, h, admin, "PUT", policyPath, map[string]any{"send_policy": "relaxed"}, 400)
-	r3HTTP(t, h, admin, "PUT", policyPath, map[string]any{"send_policy": "template_required"}, 200)
+	r3HTTP(t, h, admin, "PUT", policyPath, map[string]any{"send_policy": "template_required", "revision": 1}, 200)
 
 	effective := func() string {
 		boxes := r3Data[[]company.MailboxAccess](t, r3HTTP(t, h, admin, "GET", "/api/v1/company/mailboxes", nil, 200))
@@ -346,7 +346,7 @@ func TestSendPolicyAdminHTTPJourney(t *testing.T) {
 	}
 
 	// null clears the override back to the company default.
-	r3HTTP(t, h, admin, "PUT", policyPath, map[string]any{"send_policy": nil}, 200)
+	r3HTTP(t, h, admin, "PUT", policyPath, map[string]any{"send_policy": nil, "revision": 2}, 200)
 	if got := effective(); got != "free" {
 		t.Fatalf("effective policy after clearing override = %q, want free", got)
 	}

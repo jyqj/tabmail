@@ -41,7 +41,7 @@ func TestP4SubmissionContentAndAttachmentsScope(t *testing.T) {
 		MailFrom: f.personal.FullAddress,
 		RcptTo:   []string{"dest@client.test"}, To: []string{"dest@client.test"}, CC: []string{"cc@client.test"}, BCC: []string{"blind@client.test"},
 		Subject: "quarterly", TextBody: "see attached", HTMLBody: "<p>see attached</p>",
-		HeadersJSON: json.RawMessage(`{"X-Tag":"ok","Bcc":"hidden@client.test","Bad Name":"x"}`),
+		HeadersJSON:   json.RawMessage(`{"X-Tag":"ok","Bcc":"hidden@client.test","Bad Name":"x"}`),
 		AttachmentIDs: []uuid.UUID{pinned.ID, pinnedUploading.ID}, State: models.OutboundSent,
 	}
 	must(t, f.st.CreateOutboundJob(ctx, job))
@@ -79,7 +79,7 @@ func TestP4SubmissionContentAndAttachmentsScope(t *testing.T) {
 
 	// A current read grant on the sender mailbox confers content authority;
 	// revoking it removes the authority even though the submission is history.
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true}))
 	grantee := actor(f.other)
 	if _, e = f.st.GetSubmissionContent(ctx, grantee, job.ID); e != nil {
 		t.Fatal("current mailbox reader denied sent content", e)
@@ -87,7 +87,7 @@ func TestP4SubmissionContentAndAttachmentsScope(t *testing.T) {
 	if _, e = f.st.GetSubmissionAttachment(ctx, grantee, job.ID, pinned.ID); e != nil {
 		t.Fatal("current mailbox reader denied sent attachment", e)
 	}
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: false}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: false}))
 	if _, e = f.st.GetSubmissionContent(ctx, grantee, job.ID); e == nil {
 		t.Fatal("revoked reader still sees sent content")
 	}

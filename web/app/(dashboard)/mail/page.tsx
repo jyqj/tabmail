@@ -33,6 +33,9 @@ import {
   useText,
 } from "@/components/company/common";
 import { Compose } from "@/components/company/compose";
+import { composeIdentity } from "@/lib/compose-identity";
+import { useSessionScope } from "@/lib/session";
+import { useSWRConfig } from "swr";
 
 const FOLDERS = ["inbox", "archive", "trash", "drafts", "sent"] as const;
 type Folder = (typeof FOLDERS)[number];
@@ -132,9 +135,7 @@ function MailWorkbench() {
   // reply draft is never silently dropped. The server re-authorizes the
   // chosen identity on every draft and submit call.
   function start(payload?: DraftPayload, mb = mailbox) {
-    const from = mb?.can_send
-      ? mb
-      : boxes.data?.find((v) => v.can_send && !v.template_only);
+    const from = composeIdentity(boxes.data ?? [], mb);
     if (!from) return;
     setEditor({
       key: crypto.randomUUID(),
@@ -170,7 +171,7 @@ function MailWorkbench() {
           </p>
         </div>
         <ActionButton
-          disabled={Boolean(editor) || !boxes.data?.some((v) => v.can_send)}
+          disabled={Boolean(editor) || !composeIdentity(boxes.data ?? [], mailbox)}
           onClick={() => start()}
         >
           {t("写邮件", "Compose")}
@@ -557,8 +558,16 @@ export function SubmissionPane({ id }: { id: string }) {
   const detail = useAPI(["submission", id], () => submission(id), {
     refreshInterval: 10000,
   });
-  const [showContent, setShowContent] = useState(false);
   const s = detail.error ? undefined : detail.data;
+  const canViewContent = Boolean(s && !s.content_redacted && s.capabilities?.view_content !== false);
+  const scope = useSessionScope();
+  const { mutate: mutateCache } = useSWRConfig();
+  useEffect(() => {
+    if (canViewContent) return;
+    for (const key of ["submission-content", "submission-attachments"]) {
+      void mutateCache(["session", scope, [key, id]], undefined, { revalidate: false });
+    }
+  }, [canViewContent, id, scope, mutateCache]);
   return (
     <div className="mt-4 space-y-3 rounded-md border p-4">
       <LoadError
@@ -586,19 +595,7 @@ export function SubmissionPane({ id }: { id: string }) {
           {/* capabilities is an interaction hint, not a credential; absent on
               stale cached data keeps the current behavior. The content
               endpoint re-checks read access on every call. */}
-          {s.capabilities?.view_content !== false && (
-            <div className="flex gap-2">
-              <ActionButton
-                aria-expanded={showContent}
-                onClick={() => setShowContent((v) => !v)}
-              >
-                {showContent
-                  ? t("收起内容", "Hide content")
-                  : t("查看内容", "View content")}
-              </ActionButton>
-            </div>
-          )}
-          {showContent && <SubmissionContentView id={id} />}
+          {canViewContent && <SubmissionContentDisclosure id={id} />}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
@@ -683,6 +680,19 @@ export function SubmissionPane({ id }: { id: string }) {
   );
 }
 
+// The disclosure owns its state so capability revocation unmounts and resets
+// it. Re-granting access never reopens a previously expanded body implicitly.
+function SubmissionContentDisclosure({ id }: { id: string }) {
+  const t = useText();
+  const [open, setOpen] = useState(false);
+  return <>
+    <ActionButton aria-expanded={open} onClick={() => setOpen((v) => !v)}>
+      {open ? t("收起内容", "Hide content") : t("查看内容", "View content")}
+    </ActionButton>
+    {open && <SubmissionContentView id={id} />}
+  </>;
+}
+
 // SubmissionContentView renders the actual sent body and the pinned
 // attachments of one submission. It reuses the message pane's safe rendering
 // conventions: plain text in a pre, HTML only through the sandboxed MailHTML
@@ -738,7 +748,7 @@ function SubmissionContentView({ id }: { id: string }) {
         </>
       )}
       <LoadError error={files.error} onRetry={() => void files.mutate()} />
-      {(files.data ?? []).map((f) => (
+      {(!files.error && !content.error && !c?.content_redacted ? files.data ?? [] : []).map((f) => (
         <ActionButton
           key={f.id}
           disabled={busy}
@@ -776,13 +786,8 @@ export function MessagePane({
   const { busy, run } = useAction();
   // Reply/forward only needs some sendable identity to exist — the compose
   // view owns the identity switch. The server re-authorizes every send.
-  const canCompose = (mailboxes ?? [mailbox]).some((v) => v.can_send);
-  // Same default-identity rule as start(): prefer the reading mailbox, else
-  // the first sendable non-template-only mailbox. The server re-authorizes.
-  const composeFrom =
-    (mailbox.can_send && mailbox) ||
-    (mailboxes ?? [mailbox]).find((v) => v.can_send && !v.template_only) ||
-    mailbox;
+  const composeFrom = composeIdentity(mailboxes ?? [mailbox], mailbox);
+  const canCompose = Boolean(composeFrom);
   const detail = useAPI(["work-message", mailbox.mailbox.id, id], () =>
     workMessage(mailbox.mailbox.id, id),
   );
@@ -813,7 +818,7 @@ export function MessagePane({
                     onCompose(
                       await company<DraftPayload>(`${base}/compose`, {
                         method: "POST",
-                        body: { mode, from_mailbox_id: composeFrom.mailbox.id },
+                        body: { mode, from_mailbox_id: composeFrom!.mailbox.id },
                       }),
                     ),
                   )

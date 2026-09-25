@@ -28,7 +28,7 @@ type domainStore interface {
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
 	CountZones(ctx context.Context, tenantID uuid.UUID) (int, error)
 	CreateZone(ctx context.Context, z *models.DomainZone) error
-	DeleteZone(ctx context.Context, id uuid.UUID) error
+	DeleteZone(ctx context.Context, id uuid.UUID, entry models.AuditEntry) error
 	UpdateZone(ctx context.Context, z *models.DomainZone) error
 	GetZone(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)
 	GetZoneByDomain(ctx context.Context, domain string) (*models.DomainZone, error)
@@ -97,4 +97,3 @@ func (h *DomainHandler) AdminListZones(w http.ResponseWriter, r *http.Request) {
 	}
 	ok(w, items)
 }
-

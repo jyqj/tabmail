@@ -110,6 +110,9 @@ def main() -> int:
     company_ts = parse_ts_interface_fields((ROOT / "web/lib/company.ts").read_text())
     company_pairs = {
         "Settings": "CompanySettings", "Invitation": "Invitation",
+        "MailboxGrantSnapshot": "MailboxGrantSnapshot",
+        "DraftTemplateVersion": "DraftTemplateVersion",
+        "SubmissionCapabilities": "SubmissionCapabilities",
         "MailboxAccess": "WorkMailbox", "Variable": "TemplateVariable",
         "TemplateDraft": "TemplateDraft", "Template": "MailTemplate",
         "TemplateVersion": "TemplateVersion", "DraftPayload": "DraftPayload",
