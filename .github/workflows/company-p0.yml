@@ -79,6 +79,9 @@ jobs:
           name: dependency-audit
           path: /tmp/tabmail-npm-audit.json
           retention-days: 14
+      - name: Require a complete clean dependency audit
+        run: |
+          node -e 'const d=require("/tmp/tabmail-npm-audit.json"); if(!d.metadata?.vulnerabilities || d.error || d.metadata.vulnerabilities.total !== 0) throw new Error("dependency audit missing, failed or contains vulnerabilities");'
       - run: npx tsc --noEmit
         working-directory: web
       - run: npm test

@@ -1,0 +1,153 @@
+name: Architecture final source application
+on:
+  push:
+    branches: [refactor/company-mail-architecture]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: >-
+      github.repository == 'jyqj/tabmail' && github.event.head_commit.message == 'fix: finalize draft outcome recovery and bounded content indexing'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Apply exact reviewed source changes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD^)" = fba43badba1b42fbeb50d54d46c75a5d95b95cb3
+          python3 - <<'PY'
+          from pathlib import Path
+          def replace(path, old, new):
+              p=Path(path); s=p.read_text(); assert s.count(old)==1, (path,old[:80]); p.write_text(s.replace(old,new))
+          replace('internal/api/handlers/company_routes.go', '\t\tr.Get("/overview", c.Console.Overview)\n', '\t\tr.Get("/overview", c.Console.Overview)\n\t\tr.With(middleware.RequireAdmin).Post("/index/retry", c.Console.RetryIndex)\n')
+          p=Path('internal/company/content.go'); p.write_text(p.read_text()+'''\n// ContentIndexRecovery is administrative control of derived data only. It
+          // neither grants content access nor touches SMTP acceptance/delivery records.
+          type ContentIndexRecovery interface {
+          \tRetryFailedMailIndex(context.Context, authz.Actor, string) (int, error)
+          }
+          ''')
+          for p in ['internal/company/types.go','internal/company/types_iface_test.go']:
+              replace(p,'\tConsoleReader\n}', '\tConsoleReader\n\tContentIndexRecovery\n}')
+          p='internal/store/postgres/mail_content.go'
+          replace(p,'\t"github.com/jackc/pgx/v5"\n','\t"github.com/jackc/pgx/v5"\n\t"strings"\n')
+          replace(p,"\trows, e := s.pool.Query(ctx, `WITH picked AS(SELECT message_id FROM mail_index_jobs WHERE (state='pending' AND next_attempt_at<=now()) OR (state='processing' AND lease_until<now()) ORDER BY next_attempt_at,message_id LIMIT $1 FOR UPDATE SKIP LOCKED)",'''\t// A worker that repeatedly crashes cannot hold a derived job forever. The
+          \t// existing token/lease predicate is rechecked under the row lock.
+          \tif _, e := s.pool.Exec(ctx, `UPDATE mail_index_jobs SET state='failed',lease_until=NULL,lease_token=NULL,last_error='index worker lease expired' WHERE state='processing' AND lease_until<now() AND attempts>=5`); e != nil {
+          \t\treturn nil, e
+          \t}
+          \trows, e := s.pool.Query(ctx, `WITH picked AS(SELECT message_id FROM mail_index_jobs WHERE attempts<5 AND ((state='pending' AND next_attempt_at<=now()) OR (state='processing' AND lease_until<now())) ORDER BY next_attempt_at,message_id LIMIT $1 FOR UPDATE SKIP LOCKED)''')
+          replace(p,"\t_, e := s.pool.Exec(ctx, `UPDATE mail_index_jobs SET state=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END,next_attempt_at=now()+interval '1 minute',lease_until=NULL,lease_token=NULL,last_error='content parsing failed' WHERE tenant_id=$1 AND message_id=$2 AND lease_token=$3`, j.TenantID, j.MessageID, j.Token)\n\treturn e",'''\ttag, e := s.pool.Exec(ctx, `UPDATE mail_index_jobs SET state=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END,next_attempt_at=now()+interval '1 minute',lease_until=NULL,lease_token=NULL,last_error='content parsing failed' WHERE tenant_id=$1 AND message_id=$2 AND lease_token=$3 AND source_key=$4 AND state='processing' AND lease_until>now()`, j.TenantID, j.MessageID, j.Token, j.SourceKey)
+          \tif e != nil {
+          \t\treturn e
+          \t}
+          \tif tag.RowsAffected() != 1 {
+          \t\treturn app.Conflict("index lease lost")
+          \t}
+          \treturn nil''')
+          f=Path(p); f.write_text(f.read_text()+'''
+          // RetryFailedMailIndex is bounded, company-scoped, audited, and excludes live
+          // leases. Repeating a request cannot retry work already requeued/processing.
+          func (s *PgStore) RetryFailedMailIndex(ctx context.Context, a authz.Actor, reason string) (int, error) {
+          \treason = strings.TrimSpace(reason)
+          \tif !meaningfulReason(reason) {
+          \t\treturn 0, app.BadRequest("documented recovery reason required (8-1000 bytes)")
+          \t}
+          \tn := 0
+          \te := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+          \t\ttag, e := tx.Exec(ctx, `WITH picked AS (
+             SELECT j.message_id FROM mail_index_jobs j JOIN messages m ON m.tenant_id=j.tenant_id AND m.id=j.message_id AND m.raw_object_key=j.source_key
+             WHERE j.tenant_id=$1 AND j.state='failed'
+             ORDER BY j.message_id LIMIT 100 FOR UPDATE OF j SKIP LOCKED
+            ) UPDATE mail_index_jobs j SET state='pending',attempts=0,next_attempt_at=now(),lease_until=NULL,lease_token=NULL,last_error=''
+            FROM picked p WHERE j.tenant_id=$1 AND j.message_id=p.message_id AND j.state='failed'`, a.TenantID)
+          \t\tif e != nil {
+          \t\t\treturn e
+          \t\t}
+          \t\tn = int(tag.RowsAffected())
+          \t\treturn companyAudit(ctx, tx, a, "company.index_retry", "company", a.TenantID, map[string]any{"reason": reason, "requeued": n, "limit": 100})
+          \t})
+          \tif e != nil {
+          \t\treturn 0, e
+          \t}
+          \treturn n, nil
+          }
+          
+          var _ company.ContentIndexRecovery = (*PgStore)(nil)
+          ''')
+          schema='''  /api/v1/company/index/retry:
+              post:
+                tags: [Company]
+                summary: Retry up to 100 failed derived indexes in the current company
+                description: Requires current company administrator authority. Does not touch SMTP or grant content access. Mutation, audit and outbox commit together.
+                security: [{BearerAuth: []}]
+                requestBody:
+                  required: true
+                  content:
+                    application/json:
+                      schema:
+                        type: object
+                        required: [reason]
+                        properties:
+                          reason:
+                            type: string
+                            description: Trimmed documented reason, 8 to 1000 UTF-8 bytes
+                responses:
+                  '200':
+                    description: Queued for normal lease-fenced workers; not proof of successful parsing
+                    content:
+                      application/json:
+                        schema:
+                          type: object
+                          properties:
+                            data:
+                              type: object
+                              required: [requeued, limit]
+                              properties:
+                                requeued: {type: integer, minimum: 0, maximum: 100}
+                                limit: {type: integer, enum: [100]}
+                  '400': {description: Invalid reason}
+                  '403': {description: Current company administrator required}
+          '''
+          replace('internal/api/openapi.yaml','  /api/v1/company/overview:\n',schema+'  /api/v1/company/overview:\n')
+          p='README.md'
+          replace(p,'收件、回复／回复全部／转发、附件、版本草稿、归档、搜索、30 天回收站、发送与逐收件人状态','收件、会话关联、稳定附件链接、回复／回复全部／转发、版本草稿自动保存、受限富文本、归档、正文搜索、30 天回收站；已发送资产与投递回执分离')
+          replace(p,'| 公司管理员 | `/company` | 选择已验证主域名、邀请／激活员工、分配个人与共享邮箱、独立读／整理／代发授权、停用和交接 |','| 公司管理员 | `/company` 及其子页面 | 公司概览；域名与发送策略；员工入职和预览式离职交接；邮箱授权与权限解释；公司审计 |')
+          replace(p,'参见 [R3 公司邮箱发布手册](docs/company-mail/RELEASE-R3.md)。','参见 [R4 架构与升级说明](docs/company-mail/ARCHITECTURE-R4.md)，基础部署配置仍参考 [R3 发布手册](docs/company-mail/RELEASE-R3.md)。')
+          replace(p,'本版本新增 Goose `00005_company_workflows.sql`，不修改已发布 `00001`–`00004`。','本版本在安全修复迁移 `00009` 基础上新增 `00010`–`00013`：独立已发送资产、正文索引、离职处置计划和草稿创建回执。不修改历史迁移。需要数据库支持 `pg_trgm`。')
+          replace(p,'搜索目前针对主题、发件人和收件人，不是正文全文索引。','搜索覆盖主题、发件人、收件人和已索引正文，提供索引进度；采用权限隔离的字面子串匹配，不是语义检索。原始 EML 保持权威；派生索引失败可在公司概览中带原因重试。已发送副本拥有独立内容、附件引用、文件夹和保留期，清理投递任务不会删除员工邮件。')
+          replace(p,'此前 P0/R2 文档保留为历史记录，不能代替本版本的操作说明。','此前 P0/R2/R3 文档中的旧 API 与迁移版本说明保留作历史参考；本版本的接口兼容变化和升级顺序以 R4 说明为准。')
+          p='docs/company-mail/ARCHITECTURE-R4.md'
+          replace(p,'Parser memory is bounded and cached reads never replace current authorization. EML remains the source of truth.','Parser input/cache are bounded and cached reads never replace current authorization. EML remains the source of truth. Expired workers cannot report either success or failure with a stale lease; five repeatedly expired leases move a job to failed. Company administrators can retry up to 100 failed jobs per action with a documented reason; current authority, tenant scope, retry, audit and outbox are atomic. Recovery never resends mail or grants body access.')
+          replace(p,'Late save responses do not overwrite typed text. Conflicts require explicit reload','Late save responses do not overwrite typed text. Unknown writes pin their original UUID, revision and payload even when readback is also unavailable; later typing is flushed only after the original command is acknowledged. Readback accepts only the exact identity, input and next revision; it cannot silently adopt someone else\'s later revision. Conflicts require explicit reload')
+          replace(p,'## Validation and scope\n','''## Dependency verification
+          
+          Next.js and eslint-config-next are pinned to 16.3.3; Vitest is pinned to 4.1.11.
+          Compatible transitive security fixes are resolved in the committed lockfile,
+          including sharp 0.35.4. The dependency repair uses an isolated npm 11.6.4 to
+          avoid an observed npm 10.9.8 lockfile resolver crash; normal builds still use
+          `npm ci`, never re-resolve dependencies. The complete npm audit report is saved
+          in CI and any reported vulnerability or invalid audit response blocks the
+          frontend job. A zero report is not a proof that all application vulnerabilities
+          or future advisories are absent. Public advisory sources include:
+          - https://github.com/vercel/next.js/security/advisories/GHSA-p293-qw3h-jr36
+          - https://github.com/vercel/next.js/security/advisories/GHSA-2xp9-vwfh-vxw4
+          - https://github.com/lovell/sharp/security/advisories/GHSA-rgj7-g3m4-5g8c
+          - https://github.com/vitest-dev/vitest/security/advisories/GHSA-82fw-gwwq-j7x9
+          
+          ## Validation and scope
+          ''')
+          PY
+          git add README.md docs internal
+          cp .git/index /tmp/architecture-final-index
+          GIT_INDEX_FILE=/tmp/architecture-final-index git update-index --force-remove .github/workflows/architecture-final-source.yml
+          test "$(GIT_INDEX_FILE=/tmp/architecture-final-index git write-tree)" = fb11a2e062a80d2c8cc9014076906163ccf70d23
+          git -c user.name='TabMail maintenance' -c user.email='tabmail-maintenance@users.noreply.github.com' commit -m 'fix: fence failed indexing and document final lifecycle contracts'
+          auth="$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          git -c http.https://github.com/.extraheader="AUTHORIZATION: basic $auth" push origin HEAD:refs/heads/refactor/company-mail-architecture

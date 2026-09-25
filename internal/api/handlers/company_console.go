@@ -7,12 +7,26 @@ import (
 )
 
 type CompanyConsoleHandler struct {
-	repo   company.ConsoleReader
-	logger zerolog.Logger
+	repo     company.ConsoleReader
+	recovery company.ContentIndexRecovery
+	logger   zerolog.Logger
 }
 
-func NewCompanyConsoleHandler(repo company.ConsoleReader, l zerolog.Logger) *CompanyConsoleHandler {
-	return &CompanyConsoleHandler{repo, l}
+func NewCompanyConsoleHandler(repo interface {
+	company.ConsoleReader
+	company.ContentIndexRecovery
+}, l zerolog.Logger) *CompanyConsoleHandler {
+	return &CompanyConsoleHandler{repo: repo, recovery: repo, logger: l}
+}
+func (h *CompanyConsoleHandler) RetryIndex(w http.ResponseWriter, r *http.Request) {
+	input, valid := companyBody[struct {
+		Reason string `json:"reason"`
+	}](w, r)
+	if !valid {
+		return
+	}
+	n, err := h.recovery.RetryFailedMailIndex(r.Context(), companyActor(r), input.Reason)
+	companyResponse(w, h.logger, map[string]int{"requeued": n, "limit": 100}, err)
 }
 func (h *CompanyConsoleHandler) Overview(w http.ResponseWriter, r *http.Request) {
 	v, e := h.repo.CompanyOverview(r.Context(), companyActor(r))

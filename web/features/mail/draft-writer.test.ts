@@ -38,7 +38,8 @@ describe("DraftWriter persistence lane", () => {
         const write = vi.fn().mockRejectedValue(new Error("lost"));
         const read = vi.fn(async () => ({ ...initial, id: "other", revision: 2, payload: input("someone else").payload }));
         const lane = new DraftWriter(initial, { write, read });
-        await expect(lane.save(input("a"))).rejects.toThrow("lost");
+        await expect(lane.save(input("a"))).rejects.toMatchObject({ error: { code: "CONFLICT" } });
+        await expect(lane.save(input("b"))).rejects.toMatchObject({ error: { code: "CONFLICT" } });
         expect(write).toHaveBeenCalledTimes(1);
     });
     it("latches conflicts until explicit reload and keeps all queued writes off the server", async () => {
@@ -50,7 +51,7 @@ describe("DraftWriter persistence lane", () => {
         await expect(lane.save(input("b"))).rejects.toBe(conflict);
         expect(write).toHaveBeenCalledTimes(1);
         await lane.reload();
-        write.mockResolvedValue({ ...initial, id: "saved", revision: 5 });
+        write.mockImplementation(async (d: MailDraft) => ({ ...d, revision: d.revision + 1 }));
         await lane.save(input("c"));
         expect(write.mock.calls[1][0].revision).toBe(4);
     });
@@ -77,4 +78,63 @@ describe("DraftWriter persistence lane", () => {
         expect(draftKey({ ...initial, payload: { ...initial.payload, cc: [], bcc: [], headers: {}, html_body: "" } })).toBe(draftKey(initial));
         expect(draftKey(input("changed"))).not.toBe(draftKey(initial));
     });
+});
+
+
+describe("Unknown draft write outcomes", () => {
+    it("replays the original creation before saving new typing after both responses were lost", async () => {
+        const write = vi.fn().mockRejectedValueOnce(new Error("write response lost"))
+            .mockImplementation(async (d: MailDraft) => ({ ...d, revision: d.revision + 1 }));
+        const read = vi.fn().mockRejectedValue(new Error("readback unavailable"));
+        const lane = new DraftWriter(initial, { write, read });
+        await expect(lane.save(input("a"))).rejects.toThrow("write response lost");
+        const last = await lane.save(input("b"));
+        expect(write).toHaveBeenCalledTimes(3);
+        expect(write.mock.calls[1]).toEqual(write.mock.calls[0]);
+        expect(write.mock.calls[2][1]).toBe(false);
+        expect(write.mock.calls[2][0].revision).toBe(1);
+        expect(last.payload.subject).toBe("b");
+        expect(last.revision).toBe(2);
+    });
+    it("recovers a committed update on retry conflict without treating later typing as its input", async () => {
+        const lost = new Error("lost acknowledgement");
+        const write = vi.fn().mockRejectedValueOnce(lost)
+            .mockRejectedValueOnce({ error: { code: "CONFLICT" } })
+            .mockImplementation(async (d: MailDraft) => ({ ...d, revision: d.revision + 1 }));
+        const read = vi.fn().mockRejectedValueOnce(new Error("offline"))
+            .mockResolvedValue({ ...initial, id: "saved", revision: 4, payload: input("a").payload });
+        const lane = new DraftWriter({ ...initial, id: "saved", revision: 3 }, { write, read });
+        await expect(lane.save(input("a"))).rejects.toBe(lost);
+        const b = await lane.save(input("b"));
+        expect(write.mock.calls[0]).toEqual(write.mock.calls[1]);
+        expect(write.mock.calls[2][0].revision).toBe(4);
+        expect(b.revision).toBe(5);
+        expect(b.payload.subject).toBe("b");
+    });
+    it("does not adopt an unrelated later revision even if its text happens to match", async () => {
+        const write = vi.fn().mockRejectedValue(new Error("lost"));
+        const read = vi.fn().mockResolvedValue({ ...initial, id: "saved", revision: 7, payload: input("a").payload });
+        const lane = new DraftWriter({ ...initial, id: "saved", revision: 3 }, { write, read });
+        await expect(lane.save(input("a"))).rejects.toMatchObject({ error: { code: "CONFLICT" } });
+        await expect(lane.save(input("b"))).rejects.toMatchObject({ error: { code: "CONFLICT" } });
+        expect(write).toHaveBeenCalledTimes(1);
+    });
+});
+
+it("keeps an uncertain replay retryable when the conflict readback is also offline", async () => {
+    const conflict = { error: { code: "CONFLICT" } };
+    const write = vi.fn().mockRejectedValueOnce(new Error("offline"))
+        .mockRejectedValueOnce(conflict).mockRejectedValueOnce(conflict)
+        .mockImplementation(async (d: MailDraft) => ({ ...d, revision: d.revision + 1 }));
+    const read = vi.fn().mockRejectedValueOnce(new Error("offline"))
+        .mockRejectedValueOnce(new Error("offline"))
+        .mockResolvedValue({ ...initial, id: "saved", revision: 4, payload: input("a").payload });
+    const lane = new DraftWriter({ ...initial, id: "saved", revision: 3 }, { write, read });
+    await expect(lane.save(input("a"))).rejects.toThrow("offline");
+    await expect(lane.save(input("b"))).rejects.toThrow("still unconfirmed");
+    const last = await lane.save(input("c"));
+    expect(write.mock.calls[0]).toEqual(write.mock.calls[1]);
+    expect(write.mock.calls[0]).toEqual(write.mock.calls[2]);
+    expect(last.revision).toBe(5);
+    expect(last.payload.subject).toBe("c");
 });
