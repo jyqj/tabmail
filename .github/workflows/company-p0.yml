@@ -3,7 +3,7 @@ on:
   push:
     branches: [main, fix/company-mail-release-blockers-r2]
   pull_request:
-    branches: [main]
+    branches: [main, fix/company-mail-safety-contracts]
 permissions:
   contents: read
 concurrency:
@@ -71,6 +71,17 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
         working-directory: web
+      - name: Record full dependency audit
+        working-directory: web
+        run: npm audit --json > /tmp/tabmail-npm-audit.json || test -s /tmp/tabmail-npm-audit.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit
+          path: /tmp/tabmail-npm-audit.json
+          retention-days: 14
+      - name: Require a complete clean dependency audit
+        run: |
+          node -e 'const d=require("/tmp/tabmail-npm-audit.json"); if(!d.metadata?.vulnerabilities || d.error || d.metadata.vulnerabilities.total !== 0) throw new Error("dependency audit missing, failed or contains vulnerabilities");'
       - run: npx tsc --noEmit
         working-directory: web
       - run: npm test
@@ -135,15 +146,13 @@ jobs:
         run: |
           npm install --prefix /tmp/tabmail-browser --ignore-scripts --no-audit --no-fund @playwright/test@1.56.1
           /tmp/tabmail-browser/node_modules/.bin/playwright install --with-deps chromium
-      - name: Build the actual frontend
-        working-directory: web
-        run: npm ci && npm run build
+      - name: Build the shipping standalone frontend
+        run: docker build --build-arg INTERNAL_API_URL=http://127.0.0.1:18080 -t tabmail-browser-standalone ./web
       - name: Exercise the production UI against the real API and loopback SMTP
         run: |
           set -euo pipefail
-          (cd web && npm run start -- --hostname 127.0.0.1 --port 3000) >/tmp/tabmail-next.log 2>&1 &
-          web_pid=$!
-          trap 'kill "$web_pid" 2>/dev/null || true' EXIT
+          docker run -d --name tabmail-browser --network host -e HOSTNAME=127.0.0.1 -e PORT=3000 tabmail-browser-standalone
+          trap 'docker logs tabmail-browser >/tmp/tabmail-next.log 2>&1; docker rm -f tabmail-browser >/dev/null' EXIT
           for i in $(seq 1 60); do curl -sf http://localhost:3000 >/dev/null && break; sleep 1; done
           curl -sf http://localhost:3000 >/dev/null
           go test -v -count=1 -timeout=180s -run '^TestR3BrowserJourney$' ./internal/store/postgres | tee /tmp/tabmail-browser.log

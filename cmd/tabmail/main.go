@@ -19,6 +19,7 @@ import (
 
 	"tabmail/internal/api"
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app/mailindex"
 	"tabmail/internal/autocreate"
 	"tabmail/internal/config"
 	"tabmail/internal/hooks"
@@ -249,6 +250,11 @@ func main() {
 		IngestInvalidator:  ingestSvc,
 		CompanyRepository:  pg,
 		Logger:             logger,
+	}
+
+	// The content index is a rebuildable worker role, separate from SMTP delivery.
+	if cfg.CompanyOnly && (role == "all" || role == "worker") {
+		go mailindex.New(pg, obj, logger).Run(ctx)
 	}
 
 	// --- Retention scanner ---

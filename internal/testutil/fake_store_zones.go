@@ -2,8 +2,10 @@ package testutil
 
 import (
 	"context"
+	"encoding/json"
 	"sort"
 	"strings"
+	"tabmail/internal/app"
 	"time"
 
 	"github.com/google/uuid"
@@ -157,9 +159,58 @@ func (s *FakeStore) UpdateZone(_ context.Context, z *models.DomainZone) error {
 	return nil
 }
 
-func (s *FakeStore) DeleteZone(_ context.Context, id uuid.UUID) error {
+func (s *FakeStore) DeleteZone(_ context.Context, id uuid.UUID, entry models.AuditEntry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if entry.TenantID == nil || entry.Actor == "" {
+		return app.BadRequest("domain deletion requires tenant and audit actor")
+	}
+	z := s.zones[id]
+	if z == nil || z.TenantID != *entry.TenantID {
+		return app.NotFound("domain not found")
+	}
+	for _, m := range s.mailboxes {
+		if m.ZoneID == id {
+			return app.Conflict("domain has mailboxes")
+		}
+	}
+	for _, m := range s.messages {
+		if m.ZoneID == id {
+			return app.Conflict("domain has messages")
+		}
+	}
+	for _, j := range s.outboundJobs {
+		if j.ZoneID == id {
+			return app.Conflict("domain has submissions")
+		}
+	}
+	for _, targets := range s.ingressTargets {
+		for _, target := range targets {
+			if target.ZoneID == id {
+				return app.Conflict("domain has ingress provenance")
+			}
+		}
+	}
+	for _, child := range s.zones {
+		if child.ParentZoneID != nil && *child.ParentZoneID == id {
+			return app.Conflict("domain has child domains")
+		}
+	}
+	// Parse before mutation so malformed audit details leave the domain intact.
+	details := map[string]any{}
+	if len(entry.Details) != 0 {
+		if err := json.Unmarshal(entry.Details, &details); err != nil {
+			return err
+		}
+	}
+	details["domain"] = z.Domain
+	raw, err := json.Marshal(details)
+	if err != nil {
+		return err
+	}
+	entry.ID, entry.Action, entry.ResourceType, entry.ResourceID, entry.Details = uuid.New(), "domain.delete", "domain_zone", &id, raw
+	entry.CreatedAt = time.Now()
+	s.audits = append(s.audits, &entry)
 	delete(s.zones, id)
 	return nil
 }

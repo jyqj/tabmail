@@ -103,7 +103,9 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 		t.Fatalf("provisioning not visible: %+v", boxes)
 	}
 	shared := f.shared.ID.String()
-	r3HTTP(t, h, admin, "PUT", "/api/v1/company/mailboxes/"+shared+"/grants", models.MailboxGrant{UserID: f.employee.ID, CanSend: true, TemplateOnly: true}, 200)
+	grantPath := "/api/v1/company/mailboxes/" + shared + "/grants"
+	grantSnapshot := r3Data[company.MailboxGrantSnapshot](t, r3HTTP(t, h, admin, "GET", grantPath, nil, 200))
+	r3HTTP(t, h, admin, "PUT", grantPath, map[string]any{"user_id": f.employee.ID, "can_send": true, "template_only": true, "revision": grantSnapshot.Revision}, 200)
 	r3HTTP(t, h, employee, "GET", "/api/v1/company/mailboxes/"+shared+"/messages", nil, 403)
 	tpl := r3Data[company.Template](t, r3HTTP(t, h, admin, "POST", "/api/v1/company/templates", company.Template{Name: "HTTP template", Draft: templateDraft()}, 200))
 	version := r3Data[company.TemplateVersion](t, r3HTTP(t, h, admin, "POST", "/api/v1/company/templates/"+tpl.ID.String()+"/publish", map[string]int{"revision": tpl.Revision}, 200))
@@ -132,7 +134,7 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 	draft := company.Draft{MailboxID: f.shared.ID, Payload: company.DraftPayload{To: []string{"client@recipient.test"}, BCC: []string{"hidden@recipient.test"}, Subject: "ignored", TextBody: "ignored", TemplateVersionID: &version.ID, TemplateVars: map[string]string{"customer": "Client"}, AttachmentIDs: []uuid.UUID{attachment.ID}}}
 	saved := r3Data[company.Draft](t, r3HTTP(t, h, employee, "POST", "/api/v1/company/drafts", draft, 200))
 	draft.ID = saved.ID
-	r3HTTP(t, h, employee, "PUT", "/api/v1/company/drafts/"+saved.ID.String(), draft, 409)
+	r3HTTP(t, h, employee, "PUT", "/api/v1/company/drafts/"+saved.ID.String(), draft, 400)
 	submitPath := "/api/v1/company/drafts/" + saved.ID.String() + "/submit"
 	sent := r3Data[struct {
 		ID uuid.UUID `json:"id"`
@@ -175,9 +177,10 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 	r3HTTP(t, h, employee, "POST", path+"/actions", map[string]string{"action": "restore"}, 200)
 	// Missing object is not reported as a successfully empty body.
 	must(t, obj.Delete(ctx, key))
-	r3HTTP(t, h, employee, "GET", path, nil, 500)
+	r3HTTP(t, companyRouter(t, f, obj, svc), employee, "GET", path, nil, 500)
 	// The already-issued JWT is rejected once the employee is offboarded.
-	r3HTTP(t, h, admin, "POST", "/api/v1/company/employees/"+f.employee.ID.String()+"/offboard", map[string]any{"successor_user_id": f.other.ID, "reason": "Employee departure and handover"}, 200)
+	plan := r3Data[company.OffboardingPlan](t, r3HTTP(t, h, admin, "POST", "/api/v1/company/employees/"+f.employee.ID.String()+"/offboard/preview", map[string]any{"successor_user_id": f.other.ID, "reason": "Employee departure and handover", "options": company.OffboardingOptions{Drafts: "seal"}}, 200))
+	r3HTTP(t, h, admin, "POST", "/api/v1/company/employees/"+f.employee.ID.String()+"/offboard", map[string]any{"plan_id": plan.ID}, 200)
 	r3HTTP(t, h, employee, "GET", "/api/v1/company/mailboxes", nil, 401)
 }
 
@@ -194,4 +197,3 @@ func TestR3PasswordChangeInvalidatesExistingAccess(t *testing.T) {
 	r3HTTP(t, h, token, "POST", "/api/v1/auth/change-password", map[string]string{"old_password": "old-test-password", "new_password": "new-test-password"}, 200)
 	r3HTTP(t, h, token, "GET", "/api/v1/company/mailboxes", nil, 401)
 }
-

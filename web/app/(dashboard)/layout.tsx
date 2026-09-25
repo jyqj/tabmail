@@ -42,7 +42,7 @@ export default function DashboardLayout({
         pathname.startsWith("/admin/settings") ||
         pathname.startsWith("/admin/policy"))
     ) {
-      router.replace("/admin/users");
+      router.replace("/company");
     }
   }, [hydrated, level, pathname, router]);
 

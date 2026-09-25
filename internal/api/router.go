@@ -168,8 +168,18 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			mailService := companymail.NewService(cfg.CompanyRepository, cfg.ObjectStore)
 			workbench := handlers.NewCompanyMailHandler(cfg.CompanyRepository, mailService, subs, cfg.Logger)
 			events := handlers.NewMailboxEventHandler(cfg.CompanyRepository, refreshStream, cfg.Logger)
-			admin := handlers.NewCompanyHandler(cfg.CompanyRepository, st, cfg.ObjectStore, subs, cfg.Logger)
-			handlers.RegisterCompanyRoutes(r, admin, workbench, events, cdh)
+			handlers.RegisterCompanyRoutes(r, handlers.CompanyRoutes{
+				Setup:     handlers.NewCompanySetupHandler(cfg.CompanyRepository, cfg.Logger),
+				Mailboxes: handlers.NewMailboxAdminHandler(cfg.CompanyRepository, cfg.Logger),
+				Templates: handlers.NewCompanyTemplateHandler(cfg.CompanyRepository, st, cfg.Logger),
+				Recovery:  handlers.NewCompanyRecoveryHandler(cfg.CompanyRepository, st, cfg.ObjectStore, subs, cfg.Logger),
+				Mail:      workbench, Events: events, Domains: cdh,
+				Archive:   handlers.NewMailArchiveHandler(cfg.CompanyRepository, cfg.Logger),
+				Employees: handlers.NewEmployeeLifecycleHandler(cfg.CompanyRepository, cfg.Logger),
+				Drafts:    handlers.NewCompanyDraftHandler(cfg.CompanyRepository, cfg.Logger),
+				Index:     handlers.NewCompanyIndexHandler(cfg.CompanyRepository, cfg.Logger),
+				Console:   handlers.NewCompanyConsoleHandler(cfg.CompanyRepository, cfg.Logger),
+			})
 		}
 		// -- Auth (public, no auth required) --
 		r.Post("/auth/login", auth.Login)

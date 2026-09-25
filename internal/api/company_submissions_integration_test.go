@@ -291,7 +291,9 @@ func TestCompanySubmissionContentAndAttachmentEndpoints(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	must(st.SetWorkGrant(ctx, adminActor, models.MailboxGrant{MailboxID: mb.ID, UserID: reader.ID, CanRead: true}))
+	grantAccess, grantErr := st.GetWorkMailbox(ctx, adminActor, mb.ID)
+	must(grantErr)
+	must(st.SetWorkGrant(ctx, adminActor, models.MailboxGrant{MailboxID: mb.ID, UserID: reader.ID, CanRead: true}, grantAccess.Revision))
 	readerToken := issueAccessTokenForExistingUser(t, reader)
 	for _, path := range []string{
 		"/api/v1/company/submissions/" + job.ID.String() + "/content",
@@ -307,7 +309,9 @@ func TestCompanySubmissionContentAndAttachmentEndpoints(t *testing.T) {
 			t.Fatalf("out-of-scope viewer must get 404 on %s: %d %s", path, w.Code, w.Body.String())
 		}
 	}
-	must(st.SetWorkGrant(ctx, adminActor, models.MailboxGrant{MailboxID: mb.ID, UserID: reader.ID, CanRead: false}))
+	grantAccess, grantErr = st.GetWorkMailbox(ctx, adminActor, mb.ID)
+	must(grantErr)
+	must(st.SetWorkGrant(ctx, adminActor, models.MailboxGrant{MailboxID: mb.ID, UserID: reader.ID, CanRead: false}, grantAccess.Revision))
 	for _, path := range []string{
 		"/api/v1/company/submissions/" + job.ID.String() + "/content",
 		"/api/v1/company/submissions/" + job.ID.String() + "/attachments",

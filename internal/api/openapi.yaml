@@ -2,10 +2,11 @@ openapi: 3.1.0
 info:
   title: TabMail API
   version: '3.0'
-  description: Company browser email with personal/shared mailboxes, independent read/organize/send-as grants, employee activation,
-    immutable administrator templates, durable recipient delivery, drafts and recoverable deletion. Company production mode
-    disables public registration, standalone mailbox tokens and automatic unknown recipient provisioning. Legacy platform
-    routes remain for controlled compatibility; an administrator role alone does not grant message content access. All queued/accepted
+  description: Company browser email with personal/shared mailboxes, independent read/organize/send-as
+    grants, employee activation, immutable administrator templates, durable recipient delivery, drafts
+    and recoverable deletion. Company production mode disables public registration, standalone mailbox
+    tokens and automatic unknown recipient provisioning. Legacy platform routes remain for controlled
+    compatibility; an administrator role alone does not grant message content access. All queued/accepted
     responses describe local acceptance or next-hop acceptance, not inbox delivery or reading. See docs/company-mail/RELEASE-R3.md
     for deployment and rollback requirements.
 servers:
@@ -346,8 +347,8 @@ components:
             type: string
     Submission:
       type: object
-      description: Employee-facing projection of an outbound submission; queue
-        internals (attempts, lease, SMTP responses, delivery tokens) are excluded.
+      description: Employee-facing projection of an outbound submission; queue internals (attempts, lease,
+        SMTP responses, delivery tokens) are excluded.
       properties:
         id:
           type: string
@@ -368,10 +369,21 @@ components:
                 type: string
               state:
                 type: string
-                enum: [pending, accepted, temporary, permanent, uncertain]
+                enum:
+                - pending
+                - accepted
+                - temporary
+                - permanent
+                - uncertain
         status:
           type: string
-          enum: [submitted, waiting, sending, partially_accepted, accepted, needs_attention]
+          enum:
+          - submitted
+          - waiting
+          - sending
+          - partially_accepted
+          - accepted
+          - needs_attention
         template_version_id:
           type:
           - string
@@ -1148,7 +1160,8 @@ components:
           - free
           - template_required
           - disabled
-          description: Company-wide default outbound send policy. In requests an omitted or empty value leaves the current default unchanged.
+          description: Company-wide default outbound send policy. In requests an omitted or empty value
+            leaves the current default unchanged.
     CompanyInvitationInput:
       type: object
       properties:
@@ -1427,6 +1440,191 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyRecoveryTarget'
+    ArchivedMail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        mailbox_id:
+          type: string
+          format: uuid
+        from:
+          type: string
+        to:
+          type: array
+          items:
+            type: string
+        subject:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        revision:
+          type: integer
+        attachment_count:
+          type: integer
+        delivery_available:
+          type: boolean
+      required:
+      - id
+      - mailbox_id
+      - from
+      - subject
+      - revision
+      - delivery_available
+    ContentIndexStatus:
+      type: object
+      properties:
+        total:
+          type: integer
+        indexed:
+          type: integer
+        failed:
+          type: integer
+      required:
+      - total
+      - indexed
+      - failed
+    OffboardingOptions:
+      type: object
+      properties:
+        drafts:
+          type: string
+          enum:
+          - seal
+          - transfer_owned
+          - discard
+      required:
+      - drafts
+    OffboardingImpact:
+      type: object
+      properties:
+        mailboxes:
+          type: integer
+        drafts:
+          type: integer
+        transferable_drafts:
+          type: integer
+        attachments:
+          type: integer
+        api_keys:
+          type: integer
+        grants:
+          type: integer
+        queued:
+          type: integer
+        in_flight:
+          type: integer
+        uncertain:
+          type: integer
+    OffboardingPlan:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        target_id:
+          type: string
+          format: uuid
+        successor_id:
+          type: string
+          format: uuid
+        options:
+          $ref: '#/components/schemas/OffboardingOptions'
+        impact:
+          $ref: '#/components/schemas/OffboardingImpact'
+        reason:
+          type: string
+        state:
+          type: string
+          enum:
+          - preview
+          - executed
+        expires_at:
+          type: string
+          format: date-time
+        executed_at:
+          type: string
+          format: date-time
+      required:
+      - id
+      - target_id
+      - successor_id
+      - options
+      - impact
+      - state
+      - expires_at
+    CompanyOverview:
+      type: object
+      properties:
+        mailboxes:
+          type: integer
+        active_employees:
+          type: integer
+        pending_invitations:
+          type: integer
+        queued:
+          type: integer
+        uncertain:
+          type: integer
+        index_failed:
+          type: integer
+    CompanyAdminAudit:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        actor:
+          type: string
+        action:
+          type: string
+        resource_type:
+          type: string
+        resource_id:
+          type: string
+          format: uuid
+        reason:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    AccessExplanation:
+      type: object
+      properties:
+        mailbox_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        source:
+          type: string
+          enum:
+          - owner
+          - grant
+          - none
+        active:
+          type: boolean
+        can_read:
+          type: boolean
+        can_organize:
+          type: boolean
+        can_send:
+          type: boolean
+        template_only:
+          type: boolean
+        send_policy:
+          type: string
+          enum:
+          - free
+          - template_only
+          - disabled
+        reasons:
+          type: array
+          items:
+            type: string
   responses:
     BadRequest:
       description: Invalid request
@@ -2399,7 +2597,8 @@ paths:
                   type: string
                 scopes:
                   type: array
-                  description: Explicit API key scopes. If omitted, a read-only default is used. Wildcard scopes are not accepted.
+                  description: Explicit API key scopes. If omitted, a read-only default is used. Wildcard
+                    scopes are not accepted.
                   items:
                     $ref: '#/components/schemas/APIKeyScope'
       responses:
@@ -3361,39 +3560,46 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/employees/{id}/offboard:
     post:
       tags:
       - Company mail
-      summary: Offboard
-      operationId: companyOffboardPost
+      summary: executeEmployeeDisposition
+      operationId: executeEmployeeDisposition
       security:
       - BearerAuth: []
       responses:
         '200':
-          description: Operation completed. Creating a send task is not delivery confirmation.
+          description: Current-authority projection; never a credential.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  data: {}
+                  data:
+                    $ref: '#/components/schemas/OffboardingPlan'
+                required:
+                - data
         '400':
           description: Invalid request
         '401':
-          description: Missing/expired/revoked identity; refresh only when permitted
+          description: Missing or revoked session
         '403':
-          description: Current identity lacks required role or resource grant
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
         '409':
-          description: Stale revision, concurrent change or unsafe retry
-        '500':
-          description: Operation failed; do not assume it committed
+          description: Stale revision, expired preview or changed provenance
       parameters:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -3401,15 +3607,11 @@ paths:
             schema:
               type: object
               properties:
-                successor_user_id: *id001
-                reason: &id002
+                plan_id:
                   type: string
-                  minLength: 8
-                  maxLength: 1000
+                  format: uuid
               required:
-              - successor_user_id
-              - reason
-              additionalProperties: false
+              - plan_id
   /api/v1/company/mailboxes:
     get:
       tags:
@@ -3504,7 +3706,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -3512,10 +3716,15 @@ paths:
             schema:
               type: object
               properties:
-                owner_user_id: *id001
-                revision: &id003
+                owner_user_id:
+                  type: string
+                  format: uuid
+                revision:
                   type: integer
-                reason: *id002
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 1000
               required:
               - owner_user_id
               - revision
@@ -3552,7 +3761,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -3560,8 +3771,12 @@ paths:
             schema:
               type: object
               properties:
-                revision: *id003
-                reason: *id002
+                revision:
+                  type: integer
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 1000
               required:
               - revision
               - reason
@@ -3571,6 +3786,8 @@ paths:
       tags:
       - Company mail
       summary: Grants
+      description: Returns grants and the mailbox revision from one administrative snapshot. PUT must
+        submit this observed revision; stale edits are never replayed automatically.
       operationId: companyGrantsGet
       security:
       - BearerAuth: []
@@ -3582,7 +3799,38 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: {}
+                  data:
+                    type: object
+                    required:
+                    - revision
+                    - grants
+                    properties:
+                      revision:
+                        type: integer
+                        format: int64
+                        minimum: 1
+                      grants:
+                        type: array
+                        items:
+                          type: object
+                          required:
+                          - user_id
+                          - can_read
+                          - can_organize
+                          - can_send
+                          - template_only
+                          properties:
+                            user_id:
+                              type: string
+                              format: uuid
+                            can_read:
+                              type: boolean
+                            can_organize:
+                              type: boolean
+                            can_send:
+                              type: boolean
+                            template_only:
+                              type: boolean
         '400':
           description: Invalid request
         '401':
@@ -3597,7 +3845,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
     put:
       tags:
       - Company mail
@@ -3628,7 +3878,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -3636,7 +3888,13 @@ paths:
             schema:
               type: object
               properties:
-                user_id: *id001
+                revision:
+                  type: integer
+                  format: int64
+                  minimum: 1
+                user_id:
+                  type: string
+                  format: uuid
                 can_read:
                   type: boolean
                 can_organize:
@@ -3647,13 +3905,17 @@ paths:
                   type: boolean
               required:
               - user_id
+              - revision
               additionalProperties: false
   /api/v1/company/mailboxes/{id}/send-policy:
     put:
       tags:
       - Company mail
       summary: Mailbox Send Policy
-      description: Store or clear the mailbox-level outbound send-policy override. A null or empty send_policy clears the override so the mailbox inherits the company default again; the effective value keeps flowing on the mailbox views.
+      description: Requires the observed mailbox revision; a stale version returns 409 without mutation.
+        Store or clear the mailbox-level outbound send-policy override. A null or empty send_policy clears
+        the override so the mailbox inherits the company default again; the effective value keeps flowing
+        on the mailbox views.
       operationId: companyMailboxSendPolicyPut
       security:
       - BearerAuth: []
@@ -3682,7 +3944,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -3690,6 +3954,10 @@ paths:
             schema:
               type: object
               properties:
+                revision:
+                  type: integer
+                  format: int64
+                  minimum: 1
                 send_policy:
                   type:
                   - string
@@ -3699,6 +3967,8 @@ paths:
                   - template_required
                   - disabled
                   description: Null or empty inherits the company default.
+              required:
+              - revision
               additionalProperties: false
   /api/v1/company/templates:
     get:
@@ -3742,7 +4012,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: &id004
+                  data:
                     $ref: '#/components/schemas/CompanyTemplate'
         '400':
           description: Invalid request
@@ -3758,7 +4028,7 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id005
+            schema:
               $ref: '#/components/schemas/CompanyTemplate'
   /api/v1/company/templates/{id}:
     put:
@@ -3776,7 +4046,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id004
+                  data:
+                    $ref: '#/components/schemas/CompanyTemplate'
         '400':
           description: Invalid request
         '401':
@@ -3791,12 +4062,15 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
           application/json:
-            schema: *id005
+            schema:
+              $ref: '#/components/schemas/CompanyTemplate'
   /api/v1/company/templates/preview:
     post:
       tags:
@@ -3831,13 +4105,18 @@ paths:
             schema:
               type: object
               properties:
-                mailbox_id: *id001
-                template_version_id: *id001
+                mailbox_id:
+                  type: string
+                  format: uuid
+                template_version_id:
+                  type: string
+                  format: uuid
                 draft:
                   $ref: '#/components/schemas/CompanyTemplateDraft'
                 vars:
                   type: object
-                  additionalProperties: *id006
+                  additionalProperties:
+                    type: string
               required:
               - mailbox_id
               additionalProperties: false
@@ -3873,7 +4152,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -3881,7 +4162,8 @@ paths:
             schema:
               type: object
               properties:
-                revision: *id003
+                revision:
+                  type: integer
               required:
               - revision
               additionalProperties: false
@@ -3916,7 +4198,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -3924,7 +4208,8 @@ paths:
             schema:
               type: object
               properties:
-                revision: *id003
+                revision:
+                  type: integer
                 retired:
                   type: boolean
               required:
@@ -3962,7 +4247,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/templates/{id}/versions/{version}/revoke:
     post:
       tags:
@@ -3971,11 +4258,13 @@ paths:
       operationId: companyTemplateVersionRevokePost
       security:
       - BearerAuth: []
-      description: |-
-        Emergency one-way revoke of a single published version. Stops every
+      description: 'Emergency one-way revoke of a single published version. Stops every
+
         not-yet-started delivery attempt of that version; already-delivered
+
         outcomes, history and sibling versions are untouched. Irreversible —
-        publish a new version to correct a mistake.
+
+        publish a new version to correct a mistake.'
       responses:
         '200':
           description: Operation completed. Creating a send task is not delivery confirmation.
@@ -4005,7 +4294,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: version
         required: true
@@ -4018,7 +4309,8 @@ paths:
             schema:
               type: object
               properties:
-                revision: *id003
+                revision:
+                  type: integer
               required:
               - revision
               additionalProperties: false
@@ -4053,7 +4345,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
     put:
       tags:
       - Company mail
@@ -4084,7 +4378,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4092,8 +4388,12 @@ paths:
             schema:
               type: object
               properties:
-                mailbox_id: *id001
-                user_id: *id001
+                mailbox_id:
+                  type: string
+                  format: uuid
+                user_id:
+                  type: string
+                  format: uuid
                 enabled:
                   type: boolean
               required:
@@ -4132,7 +4432,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/mailboxes/{id}/messages:
     get:
       tags:
@@ -4164,19 +4466,25 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: page
-        schema: *id003
+        schema:
+          type: integer
       - in: query
         name: per_page
-        schema: *id003
+        schema:
+          type: integer
       - in: query
         name: folder
-        schema: *id006
+        schema:
+          type: string
       - in: query
         name: q
-        schema: *id006
+        schema:
+          type: string
   /api/v1/company/mailboxes/{id}/messages/{message}:
     get:
       tags:
@@ -4209,11 +4517,15 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: message
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/mailboxes/{id}/messages/{message}/actions:
     post:
       tags:
@@ -4245,11 +4557,15 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: message
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4301,11 +4617,15 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: message
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4319,7 +4639,9 @@ paths:
                   - reply
                   - reply_all
                   - forward
-                from_mailbox_id: *id001
+                from_mailbox_id:
+                  type: string
+                  format: uuid
               required:
               - mode
               - from_mailbox_id
@@ -4354,11 +4676,15 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: message
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/mailboxes/{id}/messages/{message}/attachments:
     get:
       tags:
@@ -4390,11 +4716,15 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: message
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/mailboxes/{id}/messages/{message}/attachments/{index}:
     get:
       tags:
@@ -4425,15 +4755,20 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: message
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: path
         name: index
         required: true
-        schema: *id003
+        schema:
+          type: integer
   /api/v1/company/mailboxes/{id}/attachments:
     post:
       tags:
@@ -4466,7 +4801,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4480,8 +4817,8 @@ paths:
               required:
               - file
               additionalProperties: false
-      description: At most 20 MiB per request; ten attachments and 20 MiB aggregate per message. Upload binds uploader, tenant
-        and sender mailbox.
+      description: At most 20 MiB per request; ten attachments and 20 MiB aggregate per message. Upload
+        binds uploader, tenant and sender mailbox.
   /api/v1/company/attachments/{id}:
     get:
       tags:
@@ -4512,34 +4849,64 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/drafts:
     get:
       tags:
       - Company mail
-      summary: Drafts
-      operationId: companyDraftsGet
+      summary: companyDraftPage
+      operationId: companyDraftPage
       security:
       - BearerAuth: []
       responses:
         '200':
-          description: Operation completed. Creating a send task is not delivery confirmation.
+          description: Current-authority projection; never a credential.
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  data: {}
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyDraft'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                required:
+                - data
         '400':
           description: Invalid request
         '401':
-          description: Missing/expired/revoked identity; refresh only when permitted
+          description: Missing or revoked session
         '403':
-          description: Current identity lacks required role or resource grant
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
         '409':
-          description: Stale revision, concurrent change or unsafe retry
-        '500':
-          description: Operation failed; do not assume it committed
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: per_page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
     post:
       tags:
       - Company mail
@@ -4555,7 +4922,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: &id007
+                  data:
                     $ref: '#/components/schemas/CompanyDraft'
         '400':
           description: Invalid request
@@ -4571,8 +4938,10 @@ paths:
         required: true
         content:
           application/json:
-            schema: &id008
+            schema:
               $ref: '#/components/schemas/CompanyDraft'
+      description: Revision zero creates a draft. A client-generated UUID makes identical first-save retries
+        idempotent; consumed/deleted UUIDs cannot be resurrected.
   /api/v1/company/drafts/{id}:
     put:
       tags:
@@ -4589,7 +4958,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: *id007
+                  data:
+                    $ref: '#/components/schemas/CompanyDraft'
         '400':
           description: Invalid request
         '401':
@@ -4604,12 +4974,15 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
           application/json:
-            schema: *id008
+            schema:
+              $ref: '#/components/schemas/CompanyDraft'
     delete:
       tags:
       - Company mail
@@ -4640,20 +5013,58 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: revision
         required: true
-        schema: *id003
+        schema:
+          type: integer
+    get:
+      tags:
+      - Company mail
+      summary: companyDraftGet
+      operationId: companyDraftGet
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyDraft'
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/submissions:
     get:
       tags:
       - Company mail
       summary: List Submissions
-      description: Employee-facing projection of outbound submissions the caller
-        sent or that originate from a mailbox the caller can read. Queue
-        internals (attempts, lease, SMTP responses) are never included; the
-        diagnostic view stays in the recovery surface.
+      description: Employee-facing projection of outbound submissions the caller sent or that originate
+        from a mailbox the caller can read. Queue internals (attempts, lease, SMTP responses) are never
+        included; the diagnostic view stays in the recovery surface.
       operationId: companySubmissionsList
       security:
       - BearerAuth: []
@@ -4714,7 +5125,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/recovery:
     get:
       tags:
@@ -4745,12 +5158,15 @@ paths:
       parameters:
       - in: query
         name: page
-        schema: *id003
+        schema:
+          type: integer
       - in: query
         name: per_page
-        schema: *id003
-      description: Current super administrator in the selected tenant only. Inspections and writes require durable audit.
-        Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown acceptance is never blindly replayed.
+        schema:
+          type: integer
+      description: Current super administrator in the selected tenant only. Inspections and writes require
+        durable audit. Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown
+        acceptance is never blindly replayed.
   /api/v1/company/recovery/{id}/inspect:
     post:
       tags:
@@ -4789,7 +5205,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4797,12 +5215,16 @@ paths:
             schema:
               type: object
               properties:
-                reason: *id002
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 1000
               required:
               - reason
               additionalProperties: false
-      description: Current super administrator in the selected tenant only. Inspections and writes require durable audit.
-        Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown acceptance is never blindly replayed.
+      description: Current super administrator in the selected tenant only. Inspections and writes require
+        durable audit. Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown
+        acceptance is never blindly replayed.
   /api/v1/company/recovery/{id}/retry:
     post:
       tags:
@@ -4834,7 +5256,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4847,16 +5271,22 @@ paths:
                   format: date-time
                 targets:
                   type: array
-                  items: *id001
+                  items:
+                    type: string
+                    format: uuid
                   minItems: 1
-                reason: *id002
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 1000
               required:
               - updated_at
               - targets
               - reason
               additionalProperties: false
-      description: Current super administrator in the selected tenant only. Inspections and writes require durable audit.
-        Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown acceptance is never blindly replayed.
+      description: Current super administrator in the selected tenant only. Inspections and writes require
+        durable audit. Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown
+        acceptance is never blindly replayed.
   /api/v1/company/outbound/{id}/recipients:
     get:
       tags:
@@ -4888,7 +5318,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
   /api/v1/company/outbound/{id}/reconcile:
     post:
       tags:
@@ -4920,7 +5352,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4935,14 +5369,18 @@ paths:
                   type: array
                   items:
                     $ref: '#/components/schemas/CompanyRecipient'
-                reason: *id002
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 1000
               required:
               - updated_at
               - results
               - reason
               additionalProperties: false
-      description: Current super administrator in the selected tenant only. Inspections and writes require durable audit.
-        Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown acceptance is never blindly replayed.
+      description: Current super administrator in the selected tenant only. Inspections and writes require
+        durable audit. Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown
+        acceptance is never blindly replayed.
   /api/v1/company/outbound/{id}/inspect:
     post:
       tags:
@@ -4974,7 +5412,9 @@ paths:
       - in: path
         name: id
         required: true
-        schema: *id001
+        schema:
+          type: string
+          format: uuid
       requestBody:
         required: true
         content:
@@ -4982,12 +5422,16 @@ paths:
             schema:
               type: object
               properties:
-                reason: *id002
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 1000
               required:
               - reason
               additionalProperties: false
-      description: Current super administrator in the selected tenant only. Inspections and writes require durable audit.
-        Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown acceptance is never blindly replayed.
+      description: Current super administrator in the selected tenant only. Inspections and writes require
+        durable audit. Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown
+        acceptance is never blindly replayed.
   /ready:
     get:
       summary: Dependency readiness (no authentication)
@@ -5007,3 +5451,511 @@ paths:
           description: Effective startup policy and restart-required settings; no credentials
         '403':
           description: Insufficient role
+  /api/v1/company/employees/{id}/offboard/preview:
+    post:
+      tags:
+      - Company mail
+      summary: previewEmployeeDisposition
+      operationId: previewEmployeeDisposition
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OffboardingPlan'
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                successor_user_id:
+                  type: string
+                  format: uuid
+                options:
+                  $ref: '#/components/schemas/OffboardingOptions'
+                reason:
+                  type: string
+                  minLength: 8
+                  maxLength: 1000
+              required:
+              - successor_user_id
+              - reason
+  /api/v1/company/mailboxes/{id}/sent:
+    get:
+      tags:
+      - Company mail
+      summary: companySentAssets
+      operationId: companySentAssets
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ArchivedMail'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: folder
+        required: false
+        schema:
+          type: string
+          enum:
+          - sent
+          - archive
+          - trash
+      - in: query
+        name: q
+        required: false
+        schema:
+          type: string
+          maxLength: 256
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: per_page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+  /api/v1/company/mailboxes/{id}/sent/{message}/actions:
+    post:
+      tags:
+      - Company mail
+      summary: companySentAssetAction
+      operationId: companySentAssetAction
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      updated:
+                        type: boolean
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: message
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                revision:
+                  type: integer
+                  minimum: 1
+                action:
+                  type: string
+                  enum:
+                  - archive
+                  - unarchive
+                  - trash
+                  - restore
+              required:
+              - revision
+              - action
+  /api/v1/company/mailboxes/{id}/index-status:
+    get:
+      tags:
+      - Company mail
+      summary: companyMailboxIndex
+      operationId: companyMailboxIndex
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/ContentIndexStatus'
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/mailboxes/{id}/messages/{message}/conversation:
+    get:
+      tags:
+      - Company mail
+      summary: companyMessageConversation
+      operationId: companyMessageConversation
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: message
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: per_page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+  /api/v1/company/mailboxes/{id}/messages/{message}/parts/{attachment}:
+    get:
+      tags:
+      - Company mail
+      summary: companyStableInboundAttachment
+      operationId: companyStableInboundAttachment
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Authorized original attachment bytes
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: message
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: attachment
+        required: true
+        schema:
+          type: string
+          pattern: ^[a-f0-9]{64}$
+  /api/v1/company/index/retry:
+    post:
+      tags: [Company]
+      summary: Retry up to 100 failed derived indexes in the current company
+      description: Requires current company administrator authority. Does not touch SMTP or grant content access. Mutation, audit and outbox commit together.
+      security: [{BearerAuth: []}]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason:
+                  type: string
+                  description: Trimmed documented reason, 8 to 1000 UTF-8 bytes
+      responses:
+        '200':
+          description: Queued for normal lease-fenced workers; not proof of successful parsing
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    required: [requeued, limit]
+                    properties:
+                      requeued: {type: integer, minimum: 0, maximum: 100}
+                      limit: {type: integer, enum: [100]}
+        '400': {description: Invalid reason}
+        '403': {description: Current company administrator required}
+  /api/v1/company/overview:
+    get:
+      tags:
+      - Company mail
+      summary: companyOverview
+      operationId: companyOverview
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyOverview'
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+  /api/v1/company/audit:
+    get:
+      tags:
+      - Company mail
+      summary: companyAuditMetadata
+      operationId: companyAuditMetadata
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyAdminAudit'
+                  meta:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+      - in: query
+        name: per_page
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 200
+  /api/v1/company/mailboxes/{id}/access/{user}:
+    get:
+      tags:
+      - Company mail
+      summary: companyAccessExplanation
+      operationId: companyAccessExplanation
+      security:
+      - BearerAuth: []
+      responses:
+        '200':
+          description: Current-authority projection; never a credential.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/AccessExplanation'
+                required:
+                - data
+        '400':
+          description: Invalid request
+        '401':
+          description: Missing or revoked session
+        '403':
+          description: Current permission denied
+        '404':
+          description: Unavailable or inaccessible resource
+        '409':
+          description: Stale revision, expired preview or changed provenance
+      parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - in: path
+        name: user
+        required: true
+        schema:
+          type: string
+          format: uuid

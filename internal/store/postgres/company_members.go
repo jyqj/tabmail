@@ -14,6 +14,7 @@ import (
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
+	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 )
 
@@ -25,7 +26,7 @@ func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, 
 	return s.companyTxScope(ctx, actor, admin, true, f)
 }
 
-// companyReadTx is the lock-free counterpart of companyTx for pure reads and
+// companyReadTx is the tenant-lock-free counterpart of companyTx for pure reads and
 // single-row CAS writes: it never takes the tenants row lock, so mailbox
 // reads, drafts, attachments and the outbound template hot path no longer
 // queue behind company-wide administration or ingress quota serialization.
@@ -63,6 +64,9 @@ func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin, 
 	}
 	if err = f(tx, actor); err != nil {
 		var pg *pgconn.PgError
+		if errors.As(err, &pg) && pg.Code == "42501" {
+			return app.Forbidden("employee authority changed")
+		}
 		if errors.As(err, &pg) && (pg.Code == "23505" || pg.Code == "40001" || pg.Code == "55P03") {
 			return app.Conflict("resource changed or already exists; reload before retrying")
 		}
@@ -76,6 +80,14 @@ func companyAudit(ctx context.Context, tx pgx.Tx, a authz.Actor, action, kind st
 		return e
 	}
 	_, e = tx.Exec(ctx, `INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,$3,$4,$5,$6)`, a.TenantID, a.AuditLabel(), action, kind, id, b)
+	if e != nil {
+		return e
+	}
+	raw, e := json.Marshal(hooks.Event{Type: "company.admin.changed", TenantID: a.TenantID.String(), OccurredAt: time.Now().UTC(), Metadata: map[string]any{"action": action, "resource_type": kind, "resource_id": id.String()}})
+	if e != nil {
+		return e
+	}
+	_, e = tx.Exec(ctx, `INSERT INTO outbox_events(id,event_type,payload) VALUES($1,'company.admin.changed',$2)`, uuid.New(), raw)
 	return e
 }
 func meaningfulReason(s string) bool { n := len(strings.TrimSpace(s)); return n >= 8 && n <= 1000 }
@@ -87,6 +99,7 @@ func (s *PgStore) GetCompanySettings(ctx context.Context, tenant uuid.UUID) (*co
 	}
 	return c, e
 }
+
 // validSendPolicy reports whether s is one of the three policy words stored in
 // the migration CHECK constraints. The empty string is handled by callers: it
 // means "no change / inherit" in both update paths.
@@ -97,7 +110,9 @@ func validSendPolicy(s string) bool {
 	}
 	return false
 }
+
 const sendPolicyValues = "free, template_required, disabled"
+
 func (s *PgStore) ConfigureCompany(ctx context.Context, a authz.Actor, c company.Settings) (*company.Settings, error) {
 	c.Name = strings.TrimSpace(c.Name)
 	if len(c.Name) < 1 || len(c.Name) > 120 {
@@ -302,6 +317,7 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	}
 	return tx.Commit(ctx)
 }
+
 // mailboxAccessTx fetches the mailbox, its revision and the actor's grant,
 // then defers every semantic decision to authz.EvaluateMailboxAccess — the
 // single interpretation of admin roles, expiry, zone allowlists and the
@@ -500,6 +516,7 @@ func (s *PgStore) CreateWorkMailbox(ctx context.Context, a authz.Actor, in compa
 	})
 	return out, e
 }
+
 // Mailbox administration follows the member hierarchy: a mailbox owner can
 // always manage their own mailbox, and an administrator can only reassign or
 // regrant mailboxes owned by members they can manage. Shared mailboxes have
@@ -553,46 +570,30 @@ func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, ow
 		return companyAudit(ctx, tx, a, "mailbox.handover", "mailbox", id, map[string]any{"old_owner": old, "new_owner": owner, "reason": reason})
 	})
 }
+
+// OffboardEmployee is the internal compatibility command. Public HTTP uses a
+// persisted preview plan. Both commands share the same transaction and default
+// disposition: seal private drafts, cancel only known-not-in-flight sends.
 func (s *PgStore) OffboardEmployee(ctx context.Context, a authz.Actor, target, successor uuid.UUID, reason string) error {
-	if !meaningfulReason(reason) || target == successor || target == a.ID {
-		return app.BadRequest("distinct employee/successor and handover reason required")
+	if !meaningfulReason(reason) {
+		return app.BadRequest("documented handover reason required")
 	}
 	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
-		u, e := scanUser(tx.QueryRow(ctx, userSelect+` WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, target))
+		if _, e := s.offboardingTarget(ctx, tx, a, target, successor); e != nil {
+			return e
+		}
+		return s.applyOffboarding(ctx, tx, a, target, successor, company.OffboardingOptions{Drafts: "seal"}, reason, uuid.Nil)
+	})
+}
+
+func (s *PgStore) ListWorkGrants(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.MailboxGrantSnapshot, error) {
+	out := &company.MailboxGrantSnapshot{Grants: []models.MailboxGrant{}}
+	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+		access, e := s.mailboxAccessTx(ctx, tx, a, id)
 		if e != nil {
 			return e
 		}
-		if u == nil {
-			return app.NotFound("employee not found")
-		}
-		if !authz.CanManageTenantMember(a, a.TenantID, u.Role) {
-			return app.Forbidden("cannot manage this employee")
-		}
-		next := *u
-		next.IsActive = false
-		if e = guardMemberRemoval(ctx, tx, u, &next); e != nil {
-			return e
-		}
-		if e = activeCompanyUser(ctx, tx, a.TenantID, successor); e != nil {
-			return e
-		}
-		for _, stmt := range []string{`UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$2 AND revoked_at IS NULL AND EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, `DELETE FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2`, `DELETE FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2`, `DELETE FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2`, `UPDATE users SET is_active=false,session_version=session_version+1,updated_at=now() WHERE tenant_id=$1 AND id=$2`} {
-			if _, e = tx.Exec(ctx, stmt, a.TenantID, target); e != nil {
-				return e
-			}
-		}
-		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$3,lifecycle_revision=lifecycle_revision+1 WHERE tenant_id=$1 AND owner_user_id=$2`, a.TenantID, target, successor); e != nil {
-			return e
-		}
-		return companyAudit(ctx, tx, a, "employee.offboard", "user", target, map[string]any{"successor": successor, "reason": reason, "queued_sends": "reauthorized before next delivery"})
-	})
-}
-func (s *PgStore) ListWorkGrants(ctx context.Context, a authz.Actor, id uuid.UUID) ([]models.MailboxGrant, error) {
-	out := []models.MailboxGrant{}
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
-		if _, e := s.mailboxAccessTx(ctx, tx, a, id); e != nil {
-			return e
-		}
+		out.Revision = access.Revision
 		rows, e := tx.Query(ctx, `SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by,created_at,updated_at FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 ORDER BY user_id`, a.TenantID, id)
 		if e != nil {
 			return e
@@ -603,13 +604,13 @@ func (s *PgStore) ListWorkGrants(ctx context.Context, a authz.Actor, id uuid.UUI
 			if e = rows.Scan(&g.TenantID, &g.MailboxID, &g.UserID, &g.CanRead, &g.CanOrganize, &g.CanSend, &g.TemplateOnly, &g.GrantedBy, &g.CreatedAt, &g.UpdatedAt); e != nil {
 				return e
 			}
-			out = append(out, g)
+			out.Grants = append(out.Grants, g)
 		}
 		return rows.Err()
 	})
 	return out, e
 }
-func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.MailboxGrant) error {
+func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.MailboxGrant, revision int64) error {
 	if g.CanOrganize && !g.CanRead || g.TemplateOnly && !g.CanSend {
 		return app.BadRequest("organize requires read; template-only requires send")
 	}
@@ -627,6 +628,9 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 		if e = activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
 			return e
 		}
+		if e = claimMailboxRevision(ctx, tx, a.TenantID, g.MailboxID, revision); e != nil {
+			return e
+		}
 		if !g.CanRead && !g.CanSend && !g.CanOrganize {
 			_, e = tx.Exec(ctx, `DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, g.MailboxID, g.UserID)
 		} else {
@@ -635,10 +639,7 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 		if e != nil {
 			return e
 		}
-		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET lifecycle_revision=lifecycle_revision+1 WHERE id=$1`, g.MailboxID); e != nil {
-			return e
-		}
-		return companyAudit(ctx, tx, a, "mailbox.grant", "mailbox", g.MailboxID, map[string]any{"user_id": g.UserID, "read": g.CanRead, "organize": g.CanOrganize, "send": g.CanSend, "template_only": g.TemplateOnly})
+		return companyAudit(ctx, tx, a, "mailbox.grant", "mailbox", g.MailboxID, map[string]any{"revision": revision + 1, "user_id": g.UserID, "read": g.CanRead, "organize": g.CanOrganize, "send": g.CanSend, "template_only": g.TemplateOnly})
 	})
 }
 
@@ -651,7 +652,7 @@ func (s *PgStore) SetWorkGrant(ctx context.Context, a authz.Actor, g models.Mail
 // administrator can only retune mailboxes owned by members it can manage.
 // The lifecycle revision is bumped like every other administrative mailbox
 // change so concurrent handover/convert CAS calls observe the policy change.
-func (s *PgStore) SetWorkMailboxSendPolicy(ctx context.Context, a authz.Actor, id uuid.UUID, policy *string) error {
+func (s *PgStore) SetWorkMailboxSendPolicy(ctx context.Context, a authz.Actor, id uuid.UUID, policy *string, revision int64) error {
 	override := ""
 	if policy != nil {
 		override = strings.TrimSpace(*policy)
@@ -667,10 +668,13 @@ func (s *PgStore) SetWorkMailboxSendPolicy(ctx context.Context, a authz.Actor, i
 		if e = guardMailboxOwner(ctx, tx, a, v.Mailbox.OwnerUserID); e != nil {
 			return e
 		}
-		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET send_policy=NULLIF($2,''),lifecycle_revision=lifecycle_revision+1 WHERE id=$1`, id, override); e != nil {
+		if e = claimMailboxRevision(ctx, tx, a.TenantID, id, revision); e != nil {
 			return e
 		}
-		return companyAudit(ctx, tx, a, "mailbox.send_policy", "mailbox", id, map[string]any{"send_policy": override})
+		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3`, id, override, a.TenantID); e != nil {
+			return e
+		}
+		return companyAudit(ctx, tx, a, "mailbox.send_policy", "mailbox", id, map[string]any{"send_policy": override, "revision": revision + 1})
 	})
 }
 

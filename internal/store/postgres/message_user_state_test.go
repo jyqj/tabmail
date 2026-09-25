@@ -17,8 +17,8 @@ func TestSharedMailboxPersonalStateSeparation(t *testing.T) {
 	ctx := context.Background()
 	readerActor := authz.Actor{Type: authz.PrincipalUser, ID: f.employee.ID, TenantID: f.tenant.ID, Role: models.RoleUser}
 	organizerActor := authz.Actor{Type: authz.PrincipalUser, ID: f.other.ID, TenantID: f.tenant.ID, Role: models.RoleUser}
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}))
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.other.ID, CanRead: true, CanOrganize: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.other.ID, CanRead: true, CanOrganize: true}))
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.shared.ID, ZoneID: f.zone.ID, Sender: "sender@client.test", Recipients: []string{f.shared.FullAddress}, Subject: "shared item", RawObjectKey: "shared-item"}
 	must(t, f.st.CreateMessage(ctx, m))
 
@@ -140,7 +140,7 @@ func TestPersonalMailboxSeenBehaviorUnchanged(t *testing.T) {
 func TestPersonalStateWritesStillEmitMailboxEvents(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}))
 	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.shared.ID, ZoneID: f.zone.ID, Sender: "sender@client.test", Recipients: []string{f.shared.FullAddress}, Subject: "event item", RawObjectKey: "event-item"}
 	must(t, f.st.CreateMessage(ctx, m))
 	readerActor := authz.Actor{Type: authz.PrincipalUser, ID: f.employee.ID, TenantID: f.tenant.ID, Role: models.RoleUser}

@@ -108,8 +108,17 @@ def main() -> int:
             continue
         company_go.update(parse_go_struct_fields(company_file.read_text()))
     company_ts = parse_ts_interface_fields((ROOT / "web/lib/company.ts").read_text())
+    for feature in ["mail", "company"]:
+        company_ts.update(parse_ts_interface_fields((ROOT / f"web/features/{feature}/api.ts").read_text()))
     company_pairs = {
+        "ArchivedMail": "ArchivedMail", "ContentIndexStatus": "ContentIndexStatus",
+        "OffboardingOptions": "OffboardingOptions", "OffboardingImpact": "OffboardingImpact",
+        "OffboardingPlan": "OffboardingPlan", "Overview": "CompanyOverview",
+        "AdminAudit": "CompanyAdminAudit", "AccessExplanation": "AccessExplanation",
         "Settings": "CompanySettings", "Invitation": "Invitation",
+        "MailboxGrantSnapshot": "MailboxGrantSnapshot",
+        "DraftTemplateVersion": "DraftTemplateVersion",
+        "SubmissionCapabilities": "SubmissionCapabilities",
         "MailboxAccess": "WorkMailbox", "Variable": "TemplateVariable",
         "TemplateDraft": "TemplateDraft", "Template": "MailTemplate",
         "TemplateVersion": "TemplateVersion", "DraftPayload": "DraftPayload",

@@ -213,12 +213,12 @@ func TestDraftSubmitRevokedSendRightKeepsDraft(t *testing.T) {
 	ctx := context.Background()
 
 	// Draft on the shared mailbox via an explicit grant, then revoke the grant.
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: true}))
 	draft := company.Draft{MailboxID: f.shared.ID, Payload: company.DraftPayload{
 		To: []string{"client@recipient.test"}, Subject: "Grant", TextBody: "body",
 	}}
 	saved := r3Data[company.Draft](t, r3HTTP(t, h, token, "POST", "/api/v1/company/drafts", draft, 200))
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: false}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: f.shared.ID, UserID: f.employee.ID, CanSend: false}))
 
 	w := draftSubmitHTTP(t, h, token, saved.ID.String(), "revoked-key", saved.Revision)
 	if w.Code != 403 {

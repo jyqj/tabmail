@@ -40,7 +40,7 @@ func TestCompanyReadPathDoesNotSerializeOnTenantLock(t *testing.T) {
 	// company lock and only the context deadline unblocks it.
 	writeCtx, wcancel := context.WithTimeout(ctx, 2*time.Second)
 	defer wcancel()
-	e = f.st.SetWorkGrant(writeCtx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true})
+	e = grantCurrent(f.st, writeCtx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true})
 	if e == nil {
 		t.Fatal("management mutation did not wait for the company lock")
 	}

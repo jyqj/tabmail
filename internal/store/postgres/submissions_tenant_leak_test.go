@@ -33,6 +33,17 @@ func TestSubmissionScopeRejectsCrossTenantRows(t *testing.T) {
 	_, e = f.pool.Exec(ctx, `INSERT INTO outbound_jobs(tenant_id,zone_id,sender_user_id,sender_mailbox_id,mail_from,rcpt_to,to_addrs,subject,state,recipient_ledger)
 		VALUES($1,$2,$3,$4,'boss@other.test','{y@client.test}','{y@client.test}','cross-tenant mailbox chain','pending',true)`,
 		tenantB.ID, zoneB.ID, f.employee.ID, f.personal.ID)
+	if e == nil {
+		t.Fatal("new cross-company employee enqueue bypassed database fence")
+	}
+	// Still exercise READ isolation for pre-migration malformed provenance.
+	// Only privileged fixture SQL backfills a legacy row; production enqueue
+	// remains fenced and no trigger or authorization check is disabled.
+	var historicalID uuid.UUID
+	must(t, f.pool.QueryRow(ctx, `INSERT INTO outbound_jobs(tenant_id,zone_id,sender_mailbox_id,mail_from,rcpt_to,to_addrs,subject,state,recipient_ledger)
+        VALUES($1,$2,$3,'boss@other.test','{y@client.test}','{y@client.test}','cross-tenant mailbox chain','pending',true) RETURNING id`,
+		tenantB.ID, zoneB.ID, f.personal.ID).Scan(&historicalID))
+	_, e = f.pool.Exec(ctx, `UPDATE outbound_jobs SET sender_user_id=$2 WHERE id=$1`, historicalID, f.employee.ID)
 	must(t, e)
 
 	items, total, e := f.st.ListSubmissions(ctx, employeeActor, models.Page{})

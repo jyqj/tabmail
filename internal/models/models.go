@@ -659,6 +659,7 @@ const (
 	OutboundRetry      OutboundState = "retry"
 	OutboundFailed     OutboundState = "failed"
 	OutboundDead       OutboundState = "dead"
+	OutboundCancelled  OutboundState = "cancelled"
 )
 
 type OutboundJob struct {

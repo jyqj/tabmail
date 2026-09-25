@@ -98,6 +98,7 @@ type SubmissionAttachment struct {
 // User-facing submission statuses (the Status field above).
 const (
 	SubmissionSubmitted         = "submitted"
+	SubmissionCancelled         = "cancelled"
 	SubmissionWaiting           = "waiting"
 	SubmissionSending           = "sending"
 	SubmissionPartiallyAccepted = "partially_accepted"
@@ -118,6 +119,8 @@ func DeriveSubmissionStatus(state models.OutboundState, recipientStates []string
 		}
 	}
 	switch state {
+	case models.OutboundCancelled:
+		return SubmissionCancelled
 	case models.OutboundProcessing:
 		return SubmissionSending
 	case models.OutboundPending:

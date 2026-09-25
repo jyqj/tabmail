@@ -36,6 +36,10 @@ export interface WorkGrant {
   can_send: boolean;
   template_only: boolean;
 }
+export interface MailboxGrantSnapshot {
+  revision: number;
+  grants: WorkGrant[];
+}
 export interface Invitation {
   id: string;
   email: string;
@@ -137,6 +141,7 @@ export interface DraftSubmission {
   created_at: string;
 }
 export interface InboundAttachment {
+  id: string;
   index: number;
   filename: string;
   size: number;
@@ -157,6 +162,7 @@ export interface RecoveryTarget {
   error?: string;
 }
 export type SubmissionStatus =
+  | "cancelled"
   | "submitted"
   | "waiting"
   | "sending"
@@ -293,10 +299,11 @@ export function deleteCompanyDomain(id: string) {
 export function setMailboxSendPolicy(
   id: string,
   policy: MailSendPolicy | "",
+  revision: number,
 ) {
   return company<{ updated: boolean }>(
     `/mailboxes/${encodeURIComponent(id)}/send-policy`,
-    { method: "PUT", body: { send_policy: policy || null } },
+    { method: "PUT", body: { send_policy: policy || null, revision } },
   );
 }
 // Emergency one-way revoke of a single published template version. Distinct

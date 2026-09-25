@@ -284,7 +284,9 @@ func (s *PgStore) CheckWorkers(ctx context.Context, outbound bool) error {
 // Attachments remain while referenced by either a draft or an outbound job.
 func (s *PgStore) SweepCompanyMetadata(ctx context.Context) error {
 	for _, q := range []string{
-		`DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'`,
+		`DELETE FROM sent_mail_items WHERE asset_id IN (SELECT asset_id FROM sent_mail_items WHERE purge_after<now() OR expires_at<now() ORDER BY COALESCE(purge_after,expires_at) LIMIT 1000)`,
+        `DELETE FROM sent_mail_assets a WHERE a.id IN (SELECT x.id FROM sent_mail_assets x WHERE NOT EXISTS(SELECT 1 FROM sent_mail_items i WHERE i.asset_id=x.id) AND NOT EXISTS(SELECT 1 FROM outbound_jobs j WHERE j.id=x.id) LIMIT 1000)`,
+        `DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'`,
 		`DELETE FROM mailbox_event_log WHERE sequence IN (SELECT sequence FROM mailbox_event_log WHERE created_at<now()-interval '7 days' ORDER BY sequence LIMIT 5000)`,
 	} {
 		if _, err := s.pool.Exec(ctx, q); err != nil {
@@ -350,6 +352,7 @@ func (s *PgStore) sweepCompanyAttachments(ctx context.Context, tenant uuid.UUID)
 	_, err = tx.Exec(ctx, `WITH gone AS (
        DELETE FROM mail_attachments a WHERE a.tenant_id=$1 AND a.id=ANY($2::uuid[]) AND a.expires_at<now()
        AND NOT EXISTS(SELECT 1 FROM outbound_attachments o WHERE o.attachment_id=a.id)
+       AND NOT EXISTS(SELECT 1 FROM sent_asset_attachments o WHERE o.attachment_id=a.id)
        AND NOT EXISTS(SELECT 1 FROM mail_drafts d WHERE d.tenant_id=a.tenant_id AND d.payload->'attachment_ids' ? a.id::text)
        RETURNING object_key)
        INSERT INTO orphan_objects(object_key,first_failed_at,last_failed_at,attempts)

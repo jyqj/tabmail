@@ -1,5 +1,8 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { DraftWriter, draftKey, draftErrorCode } from "@/features/mail/draft-writer";
+import { sessionScope, assertSession } from "@/lib/session";
+import { RichMessage } from "@/features/mail/components/rich-message";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import {
@@ -8,6 +11,7 @@ import {
   downloadCompanyFile,
   submitDraft,
   workPath,
+  errorText,
   type MailAttachment,
   type MailDraft,
   type DraftPayload,
@@ -67,6 +71,20 @@ export function Compose({
   const [draft, setDraft] = useState(initial);
   const [payload, setPayload] = useState<DraftPayload>(initial.payload);
   const [mailboxId, setMailboxId] = useState(initial.mailbox_id);
+  const mounted = useRef(true);
+  const [writer, setWriter] = useState(() => makeWriter(initial));
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<unknown>(null);
+  function makeWriter(value: MailDraft) {
+    const scope = sessionScope();
+    return new DraftWriter(value, {
+      write: (d, create) => company<MailDraft>(create ? "/drafts" : `/drafts/${d.id}`, {
+        method: create ? "POST" : "PUT", body: d,
+      }),
+      read: id => company<MailDraft>(`/drafts/${id}`),
+    }, () => assertSession(scope));
+  }
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
   const [names, setNames] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<RenderedTemplate | null>(null);
   // A pending submission pins the exact key/draft revision so retries are
@@ -80,7 +98,7 @@ export function Compose({
   const templates = useAPI(["usable-templates", mailboxId], () =>
     company<TemplateVersion[]>(`${workPath(mailboxId)}/templates`),
   );
-  const version = templates.data?.find(
+  const listedVersion = templates.data?.find(
     (v) => v.id === payload.template_version_id,
   );
   // Eligibility comes from the server only. A saved draft carries the
@@ -89,23 +107,32 @@ export function Compose({
   // resolves it authoritatively. "missing" is deliberately not an error: the
   // payload stays editable and savable, and the server rejects a bad send.
   const eligibility =
+    draft.mailbox_id === mailboxId &&
     draft.template_version?.id === payload.template_version_id
       ? draft.template_version
       : undefined;
+  // Saved v1 remains editable after v2 is published. The server-provided
+  // snapshot is authoritative for this pin; the picker is only for NEW pins.
+  const version = eligibility
+    ? eligibility.status === "usable" && eligibility.snapshot
+      ? { id: eligibility.id, name: eligibility.name, version: eligibility.version,
+          snapshot: eligibility.snapshot }
+      : undefined
+    : listedVersion;
   const status = eligibility?.status;
   const ineligible =
     Boolean(status) &&
     status !== "usable" &&
     status !== "missing";
   const invalidVersion = Boolean(payload.template_version_id) &&
-    (ineligible || (!eligibility && !version));
+    (ineligible || (status === "usable" && !version) || (!eligibility && !version));
   const notice = status
     ? INELIGIBLE_NOTICES[status as Exclude<DraftTemplateVersionStatus, "usable" | "missing">]
     : undefined;
   const locked = busy || Boolean(pending);
   const dirty =
-    JSON.stringify(payload) !== JSON.stringify(draft.payload) ||
-    draft.mailbox_id !== mailboxId;
+    (draft.revision === 0 && Boolean(payload.to.length || payload.subject || payload.text_body || payload.html_body || payload.attachment_ids?.length || payload.template_version_id)) ||
+    draftKey({payload, mailbox_id: mailboxId}) !== draftKey(draft);
   useEffect(() => {
     if (!dirty && !pending) return;
     const warn = (e: BeforeUnloadEvent) => {
@@ -119,23 +146,31 @@ export function Compose({
     setPreview(null);
   }
   async function save(next: DraftPayload = payload, silent = false) {
-    const value = await company<MailDraft>(
-      draft.id ? `/drafts/${draft.id}` : "/drafts",
-      {
-        method: draft.id ? "PUT" : "POST",
-        body: {
-          id: draft.id,
-          mailbox_id: mailboxId,
-          payload: next,
-          revision: draft.revision,
-        },
-      },
-    );
-    setDraft(value);
-    setPayload(value.payload);
-    if (!silent) toast.success(t("草稿已保存", "Draft saved"));
-    return value;
+    setSaving(true);
+    try {
+      const value = await writer.save({mailbox_id: mailboxId, payload: next});
+      if (mounted.current) { setDraft(value); setSaveError(null); }
+      // Never replace the editor payload with an older in-flight save response.
+      if (!silent) toast.success(t("草稿已保存", "Draft saved"));
+      return value;
+    } catch (error) {
+      if (mounted.current) setSaveError(error);
+      throw error;
+    } finally { if (mounted.current) setSaving(false); }
   }
+  useEffect(() => {
+    if (!dirty || busy || pending || saveError || !from?.can_send) return;
+    const input = {mailbox_id: mailboxId, payload};
+    let active = true;
+    const timer = window.setTimeout(() => {
+      setSaving(true);
+      void writer.save(input).then(value => {
+        if (mounted.current) {setDraft(value);setSaveError(null);}
+      }).catch(error => {if (active && mounted.current) setSaveError(error);})
+        .finally(() => {if (mounted.current) setSaving(false);});
+    }, 2000);
+    return () => {active = false; window.clearTimeout(timer);};
+  }, [dirty, busy, pending, saveError, from?.can_send, mailboxId, payload, writer]);
   async function send() {
     if (!from?.can_send) return;
     if (!pending && (invalidVersion || (from.template_only && !version)))
@@ -163,6 +198,7 @@ export function Compose({
       toast.success(
         `${t("已加入发送队列，不代表已送达：", "Queued, not yet delivered: ")}${job.id}`,
       );
+      writer.close();
       onSent();
     } catch (e) {
       const err = e as { error?: { code?: string }; data?: { revision?: number } };
@@ -219,12 +255,32 @@ export function Compose({
               )
             )
               return;
+            writer.close();
             onClose();
           }}
         >
           {t("关闭", "Close")}
         </ActionButton>
       </div>
+      <p role="status" aria-live="polite" className="text-sm text-muted-foreground">
+        {saveError ? t("保存失败，当前编辑仍保留在此窗口。", "Save failed; your edits remain in this window.") : saving ? t("正在保存…", "Saving…") : dirty ? t("有未保存的编辑，将自动保存。", "Unsaved changes; autosave is pending.") : draft.id ? t(`已保存 · v${draft.revision}`, `Saved · v${draft.revision}`) : t("尚未保存", "Not saved yet")}
+      </p>
+      {saveError != null && <div role="alert" className="space-y-3 rounded border border-destructive p-3 text-sm">
+        <p>{errorText(saveError)}</p>
+        <p>{t("冲突不会覆盖服务器版本。可明确载入服务器草稿，或把当前编辑保存为一份新草稿。", "A conflict never overwrites the server version. Explicitly reload it, or save your current edits as a new draft.")}</p>
+        <div className="flex flex-wrap gap-2">
+          <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => {
+            if (!window.confirm(t("载入服务器版本会替换此窗口的编辑，确认？", "Replace this window's edits with the server version?"))) return;
+            const current = await writer.reload();setDraft(current);setPayload(current.payload);setMailboxId(current.mailbox_id);setSaveError(null);setPreview(null);
+          })}>{t("载入服务器版本", "Reload server draft")}</ActionButton>
+          <ActionButton disabled={busy || saving || Boolean(pending) || !from?.can_send} onClick={() => {
+            if (!window.confirm(t("创建独立草稿，不会自动发送。提交结果不确定时请先核对发送状态。", "Create a separate draft, without sending. Check delivery status first if submission was uncertain."))) return;
+            writer.close();const copy: MailDraft = {mailbox_id: mailboxId, payload, revision: 0};
+            setDraft(copy);setWriter(makeWriter(copy));setSaveError(null);
+          }}>{t("保留编辑为新草稿", "Keep edits as a new draft")}</ActionButton>
+          {!['CONFLICT','FORBIDDEN','NOT_FOUND','UNAUTHORIZED'].includes(draftErrorCode(saveError) ?? '') && <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => { await save(); })}>{t("重试保存", "Retry save")}</ActionButton>}
+        </div>
+      </div>}
       {pending && (
         <p
           role="status"
@@ -309,9 +365,9 @@ export function Compose({
                 ? t("必须选择模板", "Template required")
                 : t("自由撰写", "Free composition")}
             </option>
-            {payload.template_version_id && !version && (
+            {payload.template_version_id && !listedVersion && (
               <option value={payload.template_version_id}>
-                {status === "missing" && eligibility?.name
+                {(status === "missing" || status === "usable") && eligibility?.name
                   ? `${eligibility.name}${eligibility.version ? ` · v${eligibility.version}` : ""}`
                   : t(
                       "此版本不可用，请重新选择",
@@ -444,19 +500,13 @@ export function Compose({
           </Field>
           <Field label={t("正文", "Message")}>
             {(id) => (
-              <textarea
-                id={id}
-                className={inputClass}
-                disabled={locked || from?.template_only}
-                rows={10}
-                value={payload.text_body}
-                onChange={(e) => change({ text_body: e.target.value })}
-              />
+              <RichMessage id={id} text={payload.text_body} html={payload.html_body}
+                disabled={locked || from?.template_only} onChange={change} />
             )}
           </Field>
           <details>
             <summary className="cursor-pointer text-sm">
-              {t("可选 HTML 正文", "Optional HTML body")}
+              {t("高级：HTML 源码", "Advanced: HTML source")}
             </summary>
             <textarea
               aria-label="HTML"

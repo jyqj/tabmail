@@ -63,7 +63,7 @@ func TestSubmissionProjectionScopeAndDTO(t *testing.T) {
 	}
 
 	// A read grant on the shared mailbox pulls its submissions into scope.
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}))
 	items, total, e = f.st.ListSubmissions(ctx, employeeActor, models.Page{})
 	must(t, e)
 	if total != 2 || len(items) != 2 {
@@ -75,7 +75,7 @@ func TestSubmissionProjectionScopeAndDTO(t *testing.T) {
 			t.Fatalf("pending submission status wrong: %s", v.Status)
 		}
 	}
-	must(t, f.st.SetWorkGrant(ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID}))
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID}))
 	items, _, e = f.st.ListSubmissions(ctx, employeeActor, models.Page{})
 	must(t, e)
 	if len(items) != 1 {

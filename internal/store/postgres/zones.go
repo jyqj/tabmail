@@ -178,11 +178,6 @@ func (s *PgStore) UpdateZone(ctx context.Context, z *models.DomainZone) error {
 	return err
 }
 
-func (s *PgStore) DeleteZone(ctx context.Context, id uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM domain_zones WHERE id=$1`, id)
-	return err
-}
-
 func (s *PgStore) CountZones(ctx context.Context, tenantID uuid.UUID) (int, error) {
 	var n int
 	err := s.pool.QueryRow(ctx,
