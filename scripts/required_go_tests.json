@@ -43,7 +43,10 @@
         ["tabmail/internal/store/postgres", "TestR5ReferenceGCRollsBackIfOrphanRegistrationFails"],
         ["tabmail/internal/store/postgres", "TestR5ReferenceGCKeepsSentPinAfterQueueCleanup"],
         ["tabmail/internal/store/postgres", "TestR5ReferenceObjectCallbackCancellationReleasesKey"],
-        ["tabmail/internal/store/postgres", "TestR5ReferenceObjectGCWaitsForCommittedMessage"]
+        ["tabmail/internal/store/postgres", "TestR5ReferenceObjectGCWaitsForCommittedMessage"],
+        ["tabmail/internal/store/postgres", "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"],
+        ["tabmail/internal/store/postgres", "TestR5IngressAuditFailureRollsBackCheckpointAndQuota"],
+        ["tabmail/internal/store/postgres", "TestR5IngressAcceptanceRollsBackEarlierTarget"]
       ],
       "allowed_skips": [
         {
