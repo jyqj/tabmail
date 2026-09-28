@@ -16,7 +16,12 @@
         ["tabmail/internal/store/postgres", "TestArchitectureOffboardingExpiryAndAuditRollback"],
         ["tabmail/internal/architecture", "TestR5RouteInventory"],
         ["tabmail/internal/architecture", "TestR5RouteInventoryRejectsDrift"],
-        ["tabmail/internal/store/postgres", "TestR5SchemaInventoryAndRestart"]
+        ["tabmail/internal/store/postgres", "TestR5SchemaInventoryAndRestart"],
+        ["tabmail/internal/store/postgres", "TestR5LockMapExistingDraftCASAvoidsTenantLock"],
+        ["tabmail/internal/store/postgres", "TestR5LockMapNewDraftHasImplicitMailboxFKWait"],
+        ["tabmail/internal/store/postgres", "TestR5LockMapDraftUserFenceOrdersSuspension"],
+        ["tabmail/internal/store/postgres", "TestR5LockMapRefreshFamilyThenUserThenToken"],
+        ["tabmail/internal/store/postgres", "TestR5LockMapEnqueueAttachmentBeforeUserBaseline"]
       ],
       "allowed_skips": [
         {

@@ -13,7 +13,7 @@ function scan(root = ROOT) {
       if (["node_modules", ".next", ".git", "out"].includes(item.name)) continue;
       const p = path.join(dir, item.name);
       if (item.isDirectory()) walk(p);
-      else if (/\.tsx?$/.test(p) && !/\.(test|spec)\.tsx?$/.test(p) && !/\.d\.ts$/.test(p)) files.push(p);
+      else if (/\.tsx?$/.test(p) && !/\.(test|spec|r5audit)\.tsx?$/.test(p) && !/\.d\.ts$/.test(p)) files.push(p);
     }
   }
   walk(path.join(root, "web"));

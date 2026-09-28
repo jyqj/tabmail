@@ -60,4 +60,20 @@ python3 -B scripts/test_go_evidence_integration.py \
 
 Use a new output directory for each invocation. This driver removes only the test DSN/browser flags from child environments, records actual Go JSONL, requires Go exit 0, and then requires a structured gate rejection specifically due to missing/skipped execution. Compilation errors, malformed logs, timeouts and accidentally matching the zero-test filter cannot satisfy the negative test.
 
+## R5 pending security-behavior reproductions
+
+The default `scripts/run_r5_audit_baseline.py` command runs the seven opt-in DB/HTTP failures; `--layer components` runs the original permission editors against a Go-owned temporary API and PostgreSQL fixture:
+
+```sh
+# Supply a disposable DB DSN and a NEW output directory. No production service.
+python3 -B scripts/run_r5_audit_baseline.py --layer components \
+  --output-dir /tmp/new-component-evidence --source-sha "$SOURCE_SHA"
+```
+
+Install frontend dependencies from the lockfile in the isolated source copy first. The component suite uses `web/vitest.r5audit.config.ts` and `*.r5audit.tsx`, not the normal green unit-test glob. It renders the original React/Sidebar/Base UI/SWR components and real API/session clients in jsdom; only the host auth context and absent layout observers are supplied. All fetches must target the Go fixture's loopback origin. Fixtures have short-lived synthetic credentials in temporary 0600 files and must never be published.
+
+The Go parent requires the exact component security assertion, inspects captured HTTP writes and independently reads final PostgreSQL state. Both Go tests are expected to FAIL while the defects exist; driver success means `baseline_reproduced` with `product_fixed=false`, not a release check. Setup errors, missing Node/UI providers, skipped cases or compile failures are not accepted as reproductions. On P1 repair, adapt the new protocol and promote the secure assertions into the ordinary required regression suite; do not invert expectations to preserve vulnerable behavior.
+
+Normal CI also runs five `TestR5LockMap*` PostgreSQL observations and the required-test manifest includes them. The enqueue attachment-before-user test explicitly records a current cross-path inversion: its pass is NOT a global deadlock-free certification. Read `docs/company-mail/R5-TRANSACTIONS.md` for pending complete-path concurrency experiments.
+
 

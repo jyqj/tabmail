@@ -59,7 +59,7 @@ def source_files(root: Path) -> list[Path]:
                 path = Path(current) / name
                 if path.suffix not in {".ts", ".tsx"} or name.endswith(".d.ts"):
                     continue
-                if any(mark in name for mark in (".test.", ".spec.")):
+                if any(mark in name for mark in (".test.", ".spec.", ".r5audit.")):
                     continue
                 if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
                     raise CheckError(f"source outside validation root: {path}")

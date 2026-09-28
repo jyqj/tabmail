@@ -58,6 +58,7 @@ class CatalogTests(unittest.TestCase):
     def test_scan_includes_features_and_hooks_not_generated_or_tests(self):
         (self.root / "web/hooks/use-view.ts").write_text('t("ok")')
         (self.root / "web/features/view.test.tsx").write_text('t("test.only")')
+        (self.root / "web/features/permission.r5audit.tsx").write_text('t("audit.only")')
         (self.root / "web/features/.next").mkdir()
         (self.root / "web/features/.next/built.ts").write_text('t("build.only")')
         found = [p.relative_to(self.root).as_posix() for p in check.source_files(self.root)]

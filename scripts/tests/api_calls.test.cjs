@@ -13,6 +13,7 @@ test("request verb and parameter identity",()=>{const r=run('request(`/api/v1/ou
 test("conditional path and verb stay paired",()=>{const r=run('company(create ? "/drafts" : `/drafts/${id}`, {method:create ? "POST":"PUT"})');assert.equal(r.length,2);assert.deepEqual(r.map(x=>[x.path,x.methods]),[["/api/v1/company/drafts",["POST"]],["/api/v1/company/drafts/{dynamic}",["PUT"]]])});
 test("workPath and local base expand",()=>{const r=run('const base = `${workPath(mailbox)}/messages/${id}`; company(`${base}/source`)');assert.equal(r[0].path,"/api/v1/company/mailboxes/{id}/messages/{dynamic}/source")});
 test("docs strings and tests are not network calls",()=>{assert.throws(()=>run('const x="request(\"/api/v1/fake\")"'),/syntax|empty/);assert.throws(()=>run('request("/api/v1/test")',"view.test.tsx"),/empty/)});
+test("opt-in audit fixture calls do not become production routes",()=>{assert.throws(()=>run('request("/fixture-only")',"permission.r5audit.tsx"),/empty/);assert.equal(run('request("/api/v1/domains")',"features/permission.tsx").length,1)});
 test("source is never evaluated",()=>{const r=run('throw new Error("must not execute"); request("/api/v1/domains")');assert.equal(r.length,1)});
 test("transport forwarding remains explicit",()=>{const r=run('fetch(`${getBaseUrl()}${path}`, options)',"lib/api/base.ts");assert.equal(r[0].forwarding,true)});
 test("stream uses GET independent of callback options",()=>{const r=run('streamEvents("/api/v1/company/mailboxes/x/events", options)');assert.deepEqual(r[0].methods,["GET"])});
