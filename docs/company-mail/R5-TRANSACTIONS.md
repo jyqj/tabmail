@@ -1,6 +1,8 @@
 # R5 事务、锁顺序与授权检查地图
 
-2026-09-28，B01-C。源码读取基线 `97675a743f83287b85297af4e94c339ce5a83bba`，本轮不改生产 Go/SQL。此文是 P0-070 的实际地图与竞争验证清单，**不是全路径无死锁证明；070 暂不关闭**。进度唯一入口是 [R5-TODO](R5-TODO.md)，数据库实体和完整 FK 依据 [R5-MIGRATIONS](R5-MIGRATIONS.md) 及其实际 catalog。
+> **B01-D 验证限制：** 三项生产修复及原五项锁测试曾在中间测试版本完成8/8定向通过；生产二文件此后未改。随后加强错误类型断言、增加并行提交用例，最终全量及重复验证因Docker运行超时未完成。下文的“回归覆盖”表示用例已落地，不等于最终九项或全量已通过。详见本批验证记录，070仍不关闭。
+
+2026-09-28，B01-D更新。原地图基线为 `97675a743f83287b85297af4e94c339ce5a83bba`；B01-D从 `46711be9d8421db35a687e28e181a67a2e720b2f` 实际复现两类40P01和草稿撤权窗口，并提前修复对应生产路径。本图下列TX08/TX11及锁测试反映本次新顺序；历史证据保留在各批报告。**不是全路径无死锁证明；070仍未关闭**。进度唯一入口是 [R5-TODO](R5-TODO.md)，数据库实体和完整 FK 依据 [R5-MIGRATIONS](R5-MIGRATIONS.md) 及其实际 catalog。
 
 ## 1. 阅读方式与证据边界
 
@@ -17,7 +19,7 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | `companyTx` / `companyTxScope(lock=true)` | Begin → T U锁 → 当前操作者 U S锁 → 当前角色/有效权限 → callback → Commit | 只有采用这条路径的管理命令受同一 T 锁约束；旧 permission handler 不自动纳入 |
 | `companyReadTx` / `companyTxScope(lock=false)` | Begin → 当前操作者 U S锁 → 有效权限 → callback → Commit；没有显式 T 锁 | 名字带 Read 不等于只读，它也用于草稿、附件和单行 CAS；FK 与业务 UPDATE 仍会等待 |
 | `currentMemberActor` | 精确 tenant/user 和 PrincipalUser；数据库重读角色及 is_active，用户行 S锁 | 不自动锁 permission profile、override、mailbox 或 grant |
-| `mailboxAccessTx` | 普通 SELECT 读取邮箱、lifecycle_revision、grant；统一调用 `EvaluateMailboxAccess` | 读取 revision 不等于已经消费 revision；普通访问与管理员后续撤权之间仍需分析 |
+| `mailboxAccessTx` | 本函数仍用普通SELECT读取邮箱、revision和grant；统一调用EvaluateMailboxAccess。SaveMailDraft在调用前新增同邮箱FOR SHARE并保持到提交 | 草稿与公司grant/policy/handover写入共享邮箱行边界；不扩大为profile/override/全部读取都已受锁保护 |
 | `claimMailboxRevision` | 条件 UPDATE 消费观察到的 mailbox revision，零行按冲突拒绝 | 不替代外围层级/tenant/所有权校验 |
 | `companyAudit` | 同一 tx 插入 audit_log 和 outbox_events | 不是所有旧操作都调用它；外部 SMTP 和对象存储也不会自动参加此事务 |
 
@@ -35,11 +37,11 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | TX04 成员冻结 / 管理更新 | `UpdateUserGuarded`，member_guard.go | T U锁 → actor U S锁 → target U U锁 → 层级/最后管理员/profile 核对 → user/session W → refresh W、owned Key 删除 → member audit | target U 锁使已开始的持有 U S锁写入先完成；新请求必须按冻结状态拒绝 |
 | TX05 成员删除 | `DeleteUserGuarded` | T U锁 → actor U S锁 → target U U锁 → owner/角色保护 → key/user 删除及 FK → member audit | 所有历史资产 FK 不能被“用户已停用”自动豁免；有损删除不在本轮执行 |
 | TX06 离职预览 | `PreviewOffboarding` → `offboardingTarget` | T U锁 → actor U S锁 → target U U锁 → successor U S锁 → 相关 J 按 id U锁 → 资产指纹 → plan INSERT/audit | inactive target 当前拒绝是 A04；不是目标政策 |
-| TX07 离职执行 | `ExecuteOffboarding` → `applyOffboarding` | T U锁 → actor U S锁 → plan U锁 → target U U锁 → successor U S锁 → J 按 id U锁；transfer_owned 分支先 A W 后 D W；再封存/取消已知未在途 J、refresh、keys、grants、user、mailbox、audit/outbox | 与 TX11 的 A→U 顺序相反，列为 RISK01；本轮不声称整条业务链已经无死锁 |
-| TX08 草稿保存 | `SaveMailDraft`，company_mail.go:373–430 | actor U S锁 → mailbox/grant 普通读取 → A 按输入顺序 S锁 → 创建 receipt/草稿或 D revision CAS → 模板资格读取 → Commit | receipt FK 指向 `(tenant_id,user_id)`；新 draft FK 指向用户和邮箱，**不是直接指向 tenant**；现有 D 更新与首次 INSERT 等待行为不同 |
+| TX07 离职执行 | `ExecuteOffboarding` → `applyOffboarding` | T U锁 → actor U S锁 → plan U锁 → target U U锁 → successor U S锁 → J 按 id U锁；transfer_owned 分支先 A W 后 D W；再封存/取消已知未在途 J、refresh、keys、grants、user、mailbox、audit/outbox | B01-D已将TX11改为父租户KEY SHARE→用户SHARE→附件；两种完整命令竞争由普通回归覆盖，其他交叉关系仍不宣称全部安全 |
+| TX08 草稿保存 | `SaveMailDraft`，company_mail.go:373–430 | actor U S锁 → M S锁 → mailbox/grant读取 → A 按输入顺序 S锁 → 创建receipt/草稿或D revision CAS → 模板资格读取 → Commit | receipt FK 指向 `(tenant_id,user_id)`；新 draft FK 指向用户和邮箱，**不是直接指向 tenant**；现有 D 更新与首次 INSERT 等待行为不同 |
 | TX09 草稿删除 | `DeleteMailDraft` | actor U S锁 → 精确 tenant/user/id/revision、未封存 D DELETE → Commit | 保留 creation tombstone；不能误称 DELETE 释放了全部历史来源 |
 | TX10 上传 reserve / finish | `ReserveMailAttachment`、`FinishMailAttachment` | reserve：actor U S锁 → mailbox 普通读取 → `attachment-budget:tenant:user` advisory → sum/INSERT；finish：actor U S锁 → uploading/归属/权利读取 → A UPDATE | reserve 并发预算有同一上传者 advisory；finish 目前 UPDATE 未再次限定 uploading、未检查零行，需 P5-050 验证；不要借本图提前宣称修复 |
-| TX11 原子发送入队 | `enqueueOutboundJobTx`，outbound.go:49–145 | submission advisory（有幂等键时）→ A S锁 → 排序后的 quota advisory → quota 查询 → J INSERT → **BEFORE trigger U S锁** → sent archive trigger → recipients/link pins → audit → D消费DELETE → Commit | 首个 sender U S锁在附件之后；触发器只验证员工 active，不是完整 profile/grant/template 的再次判断；网络发送不在本入队事务 |
+| TX11 原子发送入队 | `enqueueOutboundJobTx`，outbound.go | **T KEY SHARE** → submission advisory/已存在回执重放 → **sender U S锁及active检查** → A S锁 → 排序quota advisory及查询 → J INSERT/保留原BEFORE用户触发器 → archive/recipients/pins/audit/D消费 → Commit | 父租户FK锁提前，用户先于附件；KEY SHARE允许不同提交共享父键，不改为租户排他串行。回执重放不新增发送；此处active仍不是完整profile/grant/template授权 |
 | TX12 逐收件人 begin / complete | outbound_recipients.go | begin：J U锁/token/lease → recipient uncertain W → J in-flight W → Commit；complete：J 条件 W → recipient结果 W → Commit | SMTP 在这两个事务之间；不确定 fence 不是最终接受证明，不把 token 检查等同全部授权 |
 | TX13 手工核对投递 | `ReconcileOutbound`，company_ops.go | 当前 operator U S锁 → J U锁 NOWAIT → state/updated_at/目标检查 → recipient/J W → 必要 audit | NOWAIT 拒绝当前竞争，不代表别的阻塞都已消除；不得覆盖 accepted 事实 |
 | TX14 持久入站投递 | `DeliverIngress`，ingress.go:117–209 | I U锁/token/lease → target U锁 → T U锁 → UTC daily usage W → M count W → message INSERT / index/event triggers → target delivered W → audit/outbox → clock_timestamp lease重验 → Commit | job→target→tenant 是真实次序，不能改写成“所有业务都tenant-first”；原件取得与解析在外层，提交前租约重验保留 |
@@ -61,28 +63,28 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | 测试 | 控制方式 | 证明及限制 |
 |---|---|---|
 | `TestR5LockMapExistingDraftCASAvoidsTenantLock` | 保持 T U锁，执行不改变父键的现有 D 更新 | 更新提交且revision增加；只证明这条热路径不等显式T锁 |
-| `TestR5LockMapNewDraftHasImplicitMailboxFKWait` | 保持 M U锁，观察新 D INSERT 等待该 blocker，然后释放 | 新建草稿存在父邮箱 FK 等待；没有把不存在的tenant FK写进结论 |
+| `TestR5LockMapDraftAuthorizationWaitsForMailboxFence` | 保持M U锁，观察保存先等待M SHARE再读资格 | 替代旧FK等待观测：保存现在显式保护邮箱授权读取；原FK事实仍见B01-C证据 |
 | `TestR5LockMapDraftUserFenceOrdersSuspension` | 阻塞 D更新，确认writer已持 U S锁；启动真实 UpdateUserGuarded冻结，观察它等待writer | 先开始的草稿保存结束后冻结完成；冻结之后新old-actor写入拒绝 |
 | `TestR5LockMapRefreshFamilyThenUserThenToken` | 保持U U锁使轮换等待；尝试family advisory与旧token NOWAIT | family已被轮换持有，旧token此时仍可锁；释放用户后轮换成功 |
-| `TestR5LockMapEnqueueAttachmentBeforeUserBaseline` | 保持sender U U锁，启动真实入队；观察INSERT阻塞并探测A锁冲突 | 确认入队已持A S锁才等待U；**这是现状观察，不是对反向顺序的安全背书**，修复顺序时必须连测试和地图一起更新 |
+| `TestR5LockMapEnqueueParentAndUserBeforeAttachments` | 保持sender U U锁，启动入队；观察U SHARE等待，探测A与T | A仍可NOWAIT锁定，T已受KEY SHARE保护；释放U后入队成功。不再把旧反向次序固定成必需行为 |
 
-第五项没有伪造“安全结果”，也不作为A01–A07修复验收。它刻意揭示两个业务链的顺序差异；目前没有在一次试验里完成真实入队与真实离职两者的完整等待环。因此RISK01不写成已复现生产死锁。
+B01-C第五项原先只证明单侧次序。B01-D已补两条完整生产命令竞争：原源码在附件/用户环和用户/租户FK环都实际返回40P01；前置修复后返回有序成功或明确的禁用主体/旧计划冲突。原始失败与修复后普通回归分别保留，不据此关闭A01–A07。
 
 ## 5. 仍需处理的顺序与窗口
 
 | 风险 | 实际支持 | 尚缺验证 / 下一操作 | 对应现有任务 |
 |---|---|---|---|
-| RISK01 入队与 transfer_owned 相反顺序 | 入队A S→U S已实测；离职target U U→A W在applyOffboarding实际SQL中 | 在独立PG用屏障运行两条完整生产命令，记录等待图/结果/回滚与原件引用，再提出不会扩大锁范围的统一次序 | P0-070续项；P3-060、P4-050、P5-040、P6-080 |
-| RISK02 热路径已读取grant后等待资源 | actor用户行受S锁，但mailbox/grant普通SELECT；管理员撤grant不一定需要同一个目标用户冲突锁 | SaveDraft/Finish/内容操作与SetWorkGrant的真实屏障；明确生效线性化点，不能只要求“每处再读一次” | P0-070续项；P1-120、P3-060、P5-040 |
-| RISK03 其他隐式FK与广域管理锁 | 草稿邮箱FK已实证；audit/outbox/任务等引用关系见实际catalog | 对入站job→tenant、管理tenant→资源、原件key与索引/清理交叉补完整路径；区分没有相同资源的表面逆序 | P0-070续项；P6-100、P10-040 |
+| RISK01 入队与transfer_owned相反顺序 | B01-D完整ExecuteOffboarding/CreateOutboundJob实测40P01，失败事务资产无半提交 | 已改父租户KEY SHARE→用户SHARE→附件；R01回归覆盖离职先持锁时入队拒绝，无重复资产 | P0-070本批前置修复；后续P3/P4/P5/P6仍需各自全链验收 |
+| RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft现先锁M SHARE再读取grant；R02证明撤权等待先开始的保存，完成后新保存拒绝。Finish、正文读取、profile/override变更仍待对应验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
+| RISK03 隐式FK与广域管理锁 | B01-D实证：入队已持user SHARE，后置tenant FK与离职tenant→user形成40P01 | 入队父键保护提前已修复此环；R03覆盖入队先完成导致旧计划冲突。入站、原件、索引/清理其他交叉仍待核对 | P0-070部分修复；P6-100、P10-040 |
 | RISK04 对象回调持锁时间 | TX21实际在tx内调用ensureObject/del | 慢/失败对象适配器、取消、提交未知的故障测试与上界，不直接移出保护区 | P3-090、P6-100、P10-050 |
 | RISK05 事务时钟与等待后期限 | TX19期限用now；ingress末尾用clock_timestamp再次检验lease | 精确截止跨越/阻塞后重验，不把无等待的单次通过扩大为边界成立 | P3-040、P6-030、P7-030 |
 | RISK06 多资源批量W及共享锁输入顺序 | 多附件按输入顺序S锁；offboard批量UPDATE未为所有对象固定排序 | S/S本身兼容，不因此认定两次保存死锁；与W/交接/GC一起测试真实冲突 | P3-060、P4-130、P5-130 |
 
 ## 6. P0-070收口前的剩余范围
 
-本轮已完成关键路径清点、五项可运行锁观测及风险对应任务，但原清单要求的跨路径一致性评审未完成，因此**070复选框保持未勾选，不能据此启动依赖它的P0-090**。P0-080的前置020/030/060在本轮030关闭后已满足，可独立推进；P1仍待整个G0。
+本轮已完成上述两类死锁及SaveDraft撤权窗口的前后对照和生产修复，并加入并行提交共享父键回归；仍未完成Finish/内容操作、GC引用、入站/对象回调等交叉评审，因此**070复选框保持未勾选，090仍受依赖限制**。080的目标文本见R5-PROTOCOL.md，尚缺可执行核验；G0与P1未开启。
 
-下一轮优先跑RISK01和RISK02的完整命令竞争。若确定需要生产锁序修复，应先在同一TODO明确提前处理的范围、原迁移/调用路径影响与回归门禁，不通过重新定义“所有测试都绿”绕过。不得删除已知风险或将070改成仅“写文档”以虚增完成度。
+下一轮先补最终源码的完整回归，不重复编写已修复的三个场景，先验证其余明确窗口并收口070；必要的范围变更仍须记录。原070“每个多资源写入有一致锁顺序”的要求不因本批局部回归通过而删减。
 
-复现与提交证据记录在本批 B01-C 验证说明和 `evidence/R5-B01-C.json`。原始失败、后续修正和最终通过分别保存，test name 不充当执行结果。
+B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普通回归和提交映射见R5-B01-D-VALIDATION.md及其机器证据。原始失败、后续修正和最终通过分别保存，test name 不充当执行结果。

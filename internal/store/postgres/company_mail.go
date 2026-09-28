@@ -379,6 +379,17 @@ func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Dr
 		return nil, app.BadRequest("draft too large")
 	}
 	e = s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		// Company grant/policy/handover commands advance this mailbox row.
+		// Hold SHARE before reading those rights until the draft write commits:
+		// a revocation either precedes the read or completes after this save.
+		// Draft saves do not acquire the global tenant administration lock.
+		var mailboxID uuid.UUID
+		if e := tx.QueryRow(ctx, `SELECT id FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, v.MailboxID).Scan(&mailboxID); e != nil {
+			if errors.Is(e, pgx.ErrNoRows) {
+				return app.NotFound("mailbox not found")
+			}
+			return e
+		}
 		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
 		if e != nil {
 			return e

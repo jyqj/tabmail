@@ -74,6 +74,6 @@ Install frontend dependencies from the lockfile in the isolated source copy firs
 
 The Go parent requires the exact component security assertion, inspects captured HTTP writes and independently reads final PostgreSQL state. Both Go tests are expected to FAIL while the defects exist; driver success means `baseline_reproduced` with `product_fixed=false`, not a release check. Setup errors, missing Node/UI providers, skipped cases or compile failures are not accepted as reproductions. On P1 repair, adapt the new protocol and promote the secure assertions into the ordinary required regression suite; do not invert expectations to preserve vulnerable behavior.
 
-Normal CI also runs five `TestR5LockMap*` PostgreSQL observations and the required-test manifest includes them. The enqueue attachment-before-user test explicitly records a current cross-path inversion: its pass is NOT a global deadlock-free certification. Read `docs/company-mail/R5-TRANSACTIONS.md` for pending complete-path concurrency experiments.
+Normal CI also runs the five `TestR5LockMap*` observations and four `TestR5Concurrency*` regressions from B01-D. The old attachment-before-user characterization has been replaced by a parent/user-before-attachment fence check after real deadlock reproduction. Complete enqueue/offboarding commands, draft grant revocation and independent concurrent submissions are tested with controlled PostgreSQL barriers. These passes are not a global deadlock-free certification; remaining scope is recorded in `docs/company-mail/R5-TRANSACTIONS.md`.
 
 

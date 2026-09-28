@@ -61,6 +61,18 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 	}
 	defer func() { _ = tx.Rollback(ctx) }()
 
+	// Acquire the parent key before sender/attachment/quota locks. The INSERT
+	// needs this same FK key protection eventually; taking it late creates a
+	// user -> tenant cycle against tenant-first offboarding. KEY SHARE allows
+	// concurrent submissions; it does not serialize them on tenant FOR UPDATE.
+	var tenantID uuid.UUID
+	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, job.TenantID).Scan(&tenantID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return false, app.NotFound("company not found")
+		}
+		return false, err
+	}
+
 	if job.IdempotencyKey != "" {
 		if len(job.IdempotencyKey) > 128 || job.SubmitActor == "" || job.RequestHash == "" {
 			return false, app.BadRequest("invalid submission identity")
@@ -80,6 +92,20 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 			return true, tx.Commit(ctx)
 		}
 	}
+	// Match employee disposition's user-before-attachment order. Keep the
+	// database trigger as a final defense for direct INSERTs. A replay above
+	// performs no new submission and retains its established receipt semantics.
+	if job.SenderUserID != nil && job.SenderMailboxID != nil {
+		var active bool
+		err = tx.QueryRow(ctx, `SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, job.TenantID, *job.SenderUserID).Scan(&active)
+		if errors.Is(err, pgx.ErrNoRows) || err == nil && !active {
+			return false, app.Forbidden("employee sender is inactive")
+		}
+		if err != nil {
+			return false, err
+		}
+	}
+
 	if len(job.AttachmentIDs) > 0 {
 		if job.SenderUserID == nil || job.SenderMailboxID == nil {
 			return false, app.Forbidden("attachments require an employee mailbox")
@@ -612,4 +638,3 @@ func mergeAuditDetail(details json.RawMessage, key string, value string) (json.R
 	}
 	return b, nil
 }
-

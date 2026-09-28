@@ -18,10 +18,14 @@
         ["tabmail/internal/architecture", "TestR5RouteInventoryRejectsDrift"],
         ["tabmail/internal/store/postgres", "TestR5SchemaInventoryAndRestart"],
         ["tabmail/internal/store/postgres", "TestR5LockMapExistingDraftCASAvoidsTenantLock"],
-        ["tabmail/internal/store/postgres", "TestR5LockMapNewDraftHasImplicitMailboxFKWait"],
+        ["tabmail/internal/store/postgres", "TestR5LockMapDraftAuthorizationWaitsForMailboxFence"],
         ["tabmail/internal/store/postgres", "TestR5LockMapDraftUserFenceOrdersSuspension"],
         ["tabmail/internal/store/postgres", "TestR5LockMapRefreshFamilyThenUserThenToken"],
-        ["tabmail/internal/store/postgres", "TestR5LockMapEnqueueAttachmentBeforeUserBaseline"]
+        ["tabmail/internal/store/postgres", "TestR5LockMapEnqueueParentAndUserBeforeAttachments"],
+        ["tabmail/internal/store/postgres", "TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle"],
+        ["tabmail/internal/store/postgres", "TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle"],
+        ["tabmail/internal/store/postgres", "TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke"],
+        ["tabmail/internal/store/postgres", "TestR5ConcurrencyIndependentSubmissionsShareParentLock"]
       ],
       "allowed_skips": [
         {

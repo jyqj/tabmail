@@ -78,7 +78,7 @@ func TestR5LockMapExistingDraftCASAvoidsTenantLock(t *testing.T) {
 	t.Log("observed: existing draft update completed while tenant FOR UPDATE remained held; not a claim about INSERT/FK paths")
 }
 
-func TestR5LockMapNewDraftHasImplicitMailboxFKWait(t *testing.T) {
+func TestR5LockMapDraftAuthorizationWaitsForMailboxFence(t *testing.T) {
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
@@ -92,10 +92,10 @@ func TestR5LockMapNewDraftHasImplicitMailboxFKWait(t *testing.T) {
 		_, err := f.st.SaveMailDraft(ctx, f.u, company.Draft{MailboxID: f.personal.ID, Payload: company.DraftPayload{Subject: "new draft FK wait"}})
 		done <- err
 	}()
-	r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "INSERT INTO mail_drafts")
+	r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "SELECT id FROM mailboxes")
 	must(t, hold.Rollback(ctx))
 	r5AwaitOperation(t, ctx, done)
-	t.Log("observed: new mail_drafts INSERT waits on mailbox parent FK despite plain mailboxAccessTx reads; receipt FK itself targets users, not tenants")
+	t.Log("observed: draft save waits on the mailbox fence before reading grant authority; original FK-only wait is superseded by the explicit authorization fence")
 }
 
 func TestR5LockMapDraftUserFenceOrdersSuspension(t *testing.T) {
@@ -171,10 +171,9 @@ func TestR5LockMapRefreshFamilyThenUserThenToken(t *testing.T) {
 	t.Log("observed: family advisory held, user SHARE waiting, old token still NOWAIT-lockable; then rotation completed")
 }
 
-// This is explicitly a current-order characterization, NOT proof that all
-// enqueue/offboarding interleavings are deadlock-free. A future lock-order
-// repair updates this test and the P0 map together; do not preserve a reversal.
-func TestR5LockMapEnqueueAttachmentBeforeUserBaseline(t *testing.T) {
+// Verify the repaired order without asserting unrelated paths are deadlock-free.
+// Parent KEY SHARE and sender SHARE must precede any attachment pinning.
+func TestR5LockMapEnqueueParentAndUserBeforeAttachments(t *testing.T) {
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
 	defer cancel()
@@ -189,14 +188,16 @@ func TestR5LockMapEnqueueAttachmentBeforeUserBaseline(t *testing.T) {
 	job := &models.OutboundJob{TenantID: f.tenant.ID, ZoneID: f.zone.ID, UserID: &f.employee.ID, SenderUserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, MailFrom: f.personal.FullAddress, RcptTo: []string{"recipient@lock.test"}, To: []string{"recipient@lock.test"}, AttachmentIDs: []uuid.UUID{a.ID}, Subject: "lock order only", State: models.OutboundPending}
 	done := make(chan error, 1)
 	go func() { done <- f.st.CreateOutboundJob(ctx, job) }()
-	r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "INSERT INTO outbound_jobs")
+	r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "SELECT is_active FROM users")
 	probe, e := f.pool.Begin(ctx)
 	must(t, e)
 	defer probe.Rollback(context.Background())
 	_, e = probe.Exec(ctx, `SELECT id FROM mail_attachments WHERE id=$1 FOR UPDATE NOWAIT`, a.ID)
-	r5RequireLockConflict(t, e)
+	must(t, e) // No attachment lock while enqueue is waiting on its sender.
+	_, e = probe.Exec(ctx, `SELECT id FROM tenants WHERE id=$1 FOR UPDATE NOWAIT`, f.tenant.ID)
+	r5RequireLockConflict(t, e) // Parent key is already protected.
 	must(t, probe.Rollback(ctx))
 	must(t, hold.Rollback(ctx))
 	r5AwaitOperation(t, ctx, done)
-	t.Log("observed: enqueue holds attachment SHARE before trigger waits on user SHARE; offboarding takes target user before attachment writes, a cross-path inversion requiring follow-up")
+	t.Log("observed: parent key held before sender wait; attachment remains NOWAIT-lockable; enqueue succeeds after sender release")
 }
