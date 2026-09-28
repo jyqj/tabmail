@@ -29,6 +29,7 @@ python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
 node --test scripts/tests/i18n_sources.test.cjs
 python3 -B scripts/check_i18n_keys.py
 python3 -B scripts/check_contract_drift.py
+python3 -B scripts/check_http_contract.py --output-dir /evidence/new-http-run --source-sha "$SOURCE_SHA"
 # Includes company DTO/schema and operation bindings. The Go route-inventory
 # test below independently proves the checked-in inventory matches live source.
 go build ./...
@@ -40,6 +41,27 @@ go vet ./...
 The i18n gate now needs Node and the installed TypeScript compiler from `web/package-lock.json`; run `npm ci` first. It reads real JSON catalogs and production ASTs, including `features` and `hooks`. Both missing dependencies and empty scans fail. Inline `useText(zh,en)` and explicitly typed two-string callbacks are not catalog lookups; mixed files are checked per binding. Computed keys are reported as `dynamic_calls`, not certified as statically validated. No application module is evaluated to extract keys.
 
 `TestR3BrowserJourney` remains a separate, opt-in shipping-image check: the standalone frontend, real Go API, PostgreSQL and loopback SMTP must all be available. Running component tests does not satisfy this browser check. Lack of a browser, client tools or DSN must be recorded, not called a green full regression. Image tags are build inputs, not immutable evidence: record the resolved image IDs/digests and actual tool versions for every run.
+
+## Runtime HTTP contracts
+
+The static gate binds every company route, including binary downloads and SSE.
+`check_http_contract.py` additionally starts `TestCompanyHTTPContract` against a
+new PostgreSQL fixture and the production Go router over loopback HTTP. It does
+not start an SMTP delivery worker. Object bytes and Redis are disposable test
+adapters; DNS verify/status are explicitly excluded rather than claimed as run.
+The result lists actual success coverage and missing cases. The Go journey is
+also mandatory in the full backend suite; the separate runtime gate checks its
+captured bytes against the same OpenAPI using pinned JSON Schema 2020-12 tooling.
+
+Always supply a **new** output directory. The gate refuses missing or skipped Go
+execution, duplicate captures, stale schema hashes, malformed JSON, missing
+success variants, invalid UUID/date-time formats, and unsafe download headers.
+All `$ref` resolution is local; validation never fetches remote schemas. Captures
+contain synthetic mail and already-consumed/revoked fixture invitation tokens,
+never request authorization headers, production settings or employee data.
+Keep raw `responses.json` local with mode 0600: CI explicitly excludes it from
+uploaded artifacts. Publish the validation report, capture hash and execution
+logs, not the raw response payloads.
 
 ## Required execution evidence
 

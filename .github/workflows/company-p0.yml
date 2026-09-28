@@ -63,6 +63,10 @@ jobs:
         run: python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
       - name: DTO field contract
         run: python3 scripts/check_contract_drift.py
+      - name: Actual HTTP response contracts with PostgreSQL
+        run: |
+          python3 -B scripts/check_http_contract.py \
+            --output-dir http-contract-evidence --source-sha "$(git rev-parse HEAD)"
       - name: Vet
         run: go vet ./...
       - name: Upload test evidence
@@ -75,6 +79,8 @@ jobs:
             go-test-source-sha.txt
             go-test-evidence.json
             go-test-negative-evidence
+            http-contract-evidence
+            !http-contract-evidence/responses.json
           retention-days: 14
   frontend:
     runs-on: ubuntu-latest

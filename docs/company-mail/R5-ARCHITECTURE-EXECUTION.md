@@ -1,6 +1,6 @@
 # R5 架构深化：九组优化实施与验收
 
-> 后续状态：下文记录首轮九组架构包。AR07 原先“OpenAPI 未编译”的缺口已在后续批次接入可执行静态门禁，覆盖33投影、67操作和36响应绑定；完整HTTP运行时契约仍非全覆盖。最新证据见 [R5-OPENAPI-VALIDATION](R5-OPENAPI-VALIDATION.md)，不把下文旧测试成绩当作后续批次成绩。
+> 后续状态：下文记录首轮九组架构包。AR07 已接通33投影的三方静态检查，67个公司操作全部具有响应绑定，并完成65个操作、80份真实HTTP响应验证；两个实时DNS操作及完整错误矩阵仍未覆盖。最新证据见 [R5-HTTP-CONTRACT-VALIDATION](R5-HTTP-CONTRACT-VALIDATION.md)，前一静态子包见 [R5-OPENAPI-VALIDATION](R5-OPENAPI-VALIDATION.md)。不回写下文历史测试成绩，不据此关闭完整P8-080或其他阶段门禁。
 
 ## 来源与范围
 

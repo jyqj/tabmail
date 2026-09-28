@@ -1,5 +1,7 @@
 # AR07 后续：OpenAPI 可执行契约与路由接线
 
+> 本文为 c0e4795 之前的静态子包历史验收。后续 67 操作完整响应绑定、65 操作真实 HTTP 验证和集合输出修复见 [HTTP 契约验收](R5-HTTP-CONTRACT-VALIDATION.md)，不回写本文历史测试成绩。
+
 ## 本批范围与源码身份
 
 接续用户要求的下一轮优化。开始时 HEAD 为 `eb8382ab04daf28137460b4f695cbb36fc29dbd1`，分支为 `refactor/openapi-contract-gate-20260929`。已有四份未提交 OpenAPI 工作：CI、checker、checker 测试和 `requirements-contract.txt`。先保存其 patch 与哈希，再继续实现；没有 reset、stash、覆盖其他分支或重复执行上一轮九组重构。

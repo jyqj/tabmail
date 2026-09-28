@@ -31,6 +31,10 @@ type meta struct {
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
+	if result, isEnvelope := v.(envelope); isEnvelope {
+		result.Data = companyWireValue(result.Data)
+		v = result
+	}
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)

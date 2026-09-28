@@ -1,4 +1,4 @@
-.PHONY: build run dev test vet lint web-lint web-test web-build contract-deps contract-check i18n-check validation-tools-test i18n-source-test check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
+.PHONY: build run dev test vet lint web-lint web-test web-build contract-deps contract-check http-contract-check i18n-check validation-tools-test i18n-source-test check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
 
 BINARY  := tabmail
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -39,6 +39,12 @@ contract-deps:
 contract-check:
 	python3 scripts/check_contract_drift.py
 
+# Requires the disposable PostgreSQL DSN and explicitly installed test dependencies.
+http-contract-check:
+	@root=$$(mktemp -d "$${TMPDIR:-/tmp}/tabmail-http-contract.XXXXXX"); \
+	  echo "HTTP contract evidence: $$root/run"; \
+	  python3 -B scripts/check_http_contract.py --output-dir "$$root/run" --source-sha "$$(git rev-parse HEAD)"
+
 i18n-check:
 	python3 scripts/check_i18n_keys.py
 
@@ -51,7 +57,7 @@ i18n-source-test:
 
 lint: vet web-lint
 
-check: test vet contract-check validation-tools-test i18n-source-test i18n-check web-lint web-test web-build
+check: test vet contract-check http-contract-check validation-tools-test i18n-source-test i18n-check web-lint web-test web-build
 
 
 backup-db:

@@ -1,8 +1,13 @@
 {
   "version": 1,
   "suites": {
+    "http-contract": {
+      "required_tests": [["tabmail/internal/api", "TestCompanyHTTPContract"]],
+      "allowed_skips": []
+    },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/api", "TestCompanyHTTPContract"],
         ["tabmail/internal/store/postgres", "TestMigrateAppliesCleanly"],
         ["tabmail/internal/store/postgres", "TestP0PostgresOwnerGrantAndPermanentRetention"],
         ["tabmail/internal/store/postgres", "TestP0PostgresOutboundDomainFencingAndUncertainty"],

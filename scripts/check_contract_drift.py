@@ -1027,7 +1027,7 @@ COMPANY_RESPONSES = {
     'c.Setup.Settings': ('200', 'nullable', 'CompanySettings'),
     'c.Setup.Configure': ('200', 'one', 'CompanySettings'),
     'c.Setup.Invitations': ('200', 'list', 'CompanyInvitation'),
-    'c.Setup.Invite': ('200', 'field:invitation', 'CompanyInvitation'),
+    'c.Setup.Invite': ('200', 'one', 'CompanyInvitationIssued'),
     'c.Mailboxes.Mailboxes': ('200', 'list', 'CompanyMailboxAccess'),
     'c.Mailboxes.Grants': ('200', 'one', 'MailboxGrantSnapshot'),
     'c.Templates.Templates': ('200', 'list', 'CompanyTemplate'),
@@ -1045,7 +1045,7 @@ COMPANY_RESPONSES = {
     'c.Mail.ComposeReply': ('200', 'one', 'CompanyDraftPayload'),
     'c.Mail.UploadAttachment': ('200', 'one', 'CompanyAttachment'),
     'c.Recovery.Recovery': ('200', 'page', 'CompanyRecoveryReceipt'),
-    'c.Recovery.InspectReceipt': ('200', 'field:receipt', 'CompanyRecoveryReceipt'),
+    'c.Recovery.InspectReceipt': ('200', 'one', 'CompanyRecoveryInspection'),
     'c.Recovery.Recipients': ('200', 'list', 'CompanyRecipient'),
     'c.Archive.List': ('200', 'page', 'ArchivedMail'),
     'c.Index.Status': ('200', 'one', 'ContentIndexStatus'),
@@ -1058,7 +1058,52 @@ COMPANY_RESPONSES = {
     'c.Domains.List': ('200', 'list', 'CompanyDomain'),
     'c.Domains.Verify': ('200', 'one', 'DomainVerification'),
     'c.Domains.Verification': ('200', 'one', 'DomainVerification'),
+    'c.Domains.Delete': ('200', 'one', 'CompanyDeleted'),
+    'c.Drafts.Delete': ('200', 'one', 'CompanyDeleted'),
+    'c.Setup.RevokeInvite': ('200', 'one', 'CompanyRevoked'),
+    'c.Setup.Activate': ('200', 'one', 'CompanyActivated'),
+    'c.Mailboxes.CreateMailbox': ('200', 'one', 'Mailbox'),
+    'c.Mailboxes.Handover': ('200', 'one', 'CompanyTransferred'),
+    'c.Mailboxes.ConvertShared': ('200', 'one', 'CompanyConverted'),
+    'c.Mailboxes.Grant': ('200', 'one', 'CompanyRevisionUpdated'),
+    'c.Mailboxes.MailboxSendPolicy': ('200', 'one', 'CompanyRevisionUpdated'),
+    'c.Mail.Messages': ('200', 'page', 'Message'),
+    'c.Mail.Message': ('200', 'one', 'MessageDetail'),
+    'c.Mail.InboundAttachments': ('200', 'list', 'CompanyParsedAttachment'),
+    'c.Mail.MessageAction': ('200', 'one', 'CompanyUpdated'),
+    'c.Mail.SubmitDraft': ('201', 'one', 'OutboundJob'),
+    'c.Index.Conversation': ('200', 'page', 'Message'),
+    'c.Console.RetryIndex': ('200', 'one', 'CompanyIndexRetryResult'),
+    'c.Archive.Change': ('200', 'one', 'CompanyRevisionUpdated'),
+    'c.Recovery.InspectOutbound': ('200', 'one', 'CompanyOutboundInspection'),
+    'c.Recovery.Reconcile': ('200', 'one', 'CompanyReconciled'),
+    'c.Recovery.RetryReceipt': ('200', 'one', 'CompanyQueued'),
+    'c.Templates.Preview': ('200', 'one', 'CompanyRenderedTemplate'),
+    'c.Templates.Retire': ('200', 'one', 'CompanyUpdated'),
+    'c.Templates.RevokeTemplateVersion': ('200', 'one', 'CompanyRevoked'),
+    'c.Templates.TemplateGrants': ('200', 'list', 'CompanyTemplateGrant'),
+    'c.Templates.TemplateGrant': ('200', 'one', 'CompanyUpdated'),
 }
+# A fresh submit and an idempotent replay have distinct success codes.
+COMPANY_ALTERNATE_RESPONSES = {
+    'c.Mail.SubmitDraft': ('200', 'one', 'OutboundJob'),
+}
+# Non-JSON bodies must not pass through a JSON envelope checker.
+COMPANY_STREAMS = {
+    'c.Mail.Attachment': 'application/octet-stream',
+    'c.Mail.InboundAttachment': 'application/octet-stream',
+    'c.Mail.InboundAttachmentByID': 'application/octet-stream',
+    'c.Mail.Source': 'message/rfc822',
+    'c.Mail.SubmissionAttachmentDownload': 'application/octet-stream',
+    'c.Events.Events': 'text/event-stream',
+}
+COMPANY_ACK_FIELDS = {
+    'CompanyDeleted': 'deleted', 'CompanyRevoked': 'revoked',
+    'CompanyActivated': 'activated', 'CompanyTransferred': 'transferred',
+    'CompanyConverted': 'converted', 'CompanyUpdated': 'updated',
+    'CompanyReconciled': 'reconciled', 'CompanyQueued': 'queued',
+}
+
 COMPANY_REQUESTS = {
     'c.Setup.Configure': 'CompanySettingsInput',
     'c.Templates.SaveTemplate': 'CompanyTemplateInput',
@@ -1119,6 +1164,34 @@ def check_input_schemas(document: dict) -> list[str]:
     return errors
 
 
+def _check_stream_response(label: str, op: dict, media_type: str) -> list[str]:
+    response = _object_at(op, 'responses', '200')
+    content = _object_at(response, 'content')
+    errors = []
+    expected_schema = {'type': 'string'} if media_type == 'text/event-stream' else {'type': 'string', 'format': 'binary'}
+    if set(content) != {media_type} or _object_at(content, media_type, 'schema') != expected_schema:
+        errors.append(f'[openapi-stream] {label}: requires {media_type}, not a JSON envelope')
+    if media_type != 'text/event-stream':
+        for name in ('Cache-Control', 'Content-Disposition', 'X-Content-Type-Options'):
+            header = _object_at(response, 'headers', name)
+            if header.get('required') is not True or _object_at(header, 'schema').get('type') != 'string':
+                errors.append(f'[openapi-download-header] {label}: missing required {name}')
+    return errors
+
+
+def check_receipt_schemas(document: dict) -> list[str]:
+    errors = []
+    for name, field in COMPANY_ACK_FIELDS.items():
+        schema = _object_at(document, 'components', 'schemas', name)
+        props = _object_at(schema, 'properties')
+        if (schema.get('type') != 'object' or set(props) != {field}
+                or _required_names(schema) != {field}
+                or props.get(field) != {'type': 'boolean', 'const': True}
+                or schema.get('additionalProperties') is not False):
+            errors.append(f'[openapi-receipt] {name}: closed {field}=true receipt required')
+    return errors
+
+
 def check_company_operations(document: dict, inventory: object) -> list[str]:
     if not isinstance(inventory, list) or not inventory:
         return ['[openapi-routes] missing nonempty Go-AST route inventory']
@@ -1144,14 +1217,26 @@ def check_company_operations(document: dict, inventory: object) -> list[str]:
     for key in sorted(documented - keys):
         errors.append(f'[openapi-route-extra] {key}')
     handlers = {r['handler'] for r in rows}
-    for handler in sorted(set(COMPANY_RESPONSES) - handlers):
+    for handler in sorted((set(COMPANY_RESPONSES) | set(COMPANY_STREAMS)) - handlers):
         errors.append(f'[openapi-route-binding] reviewed handler disappeared: {handler}')
     for row in rows:
         op = _object_at(paths, row['path'], row['method'].lower())
         label = f"{row['method']} {row['path']}"
         binding = COMPANY_RESPONSES.get(row['handler'])
-        if binding is not None and op:
-            status, shape, component = binding
+        stream = COMPANY_STREAMS.get(row['handler'])
+        if binding is None and stream is None:
+            errors.append(f'[openapi-route-binding] {label}: no reviewed response for {row["handler"]}')
+        bindings = [binding] if binding is not None else []
+        alternate = COMPANY_ALTERNATE_RESPONSES.get(row['handler'])
+        if alternate is not None:
+            bindings.append(alternate)
+        expected_success = {b[0] for b in bindings} if bindings else {'200'}
+        actual_success = {code for code in _object_at(op, 'responses') if str(code).startswith('2')}
+        if op and actual_success != expected_success:
+            errors.append(f'[openapi-status] {label}: expected success codes {sorted(expected_success)}')
+        if stream is not None and op:
+            errors.extend(_check_stream_response(label, op, stream))
+        for status, shape, component in bindings if op else []:
             envelope = _object_at(op, 'responses', status, 'content', 'application/json', 'schema')
             if envelope.get('type') != 'object' or 'data' not in _required_names(envelope):
                 errors.append(f'[openapi-envelope] {label}: required data object envelope missing')
@@ -1233,6 +1318,7 @@ def main() -> int:
             inventory = json.loads((ROOT / 'docs/company-mail/evidence/R5-API-MATRIX.json').read_text())
             problems += check_company_operations(openapi_document, inventory)
             problems += check_input_schemas(openapi_document)
+            problems += check_receipt_schemas(openapi_document)
         except (OSError, ValueError) as exc:
             problems.append(f'[openapi-routes] cannot load route inventory: {exc}')
 
@@ -1250,9 +1336,10 @@ def main() -> int:
     )
     company_rows = [r for r in inventory if r['path'].startswith('/api/v1/company/')]
     typed = sum(r['handler'] in COMPANY_RESPONSES for r in company_rows)
-    print(f"OpenAPI routing: {len(company_rows)} company operations present; "
-          f"{typed} response bindings verified (remaining {len(company_rows) - typed} "
-          "have route/reference coverage, not complete response-shape verification).")
+    streamed = sum(r['handler'] in COMPANY_STREAMS for r in company_rows)
+    print(f"OpenAPI routing: {len(company_rows)} company operations; {typed} JSON bindings, "
+          f"{streamed} non-JSON bindings, including both submit success statuses. "
+          "Runtime response coverage is reported separately by check_http_contract.py.")
     return 0
 
 

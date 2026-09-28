@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；最新完成 AR07 OpenAPI 静态契约子包：33 投影、67 操作、36 响应绑定；本次 Go 721 通过、54 必跑齐全、Python 128、前端 115 通过，测试资源已清理。P0-070/080、完整 P8-080 与 G0 未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；最新完成 AR07 HTTP 响应子包：67 操作完整静态绑定、65 操作/80 响应实际验证；最终 Go 736 通过、55 必跑齐全、Python 168、前端 115 通过。P0-070/080、完整 P8-080 与 G0 未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | P0 其余依赖未关闭；跨阶段 AR07 OpenAPI 静态契约与路由绑定子包已验收，见 R5-OPENAPI-VALIDATION.md |
+| 当前阶段 | P0 其余依赖未关闭；跨阶段 AR07 HTTP 响应子包已验收，见 R5-HTTP-CONTRACT-VALIDATION.md；原静态报告保留历史含义 |
 | 下一可执行任务 | 继续070跨语句授权/普通内容截止与其余多资源写入边界；080按020/030/060已完成前置独立推进协议案例，不重复01937522已取得的基线/候选验收 |
 | 下一批范围 | B01-K：070剩余授权/期限快照及跨路径锁图收口；080可并行推进目标案例；090/110仍遵守原依赖，G0未关闭 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 070其余/080/性能/兼容仍待完成；OpenAPI 剩余31个操作只有路由/引用覆盖，完整运行时响应验证未完成。本批前端已跑；shipping浏览器、远端CI、A01–A07独立复现未重跑，原问题状态不因此改变 |
+| 当前阻塞 | 原31个操作的响应绑定缺口已补齐；实际HTTP覆盖65操作，2个实时DNS操作、SSE重连/跨进程回放及全部权限错误矩阵未覆盖。070其余/080/性能/兼容仍待完成；shipping浏览器、远端CI、A01–A07独立复现未重跑 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
 ### 0.1 状态、依赖与记录规则
@@ -1433,6 +1433,15 @@ python3 scripts/check_i18n_keys.py
 - 被测 Git tree（非 commit）`f03d0cbaa11376a7995a034651ffd3eac6ac14e2`，589快照文件测试后哈希一致。Go build/vet/race：721 pass、0 fail、1显式browser skip；54必跑齐全。Python128、契约71方法、Node23、Vitest25文件115测试、tsc/lint/build、i18n/API inventory均通过。
 - [执行报告](R5-OPENAPI-VALIDATION.md)、[机器结果](evidence/R5-OPENAPI-VALIDATION.json)与[54份原始记录](evidence/R5-OPENAPI-LOGS.tar.gz)保留前后结果。本批容器、匿名卷和网络按归属清理；未改Go module/npm lockfile/迁移，未push/PR/merge/deploy。
 - 范围：AR07 的 OpenAPI 静态接线子包完成；31操作完整响应、共享持久化模型的公开投影、nil集合/自定义序列化与真实HTTP全响应验证仍未关闭。不得据此勾选整个 P8-080、P1 或 G0；原统计保持 **6/171**。
+
+### AR07 HTTP 响应闭环与集合输出修复（2026-09-29）
+
+- 起点 commit `c0e4795119aca7b296e43d5b69724549860ffe44`，分支 `test/company-http-contract-20260929`。保留前序中断工作与失败；最终被测 tree `6f0bbdf5f5be29914be470fa529894fb12c285c2`，598文件哈希一致。
+- 实现：67个公司操作具体响应绑定（61 JSON/6非JSON），独立 Go/PG/loopback HTTP 捕获与 JSON Schema 验证；提交201/重放200、下载字节/头、SSE帧、错误响应及必跑证据。生产修复仅在HTTP边界复制并把必需集合null规范化为[]，不修改领域序列化、模板摘要或草稿幂等记录。
+- 红绿：基线12个集合子用例失败，摘要/nullable测试通过；修复后均通过。采集器大小/深度/溢出/敏感字段与CI排除原始响应均有反例；缺DSN实际Go skip时门禁exit1。
+- 最终验证：Go build/vet及全量race 736 pass/0 fail/1 browser skip，55必跑齐全；独立HTTP 80响应/65操作/66成功变体通过；Python168、Node23、Vitest115及tsc/lint/build/i18n/API矩阵通过。
+- [报告](R5-HTTP-CONTRACT-VALIDATION.md)、[机器结果](evidence/R5-HTTP-CONTRACT-VALIDATION.json)、[非敏感原始记录](evidence/R5-HTTP-CONTRACT-LOGS.tar.gz)保留前后结果。原始responses.json不发布，清理逐项记载。Go module、npm lockfile及所有既有迁移未修改。
+- 仍未覆盖两个实时DNS操作、SSE重连/跨进程回放、全错误矩阵、shipping浏览器、远端CI、性能及依赖审计；没有push/PR/merge/deploy。本批关闭HTTP响应子包而非整个P8-080/P1/G0，原统计仍 **6/171**。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 
