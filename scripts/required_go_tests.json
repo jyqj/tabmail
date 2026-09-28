@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "suites": {
+    "backend": {
+      "required_tests": [
+        ["tabmail/internal/store/postgres", "TestMigrateAppliesCleanly"],
+        ["tabmail/internal/store/postgres", "TestP0PostgresOwnerGrantAndPermanentRetention"],
+        ["tabmail/internal/store/postgres", "TestP0PostgresOutboundDomainFencingAndUncertainty"],
+        ["tabmail/internal/store/postgres", "TestP0GooseRestartAndHistoricalGrantSafety"],
+        ["tabmail/internal/store/postgres", "TestArchitectureUpgradeBackfillsExistingEmployeeAssets"],
+        ["tabmail/internal/store/postgres", "TestR3CoordinatedSnapshotRestoresIntoEmptyTargets"],
+        ["tabmail/internal/store/postgres", "TestArchitectureSentAssetsOutliveQueueAndRemainPrivate"],
+        ["tabmail/internal/store/postgres", "TestArchitectureSentAssetCreationRollsBackWithJob"],
+        ["tabmail/internal/store/postgres", "TestArchitectureDraftCreationReplayAndTombstone"],
+        ["tabmail/internal/store/postgres", "TestArchitectureOffboardingPreviewFencesChangesAndReplay"],
+        ["tabmail/internal/store/postgres", "TestArchitectureOffboardingExpiryAndAuditRollback"]
+      ],
+      "allowed_skips": [
+        {
+          "identity": ["tabmail/internal/store/postgres", "TestR3BrowserJourney"],
+          "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job."
+        }
+      ]
+    },
+    "browser": {
+      "required_tests": [["tabmail/internal/store/postgres", "TestR3BrowserJourney"]],
+      "allowed_skips": []
+    }
+  }
+}

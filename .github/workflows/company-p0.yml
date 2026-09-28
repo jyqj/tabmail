@@ -44,8 +44,21 @@ jobs:
         run: go build ./...
       - name: Race tests with PostgreSQL
         run: |
-          set -o pipefail
+          set -euo pipefail
+          git rev-parse HEAD > go-test-source-sha.txt
+          set +e
           go test -json -race -count=1 -timeout=180s ./... | tee go-test.jsonl
+          test_exit=$?
+          set -e
+          python3 -B scripts/check_go_test_evidence.py --suite backend \
+            --log go-test.jsonl --exit-code "$test_exit" \
+            --source-sha "$(cat go-test-source-sha.txt)" | tee go-test-evidence.json
+      - name: Prove missing execution cannot pass
+        run: |
+          python3 -B scripts/test_go_evidence_integration.py \
+            --output-dir go-test-negative-evidence --source-sha "$(git rev-parse HEAD)"
+      - name: Validation tool regressions
+        run: python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
       - name: DTO field contract
         run: python3 scripts/check_contract_drift.py
       - name: Vet
@@ -55,7 +68,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: company-p0-test-evidence
-          path: go-test.jsonl
+          path: |
+            go-test.jsonl
+            go-test-source-sha.txt
+            go-test-evidence.json
+            go-test-negative-evidence
           retention-days: 14
   frontend:
     runs-on: ubuntu-latest
@@ -71,6 +88,10 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci
         working-directory: web
+      - name: Catalog and TypeScript source validation
+        run: |
+          node --test scripts/tests/i18n_sources.test.cjs
+          python3 -B scripts/check_i18n_keys.py
       - name: Record full dependency audit
         working-directory: web
         run: npm audit --json > /tmp/tabmail-npm-audit.json || test -s /tmp/tabmail-npm-audit.json
@@ -155,13 +176,22 @@ jobs:
           trap 'docker logs tabmail-browser >/tmp/tabmail-next.log 2>&1; docker rm -f tabmail-browser >/dev/null' EXIT
           for i in $(seq 1 60); do curl -sf http://localhost:3000 >/dev/null && break; sleep 1; done
           curl -sf http://localhost:3000 >/dev/null
-          go test -v -count=1 -timeout=180s -run '^TestR3BrowserJourney$' ./internal/store/postgres | tee /tmp/tabmail-browser.log
+          git rev-parse HEAD > /tmp/tabmail-browser-source-sha.txt
+          set +e
+          go test -json -count=1 -timeout=180s -run '^TestR3BrowserJourney$' ./internal/store/postgres | tee /tmp/tabmail-browser.jsonl
+          test_exit=$?
+          set -e
+          python3 -B scripts/check_go_test_evidence.py --suite browser \
+            --log /tmp/tabmail-browser.jsonl --exit-code "$test_exit" \
+            --source-sha "$(cat /tmp/tabmail-browser-source-sha.txt)" | tee /tmp/tabmail-browser-evidence.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: company-browser-evidence
           path: |
             /tmp/tabmail-next.log
-            /tmp/tabmail-browser.log
+            /tmp/tabmail-browser.jsonl
+            /tmp/tabmail-browser-source-sha.txt
+            /tmp/tabmail-browser-evidence.json
             /tmp/tabmail-browser-evidence
           retention-days: 14
