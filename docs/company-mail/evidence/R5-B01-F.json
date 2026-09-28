@@ -1,0 +1,160 @@
+{
+  "batch": "B01-F",
+  "status": "implementation_committed_validation_blocked",
+  "documentation_commit": "blocked before execution by tool safety check; not retried via another entrypoint",
+  "working_tree": "three modified documentation files and six untracked report/evidence files",
+  "delivery_head": "6ef485951f464d0e2c92413a5ec43feb0b14aa1e",
+  "base_sha": "23e8c8eb9215faa2817634dd8efde24910605f2f",
+  "implementation_commit": "6ef485951f464d0e2c92413a5ec43feb0b14aa1e",
+  "implementation_tree": "86ec30730ae4b9188860ee1e12d33a5a3574f794",
+  "branch": "test/company-mail-r5-b01f-reservation-gc",
+  "runtime_file_sha256": {
+    "internal/store/postgres/company_mail.go": "88ddcb7c99188131981d6978e68d38f5c58e7391d567eaa12ebfffc1971dfb0e",
+    "internal/store/postgres/company_ops.go": "76f748fb5738dbf9bf8dd203f47d2c25be654677404a5ae1bfdb4c56d70645ee",
+    "internal/store/postgres/r5_reservation_boundary_test.go": "2235eeb9bce0309344164540bf1da3aca492ffdda1f53825e7d182a038e0fcd8",
+    "internal/store/postgres/r5_reference_gc_test.go": "0a6fa1842fafe9fe0d6796735305646f1045cf77aecccff10698831774eed5ab",
+    "scripts/required_go_tests.json": "5c468e38bc781314d74b18f4ab7904aeb89701d88c23679be61160012203f2ea"
+  },
+  "baseline": {
+    "base": "23e8c8eb9215faa2817634dd8efde24910605f2f",
+    "exit": 1,
+    "counts": {
+      "run": 10,
+      "pass": 8,
+      "fail": 2,
+      "skip": 0
+    },
+    "markers": {
+      "REVOKED": 1,
+      "ORDER": 1
+    },
+    "log_sha256": "ba5d29964078fb96da7d5f0a376960943604b05be00dc391d9c529011725b8fb",
+    "test_source_sha256": {
+      "internal/store/postgres/r5_reservation_boundary_test.go": "2235eeb9bce0309344164540bf1da3aca492ffdda1f53825e7d182a038e0fcd8",
+      "internal/store/postgres/r5_reference_gc_test.go": "09f623358feae43889685f2ea9c3c3b8773f3a576b3f9d3973581356db68e145"
+    }
+  },
+  "post_fix": {
+    "full_backend": "outer invocation timed out at 660s; race binary linking observed; no completed backend gate",
+    "repeated_focused": "not reached by full chain",
+    "local_cache_focused": "not started; preceding owned-container stop operation timed out",
+    "required_tests_registered": 41,
+    "required_tests_verified_on_final_tree": null,
+    "success_not_inferred_from_baseline": true
+  },
+  "host_checks": {
+    "python_tool_tests": 57,
+    "dto_shared_models": 16,
+    "dto_company_types": 32,
+    "diff_check": "pass"
+  },
+  "not_run": [
+    "frontend Vitest/TS/lint/build",
+    "shipping-image browser",
+    "GitHub Actions",
+    "current dependency audit",
+    "S/M benchmark",
+    "original A01-A07 opt-in audit",
+    "A01/A02 rendered editor integration"
+  ],
+  "historical_migrations": {
+    "internal/store/postgres/migrations/00013_draft_creation_receipts.sql": "69c605b794be3b3884659c6315d518b94c69ffb8259d00199a45ee4d1e1160c3",
+    "internal/store/postgres/migrations/00001_baseline.sql": "233a6e0a5dea5e08de370aa3d8cd7e69a61f9cfaf2421846e23494de0e4e0549",
+    "internal/store/postgres/migrations/00002_mailbox_grants.sql": "51615b38624aaa3010c5b8e7ff84ddafbd22046fe5f8992bfc2c31b5592a6ba5",
+    "internal/store/postgres/migrations/00011_mail_content_index.sql": "6232a3c74b75980d48bcc2f8e2e5f79854c366a89f09743deb5a8ebbfe747042",
+    "internal/store/postgres/migrations/00005_company_workflows.sql": "f6a66202fd0f2bdc9d3b6ceecb05cee5f6bd96f620d665e873222938b0e5ba50",
+    "internal/store/postgres/migrations/00003_refresh_token_family.sql": "11a168f78cf5b3b11e369f3c089e6252258bfa0a5cdbfc192b1581284d3c541b",
+    "internal/store/postgres/migrations/00006_draft_submission.sql": "8c02d23d9b06da8524e4ce67ade38cb72aa289f675b8856a831a62915907610a",
+    "internal/store/postgres/migrations/00007_message_user_state.sql": "8a0806eb2367d797a5af2f3f030d4767db9202b4cf7af472e360e8dcaa873caf",
+    "internal/store/postgres/migrations/00012_employee_disposition.sql": "2f7d448d04c185a1642399a0f6559d2df7ed9a1e59ac2523167e259e24e3d9b0",
+    "internal/store/postgres/migrations/00004_owned_mailbox_private.sql": "e8abcdd3026d6586afd20d0a7375c9b9a10bcfab94b9a5ddcace0efa3899add1",
+    "internal/store/postgres/migrations/00008_send_policy.sql": "f97a25c5fd3911bded2d1e63a094027780c34b58a503c27561c7423dc4cbc891",
+    "internal/store/postgres/migrations/00010_sent_mail_archive.sql": "57156b73a3f5f4ba4aab55ce0a6e3a670a74b52544e7df13ea38e7dd61fb259f",
+    "internal/store/postgres/migrations/00009_domain_asset_guard.sql": "54348b595d017a36edb77930f666aa6a26fadf7e848bf1cf5d1e4190c57fcc2a"
+  },
+  "unchanged_dependencies_and_prior_fixes": {
+    "go.mod": "21a28dfa61c59ffd20f04cd7fa9ea915536b84a366c113227fa5af71c5600b4d",
+    "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+    "web/package.json": "e09a3518e69ae265bcdbdcf9b23f41176c253e33326e296089b09d87ec28a6e7",
+    "web/package-lock.json": "bd31660c52baa389e6d66a4ebf02a7ecd952bab72da6b16460f9d484b0be38c0",
+    "internal/store/postgres/outbound.go": "4f5ddbd472c2a2a31435e85998b6c1d6194ec89c255df5348593278fd1b277bd",
+    "internal/store/postgres/mailbox_revision.go": "de654e6d1c72e9efc87dd81b2d6d950052a1b2298d6d07e98f708bdfa47747c8"
+  },
+  "evidence_files": {
+    "R5-B01-F-BEFORE.jsonl": {
+      "bytes": 9162,
+      "sha256": "ba5d29964078fb96da7d5f0a376960943604b05be00dc391d9c529011725b8fb",
+      "partial": false
+    },
+    "R5-B01-F-RESERVATION-BEFORE.go.txt": {
+      "bytes": 8263,
+      "sha256": "2235eeb9bce0309344164540bf1da3aca492ffdda1f53825e7d182a038e0fcd8",
+      "partial": false
+    },
+    "R5-B01-F-REFERENCE-BEFORE.go.txt": {
+      "bytes": 7833,
+      "sha256": "09f623358feae43889685f2ea9c3c3b8773f3a576b3f9d3973581356db68e145",
+      "partial": false
+    },
+    "R5-B01-F-BACKEND-PARTIAL.jsonl.gz": {
+      "bytes": 20107,
+      "sha256": "cc91d79f7d6478577104caeeee6b2e2ad65ecbaf65f9116eecbfd55eebac6520",
+      "partial": true,
+      "uncompressed_sha256": "308c774f1145839862dbf188f68902f9dbdc16adeb4f81c97aafedc37c98373b"
+    }
+  },
+  "environment": {
+    "tool_image": "sha256:65934079f212a76983064db24e7a26066106a7e173cf2b05e4f1621aebfdb5c7",
+    "postgres_image": "sha256:f1c3376c26f2609ab9f29f71f824103fe2fcd8ee0346485cb6122a4f93df6f94",
+    "source_snapshot": "/tmp/tabmail-r5-b01f-t793d5td",
+    "network": "session-owned internal, no published ports",
+    "no_production_data": true,
+    "no_global_restart": true
+  },
+  "cleanup": {
+    "baseline2": {
+      "name": "tabmail-r5-b01f-baseline2-f16d27b0",
+      "id": "63dfd8a15721d5ef660d2593f5b236c210b57b669b9ae7a4e8fa9a6792727dac",
+      "label_verified": true,
+      "removed": true
+    },
+    "full_test_container": {
+      "name": "tabmail-r5-b01f-final-f16d27b0",
+      "id": "3e3b9a8ab0ce101dced88087671856ddeaf5d0b23445910f7b9d0429b1fb54cf",
+      "ownership_verified": true,
+      "owner_session": "wc_sess_0sQix7Usax9PmhFb",
+      "stop": "timed out after 40s",
+      "force_remove": "failed: did not receive exit event",
+      "removed": false
+    },
+    "postgres_and_network": [
+      {
+        "kind": "container",
+        "name": "tabmail-r5-b01f-pg-f16d27b0",
+        "removed": false,
+        "ownership_verified": true,
+        "id": "74bf5e3ae714b0ecc8b5cc2f87f0b6c33ea663dadb8e255339614ddb2ac4801b",
+        "status": "operation_timeout_unconfirmed"
+      },
+      {
+        "kind": "network",
+        "name": "tabmail-r5-b01f-f16d27b0",
+        "removed": false,
+        "ownership_verified": true,
+        "id": "4ceca98d70297ddbab16e6e27b533355f23688af5790aa15a92a2b8f927b3ee0",
+        "remove_exit": 1,
+        "diagnostic": "Error response from daemon: error while removing network: network tabmail-r5-b01f-f16d27b0 has active endpoints (name:\"tabmail-r5-b01f-pg-f16d27b0\" id:\"6a4fec80493b\", name:\"tabmail-r5-b01f-final-f16d27b0\" id:\"9f9600bddc08\")\nexit status 1\n"
+      }
+    ],
+    "all_owned_resources_removed": false,
+    "other_projects_untouched": true
+  },
+  "limitations": [
+    "P0-070/P0-080 still incomplete, progress 6/171",
+    "one authorization/order issue reproduced with two target assertions, not two independent vulnerabilities",
+    "GC properties passed on baseline; no GC SQL change",
+    "controlled object callbacks do not certify S3/filesystem durability",
+    "earlier blocked progress diagnostic not rerun through another route; P0-080 blocked checker untouched"
+  ],
+  "next_required_action": "Reconcile and clean only the named session resources, restore isolated execution, verify the exact implementation with ten new tests and all 41 mandatory backend tests; no milestone closure before evidence."
+}

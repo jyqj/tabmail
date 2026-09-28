@@ -1,6 +1,6 @@
 # R5 事务、锁顺序与授权检查地图
 
-> **B01-E验证更新：** 已继承并补齐B01-D最终九项回归，另修复附件完成窗口。最终17项锁/并发/附件各三轮共51通过，全量后端566通过、31必跑齐全；唯一browser skip明确。详见 [B01-E记录](R5-B01-E-VALIDATION.md)。070仍有其他路径未收口，不把这些测试等同全项目无死锁/无撤权窗口。
+> **B01-F验证限制：** 已实证预留授权窗口并提交mailbox→budget顺序修复；10项新测试在原基线8通过/2目标失败。修复后全量超时、定向重试未启动，41必跑未取得完整验收；本批容器/网络清理未确认。详见 [B01-F记录](R5-B01-F-VALIDATION.md)。B01-E旧通过不替代当前树，070仍不关闭。
 
 2026-09-28，B01-D更新。原地图基线为 `97675a743f83287b85297af4e94c339ce5a83bba`；B01-D从 `46711be9d8421db35a687e28e181a67a2e720b2f` 实际复现两类40P01和草稿撤权窗口，并提前修复对应生产路径。本图下列TX08/TX11及锁测试反映本次新顺序；历史证据保留在各批报告。**不是全路径无死锁证明；070仍未关闭**。进度唯一入口是 [R5-TODO](R5-TODO.md)，数据库实体和完整 FK 依据 [R5-MIGRATIONS](R5-MIGRATIONS.md) 及其实际 catalog。
 
@@ -40,7 +40,7 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | TX07 离职执行 | `ExecuteOffboarding` → `applyOffboarding` | T U锁 → actor U S锁 → plan U锁 → target U U锁 → successor U S锁 → J 按 id U锁；transfer_owned 分支先 A W 后 D W；再封存/取消已知未在途 J、refresh、keys、grants、user、mailbox、audit/outbox | B01-D已将TX11改为父租户KEY SHARE→用户SHARE→附件；两种完整命令竞争由普通回归覆盖，其他交叉关系仍不宣称全部安全 |
 | TX08 草稿保存 | `SaveMailDraft`，company_mail.go:373–430 | actor U S锁 → M S锁 → mailbox/grant读取 → A 按输入顺序 S锁 → 创建receipt/草稿或D revision CAS → 模板资格读取 → Commit | receipt FK 指向 `(tenant_id,user_id)`；新 draft FK 指向用户和邮箱，**不是直接指向 tenant**；现有 D 更新与首次 INSERT 等待行为不同 |
 | TX09 草稿删除 | `DeleteMailDraft` | actor U S锁 → 精确 tenant/user/id/revision、未封存 D DELETE → Commit | 保留 creation tombstone；不能误称 DELETE 释放了全部历史来源 |
-| TX10 上传 reserve / finish | `ReserveMailAttachment`、`FinishMailAttachment` | reserve：actor U S锁 → mailbox 普通读取 → `attachment-budget:tenant:user` advisory → sum/INSERT；finish：actor U S锁 → 预定位mailbox → M S锁及当前资格 → 精确A U锁 → 锁后clock_timestamp/原state条件W → Commit | reserve预算有同一上传者advisory但授权窗口仍待验；B01-E修复finish的撤权/零行/到期/重复完成/摘要边界，八项真实PG回归通过，不替代完整P5-050 |
+| TX10 上传 reserve / finish | `ReserveMailAttachment`、`FinishMailAttachment` | reserve：actor U S锁 → M S锁 → 当前mailbox/grant读取 → `attachment-budget:tenant:user` advisory → sum/INSERT；finish：actor U S锁 → 预定位mailbox → M S锁及当前资格 → 精确A U锁 → 锁后clock_timestamp/原state条件W → Commit | B01-F实证reserve等待额度后漏撤权并前置邮箱锁，修复后验收受环境阻塞；B01-E的Finish修复保留，不替代完整P5-050 |
 | TX11 原子发送入队 | `enqueueOutboundJobTx`，outbound.go | **T KEY SHARE** → submission advisory/已存在回执重放 → **sender U S锁及active检查** → A S锁 → 排序quota advisory及查询 → J INSERT/保留原BEFORE用户触发器 → archive/recipients/pins/audit/D消费 → Commit | 父租户FK锁提前，用户先于附件；KEY SHARE允许不同提交共享父键，不改为租户排他串行。回执重放不新增发送；此处active仍不是完整profile/grant/template授权 |
 | TX12 逐收件人 begin / complete | outbound_recipients.go | begin：J U锁/token/lease → recipient uncertain W → J in-flight W → Commit；complete：J 条件 W → recipient结果 W → Commit | SMTP 在这两个事务之间；不确定 fence 不是最终接受证明，不把 token 检查等同全部授权 |
 | TX13 手工核对投递 | `ReconcileOutbound`，company_ops.go | 当前 operator U S锁 → J U锁 NOWAIT → state/updated_at/目标检查 → recipient/J W → 必要 audit | NOWAIT 拒绝当前竞争，不代表别的阻塞都已消除；不得覆盖 accepted 事实 |
@@ -75,16 +75,16 @@ B01-C第五项原先只证明单侧次序。B01-D已补两条完整生产命令�
 | 风险 | 实际支持 | 尚缺验证 / 下一操作 | 对应现有任务 |
 |---|---|---|---|
 | RISK01 入队与transfer_owned相反顺序 | B01-D完整ExecuteOffboarding/CreateOutboundJob实测40P01，失败事务资产无半提交 | 已改父租户KEY SHARE→用户SHARE→附件；R01回归覆盖离职先持锁时入队拒绝，无重复资产 | P0-070本批前置修复；后续P3/P4/P5/P6仍需各自全链验收 |
-| RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft和FinishMailAttachment现共用M SHARE后读取grant；R02及B01-E上传完成竞争均通过，撤权完成后的新命令拒绝。reserve、正文读取及profile/override变更仍待对应验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
+| RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft和FinishMailAttachment的既有修复保留；B01-F补reserve同类窗口实证及M SHARE修复代码，但最终验证受阻。正文读取及profile/override变更仍待对应验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
 | RISK03 隐式FK与广域管理锁 | B01-D实证：入队已持user SHARE，后置tenant FK与离职tenant→user形成40P01 | 入队父键保护提前已修复此环；R03覆盖入队先完成导致旧计划冲突。入站、原件、索引/清理其他交叉仍待核对 | P0-070部分修复；P6-100、P10-040 |
-| RISK04 对象回调持锁时间 | TX21实际在tx内调用ensureObject/del | 慢/失败对象适配器、取消、提交未知的故障测试与上界，不直接移出保护区 | P3-090、P6-100、P10-050 |
+| RISK04 对象回调持锁时间 | TX21实际在tx内调用ensureObject/del | B01-F基线实测可控delete取消释放key、ensure期间GC等待且提交后保护引用；实际对象后端、提交未知和其余失败上界仍待验，不直接移出保护区 | P3-090、P6-100、P10-050 |
 | RISK05 事务时钟与等待后期限 | TX19期限用now；ingress末尾用clock_timestamp再次检验lease | 精确截止跨越/阻塞后重验，不把无等待的单次通过扩大为边界成立 | P3-040、P6-030、P7-030 |
 | RISK06 多资源批量W及共享锁输入顺序 | 多附件按输入顺序S锁；offboard批量UPDATE未为所有对象固定排序 | S/S本身兼容，不因此认定两次保存死锁；与W/交接/GC一起测试真实冲突 | P3-060、P4-130、P5-130 |
 
 ## 6. P0-070收口前的剩余范围
 
-截至B01-E，已验证上述两类死锁和SaveDraft修复、并行共享父键，新增Finish撤权/状态/时间边界修复与八项回归；仍未完成reserve/普通内容操作、GC引用、入站/对象回调等交叉评审，因此**070复选框保持未勾选，090仍受依赖限制**。080目标文本仍是未冻结草案；G0与P1未开启。
+截至B01-F，新增reserve问题实证与修复代码，以及五项GC/对象引用基线通过。修复后门禁及隔离资源清理仍阻塞，普通内容读取、入站、其余引用与对象故障边界也未完成，因此**070复选框保持未勾选，090仍受依赖限制**。080目标文本仍是未冻结草案；G0与P1未开启。
 
-B01-E已补齐最终源码完整回归；下一轮继续其余明确窗口，不重复实现已修复的入队/草稿/Finish边界。必要的范围变更仍须记录。原070“每个多资源写入有一致锁顺序”的要求不因本批局部回归通过而删减。
+下一轮先核对B01-F的确切遗留资源，再对6ef48595补新增/定向/全量验证。已记录的基线性质不是新树绿灯；不重复实现已有入队/草稿/Finish修复。原070“每个多资源写入有一致锁顺序”的要求不因局部证据而删减。
 
 B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普通回归和提交映射见R5-B01-D-VALIDATION.md及其机器证据。原始失败、后续修正和最终通过分别保存，test name 不充当执行结果。
