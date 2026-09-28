@@ -1,9 +1,9 @@
 name: Company mail security and release checks
 on:
   push:
-    branches: [main, fix/company-mail-release-blockers-r2]
+    branches: [main]
   pull_request:
-    branches: [main, fix/company-mail-safety-contracts]
+    branches: [main]
 permissions:
   contents: read
 concurrency:
