@@ -42,7 +42,8 @@ validation-tools-test:
 	python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
 
 i18n-source-test:
-	node --test scripts/tests/i18n_sources.test.cjs
+	node --test scripts/tests/*.test.cjs
+	node scripts/collect_api_calls.cjs --check
 
 lint: vet web-lint
 

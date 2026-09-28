@@ -13,7 +13,10 @@
         ["tabmail/internal/store/postgres", "TestArchitectureSentAssetCreationRollsBackWithJob"],
         ["tabmail/internal/store/postgres", "TestArchitectureDraftCreationReplayAndTombstone"],
         ["tabmail/internal/store/postgres", "TestArchitectureOffboardingPreviewFencesChangesAndReplay"],
-        ["tabmail/internal/store/postgres", "TestArchitectureOffboardingExpiryAndAuditRollback"]
+        ["tabmail/internal/store/postgres", "TestArchitectureOffboardingExpiryAndAuditRollback"],
+        ["tabmail/internal/architecture", "TestR5RouteInventory"],
+        ["tabmail/internal/architecture", "TestR5RouteInventoryRejectsDrift"],
+        ["tabmail/internal/store/postgres", "TestR5SchemaInventoryAndRestart"]
       ],
       "allowed_skips": [
         {

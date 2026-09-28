@@ -90,7 +90,8 @@ jobs:
         working-directory: web
       - name: Catalog and TypeScript source validation
         run: |
-          node --test scripts/tests/i18n_sources.test.cjs
+          node --test scripts/tests/*.test.cjs
+          node scripts/collect_api_calls.cjs --check
           python3 -B scripts/check_i18n_keys.py
       - name: Record full dependency audit
         working-directory: web
