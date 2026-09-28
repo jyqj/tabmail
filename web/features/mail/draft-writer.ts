@@ -1,3 +1,4 @@
+import { errorCode, isConflict, isDeterministicErrorCode } from "@/lib/error-code";
 import type { DraftPayload, MailDraft } from "@/lib/company";
 export type DraftInput = {
     mailbox_id: string;
@@ -25,13 +26,6 @@ export function draftKey(input: DraftInput): string {
             return Object.fromEntries(Object.keys(value).sort().filter(k => value[k] !== undefined).map(k => [k, value[k]]));
         return value;
     });
-}
-export function draftErrorCode(e: unknown): string | undefined {
-    return (e as {
-        error?: {
-            code?: string;
-        };
-    })?.error?.code;
 }
 // One revision lane shared by autosave, explicit save and submit flush. No
 // request can observe a stale locally acknowledged revision, and a conflict
@@ -69,9 +63,9 @@ export class DraftWriter {
                 throw new Error("Draft acknowledgement does not match the submitted revision");
         } catch (e) {
             this.check();
-            const code = draftErrorCode(e);
+            const code = errorCode(e);
             const unknown = !code || code === "INTERNAL_ERROR" || code === "INTERNAL";
-            const mayReplayConflict = command.uncertain && code === "CONFLICT";
+            const mayReplayConflict = command.uncertain && isConflict(e);
             if (unknown || mayReplayConflict) {
                 command.uncertain = true;
                 // Pin the exact UUID, revision AND input until its outcome is
@@ -93,7 +87,7 @@ export class DraftWriter {
             }
             if (mayReplayConflict)
                 throw new Error("Draft save is still unconfirmed; retry the original request when connected");
-            if (["CONFLICT", "FORBIDDEN", "NOT_FOUND", "UNAUTHORIZED"].includes(code ?? ""))
+            if (isDeterministicErrorCode(code))
                 this.conflict = e;
             if (!unknown && !mayReplayConflict)
                 this.pending = undefined;

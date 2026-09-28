@@ -41,7 +41,7 @@ export interface TenantAPIKey {
   scopes: string[];
   owner_user_id?: string | null;
   allowed_zone_ids?: string[] | null;
-  expires_at: string | null;
+  expires_at?: string | null;
   created_at: string;
   last_used_at?: string | null;
   last_used_ip?: string | null;
@@ -79,12 +79,12 @@ export interface DomainZone {
   allow_random_subdomains: boolean;
   is_verified: boolean;
   mx_verified: boolean;
-  txt_record: string;
+  txt_record?: string;
   dkim_selector: string;
   dkim_enabled: boolean;
   dkim_required_for_send: boolean;
   created_at: string;
-  verified_at: string | null;
+  verified_at?: string | null;
 }
 
 export type AccessMode = "public" | "token" | "api_key";
@@ -100,8 +100,8 @@ export interface Mailbox {
   resolved_domain: string;
   full_address: string;
   access_mode: AccessMode;
-  retention_hours_override: number | null;
-  expires_at: string | null;
+  retention_hours_override?: number | null;
+  expires_at?: string | null;
   created_at: string;
   /** Effective send policy: COALESCE(mailbox override, company default). */
   send_policy?: "free" | "template_required" | "disabled";
@@ -228,14 +228,7 @@ export interface SystemStats {
       realtime_published: number;
     }[];
   };
-  recent_audit: {
-    id: string;
-    actor: string;
-    action: string;
-    resource_type: string;
-    resource_id?: string | null;
-    created_at: string;
-  }[];
+  recent_audit: AuditEntry[];
 }
 
 export interface AuditEntry {
@@ -421,7 +414,8 @@ export type OutboundState =
   | "sent"
   | "retry"
   | "failed"
-  | "dead";
+  | "dead"
+  | "cancelled";
 
 export interface OutboundJob {
   template_version_id?: string;

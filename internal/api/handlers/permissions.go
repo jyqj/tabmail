@@ -1,47 +1,46 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/middleware"
+	"tabmail/internal/app/permissions"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
 
 type PermissionHandler struct {
-	store  store.Store
-	logger zerolog.Logger
+	service *permissions.Service
+	logger  zerolog.Logger
 }
 
 func NewPermissionHandler(st store.Store, l zerolog.Logger) *PermissionHandler {
-	return &PermissionHandler{store: st, logger: l.With().Str("handler", "permissions").Logger()}
+	return &PermissionHandler{
+		service: permissions.New(st),
+		logger:  l.With().Str("handler", "permissions").Logger(),
+	}
+}
+
+// tenantCtx extracts the caller's tenant id, or nil when the request carries
+// no tenant context. The service decides whether a nil context is allowed.
+func tenantCtx(r *http.Request) *uuid.UUID {
+	if tenant := middleware.TenantFromCtx(r.Context()); tenant != nil {
+		id := tenant.ID
+		return &id
+	}
+	return nil
 }
 
 // ListProfiles returns permission profiles visible to the caller.
 // Platform admin sees all profiles; tenant admin sees system + own tenant profiles.
 func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request) {
-	actor := middleware.ActorFromContext(r.Context())
-
-	var tenantID *uuid.UUID
-	if !actor.IsSuperAdmin {
-		tenant := middleware.TenantFromCtx(r.Context())
-		if tenant == nil {
-			errForbidden(w, "no tenant context")
-			return
-		}
-		tenantID = &tenant.ID
-	}
-
-	items, err := h.store.ListPermissionProfiles(r.Context(), tenantID)
+	items, err := h.service.ListProfiles(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r))
 	if err != nil {
-		h.logger.Err(err).Msg("failed to list permission profiles")
-		errInternal(w)
+		respondAppError(w, h.logger, err)
 		return
 	}
 	ok(w, items)
@@ -51,86 +50,15 @@ func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request)
 // Platform admin can create system profiles (tenant_id=nil) or tenant-scoped.
 // Tenant admin always creates tenant-scoped profiles.
 func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
-	actor := middleware.ActorFromContext(r.Context())
-	tenant := middleware.TenantFromCtx(r.Context())
-
-	var body struct {
-		Name              string      `json:"name"`
-		Description       string      `json:"description"`
-		TenantID          *uuid.UUID  `json:"tenant_id,omitempty"`
-		CanSend           bool        `json:"can_send"`
-		DailySendQuota    int         `json:"daily_send_quota"`
-		DailyReceiveQuota int         `json:"daily_receive_quota"`
-		MaxMailboxes      int         `json:"max_mailboxes"`
-		MaxDomains        int         `json:"max_domains"`
-		AllowedZoneIDs    []uuid.UUID `json:"allowed_zone_ids,omitempty"`
-		CanCreateDomains  bool        `json:"can_create_domains"`
-		CanCreateRoutes   bool        `json:"can_create_routes"`
-		CanCreateAPIKeys  bool        `json:"can_create_api_keys"`
-	}
+	var body permissions.CreateInput
 	if err := decodeBody(r, &body); err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	if body.Name == "" {
-		errBadRequest(w, "name is required")
-		return
-	}
 
-	var profileTenantID *uuid.UUID
-	if actor.IsSuperAdmin {
-		profileTenantID = body.TenantID
-	} else {
-		if tenant == nil {
-			errForbidden(w, "no tenant context")
-			return
-		}
-		profileTenantID = &tenant.ID
-	}
-
-	profile := &models.PermissionProfile{
-		ID:                uuid.New(),
-		TenantID:          profileTenantID,
-		Name:              body.Name,
-		Description:       body.Description,
-		CanSend:           body.CanSend,
-		DailySendQuota:    body.DailySendQuota,
-		DailyReceiveQuota: body.DailyReceiveQuota,
-		MaxMailboxes:      body.MaxMailboxes,
-		MaxDomains:        body.MaxDomains,
-		AllowedZoneIDs:    body.AllowedZoneIDs,
-		CanCreateDomains:  body.CanCreateDomains,
-		CanCreateRoutes:   body.CanCreateRoutes,
-		CanCreateAPIKeys:  body.CanCreateAPIKeys,
-		IsSystem:          false,
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
-	}
-
-	// Validate AllowedZoneIDs belong to the target tenant.
-	// Global profiles (TenantID=nil) cannot carry tenant-local zone IDs because they are reusable across tenants.
-	if len(body.AllowedZoneIDs) > 0 && profileTenantID == nil {
-		errBadRequest(w, "allowed_zone_ids require a tenant-scoped permission profile")
-		return
-	}
-	if len(body.AllowedZoneIDs) > 0 && profileTenantID != nil {
-		for _, zoneID := range body.AllowedZoneIDs {
-			zone, err := h.store.GetZone(r.Context(), zoneID)
-			if err != nil {
-				h.logger.Err(err).Msg("validating allowed zone")
-				errInternal(w)
-				return
-			}
-			if zone == nil || zone.TenantID != *profileTenantID {
-				errBadRequest(w, fmt.Sprintf("zone %s not found or does not belong to target tenant", zoneID))
-				return
-			}
-		}
-	}
-
-	if err := h.store.CreatePermissionProfile(r.Context(), profile); err != nil {
-		h.logger.Err(err).Msg("failed to create permission profile")
-		errInternal(w)
+	profile, err := h.service.CreateProfile(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), body)
+	if err != nil {
+		respondAppError(w, h.logger, err)
 		return
 	}
 	created(w, profile)
@@ -138,167 +66,35 @@ func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request
 
 // UpdateProfile updates an existing permission profile.
 func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	actor := middleware.ActorFromContext(r.Context())
-	tenant := middleware.TenantFromCtx(r.Context())
-
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid id")
 		return
 	}
-
-	existing, err := h.store.GetPermissionProfile(r.Context(), id)
-	if err != nil {
-		h.logger.Err(err).Msg("failed to get permission profile")
-		errInternal(w)
-		return
-	}
-	if existing == nil {
-		errNotFound(w, "permission profile not found")
-		return
-	}
-	if existing.IsSystem {
-		errForbidden(w, "cannot modify system profile")
-		return
-	}
-
-	if !actor.IsSuperAdmin {
-		if tenant == nil {
-			errForbidden(w, "no tenant context")
-			return
-		}
-		if existing.TenantID == nil || *existing.TenantID != tenant.ID {
-			errNotFound(w, "permission profile not found")
-			return
-		}
-	}
-
-	var body struct {
-		Name              *string     `json:"name,omitempty"`
-		Description       *string     `json:"description,omitempty"`
-		CanSend           *bool       `json:"can_send,omitempty"`
-		DailySendQuota    *int        `json:"daily_send_quota,omitempty"`
-		DailyReceiveQuota *int        `json:"daily_receive_quota,omitempty"`
-		MaxMailboxes      *int        `json:"max_mailboxes,omitempty"`
-		MaxDomains        *int        `json:"max_domains,omitempty"`
-		AllowedZoneIDs    []uuid.UUID `json:"allowed_zone_ids,omitempty"`
-		CanCreateDomains  *bool       `json:"can_create_domains,omitempty"`
-		CanCreateRoutes   *bool       `json:"can_create_routes,omitempty"`
-		CanCreateAPIKeys  *bool       `json:"can_create_api_keys,omitempty"`
-	}
+	var body permissions.UpdateInput
 	if err := decodeBody(r, &body); err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
 
-	if body.Name != nil {
-		existing.Name = *body.Name
-	}
-	if body.Description != nil {
-		existing.Description = *body.Description
-	}
-	if body.CanSend != nil {
-		existing.CanSend = *body.CanSend
-	}
-	if body.DailySendQuota != nil {
-		existing.DailySendQuota = *body.DailySendQuota
-	}
-	if body.DailyReceiveQuota != nil {
-		existing.DailyReceiveQuota = *body.DailyReceiveQuota
-	}
-	if body.MaxMailboxes != nil {
-		existing.MaxMailboxes = *body.MaxMailboxes
-	}
-	if body.MaxDomains != nil {
-		existing.MaxDomains = *body.MaxDomains
-	}
-	if body.AllowedZoneIDs != nil {
-		existing.AllowedZoneIDs = body.AllowedZoneIDs
-	}
-	if body.CanCreateDomains != nil {
-		existing.CanCreateDomains = *body.CanCreateDomains
-	}
-	if body.CanCreateRoutes != nil {
-		existing.CanCreateRoutes = *body.CanCreateRoutes
-	}
-	if body.CanCreateAPIKeys != nil {
-		existing.CanCreateAPIKeys = *body.CanCreateAPIKeys
-	}
-
-	// Validate AllowedZoneIDs belong to the profile's tenant.
-	// Global profiles (TenantID=nil) cannot carry tenant-local zone IDs because they are reusable across tenants.
-	if body.AllowedZoneIDs != nil && len(body.AllowedZoneIDs) > 0 && existing.TenantID == nil {
-		errBadRequest(w, "allowed_zone_ids require a tenant-scoped permission profile")
+	profile, err := h.service.UpdateProfile(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id, body)
+	if err != nil {
+		respondAppError(w, h.logger, err)
 		return
 	}
-	if body.AllowedZoneIDs != nil && len(body.AllowedZoneIDs) > 0 && existing.TenantID != nil {
-		for _, zoneID := range body.AllowedZoneIDs {
-			zone, err := h.store.GetZone(r.Context(), zoneID)
-			if err != nil {
-				h.logger.Err(err).Msg("validating allowed zone")
-				errInternal(w)
-				return
-			}
-			if zone == nil || zone.TenantID != *existing.TenantID {
-				errBadRequest(w, fmt.Sprintf("zone %s not found or does not belong to target tenant", zoneID))
-				return
-			}
-		}
-	}
-
-	if err := h.store.UpdatePermissionProfile(r.Context(), existing); err != nil {
-		h.logger.Err(err).Msg("failed to update permission profile")
-		errInternal(w)
-		return
-	}
-	ok(w, existing)
+	ok(w, profile)
 }
 
 // DeleteProfile deletes a permission profile.
 func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request) {
-	actor := middleware.ActorFromContext(r.Context())
-	tenant := middleware.TenantFromCtx(r.Context())
-
 	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid id")
 		return
 	}
 
-	existing, err := h.store.GetPermissionProfile(r.Context(), id)
-	if err != nil {
-		h.logger.Err(err).Msg("failed to get permission profile")
-		errInternal(w)
-		return
-	}
-	if existing == nil {
-		errNotFound(w, "permission profile not found")
-		return
-	}
-	if existing.IsSystem {
-		errForbidden(w, "cannot delete system profile")
-		return
-	}
-
-	if !actor.IsSuperAdmin {
-		if tenant == nil {
-			errForbidden(w, "no tenant context")
-			return
-		}
-		if existing.TenantID == nil || *existing.TenantID != tenant.ID {
-			errNotFound(w, "permission profile not found")
-			return
-		}
-	}
-
-	var deleteTenantID *uuid.UUID
-	if !actor.IsSuperAdmin && tenant != nil {
-		deleteTenantID = &tenant.ID
-	}
-
-	if err := h.store.DeletePermissionProfile(r.Context(), id, deleteTenantID); err != nil {
-		h.logger.Err(err).Msg("failed to delete permission profile")
-		errInternal(w)
+	if err := h.service.DeleteProfile(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id); err != nil {
+		respondAppError(w, h.logger, err)
 		return
 	}
 	noContent(w)
@@ -306,31 +102,15 @@ func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request
 
 // GetUserPermission returns the effective permission for a user.
 func (h *PermissionHandler) GetUserPermission(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
-	if tenant == nil {
-		errForbidden(w, "no tenant context")
-		return
-	}
 	userID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
 		return
 	}
-	user, err := h.store.GetUser(r.Context(), userID)
-	if err != nil {
-		h.logger.Err(err).Str("user_id", userID.String()).Msg("failed to get user")
-		errInternal(w)
-		return
-	}
-	if user == nil || user.TenantID != tenant.ID {
-		errNotFound(w, "user not found")
-		return
-	}
 
-	perm, err := h.store.EffectivePermission(r.Context(), userID)
+	perm, err := h.service.GetUserPermission(r.Context(), tenantCtx(r), userID)
 	if err != nil {
-		h.logger.Err(err).Str("user_id", userID.String()).Msg("failed to get effective permission")
-		errInternal(w)
+		respondAppError(w, h.logger, err)
 		return
 	}
 	ok(w, perm)
@@ -338,84 +118,35 @@ func (h *PermissionHandler) GetUserPermission(w http.ResponseWriter, r *http.Req
 
 // SetUserPermissionOverride sets or updates a user's permission override.
 func (h *PermissionHandler) SetUserPermissionOverride(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
-	if tenant == nil {
-		errForbidden(w, "no tenant context")
-		return
-	}
 	userID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
 		return
 	}
-	user, err := h.store.GetUser(r.Context(), userID)
-	if err != nil {
-		h.logger.Err(err).Str("user_id", userID.String()).Msg("failed to get user")
-		errInternal(w)
-		return
-	}
-	if user == nil || user.TenantID != tenant.ID {
-		errNotFound(w, "user not found")
-		return
-	}
-
 	var body models.UserPermissionOverride
 	if err := decodeBody(r, &body); err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	body.UserID = userID
 
-	// Validate AllowedZoneIDs belong to the user's tenant.
-	if len(body.AllowedZoneIDs) > 0 {
-		for _, zoneID := range body.AllowedZoneIDs {
-			zone, err := h.store.GetZone(r.Context(), zoneID)
-			if err != nil {
-				h.logger.Err(err).Msg("validating override zone")
-				errInternal(w)
-				return
-			}
-			if zone == nil || zone.TenantID != tenant.ID {
-				errBadRequest(w, fmt.Sprintf("zone %s not found or does not belong to tenant", zoneID))
-				return
-			}
-		}
-	}
-
-	if err := h.store.UpsertUserPermissionOverride(r.Context(), &body); err != nil {
-		h.logger.Err(err).Str("user_id", userID.String()).Msg("failed to upsert permission override")
-		errInternal(w)
+	override, err := h.service.SetUserPermissionOverride(r.Context(), tenantCtx(r), userID, &body)
+	if err != nil {
+		respondAppError(w, h.logger, err)
 		return
 	}
-	ok(w, body)
+	ok(w, override)
 }
 
 // DeleteUserPermissionOverride deletes a user's permission override.
 func (h *PermissionHandler) DeleteUserPermissionOverride(w http.ResponseWriter, r *http.Request) {
-	tenant := middleware.TenantFromCtx(r.Context())
-	if tenant == nil {
-		errForbidden(w, "no tenant context")
-		return
-	}
 	userID, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
 		return
 	}
-	user, err := h.store.GetUser(r.Context(), userID)
-	if err != nil {
-		h.logger.Err(err).Str("user_id", userID.String()).Msg("failed to get user")
-		errInternal(w)
-		return
-	}
-	if user == nil || user.TenantID != tenant.ID {
-		errNotFound(w, "user not found")
-		return
-	}
 
-	if err := h.store.DeleteUserPermissionOverride(r.Context(), userID); err != nil {
-		h.logger.Err(err).Str("user_id", userID.String()).Msg("failed to delete permission override")
-		errInternal(w)
+	if err := h.service.DeleteUserPermissionOverride(r.Context(), tenantCtx(r), userID); err != nil {
+		respondAppError(w, h.logger, err)
 		return
 	}
 	noContent(w)
@@ -429,10 +160,9 @@ func (h *PermissionHandler) MyPermissions(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	perm, err := h.store.EffectivePermission(r.Context(), user.ID)
+	perm, err := h.service.MyPermissions(r.Context(), user.ID)
 	if err != nil {
-		h.logger.Err(err).Str("user_id", user.ID.String()).Msg("failed to get own effective permission")
-		errInternal(w)
+		respondAppError(w, h.logger, err)
 		return
 	}
 	ok(w, perm)

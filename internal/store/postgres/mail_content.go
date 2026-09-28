@@ -6,8 +6,8 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"strings"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 )
@@ -209,8 +209,8 @@ var _ company.ContentIndexer = (*PgStore)(nil)
 // RetryFailedMailIndex is bounded, company-scoped, audited, and excludes live
 // leases. Repeating a request cannot retry work already requeued/processing.
 func (s *PgStore) RetryFailedMailIndex(ctx context.Context, a authz.Actor, reason string) (int, error) {
-	reason = strings.TrimSpace(reason)
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return 0, app.BadRequest("documented recovery reason required (8-1000 bytes)")
 	}
 	n := 0

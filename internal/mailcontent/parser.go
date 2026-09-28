@@ -66,6 +66,24 @@ func SafeFilename(name string) string {
 func Parts(env *enmime.Envelope) []*enmime.Part {
 	return append(append([]*enmime.Part{}, env.Attachments...), env.Inlines...)
 }
+
+// ParseBounded enforces the package limits (MaxBytes raw, maxParts parts) on an
+// in-memory message and returns the parsed envelope. It is the single bounded
+// parse entry: Parser.load uses it for the HTTP read path and the ingest
+// acceptance paths call it directly, so no caller parses unbounded MIME.
+func ParseBounded(raw []byte) (*enmime.Envelope, error) {
+	if int64(len(raw)) > MaxBytes {
+		return nil, errors.New("message exceeds 25 MiB parser limit")
+	}
+	env, err := enmime.ReadEnvelope(bytes.NewReader(raw))
+	if err != nil {
+		return nil, errors.New("MIME parsing failed")
+	}
+	if len(Parts(env)) > maxParts {
+		return nil, errors.New("MIME part limit exceeded")
+	}
+	return env, nil
+}
 func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -103,17 +121,11 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 		if e != nil {
 			return nil, e
 		}
-		if int64(len(raw)) > MaxBytes {
-			return nil, errors.New("message exceeds 25 MiB parser limit")
-		}
-		env, e := enmime.ReadEnvelope(bytes.NewReader(raw))
+		env, e := ParseBounded(raw)
 		if e != nil {
-			return nil, errors.New("MIME parsing failed")
+			return nil, e
 		}
 		parts := Parts(env)
-		if len(parts) > maxParts {
-			return nil, errors.New("MIME part limit exceeded")
-		}
 		size := int64(len(raw) + len(env.Text) + len(env.HTML))
 		for _, f := range parts {
 			size += int64(len(f.Content))

@@ -521,35 +521,15 @@ func (s *Service) capabilitiesForJob(ctx context.Context, actor authz.Actor, job
 	return caps
 }
 
-// RedactOutboundJob builds the actor-safe view of a job. Copy before
-// redacting: cached/shared store objects and delivery state must not be
-// mutated by presentation. RcptTo contains BCC; protocol errors may echo it.
+// RedactOutboundJob builds the actor-safe view of a job. It stays the single
+// entry point handlers call; the copy/redact rules and placeholder copy live
+// in redaction.go, keyed on the ContentAllowed decision below.
 func (s *Service) RedactOutboundJob(ctx context.Context, actor authz.Actor, job *models.OutboundJob) (*models.OutboundJob, error) {
 	allowed, err := s.ContentAllowed(ctx, actor, job)
 	if err != nil {
 		return nil, err
 	}
-	cp := *job
-	cp.DeliveryToken = nil
-	cp.RawMIME = nil
-	cp.ContentRedacted = !allowed
-	cp.DeliveryUncertain = job.InFlightDomain != "" && job.State != models.OutboundProcessing
-	if !allowed {
-		cp.TextBody = ""
-		cp.HTMLBody = ""
-		cp.BCC = nil
-		cp.HeadersJSON = nil
-		cp.AttachmentIDs = nil
-		cp.InFlightDomain = ""
-		cp.RcptTo = append(append([]string{}, job.To...), job.CC...)
-		if cp.LastError != "" {
-			cp.LastError = "Delivery details restricted; inspect status and SMTP code"
-		}
-		if cp.SMTPResponse != "" {
-			cp.SMTPResponse = "Protocol response restricted"
-		}
-	}
-	return &cp, nil
+	return RedactOutboundJobView(job, allowed), nil
 }
 
 func canAccessOutboundJob(actor authz.Actor, tenantID uuid.UUID, job *models.OutboundJob) bool {

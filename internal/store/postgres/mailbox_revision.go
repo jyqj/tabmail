@@ -37,3 +37,45 @@ func claimMailboxRevision(ctx context.Context, tx pgx.Tx, tenant, mailbox uuid.U
 	}
 	return nil
 }
+
+// transferOwnedMailboxes moves every mailbox owned by the departing member to
+// the successor during offboarding. It takes the same companyTx tenant lock as
+// the single-mailbox commands, then locks the owned rows in a stable
+// `ORDER BY id` scan so no reverse order is introduced against handover or
+// grant writers, and advances each revision through claimMailboxRevision —
+// offboarding never increments lifecycle_revision with its own statement.
+func transferOwnedMailboxes(ctx context.Context, tx pgx.Tx, tenant, from, to uuid.UUID) error {
+	type ownedMailbox struct {
+		id       uuid.UUID
+		revision int64
+	}
+	rows, err := tx.Query(ctx, `SELECT id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2 ORDER BY id FOR UPDATE`, tenant, from)
+	if err != nil {
+		return err
+	}
+	var batch []ownedMailbox
+	for rows.Next() {
+		var m ownedMailbox
+		if err := rows.Scan(&m.id, &m.revision); err != nil {
+			rows.Close()
+			return err
+		}
+		batch = append(batch, m)
+	}
+	if err := rows.Err(); err != nil {
+		rows.Close()
+		return err
+	}
+	rows.Close()
+	for _, m := range batch {
+		// The rows are FOR UPDATE-locked, so the CAS below always matches;
+		// routing through it keeps the revision increment in one place.
+		if err := claimMailboxRevision(ctx, tx, tenant, m.id, m.revision); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$2 WHERE tenant_id=$1 AND id=$3`, tenant, to, m.id); err != nil {
+			return err
+		}
+	}
+	return nil
+}

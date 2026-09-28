@@ -7,26 +7,17 @@ import (
 	"github.com/google/uuid"
 	"net/textproto"
 	"tabmail/internal/authz"
-	"tabmail/internal/company"
+	"tabmail/internal/delivery"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
-
-type recipientStore interface {
-	ListOutboundRecipients(context.Context, uuid.UUID, uuid.UUID) ([]company.Recipient, error)
-	BeginOutboundRecipient(context.Context, uuid.UUID, *uuid.UUID, string) (bool, error)
-	CompleteOutboundRecipient(context.Context, uuid.UUID, *uuid.UUID, string, string, int, string) error
-}
 
 // A transaction per envelope recipient is deliberate: a rejected RCPT cannot
 // poison valid recipients at that domain. It costs more relay connections than
 // batching, but keeps every accepted/permanent/uncertain result independently
 // fenced. The full To/CC headers stay intact and BCC stays envelope-only.
 func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, token *uuid.UUID, mime []byte) error {
-	st, ok := s.store.(recipientStore)
-	if !ok {
-		return fmt.Errorf("per-recipient ledger unavailable")
-	}
+	st := s.store
 	recipients, e := st.ListOutboundRecipients(ctx, j.TenantID, j.ID)
 	if e != nil {
 		return e
@@ -37,12 +28,12 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 	temporary, permanent := 0, 0
 	for _, rcpt := range recipients {
 		switch rcpt.State {
-		case "accepted":
+		case delivery.Accepted:
 			continue
-		case "permanent":
+		case delivery.Permanent:
 			permanent++
 			continue
-		case "uncertain":
+		case delivery.Uncertain:
 			return s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance is uncertain; operator review required", false)
 		}
 		if err := s.ValidateJobAuthorization(ctx, j); err != nil {
@@ -84,26 +75,26 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 		if errors.Is(deliveryErr, store.ErrOutboundUncertain) {
 			return s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance uncertain: "+rcpt.Address, false)
 		}
-		state, code, diagnostic := "accepted", 250, "Accepted by next hop"
+		state, code, diagnostic := delivery.Accepted, 250, "Accepted by next hop"
 		if deliveryErr != nil {
-			state = "temporary"
+			state = delivery.Temporary
 			code = 0
 			diagnostic = deliveryErr.Error()
 			var reply *textproto.Error
 			if errors.As(deliveryErr, &reply) {
 				code = reply.Code
 				if code >= 500 && code < 600 {
-					state = "permanent"
+					state = delivery.Permanent
 				}
 			}
 		}
 		if err = st.CompleteOutboundRecipient(ctx, j.ID, token, rcpt.Address, state, code, diagnostic); err != nil {
 			return fmt.Errorf("%w: recipient checkpoint: %v", store.ErrOutboundUncertain, err)
 		}
-		if state == "temporary" {
+		if state == delivery.Temporary {
 			temporary++
 		}
-		if state == "permanent" {
+		if state == delivery.Permanent {
 			permanent++
 		}
 	}

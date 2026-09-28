@@ -7,8 +7,8 @@ import (
 
 	"github.com/google/uuid"
 	"tabmail/internal/app"
+	"tabmail/internal/authn"
 	"tabmail/internal/authz"
-	"tabmail/internal/mailtoken"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/store"
@@ -102,7 +102,7 @@ func (r *mailboxResolver) Resolve(ctx context.Context, address string, viewer Vi
 		if strings.TrimSpace(viewer.BearerToken) == "" {
 			return nil, accessDeniedOrNotFound(viewer, "mailbox token required")
 		}
-		claims, err := mailtoken.Verify(r.tokenSecret, viewer.BearerToken)
+		claims, err := authn.VerifyMailboxToken(r.tokenSecret, viewer.BearerToken)
 		if err != nil || claims.MailboxID != mb.ID.String() {
 			return nil, accessDeniedOrNotFound(viewer, "invalid mailbox token")
 		}

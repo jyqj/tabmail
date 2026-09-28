@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"tabmail/internal/delivery"
 	"time"
 
 	"tabmail/internal/app"
@@ -171,6 +172,7 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 }
 
 func prepareOutboundJob(job *models.OutboundJob) {
+	job.RecipientLedger = true
 	if job.ID == uuid.Nil {
 		job.ID = uuid.New()
 	}
@@ -312,9 +314,8 @@ func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerL
 
 	if scope.ReaderUserID != nil && !scope.AllInTenant {
 		n++
-		u := "$" + strconv.Itoa(n)
 		args = append(args, *scope.ReaderUserID)
-		shared := `sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE m.tenant_id=$1 AND (m.expires_at IS NULL OR m.expires_at>clock_timestamp()) AND (m.owner_user_id=` + u + ` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=` + u + ` AND g.can_read)))`
+		shared := `sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE ` + readableMailboxPredicate(1, n) + `)`
 		where[len(where)-1] = "(" + where[len(where)-1] + " OR " + shared + ")"
 	}
 	if len(scope.AllowedZoneIDs) > 0 {
@@ -352,23 +353,25 @@ func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerL
 // of handing them to another sender. Network calls are bounded to one minute,
 // comfortably below this five-minute lease.
 func (s *PgStore) ClaimOutboundJobs(ctx context.Context, _ time.Time, _ int) ([]*models.OutboundJob, error) {
-	_, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state='failed',last_error='Expired in-flight SMTP operation; acceptance uncertain, review required',
+	_, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=$1::outbound_state,last_error='Expired in-flight SMTP operation; acceptance uncertain, review required',
  claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE state='processing' AND in_flight_domain<>'' AND (lease_until IS NULL OR lease_until<=clock_timestamp())`)
+ WHERE state=$2::outbound_state AND in_flight_domain<>'' AND (lease_until IS NULL OR lease_until<=clock_timestamp())`,
+		models.OutboundFailed, models.OutboundProcessing)
 	if err != nil {
 		return nil, err
 	}
 	rows, err := s.pool.Query(ctx, `WITH candidate AS (
  SELECT id FROM outbound_jobs WHERE in_flight_domain='' AND
- ((state IN ('pending','retry') AND next_attempt_at<=clock_timestamp()) OR
- (state='processing' AND (lease_until IS NULL OR lease_until<=clock_timestamp())))
+ ((state IN ($1::outbound_state,$2::outbound_state) AND next_attempt_at<=clock_timestamp()) OR
+ (state=$3::outbound_state AND (lease_until IS NULL OR lease_until<=clock_timestamp())))
  ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED)
- UPDATE outbound_jobs j SET state='processing',attempts=j.attempts+1,claimed_at=clock_timestamp(),
+ UPDATE outbound_jobs j SET state=$3::outbound_state,attempts=j.attempts+1,claimed_at=clock_timestamp(),
  lease_until=clock_timestamp()+interval '5 minutes',delivery_token=gen_random_uuid(),updated_at=clock_timestamp()
  FROM candidate WHERE j.id=candidate.id RETURNING j.id,j.tenant_id,j.user_id,j.api_key_id,j.mail_from,j.rcpt_to,j.subject,
  j.text_body,j.html_body,j.headers_json,j.raw_mime,j.zone_id,j.state,j.attempts,j.max_attempts,j.last_error,j.next_attempt_at,
  j.claimed_at,j.lease_until,j.smtp_code,j.smtp_response,j.message_id_header,j.delivery_token,j.created_at,j.updated_at,
- j.to_addrs,j.cc_addrs,j.bcc_addrs,j.delivered_domains,j.in_flight_domain,j.sender_user_id,j.sender_key_id,j.sender_mailbox_id,j.template_name,j.template_version_id,j.content_digest,j.submit_actor,j.idempotency_key,j.request_hash,j.recipient_ledger,j.attachment_ids,j.draft_id`)
+ j.to_addrs,j.cc_addrs,j.bcc_addrs,j.delivered_domains,j.in_flight_domain,j.sender_user_id,j.sender_key_id,j.sender_mailbox_id,j.template_name,j.template_version_id,j.content_digest,j.submit_actor,j.idempotency_key,j.request_hash,j.recipient_ledger,j.attachment_ids,j.draft_id`,
+		models.OutboundPending, models.OutboundRetry, models.OutboundProcessing)
 	if err != nil {
 		return nil, err
 	}
@@ -384,7 +387,8 @@ func (s *PgStore) ClaimOutboundJobs(ctx context.Context, _ time.Time, _ int) ([]
 	return out, rows.Err()
 }
 
-var ErrDeliveryTokenMismatch = errors.New("delivery token mismatch: job was re-claimed")
+// Compatibility alias: callers can use errors.Is against the store sentinel.
+var ErrDeliveryTokenMismatch = store.ErrDeliveryTokenMismatch
 
 func requireDeliveryUpdate(tag pgconn.CommandTag, err error) error {
 	if err != nil {
@@ -396,36 +400,18 @@ func requireDeliveryUpdate(tag pgconn.CommandTag, err error) error {
 	return nil
 }
 func (s *PgStore) MarkOutboundJobSent(ctx context.Context, id uuid.UUID, token *uuid.UUID, code int, response, messageID string) error {
-	if token == nil {
-		return ErrDeliveryTokenMismatch
-	}
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state='sent',smtp_code=$3,smtp_response=$4,message_id_header=$5,last_error='',
- claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND delivery_token=$2 AND state='processing' AND lease_until>clock_timestamp() AND in_flight_domain=''`, id, *token, code, response, messageID)
-	return requireDeliveryUpdate(tag, err)
+	return s.finalizeOutbound(ctx, id, token, delivery.FinishSent, "", nil, &code, &response, &messageID)
 }
 func (s *PgStore) MarkOutboundJobRetry(ctx context.Context, id uuid.UUID, token *uuid.UUID, reason string, next time.Time) error {
-	if token == nil {
-		return ErrDeliveryTokenMismatch
-	}
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=(CASE WHEN in_flight_domain='' THEN 'retry' ELSE 'failed' END)::outbound_state,
- last_error=CASE WHEN in_flight_domain='' THEN $3 ELSE 'Acceptance uncertain; review required: '||$3 END,next_attempt_at=$4,
- claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND delivery_token=$2 AND state='processing' AND lease_until>clock_timestamp()`, id, *token, boundedIngressError(reason), next.UTC())
-	return requireDeliveryUpdate(tag, err)
+	next = next.UTC()
+	return s.finalizeOutbound(ctx, id, token, delivery.FinishRetry, reason, &next, nil, nil, nil)
 }
 func (s *PgStore) MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, token *uuid.UUID, reason string, dead bool) error {
-	if token == nil {
-		return ErrDeliveryTokenMismatch
-	}
-	state := "failed"
+	event := delivery.FinishFailed
 	if dead {
-		state = "dead"
+		event = delivery.FinishDead
 	}
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=$3,last_error=$4,
- claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND delivery_token=$2 AND state='processing' AND lease_until>clock_timestamp()`, id, *token, state, boundedIngressError(reason))
-	return requireDeliveryUpdate(tag, err)
+	return s.finalizeOutbound(ctx, id, token, event, reason, nil, nil, nil, nil)
 }
 
 func (s *PgStore) CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error) {
@@ -481,9 +467,10 @@ func countOutboundByIdentitySinceQuery(ctx context.Context, querier outboundJobQ
 }
 
 func (s *PgStore) RequeueOutboundJob(ctx context.Context, id uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state='pending',last_error='',next_attempt_at=clock_timestamp(),
+	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=$2::outbound_state,last_error='',next_attempt_at=clock_timestamp(),
  claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
- WHERE id=$1 AND state IN ('dead','failed') AND in_flight_domain=''`, id)
+ WHERE id=$1 AND state IN ($3::outbound_state,$4::outbound_state) AND in_flight_domain=''`,
+		id, models.OutboundPending, models.OutboundDead, models.OutboundFailed)
 	if err != nil {
 		return err
 	}

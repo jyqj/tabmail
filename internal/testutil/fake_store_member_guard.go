@@ -12,24 +12,26 @@ import (
 )
 
 func (s *FakeStore) memberActorLocked(actor authz.Actor, tenant uuid.UUID) (authz.Actor, error) {
-	u := s.users[actor.ID]
-	if actor.Type != authz.PrincipalUser || actor.TenantID != tenant || u == nil || !u.IsActive || (u.TenantID != tenant && u.Role != models.RoleSuperAdmin) {
+	refreshed, ok := authz.RefreshMemberActor(actor, tenant, s.users[actor.ID])
+	if !ok {
 		return actor, authz.ErrForbidden("administrator unavailable")
 	}
-	actor.IsAdmin = u.Role == models.RoleAdmin
-	actor.IsSuperAdmin = u.Role == models.RoleSuperAdmin
-	return actor, nil
+	return refreshed, nil
 }
 func (s *FakeStore) guardRemovalLocked(old, next *models.User) error {
-	if !models.IsActiveAdministrator(old) || models.IsActiveAdministrator(next) {
+	if !authz.MemberRemovalRequiresAdminCount(old, next) {
 		return nil
 	}
+	others := 0
 	for _, u := range s.users {
 		if u.TenantID == old.TenantID && u.ID != old.ID && models.IsActiveAdministrator(u) {
-			return nil
+			others++
 		}
 	}
-	return store.ErrLastAdministrator
+	if authz.MemberRemovalBlockedAsLastAdmin(old, next, others) {
+		return store.ErrLastAdministrator
+	}
+	return nil
 }
 func (s *FakeStore) UpdateUserGuarded(_ context.Context, actor authz.Actor, tenant, target uuid.UUID, patch models.UserAdminPatch) (*models.User, error) {
 	s.mu.Lock()

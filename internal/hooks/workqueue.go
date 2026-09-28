@@ -64,8 +64,16 @@ func (a *outboxStore) MarkRetry(ctx context.Context, job *workqueue.Job[*outboxP
 	return a.store.MarkOutboxEventRetry(ctx, job.ID, lastError, nextAttemptAt)
 }
 
-// MarkDead is unreachable for outbox (FixedBackoff never returns dead). It is
-// implemented as a retry to keep the Store contract satisfied.
+// MarkDead documents the adapter protocol split across the two workqueue
+// consumers. Outbound (internal/outbound/workqueue.go) is the mirror image:
+// its MarkDone is a no-op because the SMTP handler owns the durable success
+// write, while its MarkDead terminates the job. The outbox adapter is the
+// opposite — MarkDone (MarkOutboxEventDone) is the real completion write, and
+// MarkDead is unreachable in practice because FixedBackoff.Dead always
+// returns false, so the worker only routes through MarkDone/MarkRetry. Should
+// a future policy ever route here, the behavior is a retry
+// (MarkOutboxEventRetry with nextAttemptAt=now): an outbox event is never
+// dropped or dead-lettered; only webhook deliveries dead-letter.
 func (a *outboxStore) MarkDead(ctx context.Context, job *workqueue.Job[*outboxPayload], lastError string) error {
 	return a.store.MarkOutboxEventRetry(ctx, job.ID, lastError, time.Now().UTC())
 }

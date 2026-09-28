@@ -110,10 +110,7 @@ func submissionScopeFor(a authz.Actor, argBase int, allowSubmitter bool) (string
 		n++
 		u := "$" + strconv.Itoa(n)
 		args = append(args, *uid)
-		readable := `s.sender_mailbox_id IN (
-			SELECT m.id FROM mailboxes m WHERE m.tenant_id=$` + strconv.Itoa(argBase) + `
-			 AND (m.expires_at IS NULL OR m.expires_at>clock_timestamp())
-			 AND (m.owner_user_id=` + u + ` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=` + u + ` AND g.can_read)))`
+		readable := `s.sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE ` + readableMailboxPredicate(argBase, n) + `)`
 		if allowSubmitter {
 			where = append(where, `(s.user_id=`+u+` OR s.sender_user_id=`+u+` OR `+readable+`)`)
 		} else {

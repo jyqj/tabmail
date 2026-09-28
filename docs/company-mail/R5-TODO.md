@@ -1402,6 +1402,29 @@ python3 scripts/check_i18n_keys.py
 - [B01-J报告](R5-B01-J-VALIDATION.md)、[机器证据](evidence/R5-B01-J.json)、基线/候选/完整后端/三轮/七项审计及各失败日志均留存。未push/PR/合并/部署，前端/生产浏览器/远端CI/当前依赖审计/S-M性能未跑。
 - 总计仍6/171：070跨语句授权和内容期限/其他多资源边界未齐，080目标协议仍待执行验收。B01-K从剩余范围继续，不再把已验证索引候选当运行阻塞，不越依赖进入P1。
 
+### AR 架构深化九组收敛（2026-09-29）
+
+> 本批是用户明确授权的一次跨阶段架构收敛，不新增第二套活跃 TODO，也不改变原 171 项分母。下面的 AR01–AR09 是本轮实施映射；只有其直接覆盖的结构性子项获得证据，原父项、阶段门禁和 G0–G11 不因映射而自动完成。
+
+| 编号 | 状态 | 与 R5 的关系及边界 |
+|---|---|---|
+| AR01 凭证/审计/邀请策略单源 | completed | 新发现并修复注册 8 字节与改密/激活 12 字节漂移；统一 break-glass 等审计 reason。属于 R5 外的新缺陷与 P8 收敛支撑，不改 171 计数。 |
+| AR02 可读邮箱谓词与存活时钟 | completed | 落实 `R5-P8-050` 的具体窄端口；只统一普通读取资格和 wall-clock liveness，send-only 管理元数据/留存保护不冒充可读授权。 |
+| AR03 投递状态机共享策略 | completed | 落实 `R5-P8-060` 的状态语义抓手；SQL 原子并发守卫仍由 Pg adapter 持有。 |
+| AR04 legacy 出站退役与 ledger 迁移 | completed | 提前落实 `R5-P8-100` 的一部分，并为 P6 可靠性测试提供真实路径；迁移歧义结果 fail closed，不自动重发。 |
+| AR05 app/permissions 与统一错误映射 | completed_architecture_only | 落实 P1/B02 与 `R5-P8-030` 的应用层前置；未实现/关闭 P1 revision、CAS、增量迁移或完整权限编辑协议。 |
+| AR06 ingest 内核合一 | completed | 作为 P6 结构性前置；保留 `Durable=false` 外壳，不把两种事务承诺错误合并。 |
+| AR07 company Go↔TS 契约 | partial | 16 shared + 32 company DTO 的字段/nullable/type/array/nested 门禁完成并接入现有 CI；OpenAPI YAML 未编译，`R5-P8-080` 不关闭。 |
+| AR08 消费方窄端口/共享策略 | completed_scoped | 落实 `R5-P8-050/090` 的实际消费者与 Pg/Fake 策略共享；装配用 `store.Store` 保留，不进行无收益全量接口爆炸。 |
+| AR09 快速收口包 | completed | retention 死方法、revision helper、mailtoken/authn、脱敏、前端 error predicate、workqueue 契约均收口。 |
+
+- 开始 base SHA：`17fd8e4e570958fcf41f6b4e9a9f7341dd0e15d3`；分支 `refactor/company-mail-architecture-20260929`。
+- 主要改动：统一凭证/审计策略；可读邮箱 SQL 谓词；共享 delivery 状态策略；强制 recipient ledger 和不可逆 `00014` 迁移；`app/permissions`；ingest 公共内核；契约 checker；消费方角色端口；快速删除与前端错误谓词。
+- 兼容/迁移：`00001`–`00013`、Go module 和前端 lockfile 未修改；mailbox token wire format 与 `Durable=false` 保留；`00014` 需要协调停写，旧 writer 由 CHECK 约束拒绝。
+- 预提交验证源码 manifest：`5c754d573ef577b28fe87084ba9ba10d4c56a368a2719700098a6ab074cd9027`。Go build/vet 通过；全量 race 722 run / 721 pass / 0 fail / 1 browser skip，37 package pass / 0 fail；后端证据门禁通过。Python 88/88、契约 16/32、Node 23/23、API inventory 125/7、tsc、Vitest 25 files/115 tests、ESLint、Next production build 均通过；gofmt 与 diff check 通过。
+- 未完成/未执行：OpenAPI YAML 编译、browser journey、远端 CI、生产迁移/部署、性能与依赖审计。未 push/PR/merge/deploy；生产数据未触碰。
+- 本批不新增原清单整项勾选；总计仍 **6/171**。详细实施边界与验收见 [R5 架构深化执行报告](R5-ARCHITECTURE-EXECUTION.md)。
+
 后续每批在本节追加一条，不另建第二套活跃TODO：
 
 ```text

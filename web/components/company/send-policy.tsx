@@ -6,6 +6,7 @@ import {
   type MailSendPolicy,
   type WorkMailbox,
 } from "@/lib/company";
+import { isConflict } from "@/lib/error-code";
 import { ActionButton, Field, inputClass, useAction, useText } from "./common";
 
 type Text = (zh: string, en: string) => string;
@@ -133,7 +134,7 @@ export function MailboxSendPolicyEditor({
             try {
               await setMailboxSendPolicy(mailbox.mailbox.id, choice, revision);
             } catch (error) {
-              if ((error as { error?: { code?: string } }).error?.code === "CONFLICT") {
+              if (isConflict(error)) {
                 setConflict(true);
                 await refresh();
               }

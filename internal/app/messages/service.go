@@ -3,12 +3,12 @@ package messageapp
 import (
 	"context"
 	"io"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/jhillyerd/enmime/v2"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/authz"
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
@@ -262,8 +262,10 @@ func (s *Service) BreakGlassRead(ctx context.Context, address string, msgID uuid
 	if !viewer.IsTenantAdmin() {
 		return nil, app.Forbidden("break-glass is only available to admin users")
 	}
-	if strings.TrimSpace(reason) == "" {
-		return nil, app.BadRequest("reason is required for break-glass access")
+	var reasonErr error
+	reason, reasonErr = credentials.AuditReason(reason)
+	if reasonErr != nil {
+		return nil, app.BadRequest(reasonErr.Error())
 	}
 	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
 	if err != nil {
@@ -315,8 +317,10 @@ func (s *Service) BreakGlassSource(ctx context.Context, address string, msgID uu
 	if !viewer.IsTenantAdmin() {
 		return nil, app.Forbidden("break-glass is only available to admin users")
 	}
-	if strings.TrimSpace(reason) == "" {
-		return nil, app.BadRequest("reason is required for break-glass access")
+	var reasonErr error
+	reason, reasonErr = credentials.AuditReason(reason)
+	if reasonErr != nil {
+		return nil, app.BadRequest(reasonErr.Error())
 	}
 	mb, msg, err := s.lookupMessage(ctx, address, msgID, viewer)
 	if err != nil {

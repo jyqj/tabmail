@@ -4,20 +4,29 @@ import (
 	"errors"
 	"net/http"
 
+	appcore "tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/store"
 )
 
-func (h *UserAdminHandler) writeMemberError(w http.ResponseWriter, err error) {
+// memberAppError maps member-guard domain errors onto the app error kinds the
+// member endpoints have always produced; unknown errors stay internal with
+// their cause preserved for logging.
+func memberAppError(err error) error {
 	switch {
+	case err == nil:
+		return nil
 	case authz.IsAuthzError(err):
-		errForbidden(w, err.Error())
+		return appcore.Forbidden(err.Error())
 	case errors.Is(err, store.ErrMemberNotFound):
-		errNotFound(w, err.Error())
+		return appcore.NotFound(err.Error())
 	case errors.Is(err, store.ErrLastAdministrator), errors.Is(err, store.ErrMemberOwnsMailbox):
-		errConflict(w, err.Error())
+		return appcore.Conflict(err.Error())
 	default:
-		h.logger.Error().Err(err).Msg("guarded member mutation")
-		errInternal(w)
+		return appcore.Internal(err)
 	}
+}
+
+func (h *UserAdminHandler) writeMemberError(w http.ResponseWriter, err error) {
+	respondAppError(w, h.logger, memberAppError(err))
 }

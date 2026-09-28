@@ -2,6 +2,7 @@ package messageapp
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -9,6 +10,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/testutil"
@@ -73,6 +75,31 @@ func TestResolveMailboxOwnerBoundAPIKeyOwnerFallbackAndAllowedZones(t *testing.T
 	}
 	if appErr, ok := app.As(err); !ok || appErr.Kind != app.KindForbidden {
 		t.Fatalf("expected forbidden app error, got %T %v", err, err)
+	}
+}
+
+func TestBreakGlassReasonUsesCredentialPolicy(t *testing.T) {
+	svc := &Service{}
+	viewer := Viewer{IsAdmin: true}
+	messageID := uuid.New()
+	cases := []struct {
+		name   string
+		reason string
+	}{
+		{name: "trimmed too short", reason: "   short   "},
+		{name: "too long", reason: strings.Repeat("x", credentials.MaxAuditReasonBytes+1)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, err := svc.BreakGlassRead(context.Background(), "mailbox@example.test", messageID, viewer, "admin", tc.reason)
+			if appErr, ok := app.As(err); !ok || appErr.Kind != app.KindBadRequest {
+				t.Fatalf("body break-glass error = %T %v, want bad_request", err, err)
+			}
+			_, err = svc.BreakGlassSource(context.Background(), "mailbox@example.test", messageID, viewer, "admin", tc.reason)
+			if appErr, ok := app.As(err); !ok || appErr.Kind != app.KindBadRequest {
+				t.Fatalf("source break-glass error = %T %v, want bad_request", err, err)
+			}
+		})
 	}
 }
 

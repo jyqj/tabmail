@@ -11,8 +11,8 @@ import (
 )
 
 type retentionStore interface {
-	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
-	DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error)
+	// Atomically deletes expired messages and returns affected object keys so
+	// the scanner can release the raw objects through the reference protocol.
 	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
 	PurgeOldIngestJobs(ctx context.Context, before time.Time, limit int) (int, []string, error)
 	EnqueueOrphanRetry(ctx context.Context, key string) error

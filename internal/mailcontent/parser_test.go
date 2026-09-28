@@ -3,6 +3,7 @@ package mailcontent
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"io"
 	"sync"
@@ -86,5 +87,32 @@ func TestParserRejectsOversizedSources(t *testing.T) {
 	obj := &fixtureObjects{raw: bytes.Repeat([]byte("x"), int(MaxBytes)+1)}
 	if _, e := New(obj).Document(context.Background(), uuid.New(), "large"); e == nil {
 		t.Fatal("unbounded input accepted")
+	}
+}
+
+// badMIMEFixture hard-fails enmime: the first header line has no colon, so the
+// parser repairs it as a continuation and the buffered header block then starts
+// with a space, which ReadEmailMIMEHeader rejects as a malformed initial line.
+const badMIMEFixture = "Subject broken no colon\r\n\r\nbody"
+
+func TestParseBoundedAppliesSharedLimits(t *testing.T) {
+	good, e := ParseBounded([]byte(multipartFixture))
+	if e != nil || good == nil || good.GetHeader("Subject") != "parser fixture" {
+		t.Fatal("valid source rejected", e)
+	}
+	if _, e = ParseBounded([]byte(badMIMEFixture)); e == nil {
+		t.Fatal("unparseable MIME accepted")
+	}
+	if _, e = ParseBounded(bytes.Repeat([]byte("x"), int(MaxBytes)+1)); e == nil {
+		t.Fatal("oversized source accepted")
+	}
+	var flood bytes.Buffer
+	flood.WriteString("From: client@test\r\nSubject: flood\r\nContent-Type: multipart/mixed; boundary=B\r\n\r\n")
+	for i := 0; i <= maxParts; i++ {
+		fmt.Fprintf(&flood, "--B\r\nContent-Type: text/plain\r\nContent-Disposition: attachment; filename=p%d.txt\r\n\r\npart\r\n", i)
+	}
+	flood.WriteString("--B--\r\n")
+	if _, e = ParseBounded(flood.Bytes()); e == nil {
+		t.Fatal("part flood accepted")
 	}
 }

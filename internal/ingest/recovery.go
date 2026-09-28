@@ -4,19 +4,16 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha256"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
-	"tabmail/internal/classify"
-
-	"github.com/google/uuid"
-	"github.com/jhillyerd/enmime/v2"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
 	"tabmail/internal/realtime"
 	"tabmail/internal/store"
+
+	"github.com/google/uuid"
 )
 
 func (s *Service) acceptDurable(ctx context.Context, env Envelope, raw []byte) (AcceptResult, error) {
@@ -74,20 +71,14 @@ func (s *Service) processReceipt(ctx context.Context, ledger store.IngressLedger
 	if readErr == nil && (int64(len(raw)) != c.RawSize || fmt.Sprintf("%x", sha256.Sum256(raw)) != c.RawHash) {
 		readErr = permanentIngress("original object size/checksum mismatch; receipt held for recovery")
 	}
-	var subject string
-	var headers json.RawMessage
+	// One shared bounded parse per receipt: every replayed target sees the same
+	// extracted subject/headers/OTP as the immediate path. The parse result is
+	// never a substitute for re-verification — destinations, zone verification,
+	// store policy, tenant config, retention and quota are all re-checked per
+	// target below against current state.
+	var content envelopeContent
 	if readErr == nil {
-		env, _ := enmime.ReadEnvelope(bytes.NewReader(raw))
-		if env != nil {
-			subject = env.GetHeader("Subject")
-			hm := map[string]string{}
-			for _, k := range []string{"From", "To", "Cc", "Date", "Message-Id", "In-Reply-To", "References", "Reply-To", "Content-Type"} {
-				if v := env.GetHeader(k); v != "" {
-					hm[k] = v
-				}
-			}
-			headers, _ = json.Marshal(hm)
-		}
+		content = parseEnvelopeContent(s.logger, raw)
 	}
 	var failures []error
 	for _, target := range targets {
@@ -103,7 +94,7 @@ func (s *Service) processReceipt(ctx context.Context, ledger store.IngressLedger
 		}
 		err = readErr
 		if err == nil {
-			err = s.deliverTarget(ctx, ledger, c, target, raw, subject, headers)
+			err = s.deliverTarget(ctx, ledger, c, target, raw, content)
 		}
 		if err != nil {
 			failures = append(failures, err)
@@ -129,7 +120,14 @@ type permanentIngress string
 
 func (e permanentIngress) Error() string { return string(e) }
 
-func (s *Service) deliverTarget(ctx context.Context, ledger store.IngressLedger, c *store.IngressClaim, t store.IngressTarget, raw []byte, subject string, headers json.RawMessage) error {
+// deliverTarget replays one accepted target. The shells own every re-verified
+// mutable precondition that depends on the frozen identity (mailbox identity,
+// zone verification, route re-fetch); the shared prepareDelivery kernel runs
+// store policy, tenant config, size limit, retention and Message construction
+// against current state. The shared content only carries the immutable parse
+// product (subject/headers/OTP). Terminal kernel rejections map to
+// permanentIngress so accepted bytes are held for review, never discarded.
+func (s *Service) deliverTarget(ctx context.Context, ledger store.IngressLedger, c *store.IngressClaim, t store.IngressTarget, raw []byte, content envelopeContent) error {
 	mb, err := s.store.GetMailbox(ctx, t.MailboxID)
 	if err != nil {
 		return err
@@ -148,42 +146,31 @@ func (s *Service) deliverTarget(ctx context.Context, ledger store.IngressLedger,
 	if err != nil {
 		return err
 	}
-	if !policy.ShouldStoreDomain(mb.ResolvedDomain, pol.DefaultStore, pol.StoreDomains, pol.DiscardDomains) {
-		return permanentIngress("storage policy blocks delivery; accepted bytes retained")
-	}
-	cfg, err := s.store.EffectiveConfig(ctx, t.TenantID)
-	if err != nil {
-		return err
-	}
-	if cfg == nil {
-		return fmt.Errorf("tenant configuration unavailable")
-	}
-	if cfg.MaxMessageBytes > 0 && len(raw) > cfg.MaxMessageBytes {
-		return permanentIngress("tenant size limit exceeded; accepted bytes retained")
-	}
-	var routeRetention *int
-	if mb.RouteID != nil {
-		route, lookupErr := s.store.GetRoute(ctx, *mb.RouteID)
-		if lookupErr != nil {
-			return lookupErr
+	plan, pf := s.prepareDelivery(ctx, deliveryInput{
+		pol: pol, mb: mb, content: content, raw: raw, objKey: c.Job.RawObjectKey,
+		rcpt: t.Address, from: c.Job.MailFrom, at: c.Job.CreatedAt,
+		routeFn: func(ctx context.Context) (*models.DomainRoute, error) {
+			if mb.RouteID == nil {
+				return nil, nil
+			}
+			return s.store.GetRoute(ctx, *mb.RouteID)
+		},
+	})
+	if pf != nil {
+		if pf.terminal() {
+			switch pf.code {
+			case rejectStorePolicyDiscard:
+				return permanentIngress("storage policy blocks delivery; accepted bytes retained")
+			case rejectMaxMessageBytes:
+				return permanentIngress("tenant size limit exceeded; accepted bytes retained")
+			default:
+				return permanentIngress(pf.code)
+			}
 		}
-		if route != nil {
-			routeRetention = route.RetentionHoursOverride
-		}
+		return pf.err
 	}
-	retention := resolveRetention(mb.RetentionHoursOverride, routeRetention, &cfg.RetentionHours, s.fallbackRetentionH)
-	m := &models.Message{TenantID: t.TenantID, MailboxID: t.MailboxID, ZoneID: t.ZoneID, Sender: c.Job.MailFrom,
-		Recipients: []string{t.Address}, Subject: subject, Size: int64(len(raw)), RawObjectKey: c.Job.RawObjectKey, HeadersJSON: headers,
-		ExpiresAt: models.MessageExpiry(mb, retention, c.Job.CreatedAt)}
-	env, _ := enmime.ReadEnvelope(bytes.NewReader(raw))
-	if env != nil {
-		otp := classify.OTPFromMessage(classify.Env{Subject: subject, TextBody: env.Text, HTMLBody: env.HTML, From: c.Job.MailFrom})
-		if otp.Found {
-			m.OTPCode = otp.Code
-			m.OTPConfidence = otp.Confidence
-		}
-	}
-	inserted, err := ledger.DeliverIngress(ctx, c, m, cfg.MaxMessagesPerMailbox, cfg.DailyQuota)
+	m := plan.msg
+	inserted, err := ledger.DeliverIngress(ctx, c, m, plan.cfg.MaxMessagesPerMailbox, plan.cfg.DailyQuota)
 	if err != nil {
 		return err
 	}

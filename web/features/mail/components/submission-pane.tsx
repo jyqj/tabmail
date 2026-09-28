@@ -4,7 +4,7 @@ import { useSWRConfig } from "swr";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import { request } from "@/lib/api/base";
-import type { APIError } from "@/lib/types";
+import { errorReason, isConflict } from "@/lib/error-code";
 import { submission } from "@/lib/company";
 import { useSessionScope } from "@/lib/session";
 import { ActionButton, LoadError, useAction, useText } from "@/components/company/common";
@@ -101,8 +101,8 @@ export function SubmissionPane({ id }: {
                         void detail.mutate();
                     }
                     catch (e) {
-                        if ((e as APIError)?.error?.code === "CONFLICT") {
-                            const reason = (e as APIError)?.error?.reason;
+                        if (isConflict(e)) {
+                            const reason = errorReason(e);
                             toast.error(reason === "state_changed"
                                 ? t("任务状态已变化，请刷新后查看。", "The task state has changed; refresh to see the latest status.")
                                 : t("结果不确定，已禁止重试。请到恢复中心核实下一跳记录后再处理。", "Uncertain outcome: retry is blocked. Review next-hop evidence in the recovery center."));

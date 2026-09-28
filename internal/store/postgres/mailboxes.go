@@ -120,8 +120,7 @@ func (s *PgStore) ListMailboxesScoped(ctx context.Context, scope authz.ZoneListF
 		if scope.GrantedUserID != nil {
 			n++
 			args = append(args, *scope.GrantedUserID)
-			u := "$" + strconv.Itoa(n)
-			rights = append(rights, `((m.expires_at IS NULL OR m.expires_at>clock_timestamp()) AND (m.owner_user_id=`+u+` OR EXISTS(SELECT 1 FROM mailbox_grants g WHERE g.tenant_id=m.tenant_id AND g.mailbox_id=m.id AND g.user_id=`+u+` AND g.can_read)))`)
+			rights = append(rights, readableMailboxPredicate(1, n))
 		}
 		clauses = append(clauses, "("+strings.Join(rights, " OR ")+")")
 	}

@@ -2,11 +2,10 @@ package handlers
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"strings"
+	"tabmail/internal/app/credentials"
 	"time"
 
 	"tabmail/internal/api/middleware"
@@ -292,11 +291,8 @@ func (h *UserAdminHandler) DeleteUserByAdmin(w http.ResponseWriter, r *http.Requ
 }
 
 func generateInviteCode() (string, error) {
-	buf := make([]byte, 24)
-	if _, err := rand.Read(buf); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(buf), nil
+	raw, _, err := credentials.IssueInvitation()
+	return raw, err
 }
 
 func chiURLParam(r *http.Request, key string) string {

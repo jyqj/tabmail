@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import { company, workPath, type WorkGrant, type WorkMailbox, type MailboxGrantSnapshot } from "@/lib/company";
 import type { AdminUser } from "@/lib/types";
+import { isConflict } from "@/lib/error-code";
 import { EmployeeField } from "./employee-field";
 import { ActionButton, Field, inputClass, LoadError, useAction, useText } from "./common";
 
@@ -105,7 +106,7 @@ export function GrantEditor({
                 body: { ...grant, revision: grantRevision },
               });
             } catch (error) {
-              if ((error as { error?: { code?: string } }).error?.code === "CONFLICT") setConflict(true);
+              if (isConflict(error)) setConflict(true);
               throw error;
             }
             setGrant(empty);

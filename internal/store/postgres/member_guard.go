@@ -33,31 +33,29 @@ func lockMemberTenant(ctx context.Context, tx pgx.Tx, tenant uuid.UUID) error {
 }
 
 func currentMemberActor(ctx context.Context, tx pgx.Tx, actor authz.Actor, tenant uuid.UUID) (authz.Actor, error) {
-	if actor.Type != authz.PrincipalUser || actor.TenantID != tenant {
+	if !authz.IsInteractiveMemberPrincipal(actor, tenant) {
 		return actor, authz.ErrForbidden("interactive company administrator required")
 	}
 	u, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 FOR SHARE`, actor.ID))
 	if err != nil {
 		return actor, err
 	}
-	if u == nil || !u.IsActive || (u.TenantID != tenant && u.Role != models.RoleSuperAdmin) {
+	refreshed, ok := authz.RefreshMemberActor(actor, tenant, u)
+	if !ok {
 		return actor, authz.ErrForbidden("administrator no longer active in this company")
 	}
-	actor.IsAdmin = u.Role == models.RoleAdmin
-	actor.IsSuperAdmin = u.Role == models.RoleSuperAdmin
-	actor.Role = u.Role
-	return actor, nil
+	return refreshed, nil
 }
 
 func guardMemberRemoval(ctx context.Context, tx pgx.Tx, old, next *models.User) error {
-	if !models.IsActiveAdministrator(old) || models.IsActiveAdministrator(next) {
+	if !authz.MemberRemovalRequiresAdminCount(old, next) {
 		return nil
 	}
 	var count int
 	if err := tx.QueryRow(ctx, `SELECT count(*) FROM users WHERE tenant_id=$1 AND id<>$2 AND is_active AND role IN ('admin','super_admin')`, old.TenantID, old.ID).Scan(&count); err != nil {
 		return err
 	}
-	if count == 0 {
+	if authz.MemberRemovalBlockedAsLastAdmin(old, next, count) {
 		return store.ErrLastAdministrator
 	}
 	return nil

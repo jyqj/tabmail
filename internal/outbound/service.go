@@ -3,6 +3,7 @@ package outbound
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/mail"
 	"strings"
@@ -28,7 +29,7 @@ const maxRetryDelay = 1 * time.Hour
 type Service struct {
 	workerMu   sync.Mutex
 	cfg        config.Outbound
-	store      store.Store
+	store      Repository
 	adapter    DeliveryAdapter
 	logger     zerolog.Logger
 	objects    store.ObjectStore
@@ -41,7 +42,7 @@ type Service struct {
 // NewService creates a new outbound service. gov is the published-template
 // governance dependency (the production Postgres store implements it); a nil
 // gov fails construction instead of degrading at send time.
-func NewService(cfg config.Outbound, st store.Store, gov TemplateGovernance, logger zerolog.Logger) *Service {
+func NewService(cfg config.Outbound, st Repository, gov TemplateGovernance, logger zerolog.Logger) *Service {
 	if gov == nil {
 		panic("outbound: template governance dependency is required (pass the store that implements TemplateForSend)")
 	}
@@ -237,9 +238,9 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		draftID = &id
 	}
 	job := &models.OutboundJob{
-		SenderUserID:      req.UserID,
-		SenderKeyID:       req.APIKeyID,
-		SenderMailboxID:   req.SenderMailboxID,
+		SenderUserID:    req.UserID,
+		SenderKeyID:     req.APIKeyID,
+		SenderMailboxID: req.SenderMailboxID,
 		// TemplateName is intentionally no longer written: the legacy
 		// name-based render path is gone. The column stays for provenance of
 		// pre-existing jobs rendered by the retired /api/v1/send path.
@@ -267,9 +268,7 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		NextAttemptAt:    now,
 	}
 
-	if _, ok := s.store.(recipientStore); ok {
-		job.RecipientLedger = true
-	}
+	job.RecipientLedger = true
 	job.ContentDigest = contentDigest(job)
 	if err := s.ValidateJobAuthorization(ctx, job); err != nil {
 		return nil, false, err
@@ -416,10 +415,11 @@ func (s *Service) processOne(ctx context.Context, job *workqueue.Job[*outboundJo
 		}
 	}
 
-	if out.RecipientLedger {
-		return s.deliverRecipients(ctx, out, job.Lease.Token, mime)
+	if !out.RecipientLedger {
+		// Unmigrated history is an operator hold, never a second send path.
+		return store.ErrOutboundUncertain
 	}
-	return s.deliverDomains(ctx, out, job.Lease.Token, mime)
+	return s.deliverRecipients(ctx, out, job.Lease.Token, mime)
 }
 
 func (s *Service) dkimFailClosed() bool {
@@ -446,7 +446,7 @@ func (s *Service) DKIMSendBlockReason(zone *models.DomainZone) string {
 
 // isTokenMismatch checks if the error is a delivery token mismatch sentinel.
 func isTokenMismatch(err error) bool {
-	return err != nil && err.Error() == "delivery token mismatch: job was re-claimed"
+	return errors.Is(err, store.ErrDeliveryTokenMismatch)
 }
 
 func extractDomain(addr string) string {

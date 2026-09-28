@@ -4,9 +4,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"net/http"
-	"strings"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/app/recovery"
 	"tabmail/internal/app/submissions"
 	"tabmail/internal/company"
@@ -110,20 +110,9 @@ func (h *CompanyRecoveryHandler) Recipients(w http.ResponseWriter, r *http.Reque
 		h.result(w, nil, e)
 		return
 	}
-	if view.ContentRedacted {
-		visible := map[string]bool{}
-		for _, a := range view.RcptTo {
-			visible[a] = true
-		}
-		filtered := []company.Recipient{}
-		for _, row := range rows {
-			if visible[row.Address] {
-				row.Diagnostic = "Protocol details restricted"
-				filtered = append(filtered, row)
-			}
-		}
-		rows = filtered
-	}
+	// The BCC filter and diagnostic placeholder copy come from the same
+	// redaction view the job receipt uses — no handler-side second policy.
+	rows = submissions.FilterRecipientsForJobView(view, rows)
 	h.result(w, rows, nil)
 }
 
@@ -154,8 +143,10 @@ func (h *CompanyRecoveryHandler) InspectOutbound(w http.ResponseWriter, r *http.
 	if !ok {
 		return
 	}
-	if len(strings.TrimSpace(v.Reason)) < 8 || len(v.Reason) > 1000 {
-		errBadRequest(w, "inspection reason must be 8-1000 bytes")
+	var reasonErr error
+	v.Reason, reasonErr = credentials.AuditReason(v.Reason)
+	if reasonErr != nil {
+		errBadRequest(w, reasonErr.Error())
 		return
 	}
 	if h.subs == nil || !h.subs.OutboundEnabled() {
@@ -173,9 +164,9 @@ func (h *CompanyRecoveryHandler) InspectOutbound(w http.ResponseWriter, r *http.
 		errInternal(w)
 		return
 	}
-	cp := *j
-	cp.DeliveryToken = nil
-	cp.RawMIME = nil
+	// Break-glass with an audit row: content stays visible to the inspected
+	// view, but the same copy rule as the redacted path strips claim secrets.
+	cp := submissions.StripJobSecrets(j)
 	rows, e := h.repo.ListOutboundRecipients(r.Context(), a.TenantID, id)
 	h.result(w, map[string]any{"job": cp, "recipients": rows}, e)
 }

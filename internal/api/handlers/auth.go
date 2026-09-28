@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"tabmail/internal/app/credentials"
 	"time"
 
 	"tabmail/internal/api/middleware"
@@ -192,8 +193,8 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "email and password are required")
 		return
 	}
-	if len(req.Password) < 8 {
-		errBadRequest(w, "password must be at least 8 characters")
+	if err := credentials.ValidatePassword(req.Password); err != nil {
+		errBadRequest(w, err.Error())
 		return
 	}
 
@@ -386,8 +387,8 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "old_password and new_password are required")
 		return
 	}
-	if len(req.NewPassword) < 12 || len(req.NewPassword) > 72 {
-		errBadRequest(w, "new password must be 12-72 bytes")
+	if err := credentials.ValidatePassword(req.NewPassword); err != nil {
+		errBadRequest(w, err.Error())
 		return
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword)); err != nil {

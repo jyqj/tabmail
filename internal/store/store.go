@@ -183,10 +183,6 @@ type MessageStore interface {
 	CountTenantMessagesSince(ctx context.Context, tenantID uuid.UUID, since time.Time) (int, error)
 	CountAllMessages(ctx context.Context) (int, error)
 
-	// Batch-delete expired messages, returns the number deleted.
-	DeleteExpiredMessages(ctx context.Context, before time.Time, limit int) (int, error)
-	// Returns raw_object_key values for messages deleted by retention.
-	ListExpiredObjectKeys(ctx context.Context, before time.Time, limit int) ([]string, error)
 	// Atomically deletes expired messages and returns affected object keys.
 	DeleteExpiredMessagesReturningKeys(ctx context.Context, before time.Time, limit int) (int, []string, error)
 }
@@ -344,7 +340,7 @@ type LifecycleStore interface {
 type Store interface {
 	MemberGuardStore
 	RefreshRotationStore
-	OutboundProgress
+	OutboundRecipientLedger
 	authz.MailboxGrantReader
 	SetMailboxGrant(context.Context, *models.MailboxGrant) error
 

@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"tabmail/internal/config"
+	"tabmail/internal/delivery"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 	"tabmail/internal/testutil"
@@ -62,13 +63,21 @@ func TestP0OutboundPartialDomainRecoverySkipsAcceptedDomain(t *testing.T) {
 	}
 	svc.ensureWorker().ProcessBatch(ctx)
 	stored, _ := st.GetOutboundJob(ctx, job.ID)
-	if stored.State != models.OutboundRetry || len(stored.DeliveredDomains) != 1 || stored.DeliveredDomains[0] != "a.test" {
-		t.Fatalf("missing durable progress: %+v", stored)
+	recipients, ledgerErr := st.ListOutboundRecipients(ctx, job.TenantID, job.ID)
+	if ledgerErr != nil {
+		t.Fatal(ledgerErr)
+	}
+	if !stored.RecipientLedger || stored.State != models.OutboundRetry || len(recipients) != 2 || recipients[0].Address != "alice@a.test" || recipients[0].State != delivery.Accepted || recipients[1].State != delivery.Temporary {
+		t.Fatalf("missing durable recipient progress: job=%+v recipients=%+v", stored, recipients)
 	}
 	svc.ensureWorker().ProcessBatch(ctx)
 	stored, _ = st.GetOutboundJob(ctx, job.ID)
-	if stored.State != models.OutboundSent || len(stored.DeliveredDomains) != 2 || a.calls["a.test"] != 1 || a.calls["b.test"] != 2 {
-		t.Fatalf("duplicate or lost delivery: job=%+v calls=%v", stored, a.calls)
+	recipients, ledgerErr = st.ListOutboundRecipients(ctx, job.TenantID, job.ID)
+	if ledgerErr != nil {
+		t.Fatal(ledgerErr)
+	}
+	if stored.State != models.OutboundSent || len(recipients) != 2 || recipients[0].State != delivery.Accepted || recipients[1].State != delivery.Accepted || recipients[0].Attempts != 1 || recipients[1].Attempts != 2 || a.calls["a.test"] != 1 || a.calls["b.test"] != 2 {
+		t.Fatalf("duplicate or lost delivery: job=%+v recipients=%+v calls=%v", stored, recipients, a.calls)
 	}
 }
 func TestP0OutboundUncertainAcceptanceCannotBeBlindlyRetried(t *testing.T) {
@@ -81,7 +90,7 @@ func TestP0OutboundUncertainAcceptanceCannotBeBlindlyRetried(t *testing.T) {
 	}
 	svc.ensureWorker().ProcessBatch(ctx)
 	stored, _ := st.GetOutboundJob(ctx, job.ID)
-	if stored.State != models.OutboundFailed || stored.InFlightDomain != "a.test" {
+	if stored.State != models.OutboundFailed || stored.InFlightDomain != "rcpt:alice@a.test" {
 		t.Fatalf("uncertainty lost: %+v", stored)
 	}
 	if !errors.Is(svc.ValidateJobAuthorization(ctx, stored), store.ErrOutboundUncertain) {
@@ -98,7 +107,7 @@ func TestP0OutboundUncertainAcceptanceCannotBeBlindlyRetried(t *testing.T) {
 
 type checkpointFailure struct{ *testutil.FakeStore }
 
-func (s checkpointFailure) CompleteOutboundDomain(context.Context, uuid.UUID, *uuid.UUID, string, bool) error {
+func (s checkpointFailure) CompleteOutboundRecipient(context.Context, uuid.UUID, *uuid.UUID, string, string, int, string) error {
 	return errors.New("checkpoint database failure")
 }
 func TestP0OutboundCheckpointFailureRetainsUncertainMarker(t *testing.T) {

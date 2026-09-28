@@ -71,8 +71,8 @@ func TestR5SchemaInventoryAndRestart(t *testing.T) {
 	if e = pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version); e != nil {
 		t.Fatal(e)
 	}
-	if version != 13 {
-		t.Fatalf("R4 baseline moved to %d; review schema inventory", version)
+	if version != 14 {
+		t.Fatalf("expected recipient-ledger schema v14, got %d; review current schema inventory", version)
 	}
 	hashes := map[string]string{}
 	names, e := filepath.Glob("migrations/*.sql")

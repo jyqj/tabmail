@@ -196,7 +196,7 @@ func TestDeleteSuppressionIsTenantScoped(t *testing.T) {
 
 	deleteSuppression := func(t *testing.T, user *models.User) *httptest.ResponseRecorder {
 		t.Helper()
-		req := httptest.NewRequest(http.MethodDelete, "/api/v1/suppression/"+suppressionID.String(), strings.NewReader(`{"reason":"cleanup"}`))
+		req := httptest.NewRequest(http.MethodDelete, "/api/v1/suppression/"+suppressionID.String(), strings.NewReader(`{"reason":"cleanup reason"}`))
 		for k, v := range outboundUserHeaders(t, user) {
 			req.Header.Set(k, v)
 		}
@@ -236,7 +236,6 @@ func TestDeleteSuppressionIsTenantScoped(t *testing.T) {
 		t.Fatal("same-tenant delete did not remove suppression")
 	}
 }
-
 
 func newOutboundAccessFixture(t *testing.T) outboundAccessFixture {
 	t.Helper()
@@ -321,7 +320,6 @@ func outboundDataLen(t *testing.T, rr *httptest.ResponseRecorder) int {
 	}
 	return len(body.Data)
 }
-
 
 func withRouteContext(r *http.Request, rctx *chi.Context) context.Context {
 	return context.WithValue(r.Context(), chi.RouteCtxKey, rctx)

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
@@ -13,6 +12,7 @@ import (
 
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/app/submissions"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
@@ -172,25 +172,15 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 		errInternal(w)
 		return
 	}
-	if attempts == nil {
-		attempts = []*models.OutboundAttempt{}
-	}
-	allowed, err := h.subs.ContentAllowed(ctx, middleware.ActorFromContext(ctx), job)
+	// The restricted-view decision and copy rules live in the submissions
+	// service; the handler only maps the result to the response envelope.
+	attempts, err = h.subs.RedactOutboundAttempts(ctx, middleware.ActorFromContext(ctx), job, attempts)
 	if err != nil {
 		errInternal(w)
 		return
 	}
-	if !allowed {
-		for i, a := range attempts {
-			cp := *a
-			if cp.Error != "" {
-				cp.Error = "Delivery details restricted"
-			}
-			if cp.SMTPResponse != "" {
-				cp.SMTPResponse = "Protocol response restricted"
-			}
-			attempts[i] = &cp
-		}
+	if attempts == nil {
+		attempts = []*models.OutboundAttempt{}
 	}
 	ok(w, attempts)
 }
@@ -233,7 +223,7 @@ func (h *OutboundHandler) ListSuppressions(w http.ResponseWriter, r *http.Reques
 
 // DeleteSuppression handles DELETE /api/v1/suppression/{id} — remove a
 // suppressed address. The removal is destructive for future deliveries, so it
-// demands a non-empty reason in the body and lands with the audit row in one
+// demands a normalized 8-1000 byte reason and lands with the audit row in one
 // transaction; a failed audit fails the whole request.
 func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -253,8 +243,13 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 	var body struct {
 		Reason string `json:"reason"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || strings.TrimSpace(body.Reason) == "" {
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		errBadRequest(w, "reason is required")
+		return
+	}
+	reason, reasonErr := credentials.AuditReason(body.Reason)
+	if reasonErr != nil {
+		errBadRequest(w, reasonErr.Error())
 		return
 	}
 	actor := middleware.ActorFromContext(ctx)
@@ -266,7 +261,7 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 		ResourceID:   &id,
 		Details: app.MustJSON(map[string]any{
 			"suppression_id": id.String(),
-			"reason":         strings.TrimSpace(body.Reason),
+			"reason":         reason,
 		}),
 	}
 	if err := h.store.DeleteSuppressionAudited(ctx, tenant.ID, id, entry); err != nil {
@@ -292,16 +287,19 @@ func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenant
 }
 
 // writeOutboundJobAccessError maps the submissions service's job-visibility
-// sentinels to the responses the outbound and company endpoints have always
-// produced.
+// sentinels to app errors and replays them through respondAppError. The
+// auth-required 403 and the existence-hiding 404 distinction is intentional
+// and must survive any refactor.
 func writeOutboundJobAccessError(w http.ResponseWriter, logger zerolog.Logger, err error, logMsg string) {
+	var appErr error
 	switch {
 	case errors.Is(err, submissions.ErrOutboundJobAuthRequired):
-		errForbidden(w, "authentication required")
+		appErr = app.Forbidden("authentication required")
 	case errors.Is(err, submissions.ErrOutboundJobNotFound):
-		errNotFound(w, "outbound job not found")
+		appErr = app.NotFound("outbound job not found")
 	default:
 		logger.Err(err).Msg(logMsg)
-		errInternal(w)
+		appErr = app.Internal(err)
 	}
+	respondAppError(w, logger, appErr)
 }

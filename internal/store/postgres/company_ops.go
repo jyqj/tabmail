@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"tabmail/internal/app/credentials"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,6 +12,7 @@ import (
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
+	"tabmail/internal/delivery"
 	"tabmail/internal/models"
 )
 
@@ -95,7 +97,8 @@ func (s *PgStore) ListRecoveryReceipts(ctx context.Context, a authz.Actor, page 
 	return out, total, tx.Commit(ctx)
 }
 func (s *PgStore) InspectRecoveryReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, reason string) (*company.RecoveryReceipt, error) {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return nil, app.BadRequest("inspection reason must be 8-1000 bytes")
 	}
 	tx, e := s.pool.Begin(ctx)
@@ -124,7 +127,8 @@ func (s *PgStore) InspectRecoveryReceipt(ctx context.Context, a authz.Actor, id 
 	return &v, tx.Commit(ctx)
 }
 func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, targets []uuid.UUID, reason, verifiedHash string) error {
-	if !meaningfulReason(reason) || len(targets) == 0 || len(targets) > 200 {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil || len(targets) == 0 || len(targets) > 200 {
 		return app.BadRequest("select destinations and provide a reason (8-1000 bytes)")
 	}
 	tx, e := s.pool.Begin(ctx)
@@ -158,7 +162,7 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 		}
 		seen[mb] = true
 		var valid bool
-		e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM ingest_recipient_outcomes t JOIN mailboxes m ON m.id=t.mailbox_id AND m.tenant_id=t.tenant_id AND m.zone_id=t.zone_id AND m.full_address=t.address JOIN domain_zones z ON z.id=t.zone_id AND z.tenant_id=t.tenant_id WHERE t.job_id=$1 AND t.mailbox_id=$2 AND t.tenant_id=$3 AND t.state<>'delivered' AND z.is_verified AND z.mx_verified AND (m.expires_at IS NULL OR m.expires_at>now()))`, id, mb, a.TenantID).Scan(&valid)
+		e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM ingest_recipient_outcomes t JOIN mailboxes m ON m.id=t.mailbox_id AND m.tenant_id=t.tenant_id AND m.zone_id=t.zone_id AND m.full_address=t.address JOIN domain_zones z ON z.id=t.zone_id AND z.tenant_id=t.tenant_id WHERE t.job_id=$1 AND t.mailbox_id=$2 AND t.tenant_id=$3 AND t.state<>'delivered' AND z.is_verified AND z.mx_verified AND `+mailboxAliveSQL+`)`, id, mb, a.TenantID).Scan(&valid)
 		if e != nil {
 			return e
 		}
@@ -196,7 +200,8 @@ func (s *PgStore) ListOutboundRecipients(ctx context.Context, tenant, job uuid.U
 	return out, rows.Err()
 }
 func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, results []company.Recipient, reason string) error {
-	if !meaningfulReason(reason) || len(results) == 0 || len(results) > 50 {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil || len(results) == 0 || len(results) > 50 {
 		return app.BadRequest("explicit confirmed outcomes and reason required")
 	}
 	tx, e := s.pool.Begin(ctx)
@@ -218,16 +223,16 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 	if e != nil {
 		return app.Conflict("send job busy")
 	}
-	if state == "processing" || !updated.Equal(version) || !managed {
+	if state == string(models.OutboundProcessing) || !updated.Equal(version) || !managed {
 		return app.Conflict("job changed or needs legacy manual investigation")
 	}
 	seen := map[string]bool{}
 	for _, v := range results {
-		if seen[v.Address] || (v.State != "accepted" && v.State != "permanent" && v.State != "temporary") {
+		if seen[v.Address] || !delivery.IsCompletion(v.State) {
 			return app.BadRequest("each recipient must have one confirmed accepted/not-accepted outcome")
 		}
 		seen[v.Address] = true
-		tag, e := tx.Exec(ctx, `UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=now() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state='uncertain'`, a.TenantID, id, v.Address, v.State)
+		tag, e := tx.Exec(ctx, `UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state=ANY($5::text[])`, a.TenantID, id, v.Address, v.State, delivery.RecipientSources(v.State))
 		if e != nil {
 			return e
 		}
@@ -235,15 +240,17 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 			return app.Conflict("only uncertain recipients may be reconciled")
 		}
 	}
-	var unresolved int
-	if e = tx.QueryRow(ctx, `SELECT count(*) FROM outbound_recipients WHERE job_id=$1 AND state='uncertain'`, id).Scan(&unresolved); e != nil {
+	var recipientStates []string
+	if e = tx.QueryRow(ctx, `SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2`, a.TenantID, id).Scan(&recipientStates); e != nil {
 		return e
 	}
-	if unresolved == 0 {
-		if _, e = tx.Exec(ctx, `UPDATE outbound_jobs SET in_flight_domain='',
-        state=CASE WHEN NOT EXISTS(SELECT 1 FROM outbound_recipients WHERE job_id=$1 AND state<>'accepted') THEN 'sent'::outbound_state ELSE 'failed'::outbound_state END,
-        last_error=CASE WHEN NOT EXISTS(SELECT 1 FROM outbound_recipients WHERE job_id=$1 AND state<>'accepted') THEN '' ELSE 'Operator reconciliation complete; explicit retry required' END,
-        smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE id=$1`, id); e != nil {
+	if next, resolved := delivery.AfterReconciliation(recipientStates); resolved {
+		message := "Operator reconciliation complete; explicit retry required"
+		if next == models.OutboundSent {
+			message = ""
+		}
+		if _, e = tx.Exec(ctx, `UPDATE outbound_jobs SET in_flight_domain='',state=$3::outbound_state,last_error=$4,
+ smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND id=$2`, a.TenantID, id, next, message); e != nil {
 			return e
 		}
 	} else {
@@ -285,8 +292,8 @@ func (s *PgStore) CheckWorkers(ctx context.Context, outbound bool) error {
 func (s *PgStore) SweepCompanyMetadata(ctx context.Context) error {
 	for _, q := range []string{
 		`DELETE FROM sent_mail_items WHERE asset_id IN (SELECT asset_id FROM sent_mail_items WHERE purge_after<now() OR expires_at<now() ORDER BY COALESCE(purge_after,expires_at) LIMIT 1000)`,
-        `DELETE FROM sent_mail_assets a WHERE a.id IN (SELECT x.id FROM sent_mail_assets x WHERE NOT EXISTS(SELECT 1 FROM sent_mail_items i WHERE i.asset_id=x.id) AND NOT EXISTS(SELECT 1 FROM outbound_jobs j WHERE j.id=x.id) LIMIT 1000)`,
-        `DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'`,
+		`DELETE FROM sent_mail_assets a WHERE a.id IN (SELECT x.id FROM sent_mail_assets x WHERE NOT EXISTS(SELECT 1 FROM sent_mail_items i WHERE i.asset_id=x.id) AND NOT EXISTS(SELECT 1 FROM outbound_jobs j WHERE j.id=x.id) LIMIT 1000)`,
+		`DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'`,
 		`DELETE FROM mailbox_event_log WHERE sequence IN (SELECT sequence FROM mailbox_event_log WHERE created_at<now()-interval '7 days' ORDER BY sequence LIMIT 5000)`,
 	} {
 		if _, err := s.pool.Exec(ctx, q); err != nil {

@@ -1,7 +1,6 @@
 package ingest
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,7 +8,6 @@ import (
 	"sync"
 	"time"
 
-	"tabmail/internal/classify"
 	"tabmail/internal/config"
 	"tabmail/internal/configcache"
 	"tabmail/internal/hooks"
@@ -23,7 +21,6 @@ import (
 	"tabmail/internal/workqueue"
 
 	"github.com/google/uuid"
-	"github.com/jhillyerd/enmime/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 )
@@ -320,10 +317,9 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 	if len(env.Recipients) == 0 {
 		return nil, nil
 	}
-	envMime, err := enmime.ReadEnvelope(bytes.NewReader(raw))
-	if err != nil {
-		s.logger.Warn().Err(err).Msg("parsing MIME envelope (storing raw only)")
-	}
+	// One shared bounded parse + header extraction per envelope; every recipient
+	// below reuses this kernel (same as the durable path's per-receipt parse).
+	content := parseEnvelopeContent(s.logger, raw)
 
 	now := time.Now()
 	outcomes := make([]RecipientOutcome, 0, len(env.Recipients))
@@ -331,19 +327,6 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 	pol, err := s.currentPolicy(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("load smtp policy: %w", err)
-	}
-
-	subject := ""
-	var headersJSON json.RawMessage
-	if envMime != nil {
-		subject = envMime.GetHeader("Subject")
-		hm := make(map[string]string)
-		for _, key := range []string{"From", "To", "Cc", "Date", "Message-Id", "Reply-To", "Content-Type"} {
-			if v := envMime.GetHeader(key); v != "" {
-				hm[key] = v
-			}
-		}
-		headersJSON, _ = json.Marshal(hm)
 	}
 
 	objKey, err := s.objects.Put(ctx, raw)
@@ -387,60 +370,23 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		}
 
 		mb := result.Mailbox
-		if !policy.ShouldStoreDomain(mb.ResolvedDomain, pol.DefaultStore, pol.StoreDomains, pol.DiscardDomains) {
-			s.logger.Info().Str("mailbox", mb.FullAddress).Msg("message accepted but discarded by store policy")
-			outcomes = append(outcomes, rejectedOutcome(addr, "store_policy_discard"))
+		// Shared kernel: store policy → effective config → size gate →
+		// retention → Message(+OTP). Destination resolution above and the
+		// quota/persistence/event differences below stay shell-owned.
+		plan, pf := s.prepareDelivery(ctx, deliveryInput{
+			pol: pol, mb: mb, content: content, raw: raw, objKey: objKey,
+			rcpt: addr, from: env.MailFrom, at: now, cfgCache: tenantConfigs,
+			routeFn: func(context.Context) (*models.DomainRoute, error) { return result.Route, nil },
+		})
+		if pf != nil {
+			if pf.terminal() {
+				outcomes = append(outcomes, rejectedOutcome(addr, pf.code))
+			} else {
+				outcomes = append(outcomes, erroredOutcome(addr, pf.stage))
+			}
 			continue
 		}
-		cfg, ok := tenantConfigs[mb.TenantID]
-		if !ok {
-			cfg, err = s.store.EffectiveConfig(ctx, mb.TenantID)
-			if err != nil || cfg == nil {
-				s.logger.Warn().Err(err).Str("mailbox", mb.FullAddress).Msg("load tenant config")
-				outcomes = append(outcomes, erroredOutcome(addr, "tenant_config"))
-				continue
-			}
-			tenantConfigs[mb.TenantID] = cfg
-		}
-		if cfg.MaxMessageBytes > 0 && len(raw) > cfg.MaxMessageBytes {
-			s.logger.Warn().
-				Str("mailbox", mb.FullAddress).
-				Int("limit", cfg.MaxMessageBytes).
-				Int("size", len(raw)).
-				Msg("tenant max message bytes exceeded")
-			outcomes = append(outcomes, rejectedOutcome(addr, "max_message_bytes"))
-			continue
-		}
-
-		mbRetention, routeRetention, tenantRetention := retentionOf(result, cfg)
-		retH := resolveRetention(mbRetention, routeRetention, tenantRetention, s.fallbackRetentionH)
-		msg := &models.Message{
-			TenantID:     mb.TenantID,
-			MailboxID:    mb.ID,
-			ZoneID:       mb.ZoneID,
-			Sender:       env.MailFrom,
-			Recipients:   []string{addr},
-			Subject:      subject,
-			Size:         int64(len(raw)),
-			RawObjectKey: objKey,
-			HeadersJSON:  headersJSON,
-			ExpiresAt:    models.MessageExpiry(mb, retH, now),
-		}
-		// OTP signal extraction. Reuses the already-parsed envelope (no extra
-		// decode). OTPCode/OTPConfidence stay zero-value when nothing is found,
-		// so the omitempty JSON path and existing deliver tests are unaffected.
-		if envMime != nil {
-			otp := classify.OTPFromMessage(classify.Env{
-				Subject:  subject,
-				TextBody: envMime.Text,
-				HTMLBody: envMime.HTML,
-				From:     env.MailFrom,
-			})
-			if otp.Found {
-				msg.OTPCode = otp.Code
-				msg.OTPConfidence = otp.Confidence
-			}
-		}
+		cfg, msg := plan.cfg, plan.msg
 		if ok, err := s.reserveTenantDaily(ctx, mb.TenantID, cfg.DailyQuota); err != nil {
 			s.logger.Warn().Err(err).Str("tenant", mb.TenantID.String()).Msg("reserve tenant daily quota")
 			outcomes = append(outcomes, erroredOutcome(addr, "quota_error"))
@@ -477,7 +423,7 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 				Mailbox:   mb.FullAddress,
 				MessageID: msg.ID.String(),
 				Sender:    env.MailFrom,
-				Subject:   subject,
+				Subject:   content.subject,
 				Size:      int64(len(raw)),
 			})
 		}
@@ -489,7 +435,7 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 				TenantID:   mb.TenantID.String(),
 				Sender:     env.MailFrom,
 				Recipients: []string{addr},
-				Subject:    subject,
+				Subject:    content.subject,
 			})
 		}
 		outcomes = append(outcomes, RecipientOutcome{
@@ -500,7 +446,7 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		s.logger.Info().
 			Str("from", env.MailFrom).
 			Str("to", addr).
-			Str("subject", subject).
+			Str("subject", content.subject).
 			Int64("size", int64(len(raw))).
 			Msg("message delivered")
 	}
@@ -619,22 +565,23 @@ func resolveRetention(mailboxOverride, routeOverride, tenantRetention *int, fall
 	return 24
 }
 
-// retentionOf extracts the override/route/tenant retention for a recipient from
-// the resolved Result and the cached tenant config, returning nil for unset
-// levels so resolveRetention's != nil precedence matches the legacy
-// EffectiveConfig behavior (a non-nil cfg returns RetentionHours even when 0).
-func retentionOf(res *resolver.Result, cfg *models.EffectiveConfig) (mailbox, route, tenant *int) {
-	if res.Mailbox != nil && res.Mailbox.RetentionHoursOverride != nil {
-		v := *res.Mailbox.RetentionHoursOverride
+// retentionOf extracts the mailbox/route/tenant retention override levels so
+// resolveRetention's != nil precedence matches the legacy EffectiveConfig
+// behavior (a non-nil cfg returns RetentionHours even when 0). Both delivery
+// paths share it: the immediate path passes the resolver's matched route, the
+// durable path passes the route it re-fetched from the store during replay.
+func retentionOf(mb *models.Mailbox, route *models.DomainRoute, cfg *models.EffectiveConfig) (mailbox, routeOverride, tenant *int) {
+	if mb != nil && mb.RetentionHoursOverride != nil {
+		v := *mb.RetentionHoursOverride
 		mailbox = &v
 	}
-	if res.Route != nil && res.Route.RetentionHoursOverride != nil {
-		v := *res.Route.RetentionHoursOverride
-		route = &v
+	if route != nil && route.RetentionHoursOverride != nil {
+		v := *route.RetentionHoursOverride
+		routeOverride = &v
 	}
 	if cfg != nil {
 		v := cfg.RetentionHours
 		tenant = &v
 	}
-	return mailbox, route, tenant
+	return mailbox, routeOverride, tenant
 }

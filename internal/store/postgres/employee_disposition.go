@@ -6,17 +6,18 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"strings"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/models"
 	"time"
 )
 
-// Lock order: tenant -> departing user -> successor -> active jobs. Draft and
-// upload writes take a user SHARE lock; enqueue has the same database fence.
-// A preview never reads or returns private draft/message content.
+// Lock order: tenant -> departing user -> successor -> active jobs -> owned
+// mailboxes (ORDER BY id). Draft and upload writes take a user SHARE lock;
+// enqueue has the same database fence. A preview never reads or returns
+// private draft/message content.
 func (s *PgStore) offboardingTarget(ctx context.Context, tx pgx.Tx, a authz.Actor, target, successor uuid.UUID) (*models.User, error) {
 	if target == successor || target == a.ID || target == uuid.Nil || successor == uuid.Nil {
 		return nil, app.BadRequest("distinct employee and successor required")
@@ -92,8 +93,8 @@ func offboardingSnapshot(ctx context.Context, tx pgx.Tx, tenant, target uuid.UUI
 	return impact, company.Hash(string(raw)), e
 }
 func (s *PgStore) PreviewOffboarding(ctx context.Context, a authz.Actor, target, successor uuid.UUID, options company.OffboardingOptions, reason string) (*company.OffboardingPlan, error) {
-	reason = strings.TrimSpace(reason)
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return nil, app.BadRequest("documented offboarding reason required")
 	}
 	switch options.Drafts {
@@ -195,7 +196,7 @@ func (s *PgStore) applyOffboarding(ctx context.Context, tx pgx.Tx, a authz.Actor
 			return e
 		}
 	}
-	if _, e := tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$3,lifecycle_revision=lifecycle_revision+1 WHERE tenant_id=$1 AND owner_user_id=$2`, a.TenantID, target, successor); e != nil {
+	if e := transferOwnedMailboxes(ctx, tx, a.TenantID, target, successor); e != nil {
 		return e
 	}
 	return companyAudit(ctx, tx, a, "employee.offboard", "user", target, map[string]any{"plan_id": plan, "successor": successor, "reason": reason, "drafts": options.Drafts, "queued_sends": "cancelled; active and uncertain delivery evidence preserved"})

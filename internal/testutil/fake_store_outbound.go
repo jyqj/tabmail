@@ -56,7 +56,10 @@ func (s *FakeStore) createOutboundJobLocked(job *models.OutboundJob) {
 	if cp.UpdatedAt.IsZero() {
 		cp.UpdatedAt = cp.CreatedAt
 	}
+	cp.RecipientLedger = true
+	s.initializeRecipientLedgerLocked(cp)
 	s.outboundJobs[cp.ID] = cp
+	job.RecipientLedger = true
 	job.ID = cp.ID
 	job.State = cp.State
 	job.NextAttemptAt = cp.NextAttemptAt
@@ -522,4 +525,3 @@ func (s *FakeStore) listOutboundJobsLocked(pg models.Page, keep func(*models.Out
 	}
 	return items[start:end], total, nil
 }
-

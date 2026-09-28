@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { DraftWriter, draftKey, draftErrorCode } from "@/features/mail/draft-writer";
+import { errorCode, isConflict, isDeterministicErrorCode } from "@/lib/error-code";
+import { DraftWriter, draftKey } from "@/features/mail/draft-writer";
 import { sessionScope, assertSession } from "@/lib/session";
 import { RichMessage } from "@/features/mail/components/rich-message";
 import { toast } from "sonner";
@@ -201,8 +202,8 @@ export function Compose({
       writer.close();
       onSent();
     } catch (e) {
-      const err = e as { error?: { code?: string }; data?: { revision?: number } };
-      if (err?.error?.code === "CONFLICT") {
+      const err = e as { data?: { revision?: number } };
+      if (isConflict(e)) {
         setPending(null);
         if (err.data?.revision) {
           throw new Error(
@@ -219,7 +220,7 @@ export function Compose({
           ),
         );
       }
-      const code = err?.error?.code;
+      const code = errorCode(e);
       if (
         [
           "BAD_REQUEST",
@@ -278,7 +279,7 @@ export function Compose({
             writer.close();const copy: MailDraft = {mailbox_id: mailboxId, payload, revision: 0};
             setDraft(copy);setWriter(makeWriter(copy));setSaveError(null);
           }}>{t("保留编辑为新草稿", "Keep edits as a new draft")}</ActionButton>
-          {!['CONFLICT','FORBIDDEN','NOT_FOUND','UNAUTHORIZED'].includes(draftErrorCode(saveError) ?? '') && <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => { await save(); })}>{t("重试保存", "Retry save")}</ActionButton>}
+          {!isDeterministicErrorCode(errorCode(saveError)) && <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => { await save(); })}>{t("重试保存", "Retry save")}</ActionButton>}
         </div>
       </div>}
       {pending && (

@@ -12,6 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"tabmail/internal/app"
+	"tabmail/internal/app/credentials"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/hooks"
@@ -90,7 +91,6 @@ func companyAudit(ctx context.Context, tx pgx.Tx, a authz.Actor, action, kind st
 	_, e = tx.Exec(ctx, `INSERT INTO outbox_events(id,event_type,payload) VALUES($1,'company.admin.changed',$2)`, uuid.New(), raw)
 	return e
 }
-func meaningfulReason(s string) bool { n := len(strings.TrimSpace(s)); return n >= 8 && n <= 1000 }
 func (s *PgStore) GetCompanySettings(ctx context.Context, tenant uuid.UUID) (*company.Settings, error) {
 	c := &company.Settings{}
 	e := s.pool.QueryRow(ctx, `SELECT c.tenant_id,c.name,c.primary_zone_id,z.domain,c.revision,t.mail_send_policy FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id JOIN tenants t ON t.id=c.tenant_id WHERE c.tenant_id=$1`, tenant).Scan(&c.TenantID, &c.Name, &c.PrimaryZoneID, &c.Domain, &c.Revision, &c.MailSendPolicy)
@@ -536,7 +536,8 @@ func guardMailboxOwner(ctx context.Context, tx pgx.Tx, a authz.Actor, owner *uui
 }
 
 func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, owner uuid.UUID, revision int64, reason string) error {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return app.BadRequest("handover reason must be 8-1000 bytes")
 	}
 	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
@@ -559,7 +560,13 @@ func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, ow
 		if e = guardMailboxOwner(ctx, tx, a, old); e != nil {
 			return e
 		}
-		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$3,lifecycle_revision=lifecycle_revision+1 WHERE tenant_id=$1 AND id=$2`, a.TenantID, id, owner); e != nil {
+		// The row is already FOR UPDATE-locked and matched above, so the claim
+		// CAS cannot fail here; it exists to keep every revision increment on
+		// the single helper shared with grants, policy and offboarding.
+		if e = claimMailboxRevision(ctx, tx, a.TenantID, id, revision); e != nil {
+			return e
+		}
+		if _, e = tx.Exec(ctx, `UPDATE mailboxes SET owner_user_id=$3 WHERE tenant_id=$1 AND id=$2`, a.TenantID, id, owner); e != nil {
 			return e
 		}
 		if old != nil {
@@ -575,7 +582,8 @@ func (s *PgStore) TransferWorkMailbox(ctx context.Context, a authz.Actor, id, ow
 // persisted preview plan. Both commands share the same transaction and default
 // disposition: seal private drafts, cancel only known-not-in-flight sends.
 func (s *PgStore) OffboardEmployee(ctx context.Context, a authz.Actor, target, successor uuid.UUID, reason string) error {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return app.BadRequest("documented handover reason required")
 	}
 	return s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
@@ -701,7 +709,8 @@ func (s *PgStore) GetWorkMailbox(ctx context.Context, a authz.Actor, id uuid.UUI
 // Existing messages become permanent; historical personal ownership is never
 // discarded as a side effect of reclassification.
 func (s *PgStore) ConvertSharedMailbox(ctx context.Context, actor authz.Actor, id uuid.UUID, revision int64, reason string) error {
-	if !meaningfulReason(reason) {
+	reason, reasonErr := credentials.AuditReason(reason)
+	if reasonErr != nil {
 		return app.BadRequest("reason must be 8-1000 bytes")
 	}
 	return s.companyTx(ctx, actor, true, func(tx pgx.Tx, a authz.Actor) error {
@@ -714,7 +723,12 @@ func (s *PgStore) ConvertSharedMailbox(ctx context.Context, actor authz.Actor, i
 		if owner != nil || kind != "legacy" || current != revision {
 			return app.Conflict("only an unchanged ownerless legacy mailbox may be converted")
 		}
-		if _, err := tx.Exec(ctx, `UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL,lifecycle_revision=lifecycle_revision+1 WHERE id=$1`, id); err != nil {
+		// Same single revision helper as every other mailbox write; the
+		// FOR UPDATE read above guarantees the CAS matches.
+		if err := claimMailboxRevision(ctx, tx, a.TenantID, id, revision); err != nil {
+			return err
+		}
+		if _, err := tx.Exec(ctx, `UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`, id); err != nil {
 			return err
 		}
 		if _, err := tx.Exec(ctx, `UPDATE messages SET expires_at=NULL WHERE mailbox_id=$1 AND deleted_at IS NULL`, id); err != nil {

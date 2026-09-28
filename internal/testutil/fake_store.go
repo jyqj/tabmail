@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"tabmail/internal/company"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
 )
@@ -36,50 +37,50 @@ type FakeStore struct {
 	apiRaw     map[string]resolvedAPIKey
 	smtpPolicy *models.SMTPPolicy
 
-	zones            map[uuid.UUID]*models.DomainZone
-	routes           map[uuid.UUID]*models.DomainRoute
-	mailboxes        map[uuid.UUID]*models.Mailbox
-	messages         map[uuid.UUID]*models.Message
-	audits           []*models.AuditEntry
-	monitor          []*models.MonitorEvent
-	outbox           map[uuid.UUID]*models.OutboxEvent
-	deliveries       map[uuid.UUID]*models.WebhookDelivery
-	ingestJobs       map[uuid.UUID]*models.IngestJob
-	outboundJobs     map[uuid.UUID]*models.OutboundJob
-	outboundAttempts map[uuid.UUID]*models.OutboundAttempt
-	suppressions     map[uuid.UUID]*models.SuppressionEntry
-	users            map[uuid.UUID]*models.User
-	settings         map[string]*models.SystemSetting
+	zones              map[uuid.UUID]*models.DomainZone
+	routes             map[uuid.UUID]*models.DomainRoute
+	mailboxes          map[uuid.UUID]*models.Mailbox
+	messages           map[uuid.UUID]*models.Message
+	audits             []*models.AuditEntry
+	monitor            []*models.MonitorEvent
+	outbox             map[uuid.UUID]*models.OutboxEvent
+	deliveries         map[uuid.UUID]*models.WebhookDelivery
+	ingestJobs         map[uuid.UUID]*models.IngestJob
+	outboundJobs       map[uuid.UUID]*models.OutboundJob
+	outboundRecipients map[uuid.UUID]map[string]company.Recipient
+	outboundAttempts   map[uuid.UUID]*models.OutboundAttempt
+	suppressions       map[uuid.UUID]*models.SuppressionEntry
+	users              map[uuid.UUID]*models.User
+	settings           map[string]*models.SystemSetting
 
 	sendIdentities map[uuid.UUID]*models.SendIdentity
-
 
 	orphanRetries map[string]int
 }
 
 func NewFakeStore() *FakeStore {
 	return &FakeStore{
-		mailboxGrants:     map[[2]uuid.UUID]*models.MailboxGrant{},
-		ingressClaims:     map[uuid.UUID]*store.IngressClaim{},
-		ingressTargets:    map[uuid.UUID][]store.IngressTarget{},
-		ingressUsage:      map[string]int{},
-		plans:             map[uuid.UUID]*models.Plan{},
-		tenants:           map[uuid.UUID]*models.Tenant{},
-		overrides:         map[uuid.UUID]*models.TenantOverride{},
-		apiKeys:           map[uuid.UUID]*models.TenantAPIKey{},
-		apiRaw:            map[string]resolvedAPIKey{},
-		zones:             map[uuid.UUID]*models.DomainZone{},
-		routes:            map[uuid.UUID]*models.DomainRoute{},
-		mailboxes:         map[uuid.UUID]*models.Mailbox{},
-		messages:          map[uuid.UUID]*models.Message{},
-		monitor:           []*models.MonitorEvent{},
-		outbox:            map[uuid.UUID]*models.OutboxEvent{},
-		deliveries:        map[uuid.UUID]*models.WebhookDelivery{},
-		ingestJobs:        map[uuid.UUID]*models.IngestJob{},
-		outboundJobs:      map[uuid.UUID]*models.OutboundJob{},
-		outboundAttempts:  map[uuid.UUID]*models.OutboundAttempt{},
-		suppressions:      map[uuid.UUID]*models.SuppressionEntry{},
-		sendIdentities:    map[uuid.UUID]*models.SendIdentity{},
+		mailboxGrants:    map[[2]uuid.UUID]*models.MailboxGrant{},
+		ingressClaims:    map[uuid.UUID]*store.IngressClaim{},
+		ingressTargets:   map[uuid.UUID][]store.IngressTarget{},
+		ingressUsage:     map[string]int{},
+		plans:            map[uuid.UUID]*models.Plan{},
+		tenants:          map[uuid.UUID]*models.Tenant{},
+		overrides:        map[uuid.UUID]*models.TenantOverride{},
+		apiKeys:          map[uuid.UUID]*models.TenantAPIKey{},
+		apiRaw:           map[string]resolvedAPIKey{},
+		zones:            map[uuid.UUID]*models.DomainZone{},
+		routes:           map[uuid.UUID]*models.DomainRoute{},
+		mailboxes:        map[uuid.UUID]*models.Mailbox{},
+		messages:         map[uuid.UUID]*models.Message{},
+		monitor:          []*models.MonitorEvent{},
+		outbox:           map[uuid.UUID]*models.OutboxEvent{},
+		deliveries:       map[uuid.UUID]*models.WebhookDelivery{},
+		ingestJobs:       map[uuid.UUID]*models.IngestJob{},
+		outboundJobs:     map[uuid.UUID]*models.OutboundJob{},
+		outboundAttempts: map[uuid.UUID]*models.OutboundAttempt{},
+		suppressions:     map[uuid.UUID]*models.SuppressionEntry{},
+		sendIdentities:   map[uuid.UUID]*models.SendIdentity{},
 	}
 }
 

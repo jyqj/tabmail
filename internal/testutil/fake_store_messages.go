@@ -280,66 +280,6 @@ func (s *FakeStore) CountAllMessages(_ context.Context) (int, error) {
 	return len(s.messages), nil
 }
 
-func (s *FakeStore) DeleteExpiredMessages(_ context.Context, before time.Time, limit int) (int, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	expired := make([]*models.Message, 0, len(s.messages))
-	for _, m := range s.messages {
-		if m.ExpiresAt != nil && m.ExpiresAt.Before(before) && (s.mailboxes[m.MailboxID] == nil || s.mailboxes[m.MailboxID].OwnerUserID == nil) {
-			cp := *m
-			expired = append(expired, &cp)
-		}
-	}
-	sort.Slice(expired, func(i, j int) bool {
-		if expired[i].ExpiresAt.Equal(*expired[j].ExpiresAt) {
-			return expired[i].ID.String() < expired[j].ID.String()
-		}
-		return expired[i].ExpiresAt.Before(*expired[j].ExpiresAt)
-	})
-
-	n := 0
-	for _, m := range expired {
-		if n >= limit {
-			break
-		}
-		if mb, ok := s.mailboxes[m.MailboxID]; ok && mb.MessageCount > 0 {
-			mb.MessageCount--
-		}
-		delete(s.messages, m.ID)
-		n++
-	}
-	return n, nil
-}
-
-func (s *FakeStore) ListExpiredObjectKeys(_ context.Context, before time.Time, limit int) ([]string, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	expired := make([]*models.Message, 0, len(s.messages))
-	for _, m := range s.messages {
-		if m.ExpiresAt != nil && m.ExpiresAt.Before(before) && (s.mailboxes[m.MailboxID] == nil || s.mailboxes[m.MailboxID].OwnerUserID == nil) && m.RawObjectKey != "" {
-			cp := *m
-			expired = append(expired, &cp)
-		}
-	}
-	sort.Slice(expired, func(i, j int) bool {
-		if expired[i].ExpiresAt.Equal(*expired[j].ExpiresAt) {
-			return expired[i].ID.String() < expired[j].ID.String()
-		}
-		return expired[i].ExpiresAt.Before(*expired[j].ExpiresAt)
-	})
-
-	var out []string
-	for _, m := range expired {
-		if len(out) >= limit {
-			break
-		}
-		out = append(out, m.RawObjectKey)
-	}
-	return out, nil
-}
-
 func (s *FakeStore) DeleteExpiredMessagesReturningKeys(_ context.Context, before time.Time, limit int) (int, []string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

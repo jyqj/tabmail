@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import type { AdminUser } from "@/lib/types";
+import { isConflict } from "@/lib/error-code";
 import { EmployeeField } from "@/components/company/employee-field";
 import { ActionButton, Field, inputClass, Section, useAction, useText } from "@/components/company/common";
 import { previewOffboarding, executeOffboarding, type OffboardingOptions, type OffboardingPlan } from "./api";
@@ -42,11 +43,7 @@ export function OffboardingPanel({ employees, refresh }: {
                         await refresh();
                     }
                     catch (error) {
-                        if ((error as {
-                            error?: {
-                                code?: string;
-                            };
-                        })?.error?.code === "CONFLICT") {
+                        if (isConflict(error)) {
                             setPlan(null);
                             setConflict(true);
                         }
