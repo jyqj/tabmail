@@ -1,0 +1,91 @@
+{
+  "batch": "B01-H",
+  "base": "5e4b9df22041ac0bfda570901d114166101067b6",
+  "status": "candidate_only_runtime_validation_blocked",
+  "checks": {
+    "python": {
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts/tests",
+        "-p",
+        "test_*.py",
+        "-v"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "test_build_failure_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_concatenated_runs_fail (test_go_test_evidence.EvidenceTests) ... ok\ntest_corrupted_or_non_object_events_fail (test_go_test_evidence.EvidenceTests) ... ok\ntest_documented_exact_optional_skip_is_reported (test_go_test_evidence.EvidenceTests) ... ok\ntest_duplicate_test_run_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_empty_log_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_empty_package_is_allowed_but_not_substitute_for_required (test_go_test_evidence.EvidenceTests) ... ok\ntest_failed_then_passed_cannot_overwrite_failure (test_go_test_evidence.EvidenceTests) ... ok\ntest_interleaved_packages_and_subtests (test_go_test_evidence.EvidenceTests) ... ok\ntest_invalid_field_types_fail (test_go_test_evidence.EvidenceTests) ... ok\ntest_missing_package_completion_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_missing_package_start_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_missing_test_completion_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_nonzero_exit_fails_even_with_green_events (test_go_test_evidence.EvidenceTests) ... ok\ntest_output_pass_text_is_not_a_test (test_go_test_evidence.EvidenceTests) ... ok\ntest_package_failure_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_package_pass_is_not_a_test (test_go_test_evidence.EvidenceTests) ... ok\ntest_parallel_pause_and_resume (test_go_test_evidence.EvidenceTests) ... ok\ntest_pass_without_run_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_real_lifecycle_passes (test_go_test_evidence.EvidenceTests) ... ok\ntest_skip_is_not_pass (test_go_test_evidence.EvidenceTests) ... ok\ntest_skipped_child_is_not_hidden_by_parent_pass (test_go_test_evidence.EvidenceTests) ... ok\ntest_unexpected_skip_fails_even_if_required_passes (test_go_test_evidence.EvidenceTests) ... ok\ntest_unknown_action_fails (test_go_test_evidence.EvidenceTests) ... ok\ntest_wrong_package_does_not_satisfy_identity (test_go_test_evidence.EvidenceTests) ... ok\ntest_empty_or_duplicate_requirements_fail (test_go_test_evidence.ManifestTests) ... ok\ntest_invalid_manifest_version_fails (test_go_test_evidence.ManifestTests) ... ok\ntest_missing_suite_fails (test_go_test_evidence.ManifestTests) ... ok\ntest_optional_overlap_or_no_reason_fails (test_go_test_evidence.ManifestTests) ... ok\ntest_valid_manifest (test_go_test_evidence.ManifestTests) ... ok\ntest_catalog_mismatch_precedes_collector (test_i18n_keys.CatalogTests) ... ok\ntest_empty_scan_fails (test_i18n_keys.CatalogTests) ... ok\ntest_empty_wrong_type_and_bad_values (test_i18n_keys.CatalogTests) ... ok\ntest_invalid_or_empty_collector_output_fails (test_i18n_keys.CatalogTests) ... ok\ntest_malformed_and_duplicate_catalog (test_i18n_keys.CatalogTests) ... ok\ntest_missing_catalog (test_i18n_keys.CatalogTests) ... ok\ntest_missing_features_key_fails (test_i18n_keys.CatalogTests) ... ok\ntest_missing_node_fails (test_i18n_keys.CatalogTests) ... ok\ntest_missing_source_directory_fails (test_i18n_keys.CatalogTests) ... ok\ntest_scan_includes_features_and_hooks_not_generated_or_tests (test_i18n_keys.CatalogTests) ... ok\ntest_strict_utf8 (test_i18n_keys.CatalogTests) ... ok\ntest_valid_catalog (test_i18n_keys.CatalogTests) ... ok\ntest_valid_end_to_end_contract (test_i18n_keys.CatalogTests) ... ok\ntest_compile_failure_is_rejected (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_duplicate_marker_is_rejected (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_exact_failures_are_reproduction_not_fix (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_invalid_json_is_not_reproduction (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_missing_test_is_rejected (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_setup_failure_is_rejected (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_skip_is_rejected (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_success_is_not_a_baseline_failure (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_zero_tests_is_rejected (test_r5_audit_baseline.AuditEvidenceTests) ... ok\ntest_component_layer_is_exact_and_not_product_success (test_r5_audit_baseline.ComponentEvidenceTests) ... ok\ntest_component_missing_second_case_rejected (test_r5_audit_baseline.ComponentEvidenceTests) ... ok\ntest_component_setup_failure_rejected (test_r5_audit_baseline.ComponentEvidenceTests) ... ok\ntest_db_marker_cannot_substitute_for_component_execution (test_r5_audit_baseline.ComponentEvidenceTests) ... ok\ntest_unknown_layer_rejected (test_r5_audit_baseline.ComponentEvidenceTests) ... ok\n\n----------------------------------------------------------------------\nRan 57 tests in 0.040s\n\nOK\n"
+    },
+    "dto": {
+      "command": [
+        "python3",
+        "-B",
+        "scripts/check_contract_drift.py"
+      ],
+      "exit": 0,
+      "stdout": "Contract check passed for 16 shared models and 32 company DTOs.\n",
+      "stderr": ""
+    },
+    "diff": {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  },
+  "runtime_hashes": {
+    "internal/store/postgres/mail_content.go": "f8c1718069a434b93fd320e72b3796238d38957fd698744ad1205b0cf839e198",
+    "internal/store/postgres/r5_index_boundary_test.go": "f7d4f40fa338a3cd0e30dfed3839e67a20bd59c94625119414fc229166a326a9",
+    "internal/store/postgres/r5_read_boundary_test.go": "852c2c627574392d4e9cf0209a75aa991949a27d9d2442d782dd427d03c91c59",
+    "scripts/required_go_tests.json": "2bb7316420a53c954222ec182dcdf2e87b3f42e2fb00d37ccec8a477247e6673"
+  },
+  "backend_required_registered": 54,
+  "new_tests_registered": 10,
+  "new_tests_executed": 0,
+  "go_syntax_only": {
+    "toolchain": "go1.23.2",
+    "files": 266,
+    "pass": true,
+    "typecheck": false,
+    "test_execution": false
+  },
+  "runtime_blockers": [
+    "User Mac Docker creation invocation rejected before execution by tool safety; not retried via another entrypoint.",
+    "Independent sandbox: Go 1.23.2 only, no PostgreSQL, external dependency downloads failed.",
+    "go test with GOTOOLCHAIN=local rejected go.mod requiring >=1.25.7 before compilation; no test events."
+  ],
+  "new_mac_test_resources_created": false,
+  "temporary_export_archives_removed": true,
+  "historical_migrations_unchanged": 13,
+  "original_audit_A01_A07_rerun": false,
+  "candidate_commit": "01937522ebaa299d1c816085ef1678d5c2e62a03",
+  "candidate_tree": "3cf3d7ac738b14161961d2057d7aa1d5c6e2817e",
+  "sandbox_go_test_attempt": {
+    "command": "GOTOOLCHAIN=local go test -mod=readonly -run ^TestR5(Index|Read) ./internal/store/postgres",
+    "exit": 1,
+    "diagnostic": "go: go.mod requires go >= 1.25.7 (running go 1.23.2; GOTOOLCHAIN=local)",
+    "tests_started": 0
+  },
+  "sandbox_parser_result": {
+    "status": "pass",
+    "toolchain": "go1.23.2",
+    "go_files_parsed": 266,
+    "new_test_declarations": 10,
+    "boundary": "syntax only; no dependency typechecking, SQL, DB or HTTP execution"
+  },
+  "task_integrity": {
+    "count": 171,
+    "completed": 6,
+    "dependency_edges": 395,
+    "dependency_dag": "pass",
+    "links_checked": 55
+  }
+}
