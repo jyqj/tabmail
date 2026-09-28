@@ -233,5 +233,243 @@ class StrictWireContractTests(unittest.TestCase):
             ccd.ts_members('Array<string | null')
 
 
+OPENAPI_LEGAL = {
+    "openapi": "3.1.0",
+    "components": {
+        "schemas": {
+            "Child": {
+                "type": "object",
+                "required": ["x"],
+                "properties": {"x": {"type": "integer"}},
+            },
+            "Widget": {
+                "type": "object",
+                "required": [
+                    "id", "name", "count", "when", "when_or_null",
+                    "nullable", "tags", "state",
+                ],
+                "properties": {
+                    "id": {"type": "string", "format": "uuid"},
+                    "name": {"type": "string"},
+                    "count": {"type": "integer"},
+                    "when": {"type": "string", "format": "date-time"},
+                    "when_or_null": {
+                        "type": ["string", "null"],
+                        "format": "date-time",
+                    },
+                    "nullable": {"type": "integer"},
+                    "opt_count": {"type": ["integer", "null"]},
+                    "tags": {"type": "array", "items": {"type": "string"}},
+                    "opt_tags": {
+                        "type": "array",
+                        "items": {"type": "string", "format": "uuid"},
+                    },
+                    "child": {"$ref": "#/components/schemas/Child"},
+                    "meta": {
+                        "type": "object",
+                        "additionalProperties": {"type": "string"},
+                    },
+                    "raw": {"type": "object"},
+                    "kind": {"type": "string", "enum": ["a", "b"]},
+                    "state": {"type": "string", "enum": ["on", "off"]},
+                },
+            },
+        }
+    },
+    "paths": {},
+}
+
+
+def openapi_sources():
+    problems = []
+    go = ccd.merge_go_sources([GO_LEGAL], problems)
+    ts = ccd.merge_ts_sources([TS_LEGAL], problems)
+    assert problems == []
+    return go, ts
+
+
+def run_openapi(document):
+    go, ts = openapi_sources()
+    return ccd.check_openapi_pairs(
+        PAIRS,
+        {"Widget": "Widget", "Child": "Child"},
+        go,
+        ts,
+        document,
+        NESTED,
+    )
+
+
+class OpenAPIContractTests(unittest.TestCase):
+    def test_legal_openapi_contract_passes(self):
+        import copy
+        self.assertEqual(run_openapi(copy.deepcopy(OPENAPI_LEGAL)), [])
+
+    def test_missing_component_fails(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        del document["components"]["schemas"]["Widget"]
+        self.assertTrue(any(e.startswith("[missing-openapi]") for e in run_openapi(document)))
+
+    def test_field_set_drift_fails(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        del document["components"]["schemas"]["Widget"]["properties"]["name"]
+        self.assertTrue(any(e.startswith("[openapi-fields]") for e in run_openapi(document)))
+
+    def test_required_drift_fails(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["components"]["schemas"]["Widget"]["required"].remove("name")
+        self.assertTrue(any(e.startswith("[openapi-required]") for e in run_openapi(document)))
+
+    def test_required_pointer_must_allow_null(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["components"]["schemas"]["Widget"]["properties"]["when_or_null"] = {
+            "type": "string", "format": "date-time"
+        }
+        self.assertTrue(any(e.startswith("[openapi-null]") for e in run_openapi(document)))
+
+    def test_scalar_type_and_format_drift_fail(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["components"]["schemas"]["Widget"]["properties"]["id"] = {
+            "type": "integer"
+        }
+        errors = run_openapi(document)
+        self.assertTrue(any(e.startswith("[openapi-type]") for e in errors), errors)
+        self.assertTrue(any(e.startswith("[openapi-format]") for e in errors), errors)
+
+    def test_array_item_drift_fails(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["components"]["schemas"]["Widget"]["properties"]["tags"]["items"] = {
+            "type": "integer"
+        }
+        self.assertTrue(any(e.startswith("[openapi-type]") for e in run_openapi(document)))
+
+    def test_typed_map_requires_additional_properties_schema(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["components"]["schemas"]["Widget"]["properties"]["meta"].pop(
+            "additionalProperties"
+        )
+        self.assertTrue(any(e.startswith("[openapi-map]") for e in run_openapi(document)))
+
+    def test_enum_drift_fails(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["components"]["schemas"]["Widget"]["properties"]["state"]["enum"] = [
+            "on"
+        ]
+        self.assertTrue(any(e.startswith("[openapi-enum]") for e in run_openapi(document)))
+
+    def test_nested_reference_drift_fails(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["components"]["schemas"]["Widget"]["properties"]["child"] = {
+            "type": "object"
+        }
+        self.assertTrue(any(e.startswith("[openapi-ref]") for e in run_openapi(document)))
+
+    def test_missing_local_reference_fails(self):
+        import copy
+        document = copy.deepcopy(OPENAPI_LEGAL)
+        document["paths"] = {
+            "/widgets": {
+                "get": {
+                    "responses": {
+                        "200": {
+                            "content": {
+                                "application/json": {
+                                    "schema": {"$ref": "#/components/schemas/Missing"}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        errors = ccd._check_local_openapi_refs(document)
+        self.assertTrue(any(e.startswith("[openapi-ref-missing]") for e in errors))
+
+    def test_duplicate_yaml_key_is_rejected(self):
+        document, errors = ccd.parse_openapi_text(
+            "openapi: 3.1.0\ncomponents:\n  schemas:\n    A: {}\n    A: {}\n"
+        )
+        self.assertIsNone(document)
+        self.assertTrue(any(e.startswith("[openapi-yaml]") for e in errors), errors)
+
+    def test_wrong_openapi_version_is_rejected(self):
+        document, errors = ccd.parse_openapi_text("openapi: 3.0.3\ncomponents: {}\n")
+        self.assertIsNotNone(document)
+        self.assertTrue(any(e.startswith("[openapi-version]") for e in errors), errors)
+
+
+class OpenAPIFailClosedTests(unittest.TestCase):
+    def test_extra_scalar_type_cannot_hide_behind_expected_type(self):
+        import copy
+        d = copy.deepcopy(OPENAPI_LEGAL)
+        d['components']['schemas']['Widget']['properties']['count']['type'] = ['integer', 'string']
+        self.assertTrue(run_openapi(d))
+
+    def test_extra_array_type_is_rejected(self):
+        import copy
+        d = copy.deepcopy(OPENAPI_LEGAL)
+        d['components']['schemas']['Widget']['properties']['tags']['type'] = ['array', 'integer']
+        self.assertTrue(run_openapi(d))
+
+    def test_unrelated_union_branch_cannot_hide_behind_nested_ref(self):
+        import copy
+        d = copy.deepcopy(OPENAPI_LEGAL)
+        d['components']['schemas']['Widget']['properties']['child'] = {
+            'anyOf': [{'$ref': '#/components/schemas/Child'}, {'type': 'integer'}]
+        }
+        self.assertTrue(run_openapi(d))
+
+    def test_legacy_nullable_is_not_json_schema_null(self):
+        import copy
+        d = copy.deepcopy(OPENAPI_LEGAL)
+        d['components']['schemas']['Widget']['properties']['when_or_null'] = {
+            'type': 'string', 'format': 'date-time', 'nullable': True
+        }
+        self.assertTrue(run_openapi(d))
+
+    def test_duplicate_required_is_rejected(self):
+        import copy
+        d = copy.deepcopy(OPENAPI_LEGAL)
+        d['components']['schemas']['Widget']['required'].append('id')
+        self.assertTrue(run_openapi(d))
+
+    def test_missing_ts_property_is_reported_not_a_key_error(self):
+        import copy
+        go, ts = openapi_sources()
+        del ts.interfaces['Widget']['count']
+        errors = ccd.check_openapi_pairs(PAIRS, NESTED, go, ts, copy.deepcopy(OPENAPI_LEGAL), NESTED)
+        self.assertTrue(errors)
+
+    def test_malformed_components_is_reported(self):
+        self.assertTrue(run_openapi({'components': []}))
+
+    def test_missing_yaml_dependency_is_reported(self):
+        from unittest.mock import patch
+        with patch.object(ccd, 'yaml', None):
+            doc, errors = ccd.parse_openapi_text('openapi: 3.1.0\n')
+        self.assertIsNone(doc)
+        self.assertTrue(any(e.startswith('[openapi-dependency]') for e in errors))
+
+    def test_missing_response_ref_is_rejected(self):
+        d = {'components': {'schemas': {}}, 'paths': {'/x': {
+            'get': {'responses': {'200': {'$ref': '#/components/responses/Missing'}}}
+        }}}
+        self.assertTrue(ccd._check_local_openapi_refs(d))
+
+    def test_remote_ref_is_not_silently_unchecked(self):
+        self.assertTrue(ccd._check_local_openapi_refs({
+            'components': {'schemas': {}}, 'x': {'$ref': 'https://example.invalid/schema'}
+        }))
+
+
 if __name__ == '__main__':
     unittest.main()

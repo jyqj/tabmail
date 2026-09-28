@@ -30,6 +30,12 @@ export interface WorkMailbox {
   revision: number;
 }
 export interface WorkGrant {
+  /** Read-side metadata is optional while constructing an editable grant. */
+  tenant_id?: string;
+  mailbox_id?: string;
+  granted_by?: string;
+  created_at?: string;
+  updated_at?: string;
   user_id: string;
   can_read: boolean;
   can_organize: boolean;

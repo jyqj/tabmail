@@ -1,5 +1,7 @@
 # R5 架构深化：九组优化实施与验收
 
+> 后续状态：下文记录首轮九组架构包。AR07 原先“OpenAPI 未编译”的缺口已在后续批次接入可执行静态门禁，覆盖33投影、67操作和36响应绑定；完整HTTP运行时契约仍非全覆盖。最新证据见 [R5-OPENAPI-VALIDATION](R5-OPENAPI-VALIDATION.md)，不把下文旧测试成绩当作后续批次成绩。
+
 ## 来源与范围
 
 用户于本轮明确要求一次性执行上传《TabMail 架构深化审查》的九组优化。实施起点为 `17fd8e4e570958fcf41f6b4e9a9f7341dd0e15d3`，分支 `refactor/company-mail-architecture-20260929`；起点工作区干净，保留全部 B01 历史工作。附件审查所用基线分支为 `test/company-mail-r5-b01j-index-validation`；本文件按附件九组候选保存实际实施边界、验证证据与未完成项。

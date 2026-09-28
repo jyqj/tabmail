@@ -1703,7 +1703,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 273,
+    "line": 279,
     "branch": 0,
     "callee": "company",
     "owner": "companyDomains",
@@ -1719,7 +1719,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 275,
+    "line": 281,
     "branch": 0,
     "callee": "company",
     "owner": "addCompanyDomain",
@@ -1735,7 +1735,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 281,
+    "line": 287,
     "branch": 0,
     "callee": "company",
     "owner": "verifyCompanyDomain",
@@ -1751,7 +1751,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 287,
+    "line": 293,
     "branch": 0,
     "callee": "company",
     "owner": "companyDomainVerification",
@@ -1767,7 +1767,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 292,
+    "line": 298,
     "branch": 0,
     "callee": "company",
     "owner": "deleteCompanyDomain",
@@ -1783,7 +1783,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 304,
+    "line": 310,
     "branch": 0,
     "callee": "company",
     "owner": "setMailboxSendPolicy",
@@ -1799,7 +1799,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 317,
+    "line": 323,
     "branch": 0,
     "callee": "company",
     "owner": "revokeTemplateVersion",
@@ -1815,7 +1815,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 327,
+    "line": 333,
     "branch": 0,
     "callee": "company",
     "owner": "submitDraft",
@@ -1831,7 +1831,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 340,
+    "line": 346,
     "branch": 0,
     "callee": "request",
     "owner": "res",
@@ -1845,7 +1845,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 344,
+    "line": 350,
     "branch": 0,
     "callee": "company",
     "owner": "workMailboxes",
@@ -1861,7 +1861,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 351,
+    "line": 357,
     "branch": 0,
     "callee": "request",
     "owner": "workMessages",
@@ -1877,7 +1877,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 357,
+    "line": 363,
     "branch": 0,
     "callee": "company",
     "owner": "workMessage",
@@ -1893,7 +1893,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 362,
+    "line": 368,
     "branch": 0,
     "callee": "request",
     "owner": "submissions",
@@ -1909,7 +1909,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 368,
+    "line": 374,
     "branch": 0,
     "callee": "company",
     "owner": "submission",
@@ -1925,7 +1925,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 371,
+    "line": 377,
     "branch": 0,
     "callee": "company",
     "owner": "submissionContent",
@@ -1941,7 +1941,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 376,
+    "line": 382,
     "branch": 0,
     "callee": "company",
     "owner": "submissionAttachments",
@@ -1957,7 +1957,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 383,
+    "line": 389,
     "branch": 0,
     "callee": "request",
     "owner": "res",
@@ -1973,7 +1973,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 402,
+    "line": 408,
     "branch": 0,
     "callee": "request",
     "owner": "blob",

@@ -1,4 +1,4 @@
-.PHONY: build run dev test vet lint web-lint web-test web-build contract-check i18n-check validation-tools-test i18n-source-test check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
+.PHONY: build run dev test vet lint web-lint web-test web-build contract-deps contract-check i18n-check validation-tools-test i18n-source-test check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
 
 BINARY  := tabmail
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -31,6 +31,10 @@ web-test:
 
 web-build:
 	cd web && npm run build
+
+# Run this explicitly in a virtualenv or the disposable validation container.
+contract-deps:
+	python3 -m pip install -r scripts/requirements-contract.txt
 
 contract-check:
 	python3 scripts/check_contract_drift.py

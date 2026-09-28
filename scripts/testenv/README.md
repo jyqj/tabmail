@@ -15,6 +15,13 @@ Use `git archive` to make a **tracked-source-only temporary snapshot**, then cop
 
 Download dependencies in that disposable source snapshot with `go mod download` and `(cd web && npm ci)`; preserve `GOSUMDB` and lockfiles. Run tests on a newly created, session-labelled `--internal` Docker network with a new PostgreSQL container, no host-published ports, and disposable storage. Assign the test DSN only to that container/network. `internal/testpg` creates its own databases, while the migration smoke test uses the supplied database directly: the supplied database must therefore also be disposable. Keep all test resource names and cleanup identities in the run receipt.
 
+The OpenAPI gate now parses YAML with pinned PyYAML. During the disposable
+runner's dependency-bootstrap phase, run `python3 -m pip install -r
+scripts/requirements-contract.txt` (equivalently `make contract-deps`). Disconnect
+external networking before executing tests on the internal PostgreSQL network.
+A missing parser is a failed gate; do not bypass the OpenAPI portion. On a host,
+activate a project virtualenv first rather than changing the system interpreter.
+
 Commands inside the source snapshot:
 
 ```sh
@@ -22,6 +29,8 @@ python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
 node --test scripts/tests/i18n_sources.test.cjs
 python3 -B scripts/check_i18n_keys.py
 python3 -B scripts/check_contract_drift.py
+# Includes company DTO/schema and operation bindings. The Go route-inventory
+# test below independently proves the checked-in inventory matches live source.
 go build ./...
 go test -json -race -count=1 -timeout=180s ./...
 go vet ./...

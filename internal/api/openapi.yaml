@@ -347,6 +347,7 @@ components:
             type: string
     Submission:
       type: object
+      required: [id, mailbox_id, from, subject, recipients, status, draft_consumed, attachment_count, created_at, content_redacted, delivery_uncertain]
       description: Employee-facing projection of an outbound submission; queue internals (attempts, lease,
         SMTP responses, delivery tokens) are excluded.
       properties:
@@ -363,21 +364,11 @@ components:
         recipients:
           type: array
           items:
-            type: object
-            properties:
-              address:
-                type: string
-              state:
-                type: string
-                enum:
-                - pending
-                - accepted
-                - temporary
-                - permanent
-                - uncertain
+            $ref: '#/components/schemas/SubmissionRecipient'
         status:
           type: string
           enum:
+          - cancelled
           - submitted
           - waiting
           - sending
@@ -400,6 +391,8 @@ components:
           type: boolean
         delivery_uncertain:
           type: boolean
+        capabilities:
+          $ref: '#/components/schemas/SubmissionCapabilities'
     APIKeyScope:
       type: string
       enum:
@@ -949,34 +942,19 @@ components:
           type: boolean
     MailboxGrant:
       type: object
+      description: Current per-user mailbox rights and administrative metadata, not the retired role model.
+      required: [tenant_id, mailbox_id, user_id, can_read, can_organize, can_send, template_only, created_at, updated_at]
       properties:
-        id:
-          type: string
-          format: uuid
-        tenant_id:
-          type: string
-          format: uuid
-        mailbox_id:
-          type: string
-          format: uuid
-        principal_type:
-          type: string
-          enum:
-          - user
-          - api_key
-        principal_id:
-          type: string
-          format: uuid
-        role:
-          type: string
-          enum:
-          - owner
-          - manager
-          - writer
-          - reader
-        created_at:
-          type: string
-          format: date-time
+        tenant_id: {type: string, format: uuid}
+        mailbox_id: {type: string, format: uuid}
+        user_id: {type: string, format: uuid}
+        can_read: {type: boolean}
+        can_organize: {type: boolean}
+        can_send: {type: boolean}
+        template_only: {type: boolean}
+        granted_by: {type: string, format: uuid}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
     ZoneGrant:
       type: object
       properties:
@@ -1141,6 +1119,7 @@ components:
           description: 0 = unlimited
     CompanySettings:
       type: object
+      required: [tenant_id, name, primary_zone_id, domain, revision]
       properties:
         tenant_id:
           type: string
@@ -1177,6 +1156,7 @@ components:
           description: Optional; null when absent.
     CompanyInvitation:
       type: object
+      required: [id, email, mailbox_address, display_name, expires_at, created_at]
       properties:
         id:
           type: string
@@ -1217,6 +1197,7 @@ components:
           description: Optional; null when absent.
     CompanyMailboxAccess:
       type: object
+      required: [mailbox, can_read, can_organize, can_send, template_only, revision]
       properties:
         mailbox:
           $ref: '#/components/schemas/Mailbox'
@@ -1232,11 +1213,13 @@ components:
           type: integer
     CompanyVariable:
       type: object
+      required: [name, type, required, max_length]
       properties:
         name:
           type: string
         type:
           type: string
+          enum: [text, email, integer, date, url]
         required:
           type: boolean
         max_length:
@@ -1247,6 +1230,7 @@ components:
             type: string
     CompanyTemplateDraft:
       type: object
+      required: [subject, text_body, html_body, variables]
       properties:
         subject:
           type: string
@@ -1260,6 +1244,7 @@ components:
             $ref: '#/components/schemas/CompanyVariable'
     CompanyTemplate:
       type: object
+      required: [id, name, draft, revision, retired, updated_at]
       properties:
         id:
           type: string
@@ -1277,6 +1262,7 @@ components:
           format: date-time
     CompanyTemplateVersion:
       type: object
+      required: [id, template_id, name, version, snapshot, content_hash, published_at]
       properties:
         id:
           type: string
@@ -1313,6 +1299,7 @@ components:
           format: uuid
     CompanyDraftPayload:
       type: object
+      required: [to, subject, text_body]
       properties:
         to:
           type: array
@@ -1351,6 +1338,7 @@ components:
             format: uuid
     CompanyDraft:
       type: object
+      required: [id, mailbox_id, payload, revision, updated_at]
       properties:
         id:
           type: string
@@ -1360,6 +1348,8 @@ components:
           format: uuid
         payload:
           $ref: '#/components/schemas/CompanyDraftPayload'
+        template_version:
+          $ref: '#/components/schemas/DraftTemplateVersion'
         revision:
           type: integer
         updated_at:
@@ -1367,6 +1357,7 @@ components:
           format: date-time
     CompanyAttachment:
       type: object
+      required: [id, mailbox_id, filename, content_type, size, state]
       properties:
         id:
           type: string
@@ -1395,11 +1386,13 @@ components:
           description: Optional; null when absent.
     CompanyRecipient:
       type: object
+      required: [address, state, smtp_code, attempts, updated_at]
       properties:
         address:
           type: string
         state:
           type: string
+          enum: [pending, accepted, temporary, permanent, uncertain]
         smtp_code:
           type: integer
         diagnostic:
@@ -1411,6 +1404,7 @@ components:
           format: date-time
     CompanyRecoveryTarget:
       type: object
+      required: [mailbox_id, address, state]
       properties:
         mailbox_id:
           type: string
@@ -1423,6 +1417,7 @@ components:
           type: string
     CompanyRecoveryReceipt:
       type: object
+      required: [id, state, updated_at, raw_size, targets]
       properties:
         id:
           type: string
@@ -1473,6 +1468,9 @@ components:
       - subject
       - revision
       - delivery_available
+      - to
+      - created_at
+      - attachment_count
     ContentIndexStatus:
       type: object
       properties:
@@ -1499,6 +1497,7 @@ components:
       - drafts
     OffboardingImpact:
       type: object
+      required: [mailboxes, drafts, transferable_drafts, attachments, api_keys, grants, queued, in_flight, uncertain]
       properties:
         mailboxes:
           type: integer
@@ -1555,8 +1554,10 @@ components:
       - impact
       - state
       - expires_at
+      - reason
     CompanyOverview:
       type: object
+      required: [mailboxes, active_employees, pending_invitations, queued, uncertain, index_failed]
       properties:
         mailboxes:
           type: integer
@@ -1572,6 +1573,7 @@ components:
           type: integer
     CompanyAdminAudit:
       type: object
+      required: [id, actor, action, resource_type, created_at]
       properties:
         id:
           type: string
@@ -1592,6 +1594,7 @@ components:
           format: date-time
     AccessExplanation:
       type: object
+      required: [mailbox_id, user_id, source, active, can_read, can_organize, can_send, template_only, send_policy, reasons]
       properties:
         mailbox_id:
           type: string
@@ -1619,12 +1622,190 @@ components:
           type: string
           enum:
           - free
-          - template_only
+          - template_required
           - disabled
         reasons:
           type: array
           items:
             type: string
+    MailboxGrantSnapshot:
+      type: object
+      required: [revision, grants]
+      properties:
+        revision: {type: integer, format: int64}
+        grants:
+          type: array
+          items: {$ref: '#/components/schemas/MailboxGrant'}
+    DraftTemplateVersion:
+      type: object
+      required: [id, status]
+      properties:
+        id: {type: string, format: uuid}
+        template_id: {type: string, format: uuid}
+        name: {type: string}
+        version: {type: integer}
+        status:
+          type: string
+          enum: [missing, revoked, corrupt, retired, unauthorized, usable]
+        snapshot: {$ref: '#/components/schemas/CompanyTemplateDraft'}
+    SubmissionCapabilities:
+      type: object
+      description: Interaction hints only; every operation rechecks current server-side authority.
+      required: [view_content, retry, retry_block_reason]
+      properties:
+        view_content: {type: boolean}
+        retry: {type: boolean}
+        retry_block_reason: {type: string}
+    SubmissionRecipient:
+      type: object
+      required: [address, state]
+      properties:
+        address: {type: string}
+        state: {type: string}
+    SubmissionContent:
+      type: object
+      description: Current mailbox read authority is required; BCC and queue-internal fields are not returned.
+      required: [id, subject, from, to, created_at, content_redacted]
+      properties:
+        id: {type: string, format: uuid}
+        subject: {type: string}
+        from: {type: string}
+        to: {type: array, items: {type: string}}
+        cc: {type: array, items: {type: string}}
+        headers: {type: object, additionalProperties: {type: string}}
+        text_body: {type: string}
+        html_body: {type: string}
+        created_at: {type: string, format: date-time}
+        content_redacted: {type: boolean}
+    SubmissionAttachment:
+      type: object
+      required: [id, filename, content_type, size, state]
+      properties:
+        id: {type: string, format: uuid}
+        filename: {type: string}
+        content_type: {type: string}
+        size: {type: integer}
+        state: {type: string}
+    CompanyDomain:
+      type: object
+      required: [id, domain, is_verified, mx_verified, dkim_enabled, txt_record, expected_mx, created_at]
+      properties:
+        id: {type: string, format: uuid}
+        domain: {type: string}
+        is_verified: {type: boolean}
+        mx_verified: {type: boolean}
+        dkim_enabled: {type: boolean}
+        txt_record: {type: string}
+        expected_mx: {type: string}
+        dkim_host: {type: string}
+        dkim_record: {type: string}
+        created_at: {type: string, format: date-time}
+    DomainDNSCheck:
+      type: object
+      required: [status]
+      properties:
+        status: {type: string}
+        details: {type: array, items: {type: string}}
+    DomainVerificationChecks:
+      type: object
+      required: [txt, mx, spf, dkim, dmarc]
+      properties:
+        txt: {$ref: '#/components/schemas/DomainDNSCheck'}
+        mx: {$ref: '#/components/schemas/DomainDNSCheck'}
+        spf: {$ref: '#/components/schemas/DomainDNSCheck'}
+        dkim: {$ref: '#/components/schemas/DomainDNSCheck'}
+        dmarc: {$ref: '#/components/schemas/DomainDNSCheck'}
+    DomainVerification:
+      type: object
+      required: [id, domain, is_verified, mx_verified, dkim_enabled, txt_record, expected_mx, checks]
+      properties:
+        id: {type: string, format: uuid}
+        domain: {type: string}
+        is_verified: {type: boolean}
+        mx_verified: {type: boolean}
+        dkim_enabled: {type: boolean}
+        txt_record: {type: string}
+        expected_mx: {type: string}
+        dkim_host: {type: string}
+        dkim_record: {type: string}
+        checks: {$ref: '#/components/schemas/DomainVerificationChecks'}
+    CompanySettingsInput:
+      type: object
+      description: Server-owned tenant_id/domain are optional echoed fields; revision zero creates initial settings.
+      required: [name, primary_zone_id]
+      properties:
+        tenant_id: {type: string, format: uuid}
+        domain: {type: string}
+        name: {type: string}
+        primary_zone_id: {type: string, format: uuid}
+        revision: {type: integer, minimum: 0, default: 0}
+        mail_send_policy: {type: string, enum: ['', free, template_required, disabled]}
+    CompanyTemplateInput:
+      type: object
+      required: [name, draft]
+      description: Create ignores id; update uses the URL id and an observed revision. Server timestamps are not required.
+      properties:
+        id: {type: string, format: uuid}
+        name: {type: string}
+        draft: {$ref: '#/components/schemas/CompanyTemplateDraftInput'}
+        revision: {type: integer, minimum: 0}
+        retired: {type: boolean}
+        updated_at: {type: string, format: date-time}
+    CompanyTemplateDraftInput:
+      type: object
+      description: Template saves validate subject and at least one nonempty body; private mail drafts use a different input contract.
+      required: [subject]
+      anyOf:
+      - required: [text_body]
+        properties: {text_body: {type: string, minLength: 1}}
+      - required: [html_body]
+        properties: {html_body: {type: string, minLength: 1}}
+      properties:
+        subject: {type: string}
+        text_body: {type: string}
+        html_body: {type: string}
+        variables: {type: array, items: {$ref: '#/components/schemas/CompanyVariableInput'}}
+    CompanyVariableInput:
+      type: object
+      required: [name, type, max_length]
+      properties:
+        name: {type: string}
+        type: {type: string, enum: [text, email, integer, date, url]}
+        max_length: {type: integer, minimum: 1, maximum: 4000}
+        required: {type: boolean, default: false}
+        options: {type: array, items: {type: string}, maxItems: 100}
+    CompanyDraftInput:
+      type: object
+      description: Private incomplete drafts are allowed. Create uses revision zero; update requires a positive revision. Optional id supports creation replay.
+      required: [mailbox_id]
+      properties:
+        id: {type: string, format: uuid}
+        mailbox_id: {type: string, format: uuid}
+        payload: {$ref: '#/components/schemas/CompanyDraftPayloadInput'}
+        revision: {type: integer, minimum: 0, default: 0}
+        updated_at: {type: string, format: date-time}
+        template_version: {$ref: '#/components/schemas/DraftTemplateVersion'}
+    CompanyDraftPayloadInput:
+      type: object
+      description: All draft fields may be omitted while editing; sending validates the complete message.
+      properties:
+        to: {type: array, items: {type: string}}
+        cc: {type: array, items: {type: string}}
+        bcc: {type: array, items: {type: string}}
+        subject: {type: string}
+        text_body: {type: string}
+        html_body: {type: string}
+        headers: {type: object, additionalProperties: {type: string}}
+        template_version_id: {type: string, format: uuid}
+        template_vars: {type: object, additionalProperties: {type: string}}
+        attachment_ids: {type: array, items: {type: string, format: uuid}}
+    CompanyRecipientOutcomeInput:
+      type: object
+      required: [address, state]
+      properties:
+        address: {type: string}
+        state: {type: string, enum: [accepted, temporary, permanent]}
+      description: Explicit confirmed outcomes only; attempt counters and protocol transcripts are not required inputs.
   responses:
     BadRequest:
       description: Invalid request
@@ -3424,9 +3605,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/CompanySettings'
+                    anyOf:
+                    - $ref: '#/components/schemas/CompanySettings'
+                    - type: 'null'
         '400':
           description: Invalid request
         '401':
@@ -3451,6 +3636,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanySettings'
@@ -3469,7 +3656,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompanySettings'
+              $ref: '#/components/schemas/CompanySettingsInput'
   /api/v1/company/invitations:
     get:
       tags:
@@ -3485,8 +3672,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
-                  data: {}
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyInvitation'
         '400':
           description: Invalid request
         '401':
@@ -3511,8 +3703,20 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
-                  data: {}
+                  data:
+                    type: object
+                    required:
+                    - invitation
+                    - activation_token
+                    properties:
+                      invitation:
+                        $ref: '#/components/schemas/CompanyInvitation'
+                      activation_token:
+                        type: string
+                        description: Returned once; treat as a secret.
         '400':
           description: Invalid request
         '401':
@@ -3627,6 +3831,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     type: array
@@ -3786,8 +3992,8 @@ paths:
       tags:
       - Company mail
       summary: Grants
-      description: Returns grants and the mailbox revision from one administrative snapshot. PUT must
-        submit this observed revision; stale edits are never replayed automatically.
+      description: Returns grants and the mailbox revision from one administrative snapshot. PUT must submit
+        this observed revision; stale edits are never replayed automatically.
       operationId: companyGrantsGet
       security:
       - BearerAuth: []
@@ -3798,39 +4004,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
-                    type: object
-                    required:
-                    - revision
-                    - grants
-                    properties:
-                      revision:
-                        type: integer
-                        format: int64
-                        minimum: 1
-                      grants:
-                        type: array
-                        items:
-                          type: object
-                          required:
-                          - user_id
-                          - can_read
-                          - can_organize
-                          - can_send
-                          - template_only
-                          properties:
-                            user_id:
-                              type: string
-                              format: uuid
-                            can_read:
-                              type: boolean
-                            can_organize:
-                              type: boolean
-                            can_send:
-                              type: boolean
-                            template_only:
-                              type: boolean
+                    $ref: '#/components/schemas/MailboxGrantSnapshot'
         '400':
           description: Invalid request
         '401':
@@ -3985,8 +4163,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
-                  data: {}
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyTemplate'
         '400':
           description: Invalid request
         '401':
@@ -4011,6 +4194,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyTemplate'
@@ -4029,7 +4214,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompanyTemplate'
+              $ref: '#/components/schemas/CompanyTemplateInput'
   /api/v1/company/templates/{id}:
     put:
       tags:
@@ -4045,6 +4230,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyTemplate'
@@ -4070,7 +4257,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompanyTemplate'
+              $ref: '#/components/schemas/CompanyTemplateInput'
   /api/v1/company/templates/preview:
     post:
       tags:
@@ -4112,7 +4299,7 @@ paths:
                   type: string
                   format: uuid
                 draft:
-                  $ref: '#/components/schemas/CompanyTemplateDraft'
+                  $ref: '#/components/schemas/CompanyTemplateDraftInput'
                 vars:
                   type: object
                   additionalProperties:
@@ -4135,6 +4322,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyTemplateVersion'
@@ -4231,8 +4420,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
-                  data: {}
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyTemplateVersion'
         '400':
           description: Invalid request
         '401':
@@ -4416,8 +4610,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
-                  data: {}
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyTemplateVersion'
         '400':
           description: Invalid request
         '401':
@@ -4600,6 +4799,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyDraftPayload'
@@ -4784,6 +4985,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyAttachment'
@@ -4867,6 +5070,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
+                - meta
                 properties:
                   data:
                     type: array
@@ -4874,6 +5080,10 @@ paths:
                       $ref: '#/components/schemas/CompanyDraft'
                   meta:
                     type: object
+                    required:
+                    - page
+                    - per_page
+                    - total
                     properties:
                       page:
                         type: integer
@@ -4881,8 +5091,6 @@ paths:
                         type: integer
                       total:
                         type: integer
-                required:
-                - data
         '400':
           description: Invalid request
         '401':
@@ -4921,6 +5129,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyDraft'
@@ -4939,7 +5149,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompanyDraft'
+              $ref: '#/components/schemas/CompanyDraftInput'
       description: Revision zero creates a draft. A client-generated UUID makes identical first-save retries
         idempotent; consumed/deleted UUIDs cannot be resurrected.
   /api/v1/company/drafts/{id}:
@@ -4957,6 +5167,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyDraft'
@@ -4982,7 +5194,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CompanyDraft'
+              $ref: '#/components/schemas/CompanyDraftInput'
     delete:
       tags:
       - Company mail
@@ -5035,11 +5247,11 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/CompanyDraft'
-                required:
-                - data
         '400':
           description: Invalid request
         '401':
@@ -5086,13 +5298,27 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
+                - meta
                 properties:
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/Submission'
                   meta:
-                    $ref: '#/components/schemas/Meta'
+                    type: object
+                    required:
+                    - page
+                    - per_page
+                    - total
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
         '401':
           description: Missing/expired/revoked identity; refresh only when permitted
         '500':
@@ -5112,6 +5338,8 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     $ref: '#/components/schemas/Submission'
@@ -5143,8 +5371,27 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
+                - meta
                 properties:
-                  data: {}
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyRecoveryReceipt'
+                  meta:
+                    type: object
+                    required:
+                    - page
+                    - per_page
+                    - total
+                    properties:
+                      page:
+                        type: integer
+                      per_page:
+                        type: integer
+                      total:
+                        type: integer
         '400':
           description: Invalid request
         '401':
@@ -5182,15 +5429,19 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
                   data:
                     type: object
+                    required:
+                    - receipt
+                    - original_valid
                     properties:
                       receipt:
                         $ref: '#/components/schemas/CompanyRecoveryReceipt'
                       original_valid:
                         type: boolean
-                    additionalProperties: false
         '400':
           description: Invalid request
         '401':
@@ -5302,8 +5553,13 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
                 properties:
-                  data: {}
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyRecipient'
         '400':
           description: Invalid request
         '401':
@@ -5368,7 +5624,7 @@ paths:
                 results:
                   type: array
                   items:
-                    $ref: '#/components/schemas/CompanyRecipient'
+                    $ref: '#/components/schemas/CompanyRecipientOutcomeInput'
                 reason:
                   type: string
                   minLength: 8
@@ -5522,6 +5778,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
+                - meta
                 properties:
                   data:
                     type: array
@@ -5529,6 +5788,10 @@ paths:
                       $ref: '#/components/schemas/ArchivedMail'
                   meta:
                     type: object
+                    required:
+                    - page
+                    - per_page
+                    - total
                     properties:
                       page:
                         type: integer
@@ -5536,8 +5799,6 @@ paths:
                         type: integer
                       total:
                         type: integer
-                required:
-                - data
         '400':
           description: Invalid request
         '401':
@@ -5876,6 +6137,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                - data
+                - meta
                 properties:
                   data:
                     type: array
@@ -5883,6 +6147,10 @@ paths:
                       $ref: '#/components/schemas/CompanyAdminAudit'
                   meta:
                     type: object
+                    required:
+                    - page
+                    - per_page
+                    - total
                     properties:
                       page:
                         type: integer
@@ -5890,8 +6158,6 @@ paths:
                         type: integer
                       total:
                         type: integer
-                required:
-                - data
         '400':
           description: Invalid request
         '401':
@@ -5959,3 +6225,386 @@ paths:
         schema:
           type: string
           format: uuid
+  /api/v1/company/domains/{id}:
+    delete:
+      tags:
+      - Company
+      summary: Domains.Delete
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: object
+                    required:
+                    - deleted
+                    properties:
+                      deleted:
+                        type: boolean
+        '409':
+          description: Configured primary domain or referenced assets prevent deletion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/domains:
+    get:
+      tags:
+      - Company
+      summary: Domains.List
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CompanyDomain'
+      description: Company administrator only. DNS/signing private material and platform-management fields
+        are not returned.
+    post:
+      tags:
+      - Company
+      summary: Domains.Create
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/CompanyDomain'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - domain
+              properties:
+                domain:
+                  type: string
+      description: Company administrator only. DNS/signing private material and platform-management fields
+        are not returned.
+  /api/v1/company/domains/{id}/verification:
+    get:
+      tags:
+      - Company
+      summary: Domains.Verification
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DomainVerification'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: Company administrator only. DNS/signing private material and platform-management fields
+        are not returned.
+  /api/v1/company/mailboxes/{id}/events:
+    get:
+      tags:
+      - Company
+      summary: Events.Events
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Mailbox event stream. Current mailbox read authority is required; event hints do
+            not grant access.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/submissions/{id}/attachments:
+    get:
+      tags:
+      - Company
+      summary: Mail.SubmissionAttachments
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubmissionAttachment'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/submissions/{id}/attachments/{aid}/download:
+    get:
+      tags:
+      - Company
+      summary: Mail.SubmissionAttachmentDownload
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: 'Attachment bytes; current mailbox content authority is checked before reading the
+            object. Cache-Control: private, no-store.'
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: aid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/submissions/{id}/content:
+    get:
+      tags:
+      - Company
+      summary: Mail.SubmissionContent
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SubmissionContent'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+  /api/v1/company/domains/{id}/verify:
+    post:
+      tags:
+      - Company
+      summary: Domains.Verify
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/DomainVerification'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      description: Company administrator only. DNS/signing private material and platform-management fields
+        are not returned.
+  /api/v1/company/drafts/{id}/submit:
+    post:
+      tags:
+      - Company
+      summary: Mail.SubmitDraft
+      security:
+      - BearerAuth: []
+      responses:
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '200':
+          description: Original receipt replayed with current content redaction
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OutboundJob'
+        '201':
+          description: New outbound submission accepted locally
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OutboundJob'
+        '409':
+          description: Draft revision or idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Send quota exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: Idempotency-Key
+        in: header
+        required: true
+        schema:
+          type: string
+          minLength: 1
+        description: At most 128 UTF-8 bytes; CR/LF forbidden. Reuse the same key only for an identical
+          submission.
+      description: Consumes the observed draft revision atomically. A repeated Idempotency-Key replays the
+        original receipt with current redaction; local acceptance is not final delivery.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - expected_revision
+              properties:
+                expected_revision:
+                  type: integer
+                  minimum: 1

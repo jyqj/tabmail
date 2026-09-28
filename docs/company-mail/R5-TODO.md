@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；状态：P0 / B01-J已完成索引候选真实前后对照及最终全量验收；589通过、54必跑齐全、40项三轮120通过，测试资源已清理。070/080其余范围及G0未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；最新完成 AR07 OpenAPI 静态契约子包：33 投影、67 操作、36 响应绑定；本次 Go 721 通过、54 必跑齐全、Python 128、前端 115 通过，测试资源已清理。P0-070/080、完整 P8-080 与 G0 未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | P0 / B01-J验收收口：基线6通过/4目标失败，候选10通过；最终原180秒预算589通过、54必跑、40项三轮120通过，无新增生产/测试修改 |
+| 当前阶段 | P0 其余依赖未关闭；跨阶段 AR07 OpenAPI 静态契约与路由绑定子包已验收，见 R5-OPENAPI-VALIDATION.md |
 | 下一可执行任务 | 继续070跨语句授权/普通内容截止与其余多资源写入边界；080按020/030/060已完成前置独立推进协议案例，不重复01937522已取得的基线/候选验收 |
 | 下一批范围 | B01-K：070剩余授权/期限快照及跨路径锁图收口；080可并行推进目标案例；090/110仍遵守原依赖，G0未关闭 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | H/I验收缺口已关闭；两次整包超时与runner寿命中断均留存，最终原预算全量与重复回归通过。070其余/080/性能/兼容仍待完成；前端、shipping浏览器与远端CI本批未跑，原A01–A07再次复现但未修复 |
+| 当前阻塞 | 070其余/080/性能/兼容仍待完成；OpenAPI 剩余31个操作只有路由/引用覆盖，完整运行时响应验证未完成。本批前端已跑；shipping浏览器、远端CI、A01–A07独立复现未重跑，原问题状态不因此改变 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
 ### 0.1 状态、依赖与记录规则
@@ -1424,6 +1424,15 @@ python3 scripts/check_i18n_keys.py
 - 预提交验证源码 manifest：`5c754d573ef577b28fe87084ba9ba10d4c56a368a2719700098a6ab074cd9027`。Go build/vet 通过；全量 race 722 run / 721 pass / 0 fail / 1 browser skip，37 package pass / 0 fail；后端证据门禁通过。Python 88/88、契约 16/32、Node 23/23、API inventory 125/7、tsc、Vitest 25 files/115 tests、ESLint、Next production build 均通过；gofmt 与 diff check 通过。
 - 未完成/未执行：OpenAPI YAML 编译、browser journey、远端 CI、生产迁移/部署、性能与依赖审计。未 push/PR/merge/deploy；生产数据未触碰。
 - 本批不新增原清单整项勾选；总计仍 **6/171**。详细实施边界与验收见 [R5 架构深化执行报告](R5-ARCHITECTURE-EXECUTION.md)。
+
+### AR07 OpenAPI 后续实施与实测（2026-09-29）
+
+- 起点 `eb8382ab04daf28137460b4f695cbb36fc29dbd1`，接续 `refactor/openapi-contract-gate-20260929` 的四份未提交草稿，先保存 patch/manifest，再补齐实现。
+- 实现：SafeLoader/固定 parser、文档内 JSON Pointer、重复键/别名/超限/外部引用安全拒绝；33 个投影的三方静态检查；67 个公司操作登记与36个响应绑定；7个请求专用 schema；旧授权角色 schema/错误枚举/缺失字段修正。CI 和 Make 复用原 checker，没有另起一套类型引擎。
+- 红绿：继承44单测通过但真实仓库校验失败；新增10反例得到7 fail/3 error，修复后通过。真实 schema/路由/响应破坏测试纳入完整 Python 门禁。
+- 被测 Git tree（非 commit）`f03d0cbaa11376a7995a034651ffd3eac6ac14e2`，589快照文件测试后哈希一致。Go build/vet/race：721 pass、0 fail、1显式browser skip；54必跑齐全。Python128、契约71方法、Node23、Vitest25文件115测试、tsc/lint/build、i18n/API inventory均通过。
+- [执行报告](R5-OPENAPI-VALIDATION.md)、[机器结果](evidence/R5-OPENAPI-VALIDATION.json)与[54份原始记录](evidence/R5-OPENAPI-LOGS.tar.gz)保留前后结果。本批容器、匿名卷和网络按归属清理；未改Go module/npm lockfile/迁移，未push/PR/merge/deploy。
+- 范围：AR07 的 OpenAPI 静态接线子包完成；31操作完整响应、共享持久化模型的公开投影、nil集合/自定义序列化与真实HTTP全响应验证仍未关闭。不得据此勾选整个 P8-080、P1 或 G0；原统计保持 **6/171**。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

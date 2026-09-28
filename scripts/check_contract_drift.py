@@ -26,22 +26,33 @@ Fail-closed structure checks: a missing Go/TS endpoint of a declared mapping,
 duplicate struct/interface definitions across the scanned files, and duplicate
 field names inside one struct/interface all fail the check.
 
-OpenAPI: internal/api/openapi.yaml is deliberately NOT compiled here. The
-Python stdlib has no YAML parser and a hand-rolled indentation parser would
-silently mis-read the schema; envelope/schema drift inside the spec remains a
-documented blind spot of this checker.
+OpenAPI: internal/api/openapi.yaml is parsed with the pinned PyYAML dependency
+using a duplicate-key-rejecting loader. The same Go/TS projection is checked
+against the 32 explicit internal/company DTO component schemas for fields,
+required/optional/nullability, scalar/array/map shapes, nested references and
+string-literal enums. Storage-backed shared models are intentionally excluded
+until R5-P8-070 gives them allow-list response DTOs; the gate must never force
+internal object keys, leases or deletion timestamps into the public contract.
+Local component references are also resolved fail-closed.
 """
 from __future__ import annotations
 
 import re
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+
+try:
+    import yaml
+except ModuleNotFoundError:  # pragma: no cover - exercised by the CLI guard
+    yaml = None
 
 
 ROOT = Path(__file__).resolve().parents[1]
 GO_MODELS = ROOT / "internal/models/models.go"
 TS_TYPES = ROOT / "web/lib/types.ts"
+OPENAPI_SPEC = ROOT / "internal/api/openapi.yaml"
 
 SHARED_TYPES = [
     "Plan",
@@ -63,6 +74,7 @@ SHARED_TYPES = [
 ]
 
 company_pairs = {
+    "MailboxGrant": "WorkGrant",
     "ArchivedMail": "ArchivedMail", "ContentIndexStatus": "ContentIndexStatus",
     "OffboardingOptions": "OffboardingOptions", "OffboardingImpact": "OffboardingImpact",
     "OffboardingPlan": "OffboardingPlan", "Overview": "CompanyOverview",
@@ -88,6 +100,49 @@ SHARED_PAIRS = {name: name for name in SHARED_TYPES}
 # Nested Go struct references resolve through the same projection table, so a
 # struct-typed field must serialize as the mapped TS name or as an inline object.
 NESTED_MAP: dict[str, str] = {**SHARED_PAIRS, **company_pairs}
+
+# Go DTO name -> OpenAPI component. Existing company component names are kept
+# for compatibility with the path document; missing DTOs are added under a
+# stable explicit name instead of inferred by a permissive naming heuristic.
+OPENAPI_COMPANY_COMPONENTS = {
+    "MailboxGrant": "MailboxGrant",
+    "ArchivedMail": "ArchivedMail",
+    "ContentIndexStatus": "ContentIndexStatus",
+    "OffboardingOptions": "OffboardingOptions",
+    "OffboardingImpact": "OffboardingImpact",
+    "OffboardingPlan": "OffboardingPlan",
+    "Overview": "CompanyOverview",
+    "AdminAudit": "CompanyAdminAudit",
+    "AccessExplanation": "AccessExplanation",
+    "Settings": "CompanySettings",
+    "Invitation": "CompanyInvitation",
+    "MailboxGrantSnapshot": "MailboxGrantSnapshot",
+    "DraftTemplateVersion": "DraftTemplateVersion",
+    "SubmissionCapabilities": "SubmissionCapabilities",
+    "MailboxAccess": "CompanyMailboxAccess",
+    "Variable": "CompanyVariable",
+    "TemplateDraft": "CompanyTemplateDraft",
+    "Template": "CompanyTemplate",
+    "TemplateVersion": "CompanyTemplateVersion",
+    "DraftPayload": "CompanyDraftPayload",
+    "Draft": "CompanyDraft",
+    "Attachment": "CompanyAttachment",
+    "Recipient": "CompanyRecipient",
+    "RecoveryTarget": "CompanyRecoveryTarget",
+    "RecoveryReceipt": "CompanyRecoveryReceipt",
+    "Submission": "Submission",
+    "SubmissionRecipient": "SubmissionRecipient",
+    "SubmissionContent": "SubmissionContent",
+    "SubmissionAttachment": "SubmissionAttachment",
+    "Domain": "CompanyDomain",
+    "DNSCheck": "DomainDNSCheck",
+    "DomainVerificationChecks": "DomainVerificationChecks",
+    "DomainVerification": "DomainVerification",
+}
+OPENAPI_COMPONENTS = {
+    **{name: name for name in SHARED_TYPES},
+    **OPENAPI_COMPANY_COMPONENTS,
+}
 
 # Unambiguous Go scalar -> TS base-type projection. Anything absent stays opaque.
 SCALAR_PROJECTION = {
@@ -473,6 +528,660 @@ def check_pairs(
     return errors
 
 
+def _strict_yaml_loader():
+    if yaml is None:
+        raise RuntimeError(
+            "PyYAML is required for the OpenAPI contract gate; "
+            "install scripts/requirements-contract.txt"
+        )
+
+    class StrictSafeLoader(yaml.SafeLoader):
+        # Contract documents are small, alias-free source files. Reject aliases
+        # rather than constructing recursive or exponentially expanded objects.
+        def compose_node(self, parent, index):
+            if self.check_event(yaml.AliasEvent):
+                raise yaml.YAMLError("aliases are not supported in contract documents")
+            self.contract_nodes = getattr(self, 'contract_nodes', 0) + 1
+            self.contract_depth = getattr(self, 'contract_depth', 0) + 1
+            try:
+                if self.contract_nodes > 50000 or self.contract_depth > 100:
+                    raise yaml.YAMLError("contract document exceeds node/depth budget")
+                return super().compose_node(parent, index)
+            finally:
+                self.contract_depth -= 1
+
+    def construct_mapping(loader, node, deep=False):
+        loader.flatten_mapping(node)
+        mapping = {}
+        for key_node, value_node in node.value:
+            key = loader.construct_object(key_node, deep=deep)
+            if not isinstance(key, (str, int)):
+                raise yaml.YAMLError("contract mapping keys must be strings or integers")
+            if key in mapping:
+                raise yaml.constructor.ConstructorError(
+                    "while constructing a mapping",
+                    node.start_mark,
+                    f"found duplicate key {key!r}",
+                    key_node.start_mark,
+                )
+            mapping[key] = loader.construct_object(value_node, deep=deep)
+        return mapping
+
+    StrictSafeLoader.add_constructor(
+        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+        construct_mapping,
+    )
+    return StrictSafeLoader
+
+
+def parse_openapi_text(text: str) -> tuple[dict | None, list[str]]:
+    try:
+        loader = _strict_yaml_loader()
+    except RuntimeError as exc:
+        return None, [f"[openapi-dependency] {exc}"]
+    if len(text.encode('utf-8')) > 2 * 1024 * 1024:
+        return None, ["[openapi-shape] document exceeds 2 MiB limit"]
+    try:
+        document = yaml.load(text, Loader=loader)
+    except yaml.YAMLError as exc:
+        return None, [f"[openapi-yaml] {exc}"]
+    if not isinstance(document, dict):
+        return None, ["[openapi-shape] document root must be an object"]
+    if document.get("openapi") != "3.1.0":
+        return document, [
+            f"[openapi-version] expected 3.1.0, got {document.get('openapi')!r}"
+        ]
+    return document, []
+
+
+def _schema_types(schema: object) -> set[str]:
+    if not isinstance(schema, dict):
+        return set()
+    value = schema.get("type")
+    if isinstance(value, str):
+        return {value}
+    if isinstance(value, list):
+        return {str(item) for item in value if item != "null"}
+    for keyword in ("anyOf", "oneOf"):
+        variants = schema.get(keyword)
+        if isinstance(variants, list):
+            out: set[str] = set()
+            for variant in variants:
+                out |= _schema_types(variant)
+            return out
+    return set()
+
+
+def _schema_nullable(schema: object) -> bool:
+    if not isinstance(schema, dict):
+        return False
+    value = schema.get("type")
+    if isinstance(value, list) and "null" in value:
+        return True
+    for keyword in ("anyOf", "oneOf"):
+        variants = schema.get(keyword)
+        if isinstance(variants, list):
+            for variant in variants:
+                if isinstance(variant, dict) and variant.get("type") == "null":
+                    return True
+    return False
+
+
+def _schema_ref_component(schema: object) -> str | None:
+    if not isinstance(schema, dict):
+        return None
+    ref = schema.get("$ref")
+    prefix = "#/components/schemas/"
+    if isinstance(ref, str) and ref.startswith(prefix):
+        return ref[len(prefix):]
+    for keyword in ("anyOf", "oneOf", "allOf"):
+        variants = schema.get(keyword)
+        if not isinstance(variants, list):
+            continue
+        non_null = [v for v in variants if v != {"type": "null"}]
+        if len(non_null) == 1:
+            return _schema_ref_component(non_null[0])
+    return None
+
+
+def _expanded_ts_members(
+    ts_type: str,
+    aliases: dict[str, str],
+    seen: frozenset[str] = frozenset(),
+) -> list[str]:
+    expanded: list[str] = []
+    for member in ts_members(ts_type):
+        if re.fullmatch(r"\w+", member) and member in aliases and member not in seen:
+            expanded.extend(
+                _expanded_ts_members(aliases[member], aliases, seen | {member})
+            )
+        else:
+            expanded.append(member)
+    return expanded
+
+
+def _ts_string_enum(ts_type: str, aliases: dict[str, str]) -> list[str] | None:
+    members = [
+        member for member in _expanded_ts_members(ts_type, aliases)
+        if member != "null"
+    ]
+    if not members:
+        return None
+    values: list[str] = []
+    for member in members:
+        member = member.strip()
+        if len(member) < 2 or member[0] != member[-1] or member[0] not in "\"'":
+            return None
+        value = member[1:-1]
+        if value not in values:
+            values.append(value)
+    return values
+
+
+def _expected_scalar(
+    go_type: str,
+    go_string_types: set[str],
+) -> tuple[str | None, str | None]:
+    bare = go_type.lstrip("*")
+    short = bare.split(".")[-1]
+    if bare == "uuid.UUID":
+        return "string", "uuid"
+    if bare == "time.Time":
+        return "string", "date-time"
+    projection = SCALAR_PROJECTION.get(bare) or SCALAR_PROJECTION.get(short)
+    if projection == "number":
+        if bare.startswith("float") or short.startswith("float"):
+            return "number", None
+        return "integer", None
+    if projection is not None:
+        return projection, None
+    if short in go_string_types:
+        return "string", None
+    return None, None
+
+
+def _compare_openapi_value(
+    label: str,
+    go_type: str,
+    ts_type: str,
+    schema: object,
+    schemas: dict[str, object],
+    nested_components: dict[str, str],
+    go_string_types: set[str],
+    ts_aliases: dict[str, str],
+) -> list[str]:
+    errors: list[str] = []
+    bare = go_type.lstrip("*")
+    if not isinstance(schema, dict):
+        return [f"[openapi-shape] {label}: schema must be an object"]
+
+    if "nullable" in schema:
+        errors.append(f"[openapi-dialect] {label}: use JSON Schema null, not nullable")
+    # We verify a deliberately bounded DTO subset, not arbitrary JSON Schema.
+    # A composite is supported only as one value alternative plus literal null.
+    for keyword in ('anyOf', 'oneOf', 'allOf'):
+        if keyword in schema:
+            variants = schema[keyword]
+            if (not isinstance(variants, list) or not variants
+                    or any(not isinstance(v, dict) for v in variants)):
+                return errors + [f"[openapi-shape] {label}: malformed {keyword}"]
+            non_null = [v for v in variants if v != {'type': 'null'}]
+            if (len(non_null) != 1 or (keyword == 'allOf' and len(variants) != 1)
+                    or any(k in schema for k in ('type', '$ref'))):
+                return errors + [f"[openapi-shape] {label}: unsupported composite {keyword}"]
+            return errors + _compare_openapi_value(
+                label, go_type, ts_type, non_null[0], schemas, nested_components,
+                go_string_types, ts_aliases)
+    if any(k in schema for k in ('not', 'if', 'then', 'else', '$dynamicRef')):
+        return errors + [f"[openapi-shape] {label}: unsupported conditional schema"]
+
+    if bare.startswith("[]"):
+        if _schema_types(schema) != {"array"}:
+            return [f"[openapi-type] {label}: Go `{go_type}` requires type array"]
+        items = schema.get("items")
+        members = [m for m in ts_members(ts_type) if m != "null"]
+        array_members = [
+            m for m in members
+            if m.endswith("[]") or (m.startswith("Array<") and m.endswith(">"))
+        ]
+        if not isinstance(items, dict) or not array_members:
+            return [f"[openapi-array] {label}: array items are missing or TS is not an array"]
+        errors.extend(
+            _compare_openapi_value(
+                f"{label}[]",
+                bare[2:],
+                array_elem_ts(array_members[0]),
+                items,
+                schemas,
+                nested_components,
+                go_string_types,
+                ts_aliases,
+            )
+        )
+        return errors
+
+    map_match = re.fullmatch(r"map\[[^]]+\](.+)", bare)
+    if map_match:
+        if _schema_types(schema) != {"object"}:
+            return [f"[openapi-type] {label}: Go `{go_type}` requires type object"]
+        additional = schema.get("additionalProperties")
+        if not isinstance(additional, dict):
+            return [
+                f"[openapi-map] {label}: typed Go map requires an explicit "
+                "additionalProperties schema"
+            ]
+        ts_match = re.fullmatch(r"Record<\s*string\s*,\s*(.+)>", ts_type.strip())
+        value_ts = ts_match.group(1).strip() if ts_match else "unknown"
+        return _compare_openapi_value(
+            f"{label}{{}}",
+            map_match.group(1).strip(),
+            value_ts,
+            additional,
+            schemas,
+            nested_components,
+            go_string_types,
+            ts_aliases,
+        )
+
+    if bare == "json.RawMessage":
+        if "object" not in _schema_types(schema):
+            errors.append(f"[openapi-type] {label}: json.RawMessage requires type object")
+        return errors
+
+    expected_type, expected_format = _expected_scalar(bare, go_string_types)
+    if expected_type is not None:
+        actual_types = _schema_types(schema)
+        if actual_types != {expected_type}:
+            errors.append(
+                f"[openapi-type] {label}: Go `{go_type}` requires {expected_type}; "
+                f"OpenAPI has {sorted(actual_types)}"
+            )
+        if expected_format is not None and schema.get("format") != expected_format:
+            errors.append(
+                f"[openapi-format] {label}: Go `{go_type}` requires format "
+                f"{expected_format!r}"
+            )
+        expected_enum = _ts_string_enum(ts_type, ts_aliases)
+        actual_enum = schema.get("enum")
+        if expected_enum is not None:
+            if (not isinstance(actual_enum, list)
+                    or any(not isinstance(v, str) for v in actual_enum)
+                    or len(actual_enum) != len(set(actual_enum))
+                    or set(actual_enum) != set(expected_enum)):
+                errors.append(
+                    f"[openapi-enum] {label}: expected {expected_enum}, got {actual_enum}"
+                )
+        elif actual_enum is not None:
+            errors.append(
+                f"[openapi-enum] {label}: OpenAPI narrows unconstrained TS `{ts_type}` "
+                f"to {actual_enum}"
+            )
+        return errors
+
+    short = bare.split(".")[-1]
+    expected_component = nested_components.get(short)
+    if expected_component is None and short in schemas:
+        expected_component = short
+    if expected_component is not None:
+        actual_component = _schema_ref_component(schema)
+        if actual_component != expected_component:
+            errors.append(
+                f"[openapi-ref] {label}: Go `{go_type}` requires "
+                f"#/components/schemas/{expected_component}, got {actual_component!r}"
+            )
+        return errors
+
+    if "object" not in _schema_types(schema):
+        errors.append(
+            f"[openapi-type] {label}: unmapped Go `{go_type}` must be represented "
+            "as an explicit object"
+        )
+    return errors
+
+
+def check_openapi_pairs(
+    pairs: dict[str, str],
+    components: dict[str, str],
+    go: GoSource,
+    ts: TsSource,
+    document: dict,
+    nested_components: dict[str, str],
+) -> list[str]:
+    errors: list[str] = []
+    schemas = _component_schemas(document)
+    if schemas is None:
+        return ["[openapi-shape] components.schemas must be an object"]
+    for go_name, ts_name in pairs.items():
+        component_name = components[go_name]
+        schema = schemas.get(component_name)
+        go_fields = go.structs.get(go_name)
+        ts_fields = ts.interfaces.get(ts_name)
+        label = f"{go_name}->{ts_name}->{component_name}"
+        if go_fields is None or ts_fields is None:
+            errors.append(f"[openapi-source] {label}: Go or TS source is missing")
+            continue
+        if set(go_fields) != set(ts_fields):
+            errors.append(f"[openapi-source] {label}: Go/TS field sets differ")
+        if not isinstance(schema, dict):
+            errors.append(f"[missing-openapi] {label}")
+            continue
+        if _schema_types(schema) != {"object"}:
+            errors.append(f"[openapi-shape] {label}: component must have type object")
+            continue
+        properties = schema.get("properties")
+        if not isinstance(properties, dict):
+            errors.append(f"[openapi-shape] {label}: properties must be an object")
+            continue
+        expected_names = set(go_fields)
+        actual_names = set(properties)
+        if expected_names != actual_names:
+            errors.append(
+                f"[openapi-fields] {label}\n"
+                f"  missing={sorted(expected_names - actual_names)}\n"
+                f"  extra={sorted(actual_names - expected_names)}"
+            )
+        expected_required = {
+            name for name, field in go_fields.items() if not field.omitempty
+        }
+        actual_required_value = schema.get("required", [])
+        if (not isinstance(actual_required_value, list)
+                or any(not isinstance(v, str) for v in actual_required_value)):
+            errors.append(f"[openapi-required] {label}: required must be a string list")
+            actual_required_value = []
+        actual_required = set(actual_required_value)
+        if len(actual_required) != len(actual_required_value):
+            errors.append(f"[openapi-required] {label}: duplicate required property")
+        if expected_required != actual_required:
+            errors.append(
+                f"[openapi-required] {label}\n"
+                f"  missing={sorted(expected_required - actual_required)}\n"
+                f"  extra={sorted(actual_required - expected_required)}"
+            )
+        for field_name in sorted(expected_names & actual_names & set(ts_fields)):
+            go_field = go_fields[field_name]
+            ts_field = ts_fields[field_name]
+            property_schema = properties[field_name]
+            collection = (
+                go_field.go_type.lstrip("*").startswith("[]")
+                or go_field.go_type.lstrip("*").startswith("map[")
+            )
+            if go_field.pointer and not go_field.omitempty:
+                if not _schema_nullable(property_schema):
+                    errors.append(
+                        f"[openapi-null] {label}.{field_name}: required pointer must allow null"
+                    )
+            elif not go_field.pointer and not collection and _schema_nullable(property_schema):
+                errors.append(
+                    f"[openapi-null] {label}.{field_name}: non-pointer value must not allow null"
+                )
+            errors.extend(
+                _compare_openapi_value(
+                    f"{label}.{field_name}",
+                    go_field.go_type,
+                    ts_field.ts_type,
+                    property_schema,
+                    schemas,
+                    nested_components,
+                    go.string_types,
+                    ts.aliases,
+                )
+            )
+    return errors
+
+
+def _component_schemas(document: object) -> dict | None:
+    if not isinstance(document, dict):
+        return None
+    components = document.get('components')
+    if not isinstance(components, dict):
+        return None
+    schemas = components.get('schemas')
+    return schemas if isinstance(schemas, dict) else None
+
+
+def _resolve_local_ref(document: dict, ref: object) -> object:
+    if not isinstance(ref, str) or not ref.startswith('#/'):
+        raise ValueError('only document-local JSON Pointer references are supported')
+    node = document
+    for token in ref[2:].split('/'):
+        if re.search(r'~(?![01])', token):
+            raise ValueError('invalid JSON Pointer escape')
+        token = token.replace('~1', '/').replace('~0', '~')
+        if isinstance(node, dict) and token in node:
+            node = node[token]
+        elif isinstance(node, list) and re.fullmatch(r'0|[1-9][0-9]*', token) and int(token) < len(node):
+            node = node[int(token)]
+        else:
+            raise ValueError('reference target does not exist')
+    return node
+
+
+def _check_local_openapi_refs(document: dict) -> list[str]:
+    errors: list[str] = []
+    seen: set[int] = set()
+
+    def visit(node: object, location: str) -> None:
+        if not isinstance(node, (dict, list)):
+            return
+        if id(node) in seen:
+            errors.append(f'[openapi-shape] {location}: recursive or aliased document')
+            return
+        seen.add(id(node))
+        if isinstance(node, dict):
+            if '$ref' in node:
+                try:
+                    _resolve_local_ref(document, node['$ref'])
+                except ValueError as exc:
+                    errors.append(f"[openapi-ref-missing] {location}: {node['$ref']!r}: {exc}")
+            for key, value in node.items():
+                # Example/extension payloads are data, not OpenAPI Reference Objects.
+                if key not in ('example', 'examples', 'default', 'const', 'enum') and not str(key).startswith('x-'):
+                    visit(value, f'{location}.{key}')
+        else:
+            for index, value in enumerate(node):
+                visit(value, f'{location}[{index}]')
+        seen.remove(id(node))
+
+    visit(document, '$')
+    return errors
+
+
+def check_openapi_contract(
+    document: dict,
+    shared_go: GoSource,
+    shared_ts: TsSource,
+    company_go: GoSource,
+    company_ts: TsSource,
+) -> list[str]:
+    schemas = _component_schemas(document)
+    if schemas is None:
+        return ["[openapi-shape] components.schemas must be an object"]
+    dynamic_nested = dict(OPENAPI_COMPONENTS)
+    if isinstance(schemas, dict):
+        for name in schemas:
+            dynamic_nested.setdefault(name, name)
+    errors = _check_local_openapi_refs(document)
+    # Shared models remain Go↔TS checked above, but many are persistence objects
+    # whose JSON tags include object keys, lease fields and retention tombstones.
+    # Binding those directly to OpenAPI before response DTOs exist would turn an
+    # implementation leak into a public promise. Only the explicit company DTO
+    # layer is an eligible HTTP contract source in this phase.
+    errors.extend(
+        check_openapi_pairs(
+            company_pairs,
+            OPENAPI_COMPANY_COMPONENTS,
+            company_go,
+            company_ts,
+            document,
+            dynamic_nested,
+        )
+    )
+    return errors
+
+
+# Bind reviewed handler outputs to schemas, reusing the Go-AST route inventory
+# rather than adding another router parser. route_inventory_test.go proves that
+# inventory matches the current Go source in the normal backend suite.
+# Values: success status, data shape, referenced DTO component.
+COMPANY_RESPONSES = {
+    'c.Setup.Settings': ('200', 'nullable', 'CompanySettings'),
+    'c.Setup.Configure': ('200', 'one', 'CompanySettings'),
+    'c.Setup.Invitations': ('200', 'list', 'CompanyInvitation'),
+    'c.Setup.Invite': ('200', 'field:invitation', 'CompanyInvitation'),
+    'c.Mailboxes.Mailboxes': ('200', 'list', 'CompanyMailboxAccess'),
+    'c.Mailboxes.Grants': ('200', 'one', 'MailboxGrantSnapshot'),
+    'c.Templates.Templates': ('200', 'list', 'CompanyTemplate'),
+    'c.Templates.SaveTemplate': ('200', 'one', 'CompanyTemplate'),
+    'c.Templates.Publish': ('200', 'one', 'CompanyTemplateVersion'),
+    'c.Templates.Versions': ('200', 'list', 'CompanyTemplateVersion'),
+    'c.Templates.UsableTemplates': ('200', 'list', 'CompanyTemplateVersion'),
+    'c.Drafts.List': ('200', 'page', 'CompanyDraft'),
+    'c.Drafts.Get': ('200', 'one', 'CompanyDraft'),
+    'c.Drafts.Save': ('200', 'one', 'CompanyDraft'),
+    'c.Mail.Submissions': ('200', 'page', 'Submission'),
+    'c.Mail.Submission': ('200', 'one', 'Submission'),
+    'c.Mail.SubmissionContent': ('200', 'one', 'SubmissionContent'),
+    'c.Mail.SubmissionAttachments': ('200', 'list', 'SubmissionAttachment'),
+    'c.Mail.ComposeReply': ('200', 'one', 'CompanyDraftPayload'),
+    'c.Mail.UploadAttachment': ('200', 'one', 'CompanyAttachment'),
+    'c.Recovery.Recovery': ('200', 'page', 'CompanyRecoveryReceipt'),
+    'c.Recovery.InspectReceipt': ('200', 'field:receipt', 'CompanyRecoveryReceipt'),
+    'c.Recovery.Recipients': ('200', 'list', 'CompanyRecipient'),
+    'c.Archive.List': ('200', 'page', 'ArchivedMail'),
+    'c.Index.Status': ('200', 'one', 'ContentIndexStatus'),
+    'c.Employees.Preview': ('200', 'one', 'OffboardingPlan'),
+    'c.Employees.Execute': ('200', 'one', 'OffboardingPlan'),
+    'c.Console.Overview': ('200', 'one', 'CompanyOverview'),
+    'c.Console.Audit': ('200', 'page', 'CompanyAdminAudit'),
+    'c.Console.Access': ('200', 'one', 'AccessExplanation'),
+    'c.Domains.Create': ('201', 'one', 'CompanyDomain'),
+    'c.Domains.List': ('200', 'list', 'CompanyDomain'),
+    'c.Domains.Verify': ('200', 'one', 'DomainVerification'),
+    'c.Domains.Verification': ('200', 'one', 'DomainVerification'),
+}
+COMPANY_REQUESTS = {
+    'c.Setup.Configure': 'CompanySettingsInput',
+    'c.Templates.SaveTemplate': 'CompanyTemplateInput',
+    'c.Drafts.Save': 'CompanyDraftInput',
+}
+
+
+def _object_at(node: object, *keys: str) -> dict:
+    for key in keys:
+        if not isinstance(node, dict):
+            return {}
+        node = node.get(key)
+    return node if isinstance(node, dict) else {}
+
+
+def _required_names(schema: object) -> set[str]:
+    value = _object_at(schema).get('required', [])
+    return set(value) if isinstance(value, list) and all(isinstance(v, str) for v in value) else set()
+
+
+def _is_component_ref(schema: dict, component: str, nullable: bool = False) -> bool:
+    ref = {'$ref': '#/components/schemas/' + component}
+    if nullable:
+        return schema == {'anyOf': [ref, {'type': 'null'}]} or schema == {'anyOf': [{'type': 'null'}, ref]}
+    return schema == ref
+
+
+# These are request-specific shapes, not response DTOs. Incomplete drafts and
+# initial settings must not acquire response-only required fields by accident.
+INPUT_REQUIRED = {
+    'CompanySettingsInput': {'name', 'primary_zone_id'},
+    'CompanyTemplateInput': {'name', 'draft'},
+    'CompanyTemplateDraftInput': {'subject'},
+    'CompanyVariableInput': {'name', 'type', 'max_length'},
+    'CompanyDraftInput': {'mailbox_id'},
+    'CompanyDraftPayloadInput': set(),
+    'CompanyRecipientOutcomeInput': {'address', 'state'},
+}
+
+
+def check_input_schemas(document: dict) -> list[str]:
+    errors = []
+    for name, required in INPUT_REQUIRED.items():
+        schema = _object_at(document, 'components', 'schemas', name)
+        declared = schema.get('required', [])
+        if (schema.get('type') != 'object' or not isinstance(declared, list)
+                or any(not isinstance(v, str) for v in declared)
+                or len(declared) != len(_required_names(schema))
+                or _required_names(schema) != required):
+            errors.append(f'[openapi-input-required] {name}: expected {sorted(required)}')
+    outcome = _object_at(document, 'components', 'schemas', 'CompanyRecipientOutcomeInput', 'properties', 'state')
+    if outcome.get('enum') != ['accepted', 'temporary', 'permanent']:
+        errors.append('[openapi-input-outcome] reconciliation must require a confirmed outcome')
+    op = _object_at(document, 'paths', '/api/v1/company/outbound/{id}/reconcile', 'post')
+    items = _object_at(op, 'requestBody', 'content', 'application/json', 'schema', 'properties', 'results', 'items')
+    if not _is_component_ref(items, 'CompanyRecipientOutcomeInput'):
+        errors.append('[openapi-input-outcome] reconciliation must not reuse the response ledger DTO')
+    return errors
+
+
+def check_company_operations(document: dict, inventory: object) -> list[str]:
+    if not isinstance(inventory, list) or not inventory:
+        return ['[openapi-routes] missing nonempty Go-AST route inventory']
+    rows = []
+    errors: list[str] = []
+    for row in inventory:
+        if not isinstance(row, dict) or any(not isinstance(row.get(k), str) for k in ('method', 'path', 'handler')):
+            return ['[openapi-routes] malformed Go-AST route inventory']
+        if row['path'].startswith('/api/v1/company/'):
+            rows.append(row)
+    if not rows:
+        return ['[openapi-routes] company route inventory is empty']
+    keys = {(r['method'].lower(), r['path']) for r in rows}
+    if len(keys) != len(rows):
+        errors.append('[openapi-routes] duplicate company operation in inventory')
+    paths = _object_at(document, 'paths')
+    documented = {(method, path) for path, item in paths.items()
+                  if isinstance(path, str) and path.startswith('/api/v1/company/')
+                  and isinstance(item, dict) for method in item
+                  if method in ('get', 'post', 'put', 'patch', 'delete', 'head', 'options')}
+    for key in sorted(keys - documented):
+        errors.append(f'[openapi-route-missing] {key}')
+    for key in sorted(documented - keys):
+        errors.append(f'[openapi-route-extra] {key}')
+    handlers = {r['handler'] for r in rows}
+    for handler in sorted(set(COMPANY_RESPONSES) - handlers):
+        errors.append(f'[openapi-route-binding] reviewed handler disappeared: {handler}')
+    for row in rows:
+        op = _object_at(paths, row['path'], row['method'].lower())
+        label = f"{row['method']} {row['path']}"
+        binding = COMPANY_RESPONSES.get(row['handler'])
+        if binding is not None and op:
+            status, shape, component = binding
+            envelope = _object_at(op, 'responses', status, 'content', 'application/json', 'schema')
+            if envelope.get('type') != 'object' or 'data' not in _required_names(envelope):
+                errors.append(f'[openapi-envelope] {label}: required data object envelope missing')
+            data = _object_at(envelope, 'properties', 'data')
+            if shape in ('list', 'page'):
+                if _schema_types(data) != {'array'}:
+                    errors.append(f'[openapi-response] {label}: data must be an array')
+                data = _object_at(data, 'items')
+            elif shape.startswith('field:'):
+                field = shape.split(':', 1)[1]
+                if data.get('type') != 'object' or field not in _required_names(data):
+                    errors.append(f'[openapi-response] {label}: missing required data.{field}')
+                data = _object_at(data, 'properties', field)
+            if not _is_component_ref(data, component, nullable=shape == 'nullable'):
+                errors.append(f'[openapi-response] {label}: expected {component}, got {data}')
+            if shape == 'page':
+                meta = _object_at(envelope, 'properties', 'meta')
+                if ('meta' not in _required_names(envelope) or meta.get('type') != 'object'
+                        or not {'page', 'per_page', 'total'} <= _required_names(meta)
+                        or any(_object_at(meta, 'properties', k).get('type') != 'integer'
+                               for k in ('page', 'per_page', 'total'))):
+                    errors.append(f'[openapi-pagination] {label}: pagination metadata missing')
+        request_component = COMPANY_REQUESTS.get(row['handler'])
+        if request_component is not None and op:
+            request = _object_at(op, 'requestBody', 'content', 'application/json', 'schema')
+            if not _is_component_ref(request, request_component):
+                errors.append(f'[openapi-request] {label}: requires separate {request_component}')
+    return errors
+
+
 def check_shared(go_text: str, ts_text: str) -> list[str]:
     return check_pairs(SHARED_PAIRS, [go_text], [ts_text], NESTED_MAP)
 
@@ -482,33 +1191,68 @@ def check_company(go_texts: list[str], ts_texts: list[str]) -> list[str]:
 
 
 def main() -> int:
-    problems = check_shared(GO_MODELS.read_text(), TS_TYPES.read_text())
-    company_go = [
+    shared_go_text = GO_MODELS.read_text()
+    shared_ts_text = TS_TYPES.read_text()
+    company_go_texts = [
         path.read_text()
         for path in sorted((ROOT / "internal/company").glob("*.go"))
         if not path.name.endswith("_test.go")
     ]
-    company_ts = [
+    # This administrative projection is nested in MailboxGrantSnapshot. It
+    # contains no object keys or credential material; verify it explicitly.
+    company_go_texts.append((ROOT / 'internal/models/mailbox_grants.go').read_text())
+    company_ts_texts = [
         (ROOT / "web/lib/company.ts").read_text(),
         (ROOT / "web/features/mail/api.ts").read_text(),
         (ROOT / "web/features/company/api.ts").read_text(),
     ]
-    problems += check_company(company_go, company_ts)
+
+    problems = check_shared(shared_go_text, shared_ts_text)
+    problems += check_company(company_go_texts, company_ts_texts)
+
+    parse_problems: list[str] = []
+    shared_go = merge_go_sources([shared_go_text], parse_problems)
+    shared_ts = merge_ts_sources([shared_ts_text], parse_problems)
+    company_go = merge_go_sources(company_go_texts, parse_problems)
+    company_ts = merge_ts_sources(company_ts_texts, parse_problems)
+    # check_shared/check_company already report these; do not duplicate them.
+
+    openapi_document, openapi_problems = parse_openapi_text(OPENAPI_SPEC.read_text())
+    problems += openapi_problems
+    if openapi_document is not None:
+        problems += check_openapi_contract(
+            openapi_document,
+            shared_go,
+            shared_ts,
+            company_go,
+            company_ts,
+        )
+
+    if openapi_document is not None:
+        try:
+            inventory = json.loads((ROOT / 'docs/company-mail/evidence/R5-API-MATRIX.json').read_text())
+            problems += check_company_operations(openapi_document, inventory)
+            problems += check_input_schemas(openapi_document)
+        except (OSError, ValueError) as exc:
+            problems.append(f'[openapi-routes] cannot load route inventory: {exc}')
 
     if problems:
-        print("Contract drift detected between Go DTOs and the TypeScript projections:\n")
+        print("Contract drift detected across Go DTOs, TypeScript projections and OpenAPI:\n")
         print("\n".join(problems))
         return 1
 
     print(
-        f"Contract check passed: {len(SHARED_TYPES)} shared models and "
-        f"{len(company_pairs)} company DTOs verified for fields, wire nullability, "
-        "scalar projection, arrays and nested references."
+        f"Contract check passed: {len(SHARED_TYPES)} shared models verified across "
+        f"Go and TypeScript; {len(company_pairs)} explicit company DTOs additionally "
+        f"verified against OpenAPI component schemas for fields, required/optional "
+        "wire semantics, nullability, scalar/array/map projection, nested references "
+        "and string enums."
     )
-    print(
-        "OpenAPI (internal/api/openapi.yaml) is not compiled: stdlib Python has no "
-        "YAML parser; spec-level drift remains a documented blind spot."
-    )
+    company_rows = [r for r in inventory if r['path'].startswith('/api/v1/company/')]
+    typed = sum(r['handler'] in COMPANY_RESPONSES for r in company_rows)
+    print(f"OpenAPI routing: {len(company_rows)} company operations present; "
+          f"{typed} response bindings verified (remaining {len(company_rows) - typed} "
+          "have route/reference coverage, not complete response-shape verification).")
     return 0
 
 
