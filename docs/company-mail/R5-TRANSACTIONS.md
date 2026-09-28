@@ -1,6 +1,6 @@
 # R5 事务、锁顺序与授权检查地图
 
-> **B01-H候选限制：** 索引完成/失败的锁与时间顺序已形成WIP候选，新增7项索引和3项读取测试，但执行环境阻塞，真实测试0项。详见 [B01-H记录](R5-B01-H-VALIDATION.md)。B01-G的579/44/90仍是历史结果，不覆盖当前候选；070不关闭。
+> **B01-J验证更新：** H候选已取得相同测试的基线6通过/4目标失败、候选10通过；最终原180秒预算全量589通过、54必跑齐全，40项各三轮120通过。见 [B01-J记录](R5-B01-J-VALIDATION.md)。070尚有跨语句授权/内容期限及其他多资源边界，不据此宣称全项目无竞争风险。
 
 2026-09-28，B01-D更新。原地图基线为 `97675a743f83287b85297af4e94c339ce5a83bba`；B01-D从 `46711be9d8421db35a687e28e181a67a2e720b2f` 实际复现两类40P01和草稿撤权窗口，并提前修复对应生产路径。本图下列TX08/TX11及锁测试反映本次新顺序；历史证据保留在各批报告。**不是全路径无死锁证明；070仍未关闭**。进度唯一入口是 [R5-TODO](R5-TODO.md)，数据库实体和完整 FK 依据 [R5-MIGRATIONS](R5-MIGRATIONS.md) 及其实际 catalog。
 
@@ -52,7 +52,7 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | TX19 已发送状态操作 | `MutateArchivedMail`，sent_archive.go | actor U S锁 → mailbox read/organize 读取 → item revision+期限条件 UPDATE → audit/outbox+mailbox event → Commit | now() 是事务时间；跨期限等待的政策与测试属于 P3-040，不能只凭条件存在就认证 |
 | TX20 元数据及附件 GC | `SweepCompanyMetadata` / `sweepCompanyAttachments` | 前面多项DELETE分别自动提交；附件子事务 T U锁 → A按id LIMIT100 U锁 SKIP LOCKED → 引用复检 → DELETE + orphan INSERT一个CTE → Commit | 整个Sweep不是单事务；protected-prefix饥饿A06仍存在；旧“SaveDraft/Finish也首先T锁”注释与实现不符 |
 | TX21 原件保护 / 回收 | `CreateMessageWithQuota`、`CreateIngestJob`、`ReleaseRawObjectIfUnreferenced` | 原件key advisory → ensureObject回调/引用检查 → message/job W 或 del回调 → Commit | **这些旧路径的回调在数据库事务内**，对象后端可能阻塞；不能概括成全项目“事务不做对象I/O”。不贸然把回调移出去破坏原件引用保护 |
-| TX22 索引结果提交（H候选未实测） | `CompleteMailIndexJob` / `FailMailIndexJob`，mail_content.go | complete：source message S锁→job U锁→新语句clock_timestamp资格→document写入→最终lease条件UPDATE→Commit；fail：job U锁→实际时间复核→条件UPDATE→Commit | H候选调整旧ready-before-document及now时间边界；7项索引测试未执行，不能视为租约/无死锁认证；claim/手工retry规则未改 |
+| TX22 索引结果提交（J已实测） | `CompleteMailIndexJob` / `FailMailIndexJob`，mail_content.go | complete：source message S锁→job U锁→新语句clock_timestamp资格→document写入→最终lease条件UPDATE→Commit；fail：job U锁→实际时间复核→条件UPDATE→Commit | J实证三个等待超lease场景原版仍提交，候选拒绝并回滚；source-before-job由NOWAIT探针验证。7项索引/3项读取及全量通过，非完整死锁或全部claim/retry认证 |
 | TX23 域名删除 | `DeleteZone`，domain_delete.go | T U锁 → domain U锁 →资产引用检查 → domain DELETE/FK →必要audit → Commit | 此函数不自行重载 actor；服务/handler身份校验不能在图上被省略；NO ACTION FK仍保护直接SQL竞态 |
 | TX24 旧权限 profile / overrides | permission handler → permissions.go | handler 多次读主体/目标/域名，随后独立 profile UPDATE 或 override UPSERT；不走完整 companyTx 管理命令 | 当前无 revision CAS，不能把中间校验当作整个读改写的串行保证；A01/A02本轮组件+HTTP+DB再次复现 |
 
@@ -75,16 +75,16 @@ B01-C第五项原先只证明单侧次序。B01-D已补两条完整生产命令�
 | 风险 | 实际支持 | 尚缺验证 / 下一操作 | 对应现有任务 |
 |---|---|---|---|
 | RISK01 入队与transfer_owned相反顺序 | B01-D完整ExecuteOffboarding/CreateOutboundJob实测40P01，失败事务资产无半提交 | 已改父租户KEY SHARE→用户SHARE→附件；R01回归覆盖离职先持锁时入队拒绝，无重复资产 | P0-070本批前置修复；后续P3/P4/P5/P6仍需各自全链验收 |
-| RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft/Finish/Reserve共用M SHARE授权边界；B01-G已补Reserve修复后的撤权顺序、额度原子性、不同上传者及取消回归。正文读取和profile/override仍待对应验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
+| RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft/Finish/Reserve共用M SHARE授权边界；B01-G已补Reserve修复后的撤权顺序、额度原子性、不同上传者及取消回归。J三项读取证实新请求撤权拒绝、管理身份不授予正文、身份等待后冻结拒绝；跨语句授权快照/内容期限与profile/override仍待验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
 | RISK03 隐式FK与广域管理锁 | B01-D实证：入队已持user SHARE，后置tenant FK与离职tenant→user形成40P01 | 入队父键保护提前已修复此环；R03覆盖入队先完成导致旧计划冲突。入站、原件、索引/清理其他交叉仍待核对 | P0-070部分修复；P6-100、P10-040 |
 | RISK04 对象回调持锁时间 | TX21实际在tx内调用ensureObject/del | B01-F基线实测可控delete取消释放key、ensure期间GC等待且提交后保护引用；实际对象后端、提交未知和其余失败上界仍待验，不直接移出保护区 | P3-090、P6-100、P10-050 |
-| RISK05 事务时钟与等待后期限 | TX19期限用now；ingress末尾用clock_timestamp再次检验lease | B01-G已实际验证入站锁后自然过lease回滚；B01-H提出并编码索引job/document等待后的重验候选，但没有真实PG前后结果。sent操作、普通读取和其他时间边界仍待验 | P3-040、P6-030、P7-030 |
+| RISK05 事务时钟与等待后期限 | TX19期限用now；ingress末尾用clock_timestamp再次检验lease | B01-G已验证入站锁后自然过lease回滚；B01-J补齐索引完成/失败等job锁及完成等document锁的真实前后对照，旧结果拒绝、回滚且新token可恢复。sent操作、普通内容到期和其他时钟边界仍待验 | P3-040、P6-030、P7-030 |
 | RISK06 多资源批量W及共享锁输入顺序 | 多附件按输入顺序S锁；offboard批量UPDATE未为所有对象固定排序 | S/S本身兼容，不因此认定两次保存死锁；与W/交接/GC一起测试真实冲突 | P3-060、P4-130、P5-130 |
 
 ## 6. P0-070收口前的剩余范围
 
-截至B01-H，G以前的验收保持历史归属；H索引重构仍是未运行的候选，普通读取测试也没有执行。其基线/候选对照、跨语句授权/到期、其他隐式FK与对象故障均未齐，因此**070复选框保持未勾选，090仍受依赖限制**。080仍未冻结；G0/P1未开启。
+截至B01-J，索引候选前后对照、7项索引与3项普通读取、54必跑及原预算全量均已执行通过；该候选运行阻塞解除。跨语句授权/内容到期、其他隐式FK与对象故障仍未齐，因此**070复选框保持未勾选，090仍受依赖限制**。080仍未冻结；G0/P1未开启。
 
-下一轮先取得H候选01937522及基线5e4b9df+新测试的实际PG结果，再执行54必跑所在全量门禁。环境未恢复前不追加生产改动；不重复Reserve/Finish/入队已验证修复，也不缩减070原验收标准。
+下一轮从未覆盖的跨语句授权/内容截止及其余多资源路径继续，080按既定前置独立推进。索引、Reserve、Finish、入队的已验证局部修复不重复实现；不缩减070原验收标准，提交决策时的有效租约也不宣称数据库确认返回时仍未过期。
 
 B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普通回归和提交映射见R5-B01-D-VALIDATION.md及其机器证据。原始失败、后续修正和最终通过分别保存，test name 不充当执行结果。

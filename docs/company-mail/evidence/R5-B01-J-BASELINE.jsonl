@@ -1,0 +1,49 @@
+{"Time":"2026-09-28T13:41:29.097129424Z","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-09-28T13:41:29.174245049Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterJobWait"}
+{"Time":"2026-09-28T13:41:29.174341841Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterJobWait","Output":"=== RUN   TestR5IndexCompleteRechecksAfterJobWait\n"}
+{"Time":"2026-09-28T13:41:33.589982801Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterJobWait","Output":"    r5_index_boundary_test.go:131: R5_INDEX_DEFECT_COMPLETE_WAIT: expired waiting worker committed\n"}
+{"Time":"2026-09-28T13:41:33.627580801Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterJobWait","Output":"--- FAIL: TestR5IndexCompleteRechecksAfterJobWait (4.45s)\n"}
+{"Time":"2026-09-28T13:41:33.627621884Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterJobWait","Elapsed":4.45}
+{"Time":"2026-09-28T13:41:33.627650551Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexFailRechecksAfterJobWait"}
+{"Time":"2026-09-28T13:41:33.627653593Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexFailRechecksAfterJobWait","Output":"=== RUN   TestR5IndexFailRechecksAfterJobWait\n"}
+{"Time":"2026-09-28T13:41:37.049289386Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexFailRechecksAfterJobWait","Output":"    r5_index_boundary_test.go:134: R5_INDEX_DEFECT_FAIL_WAIT: expired waiting worker committed\n"}
+{"Time":"2026-09-28T13:41:37.201709719Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexFailRechecksAfterJobWait","Output":"--- FAIL: TestR5IndexFailRechecksAfterJobWait (3.57s)\n"}
+{"Time":"2026-09-28T13:41:37.201763136Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexFailRechecksAfterJobWait","Elapsed":3.57}
+{"Time":"2026-09-28T13:41:37.201773386Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterDocumentWait"}
+{"Time":"2026-09-28T13:41:37.201778928Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterDocumentWait","Output":"=== RUN   TestR5IndexCompleteRechecksAfterDocumentWait\n"}
+{"Time":"2026-09-28T13:41:40.919908638Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterDocumentWait","Output":"    r5_index_boundary_test.go:137: R5_INDEX_DEFECT_DOCUMENT_WAIT: expired waiting worker committed\n"}
+{"Time":"2026-09-28T13:41:40.952828138Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterDocumentWait","Output":"--- FAIL: TestR5IndexCompleteRechecksAfterDocumentWait (3.75s)\n"}
+{"Time":"2026-09-28T13:41:40.952864388Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCompleteRechecksAfterDocumentWait","Elapsed":3.75}
+{"Time":"2026-09-28T13:41:40.95287093Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexSourceLockPrecedesJob"}
+{"Time":"2026-09-28T13:41:40.952874221Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexSourceLockPrecedesJob","Output":"=== RUN   TestR5IndexSourceLockPrecedesJob\n"}
+{"Time":"2026-09-28T13:41:43.7212715Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexSourceLockPrecedesJob","Output":"    r5_index_boundary_test.go:161: R5_INDEX_DEFECT_SOURCE_ORDER: completion held child job while waiting for source parent\n"}
+{"Time":"2026-09-28T13:41:43.768777917Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexSourceLockPrecedesJob","Output":"--- FAIL: TestR5IndexSourceLockPrecedesJob (2.82s)\n"}
+{"Time":"2026-09-28T13:41:43.768815542Z","Action":"fail","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexSourceLockPrecedesJob","Elapsed":2.82}
+{"Time":"2026-09-28T13:41:43.768833833Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexDocumentFailureRollsBackCompletion"}
+{"Time":"2026-09-28T13:41:43.768837208Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexDocumentFailureRollsBackCompletion","Output":"=== RUN   TestR5IndexDocumentFailureRollsBackCompletion\n"}
+{"Time":"2026-09-28T13:41:46.440793543Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexDocumentFailureRollsBackCompletion","Output":"--- PASS: TestR5IndexDocumentFailureRollsBackCompletion (2.67s)\n"}
+{"Time":"2026-09-28T13:41:46.440835751Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexDocumentFailureRollsBackCompletion","Elapsed":2.67}
+{"Time":"2026-09-28T13:41:46.440842918Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCancelledCompletionReleasesLocks"}
+{"Time":"2026-09-28T13:41:46.440845959Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCancelledCompletionReleasesLocks","Output":"=== RUN   TestR5IndexCancelledCompletionReleasesLocks\n"}
+{"Time":"2026-09-28T13:41:49.628449794Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCancelledCompletionReleasesLocks","Output":"--- PASS: TestR5IndexCancelledCompletionReleasesLocks (3.19s)\n"}
+{"Time":"2026-09-28T13:41:49.628506919Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexCancelledCompletionReleasesLocks","Elapsed":3.19}
+{"Time":"2026-09-28T13:41:49.628520003Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexRejectsChangedSourceAndStaleToken"}
+{"Time":"2026-09-28T13:41:49.628526461Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexRejectsChangedSourceAndStaleToken","Output":"=== RUN   TestR5IndexRejectsChangedSourceAndStaleToken\n"}
+{"Time":"2026-09-28T13:41:51.55632242Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexRejectsChangedSourceAndStaleToken","Output":"--- PASS: TestR5IndexRejectsChangedSourceAndStaleToken (1.93s)\n"}
+{"Time":"2026-09-28T13:41:51.55640192Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5IndexRejectsChangedSourceAndStaleToken","Elapsed":1.93}
+{"Time":"2026-09-28T13:41:51.556599962Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadCachedContentRejectsNewRequestsAfterRevoke"}
+{"Time":"2026-09-28T13:41:51.556612462Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadCachedContentRejectsNewRequestsAfterRevoke","Output":"=== RUN   TestR5ReadCachedContentRejectsNewRequestsAfterRevoke\n"}
+{"Time":"2026-09-28T13:41:53.466726046Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadCachedContentRejectsNewRequestsAfterRevoke","Output":"    r5_read_boundary_test.go:94: existing cache/raw bytes retained; new requests denied before object access\n"}
+{"Time":"2026-09-28T13:41:53.496934213Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadCachedContentRejectsNewRequestsAfterRevoke","Output":"--- PASS: TestR5ReadCachedContentRejectsNewRequestsAfterRevoke (1.94s)\n"}
+{"Time":"2026-09-28T13:41:53.496991255Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadCachedContentRejectsNewRequestsAfterRevoke","Elapsed":1.94}
+{"Time":"2026-09-28T13:41:53.498208505Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadAdminAndWrongMailboxDoNotOpenObject"}
+{"Time":"2026-09-28T13:41:53.498237921Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadAdminAndWrongMailboxDoNotOpenObject","Output":"=== RUN   TestR5ReadAdminAndWrongMailboxDoNotOpenObject\n"}
+{"Time":"2026-09-28T13:41:54.96399838Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadAdminAndWrongMailboxDoNotOpenObject","Output":"--- PASS: TestR5ReadAdminAndWrongMailboxDoNotOpenObject (1.47s)\n"}
+{"Time":"2026-09-28T13:41:54.964095464Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadAdminAndWrongMailboxDoNotOpenObject","Elapsed":1.47}
+{"Time":"2026-09-28T13:41:54.96410938Z","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadWaitingIdentityReloadRejectsFrozenActor"}
+{"Time":"2026-09-28T13:41:54.964116047Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadWaitingIdentityReloadRejectsFrozenActor","Output":"=== RUN   TestR5ReadWaitingIdentityReloadRejectsFrozenActor\n"}
+{"Time":"2026-09-28T13:41:56.729724381Z","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadWaitingIdentityReloadRejectsFrozenActor","Output":"--- PASS: TestR5ReadWaitingIdentityReloadRejectsFrozenActor (1.76s)\n"}
+{"Time":"2026-09-28T13:41:56.729777589Z","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5ReadWaitingIdentityReloadRejectsFrozenActor","Elapsed":1.76}
+{"Time":"2026-09-28T13:41:56.729784173Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\n"}
+{"Time":"2026-09-28T13:41:56.741708339Z","Action":"output","Package":"tabmail/internal/store/postgres","Output":"FAIL\ttabmail/internal/store/postgres\t27.651s\n"}
+{"Time":"2026-09-28T13:41:56.741763214Z","Action":"fail","Package":"tabmail/internal/store/postgres","Elapsed":27.652}

@@ -88,3 +88,9 @@ Write each phase's stdout, stderr and actual exit code **inside the runner**, no
 
 For cleanup, independently inspect the stored IDs and `tabmail.validation.session` label. Remove only those owned containers and their empty internal network. After a previous stop timed out, read the actual state again; an exited container can be removed normally. If ownership/state is unknown or the daemon cannot confirm removal, record it and do not escalate into a global restart or system-wide kill.
 
+## Resuming a long-running validation session (B01-J)
+
+Inspect the exact owned runner's command, start time, state and remaining lifetime before resuming tests. In B01-J, a runner started with `sleep 3600` exited normally at its one-hour boundary after a complete backend phase; that exit interrupted the subsequent repeated phase. The backend's persisted process exit and evidence gate remained valid, but the unfinished phase was not counted. Only that disposable runner was restarted, its source reverified, and the repeated phase rerun into a new evidence directory. No database or host restart was used.
+
+Keep failed full-suite attempts and incomplete phases separate from later successful attempts. B01-J retained both 180-second and 600-second package timeouts; after recovery the original 180-second full-suite budget passed. No business lease deadlines, per-case contexts, assertions, required tests or CI budgets were relaxed. This last lifecycle interruption was identified; earlier broad runtime slowdowns remain undiagnosed. A successful retry alone is not proof that the host cause was fixed.
+
