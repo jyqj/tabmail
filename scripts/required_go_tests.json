@@ -25,7 +25,15 @@
         ["tabmail/internal/store/postgres", "TestR5ConcurrencyR01EnqueueOffboardNoAttachmentCycle"],
         ["tabmail/internal/store/postgres", "TestR5ConcurrencyR03EnqueueOffboardNoTenantFKCycle"],
         ["tabmail/internal/store/postgres", "TestR5ConcurrencyR02DraftCannotCommitAfterCompletedRevoke"],
-        ["tabmail/internal/store/postgres", "TestR5ConcurrencyIndependentSubmissionsShareParentLock"]
+        ["tabmail/internal/store/postgres", "TestR5ConcurrencyIndependentSubmissionsShareParentLock"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishRejectsConcurrentRemoval"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishRejectsExpiryAfterWait"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishOnlyOneChecksumWins"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishOrdersMailboxRevocation"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishRejectsNonHexChecksum"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishCanonicalChecksumAndReplay"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishCancellationRollsBack"],
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishUsesTimeAfterLockWait"]
       ],
       "allowed_skips": [
         {

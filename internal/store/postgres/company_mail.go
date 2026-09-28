@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -383,11 +384,7 @@ func (s *PgStore) SaveMailDraft(ctx context.Context, a authz.Actor, v company.Dr
 		// Hold SHARE before reading those rights until the draft write commits:
 		// a revocation either precedes the read or completes after this save.
 		// Draft saves do not acquire the global tenant administration lock.
-		var mailboxID uuid.UUID
-		if e := tx.QueryRow(ctx, `SELECT id FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, v.MailboxID).Scan(&mailboxID); e != nil {
-			if errors.Is(e, pgx.ErrNoRows) {
-				return app.NotFound("mailbox not found")
-			}
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, v.MailboxID); e != nil {
 			return e
 		}
 		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
@@ -532,13 +529,22 @@ func (s *PgStore) FinishMailAttachment(ctx context.Context, a authz.Actor, id uu
 	if len(sha) != 64 {
 		return app.BadRequest("invalid checksum")
 	}
+	if _, err := hex.DecodeString(sha); err != nil {
+		return app.BadRequest("invalid checksum")
+	}
+	sha = strings.ToLower(sha)
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		// This first lookup identifies the mailbox only. Recheck the exact
+		// reservation after acquiring mailbox -> attachment locks below.
 		var mailbox uuid.UUID
 		e := tx.QueryRow(ctx, `SELECT mailbox_id FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND state='uploading'`, a.TenantID, a.ID, id).Scan(&mailbox)
 		if errors.Is(e, pgx.ErrNoRows) {
 			return app.NotFound("upload not found")
 		}
 		if e != nil {
+			return e
+		}
+		if e = lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
 			return e
 		}
 		rights, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
@@ -548,8 +554,25 @@ func (s *PgStore) FinishMailAttachment(ctx context.Context, a authz.Actor, id uu
 		if !rights.CanSend {
 			return app.Forbidden("mailbox sending authority revoked during upload")
 		}
-		_, e = tx.Exec(ctx, `UPDATE mail_attachments SET state='ready',sha256=$4 WHERE tenant_id=$1 AND user_id=$2 AND id=$3`, a.TenantID, a.ID, id, sha)
-		return e
+		var locked uuid.UUID
+		e = tx.QueryRow(ctx, `SELECT id FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND mailbox_id=$4 FOR UPDATE`, a.TenantID, a.ID, id, mailbox).Scan(&locked)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.NotFound("upload not found")
+		}
+		if e != nil {
+			return e
+		}
+		// Evaluate expiry in a NEW statement after any row-lock wait. now()
+		// would retain the transaction's earlier time. The conditional update
+		// also prevents a competing completion from replacing a ready checksum.
+		tag, e := tx.Exec(ctx, `UPDATE mail_attachments SET state='ready',sha256=$4 WHERE tenant_id=$1 AND user_id=$2 AND id=$3 AND mailbox_id=$5 AND state='uploading' AND expires_at>clock_timestamp()`, a.TenantID, a.ID, id, sha, mailbox)
+		if e != nil {
+			return e
+		}
+		if tag.RowsAffected() != 1 {
+			return app.Conflict("upload expired, completed, or changed; upload again after reviewing its state")
+		}
+		return nil
 	})
 }
 func (s *PgStore) GetWorkAttachment(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.Attachment, error) {
