@@ -76,4 +76,15 @@ The Go parent requires the exact component security assertion, inspects captured
 
 Normal CI also runs the five `TestR5LockMap*` observations and four `TestR5Concurrency*` regressions from B01-D. The old attachment-before-user characterization has been replaced by a parent/user-before-attachment fence check after real deadlock reproduction. Complete enqueue/offboarding commands, draft grant revocation and independent concurrent submissions are tested with controlled PostgreSQL barriers. These passes are not a global deadlock-free certification; remaining scope is recorded in `docs/company-mail/R5-TRANSACTIONS.md`.
 
+## Container-local source and build cache (B01-G)
+
+B01-G completed the previously blocked reservation/reference regression using a different isolated layout: a tracked `git archive` copied into the disposable runner's `/src`, **container-local `GOCACHE=/var/cache/tabmail-go`**, and the already populated module cache mounted read-only at `/go/pkg/mod`. No working checkout, host Go build cache, Docker socket, production config or mail directory is mounted. This is a verified execution alternative, **not a diagnosis of the earlier Docker/linker timeouts**.
+
+Use the existing test-tool image by its recorded immutable ID, a separately created session-labelled PostgreSQL container and an internal network without published host ports. Record every exact resource ID before running tests. B01-G used `GOPROXY=off`, `GOTOOLCHAIN=local`, `GOMAXPROCS=4` and `-mod=readonly`; missing cached dependencies must fail rather than trigger an unrecorded toolchain/download change. Keep checksum verification enabled. This layout does not certify a fresh install or current dependency audit.
+
+Run and preserve evidence in distinct phases: the ten reservation/reference tests first, then build/vet, the complete backend with the **existing** `check_go_test_evidence.py`, and repeated targeted lock/transaction tests. After adding tests, rerun against the new exact source; do not reuse the first phase's source label. The targeted repeat check is supplementary and never replaces the full-suite required-test manifest.
+
+Write each phase's stdout, stderr and actual exit code **inside the runner**, not only into a host process's captured output. Use a new output directory per attempt. A host timeout without the test's exit file is incomplete evidence, not a failed security assertion or a successful test. Retain the container until logs are copied out and verified; do not use auto-removal for evidence that exists only in its filesystem. At completion, hash both the retained raw logs and the source files actually tested; publish only synthetic, credential-free evidence.
+
+For cleanup, independently inspect the stored IDs and `tabmail.validation.session` label. Remove only those owned containers and their empty internal network. After a previous stop timed out, read the actual state again; an exited container can be removed normally. If ownership/state is unknown or the daemon cannot confirm removal, record it and do not escalate into a global restart or system-wide kill.
 
