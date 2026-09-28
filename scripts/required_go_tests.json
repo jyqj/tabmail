@@ -33,7 +33,17 @@
         ["tabmail/internal/store/postgres", "TestR5AttachmentFinishRejectsNonHexChecksum"],
         ["tabmail/internal/store/postgres", "TestR5AttachmentFinishCanonicalChecksumAndReplay"],
         ["tabmail/internal/store/postgres", "TestR5AttachmentFinishCancellationRollsBack"],
-        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishUsesTimeAfterLockWait"]
+        ["tabmail/internal/store/postgres", "TestR5AttachmentFinishUsesTimeAfterLockWait"],
+        ["tabmail/internal/store/postgres", "TestR5ReservationOrdersMailboxRevocation"],
+        ["tabmail/internal/store/postgres", "TestR5ReservationWaitsForMailboxBeforeBudget"],
+        ["tabmail/internal/store/postgres", "TestR5ReservationConcurrentBudgetIsAtomic"],
+        ["tabmail/internal/store/postgres", "TestR5ReservationOtherUploaderRemainsIndependent"],
+        ["tabmail/internal/store/postgres", "TestR5ReservationCancellationReleasesLocksAndBudget"],
+        ["tabmail/internal/store/postgres", "TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal"],
+        ["tabmail/internal/store/postgres", "TestR5ReferenceGCRollsBackIfOrphanRegistrationFails"],
+        ["tabmail/internal/store/postgres", "TestR5ReferenceGCKeepsSentPinAfterQueueCleanup"],
+        ["tabmail/internal/store/postgres", "TestR5ReferenceObjectCallbackCancellationReleasesKey"],
+        ["tabmail/internal/store/postgres", "TestR5ReferenceObjectGCWaitsForCommittedMessage"]
       ],
       "allowed_skips": [
         {

@@ -325,9 +325,11 @@ func (s *PgStore) sweepCompanyAttachments(ctx context.Context, tenant uuid.UUID)
 		return err
 	}
 	defer tx.Rollback(ctx)
-	// Same first lock as SaveDraft/FinishAttachment. A draft's JSON reference
-	// must not race a GC snapshot; pinning outbound attachments also takes a
-	// shared attachment-row lock and is protected by the foreign key.
+	// The tenant lock orders this sweep with company-wide disposition, not
+	// with ordinary draft/finish paths (which do not take a tenant lock).
+	// Draft and enqueue writers retain shared attachment-row locks; the
+	// candidate scan skips those busy rows. Recheck JSON and FK-backed pins
+	// after selecting candidates, and commit deletion with orphan registration.
 	if err = lockMemberTenant(ctx, tx, tenant); err != nil {
 		return err
 	}

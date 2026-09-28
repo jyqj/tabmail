@@ -1,0 +1,197 @@
+package postgres_test
+
+import (
+	"context"
+	"errors"
+	"testing"
+	"time"
+
+	"github.com/google/uuid"
+	"tabmail/internal/company"
+	"tabmail/internal/models"
+)
+
+func r5ReadyReference(t *testing.T, f *companyFixture, ctx context.Context) *company.Attachment {
+	t.Helper()
+	a, err := f.st.ReserveMailAttachment(ctx, f.u, company.Attachment{MailboxID: f.personal.ID, Filename: "reference.txt", Size: 3})
+	must(t, err)
+	must(t, f.st.FinishMailAttachment(ctx, f.u, a.ID, company.Hash("abc")))
+	return a
+}
+func r5ReferenceCounts(t *testing.T, f *companyFixture, ctx context.Context, a *company.Attachment, wantAttachment, wantOrphan int) {
+	t.Helper()
+	var attachments, orphans int
+	must(t, f.pool.QueryRow(ctx, `SELECT (SELECT count(*) FROM mail_attachments WHERE id=$1),(SELECT count(*) FROM orphan_objects WHERE object_key=$2)`, a.ID, a.ObjectKey).Scan(&attachments, &orphans))
+	if attachments != wantAttachment || orphans != wantOrphan {
+		t.Fatalf("reference counts attachment=%d orphan=%d; want %d/%d", attachments, orphans, wantAttachment, wantOrphan)
+	}
+}
+
+func TestR5ReferenceGCSkipsDraftWriterAndPreservesSeal(t *testing.T) {
+	f := seedCompany(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
+	defer cancel()
+	a := r5ReadyReference(t, f, ctx)
+	d, err := f.st.SaveMailDraft(ctx, f.u, company.Draft{MailboxID: f.personal.ID, Payload: company.DraftPayload{Subject: "before", AttachmentIDs: []uuid.UUID{a.ID}}})
+	must(t, err)
+	_, err = f.pool.Exec(ctx, `UPDATE mail_attachments SET expires_at=clock_timestamp()-interval '1 hour' WHERE id=$1`, a.ID)
+	must(t, err)
+	hold, err := f.pool.Begin(ctx)
+	must(t, err)
+	defer hold.Rollback(context.Background())
+	_, err = hold.Exec(ctx, `SELECT id FROM mail_drafts WHERE id=$1 FOR UPDATE`, d.ID)
+	must(t, err)
+	d.Payload.Subject = "writer keeps reference"
+	done := make(chan error, 1)
+	go func() { _, e := f.st.SaveMailDraft(ctx, f.u, *d); done <- e }()
+	r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "UPDATE mail_drafts")
+	// Actual GC must skip the writer's shared attachment lock, not wait on D.
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	r5ReferenceCounts(t, f, ctx, a, 1, 0)
+	must(t, hold.Rollback(ctx))
+	must(t, r5ConcurrentResult(t, ctx, done))
+	_, err = f.pool.Exec(ctx, `UPDATE mail_drafts SET sealed_at=clock_timestamp() WHERE id=$1`, d.ID)
+	must(t, err)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	r5ReferenceCounts(t, f, ctx, a, 1, 0)
+	// Fixture removes the sole reference, not an exposed permanent-delete API.
+	_, err = f.pool.Exec(ctx, `DELETE FROM mail_drafts WHERE id=$1`, d.ID)
+	must(t, err)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	r5ReferenceCounts(t, f, ctx, a, 0, 1)
+}
+
+func TestR5ReferenceGCRollsBackIfOrphanRegistrationFails(t *testing.T) {
+	f := seedCompany(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	a := r5ReadyReference(t, f, ctx)
+	_, err := f.pool.Exec(ctx, `UPDATE mail_attachments SET expires_at=clock_timestamp()-interval '1 hour' WHERE id=$1`, a.ID)
+	must(t, err)
+	_, err = f.pool.Exec(ctx, `CREATE FUNCTION r5_reject_orphan() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN RAISE EXCEPTION 'controlled orphan registration failure'; END $$;
+ CREATE TRIGGER r5_reject_orphan BEFORE INSERT ON orphan_objects FOR EACH ROW EXECUTE FUNCTION r5_reject_orphan()`)
+	must(t, err)
+	if err = f.st.SweepCompanyMetadata(ctx); err == nil {
+		t.Fatal("GC swallowed orphan registration failure")
+	}
+	r5ReferenceCounts(t, f, ctx, a, 1, 0)
+	_, err = f.pool.Exec(ctx, `DROP TRIGGER r5_reject_orphan ON orphan_objects`)
+	must(t, err)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	r5ReferenceCounts(t, f, ctx, a, 0, 1)
+}
+
+func TestR5ReferenceGCKeepsSentPinAfterQueueCleanup(t *testing.T) {
+	f := seedCompany(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	a, d, _, job := r5TransferFixture(t, f)
+	must(t, f.st.CreateOutboundJob(ctx, job))
+	must(t, f.st.DeleteMailDraft(ctx, f.u, d.ID, d.Revision))
+	_, err := f.pool.Exec(ctx, `UPDATE mail_attachments SET expires_at=clock_timestamp()-interval '1 hour' WHERE id=$1`, a.ID)
+	must(t, err)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	r5ReferenceCounts(t, f, ctx, a, 1, 0)
+	_, err = f.pool.Exec(ctx, `DELETE FROM outbound_jobs WHERE id=$1`, job.ID)
+	must(t, err)
+	must(t, f.st.SweepCompanyMetadata(ctx))
+	r5ReferenceCounts(t, f, ctx, a, 1, 0)
+	var pins int
+	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM sent_asset_attachments WHERE asset_id=$1 AND attachment_id=$2`, job.ID, a.ID).Scan(&pins))
+	if pins != 1 {
+		t.Fatal("long-lived sent pin missing after queue cleanup")
+	}
+}
+
+func TestR5ReferenceObjectCallbackCancellationReleasesKey(t *testing.T) {
+	f := seedCompany(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	work, stop := context.WithCancel(ctx)
+	defer stop()
+	entered := make(chan struct{})
+	done := make(chan error, 1)
+	key := "r5-cancel-" + uuid.New().String()
+	go func() {
+		_, err := f.st.ReleaseRawObjectIfUnreferenced(work, key, func(c context.Context) error { close(entered); <-c.Done(); return c.Err() })
+		done <- err
+	}()
+	select {
+	case <-entered:
+	case <-ctx.Done():
+		t.Fatal("delete callback never entered")
+	}
+	var holder uint32
+	must(t, f.pool.QueryRow(ctx, `SELECT pid FROM pg_stat_activity WHERE datname=current_database() AND state='idle in transaction' AND query LIKE '%ingest_jobs WHERE raw_object_key%'`).Scan(&holder))
+	second := make(chan error, 1)
+	go func() {
+		called := false
+		released, err := f.st.ReleaseRawObjectIfUnreferenced(ctx, key, func(context.Context) error { called = true; return nil })
+		if err == nil && (!released || !called) {
+			err = errors.New("second callback did not execute")
+		}
+		second <- err
+	}()
+	r5WaitBlockedBy(t, f, ctx, holder, "pg_advisory_xact_lock")
+	stop()
+	if err := r5ConcurrentResult(t, ctx, done); !errors.Is(err, context.Canceled) {
+		t.Fatalf("cancelled callback must fail, got %v", err)
+	}
+	must(t, r5ConcurrentResult(t, ctx, second))
+}
+
+func TestR5ReferenceObjectGCWaitsForCommittedMessage(t *testing.T) {
+	f := seedCompany(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	key := "r5-reference-" + uuid.New().String()
+	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.personal.ID, ZoneID: f.zone.ID, Sender: "sender@fixture.test", Recipients: []string{f.personal.FullAddress}, RawObjectKey: key}
+	entered := make(chan struct{})
+	release := make(chan struct{})
+	defer close(release)
+	insert := make(chan error, 1)
+	go func() {
+		ok, err := f.st.CreateMessageWithQuota(ctx, m, 100, func(c context.Context) error {
+			close(entered)
+			select {
+			case <-release:
+				return nil
+			case <-c.Done():
+				return c.Err()
+			}
+		})
+		if err == nil && !ok {
+			err = errors.New("message was not inserted")
+		}
+		insert <- err
+	}()
+	select {
+	case <-entered:
+	case <-ctx.Done():
+		t.Fatal("ensure callback never entered")
+	}
+	var holder uint32
+	must(t, f.pool.QueryRow(ctx, `SELECT pid FROM pg_stat_activity WHERE datname=current_database() AND state='idle in transaction' AND query LIKE '%pg_advisory_xact_lock%'`).Scan(&holder))
+	collected := make(chan error, 1)
+	go func() {
+		called := false
+		removed, err := f.st.ReleaseRawObjectIfUnreferenced(ctx, key, func(context.Context) error { called = true; return nil })
+		if err == nil && (removed || called) {
+			err = errors.New("GC removed an object referenced by committed message")
+		}
+		collected <- err
+	}()
+	r5WaitBlockedBy(t, f, ctx, holder, "pg_advisory_xact_lock")
+	select {
+	case release <- struct{}{}:
+	case <-ctx.Done():
+		t.Fatal("ensure callback no longer accepted the release signal")
+	}
+	must(t, r5ConcurrentResult(t, ctx, insert))
+	must(t, r5ConcurrentResult(t, ctx, collected))
+	var count int
+	must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM messages WHERE id=$1 AND raw_object_key=$2`, m.ID, key).Scan(&count))
+	if count != 1 {
+		t.Fatal("message reference missing")
+	}
+}

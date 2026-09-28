@@ -499,6 +499,13 @@ func (s *PgStore) ReserveMailAttachment(ctx context.Context, a authz.Actor, v co
 	v.State = "uploading"
 	v.ContentType = "application/octet-stream"
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		// Keep mailbox authorization valid through any uploader-budget wait and
+		// the reservation INSERT. Grant/policy/handover writers advance this
+		// same mailbox row; acquire it before the budget key, as in draft/finish.
+		// This does not lock permission profiles or add a tenant-exclusive lock.
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, v.MailboxID); e != nil {
+			return e
+		}
 		rights, e := s.mailboxAccessTx(ctx, tx, a, v.MailboxID)
 		if e != nil {
 			return e
