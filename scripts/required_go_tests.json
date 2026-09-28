@@ -46,7 +46,17 @@
         ["tabmail/internal/store/postgres", "TestR5ReferenceObjectGCWaitsForCommittedMessage"],
         ["tabmail/internal/store/postgres", "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"],
         ["tabmail/internal/store/postgres", "TestR5IngressAuditFailureRollsBackCheckpointAndQuota"],
-        ["tabmail/internal/store/postgres", "TestR5IngressAcceptanceRollsBackEarlierTarget"]
+        ["tabmail/internal/store/postgres", "TestR5IngressAcceptanceRollsBackEarlierTarget"],
+        ["tabmail/internal/store/postgres", "TestR5IndexCompleteRechecksAfterJobWait"],
+        ["tabmail/internal/store/postgres", "TestR5IndexFailRechecksAfterJobWait"],
+        ["tabmail/internal/store/postgres", "TestR5IndexCompleteRechecksAfterDocumentWait"],
+        ["tabmail/internal/store/postgres", "TestR5IndexSourceLockPrecedesJob"],
+        ["tabmail/internal/store/postgres", "TestR5IndexDocumentFailureRollsBackCompletion"],
+        ["tabmail/internal/store/postgres", "TestR5IndexCancelledCompletionReleasesLocks"],
+        ["tabmail/internal/store/postgres", "TestR5IndexRejectsChangedSourceAndStaleToken"],
+        ["tabmail/internal/store/postgres", "TestR5ReadCachedContentRejectsNewRequestsAfterRevoke"],
+        ["tabmail/internal/store/postgres", "TestR5ReadAdminAndWrongMailboxDoNotOpenObject"],
+        ["tabmail/internal/store/postgres", "TestR5ReadWaitingIdentityReloadRejectsFrozenActor"]
       ],
       "allowed_skips": [
         {

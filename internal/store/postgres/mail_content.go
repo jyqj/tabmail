@@ -118,6 +118,30 @@ func (s *PgStore) ClaimMailIndexJobs(ctx context.Context, limit int) ([]company.
 	}
 	return out, rows.Err()
 }
+
+// lockMailIndexLease acquires the exact current job before evaluating elapsed
+// time in a separate statement. A WHERE predicate evaluated before a row-lock
+// wait is not a sufficient expiry check. Completion also locks the source
+// message first; failure changes only the job and acquires no source locks.
+func lockMailIndexLease(ctx context.Context, tx pgx.Tx, j company.MailIndexJob) error {
+	var id uuid.UUID
+	err := tx.QueryRow(ctx, `SELECT message_id FROM mail_index_jobs WHERE tenant_id=$1 AND message_id=$2 AND source_key=$3 AND lease_token=$4 AND state='processing' FOR UPDATE`, j.TenantID, j.MessageID, j.SourceKey, j.Token).Scan(&id)
+	if errors.Is(err, pgx.ErrNoRows) {
+		return app.Conflict("index lease lost")
+	}
+	if err != nil {
+		return err
+	}
+	var valid bool
+	if err = tx.QueryRow(ctx, `SELECT COALESCE(lease_until>clock_timestamp(),false) FROM mail_index_jobs WHERE tenant_id=$1 AND message_id=$2`, j.TenantID, j.MessageID).Scan(&valid); err != nil {
+		return err
+	}
+	if !valid {
+		return app.Conflict("index lease lost")
+	}
+	return nil
+}
+
 func (s *PgStore) CompleteMailIndexJob(ctx context.Context, j company.MailIndexJob, d company.ParsedMessage) error {
 	if d.MessageID != j.MessageID || d.SourceKey != j.SourceKey {
 		return app.Conflict("index provenance changed")
@@ -127,29 +151,56 @@ func (s *PgStore) CompleteMailIndexJob(ctx context.Context, j company.MailIndexJ
 		return e
 	}
 	defer tx.Rollback(ctx)
-	tag, e := tx.Exec(ctx, `UPDATE mail_index_jobs SET state='ready',lease_until=NULL,lease_token=NULL,last_error='' WHERE tenant_id=$1 AND message_id=$2 AND source_key=$3 AND lease_token=$4 AND state='processing' AND lease_until>now()`, j.TenantID, j.MessageID, j.SourceKey, j.Token)
+	// Source updates/deletion acquire the parent message before touching its
+	// document/job children. SHARE protects the non-key raw_object_key too;
+	// KEY SHARE alone would not serialize a source replacement.
+	var source string
+	e = tx.QueryRow(ctx, `SELECT raw_object_key FROM messages WHERE tenant_id=$1 AND id=$2 FOR SHARE`, j.TenantID, j.MessageID).Scan(&source)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.Conflict("index provenance changed")
+	}
 	if e != nil {
 		return e
 	}
-	if tag.RowsAffected() != 1 {
-		return app.Conflict("index lease lost")
+	if source != j.SourceKey {
+		return app.Conflict("index provenance changed")
+	}
+	if e = lockMailIndexLease(ctx, tx, j); e != nil {
+		return e
 	}
 	if e = saveParsed(ctx, tx, j.TenantID, d); e != nil {
 		return e
 	}
-	return tx.Commit(ctx)
-}
-func (s *PgStore) FailMailIndexJob(ctx context.Context, j company.MailIndexJob, reason string) error {
-	// Diagnostics are deliberately coarse: a malicious MIME header must never
-	// copy employee content into operational status or logs.
-	tag, e := s.pool.Exec(ctx, `UPDATE mail_index_jobs SET state=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END,next_attempt_at=now()+interval '1 minute',lease_until=NULL,lease_token=NULL,last_error='content parsing failed' WHERE tenant_id=$1 AND message_id=$2 AND lease_token=$3 AND source_key=$4 AND state='processing' AND lease_until>now()`, j.TenantID, j.MessageID, j.Token, j.SourceKey)
+	// Document writes can wait too. Consume the lease only after all derived
+	// writes, using database wall time; a late conflict rolls them all back.
+	tag, e := tx.Exec(ctx, `UPDATE mail_index_jobs SET state='ready',lease_until=NULL,lease_token=NULL,last_error='' WHERE tenant_id=$1 AND message_id=$2 AND source_key=$3 AND lease_token=$4 AND state='processing' AND lease_until>clock_timestamp()`, j.TenantID, j.MessageID, j.SourceKey, j.Token)
 	if e != nil {
 		return e
 	}
 	if tag.RowsAffected() != 1 {
 		return app.Conflict("index lease lost")
 	}
-	return nil
+	return tx.Commit(ctx)
+}
+func (s *PgStore) FailMailIndexJob(ctx context.Context, j company.MailIndexJob, reason string) error {
+	tx, e := s.pool.Begin(ctx)
+	if e != nil {
+		return e
+	}
+	defer tx.Rollback(ctx)
+	if e = lockMailIndexLease(ctx, tx, j); e != nil {
+		return e
+	}
+	// Diagnostics remain coarse; caller-supplied parser content is not stored.
+	// No source/document locks or object I/O are acquired on this failure path.
+	tag, e := tx.Exec(ctx, `UPDATE mail_index_jobs SET state=CASE WHEN attempts>=5 THEN 'failed' ELSE 'pending' END,next_attempt_at=clock_timestamp()+interval '1 minute',lease_until=NULL,lease_token=NULL,last_error='content parsing failed' WHERE tenant_id=$1 AND message_id=$2 AND lease_token=$3 AND source_key=$4 AND state='processing' AND lease_until>clock_timestamp()`, j.TenantID, j.MessageID, j.Token, j.SourceKey)
+	if e != nil {
+		return e
+	}
+	if tag.RowsAffected() != 1 {
+		return app.Conflict("index lease lost")
+	}
+	return tx.Commit(ctx)
 }
 
 var _ company.ParsedContentReader = (*PgStore)(nil)
