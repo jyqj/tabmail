@@ -1,0 +1,176 @@
+{
+  "A01": {
+    "corroboration": {
+      "after": {
+        "can_send": true,
+        "daily_send_quota": 25,
+        "restricted_zone_count": 0
+      },
+      "case": "A01",
+      "component": "original React editor and Base UI; auth context fixture only",
+      "database": "isolated PostgreSQL",
+      "product_fixed": false,
+      "requests": [
+        {
+          "method": "PUT",
+          "path": "/api/v1/admin/users/cecdeebd-af35-480a-b79c-96419b117560/permissions",
+          "body": {
+            "daily_send_quota": 25
+          }
+        }
+      ],
+      "transport": "unmodified API/session clients and real loopback HTTP",
+      "vitest_failed_tests": 1,
+      "vitest_skipped_tests": 0
+    },
+    "vitest": {
+      "numTotalTestSuites": 1,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 1,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 1,
+      "numPassedTests": 0,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1790583325701,
+      "success": false,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [],
+              "fullName": "A01 secure editor behavior",
+              "status": "failed",
+              "title": "A01 secure editor behavior",
+              "duration": 743.7433759999994,
+              "failureMessages": [
+                "Error: R5_COMPONENT_DEFECT_A01: real quota-only editor save erased existing restrictions\n    at /src/web/features/company/permission-editors.r5audit.tsx:82:13\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///src/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+              ],
+              "meta": {},
+              "tags": []
+            }
+          ],
+          "startTime": 1790583329231,
+          "endTime": 1790583329974.7434,
+          "status": "failed",
+          "message": "",
+          "name": "/src/web/features/company/permission-editors.r5audit.tsx"
+        }
+      ]
+    },
+    "original_vitest_sha256": "530b9c11ba15fb6bbc53dbc493f07b8d96efc419604a83b0dbe17ef5a0d092ce",
+    "original_log_sha256": "fb1916a6eaa64980ab4f14aa08d363fef45c7d5116055a5d5c75861047f7d306"
+  },
+  "A02": {
+    "corroboration": {
+      "after": {
+        "can_send": true,
+        "description": "R5 stale description"
+      },
+      "case": "A02",
+      "component": "original React editor and Base UI; auth context fixture only",
+      "database": "isolated PostgreSQL",
+      "product_fixed": false,
+      "requests": [
+        {
+          "method": "PATCH",
+          "path": "/api/v1/admin/permissions/9b0b4866-6d3e-4de9-8eec-a91dcaf61deb",
+          "body": {
+            "can_send": false
+          }
+        },
+        {
+          "method": "PATCH",
+          "path": "/api/v1/admin/permissions/9b0b4866-6d3e-4de9-8eec-a91dcaf61deb",
+          "body": {
+            "name": "R5 component profile",
+            "description": "R5 stale description",
+            "can_send": true,
+            "daily_send_quota": 0,
+            "daily_receive_quota": 0,
+            "max_mailboxes": 0,
+            "max_domains": 0,
+            "allowed_zone_ids": [],
+            "can_create_domains": false,
+            "can_create_routes": false,
+            "can_create_api_keys": false
+          }
+        }
+      ],
+      "transport": "unmodified API/session clients and real loopback HTTP",
+      "vitest_failed_tests": 1,
+      "vitest_skipped_tests": 0
+    },
+    "vitest": {
+      "numTotalTestSuites": 1,
+      "numPassedTestSuites": 0,
+      "numFailedTestSuites": 1,
+      "numPendingTestSuites": 0,
+      "numTotalTests": 1,
+      "numPassedTests": 0,
+      "numFailedTests": 1,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "snapshot": {
+        "added": 0,
+        "failure": false,
+        "filesAdded": 0,
+        "filesRemoved": 0,
+        "filesRemovedList": [],
+        "filesUnmatched": 0,
+        "filesUpdated": 0,
+        "matched": 0,
+        "total": 0,
+        "unchecked": 0,
+        "uncheckedKeysByFile": [],
+        "unmatched": 0,
+        "updated": 0,
+        "didUpdate": false
+      },
+      "startTime": 1790583330518,
+      "success": false,
+      "testResults": [
+        {
+          "assertionResults": [
+            {
+              "ancestorTitles": [],
+              "fullName": "A02 secure editor behavior",
+              "status": "failed",
+              "title": "A02 secure editor behavior",
+              "duration": 808.7840840000003,
+              "failureMessages": [
+                "Error: R5_COMPONENT_DEFECT_A02: real stale editor restored revoked sending\n    at /src/web/features/company/permission-editors.r5audit.tsx:100:32\n    at processTicksAndRejections (node:internal/process/task_queues:103:5)\n    at file:///src/web/node_modules/@vitest/runner/dist/chunk-artifact.js:1903:20"
+              ],
+              "meta": {},
+              "tags": []
+            }
+          ],
+          "startTime": 1790583333289,
+          "endTime": 1790583334097.7842,
+          "status": "failed",
+          "message": "",
+          "name": "/src/web/features/company/permission-editors.r5audit.tsx"
+        }
+      ]
+    },
+    "original_vitest_sha256": "cccf40704061c5c4f75df1c74b63a7a88aa73c9ad7b9551690c4172c65bbde4b",
+    "original_log_sha256": "b399d334ee8fcbb72f745f802171946157e1655cd7c8d8b7c9f234a3ddcbb74e"
+  }
+}
