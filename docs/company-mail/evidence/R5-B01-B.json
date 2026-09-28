@@ -1,0 +1,134 @@
+{
+  "batch": "B01-B",
+  "base_sha": "99f1e21fe1feee13a4c9cc4c997b1a2c7d3fbfa9",
+  "implementation_commit": "f5a958958fe61c0c35f8c3ebde0ab80ea71f8f15",
+  "implementation_tree": "d85599b32cde6e7e1b7bb502173c458e1ce0295d",
+  "mapping": "Base archive plus exact test/tool/matrix overlays; implementation files match tested snapshot hashes. Progress-only docs are outside runtime verification.",
+  "implementation_sha256": {
+    ".github/workflows/company-p0.yml": "c278770a857a88f82a07ac50a410b8af53d611ffdcea002c9be5b4e49454d73c",
+    "Makefile": "7eea4595d11a40b9e16a99aa8ed09a6f2dbf9de878ff9fef1cd9e5bb4f651bde",
+    "docs/company-mail/R5-API-MATRIX.md": "45a521858846309fce7287d7db5e0895953ab2883b9583f8b0df397b8f6d6f6f",
+    "docs/company-mail/R5-MIGRATIONS.md": "414ddd19a5954810b10209b0e4fe24083b16baaac45d63d6f9d24a3a3b16062d",
+    "docs/company-mail/evidence/R4-MIGRATION-HASHES.json": "c4d6ab25874f85b240eb457601473b1bafa826999483abcb7d2d5d1b1c0decd7",
+    "docs/company-mail/evidence/R4-SCHEMA-INVENTORY.json": "83bd26e8b3f1ff5e27e71b003c5704d711636a1e152b223be308dcbd5f269d70",
+    "docs/company-mail/evidence/R5-API-MATRIX.json": "4846ffb96f47ab66a660133c4ed20760cde42b4921e723fbaa3d292bdd4c0f0a",
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": "4474c852e7eb2d1ffb54f3b8d7ba94548ebab34586954f7aeef3da0338aab7d4",
+    "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
+    "internal/store/postgres/r5_audit_baseline_test.go": "d935efbf1e9007928fc50e92fb152f2c1de161359c9fedffd97883a257add099",
+    "internal/store/postgres/r5_schema_inventory_test.go": "863a02599046f6bd8171d3cdef58825adde1263e64dd413d6d560ae54c61b2f5",
+    "scripts/collect_api_calls.cjs": "91a534509f4fb0df512783b6ea8d39a36c2c140a1fac4edae437155c82e1d6b4",
+    "scripts/required_go_tests.json": "d7d68ed0570fa89acbfac8641cde7e8fcf324583bddcdd6ad7f307ded2d38ed0",
+    "scripts/run_r5_audit_baseline.py": "5fffcc80a38ccfa1e18067b7040ef8f45a7d348c1773db032d5380b48c445a8f",
+    "scripts/tests/api_calls.test.cjs": "aba82bff3f61e3d08ada9cceb51faab419bcdb25e18b0ea9d20ff61cf849dd40",
+    "scripts/tests/test_r5_audit_baseline.py": "3ff67a127947e11acd085a582dc4e529d74f308e329c4004713d0e45457080df"
+  },
+  "unchanged_existing_business_and_test_files": 435,
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 2479,
+    "log_sha256": "51f0b558ab78ed67ab132edda8d9efb20646daf3af36c486239af29140760ee8",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 14,
+    "manifest_sha256": "d7d68ed0570fa89acbfac8641cde7e8fcf324583bddcdd6ad7f307ded2d38ed0",
+    "packages": 48,
+    "process_exit_code": 0,
+    "source_sha": "99f1e21fe1feee13a4c9cc4c997b1a2c7d3fbfa9",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 549,
+    "tests_skipped": 1,
+    "tests_started": 550
+  },
+  "audit_baseline": {
+    "status": "baseline_reproduced",
+    "product_fixed": false,
+    "reproduced": [
+      "A01",
+      "A02",
+      "A03",
+      "A04",
+      "A05",
+      "A06",
+      "A07"
+    ],
+    "errors": [],
+    "process_exit_code": 1,
+    "log_sha256": "203762f0a31eb9878b2c917979ce34135fa8550e1b503681ae71b2067ad96247",
+    "tests_expected": 7,
+    "source_sha": "99f1e21fe1feee13a4c9cc4c997b1a2c7d3fbfa9",
+    "command": [
+      "go",
+      "test",
+      "-json",
+      "-race",
+      "-count=1",
+      "-timeout=180s",
+      "-tags=r5audit",
+      "-run",
+      "^TestR5AuditA0[1-7]",
+      "./internal/store/postgres"
+    ],
+    "test_source_sha256": "d935efbf1e9007928fc50e92fb152f2c1de161359c9fedffd97883a257add099",
+    "evidence_boundary": "Real PostgreSQL and loopback HTTP; deterministic fixtures. A01/A02 UI component integration still separate."
+  },
+  "tool_tests": {
+    "python_pass": 52,
+    "node_pass": 22,
+    "fail": 0,
+    "skip": 0
+  },
+  "inventory": {
+    "routes": 127,
+    "client_call_sites": 122,
+    "client_branches": 125,
+    "mapped_branches": 118,
+    "transport_forwarders": 7,
+    "tables": 50,
+    "columns": 499,
+    "constraints": 177,
+    "foreign_keys": 75,
+    "indexes": 152,
+    "triggers": 7
+  },
+  "raw_log_sha256": {
+    "backend-reviewed.jsonl": "51f0b558ab78ed67ab132edda8d9efb20646daf3af36c486239af29140760ee8",
+    "backend-reviewed-report.json": "7b431e6c533280b1de3b0dc2a5bfa864ccb860c92ca52a47dba2e21e4eac32d6",
+    "tools-reviewed.log": "8786bcf30c2636b98e7796a09e7e11b0f89b9ade7ee19886f7c380250b615978",
+    "schema-reviewed-tests.jsonl": "a60fb048f249d31a735ac35bfea4fa87900a6944b265f802199744882bd70961",
+    "schema-reviewed.json": "b644ab58edd7ac94fea97daf50c426f76e263f30f8f7aea984b13409412aebf6",
+    "audit-reviewed/audit.jsonl": "203762f0a31eb9878b2c917979ce34135fa8550e1b503681ae71b2067ad96247",
+    "audit-reviewed/report.json": "3e85631865b29425ed69a365f1d06bfd0f23c32f55a717ed00af887b6c92f61c",
+    "source-manifest-final.json": "74e4a89135252666019e80c29ad788c74841b7415c930ac8d1b8f52573f183f6"
+  },
+  "cleanup": {
+    "session": "wc_sess_9jLLe7OV0ULj-hgy",
+    "removed": [
+      "tabmail-r5-b01b-pg-9jll",
+      "tabmail-r5-b01b-9jll"
+    ],
+    "existing_services_untouched": true
+  },
+  "closed_tasks": [
+    "R5-P0-020",
+    "R5-P0-060"
+  ],
+  "partial_tasks": {
+    "R5-P0-030": "A01-A07 real DB/HTTP reproduced; A01/A02 actual component integration not executed"
+  },
+  "not_executed": [
+    "GitHub Actions",
+    "shipping-image browser journey",
+    "new A01/A02 component regressions",
+    "S/M performance",
+    "production deployment",
+    "external email delivery"
+  ]
+}
