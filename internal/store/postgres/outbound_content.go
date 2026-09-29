@@ -2,14 +2,11 @@ package postgres
 
 import (
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
@@ -69,45 +66,11 @@ func (s *PgStore) CanReadOutboundContent(ctx context.Context, a authz.Actor, obs
 // the private user-shaped selector below is only for canonical mailbox scope,
 // never for granting interactive administration or bypassing key scope checks.
 func (s *PgStore) legacyKeyContentTx(ctx context.Context, a authz.Actor, job *models.OutboundJob, check func(pgx.Tx, authz.Actor, *time.Time) error) error {
-	tx, err := s.pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
-	uid := *a.OwnerUserID
-	u, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 AND tenant_id=$2 FOR SHARE`, uid, a.TenantID))
-	if err != nil {
-		return err
-	}
-	if u == nil || !u.IsActive {
-		return app.Forbidden("key owner unavailable")
-	}
-	k := &models.TenantAPIKey{}
-	var raw json.RawMessage
-	err = tx.QueryRow(ctx, `SELECT id,tenant_id,owner_user_id,scopes,allowed_zone_ids,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT`, a.ID, a.TenantID).Scan(&k.ID, &k.TenantID, &k.OwnerUserID, &raw, &k.AllowedZoneIDs, &k.ExpiresAt)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return app.Forbidden("key unavailable")
-	}
-	if err != nil {
-		var pg *pgconn.PgError
-		if errors.As(err, &pg) && pg.Code == "55P03" {
-			return app.Conflict("key is changing; reload before retrying")
+	return s.outboundPrincipalTx(ctx, a, []string{"send:read", "send:write"}, func(tx pgx.Tx, current authz.Actor, key *models.TenantAPIKey) error {
+		if !authz.OutboundContentKeyMatches(a, key, job) {
+			return app.Forbidden("key content authority unavailable")
 		}
-		return err
-	}
-	if err = json.Unmarshal(raw, &k.Scopes); err != nil {
-		return err
-	}
-	if !authz.OutboundContentKeyMatches(a, k, job) {
-		return app.Forbidden("key content authority unavailable")
-	}
-	permission, err := effectivePermissionSnapshot(ctx, tx, uid)
-	if err != nil {
-		return err
-	}
-	current := authz.Actor{Type: authz.PrincipalUser, ID: uid, TenantID: a.TenantID, Permission: permission}
-	if err = check(tx, current, k.ExpiresAt); err != nil {
-		return err
-	}
-	return tx.Commit(ctx)
+		selector := authz.Actor{Type: authz.PrincipalUser, ID: *current.OwnerUserID, TenantID: current.TenantID, Permission: current.Permission}
+		return check(tx, selector, key.ExpiresAt)
+	})
 }

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -50,13 +49,12 @@ func (h *OutboundHandler) GetJob(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
+	view, err := h.subs.OutboundReceiptView(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
 		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job")
 		return
 	}
-
-	h.writeOutboundView(w, r, job)
+	ok(w, view)
 }
 
 // ListJobs handles GET /api/v1/outbound — list outbound jobs for the tenant.
@@ -71,18 +69,10 @@ func (h *OutboundHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
 
 	pg := pageFromReq(r)
 
-	items, total, err := h.listAccessibleOutboundJobs(ctx, tenant.ID, pg)
+	items, total, err := h.subs.ListOutboundReceiptViews(ctx, tenant, middleware.ActorFromContext(ctx), pg)
 	if err != nil {
 		writeOutboundJobAccessError(w, h.logger, err, "listing outbound jobs")
 		return
-	}
-	for i, job := range items {
-		view, viewErr := h.subs.RedactOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
-		if viewErr != nil {
-			respondAppError(w, h.logger, viewErr)
-			return
-		}
-		items[i] = view
 	}
 	okList(w, items, total, pg.Page, pg.PerPage)
 }
@@ -100,7 +90,7 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
+	job, err := h.subs.AccessibleOutboundJobForRetry(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
 		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job for retry")
 		return
@@ -161,26 +151,10 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 		errForbidden(w, "authentication required")
 		return
 	}
-	job, err := h.subs.AccessibleOutboundJob(ctx, middleware.TenantFromCtx(ctx), middleware.ActorFromContext(ctx), jobID)
+	attempts, err := h.subs.OutboundAttemptViews(ctx, tenant, middleware.ActorFromContext(ctx), jobID)
 	if err != nil {
-		writeOutboundJobAccessError(w, h.logger, err, "getting outbound job for attempts")
+		writeOutboundJobAccessError(w, h.logger, err, "listing outbound attempts")
 		return
-	}
-	attempts, err := h.store.ListOutboundAttempts(ctx, jobID)
-	if err != nil {
-		h.logger.Err(err).Msg("listing outbound attempts")
-		errInternal(w)
-		return
-	}
-	// The restricted-view decision and copy rules live in the submissions
-	// service; the handler only maps the result to the response envelope.
-	attempts, err = h.subs.RedactOutboundAttempts(ctx, middleware.ActorFromContext(ctx), job, attempts)
-	if err != nil {
-		respondAppError(w, h.logger, err)
-		return
-	}
-	if attempts == nil {
-		attempts = []*models.OutboundAttempt{}
 	}
 	ok(w, attempts)
 }
@@ -270,20 +244,6 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	noContent(w)
-}
-
-func (h *OutboundHandler) listAccessibleOutboundJobs(ctx context.Context, tenantID uuid.UUID, pg models.Page) ([]*models.OutboundJob, int, error) {
-	// ActionOutboundRead defers row scope to the query level; the authz seam
-	// resolves which owned rows this actor may see. The OwnerListFilter pins
-	// TenantID and the mutually-exclusive owner dimension, so tenant isolation
-	// and the owner rule are both enforced in SQL.
-	scope := authz.OwnerListScope(middleware.ActorFromContext(ctx), tenantID)
-	actor := middleware.ActorFromContext(ctx)
-	scope.ReaderUserID = actor.EffectiveUserID()
-	if actor.Permission != nil {
-		scope.AllowedZoneIDs = actor.Permission.AllowedZoneIDs
-	}
-	return h.store.ListOutboundJobsScoped(ctx, scope, pg)
 }
 
 // writeOutboundJobAccessError maps the submissions service's job-visibility

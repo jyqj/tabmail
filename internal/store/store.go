@@ -294,9 +294,23 @@ type OutboundContentAuthority interface {
 	CanReadOutboundContent(context.Context, authz.Actor, *models.OutboundJob) (bool, error)
 }
 
+// OutboundReceipt is an internal authorization result, not a public DTO.
+// Only the submissions projection may expose Job; the raw record is never safe
+// merely because the caller is entitled to an operation receipt.
+type OutboundReceipt struct {
+	Job            *models.OutboundJob
+	ContentAllowed bool
+}
+
+type OutboundReceiptReader interface {
+	GetOutboundReceipt(context.Context, authz.Actor, uuid.UUID, string) (*OutboundReceipt, error)
+	ListOutboundReceipts(context.Context, authz.Actor, models.Page) ([]OutboundReceipt, int, error)
+}
+
 // OutboundStore persists outbound jobs, outbound attempts, and send identities.
 type OutboundStore interface {
 	OutboundContentAuthority
+	OutboundReceiptReader
 	// --- Outbound jobs -----------------------------------------------------
 	CreateOutboundJob(ctx context.Context, job *models.OutboundJob) error
 	CreateOutboundJobWithQuota(ctx context.Context, job *models.OutboundJob, quota OutboundQuotaReservation) error

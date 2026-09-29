@@ -106,7 +106,7 @@ func (h *CompanyRecoveryHandler) Recipients(w http.ResponseWriter, r *http.Reque
 		return
 	}
 	// Recheck after the ledger read, which may wait across expiry/revocation.
-	view, e := h.subs.RedactOutboundJob(r.Context(), companyActor(r), j)
+	view, e := h.subs.OutboundReceiptView(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), j.ID)
 	if e != nil {
 		h.result(w, nil, e)
 		return

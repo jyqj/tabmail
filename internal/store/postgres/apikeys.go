@@ -37,10 +37,12 @@ func (s *PgStore) CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) erro
 	return err
 }
 
+// Metadata readers expose a host address string, not PostgreSQL's binary inet
+// representation. Keep all three reads on one projection, preserving SQL NULL.
+const apiKeyMetadataSelect = `SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,host(last_used_ip) AS last_used_ip FROM tenant_api_keys`
+
 func (s *PgStore) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
-		FROM tenant_api_keys WHERE tenant_id=$1 ORDER BY created_at`, tenantID)
+	rows, err := s.pool.Query(ctx, apiKeyMetadataSelect+` WHERE tenant_id=$1 ORDER BY created_at`, tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -49,9 +51,7 @@ func (s *PgStore) ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*model
 }
 
 func (s *PgStore) ListAPIKeysByOwner(ctx context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error) {
-	rows, err := s.pool.Query(ctx, `
-		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
-		FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2 ORDER BY created_at`, tenantID, ownerUserID)
+	rows, err := s.pool.Query(ctx, apiKeyMetadataSelect+` WHERE tenant_id=$1 AND owner_user_id=$2 ORDER BY created_at`, tenantID, ownerUserID)
 	if err != nil {
 		return nil, err
 	}
@@ -87,9 +87,7 @@ func (s *PgStore) GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAP
 	k := &models.TenantAPIKey{}
 	var scopesJSON []byte
 	var ownerID pgtype.UUID
-	err := s.pool.QueryRow(ctx, `
-		SELECT id,tenant_id,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at,last_used_at,last_used_ip
-		FROM tenant_api_keys WHERE id=$1`, id).
+	err := s.pool.QueryRow(ctx, apiKeyMetadataSelect+` WHERE id=$1`, id).
 		Scan(&k.ID, &k.TenantID, &k.KeyPrefix, &k.Label,
 			&scopesJSON, &ownerID, &k.AllowedZoneIDs, &k.ExpiresAt, &k.CreatedAt, &k.LastUsedAt, &k.LastUsedIP)
 	if errors.Is(err, pgx.ErrNoRows) {

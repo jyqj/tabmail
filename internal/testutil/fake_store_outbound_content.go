@@ -18,6 +18,10 @@ func (s *FakeStore) CanReadOutboundContent(ctx context.Context, a authz.Actor, j
 	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.canReadOutboundContentLocked(a, j)
+}
+
+func (s *FakeStore) canReadOutboundContentLocked(a authz.Actor, j *models.OutboundJob) (bool, error) {
 	if j == nil || j.TenantID != a.TenantID || j.SenderMailboxID == nil || !a.Permission.AllowsZone(j.ZoneID) {
 		return false, nil
 	}

@@ -373,36 +373,26 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 	return job, replayed, nil
 }
 
-// AccessibleOutboundJob resolves a single outbound job for the actor: tenant
-// context must exist, the actor's zone allowlist must cover the job, and
-// either the owner rule or a current content authority (sender identity or
-// mailbox read grant) must hold. Visibility failures collapse to
-// ErrOutboundJobNotFound so existence is not disclosed.
+// AccessibleOutboundJob resolves a receipt under the current principal and
+// current zone scope. The store applies the same owner-or-live-content rule
+// used by the list. Visibility and credential failures collapse to not-found;
+// the returned internal job still requires an authorized content projection.
 func (s *Service) AccessibleOutboundJob(ctx context.Context, tenant *models.Tenant, actor authz.Actor, jobID uuid.UUID) (*models.OutboundJob, error) {
-	if tenant == nil {
-		return nil, ErrOutboundJobAuthRequired
-	}
-	if actor.TenantID != tenant.ID {
-		return nil, ErrOutboundJobNotFound
-	}
-
-	job, err := s.store.GetOutboundJob(ctx, jobID)
+	r, err := s.outboundReceipt(ctx, tenant, actor, jobID, "send:read")
 	if err != nil {
 		return nil, err
 	}
-	if job != nil && !actor.Permission.AllowsZone(job.ZoneID) {
-		return nil, ErrOutboundJobNotFound
+	return r.Job, nil
+}
+
+// Retry receipt lookup needs current send:write, not GET's send:read. This is
+// receipt admission only, not the final atomic retry authorization.
+func (s *Service) AccessibleOutboundJobForRetry(ctx context.Context, tenant *models.Tenant, actor authz.Actor, jobID uuid.UUID) (*models.OutboundJob, error) {
+	r, err := s.outboundReceipt(ctx, tenant, actor, jobID, "send:write")
+	if err != nil {
+		return nil, err
 	}
-	if !canAccessOutboundJob(actor, tenant.ID, job) {
-		allowed, err := s.ContentAllowed(ctx, actor, job)
-		if err != nil {
-			return nil, err
-		}
-		if !allowed {
-			return nil, ErrOutboundJobNotFound
-		}
-	}
-	return job, nil
+	return r.Job, nil
 }
 
 // ContentAllowed decides whether the actor may see a job's content and
@@ -509,14 +499,6 @@ func (s *Service) RedactOutboundJob(ctx context.Context, actor authz.Actor, job 
 		return nil, err
 	}
 	return RedactOutboundJobView(job, allowed), nil
-}
-
-func canAccessOutboundJob(actor authz.Actor, tenantID uuid.UUID, job *models.OutboundJob) bool {
-	if job == nil || job.TenantID != tenantID {
-		return false
-	}
-	// Same owner rule as the scoped list query, via the single authz seam.
-	return authz.CanAccessOwned(actor, job.UserID, job.APIKeyID)
 }
 
 // extractDomainFromAddress extracts the domain part from an email address.

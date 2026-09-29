@@ -3,6 +3,14 @@
   "suites": {
     "content-postgres-boundary": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5APIKeyLastUsedIPRoundTrips"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptRejectsStalePrincipal"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptKeyExpiryAfterQueryWait"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptListOrdersMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptListMatchesDetailScope"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptOwnerlessKeyAndRetryScope"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptStorageErrorAndTenantIsolation"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptStablePaginationAndEmptyPage"],
         ["tabmail/internal/store/postgres", "TestR5LegacyContentLifecycleMatchesArchive"],
         ["tabmail/internal/store/postgres", "TestR5LegacyContentRechecksKeyAndOwner"],
         ["tabmail/internal/store/postgres", "TestR5LegacyContentReloadsPermissionAfterIdentityWait"],
@@ -115,7 +123,17 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5APIKeyLastUsedIPRoundTrips"],
+        ["tabmail/internal/app/submissions", "TestOutboundReceiptProjectionUsesOneAuthorizedPage"],
+        ["tabmail/internal/app/submissions", "TestOutboundReceiptProjectionPreservesScopeAndFailsClosed"],
         ["tabmail/internal/authz", "TestOutboundContentKeyMetadataNeverWidensIdentity"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptRejectsStalePrincipal"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptKeyExpiryAfterQueryWait"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptListOrdersMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptListMatchesDetailScope"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptOwnerlessKeyAndRetryScope"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptStorageErrorAndTenantIsolation"],
+        ["tabmail/internal/store/postgres", "TestR5OutboundReceiptStablePaginationAndEmptyPage"],
         ["tabmail/internal/store/postgres", "TestR5LegacyContentLifecycleMatchesArchive"],
         ["tabmail/internal/store/postgres", "TestR5LegacyContentRechecksKeyAndOwner"],
         ["tabmail/internal/store/postgres", "TestR5LegacyContentReloadsPermissionAfterIdentityWait"],
