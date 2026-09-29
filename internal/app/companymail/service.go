@@ -59,6 +59,9 @@ type File struct {
 type InboundAttachment = company.ParsedAttachment
 
 func (s *Service) message(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*models.Message, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	m, err := s.repo.GetWorkMessage(ctx, a, mailbox, id)
 	if err != nil {
 		return nil, err
@@ -68,7 +71,9 @@ func (s *Service) message(ctx context.Context, a authz.Actor, mailbox, id uuid.U
 	if m == nil || m.TenantID != a.TenantID || m.MailboxID != mailbox || m.ID != id {
 		return nil, app.NotFound("message not found")
 	}
-	return m, nil
+	// Keep the observed provenance even if an adapter reuses its object.
+	value := *m
+	return &value, nil
 }
 
 func (s *Service) Message(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*models.MessageDetail, error) {
@@ -94,7 +99,16 @@ func (s *Service) Source(ctx context.Context, a authz.Actor, mailbox, id uuid.UU
 	if err != nil {
 		return nil, err
 	}
-	return s.open(ctx, m.RawObjectKey)
+	r, err := s.open(ctx, m.RawObjectKey)
+	if err != nil {
+		return nil, err
+	}
+	check := func() error { return s.recheckMessage(ctx, a, mailbox, m) }
+	if err = check(); err != nil {
+		_ = r.Close()
+		return nil, err
+	}
+	return &authorizedSource{ReadCloser: r, check: check}, nil
 }
 
 func (s *Service) open(ctx context.Context, key string) (io.ReadCloser, error) {
@@ -124,6 +138,14 @@ func (s *Service) document(ctx context.Context, a authz.Actor, mailbox uuid.UUID
 			return nil, e
 		}
 		if doc != nil {
+			// A cache is derived content, never a replacement authority or a
+			// license to mix metadata with a different immutable source.
+			if doc.MessageID != m.ID || doc.SourceKey != m.RawObjectKey || doc.ParserVersion != 1 {
+				return nil, app.Conflict("message source changed; reload")
+			}
+			if e = s.recheckMessage(ctx, a, mailbox, m); e != nil {
+				return nil, e
+			}
 			return doc, nil
 		}
 	}
@@ -136,6 +158,9 @@ func (s *Service) document(ctx context.Context, a authz.Actor, mailbox uuid.UUID
 			return nil, e
 		}
 	}
+	if e = s.recheckMessage(ctx, a, mailbox, m); e != nil {
+		return nil, e
+	}
 	return doc, nil
 }
 
@@ -144,7 +169,14 @@ func (s *Service) inboundEnvelope(ctx context.Context, a authz.Actor, mailbox, i
 	if err != nil {
 		return nil, err
 	}
-	return s.envelope(ctx, m.RawObjectKey)
+	env, err := s.envelope(ctx, m.RawObjectKey)
+	if err != nil {
+		return nil, err
+	}
+	if err = s.recheckMessage(ctx, a, mailbox, m); err != nil {
+		return nil, err
+	}
+	return env, nil
 }
 
 func envelopeFiles(env *enmime.Envelope) []*enmime.Part {
@@ -173,6 +205,9 @@ func (s *Service) InboundAttachmentByID(ctx context.Context, a authz.Actor, mail
 	part, raw, e := s.parser.Attachment(ctx, message, m.RawObjectKey, id)
 	if e != nil {
 		return nil, app.NotFound("attachment not found")
+	}
+	if e = s.recheckMessage(ctx, a, mailbox, m); e != nil {
+		return nil, e
 	}
 	return &File{Filename: part.Filename, Content: raw}, nil
 }
@@ -265,7 +300,25 @@ func (s *Service) Attachment(ctx context.Context, a authz.Actor, id uuid.UUID) (
 	if err != nil {
 		return nil, err
 	}
-	return s.verifiedFile(ctx, v.ObjectKey, v.Filename, v.State, v.Size, v.SHA256)
+	if v == nil || v.ID != id {
+		return nil, app.NotFound("attachment not found")
+	}
+	observed := *v
+	file, err := s.verifiedFile(ctx, observed.ObjectKey, observed.Filename, observed.State, observed.Size, observed.SHA256)
+	if err != nil {
+		return nil, err
+	}
+	if err = ctx.Err(); err != nil {
+		return nil, err
+	}
+	current, err := s.repo.GetWorkAttachment(ctx, a, id)
+	if err != nil {
+		return nil, err
+	}
+	if current == nil || current.ID != observed.ID || current.ObjectKey != observed.ObjectKey || current.SHA256 != observed.SHA256 || current.Size != observed.Size || current.State != observed.State {
+		return nil, app.Conflict("attachment changed; reload")
+	}
+	return file, nil
 }
 
 func (s *Service) SubmissionContent(ctx context.Context, a authz.Actor, id uuid.UUID) (*company.SubmissionContent, error) {
@@ -281,5 +334,24 @@ func (s *Service) SubmissionAttachment(ctx context.Context, a authz.Actor, id, a
 	if err != nil {
 		return nil, err
 	}
-	return s.verifiedFile(ctx, v.ObjectKey, v.Filename, v.State, v.Size, v.SHA256)
+	if v == nil || v.ID != attachment {
+		return nil, app.NotFound("attachment not found")
+	}
+	observed := *v
+	file, err := s.verifiedFile(ctx, observed.ObjectKey, observed.Filename, observed.State, observed.Size, observed.SHA256)
+	if err != nil {
+		return nil, err
+	}
+	if err = ctx.Err(); err != nil {
+		return nil, err
+	}
+	// Re-resolve through the sent-asset authority, not uploader or job identity.
+	current, err := s.repo.GetSubmissionAttachment(ctx, a, id, attachment)
+	if err != nil {
+		return nil, err
+	}
+	if current == nil || current.ID != observed.ID || current.ObjectKey != observed.ObjectKey || current.SHA256 != observed.SHA256 || current.Size != observed.Size || current.State != observed.State {
+		return nil, app.Conflict("attachment changed; reload")
+	}
+	return file, nil
 }

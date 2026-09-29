@@ -1,5 +1,7 @@
 # R5 事务、锁顺序与授权检查地图
 
+> **B01-K 更新（部分完成）：** 内容 I/O 后同端口重验、缓存来源与 EML 首批字节保护已取得应用层相同测试红绿；mailbox SHARE 和 sent 锁后/审计后实际时钟候选已实现。新 PG 用例只编译未执行，全量无 DSN 643pass/159skip，backend 门禁拒绝，不覆盖下文历史实测。见 [B01-K记录](R5-B01-K-VALIDATION.md)。
+
 > **B01-J验证更新：** H候选已取得相同测试的基线6通过/4目标失败、候选10通过；最终原180秒预算全量589通过、54必跑齐全，40项各三轮120通过。见 [B01-J记录](R5-B01-J-VALIDATION.md)。070尚有跨语句授权/内容期限及其他多资源边界，不据此宣称全项目无竞争风险。
 
 2026-09-28，B01-D更新。原地图基线为 `97675a743f83287b85297af4e94c339ce5a83bba`；B01-D从 `46711be9d8421db35a687e28e181a67a2e720b2f` 实际复现两类40P01和草稿撤权窗口，并提前修复对应生产路径。本图下列TX08/TX11及锁测试反映本次新顺序；历史证据保留在各批报告。**不是全路径无死锁证明；070仍未关闭**。进度唯一入口是 [R5-TODO](R5-TODO.md)，数据库实体和完整 FK 依据 [R5-MIGRATIONS](R5-MIGRATIONS.md) 及其实际 catalog。
@@ -19,7 +21,7 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | `companyTx` / `companyTxScope(lock=true)` | Begin → T U锁 → 当前操作者 U S锁 → 当前角色/有效权限 → callback → Commit | 只有采用这条路径的管理命令受同一 T 锁约束；旧 permission handler 不自动纳入 |
 | `companyReadTx` / `companyTxScope(lock=false)` | Begin → 当前操作者 U S锁 → 有效权限 → callback → Commit；没有显式 T 锁 | 名字带 Read 不等于只读，它也用于草稿、附件和单行 CAS；FK 与业务 UPDATE 仍会等待 |
 | `currentMemberActor` | 精确 tenant/user 和 PrincipalUser；数据库重读角色及 is_active，用户行 S锁 | 不自动锁 permission profile、override、mailbox 或 grant |
-| `mailboxAccessTx` | 本函数仍用普通SELECT读取邮箱、revision和grant；统一调用EvaluateMailboxAccess。SaveMailDraft在调用前新增同邮箱FOR SHARE并保持到提交 | 草稿与公司grant/policy/handover写入共享邮箱行边界；不扩大为profile/override/全部读取都已受锁保护 |
+| `mailboxAccessTx` | 本函数用普通SELECT读取邮箱、revision和grant，统一调用EvaluateMailboxAccess；已有草稿/附件调用方持M SHARE，B01-K另在GetWorkMessage/GetParsedMessage/SaveParsedMessage及MutateArchivedMail前复用同锁 | B01-K新增接线的实际PG竞争尚未执行；不扩大为profile/override/所有列表都已受锁保护 |
 | `claimMailboxRevision` | 条件 UPDATE 消费观察到的 mailbox revision，零行按冲突拒绝 | 不替代外围层级/tenant/所有权校验 |
 | `companyAudit` | 同一 tx 插入 audit_log 和 outbox_events | 不是所有旧操作都调用它；外部 SMTP 和对象存储也不会自动参加此事务 |
 
@@ -49,12 +51,18 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | TX16 刷新令牌轮换 | `RotateRefreshToken`，refresh_rotation.go | family普通查找 → `tabmail:refresh-family:<id>` advisory → U S锁 →旧 R U锁 → 撤销/插入后代 → Commit | 本轮通过真实等待与 NOWAIT/try-advisory 探针验证此顺序；不是先锁旧token再锁user |
 | TX17 logout / family GC | `RevokeRefreshTokenByHash`、`deleteExpiredRefreshFamily` | family advisory → family R UPDATE/DELETE → Commit | logout不要求U S锁；GC在整族都到期时删除；不要新引入user→family等待而与TX16成环 |
 | TX18 改密及用户会话撤销 | `ChangePasswordAtomic`、`RevokeUserRefreshTokens`，users.go | 用户条件 UPDATE/显式 U锁 → refresh rows W →必要audit（改密）→ Commit | 改密expected password hash和active是条件；与轮换用户锁顺序兼容的假设仍须保留真实旧回归 |
-| TX19 已发送状态操作 | `MutateArchivedMail`，sent_archive.go | actor U S锁 → mailbox read/organize 读取 → item revision+期限条件 UPDATE → audit/outbox+mailbox event → Commit | now() 是事务时间；跨期限等待的政策与测试属于 P3-040，不能只凭条件存在就认证 |
+| TX19 已发送状态操作（K候选） | `MutateArchivedMail`，sent_archive.go | actor U S锁 → M S锁 → 当前read/organize → 精确item/revision U锁 → DB实际时间检查原expires/purge/mailbox期限 → item W → audit/outbox+mailbox event → 再验原期限 → Commit | restore清空字段仍保留原purge检查；K纯函数/时钟调用单测通过，但真实锁等待、原子回滚与撤权顺序未执行，不宣称PG验收通过 |
 | TX20 元数据及附件 GC | `SweepCompanyMetadata` / `sweepCompanyAttachments` | 前面多项DELETE分别自动提交；附件子事务 T U锁 → A按id LIMIT100 U锁 SKIP LOCKED → 引用复检 → DELETE + orphan INSERT一个CTE → Commit | 整个Sweep不是单事务；protected-prefix饥饿A06仍存在；旧“SaveDraft/Finish也首先T锁”注释与实现不符 |
 | TX21 原件保护 / 回收 | `CreateMessageWithQuota`、`CreateIngestJob`、`ReleaseRawObjectIfUnreferenced` | 原件key advisory → ensureObject回调/引用检查 → message/job W 或 del回调 → Commit | **这些旧路径的回调在数据库事务内**，对象后端可能阻塞；不能概括成全项目“事务不做对象I/O”。不贸然把回调移出去破坏原件引用保护 |
 | TX22 索引结果提交（J已实测） | `CompleteMailIndexJob` / `FailMailIndexJob`，mail_content.go | complete：source message S锁→job U锁→新语句clock_timestamp资格→document写入→最终lease条件UPDATE→Commit；fail：job U锁→实际时间复核→条件UPDATE→Commit | J实证三个等待超lease场景原版仍提交，候选拒绝并回滚；source-before-job由NOWAIT探针验证。7项索引/3项读取及全量通过，非完整死锁或全部claim/retry认证 |
 | TX23 域名删除 | `DeleteZone`，domain_delete.go | T U锁 → domain U锁 →资产引用检查 → domain DELETE/FK →必要audit → Commit | 此函数不自行重载 actor；服务/handler身份校验不能在图上被省略；NO ACTION FK仍保护直接SQL竞态 |
 | TX24 旧权限 profile / overrides | permission handler → permissions.go | handler 多次读主体/目标/域名，随后独立 profile UPDATE 或 override UPSERT；不走完整 companyTx 管理命令 | 当前无 revision CAS，不能把中间校验当作整个读改写的串行保证；A01/A02本轮组件+HTTP+DB再次复现 |
+
+### B01-K 的内容返回边界（应用层已测，PG接线待测）
+
+`GetWorkMessage` 与 parsed cache 读写：user SHARE → mailbox SHARE → 当前 owner/grant/revision → 内容查询/派生写入 → Commit。对象打开/解析不在这些事务里。`companymail` 在 I/O 或缓存完成后重新调用相同权限端口，比较原始 message/source；上传和已发送附件重新通过各自原端口核对 ID/key/hash/size/state。
+
+EML 在打开完成后和首批字节释放前各有检查。首次 Read 失败立即关闭流并不给出字节；正常首批放行后不逐块查数据库。它不是“已发送字节可撤销”，也不是全下载时段持数据库锁。新 `r5_content_wait_test.go` 用例尚无执行结果，不放进下一节“已实测”表。
 
 ## 4. 已实测的五项竞争观察
 
@@ -78,10 +86,12 @@ B01-C第五项原先只证明单侧次序。B01-D已补两条完整生产命令�
 | RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft/Finish/Reserve共用M SHARE授权边界；B01-G已补Reserve修复后的撤权顺序、额度原子性、不同上传者及取消回归。J三项读取证实新请求撤权拒绝、管理身份不授予正文、身份等待后冻结拒绝；跨语句授权快照/内容期限与profile/override仍待验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
 | RISK03 隐式FK与广域管理锁 | B01-D实证：入队已持user SHARE，后置tenant FK与离职tenant→user形成40P01 | 入队父键保护提前已修复此环；R03覆盖入队先完成导致旧计划冲突。入站、原件、索引/清理其他交叉仍待核对 | P0-070部分修复；P6-100、P10-040 |
 | RISK04 对象回调持锁时间 | TX21实际在tx内调用ensureObject/del | B01-F基线实测可控delete取消释放key、ensure期间GC等待且提交后保护引用；实际对象后端、提交未知和其余失败上界仍待验，不直接移出保护区 | P3-090、P6-100、P10-050 |
-| RISK05 事务时钟与等待后期限 | TX19期限用now；ingress末尾用clock_timestamp再次检验lease | B01-G已验证入站锁后自然过lease回滚；B01-J补齐索引完成/失败等job锁及完成等document锁的真实前后对照，旧结果拒绝、回滚且新token可恢复。sent操作、普通内容到期和其他时钟边界仍待验 | P3-040、P6-030、P7-030 |
+| RISK05 事务时钟与等待后期限 | 旧TX19期限用now；K已改sent读侧实际时钟、写侧锁后和审计后检查原期限 | G/J已实测的入站/索引结果保留；K新增sent item/audit等待与restore截止用例只编译，需PG红绿；普通收件条目期限、其他时钟边界未统一 | P0-070部分实现；P3-040、P6-030、P7-030 |
 | RISK06 多资源批量W及共享锁输入顺序 | 多附件按输入顺序S锁；offboard批量UPDATE未为所有对象固定排序 | S/S本身兼容，不因此认定两次保存死锁；与W/交接/GC一起测试真实冲突 | P3-060、P4-130、P5-130 |
 
 ## 6. P0-070收口前的剩余范围
+
+B01-K：应用层最终定向60项通过；最终无DSN全量643通过/159跳过，backend必跑70项未全执行。6个PG顶层用例必须在授权临时数据库取得同测试基线与候选结果后再关闭对应验证窗口。后续普通收件期限须与现行个人/共享永久保留规则核对，不能从物理GC保护直接推导新可读政策；profile/override、其他隐式FK、GC与多资源交叉仍待处理。
 
 截至B01-J，索引候选前后对照、7项索引与3项普通读取、54必跑及原预算全量均已执行通过；该候选运行阻塞解除。跨语句授权/内容到期、其他隐式FK与对象故障仍未齐，因此**070复选框保持未勾选，090仍受依赖限制**。080仍未冻结；G0/P1未开启。
 

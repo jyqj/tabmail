@@ -18,6 +18,11 @@ import (
 func (s *PgStore) GetWorkMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*models.Message, error) {
 	var out *models.Message
 	err := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, current authz.Actor) error {
+		// Keep mailbox, owner, revision and grant reads on one boundary with
+		// company grant/policy/handover writers, without a tenant-wide lock.
+		if err := lockMailboxAuthorization(ctx, tx, current.TenantID, mailbox); err != nil {
+			return err
+		}
 		rights, err := s.mailboxAccessTx(ctx, tx, current, mailbox)
 		if err != nil {
 			return err

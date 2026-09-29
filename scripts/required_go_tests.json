@@ -1,12 +1,41 @@
 {
   "version": 1,
   "suites": {
+    "content-boundary": {
+      "required_tests": [
+        ["tabmail/internal/app/companymail", "TestCompanyReadRechecksAfterObjectOpen"],
+        ["tabmail/internal/app/companymail", "TestCompanySourceRechecksBeforeFirstBytes"],
+        ["tabmail/internal/app/companymail", "TestCompanySourceSuccessfulStreamDoesNotReauthorizeEachChunk"],
+        ["tabmail/internal/app/companymail", "TestCompanyCachedContentRechecksAuthorityAndProvenance"],
+        ["tabmail/internal/app/companymail", "TestCompanyContentRechecksAfterCacheWrite"],
+        ["tabmail/internal/app/companymail", "TestCompanyReadCancellationDoesNotReturnSource"],
+        ["tabmail/internal/app/companymail", "TestCompanyAttachmentRechecksAfterReadingBytes"],
+        ["tabmail/internal/store/postgres", "TestSentItemAvailableAt"],
+        ["tabmail/internal/store/postgres", "TestSentItemDeadlineUsesDatabaseClockAndPropagatesFailure"]
+      ],
+      "allowed_skips": []
+    },
     "http-contract": {
       "required_tests": [["tabmail/internal/api", "TestCompanyHTTPContract"]],
       "allowed_skips": []
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/app/companymail", "TestCompanyReadRechecksAfterObjectOpen"],
+        ["tabmail/internal/app/companymail", "TestCompanySourceRechecksBeforeFirstBytes"],
+        ["tabmail/internal/app/companymail", "TestCompanySourceSuccessfulStreamDoesNotReauthorizeEachChunk"],
+        ["tabmail/internal/app/companymail", "TestCompanyCachedContentRechecksAuthorityAndProvenance"],
+        ["tabmail/internal/app/companymail", "TestCompanyContentRechecksAfterCacheWrite"],
+        ["tabmail/internal/app/companymail", "TestCompanyReadCancellationDoesNotReturnSource"],
+        ["tabmail/internal/app/companymail", "TestCompanyAttachmentRechecksAfterReadingBytes"],
+        ["tabmail/internal/store/postgres", "TestSentItemAvailableAt"],
+        ["tabmail/internal/store/postgres", "TestSentItemDeadlineUsesDatabaseClockAndPropagatesFailure"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationRejectsExpiryAfterItemWait"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationRollsBackExpiryDuringAuditWait"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationOrdersGrantRevocation"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationCancellationAndAuditFailureRollBack"],
+        ["tabmail/internal/store/postgres", "TestR5SentReadUsesTimeAfterIdentityWait"],
+        ["tabmail/internal/store/postgres", "TestR5ContentReadsFenceMailboxSnapshot"],
         ["tabmail/internal/api", "TestCompanyHTTPContract"],
         ["tabmail/internal/store/postgres", "TestMigrateAppliesCleanly"],
         ["tabmail/internal/store/postgres", "TestP0PostgresOwnerGrantAndPermanentRetention"],

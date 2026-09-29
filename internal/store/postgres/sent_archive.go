@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"strings"
@@ -9,12 +10,13 @@ import (
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
 	"tabmail/internal/models"
+	"time"
 )
 
 // sentContentFrom is the content authority. It never depends on the presence,
 // owner or state of a delivery job. Purged items cannot be resurrected by a
 // stale submission URL; trash items remain readable until their purge date.
-const sentContentFrom = ` FROM sent_mail_assets s JOIN sent_mail_items i ON i.tenant_id=s.tenant_id AND i.asset_id=s.id AND i.mailbox_id=s.sender_mailbox_id AND (i.expires_at IS NULL OR i.expires_at>now()) AND (i.purge_after IS NULL OR i.purge_after>now()) `
+const sentContentFrom = ` FROM sent_mail_assets s JOIN sent_mail_items i ON i.tenant_id=s.tenant_id AND i.asset_id=s.id AND i.mailbox_id=s.sender_mailbox_id AND (i.expires_at IS NULL OR i.expires_at>clock_timestamp()) AND (i.purge_after IS NULL OR i.purge_after>clock_timestamp()) `
 
 func searchPattern(query string) (string, error) {
 	query = strings.TrimSpace(query)
@@ -78,17 +80,20 @@ func (s *PgStore) MutateArchivedMail(ctx context.Context, a authz.Actor, mailbox
 	clause := ""
 	switch action {
 	case "trash":
-		clause = `deleted_at=COALESCE(deleted_at,now()),purge_after=COALESCE(purge_after,now()+interval '30 days')`
+		clause = `deleted_at=COALESCE(deleted_at,clock_timestamp()),purge_after=COALESCE(purge_after,clock_timestamp()+interval '30 days')`
 	case "restore":
 		clause = `deleted_at=NULL,purge_after=NULL`
 	case "archive":
-		clause = `archived_at=now()`
+		clause = `archived_at=clock_timestamp()`
 	case "unarchive":
 		clause = `archived_at=NULL`
 	default:
 		return app.BadRequest("unsupported sent item action")
 	}
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
+			return e
+		}
 		access, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
@@ -96,7 +101,20 @@ func (s *PgStore) MutateArchivedMail(ctx context.Context, a authz.Actor, mailbox
 		if !access.CanRead || !access.CanOrganize {
 			return app.Forbidden("mailbox organize permission required")
 		}
-		tag, e := tx.Exec(ctx, `UPDATE sent_mail_items SET `+clause+`,revision=revision+1 WHERE tenant_id=$1 AND mailbox_id=$2 AND asset_id=$3 AND revision=$4 AND (expires_at IS NULL OR expires_at>now()) AND (purge_after IS NULL OR purge_after>now())`, a.TenantID, mailbox, id, revision)
+		// Acquire the exact observed item before reading the decision clock.
+		// A WHERE time predicate alone can be evaluated before a lock wait.
+		var expiresAt, purgeAfter *time.Time
+		e = tx.QueryRow(ctx, `SELECT expires_at,purge_after FROM sent_mail_items WHERE tenant_id=$1 AND mailbox_id=$2 AND asset_id=$3 AND revision=$4 FOR UPDATE`, a.TenantID, mailbox, id, revision).Scan(&expiresAt, &purgeAfter)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.Conflict("sent item changed or unavailable; reload")
+		}
+		if e != nil {
+			return e
+		}
+		if e = checkSentItemDeadline(ctx, tx, expiresAt, purgeAfter, access.Mailbox.ExpiresAt); e != nil {
+			return e
+		}
+		tag, e := tx.Exec(ctx, `UPDATE sent_mail_items SET `+clause+`,revision=revision+1 WHERE tenant_id=$1 AND mailbox_id=$2 AND asset_id=$3 AND revision=$4`, a.TenantID, mailbox, id, revision)
 		if e != nil {
 			return e
 		}
@@ -107,7 +125,12 @@ func (s *PgStore) MutateArchivedMail(ctx context.Context, a authz.Actor, mailbox
 			return e
 		}
 		_, e = tx.Exec(ctx, `INSERT INTO mailbox_event_log(tenant_id,mailbox_id,event_type,message_id) VALUES($1,$2,'sent.changed',$3)`, a.TenantID, mailbox, id)
-		return e
+		if e != nil {
+			return e
+		}
+		// Auditing/events may also wait. Retain the original purge bound even
+		// after restore clears it, so a delayed restore cannot revive an item.
+		return checkSentItemDeadline(ctx, tx, expiresAt, purgeAfter, access.Mailbox.ExpiresAt)
 	})
 }
 

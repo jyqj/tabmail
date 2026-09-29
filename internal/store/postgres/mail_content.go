@@ -15,6 +15,9 @@ import (
 func (s *PgStore) GetParsedMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*company.ParsedMessage, error) {
 	var out *company.ParsedMessage
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
+			return e
+		}
 		mb, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
@@ -37,7 +40,10 @@ func (s *PgStore) GetParsedMessage(ctx context.Context, a authz.Actor, mailbox, 
 		out = d
 		return nil
 	})
-	return out, e
+	if e != nil {
+		return nil, e
+	}
+	return out, nil
 }
 func saveParsed(ctx context.Context, tx pgx.Tx, tenant uuid.UUID, d company.ParsedMessage) error {
 	if d.ParserVersion != 1 || len(d.SourceSHA256) != 64 || len(d.Parts) > 512 {
@@ -61,6 +67,9 @@ func saveParsed(ctx context.Context, tx pgx.Tx, tenant uuid.UUID, d company.Pars
 }
 func (s *PgStore) SaveParsedMessage(ctx context.Context, a authz.Actor, mailbox uuid.UUID, d company.ParsedMessage) error {
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
+			return e
+		}
 		mb, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e
