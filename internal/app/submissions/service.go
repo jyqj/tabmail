@@ -382,6 +382,9 @@ func (s *Service) AccessibleOutboundJob(ctx context.Context, tenant *models.Tena
 	if tenant == nil {
 		return nil, ErrOutboundJobAuthRequired
 	}
+	if actor.TenantID != tenant.ID {
+		return nil, ErrOutboundJobNotFound
+	}
 
 	job, err := s.store.GetOutboundJob(ctx, jobID)
 	if err != nil {
@@ -403,39 +406,15 @@ func (s *Service) AccessibleOutboundJob(ctx context.Context, tenant *models.Tena
 }
 
 // ContentAllowed decides whether the actor may see a job's content and
-// protocol details. Content authority rests solely on a CURRENT read grant
-// for the job's original sender mailbox, matching the store layer's
-// submissionScopeFor(allowSubmitter=false). Never derive content authority
+// protocol details. The store checks a CURRENT principal/read grant and live
+// sent asset/item on the original mailbox, sharing the archive's content scope.
+// Receipt visibility does not imply that retained job content is still readable.
+// Never derive content authority
 // from an administrative role or from historical sender identity; the
 // latter is kept only for receipt visibility via AccessibleOutboundJob's
 // owner rule.
 func (s *Service) ContentAllowed(ctx context.Context, actor authz.Actor, job *models.OutboundJob) (bool, error) {
-	if job == nil || actor.TenantID != job.TenantID || !actor.Permission.AllowsZone(job.ZoneID) {
-		return false, nil
-	}
-	uid := actor.EffectiveUserID()
-	if uid == nil {
-		return false, nil
-	}
-	u, err := s.store.GetUser(ctx, *uid)
-	if err != nil {
-		return false, err
-	}
-	if u == nil || !u.IsActive || (u.TenantID != job.TenantID && !(actor.IsSuperAdmin && u.Role == models.RoleSuperAdmin)) {
-		return false, nil
-	}
-	if job.SenderMailboxID == nil {
-		return false, nil
-	}
-	mb, err := s.store.ForTenant(job.TenantID).GetMailbox(ctx, *job.SenderMailboxID)
-	if err != nil {
-		return false, err
-	}
-	if mb == nil || mb.ZoneID != job.ZoneID {
-		return false, nil
-	}
-	g, err := authz.MailboxRights(ctx, s.store, job.TenantID, uid, mb)
-	return g != nil && g.CanRead, err
+	return s.store.CanReadOutboundContent(ctx, actor, job)
 }
 
 // RetryAuthority is the single retry-authority predicate for an outbound job,

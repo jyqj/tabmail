@@ -79,7 +79,7 @@ func (h *OutboundHandler) ListJobs(w http.ResponseWriter, r *http.Request) {
 	for i, job := range items {
 		view, viewErr := h.subs.RedactOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
 		if viewErr != nil {
-			errInternal(w)
+			respondAppError(w, h.logger, viewErr)
 			return
 		}
 		items[i] = view
@@ -176,7 +176,7 @@ func (h *OutboundHandler) ListAttempts(w http.ResponseWriter, r *http.Request) {
 	// service; the handler only maps the result to the response envelope.
 	attempts, err = h.subs.RedactOutboundAttempts(ctx, middleware.ActorFromContext(ctx), job, attempts)
 	if err != nil {
-		errInternal(w)
+		respondAppError(w, h.logger, err)
 		return
 	}
 	if attempts == nil {
@@ -298,8 +298,9 @@ func writeOutboundJobAccessError(w http.ResponseWriter, logger zerolog.Logger, e
 	case errors.Is(err, submissions.ErrOutboundJobNotFound):
 		appErr = app.NotFound("outbound job not found")
 	default:
-		logger.Err(err).Msg(logMsg)
-		appErr = app.Internal(err)
+		// A busy authority snapshot is a classified conflict, not an internal
+		// error. Unclassified database failures remain sanitized by the mapper.
+		appErr = err
 	}
 	respondAppError(w, logger, appErr)
 }

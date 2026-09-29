@@ -47,6 +47,7 @@ type FakeStore struct {
 	deliveries         map[uuid.UUID]*models.WebhookDelivery
 	ingestJobs         map[uuid.UUID]*models.IngestJob
 	outboundJobs       map[uuid.UUID]*models.OutboundJob
+	outboundContent    map[uuid.UUID]*models.OutboundJob // synthetic immutable sent-asset facts
 	outboundRecipients map[uuid.UUID]map[string]company.Recipient
 	outboundAttempts   map[uuid.UUID]*models.OutboundAttempt
 	suppressions       map[uuid.UUID]*models.SuppressionEntry
@@ -78,6 +79,7 @@ func NewFakeStore() *FakeStore {
 		deliveries:       map[uuid.UUID]*models.WebhookDelivery{},
 		ingestJobs:       map[uuid.UUID]*models.IngestJob{},
 		outboundJobs:     map[uuid.UUID]*models.OutboundJob{},
+		outboundContent:  map[uuid.UUID]*models.OutboundJob{},
 		outboundAttempts: map[uuid.UUID]*models.OutboundAttempt{},
 		suppressions:     map[uuid.UUID]*models.SuppressionEntry{},
 		sendIdentities:   map[uuid.UUID]*models.SendIdentity{},

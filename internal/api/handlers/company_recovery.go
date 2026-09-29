@@ -100,12 +100,13 @@ func (h *CompanyRecoveryHandler) Recipients(w http.ResponseWriter, r *http.Reque
 		writeOutboundJobAccessError(w, h.logger, e, "listing recipient outcomes")
 		return
 	}
-	view, e := h.subs.RedactOutboundJob(r.Context(), companyActor(r), j)
+	rows, e := h.repo.ListOutboundRecipients(r.Context(), j.TenantID, id)
 	if e != nil {
 		h.result(w, nil, e)
 		return
 	}
-	rows, e := h.repo.ListOutboundRecipients(r.Context(), j.TenantID, id)
+	// Recheck after the ledger read, which may wait across expiry/revocation.
+	view, e := h.subs.RedactOutboundJob(r.Context(), companyActor(r), j)
 	if e != nil {
 		h.result(w, nil, e)
 		return

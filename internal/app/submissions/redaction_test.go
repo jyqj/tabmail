@@ -217,6 +217,9 @@ func TestRedactOutboundAttemptsUsesContentAllowed(t *testing.T) {
 		{ID: uuid.New(), JobID: job.ID, Attempt: 1, Error: "550 refused", SMTPResponse: "550 detail"},
 	}
 
+	if err := f.st.CreateOutboundJob(context.Background(), job); err != nil {
+		t.Fatal(err)
+	}
 	ownerViews, err := f.svc.RedactOutboundAttempts(context.Background(), userActor(f.owner), job, attempts)
 	if err != nil {
 		t.Fatal(err)

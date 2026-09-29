@@ -287,8 +287,16 @@ type PermissionStore interface {
 	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
 }
 
+// OutboundContentAuthority resolves legacy content visibility from current
+// identity, mailbox rights and a live sent item, never from delivery-job life.
+// It only reads identity fields from observed; errors must not trigger fallback.
+type OutboundContentAuthority interface {
+	CanReadOutboundContent(context.Context, authz.Actor, *models.OutboundJob) (bool, error)
+}
+
 // OutboundStore persists outbound jobs, outbound attempts, and send identities.
 type OutboundStore interface {
+	OutboundContentAuthority
 	// --- Outbound jobs -----------------------------------------------------
 	CreateOutboundJob(ctx context.Context, job *models.OutboundJob) error
 	CreateOutboundJobWithQuota(ctx context.Context, job *models.OutboundJob, quota OutboundQuotaReservation) error

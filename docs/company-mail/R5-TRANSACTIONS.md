@@ -1,5 +1,7 @@
 # R5 事务、锁顺序与授权检查地图
 
+> **B01-S 当前状态：** 旧outbound正文/诊断通过新角色端口复用sent存活与内容资格；owned Key当前metadata/owner重验，最终时钟在邮箱等待之后。39组PG142事件三轮、完整backend1084pass/1 browser skip、139必跑、HTTP80响应均通过。仅内容投影范围，回执/重试/批量快照仍待验，见 [B01-S](R5-B01-S-VALIDATION.md)。
+
 > **B01-R 当前状态：** 目标用户访问说明的active/profile/override跨代组合已实测修复；来源和能力共用一次邮箱判断。30组PG/115事件三轮通过，完整backend1041pass/1 browser skip、129必跑、HTTP80响应通过。见 [B01-R](R5-B01-R-VALIDATION.md)；以下Q中目标说明未覆盖的描述保留历史含义。
 
 > **B01-Q 当前状态：** 公司事务当前普通用户的profile/override来源窗口已实测修复；23组PG/81事件三轮通过，完整backend1007pass/1 browser skip、122必跑齐全、HTTP80响应。读取先保护用户及profile，覆盖写入先锁稳定用户；繁忙profile以409拒绝，避免用户/profile反向等待。仅为当前主体的公司事务范围，目标说明和旧接口仍另验。见 [B01-Q](R5-B01-Q-VALIDATION.md)。
@@ -128,9 +130,15 @@ B01-O列出的四个静态候选已经在B01-P逐项复现：`MutateWorkMessage`
 
 原版在active/profile禁发与inactive/override允许的原子切换中拼出从未成立的发送说明；本批先复现，再验证顺序、取消后有界锁回收和正常语义。该结果是管理诊断修复，不宣称发送接口越权；保留原租户管理锁，未取得总体性能无回归证明。
 
+### B01-S：旧内容投影与owned Key决策
+
+`CanReadOutboundContent` 不读取正文，复用sentContentFrom与submissionContentScope并校验observed job的tenant/id/zone/mailbox。User走companyReadTx的U SHARE→profile SHARE NOWAIT→M SHARE→存活item/范围EXISTS；Key走owner U SHARE→key SHARE NOWAIT→owner profile SHARE NOWAIT→M SHARE→相同EXISTS及key实际期限→Commit。无owner Key不取得内容权，属主admin角色不扩大Key范围。当前Key SHARE NOWAIT避免旧DeleteUser的key→user反向等待，但可能与last-used写竞争而产生409，未宣称零延迟代价。
+
+旧job保留不能复活过期/清理的内容。正文相关HTTP生产Router实测差异已红绿对照；recipient投影移到ledger读取后决定BCC/诊断可见性。判断点在事务内，不是全HTTP响应或整页结果的线性化授权；原回执metadata、RetryAuthority和完整Key生命周期不由此认证。
+
 ## 6. P0-070收口前的剩余范围
 
-B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。Q已补当前普通用户的公司事务profile/override保护，R已独立验收目标用户说明；剩余旧outbound/API Key、普通收件历史期限、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
+B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。Q已补当前普通用户的公司事务profile/override保护，R已独立验收目标用户说明，S已统一旧正文/诊断与owned Key内容资格；剩余回执本身/批量一致性、重试/入队最终授权、普通收件历史期限、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
 
 截至B01-J，索引候选前后对照、7项索引与3项普通读取、54必跑及原预算全量均已执行通过；该候选运行阻塞解除。跨语句授权/内容到期、其他隐式FK与对象故障仍未齐，因此**070复选框保持未勾选，090仍受依赖限制**。080仍未冻结；G0/P1未开启。
 

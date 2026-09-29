@@ -52,6 +52,12 @@ procedure at an existing database directory, production DSN or production object
 root. Go must match `go.mod`, Python must be 3.12+, and dependencies must already
 be cached. No global service or host tool installation needs to change.
 
+Ensure `python3` in the **child PATH** resolves to that Python 3.12+ interpreter.
+The Go backup/restore tests invoke `python3` themselves; passing an absolute
+virtualenv Python only to top-level gates does not configure those children.
+Prepend the existing virtualenv's `bin` directory before running Go tests, and
+verify `python3 --version`. Keep the safe tar extraction filter enabled.
+
 Run from the repository containing the reviewed committed code. This tests only
 `HEAD`; uncommitted changes are not included. Set `PG_BIN` to the absolute path
 of the trusted PostgreSQL installation's `bin` directory, then:

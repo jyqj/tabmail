@@ -59,6 +59,11 @@ func (s *FakeStore) createOutboundJobLocked(job *models.OutboundJob) {
 	cp.RecipientLedger = true
 	s.initializeRecipientLedgerLocked(cp)
 	s.outboundJobs[cp.ID] = cp
+	// A fixture's accepted submission creates distinct synthetic archive facts.
+	// Production lifecycle and transaction behavior are tested on PostgreSQL.
+	if _, exists := s.outboundContent[cp.ID]; !exists && cp.SenderMailboxID != nil {
+		s.outboundContent[cp.ID] = cloneOutboundJob(cp)
+	}
 	job.RecipientLedger = true
 	job.ID = cp.ID
 	job.State = cp.State

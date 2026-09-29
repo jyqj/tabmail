@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-R 已修复目标用户访问说明的跨代快照：原版34事件25fail/9pass，30组PG/115事件连续三轮通过；完整backend1041pass/0fail/1 browser skip、129必跑齐全，HTTP80响应通过。Q当前用户/R目标说明局部均已验收；P0-070/080、完整P8-080与G0仍未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-S 已把旧outbound内容投影接到当前sent资产/条目资格：原版27事件21fail/6pass，39组PG/142事件连续三轮通过；最终backend1084pass/0fail/1 browser skip、139必跑齐全，HTTP80响应通过。子进程Python版本选择导致的首次备份失败保留；仅修正环境后全量通过。P0-070/080、P2整体、完整P8-080与G0仍未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-R 完成ExplainMailboxAccess目标用户/权限来源保护及单次邮箱判定来源投影，见R5-B01-R-VALIDATION.md；Q及O/P历史成果分别保留 |
-| 下一可执行任务 | P0-070/P2前置：核对旧outbound/API Key跨端口内容资格、回执与正文生命周期，以及其余隐式FK/GC顺序；普通收件历史期限先做兼容映射；080按既定前置推进，不重复Q/R快照实现 |
-| 下一批范围 | 复用隔离PG与原门禁，针对旧outbound/Key和多资源候选建立具体基线；R目标说明已收口。普通收件期限遵守P3-010/020映射，权限编辑CAS仍属P1；090/110/G0依赖不变 |
+| 当前阶段 | B01-S 完成旧job/attempt/recipient内容期限、owned Key当前元数据与属主权限重验，见R5-B01-S-VALIDATION.md；Q/R及O/P已验收范围不重复实现 |
+| 下一可执行任务 | P0-070/P2前置：核对旧回执自身的身份/scope与整页一致性、RetryAuthority/入队最终资格和其余FK/GC顺序；普通收件期限先做历史兼容映射；080按既定前置推进，不重复S已收口的正文/诊断放行 |
+| 下一批范围 | 复用隔离PG与原门禁，针对回执/重试授权及多资源候选建立具体对照；S只统一内容投影，不冒充全部Key授权。普通收件期限遵守P3-010/020映射，编辑CAS属P1；090/110/G0依赖不变 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 缺DSN及Q/R局部快照验收已解除；旧outbound/Key、权限编辑CAS/ABA、普通收件历史期限、其他FK/GC、080/性能/兼容、浏览器及DNS/SSE仍有缺口。目标说明不是发信授权凭据，真实S3/断电与存量key未验收 |
+| 当前阻塞 | S的旧正文生命周期与owned Key内容重验已验收；回执元数据/批量一致性、重试/入队最终资格、P1编辑CAS/ABA、普通收件期限、其余FK/GC、080/规模性能/兼容、浏览器/DNS/SSE仍待完成。真实S3/断电和存量非规范key未验收 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
 ### 0.1 状态、依赖与记录规则
@@ -1511,6 +1511,14 @@ python3 scripts/check_i18n_keys.py
 - 完整backend1041pass/0fail/1 browser skip，129必跑齐全；HTTP80/65/66、Python168、静态67操作及build/vet通过。缺DSN负例仍由门禁拒绝。
 - [报告](R5-B01-R-VALIDATION.md)、[机器结果](evidence/R5-B01-R-VALIDATION.json)、[101成员日志](evidence/R5-B01-R-LOGS.tar.gz)保留早期失败和最终结果；独立PG已停止。未改变公开DTO/权限语义/迁移/依赖/前端；未push/PR/merge/deploy。
 - R只关闭目标说明子包，整个070/080/G0及6/171统计保持。下一步回到旧outbound/API Key内容资格、期限兼容和其余FK/GC边界；不重复已完成的Q/R保护。
+
+### B01-S：旧outbound内容资格与当前sent资产同源（2026-09-29）
+
+- 基线8bd5dae8413f2390a318b1d4aebf5d0f39baaf34；最终程序tree c33fda56bac580421ea600072b7cc023a1ad86ad，651源文件哈希一致。新增单方法角色端口，旧内容/诊断统一复用sentContentFrom及submissionContentScope，禁止保留job绕过expired/purged/missing条目。
+- 当前用户快照沿用Q；owned Key重验tenant/属主/scope/Key范围/属主范围，Key截止在邮箱等待后按DB时钟决定。Key SHARE NOWAIT避免反向等待；recipient过滤在ledger读取后重验。回执原Subject/To/CC/状态协议保持，不等于完整P2最小投影。
+- 原版相同27事件21fail/6pass；最终与O/P/Q/R一起39组142事件连续三轮通过。完整backend首次因子进程误用Python3.9导致备份失败；环境路径修正后同树1084pass/0fail/1 browser skip、139必跑齐全，HTTP80/65/66、Python168、静态67操作、build/vet通过。失败原始记录保留。
+- [报告](R5-B01-S-VALIDATION.md)、[机器结果](evidence/R5-B01-S-VALIDATION.json)、[113成员证据](evidence/R5-B01-S-LOGS.tar.gz)随本地提交保存；两次本批PG运行均已停止，原始responses.json只保留本地。迁移/公开DTO/OpenAPI/依赖/前端未变，未push/PR/merge/deploy。
+- 只关闭S内容投影子包；回执主体与批量快照、重试/入队最终授权、期限兼容、其余FK/GC和完整070/080/G0未关闭，6/171统计不变。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

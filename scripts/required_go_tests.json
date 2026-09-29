@@ -3,6 +3,15 @@
   "suites": {
     "content-postgres-boundary": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentLifecycleMatchesArchive"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentRechecksKeyAndOwner"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentReloadsPermissionAfterIdentityWait"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentKeyHTTPPreservesSafeReceipt"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentRejectsBusyKeyWithoutDeadlock"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentKeyExpiryAfterMailboxWait"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyRecipientProjectionRechecksAfterLedgerWait"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentPropagatesStorageFailure"],
         ["tabmail/internal/store/postgres", "TestR5AccessExplanationWaitsForTargetWrites"],
         ["tabmail/internal/store/postgres", "TestR5AccessExplanationRejectsBusyTargetProfile"],
         ["tabmail/internal/store/postgres", "TestR5AccessExplanationOrdersPermissionChanges"],
@@ -106,6 +115,16 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/authz", "TestOutboundContentKeyMetadataNeverWidensIdentity"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentLifecycleMatchesArchive"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentRechecksKeyAndOwner"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentReloadsPermissionAfterIdentityWait"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentKeyHTTPPreservesSafeReceipt"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentRejectsBusyKeyWithoutDeadlock"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentKeyExpiryAfterMailboxWait"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyRecipientProjectionRechecksAfterLedgerWait"],
+        ["tabmail/internal/store/postgres", "TestR5LegacyContentPropagatesStorageFailure"],
         ["tabmail/internal/store/postgres", "TestR5AccessExplanationWaitsForTargetWrites"],
         ["tabmail/internal/store/postgres", "TestR5AccessExplanationRejectsBusyTargetProfile"],
         ["tabmail/internal/store/postgres", "TestR5AccessExplanationOrdersPermissionChanges"],
