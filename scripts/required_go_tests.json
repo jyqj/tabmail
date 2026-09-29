@@ -1,6 +1,25 @@
 {
   "version": 1,
   "suites": {
+    "file-object-boundary": {
+      "required_tests": [
+        ["tabmail/internal/store/fileobj", "TestFileObjectRejectsNonCanonicalKeys"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectRejectsEscapingSymlinks"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectRejectsDirectoryObjects"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectCancelledOperationsHaveNoEffects"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectReadHonorsCancellation"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectChecksDeclaredLengthBeforePublication"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectNoProgressAbortsPublication"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectRelativeRootIsStable"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectValidLifecycleAndAtomicReaders"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectParentSwapCannotRedirectPublication"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectPublicationPreservesEOFAndCancellation"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectDeclaredLengthBoundsConsumption"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectCopyCannotBypassCancelledReader"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectInternalParentLinkRemainsSupported"]
+      ],
+      "allowed_skips": []
+    },
     "parser-resource": {
       "required_tests": [
         ["tabmail/internal/mailcontent", "TestParserResourceAdmissionAndCache"],
@@ -52,6 +71,20 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/store/fileobj", "TestFileObjectRejectsNonCanonicalKeys"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectRejectsEscapingSymlinks"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectRejectsDirectoryObjects"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectCancelledOperationsHaveNoEffects"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectReadHonorsCancellation"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectChecksDeclaredLengthBeforePublication"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectNoProgressAbortsPublication"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectRelativeRootIsStable"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectValidLifecycleAndAtomicReaders"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectParentSwapCannotRedirectPublication"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectPublicationPreservesEOFAndCancellation"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectDeclaredLengthBoundsConsumption"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectCopyCannotBypassCancelledReader"],
+        ["tabmail/internal/store/fileobj", "TestFileObjectInternalParentLinkRemainsSupported"],
         ["tabmail/internal/mailcontent", "TestParserResourceAdmissionAndCache"],
         ["tabmail/internal/mailcontent", "TestParserResourceTimeoutClosesDeferredReader"],
         ["tabmail/internal/mailcontent", "TestParserResourceLateOpenDoesNotPopulateCache"],
