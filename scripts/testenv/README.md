@@ -42,6 +42,75 @@ The i18n gate now needs Node and the installed TypeScript compiler from `web/pac
 
 `TestR3BrowserJourney` remains a separate, opt-in shipping-image check: the standalone frontend, real Go API, PostgreSQL and loopback SMTP must all be available. Running component tests does not satisfy this browser check. Lack of a browser, client tools or DSN must be recorded, not called a green full regression. Image tags are build inputs, not immutable evidence: record the resolved image IDs/digests and actual tool versions for every run.
 
+## Native PostgreSQL 16 fallback
+
+A missing `TABMAIL_TEST_DB_DSN` is not a successful backend run. When Docker is
+unavailable, a complete, already installed PostgreSQL 16 distribution can run a
+**new** temporary cluster instead. Require `initdb`, `pg_ctl`, `postgres`, `psql`,
+`pg_dump`, `pgcrypto` and `pg_trgm` from that distribution; do not point this
+procedure at an existing database directory, production DSN or production object
+root. Go must match `go.mod`, Python must be 3.12+, and dependencies must already
+be cached. No global service or host tool installation needs to change.
+
+Run from the repository containing the reviewed committed code. This tests only
+`HEAD`; uncommitted changes are not included. Set `PG_BIN` to the absolute path
+of the trusted PostgreSQL installation's `bin` directory, then:
+
+```sh
+set -eu
+: "${PG_BIN:?Set PG_BIN to a complete PostgreSQL 16 bin directory}"
+umask 077
+SOURCE_SHA=$(git rev-parse HEAD)
+TEST_ROOT=$(mktemp -d /tmp/tabmail-pg.XXXXXXXX)
+mkdir "$TEST_ROOT/socket" "$TEST_ROOT/src"
+started=0
+cleanup() {
+  rc=$?
+  trap - EXIT
+  if test "$started" = 1; then
+    "$PG_BIN/pg_ctl" -D "$TEST_ROOT/db" -m fast -w stop \
+      > "$TEST_ROOT/stop.log" 2>&1 || rc=1
+  fi
+  printf 'Validation artifacts retained: %s\n' "$TEST_ROOT"
+  exit "$rc"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+"$PG_BIN/initdb" -D "$TEST_ROOT/db" --username=tabmail_test \
+  --auth-local=trust --auth-host=reject --no-locale --encoding=UTF8 \
+  > "$TEST_ROOT/initdb.log" 2>&1
+"$PG_BIN/pg_ctl" -D "$TEST_ROOT/db" -l "$TEST_ROOT/postgres.log" \
+  -o "-c listen_addresses='' -c unix_socket_directories='$TEST_ROOT/socket' -c unix_socket_permissions=0700 -p 55439" -w start
+started=1
+"$PG_BIN/psql" -h "$TEST_ROOT/socket" -p 55439 -U tabmail_test \
+  -d postgres -v ON_ERROR_STOP=1 -c 'CREATE DATABASE tabmail_test'
+git archive "$SOURCE_SHA" > "$TEST_ROOT/source.tar"
+python3 -c 'import sys,tarfile; t=tarfile.open(sys.argv[1]); t.extractall(sys.argv[2],filter="data")' \
+  "$TEST_ROOT/source.tar" "$TEST_ROOT/src"
+export PATH="$PG_BIN:$PATH" GOPROXY=off GOTOOLCHAIN=local
+export TABMAIL_TEST_DB_DSN="postgres://tabmail_test@localhost/tabmail_test?host=$TEST_ROOT/socket&port=55439&sslmode=disable"
+cd "$TEST_ROOT/src"
+set +e
+go test -mod=readonly -json -race -count=1 -timeout=180s ./... \
+  > "$TEST_ROOT/go-test.jsonl" 2> "$TEST_ROOT/go-test.stderr"
+test_exit=$?
+set -e
+python3 -B scripts/check_go_test_evidence.py --suite backend \
+  --log "$TEST_ROOT/go-test.jsonl" --exit-code "$test_exit" \
+  --source-sha "$SOURCE_SHA" > "$TEST_ROOT/backend-evidence.json"
+python3 -B scripts/check_http_contract.py \
+  --output-dir "$TEST_ROOT/http" --source-sha "$SOURCE_SHA"
+```
+
+The short, private socket path avoids Unix socket length limits. TCP is disabled
+and host authentication is rejected. Test fixtures create/drop only databases
+inside this new cluster. Keep raw HTTP captures private and out of published
+bundles. Record the actual server/client versions, source identity, command exit
+codes and shutdown result; native validation is not a shipping-image or production
+migration rehearsal. On interrupted startup, inspect the recorded temporary
+cluster before removing anything; never stop an unrelated server.
+
 ## Runtime HTTP contracts
 
 The static gate binds every company route, including binary downloads and SSE.

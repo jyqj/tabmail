@@ -152,7 +152,10 @@ func TestR5SentMutationOrdersGrantRevocation(t *testing.T) {
 	grant.CanOrganize = false
 	revoked := make(chan error, 1)
 	go func() { revoked <- grantCurrent(f.st, ctx, f.a, grant) }()
-	r5WaitBlockedBy(t, f, ctx, writer, "mailboxes")
+	// Observe the actual revocation waiting behind this writer. A correctly
+	// ordered parent-key fence queues it before its mailbox UPDATE; the old
+	// implementation queues on the mailbox and then deadlocks during audit.
+	r5WaitBlockedBy(t, f, ctx, writer, "")
 	must(t, hold.Rollback(ctx))
 	r5AwaitOperation(t, ctx, done)
 	r5AwaitOperation(t, ctx, revoked)

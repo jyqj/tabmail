@@ -1,0 +1,302 @@
+{
+  "version": 1,
+  "batch": "B01-O",
+  "base_commit": "c39fdce62b0e7a0644eaad2361463f504f9ea7a0",
+  "branch": "test/company-postgres-closeout-20260929",
+  "tested_source_tree": "73d6b372ad2428a8562295724d63a4ada94d03a3",
+  "verified_source_files": 630,
+  "post_test_documentation_changes": [
+    "docs/company-mail/R5-B01-K-VALIDATION.md",
+    "docs/company-mail/R5-TODO.md",
+    "docs/company-mail/R5-TRANSACTIONS.md",
+    "scripts/testenv/README.md"
+  ],
+  "pre_K_baseline": {
+    "exit_code": 1,
+    "counts": {
+      "run": 19,
+      "fail": 16,
+      "pass": 3
+    },
+    "failed": [
+      "TestR5SentMutationRejectsExpiryAfterItemWait/expires",
+      "TestR5SentMutationRejectsExpiryAfterItemWait/purge",
+      "TestR5SentMutationRejectsExpiryAfterItemWait",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait/expires",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait/purge",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait/mailbox",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+      "TestR5SentMutationOrdersGrantRevocation",
+      "TestR5SentReadUsesTimeAfterIdentityWait/content",
+      "TestR5SentReadUsesTimeAfterIdentityWait/attachments",
+      "TestR5SentReadUsesTimeAfterIdentityWait/list",
+      "TestR5SentReadUsesTimeAfterIdentityWait",
+      "TestR5ContentReadsFenceMailboxSnapshot/message",
+      "TestR5ContentReadsFenceMailboxSnapshot/parsed",
+      "TestR5ContentReadsFenceMailboxSnapshot/save-parsed",
+      "TestR5ContentReadsFenceMailboxSnapshot"
+    ],
+    "passed": [
+      "TestR5SentMutationCancellationAndAuditFailureRollBack/cancel",
+      "TestR5SentMutationCancellationAndAuditFailureRollBack/audit",
+      "TestR5SentMutationCancellationAndAuditFailureRollBack"
+    ],
+    "diagnostics": [
+      "r5_content_wait_test.go:91: expected unavailable sent item conflict, got <nil>",
+      "r5_content_wait_test.go:91: expected unavailable sent item conflict, got <nil>",
+      "r5_content_wait_test.go:122: expected unavailable sent item conflict, got <nil>",
+      "r5_content_wait_test.go:122: expected unavailable sent item conflict, got <nil>",
+      "r5_content_wait_test.go:122: expected unavailable sent item conflict, got <nil>",
+      "r5_content_wait_test.go:150: expected NOWAIT lock conflict, got <nil>",
+      "r5_content_wait_test.go:264: expired sent content remained readable",
+      "r5_content_wait_test.go:264: expired sent attachment metadata remained readable",
+      "r5_content_wait_test.go:264: expired item remained in list",
+      "r5_content_wait_test.go:294: expected lock waiter was not observed",
+      "r5_content_wait_test.go:294: expected lock waiter was not observed",
+      "r5_content_wait_test.go:294: expected lock waiter was not observed"
+    ],
+    "log_sha256": "7c9e081043fca06d8ed1c5e35f8ccf8109a64df690296b94df1dc5b3dc7adf86"
+  },
+  "inherited_candidate_failure": {
+    "exit_code": 1,
+    "counts": {
+      "run": 19,
+      "pass": 18,
+      "fail": 1
+    },
+    "failed": [
+      "TestR5SentMutationOrdersGrantRevocation"
+    ],
+    "passed": [
+      "TestR5SentMutationRejectsExpiryAfterItemWait/expires",
+      "TestR5SentMutationRejectsExpiryAfterItemWait/purge",
+      "TestR5SentMutationRejectsExpiryAfterItemWait",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait/expires",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait/purge",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait/mailbox",
+      "TestR5SentMutationRollsBackExpiryDuringAuditWait",
+      "TestR5SentMutationCancellationAndAuditFailureRollBack/cancel",
+      "TestR5SentMutationCancellationAndAuditFailureRollBack/audit",
+      "TestR5SentMutationCancellationAndAuditFailureRollBack",
+      "TestR5SentReadUsesTimeAfterIdentityWait/content",
+      "TestR5SentReadUsesTimeAfterIdentityWait/attachments",
+      "TestR5SentReadUsesTimeAfterIdentityWait/list",
+      "TestR5SentReadUsesTimeAfterIdentityWait",
+      "TestR5ContentReadsFenceMailboxSnapshot/message",
+      "TestR5ContentReadsFenceMailboxSnapshot/parsed",
+      "TestR5ContentReadsFenceMailboxSnapshot/save-parsed",
+      "TestR5ContentReadsFenceMailboxSnapshot"
+    ],
+    "diagnostics": [
+      "r5_content_wait_test.go:158: ERROR: deadlock detected (SQLSTATE 40P01)"
+    ],
+    "log_sha256": "a60306d24eb09e26b144e51d56c83e30344b53b2687db1e51e69f5ae0d5e9097"
+  },
+  "new_lock_tests_baseline": {
+    "exit_code": 1,
+    "counts": {
+      "run": 4,
+      "fail": 3,
+      "pass": 1
+    },
+    "failed": [
+      "TestR5SentMutationParentLockPrecedesActor",
+      "TestR5SentMutationReloadsActorAfterParentWait",
+      "TestR5SentMutationOrdersGrantRevocation"
+    ],
+    "diagnostics": [
+      "r5_audited_parent_test.go:34: expected NOWAIT lock conflict, got <nil>",
+      "r5_audited_parent_test.go:86: expected lock waiter was not observed",
+      "r5_content_wait_test.go:161: ERROR: deadlock detected (SQLSTATE 40P01)"
+    ]
+  },
+  "postgres_repeated": [
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 92,
+      "log_sha256": "742bf007164a78d02515c4f23f6befd89ded7e05494257c6dcfbfb006f1d95b8",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 9,
+      "manifest_sha256": "adf1fb64d02160f4bef5fd6f45985283d2aae21584c5e9d0babcfa8a78ea80b4",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "73d6b372ad2428a8562295724d63a4ada94d03a3",
+      "status": "pass",
+      "suite": "content-postgres-boundary",
+      "tests_failed": 0,
+      "tests_passed": 22,
+      "tests_skipped": 0,
+      "tests_started": 22
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 92,
+      "log_sha256": "e9f6729cc8ac60165d486b3c6dbac3da7d5791fa38adb8deafc0547d9f089185",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 9,
+      "manifest_sha256": "adf1fb64d02160f4bef5fd6f45985283d2aae21584c5e9d0babcfa8a78ea80b4",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "73d6b372ad2428a8562295724d63a4ada94d03a3",
+      "status": "pass",
+      "suite": "content-postgres-boundary",
+      "tests_failed": 0,
+      "tests_passed": 22,
+      "tests_skipped": 0,
+      "tests_started": 22
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 92,
+      "log_sha256": "098c3b4263043ab7dba96603b9756b3ec53d44d7a06662716b9ba27e084608d3",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 9,
+      "manifest_sha256": "adf1fb64d02160f4bef5fd6f45985283d2aae21584c5e9d0babcfa8a78ea80b4",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "73d6b372ad2428a8562295724d63a4ada94d03a3",
+      "status": "pass",
+      "suite": "content-postgres-boundary",
+      "tests_failed": 0,
+      "tests_passed": 22,
+      "tests_skipped": 0,
+      "tests_started": 22
+    }
+  ],
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 4107,
+    "log_sha256": "93bc655698c0346fee0ad5cfd3009fa74ba5c73d73cb390d24e88b95cd3de560",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 108,
+    "manifest_sha256": "adf1fb64d02160f4bef5fd6f45985283d2aae21584c5e9d0babcfa8a78ea80b4",
+    "packages": 50,
+    "process_exit_code": 0,
+    "source_sha": "73d6b372ad2428a8562295724d63a4ada94d03a3",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 948,
+    "tests_skipped": 1,
+    "tests_started": 949
+  },
+  "http": {
+    "status": "pass",
+    "source_sha": "73d6b372ad2428a8562295724d63a4ada94d03a3",
+    "errors": [],
+    "responses": 80,
+    "successful_operations": 65,
+    "required_success_variants": 66,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "capture_sha256": "4a7e51c369333c617808fdef9090573cda6d4a0d33794940692bd6907883c24e"
+  },
+  "python_tests": 168,
+  "build_exit": 0,
+  "vet_exit": 0,
+  "static_contract_exit": 0,
+  "missing_dsn_gate": {
+    "allowed_skips_observed": [],
+    "errors": [
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationParentLockPrecedesActor",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentIndependentMutationsShareParent",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationReloadsActorAfterParentWait",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRejectsExpiryAfterItemWait/expires",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRejectsExpiryAfterItemWait/purge",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait/expires",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait/purge",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationRollsBackExpiryDuringAuditWait/mailbox",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationOrdersGrantRevocation",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationCancellationAndAuditFailureRollBack/cancel",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentMutationCancellationAndAuditFailureRollBack/audit",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait/content",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait/attachments",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5SentReadUsesTimeAfterIdentityWait/list",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5ContentReadsFenceMailboxSnapshot/message",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5ContentReadsFenceMailboxSnapshot/parsed",
+      "unexpected skipped test: tabmail/internal/store/postgres::TestR5ContentReadsFenceMailboxSnapshot/save-parsed",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentIndependentMutationsShareParent",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationOrdersGrantRevocation",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationParentLockPrecedesActor",
+      "mandatory test did not pass in a successful package: tabmail/internal/store/postgres::TestR5SentMutationReloadsActorAfterParentWait"
+    ],
+    "events": 109,
+    "log_sha256": "cd21031bcbe2f5da70ddce9b7fc07a7592e3e407b77e0474edebbf76300853ae",
+    "mandatory_missing_or_not_passed": 4,
+    "mandatory_tests": 9,
+    "manifest_sha256": "adf1fb64d02160f4bef5fd6f45985283d2aae21584c5e9d0babcfa8a78ea80b4",
+    "packages": 1,
+    "process_exit_code": 0,
+    "source_sha": "73d6b372ad2428a8562295724d63a4ada94d03a3",
+    "status": "fail",
+    "suite": "content-postgres-boundary",
+    "tests_failed": 0,
+    "tests_passed": 5,
+    "tests_skipped": 17,
+    "tests_started": 22
+  },
+  "environment": {
+    "server": "PostgreSQL 16.13 on aarch64-apple-darwin25.6.0, compiled by Apple clang version 21.0.0 (clang-2100.1.1.101), 64-bit",
+    "go": "1.25.7 darwin/arm64",
+    "python": "3.12.11",
+    "native_postgresql_client_major": 16,
+    "tcp_enabled": false,
+    "socket_directory_mode": "0700",
+    "fresh_cluster": true
+  },
+  "cleanup": {
+    "session": "wc_sess_Or6MAGx3-vT1ftoK",
+    "data": "/private/tmp/tabmail-b01o-Or6M-a7097dj1/pgdata",
+    "startup_pid": 32196,
+    "shutdown": "pg_ctl -m fast -w stop returned success through native tool",
+    "postmaster_pid_file_absent": true,
+    "tcp_enabled": false,
+    "temporary_files_retained": true
+  },
+  "not_run": [
+    "shipping browser journey",
+    "remote CI",
+    "frontend suite in this batch",
+    "live DNS endpoints (2)",
+    "SSE reconnect and cross-process replay",
+    "production deployment/migration",
+    "current dependency audit",
+    "S/M/L performance suite"
+  ],
+  "bundle": {
+    "path": "R5-B01-O-LOGS.tar.gz",
+    "members": 106,
+    "bytes": 141501,
+    "sha256": "581ab28388c5c5dfc7b3dc2d4ec5605835b15b2ea453ea54ae5e7cde86b2373e",
+    "raw_http_capture_included": false,
+    "member_manifest": "MANIFEST.json"
+  },
+  "final_source_verification": {
+    "verified_files": 630,
+    "only_documentation_differences": true,
+    "native_recipe_shell_syntax": "pass",
+    "todo_completed": 6,
+    "todo_total": 171
+  }
+}

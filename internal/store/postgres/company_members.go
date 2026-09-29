@@ -19,16 +19,24 @@ import (
 	"tabmail/internal/models"
 )
 
+type companyTenantLock uint8
+
+const (
+	companyNoTenantLock companyTenantLock = iota
+	companyTenantReferenceLock
+	companyTenantWriteLock
+)
+
 // companyTx orders administrative mutations on one company lock. Interactive
 // identity and effective permissions are reloaded inside the transaction,
 // never trusted from the HTTP handshake. Normal resource access is separate
 // from management.
 func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
-	return s.companyTxScope(ctx, actor, admin, true, f)
+	return s.companyTxScope(ctx, actor, admin, companyTenantWriteLock, f)
 }
 
 // companyReadTx is the tenant-lock-free counterpart of companyTx for pure reads and
-// single-row CAS writes: it never takes the tenants row lock, so mailbox
+// single-row CAS writes: it takes no explicit tenants row lock, so mailbox
 // reads, drafts, attachments and the outbound template hot path no longer
 // queue behind company-wide administration or ingress quota serialization.
 // The interactive identity reload and the non-admin effective-permission load
@@ -36,19 +44,41 @@ func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, 
 // concurrent administration (multi-row invariants, grant clearing vs
 // offboarding, MAX(version)+1 publication) stays on companyTx.
 func (s *PgStore) companyReadTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
-	return s.companyTxScope(ctx, actor, admin, false, f)
+	return s.companyTxScope(ctx, actor, admin, companyNoTenantLock, f)
 }
 
-func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin, lock bool, f func(pgx.Tx, authz.Actor) error) error {
+// companyReferencedTx orders a mutation that inserts tenant-referencing rows
+// (including required audit records) before its user/mailbox/resource locks.
+// Deferring the FK's parent lock until audit can deadlock against tenant-first
+// administration. KEY SHARE is compatible with other ordinary referenced writes;
+// this is not the exclusive company administration lock. Pure reads stay on
+// companyReadTx, and neither helper substitutes for mailbox authorization.
+func (s *PgStore) companyReferencedTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
+	return s.companyTxScope(ctx, actor, admin, companyTenantReferenceLock, f)
+}
+
+func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin bool, lock companyTenantLock, f func(pgx.Tx, authz.Actor) error) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
-	if lock {
+	switch lock {
+	case companyNoTenantLock:
+	case companyTenantWriteLock:
 		if err = lockMemberTenant(ctx, tx, actor.TenantID); err != nil {
 			return err
 		}
+	case companyTenantReferenceLock:
+		var tenantID uuid.UUID
+		if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, actor.TenantID).Scan(&tenantID); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return app.NotFound("company not found")
+			}
+			return err
+		}
+	default:
+		return app.Internal(errors.New("invalid company transaction lock mode"))
 	}
 	actor, err = currentMemberActor(ctx, tx, actor, actor.TenantID)
 	if err != nil {

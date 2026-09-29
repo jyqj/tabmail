@@ -90,7 +90,7 @@ func (s *PgStore) MutateArchivedMail(ctx context.Context, a authz.Actor, mailbox
 	default:
 		return app.BadRequest("unsupported sent item action")
 	}
-	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReferencedTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
 		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
 			return e
 		}

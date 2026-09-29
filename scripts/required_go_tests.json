@@ -1,6 +1,20 @@
 {
   "version": 1,
   "suites": {
+    "content-postgres-boundary": {
+      "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5SentMutationRejectsExpiryAfterItemWait"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationRollsBackExpiryDuringAuditWait"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationOrdersGrantRevocation"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationCancellationAndAuditFailureRollBack"],
+        ["tabmail/internal/store/postgres", "TestR5SentReadUsesTimeAfterIdentityWait"],
+        ["tabmail/internal/store/postgres", "TestR5ContentReadsFenceMailboxSnapshot"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationParentLockPrecedesActor"],
+        ["tabmail/internal/store/postgres", "TestR5SentIndependentMutationsShareParent"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationReloadsActorAfterParentWait"]
+      ],
+      "allowed_skips": []
+    },
     "file-object-boundary": {
       "required_tests": [
         ["tabmail/internal/store/fileobj", "TestFileObjectRejectsNonCanonicalKeys"],
@@ -71,6 +85,9 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5SentMutationParentLockPrecedesActor"],
+        ["tabmail/internal/store/postgres", "TestR5SentIndependentMutationsShareParent"],
+        ["tabmail/internal/store/postgres", "TestR5SentMutationReloadsActorAfterParentWait"],
         ["tabmail/internal/store/fileobj", "TestFileObjectRejectsNonCanonicalKeys"],
         ["tabmail/internal/store/fileobj", "TestFileObjectRejectsEscapingSymlinks"],
         ["tabmail/internal/store/fileobj", "TestFileObjectRejectsDirectoryObjects"],
