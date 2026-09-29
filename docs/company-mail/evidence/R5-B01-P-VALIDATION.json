@@ -1,0 +1,146 @@
+{
+  "version": 1,
+  "base_commit": "91b4f63ca81dcef8962f5bc52ecb79db7fc7ea22",
+  "branch": "fix/company-audited-writes-20260929",
+  "tested_tree": "9fe4aa98398074c3da970e7543b5920a3e49e700",
+  "verified_source_files": 634,
+  "canonical_final_run": {
+    "session": "wc_sess_axBWhJrw0bcaOGiD",
+    "job_id": "wc_job_T7wMK5o829av-KO7",
+    "status": "pass",
+    "backend": {
+      "allowed_skips_observed": [
+        {
+          "package": "tabmail/internal/store/postgres",
+          "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+          "test": "TestR3BrowserJourney"
+        }
+      ],
+      "errors": [],
+      "events": 4235,
+      "log_sha256": "8e62e6e36d58b0ca6fa7569959d28a3b8ba5836b3f931ded93cfe2290ae71afc",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 114,
+      "manifest_sha256": "5c8dcaf4984f95f7660222b500eba102d65b66957e02fd041971fe13f943bdf3",
+      "packages": 50,
+      "process_exit_code": 0,
+      "source_sha": "9fe4aa98398074c3da970e7543b5920a3e49e700",
+      "status": "pass",
+      "suite": "backend",
+      "tests_failed": 0,
+      "tests_passed": 980,
+      "tests_skipped": 1,
+      "tests_started": 981
+    },
+    "focused": {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 220,
+      "log_sha256": "284bfef8bae82e436027cfa47a539af4a20a39a4f090e468ac62c687683aba77",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 15,
+      "manifest_sha256": "5c8dcaf4984f95f7660222b500eba102d65b66957e02fd041971fe13f943bdf3",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "9fe4aa98398074c3da970e7543b5920a3e49e700",
+      "status": "pass",
+      "suite": "content-postgres-boundary",
+      "tests_failed": 0,
+      "tests_passed": 54,
+      "tests_skipped": 0,
+      "tests_started": 54
+    },
+    "http": {
+      "status": "pass",
+      "source_sha": "9fe4aa98398074c3da970e7543b5920a3e49e700",
+      "errors": [],
+      "responses": 80,
+      "successful_operations": 65,
+      "required_success_variants": 66,
+      "excluded_operations": [
+        {
+          "method": "GET",
+          "path": "/api/v1/company/domains/{id}/verification",
+          "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+        },
+        {
+          "method": "POST",
+          "path": "/api/v1/company/domains/{id}/verify",
+          "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+        }
+      ],
+      "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+      "capture_sha256": "2b0ae4632846ea8c655975f2d54af3390eef7195fcb9badae09d8e284faed789"
+    },
+    "python_tests": 168,
+    "build_exit": 0,
+    "vet_exit": 0,
+    "contract_exit": 0
+  },
+  "independent_baseline": {
+    "base_commit": "91b4f63ca81dcef8962f5bc52ecb79db7fc7ea22",
+    "test_overlay": "internal/store/postgres/r5_audited_writes_test.go",
+    "test_events": 6,
+    "fail": 6,
+    "subcases": [
+      "TestR5AuditedWritesOrderMemberFreeze/message",
+      "TestR5AuditedWritesOrderMemberFreeze/template-save",
+      "TestR5AuditedWritesOrderMemberFreeze/template-retire",
+      "TestR5AuditedWritesOrderMemberFreeze/template-revoke",
+      "TestR5AuditedWritesOrderMemberFreeze/template-create"
+    ],
+    "sqlstate_40P01_subcases": 5
+  },
+  "primary_run_observed": {
+    "job_id": "wc_job_vRIiPfIsXxP0nXcf",
+    "tested_tree": "9fe4aa98398074c3da970e7543b5920a3e49e700",
+    "baseline_events": 32,
+    "baseline_failed": 21,
+    "baseline_passed": 11,
+    "focused_pass_each": 54,
+    "focused_repetitions": 3,
+    "backend_pass": 980,
+    "backend_skip": 1,
+    "mandatory_tests": 114,
+    "http_responses": 80,
+    "note": "Observed primary Job; independent canonical logs retained separately, not relabeled as one run."
+  },
+  "environment": {
+    "postgres": "16.13",
+    "go": "1.25.7 darwin/arm64",
+    "python": "3.12.11",
+    "tcp_enabled": false,
+    "synthetic_data_only": true
+  },
+  "cleanup": {
+    "independent": {
+      "session": "wc_sess_axBWhJrw0bcaOGiD",
+      "pid": 17716,
+      "stop_exit": 0,
+      "pidfile_removed": true
+    },
+    "primary": {
+      "session": "wc_sess_qeRvpOO2JycHH1zX",
+      "pid": 71816,
+      "root": "/private/tmp/tabmail-b01p-qeRv-m3ykebzk",
+      "pidfile_removed": true,
+      "stopped_by_current_closeout": false
+    }
+  },
+  "not_run": [
+    "shipping browser journey",
+    "frontend suite",
+    "live DNS verification/status",
+    "SSE reconnect/cross-process replay",
+    "S/M/L benchmarks",
+    "production migration/deployment"
+  ],
+  "bundle": {
+    "file": "R5-B01-P-LOGS.tar.gz",
+    "bytes": 250287,
+    "members": 162,
+    "sha256": "62a541c0346ac7c92d5b89bd892685622b5be95f30c608c6644cc3f914a2f028",
+    "raw_responses_published": false,
+    "omissions": []
+  }
+}

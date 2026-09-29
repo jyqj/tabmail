@@ -1,5 +1,7 @@
 # R5 事务、锁顺序与授权检查地图
 
+> **B01-P 当前状态：** 收件状态修改、模板新建/保存/退休/版本撤销与成员冻结的五条写路径已真实复现并修复40P01。现统一为T KEY SHARE → 当前actor SHARE → 资源/CAS → 必要审计/事件；收件另持M SHARE。15组PG/54事件三轮通过并独立重跑，完整backend980pass/1 browser skip、114必跑齐全、HTTP80响应通过。完整070/080/G0仍未关闭，见 [B01-P记录](R5-B01-P-VALIDATION.md)。
+
 > **B01-O 当前状态：** B01-K 六组PG已实测，发现并修复 sent 操作与撤权的 audit FK 锁环；最终9组/22事件连续三轮通过，完整backend948pass/1 browser skip、108必跑齐全、HTTP80响应通过。以下B01-K/L/M/N缺DSN说明保留历史含义，当前局部运行阻塞已解除。见 [B01-O记录](R5-B01-O-VALIDATION.md)。
 
 > **B01-N：** 真实文件对象后端完成根内路径、长度、取消与原子发布红绿（三轮各67pass），不改数据库锁序或rawobject引用回调。父目录切换失败只清理本次临时对象，不碰根外夹具；Rename后Sync失败仍属可能已发布，不用抢删补偿。B01-K PG未验收，见 [B01-N记录](R5-B01-N-VALIDATION.md)。
@@ -108,11 +110,11 @@ B01-C第五项原先只证明单侧次序。B01-D已补两条完整生产命令�
 
 已复现：sent操作持M SHARE后才在audit_log INSERT取T KEY SHARE，SetWorkGrant持T UPDATE后等M，服务器返回40P01。现在TX19前置T KEY SHARE，原错误映射不改，原始和修正控制器均保留红灯；修复后9组PG连续三轮、完整backend及HTTP通过。
 
-静态候选（尚未独立证明）：`MutateWorkMessage`、`SaveMailTemplate`、`SetMailTemplateRetired`、`RevokeMailTemplateVersion` 仍有companyReadTx+companyAudit组合。下一批逐项建立完整管理命令竞争，不能仅凭该组合认定漏洞或一律更换事务入口。
+B01-O列出的四个静态候选已经在B01-P逐项复现：`MutateWorkMessage`、`SaveMailTemplate`（新建/更新）、`SetMailTemplateRetired`、`RevokeMailTemplateVersion` 与 `UpdateUserGuarded` 并发均出现40P01。现复用companyReferencedTx前置T KEY SHARE，收件修改在读取owner/grant前持M SHARE；没有将审计移出事务、删除FK或重试吞错。独立不同资源写入不被T排他串行化、等待后冻结/撤权拒绝、审计失败完整回滚均有PG回归。
 
 ## 6. P0-070收口前的剩余范围
 
-B01-O已经关闭K的局部PG运行缺口：原版本目标失败、继承版本新死锁、修复后的9组重复以及完整backend/HTTP均有真实证据。仍需核对上述四个审计FK候选、普通收件历史期限、profile/override、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
+B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。仍需核对普通收件历史期限、profile/override、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
 
 截至B01-J，索引候选前后对照、7项索引与3项普通读取、54必跑及原预算全量均已执行通过；该候选运行阻塞解除。跨语句授权/内容到期、其他隐式FK与对象故障仍未齐，因此**070复选框保持未勾选，090仍受依赖限制**。080仍未冻结；G0/P1未开启。
 

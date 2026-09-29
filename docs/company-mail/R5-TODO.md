@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-O 已解除 PG 验收阻塞并修复 sent/audit FK 与撤权的真实40P01：9组PG/22事件连续三轮通过，完整backend 948pass/0fail/1 browser skip，108必跑齐全，HTTP 80响应/65操作通过。B01-K局部验收收口；P0-070/080、完整P8-080与G0仍未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-P 已修复收件/模板四入口五条写路径与成员冻结的真实40P01：15组PG/54事件三轮通过，独立收口再验54pass；完整backend 980pass/0fail/1 browser skip、114必跑齐全，HTTP80响应/65操作通过。B01-K/O/P局部验收收口；P0-070/080、完整P8-080与G0仍未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-O 完成 B01-K 真实PG验收、新死锁修复与完整 backend/HTTP 验收，见 R5-B01-O-VALIDATION.md；此前无DSN成绩保留历史含义 |
-| 下一可执行任务 | P0-070：独立复现 MutateWorkMessage / SaveMailTemplate / SetMailTemplateRetired / RevokeMailTemplateVersion 的晚期审计外键候选，再决定适当锁边界；继续普通收件历史期限和profile/override快照；080按原前置独立推进 |
-| 下一批范围 | 复用已验证的隔离PG和现有证据门禁，推进剩余审计/FK与管理竞争；不重复B01-K/O验收或L/M/N实现。普通收件期限遵守P3-010/020映射，090/110与G0/P1依赖不变 |
+| 当前阶段 | B01-P 完成收件/模板审计父键顺序、撤权快照修复与独立PG/backend/HTTP验收，见 R5-B01-P-VALIDATION.md；O/K历史证据保留，缺DSN已非当前阻塞 |
+| 下一可执行任务 | P0-070：核对profile/override有效权限的跨语句一致快照、其余隐式FK/GC和多资源顺序；普通收件历史期限先做兼容映射；080按既定前置推进协议案例，不重复P已完成的四入口修复 |
+| 下一批范围 | 复用隔离PG与原证据门禁，对剩余权限快照/多资源候选先做具体前后对照；普通收件期限遵守P3-010/020映射，090/110与G0/P1依赖不变；不另造平行权限引擎 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 缺DSN与B01-K局部执行阻塞已解除；仍有普通收件期限、profile/override、其他审计/FK锁图、080/性能/兼容、shipping浏览器及DNS/SSE缺口。真实S3/断电耐久性和历史非规范key清点未被本批代替 |
+| 当前阻塞 | 缺DSN和B01-K/O/P局部PG验收已解除；剩余普通收件期限、profile/override、其他隐式FK/GC锁图、080/性能/兼容、shipping浏览器及DNS/SSE缺口。真实S3/断电耐久性与存量非规范key仍未验收 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
 ### 0.1 状态、依赖与记录规则
@@ -1487,6 +1487,14 @@ python3 scripts/check_i18n_keys.py
 - 最终9组PG/22事件连续三轮通过；完整backend 948pass/0fail/1 browser skip，108必跑齐全；HTTP 80响应/65操作/66成功变体、Python168、静态67操作及build/vet通过。缺DSN负例仍由门禁拒绝。
 - 独立PG16.13原生0700 Unix socket、无TCP，实例已停止并确认PID文件消失；README补原生隔离复现方法。[报告](R5-B01-O-VALIDATION.md)、[机器结果](evidence/R5-B01-O-VALIDATION.json)、[106份归档成员](evidence/R5-B01-O-LOGS.tar.gz)。无原始HTTP响应发布，无生产数据操作。
 - B01-K运行验收收口，不关闭整个070/080/G0，统计仍6/171。下一批针对四个剩余companyReadTx+companyAudit静态候选独立复现；普通收件/权限快照/其他锁图及发布验收仍待完成。未push/PR/merge/deploy。
+
+### B01-P：收件与模板审计父键顺序（2026-09-29）
+
+- 基线 `91b4f63ca81dcef8962f5bc52ecb79db7fc7ea22`；最终被测 tree `9fe4aa98398074c3da970e7543b5920a3e49e700`，634文件哈希核对。原位复用companyReferencedTx，四个入口/五条写路径在actor之前取tenant KEY SHARE；收件修改再取mailbox SHARE保护grant读取。
+- 五条完整写入/成员冻结竞争均在原版复现40P01；前序同测试32事件21fail/11pass，独立收口另一次确认五个deadlock子场景。修复后15组PG/54事件三轮通过，独立再验54pass；必要审计失败不留下业务、revision、outbox或事件半提交。
+- 独立最终完整backend 980pass/0fail/1 browser skip、114必跑齐全；HTTP80响应/65操作/66成功变体、Python168、静态67操作与build/vet通过。前端/浏览器/真实DNS/SSE未以此替代。
+- [报告](R5-B01-P-VALIDATION.md)、[机器结果](evidence/R5-B01-P-VALIDATION.json)、[162成员日志归档](evidence/R5-B01-P-LOGS.tar.gz)分别记录primary与独立运行，不混用来源。本轮独立PG已stop0且PID文件消失，原始HTTP响应不发布。
+- 不关闭整个070/080/G0，父项统计仍6/171；后续转向权限快照、普通收件兼容期限及其余FK/GC边界。未push/PR/merge/deploy，未修改历史迁移或生产数据。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

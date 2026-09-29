@@ -136,7 +136,12 @@ func messageOutbox(ctx context.Context, tx pgx.Tx, tenant, id uuid.UUID, address
 // the historical messages.seen fast path so the company workbench and the
 // legacy mailbox route stay consistent for the owner's own mailbox.
 func (s *PgStore) MutateWorkMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID, action string) error {
-	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+	// Audit and personal state insert tenant references. Protect the parent
+	// before actor/mailbox locks, then keep the grant snapshot until commit.
+	return s.companyReferencedTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
+		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
+			return e
+		}
 		v, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
 		if e != nil {
 			return e

@@ -3,6 +3,12 @@
   "suites": {
     "content-postgres-boundary": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesOrderMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesParentPrecedesActor"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesReloadActorAfterParentWait"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedIndependentWritesShareParent"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesAuditFailureRollsBack"],
+        ["tabmail/internal/store/postgres", "TestR5MessageMutationReloadsGrantAfterMailboxWait"],
         ["tabmail/internal/store/postgres", "TestR5SentMutationRejectsExpiryAfterItemWait"],
         ["tabmail/internal/store/postgres", "TestR5SentMutationRollsBackExpiryDuringAuditWait"],
         ["tabmail/internal/store/postgres", "TestR5SentMutationOrdersGrantRevocation"],
@@ -85,6 +91,12 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesOrderMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesParentPrecedesActor"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesReloadActorAfterParentWait"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedIndependentWritesShareParent"],
+        ["tabmail/internal/store/postgres", "TestR5AuditedWritesAuditFailureRollsBack"],
+        ["tabmail/internal/store/postgres", "TestR5MessageMutationReloadsGrantAfterMailboxWait"],
         ["tabmail/internal/store/postgres", "TestR5SentMutationParentLockPrecedesActor"],
         ["tabmail/internal/store/postgres", "TestR5SentIndependentMutationsShareParent"],
         ["tabmail/internal/store/postgres", "TestR5SentMutationReloadsActorAfterParentWait"],

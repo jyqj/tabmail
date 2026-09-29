@@ -80,7 +80,9 @@ func (s *PgStore) SaveMailTemplate(ctx context.Context, a authz.Actor, v company
 		return nil, e
 	}
 	raw, _ := json.Marshal(v.Draft)
-	e := s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	// New templates and required audit rows reference the tenant. Acquire its
+	// shared parent-key fence before the actor/template locks in either branch.
+	e := s.companyReferencedTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		if v.ID == uuid.Nil {
 			if v.Revision != 0 {
 				return app.Conflict("new template revision must be zero")
@@ -131,7 +133,7 @@ func (s *PgStore) PublishMailTemplate(ctx context.Context, a authz.Actor, id uui
 	return &out, e
 }
 func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id uuid.UUID, revision int, retired bool) error {
-	return s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReferencedTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		tag, e := tx.Exec(ctx, `UPDATE mail_templates SET retired=$4,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND id=$2 AND revision=$3`, a.TenantID, id, revision, retired)
 		if e != nil {
 			return e
@@ -154,7 +156,7 @@ func (s *PgStore) SetMailTemplateRetired(ctx context.Context, a authz.Actor, id 
 // revision CAS — the emergency stop must stay confirmable without a fresh
 // reload. There is no unrevoke.
 func (s *PgStore) RevokeMailTemplateVersion(ctx context.Context, a authz.Actor, id uuid.UUID, version, revision int) error {
-	return s.companyReadTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	return s.companyReferencedTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
 		var revoked *time.Time
 		e := tx.QueryRow(ctx, `SELECT v.revoked_at FROM mail_template_versions v JOIN mail_templates t ON t.id=v.template_id AND t.tenant_id=v.tenant_id WHERE v.tenant_id=$1 AND v.template_id=$2 AND v.version=$3 FOR UPDATE OF v`, a.TenantID, id, version).Scan(&revoked)
 		if errors.Is(e, pgx.ErrNoRows) {
