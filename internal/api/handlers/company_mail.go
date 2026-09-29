@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"io"
 	"mime"
 	"net/http"
 	"strconv"
@@ -100,8 +99,7 @@ func (h *CompanyMailHandler) Source(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer source.Close()
-	downloadHeaders(w, "message.eml", "message/rfc822")
-	_, _ = io.Copy(w, source)
+	h.streamMailSource(w, r, source)
 }
 
 func downloadHeaders(w http.ResponseWriter, name, ct string) {

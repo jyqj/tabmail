@@ -23,9 +23,26 @@ func (s *Service) Compose(ctx context.Context, actor authz.Actor, mailbox, messa
 	if err != nil {
 		return nil, err
 	}
-	env, err := s.inboundEnvelope(ctx, actor, mailbox, message)
+	env, source, err := s.inboundEnvelope(ctx, actor, mailbox, message)
 	if err != nil {
 		return nil, err
+	}
+	// Source reads and destination writes are independent authorities. Retain
+	// both observations across parsing and every copy, including the last one.
+	// This is not a cross-object transaction: completed reservations stay with
+	// the existing recovery/retention protocol when a later check rejects.
+	recheck := func() error {
+		if err := s.recheckMessage(ctx, actor, mailbox, source); err != nil {
+			return err
+		}
+		current, err := s.sender(ctx, actor, fromMailbox)
+		if err != nil {
+			return err
+		}
+		if current.Mailbox.FullAddress != from.Mailbox.FullAddress {
+			return app.Conflict("sender mailbox changed; reload")
+		}
+		return nil
 	}
 	p := company.DraftPayload{To: []string{}, CC: []string{}, Subject: env.GetHeader("Subject"), TextBody: "\n\n--- " + env.GetHeader("From") + " · " + env.GetHeader("Date") + " ---\n" + env.Text}
 	seen := map[string]bool{strings.ToLower(from.Mailbox.FullAddress): true}
@@ -63,6 +80,9 @@ func (s *Service) Compose(ctx context.Context, actor authz.Actor, mailbox, messa
 			return nil, app.BadRequest("forward attachments exceed 20 MiB")
 		}
 		for _, file := range files {
+			if err := recheck(); err != nil {
+				return nil, err
+			}
 			a, err := s.UploadAttachment(ctx, actor, fromMailbox, file.FileName, bytes.NewReader(file.Content))
 			if err != nil {
 				return nil, err
@@ -101,6 +121,9 @@ func (s *Service) Compose(ctx context.Context, actor authz.Actor, mailbox, messa
 			}
 			p.Headers = map[string]string{"In-Reply-To": id, "References": strings.TrimSpace(refs + " " + id)}
 		}
+	}
+	if err := recheck(); err != nil {
+		return nil, err
 	}
 	return &p, nil
 }

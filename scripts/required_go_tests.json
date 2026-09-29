@@ -1,6 +1,21 @@
 {
   "version": 1,
   "suites": {
+    "content-http-boundary": {
+      "required_tests": [
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPEarlyIOFailureAndNoProgress"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPPreservesSuccessfulBytes"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPAbortsFailedClientWrite"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPCancellationBeforeHeaders"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPNoProgressAfterFirstChunkAborts"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPLateReadFailureAbortsTransport"],
+        ["tabmail/internal/app/companymail", "TestCompanyComposeRechecksDestinationAfterParsing"],
+        ["tabmail/internal/app/companymail", "TestCompanyForwardRechecksSourceBetweenCopies"],
+        ["tabmail/internal/app/companymail", "TestCompanyComposeBoundaryPreservesForward"]
+      ],
+      "allowed_skips": []
+    },
     "content-boundary": {
       "required_tests": [
         ["tabmail/internal/app/companymail", "TestCompanyReadRechecksAfterObjectOpen"],
@@ -21,6 +36,16 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPEarlyIOFailureAndNoProgress"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPPreservesSuccessfulBytes"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPAbortsFailedClientWrite"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPCancellationBeforeHeaders"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPNoProgressAfterFirstChunkAborts"],
+        ["tabmail/internal/api/handlers", "TestCompanySourceHTTPLateReadFailureAbortsTransport"],
+        ["tabmail/internal/app/companymail", "TestCompanyComposeRechecksDestinationAfterParsing"],
+        ["tabmail/internal/app/companymail", "TestCompanyForwardRechecksSourceBetweenCopies"],
+        ["tabmail/internal/app/companymail", "TestCompanyComposeBoundaryPreservesForward"],
         ["tabmail/internal/app/companymail", "TestCompanyReadRechecksAfterObjectOpen"],
         ["tabmail/internal/app/companymail", "TestCompanySourceRechecksBeforeFirstBytes"],
         ["tabmail/internal/app/companymail", "TestCompanySourceSuccessfulStreamDoesNotReauthorizeEachChunk"],

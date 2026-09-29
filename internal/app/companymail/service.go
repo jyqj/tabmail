@@ -164,19 +164,21 @@ func (s *Service) document(ctx context.Context, a authz.Actor, mailbox uuid.UUID
 	return doc, nil
 }
 
-func (s *Service) inboundEnvelope(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*enmime.Envelope, error) {
+// Return the observed source as well as derived bytes so multi-step compose
+// can retain provenance across destination uploads without reparsing the MIME.
+func (s *Service) inboundEnvelope(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*enmime.Envelope, *models.Message, error) {
 	m, err := s.message(ctx, a, mailbox, id)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	env, err := s.envelope(ctx, m.RawObjectKey)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if err = s.recheckMessage(ctx, a, mailbox, m); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return env, nil
+	return env, m, nil
 }
 
 func envelopeFiles(env *enmime.Envelope) []*enmime.Part {
@@ -216,7 +218,7 @@ func (s *Service) InboundAttachment(ctx context.Context, a authz.Actor, mailbox,
 	if index < 0 {
 		return nil, app.NotFound("attachment not found")
 	}
-	env, err := s.inboundEnvelope(ctx, a, mailbox, id)
+	env, _, err := s.inboundEnvelope(ctx, a, mailbox, id)
 	if err != nil {
 		return nil, err
 	}
@@ -229,6 +231,9 @@ func (s *Service) InboundAttachment(ctx context.Context, a authz.Actor, mailbox,
 }
 
 func (s *Service) sender(ctx context.Context, a authz.Actor, mailbox uuid.UUID) (*company.MailboxAccess, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	mb, err := s.repo.GetWorkMailbox(ctx, a, mailbox)
 	if err != nil {
 		return nil, err
@@ -239,7 +244,12 @@ func (s *Service) sender(ctx context.Context, a authz.Actor, mailbox uuid.UUID) 
 	if !mb.CanSend {
 		return nil, app.Forbidden("send_as permission required")
 	}
-	return mb, nil
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	// Keep the observed destination address even if an adapter reuses its value.
+	value := *mb
+	return &value, nil
 }
 
 func digest(raw []byte) string {
