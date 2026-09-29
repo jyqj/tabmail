@@ -1,5 +1,7 @@
 # R5 事务、锁顺序与授权检查地图
 
+> **B01-Q 当前状态：** 公司事务当前普通用户的profile/override来源窗口已实测修复；23组PG/81事件三轮通过，完整backend1007pass/1 browser skip、122必跑齐全、HTTP80响应。读取先保护用户及profile，覆盖写入先锁稳定用户；繁忙profile以409拒绝，避免用户/profile反向等待。仅为当前主体的公司事务范围，目标说明和旧接口仍另验。见 [B01-Q](R5-B01-Q-VALIDATION.md)。
+
 > **B01-P 当前状态：** 收件状态修改、模板新建/保存/退休/版本撤销与成员冻结的五条写路径已真实复现并修复40P01。现统一为T KEY SHARE → 当前actor SHARE → 资源/CAS → 必要审计/事件；收件另持M SHARE。15组PG/54事件三轮通过并独立重跑，完整backend980pass/1 browser skip、114必跑齐全、HTTP80响应通过。完整070/080/G0仍未关闭，见 [B01-P记录](R5-B01-P-VALIDATION.md)。
 
 > **B01-O 当前状态：** B01-K 六组PG已实测，发现并修复 sent 操作与撤权的 audit FK 锁环；最终9组/22事件连续三轮通过，完整backend948pass/1 browser skip、108必跑齐全、HTTP80响应通过。以下B01-K/L/M/N缺DSN说明保留历史含义，当前局部运行阻塞已解除。见 [B01-O记录](R5-B01-O-VALIDATION.md)。
@@ -31,8 +33,10 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | `companyTx` / `companyTenantWriteLock` | Begin → T U锁 → 当前操作者 U S锁 → 当前角色/有效权限 → callback → Commit | 只有采用这条路径的管理命令受同一 T 锁约束；旧 permission handler 不自动纳入 |
 | `companyReadTx` / `companyNoTenantLock` | Begin → 当前操作者 U S锁 → 有效权限 → callback → Commit；没有显式 T 锁 | 名字带Read不等于只读；隐式FK仍会加锁，尤其不能把晚期审计INSERT当作无父键依赖 |
 | `companyReferencedTx` / `companyTenantReferenceLock` | Begin → T KEY SHARE → 当前操作者 U S锁 → 有效权限 → callback → Commit | O已用于MutateArchivedMail；父键先于actor/mailbox，普通独立修改共享父键，不替代管理、邮箱权限或所有其他写路径 |
-| `currentMemberActor` | 精确 tenant/user 和 PrincipalUser；数据库重读角色及 is_active，用户行 S锁 | 不自动锁 permission profile、override、mailbox 或 grant |
-| `mailboxAccessTx` | 本函数用普通SELECT读取邮箱、revision和grant，统一调用EvaluateMailboxAccess；草稿/附件及K新增GetWorkMessage/GetParsedMessage/SaveParsedMessage/MutateArchivedMail调用方持M SHARE | O已实测K三个内容入口的撤权快照，sent另补前置父键；不扩大为profile/override/所有列表都已受锁保护 |
+| `currentMemberActor` | 精确 tenant/user 和 PrincipalUser；数据库重读角色及 is_active，用户行 S锁 | 本函数不锁profile；Q由companyTxScope随后调用effectivePermissionSnapshot，用户S锁与override写者NOKEY锁配对；其他直接调用者不自动获得整个保护 |
+| `mailboxAccessTx` | 本函数用普通SELECT读取邮箱、revision和grant，统一调用EvaluateMailboxAccess；草稿/附件及K新增GetWorkMessage/GetParsedMessage/SaveParsedMessage/MutateArchivedMail调用方持M SHARE | O已实测K三个内容入口，sent另补父键；Q在事务入口保护当前普通用户profile/override，但不代替每条路径的mailbox/grant边界或另一目标用户说明 |
+| `effectivePermissionSnapshot`（Q） | 已持当前用户S锁 → 已分配profile S锁NOWAIT → 原effectivePermission单语句合并；保持到公司事务结束 | 繁忙profile立即app.Conflict，避免DELETE profile→user与user→profile互等；不改管理员分支或独立目标说明读取 |
+| `permissionOverrideTx`（Q） | user NO KEY UPDATE → override INSERT/UPDATE/DELETE → Commit | 锁稳定user保护覆盖行的有/无状态；不额外锁tenant，仍需P1的写入授权、CAS及字段意图协议；直接维护SQL不自动参加此约定 |
 | `claimMailboxRevision` | 条件 UPDATE 消费观察到的 mailbox revision，零行按冲突拒绝 | 不替代外围层级/tenant/所有权校验 |
 | `companyAudit` | 同一tx插入audit_log和outbox_events；audit_log.tenant_id通过FK需要T父键保护 | O实证晚期FK可与tenant-first管理成环；不是所有旧操作都调用它，外部SMTP/对象存储也不参加此事务 |
 
@@ -100,7 +104,7 @@ B01-C第五项原先只证明单侧次序。B01-D已补两条完整生产命令�
 | 风险 | 实际支持 | 尚缺验证 / 下一操作 | 对应现有任务 |
 |---|---|---|---|
 | RISK01 入队与transfer_owned相反顺序 | B01-D完整ExecuteOffboarding/CreateOutboundJob实测40P01，失败事务资产无半提交 | 已改父租户KEY SHARE→用户SHARE→附件；R01回归覆盖离职先持锁时入队拒绝，无重复资产 | P0-070本批前置修复；后续P3/P4/P5/P6仍需各自全链验收 |
-| RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft/Finish/Reserve共用M SHARE授权边界；B01-G已补Reserve修复后的撤权顺序、额度原子性、不同上传者及取消回归。J三项读取证实新请求撤权拒绝、管理身份不授予正文、身份等待后冻结拒绝；跨语句授权快照/内容期限与profile/override仍待验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
+| RISK02 读grant后等待资源 | B01-D实证：撤去CanSend已完成，旧SaveMailDraft仍提交 | SaveMailDraft/Finish/Reserve共用M SHARE授权边界；B01-G已补Reserve修复后的撤权顺序、额度原子性、不同上传者及取消回归。J三项读取证实新请求撤权拒绝、管理身份不授予正文、身份等待后冻结拒绝；Q已补当前用户profile/override跨语句保护；另一目标说明、旧接口和普通内容期限仍待验证 | P0-070部分修复；P1-120、P3-060、P5-040 |
 | RISK03 隐式FK与广域管理锁 | B01-D实证：入队已持user SHARE，后置tenant FK与离职tenant→user形成40P01 | 入队父键保护提前已修复此环；R03覆盖入队先完成导致旧计划冲突。入站、原件、索引/清理其他交叉仍待核对 | P0-070部分修复；P6-100、P10-040 |
 | RISK04 对象回调持锁时间 | TX21实际在tx内调用ensureObject/del | B01-F基线实测可控delete取消释放key、ensure期间GC等待且提交后保护引用；实际对象后端、提交未知和其余失败上界仍待验，不直接移出保护区 | P3-090、P6-100、P10-050 |
 | RISK05 事务时钟与等待后期限 | 旧TX19期限用now；K改sent读侧实际时钟、写侧锁后和审计后检查原期限 | O已取得K真实PG前后对照并通过；G/J入站/索引历史结果保留，普通收件条目期限和其他时钟边界仍未统一 | P0-070局部已验收；P3-040、P6-030、P7-030 |
@@ -112,9 +116,13 @@ B01-C第五项原先只证明单侧次序。B01-D已补两条完整生产命令�
 
 B01-O列出的四个静态候选已经在B01-P逐项复现：`MutateWorkMessage`、`SaveMailTemplate`（新建/更新）、`SetMailTemplateRetired`、`RevokeMailTemplateVersion` 与 `UpdateUserGuarded` 并发均出现40P01。现复用companyReferencedTx前置T KEY SHARE，收件修改在读取owner/grant前持M SHARE；没有将审计移出事务、删除FK或重试吞错。独立不同资源写入不被T排他串行化、等待后冻结/撤权拒绝、审计失败完整回滚均有PG回归。
 
+### B01-Q：有效权限来源保护
+
+原effectivePermission的单条SELECT已经一致，但Actor快照会跨后续等待使用；原版真实复现profile局部/全局更新、override插入/更新/清除先完成，旧草稿后提交，以及缓存正文在域名撤权后仍从等待中返回。现在当前user S锁与override写者NO KEY UPDATE配对，profile单独S锁NOWAIT后再执行原合并SQL。Q八组27事件与O/P一起重复验收；P1持久revision、管理员写授权、独立EffectivePermission调用及ExplainMailboxAccess目标说明并未因此关闭。
+
 ## 6. P0-070收口前的剩余范围
 
-B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。仍需核对普通收件历史期限、profile/override、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
+B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。Q已补当前普通用户的公司事务profile/override保护；仍需核对另一目标用户的说明快照、旧outbound/API Key、普通收件历史期限、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
 
 截至B01-J，索引候选前后对照、7项索引与3项普通读取、54必跑及原预算全量均已执行通过；该候选运行阻塞解除。跨语句授权/内容到期、其他隐式FK与对象故障仍未齐，因此**070复选框保持未勾选，090仍受依赖限制**。080仍未冻结；G0/P1未开启。
 

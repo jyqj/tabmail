@@ -3,6 +3,14 @@
   "suites": {
     "content-postgres-boundary": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOrdersChanges"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotWriterFirstReloads"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotBusyProfileFailsClosed"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotIndependentUsersShareProfile"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotFailureReleasesLocks"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotPreservesEffectiveSemantics"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOrdersContentScope"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOverrideFailureAndMissingUser"],
         ["tabmail/internal/store/postgres", "TestR5AuditedWritesOrderMemberFreeze"],
         ["tabmail/internal/store/postgres", "TestR5AuditedWritesParentPrecedesActor"],
         ["tabmail/internal/store/postgres", "TestR5AuditedWritesReloadActorAfterParentWait"],
@@ -91,6 +99,14 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOrdersChanges"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotWriterFirstReloads"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotBusyProfileFailsClosed"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotIndependentUsersShareProfile"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotFailureReleasesLocks"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotPreservesEffectiveSemantics"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOrdersContentScope"],
+        ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOverrideFailureAndMissingUser"],
         ["tabmail/internal/store/postgres", "TestR5AuditedWritesOrderMemberFreeze"],
         ["tabmail/internal/store/postgres", "TestR5AuditedWritesParentPrecedesActor"],
         ["tabmail/internal/store/postgres", "TestR5AuditedWritesReloadActorAfterParentWait"],

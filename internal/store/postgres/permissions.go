@@ -119,7 +119,8 @@ func (s *PgStore) UpsertUserPermissionOverride(ctx context.Context, o *models.Us
 		o.ID = uuid.New()
 	}
 	o.UpdatedAt = time.Now()
-	return s.pool.QueryRow(ctx, `
+	return s.permissionOverrideTx(ctx, o.UserID, false, func(tx pgx.Tx) error {
+		return tx.QueryRow(ctx, `
 		INSERT INTO user_permission_overrides (id, user_id, can_send, daily_send_quota, daily_receive_quota,
 			max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
 			can_create_api_keys, updated_at)
@@ -136,15 +137,18 @@ func (s *PgStore) UpsertUserPermissionOverride(ctx context.Context, o *models.Us
 			can_create_api_keys=EXCLUDED.can_create_api_keys,
 			updated_at=EXCLUDED.updated_at
 		RETURNING id, updated_at`,
-		o.ID, o.UserID, o.CanSend, o.DailySendQuota, o.DailyReceiveQuota,
-		o.MaxMailboxes, o.MaxDomains, uuidSliceParam(o.AllowedZoneIDs), o.CanCreateDomains, o.CanCreateRoutes,
-		o.CanCreateAPIKeys, o.UpdatedAt).
-		Scan(&o.ID, &o.UpdatedAt)
+			o.ID, o.UserID, o.CanSend, o.DailySendQuota, o.DailyReceiveQuota,
+			o.MaxMailboxes, o.MaxDomains, uuidSliceParam(o.AllowedZoneIDs), o.CanCreateDomains, o.CanCreateRoutes,
+			o.CanCreateAPIKeys, o.UpdatedAt).
+			Scan(&o.ID, &o.UpdatedAt)
+	})
 }
 
 func (s *PgStore) DeleteUserPermissionOverride(ctx context.Context, userID uuid.UUID) error {
-	_, err := s.pool.Exec(ctx, `DELETE FROM user_permission_overrides WHERE user_id=$1`, userID)
-	return err
+	return s.permissionOverrideTx(ctx, userID, true, func(tx pgx.Tx) error {
+		_, err := tx.Exec(ctx, `DELETE FROM user_permission_overrides WHERE user_id=$1`, userID)
+		return err
+	})
 }
 
 func (s *PgStore) EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error) {

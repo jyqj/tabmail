@@ -88,7 +88,7 @@ func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin b
 		return app.Forbidden("company administrator required")
 	}
 	if !actor.IsTenantAdmin() {
-		actor.Permission, err = effectivePermission(ctx, tx, actor.ID)
+		actor.Permission, err = effectivePermissionSnapshot(ctx, tx, actor.ID)
 		if err != nil {
 			return err
 		}
