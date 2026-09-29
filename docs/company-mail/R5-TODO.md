@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-L 修复原件下载错误传播与回复/转发跨步骤权限重验：相同测试基线 32fail/11pass，候选 43pass 连续三轮；最终无 DSN 全量 686pass/159skip，backend 80 必跑中 53 未满足并明确拒绝。B01-K 六组 PG 用例仍待执行，P0-070/080、完整 P8-080 与 G0 未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-M 修复 Parser 在途并发、超时关闭与失败重试：相同七项基线 6fail/1pass，最终全包 26pass 连续三轮；无 DSN 全量 708pass/159skip，backend 91 必跑中 53 未满足并明确拒绝。B01-K 六组 PG 仍待执行，P0-070/080、完整 P8-080 与 G0 未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-L 内容边界续批已完成应用层和真实本机 HTTP/1.1、HTTP/2 前后对照，见 R5-B01-L-VALIDATION.md；B01-K 的 PG 锁序/期限候选仍待真实验收 |
+| 当前阶段 | B01-M 已完成 Parser 资源边界红绿、虚拟时钟并发/超时测试与局部微基准，见 R5-B01-M-VALIDATION.md；不将 B01-L 历史 HTTP 或本批无 DSN 成绩当成 B01-K PG 验收 |
 | 下一可执行任务 | 在授权的临时 PostgreSQL 上运行 B01-K 六个并发/期限测试的同测试基线与候选，再跑完整 backend/HTTP；继续核对普通收件期限、profile/override 与其他多资源边界；080可独立推进 |
 | 下一批范围 | 优先补 B01-K 六组 PG 实测及完整 backend/PG HTTP；保留 B01-L 已取得的下载和 compose 回归，不重复扩展验证工具；普通收件历史期限先遵守 P3-010/020 映射，090/110与G0/P1依赖不变 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 未配置测试 DSN，B01-K 六组 PG 仍未执行；backend 80 必跑中 53 未满足。B01-L 实测的本机 HTTP 传输不等于 PG HTTP journey 或浏览器；普通收件期限、profile/override、其他锁图、080/性能/兼容及原DNS/SSE缺口保留 |
+| 当前阻塞 | 仍未配置测试 DSN，B01-K 六组 PG 未执行；本批 backend 91 必跑中 53 未满足。Parser 并发保护为每实例边界，冷解析微基准有开销，不代替真实对象后端或 S/M/L 验收；普通收件期限、profile/override、其他锁图、080/兼容及原 DNS/SSE 缺口保留 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
 ### 0.1 状态、依赖与记录规则
@@ -1461,6 +1461,15 @@ python3 scripts/check_i18n_keys.py
 - 最终验证：build/vet、Python168、16共享模型/33投影/67操作静态契约通过；全量 Go race 无 DSN 845started/686pass/159skip/0fail，backend 80 必跑中 53 未满足，门禁实际 exit1。保留负例和测试开发中错误码断言修正历史。
 - [报告](R5-B01-L-VALIDATION.md)、[机器结果](evidence/R5-B01-L-VALIDATION.json)、[原始记录](evidence/R5-B01-L-LOGS.tar.gz)随本地交付。未改SQL、历史迁移、依赖、OpenAPI或前端；无 push/PR/merge/deploy。
 - B01-K 六组 PG 并发仍未执行；PG HTTP、shipping浏览器、普通收件期限兼容、profile/override和其余070/080边界保留。只完成本子包，不关闭父项；统计仍 **6/171**。
+
+### B01-M：派生内容解析资源边界（2026-09-29）
+
+- 基线 `55072237dc4445645d81fe5124f1cf24d5d20401`；最终被测 tree `b1ee6358384da2f8e477289aaffb6f84c693045c`，620 份源码文件哈希一致。
+- PG 测试 DSN 仍缺失，既有拦截未换入口重试。本批原位修复 Parser 的四并发许可、包含排队的共享截止、取消关闭 reader、无进展/非法读取拒绝、失败重试；不增加数据库候选或另建解析引擎。
+- 相同七项基线 6fail/1pass；最终 mailcontent race 26pass/0fail/0skip，三轮共78pass，11个必跑齐全；build/vet/Python168/静态契约通过。全量无 DSN 708pass/159skip，backend91必跑中53未满足，实际exit1。
+- 同输入三轮微基准：缓存命中分配不变；冷解析中位89.7→99.9微秒，有成本，不宣称整体加速或关闭P0-100。
+- [报告](R5-B01-M-VALIDATION.md)、[机器证据](evidence/R5-B01-M-VALIDATION.json)、[原始日志](evidence/R5-B01-M-LOGS.tar.gz)保留红绿、候选失败、缺DSN拒绝及基准；仅本地提交，无push/PR/merge/deploy。
+- 本批不关闭P0-070/080/G0或AR06父项，仍6/171。下一主线仍是B01-K六组PG真实同测试前后对照，再跑完整backend/PG HTTP；不得把Parser局部验证当作其替代。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

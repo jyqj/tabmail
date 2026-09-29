@@ -27,6 +27,11 @@ const MaxBytes int64 = 25 * 1024 * 1024
 const cacheBudget int64 = 64 * 1024 * 1024
 const maxParts = 512
 
+// Bound expensive distinct-key work per Parser, independently of the LRU's
+// retained-byte budget. Same-key waiters share one slot through singleflight.
+const maxConcurrentParses = 4
+const parseTimeout = 30 * time.Second
+
 type ObjectReader interface {
 	Get(context.Context, string) (io.ReadCloser, error)
 }
@@ -44,10 +49,11 @@ type Parser struct {
 	entries map[string]*list.Element
 	bytes   int64
 	flight  singleflight.Group
+	parses  chan struct{}
 }
 
 func New(objects ObjectReader) *Parser {
-	return &Parser{objects: objects, lru: list.New(), entries: map[string]*list.Element{}}
+	return &Parser{objects: objects, lru: list.New(), entries: map[string]*list.Element{}, parses: make(chan struct{}, maxConcurrentParses)}
 }
 func Hash(raw []byte) string { h := sha256.Sum256(raw); return hex.EncodeToString(h[:]) }
 func SafeFilename(name string) string {
@@ -91,38 +97,37 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 	if key == "" || p.objects == nil {
 		return nil, errors.New("raw source unavailable")
 	}
-	p.mu.Lock()
-	if el := p.entries[key]; el != nil {
-		v := el.Value.(*parsed)
-		if time.Now().Before(v.until) {
-			p.lru.MoveToFront(el)
-			p.mu.Unlock()
+	if v := p.cached(key); v != nil {
+		return v, nil
+	}
+	ch := p.flight.DoChan(key, func() (any, error) {
+		// A previous flight may have populated the cache between the caller's
+		// lookup and joining singleflight. Do not reopen that immutable source.
+		if v := p.cached(key); v != nil {
 			return v, nil
 		}
-		p.bytes -= v.size
-		p.lru.Remove(el)
-		delete(p.entries, key)
-	}
-	p.mu.Unlock()
-	ch := p.flight.DoChan(key, func() (any, error) {
-		// Do not tie a shared parse to the first viewer's cancelled request. The
-		// parse is bounded by its own timeout; each waiter may independently leave.
-		parseCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 30*time.Second)
+		// Keep shared work independent of one waiter's cancellation, but include
+		// capacity waiting in its own deadline. No object opens before admission.
+		parseCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), parseTimeout)
 		defer cancel()
-		r, e := p.objects.Get(parseCtx, key)
-		if e != nil {
+		select {
+		case p.parses <- struct{}{}:
+			defer func() { <-p.parses }()
+		case <-parseCtx.Done():
+			return nil, parseCtx.Err()
+		}
+		if e := parseCtx.Err(); e != nil {
 			return nil, e
 		}
-		if r == nil {
-			return nil, errors.New("object reader unavailable")
-		}
-		defer r.Close()
-		raw, e := io.ReadAll(io.LimitReader(r, MaxBytes+1))
+		raw, e := p.readSource(parseCtx, key)
 		if e != nil {
 			return nil, e
 		}
 		env, e := ParseBounded(raw)
 		if e != nil {
+			return nil, e
+		}
+		if e = parseCtx.Err(); e != nil {
 			return nil, e
 		}
 		parts := Parts(env)
@@ -133,6 +138,9 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 		v := &parsed{env: env, hash: Hash(raw), size: size, key: key, until: time.Now().Add(2 * time.Minute)}
 		p.mu.Lock()
 		defer p.mu.Unlock()
+		if e = parseCtx.Err(); e != nil {
+			return nil, e
+		}
 		if size <= cacheBudget {
 			if old := p.entries[key]; old != nil {
 				p.bytes -= old.Value.(*parsed).size
@@ -155,6 +163,9 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 	case <-ctx.Done():
 		return nil, ctx.Err()
 	case result := <-ch:
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
 		if result.Err != nil {
 			return nil, result.Err
 		}

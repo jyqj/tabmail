@@ -1,6 +1,22 @@
 {
   "version": 1,
   "suites": {
+    "parser-resource": {
+      "required_tests": [
+        ["tabmail/internal/mailcontent", "TestParserResourceAdmissionAndCache"],
+        ["tabmail/internal/mailcontent", "TestParserResourceTimeoutClosesDeferredReader"],
+        ["tabmail/internal/mailcontent", "TestParserResourceLateOpenDoesNotPopulateCache"],
+        ["tabmail/internal/mailcontent", "TestParserResourceNoProgressFailsAndRetries"],
+        ["tabmail/internal/mailcontent", "TestParserResourceOpenErrorClosesReader"],
+        ["tabmail/internal/mailcontent", "TestParserResourceCancelledWaiterPreservesSharedLoad"],
+        ["tabmail/internal/mailcontent", "TestParserResourceQueuedDeadlineDoesNotOpenObject"],
+        ["tabmail/internal/mailcontent", "TestParserResourceFailuresReleaseAdmission"],
+        ["tabmail/internal/mailcontent", "TestParserResourceLimitClosesAndDoesNotCache"],
+        ["tabmail/internal/mailcontent", "TestSourceReadRejectsCancelledContextBeforeOpen"],
+        ["tabmail/internal/mailcontent", "TestSourceReadWireBoundaries"]
+      ],
+      "allowed_skips": []
+    },
     "content-http-boundary": {
       "required_tests": [
         ["tabmail/internal/api/handlers", "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload"],
@@ -36,6 +52,17 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/mailcontent", "TestParserResourceAdmissionAndCache"],
+        ["tabmail/internal/mailcontent", "TestParserResourceTimeoutClosesDeferredReader"],
+        ["tabmail/internal/mailcontent", "TestParserResourceLateOpenDoesNotPopulateCache"],
+        ["tabmail/internal/mailcontent", "TestParserResourceNoProgressFailsAndRetries"],
+        ["tabmail/internal/mailcontent", "TestParserResourceOpenErrorClosesReader"],
+        ["tabmail/internal/mailcontent", "TestParserResourceCancelledWaiterPreservesSharedLoad"],
+        ["tabmail/internal/mailcontent", "TestParserResourceQueuedDeadlineDoesNotOpenObject"],
+        ["tabmail/internal/mailcontent", "TestParserResourceFailuresReleaseAdmission"],
+        ["tabmail/internal/mailcontent", "TestParserResourceLimitClosesAndDoesNotCache"],
+        ["tabmail/internal/mailcontent", "TestSourceReadRejectsCancelledContextBeforeOpen"],
+        ["tabmail/internal/mailcontent", "TestSourceReadWireBoundaries"],
         ["tabmail/internal/api/handlers", "TestCompanySourceHTTPFirstReadFailureIsNotSuccessfulDownload"],
         ["tabmail/internal/api/handlers", "TestCompanySourceHTTPEarlyIOFailureAndNoProgress"],
         ["tabmail/internal/api/handlers", "TestCompanySourceHTTPPreservesSuccessfulBytes"],
