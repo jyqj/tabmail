@@ -467,7 +467,11 @@ func countOutboundByIdentitySinceQuery(ctx context.Context, querier outboundJobQ
 }
 
 func (s *PgStore) RequeueOutboundJob(ctx context.Context, id uuid.UUID) error {
-	tag, err := s.pool.Exec(ctx, `UPDATE outbound_jobs SET state=$2::outbound_state,last_error='',next_attempt_at=clock_timestamp(),
+	return requeueOutboundJob(ctx, s.pool, id)
+}
+
+func requeueOutboundJob(ctx context.Context, q outboundSQLExecutor, id uuid.UUID) error {
+	tag, err := q.Exec(ctx, `UPDATE outbound_jobs SET state=$2::outbound_state,last_error='',next_attempt_at=clock_timestamp(),
  claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=clock_timestamp()
  WHERE id=$1 AND state IN ($3::outbound_state,$4::outbound_state) AND in_flight_domain=''`,
 		id, models.OutboundPending, models.OutboundDead, models.OutboundFailed)

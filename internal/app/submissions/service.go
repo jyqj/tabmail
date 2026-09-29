@@ -412,21 +412,18 @@ func (s *Service) ContentAllowed(ctx context.Context, actor authz.Actor, job *mo
 // two can never drift. A read grant may expose shared history, but must not
 // authorize resending it.
 func (s *Service) RetryAuthority(ctx context.Context, actor authz.Actor, job *models.OutboundJob) error {
-	if job.SenderMailboxID != nil {
-		mb, err := s.store.ForTenant(job.TenantID).GetMailbox(ctx, *job.SenderMailboxID)
-		if err != nil {
+	return outbound.ValidateRetryRequester(ctx, s.store, actor, job)
+}
+
+// RetryOutboundJob never falls back to a bare state update. Both the requester
+// and the original sender are validated inside the adapter's atomic boundary.
+func (s *Service) RetryOutboundJob(ctx context.Context, actor authz.Actor, observed *models.OutboundJob) (*models.OutboundJob, error) {
+	return s.store.RequeueOutboundJobAuthorized(ctx, actor, observed, func(ctx context.Context, reader store.OutboundRetryReader, locked *models.OutboundJob) error {
+		if err := outbound.ValidateRetryRequester(ctx, reader, actor, locked); err != nil {
 			return err
 		}
-		return authz.CheckMailboxSender(ctx, s.store, actor, mb, job.TemplateVersionID != nil)
-	}
-	uid := actor.EffectiveUserID()
-	if uid != nil && job.SenderUserID != nil && *uid == *job.SenderUserID {
-		return nil
-	}
-	if actor.Type == authz.PrincipalAPIKey && job.SenderKeyID != nil && actor.ID == *job.SenderKeyID {
-		return nil
-	}
-	return authz.ErrForbidden("send identity authority required to retry")
+		return outbound.ValidateJobAuthorization(ctx, reader, reader, locked)
+	})
 }
 
 // Capability block reasons for SubmissionCapabilities.RetryBlockReason.

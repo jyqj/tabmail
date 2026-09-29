@@ -309,6 +309,7 @@ type OutboundReceiptReader interface {
 
 // OutboundStore persists outbound jobs, outbound attempts, and send identities.
 type OutboundStore interface {
+	AtomicOutboundRetry
 	OutboundContentAuthority
 	OutboundReceiptReader
 	// --- Outbound jobs -----------------------------------------------------
@@ -327,6 +328,7 @@ type OutboundStore interface {
 	MarkOutboundJobFailed(ctx context.Context, id uuid.UUID, deliveryToken *uuid.UUID, lastError string, dead bool) error
 	CountOutboundSince(ctx context.Context, tenantID uuid.UUID, userID *uuid.UUID, since time.Time) (int, error)
 	CountOutboundByIdentitySince(ctx context.Context, tenantID uuid.UUID, principalType string, principalID uuid.UUID, identityID uuid.UUID, since time.Time) (int, error)
+	// Trusted low-level state primitive; HTTP retries MUST use AtomicOutboundRetry.
 	RequeueOutboundJob(ctx context.Context, id uuid.UUID) error
 
 	// --- Outbound attempts ------------------------------------------------

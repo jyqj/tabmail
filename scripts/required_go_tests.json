@@ -3,6 +3,14 @@
   "suites": {
     "content-postgres-boundary": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryOrdersAuthorizationChanges"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryRechecksLockedJobAndRecipientState"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryKeyExpiryDuringJobWait"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryAuditWaitExpiryAndCancellation"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryTemplatesAndLegacyIdentity"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryOutboxFailureAndAcceptedRecipients"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryConcurrentCommands"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryRequiredAuditRollsBack"],
         ["tabmail/internal/store/postgres", "TestR5APIKeyLastUsedIPRoundTrips"],
         ["tabmail/internal/store/postgres", "TestR5OutboundReceiptRejectsStalePrincipal"],
         ["tabmail/internal/store/postgres", "TestR5OutboundReceiptKeyExpiryAfterQueryWait"],
@@ -123,6 +131,17 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/app/submissions", "TestAtomicRetryPolicyUsesOnlyTransactionalReader"],
+        ["tabmail/internal/app/submissions", "TestAtomicRetryMissingValidatorCannotMutate"],
+        ["tabmail/internal/api/handlers", "TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryOrdersAuthorizationChanges"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryRechecksLockedJobAndRecipientState"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryKeyExpiryDuringJobWait"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryAuditWaitExpiryAndCancellation"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryTemplatesAndLegacyIdentity"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryOutboxFailureAndAcceptedRecipients"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryConcurrentCommands"],
+        ["tabmail/internal/store/postgres", "TestR5AtomicRetryRequiredAuditRollsBack"],
         ["tabmail/internal/store/postgres", "TestR5APIKeyLastUsedIPRoundTrips"],
         ["tabmail/internal/app/submissions", "TestOutboundReceiptProjectionUsesOneAuthorizedPage"],
         ["tabmail/internal/app/submissions", "TestOutboundReceiptProjectionPreservesScopeAndFailsClosed"],

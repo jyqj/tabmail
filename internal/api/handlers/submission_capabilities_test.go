@@ -60,8 +60,8 @@ func (s *capabilitiesSubmissionStub) ListMailboxEvents(context.Context, uuid.UUI
 // the FakeStore cannot reach through handler-visible state alone.
 type notRetryableStore struct{ *testutil.FakeStore }
 
-func (s *notRetryableStore) RequeueOutboundJob(context.Context, uuid.UUID) error {
-	return store.ErrOutboundNotRetryable
+func (s *notRetryableStore) RequeueOutboundJobAuthorized(context.Context, authz.Actor, *models.OutboundJob, store.OutboundRetryValidator) (*models.OutboundJob, error) {
+	return nil, store.ErrOutboundNotRetryable
 }
 
 func newSubmissionCapabilitiesHandler(t *testing.T, f outboundAccessFixture) *CompanyMailHandler {

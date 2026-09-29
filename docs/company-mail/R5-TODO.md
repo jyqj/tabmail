@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-T 已补旧回执当前身份/scope、整页语句快照及尝试读取后重验，并修复Key非空IP读取500：原版31事件24fail/7pass，47组PG/173事件连续三轮通过；完整backend1117pass/0fail/1 browser skip、149必跑齐全，HTTP80响应通过。重试最终写入原子性仍独立待验；P0-070/080、P2整体、完整P8-080与G0未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-U已闭合手工重试最终授权/状态/审计原子性并修正提交后的错误回执：原版31事件27fail/4pass，55组PG204事件连续三轮通过；完整backend1151pass/0fail/1 browser skip、160必跑齐全，HTTP80响应通过。新入队最终资格、其他凭据/兼容边界仍独立待验；P0-070/080、P2整体、完整P8-080与G0未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-T 完成旧详情/列表回执当前资格、统一分页/总数/内容决定、尝试/ledger后重验及API Key使用IP元数据修复，见R5-B01-T-VALIDATION.md；S/Q/R已验收成果继续保留 |
-| 下一可执行任务 | P0-070：针对RetryAuthority/ValidateJobAuthorization到RequeueOutboundJob最终写入的撤权竞争建立原版对照并选择原子边界；并行梳理入队最终资格、其余FK/GC和普通收件期限兼容；080按既定前置推进，不重复T回执快照 |
-| 下一批范围 | 复用隔离PG与既有门禁，集中重试动作最终事务而非只改其提示/准入；T保留read与write区别，不把读回执锁等同发送授权。普通收件期限遵守P3-010/020映射，编辑CAS属P1；090/110/G0依赖不变 |
+| 当前阶段 | B01-U完成手工重试事务内请求者/原发送者校验、状态/recipient检查、审计/事件/最后期限与准确成功回执；见R5-B01-U-VALIDATION.md。T/S/Q/R已验收成果保留 |
+| 下一可执行任务 | P0-070：核对新提交enqueue的当前profile/Key/模板与最后写入资格，结合现有sender/attachment/quota顺序建立具体对照；旧POST幂等、其余FK/GC和普通收件历史期限兼容分别推进。U手工重试不重复实现 |
+| 下一批范围 | 复用隔离PG、既有validator和原门禁，重点是新入队最终授权而非再改U/T投影；保留回执/重试/read/write区别及租约边界。普通收件期限遵守P3-010/020映射，编辑CAS属P1；090/110/G0依赖不变 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | S内容/T回执当前资格与语句级整页读取已验收；重试/入队最终写入原子性、全部JWT会话版本/旧POST重放、P1编辑CAS/ABA、普通收件期限、其余FK/GC、080/规模性能、浏览器/DNS/SSE仍待完成。语句快照不是网络全程线性化，真实S3/断电/存量key未验收 |
+| 当前阻塞 | U手工重试原子写入已验收；新入队完整资格、全部JWT会话版本/旧POST重放、P1编辑CAS/ABA、普通收件期限兼容、其他FK/GC、080/规模性能、浏览器/DNS/SSE仍待完成。历史无邮箱重试有表锁成本，数据库提交确认丢失及SMTP网络不具备分布式原子性 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
 ### 0.1 状态、依赖与记录规则
@@ -1527,6 +1527,14 @@ python3 scripts/check_i18n_keys.py
 - 最终与O/P/Q/R/S一起47组173事件连续三轮通过；完整backend1117pass/0fail/1 browser skip、149必跑齐全；HTTP80/65/66、Python168、静态67操作及build/vet通过。候选原始失败/诊断/最终绿灯分别保留，不挪用旧源码成绩。
 - [报告](R5-B01-T-VALIDATION.md)、[机器结果](evidence/R5-B01-T-VALIDATION.json)、[123成员证据](evidence/R5-B01-T-LOGS.tar.gz)随本地提交保存；本批PG已停止，原始responses.json仅私有留存。迁移/公开DTO/OpenAPI/依赖/前端未变，未push/PR/merge/deploy。
 - 只关闭回执准入与语句级读取子包，不关闭RetryAuthority→Requeue最终撤权窗口、整个070/080/P2/G0或规模性能；6/171父任务统计不变，下一步集中最终重试事务。
+
+### B01-U：手工重试最终授权与状态原子化（2026-09-30）
+
+- 基线f3b64a51f1a3e52e6ca25faf1da1aabf52602e3a；被测tree 136de634fa04f78cde67d1d73e72b0162c5703cb，672文件哈希一致。应用服务把同一请求者/worker验证函数绑定到事务读端口，tenant SHARE→依赖SHARE NOWAIT→job UPDATE锁/再验→recipient→原状态原语→audit/outbox→最终DB期限→Commit。
+- 原版撤权先完成而job后入队、Key等锁期间过期、锁后摘要/uncertain变化均已具体复现。相同最终31事件27fail/4pass；最终与前序一起55组204事件连续三轮通过。accepted结果不重置，同任务仅一成功，不同任务共享父键；audit/outbox失败及审计等待中过期/取消整体回滚。
+- 候选另修复commit成功后脱敏查询冲突导致错误409：现失败关闭正文但返回准确受限成功回执，不把真实事务失败变200。worker/模板策略无第二实现，历史无邮箱身份路径为防空查竞争使用SHARE NOWAIT表保护，成本与范围明确记录。
+- 最终backend1151pass/0fail/1 browser skip、160必跑齐全；HTTP80/65/66、Python168、静态67操作、build/vet通过。[报告](R5-B01-U-VALIDATION.md)、[机器结果](evidence/R5-B01-U-VALIDATION.json)、[96成员证据](evidence/R5-B01-U-LOGS.tar.gz)保留原始失败与三轮成功；本批PG已停止。
+- 仅本地提交，未push/PR/merge/deploy；公开DTO/迁移/依赖/前端未变。U只关闭手工重试子包，下一步转向新enqueue最终资格；完整070/080/G0及6/171不提前关闭。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

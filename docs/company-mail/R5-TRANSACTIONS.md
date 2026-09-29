@@ -1,5 +1,7 @@
 # R5 事务、锁顺序与授权检查地图
 
+> **B01-U 当前状态：** 手工重试最终授权与requeue/audit/outbox现同事务，锁后再次验证实际job及recipient不确定性，最终DB时钟检查Key/邮箱期限；提交成功后投影失败返回受限成功回执。55组204事件三轮、backend1151pass/1 browser skip、160必跑、HTTP80响应通过。T中重试尚未原子化的描述保留历史含义，见 [B01-U](R5-B01-U-VALIDATION.md)。
+
 > **B01-T 当前状态：** 旧回执现在由当前主体事务和同条SQL返回可见ID/total/页面/内容决定，Key查询后按实际时钟再验截止；attempts及recipient在读取后重验。47组PG173事件三轮、完整backend1117pass/1 browser skip、149必跑、HTTP80响应通过。另修复Key非空inet使用IP解码，重试最终写入授权仍未合并，见 [B01-T](R5-B01-T-VALIDATION.md)。
 
 > **B01-S 当前状态：** 旧outbound正文/诊断通过新角色端口复用sent存活与内容资格；owned Key当前metadata/owner重验，最终时钟在邮箱等待之后。39组PG142事件三轮、完整backend1084pass/1 browser skip、139必跑、HTTP80响应均通过。仅内容投影范围，回执/重试/批量快照仍待验，见 [B01-S](R5-B01-S-VALIDATION.md)。
@@ -146,9 +148,15 @@ B01-O列出的四个静态候选已经在B01-P逐项复现：`MutateWorkMessage`
 
 attempts和ledger读取后执行最终回执准入及内容检查；失败无半页结果。GetAPIKey及两个Key列表使用host(last_used_ip)修正真实binary inet→字符串错误，未改数据库存储类型。RetryAuthority/ValidateJobAuthorization检查到RequeueOutboundJob之间仍分开，T只保障其初始write scope准入，不宣称最终重试已原子化。
 
+### B01-U：手工重试的最终事务
+
+`RequeueOutboundJobAuthorized`：T SHARE→同步验证回调/事务依赖读（user、Key、profile、zone、mailbox、grant SHARE NOWAIT）→精确tenant/job FOR UPDATE→同一校验器验证实际job→recipient SHARE/uncertain拒绝→原requeue UPDATE→required companyAudit/outbox→原始Key/邮箱截止的DB clock检查→Commit。租户SHARE保护默认发送政策，不是KEY SHARE；它不排他串行不同重试，但可能等待管理/配额写。取消/审计失败/过期回滚全部效果，accepted结果保留。
+
+worker及重试共用ValidateJobAuthorization核心，模板和发送身份查询原位抽出tx适配，不经过外层连接池或网络。历史无SenderMailboxID的verified identity回退另外持mailboxes/send_identities SHARE NOWAIT表锁，保护邮箱/更高优先级精确身份的缺失；繁忙409，存在跨租户写竞争成本，未宣称已完成性能验收。客户端未收到commit确认、worker校验到SMTP接受及全部JWT session版本不因此原子化。
+
 ## 6. P0-070收口前的剩余范围
 
-B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。Q已补当前普通用户的公司事务profile/override保护，R已独立验收目标用户说明，S已统一旧正文/诊断与owned Key内容资格，T已补回执当前主体与语句级整页读取；剩余重试/入队最终写入原子性、其他凭据/旧POST协议、普通收件历史期限、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
+B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。Q已补当前普通用户的公司事务profile/override保护，R已独立验收目标用户说明，S已统一旧正文/诊断与owned Key内容资格，T已补回执当前主体与语句级整页读取，U已闭合手工重试的最终事务；剩余新入队完整授权、其他凭据/旧POST协议、普通收件历史期限、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
 
 截至B01-J，索引候选前后对照、7项索引与3项普通读取、54必跑及原预算全量均已执行通过；该候选运行阻塞解除。跨语句授权/内容到期、其他隐式FK与对象故障仍未齐，因此**070复选框保持未勾选，090仍受依赖限制**。080仍未冻结；G0/P1未开启。
 

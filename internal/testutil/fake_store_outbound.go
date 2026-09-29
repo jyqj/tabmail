@@ -132,6 +132,10 @@ func (s *FakeStore) CountOutboundByIdentitySince(_ context.Context, tenantID uui
 func (s *FakeStore) RequeueOutboundJob(_ context.Context, id uuid.UUID) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	return s.requeueOutboundJobLocked(id)
+}
+
+func (s *FakeStore) requeueOutboundJobLocked(id uuid.UUID) error {
 	job := s.outboundJobs[id]
 	if job == nil || job.InFlightDomain != "" || (job.State != models.OutboundDead && job.State != models.OutboundFailed) {
 		return store.ErrOutboundNotRetryable

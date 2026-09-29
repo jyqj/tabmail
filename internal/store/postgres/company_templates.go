@@ -368,47 +368,52 @@ func (s *PgStore) TemplateForSend(ctx context.Context, tenant uuid.UUID, user, k
 	var out company.TemplateVersion
 	var employee, companyName string
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		access, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
-		if e != nil {
-			return e
-		}
-		if !access.CanSend {
-			return authz.ErrForbidden("template sender mailbox permission revoked")
-		}
-		if key != nil {
-			var valid bool
-			e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`, *key, tenant, *user).Scan(&valid)
-			if e != nil {
-				return e
-			}
-			if !valid {
-				return authz.ErrForbidden("template sending key revoked")
-			}
-		}
-		status, v, e := templateVersionStatusTx(ctx, tx, tenant, *user, mailbox, version)
-		if e != nil {
-			return e
-		}
-		// Same external contract as the previous single filtered-row query:
-		// every unusable state collapses to one denial, and only a tampered
-		// snapshot is named separately.
-		if status != company.TemplateVersionUsable {
-			if status == company.TemplateVersionCorrupt {
-				return authz.ErrForbidden("published template integrity mismatch")
-			}
-			return authz.ErrForbidden("published template unavailable or not granted")
-		}
-		out = *v
-		if e = tx.QueryRow(ctx, `SELECT display_name FROM users WHERE id=$1`, *user).Scan(&employee); e != nil {
-			return e
-		}
-		e = tx.QueryRow(ctx, `SELECT name FROM company_settings WHERE tenant_id=$1`, tenant).Scan(&companyName)
-		if errors.Is(e, pgx.ErrNoRows) {
-			return authz.ErrForbidden("company settings unavailable")
-		}
-		return e
+		return s.loadTemplateForSendTx(ctx, tx, a, tenant, user, key, mailbox, version, &out, &employee, &companyName)
 	})
 	return &out, employee, companyName, e
+}
+
+// Shared template policy for ordinary reads and the transaction-bound retry.
+func (s *PgStore) loadTemplateForSendTx(ctx context.Context, tx pgx.Tx, a authz.Actor, tenant uuid.UUID, user, key *uuid.UUID, mailbox, version uuid.UUID, out *company.TemplateVersion, employee, companyName *string) error {
+	access, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
+	if e != nil {
+		return e
+	}
+	if !access.CanSend {
+		return authz.ErrForbidden("template sender mailbox permission revoked")
+	}
+	if key != nil {
+		var valid bool
+		e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`, *key, tenant, *user).Scan(&valid)
+		if e != nil {
+			return e
+		}
+		if !valid {
+			return authz.ErrForbidden("template sending key revoked")
+		}
+	}
+	status, v, e := templateVersionStatusTx(ctx, tx, tenant, *user, mailbox, version)
+	if e != nil {
+		return e
+	}
+	// Same external contract as the previous single filtered-row query:
+	// every unusable state collapses to one denial, and only a tampered
+	// snapshot is named separately.
+	if status != company.TemplateVersionUsable {
+		if status == company.TemplateVersionCorrupt {
+			return authz.ErrForbidden("published template integrity mismatch")
+		}
+		return authz.ErrForbidden("published template unavailable or not granted")
+	}
+	*out = *v
+	if e = tx.QueryRow(ctx, `SELECT display_name FROM users WHERE id=$1`, *user).Scan(employee); e != nil {
+		return e
+	}
+	e = tx.QueryRow(ctx, `SELECT name FROM company_settings WHERE tenant_id=$1`, tenant).Scan(companyName)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return authz.ErrForbidden("company settings unavailable")
+	}
+	return e
 }
 
 // TemplateContentDigest ties the final queued MIME inputs to the selected

@@ -121,18 +121,27 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if err := h.store.RequeueOutboundJob(ctx, jobID); err != nil {
+	updatedJob, err := h.subs.RetryOutboundJob(ctx, middleware.ActorFromContext(ctx), job)
+	if err != nil {
 		if errors.Is(err, store.ErrOutboundNotRetryable) {
 			errConflictReason(w, err.Error(), "state_changed")
-			return
+		} else if errors.Is(err, store.ErrOutboundUncertain) {
+			errConflictReason(w, err.Error(), "delivery_uncertain")
+		} else {
+			respondAppError(w, h.logger, app.FromAuthz(err))
 		}
-		h.logger.Err(err).Str("job_id", jobID.String()).Msg("requeue outbound job")
-		errInternal(w)
 		return
 	}
-	updatedJob, _ := h.store.GetOutboundJob(ctx, jobID)
 	if updatedJob != nil {
-		h.writeOutboundView(w, r, updatedJob)
+		// Mutation already committed. A later redaction lookup must not report
+		// retry failure (and encourage a duplicate action); fail CLOSED on
+		// content while retaining the truthful successful operation receipt.
+		view, viewErr := h.subs.RedactOutboundJob(ctx, middleware.ActorFromContext(ctx), updatedJob)
+		if viewErr != nil {
+			h.logger.Err(viewErr).Str("job_id", jobID.String()).Msg("retry committed; receipt content restricted")
+			view = submissions.RedactOutboundJobView(updatedJob, false)
+		}
+		ok(w, view)
 	} else {
 		ok(w, map[string]string{"status": "requeued"})
 	}
