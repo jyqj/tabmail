@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-Q 已保护公司事务当前普通用户的profile/override来源快照：原版27事件15fail/12pass，23组PG/81事件连续三轮通过；完整backend1007pass/0fail/1 browser skip、122必跑齐全，HTTP80响应通过。外层摘要解析失败独立记录并完成报告/源文件核验；P0-070/080、完整P8-080与G0仍未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-R 已修复目标用户访问说明的跨代快照：原版34事件25fail/9pass，30组PG/115事件连续三轮通过；完整backend1041pass/0fail/1 browser skip、129必跑齐全，HTTP80响应通过。Q当前用户/R目标说明局部均已验收；P0-070/080、完整P8-080与G0仍未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-Q 完成公司事务当前非管理员权限来源快照保护、override稳定用户锁和profile占锁失败关闭，见R5-B01-Q-VALIDATION.md；K/O/P局部实测成果继续保留 |
-| 下一可执行任务 | P0-070：单独核对ExplainMailboxAccess另一目标用户的说明快照、旧outbound/API Key跨端口权限边界及其余隐式FK/GC顺序；普通收件历史期限先做兼容映射；080按既定前置推进，不重复Q当前用户来源保护 |
-| 下一批范围 | 复用隔离PG/原门禁，补目标用户说明与剩余跨端口/多资源候选的具体对照；普通收件期限遵守P3-010/020映射，权限编辑CAS仍属P1；090/110/G0依赖不变 |
+| 当前阶段 | B01-R 完成ExplainMailboxAccess目标用户/权限来源保护及单次邮箱判定来源投影，见R5-B01-R-VALIDATION.md；Q及O/P历史成果分别保留 |
+| 下一可执行任务 | P0-070/P2前置：核对旧outbound/API Key跨端口内容资格、回执与正文生命周期，以及其余隐式FK/GC顺序；普通收件历史期限先做兼容映射；080按既定前置推进，不重复Q/R快照实现 |
+| 下一批范围 | 复用隔离PG与原门禁，针对旧outbound/Key和多资源候选建立具体基线；R目标说明已收口。普通收件期限遵守P3-010/020映射，权限编辑CAS仍属P1；090/110/G0依赖不变 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 缺DSN已解除，Q仅关闭公司事务当前普通用户的权限来源窗口；目标用户说明、旧outbound/Key、权限编辑CAS/ABA、普通收件期限、其他FK/GC、080/性能/兼容、浏览器及DNS/SSE仍有缺口。真实S3/断电与存量key未验收 |
+| 当前阻塞 | 缺DSN及Q/R局部快照验收已解除；旧outbound/Key、权限编辑CAS/ABA、普通收件历史期限、其他FK/GC、080/性能/兼容、浏览器及DNS/SSE仍有缺口。目标说明不是发信授权凭据，真实S3/断电与存量key未验收 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
 ### 0.1 状态、依赖与记录规则
@@ -1503,6 +1503,14 @@ python3 scripts/check_i18n_keys.py
 - 不修改继承/false/0/空列表语义；profile占锁返回409而非新增反向等待；同用户读取、同profile不同用户及不同用户override写入不被全局串行。不是P1管理员授权、字段补丁、CAS/ABA或所有旧接口的完成证明。
 - 外层汇总解析缺DSN报告时发生类型错误，原Job exit1保留；完成后按完整JSON重新核验全部退出码、hash/源文件及清理，未把原Job改标成功。首次测试类型编译失败亦单列保留。
 - [报告](R5-B01-Q-VALIDATION.md)、[机器结果](evidence/R5-B01-Q-VALIDATION.json)、[105成员日志](evidence/R5-B01-Q-LOGS.tar.gz)已归档；本批PG已stop0/PID文件消失。不发布原始HTTP/环境/服务日志，不push/PR/merge/deploy。070/080/G0未关闭，父统计仍6/171。
+
+### B01-R：目标用户访问说明快照（2026-09-29）
+
+- 基线862f09b280b7af376b50a523553a822de57c6909；最终程序tree dbdba853daebd6488f6a869bc045f058c6ec8f40，643源文件哈希一致。目标用户SHARE→profile SHARE NOWAIT→mailbox SHARE，来源和能力复用同一次EvaluateMailboxAccess判定。
+- 原版实际拼出从未成立的Active=true/CanSend=true组合；同最终34事件25fail/9pass。其他失败为快照锁序及error+nil约束，不虚称为独立发信越权。候选与O/P/Q一起30组115事件连续三轮通过。
+- 完整backend1041pass/0fail/1 browser skip，129必跑齐全；HTTP80/65/66、Python168、静态67操作及build/vet通过。缺DSN负例仍由门禁拒绝。
+- [报告](R5-B01-R-VALIDATION.md)、[机器结果](evidence/R5-B01-R-VALIDATION.json)、[101成员日志](evidence/R5-B01-R-LOGS.tar.gz)保留早期失败和最终结果；独立PG已停止。未改变公开DTO/权限语义/迁移/依赖/前端；未push/PR/merge/deploy。
+- R只关闭目标说明子包，整个070/080/G0及6/171统计保持。下一步回到旧outbound/API Key内容资格、期限兼容和其余FK/GC边界；不重复已完成的Q/R保护。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

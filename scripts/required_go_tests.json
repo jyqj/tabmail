@@ -3,6 +3,13 @@
   "suites": {
     "content-postgres-boundary": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationWaitsForTargetWrites"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationRejectsBusyTargetProfile"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationOrdersPermissionChanges"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationNeverCombinesTargetGenerations"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationFailureReturnsNoProjection"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationCancellationReleasesSnapshot"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationPreservesCanonicalDecisions"],
         ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOrdersChanges"],
         ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotWriterFirstReloads"],
         ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotBusyProfileFailsClosed"],
@@ -99,6 +106,13 @@
     },
     "backend": {
       "required_tests": [
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationWaitsForTargetWrites"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationRejectsBusyTargetProfile"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationOrdersPermissionChanges"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationNeverCombinesTargetGenerations"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationFailureReturnsNoProjection"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationCancellationReleasesSnapshot"],
+        ["tabmail/internal/store/postgres", "TestR5AccessExplanationPreservesCanonicalDecisions"],
         ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotOrdersChanges"],
         ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotWriterFirstReloads"],
         ["tabmail/internal/store/postgres", "TestR5PermissionSnapshotBusyProfileFailsClosed"],

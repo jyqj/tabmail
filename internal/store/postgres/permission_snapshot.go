@@ -12,8 +12,8 @@ import (
 	"tabmail/internal/models"
 )
 
-// effectivePermissionSnapshot requires the current user's SHARE lock, acquired
-// by currentMemberActor. That row protects profile assignment and both presence
+// effectivePermissionSnapshot requires the user's SHARE lock, acquired by
+// currentMemberActor or a tenant-scoped target lookup. It protects assignment and both presence
 // and absence of an override: the override writers below lock the same user.
 // The assigned profile is separately SHARE-locked before the canonical merge.
 //

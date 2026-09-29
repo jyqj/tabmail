@@ -353,34 +353,46 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 // single interpretation of admin roles, expiry, zone allowlists and the
 // profile-level send veto. The store must not re-derive those rules inline.
 func (s *PgStore) mailboxAccessTx(ctx context.Context, tx pgx.Tx, a authz.Actor, id uuid.UUID) (*company.MailboxAccess, error) {
+	v, _, err := s.mailboxAccessWithSourceTx(ctx, tx, a, id)
+	return v, err
+}
+
+// Keep explanation provenance bound to the exact owner/grant used by the
+// canonical evaluator. A second EXISTS or a second mailbox decision can observe
+// another generation. Callers still own the actor and mailbox lock boundary.
+func (s *PgStore) mailboxAccessWithSourceTx(ctx context.Context, tx pgx.Tx, a authz.Actor, id uuid.UUID) (*company.MailboxAccess, string, error) {
 	mb, e := s.scanMailbox(tx.QueryRow(ctx, mailboxSelect+` WHERE m.tenant_id=$1 AND m.id=$2`, a.TenantID, id))
 	if e != nil {
-		return nil, e
+		return nil, "", e
 	}
 	if mb == nil {
-		return nil, app.NotFound("mailbox not found")
+		return nil, "", app.NotFound("mailbox not found")
 	}
 	v := &company.MailboxAccess{Mailbox: *mb}
 	if e = tx.QueryRow(ctx, `SELECT lifecycle_revision FROM mailboxes WHERE id=$1`, id).Scan(&v.Revision); e != nil {
-		return nil, e
+		return nil, "", e
 	}
 	uid := a.EffectiveUserID()
 	owner := uid != nil && mb.OwnerUserID != nil && *mb.OwnerUserID == *uid
+	source := "none"
 	var grant *models.MailboxGrant
-	if !owner {
+	if owner {
+		source = "owner"
+	} else {
 		g := &models.MailboxGrant{}
 		e = tx.QueryRow(ctx, `SELECT tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`, a.TenantID, id, a.ID).Scan(&g.TenantID, &g.MailboxID, &g.UserID, &g.CanRead, &g.CanOrganize, &g.CanSend, &g.TemplateOnly)
 		if errors.Is(e, pgx.ErrNoRows) {
 			grant = nil
 		} else if e != nil {
-			return nil, e
+			return nil, "", e
 		} else {
 			grant = g
+			source = "grant"
 		}
 	}
 	d := authz.EvaluateMailboxAccess(a, mb, grant)
 	v.CanRead, v.CanOrganize, v.CanSend, v.TemplateOnly, v.CanManage = d.CanRead, d.CanOrganize, d.CanSend, d.TemplateOnly, d.CanManage
-	return v, nil
+	return v, source, nil
 }
 
 // mailboxAccessBatch resolves access decisions for a batch of mailboxes with
