@@ -1,0 +1,91 @@
+{
+  "scope": "post_AB_tool_document_compatibility_acceptance",
+  "base_commit": "1a14ce506a06763991f9fa2f9950eb1afae17bdf",
+  "product_tested_tree": "e2d633b13f5e4658f8c25d202be36e8400a363f4",
+  "new_tool_source_hashes": {
+    "docs/company-mail/R5-COMPATIBILITY-GATES.md": "6e495be6c9fd7370b3fec796a750c77f09ea4e2e8086a41ad89102df4e019f3e",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+    "scripts/check_r5_compatibility.py": "2097ce213e1dbea47c96c71c8a3f747a8fe0ef59e798b95b56e4aeb7e0d7d20b",
+    "scripts/tests/test_r5_compatibility.py": "36722bc81a8632ac6ba1fb03251e3afda66ed9fc9ae0cfc2b8c76a04e1a935f7"
+  },
+  "fresh_result": {
+    "wire_observations": 193,
+    "wire_observed_routes": 75,
+    "wire_explicit_not_observed_routes": 52,
+    "wire_validation_scope": "actual_safe_artifacts_rehashed",
+    "wire_source_identity": {
+      "frozen_tree": "e2d633b13f5e4658f8c25d202be36e8400a363f4",
+      "validation_commit": "88d1411ee9cc03ed6ddd1e0785b8049f04b7a177"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 127,
+    "client_branches": 127,
+    "source_files": 52,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/outbound/{id}/attempts",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*",
+      "POST /api/v1/outbound/{id}/retry"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/outbound/{id}/attempts",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "gates": {
+    "post-final-api.exit": 0,
+    "post-final-contract.exit": 0,
+    "post-final-fresh.exit": 0,
+    "post-final-negative.exit": 0
+  },
+  "negative_tests": 13,
+  "runtime_reexecution_of_new_whole_tree": false,
+  "product_source_and_tests_unchanged": true,
+  "wire_source": "safeSummary6421a985 + actual29artifactSHA/spec/case/tree/privatecommit/manifest binding",
+  "requirements_review": {
+    "dependencies_020_050_080": "accepted before post-gates",
+    "differences": "127routes/122OpenAPI operations/57DTO bindings; missing5/12no shippedcaller and externalusageunknown preserved",
+    "actual_response_scope": "193status/aspect observations75routes; 52explicitnotobserved; schema/status not allbehavior",
+    "legacy_clients_and_API_Keys": "real shippedclient/source/middleware scopes mapped; externalusage unknown, not declared absent",
+    "release_plan": "original P5template, P6recovery, P7index task semantics checked; all known breaking batches require oldwrite refusal plan plus coordinated clients/data upgrades",
+    "existing_field_checker_limits": "nil slices/opaque dynamics/DTO absence/CAS/authority limits explicit"
+  },
+  "task_acceptance": {
+    "R5-P0-110": true,
+    "R5-P0-070": false,
+    "G0": false,
+    "complete": 8,
+    "total": 171
+  },
+  "future_old_write_rejection_or_migration_execution_claimed": false,
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-COMPATIBILITY-POST-LOGS.tar.gz",
+    "sha256": "09a02614411dbb60f834e00500d29dae043c1b8cab599ed8f2272dc7da1f3338",
+    "members": 8,
+    "members_sha256": {
+      "post-final-api.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "post-final-api.log": "d299c4427cb3ac6c4d9fcc32173bc92730258dfe8308eb4046075959cf820a04",
+      "post-final-contract.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "post-final-contract.log": "f8082a21d45518cbef41e0dfb35ecfb453504dc0ee981a1c051775140b13835a",
+      "post-final-fresh.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "post-final-fresh.log": "997225d603ae73705b7533c785baf8b4554db9b1cd632a7a362716fa23a7a0a6",
+      "post-final-negative.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "post-final-negative.log": "be31d58f2bce404c4227efd3ddd79df5d62d37f7a4e9ae4f5225b395c8fae1f6"
+    }
+  },
+  "known_corrected_truth": "exact DNS GETverification/POSTverify excluded; POSTdomainscreate covered; original staticgreen wrong labels preserved in immutable AB archive"
+}

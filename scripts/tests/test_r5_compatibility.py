@@ -80,8 +80,63 @@ class CompatibilityGateTests(unittest.TestCase):
         for batch,wrong_tasks in [('P5','R5-P6-030/050/080/150'),('P6','R5-P7-040/060/090/120'),('P7','R5-P5-080/090/100/110')]:
             with self.subTest(batch=batch):self.reject(lambda d:d['release_batches'][batch].__setitem__('successor_tasks',wrong_tasks))
 
+    def test_dns_exclusions_match_real_HTTP_methods_not_create(self):
+        facts={r['route']:r for r in gate.source_facts(self.routes,self.clients)}
+        for route in ['GET /api/v1/company/domains/{id}/verification','POST /api/v1/company/domains/{id}/verify']:
+            self.assertEqual(facts[route]['runtime_test_registration'],'live_DNS_excluded_from_company_HTTP_fixture')
+        self.assertEqual(facts['POST /api/v1/company/domains']['runtime_test_registration'],'declared_company_http_fixture')
+        self.assertNotEqual(facts['GET /api/v1/company/domains']['runtime_test_registration'],'live_DNS_excluded_from_company_HTTP_fixture')
+
     def test_duplicate_and_nonfinite_json_rejected(self):
         for raw in ['{"schema_version":1,"schema_version":1}','{"value":NaN}','{"value":Infinity}']:
             with self.subTest(raw=raw),self.assertRaises(ValueError):gate.strict_json(raw)
 
 if __name__=='__main__':unittest.main()
+
+class SafeWireJoinTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.data=json.loads(gate.MAP.read_text())
+        cls.facts=[{'route':r['route']} for r in cls.data['routes']]
+
+    def validate(self,data):return gate.validate_wire(data,self.facts)
+    def reject(self,modify,repin=False):
+        data=copy.deepcopy(self.data);modify(data)
+        if repin:data['wire_source_evidence']['summary_sha256']=__import__('hashlib').sha256(gate.canonical_bytes(data['wire_source_evidence']['summary'])).hexdigest()
+        with self.assertRaises((ValueError,KeyError,TypeError)):self.validate(data)
+
+    def test_exact_safe_join_remains_metadata_not_product_approval(self):
+        result=self.validate(self.data)
+        self.assertEqual((result['wire_observations'],result['wire_observed_routes'],result['wire_explicit_not_observed_routes']),(193,75,52))
+        self.assertEqual(result['wire_validation_scope'],'embedded_safe_metadata_and_pinned_hashes_only')
+        self.assertFalse(self.data['product_green']);self.assertFalse(self.data['task_complete'])
+
+    def test_wrong_tree_report_spec_case_and_closure_hashes_rejected(self):
+        for key in ['frozen_tree','validation_commit']:
+            with self.subTest(key=key):self.reject(lambda d:d['wire_source_evidence']['summary']['source_identity'].__setitem__(key,'0'*40),True)
+        self.reject(lambda d:d['wire_source_evidence']['summary'].__setitem__('source_closure_sha256','0'*64),True)
+        self.reject(lambda d:d['wire_source_evidence'].__setitem__('summary_sha256','0'*64))
+        for field,length in [('source_sha',40),('spec_sha256',64)]:
+            with self.subTest(field=field):self.reject(lambda d:d['wire_source_evidence']['summary']['inputs'][0].__setitem__(field,'0'*length),True)
+        self.reject(lambda d:d['wire_source_evidence']['summary']['inputs'][1].__setitem__('cases_sha256','0'*64),True)
+        self.reject(lambda d:d['wire_source_evidence'].__setitem__('expected_cases_sha256','0'*64))
+        self.reject(lambda d:d['wire_source_evidence'].__setitem__('expected_spec_sha256','0'*64))
+
+    def test_unknown_private_fields_bad_status_and_aspects_rejected(self):
+        for field in ['body','payload','token','headers','private_fixture','product_green']:
+            with self.subTest(field=field):self.reject(lambda d:d['wire_source_evidence']['summary']['observations'][0].__setitem__(field,'private-or-unsupported'),True)
+        self.reject(lambda d:d['wire_source_evidence']['summary']['inputs'][0].__setitem__('authorization','private'),True)
+        self.reject(lambda d:d['wire_source_evidence']['summary']['observations'][0].__setitem__('route','GET /api/v1/not-real'),True)
+        for status in [None,True,0,199,600,'200']:
+            with self.subTest(status=status):self.reject(lambda d:d['wire_source_evidence']['summary']['observations'][0].__setitem__('actual_status',status),True)
+        self.reject(lambda d:d['wire_source_evidence']['summary']['observations'][0].__setitem__('aspect','all_policy_pass'),True)
+        self.reject(lambda d:d['wire_source_evidence']['summary']['observations'].append(d['wire_source_evidence']['summary']['observations'][0]),True)
+
+    def test_not_observed_cannot_be_laundered_as_runtime_pass(self):
+        unobserved=next(i for i,r in enumerate(self.data['routes']) if r['wire_evidence']=='explicit_not_observed')
+        self.reject(lambda d:d['routes'][unobserved].__setitem__('wire_evidence','observed_metadata_not_complete_behavior'))
+        self.reject(lambda d:d['routes'][unobserved].__setitem__('wire_observations',[d['wire_source_evidence']['summary']['observations'][0]]))
+        self.reject(lambda d:d['wire_source_evidence']['summary']['excluded_http_operations'][0].__setitem__('method','POST'),True)
+        self.reject(lambda d:d['wire_source_evidence']['summary']['excluded_http_operations'][0].__setitem__('path','/api/v1/company/domains'),True)
+        with __import__('tempfile').TemporaryDirectory() as root:
+            with self.assertRaises(ValueError):gate.validate_wire(self.data,self.facts,root)

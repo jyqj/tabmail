@@ -86,7 +86,7 @@ def source_facts(routes,clients):
         binding=c.COMPANY_RESPONSES.get(r['handler'])
         tests=[{'source':'internal/architecture/route_inventory_test.go','name':'TestR5RouteInventory','scope':'source Go AST route registration'}]
         if r['path'].startswith('/api/v1/company/'):
-            tests.append({'source':'internal/api/http_contract_test.go','name':'TestCompanyHTTPContract','scope':'actual HTTP fixture declared; live DNS verification/create are excluded, not certified here'})
+            tests.append({'source':'internal/api/http_contract_test.go','name':'TestCompanyHTTPContract','scope':'actual HTTP fixture declared; live DNS verification/status are excluded, not certified here'})
         if r['path'] in ['/api/v1/outbound','/api/v1/outbound/{id}']:
             tests.append({'source':'internal/api/handlers/r5_protocol_component_observations_test.go','name':'TestR5ProtocolComponentObservations','scope':'RC02 expired receipt and lost-response replay; not every state or API Key'})
         if r['handler'] in {'perm.SetUserPermissionOverride','perm.UpdateProfile'}:
@@ -96,7 +96,7 @@ def source_facts(routes,clients):
         runtime_registration=('declared_company_http_fixture' if r['path'].startswith('/api/v1/company/') else
                               'scoped_protocol_fixture' if len(tests)>1 else
                               'no_route_specific_runtime_fixture_recorded_by_this_map')
-        if r['handler'] in {'c.Domains.Create','c.Domains.Verify'}:runtime_registration='live_DNS_excluded_from_company_HTTP_fixture'
+        if (r['method'],r['path']) in {('GET','/api/v1/company/domains/{id}/verification'),('POST','/api/v1/company/domains/{id}/verify')}:runtime_registration='live_DNS_excluded_from_company_HTTP_fixture'
         fields=(op or {}).get('requestBody',{})
         result.append({'route':key,'release_batch':release_batch(r),'handler':r['handler'],'route_source':r['source'],'route_line':r['line'],
                        'middleware':r['middleware'],'conditions':r['conditions'],
@@ -121,7 +121,90 @@ def closure(facts,clients):
     paths|={str(p.relative_to(ROOT)) for p in (ROOT/'internal/company').glob('*.go') if not p.name.endswith('_test.go')}
     return {p:digest(ROOT/p) for p in sorted(paths)}
 
-def validate(data,routes,clients):
+def canonical_bytes(value):return (json.dumps(value,ensure_ascii=False,indent=2)+'\n').encode()
+
+def validate_wire(data,facts,artifact_root=None):
+    evidence=data.get('wire_source_evidence',{})
+    summary=evidence.get('summary',{})
+    if set(summary)!={'schema_version','source_identity','source_closure_sha256','inputs','observations','excluded_http_operations','boundary'} or summary.get('schema_version')!=1:
+        raise ValueError('missing/malformed safe wire summary')
+    if hashlib.sha256(canonical_bytes(summary)).hexdigest()!=evidence.get('summary_sha256'):
+        raise ValueError('wire summary hash mismatch')
+    identity=summary['source_identity']
+    if identity!=evidence.get('expected_source_identity') or set(identity)!={'frozen_tree','validation_commit'} or any(not re.fullmatch('[0-9a-f]{40}',str(v)) for v in identity.values()):
+        raise ValueError('wrong wire report source identity')
+    if summary['source_closure_sha256']!=evidence.get('expected_source_closure_sha256') or not re.fullmatch('[0-9a-f]{64}',str(summary['source_closure_sha256'])):
+        raise ValueError('wire source closure hash mismatch')
+    spec=digest(ROOT/'internal/api/openapi.yaml');cases=digest(ROOT/'docs/company-mail/evidence/R5-PROTOCOL-CASES.json')
+    if evidence.get('expected_spec_sha256')!=spec or evidence.get('expected_cases_sha256')!=cases:
+        raise ValueError('wire spec/case differs from current source')
+    exclusions={(x.get('method'),x.get('path')) for x in summary['excluded_http_operations']}
+    if exclusions!={('GET','/api/v1/company/domains/{id}/verification'),('POST','/api/v1/company/domains/{id}/verify')} or len(summary['excluded_http_operations'])!=2:
+        raise ValueError('wrong exact DNS method/path exclusions')
+    if any(set(x)!={'method','path','reason'} for x in summary['excluded_http_operations']):raise ValueError('unknown/private DNS exclusion fields')
+    inputs={}
+    for ref in summary['inputs']:
+        if not isinstance(ref,dict) or set(ref)-{'kind','artifact_ref','sha256','source_sha','spec_sha256','cases_sha256'} or any(not isinstance(ref.get(k),str) for k in ['kind','artifact_ref','sha256','source_sha']):
+            raise ValueError('private/unknown/malformed wire input fields')
+        path=ref['artifact_ref'];kind=ref['kind']
+        if path in inputs or not re.fullmatch('[0-9a-f]{64}',ref['sha256']):raise ValueError('duplicate/malformed artifact input')
+        fixed={'http_contract':'final-http/result.json','protocol_db':'final-protocol-db/report.json','protocol_components':'final-protocol-components/report.json'}
+        packet=bool(re.fullmatch(r'final-protocol-components/http-pg-components/[A-Z]{2}[0-9]{2}/(?:[A-Za-z0-9_-]+|\[\])/observations\.json',path))
+        if kind not in fixed or (path!=fixed[kind] and not (kind=='protocol_components' and packet)):
+            raise ValueError('unapproved artifact (private captures are forbidden)')
+        expected_source=identity['frozen_tree'] if kind=='http_contract' else identity['validation_commit']
+        if ref['source_sha']!=expected_source:raise ValueError('wrong input report source hash')
+        if kind=='http_contract' and ref.get('spec_sha256')!=spec:raise ValueError('wrong HTTP report spec hash')
+        if kind!='http_contract' and ref.get('cases_sha256')!=cases:raise ValueError('wrong protocol report case hash')
+        inputs[path]=ref
+    if not all(path in inputs for path in ['final-http/result.json','final-protocol-db/report.json','final-protocol-components/report.json']):
+        raise ValueError('missing wire source reports')
+    known={row['id']:row for row in strict_json((ROOT/'docs/company-mail/evidence/R5-PROTOCOL-CASES.json').read_text())['cases']}
+    joined={r['route']:[] for r in facts};seen=set()
+    for observation in summary['observations']:
+        if not isinstance(observation,dict) or set(observation)-{'route','actual_status','aspect','case_id','variant','target_marker','response_sha256','input_ref'}:
+            raise ValueError('private/unknown wire observation fields')
+        route=observation.get('route');aspect=observation.get('aspect');ref=observation.get('input_ref')
+        if route not in joined or ref not in inputs or type(observation.get('actual_status')) is not int or not 200<=observation['actual_status']<=599 or not isinstance(aspect,str) or not aspect:
+            raise ValueError('unknown route/input/status/aspect')
+        if not re.fullmatch('[0-9a-f]{64}',str(observation.get('response_sha256',''))):raise ValueError('missing actual response digest')
+        if ref=='final-http/result.json':
+            if aspect!='http_schema_status:'+str(observation.get('case_id')) or 'target_marker' in observation or 'variant' in observation:raise ValueError('wrong HTTP observation aspect')
+        else:
+            case=observation.get('case_id');variant=observation.get('variant')
+            path_variant='empty_array' if variant=='[]' else variant
+            if case not in known or ref!=f'final-protocol-components/http-pg-components/{case}/{path_variant}/observations.json' or not re.fullmatch(re.escape(f'real_component_http:{case}:{variant}:')+'[0-9]+',aspect):raise ValueError('wrong component case/variant/aspect')
+            marker=observation.get('target_marker')
+            allowed={t['marker'] for adapter in known[case].get('shared_adapters',[]) for path,t in adapter.get('target_failures',{}).items() if path==f'TestR5ProtocolComponentObservations/{case}/{variant}'}
+            if marker is not None and marker not in allowed:raise ValueError('unknown/wrong-case component target marker')
+        fingerprint=json.dumps(observation,sort_keys=True)
+        if fingerprint in seen:raise ValueError('duplicate wire observation')
+        seen.add(fingerprint);joined[route].append(observation)
+    if not summary['observations']:raise ValueError('empty wire observations')
+    if artifact_root is not None:
+        root=Path(artifact_root).resolve()
+        manifest=root/'final-source.json'
+        if not manifest.is_file() or digest(manifest)!=summary['source_closure_sha256']:raise ValueError('actual frozen source manifest mismatch')
+        frozen=strict_json(manifest.read_text())
+        if any(frozen.get(path)!=sha for path,sha in data['source_closure'].items()):raise ValueError('wire frozen source differs from declared source closure')
+        for path,ref in inputs.items():
+            artifact=(root/path).resolve()
+            if not artifact.is_relative_to(root) or not artifact.is_file() or digest(artifact)!=ref['sha256']:raise ValueError('actual wire artifact hash mismatch: '+path)
+            packet=strict_json(artifact.read_text())
+            if path.endswith('/observations.json'):
+                if packet.get('case_sha256')!=cases:raise ValueError('actual packet case mismatch')
+            elif packet.get('source_sha')!=ref['source_sha']:raise ValueError('actual report source mismatch')
+    for row in data['routes']:
+        actual=joined[row['route']]
+        if row.get('wire_observations')!=actual or row.get('wire_evidence')!=('observed_metadata_not_complete_behavior' if actual else 'explicit_not_observed'):
+            raise ValueError('wire row observation/unknown status laundering')
+    return {'wire_observations':len(summary['observations']),'wire_observed_routes':sum(bool(v) for v in joined.values()),
+            'wire_explicit_not_observed_routes':sum(not v for v in joined.values()),
+            'wire_validation_scope':'actual_safe_artifacts_rehashed' if artifact_root is not None else 'embedded_safe_metadata_and_pinned_hashes_only',
+            'wire_source_identity':identity}
+
+
+def validate(data,routes,clients,artifact_root=None):
     if data.get('schema_version')!=1 or data.get('scope')!='source_inventory_and_upgrade_plan' or data.get('task_complete') is not False or data.get('product_green') is not False:
         raise ValueError('explicit source-only non-completion/non-product scope required')
     if data.get('dependencies')!=['R5-P0-020','R5-P0-050','R5-P0-080'] or data.get('dependency_acceptance')!='operator_review_required':
@@ -154,19 +237,20 @@ def validate(data,routes,clients):
         for test in row['test_bindings']:
             if not re.search(r'func '+re.escape(test['name'])+r'\(', (ROOT/test['source']).read_text()):raise ValueError('missing actual test symbol')
     if data.get('source_closure')!=closure(actual,clients):raise ValueError('source hash drift')
-    return {'status':'source_inventory_and_upgrade_plan_checked','task_complete':False,'product_green':False,
+    wire=validate_wire(data,actual,artifact_root)
+    return {**wire,'status':'source_inventory_and_upgrade_plan_checked','task_complete':False,'product_green':False,
             'routes':len(actual),'client_branches':len(clients),'source_files':len(data['source_closure']),
             'openapi_missing':[r['route'] for r in actual if not r['openapi_operation_present']],
             'no_shipped_client':[r['route'] for r in actual if not r['clients']],
             'runtime_boundary':'No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required.'}
 
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--map',type=Path,default=MAP)
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--map',type=Path,default=MAP);parser.add_argument('--wire-evidence-root',type=Path)
     parser.add_argument('--route-inventory',type=Path);parser.add_argument('--client-inventory',type=Path);args=parser.parse_args()
     try:
         if bool(args.route_inventory)!=bool(args.client_inventory):raise ValueError('both fresh inventories must be supplied together')
         routes,clients=(strict_json(args.route_inventory.read_text()),strict_json(args.client_inventory.read_text())) if args.route_inventory else collect()
-        report=validate(strict_json(args.map.read_text()),routes,clients);print(json.dumps(report,ensure_ascii=False,indent=2));return 0
+        report=validate(strict_json(args.map.read_text()),routes,clients,args.wire_evidence_root);print(json.dumps(report,ensure_ascii=False,indent=2));return 0
     except (ValueError,KeyError,TypeError,OSError,subprocess.SubprocessError) as exc:
         print(json.dumps({'status':'rejected','product_green':False,'task_complete':False,'error':str(exc)},ensure_ascii=False));return 1
 if __name__=='__main__':raise SystemExit(main())

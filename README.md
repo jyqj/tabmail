@@ -8,7 +8,7 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-最新执行为 **B01-AB（2026-10-01）**：正式suppression／tenant双向父序锁环已实证修复，严格404与audit原子性三轮通过；fresh默认1417/0/1、229必跑、20门禁0。080基线已完成（7/171），070等待授权窗口及110后验truth审仍未关闭；精确协议目标红非产品绿。见 [AB记录](docs/company-mail/R5-B01-AB-VALIDATION.md)。
+最新执行为 **B01-AB（2026-10-01）**：正式suppression／tenant双向父序锁环已实证修复，严格404与audit原子性三轮通过；fresh默认1417/0/1、229必跑、20门禁0。080与110基线已验收（8/171），070等待授权窗口及G0仍未关闭；精确协议目标红非产品绿。见 [AB记录](docs/company-mail/R5-B01-AB-VALIDATION.md)。
 
 唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段/171工作包/25批次/38验收场景。目前仍 **6/171，P0为6/12**。新增 [有限事务目录](docs/company-mail/R5-TRANSACTION-COVERAGE.md) 覆盖350函数/66重点，结构清点不冒称全runtime正确；070具体未验证关系与080的RC02精确组件入口／BC02–03未来写入适用性等仍待验收，G0不提前关闭。
 

@@ -9,7 +9,7 @@
 - 正式 `TestR5RouteInventory` 的 Go AST producer：**127** route declarations，exit 0；包含 **67** company 操作。该测试无 DB/HTTP，不按目录文本猜路由。
 - 正式 `collect_api_calls.cjs` 的 TypeScript AST producer：**127** 调用分支，exit 0；包含新版 legacy list/detail，动态 transport forwarding 仍显式保留。
 - 地图绑定 **52** 份源码 SHA；12 个 route 没有当前 shipped web caller，这不等于无旧 API/Key 使用者。外部使用量未知；本批未读取生产 usage、Key 或 token。
-- 新检查器拒绝缺失/重复 route、schema/client/test/source 漂移、升级批次缺失、无旧写拒绝或同批升级条件、伪产品绿/依赖验收/运行成绩。8 项测试方法（内部 mutation 不重复当独立 test）实际通过。
+- 新检查器拒绝缺失/重复 route、schema/client/test/source 漂移、升级批次缺失、无旧写拒绝或同批升级条件、伪产品绿/依赖验收/运行成绩。13 项测试方法（内部 mutation 不重复当独立 test）实际通过。
 
 ## 现存门禁及不能证明的内容
 
@@ -74,3 +74,27 @@ AA `364925dc` 已验收080为可执行目标红基线，**不是产品全绿**�
 ### 人工审查纠错：任务ID存在不等于语义正确
 
 原错误计划把P6写为模板、P7写为恢复；实际TODO是P5包含模板，P6收发/租约/恢复，P7搜索/索引/事件。原source-only门禁绿不作为该错误计划验收，旧raw保留不覆盖。本版已最小纠正各真实route的batch及原任务绑定，并增加semantic-route反例：templates/其grants/submit→P5，legacy outbound retry/inspect/reconcile/recovery→P6，实际company index retry和mailbox events→P7。validator要求这些批次绑定原P5-080/100/110、P6-020/070/130、P7-070/090/100/120任务，拒绝“ID存在但阶段含义错”的旧方案。
+
+### 真实wire登记修正
+
+正式HTTP fixture的两个DNS排除项仅为 **GET `/api/v1/company/domains/{id}/verification`** 与 **POST `/api/v1/company/domains/{id}/verify`**；POST `/api/v1/company/domains` 创建与GET列表均真实覆盖。前版误把create排除且把verification状态列为已fixture覆盖，本版按实际method+canonical path纠正，新增反例。旧source门禁绿不能代替此人工事实审查；原full日志不回写。
+
+## AB fresh实际wire安全摘要与后验范围
+
+产品程序源码快照 **e2d633b13f5e4658f8c25d202be36e8400a363f4**，validation commit **88d1411ee9cc03ed6ddd1e0785b8049f04b7a177** 的原full程序验证保持独立。operator在actual terminal后导出安全summary：SHA **6421a985979e1e61e187d7b51ac30d75c0ac11c1d8082904fa113037bd352e33**。本次四文件DNS标签/摘要join/新反例是**后验工具与文档修正**，不是上述原full已测试的新checker，不把“原20gate通过”改写为新整树全量成绩。
+
+机器地图逐route新增 `wire_observations`：**193** 个actual status/aspect条目对应 **75** 个canonical route；其余 **52** 个标 `explicit_not_observed`。每条保留method+route、status、schema/status或真实component HTTP aspect、response digest、input reference，UI target marker按case/variant精确绑定。只复制安全metadata，**不复制payload/body/token/headers/private fixture**；193不是独立漏洞数、75也不是全部授权/CAS已通过。HTTP schema/status、UI政策target与执行资格必须按aspect区分。
+
+29个输入reference包括fresh HTTP result、DB/component报告和26个安全observation packets；分别绑定实际tree或validation commit，以及OpenAPI/cases SHA。`source_closure_sha256`为原final-source manifest字节SHA，optional artifact模式还要求地图52个source hash与该frozen manifest相同。不存在正式回填命令的BC02/03仍是current capability baseline，不自动补成未来writes。
+
+```sh
+# source-only fresh Go/Node + 嵌入摘要/pinned hashes检查，未读取原artifact时明确报metadata-only
+python3 -B scripts/check_r5_compatibility.py
+# operator只给safe artifact根；不读取responses.json或私有包
+python3 -B scripts/check_r5_compatibility.py --wire-evidence-root "$SAFE_AB_EVIDENCE_ROOT"
+python3 -B -m unittest scripts.tests.test_r5_compatibility
+```
+
+后者实际重哈希原manifest与29个safe inputrefs，读取report/observations metadata核对身份；当前实际运行exit0，报告scope=`actual_safe_artifacts_rehashed`。wrong tree/private commit、spec/case/closure/hash、错误DNS方法、unknown/private fields、错误status/aspect/marker及not-observed冒充observed均拒绝。PE02逻辑variant `[]` 的安全归档目录仅明确别名 `empty_array`，不改变原case或目标断言。
+
+原P0-110要求的是清点差异及兼容/升级方案，不要求本批提前修产品或使127endpoint全通过。现在可逐条追踪源码/已观测wire/未观测/未来方案：5缺OpenAPI、未绑明确DTO与外部Key使用unknown均保留；所有已知breaking变更有原任务、拒旧写和具体同批客户端条件。完成裁决仍由integration operator结合fresh门禁与逐条人工审查，不由checker自动`task_complete=true`。
