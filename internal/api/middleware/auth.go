@@ -159,6 +159,8 @@ func ActorFromContext(ctx context.Context) authz.Actor {
 		actor.ID = user.ID
 		actor.TenantID = user.TenantID
 		actor.Role = user.Role
+		version := user.SessionVersion
+		actor.SessionVersion = &version
 	}
 
 	if tenant := TenantFromCtx(ctx); tenant != nil {

@@ -332,6 +332,7 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 
 	// Build and submit the outbound job.
 	job, replayed, err := s.outbound.SubmitWithReplay(ctx, outbound.SendRequest{
+		Principal:         &actor,
 		TenantID:          tenant.ID,
 		SenderMailboxID:   mailboxID(mailbox),
 		UserID:            userID,

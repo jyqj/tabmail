@@ -48,6 +48,25 @@ func (s *PgStore) CreateOutboundJobConsumeDraft(ctx context.Context, job *models
 }
 
 func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption) (bool, error) {
+	return s.enqueueOutboundJobValidated(ctx, job, quota, draft, nil)
+}
+
+var _ store.AtomicOutboundEnqueue = (*PgStore)(nil)
+
+func (s *PgStore) CreateOutboundJobAuthorized(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundRetryValidator) (replayed bool, err error) {
+	if job == nil || validate == nil {
+		return false, app.Forbidden("enqueue validation unavailable")
+	}
+	defer func() {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && (pg.Code == "55P03" || pg.Code == "40001") {
+			err = app.Conflict("enqueue authority changed; reload before submitting")
+		}
+	}()
+	return s.enqueueOutboundJobValidated(ctx, job, quota, draft, validate)
+}
+
+func (s *PgStore) enqueueOutboundJobValidated(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundRetryValidator) (bool, error) {
 	prepareOutboundJob(job)
 	if draft != nil {
 		// The store owns the provenance marker so any caller of the consume
@@ -67,7 +86,13 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 	// user -> tenant cycle against tenant-first offboarding. KEY SHARE allows
 	// concurrent submissions; it does not serialize them on tenant FOR UPDATE.
 	var tenantID uuid.UUID
-	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, job.TenantID).Scan(&tenantID); err != nil {
+	parentLock := " FOR KEY SHARE"
+	if validate != nil {
+		// SHARE fences non-key tenant policy updates while independent
+		// submissions still share the parent instead of serializing globally.
+		parentLock = " FOR SHARE"
+	}
+	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1`+parentLock, job.TenantID).Scan(&tenantID); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return false, app.NotFound("company not found")
 		}
@@ -91,6 +116,20 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 			}
 			*job = *old
 			return true, tx.Commit(ctx)
+		}
+	}
+	var reader *outboundRetryReader
+	if validate != nil {
+		if job.SenderMailboxID == nil {
+			// A missing exact mailbox/identity cannot be row-locked. Match
+			// authorized retry's fail-fast protection of the absent-row gap.
+			if _, err = tx.Exec(ctx, `LOCK TABLE mailboxes,send_identities IN SHARE MODE NOWAIT`); err != nil {
+				return false, err
+			}
+		}
+		reader = &outboundRetryReader{store: s, tx: tx, tenant: job.TenantID}
+		if err = validate(ctx, reader, job); err != nil {
+			return false, err
 		}
 	}
 	// Match employee disposition's user-before-attachment order. Keep the
@@ -166,6 +205,17 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 		}
 		if tag.RowsAffected() != 1 {
 			return false, store.ErrDraftAlreadyConsumed
+		}
+	}
+	if reader != nil {
+		var now time.Time
+		if err = tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return false, err
+		}
+		for _, deadline := range reader.deadlines {
+			if !deadline.After(now) {
+				return false, app.Forbidden("enqueue credential or mailbox expired")
+			}
 		}
 	}
 	return false, tx.Commit(ctx)

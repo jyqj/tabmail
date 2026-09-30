@@ -27,6 +27,22 @@ func recoveryActor(ctx context.Context, tx pgx.Tx, a authz.Actor) (authz.Actor, 
 	}
 	return a, nil
 }
+
+// Audited recovery commands protect the audit tenant FK before the actor.
+// KEY SHARE permits independent operations and does not invert worker job
+// ordering: receipt/job mutation still uses NOWAIT rather than waiting on it.
+func recoveryReferencedActor(ctx context.Context, tx pgx.Tx, a authz.Actor) (authz.Actor, error) {
+	var tenant uuid.UUID
+	e := tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, a.TenantID).Scan(&tenant)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return a, app.NotFound("company not found")
+	}
+	if e != nil {
+		return a, e
+	}
+	return recoveryActor(ctx, tx, a)
+}
+
 func scanReceipt(row pgx.Row) (company.RecoveryReceipt, error) {
 	v := company.RecoveryReceipt{Targets: []company.RecoveryTarget{}}
 	e := row.Scan(&v.ID, &v.State, &v.Error, &v.UpdatedAt, &v.RawKey, &v.RawHash, &v.RawSize)
@@ -106,7 +122,7 @@ func (s *PgStore) InspectRecoveryReceipt(ctx context.Context, a authz.Actor, id 
 		return nil, e
 	}
 	defer tx.Rollback(ctx)
-	a, e = recoveryActor(ctx, tx, a)
+	a, e = recoveryReferencedActor(ctx, tx, a)
 	if e != nil {
 		return nil, e
 	}
@@ -136,7 +152,7 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 		return e
 	}
 	defer tx.Rollback(ctx)
-	a, e = recoveryActor(ctx, tx, a)
+	a, e = recoveryReferencedActor(ctx, tx, a)
 	if e != nil {
 		return e
 	}
@@ -209,7 +225,7 @@ func (s *PgStore) ReconcileOutbound(ctx context.Context, a authz.Actor, id uuid.
 		return e
 	}
 	defer tx.Rollback(ctx)
-	a, e = recoveryActor(ctx, tx, a)
+	a, e = recoveryReferencedActor(ctx, tx, a)
 	if e != nil {
 		return e
 	}

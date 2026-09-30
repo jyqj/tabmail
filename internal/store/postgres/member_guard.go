@@ -40,6 +40,8 @@ func currentMemberActor(ctx context.Context, tx pgx.Tx, actor authz.Actor, tenan
 	if err != nil {
 		return actor, err
 	}
+	// Preserve the authenticated JWT version across the user-lock wait; the
+	// shared refresh predicate checks it against this current fenced row.
 	refreshed, ok := authz.RefreshMemberActor(actor, tenant, u)
 	if !ok {
 		return actor, authz.ErrForbidden("administrator no longer active in this company")

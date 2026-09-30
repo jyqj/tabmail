@@ -116,6 +116,37 @@ func TestRefreshMemberActor(t *testing.T) {
 	}
 }
 
+func TestRefreshMemberActorSessionVersion(t *testing.T) {
+	tenant, id := uuid.New(), uuid.New()
+	for _, tc := range []struct {
+		name     string
+		observed *int64
+		current  int64
+		want     bool
+	}{
+		{"trusted internal actor without JWT", nil, 42, true},
+		{"explicit zero current", sessionVersionPtr(0), 0, true},
+		{"explicit zero revoked", sessionVersionPtr(0), 1, false},
+		{"nonzero current", sessionVersionPtr(42), 42, true},
+		{"nonzero revoked", sessionVersionPtr(42), 43, false},
+		{"future version rejected", sessionVersionPtr(43), 42, false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			a := Actor{Type: PrincipalUser, ID: id, TenantID: tenant, SessionVersion: tc.observed}
+			u := &models.User{ID: id, TenantID: tenant, Role: models.RoleUser, IsActive: true, SessionVersion: tc.current}
+			got, ok := RefreshMemberActor(a, tenant, u)
+			if ok != tc.want {
+				t.Fatalf("ok=%v want %v", ok, tc.want)
+			}
+			if ok && got.SessionVersion != tc.observed {
+				t.Fatal("refresh replaced the authenticated version")
+			}
+		})
+	}
+}
+
+func sessionVersionPtr(v int64) *int64 { return &v }
+
 func TestMemberRemovalRequiresAdminCount(t *testing.T) {
 	admin := &models.User{IsActive: true, Role: models.RoleAdmin}
 	inactiveAdmin := &models.User{IsActive: false, Role: models.RoleAdmin}

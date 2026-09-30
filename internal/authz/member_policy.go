@@ -32,6 +32,13 @@ func RefreshMemberActor(actor Actor, tenant uuid.UUID, u *models.User) (Actor, b
 	if u == nil || u.ID != actor.ID || !u.IsActive || (u.TenantID != tenant && u.Role != models.RoleSuperAdmin) {
 		return actor, false
 	}
+	// The HTTP authentication read precedes this transaction. Password change,
+	// revocation, or freeze/reactivation may have advanced the version while
+	// it waited for the user fence. Do not refresh an old credential into a
+	// new session merely because the same user is active again.
+	if actor.SessionVersion != nil && *actor.SessionVersion != u.SessionVersion {
+		return actor, false
+	}
 	actor.IsAdmin = u.Role == models.RoleAdmin
 	actor.IsSuperAdmin = u.Role == models.RoleSuperAdmin
 	actor.Role = u.Role

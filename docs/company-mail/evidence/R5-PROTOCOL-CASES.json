@@ -1,0 +1,2142 @@
+{
+  "schema_version": 1,
+  "task": "R5-P0-080",
+  "task_complete": false,
+  "policy_version": "r5-target-2026-09-30-cases-v1",
+  "provenance": [
+    "R5-DESIGN.md",
+    "R5-PROTOCOL.md",
+    "CONTENT-BOUNDARIES.md",
+    "SAFETY-CONTRACTS.md"
+  ],
+  "policy_change_log": [
+    {
+      "cases": [
+        "CT03",
+        "CT04"
+      ],
+      "change": "Sent content denies unavailable content with 404, not draft 403. Matches CONTENT-BOUNDARIES and the current Go not-found assertion; inbound/domain rejection remains separately unresolved."
+    }
+  ],
+  "cases": [
+    {
+      "id": "CT01",
+      "input": {
+        "operation": "normal_content",
+        "principal": "current_reader",
+        "same_mailbox_id": true,
+        "lifecycle": "live"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "200，允许指定内容/附件；不扩大到别的邮箱"
+      },
+      "acceptance": [
+        "AC-05",
+        "AC-28"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/company_content_boundary_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        },
+        {
+          "source": "internal/store/postgres/company_content_boundary_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT02",
+      "input": {
+        "operation": "normal_content",
+        "credential_state": [
+          "anonymous",
+          "revoked",
+          "frozen"
+        ]
+      },
+      "expected": {
+        "http_status": 401,
+        "http_status_kind": "exact",
+        "semantic_code": "unauthenticated",
+        "error_reason": null,
+        "assertion": "401，不打开对象"
+      },
+      "acceptance": [
+        "AC-31"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_outbound_receipt_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5OutboundReceiptRejectsStalePrincipal",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT03",
+      "input": {
+        "operation": "sent_content",
+        "principal": [
+          "company_admin",
+          "platform_super_admin"
+        ],
+        "can_read": false
+      },
+      "expected": {
+        "http_status": 404,
+        "http_status_kind": "exact",
+        "semantic_code": "not_found",
+        "error_reason": null,
+        "assertion": "sent content 404，不凭角色放行；入站入口单独核对"
+      },
+      "acceptance": [
+        "AC-05",
+        "AC-07"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/company_content_boundary_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT04",
+      "input": {
+        "operation": "sent_content",
+        "historical_author": true,
+        "can_read": false
+      },
+      "expected": {
+        "http_status": 404,
+        "http_status_kind": "exact",
+        "semantic_code": "not_found",
+        "error_reason": null,
+        "assertion": "sent content 404；看得到提交回执也不能展开正文"
+      },
+      "acceptance": [
+        "AC-05",
+        "AC-06"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/company_content_boundary_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT05",
+      "input": {
+        "operation": "normal_content",
+        "address_reused": true,
+        "original_mailbox_id_matches": false
+      },
+      "expected": {
+        "http_status": 404,
+        "http_status_kind": "exact",
+        "semantic_code": "not_found",
+        "error_reason": null,
+        "assertion": "404，不把旧邮件转向新ID"
+      },
+      "acceptance": [
+        "AC-05"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/company_content_boundary_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT06",
+      "input": {
+        "operation": "normal_content",
+        "tenant_matches": false,
+        "same_resource_name": true
+      },
+      "expected": {
+        "http_status": 404,
+        "http_status_kind": "exact",
+        "semantic_code": "not_found",
+        "error_reason": null,
+        "assertion": "404，不能跨公司读取或泄露资源存在性"
+      },
+      "acceptance": [
+        "AC-05"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/company_content_boundary_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestCompanyMessageDetailMatchesPersonalListStateAndImmutableScope",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT07",
+      "input": {
+        "operation": "normal_content",
+        "domain_allowed": false,
+        "has_grant": true
+      },
+      "expected": {
+        "http_status": 403,
+        "http_status_kind": "exact",
+        "semantic_code": "forbidden",
+        "error_reason": null,
+        "assertion": "403，不因grant或owner而放宽域名范围"
+      },
+      "acceptance": [
+        "AC-05"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT08",
+      "input": {
+        "operation": "normal_content",
+        "hard_expiry_relative_to_now": [
+          "before",
+          "equal"
+        ],
+        "physical_object_exists": true
+      },
+      "expected": {
+        "http_status": 404,
+        "http_status_kind": "exact",
+        "semantic_code": "not_found",
+        "error_reason": null,
+        "assertion": "404，不打开正文/附件对象"
+      },
+      "acceptance": [
+        "AC-05",
+        "AC-10"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_legacy_content_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        },
+        {
+          "source": "internal/store/postgres/r5_audit_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5AuditA03ExpiredContentDeniedAcrossEntrypoints",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer.",
+          "build_tag": "r5audit"
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT09",
+      "input": {
+        "operation": "normal_content",
+        "purge_after_relative_to_now": [
+          "before",
+          "equal"
+        ],
+        "physical_record_exists": true
+      },
+      "expected": {
+        "http_status": 404,
+        "http_status_kind": "exact",
+        "semantic_code": "not_found",
+        "error_reason": null,
+        "assertion": "404，物理记录仍在也不可读"
+      },
+      "acceptance": [
+        "AC-05",
+        "AC-10"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_legacy_content_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "CT10",
+      "input": {
+        "operation": "normal_content",
+        "authoritative_query": "error",
+        "job_body_exists": true
+      },
+      "expected": {
+        "http_status": 500,
+        "http_status_kind": "class",
+        "semantic_code": "internal_error",
+        "error_reason": null,
+        "assertion": "5xx、无正文，不回退为原始job JSON"
+      },
+      "acceptance": [
+        "AC-05",
+        "AC-06"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_legacy_content_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyContentPropagatesStorageFailure",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "5xx category only; exact failure status requires HTTP binding"
+      ]
+    },
+    {
+      "id": "RC01",
+      "input": {
+        "operation": "receipt",
+        "receipt_principal_valid": true,
+        "content_expired": true,
+        "job_exists": true
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "回执可依政策200，但只有安全状态投影，view_content=false"
+      },
+      "acceptance": [
+        "AC-05",
+        "AC-06"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_legacy_content_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        },
+        {
+          "source": "internal/app/submissions/redaction_test.go",
+          "package": "./internal/app/submissions",
+          "test": "TestRedactOutboundJobViewRestrictedHidesBCCAndProtocol",
+          "layers": [
+            "unit"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "RC02",
+      "input": {
+        "operation": [
+          "legacy_outbound_list",
+          "legacy_outbound_detail",
+          "submit_replay"
+        ],
+        "content_expired": true
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "与安全回执/同一内容资格适配，不再有独立正文旁路"
+      },
+      "acceptance": [
+        "AC-05"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_legacy_content_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyOutboundHTTPDoesNotResurrectExpiredContent",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        },
+        {
+          "source": "internal/store/postgres/r5_legacy_content_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "RC03",
+      "input": {
+        "operation": "receipt",
+        "job_state": "failed",
+        "in_flight_domain": "",
+        "content_allowed": false,
+        "recipients": [
+          {
+            "category": "to",
+            "address": "visible@recipient.test",
+            "state": "accepted"
+          },
+          {
+            "category": "bcc",
+            "address": "hidden@recipient.test",
+            "state": "permanent"
+          }
+        ],
+        "subject": "safe synthetic receipt",
+        "text_body": "private body",
+        "smtp_response": "private protocol",
+        "delivery_token": "12345678-1234-5678-9012-123456789012"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "显示部分失败，隐藏BCC不能变为全部成功",
+        "projection": {
+          "status": "partially_accepted",
+          "visible_addresses": [
+            "visible@recipient.test"
+          ],
+          "hidden_addresses": [
+            "hidden@recipient.test"
+          ],
+          "retry": true,
+          "delivery_uncertain": false,
+          "retry_block_reason": null,
+          "label_zh": "部分已接受",
+          "label_en": "Partially accepted",
+          "forbidden_fields": [
+            "bcc",
+            "text_body",
+            "html_body",
+            "raw_mime",
+            "delivery_token",
+            "smtp_response"
+          ]
+        }
+      },
+      "acceptance": [
+        "AC-06",
+        "AC-08"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/delivery/r5_protocol_test.go",
+          "package": "./internal/delivery",
+          "test": "TestR5ProtocolDeliverySharedCases",
+          "layers": [
+            "unit"
+          ],
+          "consumes_shared_input": true,
+          "scope": [
+            "status",
+            "recipient_redaction",
+            "secrets",
+            "capabilities"
+          ]
+        },
+        {
+          "source": "web/components/company/r5-protocol.test.tsx",
+          "runner": "vitest",
+          "layers": [
+            "components"
+          ],
+          "consumes_shared_input": true,
+          "scope": [
+            "rendered_status_label",
+            "safe_recipient_display",
+            "retry_button",
+            "uncertainty_notice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RC04",
+      "input": {
+        "operation": "receipt",
+        "job_state": "failed",
+        "in_flight_domain": "recipient.test",
+        "content_allowed": false,
+        "recipients": [
+          {
+            "category": "to",
+            "address": "uncertain@recipient.test",
+            "state": "uncertain"
+          }
+        ],
+        "subject": "safe synthetic receipt",
+        "text_body": "private body",
+        "smtp_response": "private protocol",
+        "delivery_token": "12345678-1234-5678-9012-123456789012"
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "显示不确定，普通重试不可用；不能标为取消或成功",
+        "projection": {
+          "status": "needs_attention",
+          "visible_addresses": [
+            "uncertain@recipient.test"
+          ],
+          "hidden_addresses": [],
+          "retry": false,
+          "delivery_uncertain": true,
+          "retry_block_reason": "delivery_uncertain",
+          "label_zh": "需要处理",
+          "label_en": "Needs attention",
+          "forbidden_fields": [
+            "bcc",
+            "text_body",
+            "html_body",
+            "raw_mime",
+            "delivery_token",
+            "smtp_response"
+          ]
+        }
+      },
+      "acceptance": [
+        "AC-24"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/delivery/r5_protocol_test.go",
+          "package": "./internal/delivery",
+          "test": "TestR5ProtocolDeliverySharedCases",
+          "layers": [
+            "unit"
+          ],
+          "consumes_shared_input": true,
+          "scope": [
+            "status",
+            "recipient_redaction",
+            "secrets",
+            "capabilities"
+          ]
+        },
+        {
+          "source": "web/components/company/r5-protocol.test.tsx",
+          "runner": "vitest",
+          "layers": [
+            "components"
+          ],
+          "consumes_shared_input": true,
+          "scope": [
+            "rendered_status_label",
+            "safe_recipient_display",
+            "retry_button",
+            "uncertainty_notice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "RC05",
+      "input": {
+        "operation": "receipt",
+        "job_state": "sent",
+        "in_flight_domain": "",
+        "content_allowed": false,
+        "recipients": [
+          {
+            "category": "to",
+            "address": "accepted@recipient.test",
+            "state": "accepted"
+          },
+          {
+            "category": "cc",
+            "address": "copy@recipient.test",
+            "state": "accepted"
+          }
+        ],
+        "subject": "safe synthetic receipt",
+        "text_body": "private body",
+        "smtp_response": "private protocol",
+        "delivery_token": "12345678-1234-5678-9012-123456789012"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "表述为下一跳接受，不宣称最终送达",
+        "projection": {
+          "status": "accepted",
+          "visible_addresses": [
+            "accepted@recipient.test",
+            "copy@recipient.test"
+          ],
+          "hidden_addresses": [],
+          "retry": false,
+          "delivery_uncertain": false,
+          "retry_block_reason": "state_not_retryable",
+          "label_zh": "下一跳已接受",
+          "label_en": "Accepted by next hop",
+          "forbidden_fields": [
+            "bcc",
+            "text_body",
+            "html_body",
+            "raw_mime",
+            "delivery_token",
+            "smtp_response"
+          ]
+        }
+      },
+      "acceptance": [
+        "AC-23",
+        "AC-24"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/delivery/r5_protocol_test.go",
+          "package": "./internal/delivery",
+          "test": "TestR5ProtocolDeliverySharedCases",
+          "layers": [
+            "unit"
+          ],
+          "consumes_shared_input": true,
+          "scope": [
+            "status",
+            "recipient_redaction",
+            "secrets",
+            "capabilities"
+          ]
+        },
+        {
+          "source": "web/components/company/r5-protocol.test.tsx",
+          "runner": "vitest",
+          "layers": [
+            "components"
+          ],
+          "consumes_shared_input": true,
+          "scope": [
+            "rendered_status_label",
+            "safe_recipient_display",
+            "retry_button",
+            "uncertainty_notice"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "OP01",
+      "input": {
+        "operation": "break_glass",
+        "principal": [
+          "reader",
+          "company_admin",
+          "historical_author"
+        ]
+      },
+      "expected": {
+        "http_status": 403,
+        "http_status_kind": "exact",
+        "semantic_code": "forbidden",
+        "error_reason": null,
+        "assertion": "403，无恢复原件"
+      },
+      "acceptance": [
+        "AC-07"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "OP02",
+      "input": {
+        "operation": "break_glass",
+        "principal": "platform_operator",
+        "exact_tenant_resource": true,
+        "valid_reason": true,
+        "required_audit": "success"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "允许受控恢复读取；无delivery token等执行凭据"
+      },
+      "acceptance": [
+        "AC-07"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "OP03",
+      "input": {
+        "operation": "audit_reason_policy",
+        "variants": [
+          {
+            "name": "empty",
+            "value": ""
+          },
+          {
+            "name": "whitespace",
+            "value": " \n\t"
+          },
+          {
+            "name": "seven",
+            "value": "1234567"
+          },
+          {
+            "name": "trim_seven",
+            "value": " 1234567 "
+          },
+          {
+            "name": "eight",
+            "value": " 12345678\n"
+          },
+          {
+            "name": "utf8_six",
+            "value": "理由"
+          },
+          {
+            "name": "utf8_nine",
+            "value": "审计因"
+          },
+          {
+            "name": "utf8_twelve",
+            "value": " 审计理由 "
+          },
+          {
+            "name": "maximum",
+            "repeat": "a",
+            "count": 1000
+          },
+          {
+            "name": "trim_maximum",
+            "repeat": "a",
+            "count": 1000,
+            "prefix": " \t",
+            "suffix": "\n"
+          },
+          {
+            "name": "over_maximum",
+            "repeat": "a",
+            "count": 1001
+          }
+        ]
+      },
+      "expected": {
+        "http_status": 400,
+        "http_status_kind": "exact",
+        "semantic_code": "invalid_input",
+        "error_reason": null,
+        "assertion": "400，不执行例外读取；中文按UTF-8字节核验",
+        "variants": [
+          {
+            "name": "empty",
+            "valid": false,
+            "normalized": ""
+          },
+          {
+            "name": "whitespace",
+            "valid": false,
+            "normalized": ""
+          },
+          {
+            "name": "seven",
+            "valid": false,
+            "normalized": ""
+          },
+          {
+            "name": "trim_seven",
+            "valid": false,
+            "normalized": ""
+          },
+          {
+            "name": "eight",
+            "valid": true,
+            "normalized": "12345678"
+          },
+          {
+            "name": "utf8_six",
+            "valid": false,
+            "normalized": ""
+          },
+          {
+            "name": "utf8_nine",
+            "valid": true,
+            "normalized": "审计因"
+          },
+          {
+            "name": "utf8_twelve",
+            "valid": true,
+            "normalized": "审计理由"
+          },
+          {
+            "name": "maximum",
+            "valid": true,
+            "normalized": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "trim_maximum",
+            "valid": true,
+            "normalized": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            "name": "over_maximum",
+            "valid": false,
+            "normalized": ""
+          }
+        ]
+      },
+      "acceptance": [
+        "AC-07"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/app/credentials/policy_test.go",
+          "package": "./internal/app/credentials",
+          "test": "TestAuditReasonPolicyBoundaries",
+          "layers": [
+            "unit"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/app/credentials/r5_protocol_test.go",
+          "package": "./internal/app/credentials",
+          "test": "TestR5ProtocolAuditReasonSharedCases",
+          "layers": [
+            "unit"
+          ],
+          "consumes_shared_input": true,
+          "scope": [
+            "trim",
+            "minimum_bytes",
+            "maximum_bytes",
+            "unicode_bytes",
+            "normalized_persisted_reason"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "OP04",
+      "input": {
+        "operation": "break_glass",
+        "required_audit": "error"
+      },
+      "expected": {
+        "http_status": 500,
+        "http_status_kind": "class",
+        "semantic_code": "internal_error",
+        "error_reason": null,
+        "assertion": "5xx、无内容，不能先返回正文再补审计"
+      },
+      "acceptance": [
+        "AC-07"
+      ],
+      "audit": [
+        "A03"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "5xx category only; exact failure status requires HTTP binding"
+      ]
+    },
+    {
+      "id": "RT01",
+      "input": {
+        "operation": [
+          "trash",
+          "restore"
+        ],
+        "mailbox_kind": "shared",
+        "hard_expiry": "finite_future"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "200，hard_expiry完全不变，只清删除/回收站标记"
+      },
+      "acceptance": [
+        "AC-10"
+      ],
+      "audit": [
+        "A05"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_audit_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5AuditA05RestorePreservesHardExpiry",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer.",
+          "build_tag": "r5audit"
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "RT02",
+      "input": {
+        "operation": [
+          "restore",
+          "archive"
+        ],
+        "mailbox_kind": "personal",
+        "hard_expiry": null
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "restore/archive不会创建新的硬到期时间"
+      },
+      "acceptance": [
+        "AC-11"
+      ],
+      "audit": [
+        "A05"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "RT03",
+      "input": {
+        "operation": "restore",
+        "hard_expiry_or_purge_after_relative_to_now": [
+          "before",
+          "equal"
+        ]
+      },
+      "expected": {
+        "http_status": 409,
+        "http_status_kind": "exact",
+        "semantic_code": "conflict",
+        "error_reason": null,
+        "assertion": "恢复409，状态不变；读取按CT08/09拒绝"
+      },
+      "acceptance": [
+        "AC-10"
+      ],
+      "audit": [
+        "A05"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "RT04",
+      "input": {
+        "operation": "organize",
+        "can_organize": true,
+        "can_read": false
+      },
+      "expected": {
+        "http_status": 403,
+        "http_status_kind": "exact",
+        "semantic_code": "forbidden",
+        "error_reason": null,
+        "assertion": "403，不能操作或延长期限"
+      },
+      "acceptance": [
+        "AC-10"
+      ],
+      "audit": [
+        "A05"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "RT05",
+      "input": {
+        "operation": [
+          "archive",
+          "unarchive"
+        ],
+        "hard_expiry": "finite_future"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "不暂停、清除或后移硬期限"
+      },
+      "acceptance": [
+        "AC-10",
+        "AC-11"
+      ],
+      "audit": [
+        "A05"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "RT06",
+      "input": {
+        "operation": [
+          "trash",
+          "trash"
+        ],
+        "purge_after": "existing_future"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "不通过重复删除向后延长已有回收站截止"
+      },
+      "acceptance": [
+        "AC-10"
+      ],
+      "audit": [
+        "A05"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "RT07",
+      "input": {
+        "operation": "gc",
+        "reference_kind": [
+          "draft",
+          "sent_asset",
+          "queue",
+          "held"
+        ],
+        "content_expired": true
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "逻辑正文可失效，但受保护原件不因正文失效立即删掉"
+      },
+      "acceptance": [
+        "AC-13",
+        "AC-14"
+      ],
+      "audit": [
+        "A05"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "BC01",
+      "input": {
+        "operation": "submit",
+        "recipient_categories": [
+          "to",
+          "cc",
+          "bcc"
+        ],
+        "attachments": true
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "长期资产保存完整类别和附件；wire没有BCC头"
+      },
+      "acceptance": [
+        "AC-08",
+        "AC-09"
+      ],
+      "audit": [
+        "A07"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "BC02",
+      "input": {
+        "operation": "legacy_backfill",
+        "job_exists": true,
+        "exact_tenant_asset_match": true,
+        "repeat": true
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "允许从可靠结构化来源回填；重复回填不覆盖正确值"
+      },
+      "acceptance": [
+        "AC-09"
+      ],
+      "audit": [
+        "A07"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "BC03",
+      "input": {
+        "operation": "legacy_backfill",
+        "trusted_source": "missing_or_unprovable"
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "标明legacy_unknown；不得用空名单声称没有密送"
+      },
+      "acceptance": [
+        "AC-09"
+      ],
+      "audit": [
+        "A07"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "BC04",
+      "input": {
+        "operation": "sent_content_detail",
+        "mailbox_kind": "shared",
+        "can_read": true,
+        "lifecycle": "live"
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "发件内容详情按同一read政策显示BCC，不另造平行权限"
+      },
+      "acceptance": [
+        "AC-08"
+      ],
+      "audit": [
+        "A07"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "BC05",
+      "input": {
+        "operation": [
+          "list",
+          "receipt",
+          "sse",
+          "webhook",
+          "metrics",
+          "wire_mime"
+        ],
+        "has_bcc": true
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "不输出BCC地址"
+      },
+      "acceptance": [
+        "AC-06",
+        "AC-09"
+      ],
+      "audit": [
+        "A07"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/app/submissions/redaction_test.go",
+          "package": "./internal/app/submissions",
+          "test": "TestRedactOutboundJobViewRestrictedHidesBCCAndProtocol",
+          "layers": [
+            "unit"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer."
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "BC06",
+      "input": {
+        "operation": "sent_content_detail",
+        "delete_job_and_ledger": true,
+        "lifecycle": "live",
+        "has_bcc_and_attachments": true
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "完整发件内容、分类收件人和附件独立保留"
+      },
+      "acceptance": [
+        "AC-08"
+      ],
+      "audit": [
+        "A07"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_audit_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5AuditA07SentAssetKeepsBCCAfterQueueCleanup",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer.",
+          "build_tag": "r5audit"
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "GC01",
+      "input": {
+        "operation": "gc",
+        "protected_prefix_count": 100,
+        "expired_orphan_index": 101
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "有界清理最终能够处理孤儿，前100个仍受保护"
+      },
+      "acceptance": [
+        "AC-12"
+      ],
+      "audit": [
+        "A06"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_audit_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5AuditA06ProtectedPrefixDoesNotStarveGC",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer.",
+          "build_tag": "r5audit"
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "GC02",
+      "input": {
+        "operation": "gc",
+        "reference_kind": [
+          "sealed_draft",
+          "held_raw"
+        ],
+        "tombstone_exists": true
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "普通清理不得删除；创建tombstone也不自动到期"
+      },
+      "acceptance": [
+        "AC-13",
+        "AC-14"
+      ],
+      "audit": [
+        "A06"
+      ],
+      "required_layers": [
+        "db",
+        "http"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "LF01",
+      "input": {
+        "operation": [
+          "offboard_preview",
+          "offboard_execute"
+        ],
+        "target_state": "frozen",
+        "disposition_completed": false,
+        "administrator_authorized": true,
+        "successor_valid": true
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "可预览/执行，全过程不重新启用旧账号"
+      },
+      "acceptance": [
+        "AC-15"
+      ],
+      "audit": [
+        "A04"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_audit_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5AuditA04FrozenEmployeeCanBeHandedOver",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer.",
+          "build_tag": "r5audit"
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "LF02",
+      "input": {
+        "operation": "offboard_execute",
+        "same_plan_replay": true,
+        "same_lifecycle": true,
+        "already_completed": true
+      },
+      "expected": {
+        "http_status": 200,
+        "http_status_kind": "exact",
+        "semantic_code": "success",
+        "error_reason": null,
+        "assertion": "返回原回执，不重复转移/取消/审计"
+      },
+      "acceptance": [
+        "AC-16"
+      ],
+      "audit": [
+        "A04"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "LF03",
+      "input": {
+        "operation": "offboard_execute",
+        "another_plan_completed_same_lifecycle": true
+      },
+      "expected": {
+        "http_status": 409,
+        "http_status_kind": "exact",
+        "semantic_code": "conflict",
+        "error_reason": null,
+        "assertion": "409，不执行第二次处置"
+      },
+      "acceptance": [
+        "AC-16"
+      ],
+      "audit": [
+        "A04"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "LF04",
+      "input": {
+        "operation": "offboard_execute",
+        "asset_count_matches": true,
+        "asset_id_revision_or_eligibility_changed": true
+      },
+      "expected": {
+        "http_status": 409,
+        "http_status_kind": "exact",
+        "semantic_code": "conflict",
+        "error_reason": null,
+        "assertion": "409，重新预览，不以数量相同放行旧指纹"
+      },
+      "acceptance": [
+        "AC-17"
+      ],
+      "audit": [
+        "A04"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "LF05",
+      "input": {
+        "operation": "offboard_execute",
+        "successor_state": [
+          "frozen",
+          "foreign_tenant",
+          "self",
+          "higher_role"
+        ]
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "按参数或资格拒绝，无副作用；具体400/403/404边界待契约核对"
+      },
+      "acceptance": [
+        "AC-04",
+        "AC-17"
+      ],
+      "audit": [
+        "A04"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "LF06",
+      "input": {
+        "operation": "offboard_execute",
+        "old_plan": true,
+        "new_employment_lifecycle": true
+      },
+      "expected": {
+        "http_status": 409,
+        "http_status_kind": "exact",
+        "semantic_code": "conflict",
+        "error_reason": null,
+        "assertion": "不复活旧plan、grant或token；旧plan409"
+      },
+      "acceptance": [
+        "AC-18",
+        "AC-31"
+      ],
+      "audit": [
+        "A04"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "LF07",
+      "input": {
+        "operation": "offboard_execute",
+        "audit_or_mid_write": "error"
+      },
+      "expected": {
+        "http_status": 500,
+        "http_status_kind": "class",
+        "semantic_code": "internal_error",
+        "error_reason": null,
+        "assertion": "原子回滚资产、用户及计划状态，不能留下半交接"
+      },
+      "acceptance": [
+        "AC-18"
+      ],
+      "audit": [
+        "A04"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "5xx category only; exact failure status requires HTTP binding"
+      ]
+    },
+    {
+      "id": "PE01",
+      "input": {
+        "operation": "permission_override_patch",
+        "existing_can_send": false,
+        "existing_domain_restriction": true,
+        "patch": {
+          "daily_send_quota": 25
+        }
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "只改额度，其他原始覆盖保持不变"
+      },
+      "acceptance": [
+        "AC-01"
+      ],
+      "audit": [
+        "A01",
+        "A02"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_audit_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5AuditA01OverridePreservesUneditedRestriction",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer.",
+          "build_tag": "r5audit"
+        },
+        {
+          "source": "internal/store/postgres/r5_component_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ComponentA01PreservesOverrides",
+          "layers": [
+            "components"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Baseline observer: expects the exact known defect; PASS does not establish target compliance.",
+          "build_tag": "r5audit"
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "PE02",
+      "input": {
+        "operation": "permission_override_patch",
+        "field_values": [
+          "omitted",
+          null,
+          false,
+          0,
+          []
+        ]
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "分别表示保持/恢复继承/具体输入；原始覆盖不从effective反推"
+      },
+      "acceptance": [
+        "AC-03"
+      ],
+      "audit": [
+        "A01",
+        "A02"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    },
+    {
+      "id": "PE03",
+      "input": {
+        "operation": "profile_patch",
+        "stale_revision": true,
+        "patch_contains_old_security_fields": true
+      },
+      "expected": {
+        "http_status": 409,
+        "http_status_kind": "exact",
+        "semantic_code": "conflict",
+        "error_reason": null,
+        "assertion": "revision不匹配409，不恢复刚撤销权限"
+      },
+      "acceptance": [
+        "AC-02"
+      ],
+      "audit": [
+        "A01",
+        "A02"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [
+        {
+          "source": "internal/store/postgres/r5_audit_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5AuditA02StaleProfileCannotRestoreRevocation",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Reference test only; case target needs shared-input assertions for every required layer.",
+          "build_tag": "r5audit"
+        },
+        {
+          "source": "internal/store/postgres/r5_component_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ComponentA02RejectsStaleProfile",
+          "layers": [
+            "components"
+          ],
+          "consumes_shared_input": false,
+          "scope": "Baseline observer: expects the exact known defect; PASS does not establish target compliance.",
+          "build_tag": "r5audit"
+        }
+      ],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "PE04",
+      "input": {
+        "operation": "permission_override_patch",
+        "old_revision": true,
+        "override_recreated_or_profile_reassigned": true
+      },
+      "expected": {
+        "http_status": 409,
+        "http_status_kind": "exact",
+        "semantic_code": "conflict",
+        "error_reason": null,
+        "assertion": "409，持久版本不能回到初始值"
+      },
+      "acceptance": [
+        "AC-03"
+      ],
+      "audit": [
+        "A01",
+        "A02"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters"
+      ]
+    },
+    {
+      "id": "PE05",
+      "input": {
+        "operation": "draft_save",
+        "wait_for_draft_lock": true,
+        "send_grant_revoked_during_wait": true
+      },
+      "expected": {
+        "http_status": null,
+        "http_status_kind": "unresolved",
+        "semantic_code": "policy_assertion",
+        "error_reason": null,
+        "assertion": "二者有明确顺序：保存先完成或新权限先阻止；撤权完成后旧快照不能继续提交"
+      },
+      "acceptance": [
+        "AC-13",
+        "AC-31"
+      ],
+      "audit": [
+        "A01",
+        "A02"
+      ],
+      "required_layers": [
+        "db",
+        "http",
+        "components"
+      ],
+      "reference_adapters": [],
+      "unresolved": [
+        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
+        "shared JSON input not consumed by Go/HTTP/component adapters",
+        "operation-specific HTTP status must be bound to exact endpoint"
+      ]
+    }
+  ]
+}

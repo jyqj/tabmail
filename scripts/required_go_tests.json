@@ -57,7 +57,16 @@
         ["tabmail/internal/store/postgres", "TestR5ContentReadsFenceMailboxSnapshot"],
         ["tabmail/internal/store/postgres", "TestR5SentMutationParentLockPrecedesActor"],
         ["tabmail/internal/store/postgres", "TestR5SentIndependentMutationsShareParent"],
-        ["tabmail/internal/store/postgres", "TestR5SentMutationReloadsActorAfterParentWait"]
+        ["tabmail/internal/store/postgres", "TestR5SentMutationReloadsActorAfterParentWait"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueRechecksAuthorityAfterParentWait"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueProtectsAuthorityThroughInsert"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueAuditWaitExpiryAndCancellation"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueRequiredAuditFailureRollsBack"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueAuthorizedIndependentSubmissionsShareParent"],
+        ["tabmail/internal/store/postgres", "TestR5RecoveryAuditParentPrecedesActor"],
+        ["tabmail/internal/store/postgres", "TestR5RecoveryAuditOrdersMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5RecoveryAuditReloadsActorAfterParentWait"],
+        ["tabmail/internal/store/postgres", "TestR5SessionVersionInFlightRouterAuthorization"]
       ],
       "allowed_skips": []
     },
@@ -290,7 +299,18 @@
         ["tabmail/internal/store/postgres", "TestR5IndexRejectsChangedSourceAndStaleToken"],
         ["tabmail/internal/store/postgres", "TestR5ReadCachedContentRejectsNewRequestsAfterRevoke"],
         ["tabmail/internal/store/postgres", "TestR5ReadAdminAndWrongMailboxDoNotOpenObject"],
-        ["tabmail/internal/store/postgres", "TestR5ReadWaitingIdentityReloadRejectsFrozenActor"]
+        ["tabmail/internal/store/postgres", "TestR5ReadWaitingIdentityReloadRejectsFrozenActor"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueRechecksAuthorityAfterParentWait"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueProtectsAuthorityThroughInsert"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueAuditWaitExpiryAndCancellation"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueRequiredAuditFailureRollsBack"],
+        ["tabmail/internal/store/postgres", "TestR5EnqueueAuthorizedIndependentSubmissionsShareParent"],
+        ["tabmail/internal/store/postgres", "TestR5RecoveryAuditParentPrecedesActor"],
+        ["tabmail/internal/store/postgres", "TestR5RecoveryAuditOrdersMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5RecoveryAuditReloadsActorAfterParentWait"],
+        ["tabmail/internal/store/postgres", "TestR5SessionVersionInFlightRouterAuthorization"],
+        ["tabmail/internal/delivery", "TestR5ProtocolDeliverySharedCases"],
+        ["tabmail/internal/app/credentials", "TestR5ProtocolAuditReasonSharedCases"]
       ],
       "allowed_skips": [
         {

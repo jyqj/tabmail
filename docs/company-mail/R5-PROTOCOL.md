@@ -2,7 +2,7 @@
 
 2026-09-28，B01-D。依据 [R5-DESIGN](R5-DESIGN.md) 的既定目标，将内容、回执、留存、BCC 与离职语义整理为输入/输出案例。**这是尚未完成可执行核验的草案，不是生产接口行为清单，也不是已冻结的HTTP契约。P0-080保持未完成。** 实际入口和旧行为另见 [R5-API-MATRIX](R5-API-MATRIX.md)。
 
-本轮拟议校验脚本的写入被工具安全检查拦截，未落地；本文件只是可审阅的文本，不通过其他路径执行被拦截脚本。后续须在正常获准的工具流程中完成案例数据、校验及适配器验收。表中的状态码是目标响应类别；具体error.reason仍需与OpenAPI/Go/TS一起核验，不能将本表当成已经实现的字符串常量。
+B01-D 时校验脚本未落地；本轮正常工具流程新增机器案例目录及命名测试参考驱动，新增部分共享输入 Go/组件消费者；HTTP 及其余案例仍缺，不能将结构检查当成协议验收。表中的状态码是目标响应类别；具体error.reason仍需与OpenAPI/Go/TS一起核验，不能将本表当成已经实现的字符串常量。
 
 ## 1. 通用规则和判定顺序
 
@@ -16,8 +16,8 @@
 |---|---|---|---|
 | CT01 | 有效当前reader，原邮箱ID匹配，条目未到期 | 200，允许指定内容/附件；不扩大到别的邮箱 | AC-05、AC-28 |
 | CT02 | 匿名或已撤销/冻结凭据 | 401，不打开对象 | AC-31 |
-| CT03 | 公司admin或平台super_admin但没有该邮箱read | 普通内容入口403，不凭角色放行 | AC-05、AC-07 |
-| CT04 | 历史发送者已撤去read | 403；看得到提交回执也不能展开正文 | AC-05、AC-06 |
+| CT03 | 公司admin或平台super_admin但没有该邮箱read | sent content 404，不凭角色放行；入站入口单独核对 | AC-05、AC-07 |
+| CT04 | 历史发送者已撤去read | sent content 404；看得到提交回执也不能展开正文 | AC-05、AC-06 |
 | CT05 | 邮箱地址被删除重建，ID不同 | 404，不把旧邮件转向新ID | AC-05 |
 | CT06 | 同名资源属于另一租户 | 404，不能跨公司读取或泄露资源存在性 | AC-05 |
 | CT07 | 当前域名范围不包含资源 | 403，不因grant或owner而放宽域名范围 | AC-05 |
@@ -78,3 +78,39 @@ RT03的操作拒绝与CT08的读取不可见并不矛盾：前者是写命令冲
 ## 5. 尚缺的交付
 
 本表尚未做到机器可执行、输入模式完整、Go/HTTP/组件适配器逐项对照；部分拒绝码边界仍明确待核对。因此080未完成，不能据此启动依赖它的110实现。后续须保留这些缺口，并把每项具体案例绑定到相同输入/预期数据与真实测试；不能仅验证Markdown行数就宣布协议验收通过。P1-P4原七项缺陷仍由各阶段修复验收关闭。
+
+
+## 6. B01-V 机器案例子包（仍未冻结）
+
+- [R5-PROTOCOL-CASES.json](evidence/R5-PROTOCOL-CASES.json) 编码本表全部 **46** 个案例的结构化输入、预期 HTTP 类别、语义拒绝类别、AC/A01–A07、必需证据层和未解决项。`semantic_code` 是目标分类，不是已经落实的 `error.reason`。
+- `scripts/check_r5_protocol.py` 核对精确案例集合及真实 Go 测试符号，按 `unit/db/http/components` 执行命名参考测试，要求每个测试实际 run/pass、包成功，拒绝 skip/missing/失败。记录源提交、dirty 路径、案例与适配器源哈希和原始 Go JSONL。
+- 19 个案例绑定现有真实测试参考。第二轮 RC03/04/05 与 OP03 已增加共享输入真实 Go 消费者，RC03/04/05 增加实际渲染组件消费者；其余 42 个案例仍没有共享消费者，所有案例仍缺完整必需层。参考测试 PASS 只能证明该测试的原断言，不能证明此 JSON 的全部目标、精确理由码或各层一致。组件基线观察器 PASS 表示成功复现旧缺陷，不是安全协议已实现。
+- CT03/CT04 的 sent-content 错误码从草案 403 明确修正为 404，与 `CONTENT-BOUNDARIES.md` 及 `TestSubmissionAuthorLosesContentButKeepsReceiptAfterReadRevocation` 的当前断言一致。入站或域名拒绝码需单独绑定入口；不通过放宽为任意 403/404 集合隐去矛盾。
+
+```sh
+# 仅结构检查：成功不代表协议已冻结
+python3 scripts/check_r5_protocol.py
+python3 -m unittest discover -s scripts/tests -p 'test_r5_protocol.py'
+# 实际 Go 单元参考；fresh output-dir 防止覆盖旧证据
+python3 scripts/check_r5_protocol.py --run unit --output-dir /tmp/tabmail-r5-protocol-unit
+# 只使用隔离测试 DB，沿用已有 fixture；不读取 .env、不连接生产
+TABMAIL_TEST_DB_DSN='<disposable-test-dsn>' python3 scripts/check_r5_protocol.py --run http --output-dir /tmp/tabmail-r5-protocol-http
+```
+
+P0-080 仍未完成：要为所有案例接入共同输入、精确入口/理由码与当前 Go/HTTP/组件断言，且不能用基线缺陷观察器替代安全目标回归。P0-110/G0 等依赖仍按 TODO 原门禁执行。
+
+
+### 第二轮共享输入消费者
+
+RC03/04/05 的 JSON 输入现在包括真实 job state、分类地址与逐目标状态、in-flight 标记、敏感字段。Go 测试直接调用生产 `delivery.DeriveSubmissionStatus`、`submissions.RedactOutboundJobView`、`FilterRecipientsForJobView` 与 `OutboundCapabilities`，不按案例编号编写第二套政策。能力计算的隔离存储是 FakeStore，仅证明应用策略，**不证明数据库授权或 HTTP 原子边界**。
+
+组件测试读取相同 JSON 及 Go 真实输出（带案例 SHA-256），将其送给真实 `SubmissionPane`；只注入 API 运输结果，不把目标状态/按钮值伪造成服务端输出。验证部分接受、下一跳接受、不确定提醒、重试按钮、BCC与敏感字段不展示。该证据为 jsdom 组件，不是 shipping 浏览器或实际 HTTP。
+
+OP03 新增 11 个输入变体，涵盖空白、trim、7/8 字节、中文 6/9/12 字节及 1000/1001 字节。目标包含无效拒绝与有效边界控制；消费者调用生产 `credentials.AuditReason`，验证真实错误 sentinel 与持久化规范值。恢复 HTTP 的精确 reason 仍未冻结。
+
+```sh
+python3 scripts/check_r5_protocol.py --run shared-unit --output-dir /tmp/tabmail-r5-protocol-shared-unit
+python3 scripts/check_r5_protocol.py --run shared-components --output-dir /tmp/tabmail-r5-protocol-shared-components
+```
+
+共享执行报告逐例列出已验证层和 `missing_required_layers`；报告及返回码成功仅表示所声明的共享纯策略/组件子包通过，`task_complete` 仍为 false。

@@ -20,6 +20,35 @@ import (
 // never touch the published-template path; every lookup fails loudly.
 type nopGovernance struct{}
 
+func TestRetryRequesterPreservesAuthenticatedSessionVersion(t *testing.T) {
+	for _, mode := range []string{"current", "revoked-zero", "trusted-internal"} {
+		t.Run(mode, func(t *testing.T) {
+			st := testutil.NewFakeStore()
+			u := &models.User{ID: uuid.New(), TenantID: uuid.New(), Email: "session@fixture.test", Role: models.RoleAdmin, IsActive: true, SessionVersion: 1}
+			if e := st.CreateUser(context.Background(), u); e != nil {
+				t.Fatal(e)
+			}
+			v := int64(1)
+			a := authz.Actor{Type: authz.PrincipalUser, ID: u.ID, TenantID: u.TenantID, Role: models.RoleAdmin, IsAdmin: true, SessionVersion: &v}
+			if mode == "revoked-zero" {
+				v = 0
+			}
+			if mode == "trusted-internal" {
+				a.SessionVersion = nil
+			}
+			j := &models.OutboundJob{TenantID: u.TenantID, ZoneID: uuid.New(), SenderUserID: &u.ID}
+			e := ValidateRetryRequester(context.Background(), st, a, j)
+			if mode == "revoked-zero" {
+				if !authz.IsAuthzError(e) {
+					t.Fatalf("revoked requester accepted or wrong error: %v", e)
+				}
+			} else if e != nil {
+				t.Fatalf("valid requester rejected: %v", e)
+			}
+		})
+	}
+}
+
 func (nopGovernance) TemplateForSend(context.Context, uuid.UUID, *uuid.UUID, *uuid.UUID, uuid.UUID, uuid.UUID) (*company.TemplateVersion, string, string, error) {
 	return nil, "", "", errors.New("template governance not available in this test")
 }

@@ -116,12 +116,21 @@ func (r *outboundRetryReader) TemplateForSend(ctx context.Context, tenant uuid.U
 	if tenant != r.tenant || user == nil {
 		return nil, "", "", authz.ErrForbidden("template sender unavailable")
 	}
-	// Parent/version share protection fences retirement/revocation. Template grant
-	// administration is fenced by the caller's tenant SHARE lock.
+	// Parent/version share protection fences retirement/revocation. Protect the
+	// exact granted row too: a direct delete cannot invalidate an authorization
+	// already accepted by this transaction. Missing grants still fail closed.
 	var id uuid.UUID
 	e := r.tx.QueryRow(ctx, `SELECT v.id FROM mail_template_versions v JOIN mail_templates t ON t.id=v.template_id AND t.tenant_id=v.tenant_id WHERE v.id=$1 AND v.tenant_id=$2 FOR SHARE OF t,v NOWAIT`, version, tenant).Scan(&id)
 	if errors.Is(e, pgx.ErrNoRows) {
 		return nil, "", "", authz.ErrForbidden("published template unavailable")
+	}
+	if e != nil {
+		return nil, "", "", e
+	}
+	var granted uuid.UUID
+	e = r.tx.QueryRow(ctx, `SELECT g.template_id FROM mail_template_grants g JOIN mail_template_versions v ON v.template_id=g.template_id AND v.tenant_id=g.tenant_id WHERE v.id=$1 AND g.tenant_id=$2 AND g.user_id=$3 AND g.mailbox_id=$4 FOR SHARE OF g NOWAIT`, version, tenant, *user, mailbox).Scan(&granted)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return nil, "", "", authz.ErrForbidden("published template unavailable or not granted")
 	}
 	if e != nil {
 		return nil, "", "", e

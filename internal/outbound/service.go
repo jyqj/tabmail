@@ -64,6 +64,10 @@ func NewService(cfg config.Outbound, st Repository, gov TemplateGovernance, logg
 
 // SendRequest is the validated input for submitting an outbound email.
 type SendRequest struct {
+	// Principal is request-scoped authority, never persisted on a durable job.
+	// HTTP callers carry the credential generation through the final commit;
+	// workers continue validating the current durable sender independently.
+	Principal         *authz.Actor
 	SenderMailboxID   *uuid.UUID
 	TenantID          uuid.UUID
 	UserID            *uuid.UUID
@@ -273,7 +277,7 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	if err := s.ValidateJobAuthorization(ctx, job); err != nil {
 		return nil, false, err
 	}
-	replayed, err := s.createOutboundJob(ctx, job, req.Quota, req.Draft)
+	replayed, err := s.createOutboundJob(ctx, job, req.Quota, req.Draft, req.Principal)
 	if err != nil {
 		return nil, false, fmt.Errorf("enqueue outbound job: %w", err)
 	}
@@ -287,20 +291,15 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	return job, replayed, nil
 }
 
-func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption) (bool, error) {
-	if draft != nil {
-		repo, ok := s.store.(interface {
-			CreateOutboundJobConsumeDraft(context.Context, *models.OutboundJob, store.OutboundQuotaReservation, store.DraftConsumption) (bool, error)
-		})
-		if !ok {
-			return false, app.BadRequest("draft submission unavailable")
+func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, principal *authz.Actor) (bool, error) {
+	return s.store.CreateOutboundJobAuthorized(ctx, job, quota, draft, func(ctx context.Context, reader store.OutboundRetryReader, current *models.OutboundJob) error {
+		if principal != nil {
+			if err := ValidateRetryRequester(ctx, reader, *principal, current); err != nil {
+				return err
+			}
 		}
-		return repo.CreateOutboundJobConsumeDraft(ctx, job, quota, *draft)
-	}
-	if quota.HasLimits() {
-		return false, s.store.CreateOutboundJobWithQuota(ctx, job, quota)
-	}
-	return false, s.store.CreateOutboundJob(ctx, job)
+		return ValidateJobAuthorization(ctx, reader, reader, current)
+	})
 }
 
 // StartWorker begins the background delivery worker loop. It is the

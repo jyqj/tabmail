@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"tabmail/internal/authn"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/testutil"
 )
@@ -342,5 +343,43 @@ func TestWriteErrorProducesEnvelope(t *testing.T) {
 	}
 	if rr.Code != http.StatusBadRequest || body["error"]["message"] != "boom" {
 		t.Fatalf("unexpected response: status=%d body=%v", rr.Code, body)
+	}
+}
+
+func TestJWTActorPreservesSessionVersionIncludingZero(t *testing.T) {
+	for _, version := range []int64{0, 9} {
+		st, tenant := seededAuthStore()
+		u := &models.User{ID: uuid.New(), TenantID: tenant, Email: "session@fixture.test", Role: models.RoleUser, IsActive: true, SessionVersion: version}
+		if e := st.CreateUser(context.Background(), u); e != nil {
+			t.Fatal(e)
+		}
+		token, e := authn.IssueAccessToken("jwt-test-secret", u)
+		if e != nil {
+			t.Fatal(e)
+		}
+		var actor authz.Actor
+		h := Auth(st, "jwt-test-secret", publicTenantIDForMiddlewareTests)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			actor = ActorFromContext(r.Context())
+			w.WriteHeader(http.StatusNoContent)
+		}))
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+		rr := httptest.NewRecorder()
+		h.ServeHTTP(rr, req)
+		if rr.Code != http.StatusNoContent || actor.SessionVersion == nil || *actor.SessionVersion != version {
+			t.Fatalf("JWT version lost: status=%d actor=%+v", rr.Code, actor)
+		}
+	}
+}
+
+func TestOwnedKeyActorDoesNotInheritSessionVersion(t *testing.T) {
+	u := &models.User{ID: uuid.New(), TenantID: uuid.New(), SessionVersion: 9}
+	key := uuid.New()
+	ctx := context.WithValue(context.Background(), ctxUser, u)
+	ctx = context.WithValue(ctx, ctxAPIKeyID, &key)
+	ctx = context.WithValue(ctx, ctxOwnerUserID, &u.ID)
+	a := ActorFromContext(ctx)
+	if a.Type != authz.PrincipalAPIKey || a.SessionVersion != nil {
+		t.Fatalf("owned Key inherited JWT credential: %+v", a)
 	}
 }

@@ -13,6 +13,7 @@ import (
 // Draft consumption and idempotent lookup remain explicit optional extensions
 // in createOutboundJob, preserving callers that do not submit drafts.
 type Repository interface {
+	store.AtomicOutboundEnqueue
 	SendAddressStore
 	store.OutboundRecipientLedger
 	outboundClaimMark

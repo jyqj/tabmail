@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-U已闭合手工重试最终授权/状态/审计原子性并修正提交后的错误回执：原版31事件27fail/4pass，55组PG204事件连续三轮通过；完整backend1151pass/0fail/1 browser skip、160必跑齐全，HTTP80响应通过。新入队最终资格、其他凭据/兼容边界仍独立待验；P0-070/080、P2整体、完整P8-080与G0未关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-V多轮集成已验收新enqueue当前授权/期限、恢复审计父键和JWT版本携带：原版52事件8pass/44fail，最终52事件三轮全部通过；backend1232pass/0fail/1 browser skip、171必跑齐全，HTTP80响应、前端118测试通过。当前quota变化、旧POST重放、JWT全入口、其他FK/GC和完整协议仍待验；070/080/G0及原父统计6/171不提前关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-U完成手工重试事务内请求者/原发送者校验、状态/recipient检查、审计/事件/最后期限与准确成功回执；见R5-B01-U-VALIDATION.md。T/S/Q/R已验收成果保留 |
-| 下一可执行任务 | P0-070：核对新提交enqueue的当前profile/Key/模板与最后写入资格，结合现有sender/attachment/quota顺序建立具体对照；旧POST幂等、其余FK/GC和普通收件历史期限兼容分别推进。U手工重试不重复实现 |
-| 下一批范围 | 复用隔离PG、既有validator和原门禁，重点是新入队最终授权而非再改U/T投影；保留回执/重试/read/write区别及租约边界。普通收件期限遵守P3-010/020映射，编辑CAS属P1；090/110/G0依赖不变 |
+| 当前阶段 | B01-V已验收新入队事务内授权/最后期限、模板grant行保护、恢复审计父键和JWT sv携带；四个协议案例真正消费共享JSON。见R5-B01-V-VALIDATION.md；U/T/S/Q/R成果保留 |
+| 下一可执行任务 | P0-070：先验证新入队等待中当前DailySendQuota降低/0→有限及最终quota计数；随后旧POST/缺稿幂等回放的当前principal与安全投影、JWT enqueue/retry真实竞争、recovery目标资格与其余FK/GC。不重复已关闭子包 |
+| 下一批范围 | 复用本批官方PG16.13一次性工具、Go1.25.7/Node22/Python3.12及原门禁；并行agent独占测试/权限协议/锁图，主线程集成。完整070/080与090/100/110/120依赖不变，P1暂不越依赖启动 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | U手工重试原子写入已验收；新入队完整资格、全部JWT会话版本/旧POST重放、P1编辑CAS/ABA、普通收件期限兼容、其他FK/GC、080/规模性能、浏览器/DNS/SSE仍待完成。历史无邮箱重试有表锁成本，数据库提交确认丢失及SMTP网络不具备分布式原子性 |
+| 当前阻塞 | 新入队CanSend/Key/模板与最后期限已取得本批证据，但quota仍早期捕获；旧POST回放、JWT全入口、recovery目标/期限、普通收件兼容、其他FK/GC、080完整消费者、规模性能、浏览器/DNS/SSE尚未收口。SMTP及数据库提交确认丢失仍非分布式原子性 |
 | 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
@@ -1536,6 +1536,18 @@ python3 scripts/check_i18n_keys.py
 - 候选另修复commit成功后脱敏查询冲突导致错误409：现失败关闭正文但返回准确受限成功回执，不把真实事务失败变200。worker/模板策略无第二实现，历史无邮箱身份路径为防空查竞争使用SHARE NOWAIT表保护，成本与范围明确记录。
 - 最终backend1151pass/0fail/1 browser skip、160必跑齐全；HTTP80/65/66、Python168、静态67操作、build/vet通过。[报告](R5-B01-U-VALIDATION.md)、[机器结果](evidence/R5-B01-U-VALIDATION.json)、[96成员证据](evidence/R5-B01-U-LOGS.tar.gz)保留原始失败与三轮成功；本批PG已停止。
 - 仅本地提交，未push/PR/merge/deploy；公开DTO/迁移/依赖/前端未变。U只关闭手工重试子包，下一步转向新enqueue最终资格；完整070/080/G0及6/171不提前关闭。
+
+### B01-V：多轮集成的新入队、恢复审计与会话边界（2026-09-30）
+
+- 基线c1b4deb17e02225804e30536e369a9905ce2cb94；工作分支work/company-mail-r5-goal-20260930；真实被测Git tree f6acecfd2657f7550f6c6424f2f4cffe36003a0f，687源码文件校验无漂移。tree不是commit，后续只加文档与证据。
+- 第一轮agent独占enqueue测试、恢复/JWT审查及协议目录；第二轮完成JWT携带与真实共享输入消费者，第三轮只读交叉复核；主线程掌握共享端口、生产接线、manifest及全量验收。
+- 同最终测试原版52事件8pass/44fail：撤权先提交后仍入队、恢复/冻结40P01、旧在途JWT200均实证。candidate1模板grant缺口29pass/2fail保留；JWT首次期待403而正式receipt返回404属测试设计错误，按精确入口纠正后重新对照，未改生产错误映射。
+- 新正式入队编译期要求AtomicOutboundEnqueue，复用既有请求者与durable sender validator和事务读端口；tenant SHARE保护当前政策，模板grant行SHARE补直接删除窗口，最后DB时钟保护Key/mailbox期限与审计等待回滚。trusted原低层创建端口保留给内部夹具，不是HTTP fallback。
+- 恢复三命令先tenant KEY SHARE再actor，job NOWAIT保留；JWT Actor.SessionVersion指针区分0/nil，最终RefreshMemberActor拒绝陈旧版本，owned Key不继承owner JWT；HTTP新提交把原Principal带到最终同步callback，不把sv持久化到job。
+- 46协议案例目录及严格执行门禁；RC03/04/05实际delivery/submissions输出→真实SubmissionPane，OP03实际AuditReason的11个UTF8变体；其余42例/HTTP/DB/精确reason仍missing，080未关闭。
+- 最终52事件三轮各pass、9必跑齐全；完整backend1232pass/0fail/1明确browser skip、171必跑齐全。HTTP80/65/66、Python196、Node23、Vitest118、tsc/lint/build、静态16/33/67及i18n通过；缺DSN/0test/browser-disabled仍被原门禁拒绝。
+- 本轮无可用Docker；官方PG16.13源码校验SHA256后在项目外编译，新0700 socket/no TCP临时集群已stop0/PID文件消失；没有改全局工具或触碰生产数据。[报告](R5-B01-V-VALIDATION.md)、[机器摘要](evidence/R5-B01-V-VALIDATION.json)、[96成员日志](evidence/R5-B01-V-LOGS.tar.gz)保存失败和最终结果，不含responses.json/DSN/源码tar。
+- 新入队当前quota变化仍待验证；旧POST幂等早返回、JWT enqueue/retry等全入口、recovery目标期限与其余FK/GC继续。无push/PR/merge/release/deploy；本批不勾选070/080/G0，父统计仍6/171。下一轮从当前quota红绿开始，而非反复重做已通过子包。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

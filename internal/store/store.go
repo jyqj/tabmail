@@ -310,6 +310,7 @@ type OutboundReceiptReader interface {
 // OutboundStore persists outbound jobs, outbound attempts, and send identities.
 type OutboundStore interface {
 	AtomicOutboundRetry
+	AtomicOutboundEnqueue
 	OutboundContentAuthority
 	OutboundReceiptReader
 	// --- Outbound jobs -----------------------------------------------------

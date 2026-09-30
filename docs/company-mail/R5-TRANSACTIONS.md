@@ -66,11 +66,11 @@ PostgreSQL 16 的规则依据：[显式锁与行锁冲突](https://www.postgresq
 | TX08 草稿保存 | `SaveMailDraft`，company_mail.go:373–430 | actor U S锁 → M S锁 → mailbox/grant读取 → A 按输入顺序 S锁 → 创建receipt/草稿或D revision CAS → 模板资格读取 → Commit | receipt FK 指向 `(tenant_id,user_id)`；新 draft FK 指向用户和邮箱，**不是直接指向 tenant**；现有 D 更新与首次 INSERT 等待行为不同 |
 | TX09 草稿删除 | `DeleteMailDraft` | actor U S锁 → 精确 tenant/user/id/revision、未封存 D DELETE → Commit | 保留 creation tombstone；不能误称 DELETE 释放了全部历史来源 |
 | TX10 上传 reserve / finish | `ReserveMailAttachment`、`FinishMailAttachment` | reserve：actor U S锁 → M S锁 → 当前mailbox/grant读取 → `attachment-budget:tenant:user` advisory → sum/INSERT；finish：actor U S锁 → 预定位mailbox → M S锁及当前资格 → 精确A U锁 → 锁后clock_timestamp/原state条件W → Commit | B01-F实证reserve窗口并前置邮箱锁；B01-G已补修复后全部10项及全量/重复回归。B01-E的Finish修复保留，不替代完整P5-050 |
-| TX11 原子发送入队 | `enqueueOutboundJobTx`，outbound.go | **T KEY SHARE** → submission advisory/已存在回执重放 → **sender U S锁及active检查** → A S锁 → 排序quota advisory及查询 → J INSERT/保留原BEFORE用户触发器 → archive/recipients/pins/audit/D消费 → Commit | 父租户FK锁提前，用户先于附件；KEY SHARE允许不同提交共享父键，不改为租户排他串行。回执重放不新增发送；此处active仍不是完整profile/grant/template授权 |
+| TX11 原子发送入队 | `enqueueOutboundJobTx`，outbound.go | 正式请求**T SHARE**（trusted低层仍KEY SHARE） → submission advisory/已存在回执重放 → 当前请求者/durable sender校验与依赖SHARE NOWAIT → **sender U S锁及active检查** → A S锁 → 排序quota advisory及查询 → J INSERT/保留原BEFORE用户触发器 → archive/recipients/pins/audit/D消费 → Commit | 父租户FK锁提前，用户先于附件；KEY SHARE允许不同提交共享父键，不改为租户排他串行。回执重放不新增发送；V正式请求已复用最终profile/Key/mailbox/template资格和DB截止；当前quota仍早期捕获、幂等回放早返回与其余资格待验，不关闭完整070 |
 | TX12 逐收件人 begin / complete | outbound_recipients.go | begin：J U锁/token/lease → recipient uncertain W → J in-flight W → Commit；complete：J 条件 W → recipient结果 W → Commit | SMTP 在这两个事务之间；不确定 fence 不是最终接受证明，不把 token 检查等同全部授权 |
-| TX13 手工核对投递 | `ReconcileOutbound`，company_ops.go | 当前 operator U S锁 → J U锁 NOWAIT → state/updated_at/目标检查 → recipient/J W → 必要 audit | NOWAIT 拒绝当前竞争，不代表别的阻塞都已消除；不得覆盖 accepted 事实 |
+| TX13 手工核对投递 | `ReconcileOutbound`，company_ops.go | T KEY SHARE → 当前 operator U S锁 → J U锁 NOWAIT → state/updated_at/目标检查 → recipient/J W → 必要 audit | NOWAIT 拒绝当前竞争，不代表别的阻塞都已消除；不得覆盖 accepted 事实 |
 | TX14 持久入站投递 | `DeliverIngress`，ingress.go:117–209 | I U锁/token/lease → target U锁 → T U锁 → UTC daily usage W → M count W → message INSERT / index/event triggers → target delivered W → audit/outbox → clock_timestamp lease重验 → Commit | job→target→tenant 是真实次序；B01-G实测等待tenant自然越lease后全部回滚，以及audit失败后的消息/配额/进度/派生写入回滚。原件与SMTP在外层，不由这三项DB测试认证 |
-| TX15 入站运维 retry | `RetryRecoveryReceipt` | 当前 operator U S锁 → I U锁 NOWAIT →检查状态/时间/hash →精确targets W → audit | 与 worker 锁族对照；只恢复指定未完成目标，原件验证不能被跳过 |
+| TX15 入站运维 retry | `RetryRecoveryReceipt` | T KEY SHARE → 当前 operator U S锁 → I U锁 NOWAIT →检查状态/时间/hash →精确targets W → audit | 与 worker 锁族对照；只恢复指定未完成目标，原件验证不能被跳过 |
 | TX16 刷新令牌轮换 | `RotateRefreshToken`，refresh_rotation.go | family普通查找 → `tabmail:refresh-family:<id>` advisory → U S锁 →旧 R U锁 → 撤销/插入后代 → Commit | 本轮通过真实等待与 NOWAIT/try-advisory 探针验证此顺序；不是先锁旧token再锁user |
 | TX17 logout / family GC | `RevokeRefreshTokenByHash`、`deleteExpiredRefreshFamily` | family advisory → family R UPDATE/DELETE → Commit | logout不要求U S锁；GC在整族都到期时删除；不要新引入user→family等待而与TX16成环 |
 | TX18 改密及用户会话撤销 | `ChangePasswordAtomic`、`RevokeUserRefreshTokens`，users.go | 用户条件 UPDATE/显式 U锁 → refresh rows W →必要audit（改密）→ Commit | 改密expected password hash和active是条件；与轮换用户锁顺序兼容的假设仍须保留真实旧回归 |
@@ -163,3 +163,11 @@ B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的�
 下一轮从未覆盖的跨语句授权/内容截止及其余多资源路径继续，080按既定前置独立推进。索引、Reserve、Finish、入队的已验证局部修复不重复实现；不缩减070原验收标准，提交决策时的有效租约也不宣称数据库确认返回时仍未过期。
 
 B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普通回归和提交映射见R5-B01-D-VALIDATION.md及其机器证据。原始失败、后续修正和最终通过分别保存，test name 不充当执行结果。
+
+## B01-V 当前增量与未关闭范围
+
+- 正式新入队走AtomicOutboundEnqueue：父T SHARE→事务reader重读请求者/原发送者及profile/Key/zone/mailbox/grant/template→原附件与quota顺序→job/ledger/pins/archive/audit/草稿消费→最后DB时钟→Commit。无邮箱fallback沿用表SHARE NOWAIT缺行保护，有表锁成本；旧可信低层创建仍KEY SHARE，当前没有正式HTTPfallback。
+- TemplateForSend精确grant SHARE NOWAIT与t/version行保护同事务；既有管理员也要求显式模板使用grant，不恢复管理员旁路。
+- InspectRecoveryReceipt/RetryRecoveryReceipt/ReconcileOutbound先tenant KEY SHARE再actor，job NOWAIT保留，父键图不代表目标mailbox/zone期限已统一。
+- JWT actor保留SessionVersion指针，RefreshMemberActor在user fence拒绝陈旧版本；HTTP新提交携带Principal，worker durable job不绑定旧JWT版本。receipt/draft-save真实Router红绿已测，其他入口竞争及旧POST早返回未全部认证。
+- 当前quota.Limit仍早期捕获、旧幂等回放及其余FK/GC/普通收件期限继续待验。详见R5-B01-V-VALIDATION.md；原统计6/171，不宣称全事务图闭合。

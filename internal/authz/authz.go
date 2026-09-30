@@ -68,6 +68,11 @@ type Actor struct {
 	TenantWide   bool // true for API key access (no specific user)
 	Permission   *models.EffectivePermission
 	OwnerUserID  *uuid.UUID // For API keys with an active owner user
+	// SessionVersion is the version authenticated by an interactive JWT.
+	// A pointer preserves the valid zero version. Nil is reserved for trusted
+	// internal actors that do not represent a JWT; API keys have their own
+	// current credential checks and never inherit an owner's JWT version.
+	SessionVersion *int64
 }
 
 // IsTenantAdmin reports whether the actor has admin authority within its tenant
