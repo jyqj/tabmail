@@ -422,3 +422,7 @@ Z新restore testcase06cbbc尚未纳Y：当前真实restore-first在已成功rest
 当前49 postgres非test文件／350函数／452 SQL执行调用结构清单更新；exact T KEY SHARE→S UPDATE/delete→required audit FK→Commit是DeleteSuppressionAudited自己的函数序列，不套enqueue家族风险。same final560c原生产双向40P01和victim全回滚、c874/ff50候选三轮8/8明确归证；正式HTTP父消失404／未知500／原无S204分别保留。
 
 授权仍由请求前middleware决定；tenantID/AuditEntry没有等待后currentactor重载。slot53 parent/S/audit关系安全不等whole-slot070或权限窗口PASS。继承family_context非精确函数phase；未来AC新测试排AB被测744文件。
+
+## AC current snapshot闭包
+
+49 postgres文件／352函数／456 SQL执行调用／15 migrations，caller清单来自独立AC source闭包而非AD未提交helper；实际catalog15是75FK／7trigger／34CHECK。slot53当前正式Authorized Actor路径与trusted Audited/helper分清，九leaf仅bounded准入／线性化proof，不涂全slot或全070。见AC报告。

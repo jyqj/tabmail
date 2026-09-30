@@ -258,6 +258,8 @@ type SuppressionStore interface {
 	// DeleteSuppressionAudited removes the entry and writes the audit row in
 	// one transaction; a failed audit rolls the delete back.
 	DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error
+	// DeleteSuppressionAuthorized fences the current JWT/key and the effect in one transaction.
+	DeleteSuppressionAuthorized(ctx context.Context, actor authz.Actor, id uuid.UUID, entry models.AuditEntry) error
 }
 
 // IngestStore persists ingest jobs.

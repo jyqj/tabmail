@@ -114,7 +114,7 @@
     },
     {
       "path": "internal/store/postgres/outbound.go",
-      "sha256": "c87434dff2d7f24fe8ab25e1c198cd75315614d9c68d5e982e28b7e09cd9e175"
+      "sha256": "fecca99dfed70fc4e9e9d7190fb23c223c2db2a81232c58ecd91472709cb6032"
     },
     {
       "path": "internal/store/postgres/outbound_content.go",
@@ -789,6 +789,14 @@
           "function": "ValidateRetryRequester",
           "line": 35,
           "expression": "st.GetAPIKey",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAuthorized",
+          "file": "internal/testutil/fake_store_outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 421,
+          "expression": "s.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
@@ -1769,7 +1777,7 @@
           "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAudited",
           "file": "internal/testutil/fake_store_outbound.go",
           "function": "DeleteSuppressionAudited",
-          "line": 394,
+          "line": 395,
           "expression": "s.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -25402,6 +25410,14 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
+          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+          "file": "internal/store/postgres/outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 685,
+          "expression": "currentMemberActor",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
           "caller_id": "internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:TemplateForSend",
           "file": "internal/store/postgres/outbound_retry_reader.go",
           "function": "TemplateForSend",
@@ -29324,12 +29340,12 @@
     },
     {
       "id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
-      "owner": "postgres.PgStore/outbound.go",
+      "owner": "postgres.PgStore/suppression single transaction",
       "entry": "DeleteSuppressionAudited",
       "group": "TX11",
       "classification": {
-        "kind": "direct-write",
-        "direct_write": true,
+        "kind": "write-call-closure",
+        "direct_write": false,
         "write_closure": true,
         "explicit_lock": true,
         "transaction_calls": true,
@@ -29342,8 +29358,8 @@
         "name": "DeleteSuppressionAudited",
         "receiver": "*PgStore",
         "line": 644,
-        "end": 687,
-        "sha256": "0d77df5a6c2089e85ad1fc7e50bfb4db4b9189c9083049b72c0b3c5b71379f62",
+        "end": 664,
+        "sha256": "0c891d6a6229affb16c0bd8981ece082a90a12b35af90cf9be0607441ff4bd75",
         "calls": [
           {
             "line": 645,
@@ -29377,55 +29393,12 @@
             "name": "NotFound"
           },
           {
-            "line": 661,
-            "expr": "tx.QueryRow(ctx,\n\t`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,\n\tid, tenantID).Scan",
-            "name": "Scan"
-          },
-          {
-            "line": 661,
-            "expr": "tx.QueryRow",
-            "name": "QueryRow",
-            "sql_expr": "`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`"
+            "line": 660,
+            "expr": "deleteSuppressionAuditedTx",
+            "name": "deleteSuppressionAuditedTx"
           },
           {
             "line": 663,
-            "expr": "errors.Is",
-            "name": "Is"
-          },
-          {
-            "line": 666,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`"
-          },
-          {
-            "line": 670,
-            "expr": "uuid.New",
-            "name": "New"
-          },
-          {
-            "line": 672,
-            "expr": "entry.CreatedAt.IsZero",
-            "name": "IsZero"
-          },
-          {
-            "line": 673,
-            "expr": "time.Now",
-            "name": "Now"
-          },
-          {
-            "line": 675,
-            "expr": "mergeAuditDetail",
-            "name": "mergeAuditDetail"
-          },
-          {
-            "line": 680,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)`"
-          },
-          {
-            "line": 686,
             "expr": "tx.Commit",
             "name": "Commit"
           }
@@ -29438,41 +29411,25 @@
           {
             "line": 656,
             "value": "company not found"
-          },
-          {
-            "line": 662,
-            "value": "SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE"
-          },
-          {
-            "line": 666,
-            "value": "DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2"
-          },
-          {
-            "line": 675,
-            "value": "address"
-          },
-          {
-            "line": 680,
-            "value": "\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
           }
         ],
         "params": "func(ctx context.Context, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error"
       },
       "callers": [
         {
-          "caller_id": "internal/api/handlers/outbound.go:*OutboundHandler:DeleteSuppression",
-          "file": "internal/api/handlers/outbound.go",
-          "function": "DeleteSuppression",
-          "line": 250,
-          "expression": "h.store.DeleteSuppressionAudited",
+          "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAuthorized",
+          "file": "internal/testutil/fake_store_outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 451,
+          "expression": "s.DeleteSuppressionAudited",
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "Begin → exacttenant KEY SHARE before exacttenant/id suppression UPDATE lock/delete → required audit INSERT/T FK → Commit; parent absent typedNotFound, other errors raw and wholeTxrollback. T lock is FK/ordering protection, not current actor authorization recheck.",
-      "evidence": "AB final560c same-test baseline two complete-command directions actual40P01/victimrollback; c874Store/ff50typedhandler three candidates all8events pass; ab/evidence/suppression-final-* raw. No actor revoke-during-wait proof.",
+      "lock_fk_wait_fence": "Trusted compatibility port only, no current HTTP dispatch; Begin exacttenant KEY SHARE then shared S/audit helper then Commit. Actor-aware handler now calls Authorized instead.",
+      "evidence": "AC schema-only0fba+15+6202 normal5pass/four actual stale-authority204 red; Actor4diff same15+6202 three rounds11pass; actualU/DELETEkey blocked fences are serialization, role/active afterTwait typed403. Migration15 fresh/14Up/repeat/down-refusal controls and catalog15 separate.",
       "unverified_risks": [
-        "HTTP middleware authorizes before transaction; store tenantID/AuditEntry does not reload current actor after tenant wait. Same-parent lock correctness does not close authorization window.",
-        "Other suppression writers and whole slot070 remain outside bounded AB lock-order proof."
+        "Current management-key final expiry clock is source-reviewed; expiry-during-audit branch not dynamically executed by these nine leaves.",
+        "FakeStore does not prove PostgreSQL atomicity or credential concurrency; trusted compatibility port is not formal actor admission."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -29480,24 +29437,11 @@
         "R5-P6-080"
       ],
       "assertions": {
-        "direct_sql_effects": [
-          {
-            "line": 666,
-            "sql_fragment": "DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2"
-          },
-          {
-            "line": 680,
-            "sql_fragment": "\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
-          }
-        ],
+        "direct_sql_effects": [],
         "direct_lock_fragments": [
           {
             "line": 654,
             "sql_fragment": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
-          },
-          {
-            "line": 662,
-            "sql_fragment": "SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE"
           }
         ],
         "transaction_helper_calls": [
@@ -29513,28 +29457,343 @@
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`"
-          },
-          {
-            "line": 661,
-            "expr": "tx.QueryRow",
-            "name": "QueryRow",
-            "sql_expr": "`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`"
-          },
-          {
-            "line": 666,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`"
-          },
-          {
-            "line": 680,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)`"
           }
         ],
         "effect_status": "source-fragments-not-evaluated-SQL",
-        "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
+        "callback_effect": "No external network/object callback in these ports; helper shares exact caller transaction, CPU JSON/address merge only; no nested authorization transaction or post-commit compensation.",
+        "entry_role": "store-exported-interface-candidate"
+      },
+      "file_family_context": "正式enqueue T SHARE(trusted KEY SHARE)→幂等advisory→validate reader NOWAIT/缺行table SHARE NOWAIT→sender SHARE→A SHARE→quota keys排序→J INSERT→BEFORE sender+AFTER archive→recipient/pins→audit→D消费→deadline→Commit",
+      "evidence_level": "actual-batch-linked-relationship"
+    },
+    {
+      "id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+      "owner": "postgres.PgStore/suppression single transaction",
+      "entry": "DeleteSuppressionAuthorized",
+      "group": "TX11",
+      "classification": {
+        "kind": "write-call-closure",
+        "direct_write": false,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "syntax": {
+        "id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+        "file": "internal/store/postgres/outbound.go",
+        "name": "DeleteSuppressionAuthorized",
+        "receiver": "*PgStore",
+        "line": 669,
+        "end": 747,
+        "sha256": "bfd81eddaf2bf7b5206b33395e2f6868c6b3a9864784e31b397241ee9e9b493c",
+        "calls": [
+          {
+            "line": 670,
+            "expr": "s.pool.Begin",
+            "name": "Begin"
+          },
+          {
+            "line": 674,
+            "expr": "tx.Rollback",
+            "name": "Rollback"
+          },
+          {
+            "line": 676,
+            "expr": "tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, actor.TenantID).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 676,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`"
+          },
+          {
+            "line": 677,
+            "expr": "errors.Is",
+            "name": "Is"
+          },
+          {
+            "line": 678,
+            "expr": "app.NotFound",
+            "name": "NotFound"
+          },
+          {
+            "line": 685,
+            "expr": "currentMemberActor",
+            "name": "currentMemberActor"
+          },
+          {
+            "line": 687,
+            "expr": "app.FromAuthz",
+            "name": "FromAuthz"
+          },
+          {
+            "line": 689,
+            "expr": "actor.IsTenantAdmin",
+            "name": "IsTenantAdmin"
+          },
+          {
+            "line": 690,
+            "expr": "app.Forbidden",
+            "name": "Forbidden"
+          },
+          {
+            "line": 694,
+            "expr": "scanUser",
+            "name": "scanUser"
+          },
+          {
+            "line": 694,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "userSelect + ` WHERE id=$1 AND tenant_id=$2 FOR SHARE`"
+          },
+          {
+            "line": 699,
+            "expr": "app.Forbidden",
+            "name": "Forbidden"
+          },
+          {
+            "line": 704,
+            "expr": "tx.QueryRow(ctx, `SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT`, actor.ID, tenantID).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 704,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT`"
+          },
+          {
+            "line": 705,
+            "expr": "errors.Is",
+            "name": "Is"
+          },
+          {
+            "line": 706,
+            "expr": "app.Forbidden",
+            "name": "Forbidden"
+          },
+          {
+            "line": 710,
+            "expr": "errors.As",
+            "name": "As"
+          },
+          {
+            "line": 711,
+            "expr": "app.Conflict",
+            "name": "Conflict"
+          },
+          {
+            "line": 715,
+            "expr": "json.Unmarshal",
+            "name": "Unmarshal"
+          },
+          {
+            "line": 720,
+            "expr": "strings.ToLower",
+            "name": "ToLower"
+          },
+          {
+            "line": 720,
+            "expr": "strings.TrimSpace",
+            "name": "TrimSpace"
+          },
+          {
+            "line": 724,
+            "expr": "authz.OutboundKeyIdentityMatches",
+            "name": "OutboundKeyIdentityMatches"
+          },
+          {
+            "line": 725,
+            "expr": "app.Forbidden",
+            "name": "Forbidden"
+          },
+          {
+            "line": 729,
+            "expr": "app.Forbidden",
+            "name": "Forbidden"
+          },
+          {
+            "line": 732,
+            "expr": "actor.AuditLabel",
+            "name": "AuditLabel"
+          },
+          {
+            "line": 734,
+            "expr": "deleteSuppressionAuditedTx",
+            "name": "deleteSuppressionAuditedTx"
+          },
+          {
+            "line": 739,
+            "expr": "tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 739,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT clock_timestamp()`"
+          },
+          {
+            "line": 742,
+            "expr": "keyExpiry.After",
+            "name": "After"
+          },
+          {
+            "line": 743,
+            "expr": "app.Forbidden",
+            "name": "Forbidden"
+          },
+          {
+            "line": 746,
+            "expr": "tx.Commit",
+            "name": "Commit"
+          }
+        ],
+        "strings": [
+          {
+            "line": 676,
+            "value": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
+          },
+          {
+            "line": 678,
+            "value": "company not found"
+          },
+          {
+            "line": 690,
+            "value": "tenant administrator required"
+          },
+          {
+            "line": 694,
+            "value": " WHERE id=$1 AND tenant_id=$2 FOR SHARE"
+          },
+          {
+            "line": 699,
+            "value": "key owner unavailable"
+          },
+          {
+            "line": 704,
+            "value": "SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT"
+          },
+          {
+            "line": 706,
+            "value": "key unavailable"
+          },
+          {
+            "line": 710,
+            "value": "55P03"
+          },
+          {
+            "line": 711,
+            "value": "key is changing; reload before retrying"
+          },
+          {
+            "line": 720,
+            "value": "suppression:manage"
+          },
+          {
+            "line": 725,
+            "value": "current key scope or identity unavailable"
+          },
+          {
+            "line": 729,
+            "value": "current suppression principal required"
+          },
+          {
+            "line": 733,
+            "value": "suppression.delete"
+          },
+          {
+            "line": 733,
+            "value": "suppression"
+          },
+          {
+            "line": 739,
+            "value": "SELECT clock_timestamp()"
+          },
+          {
+            "line": 743,
+            "value": "key expired"
+          }
+        ],
+        "params": "func(ctx context.Context, actor authz.Actor, id uuid.UUID, entry models.AuditEntry) error"
+      },
+      "callers": [
+        {
+          "caller_id": "internal/api/handlers/outbound.go:*OutboundHandler:DeleteSuppression",
+          "file": "internal/api/handlers/outbound.go",
+          "function": "DeleteSuppression",
+          "line": 250,
+          "expression": "h.store.DeleteSuppressionAuthorized",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": "Official HTTP explicit Actor port: Begin TKEY; JWT currentMemberActor U SHARE rechecks tenant/active/original sessionversion and role; Key ownerUactive(noJWTversion/admin) then exactKey SHARE NOWAIT/current suppression:manage/owner+tenantwide; shared exactS delete/audit; final key DBclock; Commit.",
+      "evidence": "AC schema-only0fba+15+6202 normal5pass/four actual stale-authority204 red; Actor4diff same15+6202 three rounds11pass; actualU/DELETEkey blocked fences are serialization, role/active afterTwait typed403. Migration15 fresh/14Up/repeat/down-refusal controls and catalog15 separate.",
+      "unverified_risks": [
+        "Current management-key final expiry clock is source-reviewed; expiry-during-audit branch not dynamically executed by these nine leaves.",
+        "FakeStore does not prove PostgreSQL atomicity or credential concurrency; trusted compatibility port is not formal actor admission."
+      ],
+      "review_status": "static-type-review",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-080"
+      ],
+      "assertions": {
+        "direct_sql_effects": [],
+        "direct_lock_fragments": [
+          {
+            "line": 676,
+            "sql_fragment": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
+          },
+          {
+            "line": 694,
+            "sql_fragment": " WHERE id=$1 AND tenant_id=$2 FOR SHARE"
+          },
+          {
+            "line": 704,
+            "sql_fragment": "SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT"
+          }
+        ],
+        "transaction_helper_calls": [
+          {
+            "line": 670,
+            "expr": "s.pool.Begin",
+            "name": "Begin"
+          }
+        ],
+        "sql_execution_expressions": [
+          {
+            "line": 676,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`"
+          },
+          {
+            "line": 694,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "userSelect + ` WHERE id=$1 AND tenant_id=$2 FOR SHARE`"
+          },
+          {
+            "line": 704,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT`"
+          },
+          {
+            "line": 739,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT clock_timestamp()`"
+          }
+        ],
+        "effect_status": "source-fragments-not-evaluated-SQL",
+        "callback_effect": "No external network/object callback in these ports; helper shares exact caller transaction, CPU JSON/address merge only; no nested authorization transaction or post-commit compensation.",
         "entry_role": "store-exported-interface-candidate"
       },
       "file_family_context": "正式enqueue T SHARE(trusted KEY SHARE)→幂等advisory→validate reader NOWAIT/缺行table SHARE NOWAIT→sender SHARE→A SHARE→quota keys排序→J INSERT→BEFORE sender+AFTER archive→recipient/pins→audit→D消费→deadline→Commit",
@@ -31602,6 +31861,172 @@
       "evidence_level": "source-only"
     },
     {
+      "id": "internal/store/postgres/outbound.go::deleteSuppressionAuditedTx",
+      "owner": "postgres.PgStore/suppression single transaction",
+      "entry": "deleteSuppressionAuditedTx",
+      "group": "TX11",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "syntax": {
+        "id": "internal/store/postgres/outbound.go::deleteSuppressionAuditedTx",
+        "file": "internal/store/postgres/outbound.go",
+        "name": "deleteSuppressionAuditedTx",
+        "receiver": "",
+        "line": 749,
+        "end": 777,
+        "sha256": "8933d2838824468d23f7f45a2be58d987fb25ae20a4d57a28266051710497392",
+        "calls": [
+          {
+            "line": 751,
+            "expr": "tx.QueryRow(ctx,\n\t`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,\n\tid, tenantID).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 751,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`"
+          },
+          {
+            "line": 753,
+            "expr": "errors.Is",
+            "name": "Is"
+          },
+          {
+            "line": 756,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`"
+          },
+          {
+            "line": 760,
+            "expr": "uuid.New",
+            "name": "New"
+          },
+          {
+            "line": 762,
+            "expr": "entry.CreatedAt.IsZero",
+            "name": "IsZero"
+          },
+          {
+            "line": 763,
+            "expr": "time.Now",
+            "name": "Now"
+          },
+          {
+            "line": 765,
+            "expr": "mergeAuditDetail",
+            "name": "mergeAuditDetail"
+          },
+          {
+            "line": 770,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)`"
+          }
+        ],
+        "strings": [
+          {
+            "line": 752,
+            "value": "SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE"
+          },
+          {
+            "line": 756,
+            "value": "DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2"
+          },
+          {
+            "line": 765,
+            "value": "address"
+          },
+          {
+            "line": 770,
+            "value": "\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
+          }
+        ],
+        "params": "func(ctx context.Context, tx pgx.Tx, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error"
+      },
+      "callers": [
+        {
+          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
+          "file": "internal/store/postgres/outbound.go",
+          "function": "DeleteSuppressionAudited",
+          "line": 660,
+          "expression": "deleteSuppressionAuditedTx",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+          "file": "internal/store/postgres/outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 734,
+          "expression": "deleteSuppressionAuditedTx",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": "No Begin/Commit of its own; receives caller transaction, exacttenant/id S UPDATE lock then DELETE, merges address and required audit INSERT. Parent/current credential fences belong to only two audited callers; transaction failure/clock rejection rolls effects back.",
+      "evidence": "AC schema-only0fba+15+6202 normal5pass/four actual stale-authority204 red; Actor4diff same15+6202 three rounds11pass; actualU/DELETEkey blocked fences are serialization, role/active afterTwait typed403. Migration15 fresh/14Up/repeat/down-refusal controls and catalog15 separate.",
+      "unverified_risks": [
+        "Current management-key final expiry clock is source-reviewed; expiry-during-audit branch not dynamically executed by these nine leaves.",
+        "FakeStore does not prove PostgreSQL atomicity or credential concurrency; trusted compatibility port is not formal actor admission."
+      ],
+      "review_status": "static-type-review",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-080"
+      ],
+      "assertions": {
+        "direct_sql_effects": [
+          {
+            "line": 756,
+            "sql_fragment": "DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2"
+          },
+          {
+            "line": 770,
+            "sql_fragment": "\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 752,
+            "sql_fragment": "SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE"
+          }
+        ],
+        "transaction_helper_calls": [],
+        "sql_execution_expressions": [
+          {
+            "line": 751,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`"
+          },
+          {
+            "line": 756,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`DELETE FROM suppression_list WHERE id=$1 AND tenant_id=$2`"
+          },
+          {
+            "line": 770,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`\n\t\tINSERT INTO audit_log (id,tenant_id,actor,action,resource_type,resource_id,details,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8)`"
+          }
+        ],
+        "effect_status": "source-fragments-not-evaluated-SQL",
+        "callback_effect": "No external network/object callback in these ports; helper shares exact caller transaction, CPU JSON/address merge only; no nested authorization transaction or post-commit compensation.",
+        "entry_role": "store-exported-interface-candidate"
+      },
+      "file_family_context": "正式enqueue T SHARE(trusted KEY SHARE)→幂等advisory→validate reader NOWAIT/缺行table SHARE NOWAIT→sender SHARE→A SHARE→quota keys排序→J INSERT→BEFORE sender+AFTER archive→recipient/pins→audit→D消费→deadline→Commit",
+      "evidence_level": "actual-batch-linked-relationship"
+    },
+    {
       "id": "internal/store/postgres/outbound.go::insertOutboundJob",
       "owner": "postgres.PgStore/outbound.go",
       "entry": "insertOutboundJob",
@@ -31905,22 +32330,22 @@
         "file": "internal/store/postgres/outbound.go",
         "name": "mergeAuditDetail",
         "receiver": "",
-        "line": 691,
-        "end": 704,
+        "line": 781,
+        "end": 794,
         "sha256": "9853112a848c2870e6ed9f47a0ed5d4f46c0aab2bef1818e9d3e3a3ee9470c17",
         "calls": [
           {
-            "line": 693,
+            "line": 783,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 694,
+            "line": 784,
             "expr": "json.Unmarshal",
             "name": "Unmarshal"
           },
           {
-            "line": 699,
+            "line": 789,
             "expr": "json.Marshal",
             "name": "Marshal"
           }
@@ -31938,10 +32363,10 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
+          "caller_id": "internal/store/postgres/outbound.go::deleteSuppressionAuditedTx",
           "file": "internal/store/postgres/outbound.go",
-          "function": "DeleteSuppressionAudited",
-          "line": 675,
+          "function": "deleteSuppressionAuditedTx",
+          "line": 765,
           "expression": "mergeAuditDetail",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -34885,11 +35310,27 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
+          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
           "file": "internal/store/postgres/outbound.go",
-          "function": "DeleteSuppressionAudited",
-          "line": 661,
-          "expression": "tx.QueryRow(ctx,\n\t`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,\n\tid, tenantID).Scan",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 676,
+          "expression": "tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, actor.TenantID).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+          "file": "internal/store/postgres/outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 704,
+          "expression": "tx.QueryRow(ctx, `SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT`, actor.ID, tenantID).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+          "file": "internal/store/postgres/outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 739,
+          "expression": "tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -34994,6 +35435,14 @@
           "function": "countOutboundSinceQuery",
           "line": 492,
           "expression": "querier.QueryRow(ctx,\n\t`SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND created_at >= $2`,\n\ttenantID, since).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/outbound.go::deleteSuppressionAuditedTx",
+          "file": "internal/store/postgres/outbound.go",
+          "function": "deleteSuppressionAuditedTx",
+          "line": 751,
+          "expression": "tx.QueryRow(ctx,\n\t`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,\n\tid, tenantID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -36887,6 +37336,14 @@
           "line": 35,
           "expression": "st.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAuthorized",
+          "file": "internal/testutil/fake_store_outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 421,
+          "expression": "s.GetAPIKey",
+          "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
       "lock_fk_wait_fence": {
@@ -37225,6 +37682,22 @@
           "function": "EffectivePermission",
           "line": 38,
           "expression": "r.GetUser",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAuthorized",
+          "file": "internal/testutil/fake_store_outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 411,
+          "expression": "s.GetUser",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAuthorized",
+          "file": "internal/testutil/fake_store_outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 438,
+          "expression": "s.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
@@ -42652,10 +43125,10 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
+          "caller_id": "internal/store/postgres/outbound.go::deleteSuppressionAuditedTx",
           "file": "internal/store/postgres/outbound.go",
-          "function": "DeleteSuppressionAudited",
-          "line": 670,
+          "function": "deleteSuppressionAuditedTx",
+          "line": 760,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43015,7 +43488,7 @@
           "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:AddSuppression",
           "file": "internal/testutil/fake_store_outbound.go",
           "function": "AddSuppression",
-          "line": 305,
+          "line": 306,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43023,7 +43496,7 @@
           "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:CreateOutboundAttempt",
           "file": "internal/testutil/fake_store_outbound.go",
           "function": "CreateOutboundAttempt",
-          "line": 159,
+          "line": 160,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43031,7 +43504,7 @@
           "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:CreateSendIdentity",
           "file": "internal/testutil/fake_store_outbound.go",
           "function": "CreateSendIdentity",
-          "line": 185,
+          "line": 186,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43039,7 +43512,7 @@
           "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:CreateSendIdentity",
           "file": "internal/testutil/fake_store_outbound.go",
           "function": "CreateSendIdentity",
-          "line": 193,
+          "line": 194,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43047,7 +43520,7 @@
           "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAudited",
           "file": "internal/testutil/fake_store_outbound.go",
           "function": "DeleteSuppressionAudited",
-          "line": 383,
+          "line": 384,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43055,7 +43528,7 @@
           "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:createOutboundJobLocked",
           "file": "internal/testutil/fake_store_outbound.go",
           "function": "createOutboundJobLocked",
-          "line": 44,
+          "line": 45,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52837,6 +53310,22 @@
           "line": 38,
           "expression": "r.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAuthorized",
+          "file": "internal/testutil/fake_store_outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 411,
+          "expression": "s.GetUser",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_outbound.go:*FakeStore:DeleteSuppressionAuthorized",
+          "file": "internal/testutil/fake_store_outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 438,
+          "expression": "s.GetUser",
+          "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
       "lock_fk_wait_fence": {
@@ -53943,6 +54432,14 @@
           "file": "internal/store/postgres/member_guard.go",
           "function": "currentMemberActor",
           "line": 39,
+          "expression": "scanUser",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+          "file": "internal/store/postgres/outbound.go",
+          "function": "DeleteSuppressionAuthorized",
+          "line": 694,
           "expression": "scanUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -56982,6 +57479,17 @@
           "source": "LOCK TABLE outbound_recipients IN ACCESS EXCLUSIVE MODE;"
         }
       ]
+    },
+    {
+      "path": "internal/store/postgres/migrations/00015_suppression_key_scopes.sql",
+      "sha256": "7068bf50880ee94bff29dc86fa11383cd1b799d6645ba8b4bfb2d07d362c5db8",
+      "definitions": [
+        {
+          "line": 4,
+          "child_context": "tenant_api_keys",
+          "source": "ALTER TABLE tenant_api_keys DROP CONSTRAINT tenant_api_keys_scopes_check;"
+        }
+      ]
     }
   ],
   "runtime_relationship_evidence": {
@@ -57343,5 +57851,12 @@
     "baseline": "8events5pass3fail; two real40P01",
     "candidate_three_rounds": "8pass0fail each",
     "scope": "parent/S/audit atomic ordering and typed404 after parent disappears; not actor reauthorization"
-  }
+  },
+  "authority_relationship_evidence": {
+    "source_test_sha256": "6202a98fd9fd583a5685d0bd2a6bddac4ff2d4dc11324844b9d2f2191049b541",
+    "baseline": "schema-only0fba+15 normal5green; role/active/SV/Keyactual four204red",
+    "candidate": "three11pass; role/active403, Pwd/KeybeforeScommit not permitted by rowfence; source precedes credential mutation",
+    "scope": "official DeleteSuppressionAuthorized bounded role/active/SV/currentKey/fence proofs, not all outbound principals or expiry wait branches"
+  },
+  "frozen_source_boundary": "AC excludes all uncommitted AD/AE files; caller inventory extracted from explicit frozen root, not combined dirty helper tree."
 }

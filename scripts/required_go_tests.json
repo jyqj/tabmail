@@ -450,6 +450,26 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5SuppressionTenantCompleteCommandsOrder"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionAuthorityNormalContracts"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionJWTGuardedAuthorityAfterParentWait"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionJWTSessionVersionAfterSourceWait"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionKeyRevocationAfterSourceWait"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionScopesMigrationFreshUpgradeRepeat"
         ]
       ],
       "allowed_skips": []
@@ -1576,6 +1596,26 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5SuppressionTenantCompleteCommandsOrder"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionAuthorityNormalContracts"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionJWTGuardedAuthorityAfterParentWait"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionJWTSessionVersionAfterSourceWait"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionKeyRevocationAfterSourceWait"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionScopesMigrationFreshUpgradeRepeat"
         ]
       ],
       "allowed_skips": [

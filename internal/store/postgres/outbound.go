@@ -657,6 +657,96 @@ func (s *PgStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UU
 		}
 		return err
 	}
+	if err := deleteSuppressionAuditedTx(ctx, tx, tenantID, id, entry); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+// DeleteSuppressionAuthorized keeps the current JWT or management-key admission
+// fenced in the same transaction as the suppression delete and required audit.
+// The older Audited port is trusted compatibility, not the HTTP admission port.
+func (s *PgStore) DeleteSuppressionAuthorized(ctx context.Context, actor authz.Actor, id uuid.UUID, entry models.AuditEntry) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var tenantID uuid.UUID
+	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, actor.TenantID).Scan(&tenantID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return app.NotFound("company not found")
+		}
+		return err
+	}
+	var keyExpiry *time.Time
+	switch actor.Type {
+	case authz.PrincipalUser:
+		actor, err = currentMemberActor(ctx, tx, actor, tenantID)
+		if err != nil {
+			return app.FromAuthz(err)
+		}
+		if !actor.IsTenantAdmin() {
+			return app.Forbidden("tenant administrator required")
+		}
+	case authz.PrincipalAPIKey:
+		if actor.OwnerUserID != nil {
+			u, e := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 AND tenant_id=$2 FOR SHARE`, *actor.OwnerUserID, tenantID))
+			if e != nil {
+				return e
+			}
+			if u == nil || !u.IsActive {
+				return app.Forbidden("key owner unavailable")
+			}
+		}
+		key := &models.TenantAPIKey{}
+		var scopes json.RawMessage
+		err = tx.QueryRow(ctx, `SELECT id,tenant_id,owner_user_id,scopes,expires_at FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 FOR SHARE NOWAIT`, actor.ID, tenantID).Scan(&key.ID, &key.TenantID, &key.OwnerUserID, &scopes, &key.ExpiresAt)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return app.Forbidden("key unavailable")
+		}
+		if err != nil {
+			var pg *pgconn.PgError
+			if errors.As(err, &pg) && pg.Code == "55P03" {
+				return app.Conflict("key is changing; reload before retrying")
+			}
+			return err
+		}
+		if err = json.Unmarshal(scopes, &key.Scopes); err != nil {
+			return err
+		}
+		manage := false
+		for _, scope := range key.Scopes {
+			if strings.ToLower(strings.TrimSpace(scope)) == "suppression:manage" {
+				manage = true
+			}
+		}
+		if !authz.OutboundKeyIdentityMatches(actor, key) || actor.TenantWide != (key.OwnerUserID == nil) || !manage {
+			return app.Forbidden("current key scope or identity unavailable")
+		}
+		keyExpiry = key.ExpiresAt
+	default:
+		return app.Forbidden("current suppression principal required")
+	}
+	// Audit labels are effects, never credentials or arbitrary parent references.
+	entry.TenantID, entry.Actor = &tenantID, actor.AuditLabel()
+	entry.Action, entry.ResourceType, entry.ResourceID = "suppression.delete", "suppression", &id
+	if err = deleteSuppressionAuditedTx(ctx, tx, tenantID, id, entry); err != nil {
+		return err
+	}
+	if keyExpiry != nil {
+		var now time.Time
+		if err = tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return err
+		}
+		if !keyExpiry.After(now) {
+			return app.Forbidden("key expired")
+		}
+	}
+	return tx.Commit(ctx)
+}
+
+func deleteSuppressionAuditedTx(ctx context.Context, tx pgx.Tx, tenantID uuid.UUID, id uuid.UUID, entry models.AuditEntry) error {
 	var address string
 	if err := tx.QueryRow(ctx,
 		`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,
@@ -683,7 +773,7 @@ func (s *PgStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UU
 		entry.ID, entry.TenantID, entry.Actor, entry.Action, entry.ResourceType, entry.ResourceID, entry.Details, entry.CreatedAt); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
 }
 
 // mergeAuditDetail decodes an audit entry's details JSON, sets one key, and

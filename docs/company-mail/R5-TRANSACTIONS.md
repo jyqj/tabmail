@@ -209,3 +209,7 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 官方 suppression DELETE 与仅含S的 superadmin tenant DELETE 正常可行，双方向完整命令原版真实40P01。AB先exacttenant KEY SHARE，再S锁／删除／同事务required audit，父消失typedNotFound由正式handler映404；其它DB／audit仍500，跨tenant无S的原204不改。最终560c同测试原版两红，候选三轮8/8；fresh全量1417/0/1、229必跑、20门禁0，见[AB证据](R5-B01-AB-VALIDATION.md)。
 
 父锁只是FK／排序fence，不重载等待后actor，middleware已接受JWT／Key的授权窗口仍待AC正式命令验证。070/G0未关闭；68slot只代表有限条件登记，不是68whole-slot PASS。
+
+## AC：Actor准入与15schema同源证明
+
+正式S DELETE改DeleteSuppressionAuthorized显式Actor，T/U/K/S及required audit/finalKeyclock同Tx；旧Audited是trusted兼容不当前HTTP。正常5和role/active当前403、U/Key行fence线性化三轮11/11；不是撤权后都拒。15修真实合法KeyPOST23514，不绕CHECK。fresh75FK/7trigger/34CHECK及最终1431/0/1／234门禁见[AC证据](R5-B01-AC-VALIDATION.md)。070其他多资源关系不由此全闭。

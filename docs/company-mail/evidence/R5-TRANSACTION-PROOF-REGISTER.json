@@ -3,7 +3,7 @@
   "task": "R5-P0-070",
   "task_complete": false,
   "manual_slots": 68,
-  "total_inventory_functions": 350,
+  "total_inventory_functions": 352,
   "internal_unassembled_slots": 7,
   "legacy_configuration_only_slots": 1,
   "rows": [
@@ -1124,15 +1124,15 @@
     },
     {
       "slot": 53,
-      "entry_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
-      "entry": "DeleteSuppressionAudited",
+      "entry_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+      "entry": "DeleteSuppressionAuthorized",
       "group": "TX11",
       "applicability": "formal_or_assembled_role_scoped",
       "adjudication_class": "formal_bounded_runtime",
-      "safety_condition": "exacttenant KEY SHARE precedes S UPDATE/delete and audit FK; deleted parent typed404 rolls back all S effects. Actual c874/ff50 three rounds both orders and normal controls. Request-before actor authorization remains unproved after wait.",
+      "safety_condition": "AC actualrole/active postTwait recheck and U/key held-through-commit serialization; current scope/identity and sameTx audit binding. FinalKeyclock source condition separate, not expiry-wait runtime proof.",
       "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
       "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
-      "actual_reference": "AB same final560c originalproduction baseline and candidate1/2/3; exact scope not whole-slotPASS",
+      "actual_reference": "AC6202 schema-only original command baseline and Actor4patch three actual11pass; FK/trigger15actual catalog separate",
       "followup_tasks": [
         "R5-P0-070",
         "R5-P6-080"
@@ -1141,7 +1141,12 @@
       "inherited_family_context": [
         "幂等回放早返回保留协议；低层trusted变体不走validate；其它outbound claim/attempt/suppression单写并非enqueue；quota等待日界策略需独立覆盖"
       ],
-      "authorization_wait_effect_condition": "Requires caller authorization to remain current across parent wait; middleware snapshot plus tenantID/AuditEntry does not prove current actor reload."
+      "authorization_wait_effect_condition": "Actual nine leaves current role/active/originalSV/key revocation plus normalfive; U/key credentialwriter precedes source iff admitted before fence, not stale reject after credentialwriter wins. Other principal/expiry paths remain bounded risk.",
+      "covered_implementation_entries": [
+        "DeleteSuppressionAuthorized",
+        "DeleteSuppressionAudited",
+        "deleteSuppressionAuditedTx"
+      ]
     },
     {
       "slot": 54,
@@ -1477,5 +1482,9 @@
   "catalog": "R5-TRANSACTION-DB-CATALOG.json actual75FK/7triggers",
   "static_bootstrap_correction": "already global advisory, loweremail check before writes; do not invent unlocked-empty-users gap",
   "review_source": "read-only 68-slot finite conditions; integration owner classifies without altering raw/runtime evidence",
-  "post_AA_note": "AB53 actual parent/S order proof only; authorization wait window remains finite pending, all closed_entire_slot flags unchanged."
+  "post_AA_note": "AB53 actual parent/S order proof only; authorization wait window remains finite pending, all closed_entire_slot flags unchanged.",
+  "inventory_function_count_current": 352,
+  "legacy_numbering_boundary": "Original68 reviewed slot families retained; slot53 now covers new formal Actor port and two trusted/shared implementation entries, not a claim all new functions dynamically closed.",
+  "original_inventory_functions": 350,
+  "post_AC_scope": "slot53 bounded current Actor/fences real proofs; other current profile/event pairs pending; domain/plan no invented final-commit policy"
 }

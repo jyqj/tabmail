@@ -247,7 +247,7 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 			"reason":         reason,
 		}),
 	}
-	if err := h.store.DeleteSuppressionAudited(ctx, tenant.ID, id, entry); err != nil {
+	if err := h.store.DeleteSuppressionAuthorized(ctx, actor, id, entry); err != nil {
 		var appErr *app.Error
 		if errors.As(err, &appErr) {
 			respondAppError(w, h.logger, err)

@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-AB产品父序修复与独立兼容后验：110静态／真实wire差异清点及协调方案已审，后验4gate0；新checker不冒旧full成绩 |
-| 下一可执行任务 | 070剩余有限授权／域资格／时钟／event条件；AC suppression waitauthority同正式命令证据；090–100及G0原依赖保留 |
+| 当前阶段 | B01-AC Actor当前准入／scope migration15，fresh1431/0/1、234必跑、20门禁0；已验范围不借旧程序绿 |
+| 下一可执行任务 | AD14 fixture首验纠正后实际重跑；AE webhook批序与AF invitation/profile正式关系；070／090／G0原依赖不减 |
 | 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
 | 实现完成数 | 8 / 171；P0 为 8 / 12。010–060、080与110基线已验收；070及G0仍未完成 |
-| 当前阻塞 | 070普通域资格／离职末次时钟／suppression等待后授权／event批次条件待证；080基线完成不代表产品政策或未来BCC正式写入通过 |
+| 当前阻塞 | 070 profile FK／event批序关系待实际有限证据；域资格／计划到期按原准入时点不自创commit政策；后续产品目标红不豁免 |
 | 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 

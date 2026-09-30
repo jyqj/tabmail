@@ -189,7 +189,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 			}
 			var version int
 			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
-			want := 14 // 00014_recipient_ledger_required
+			want := 15 // 00015_suppression_key_scopes; the released chain remains append-only
 			if conflict {
 				want = 1
 			}
