@@ -12,6 +12,12 @@ import (
 )
 
 func submissionActor(user, key *uuid.UUID) string {
+	return SubmissionActor(user, key)
+}
+
+// SubmissionActor is the durable command identity, shared by idempotent
+// lookup and safe POST replay projection. Administrative roles do not widen it.
+func SubmissionActor(user, key *uuid.UUID) string {
 	if key != nil {
 		return "key:" + key.String()
 	}

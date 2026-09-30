@@ -292,13 +292,16 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 }
 
 func (s *Service) createOutboundJob(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, principal *authz.Actor) (bool, error) {
-	return s.store.CreateOutboundJobAuthorized(ctx, job, quota, draft, func(ctx context.Context, reader store.OutboundRetryReader, current *models.OutboundJob) error {
+	return s.store.CreateOutboundJobAuthorized(ctx, job, quota, draft, func(ctx context.Context, reader store.OutboundRetryReader, current *models.OutboundJob, reservation store.OutboundQuotaReservation) (store.OutboundQuotaReservation, error) {
 		if principal != nil {
 			if err := ValidateRetryRequester(ctx, reader, *principal, current); err != nil {
-				return err
+				return reservation, err
 			}
 		}
-		return ValidateJobAuthorization(ctx, reader, reader, current)
+		if err := ValidateJobAuthorization(ctx, reader, reader, current); err != nil {
+			return reservation, err
+		}
+		return CurrentEnqueueQuota(ctx, reader, principal, current, reservation)
 	})
 }
 

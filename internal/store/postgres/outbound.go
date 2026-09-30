@@ -53,7 +53,7 @@ func (s *PgStore) enqueueOutboundJobTx(ctx context.Context, job *models.Outbound
 
 var _ store.AtomicOutboundEnqueue = (*PgStore)(nil)
 
-func (s *PgStore) CreateOutboundJobAuthorized(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundRetryValidator) (replayed bool, err error) {
+func (s *PgStore) CreateOutboundJobAuthorized(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundEnqueueValidator) (replayed bool, err error) {
 	if job == nil || validate == nil {
 		return false, app.Forbidden("enqueue validation unavailable")
 	}
@@ -66,7 +66,7 @@ func (s *PgStore) CreateOutboundJobAuthorized(ctx context.Context, job *models.O
 	return s.enqueueOutboundJobValidated(ctx, job, quota, draft, validate)
 }
 
-func (s *PgStore) enqueueOutboundJobValidated(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundRetryValidator) (bool, error) {
+func (s *PgStore) enqueueOutboundJobValidated(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundEnqueueValidator) (bool, error) {
 	prepareOutboundJob(job)
 	if draft != nil {
 		// The store owns the provenance marker so any caller of the consume
@@ -128,7 +128,7 @@ func (s *PgStore) enqueueOutboundJobValidated(ctx context.Context, job *models.O
 			}
 		}
 		reader = &outboundRetryReader{store: s, tx: tx, tenant: job.TenantID}
-		if err = validate(ctx, reader, job); err != nil {
+		if quota, err = validate(ctx, reader, job, quota); err != nil {
 			return false, err
 		}
 	}
@@ -153,6 +153,16 @@ func (s *PgStore) enqueueOutboundJobValidated(ctx context.Context, job *models.O
 		if err = validateAttachmentIDs(ctx, tx, job.TenantID, *job.SenderUserID, *job.SenderMailboxID, job.AttachmentIDs); err != nil {
 			return false, err
 		}
+	}
+	if quota.CurrentUserPolicy && quota.UserDaily != nil {
+		var now time.Time
+		if err = tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return false, err
+		}
+		q := *quota.UserDaily
+		q.Since = now.UTC().Truncate(24 * time.Hour)
+		quota.UserDaily = &q
+		job.CreatedAt, job.UpdatedAt = now, now
 	}
 	if err := lockOutboundQuotaKeys(ctx, tx, job, quota); err != nil {
 		return false, err
@@ -211,6 +221,9 @@ func (s *PgStore) enqueueOutboundJobValidated(ctx context.Context, job *models.O
 		var now time.Time
 		if err = tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
 			return false, err
+		}
+		if quota.CurrentUserPolicy && quota.UserDaily != nil && quota.UserDaily.Limit > 0 && !now.UTC().Truncate(24*time.Hour).Equal(quota.UserDaily.Since) {
+			return false, app.Conflict("submission crossed UTC quota day; retry the same command")
 		}
 		for _, deadline := range reader.deadlines {
 			if !deadline.After(now) {

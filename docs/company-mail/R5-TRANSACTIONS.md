@@ -171,3 +171,12 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 - InspectRecoveryReceipt/RetryRecoveryReceipt/ReconcileOutbound先tenant KEY SHARE再actor，job NOWAIT保留，父键图不代表目标mailbox/zone期限已统一。
 - JWT actor保留SessionVersion指针，RefreshMemberActor在user fence拒绝陈旧版本；HTTP新提交携带Principal，worker durable job不绑定旧JWT版本。receipt/draft-save真实Router红绿已测，其他入口竞争及旧POST早返回未全部认证。
 - 当前quota.Limit仍早期捕获、旧幂等回放及其余FK/GC/普通收件期限继续待验。详见R5-B01-V-VALIDATION.md；原统计6/171，不宣称全事务图闭合。
+
+## B01-W 已验证增量与下一清点边界
+
+- TX11正式enqueue的callback返回fenced current quota；middleware早期Limit不能决定最终名额。0仍无限，交互admin无限、owned Key按当前profile。附件后取DB UTC日→同用户daily advisory→当前计数→INSERT/audit/草稿消费→最后deadline/日边界→Commit；trusted显式窗口保持。真实待锁跨午夜未执行，时间戳边界测试不是替代。
+- 三个正式POST回放分支在handler统一ReplayReceiptView：当前send:write receipt snapshot+原命令绑定→sent生命周期投影；不把body资格false当当前JWT/key准入成功，不把当前禁发政策施加于已完成的历史回执。
+- TX15：T KEY SHARE→actor→I UPDATE NOWAIT→排序target SHARE NOWAIT→zone SHARE NOWAIT→精确M SHARE NOWAIT→状态修改→audit/outbox→DB期限→Commit。55P03/40001为目标busy409；不吞40P01。
+- TX14：I UPDATE→target UPDATE→T UPDATE→zone/M SHARE NOWAIT→原quota/mailbox计数UPDATE/message/index/event/audit→单个materialized DBclock同时决定lease和目标deadline→Commit。后续UPDATE仍可能等待，不能称整个事务NOWAIT。
+- Inspect/Reconcile不是普通read/send权限，保持held原件和已发生的外部结果。TX01–24尚未形成完整有限目录，下一步分解开通/模板发布、缓存写入/状态、清理/队列、Key/兼容写入和对象回调；SaveParsedMessage晚tenant FK为未确认候选，须独立真实屏障验证。
+- 详见R5-B01-W-VALIDATION.md；本增量不关闭完整070/080/G0，父统计6/171不变。

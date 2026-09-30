@@ -36,6 +36,9 @@ type DraftConsumption struct {
 type OutboundQuotaReservation struct {
 	UserDaily   *OutboundUserDailyQuota
 	SendAsDaily *OutboundSendAsDailyQuota
+	// CurrentUserPolicy marks the transaction-refreshed HTTP quota. Explicit
+	// internal reservations retain their documented custom counting window.
+	CurrentUserPolicy bool
 }
 
 func (q OutboundQuotaReservation) HasLimits() bool {

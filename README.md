@@ -8,11 +8,11 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-最新执行为 **B01-V 多轮集成**：新入队当前授权/最后期限、恢复审计父键与JWT版本携带已验收；最终PG新增52事件连续三轮通过，全量后端1232pass/0fail/1独立browser skip、171必跑齐全，HTTP80响应、前端118测试通过。详见 [B01-V记录](docs/company-mail/R5-B01-V-VALIDATION.md)。
+最新执行为 **B01-W 多轮集成**：当前配额、正式POST回放准入、恢复与worker固定目标资格/最后期限及目标busy契约已验收；PG新增46事件三轮全部通过，完整后端1320pass/0fail/1独立browser skip、197必跑齐全，HTTP80响应、前端118测试通过。详见 [B01-W记录](docs/company-mail/R5-B01-W-VALIDATION.md)。
 
-唯一活跃进度源为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段、171工作包、25实施/评审批次、38跨入口场景。当前仍 **6/171，P0为6/12**，仅010–060已关闭；后续大量修复属于070等父任务中的子包，不是完整阶段完成。
+唯一活跃进度源为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段、171工作包、25实施/评审批次、38跨入口场景。当前仍 **6/171，P0为6/12**；子包修复不等于父阶段完成。下一步补070有限全入口事务与FK/等待目录、080完整共享协议，然后按依赖推进G0；不要求提前修完P1–P7，但缺证据不能关闭基线任务。
 
-下一步优先验证新入队当前quota变化，随后旧POST幂等回放、JWT全入口、recovery目标/期限、其余FK/GC，以及完整协议/性能/浏览器/发布验收。070/080/G0不提前关闭。已上传的B01-U阶段分支和标签见 [检查点说明](docs/company-mail/R5-CHECKPOINT-20260930.md)；B01-V当前为后续本地工作，不代表已合并主线、远端CI通过或生产部署。
+已上传B01-U检查点见 [交付说明](docs/company-mail/R5-CHECKPOINT-20260930.md)；V/W为后续本地工作，不代表已合并主线、远端CI通过、R5正式发布或生产部署。
 
 ## 公司工作流
 

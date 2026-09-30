@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"sort"
 	"tabmail/internal/app/credentials"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
@@ -142,7 +144,13 @@ func (s *PgStore) InspectRecoveryReceipt(ctx context.Context, a authz.Actor, id 
 	}
 	return &v, tx.Commit(ctx)
 }
-func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, targets []uuid.UUID, reason, verifiedHash string) error {
+func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, targets []uuid.UUID, reason, verifiedHash string) (err error) {
+	defer func() {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && (pg.Code == "55P03" || pg.Code == "40001") {
+			err = app.Conflict("receipt or destination is changing; inspect again")
+		}
+	}()
 	reason, reasonErr := credentials.AuditReason(reason)
 	if reasonErr != nil || len(targets) == 0 || len(targets) > 200 {
 		return app.BadRequest("select destinations and provide a reason (8-1000 bytes)")
@@ -163,7 +171,7 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 		return app.NotFound("receipt not found")
 	}
 	if e != nil {
-		return app.Conflict("receipt is busy; inspect again")
+		return e
 	}
 	if v.State == "processing" || v.State == "done" || !v.UpdatedAt.Equal(version) {
 		return app.Conflict("receipt changed since inspection")
@@ -171,20 +179,32 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 	if verifiedHash == "" || verifiedHash != v.RawHash {
 		return app.Conflict("original checksum verification required")
 	}
+	targets = append([]uuid.UUID{}, targets...)
+	sort.Slice(targets, func(i, j int) bool { return targets[i].String() < targets[j].String() })
+	deadlines := make([]*time.Time, 0, len(targets))
 	seen := map[uuid.UUID]bool{}
 	for _, mb := range targets {
 		if seen[mb] {
 			return app.BadRequest("duplicate destination")
 		}
 		seen[mb] = true
-		var valid bool
-		e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM ingest_recipient_outcomes t JOIN mailboxes m ON m.id=t.mailbox_id AND m.tenant_id=t.tenant_id AND m.zone_id=t.zone_id AND m.full_address=t.address JOIN domain_zones z ON z.id=t.zone_id AND z.tenant_id=t.tenant_id WHERE t.job_id=$1 AND t.mailbox_id=$2 AND t.tenant_id=$3 AND t.state<>'delivered' AND z.is_verified AND z.mx_verified AND `+mailboxAliveSQL+`)`, id, mb, a.TenantID).Scan(&valid)
+		var address string
+		var zone uuid.UUID
+		e = tx.QueryRow(ctx, `SELECT address,zone_id FROM ingest_recipient_outcomes WHERE job_id=$1 AND mailbox_id=$2 AND tenant_id=$3 AND state<>'delivered' FOR SHARE NOWAIT`, id, mb, a.TenantID).Scan(&address, &zone)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.Conflict("destination delivered, changed, expired or outside selected company")
+		}
 		if e != nil {
 			return e
+		}
+		deadline, valid, err := fenceIngressDestination(ctx, tx, a.TenantID, zone, mb, address)
+		if err != nil {
+			return err
 		}
 		if !valid {
 			return app.Conflict("destination delivered, changed, expired or outside selected company")
 		}
+		deadlines = append(deadlines, deadline)
 	}
 	for _, mb := range targets {
 		if _, e = tx.Exec(ctx, `UPDATE ingest_recipient_outcomes SET state='pending',attempts=0,last_error='',updated_at=clock_timestamp() WHERE job_id=$1 AND mailbox_id=$2 AND tenant_id=$3 AND state<>'delivered'`, id, mb, a.TenantID); e != nil {
@@ -196,6 +216,13 @@ func (s *PgStore) RetryRecoveryReceipt(ctx context.Context, a authz.Actor, id uu
 	}
 	if e = companyAudit(ctx, tx, a, "ingress.retry", "ingest_job", id, map[string]any{"reason": reason, "targets": targets, "inspection_version": version, "verified_hash": verifiedHash}); e != nil {
 		return e
+	}
+	alive, e := ingressDestinationsAlive(ctx, tx, deadlines)
+	if e != nil {
+		return e
+	}
+	if !alive {
+		return app.Conflict("destination expired while retry was pending")
 	}
 	return tx.Commit(ctx)
 }

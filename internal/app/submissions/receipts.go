@@ -6,8 +6,45 @@ import (
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
+	"tabmail/internal/outbound"
 	"tabmail/internal/store"
 )
+
+// ReplayReceiptView separates current command admission from content access.
+// A revoked JWT/key must not become a successful redacted POST simply because
+// a content predicate failed closed. Conversely, new-send policy changes do
+// not undo a committed historical submission or require another send attempt.
+func (s *Service) ReplayReceiptView(ctx context.Context, a authz.Actor, original *models.OutboundJob) (*models.OutboundJob, error) {
+	if original == nil || original.TenantID != a.TenantID {
+		return nil, app.Forbidden("submission replay authority unavailable")
+	}
+	var user, key *uuid.UUID
+	switch a.Type {
+	case authz.PrincipalUser:
+		id := a.ID
+		user = &id
+	case authz.PrincipalAPIKey:
+		id := a.ID
+		key = &id
+	default:
+		return nil, app.Forbidden("current submission principal required")
+	}
+	identity := outbound.SubmissionActor(user, key)
+	if identity == "" || original.SubmitActor != identity {
+		return nil, app.Forbidden("submission belongs to another command principal")
+	}
+	receipt, err := s.store.GetOutboundReceipt(ctx, a, original.ID, "send:write")
+	if err != nil {
+		if v, ok := app.As(app.FromAuthz(err)); ok && (v.Kind == app.KindForbidden || v.Kind == app.KindNotFound) {
+			return nil, app.Forbidden("submission replay authority no longer current")
+		}
+		return nil, err
+	}
+	if receipt == nil || receipt.Job == nil || receipt.Job.ID != original.ID || receipt.Job.SubmitActor != identity || receipt.Job.TenantID != a.TenantID {
+		return nil, app.Forbidden("submission replay receipt unavailable")
+	}
+	return RedactOutboundJobView(receipt.Job, receipt.ContentAllowed), nil
+}
 
 func (s *Service) outboundReceipt(ctx context.Context, tenant *models.Tenant, a authz.Actor, id uuid.UUID, scope string) (*store.OutboundReceipt, error) {
 	if tenant == nil {

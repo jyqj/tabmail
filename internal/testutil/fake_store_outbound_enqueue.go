@@ -10,7 +10,7 @@ import (
 
 // The fake models policy/update atomicity only. PostgreSQL regressions prove
 // row ordering, required audit, draft consumption and database deadlines.
-func (s *FakeStore) CreateOutboundJobAuthorized(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundRetryValidator) (bool, error) {
+func (s *FakeStore) CreateOutboundJobAuthorized(ctx context.Context, job *models.OutboundJob, quota store.OutboundQuotaReservation, draft *store.DraftConsumption, validate store.OutboundEnqueueValidator) (bool, error) {
 	if err := ctx.Err(); err != nil {
 		return false, err
 	}
@@ -23,7 +23,8 @@ func (s *FakeStore) CreateOutboundJobAuthorized(ctx context.Context, job *models
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	reader := &fakeRetryReader{s: s, tenant: job.TenantID}
-	if err := validate(ctx, reader, job); err != nil {
+	var err error
+	if quota, err = validate(ctx, reader, job, quota); err != nil {
 		return false, err
 	}
 	if q := quota.UserDaily; q != nil && q.Limit > 0 && s.countOutboundSinceLocked(job.TenantID, q.UserID, q.Since) >= q.Limit {

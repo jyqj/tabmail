@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-V多轮集成已验收新enqueue当前授权/期限、恢复审计父键和JWT版本携带：原版52事件8pass/44fail，最终52事件三轮全部通过；backend1232pass/0fail/1 browser skip、171必跑齐全，HTTP80响应、前端118测试通过。当前quota变化、旧POST重放、JWT全入口、其他FK/GC和完整协议仍待验；070/080/G0及原父统计6/171不提前关闭。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-W已验收当前quota、POST回放主体准入和恢复/worker目标资格及busy契约：原版46事件21pass/25fail，最终三轮46/46；全量backend1320pass/0fail/1 browser skip、197必跑齐全，HTTP80响应、前端118测试通过。070全入口地图与080完整协议仍未收口，父统计6/171不提前改变。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-V已验收新入队事务内授权/最后期限、模板grant行保护、恢复审计父键和JWT sv携带；四个协议案例真正消费共享JSON。见R5-B01-V-VALIDATION.md；U/T/S/Q/R成果保留 |
-| 下一可执行任务 | P0-070：先验证新入队等待中当前DailySendQuota降低/0→有限及最终quota计数；随后旧POST/缺稿幂等回放的当前principal与安全投影、JWT enqueue/retry真实竞争、recovery目标资格与其余FK/GC。不重复已关闭子包 |
-| 下一批范围 | 复用本批官方PG16.13一次性工具、Go1.25.7/Node22/Python3.12及原门禁；并行agent独占测试/权限协议/锁图，主线程集成。完整070/080与090/100/110/120依赖不变，P1暂不越依赖启动 |
+| 当前阶段 | B01-W完成fenced current quota/DB UTC日、正式POST安全回执准入、retry/worker固定目标行保护与审计后期限、目标busy409；见R5-B01-W-VALIDATION.md。前序成果保留 |
+| 下一可执行任务 | P0-070：补有限全入口事务/FK/trigger/等待目录；重点SaveParsedMessage与worker mailbox/tenant交叉仅静态候选，先实证；开通/模板发布、缓存/状态、生命周期/队列/Key/对象回调完整映射。并行补080实际code与按入口reason政策、42共享消费者 |
+| 下一批范围 | 主线程保持生产/shared fixtures/manifest/TODO集成；agent分派独占地图、未覆盖交叉回归、协议JSON/HTTP消费者。G0允许精确绑定AC/后续任务的目标政策红灯，不把P1–P7全部提前实现；结构清点/夹具错误/未接线不当完成 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 新入队CanSend/Key/模板与最后期限已取得本批证据，但quota仍早期捕获；旧POST回放、JWT全入口、recovery目标/期限、普通收件兼容、其他FK/GC、080完整消费者、规模性能、浏览器/DNS/SSE尚未收口。SMTP及数据库提交确认丢失仍非分布式原子性 |
+| 当前阻塞 | 070覆盖目录与剩余具体交叉风险待验；080未定输出/实际wire code/适用层和42共享案例待接线。真实跨UTC午夜等待、各replay分支credential时序/缺稿原revision、普通收件兼容/GC/CAS、规模性能、浏览器/DNS/SSE保留；090/100/110/120依赖不变 |
 | 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
@@ -1548,6 +1548,17 @@ python3 scripts/check_i18n_keys.py
 - 最终52事件三轮各pass、9必跑齐全；完整backend1232pass/0fail/1明确browser skip、171必跑齐全。HTTP80/65/66、Python196、Node23、Vitest118、tsc/lint/build、静态16/33/67及i18n通过；缺DSN/0test/browser-disabled仍被原门禁拒绝。
 - 本轮无可用Docker；官方PG16.13源码校验SHA256后在项目外编译，新0700 socket/no TCP临时集群已stop0/PID文件消失；没有改全局工具或触碰生产数据。[报告](R5-B01-V-VALIDATION.md)、[机器摘要](evidence/R5-B01-V-VALIDATION.json)、[96成员日志](evidence/R5-B01-V-LOGS.tar.gz)保存失败和最终结果，不含responses.json/DSN/源码tar。
 - 新入队当前quota变化仍待验证；旧POST幂等早返回、JWT enqueue/retry等全入口、recovery目标期限与其余FK/GC继续。无push/PR/merge/release/deploy；本批不勾选070/080/G0，父统计仍6/171。下一轮从当前quota红绿开始，而非反复重做已通过子包。
+
+### B01-W：当前配额、POST回放与接收目标资格（2026-09-30）
+
+- 基线cb2e9e915e1b3f76b4e117ef7483848aff44dd0e；被测Git tree95881fb77cb15d05c0f002e92ca79940dd7a3077，697文件SHA256一致。三路agent独占quota/replay/recovery测试与交叉复审，主线程生产/shared seams及完整回归；中断后实际核实专属PG PID/命令和agent状态，不另启重复集群。
+- 原版同最终测试46事件21pass/25fail；早期42703/23503/23514仅夹具问题已修正并重跑，原日志保留不计产品红灯。已实证旧quota错误201/429、consumed旧JWT仍200、恢复/worker目标变化/自然expiry后仍提交、真实HTTP目标busy200。
+- enqueue validator返回同fenced reader的当前quota，0保持unlimited、current interactive admin无限、owned admin Key仍profile；PG UTC日与最后跨日回滚，不修改trusted显式自定义窗口。共享用户0→1并发一201一429；audit/INSERT失败不丢草稿。
+- 三个正式POST回放分支统一ReplayReceiptView，用当前send:write snapshot+SubmitActor/tenant/job绑定；身份失败403，内容失效仍历史安全200，不重新施加CanSend/From/template或重复计数。内部原始job不是公开投影；公司Key POST仍403，不复活已退接口。
+- Retry/worker共享固定tenant/zone/mailbox ID/address接收资格与SHARE NOWAIT保护，保留held原件与Inspect/Reconcile语义；排序target、审计后DBexpiry；worker同一个materialized时钟决定lease与目标截止。目标忙55P03/40001严格409，其他错误不吞；loopback HTTP验证无retry/audit/outbox半提交、Inspect必要审计保留。
+- 最终17顶层/46事件连续三轮全部pass；cmd/internal全量1320pass/0fail/1明确browser skip、197必跑齐全；另字面./... build/vet/race同结果（51包含1个npm目录无测试Go包）。HTTP80/65/66、Python196、Node23、Vitest118、tsc/lint/build、契约16/33/67、i18n均通过；缺DSN/0test/browser-disabled原门禁仍拒绝。PG全./...包176.262秒接近180预算，不放宽或删测试。
+- [报告](R5-B01-W-VALIDATION.md)、[机器证据](evidence/R5-B01-W-VALIDATION.json)、[89成员日志](evidence/R5-B01-W-LOGS.tar.gz)留存。新PG16.13专属0700 socket/noTCP已stop0/PID文件消失；无生产配置/真实邮件/迁移/依赖改变，无push/PR/merge/deploy。
+- 不新增父复选框，仍6/171。下一轮070有限全覆盖地图/未覆盖交叉、080实际code+per-entry reason与42消费者；真实午夜待锁、缺稿原revision等后续协议边界保留，不反复重做本批已关闭子包。G0不要求P1–P7全部预先全绿，但不能凭未接线案例或计划关闭。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

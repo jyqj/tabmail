@@ -10,8 +10,9 @@ import (
 // Repository is the outbound consumer's role port, not the all-purpose
 // store.Store assembly interface. Recipient checkpoints are mandatory: a
 // missing ledger adapter must be a compile-time error, never a legacy branch.
-// Draft consumption and idempotent lookup remain explicit optional extensions
-// in createOutboundJob, preserving callers that do not submit drafts.
+// Every submission uses the fenced enqueue transaction; draft consumption is
+// an optional command argument, never a fallback to unvalidated creation.
+// Idempotent lookup remains explicit for consumers that use command keys.
 type Repository interface {
 	store.AtomicOutboundEnqueue
 	SendAddressStore

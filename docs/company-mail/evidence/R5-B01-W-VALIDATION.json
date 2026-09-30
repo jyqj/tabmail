@@ -1,0 +1,203 @@
+{
+  "version": 1,
+  "batch": "B01-W",
+  "date": "2026-09-30",
+  "base_commit": "cb2e9e915e1b3f76b4e117ef7483848aff44dd0e",
+  "tested_tree": "95881fb77cb15d05c0f002e92ca79940dd7a3077",
+  "source_files_verified": 697,
+  "source_hashes_verified": true,
+  "baseline": {
+    "run": 46,
+    "fail": 25,
+    "pass": 21
+  },
+  "initial_baselines": {
+    "recovery_replay": {
+      "run": 29,
+      "fail": 16,
+      "pass": 13
+    },
+    "quota": {
+      "run": 14,
+      "fail": 7,
+      "pass": 7
+    },
+    "fixture_errors_excluded": [
+      "42703 incorrect mailbox kind column",
+      "23503 incoherent cross-tenant owner tuple",
+      "23514 unsupported empty API key scopes"
+    ]
+  },
+  "candidate1": {
+    "run": 43,
+    "pass": 43
+  },
+  "focused_runs": [
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 196,
+      "log_sha256": "597a0693c36fc10d10f2042976f96ddf6301836e4cf973d9763da818c6d8967a",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 17,
+      "manifest_sha256": "7c432177382763481f6ca4d153b192c2b7f269a3f80534c807100fab75cd7477",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "95881fb77cb15d05c0f002e92ca79940dd7a3077",
+      "status": "pass",
+      "suite": "b01-w",
+      "tests_failed": 0,
+      "tests_passed": 46,
+      "tests_skipped": 0,
+      "tests_started": 46
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 196,
+      "log_sha256": "f897ac956f6751ce2f579b12fb6b01bc3cfb1fad3df9d6dd679e8428ad1bcc0d",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 17,
+      "manifest_sha256": "7c432177382763481f6ca4d153b192c2b7f269a3f80534c807100fab75cd7477",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "95881fb77cb15d05c0f002e92ca79940dd7a3077",
+      "status": "pass",
+      "suite": "b01-w",
+      "tests_failed": 0,
+      "tests_passed": 46,
+      "tests_skipped": 0,
+      "tests_started": 46
+    },
+    {
+      "allowed_skips_observed": [],
+      "errors": [],
+      "events": 196,
+      "log_sha256": "b1f73a14de9c37d59f30b5790012ea9cfbe50b383b760f615f7bfebde4ace148",
+      "mandatory_missing_or_not_passed": 0,
+      "mandatory_tests": 17,
+      "manifest_sha256": "7c432177382763481f6ca4d153b192c2b7f269a3f80534c807100fab75cd7477",
+      "packages": 1,
+      "process_exit_code": 0,
+      "source_sha": "95881fb77cb15d05c0f002e92ca79940dd7a3077",
+      "status": "pass",
+      "suite": "b01-w",
+      "tests_failed": 0,
+      "tests_passed": 46,
+      "tests_skipped": 0,
+      "tests_started": 46
+    }
+  ],
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 5636,
+    "log_sha256": "15fc7b14eb8ad7abaae37e123c3272b1640e0dd84b5753d5128700ec7e8fd80e",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 197,
+    "manifest_sha256": "1b37284fa50768a0105c4de68ad6d0cdf5595783960dc0cd36fe8e34f687b384",
+    "packages": 50,
+    "process_exit_code": 0,
+    "source_sha": "95881fb77cb15d05c0f002e92ca79940dd7a3077",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1320,
+    "tests_skipped": 1,
+    "tests_started": 1321
+  },
+  "backend_all_packages": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 5639,
+    "log_sha256": "c26a31ee4e307d209191b65106d6e17fbd1a0d6a83e5ae4f530dbbe9cbe35ba4",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 197,
+    "manifest_sha256": "1b37284fa50768a0105c4de68ad6d0cdf5595783960dc0cd36fe8e34f687b384",
+    "packages": 51,
+    "process_exit_code": 0,
+    "source_sha": "95881fb77cb15d05c0f002e92ca79940dd7a3077",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1320,
+    "tests_skipped": 1,
+    "tests_started": 1321
+  },
+  "http": {
+    "status": "pass",
+    "source_sha": "95881fb77cb15d05c0f002e92ca79940dd7a3077",
+    "errors": [],
+    "responses": 80,
+    "successful_operations": 65,
+    "required_success_variants": 66,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "capture_sha256": "d79f15758653a658d9cd427722932ff47a586729bd22819ee3110f1da681aac2"
+  },
+  "gates": {
+    "build": "pass ./cmd/... ./internal/... and ./...",
+    "vet": "pass both scopes",
+    "python": 196,
+    "node": 23,
+    "vitest": 118,
+    "tsc": "pass",
+    "eslint": "pass",
+    "next_build": "pass",
+    "static_contract": "16 shared / 33 projection / 67 operations",
+    "i18n": "1325 keys, 30 dynamic lookups not certified",
+    "negative_execution": "missing DSN / zero test / browser disabled rejected"
+  },
+  "versions": {
+    "go": "1.25.7",
+    "postgres": "16.13",
+    "python": "3.12.11",
+    "node": "22.23.2",
+    "SDKROOT": "MacOSX15.4.sdk"
+  },
+  "cleanup": {
+    "root": "/tmp/tabmail-r5-b01w.2ApvFyTr",
+    "pg_pid": 96099,
+    "pg_stop_exit": 0,
+    "pidfile_removed": true
+  },
+  "bundle": {
+    "path": "docs/company-mail/evidence/R5-B01-W-LOGS.tar.gz",
+    "members": 89,
+    "sha256": "1d416a17a0e6159104e3734989e99a8b45596f8348f34827a9b4fe8a560772b5"
+  },
+  "remaining": [
+    "P0-070 finite all-entry transaction/FK/wait coverage map and uncovered intersections",
+    "P0-080 missing 42 shared cases / wire code and per-endpoint optional reason / layer applicability",
+    "real waiting across UTC midnight (only timestamp counting boundary proven)",
+    "all replay branch credential races and missing-draft original revision evidence",
+    "other GC/inbound retention compatibility / permissions CAS deferred phases",
+    "P0-090/100/110/120 and remaining P1-P11",
+    "shipping browser / actual DNS / SSE / scale / dependency audit / cold upgrade"
+  ],
+  "parent_completion": "6/171",
+  "remote_changes": false
+}
