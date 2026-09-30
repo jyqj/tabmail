@@ -77,13 +77,16 @@ func (s *PgStore) SaveParsedMessage(ctx context.Context, a authz.Actor, mailbox 
 		if !mb.CanRead {
 			return app.NotFound("message not found")
 		}
-		var valid bool
-		e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 AND raw_object_key=$4)`, a.TenantID, mailbox, d.MessageID, d.SourceKey).Scan(&valid)
+		// The document's FK protects this message, not an ancestor tenant.
+		// Physical delete owns the message before updating mailbox count;
+		// never wait in the opposite direction while holding mailbox SHARE.
+		var source uuid.UUID
+		e = tx.QueryRow(ctx, `SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 AND raw_object_key=$4 FOR SHARE NOWAIT`, a.TenantID, mailbox, d.MessageID, d.SourceKey).Scan(&source)
+		if errors.Is(e, pgx.ErrNoRows) {
+			return app.NotFound("message not found")
+		}
 		if e != nil {
 			return e
-		}
-		if !valid {
-			return app.NotFound("message not found")
 		}
 		return saveParsed(ctx, tx, a.TenantID, d)
 	})

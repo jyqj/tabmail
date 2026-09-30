@@ -16,6 +16,135 @@
         "CT04"
       ],
       "change": "Sent content denies unavailable content with 404, not draft 403. Matches CONTENT-BOUNDARIES and the current Go not-found assertion; inbound/domain rejection remains separately unresolved."
+    },
+    {
+      "cases": [
+        "CT01",
+        "CT02",
+        "CT03",
+        "CT04",
+        "CT05",
+        "CT06",
+        "CT07",
+        "CT08",
+        "CT09",
+        "CT10",
+        "RC01",
+        "RC02",
+        "RC03",
+        "RC04",
+        "RC05",
+        "OP01",
+        "OP02",
+        "OP03",
+        "OP04",
+        "RT01",
+        "RT02",
+        "RT03",
+        "RT04",
+        "RT05",
+        "RT06",
+        "RT07",
+        "BC01",
+        "BC02",
+        "BC03",
+        "BC04",
+        "BC05",
+        "BC06",
+        "GC01",
+        "GC02",
+        "LF01",
+        "LF02",
+        "LF03",
+        "LF04",
+        "LF05",
+        "LF06",
+        "LF07",
+        "PE01",
+        "PE02",
+        "PE03",
+        "PE04",
+        "PE05"
+      ],
+      "change": "error.code and nonempty error.message are required for errors; reason is absent for ordinary company/app errors, optional only where an entrypoint declares subclassification, exact for outbound retry delivery_uncertain/state_changed. Null reason is not an unresolved protocol blocker."
+    },
+    {
+      "cases": [
+        "RT04"
+      ],
+      "change": "Refine impossible organize-only state: existing API and PostgreSQL CHECK reject organize without read before it can exist. Shared operation case uses representable read-only grant and expects 403; the original organize-only grant input is separately asserted BAD_REQUEST/400. Policy still requires both rights; no constraint or production behavior is relaxed."
+    },
+    {
+      "cases": [
+        "GC01"
+      ],
+      "change": "Background SweepCompanyMetadata has no HTTP endpoint. Required evidence is PostgreSQL, not a fabricated HTTP adapter; the semantic protected-prefix/orphan target is unchanged."
+    },
+    {
+      "cases": [
+        "LF05"
+      ],
+      "change": "Freeze precise current entrypoints: successor frozen before execute400; cross-company or self successor preview400 with no invalid plan fabricated; administrator cannot offboard equal/higher-role target403. higher_role is explicitly target management hierarchy, not a new ban on higher-role successors."
+    },
+    {
+      "cases": [
+        "RC02"
+      ],
+      "change": "Freeze owned valid-principal expired-content compatibility entrypoints: legacy list/detail and same-key consumed draft replay each return200 safe receipt; canonical content remains404 and replay preserves the same job identity."
+    },
+    {
+      "cases": [
+        "GC02"
+      ],
+      "change": "Declare actual background DB/reaper evidence rather than inventing HTTP coverage. Both sealed_draft and held_raw are built by production disposition/ingress methods; creation/fixed-destination tombstones and orphan retry registration never grant deletion."
+    },
+    {
+      "cases": [
+        "RT07"
+      ],
+      "change": "Explicitly model independent logical item expiry versus live durable reference ownership, and use actual metadata/raw reaper DB ports rather than a nonexistent GC HTTP endpoint. Each of draft/sent_asset/queue/held is exercised; expired normal message alone cannot authorize another asset object deletion."
+    },
+    {
+      "cases": [
+        "BC02",
+        "BC03"
+      ],
+      "change": "Declare current real schema/response capability observations rather than inventing a backfill command. Exact trusted job BCC missing from durable asset and absent legacy_unknown are precise target gaps. Future idempotent backfill execution remains explicitly unverified."
+    },
+    {
+      "cases": [
+        "RT07"
+      ],
+      "change": "Use a genuine expired trash purge_after cutoff for normal personal content. Existing permanent personal policy intentionally ignores anomalous hard expires_at; do not reinterpret historical values or turn the fixture failure into target red. Preserve independent durable reference protection target."
+    },
+    {
+      "cases": [
+        "RT07"
+      ],
+      "change": "Source and repeated actual SQL/runtime evidence identify a real current GetWorkMessage purge-cutoff gap (A05/AC-10/P3-010), not fixture failure. Bind only exact returned provenance beyond confirmed cutoff to dedicated read-boundary marker; continue all independent physical protection assertions and reject unexpected query/fixture errors."
+    },
+    {
+      "cases": [
+        "RT07",
+        "BC01",
+        "BC02",
+        "BC03",
+        "BC05",
+        "GC01",
+        "GC02",
+        "PE01",
+        "PE02",
+        "PE05"
+      ],
+      "change": "Replace obsolete unresolved status labels with applicable actual entrypoint semantics: background DB ports not_applicable; draft submit201; current content/permission/surface HTTP200; PE05 exact ordered200/403. BC02/03 status only describes current GET capability observation, never a nonexistent future backfill command. Required component and future migration gaps remain explicit."
+    },
+    {
+      "cases": [
+        "CT10",
+        "OP04",
+        "LF07"
+      ],
+      "change": "Freeze actual shipping handler failures at500/INTERNAL with nonempty message, now backed by real SQL/audit fault consumers. Remove obsolete missing-HTTP-binding note; this does not widen accepted statuses."
     }
   ],
   "cases": [
@@ -25,14 +154,21 @@
         "operation": "normal_content",
         "principal": "current_reader",
         "same_mailbox_id": true,
-        "lifecycle": "live"
+        "lifecycle": "live",
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "200，允许指定内容/附件；不扩大到别的邮箱"
+        "assertion": "200，允许指定内容/附件；不扩大到别的邮箱",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05",
@@ -67,9 +203,22 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT01/default"
+          ]
+        }
       ]
     },
     {
@@ -80,14 +229,21 @@
           "anonymous",
           "revoked",
           "frozen"
-        ]
+        ],
+        "protocol_consumer": "content_credentials"
       },
       "expected": {
         "http_status": 401,
         "http_status_kind": "exact",
         "semantic_code": "unauthenticated",
         "error_reason": null,
-        "assertion": "401，不打开对象"
+        "assertion": "401，不打开对象",
+        "wire_error": {
+          "code": "UNAUTHORIZED",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-31"
@@ -112,9 +268,24 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolCredentialSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolCredentialSharedCases/CT02/anonymous",
+            "TestR5ProtocolCredentialSharedCases/CT02/revoked",
+            "TestR5ProtocolCredentialSharedCases/CT02/frozen"
+          ]
+        }
       ]
     },
     {
@@ -125,14 +296,21 @@
           "company_admin",
           "platform_super_admin"
         ],
-        "can_read": false
+        "can_read": false,
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 404,
         "http_status_kind": "exact",
         "semantic_code": "not_found",
         "error_reason": null,
-        "assertion": "sent content 404，不凭角色放行；入站入口单独核对"
+        "assertion": "sent content 404，不凭角色放行；入站入口单独核对",
+        "wire_error": {
+          "code": "NOT_FOUND",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05",
@@ -157,9 +335,23 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT03/company_admin",
+            "TestR5ProtocolContentSharedCases/CT03/platform_super_admin"
+          ]
+        }
       ]
     },
     {
@@ -167,14 +359,21 @@
       "input": {
         "operation": "sent_content",
         "historical_author": true,
-        "can_read": false
+        "can_read": false,
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 404,
         "http_status_kind": "exact",
         "semantic_code": "not_found",
         "error_reason": null,
-        "assertion": "sent content 404；看得到提交回执也不能展开正文"
+        "assertion": "sent content 404；看得到提交回执也不能展开正文",
+        "wire_error": {
+          "code": "NOT_FOUND",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05",
@@ -199,9 +398,22 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT04/default"
+          ]
+        }
       ]
     },
     {
@@ -209,14 +421,21 @@
       "input": {
         "operation": "normal_content",
         "address_reused": true,
-        "original_mailbox_id_matches": false
+        "original_mailbox_id_matches": false,
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 404,
         "http_status_kind": "exact",
         "semantic_code": "not_found",
         "error_reason": null,
-        "assertion": "404，不把旧邮件转向新ID"
+        "assertion": "404，不把旧邮件转向新ID",
+        "wire_error": {
+          "code": "NOT_FOUND",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05"
@@ -240,9 +459,22 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT05/default"
+          ]
+        }
       ]
     },
     {
@@ -250,14 +482,21 @@
       "input": {
         "operation": "normal_content",
         "tenant_matches": false,
-        "same_resource_name": true
+        "same_resource_name": true,
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 404,
         "http_status_kind": "exact",
         "semantic_code": "not_found",
         "error_reason": null,
-        "assertion": "404，不能跨公司读取或泄露资源存在性"
+        "assertion": "404，不能跨公司读取或泄露资源存在性",
+        "wire_error": {
+          "code": "NOT_FOUND",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05"
@@ -281,9 +520,22 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT06/default"
+          ]
+        }
       ]
     },
     {
@@ -291,14 +543,21 @@
       "input": {
         "operation": "normal_content",
         "domain_allowed": false,
-        "has_grant": true
+        "has_grant": true,
+        "protocol_consumer": "inbound_domain"
       },
       "expected": {
         "http_status": 403,
         "http_status_kind": "exact",
         "semantic_code": "forbidden",
         "error_reason": null,
-        "assertion": "403，不因grant或owner而放宽域名范围"
+        "assertion": "403，不因grant或owner而放宽域名范围",
+        "wire_error": {
+          "code": "FORBIDDEN",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05"
@@ -311,9 +570,22 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolDomainSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolDomainSharedCases/CT07"
+          ]
+        }
       ]
     },
     {
@@ -324,14 +596,21 @@
           "before",
           "equal"
         ],
-        "physical_object_exists": true
+        "physical_object_exists": true,
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 404,
         "http_status_kind": "exact",
         "semantic_code": "not_found",
         "error_reason": null,
-        "assertion": "404，不打开正文/附件对象"
+        "assertion": "404，不打开正文/附件对象",
+        "wire_error": {
+          "code": "NOT_FOUND",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05",
@@ -369,9 +648,23 @@
           "build_tag": "r5audit"
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT08/before",
+            "TestR5ProtocolContentSharedCases/CT08/equal"
+          ]
+        }
       ]
     },
     {
@@ -382,14 +675,21 @@
           "before",
           "equal"
         ],
-        "physical_record_exists": true
+        "physical_record_exists": true,
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 404,
         "http_status_kind": "exact",
         "semantic_code": "not_found",
         "error_reason": null,
-        "assertion": "404，物理记录仍在也不可读"
+        "assertion": "404，物理记录仍在也不可读",
+        "wire_error": {
+          "code": "NOT_FOUND",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05",
@@ -415,9 +715,23 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT09/before",
+            "TestR5ProtocolContentSharedCases/CT09/equal"
+          ]
+        }
       ]
     },
     {
@@ -425,14 +739,21 @@
       "input": {
         "operation": "normal_content",
         "authoritative_query": "error",
-        "job_body_exists": true
+        "job_body_exists": true,
+        "protocol_consumer": "sent_content"
       },
       "expected": {
         "http_status": 500,
-        "http_status_kind": "class",
+        "http_status_kind": "exact",
         "semantic_code": "internal_error",
         "error_reason": null,
-        "assertion": "5xx、无正文，不回退为原始job JSON"
+        "assertion": "5xx、无正文，不回退为原始job JSON",
+        "wire_error": {
+          "code": "INTERNAL",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05",
@@ -457,10 +778,22 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "5xx category only; exact failure status requires HTTP binding"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolContentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolContentSharedCases/CT10/default"
+          ]
+        }
       ]
     },
     {
@@ -469,14 +802,21 @@
         "operation": "receipt",
         "receipt_principal_valid": true,
         "content_expired": true,
-        "job_exists": true
+        "job_exists": true,
+        "protocol_consumer": "safe_receipt"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "回执可依政策200，但只有安全状态投影，view_content=false"
+        "assertion": "回执可依政策200，但只有安全状态投影，view_content=false",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05",
@@ -514,8 +854,23 @@
         }
       ],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolReceiptSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolReceiptSharedCases/RC01"
+          ]
+        }
       ]
     },
     {
@@ -526,14 +881,21 @@
           "legacy_outbound_detail",
           "submit_replay"
         ],
-        "content_expired": true
+        "content_expired": true,
+        "protocol_consumer": "legacy_receipt_replay"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 200,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "与安全回执/同一内容资格适配，不再有独立正文旁路"
+        "assertion": "与安全回执/同一内容资格适配，不再有独立正文旁路",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-05"
@@ -571,9 +933,25 @@
         }
       ],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolLegacyReplaySharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+            "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+            "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay"
+          ]
+        }
       ]
     },
     {
@@ -598,7 +976,8 @@
         "subject": "safe synthetic receipt",
         "text_body": "private body",
         "smtp_response": "private protocol",
-        "delivery_token": "12345678-1234-5678-9012-123456789012"
+        "delivery_token": "12345678-1234-5678-9012-123456789012",
+        "protocol_consumer": "safe_receipt"
       },
       "expected": {
         "http_status": 200,
@@ -627,6 +1006,12 @@
             "delivery_token",
             "smtp_response"
           ]
+        },
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
         }
       },
       "acceptance": [
@@ -642,10 +1027,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/delivery/r5_protocol_test.go",
@@ -660,6 +1042,9 @@
             "recipient_redaction",
             "secrets",
             "capabilities"
+          ],
+          "runtime_test_paths": [
+            "TestR5ProtocolDeliverySharedCases/RC03"
           ]
         },
         {
@@ -675,8 +1060,31 @@
             "retry_button",
             "uncertainty_notice"
           ]
+        },
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolReceiptSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolReceiptSharedCases/RC03"
+          ]
         }
-      ]
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_RC03",
+        "audit": "A03",
+        "acceptance": "AC-06",
+        "task": "R5-P2-050",
+        "test_paths": [
+          "TestR5ProtocolReceiptSharedCases/RC03"
+        ]
+      }
     },
     {
       "id": "RC04",
@@ -695,11 +1103,12 @@
         "subject": "safe synthetic receipt",
         "text_body": "private body",
         "smtp_response": "private protocol",
-        "delivery_token": "12345678-1234-5678-9012-123456789012"
+        "delivery_token": "12345678-1234-5678-9012-123456789012",
+        "protocol_consumer": "safe_receipt"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 200,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
         "assertion": "显示不确定，普通重试不可用；不能标为取消或成功",
@@ -722,6 +1131,12 @@
             "delivery_token",
             "smtp_response"
           ]
+        },
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
         }
       },
       "acceptance": [
@@ -736,11 +1151,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/delivery/r5_protocol_test.go",
@@ -755,6 +1166,9 @@
             "recipient_redaction",
             "secrets",
             "capabilities"
+          ],
+          "runtime_test_paths": [
+            "TestR5ProtocolDeliverySharedCases/RC04"
           ]
         },
         {
@@ -769,6 +1183,20 @@
             "safe_recipient_display",
             "retry_button",
             "uncertainty_notice"
+          ]
+        },
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolReceiptSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolReceiptSharedCases/RC04"
           ]
         }
       ]
@@ -795,7 +1223,8 @@
         "subject": "safe synthetic receipt",
         "text_body": "private body",
         "smtp_response": "private protocol",
-        "delivery_token": "12345678-1234-5678-9012-123456789012"
+        "delivery_token": "12345678-1234-5678-9012-123456789012",
+        "protocol_consumer": "safe_receipt"
       },
       "expected": {
         "http_status": 200,
@@ -823,6 +1252,12 @@
             "delivery_token",
             "smtp_response"
           ]
+        },
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
         }
       },
       "acceptance": [
@@ -838,10 +1273,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/delivery/r5_protocol_test.go",
@@ -856,6 +1288,9 @@
             "recipient_redaction",
             "secrets",
             "capabilities"
+          ],
+          "runtime_test_paths": [
+            "TestR5ProtocolDeliverySharedCases/RC05"
           ]
         },
         {
@@ -871,6 +1306,20 @@
             "retry_button",
             "uncertainty_notice"
           ]
+        },
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolReceiptSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolReceiptSharedCases/RC05"
+          ]
         }
       ]
     },
@@ -882,14 +1331,21 @@
           "reader",
           "company_admin",
           "historical_author"
-        ]
+        ],
+        "protocol_consumer": "outbound_recovery"
       },
       "expected": {
         "http_status": 403,
         "http_status_kind": "exact",
         "semantic_code": "forbidden",
         "error_reason": null,
-        "assertion": "403，无恢复原件"
+        "assertion": "403，无恢复原件",
+        "wire_error": {
+          "code": "FORBIDDEN",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-07"
@@ -902,9 +1358,24 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRecoverySharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRecoverySharedCases/OP01/reader",
+            "TestR5ProtocolRecoverySharedCases/OP01/company_admin",
+            "TestR5ProtocolRecoverySharedCases/OP01/historical_author"
+          ]
+        }
       ]
     },
     {
@@ -914,14 +1385,21 @@
         "principal": "platform_operator",
         "exact_tenant_resource": true,
         "valid_reason": true,
-        "required_audit": "success"
+        "required_audit": "success",
+        "protocol_consumer": "outbound_recovery"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "允许受控恢复读取；无delivery token等执行凭据"
+        "assertion": "允许受控恢复读取；无delivery token等执行凭据",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-07"
@@ -934,9 +1412,22 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRecoverySharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRecoverySharedCases/OP02"
+          ]
+        }
       ]
     },
     {
@@ -993,7 +1484,8 @@
             "repeat": "a",
             "count": 1001
           }
-        ]
+        ],
+        "protocol_consumer": "outbound_recovery"
       },
       "expected": {
         "http_status": 400,
@@ -1057,7 +1549,13 @@
             "valid": false,
             "normalized": ""
           }
-        ]
+        ],
+        "wire_error": {
+          "code": "BAD_REQUEST",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-07"
@@ -1081,10 +1579,7 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/app/credentials/r5_protocol_test.go",
@@ -1100,6 +1595,43 @@
             "maximum_bytes",
             "unicode_bytes",
             "normalized_persisted_reason"
+          ],
+          "runtime_test_paths": [
+            "TestR5ProtocolAuditReasonSharedCases/OP03/empty",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/whitespace",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/seven",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/trim_seven",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/eight",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_six",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_nine",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/utf8_twelve",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/maximum",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/trim_maximum",
+            "TestR5ProtocolAuditReasonSharedCases/OP03/over_maximum"
+          ]
+        },
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRecoverySharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRecoverySharedCases/OP03/empty",
+            "TestR5ProtocolRecoverySharedCases/OP03/whitespace",
+            "TestR5ProtocolRecoverySharedCases/OP03/seven",
+            "TestR5ProtocolRecoverySharedCases/OP03/trim_seven",
+            "TestR5ProtocolRecoverySharedCases/OP03/eight",
+            "TestR5ProtocolRecoverySharedCases/OP03/utf8_six",
+            "TestR5ProtocolRecoverySharedCases/OP03/utf8_nine",
+            "TestR5ProtocolRecoverySharedCases/OP03/utf8_twelve",
+            "TestR5ProtocolRecoverySharedCases/OP03/maximum",
+            "TestR5ProtocolRecoverySharedCases/OP03/trim_maximum",
+            "TestR5ProtocolRecoverySharedCases/OP03/over_maximum"
           ]
         }
       ]
@@ -1108,14 +1640,21 @@
       "id": "OP04",
       "input": {
         "operation": "break_glass",
-        "required_audit": "error"
+        "required_audit": "error",
+        "protocol_consumer": "outbound_recovery"
       },
       "expected": {
         "http_status": 500,
-        "http_status_kind": "class",
+        "http_status_kind": "exact",
         "semantic_code": "internal_error",
         "error_reason": null,
-        "assertion": "5xx、无内容，不能先返回正文再补审计"
+        "assertion": "5xx、无内容，不能先返回正文再补审计",
+        "wire_error": {
+          "code": "INTERNAL",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-07"
@@ -1128,10 +1667,22 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "5xx category only; exact failure status requires HTTP binding"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRecoverySharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRecoverySharedCases/OP04"
+          ]
+        }
       ]
     },
     {
@@ -1142,14 +1693,22 @@
           "restore"
         ],
         "mailbox_kind": "shared",
-        "hard_expiry": "finite_future"
+        "hard_expiry": "finite_future",
+        "protocol_consumer": "inbound_retention",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_RT01"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "200，hard_expiry完全不变，只清删除/回收站标记"
+        "assertion": "200，hard_expiry完全不变，只清删除/回收站标记",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-10"
@@ -1175,10 +1734,32 @@
           "build_tag": "r5audit"
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRetentionSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRetentionSharedCases/RT01/default"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_RT01",
+        "audit": "A05",
+        "acceptance": "AC-10",
+        "task": "R5-P3-010",
+        "test_paths": [
+          "TestR5ProtocolRetentionSharedCases/RT01/default"
+        ]
+      }
     },
     {
       "id": "RT02",
@@ -1188,14 +1769,21 @@
           "archive"
         ],
         "mailbox_kind": "personal",
-        "hard_expiry": null
+        "hard_expiry": null,
+        "protocol_consumer": "inbound_retention"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "restore/archive不会创建新的硬到期时间"
+        "assertion": "restore/archive不会创建新的硬到期时间",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-11"
@@ -1208,9 +1796,22 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRetentionSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRetentionSharedCases/RT02/default"
+          ]
+        }
       ]
     },
     {
@@ -1220,14 +1821,22 @@
         "hard_expiry_or_purge_after_relative_to_now": [
           "before",
           "equal"
-        ]
+        ],
+        "protocol_consumer": "inbound_retention",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_RT03"
       },
       "expected": {
         "http_status": 409,
         "http_status_kind": "exact",
         "semantic_code": "conflict",
         "error_reason": null,
-        "assertion": "恢复409，状态不变；读取按CT08/09拒绝"
+        "assertion": "恢复409，状态不变；读取按CT08/09拒绝",
+        "wire_error": {
+          "code": "CONFLICT",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-10"
@@ -1240,24 +1849,69 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRetentionSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRetentionSharedCases/RT03/expires_at/before",
+            "TestR5ProtocolRetentionSharedCases/RT03/expires_at/equal",
+            "TestR5ProtocolRetentionSharedCases/RT03/purge_after/before",
+            "TestR5ProtocolRetentionSharedCases/RT03/purge_after/equal"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_RT03",
+        "audit": "A05",
+        "acceptance": "AC-10",
+        "task": "R5-P3-010",
+        "test_paths": [
+          "TestR5ProtocolRetentionSharedCases/RT03/expires_at/before",
+          "TestR5ProtocolRetentionSharedCases/RT03/expires_at/equal",
+          "TestR5ProtocolRetentionSharedCases/RT03/purge_after/before",
+          "TestR5ProtocolRetentionSharedCases/RT03/purge_after/equal"
+        ]
+      }
     },
     {
       "id": "RT04",
       "input": {
         "operation": "organize",
-        "can_organize": true,
-        "can_read": false
+        "can_organize": false,
+        "can_read": true,
+        "protocol_consumer": "inbound_retention",
+        "rejected_grant_configuration": {
+          "can_read": false,
+          "can_organize": true,
+          "error_code": "BAD_REQUEST",
+          "http_status": 400
+        },
+        "unrepresentable_target_permissions": {
+          "can_read": false,
+          "can_organize": true
+        }
       },
       "expected": {
         "http_status": 403,
         "http_status_kind": "exact",
         "semantic_code": "forbidden",
         "error_reason": null,
-        "assertion": "403，不能操作或延长期限"
+        "assertion": "403，组织操作必须同时read和organize；organize-only配置先400拒绝",
+        "wire_error": {
+          "code": "FORBIDDEN",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-10"
@@ -1270,10 +1924,32 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRetentionSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRetentionSharedCases/RT04/default"
+          ]
+        }
+      ],
+      "applicability": {
+        "organize_only_runtime_state": "unrepresentable_by_current_api_and_database_CHECK",
+        "runtime_operation_variant": "read_only_no_organize",
+        "original_input_evidence": [
+          "actual_PgStore_grant_BAD_REQUEST",
+          "shipping_PUT_grants_400"
+        ],
+        "not_claimed": "Runtime operation with organize-only persisted state; constraints are never bypassed."
+      }
     },
     {
       "id": "RT05",
@@ -1282,14 +1958,21 @@
           "archive",
           "unarchive"
         ],
-        "hard_expiry": "finite_future"
+        "hard_expiry": "finite_future",
+        "protocol_consumer": "inbound_retention"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "不暂停、清除或后移硬期限"
+        "assertion": "不暂停、清除或后移硬期限",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-10",
@@ -1303,9 +1986,22 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRetentionSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRetentionSharedCases/RT05/default"
+          ]
+        }
       ]
     },
     {
@@ -1315,14 +2011,21 @@
           "trash",
           "trash"
         ],
-        "purge_after": "existing_future"
+        "purge_after": "existing_future",
+        "protocol_consumer": "inbound_retention"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "不通过重复删除向后延长已有回收站截止"
+        "assertion": "不通过重复删除向后延长已有回收站截止",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-10"
@@ -1335,9 +2038,22 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolRetentionSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolRetentionSharedCases/RT06/default"
+          ]
+        }
       ]
     },
     {
@@ -1350,32 +2066,71 @@
           "queue",
           "held"
         ],
-        "content_expired": true
+        "content_expired": true,
+        "protocol_consumer": "logical_expiry_reference"
       },
       "expected": {
         "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status_kind": "not_applicable",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "逻辑正文可失效，但受保护原件不因正文失效立即删掉"
+        "assertion": "逻辑正文可失效，但受保护原件不因正文失效立即删掉",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-13",
-        "AC-14"
+        "AC-14",
+        "AC-10"
       ],
       "audit": [
         "A05"
       ],
       "required_layers": [
-        "db",
-        "http"
+        "db"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+      "unresolved": [],
+      "applicability": {
+        "http": "not_applicable: this case tests metadata sweep/raw reaper; content HTTP expiry is CT08/09",
+        "normal_content": "normal personal message is in trash past purge_after cutoff, not assigned an anomalous hard expiry; GetWorkMessage denies it. This avoids reinterpreting permanent personal/shared-unlimited expiry before P3-020 conservative migration.",
+        "reference_isolation": "sent_asset removes job; queue removes archive; no candidate is protected merely by the expired logical message",
+        "read_boundary_gap": "Current company_message_read.go GetWorkMessage SQL filters only tenant/mailbox/id, not deleted_at/purge_after; companymail.message repeats identity only. Test first confirms deleted_at and expired purge_after with actual SQL, then accepts target red only if actual returned exact content provenance. Every GC/reference assertion still executes after this marker."
+      },
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolLogicalExpiryReferenceSharedCases",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/draft",
+            "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/sent_asset",
+            "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/queue",
+            "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/held"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_RT07_READ_BOUNDARY",
+        "audit": "A05",
+        "acceptance": "AC-10",
+        "task": "R5-P3-010",
+        "test_paths": [
+          "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/draft",
+          "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/sent_asset",
+          "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/queue",
+          "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/held"
+        ]
+      }
     },
     {
       "id": "BC01",
@@ -1386,14 +2141,36 @@
           "cc",
           "bcc"
         ],
-        "attachments": true
+        "attachments": true,
+        "protocol_consumer": "bcc_asset",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_BC01"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 201,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "长期资产保存完整类别和附件；wire没有BCC头"
+        "assertion": "长期资产保存完整类别和附件；wire没有BCC头",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        },
+        "entrypoints": [
+          {
+            "operation": "draft_submit",
+            "status": 201
+          },
+          {
+            "operation": "eligible_sent_content",
+            "status": 200
+          },
+          {
+            "operation": "eligible_attachment_list",
+            "status": 200
+          }
+        ]
       },
       "acceptance": [
         "AC-08",
@@ -1407,11 +2184,32 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolBCCAssetSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolBCCAssetSharedCases/BC01"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_BC01",
+        "audit": "A07",
+        "acceptance": "AC-08",
+        "task": "R5-P2-070",
+        "test_paths": [
+          "TestR5ProtocolBCCAssetSharedCases/BC01"
+        ]
+      }
     },
     {
       "id": "BC02",
@@ -1419,14 +2217,23 @@
         "operation": "legacy_backfill",
         "job_exists": true,
         "exact_tenant_asset_match": true,
-        "repeat": true
+        "repeat": true,
+        "protocol_consumer": "legacy_bcc_observation",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_BC02"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 200,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "允许从可靠结构化来源回填；重复回填不覆盖正确值"
+        "assertion": "允许从可靠结构化来源回填；重复回填不覆盖正确值",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        },
+        "status_scope": "Current GET observation only; no present formal backfill command status is asserted."
       },
       "acceptance": [
         "AC-09"
@@ -1440,23 +2247,61 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+        "Formal versioned R5 BCC backfill/unknown migration command does not exist; current capability observation is not execution of future idempotent writes."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolLegacyBCCObservationSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_BC02",
+        "audit": "A07",
+        "acceptance": "AC-09",
+        "task": "R5-P2-080",
+        "test_paths": [
+          "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source"
+        ]
+      },
+      "applicability": {
+        "observed": "actual current PostgreSQL asset/job provenance and shipping sent-content product outputs; no formal R5 BCC backfill command exists yet",
+        "BC02_boundary": "repeat checks current immutable values unchanged under real reads; this is not execution or certification of a nonexistent idempotent backfill command. Exact source has BCC but actual durable asset lacks it => specific capability target red",
+        "BC03_boundary": "source absent or same-ID foreign tenant job cannot be trusted; actual response must not imply completeness or copy foreign BCC. Missing legacy_unknown is an exact current product target red",
+        "followup": "R5-P2-080 must add real versioned migration/backfill and replace capability-observation red with actual idempotent write tests"
+      }
     },
     {
       "id": "BC03",
       "input": {
         "operation": "legacy_backfill",
-        "trusted_source": "missing_or_unprovable"
+        "trusted_source": "missing_or_unprovable",
+        "protocol_consumer": "legacy_bcc_observation",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_BC03"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 200,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "标明legacy_unknown；不得用空名单声称没有密送"
+        "assertion": "标明legacy_unknown；不得用空名单声称没有密送",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        },
+        "status_scope": "Current GET observation only; no present formal backfill command status is asserted."
       },
       "acceptance": [
         "AC-09"
@@ -1470,10 +2315,41 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+        "Formal versioned R5 BCC backfill/unknown migration command does not exist; current capability observation is not execution of future idempotent writes."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolLegacyBCCObservationSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+            "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_BC03",
+        "audit": "A07",
+        "acceptance": "AC-09",
+        "task": "R5-P2-080",
+        "test_paths": [
+          "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+          "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job"
+        ]
+      },
+      "applicability": {
+        "observed": "actual current PostgreSQL asset/job provenance and shipping sent-content product outputs; no formal R5 BCC backfill command exists yet",
+        "BC02_boundary": "repeat checks current immutable values unchanged under real reads; this is not execution or certification of a nonexistent idempotent backfill command. Exact source has BCC but actual durable asset lacks it => specific capability target red",
+        "BC03_boundary": "source absent or same-ID foreign tenant job cannot be trusted; actual response must not imply completeness or copy foreign BCC. Missing legacy_unknown is an exact current product target red",
+        "followup": "R5-P2-080 must add real versioned migration/backfill and replace capability-observation red with actual idempotent write tests"
+      }
     },
     {
       "id": "BC04",
@@ -1481,14 +2357,22 @@
         "operation": "sent_content_detail",
         "mailbox_kind": "shared",
         "can_read": true,
-        "lifecycle": "live"
+        "lifecycle": "live",
+        "protocol_consumer": "bcc_asset",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_BC04"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "发件内容详情按同一read政策显示BCC，不另造平行权限"
+        "assertion": "发件内容详情按同一read政策显示BCC，不另造平行权限",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-08"
@@ -1501,10 +2385,32 @@
         "http"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolBCCAssetSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolBCCAssetSharedCases/BC04"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_BC04",
+        "audit": "A07",
+        "acceptance": "AC-08",
+        "task": "R5-P2-100",
+        "test_paths": [
+          "TestR5ProtocolBCCAssetSharedCases/BC04"
+        ]
+      }
     },
     {
       "id": "BC05",
@@ -1517,14 +2423,53 @@
           "metrics",
           "wire_mime"
         ],
-        "has_bcc": true
+        "has_bcc": true,
+        "protocol_consumer": "bcc_surfaces"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 200,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "不输出BCC地址"
+        "assertion": "不输出BCC地址",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        },
+        "entrypoints": [
+          {
+            "operation": "list",
+            "status": 200,
+            "status_scope": "shipping_HTTP"
+          },
+          {
+            "operation": "receipt",
+            "status": 200,
+            "status_scope": "shipping_HTTP"
+          },
+          {
+            "operation": "sse",
+            "status": 200,
+            "status_scope": "shipping_HTTP"
+          },
+          {
+            "operation": "webhook",
+            "status": null,
+            "status_scope": "internal_artifact_or_delivery_not_API_status"
+          },
+          {
+            "operation": "metrics",
+            "status": null,
+            "status_scope": "internal_artifact_or_delivery_not_API_status"
+          },
+          {
+            "operation": "wire_mime",
+            "status": null,
+            "status_scope": "internal_artifact_or_delivery_not_API_status"
+          }
+        ]
       },
       "acceptance": [
         "AC-06",
@@ -1549,11 +2494,44 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolBCCSurfacesSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolBCCSurfacesSharedCases/BC05/list",
+            "TestR5ProtocolBCCSurfacesSharedCases/BC05/receipt",
+            "TestR5ProtocolBCCSurfacesSharedCases/BC05/sse",
+            "TestR5ProtocolBCCSurfacesSharedCases/BC05/webhook",
+            "TestR5ProtocolBCCSurfacesSharedCases/BC05/metrics",
+            "TestR5ProtocolBCCSurfacesSharedCases/BC05/wire_mime"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_BC05",
+        "audit": "A07",
+        "acceptance": "AC-06",
+        "task": "R5-P2-050",
+        "test_paths": [
+          "TestR5ProtocolBCCSurfacesSharedCases/BC05/list",
+          "TestR5ProtocolBCCSurfacesSharedCases/BC05/receipt"
+        ]
+      },
+      "applicability": {
+        "list_receipt_sse": "shipping authenticated routes; SSE replays stored actual sent.created then cancels after ready without arbitrary sleep",
+        "webhook": "actual current message.trash outbox producer and real dispatcher POST to loopback; this is not certification of a nonexistent outbound submission webhook event type",
+        "metrics": "actual PostgreSQL operational counts plus production Snapshot/RenderPrometheus; not live shipping /metrics HTTP scrape",
+        "wire_mime": "actual production outbound.Build; no external SMTP leaves fixture"
+      }
     },
     {
       "id": "BC06",
@@ -1561,14 +2539,22 @@
         "operation": "sent_content_detail",
         "delete_job_and_ledger": true,
         "lifecycle": "live",
-        "has_bcc_and_attachments": true
+        "has_bcc_and_attachments": true,
+        "protocol_consumer": "bcc_asset",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_BC06"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "完整发件内容、分类收件人和附件独立保留"
+        "assertion": "完整发件内容、分类收件人和附件独立保留",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-08"
@@ -1593,24 +2579,53 @@
           "build_tag": "r5audit"
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+      "unresolved": [],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolBCCAssetSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolBCCAssetSharedCases/BC06"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_BC06",
+        "audit": "A07",
+        "acceptance": "AC-08",
+        "task": "R5-P2-110",
+        "test_paths": [
+          "TestR5ProtocolBCCAssetSharedCases/BC06"
+        ]
+      }
     },
     {
       "id": "GC01",
       "input": {
         "operation": "gc",
         "protected_prefix_count": 100,
-        "expired_orphan_index": 101
+        "expired_orphan_index": 101,
+        "protocol_consumer": "bounded_gc"
       },
       "expected": {
         "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status_kind": "not_applicable",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "有界清理最终能够处理孤儿，前100个仍受保护"
+        "assertion": "有界清理最终能够处理孤儿，前100个仍受保护",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-12"
@@ -1619,8 +2634,7 @@
         "A06"
       ],
       "required_layers": [
-        "db",
-        "http"
+        "db"
       ],
       "reference_adapters": [
         {
@@ -1635,11 +2649,35 @@
           "build_tag": "r5audit"
         }
       ],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+      "unresolved": [],
+      "applicability": {
+        "http": "not_applicable: background sweep has no HTTP endpoint; no fabricated status adapter",
+        "db": "actual PostgreSQL SweepCompanyMetadata with protected_prefix_count and expired_orphan_index"
+      },
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolGCBoundedSharedCases",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolGCBoundedSharedCases/GC01"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_GC01",
+        "audit": "A06",
+        "acceptance": "AC-12",
+        "task": "R5-P3-070",
+        "test_paths": [
+          "TestR5ProtocolGCBoundedSharedCases/GC01"
+        ]
+      }
     },
     {
       "id": "GC02",
@@ -1649,14 +2687,21 @@
           "sealed_draft",
           "held_raw"
         ],
-        "tombstone_exists": true
+        "tombstone_exists": true,
+        "protocol_consumer": "protected_gc"
       },
       "expected": {
         "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status_kind": "not_applicable",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "普通清理不得删除；创建tombstone也不自动到期"
+        "assertion": "普通清理不得删除；创建tombstone也不自动到期",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-13",
@@ -1666,14 +2711,30 @@
         "A06"
       ],
       "required_layers": [
-        "db",
-        "http"
+        "db"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
+      "unresolved": [],
+      "applicability": {
+        "http": "not_applicable: metadata sweep and atomic raw-object reaper are background/internal ports with no HTTP endpoint",
+        "sealed_draft": "actual offboarding seal and draft creation receipt retained before SweepCompanyMetadata",
+        "held_raw": "actual ingress hold/finalize, mailbox removal leaves fixed destination tombstone; authoritative reaper must not call object deletion"
+      },
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolProtectedGCSharedCases",
+          "layers": [
+            "db"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolProtectedGCSharedCases/GC02/sealed_draft",
+            "TestR5ProtocolProtectedGCSharedCases/GC02/held_raw"
+          ]
+        }
       ]
     },
     {
@@ -1686,14 +2747,22 @@
         "target_state": "frozen",
         "disposition_completed": false,
         "administrator_authorized": true,
-        "successor_valid": true
+        "successor_valid": true,
+        "protocol_consumer": "offboarding",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_LF01"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "可预览/执行，全过程不重新启用旧账号"
+        "assertion": "可预览/执行，全过程不重新启用旧账号",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-15"
@@ -1721,9 +2790,33 @@
         }
       ],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolOffboardingSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolOffboardingSharedCases/LF01"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_LF01",
+        "audit": "A04",
+        "acceptance": "AC-15",
+        "task": "R5-P4-010",
+        "test_paths": [
+          "TestR5ProtocolOffboardingSharedCases/LF01"
+        ]
+      }
     },
     {
       "id": "LF02",
@@ -1731,14 +2824,21 @@
         "operation": "offboard_execute",
         "same_plan_replay": true,
         "same_lifecycle": true,
-        "already_completed": true
+        "already_completed": true,
+        "protocol_consumer": "offboarding"
       },
       "expected": {
         "http_status": 200,
         "http_status_kind": "exact",
         "semantic_code": "success",
         "error_reason": null,
-        "assertion": "返回原回执，不重复转移/取消/审计"
+        "assertion": "返回原回执，不重复转移/取消/审计",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-16"
@@ -1753,22 +2853,44 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolOffboardingSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolOffboardingSharedCases/LF02"
+          ]
+        }
       ]
     },
     {
       "id": "LF03",
       "input": {
         "operation": "offboard_execute",
-        "another_plan_completed_same_lifecycle": true
+        "another_plan_completed_same_lifecycle": true,
+        "protocol_consumer": "offboarding"
       },
       "expected": {
         "http_status": 409,
         "http_status_kind": "exact",
         "semantic_code": "conflict",
         "error_reason": null,
-        "assertion": "409，不执行第二次处置"
+        "assertion": "409，不执行第二次处置",
+        "wire_error": {
+          "code": "CONFLICT",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-16"
@@ -1783,8 +2905,23 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolOffboardingSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolOffboardingSharedCases/LF03"
+          ]
+        }
       ]
     },
     {
@@ -1792,14 +2929,21 @@
       "input": {
         "operation": "offboard_execute",
         "asset_count_matches": true,
-        "asset_id_revision_or_eligibility_changed": true
+        "asset_id_revision_or_eligibility_changed": true,
+        "protocol_consumer": "offboarding"
       },
       "expected": {
         "http_status": 409,
         "http_status_kind": "exact",
         "semantic_code": "conflict",
         "error_reason": null,
-        "assertion": "409，重新预览，不以数量相同放行旧指纹"
+        "assertion": "409，重新预览，不以数量相同放行旧指纹",
+        "wire_error": {
+          "code": "CONFLICT",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-17"
@@ -1814,8 +2958,23 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolOffboardingSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolOffboardingSharedCases/LF04"
+          ]
+        }
       ]
     },
     {
@@ -1827,14 +2986,65 @@
           "foreign_tenant",
           "self",
           "higher_role"
+        ],
+        "protocol_consumer": "offboarding_eligibility",
+        "variants": [
+          {
+            "name": "frozen",
+            "stage": "execute"
+          },
+          {
+            "name": "foreign_tenant",
+            "stage": "preview"
+          },
+          {
+            "name": "self",
+            "stage": "preview"
+          },
+          {
+            "name": "higher_role",
+            "stage": "preview"
+          }
         ]
       },
       "expected": {
         "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status_kind": "variant_exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "按参数或资格拒绝，无副作用；具体400/403/404边界待契约核对"
+        "assertion": "资格拒绝且无副作用：冻结/跨公司/自己交接400，越目标管理层级403",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        },
+        "variants": [
+          {
+            "name": "frozen",
+            "status": 400,
+            "code": "BAD_REQUEST",
+            "stage": "execute"
+          },
+          {
+            "name": "foreign_tenant",
+            "status": 400,
+            "code": "BAD_REQUEST",
+            "stage": "preview"
+          },
+          {
+            "name": "self",
+            "status": 400,
+            "code": "BAD_REQUEST",
+            "stage": "preview"
+          },
+          {
+            "name": "higher_role",
+            "status": 403,
+            "code": "FORBIDDEN",
+            "stage": "preview"
+          }
+        ]
       },
       "acceptance": [
         "AC-04",
@@ -1850,24 +3060,54 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolOffboardingEligibilitySharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/frozen",
+            "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/foreign_tenant",
+            "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/self",
+            "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/higher_role"
+          ]
+        }
+      ],
+      "applicability": {
+        "higher_role": "target role equal/higher than administrator; successor role itself does not confer management authority",
+        "foreign_or_self": "preview rejects, so no executable invalid plan is fabricated",
+        "frozen": "actual valid plan then successor freezes before actual execution"
+      }
     },
     {
       "id": "LF06",
       "input": {
         "operation": "offboard_execute",
         "old_plan": true,
-        "new_employment_lifecycle": true
+        "new_employment_lifecycle": true,
+        "protocol_consumer": "offboarding",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_LF06"
       },
       "expected": {
         "http_status": 409,
         "http_status_kind": "exact",
         "semantic_code": "conflict",
         "error_reason": null,
-        "assertion": "不复活旧plan、grant或token；旧plan409"
+        "assertion": "不复活旧plan、grant或token；旧plan409",
+        "wire_error": {
+          "code": "CONFLICT",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-18",
@@ -1883,22 +3123,53 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolOffboardingSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolOffboardingSharedCases/LF06"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_LF06",
+        "audit": "A04",
+        "acceptance": "AC-18",
+        "task": "R5-P4-060",
+        "test_paths": [
+          "TestR5ProtocolOffboardingSharedCases/LF06"
+        ]
+      }
     },
     {
       "id": "LF07",
       "input": {
         "operation": "offboard_execute",
-        "audit_or_mid_write": "error"
+        "audit_or_mid_write": "error",
+        "protocol_consumer": "offboarding"
       },
       "expected": {
         "http_status": 500,
-        "http_status_kind": "class",
+        "http_status_kind": "exact",
         "semantic_code": "internal_error",
         "error_reason": null,
-        "assertion": "原子回滚资产、用户及计划状态，不能留下半交接"
+        "assertion": "原子回滚资产、用户及计划状态，不能留下半交接",
+        "wire_error": {
+          "code": "INTERNAL",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-18"
@@ -1913,9 +3184,23 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "5xx category only; exact failure status requires HTTP binding"
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolOffboardingSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolOffboardingSharedCases/LF07"
+          ]
+        }
       ]
     },
     {
@@ -1926,14 +3211,22 @@
         "existing_domain_restriction": true,
         "patch": {
           "daily_send_quota": 25
-        }
+        },
+        "protocol_consumer": "permission_intent",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_PE01"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 200,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "只改额度，其他原始覆盖保持不变"
+        "assertion": "只改额度，其他原始覆盖保持不变",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-01"
@@ -1973,10 +3266,33 @@
         }
       ],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolPermissionIntentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolPermissionIntentSharedCases/PE01/quota_patch"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_PE01",
+        "audit": "A01",
+        "acceptance": "AC-01",
+        "task": "R5-P1-050",
+        "test_paths": [
+          "TestR5ProtocolPermissionIntentSharedCases/PE01/quota_patch"
+        ]
+      }
     },
     {
       "id": "PE02",
@@ -1988,14 +3304,22 @@
           false,
           0,
           []
-        ]
+        ],
+        "protocol_consumer": "permission_intent",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_PE02"
       },
       "expected": {
-        "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status": 200,
+        "http_status_kind": "exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "分别表示保持/恢复继承/具体输入；原始覆盖不从effective反推"
+        "assertion": "分别表示保持/恢复继承/具体输入；原始覆盖不从effective反推",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-03"
@@ -2011,24 +3335,63 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolPermissionIntentSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolPermissionIntentSharedCases/PE02/omitted",
+            "TestR5ProtocolPermissionIntentSharedCases/PE02/null",
+            "TestR5ProtocolPermissionIntentSharedCases/PE02/false",
+            "TestR5ProtocolPermissionIntentSharedCases/PE02/0",
+            "TestR5ProtocolPermissionIntentSharedCases/PE02/[]"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_PE02",
+        "audit": "A01",
+        "acceptance": "AC-03",
+        "task": "R5-P1-050",
+        "test_paths": [
+          "TestR5ProtocolPermissionIntentSharedCases/PE02/omitted",
+          "TestR5ProtocolPermissionIntentSharedCases/PE02/null",
+          "TestR5ProtocolPermissionIntentSharedCases/PE02/false",
+          "TestR5ProtocolPermissionIntentSharedCases/PE02/0",
+          "TestR5ProtocolPermissionIntentSharedCases/PE02/[]"
+        ]
+      }
     },
     {
       "id": "PE03",
       "input": {
         "operation": "profile_patch",
         "stale_revision": true,
-        "patch_contains_old_security_fields": true
+        "patch_contains_old_security_fields": true,
+        "protocol_consumer": "permission_stale",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_PE03"
       },
       "expected": {
         "http_status": 409,
         "http_status_kind": "exact",
         "semantic_code": "conflict",
         "error_reason": null,
-        "assertion": "revision不匹配409，不恢复刚撤销权限"
+        "assertion": "revision不匹配409，不恢复刚撤销权限",
+        "wire_error": {
+          "code": "CONFLICT",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-02"
@@ -2068,23 +3431,58 @@
         }
       ],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolPermissionStaleSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolPermissionStaleSharedCases/PE03"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_PE03",
+        "audit": "A01",
+        "acceptance": "AC-02",
+        "task": "R5-P1-060",
+        "test_paths": [
+          "TestR5ProtocolPermissionStaleSharedCases/PE03"
+        ]
+      },
+      "applicability": {
+        "baseline_wire": "Current profile PATCH lacks revision field; stale profile uses the actual old security form snapshot. Current override accepts id/updated_at but does not perform CAS. Only actual200 plus observed revoked-security restoration is admitted target red. Newly proposed revision fields are not sent as malformed requests."
+      }
     },
     {
       "id": "PE04",
       "input": {
         "operation": "permission_override_patch",
         "old_revision": true,
-        "override_recreated_or_profile_reassigned": true
+        "override_recreated_or_profile_reassigned": true,
+        "protocol_consumer": "permission_stale",
+        "target_failure_marker": "R5_PROTOCOL_TARGET_PE04"
       },
       "expected": {
         "http_status": 409,
         "http_status_kind": "exact",
         "semantic_code": "conflict",
         "error_reason": null,
-        "assertion": "409，持久版本不能回到初始值"
+        "assertion": "409，持久版本不能回到初始值",
+        "wire_error": {
+          "code": "CONFLICT",
+          "message_mode": "required_nonempty",
+          "reason_mode": "absent",
+          "reason": null
+        }
       },
       "acceptance": [
         "AC-03"
@@ -2100,23 +3498,71 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolPermissionStaleSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolPermissionStaleSharedCases/PE04"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_PE04",
+        "audit": "A01",
+        "acceptance": "AC-03",
+        "task": "R5-P1-040",
+        "test_paths": [
+          "TestR5ProtocolPermissionStaleSharedCases/PE04"
+        ]
+      },
+      "applicability": {
+        "baseline_wire": "Current profile PATCH lacks revision field; stale profile uses the actual old security form snapshot. Current override accepts id/updated_at but does not perform CAS. Only actual200 plus observed revoked-security restoration is admitted target red. Newly proposed revision fields are not sent as malformed requests."
+      }
     },
     {
       "id": "PE05",
       "input": {
         "operation": "draft_save",
         "wait_for_draft_lock": true,
-        "send_grant_revoked_during_wait": true
+        "send_grant_revoked_during_wait": true,
+        "protocol_consumer": "draft_grant_ordering"
       },
       "expected": {
         "http_status": null,
-        "http_status_kind": "unresolved",
+        "http_status_kind": "ordered_outcome_exact",
         "semantic_code": "policy_assertion",
         "error_reason": null,
-        "assertion": "二者有明确顺序：保存先完成或新权限先阻止；撤权完成后旧快照不能继续提交"
+        "assertion": "二者有明确顺序：保存先完成或新权限先阻止；撤权完成后旧快照不能继续提交",
+        "wire_error": {
+          "code": null,
+          "message_mode": "not_applicable",
+          "reason_mode": "not_applicable",
+          "reason": null
+        },
+        "ordered_outcomes": [
+          {
+            "order": "save_before_revoke",
+            "http_status": 200,
+            "revision_change": 1
+          },
+          {
+            "order": "revoke_before_save",
+            "http_status": 403,
+            "error_code": "FORBIDDEN",
+            "revision_change": 0
+          }
+        ],
+        "after_revoke_http_status": 403
       },
       "acceptance": [
         "AC-13",
@@ -2133,10 +3579,37 @@
       ],
       "reference_adapters": [],
       "unresolved": [
-        "literal error.reason not frozen; semantic_code is not an HTTP reason constant",
-        "shared JSON input not consumed by Go/HTTP/component adapters",
-        "operation-specific HTTP status must be bound to exact endpoint"
-      ]
+        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
+      ],
+      "shared_adapters": [
+        {
+          "source": "internal/store/postgres/r5_protocol_shared_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5ProtocolDraftGrantOrderingSharedCases",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "consumes_shared_input": true,
+          "build_tag": "r5protocol",
+          "runtime_test_paths": [
+            "TestR5ProtocolDraftGrantOrderingSharedCases/PE05"
+          ]
+        }
+      ],
+      "baseline_target_failure": {
+        "marker": "R5_PROTOCOL_TARGET_PE05",
+        "audit": "A01",
+        "acceptance": "AC-13",
+        "task": "R5-P5-010",
+        "test_paths": [
+          "TestR5ProtocolDraftGrantOrderingSharedCases/PE05"
+        ]
+      },
+      "applicability": {
+        "db_http": "both concurrent commands use shipping authenticated HTTP routes; PostgreSQL row lock and pg_blocking_pids establish order, not sleeps; verify actual SQL payload/revision and exact post-revocation403",
+        "not_claimed": "browser multiwindow interaction; components remain separate evidence"
+      }
     }
   ]
 }

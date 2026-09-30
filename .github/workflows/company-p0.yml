@@ -63,6 +63,12 @@ jobs:
         run: python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
       - name: DTO field contract
         run: python3 scripts/check_contract_drift.py
+      - name: Transaction syntax and review inventory drift
+        run: python3 -B scripts/check_r5_transactions.py
+      - name: Real protocol baseline with explicit target failures
+        run: |
+          python3 -B scripts/check_r5_protocol.py \
+            --run shared-db --output-dir protocol-baseline-evidence
       - name: Actual HTTP response contracts with PostgreSQL
         run: |
           python3 -B scripts/check_http_contract.py \
@@ -81,6 +87,7 @@ jobs:
             go-test-negative-evidence
             http-contract-evidence
             !http-contract-evidence/responses.json
+            protocol-baseline-evidence
           retention-days: 14
   frontend:
     runs-on: ubuntu-latest

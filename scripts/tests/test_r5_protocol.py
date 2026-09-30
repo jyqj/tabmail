@@ -28,7 +28,7 @@ class CaseStructureTests(unittest.TestCase):
         self.assertEqual(report['cases'], 46)
         self.assertEqual(report['shared_input_verified_cases'], 0)
         self.assertFalse(report['task_complete'])
-        self.assertEqual(len(report['missing_shared_input_adapters']), 46)
+        self.assertEqual(len(report['missing_shared_input_adapters']), 0)
 
     def test_missing_case_rejected(self):
         self.check_mutation(lambda d: d['cases'].pop())
@@ -45,8 +45,24 @@ class CaseStructureTests(unittest.TestCase):
     def test_invalid_status_rejected(self):
         self.check_mutation(lambda d: d['cases'][0]['expected'].update(http_status=999))
 
-    def test_missing_literal_reason_must_keep_gap(self):
-        self.check_mutation(lambda d: d['cases'][0].update(unresolved=[]))
+    def test_null_reason_is_not_a_protocol_gap(self):
+        data = copy.deepcopy(self.data)
+        data['cases'][0]['unresolved'] = []
+        with tempfile.TemporaryDirectory() as tmp:
+            file = Path(tmp)/'cases.json'; file.write_text(json.dumps(data))
+            protocol.load_cases(file)
+
+    def test_missing_error_code_rejected(self):
+        self.check_mutation(lambda d: d['cases'][1]['expected']['wire_error'].update(code=None))
+
+    def test_missing_message_requirement_rejected(self):
+        self.check_mutation(lambda d: d['cases'][1]['expected']['wire_error'].update(message_mode='optional'))
+
+    def test_exact_reason_requires_literal(self):
+        self.check_mutation(lambda d: d['cases'][1]['expected']['wire_error'].update(reason_mode='exact'))
+
+    def test_absent_reason_cannot_have_value(self):
+        self.check_mutation(lambda d: d['cases'][1]['expected']['wire_error'].update(reason='invented'))
 
     def test_reference_adapter_cannot_claim_shared_input(self):
         self.check_mutation(lambda d: d['cases'][0]['reference_adapters'][0].update(consumes_shared_input=True))
@@ -126,7 +142,7 @@ class SharedConsumerTests(unittest.TestCase):
     def test_declared_shared_consumers_are_real_sources(self):
         data = protocol.load_cases()
         report = protocol.summary(data)
-        self.assertEqual(report['cases_with_shared_input_adapters'], 4)
+        self.assertEqual(report['cases_with_shared_input_adapters'], 46)
         # Structure remains zero runtime verification.
         self.assertEqual(report['shared_input_verified_cases'], 0)
 
@@ -158,3 +174,108 @@ class SharedConsumerTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class ExactTargetRedTests(unittest.TestCase):
+    def classify(self, diagnostic='R5_PROTOCOL_TARGET_RT01: restore changed immutable hard expiry', code=1):
+        p = 'tabmail/internal/store/postgres'
+        parent = 'TestR5ProtocolRetentionSharedCases'
+        leaf = parent+'/RT01/default'
+        events = [{'Package':p,'Action':'run','Test':parent},
+                  {'Package':p,'Action':'run','Test':leaf},
+                  {'Package':p,'Action':'output','Test':leaf,'Output':'    r5_protocol_shared_test.go:123: '+diagnostic+'\n'},
+                  {'Package':p,'Action':'fail','Test':leaf},
+                  {'Package':p,'Action':'fail','Test':parent},
+                  {'Package':p,'Action':'fail'}]
+        return protocol.classify_shared_events('\n'.join(map(json.dumps,events)),p,{parent},code,{'cases':[r for r in protocol.load_cases()['cases'] if r['id']=='RT01']})
+
+    def test_exact_target_red_is_baseline_not_product_green(self):
+        report = self.classify()
+        self.assertFalse(report['errors'])
+        self.assertFalse(report['product_green'])
+        self.assertEqual(report['process_exit_code'],1)
+        self.assertFalse(report['task_complete'])
+        self.assertTrue(report['target_red'])
+
+    def test_setup_or_other_failure_not_admitted(self):
+        self.assertTrue(self.classify('database fixture failed')['errors'])
+        self.assertTrue(self.classify('R5_PROTOCOL_TARGET_RT01: okay\n    r5_protocol_shared_test.go:124: database failed')['errors'])
+
+    def test_timeout_process_not_admitted(self):
+        self.assertTrue(self.classify(code=124)['errors'])
+
+    def test_parent_cleanup_failure_cannot_be_laundered(self):
+        p='tabmail/internal/store/postgres'; parent='TestR5ProtocolRetentionSharedCases'; leaf=parent+'/RT01/default'
+        base=[{'Package':p,'Action':'run','Test':parent},{'Package':p,'Action':'run','Test':leaf},
+              {'Package':p,'Action':'output','Test':leaf,'Output':'    x_test.go:1: R5_PROTOCOL_TARGET_RT01: restore changed hard expiry\n'},
+              {'Package':p,'Action':'fail','Test':leaf}]
+        for scope,text in [(parent,'    x_test.go:2: cleanup database failed\n'),(None,'panic: cleanup failed\n'),
+                           (parent,'runtime error: invalid memory address\n'),(None,'context deadline exceeded\n'),
+                           (None,'# tabmail/internal/store/postgres\nx.go:12: compile failure\n')]:
+            events=base+[{'Package':p,'Action':'output','Test':scope,'Output':text},
+                         {'Package':p,'Action':'fail','Test':parent},{'Package':p,'Action':'fail'}]
+            report=protocol.classify_shared_events('\n'.join(map(json.dumps,events)),p,{parent},1,{'cases':[r for r in protocol.load_cases()['cases'] if r['id']=='RT01']})
+            self.assertTrue(report['errors'],text)
+
+    def test_undeclared_target_variant_rejected(self):
+        # The driver must not admit arbitrary children under a known case.
+        p='tabmail/internal/store/postgres';parent='TestR5ProtocolRetentionSharedCases';leaf=parent+'/RT01/invented'
+        events=[{'Package':p,'Action':'run','Test':parent},{'Package':p,'Action':'run','Test':leaf},
+                {'Package':p,'Action':'output','Test':leaf,'Output':'    x_test.go:1: R5_PROTOCOL_TARGET_RT01: failure\n'},
+                {'Package':p,'Action':'fail','Test':leaf},{'Package':p,'Action':'fail','Test':parent},{'Package':p,'Action':'fail'}]
+        self.assertTrue(protocol.classify_shared_events('\n'.join(map(json.dumps,events)),p,{parent},1,{'cases':[r for r in protocol.load_cases()['cases'] if r['id']=='RT01']})['errors'])
+
+
+class BaselineBuildTagTests(unittest.TestCase):
+    def test_protocol_target_suite_is_explicitly_opt_in(self):
+        data=protocol.load_cases()
+        adapters=[a for row in data['cases'] for a in row.get('shared_adapters',[])
+                  if a['source']=='internal/store/postgres/r5_protocol_shared_test.go']
+        self.assertTrue(adapters)
+        self.assertTrue(all(a.get('build_tag')=='r5protocol' for a in adapters))
+        source=(protocol.ROOT/adapters[0]['source']).read_text()
+        self.assertTrue(source.startswith('//go:build r5protocol\n'))
+        cmd=protocol.shared_command('./internal/store/postgres','r5protocol',{'TestR5ProtocolRetentionSharedCases'})
+        self.assertIn('-tags=r5protocol',cmd)
+        self.assertIn('-count=1',cmd)
+
+    def test_invalid_or_shell_build_tag_rejected(self):
+        with self.assertRaises(ValueError):
+            protocol.shared_command('./internal/store/postgres','r5protocol; false',{'TestReal'})
+
+
+class SharedRuntimePathTests(unittest.TestCase):
+    def test_shared_go_requires_all_actual_case_variants(self):
+        data=protocol.load_cases()
+        adapter=next(a for r in data['cases'] if r['id']=='CT02' for a in r['shared_adapters'])
+        self.assertEqual(len(adapter['runtime_test_paths']),3)
+        p='tabmail/internal/store/postgres';name=adapter['test']
+        events=[{'Package':p,'Action':'run','Test':name},{'Package':p,'Action':'pass','Test':name},{'Package':p,'Action':'pass'}]
+        scoped={'cases':[r for r in data['cases'] if r['id']=='CT02']}
+        report=protocol.classify_shared_events('\n'.join(map(json.dumps,events)),p,{name},0,scoped)
+        self.assertTrue(report['errors'])
+
+    def test_parent_fail_with_non_test_source_diagnostic_rejected(self):
+        data={'cases':[r for r in protocol.load_cases()['cases'] if r['id']=='RT01']}
+        p='tabmail/internal/store/postgres';name='TestR5ProtocolRetentionSharedCases';leaf=name+'/RT01/default'
+        events=[{'Package':p,'Action':'run','Test':name},{'Package':p,'Action':'run','Test':leaf},
+                {'Package':p,'Action':'output','Test':leaf,'Output':'    protocol_test.go:1: R5_PROTOCOL_TARGET_RT01: restore gap\n'},
+                {'Package':p,'Action':'fail','Test':leaf},
+                {'Package':p,'Action':'output','Test':name,'Output':'    fixture.go:2: cleanup SQL failed\n'},
+                {'Package':p,'Action':'fail','Test':name},{'Package':p,'Action':'fail'}]
+        self.assertTrue(protocol.classify_shared_events('\n'.join(map(json.dumps,events)),p,{name},1,data)['errors'])
+
+
+class ApplicableStatusTests(unittest.TestCase):
+    def test_background_ports_do_not_require_fake_http(self):
+        rows={r['id']:r for r in protocol.load_cases()['cases']}
+        for name in ['RT07','GC01','GC02']:
+            self.assertEqual(rows[name]['expected']['http_status_kind'],'not_applicable')
+            self.assertIsNone(rows[name]['expected']['http_status'])
+            self.assertEqual(rows[name]['required_layers'],['db'])
+        self.assertEqual(protocol.summary(protocol.load_cases())['unresolved_codes'],[])
+
+    def test_registration_still_does_not_certify_missing_components(self):
+        report=protocol.summary(protocol.load_cases())
+        self.assertIn('RC01',report['remaining_semantic_or_layer_gaps'])
+        self.assertFalse(report['task_complete'])

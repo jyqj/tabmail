@@ -57,7 +57,7 @@ func (s *PgStore) ClaimOutboxEvents(ctx context.Context, now time.Time, limit in
 		SET state='processing', attempts=o.attempts + 1, claimed_at=$1, lease_until=$3, updated_at=$1
 		FROM cte
 		WHERE o.id = cte.id
-		RETURNING o.id,o.event_type,o.payload,o.occurred_at,o.state,o.attempts,o.last_error,o.next_attempt_at,o.claimed_at,o.lease_until,o.created_at,o.updated_at`,
+		RETURNING o.id,o.event_type,o.payload,o.occurred_at,o.state,o.attempts,COALESCE(o.last_error,'') AS last_error,o.next_attempt_at,o.claimed_at,o.lease_until,o.created_at,o.updated_at`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (s *PgStore) ClaimWebhookDeliveries(ctx context.Context, now time.Time, lim
 		SET state='processing', attempts=d.attempts + 1, claimed_at=$1, lease_until=$3, last_tried_at=$1, updated_at=$1
 		FROM cte
 		WHERE d.id = cte.id
-		RETURNING d.id,d.event_id,d.url,d.event_type,d.payload,d.state,d.attempts,d.last_error,d.next_attempt_at,d.claimed_at,d.lease_until,d.last_tried_at,d.delivered_at,d.created_at,d.updated_at`,
+		RETURNING d.id,d.event_id,d.url,d.event_type,d.payload,d.state,d.attempts,COALESCE(d.last_error,'') AS last_error,d.next_attempt_at,d.claimed_at,d.lease_until,d.last_tried_at,d.delivered_at,d.created_at,d.updated_at`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ func (s *PgStore) ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]m
 		limit = 20
 	}
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,url,event_type,payload,attempts,last_error,created_at,last_tried_at
+		SELECT id,url,event_type,payload,attempts,COALESCE(last_error,'') AS last_error,created_at,last_tried_at
 		FROM webhook_deliveries
 		WHERE state='dead'
 		ORDER BY updated_at DESC
@@ -232,7 +232,7 @@ func (s *PgStore) ListWebhookDeliveries(ctx context.Context, pg models.Page, sta
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,event_id,url,event_type,payload,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,last_tried_at,delivered_at,created_at,updated_at
+		SELECT id,event_id,url,event_type,payload,state,attempts,COALESCE(last_error,'') AS last_error,next_attempt_at,claimed_at,lease_until,last_tried_at,delivered_at,created_at,updated_at
 		FROM webhook_deliveries`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
 		return nil, 0, err
@@ -322,7 +322,7 @@ func (s *PgStore) ClaimIngestJobs(ctx context.Context, now time.Time, limit int)
 		SET state='processing', attempts=j.attempts + 1, claimed_at=$1, lease_until=$3, updated_at=$1
 		FROM cte
 		WHERE j.id = cte.id
-		RETURNING j.id,j.source,j.remote_ip,j.mail_from,j.recipients,j.raw_object_key,j.metadata,j.state,j.attempts,j.last_error,j.next_attempt_at,j.claimed_at,j.lease_until,j.created_at,j.updated_at`,
+		RETURNING j.id,j.source,j.remote_ip,j.mail_from,j.recipients,j.raw_object_key,j.metadata,j.state,j.attempts,COALESCE(j.last_error,'') AS last_error,j.next_attempt_at,j.claimed_at,j.lease_until,j.created_at,j.updated_at`,
 		now, limit, leaseUntil)
 	if err != nil {
 		return nil, err
@@ -384,7 +384,7 @@ func (s *PgStore) ListIngestJobs(ctx context.Context, pg models.Page, state, sou
 	}
 	args := append(filters, pg.PerPage, pg.Offset())
 	rows, err := s.pool.Query(ctx, `
-		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,last_error,next_attempt_at,claimed_at,lease_until,created_at,updated_at
+		SELECT id,source,remote_ip,mail_from,recipients,raw_object_key,metadata,state,attempts,COALESCE(last_error,'') AS last_error,next_attempt_at,claimed_at,lease_until,created_at,updated_at
 		FROM ingest_jobs`+where+fmt.Sprintf(" ORDER BY created_at DESC LIMIT $%d OFFSET $%d", len(filters)+1, len(filters)+2), args...)
 	if err != nil {
 		return nil, 0, err

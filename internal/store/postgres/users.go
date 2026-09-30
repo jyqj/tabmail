@@ -264,8 +264,23 @@ func (s *PgStore) ChangePasswordAtomic(ctx context.Context, id uuid.UUID, expect
 		return e
 	}
 	defer tx.Rollback(ctx)
+	// The required audit references this tenant. Protect its parent key before
+	// acquiring the user UPDATE lock, matching tenant-first member changes.
+	// Locating the tenant is not authorization: the conditional UPDATE below
+	// rechecks both the observed tenant and the current password/active state.
 	var tenant uuid.UUID
-	e = tx.QueryRow(ctx, `UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active RETURNING tenant_id`, id, expectedHash, nextHash).Scan(&tenant)
+	e = tx.QueryRow(ctx, `SELECT tenant_id FROM users WHERE id=$1`, id).Scan(&tenant)
+	if e == pgx.ErrNoRows {
+		return errors.New("password or account changed during reauthentication")
+	}
+	if e != nil {
+		return e
+	}
+	var parent uuid.UUID
+	if e = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, tenant).Scan(&parent); e != nil {
+		return e
+	}
+	e = tx.QueryRow(ctx, `UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id`, id, expectedHash, nextHash, tenant).Scan(&tenant)
 	if e == pgx.ErrNoRows {
 		return errors.New("password or account changed during reauthentication")
 	}

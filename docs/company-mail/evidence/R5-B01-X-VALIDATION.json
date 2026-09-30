@@ -1,0 +1,342 @@
+{
+  "version": 1,
+  "batch": "B01-X",
+  "date": "2026-10-01",
+  "started_date": "2026-09-30",
+  "base_commit": "3893945",
+  "tested_tree": "d7a1610a34debfd38fa1ada28363010f57f33622",
+  "source_files_verified": 710,
+  "source_hashes_verified": true,
+  "cache": {
+    "baseline": {
+      "run": 17,
+      "pass": 9,
+      "fail": 8
+    },
+    "candidates": [
+      {
+        "run": 17,
+        "pass": 17
+      },
+      {
+        "run": 17,
+        "pass": 17
+      },
+      {
+        "run": 17,
+        "pass": 17
+      }
+    ],
+    "disproved": "mail_documents references messages only; no recursive tenant FK protection"
+  },
+  "password": {
+    "baseline": {
+      "run": 3,
+      "fail": 2,
+      "pass": 1
+    },
+    "candidates": [
+      {
+        "run": 3,
+        "pass": 3
+      },
+      {
+        "run": 3,
+        "pass": 3
+      },
+      {
+        "run": 3,
+        "pass": 3
+      }
+    ]
+  },
+  "queue": {
+    "baseline": {
+      "run": 5,
+      "fail": 5
+    },
+    "candidates": [
+      {
+        "run": 5,
+        "pass": 5
+      },
+      {
+        "run": 5,
+        "pass": 5
+      },
+      {
+        "run": 5,
+        "pass": 5
+      }
+    ],
+    "scope": "six nullable last_error projections only; four direct PG variants plus loopback real worker verified"
+  },
+  "backend": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 5775,
+    "log_sha256": "60d4b9602421c844f00b7fd33703bc28ca8db24ca5b5175d6f955edae8ce2b52",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 207,
+    "manifest_sha256": "d0b405aa9014ae76ab79d053c4e882e24dca76450dc96a5187cc73b365742285",
+    "packages": 51,
+    "process_exit_code": 0,
+    "source_sha": "d7a1610a34debfd38fa1ada28363010f57f33622",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1353,
+    "tests_skipped": 1,
+    "tests_started": 1354
+  },
+  "backend_all": {
+    "allowed_skips_observed": [
+      {
+        "package": "tabmail/internal/store/postgres",
+        "reason": "Shipping-image browser journey is mandatory in the separate browser suite, not the backend job.",
+        "test": "TestR3BrowserJourney"
+      }
+    ],
+    "errors": [],
+    "events": 5778,
+    "log_sha256": "81834629c2daa271f53890a5c3c72a01b6da44018f723618edfe9c4cf345be74",
+    "mandatory_missing_or_not_passed": 0,
+    "mandatory_tests": 207,
+    "manifest_sha256": "d0b405aa9014ae76ab79d053c4e882e24dca76450dc96a5187cc73b365742285",
+    "packages": 52,
+    "process_exit_code": 0,
+    "source_sha": "d7a1610a34debfd38fa1ada28363010f57f33622",
+    "status": "pass",
+    "suite": "backend",
+    "tests_failed": 0,
+    "tests_passed": 1353,
+    "tests_skipped": 1,
+    "tests_started": 1354
+  },
+  "http": {
+    "status": "pass",
+    "source_sha": "d7a1610a34debfd38fa1ada28363010f57f33622",
+    "errors": [],
+    "responses": 80,
+    "successful_operations": 65,
+    "required_success_variants": 66,
+    "excluded_operations": [
+      {
+        "method": "GET",
+        "path": "/api/v1/company/domains/{id}/verification",
+        "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+      },
+      {
+        "method": "POST",
+        "path": "/api/v1/company/domains/{id}/verify",
+        "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+      }
+    ],
+    "spec_sha256": "2c39ce1a1495af06204cebd12774ecf7fc64aa6bbd5784bb0fb46ac9d451c060",
+    "capture_sha256": "dc13c52bd3814d06f86423013fcc207bcc1d5cfc0bf58ef7222d89e47edf5dda"
+  },
+  "protocol": {
+    "status": "shared_scoped_evidence_passed",
+    "cases": 46,
+    "missing_shared_consumers": [],
+    "product_green": false,
+    "target_red": {
+      "TestR5ProtocolBCCAssetSharedCases/BC01": "R5_PROTOCOL_TARGET_BC01",
+      "TestR5ProtocolBCCAssetSharedCases/BC04": "R5_PROTOCOL_TARGET_BC04",
+      "TestR5ProtocolBCCAssetSharedCases/BC06": "R5_PROTOCOL_TARGET_BC06",
+      "TestR5ProtocolBCCSurfacesSharedCases/BC05/list": "R5_PROTOCOL_TARGET_BC05",
+      "TestR5ProtocolBCCSurfacesSharedCases/BC05/receipt": "R5_PROTOCOL_TARGET_BC05",
+      "TestR5ProtocolGCBoundedSharedCases/GC01": "R5_PROTOCOL_TARGET_GC01",
+      "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source": "R5_PROTOCOL_TARGET_BC02",
+      "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job": "R5_PROTOCOL_TARGET_BC03",
+      "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source": "R5_PROTOCOL_TARGET_BC03",
+      "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/draft": "R5_PROTOCOL_TARGET_RT07_READ_BOUNDARY",
+      "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/held": "R5_PROTOCOL_TARGET_RT07_READ_BOUNDARY",
+      "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/queue": "R5_PROTOCOL_TARGET_RT07_READ_BOUNDARY",
+      "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/sent_asset": "R5_PROTOCOL_TARGET_RT07_READ_BOUNDARY",
+      "TestR5ProtocolOffboardingSharedCases/LF01": "R5_PROTOCOL_TARGET_LF01",
+      "TestR5ProtocolOffboardingSharedCases/LF06": "R5_PROTOCOL_TARGET_LF06",
+      "TestR5ProtocolPermissionIntentSharedCases/PE01/quota_patch": "R5_PROTOCOL_TARGET_PE01",
+      "TestR5ProtocolPermissionIntentSharedCases/PE02/0": "R5_PROTOCOL_TARGET_PE02",
+      "TestR5ProtocolPermissionIntentSharedCases/PE02/[]": "R5_PROTOCOL_TARGET_PE02",
+      "TestR5ProtocolPermissionIntentSharedCases/PE02/false": "R5_PROTOCOL_TARGET_PE02",
+      "TestR5ProtocolPermissionIntentSharedCases/PE02/null": "R5_PROTOCOL_TARGET_PE02",
+      "TestR5ProtocolPermissionIntentSharedCases/PE02/omitted": "R5_PROTOCOL_TARGET_PE02",
+      "TestR5ProtocolPermissionStaleSharedCases/PE03": "R5_PROTOCOL_TARGET_PE03",
+      "TestR5ProtocolPermissionStaleSharedCases/PE04": "R5_PROTOCOL_TARGET_PE04",
+      "TestR5ProtocolReceiptSharedCases/RC03": "R5_PROTOCOL_TARGET_RC03",
+      "TestR5ProtocolRetentionSharedCases/RT01/default": "R5_PROTOCOL_TARGET_RT01",
+      "TestR5ProtocolRetentionSharedCases/RT03/expires_at/before": "R5_PROTOCOL_TARGET_RT03",
+      "TestR5ProtocolRetentionSharedCases/RT03/expires_at/equal": "R5_PROTOCOL_TARGET_RT03",
+      "TestR5ProtocolRetentionSharedCases/RT03/purge_after/before": "R5_PROTOCOL_TARGET_RT03",
+      "TestR5ProtocolRetentionSharedCases/RT03/purge_after/equal": "R5_PROTOCOL_TARGET_RT03"
+    },
+    "missing_required_layers": {
+      "CT01": [],
+      "CT02": [],
+      "CT03": [],
+      "CT04": [],
+      "CT05": [],
+      "CT06": [],
+      "CT07": [],
+      "CT08": [],
+      "CT09": [],
+      "CT10": [],
+      "RC01": [
+        "components"
+      ],
+      "RC02": [
+        "components"
+      ],
+      "RC03": [
+        "components"
+      ],
+      "RC04": [
+        "components"
+      ],
+      "RC05": [
+        "components"
+      ],
+      "OP01": [],
+      "OP02": [],
+      "OP03": [],
+      "OP04": [],
+      "RT01": [],
+      "RT02": [],
+      "RT03": [],
+      "RT04": [],
+      "RT05": [],
+      "RT06": [],
+      "RT07": [],
+      "BC01": [],
+      "BC02": [],
+      "BC03": [],
+      "BC04": [],
+      "BC05": [],
+      "BC06": [],
+      "GC01": [],
+      "GC02": [],
+      "LF01": [
+        "components"
+      ],
+      "LF02": [
+        "components"
+      ],
+      "LF03": [
+        "components"
+      ],
+      "LF04": [
+        "components"
+      ],
+      "LF05": [
+        "components"
+      ],
+      "LF06": [
+        "components"
+      ],
+      "LF07": [
+        "components"
+      ],
+      "PE01": [
+        "components"
+      ],
+      "PE02": [
+        "components"
+      ],
+      "PE03": [
+        "components"
+      ],
+      "PE04": [
+        "components"
+      ],
+      "PE05": [
+        "components"
+      ]
+    },
+    "original_process_exit_codes": [
+      1
+    ],
+    "private_snapshot_commit": "bb76ccb1cf6928a900c371fb2f723e0d417ddbfb",
+    "tree_identity": "private validation commit tree matches tested_tree; not a workspace commit",
+    "component_scoped_evidence": {
+      "cases": [
+        "RC03",
+        "RC04",
+        "RC05"
+      ],
+      "source": "web/components/company/r5-protocol.test.tsx",
+      "artifact": "final-vitest.json",
+      "artifact_sha256": "56a5c39e628c5662cf9988263f533d1474e71282be931169e24117771c768eed",
+      "status": "three actual production-policy-to-shipping-component assertions passed with CASE SHA match",
+      "shared_db_components_unmerged": 17,
+      "without_registered_shared_component_consumer": 14,
+      "not_claimed": "DB/HTTP-to-UI complete journey; source shared-db report not rewritten"
+    }
+  },
+  "transaction_catalog": {
+    "files": 49,
+    "functions": 350,
+    "sql_calls": 445,
+    "direct_writes": 126,
+    "write_closure": 141,
+    "migrations": 14,
+    "specific_multi_resource_review": 66,
+    "runtime_all_verified": false,
+    "regression_tests": 19
+  },
+  "gates": {
+    "python": 230,
+    "node": 23,
+    "vitest": 118,
+    "tsc": "pass",
+    "eslint": "pass",
+    "next_build": "pass",
+    "build_vet": "pass both product and literal ./...",
+    "wire_contract": "16 shared / 33 projections / 67 operations",
+    "negative_execution": "missing DSN / zero tests / disabled browser rejected",
+    "module_verification": "go mod verify: all modules verified with GOSUMDB=sum.golang.org"
+  },
+  "versions": {
+    "go": "1.25.7",
+    "postgres": "16.13",
+    "python": "3.12.11",
+    "node": "22.23.2",
+    "SDKROOT": "MacOSX15.4.sdk"
+  },
+  "cleanup": {
+    "root": "/tmp/tabmail-r5-b01x.8ht5RWf6",
+    "stop_exit": 0,
+    "pidfile_removed": true
+  },
+  "bundle": {
+    "path": "docs/company-mail/evidence/R5-B01-X-LOGS.tar.gz",
+    "members": 179,
+    "sha256": "834b2222755f17840141849d2723718c5f25239a16e220bc8b3b4eb3a29aa963"
+  },
+  "remaining": [
+    "P0-070 unresolved concrete intersections in full catalog, not whole runtime proof",
+    "P0-080 integrate 3 production-policy/component scoped cases and add 14 missing consumers and formal future backfill/migration capability not proved",
+    "P0-090/100/110/120 and P1-P11 dependency gates",
+    "shipping browser / real DNS / SSE reconnect / scale / current dependency audit / cold upgrade"
+  ],
+  "parent_completion": "6/171",
+  "remote_changes": false,
+  "integration_review": {
+    "operator": "delegated single integration operator; root coordinates only",
+    "production_and_tests_unchanged_from_tested_tree": true,
+    "original_logs_immutable": true,
+    "activate_manual_order_corrected": "locator SELECT -> tenant UPDATE -> invitation UPDATE",
+    "checkbox_total": 171,
+    "checkbox_checked": 6,
+    "checkbox_bits_unchanged_from_base": true,
+    "archive_hash_and_members_recomputed": true,
+    "high_signal_dsn_credentials_or_responses_not_found": true,
+    "code_execution_scope": "prior frozen exact program; new corrections are docs/inventory metadata only, not a fresh runtime claim"
+  }
+}

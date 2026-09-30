@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-W已验收当前quota、POST回放主体准入和恢复/worker目标资格及busy契约：原版46事件21pass/25fail，最终三轮46/46；全量backend1320pass/0fail/1 browser skip、197必跑齐全，HTTP80响应、前端118测试通过。070全入口地图与080完整协议仍未收口，父统计6/171不提前改变。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；B01-X完成有限事务目录/共享46案例基线并修复缓存/物理删除和改密/冻结锁环及队列NULL扫描：默认backend1353pass/0fail/1 browser skip、207必跑齐全，HTTP80/前端118通过。协议46实际共享执行、29精确目标红，product_green=false；350函数目录是结构/人工清点不冒称全锁图绿。070/080/G0仍待完整交叉/组件/适用性审查，父统计6/171。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-W完成fenced current quota/DB UTC日、正式POST安全回执准入、retry/worker固定目标行保护与审计后期限、目标busy409；见R5-B01-W-VALIDATION.md。前序成果保留 |
-| 下一可执行任务 | P0-070：补有限全入口事务/FK/trigger/等待目录；重点SaveParsedMessage与worker mailbox/tenant交叉仅静态候选，先实证；开通/模板发布、缓存/状态、生命周期/队列/Key/对象回调完整映射。并行补080实际code与按入口reason政策、42共享消费者 |
-| 下一批范围 | 主线程保持生产/shared fixtures/manifest/TODO集成；agent分派独占地图、未覆盖交叉回归、协议JSON/HTTP消费者。G0允许精确绑定AC/后续任务的目标政策红灯，不把P1–P7全部提前实现；结构清点/夹具错误/未接线不当完成 |
+| 当前阶段 | B01-X已完成350函数有限事务目录、46共享协议真实基线及缓存/改密/队列三项生产修复，见R5-B01-X-VALIDATION.md。当前070/080不自动勾选，前序成果保留 |
+| 下一可执行任务 | P0-070：主审350fn/66重点边界与实际caller，核查目录具体未验证交叉（Activate邀请/域、模板version/template、原件回调、旧内部端口等），不得把名字闭包当dispatch；080整合3个policy→组件scoped证据并补14个组件消费者与BC02/03future backfill适用性审查，保持精确目标红独立 |
+| 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 070覆盖目录与剩余具体交叉风险待验；080未定输出/实际wire code/适用层和42共享案例待接线。真实跨UTC午夜等待、各replay分支credential时序/缺稿原revision、普通收件兼容/GC/CAS、规模性能、浏览器/DNS/SSE保留；090/100/110/120依赖不变 |
+| 当前阻塞 | 350fn已清点但部分具体交叉/dispatch仍待审；080虽然46真实消费者已跑，17组件层未整合中3有policy→组件scoped证据、14缺消费者；未来backfill/迁移写入没有完整证明，不能以controller通过关闭。其余090/100/110/120、UTC真实跨日/凭据时序、后续P1–P11与浏览器/DNS/SSE/性能/依赖/冷升级依赖保留 |
 | 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
@@ -1559,6 +1559,18 @@ python3 scripts/check_i18n_keys.py
 - 最终17顶层/46事件连续三轮全部pass；cmd/internal全量1320pass/0fail/1明确browser skip、197必跑齐全；另字面./... build/vet/race同结果（51包含1个npm目录无测试Go包）。HTTP80/65/66、Python196、Node23、Vitest118、tsc/lint/build、契约16/33/67、i18n均通过；缺DSN/0test/browser-disabled原门禁仍拒绝。PG全./...包176.262秒接近180预算，不放宽或删测试。
 - [报告](R5-B01-W-VALIDATION.md)、[机器证据](evidence/R5-B01-W-VALIDATION.json)、[89成员日志](evidence/R5-B01-W-LOGS.tar.gz)留存。新PG16.13专属0700 socket/noTCP已stop0/PID文件消失；无生产配置/真实邮件/迁移/依赖改变，无push/PR/merge/deploy。
 - 不新增父复选框，仍6/171。下一轮070有限全覆盖地图/未覆盖交叉、080实际code+per-entry reason与42消费者；真实午夜待锁、缺稿原revision等后续协议边界保留，不反复重做本批已关闭子包。G0不要求P1–P7全部预先全绿，但不能凭未接线案例或计划关闭。
+
+### B01-X：有限事务目录、共享协议与三项真实修复（2026-09-30至10-01）
+
+- 基线3893945；实际被测Git tree d7a1610a34debfd38fa1ada28363010f57f33622，710文件SHA一致；private验收commit bb76ccb1cf6928a900c371fb2f723e0d417ddbfb仅提供driver Git上下文，其tree等于被测tree，不冒称用户分支commit。三路独占agent，主线程生产/PG/共享集成。
+- cache原版17事件9pass8fail：真实FK只messages，排除祖父tenant假环；三个物理delete正反向确切40P01/victim回滚。SaveParsed增加精确source SHARE NOWAIT，保留actor/M热授权，无T锁；三轮17/17。admin反例修正式read grant，不放宽正文政策。
+- password原版1pass2fail：正式pwd/freeze40P01与父锁顺序；先定位T不授信→T KEY SHARE→U UPDATE重核tenant/hash/active→R→audit，三轮3/3。
+- NULL queue原版5fail：合法NULL last_error raw→string，真实claim processing无fanout；六read COALESCE不改writer/迁移/state/lease，四直接叶三轮各5/5，实际webhook loopback POST/delivered ACK通过；其余两同型源码projection仅source-linked。
+- 有限目录49PG文件/350fn/445SQL/126direct-write候选/141name-closure/14迁移，66重点逐fn断言、caller候选/源hash/等待/FK/证据等级/后续任务；Go AST+19反例校验。结构PASS不等于runtime correctness，其他具体风险保留。
+- 协议全46真实shared-input run，29精确target leaf红；原process exit1、baseline controller exit0/product_green=false。error.code/message与reason适用模式修正，r5protocol tag与默认backend分开；panic/timeout/extra diagnostics/未知variant不接纳。原失败snapshot1–10保留，不能当红灯盖过夹具错误；SSE WriteString取消/真实webhook生产NULL前置缺口均有反例与实际修正。
+- 最终默认race原180s预算1353pass/0fail/1明确browser skip、207必跑；./...另同结果52包（含1npm目录无测试Go包），PG139.473s。HTTP80/65/66、Python230、Node23、Vitest118、tsc/lint/build、txinventory/契约16/33/67均通过；缺DSN/0test/browser-disabled仍拒。go mod verify以正式GOSUMDB确认全部modules；单条agent诊断off仅历史诊断不作为正式校验。
+- [报告](R5-B01-X-VALIDATION.md)、[机器摘要](evidence/R5-B01-X-VALIDATION.json)、[179成员归档](evidence/R5-B01-X-LOGS.tar.gz)随本地提交；不含responses/DSN/生产数据/源码tar/DB目录。新PG独占0700 socket/noTCP已stop0/PID文件消失。Make/原CI已接txinventory与独立baseline；未声称远端CI执行，无push/PR/merge/deploy。
+- 父统计仍6/171：070有限目录还需未覆盖关系/实际dispatch审查；080仍需整合已有3个policy→组件scoped证据、补14消费者及future能力证明，46注册或baseline控制器绿色都不代替。下一轮从明确有限风险与组件证据整合/14消费者补证继续，不无限重复已关闭子包；P0 G0之后依赖仍完整保留。
 
 后续每批在本节追加一条，不另建第二套活跃TODO：
 

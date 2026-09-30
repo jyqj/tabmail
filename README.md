@@ -8,11 +8,11 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-最新执行为 **B01-W 多轮集成**：当前配额、正式POST回放准入、恢复与worker固定目标资格/最后期限及目标busy契约已验收；PG新增46事件三轮全部通过，完整后端1320pass/0fail/1独立browser skip、197必跑齐全，HTTP80响应、前端118测试通过。详见 [B01-W记录](docs/company-mail/R5-B01-W-VALIDATION.md)。
+最新执行为 **B01-X（2026-09-30至10-01）**：缓存/物理删除、改密/冻结锁环及合法NULL队列扫描修复已验收；默认后端1353pass/0fail/1独立browser skip、207必跑齐全，HTTP80响应、前端118测试通过。全46共享协议基线真实执行，但29目标红独立保留（不是产品全绿）。详见 [B01-X记录](docs/company-mail/R5-B01-X-VALIDATION.md)。
 
-唯一活跃进度源为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段、171工作包、25实施/评审批次、38跨入口场景。当前仍 **6/171，P0为6/12**；子包修复不等于父阶段完成。下一步补070有限全入口事务与FK/等待目录、080完整共享协议，然后按依赖推进G0；不要求提前修完P1–P7，但缺证据不能关闭基线任务。
+唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段/171工作包/25批次/38验收场景。目前仍 **6/171，P0为6/12**。新增 [有限事务目录](docs/company-mail/R5-TRANSACTION-COVERAGE.md) 覆盖350函数/66重点，结构清点不冒称全runtime正确；070具体未验证关系与080的17未整合组件层（3已有policy→组件scoped证据、14缺消费者）等仍待验收，G0不提前关闭。
 
-已上传B01-U检查点见 [交付说明](docs/company-mail/R5-CHECKPOINT-20260930.md)；V/W为后续本地工作，不代表已合并主线、远端CI通过、R5正式发布或生产部署。
+已上传B01-U见 [检查点](docs/company-mail/R5-CHECKPOINT-20260930.md)；V/W/X为后续本地工作，不代表主线合并、远端CI通过、R5正式发布或部署。
 
 ## 公司工作流
 

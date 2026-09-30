@@ -180,3 +180,13 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 - TX14：I UPDATE→target UPDATE→T UPDATE→zone/M SHARE NOWAIT→原quota/mailbox计数UPDATE/message/index/event/audit→单个materialized DBclock同时决定lease和目标deadline→Commit。后续UPDATE仍可能等待，不能称整个事务NOWAIT。
 - Inspect/Reconcile不是普通read/send权限，保持held原件和已发生的外部结果。TX01–24尚未形成完整有限目录，下一步分解开通/模板发布、缓存写入/状态、清理/队列、Key/兼容写入和对象回调；SaveParsedMessage晚tenant FK为未确认候选，须独立真实屏障验证。
 - 详见R5-B01-W-VALIDATION.md；本增量不关闭完整070/080/G0，父统计6/171不变。
+
+## B01-X：有限覆盖目录与已确认修复
+
+- 全入口清点迁入配套R5-TRANSACTION-COVERAGE.md/json（350函数、66重点手工边界、源hash/caller候选/后续任务），本历史TX01–24仍保留，结构门禁不冒充行为证明。
+- 校正W静态候选：mail_documents FK仅messages，不递归取tenant祖父锁；缓存vs完整ingress都成功。真实反序是cache M SHARE→doc FK/message与物理delete message→M count。SaveParsed精确source SHARE NOWAIT消除等待环，不加T。
+- ChangePasswordAtomic定位tenant→T KEY SHARE→条件user UPDATE再次核tenant/hash/active→refresh撤销→audit；实际pwd/freeze原40P01与候选三轮通过，不再以旧晚audit图描述当前。
+- queue合法NULL诊断使用六处read COALESCE projection，保持writer/状态/lease/迁移；真实claim扫描失败且已processing导致worker无fanout原状已证，新PG及真实POST/delivered ACK通过。
+- 070剩余具体风险及未证明caller分档在有限目录，不一律确认为漏洞，也不因本批三关系绿涂全部图。080 tagged基线46执行/29target red与普通backend207必跑严格分开，未来产品绿色不由基线controller通过替代。
+
+- 集成事实核验：ActivateEmployee并非invitation→T反序；普通SELECT仅定位tenant，然后T UPDATE→invitation FOR UPDATE。旧配套目录已校正，now()待锁后期限/当前sponsor与域资格仍待正式命令证据；不能凭人工错序制造死锁候选。

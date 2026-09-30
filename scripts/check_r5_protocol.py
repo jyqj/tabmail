@@ -35,12 +35,43 @@ def load_cases(path=CASES, root=ROOT):
             raise ValueError(f"{row['id']}: acceptance/layers required")
         output = row.get('expected', {})
         status = output.get('http_status')
+        if output.get('http_status_kind') not in {'exact','class','variant_exact','not_applicable','ordered_outcome_exact','unresolved'}:
+            raise ValueError('unknown HTTP applicability/status mode')
+        if output.get('http_status_kind') == 'not_applicable' and status is not None:
+            raise ValueError('non-HTTP operation cannot assert HTTP status')
+        if output.get('http_status_kind') == 'ordered_outcome_exact':
+            outcomes = output.get('ordered_outcomes', [])
+            if {o.get('order') for o in outcomes} != {'save_before_revoke','revoke_before_save'} or any(o.get('http_status') not in {200,403} for o in outcomes):
+                raise ValueError('ordered outcomes must freeze both exact safe HTTP orders')
         if status is not None and (type(status) is not int or status < 200 or status > 599):
             raise ValueError(f"{row['id']}: invalid status")
         if not output.get('assertion') or not output.get('semantic_code'):
             raise ValueError(f"{row['id']}: output assertion/rejection category required")
-        if output.get('error_reason') is None and not row.get('unresolved'):
-            raise ValueError(f"{row['id']}: unresolved literal reason must remain explicit")
+        wire = output.get('wire_error', {})
+        mode = wire.get('reason_mode')
+        if mode not in {'absent','optional','exact','not_applicable'}:
+            raise ValueError(f"{row['id']}: explicit reason presence policy required")
+        if status is not None and status >= 400:
+            if not wire.get('code') or wire.get('message_mode') != 'required_nonempty':
+                raise ValueError(f"{row['id']}: error.code and error.message are required")
+            if mode == 'not_applicable':
+                raise ValueError(f"{row['id']}: error reason presence policy missing")
+        if mode == 'exact' and not wire.get('reason'):
+            raise ValueError(f"{row['id']}: exact reason value required")
+        if mode in {'absent','not_applicable'} and wire.get('reason') is not None:
+            raise ValueError(f"{row['id']}: absent reason cannot have a value")
+        if output.get('http_status_kind') == 'variant_exact':
+            variants = output.get('variants', [])
+            names = [v.get('name') for v in variants]
+            if not variants or len(names) != len(set(names)) or set(names) != {v['name'] for v in row['input'].get('variants', [])}:
+                raise ValueError('variant-exact response requires the precise input variant set')
+            if any(type(v.get('status')) is not int or not 400 <= v['status'] <= 599 or not v.get('code') for v in variants):
+                raise ValueError('variant-exact rejection needs status and error.code')
+        target = row.get('baseline_target_failure')
+        if target and (not target.get('marker') or not target.get('task') or not target.get('acceptance') or target.get('audit') not in row['audit']):
+            raise ValueError('target red requires exact marker, audit, acceptance and successor task')
+        if target and (not target.get('test_paths') or any(not re.fullmatch(r'Test[A-Za-z0-9_]+/'+re.escape(row['id'])+r'(?:/(?:[A-Za-z0-9_-]+|\[\]))*', path) for path in target['test_paths'])):
+            raise ValueError('target red requires exact named runtime test paths')
         for adapter in row.get('reference_adapters', []) + row.get('shared_adapters', []):
             shared = adapter in row.get('shared_adapters', [])
             if adapter.get('consumes_shared_input') is not shared:
@@ -48,6 +79,11 @@ def load_cases(path=CASES, root=ROOT):
             source = (root / adapter['source']).resolve()
             if not source.is_relative_to(root.resolve()) or not source.is_file():
                 raise ValueError('adapter source missing or escapes root')
+            if shared and adapter.get('runner') != 'vitest':
+                paths = adapter.get('runtime_test_paths', [])
+                prefix = adapter['test']+'/'+row['id']
+                if not paths or len(paths) != len(set(paths)) or any(path != prefix and not path.startswith(prefix+'/') for path in paths):
+                    raise ValueError('shared adapter requires exact per-case runtime paths')
             if adapter.get('runner') == 'vitest':
                 if not shared or source.suffix != '.tsx' or adapter['layers'] != ['components']:
                     raise ValueError('invalid shared component adapter')
@@ -70,7 +106,7 @@ def load_cases(path=CASES, root=ROOT):
 
 def source_closure():
     names = subprocess.run(['git','ls-files','--cached','--others','--exclude-standard',
-                            'cmd','internal','web','go.mod','go.sum'],cwd=ROOT,
+                            'cmd','internal','web','go.mod','go.sum','docs/company-mail/R5-PROTOCOL.md','docs/company-mail/evidence/R5-PROTOCOL-CASES.json','scripts/check_r5_protocol.py','scripts/tests/test_r5_protocol.py'],cwd=ROOT,
                            capture_output=True,text=True,check=True).stdout.splitlines()
     return {name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest()
             for name in sorted(set(names)) if (ROOT/name).is_file()}
@@ -117,9 +153,11 @@ def summary(data):
             'cases':len(rows), 'cases_with_reference_adapters':sum(bool(x['reference_adapters']) for x in rows),
             'shared_input_verified_cases':0,
             'cases_with_shared_input_adapters':sum(bool(x.get('shared_adapters')) for x in rows),
-            'missing_shared_input_adapters':[x['id'] for x in rows],
-            'unresolved_codes':[x['id'] for x in rows if x['expected']['error_reason'] is None],
-            'boundary':'Structure checks are not runtime evidence; shared adapters cover declared pure-policy/component scopes only, not DB/HTTP.'}
+            'missing_shared_input_adapters':[x['id'] for x in rows if not x.get('shared_adapters')],
+            'unresolved_codes':[x['id'] for x in rows if x['expected'].get('http_status_kind') == 'unresolved'],
+            'declared_applicability':{x['id']:x.get('applicability',{}) for x in rows if x.get('applicability')},
+            'remaining_semantic_or_layer_gaps':{x['id']:x.get('unresolved',[]) for x in rows if x.get('unresolved')},
+            'boundary':'Structure checks are not execution evidence. Declared shared consumers require fresh scoped unit/DB/HTTP/component execution and explicit target-red classification.'}
 
 
 def run_references(data, layer, output):
@@ -181,14 +219,95 @@ def classify_components(data, expected, exit_code):
             'errors':errors,'tests':states,'task_complete':False}
 
 
+def classify_shared_events(text, package, expected, exit_code, data):
+    """Admit only exact, documented target assertions; never setup failures."""
+    allowed = {}
+    for row in data['cases']:
+        target = row.get('baseline_target_failure')
+        if target:
+            for adapter in row.get('shared_adapters', []):
+                if adapter.get('package') == './' + package.removeprefix('tabmail/'):
+                    for path in target.get('test_paths', []):
+                        allowed[path] = target['marker']
+    events = [json.loads(line) for line in text.splitlines() if line.strip()]
+    infrastructure = ['WARNING: DATA RACE', 'panic:', 'runtime error:', 'fatal error:', 'test timed out', '[build failed]', 'context deadline exceeded', 'deadline exceeded']
+    if any(value in ''.join(e.get('Output','') for e in events) for value in infrastructure):
+        result = classify_events(text, package, expected, exit_code)
+        result['errors'].append('infrastructure/race/panic/timeout failure is never target red')
+        result.update(product_green=False, process_exit_code=exit_code)
+        return result
+    failures = {e.get('Test') for e in events if e.get('Package') == package and e.get('Test') and e.get('Action') == 'fail'}
+    red = {}
+    errors = []
+    required_paths = {path for row in data['cases'] for a in row.get('shared_adapters', [])
+                      if a.get('runner') != 'vitest' and a.get('package') == './'+package.removeprefix('tabmail/')
+                      and a['test'] in expected for path in a.get('runtime_test_paths', [])}
+    for path in sorted(required_paths):
+        lifecycle = [e['Action'] for e in events if e.get('Test') == path and e.get('Action') in {'run','pass','fail','skip'}]
+        if lifecycle not in [['run','pass'], ['run','fail']]:
+            errors.append('missing/duplicate/skipped case variant: '+path+': '+str(lifecycle))
+    # A failing leaf never launders a fatal assertion in its parent, cleanup,
+    # or package output. Inspect diagnostics across ALL scopes first.
+    for event in events:
+        if event.get('Action') != 'output':
+            continue
+        name = event.get('Test')
+        marker = allowed.get(name)
+        diagnostics = re.findall(r'[\w.-]+\.go:\d+: ([^\n]*)', event.get('Output',''))
+        if diagnostics and (name in failures or not name) and (not marker or any(not d.startswith(marker+':') for d in diagnostics)):
+            errors.append('non-target assertion diagnostics: '+str(name))
+        if not name and re.search(r'(^|\n)(?:# |.*\.go:\d+:|FAIL\s+.*\[)', event.get('Output','')):
+            errors.append('package/build diagnostics outside admitted target test')
+    for name in sorted(failures):
+        descendants = [f for f in failures if f.startswith(name+'/')]
+        if descendants:
+            continue  # Aggregate failures are admitted only through all leaves.
+        marker = allowed.get(name)
+        output = ''.join(e.get('Output','') for e in events if e.get('Test') == name and e.get('Action') == 'output')
+        diagnostics = re.findall(r'[\w.-]+\.go:\d+: ([^\n]*)', output)
+        if not marker or not diagnostics or any(not d.startswith(marker+':') for d in diagnostics):
+            errors.append('non-target failure: '+name)
+        else:
+            red[name] = marker
+    if errors or not red:
+        result = classify_events(text, package, expected, exit_code)
+        result['errors'] += errors
+        result['target_red'] = {}
+        result.update(product_green=not result['errors'], process_exit_code=exit_code)
+        return result
+    # Transform admitted target failures only for structural lifecycle checks.
+    # Original JSONL remains immutable and the result explicitly records red.
+    for e in events:
+        if e.get('Action') == 'fail' and (not e.get('Test') or e.get('Test') in failures):
+            e['Action'] = 'pass'
+    result = classify_events('\n'.join(json.dumps(e) for e in events), package, expected, 0 if exit_code == 1 else exit_code)
+    result['log_sha256'] = hashlib.sha256(text.encode()).hexdigest()
+    result['target_red'] = red
+    result['status'] = 'shared_baseline_target_red' if not result['errors'] else 'shared_baseline_invalid'
+    result['product_green'] = False
+    result['process_exit_code'] = exit_code
+    return result
+
+
+def shared_command(package, tag, tests):
+    if tag and not re.fullmatch(r'[A-Za-z0-9_]+', tag):
+        raise ValueError('invalid shared build tag')
+    cmd = ['go','test','-json','-race','-count=1','-timeout=120s']
+    if tag:
+        cmd.append('-tags='+tag)
+    return cmd + ['-run','^('+ '|'.join(sorted(tests)) + ')$',package]
+
+
 def run_shared(data, layer, output):
     selected = {}
     for row in data['cases']:
         for a in row.get('shared_adapters', []):
-            if a.get('runner') != 'vitest':
-                selected.setdefault(a['package'], set()).add(a['test'])
+            if a.get('runner') != 'vitest' and (layer in a['layers'] or layer == 'components' and 'unit' in a['layers']):
+                selected.setdefault((a['package'],a.get('build_tag','')), set()).add(a['test'])
     if not selected:
         raise ValueError('missing shared Go consumers')
+    if layer in {'db','http'} and not os.environ.get('TABMAIL_TEST_DB_DSN'):
+        raise ValueError('explicit disposable TABMAIL_TEST_DB_DSN required; no silent skip')
     output.mkdir(parents=True, exist_ok=False)
     tested_closure = source_closure()
     cases_hash = hashlib.sha256(CASES.read_bytes()).hexdigest()
@@ -196,12 +315,12 @@ def run_shared(data, layer, output):
     env = dict(os.environ)
     env['TABMAIL_R5_PROTOCOL_OBSERVATIONS'] = str((output/'observations.json').resolve())
     reports = []
-    for index, (package, tests) in enumerate(sorted(selected.items())):
-        cmd = ['go','test','-json','-race','-count=1','-timeout=120s','-run','^('+ '|'.join(sorted(tests)) + ')$',package]
+    for index, ((package, tag), tests) in enumerate(sorted(selected.items())):
+        cmd = shared_command(package,tag,tests)
         result = subprocess.run(cmd,cwd=ROOT,env=env,capture_output=True,text=True,timeout=180)
         (output/f'go-{index}.jsonl').write_text(result.stdout)
         (output/f'go-{index}.stderr').write_text(result.stderr)
-        report = classify_events(result.stdout,'tabmail/'+package.removeprefix('./'),tests,result.returncode)
+        report = classify_shared_events(result.stdout,'tabmail/'+package.removeprefix('./'),tests,result.returncode,data)
         report.update(command=cmd,package=package)
         reports.append(report)
     go_pass = all(not r['errors'] for r in reports)
@@ -227,23 +346,23 @@ def run_shared(data, layer, output):
     for row in data['cases']:
         layers = set()
         for adapter in row.get('shared_adapters', []):
-            if stable and go_pass and adapter.get('runner')!='vitest': layers.add('unit')
+            if stable and go_pass and adapter.get('runner')!='vitest' and adapter['test'] in selected.get((adapter['package'],adapter.get('build_tag','')),set()): layers.update(adapter['layers'])
             if stable and component_pass and adapter.get('runner')=='vitest': layers.add('components')
         if layers: verified[row['id']] = sorted(layers)
     report = summary(data)
     report.update(status='shared_scoped_evidence_passed' if all(not r['errors'] for r in reports) else 'shared_scoped_evidence_failed',
-                  task_complete=False,source_sha=source,layer=layer,source_closure_before=tested_closure,
+                  task_complete=False,product_green=not any(r.get('target_red') for r in reports),source_sha=source,layer=layer,source_closure_before=tested_closure,
                   source_closure_after=final_closure,cases_sha256=cases_hash,reports=reports,
                   shared_input_verified_cases=len(verified),shared_input_verified_layers=verified,
                   missing_required_layers={row['id']:sorted(set(row['required_layers'])-set(verified.get(row['id'],[]))) for row in data['cases']},
-                  boundary='Actual JSON-fed production policy and rendered component evidence. PostgreSQL/HTTP, credential admission, frozen reasons and other cases remain unverified.')
+                  boundary='Only the recorded scoped layers and exact runtime paths are verified. Accepted target red is not product green; missing component journeys and future backfill/migration implementation remain separate gaps.')
     (output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     return report
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--run', choices=['unit','db','http','components','shared-unit','shared-components'])
+    parser.add_argument('--run', choices=['unit','db','http','components','shared-unit','shared-components','shared-db','shared-http'])
     parser.add_argument('--output-dir',type=Path)
     args = parser.parse_args()
     if args.run and args.output_dir is None:

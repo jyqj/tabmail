@@ -83,7 +83,16 @@
         ["tabmail/internal/store/postgres", "TestR5RecoveryInspectRetainsUnavailableDestinationOriginal"],
         ["tabmail/internal/store/postgres", "TestR5RecoveryReconcileDoesNotRequireLiveSender"],
         ["tabmail/internal/store/postgres", "TestR5RecoveryRetryDoesNotRequireReadOrSendPolicy"],
-        ["tabmail/internal/store/postgres", "TestR5RecoveryRetryHTTPDestinationBusyConflict"]
+        ["tabmail/internal/store/postgres", "TestR5RecoveryRetryHTTPDestinationBusyConflict"],
+        ["tabmail/internal/store/postgres", "TestR5CachePlainAndAuditedRecoveryParentClassification"],
+        ["tabmail/internal/store/postgres", "TestR5CacheWriteAndIngressDoNotAcquireAncestorFK"],
+        ["tabmail/internal/store/postgres", "TestR5CacheConstraintFailureRollsBackDerivedWrite"],
+        ["tabmail/internal/store/postgres", "TestR5CacheWriteVersusPhysicalDeleteLockOrder"],
+        ["tabmail/internal/store/postgres", "TestR5CacheBusySourceRejectsBeforePhysicalDeleteCounterRelease"],
+        ["tabmail/internal/store/postgres", "TestR5PasswordChangeOrdersMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5PasswordAuditParentPrecedesUserUpdate"],
+        ["tabmail/internal/store/postgres", "TestR5PasswordAuditFailureRollsBackSessionAndRefresh"],
+        ["tabmail/internal/store/postgres", "TestR5QueueNullableDiagnosticsClaimAndRead"]
       ],
       "allowed_skips": []
     },
@@ -353,7 +362,17 @@
         ["tabmail/internal/app/submissions", "TestReplayReceiptRejectsInvalidCurrentBinding"],
         ["tabmail/internal/app/submissions", "TestReplayReceiptPreservesErrorsAndMapsCurrentDenial"],
         ["tabmail/internal/app/submissions", "TestReplayAndReadReceiptScopesRemainDistinctForKey"],
-        ["tabmail/internal/app/submissions", "TestReplayReceiptFakeStoreEnforcesKeyWriteNotReadScope"]
+        ["tabmail/internal/app/submissions", "TestReplayReceiptFakeStoreEnforcesKeyWriteNotReadScope"],
+        ["tabmail/internal/store/postgres", "TestR5CachePlainAndAuditedRecoveryParentClassification"],
+        ["tabmail/internal/store/postgres", "TestR5CacheWriteAndIngressDoNotAcquireAncestorFK"],
+        ["tabmail/internal/store/postgres", "TestR5CacheConstraintFailureRollsBackDerivedWrite"],
+        ["tabmail/internal/store/postgres", "TestR5CacheWriteVersusPhysicalDeleteLockOrder"],
+        ["tabmail/internal/store/postgres", "TestR5CacheBusySourceRejectsBeforePhysicalDeleteCounterRelease"],
+        ["tabmail/internal/store/postgres", "TestR5PasswordChangeOrdersMemberFreeze"],
+        ["tabmail/internal/store/postgres", "TestR5PasswordAuditParentPrecedesUserUpdate"],
+        ["tabmail/internal/store/postgres", "TestR5PasswordAuditFailureRollsBackSessionAndRefresh"],
+        ["tabmail/internal/store/postgres", "TestR5QueueNullableDiagnosticsClaimAndRead"],
+        ["tabmail/internal/api/handlers", "TestR5ProtocolWireErrorShape"]
       ],
       "allowed_skips": [
         {
