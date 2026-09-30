@@ -29,4 +29,3 @@ test("client drift checks reject missing/new/verb/route mismatch",()=>{
  assert.throws(()=>validate(rows,[{...doc[0],methods:["POST"]}],routes),/drift/);
  assert.throws(()=>validate(rows,[{...doc[0],routes:[]}],routes),/mapping/);
 });
-
