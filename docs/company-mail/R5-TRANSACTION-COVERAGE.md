@@ -393,7 +393,7 @@ FK目录保留迁移中的DROP/重建；例如domain mailbox-zone原CASCADE已�
 | 070-HELPERS | companyReadTx/companyTx/companyReferencedTx call effects；three tenant lock modes, actor/profile locks, callbacks and actual direct writes tracked per entry | source_inventory_current | name Read does not prove no writes; callbacks are reviewed current callsites, not future no-I/O enforcement |
 | 070-FK-TRIGGERS | enqueue trigger, message event/index/archive/pins and FK wait paths；14 Up migrations/77 REFERENCES declarations/7 triggers; X actual mail_documents parent classification | source_definitions_and_selected_runtime_catalog_links | declaration count not final catalog; full FK/cascade/NO ACTION and DDL lifecycle relation matrix not newly run on Y |
 | 070-GC-OBJECT | GC and transaction-held external object callback wait/cancel/atomic effects；TX20 auto-commit prefix plus attachment delete/orphan CTE; TX21 rawkey lock ensureObject/del tx callbacks; P3 source references | source_reviewed_existing_tests_and_explicit_followups | protected-prefix/tenant fairness, complete rawkey participants, commit-unknown and storage/provider failure layers not closed |
-| 070-AUTH-WINDOW | every multi-resource write identifies checks vs effects and waits；exact local source traces/manual66, phase-specific eligibility fences and linked outcomes | per_entry_source_and_selected_runtime_evidence | no all350 execution assertion; final predicate clocks and caller reachability must be adjudicated per remaining entry |
+| 070-AUTH-WINDOW | every multi-resource write identifies checks vs effects and waits；exact local source traces/manual68, phase-specific eligibility fences and linked outcomes | per_entry_source_and_selected_runtime_evidence | no all350 execution assertion; final predicate clocks and caller reachability must be adjudicated per remaining entry |
 
 Reachability复核：当前非test direct caller：DeleteMessage/PurgeMailbox在internal/app/messages，DeleteMailbox在internal/app/mailboxes；DeleteUser无非test direct caller，正式成员删除调用Guarded。只有名称候选不能把internal legacy端口当公开入口。Y全量尚未运行，历史绿不冒充fresh本批全图验收。
 
@@ -410,3 +410,9 @@ Z新restore testcase06cbbc尚未纳Y：当前真实restore-first在已成功rest
 独立新空测试DB经正式PgStore.New/Migrate后actual PG16.13 pg_constraint/getdef导出75 FK、7个user triggers及实际delete/update动作、validation/deferrable状态、函数body。来源SHA 0f8072788e9b621a2af1496d6d2f5d85e46f837f5717fc9ece97eb0f132c7799，完整[机器catalog与350entry conservative links](evidence/R5-TRANSACTION-DB-CATALOG.json)。14Up源的77 REFERENCES仅声明历史，绝不叫最终FK75；本catalog也不是生产DB快照。每entry按literal DML+name closure映child FK检查与delete CASCADE/SET NULL/NO ACTION扇出，不将conservative closure冒dynamic dispatch。
 
 有限caller纠偏：Publish/Revoke已有781a完整两方向T前序互斥/CAS/immutable/auditrollback/idempotent实际7事件，不因V/template词法倒序制造40P01；DeleteMailbox只有未连formal route的legacy app内部链且拒personal/shared，不能制造公司删除关系；CreateMessageWithQuota仅ingest Durable=false legacy fallback，公司config强Durable=true走DeliverIngress；DeleteTenant正式superadmin route的current行为待9c679后续control，约束拒绝也不等任务整体完成。
+
+## 12. 当前68个人工slot的typed条件登记
+
+[逐slot寄存](evidence/R5-TRANSACTION-PROOF-REGISTER.json)：68（不是历史66）、350总inventory；7internal未装配、1Durable=false legacycfg、其余formal/helper按实际role条件。字段不是PASS票：源码条件/代表动态/精确未证/不适用配置分列，closed_entire_slot=false避免静态涂全绿；source-only既不是56漏洞也不是必须56新case。slot1已有globalbootstrap advisory可静态收敛同端口同email，不假全库唯一政策。原功能史报告分数不变，只current登记修事实。
+
+实际有限remaining：53 S-onlytenant形态不能被messages NOACTION拒绝豁免，AB先正常可行再双完整命令；11/13/14普通zone/profile读末次资格不借Activate；offboard Execute早Go clock不能借别处DB最终clock；raw callback物理effect与commit unknown不当DBrollback；其余role/caller/stable batch与operation-sensitive trigger证据条件明确。070仍不勾，新增动态只针对无法静态收敛且真实可达的有限条件，不无限增总数。

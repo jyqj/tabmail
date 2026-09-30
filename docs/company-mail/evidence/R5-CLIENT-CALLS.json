@@ -1984,5 +1984,37 @@
     ],
     "forwarding": true,
     "routes": []
+  },
+  {
+    "source": "web/lib/legacy-outbound.ts",
+    "line": 17,
+    "branch": 0,
+    "callee": "request",
+    "owner": "result",
+    "expression": "\"/api/v1/outbound\"",
+    "path": "/api/v1/outbound",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/outbound"
+    ]
+  },
+  {
+    "source": "web/lib/legacy-outbound.ts",
+    "line": 21,
+    "branch": 0,
+    "callee": "request",
+    "owner": "result",
+    "expression": "`/api/v1/outbound/${encodeURIComponent(id)}`",
+    "path": "/api/v1/outbound/{id}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/outbound/{id}"
+    ]
   }
 ]

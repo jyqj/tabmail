@@ -8,7 +8,7 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-最新执行为 **B01-Z（2026-10-01）**：恢复／共享转换后实际删除资格与source顺序已实证修复，模板父序互斥有完整控制；fresh默认1405pass/0fail/1明确browser skip、226必跑、clean前端118通过。actual新空DB75FK/7triggers已归档；协议目标红仍独立，产品非全绿。见 [B01-Z记录](docs/company-mail/R5-B01-Z-VALIDATION.md)。
+最新执行为 **B01-AA（2026-10-01）**：默认1409/0/1、227必跑；46场景全适用层协议基线验收，080完成使TODO7/171。32 DB／12组件精确目标红仍非产品绿；原18/19门禁与API文档后验0分开记录，070/G0及未来BCC正式写入未完成。见 [AA记录](docs/company-mail/R5-B01-AA-VALIDATION.md)。
 
 唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段/171工作包/25批次/38验收场景。目前仍 **6/171，P0为6/12**。新增 [有限事务目录](docs/company-mail/R5-TRANSACTION-COVERAGE.md) 覆盖350函数/66重点，结构清点不冒称全runtime正确；070具体未验证关系与080的RC02精确组件入口／BC02–03未来写入适用性等仍待验收，G0不提前关闭。
 

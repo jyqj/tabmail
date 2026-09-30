@@ -953,9 +953,7 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -972,6 +970,24 @@
             "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
             "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "actual legacy GET client/folder from formal compatibility receipt entry; actual Compose same-key retry after committed-response disconnect; private fixture auth still shipping HTTP middleware",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/RC02/legacy_outbound_list",
+            "TestR5ProtocolComponentObservations/RC02/legacy_outbound_detail",
+            "TestR5ProtocolComponentObservations/RC02/submit_replay"
+          ],
+          "target_failures": {}
         }
       ]
     },
@@ -2339,6 +2355,30 @@
           "runtime_test_paths": [
             "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source"
           ]
+        },
+        {
+          "source": "internal/store/postgres/r5_legacy_bcc_contract_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyBCCContractCapabilities",
+          "build_tag": "r5protocol",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "evidence_scope": "current_contract_capability",
+          "consumes_shared_input": true,
+          "scope": "actual current schema/structured-source qualification and HTTP completeness gap; two current Migrate no-ops do not execute future formal migration/backfill or certify future idempotent writes",
+          "runtime_test_paths": [
+            "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source"
+          ],
+          "target_failures": {
+            "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source": {
+              "marker": "R5_PROTOCOL_CAPABILITY_TARGET_BC02",
+              "task": "R5-P2-080",
+              "audit": "A07",
+              "acceptance": "AC-09"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -2355,6 +2395,16 @@
         "BC02_boundary": "repeat checks current immutable values unchanged under real reads; this is not execution or certification of a nonexistent idempotent backfill command. Exact source has BCC but actual durable asset lacks it => specific capability target red",
         "BC03_boundary": "source absent or same-ID foreign tenant job cannot be trusted; actual response must not imply completeness or copy foreign BCC. Missing legacy_unknown is an exact current product target red",
         "followup": "R5-P2-080 must add real versioned migration/backfill and replace capability-observation red with actual idempotent write tests"
+      },
+      "future_product_write_requirements": {
+        "tasks": [
+          "R5-P2-070",
+          "R5-P2-080",
+          "R5-P2-110"
+        ],
+        "status": "not_implemented_or_executed",
+        "proof_required": "formal versioned recipient snapshot/completeness migration and reliable-source-qualified backfill; empty/upgrade cases; same formal writes repeated preserve immutable asset; absent/foreign source stays legacy_unknown",
+        "baseline_scope": "P0-080 freezes target semantics and exact capability target red; does not pre-complete future product writes"
       }
     },
     {
@@ -2408,6 +2458,37 @@
             "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
             "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job"
           ]
+        },
+        {
+          "source": "internal/store/postgres/r5_legacy_bcc_contract_baseline_test.go",
+          "package": "./internal/store/postgres",
+          "test": "TestR5LegacyBCCContractCapabilities",
+          "build_tag": "r5protocol",
+          "layers": [
+            "db",
+            "http"
+          ],
+          "evidence_scope": "current_contract_capability",
+          "consumes_shared_input": true,
+          "scope": "actual current schema/structured-source qualification and HTTP completeness gap; two current Migrate no-ops do not execute future formal migration/backfill or certify future idempotent writes",
+          "runtime_test_paths": [
+            "TestR5LegacyBCCContractCapabilities/BC03/missing_source",
+            "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source"
+          ],
+          "target_failures": {
+            "TestR5LegacyBCCContractCapabilities/BC03/missing_source": {
+              "marker": "R5_PROTOCOL_CAPABILITY_TARGET_BC03",
+              "task": "R5-P2-110",
+              "audit": "A07",
+              "acceptance": "AC-09"
+            },
+            "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source": {
+              "marker": "R5_PROTOCOL_CAPABILITY_TARGET_BC03",
+              "task": "R5-P2-110",
+              "audit": "A07",
+              "acceptance": "AC-09"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -2425,6 +2506,16 @@
         "BC02_boundary": "repeat checks current immutable values unchanged under real reads; this is not execution or certification of a nonexistent idempotent backfill command. Exact source has BCC but actual durable asset lacks it => specific capability target red",
         "BC03_boundary": "source absent or same-ID foreign tenant job cannot be trusted; actual response must not imply completeness or copy foreign BCC. Missing legacy_unknown is an exact current product target red",
         "followup": "R5-P2-080 must add real versioned migration/backfill and replace capability-observation red with actual idempotent write tests"
+      },
+      "future_product_write_requirements": {
+        "tasks": [
+          "R5-P2-070",
+          "R5-P2-080",
+          "R5-P2-110"
+        ],
+        "status": "not_implemented_or_executed",
+        "proof_required": "formal versioned recipient snapshot/completeness migration and reliable-source-qualified backfill; empty/upgrade cases; same formal writes repeated preserve immutable asset; absent/foreign source stays legacy_unknown",
+        "baseline_scope": "P0-080 freezes target semantics and exact capability target red; does not pre-complete future product writes"
       }
     },
     {
@@ -3932,6 +4023,7 @@
   "component_scope_decisions": {
     "registered_source_linked_cases": [
       "RC01",
+      "RC02",
       "RC03",
       "RC04",
       "RC05",
@@ -3948,10 +4040,10 @@
       "PE04",
       "PE05"
     ],
-    "runtime_leafs": 23,
+    "runtime_leafs": 26,
     "known_target_leafs": 12,
-    "remaining_case": "RC02",
-    "RC02": "legacy outbound list/detail/submit-replay has no independent tracked UI consumer for this exact operation; current company SubmissionPane/Compose are different routes. Required components remains unresolved, no exemption or fabricated equivalent consumer. P0-110/P2-040/P2-140/P5-110 adjudication pending",
+    "remaining_case": null,
+    "RC02": "New actual compatibility legacy folder/client and same-key Compose retry consumer registered; fresh AA execution required, focused result not whole-source proof",
     "boundary": "registration is not runtime evidence; fresh same-source components run required after metadata/hash change; product target red remains red"
   }
 }

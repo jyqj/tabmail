@@ -174,3 +174,9 @@ TABMAIL_TEST_DB_DSN='<disposable-test-dsn>' python3 scripts/check_r5_protocol.py
 16case/23精确variant由Go-owned PostgreSQL、真实shipping HTTP与API client/fetch驱动shipping组件；认证host context由夹具供给但实际JWT/权限仍走正式middleware。它们以Go adapter components层注册，原DB scalar目标/paths不改，UI每adapter exactpath另绑定12个已知安全目标到原P1/P2/P4任务，不覆盖或吞旧DB红。CASE SHA改变后必须同源码fresh运行，注册数不当执行数。
 
 RC02的legacy list/detail/submit-replay仍保留required components欠缺：现有ReceiptFolder/SubmissionPane走company/submissions，Compose走company/drafts/id/submit；不能拿新pane代替独立legacy路径，也不擅免适用层。后续P0-110/P2-040/140与P5-110需正式兼容/调用者裁决。shipping真实浏览器旅程不由jsdom/loopback替代。
+
+## AA：原080目标真值与后续产品写入分层
+
+RC02不免原components要求：当前正式ReceiptFolder/workspace兼容入口连接独立LegacyReceiptFolder，真实GET legacy list/detail，Compose断连后同key重放使用其原公开submission入口；实际三variant消费者注册后须同新CASE SHA／源码fresh运行。旧DB scalar与新UI／能力exact路径marker分开，不覆盖旧失败。
+
+BC02/03原目标（可靠来源回填、重复不覆盖、无可信源legacy_unknown）完整保留；新当前能力consumer只证实际最终schema／精确same-tenant job来源／HTTP缺口及两次当前Migrate no-op。它既不是未来正式write执行，也不是其幂等证明。P0-080/120基线允许绑定AC/后续任务的精确能力红；真正版本化snapshot/unknown迁移、qualified backfill、empty/upgrade及重复同formal writes验收仍必须P2-070/080/110实现，不能以基线层集合或controller0提前标产品完成。

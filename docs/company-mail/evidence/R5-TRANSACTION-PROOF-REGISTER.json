@@ -1,0 +1,1480 @@
+{
+  "schema": "r5-transaction-proof-register-v1",
+  "task": "R5-P0-070",
+  "task_complete": false,
+  "manual_slots": 68,
+  "total_inventory_functions": 350,
+  "internal_unassembled_slots": 7,
+  "legacy_configuration_only_slots": 1,
+  "rows": [
+    {
+      "slot": 1,
+      "entry_id": "internal/store/postgres/company_bootstrap.go:*PgStore:BootstrapCompanyAdmin",
+      "entry": "BootstrapCompanyAdmin",
+      "group": "CTX27",
+      "applicability": "startup_only",
+      "adjudication_class": "static_same_port_serialization",
+      "safety_condition": "global bootstrap advisory precedes lower-email existence read and tenant/user/audit INSERT; same port same email serializes, not all users writers nor single-supertenant policy",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-060"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "启动/重复bootstrap唯一约束等待、Commit不明和迁移并发未本轮执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 2,
+      "entry_id": "internal/store/postgres/company_mail.go:*PgStore:DeleteMailDraft",
+      "entry": "DeleteMailDraft",
+      "group": "TX09",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyReadTx actor/profile→精确tenant/user/id/revision且未sealed D DELETE→Commit；不删creation receipt，也不显式锁M。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-060"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "草稿附件顺序依输入；普通restore清除expires/purge与sent不同，属于070/080剩余政策；trusted TrashCompanyMessages无当前actor重载"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 3,
+      "entry_id": "internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment",
+      "entry": "FinishMailAttachment",
+      "group": "TX10",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyReadTx actor/profile→预定位M→M SHARE/current send→精确A UPDATE锁→state/expires clock条件A ready W→Commit；不是对象Put。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P5-050"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "草稿附件顺序依输入；普通restore清除expires/purge与sent不同，属于070/080剩余政策；trusted TrashCompanyMessages无当前actor重载"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 4,
+      "entry_id": "internal/store/postgres/company_mail.go:*PgStore:MutateWorkMessage",
+      "entry": "MutateWorkMessage",
+      "group": "CTX29",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "companyReferencedTx T KEY SHARE→current actor/profile→M SHARE/current rights→organize/owner seen source NOKEY UPDATE NOWAIT，或nonowner sparse source KEY SHARE NOWAIT→原W/state→audit/outbox→Commit；latebusy409同tx rollback，保留不同state owners。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Y maintenance10 + first sparse5; named owner/state variants only",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-030",
+        "R5-P3-040"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Y实际三caller10事件及nonowner首次seen/star5事件原source真40P01→候选各三轮；当前0dc源统一full回归待freeze。多source batch busy、已有state ON CONFLICT、source life restore与Z stale retention、trusted actor外层窗口尚非全部验收。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 5,
+      "entry_id": "internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment",
+      "entry": "ReserveMailAttachment",
+      "group": "TX10",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyReadTx actor/profile→M SHARE/send资格→attachment-budget tenant:user advisory→sum→A上传占位INSERT/FK M/U→Commit；真正对象上传在外层。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P5-050"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "草稿附件顺序依输入；普通restore清除expires/purge与sent不同，属于070/080剩余政策；trusted TrashCompanyMessages无当前actor重载"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 6,
+      "entry_id": "internal/store/postgres/company_mail.go:*PgStore:SaveMailDraft",
+      "entry": "SaveMailDraft",
+      "group": "TX08",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyReadTx actor/profile→M SHARE/当前send资格→逐A SHARE→新建receipt INSERT或现D revision CAS→模板版本填充→Commit；receipt FK到user，不直接到T。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-060"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "草稿附件顺序依输入；普通restore清除expires/purge与sent不同，属于070/080剩余政策；trusted TrashCompanyMessages无当前actor重载"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 7,
+      "entry_id": "internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages",
+      "entry": "TrashCompanyMessages",
+      "group": "CTX29",
+      "applicability": "internal_unassembled",
+      "adjudication_class": "scope_internal_unassembled",
+      "safety_condition": "独立Begin→T UPDATE→work M UPDATE→single id的messageMutation NOKEY NOWAIT，或bulk MATERIALIZED精确tenant/mailbox/deleted_atNULL按id NOKEY NOWAIT，仅locked ids+复核原predicate更新30day→audit/outbox→Commit；trusted actor标签不自动重读actor，bulk旧trash不改。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Y internal complete-port maintenance10/bulk control, not assembled HTTP",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-030",
+        "R5-P3-040"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Y实际三caller10事件及nonowner首次seen/star5事件原source真40P01→候选各三轮；当前0dc源统一full回归待freeze。多source batch busy、已有state ON CONFLICT、source life restore与Z stale retention、trusted actor外层窗口尚非全部验收。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 8,
+      "entry_id": "internal/store/postgres/company_mail.go:*PgStore:writePersonalMessageState",
+      "entry": "writePersonalMessageState",
+      "group": "CTX29",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "当前uid资格→owner seen/unseen原fastpath调用messageMutation→其它sparse分支精确tenant/mailbox/id source KEY SHARE NOWAIT→state UPSERT原seen/star维度CASE→mailbox event；NoRows404/55P03409，其它raw，同caller tx。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Y nonowner first seen/star5; existing-state conflict not fully covered",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-030",
+        "R5-P3-040"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Y实际三caller10事件及nonowner首次seen/star5事件原source真40P01→候选各三轮；当前0dc源统一full回归待freeze。多source batch busy、已有state ON CONFLICT、source life restore与Z stale retention、trusted actor外层窗口尚非全部验收。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 9,
+      "entry_id": "internal/store/postgres/company_mail.go::messageMutation",
+      "entry": "messageMutation",
+      "group": "CTX29",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "switch先校验action→精确tenant/mailbox/id message NO KEY UPDATE NOWAIT→保原action条件/COALESCE UPDATE→RowsAffected404；55P03显式409，其它raw，调用者事务rollback。非key最小锁模式不改生命周期政策。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Y actual organize/owner-seen complete ports; full latest default includes regression",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-030",
+        "R5-P3-040"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Y实际三caller10事件及nonowner首次seen/star5事件原source真40P01→候选各三轮；当前0dc源统一full回归待freeze。多source batch busy、已有state ON CONFLICT、source life restore与Z stale retention、trusted actor外层窗口尚非全部验收。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 10,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:ActivateEmployee",
+      "entry": "ActivateEmployee",
+      "group": "TX01",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "独立Begin→普通invitation定位tenant（不授信）→T UPDATE→hash+tenant绑定invitation UPDATE锁/原expires_at→锁后DB clock期限→当前sponsor/domain/profile资格→U/M/consumption→audit/outbox→原primary/zone/domain verified+mx SHARE NOWAIT→最终原expires DBclock→Commit；late无资格400/busy409均整体rollback，不新增T锁。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Y activation final14/3rounds",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Y最终同14事件基线6pass8fail/候选三轮14pass，busy409由正式UpdateZone+test-only advisory屏障实测，400/409均完整state rollback。其它sponsor/profile独立旧写caller、commit-unknown及整图运行未因本关系证明。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 11,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:ConfigureCompany",
+      "entry": "ConfigureCompany",
+      "group": "TX01",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "finite_actual_condition_pending",
+      "safety_condition": "T/actor serialization and settings CAS; verified zone read has no borrowed final Activate fence against independent UpdateZone",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 12,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
+      "entry": "ConvertSharedMailbox",
+      "group": "TX03",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "runtime source subset NOWAIT+actual row eligibility shown; UPDATE expiry does not fire rawkey UPDATE OF index trigger",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Z d8fb6/3rounds with original both orders/controls",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-040"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Z原d8fb旧messages6事件3pass3fail有stale-delete和40P01→same-test候选三轮6pass；当前103e/3bdff统一full未跑。批多source、其它旧port与权限外层不因本关系全证。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 13,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
+      "entry": "CreateWorkMailbox",
+      "group": "TX01",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "finite_actual_condition_pending",
+      "safety_condition": "T/actor and mailbox INSERT FK; ordinary verified-domain/owner qualification must not borrow Activate final fence",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 14,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:InviteEmployee",
+      "entry": "InviteEmployee",
+      "group": "TX01",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "finite_actual_condition_pending",
+      "safety_condition": "T/actor and invitation INSERT/expiry; profile/domain qualification conditions distinct from activation",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 15,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:OffboardEmployee",
+      "entry": "OffboardEmployee",
+      "group": "TX01",
+      "applicability": "internal_unassembled",
+      "adjudication_class": "scope_internal_unassembled",
+      "safety_condition": "companyTx T UPDATE→actor/profile→offboardingTarget U/继任U/J锁→applyOffboarding→Commit；没有preview plan，也不同于新ExecuteOffboarding的fingerprint协议。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 16,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:RevokeEmployeeInvitation",
+      "entry": "RevokeEmployeeInvitation",
+      "group": "TX01",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyTx T UPDATE→actor/profile→未consumed/revoked invitation条件UPDATE→RowsAffected冲突判定→audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 17,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
+      "entry": "SetWorkGrant",
+      "group": "TX02",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyTx T UPDATE→actor/profile→M访问/owner层级资格→目标activeCompanyUser→mailbox revision CAS W→grant DELETE或UPSERT/FK M/U/granted_by→audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 18,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
+      "entry": "SetWorkMailboxSendPolicy",
+      "group": "TX02",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyTx T UPDATE→actor/profile→M当前访问/owner管理资格→mailbox revision CAS→send_policy W→audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 19,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:TransferWorkMailbox",
+      "entry": "TransferWorkMailbox",
+      "group": "TX03",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyTx T UPDATE→actor/profile→M UPDATE锁→owner管理资格/新owner active检查→mailbox revision CAS→owner W/user FK→新owner grant DELETE→audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-040"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 20,
+      "entry_id": "internal/store/postgres/company_members.go:*PgStore:companyTxScope",
+      "entry": "companyTxScope",
+      "group": "TX01",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→按lock枚举T UPDATE/KEY SHARE/无T→currentMemberActor U SHARE→非admin有效profile SHARE NOWAIT→f callback→Commit；error mapping不把40P01变成功。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 21,
+      "entry_id": "internal/store/postgres/company_ops.go:*PgStore:InspectRecoveryReceipt",
+      "entry": "InspectRecoveryReceipt",
+      "group": "TX20",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→recoveryReferencedActor T KEY SHARE/当前actor SHARE→receipt+targets读→companyAudit/outbox写→Commit；读名称仍是多资源审计事务。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P3-060",
+        "R5-P3-070",
+        "R5-P3-080",
+        "R5-P3-090"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 22,
+      "entry_id": "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound",
+      "entry": "ReconcileOutbound",
+      "group": "TX13",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→recoveryReferencedActor T KEY SHARE/当前actor SHARE→J UPDATE NOWAIT→state/updated_at/ledger检查→recipient及J W→必要audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P6-070"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 23,
+      "entry_id": "internal/store/postgres/company_ops.go:*PgStore:RetryRecoveryReceipt",
+      "entry": "RetryRecoveryReceipt",
+      "group": "TX15",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→recoveryReferencedActor T KEY SHARE/当前actor SHARE→I UPDATE NOWAIT→版本/state/hash核对→目标SHARE NOWAIT与destination fence→精确target reset/I pending W→audit→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P6-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 24,
+      "entry_id": "internal/store/postgres/company_ops.go:*PgStore:SweepCompanyMetadata",
+      "entry": "SweepCompanyMetadata",
+      "group": "TX20",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "separate auto-commit prefix, never whole-sweep atomic rollback; fairness/GC progress belongs original followups",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P3-060",
+        "R5-P3-070",
+        "R5-P3-080",
+        "R5-P3-090"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 25,
+      "entry_id": "internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments",
+      "entry": "sweepCompanyAttachments",
+      "group": "TX20",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→T UPDATE→按id LIMIT100 A UPDATE SKIP LOCKED→draft JSON/outbound pin/sent pin引用复检→A DELETE和orphan INSERT同CTE→Commit；保护prefix可能反复占据候选窗口。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P3-060",
+        "R5-P3-070",
+        "R5-P3-080",
+        "R5-P3-090"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 26,
+      "entry_id": "internal/store/postgres/company_templates.go:*PgStore:PublishMailTemplate",
+      "entry": "PublishMailTemplate",
+      "group": "CTX30",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "runtime T UPDATE vs revoke T KEY SHARE exclusion/CAS/audit shown; INSERT version does not fire immutable BEFORE UPDATE",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Z781a7 actual parent order/CAS/audit/immutable/no-op",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P5-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "同tenant publish(T UPDATE)与revoke(T KEY SHARE)在parent先互斥，不能仅template/version相反顺序宣称40P01；跨其它入口/直接SQL及取消/条件CAS仍按实际caller另验。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 27,
+      "entry_id": "internal/store/postgres/company_templates.go:*PgStore:RevokeMailTemplateVersion",
+      "entry": "RevokeMailTemplateVersion",
+      "group": "CTX30",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "runtime same-parent mutual exclusion/CAS/immutable revocation/audit shown; not all directly maintained versions",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Z781a7 actual parent order/CAS/audit/immutable/no-op",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P5-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "同tenant publish(T UPDATE)与revoke(T KEY SHARE)在parent先互斥，不能仅template/version相反顺序宣称40P01；跨其它入口/直接SQL及取消/条件CAS仍按实际caller另验。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 28,
+      "entry_id": "internal/store/postgres/company_templates.go:*PgStore:SaveMailTemplate",
+      "entry": "SaveMailTemplate",
+      "group": "CTX30",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyReferencedTx T KEY SHARE→actor/profile→new template INSERT/FK T或观察revision条件template UPDATE→audit/outbox→Commit；new唯一name可能等待。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P5-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 29,
+      "entry_id": "internal/store/postgres/company_templates.go:*PgStore:SetMailTemplateRetired",
+      "entry": "SetMailTemplateRetired",
+      "group": "CTX30",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyReferencedTx T KEY SHARE→actor/profile→观察revision条件template retired/revision UPDATE→audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P5-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 30,
+      "entry_id": "internal/store/postgres/company_templates.go:*PgStore:SetTemplateGrant",
+      "entry": "SetTemplateGrant",
+      "group": "CTX30",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyTx T UPDATE→actor/profile→template版本/目标user/M资格检查→grant INSERT或DELETE/FK template/M/U→audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P5-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 31,
+      "entry_id": "internal/store/postgres/domain_delete.go:*PgStore:DeleteZone",
+      "entry": "DeleteZone",
+      "group": "TX23",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→T UPDATE→zone UPDATE→资产引用检查→zone DELETE/NO ACTION FK→optional audit→Commit；身份校验在调用层，不自己重载actor。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "外层当前actor与域名删除写的授权窗口及zone/ingress/mailbox交叉等待待全图验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 32,
+      "entry_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
+      "entry": "ExecuteOffboarding",
+      "group": "TX07",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "finite_actual_condition_pending",
+      "safety_condition": "formal T->plan/target/successor/stable jobs; earlier Go expiry check not automatically final DB elapsed clock",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P4-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "计划deadline是Go时间早期判定；多用户successor与最后管理员、历史FK及其它maintenance交叉未全验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 33,
+      "entry_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
+      "entry": "PreviewOffboarding",
+      "group": "TX06",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "formal T->target/successor/jobs->fingerprint/plan/audit; later execution uses own checks, not preview snapshot authorization",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P4-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "计划deadline是Go时间早期判定；多用户successor与最后管理员、历史FK及其它maintenance交叉未全验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 34,
+      "entry_id": "internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding",
+      "entry": "applyOffboarding",
+      "group": "TX07",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "调用者tx：transfer_owned先A owner W→D owner/revision W，seal/discard另分支；cancel已知非在途J→R撤销→owned Key/grants/template grants DELETE→target U inactive/session W→按id M转交/CAS→audit/outbox；依赖调用方预持T/target/successor/J。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P4-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "计划deadline是Go时间早期判定；多用户successor与最后管理员、历史FK及其它maintenance交叉未全验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 35,
+      "entry_id": "internal/store/postgres/ingress.go:*PgStore:CreateIngress",
+      "entry": "CreateIngress",
+      "group": "TX14",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→rawkey advisory→recovery_managed ingest_jobs INSERT→固定ingest_recipient_outcomes逐目标INSERT→Commit；对象已由外层持久化，没有ensureObject参数。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-100",
+        "R5-P6-110"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "CreateIngress原件在应用外层，固定目标并无事务内对象回调；fail/hold/finish锁后lease复核与等待的细分覆盖待验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 36,
+      "entry_id": "internal/store/postgres/ingress.go:*PgStore:DeliverIngress",
+      "entry": "DeliverIngress",
+      "group": "TX14",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→I UPDATE/claim fence→target UPDATE→T UPDATE→zone SHARE NOWAIT→M SHARE NOWAIT→usage seed/increment→M count W→message INSERT/triggers→target delivered W→audit/outbox→DB同一clock最终lease与destination deadline→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-100",
+        "R5-P6-110"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "CreateIngress原件在应用外层，固定目标并无事务内对象回调；fail/hold/finish锁后lease复核与等待的细分覆盖待验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 37,
+      "entry_id": "internal/store/postgres/ingress.go:*PgStore:FailIngressTarget",
+      "entry": "FailIngressTarget",
+      "group": "TX14",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→lockIngress(I UPDATE/初始token/lease)→pending target attempts/error W→Commit；此函数没有末次lease重验。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-100",
+        "R5-P6-110"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "CreateIngress原件在应用外层，固定目标并无事务内对象回调；fail/hold/finish锁后lease复核与等待的细分覆盖待验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 38,
+      "entry_id": "internal/store/postgres/ingress.go:*PgStore:FinishIngress",
+      "entry": "FinishIngress",
+      "group": "TX14",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→lockIngress(I UPDATE/初始token/lease)→target状态汇总→必要pending→held W→I状态/token清除W→Commit；不是投递message/quota事务。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-100",
+        "R5-P6-110"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "CreateIngress原件在应用外层，固定目标并无事务内对象回调；fail/hold/finish锁后lease复核与等待的细分覆盖待验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 39,
+      "entry_id": "internal/store/postgres/ingress.go:*PgStore:HoldIngressTarget",
+      "entry": "HoldIngressTarget",
+      "group": "TX14",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→lockIngress(I UPDATE/初始token/lease)→pending target held/error W→Commit；此函数没有末次lease重验。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-100",
+        "R5-P6-110"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "CreateIngress原件在应用外层，固定目标并无事务内对象回调；fail/hold/finish锁后lease复核与等待的细分覆盖待验"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 40,
+      "entry_id": "internal/store/postgres/mail_content.go:*PgStore:ClaimMailIndexJobs",
+      "entry": "ClaimMailIndexJobs",
+      "group": "TX22",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "pool.Exec耗尽租约job标failed先独立提交；随后pool.Query SKIP LOCKED领取job/token/90s lease另一statement提交；不是两句整体事务。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P7-020",
+        "R5-P7-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "SaveParsedMessage actor/profile→M SHARE→精确source message SHARE NOWAIT→document UPSERT，不新增T锁；cache/物理删除已由主线程17事件三轮验证，其余派生写不等于index completion；retry与complete/source修改触发器交叉、claim清理与领取非整体原子需验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 41,
+      "entry_id": "internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob",
+      "entry": "CompleteMailIndexJob",
+      "group": "TX22",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "Begin→精确source message SHARE→index job UPDATE→锁后clock/lease/source重验→saveParsed→最终token/state/lease条件job UPDATE→Commit；document FK仅message。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "current source order + earlier B01-J exact source/lease rounds; not every generation",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P7-020",
+        "R5-P7-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "SaveParsedMessage actor/profile→M SHARE→精确source message SHARE NOWAIT→document UPSERT，不新增T锁；cache/物理删除已由主线程17事件三轮验证，其余派生写不等于index completion；retry与complete/source修改触发器交叉、claim清理与领取非整体原子需验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 42,
+      "entry_id": "internal/store/postgres/mail_content.go:*PgStore:FailMailIndexJob",
+      "entry": "FailMailIndexJob",
+      "group": "TX22",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→index job UPDATE→锁后clock/lease/token检查→条件job失败/待重试UPDATE→Commit；没有mailbox/T授权事务。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P7-020",
+        "R5-P7-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "SaveParsedMessage actor/profile→M SHARE→精确source message SHARE NOWAIT→document UPSERT，不新增T锁；cache/物理删除已由主线程17事件三轮验证，其余派生写不等于index completion；retry与complete/source修改触发器交叉、claim清理与领取非整体原子需验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 43,
+      "entry_id": "internal/store/postgres/mail_content.go:*PgStore:RetryFailedMailIndex",
+      "entry": "RetryFailedMailIndex",
+      "group": "TX22",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyTx(T UPDATE→actor/profile)→job按message id SKIP LOCKED→源message rawkey JOIN→reset attempts/token/lease→audit/outbox→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P7-020",
+        "R5-P7-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "SaveParsedMessage actor/profile→M SHARE→精确source message SHARE NOWAIT→document UPSERT，不新增T锁；cache/物理删除已由主线程17事件三轮验证，其余派生写不等于index completion；retry与complete/source修改触发器交叉、claim清理与领取非整体原子需验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 44,
+      "entry_id": "internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage",
+      "entry": "SaveParsedMessage",
+      "group": "TX22",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "companyReadTx→当前actor U SHARE/profile SHARE NOWAIT→M SHARE→当前CanRead→精确tenant/mailbox/id/rawkey message SHARE NOWAIT→saveParsed document UPSERT/FK(message)→Commit；不存在祖父T FK，不新增T锁；55P03由companyTxScope映射Conflict。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-X actual FK parent catalog and physical delete/cache17/3rounds",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P7-020",
+        "R5-P7-030"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "SaveParsedMessage actor/profile→M SHARE→精确source message SHARE NOWAIT→document UPSERT，不新增T锁；cache/物理删除已由主线程17事件三轮验证，其余派生写不等于index completion；retry与complete/source修改触发器交叉、claim清理与领取非整体原子需验证"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 45,
+      "entry_id": "internal/store/postgres/member_guard.go:*PgStore:DeleteUserGuarded",
+      "entry": "DeleteUserGuarded",
+      "group": "TX05",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→T UPDATE→current actor SHARE→target UPDATE→成员/owner移交拒绝规则→Key DELETE→U DELETE/FK→member audit→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "target-profile读取与profile删除SET NULL、self target锁提升、所有历史资产FK拒绝未由此静态目录关闭"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 46,
+      "entry_id": "internal/store/postgres/member_guard.go:*PgStore:UpdateUserGuarded",
+      "entry": "UpdateUserGuarded",
+      "group": "TX04",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→T UPDATE→current actor SHARE→target UPDATE→角色/最后管理员/profile核对→refresh/Key撤销→target U W→member audit→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-070"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "target-profile读取与profile删除SET NULL、self target锁提升、所有历史资产FK拒绝未由此静态目录关闭"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 47,
+      "entry_id": "internal/store/postgres/messages.go:*PgStore:CreateMessage",
+      "entry": "CreateMessage",
+      "group": "TX21",
+      "applicability": "internal_unassembled",
+      "adjudication_class": "scope_internal_unassembled",
+      "safety_condition": "Begin→M count W→message INSERT（tenant/mailbox/zone FK，event/index triggers）→Commit；与quota/rawobject回调变体不同。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-050",
+        "R5-P3-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "消息插入M→message与删除message→M相反；message event晚期T FK；不同消息同行M交叉等待待验证。rawkey锁协议不能证明附件原件写者都参加；对象回调可能阻塞/提交不明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 48,
+      "entry_id": "internal/store/postgres/messages.go:*PgStore:CreateMessageWithQuota",
+      "entry": "CreateMessageWithQuota",
+      "group": "TX21",
+      "applicability": "legacy_configuration_only",
+      "adjudication_class": "scope_legacy_conditional",
+      "safety_condition": "actual StoreMessage->deliverResolved only Durable=false legacy fallback; CompanyOnly config forces Durable=true DeliverIngress, not default company route",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-050",
+        "R5-P3-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "消息插入M→message与删除message→M相反；message event晚期T FK；不同消息同行M交叉等待待验证。rawkey锁协议不能证明附件原件写者都参加；对象回调可能阻塞/提交不明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 49,
+      "entry_id": "internal/store/postgres/messages.go:*PgStore:DeleteExpiredMessagesReturningKeys",
+      "entry": "DeleteExpiredMessagesReturningKeys",
+      "group": "TX21",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "Begin→原cutoff/ORDER/LIMIT candidate→DELETE target actual m重复完整原eligibility（strict<、owner/shared保护）→RETURNING actual m mailbox/key→实际deleted分组→M计数扣减→Commit后返回keys；EPQ仅source current tuple，不把mailbox策略子查询称全新快照。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-Z restored actual-row64fc10/3rounds + d8fb conversion; statement mailbox policy snapshot retained",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-050",
+        "R5-P3-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "Z64fc原10事件8pass2fail→same-test三轮10pass；scope恢复源当前资格复检及严格相等/正常legacyTTL/永久owner共享控制。未证明新mailbox policy snapshot、所有多tenant/M顺序或Commit不明。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 50,
+      "entry_id": "internal/store/postgres/messages.go:*PgStore:DeleteMessage",
+      "entry": "DeleteMessage",
+      "group": "TX21",
+      "applicability": "internal_unassembled",
+      "adjudication_class": "scope_internal_unassembled",
+      "safety_condition": "Begin→messages DELETE RETURNING mailbox_id（message row、cascade documents/index/userstate、event trigger含T FK）→M message_count W→Commit；raw对象删除不在本函数。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-X full internal physical-command cache pair; no assembled app/messages formal route",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-050",
+        "R5-P3-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "消息插入M→message与删除message→M相反；message event晚期T FK；不同消息同行M交叉等待待验证。rawkey锁协议不能证明附件原件写者都参加；对象回调可能阻塞/提交不明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 51,
+      "entry_id": "internal/store/postgres/messages.go:*PgStore:PurgeMailbox",
+      "entry": "PurgeMailbox",
+      "group": "TX21",
+      "applicability": "internal_unassembled",
+      "adjudication_class": "scope_internal_unassembled",
+      "safety_condition": "Begin→指定M下messages DELETE（cascade documents/index/userstate/event trigger）→M message_count=0 W→Commit；M不是先锁，反向cache候选现source NOWAIT拒绝。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-X full internal physical-command cache pair; no assembled app/messages formal route",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-050",
+        "R5-P3-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "消息插入M→message与删除message→M相反；message event晚期T FK；不同消息同行M交叉等待待验证。rawkey锁协议不能证明附件原件写者都参加；对象回调可能阻塞/提交不明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 52,
+      "entry_id": "internal/store/postgres/messages.go:*PgStore:ReleaseRawObjectIfUnreferenced",
+      "entry": "ReleaseRawObjectIfUnreferenced",
+      "group": "TX21",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "rawkey advisory->refs->external del callback in tx; no DML/FK list does not imply no effect or physical rollback after commit error",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-050",
+        "R5-P3-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "消息插入M→message与删除message→M相反；message event晚期T FK；不同消息同行M交叉等待待验证。rawkey锁协议不能证明附件原件写者都参加；对象回调可能阻塞/提交不明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 53,
+      "entry_id": "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
+      "entry": "DeleteSuppressionAudited",
+      "group": "TX11",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "finite_actual_condition_pending",
+      "safety_condition": "formal outbound-enabled suppression DELETE via scope/admin guard; S UPDATE->delete->late audit T FK. S-only tenant deletion AB normal-control/actual order pending; messages NO ACTION refusal does not exempt this shape",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-080"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "幂等回放早返回保留协议；低层trusted变体不走validate；其它outbound claim/attempt/suppression单写并非enqueue；quota等待日界策略需独立覆盖"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 54,
+      "entry_id": "internal/store/postgres/outbound.go:*PgStore:enqueueOutboundJobValidated",
+      "entry": "enqueueOutboundJobValidated",
+      "group": "TX11",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→T SHARE正式/KEY SHARE trusted→idempotency advisory与早回放→正式validator/缺行table SHARE NOWAIT→sender U SHARE→A SHARE→排序quota advisories+counts→J INSERT/BEFORE user/AFTER archive→recipient/pins/sent-pin trigger→audit→精确D消费→final deadlines→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-080"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "幂等回放早返回保留协议；低层trusted变体不走validate；其它outbound claim/attempt/suppression单写并非enqueue；quota等待日界策略需独立覆盖"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 55,
+      "entry_id": "internal/store/postgres/outbound_principal.go:*PgStore:outboundPrincipalTx",
+      "entry": "outboundPrincipalTx",
+      "group": "CTX28",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "user分支companyReadTx→read callback；Key分支Begin→owner U SHARE→Key SHARE NOWAIT+identity/scope→profile SHARE NOWAIT→read callback→最终Key clock→Commit；无T祖父锁假设。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P7-010"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "没有统一T父锁；仅已有当前授权读取报告，callback扩展写入将新增FK风险，校验器只能捕捉源码变化"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 56,
+      "entry_id": "internal/store/postgres/outbound_recipients.go:*PgStore:BeginOutboundRecipient",
+      "entry": "BeginOutboundRecipient",
+      "group": "TX12",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→J UPDATE锁/token/state/lease/inflight fence→指定recipient uncertain W/attempt++→J inflight条件W→Commit；SMTP在函数返回后。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P6-030",
+        "R5-P6-050",
+        "R5-P6-060"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "等待后lease及收件集合完整性与legacy migration结果须独立运行；accepted不可被重试覆盖"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 57,
+      "entry_id": "internal/store/postgres/outbound_recipients.go:*PgStore:CompleteOutboundRecipient",
+      "entry": "CompleteOutboundRecipient",
+      "group": "TX12",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→J token/state/lease/domain条件UPDATE→指定recipient结果W→Commit；是SMTP之后checkpoint，不证明SMTP下游原子性。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P6-030",
+        "R5-P6-050",
+        "R5-P6-060"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "等待后lease及收件集合完整性与legacy migration结果须独立运行；accepted不可被重试覆盖"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 58,
+      "entry_id": "internal/store/postgres/outbound_retry.go:*PgStore:RequeueOutboundJobAuthorized",
+      "entry": "RequeueOutboundJobAuthorized",
+      "group": "CTX33",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→T SHARE→缺M分支table SHARE NOWAIT→validate observed依赖NOWAIT→J UPDATE→validate locked generation NOWAIT→recipient SHARE NOWAIT/拒uncertain→J requeue+audit/outbox→final reader deadline clock→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P6-020"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "validator是app回调非DB外调用；未静态证明所有未来validator无网络I/O；可信low-level Requeue不参加当前授权"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 59,
+      "entry_id": "internal/store/postgres/permission_snapshot.go:*PgStore:permissionOverrideTx",
+      "entry": "permissionOverrideTx",
+      "group": "TX24",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→指定user NO KEY UPDATE（missingOK分支）→write callback→Commit；callback当前仅override UPSERT/DELETE。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030",
+        "R5-P1-060",
+        "R5-P1-070"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "NOWAIT fail-closed保护profile反向等待，但旧profile更新/删除与current用户保护覆盖要全族测试"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 60,
+      "entry_id": "internal/store/postgres/queue.go:*PgStore:CreateIngestJob",
+      "entry": "CreateIngestJob",
+      "group": "TX21",
+      "applicability": "internal_unassembled",
+      "adjudication_class": "scope_internal_unassembled",
+      "safety_condition": "Begin→rawkey advisory→ensureObject对象回调→legacy ingest_jobs INSERT→Commit；不是CreateIngress固定目标事务。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-050",
+        "R5-P3-130"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "outbox/webhook旧done/retry无claim token/lease fence；过期worker可能写当前claim，待P6验证。网络webhook/对象I/O均在worker或显式回调，不推定全项目无事务I/O"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 61,
+      "entry_id": "internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries",
+      "entry": "CreateWebhookDeliveries",
+      "group": "CTX35",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "finite_actual_condition_pending",
+      "safety_condition": "batch event/url uniqueness INSERT->event FK; repeated event-worker concurrency/URL traversal requires current actual dispatcher conditions",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P6-030",
+        "R5-P7-080",
+        "R5-P7-110"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "outbox/webhook旧done/retry无claim token/lease fence；过期worker可能写当前claim，待P6验证。网络webhook/对象I/O均在worker或显式回调，不推定全项目无事务I/O"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 62,
+      "entry_id": "internal/store/postgres/refresh_rotation.go:*PgStore:RevokeRefreshTokenByHash",
+      "entry": "RevokeRefreshTokenByHash",
+      "group": "TX17",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→lockRefreshFamily→族R未revoked UPDATE→Commit；不锁U。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 63,
+      "entry_id": "internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken",
+      "entry": "RotateRefreshToken",
+      "group": "TX16",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→普通family查找→family advisory→U SHARE/active→旧R UPDATE→重放族撤销或单token撤销+后代INSERT→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 64,
+      "entry_id": "internal/store/postgres/refresh_rotation.go:*PgStore:deleteExpiredRefreshFamily",
+      "entry": "deleteExpiredRefreshFamily",
+      "group": "TX17",
+      "applicability": "helper_inherits_caller",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→族advisory→全族无未到期者条件DELETE→Commit；不锁U。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "family gc/用户删除/改密交叉依历史回归，Commit不明与客户端重放不能靠inventory证明"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 65,
+      "entry_id": "internal/store/postgres/sent_archive.go:*PgStore:MutateArchivedMail",
+      "entry": "MutateArchivedMail",
+      "group": "TX19",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "companyReferencedTx T KEY SHARE→actor/profile→M SHARE/current access→sent item精确revision UPDATE锁→原expires/purge+M期限 DB clock→action W→audit/outbox/event→原deadline再次检查→Commit。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P3-040"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "保留原purge与普通收件restore不同；sent asset GC/cascade与item mutation交叉需要全图运行"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 66,
+      "entry_id": "internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic",
+      "entry": "ChangePasswordAtomic",
+      "group": "TX18",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "runtime_representative_not_all_branches",
+      "safety_condition": "Begin→只定位user.tenant_id（不授信）→T KEY SHARE→user条件UPDATE重新核对tenant+expectedHash+active/session版本→R撤销W→audit INSERT→Commit；父键先于user，不使用T排他锁；保持审计失败全回滚。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "R5-B01-X real pwd/freeze3/3rounds + current full",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "本批验证完整Pwd/freeze双向锁关系、父键先user及audit故障回滚；不覆盖所有tenant/user删除、profile分配、Commit不明或直接维护SQL竞争。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 67,
+      "entry_id": "internal/store/postgres/users.go:*PgStore:DeleteUser",
+      "entry": "DeleteUser",
+      "group": "TX18",
+      "applicability": "internal_unassembled",
+      "adjudication_class": "scope_internal_unassembled",
+      "safety_condition": "旧Begin→owned Key DELETE→user DELETE及FK/cascades→Commit；没有T/actor授权锁，不等同DeleteUserGuarded。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "当前internal/cmd非test未找到直接DeleteUser caller（正式管理员调用DeleteUserGuarded）；旧Key→U资源顺序仅内部端口风险，不虚称公开HTTP可达漏洞。若新增live caller需重新审查。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    },
+    {
+      "slot": 68,
+      "entry_id": "internal/store/postgres/users.go:*PgStore:RevokeUserRefreshTokens",
+      "entry": "RevokeUserRefreshTokens",
+      "group": "TX18",
+      "applicability": "formal_or_assembled_role_scoped",
+      "adjudication_class": "source_safety_conditions_not_whole_runtime",
+      "safety_condition": "Begin→U UPDATE锁→该user未revoked R UPDATE→Commit；没有family advisory。",
+      "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
+      "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
+      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-120"
+      ],
+      "closed_entire_slot": false,
+      "inherited_family_context": [
+        "ChangePassword的Pwd/freeze父键关系已由本批3事件三轮验证；其它tenant/user删除及旧DeleteUser Key→U与冻结U→Key相反仍需独立运行；不覆盖提交不明。"
+      ],
+      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+    }
+  ],
+  "boundary": "Typed fields classify proof conditions and actual applicability, not 68 PASS nor 56 vulnerabilities/missing test cases; remaining precise formal conditions require targeted evidence only",
+  "real_pending_conditions": [
+    "suppression S-only tenant normal viability then actual reverse edge AB",
+    "ordinary configure/create/invite domain/profile qualification against independent zone writer (not Activate fence)",
+    "ExecuteOffboarding final elapsed deadline distinct from preview/early clock",
+    "external callback effect success then commit error/reference participants; no physical DB rollback claim",
+    "event/url repeated dispatcher and batch atomic boundaries; preserve real worker ownership",
+    "exact actual dispatch and phase-sensitive trigger mapping"
+  ],
+  "catalog": "R5-TRANSACTION-DB-CATALOG.json actual75FK/7triggers",
+  "static_bootstrap_correction": "already global advisory, loweremail check before writes; do not invent unlocked-empty-users gap",
+  "review_source": "read-only 68-slot finite conditions; integration owner classifies without altering raw/runtime evidence"
+}

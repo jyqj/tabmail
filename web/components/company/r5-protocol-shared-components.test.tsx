@@ -11,6 +11,8 @@ import { SubmissionPane } from "@/features/mail/components/submission-pane";
 import { OffboardingPanel } from "@/features/company/offboarding-panel";
 import UsersPage from "@/features/company/user-management";
 import PermissionsPage from "@/features/company/profile-management";
+import { LegacyReceiptFolder } from "@/features/mail/components/legacy-receipt-folder";
+import { ReceiptFolder } from "@/features/mail/components/receipt-folder";
 import { Compose } from "@/components/company/compose";
 import { executeOffboarding } from "@/features/company/api";
 import { company, type MailDraft, type WorkMailbox } from "@/lib/company";
@@ -28,7 +30,7 @@ interface Fixture {
   employee_id: string; employee_email: string; successor_id: string; foreign_user_id?: string;
   zone_id: string; profile_id?: string; profile_name?: string; control_plan_id?: string;
   external_employee_token?: string; draft?: MailDraft; mailboxes?: WorkMailbox[];
-  submission_id?: string; private_addresses?: string[]; input: Record<string, unknown>;
+  submission_id?: string; receipt_subject?: string; private_values?: string[]; private_addresses?: string[]; input: Record<string, unknown>;
 }
 const path = process.env.TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE;
 if (!path) throw new Error("Explicit Go-owned protocol component fixture is required; no skip or response fallback");
@@ -88,6 +90,35 @@ async function waitExecute(prior = 0) {
 
 test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavior`, async () => {
   const id = fixture.case_id;
+  if (id === "RC02") {
+    if (fixture.input.content_expired !== true) throw new Error("Original compatibility expiry scenario missing");
+    if (fixture.variant === "submit_replay") {
+      if (!fixture.draft || !fixture.mailboxes) throw new Error("Actual replay draft missing");
+      render(<Compose initial={fixture.draft} mailboxes={fixture.mailboxes} onClose={() => {}} onSent={() => {}} />);
+      await userEvent.click(screen.getByRole("button", { name: "Send" }));
+      await screen.findByRole("button", { name: "Retry same submission" });
+      await userEvent.click(screen.getByRole("button", { name: "Retry same submission" }));
+      await waitFor(() => expect(calls.some(c => c.method === "POST" && c.path.endsWith("/submit") && c.status === 200)).toBe(true));
+      const replay = calls.find(c => c.method === "POST" && c.path.endsWith("/submit") && c.status === 200)!;
+      if (fixture.private_values?.some(value => JSON.stringify(replay.data).includes(value))) target("R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS", "actual replay response resurrected expired private content");
+      cleanup(); render(<LegacyReceiptFolder />);
+    } else {
+      render(<ReceiptFolder page={1} selected="" onSelect={() => {}} onPage={() => {}} includeCompatibility />);
+      await userEvent.click(screen.getByRole("button", { name: "Compatibility receipts" }));
+      expect(screen.getByRole("button", { name: "Compatibility receipts" })).toHaveAttribute("aria-pressed", "true");
+    }
+    await screen.findAllByText(fixture.receipt_subject!);
+    await userEvent.click(screen.getAllByRole("button", { name: "View compatibility receipt" })[0]);
+    const detail = await screen.findByRole("region", { name: "Compatibility receipt detail" }).catch(async () => screen.findByLabelText("Compatibility receipt detail"));
+    expect(within(detail).queryByRole("button", { name: /Open preserved sent content/ })).not.toBeInTheDocument();
+    await screen.findByText("Content unavailable; the safe receipt is retained.");
+    const actual = calls.filter(c => c.path === "/api/v1/outbound" || /^\/api\/v1\/outbound\/[^/]+$/.test(c.path));
+    expect(actual.some(c => c.path === "/api/v1/outbound" && c.status === 200)).toBe(true);
+    expect(actual.some(c => c.path !== "/api/v1/outbound" && c.status === 200)).toBe(true);
+    if (actual.some(c => fixture.private_values?.some(value => JSON.stringify(c.data).includes(value)))) target("R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS", "actual legacy HTTP output contains expired body or private recipients even if the UI omits them");
+    expect(screen.queryByText("PRIVATE_COMPATIBILITY_BODY")).not.toBeInTheDocument();
+    return;
+  }
   if (id.startsWith("RC")) {
     if (!(fixture.input.content_expired === true || fixture.input.content_allowed === false) || !fixture.submission_id) throw new Error("Expired/redacted receipt scenario missing");
     render(<SubmissionPane id={fixture.submission_id} />);

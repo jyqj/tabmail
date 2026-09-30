@@ -50,12 +50,14 @@ type r5UICase struct {
 	Input json.RawMessage `json:"input"`
 }
 type r5UITrace struct {
-	Method         string   `json:"method"`
-	Path           string   `json:"path"`
-	Status         int      `json:"status"`
-	ResponseSHA256 string   `json:"response_sha256"`
-	RequestFields  []string `json:"request_fields,omitempty"`
-	ErrorCode      string   `json:"error_code,omitempty"`
+	Method           string   `json:"method"`
+	Path             string   `json:"path"`
+	Status           int      `json:"status"`
+	ResponseSHA256   string   `json:"response_sha256"`
+	RequestFields    []string `json:"request_fields,omitempty"`
+	ErrorCode        string   `json:"error_code,omitempty"`
+	TransportAborted bool     `json:"transport_aborted_after_commit,omitempty"`
+	IdempotencySHA   string   `json:"idempotency_key_sha256,omitempty"`
 }
 type r5UIFixture struct {
 	st                         *postgres.PgStore
@@ -68,6 +70,7 @@ type r5UIFixture struct {
 	server                     *httptest.Server
 	mu                         sync.Mutex
 	trace                      []r5UITrace
+	afterCommitFault           func(*http.Request, *httptest.ResponseRecorder) (bool, error)
 }
 
 func r5UIMust(t *testing.T, e error) {
@@ -152,9 +155,25 @@ func r5UISeed(t *testing.T) *r5UIFixture {
 		var envelope struct{ Error struct{ Code string } }
 		_ = json.Unmarshal(captured.Body.Bytes(), &envelope)
 		trace.ErrorCode = envelope.Error.Code
+		if key := r.Header.Get("Idempotency-Key"); key != "" {
+			sum := sha256.Sum256([]byte(key))
+			trace.IdempotencySHA = hex.EncodeToString(sum[:])
+		}
+		aborted := false
+		if f.afterCommitFault != nil {
+			var faultError error
+			aborted, faultError = f.afterCommitFault(r, captured)
+			if faultError != nil {
+				panic(faultError)
+			}
+		}
+		trace.TransportAborted = aborted
 		f.mu.Lock()
 		f.trace = append(f.trace, trace)
 		f.mu.Unlock()
+		if aborted {
+			panic(http.ErrAbortHandler)
+		}
 		for k, vs := range captured.Header() {
 			for _, v := range vs {
 				w.Header().Add(k, v)
@@ -192,6 +211,60 @@ func r5UISetup(t *testing.T, f *r5UIFixture, c r5UICase, variant, caseHash strin
 	token := r5UIToken(t, f.admin)
 	data := map[string]any{"schema_version": 1, "case_id": c.ID, "variant": variant, "case_sha256": caseHash, "api_url": f.server.URL, "auth": map[string]any{"token": token, "user": f.admin}, "employee_id": f.employee.ID, "employee_email": f.employee.Email, "successor_id": f.successor.ID, "zone_id": f.zone.ID, "input": c.Input}
 	switch {
+	case c.ID == "RC02":
+		payload := company.DraftPayload{To: []string{"visible@replay.test"}, CC: []string{"copy@replay.test"}, BCC: []string{"private@replay.test"}, Subject: "Owned legacy compatibility receipt", TextBody: "PRIVATE_COMPATIBILITY_BODY"}
+		data["private_addresses"] = payload.BCC
+		data["private_values"] = []string{payload.BCC[0], payload.TextBody}
+		data["receipt_subject"] = payload.Subject
+		employeeToken := r5UIToken(t, f.employee)
+		data["auth"] = map[string]any{"token": employeeToken, "user": f.employee}
+		if variant == "submit_replay" {
+			draft, e := f.st.SaveMailDraft(ctx, f.member, company.Draft{MailboxID: f.personal.ID, Payload: payload})
+			r5UIMust(t, e)
+			raw := r5UICall(t, f, employeeToken, "GET", "/api/v1/company/drafts/"+draft.ID.String(), nil, 200)
+			var env struct{ Data json.RawMessage }
+			r5UIMust(t, json.Unmarshal(raw, &env))
+			data["draft"] = env.Data
+			rights, e := f.st.GetWorkMailbox(ctx, f.member, f.personal.ID)
+			r5UIMust(t, e)
+			data["mailboxes"] = []*company.MailboxAccess{rights}
+			var first sync.Once
+			f.afterCommitFault = func(request *http.Request, response *httptest.ResponseRecorder) (bool, error) {
+				if request.Method != "POST" || !strings.HasSuffix(request.URL.Path, "/drafts/"+draft.ID.String()+"/submit") {
+					return false, nil
+				}
+				aborted := false
+				var faultError error
+				first.Do(func() {
+					if response.Code != 201 {
+						faultError = fmt.Errorf("first submit did not really create a job")
+						return
+					}
+					var body struct{ Data struct{ ID uuid.UUID } }
+					if e := json.Unmarshal(response.Body.Bytes(), &body); e != nil {
+						faultError = e
+						return
+					}
+					var jobs int
+					if e := f.pool.QueryRow(request.Context(), `SELECT count(*) FROM outbound_jobs WHERE id=$1 AND draft_id=$2`, body.Data.ID, draft.ID).Scan(&jobs); e != nil || jobs != 1 {
+						faultError = fmt.Errorf("real commit not established")
+						return
+					}
+					if _, e := f.pool.Exec(request.Context(), `UPDATE sent_mail_items SET expires_at=clock_timestamp() WHERE asset_id=$1`, body.Data.ID); e != nil {
+						faultError = e
+						return
+					}
+					aborted = true
+				})
+				return aborted, faultError
+			}
+		} else {
+			j := &models.OutboundJob{TenantID: f.tenant.ID, ZoneID: f.zone.ID, UserID: &f.employee.ID, SenderUserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, MailFrom: f.personal.FullAddress, To: payload.To, CC: payload.CC, BCC: payload.BCC, RcptTo: append(append(append([]string{}, payload.To...), payload.CC...), payload.BCC...), Subject: payload.Subject, TextBody: payload.TextBody, State: models.OutboundSent}
+			r5UIMust(t, f.st.CreateOutboundJob(ctx, j))
+			_, e := f.pool.Exec(ctx, `UPDATE sent_mail_items SET expires_at=clock_timestamp() WHERE asset_id=$1`, j.ID)
+			r5UIMust(t, e)
+			data["submission_id"] = j.ID
+		}
 	case c.ID == "RC01":
 		j := &models.OutboundJob{TenantID: f.tenant.ID, ZoneID: f.zone.ID, UserID: &f.employee.ID, SenderUserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, MailFrom: f.personal.FullAddress, To: []string{"visible@recipient.ui-fixture.test"}, BCC: []string{"private@recipient.ui-fixture.test"}, RcptTo: []string{"visible@recipient.ui-fixture.test", "private@recipient.ui-fixture.test"}, Subject: "Safe UI receipt", TextBody: "PRIVATE_UI_BODY", State: models.OutboundSent}
 		r5UIMust(t, f.st.CreateOutboundJob(ctx, j))
@@ -410,7 +483,7 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 	caseHash := hex.EncodeToString(hash[:])
 	var manifest struct{ Cases []r5UICase }
 	r5UIMust(t, json.Unmarshal(raw, &manifest))
-	wanted := map[string]bool{"RC01": true, "RC03": true, "RC04": true, "RC05": true, "LF01": true, "LF02": true, "LF03": true, "LF04": true, "LF05": true, "LF06": true, "LF07": true, "PE01": true, "PE02": true, "PE03": true, "PE04": true, "PE05": true}
+	wanted := map[string]bool{"RC01": true, "RC02": true, "RC03": true, "RC04": true, "RC05": true, "LF01": true, "LF02": true, "LF03": true, "LF04": true, "LF05": true, "LF06": true, "LF07": true, "PE01": true, "PE02": true, "PE03": true, "PE04": true, "PE05": true}
 	executed := 0
 	for _, c := range manifest.Cases {
 		if !wanted[c.ID] {
@@ -418,6 +491,9 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 		}
 		executed++
 		variants := []string{"default"}
+		if c.ID == "RC02" {
+			variants = r5UIInput[[]string](t, c, "operation")
+		}
 		if c.ID == "PE02" {
 			variants = []string{"omitted", "null", "false", "0", "[]"}
 		}
@@ -488,6 +564,19 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 				r5UIMust(t, e)
 				r5UIMust(t, os.WriteFile(filepath.Join(out, "observations.json"), b, 0600))
 				if assertion.Status == "passed" && runErr == nil && result.NumFailedTests == 0 && len(trace) > 0 {
+					if c.ID == "RC02" && variant == "submit_replay" {
+						submits := []r5UITrace{}
+						for _, v := range trace {
+							if v.Method == "POST" && strings.HasSuffix(v.Path, "/submit") {
+								submits = append(submits, v)
+							}
+						}
+						var jobs, consumed int
+						r5UIMust(t, f.pool.QueryRow(context.Background(), `SELECT count(*),count(DISTINCT draft_id) FROM outbound_jobs WHERE tenant_id=$1`, f.tenant.ID).Scan(&jobs, &consumed))
+						if len(submits) != 2 || !submits[0].TransportAborted || submits[0].Status != 201 || submits[1].Status != 200 || submits[1].TransportAborted || submits[0].IdempotencySHA == "" || submits[0].IdempotencySHA != submits[1].IdempotencySHA || jobs != 1 || consumed != 1 {
+							t.Fatal("actual lost-response replay did not preserve command identity/once effect")
+						}
+					}
 					if c.ID == "LF02" {
 						executes := []r5UITrace{}
 						for _, v := range trace {
@@ -503,7 +592,7 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 					return
 				}
 				allowed := map[string][]string{
-					"RC01": {"R5_PROTOCOL_UI_TARGET_RC01_BCC"}, "RC03": {"R5_PROTOCOL_UI_TARGET_RC03_BCC"}, "LF01": {"R5_PROTOCOL_UI_TARGET_LF01_FROZEN"}, "LF06": {"R5_PROTOCOL_UI_TARGET_LF06_LIFECYCLE"},
+					"RC01": {"R5_PROTOCOL_UI_TARGET_RC01_BCC"}, "RC02": {"R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS"}, "RC03": {"R5_PROTOCOL_UI_TARGET_RC03_BCC"}, "LF01": {"R5_PROTOCOL_UI_TARGET_LF01_FROZEN"}, "LF06": {"R5_PROTOCOL_UI_TARGET_LF06_LIFECYCLE"},
 					"PE01": {"R5_PROTOCOL_UI_TARGET_PE01_OMITTED"}, "PE02": {"R5_PROTOCOL_UI_TARGET_PE02_NULL", "R5_PROTOCOL_UI_TARGET_PE02_OMITTED"}, "PE03": {"R5_PROTOCOL_UI_TARGET_PE03_STALE"}, "PE04": {"R5_PROTOCOL_UI_TARGET_PE04_ABA"},
 				}
 				failure := strings.Join(assertion.FailureMessages, "\n")
@@ -524,7 +613,7 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 			})
 		}
 	}
-	if executed != 16 {
+	if executed != 17 {
 		t.Fatalf("shared component case coverage drift: %d", executed)
 	}
 }

@@ -277,7 +277,10 @@ class ApplicableStatusTests(unittest.TestCase):
 
     def test_registration_still_does_not_certify_missing_components(self):
         report=protocol.summary(protocol.load_cases())
-        self.assertIn('RC02',report['remaining_semantic_or_layer_gaps'])
+        self.assertEqual(report['status'],'structure_checked_only')
+        self.assertEqual(report['shared_input_verified_cases'],0)
+        self.assertIn('BC02',report['remaining_semantic_or_layer_gaps'])
+        self.assertIn('BC03',report['remaining_semantic_or_layer_gaps'])
         self.assertFalse(report['task_complete'])
 
 class SharedInfrastructureCannotBeProductGreenTests(unittest.TestCase):
@@ -354,3 +357,57 @@ class GoOwnedComponentAdapterTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             reports,verified=protocol.classify_go_component_packets({'cases':[row]},selected,Path(tmp),'a'*64)
             self.assertFalse(verified);self.assertTrue(reports[0]['errors']);self.assertFalse(reports[0]['product_green'])
+
+
+class CurrentContractCapabilityTests(unittest.TestCase):
+    def fixture(self, case='BC03'):
+        row=copy.deepcopy(next(r for r in protocol.load_cases()['cases'] if r['id']==case))
+        variants=['trusted_structured_source'] if case=='BC02' else ['missing_source','same_id_foreign_source']
+        paths=['TestR5LegacyBCCContractCapabilities/'+case+'/'+v for v in variants]
+        adapter={'source':'internal/store/postgres/r5_legacy_bcc_contract_baseline_test.go',
+                 'package':'./internal/store/postgres','test':'TestR5LegacyBCCContractCapabilities',
+                 'build_tag':'r5protocol','layers':['db','http'],'consumes_shared_input':True,
+                 'evidence_scope':'current_contract_capability','runtime_test_paths':paths,
+                 'target_failures':{p:{'marker':'R5_PROTOCOL_CAPABILITY_TARGET_'+case,
+                    'task':'R5-P2-110','audit':row['audit'][0],'acceptance':row['acceptance'][0]} for p in paths}}
+        return row,adapter
+
+    def test_exact_current_capability_source_and_all_variants(self):
+        for case in ['BC02','BC03']:
+            row,adapter=self.fixture(case)
+            self.assertEqual(protocol.validate_adapter_targets(row,adapter),adapter['target_failures'])
+
+    def test_capability_scope_cannot_admit_other_sources_layers_paths_or_future_claims(self):
+        mutations={
+            'source':'internal/store/postgres/r5_protocol_shared_test.go',
+            'package':'./internal/api/handlers','test':'TestOther','build_tag':'',
+            'layers':['components'],'runner':'vitest','component_source':'invented.tsx',
+            'consumes_shared_input':False,'evidence_scope':'future_backfill_idempotent',
+            'runtime_test_paths':['TestR5LegacyBCCContractCapabilities/BC03/invented'],
+        }
+        for key,value in mutations.items():
+            row,adapter=self.fixture();adapter[key]=value
+            with self.subTest(key=key),self.assertRaises(ValueError):protocol.validate_adapter_targets(row,adapter)
+        for mutation in ['marker','missing_target','missing_variant','wrong_case','unscoped']:
+            row,adapter=self.fixture();path=adapter['runtime_test_paths'][0]
+            if mutation=='marker':adapter['target_failures'][path]['marker']='R5_PROTOCOL_CAPABILITY_TARGET_BC02'
+            if mutation=='missing_target':adapter['target_failures'].pop(path)
+            if mutation=='missing_variant':adapter['runtime_test_paths'].pop()
+            if mutation=='wrong_case':row['id']='BC04'
+            if mutation=='unscoped':adapter.pop('evidence_scope')
+            with self.subTest(mutation=mutation),self.assertRaises(ValueError):protocol.validate_adapter_targets(row,adapter)
+
+    def test_current_capability_red_does_not_replace_old_db_target(self):
+        row,adapter=self.fixture('BC02');original=copy.deepcopy(row.get('baseline_target_failure'))
+        row['shared_adapters']=[adapter];path=adapter['runtime_test_paths'][0]
+        parent=adapter['test'];package='tabmail/internal/store/postgres'
+        events=[{'Package':package,'Action':'run','Test':parent},{'Package':package,'Action':'run','Test':path},
+                {'Package':package,'Action':'output','Test':path,'Output':'    capability_test.go:1: R5_PROTOCOL_CAPABILITY_TARGET_BC02: actual schema capability absent\n'},
+                {'Package':package,'Action':'fail','Test':path},{'Package':package,'Action':'fail','Test':parent},{'Package':package,'Action':'fail'}]
+        report=protocol.classify_shared_events('\n'.join(map(json.dumps,events)),package,{parent},1,{'cases':[row]})
+        self.assertFalse(report['errors']);self.assertFalse(report['product_green'])
+        self.assertEqual(report['target_red'],{path:'R5_PROTOCOL_CAPABILITY_TARGET_BC02'})
+        self.assertEqual(row.get('baseline_target_failure'),original)
+        events.insert(3,{'Package':package,'Action':'output','Test':path,'Output':'    capability_test.go:2: cannot scan fixture column\n'})
+        report=protocol.classify_shared_events('\n'.join(map(json.dumps,events)),package,{parent},1,{'cases':[row]})
+        self.assertTrue(report['errors']);self.assertFalse(report['product_green'])

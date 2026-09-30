@@ -24,11 +24,36 @@ def validate_adapter_targets(row, adapter):
     targets = adapter.get('target_failures', {})
     if not isinstance(targets, dict):
         raise ValueError('adapter targets must be an exact path mapping')
+    capability = adapter.get('evidence_scope') == 'current_contract_capability'
+    capability_paths = {
+        'BC02': {'TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source'},
+        'BC03': {'TestR5LegacyBCCContractCapabilities/BC03/missing_source',
+                 'TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source'},
+    }
+    if adapter.get('evidence_scope') is not None and not capability:
+        raise ValueError('unknown adapter evidence scope')
+    if capability:
+        if (row['id'] not in capability_paths
+                or adapter.get('source') != 'internal/store/postgres/r5_legacy_bcc_contract_baseline_test.go'
+                or adapter.get('package') != './internal/store/postgres'
+                or adapter.get('test') != 'TestR5LegacyBCCContractCapabilities'
+                or adapter.get('build_tag') != 'r5protocol'
+                or adapter.get('layers') != ['db', 'http']
+                or adapter.get('runner') is not None
+                or adapter.get('component_source') is not None
+                or adapter.get('consumes_shared_input') is not True
+                or set(adapter.get('runtime_test_paths', [])) != capability_paths[row['id']]
+                or len(adapter.get('runtime_test_paths', [])) != len(capability_paths[row['id']])
+                or set(targets) != capability_paths[row['id']]):
+            raise ValueError('current capability requires source-bound exact BC02/BC03 adapter')
     for path, target in targets.items():
         if path not in adapter.get('runtime_test_paths', []):
             raise ValueError('adapter target path is not a declared runtime path')
-        if not isinstance(target, dict) or not re.fullmatch(r'R5_PROTOCOL_UI_TARGET_[A-Z0-9_]+', target.get('marker','')):
-            raise ValueError('adapter requires exact UI marker')
+        marker_ok = (isinstance(target, dict) and (
+            target.get('marker') == 'R5_PROTOCOL_CAPABILITY_TARGET_' + row['id'] if capability
+            else bool(re.fullmatch(r'R5_PROTOCOL_UI_TARGET_[A-Z0-9_]+', target.get('marker', '')))))
+        if not marker_ok:
+            raise ValueError('adapter requires exact scoped target marker')
         if target.get('audit') not in row['audit'] or target.get('acceptance') not in row['acceptance'] or not re.fullmatch(r'R5-P[0-9]+-[0-9]+',target.get('task','')):
             raise ValueError('adapter target needs row audit/acceptance and successor task')
     return targets
