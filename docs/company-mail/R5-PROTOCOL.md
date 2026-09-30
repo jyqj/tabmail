@@ -168,3 +168,9 @@ TABMAIL_TEST_DB_DSN='<disposable-test-dsn>' python3 scripts/check_r5_protocol.py
 - GC01：真实100/101候选、实际Sweep三轮、固定ID排序及保护存量，精确A06/P3-070推进缺口。GC02：真实offboard seal、creation receipt；真实ingress hold/finalize、删除邮箱后fixed-destination tombstone；实际原件reaper不调用删除回调。后台DB端口不编造HTTP适配器。
 
 本轮主线程第四快照 `85e67ef4da71218546fb93ccc9ee8f6bdee8c8e8` 的真实报告曾验证35例、17个精确目标红、errors=[]，`product_green=false`/`task_complete=false`。这是中途快照，不替代后续46例和最新源码的最终验收；此前fixture/路径错误均保留原失败日志并独立修复，没有当目标红接纳。
+
+## Y：正式HTTP/PG到组件的独立消费者
+
+16case/23精确variant由Go-owned PostgreSQL、真实shipping HTTP与API client/fetch驱动shipping组件；认证host context由夹具供给但实际JWT/权限仍走正式middleware。它们以Go adapter components层注册，原DB scalar目标/paths不改，UI每adapter exactpath另绑定12个已知安全目标到原P1/P2/P4任务，不覆盖或吞旧DB红。CASE SHA改变后必须同源码fresh运行，注册数不当执行数。
+
+RC02的legacy list/detail/submit-replay仍保留required components欠缺：现有ReceiptFolder/SubmissionPane走company/submissions，Compose走company/drafts/id/submit；不能拿新pane代替独立legacy路径，也不擅免适用层。后续P0-110/P2-040/140与P5-110需正式兼容/调用者裁决。shipping真实浏览器旅程不由jsdom/loopback替代。

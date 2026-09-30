@@ -11,6 +11,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/company"
@@ -106,6 +107,21 @@ func messageMutation(ctx context.Context, tx pgx.Tx, tenant, mailbox, id uuid.UU
 	default:
 		return app.BadRequest("unsupported message action")
 	}
+	// Retention owns a source before updating mailbox count and its tenant
+	// event. Do not wait in that reverse order while this caller owns M/T.
+	// Match the non-key row lock of these status UPDATEs.
+	var source uuid.UUID
+	e := tx.QueryRow(ctx, `SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 FOR NO KEY UPDATE NOWAIT`, tenant, mailbox, id).Scan(&source)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.NotFound("message unavailable for this action")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return app.Conflict("message is changing; try again")
+		}
+		return e
+	}
 	tag, e := tx.Exec(ctx, sql, tenant, mailbox, id)
 	if e != nil {
 		return e
@@ -182,6 +198,21 @@ func (s *PgStore) writePersonalMessageState(ctx context.Context, tx pgx.Tx, a au
 	if (action == "seen" || action == "unseen") && v.Mailbox.Kind == "personal" && v.Mailbox.OwnerUserID != nil && *v.Mailbox.OwnerUserID == *uid {
 		return messageMutation(ctx, tx, a.TenantID, mailbox, id, action)
 	}
+	// The sparse row's FK eventually protects this source. Acquire that same
+	// key protection without waiting while M SHARE is held, before either a
+	// first INSERT or an existing-state UPSERT can conflict with deletion.
+	var source uuid.UUID
+	e := tx.QueryRow(ctx, `SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 FOR KEY SHARE NOWAIT`, a.TenantID, mailbox, id).Scan(&source)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.NotFound("message unavailable for this action")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return app.Conflict("message is changing; try again")
+		}
+		return e
+	}
 	// $7 marks a seen-toggle: only that dimension is written, the other keeps
 	// whatever the member previously recorded (insert defaults it to false).
 	seenToggle := action == "seen" || action == "unseen"
@@ -221,7 +252,19 @@ func (s *PgStore) TrashCompanyMessages(ctx context.Context, tenant, mailbox uuid
 	if id != nil {
 		e = messageMutation(ctx, tx, tenant, mailbox, *id, "trash")
 	} else {
-		_, e = tx.Exec(ctx, `UPDATE messages SET deleted_at=now(),purge_after=now()+interval '30 days' WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL`, tenant, mailbox)
+		// Only update this statement's locked active sources. Existing trash
+		// tombstones keep their original deadline; NOWAIT rejects a source held
+		// by physical maintenance before audit/outbox can be committed.
+		_, e = tx.Exec(ctx, `WITH locked AS MATERIALIZED (
+ SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT
+) UPDATE messages m SET deleted_at=now(),purge_after=now()+interval '30 days'
+ FROM locked l WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`, tenant, mailbox)
+		if e != nil {
+			var pg *pgconn.PgError
+			if errors.As(e, &pg) && pg.Code == "55P03" {
+				return app.Conflict("messages are changing; try again")
+			}
+		}
 	}
 	if e != nil {
 		return e

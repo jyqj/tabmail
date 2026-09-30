@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-X已完成350函数有限事务目录、46共享协议真实基线及缓存/改密/队列三项生产修复，见R5-B01-X-VALIDATION.md。当前070/080不自动勾选，前序成果保留 |
-| 下一可执行任务 | P0-070：主审350fn/66重点边界与实际caller，核查目录具体未验证交叉（Activate邀请/域、模板version/template、原件回调、旧内部端口等），不得把名字闭包当dispatch；080整合3个policy→组件scoped证据并补14个组件消费者与BC02/03future backfill适用性审查，保持精确目标红独立 |
+| 当前阶段 | B01-Y已实证修复开通资格及消息／个人状态竞争；fresh1382/0/1与218必跑，16真实API→组件/23variant目标红分离，参B01-Y报告。070/080/G0未闭，Z两测试排除本批 |
+| 下一可执行任务 | 070逐要求matrix：Z恢复与retention实际候选复检、模板T互斥/CAS；080保RC02精确legacy组件consumer／BC02–03正式未来写入适用性裁决；不以子集绿勾父项 |
 | 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
-| 当前阻塞 | 350fn已清点但部分具体交叉/dispatch仍待审；080虽然46真实消费者已跑，17组件层未整合中3有policy→组件scoped证据、14缺消费者；未来backfill/迁移写入没有完整证明，不能以controller通过关闭。其余090/100/110/120、UTC真实跨日/凭据时序、后续P1–P11与浏览器/DNS/SSE/性能/依赖/冷升级依赖保留 |
+| 当前阻塞 | 070有限关系/dispatch/其他callback仍未全证；080适用层union仅RC02.components欠，未来BCC正式回填写未证明；090–120及原P1–P11依赖保留 |
 | 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
@@ -1621,3 +1621,12 @@ review结论及风险：
 - [权限存储](../../internal/store/postgres/permissions.go)、[权限处理器](../../internal/api/handlers/permissions.go)、[权限编辑器](../../web/features/company/user-management.tsx)。
 - [提交用例](../../internal/app/submissions/service.go)、[已发送资产](../../internal/store/postgres/sent_archive.go)、[离职处置](../../internal/store/postgres/employee_disposition.go)、[清理与恢复](../../internal/store/postgres/company_ops.go)。
 - [验证Makefile](../../Makefile)、[现有CI](../../.github/workflows/company-p0.yml)、[真实PG夹具](../../internal/testpg/fixture.go)、[前端开发规则](../../web/AGENTS.md)。
+
+### B01-Y：实际资格、消息竞争和API到组件（2026-10-01）
+
+- 基线777eaa83；最终被测tree9dfd3d3bee057c77cffd62edea2543f88872ed53/720文件SHA一致；private验收a779bf96仅Git上下文，其tree相等。根仅分派，唯一operator共享源/PG/全回归。
+- 最终同测试：activation14原6pass8fail→三轮14pass；三message caller10原4pass6fail→三轮10pass；nonowner首次seen/star5原2pass3fail→三轮5pass。失败含parent rollup，不假计独立漏洞；400/409完整rollback，原生命周期政策不偷改。
+- 字面./...原180s race1382pass0fail1明确browser skip、52包、218必跑齐全，PG158.954s；19step均0。Python247/Node23/defaultVitest118、cleanNext/tsc/lint、HTTP80/65/66、官方modules验证通过；首次full失败经真实schema/屏障/测试环境纠正后newtree fresh重跑，原raw保留。
+- DB46实际29target-red；真实HTTP/PG→组件16case23variant=12target-red11scope-pass，controller0/product_green=false。union仅RC02.components缺，BC02/03未来正式backfill写未证明。adapter UI exact marker不覆盖原DB scalar红。
+- [报告](R5-B01-Y-VALIDATION.md)/[摘要](evidence/R5-B01-Y-VALIDATION.json)/[603成员raw归档](evidence/R5-B01-Y-LOGS.tar.gz)随本地集成，无responses/DSN/私有fixture/源码tar/DB/node_modules。Y所有process terminal；PG34679专属noTCP持续唯一Z租约，不假报停止。无push/PR/merge/release/deploy。
+- 父仍6/171。Z restore64fc和template781a排除Y720/full/提交，下一批实测；070全要求/080剩余适用性/原G0后P1–P11依赖不缩减。

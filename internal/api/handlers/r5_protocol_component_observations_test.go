@@ -1,0 +1,530 @@
+//go:build r5protocol
+
+package handlers_test
+
+import (
+	"bytes"
+	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/alicebob/miniredis/v2"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
+	"tabmail/internal/api"
+	"tabmail/internal/api/middleware"
+	"tabmail/internal/authn"
+	"tabmail/internal/authz"
+	"tabmail/internal/company"
+	"tabmail/internal/config"
+	"tabmail/internal/models"
+	"tabmail/internal/outbound"
+	"tabmail/internal/policy"
+	"tabmail/internal/rawobject"
+	"tabmail/internal/store/postgres"
+	"tabmail/internal/testpg"
+	"tabmail/internal/testutil"
+)
+
+const r5UIJWT = "r5-ui-disposable-test-secret"
+
+type r5UICase struct {
+	ID    string          `json:"id"`
+	Input json.RawMessage `json:"input"`
+}
+type r5UITrace struct {
+	Method         string   `json:"method"`
+	Path           string   `json:"path"`
+	Status         int      `json:"status"`
+	ResponseSHA256 string   `json:"response_sha256"`
+	RequestFields  []string `json:"request_fields,omitempty"`
+	ErrorCode      string   `json:"error_code,omitempty"`
+}
+type r5UIFixture struct {
+	st                         *postgres.PgStore
+	pool                       *pgxpool.Pool
+	tenant                     *models.Tenant
+	admin, employee, successor *models.User
+	zone                       *models.DomainZone
+	personal, shared           *models.Mailbox
+	actor, member              authz.Actor
+	server                     *httptest.Server
+	mu                         sync.Mutex
+	trace                      []r5UITrace
+}
+
+func r5UIMust(t *testing.T, e error) {
+	t.Helper()
+	if e != nil {
+		t.Fatal(e)
+	}
+}
+func r5UIToken(t *testing.T, u *models.User) string {
+	t.Helper()
+	v, e := authn.IssueAccessToken(r5UIJWT, u)
+	r5UIMust(t, e)
+	return v
+}
+func r5UIInput[T any](t *testing.T, c r5UICase, key string) T {
+	t.Helper()
+	var m map[string]json.RawMessage
+	r5UIMust(t, json.Unmarshal(c.Input, &m))
+	var v T
+	if raw, ok := m[key]; ok {
+		r5UIMust(t, json.Unmarshal(raw, &v))
+	}
+	return v
+}
+func r5UISeed(t *testing.T) *r5UIFixture {
+	t.Helper()
+	ctx := context.Background()
+	st, pool, _ := testpg.NewPostgres(t)
+	f := &r5UIFixture{st: st, pool: pool}
+	f.tenant = &models.Tenant{Name: "Shared component isolated company", PlanID: uuid.MustParse("00000000-0000-0000-0000-000000000002")}
+	r5UIMust(t, st.CreateTenant(ctx, f.tenant))
+	f.admin = &models.User{TenantID: f.tenant.ID, Email: "admin@ui-fixture.test", DisplayName: "UI administrator", Role: models.RoleAdmin, IsActive: true, PasswordHash: "test-only"}
+	r5UIMust(t, st.CreateUser(ctx, f.admin))
+	f.actor = authz.Actor{Type: authz.PrincipalUser, ID: f.admin.ID, TenantID: f.tenant.ID, Role: models.RoleAdmin, IsAdmin: true}
+	f.zone = &models.DomainZone{TenantID: f.tenant.ID, Domain: "ui-fixture.test", IsVerified: true, MXVerified: true}
+	r5UIMust(t, st.CreateZone(ctx, f.zone))
+	_, e := st.ConfigureCompany(ctx, f.actor, company.Settings{Name: "Shared UI company", PrimaryZoneID: f.zone.ID})
+	r5UIMust(t, e)
+	for i, local := range []string{"employee", "successor"} {
+		email := local + "@contact.ui-fixture.test"
+		hash := company.Hash("private-ui-invite-" + local)
+		_, e := st.InviteEmployee(ctx, f.actor, company.InvitationInput{Email: email, LocalPart: local, DisplayName: local}, hash)
+		r5UIMust(t, e)
+		r5UIMust(t, st.ActivateEmployee(ctx, hash, "test-only"))
+		u, e := st.GetUserByEmail(ctx, email)
+		r5UIMust(t, e)
+		if i == 0 {
+			f.employee = u
+			f.member = authz.Actor{Type: authz.PrincipalUser, ID: u.ID, TenantID: f.tenant.ID, Role: models.RoleUser}
+		} else {
+			f.successor = u
+		}
+	}
+	f.personal, e = st.GetMailboxByAddress(ctx, "employee@ui-fixture.test")
+	r5UIMust(t, e)
+	f.shared, e = st.CreateWorkMailbox(ctx, f.actor, company.MailboxInput{LocalPart: "shared", Kind: "shared"})
+	r5UIMust(t, e)
+	obj := testutil.NewMemoryObjectStore()
+	svc := outbound.NewService(config.Outbound{Enabled: true, Mode: "relay", RelayHost: "127.0.0.1", RelayPort: 1}, st, st, zerolog.Nop())
+	svc.SetObjectStore(obj)
+	mr := miniredis.RunT(t)
+	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
+	t.Cleanup(func() { rdb.Close() })
+	router := api.NewRouter(api.RouterConfig{Store: st, CompanyRepository: st, ObjectStore: obj, RawObjects: rawobject.NewStore(obj, st), JWTSecret: r5UIJWT, MailboxTokenSecret: "ui-fixture-only", PublicTenantID: "00000000-0000-0000-0000-000000000001", NamingMode: policy.NamingFull, CompanyOnly: true, HTTP: config.HTTP{}, RateLimiter: middleware.NewRateLimiter(rdb, st, 10000, nil), OutboundService: svc, Logger: zerolog.Nop(), Readiness: st.Readiness})
+	f.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		raw, e := io.ReadAll(io.LimitReader(r.Body, 2<<20))
+		if e != nil {
+			http.Error(w, "fixture transport failed", 500)
+			return
+		}
+		r.Body = io.NopCloser(bytes.NewReader(raw))
+		captured := httptest.NewRecorder()
+		router.ServeHTTP(captured, r)
+		sum := sha256.Sum256(captured.Body.Bytes())
+		trace := r5UITrace{Method: r.Method, Path: r.URL.Path, Status: captured.Code, ResponseSHA256: hex.EncodeToString(sum[:])}
+		var body map[string]json.RawMessage
+		if json.Unmarshal(raw, &body) == nil {
+			for k := range body {
+				trace.RequestFields = append(trace.RequestFields, k)
+			}
+		}
+		var envelope struct{ Error struct{ Code string } }
+		_ = json.Unmarshal(captured.Body.Bytes(), &envelope)
+		trace.ErrorCode = envelope.Error.Code
+		f.mu.Lock()
+		f.trace = append(f.trace, trace)
+		f.mu.Unlock()
+		for k, vs := range captured.Header() {
+			for _, v := range vs {
+				w.Header().Add(k, v)
+			}
+		}
+		w.WriteHeader(captured.Code)
+		_, _ = w.Write(captured.Body.Bytes())
+	}))
+	t.Cleanup(f.server.Close)
+	return f
+}
+func r5UICall(t *testing.T, f *r5UIFixture, token, method, path string, body any, status int) []byte {
+	t.Helper()
+	raw, e := json.Marshal(body)
+	r5UIMust(t, e)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	req, e := http.NewRequestWithContext(ctx, method, f.server.URL+path, bytes.NewReader(raw))
+	r5UIMust(t, e)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+token)
+	res, e := f.server.Client().Do(req)
+	r5UIMust(t, e)
+	defer res.Body.Close()
+	b, e := io.ReadAll(res.Body)
+	r5UIMust(t, e)
+	if res.StatusCode != status {
+		t.Fatalf("fixture actual %s %s status=%d expected=%d", method, path, res.StatusCode, status)
+	}
+	return b
+}
+func r5UISetup(t *testing.T, f *r5UIFixture, c r5UICase, variant, caseHash string) map[string]any {
+	t.Helper()
+	ctx := context.Background()
+	token := r5UIToken(t, f.admin)
+	data := map[string]any{"schema_version": 1, "case_id": c.ID, "variant": variant, "case_sha256": caseHash, "api_url": f.server.URL, "auth": map[string]any{"token": token, "user": f.admin}, "employee_id": f.employee.ID, "employee_email": f.employee.Email, "successor_id": f.successor.ID, "zone_id": f.zone.ID, "input": c.Input}
+	switch {
+	case c.ID == "RC01":
+		j := &models.OutboundJob{TenantID: f.tenant.ID, ZoneID: f.zone.ID, UserID: &f.employee.ID, SenderUserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, MailFrom: f.personal.FullAddress, To: []string{"visible@recipient.ui-fixture.test"}, BCC: []string{"private@recipient.ui-fixture.test"}, RcptTo: []string{"visible@recipient.ui-fixture.test", "private@recipient.ui-fixture.test"}, Subject: "Safe UI receipt", TextBody: "PRIVATE_UI_BODY", State: models.OutboundSent}
+		r5UIMust(t, f.st.CreateOutboundJob(ctx, j))
+		_, e := f.pool.Exec(ctx, `UPDATE sent_mail_items SET expires_at=clock_timestamp() WHERE asset_id=$1`, j.ID)
+		r5UIMust(t, e)
+		data["submission_id"] = j.ID
+		data["private_addresses"] = j.BCC
+		data["auth"] = map[string]any{"token": r5UIToken(t, f.employee), "user": f.employee}
+	case strings.HasPrefix(c.ID, "RC"):
+		recipients := r5UIInput[[]struct{ Category, Address, State string }](t, c, "recipients")
+		j := &models.OutboundJob{TenantID: f.tenant.ID, ZoneID: f.zone.ID, UserID: &f.employee.ID, SenderUserID: &f.employee.ID, SenderMailboxID: &f.personal.ID, MailFrom: f.personal.FullAddress, State: r5UIInput[models.OutboundState](t, c, "job_state"), InFlightDomain: r5UIInput[string](t, c, "in_flight_domain"), Subject: r5UIInput[string](t, c, "subject"), TextBody: r5UIInput[string](t, c, "text_body"), SMTPResponse: r5UIInput[string](t, c, "smtp_response")}
+		if len(recipients) == 0 || j.State == "" {
+			t.Fatal("real ledger/state shared receipt input missing")
+		}
+		for _, r := range recipients {
+			j.RcptTo = append(j.RcptTo, r.Address)
+			switch r.Category {
+			case "to":
+				j.To = append(j.To, r.Address)
+			case "cc":
+				j.CC = append(j.CC, r.Address)
+			case "bcc":
+				j.BCC = append(j.BCC, r.Address)
+			default:
+				t.Fatal("unknown structured recipient category")
+			}
+		}
+		tokenText := r5UIInput[string](t, c, "delivery_token")
+		if tokenText != "" {
+			v, e := uuid.Parse(tokenText)
+			r5UIMust(t, e)
+			j.DeliveryToken = &v
+		}
+		r5UIMust(t, f.st.CreateOutboundJob(ctx, j))
+		for _, r := range recipients {
+			_, e := f.pool.Exec(ctx, `UPDATE outbound_recipients SET state=$3 WHERE job_id=$1 AND address=$2`, j.ID, r.Address, r.State)
+			r5UIMust(t, e)
+		}
+		if r5UIInput[bool](t, c, "content_allowed") {
+			t.Fatal("redacted shared receipt setup cannot widen content")
+		}
+		_, e := f.pool.Exec(ctx, `UPDATE sent_mail_items SET expires_at=clock_timestamp() WHERE asset_id=$1`, j.ID)
+		r5UIMust(t, e)
+		data["submission_id"] = j.ID
+		data["private_addresses"] = j.BCC
+		data["auth"] = map[string]any{"token": r5UIToken(t, f.employee), "user": f.employee}
+	case strings.HasPrefix(c.ID, "LF"):
+		if c.ID == "LF01" {
+			r5UICall(t, f, token, "PATCH", "/api/v1/admin/users/"+f.employee.ID.String(), map[string]bool{"is_active": false}, 200)
+		}
+		if c.ID == "LF03" {
+			p, e := f.st.PreviewOffboarding(ctx, f.actor, f.employee.ID, f.successor.ID, company.OffboardingOptions{Drafts: "seal"}, "Actual second-plan component control")
+			r5UIMust(t, e)
+			data["control_plan_id"] = p.ID
+		}
+		if c.ID == "LF04" {
+			d, e := f.st.SaveMailDraft(ctx, f.member, company.Draft{MailboxID: f.personal.ID, Payload: company.DraftPayload{Subject: "before preview"}})
+			r5UIMust(t, e)
+			data["draft"] = d
+			data["external_employee_token"] = r5UIToken(t, f.employee)
+		}
+		if c.ID == "LF05" && variant == "higher_role" {
+			_, e := f.pool.Exec(ctx, `UPDATE users SET role='admin' WHERE id=$1`, f.employee.ID)
+			r5UIMust(t, e)
+		}
+		if c.ID == "LF05" && variant == "foreign_tenant" {
+			tenant := &models.Tenant{Name: "UI foreign successor", PlanID: f.tenant.PlanID}
+			r5UIMust(t, f.st.CreateTenant(ctx, tenant))
+			u := &models.User{TenantID: tenant.ID, Email: "foreign@foreign.ui-fixture.test", Role: models.RoleUser, IsActive: true, PasswordHash: "test-only"}
+			r5UIMust(t, f.st.CreateUser(ctx, u))
+			data["foreign_user_id"] = u.ID
+		}
+		if c.ID == "LF07" {
+			_, e := f.pool.Exec(ctx, `ALTER TABLE audit_log ADD CONSTRAINT ui_required_audit_failure CHECK(action<>'employee.offboard')`)
+			r5UIMust(t, e)
+		}
+	case c.ID == "PE03":
+		raw := r5UICall(t, f, token, "POST", "/api/v1/admin/permissions", map[string]any{"name": "Shared UI stale profile", "can_send": true}, 201)
+		var env struct{ Data models.PermissionProfile }
+		r5UIMust(t, json.Unmarshal(raw, &env))
+		data["profile_id"] = env.Data.ID
+		data["profile_name"] = env.Data.Name
+	case c.ID == "PE05":
+		mb, e := f.st.GetWorkMailbox(ctx, f.actor, f.shared.ID)
+		r5UIMust(t, e)
+		r5UIMust(t, f.st.SetWorkGrant(ctx, f.actor, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanSend: true}, mb.Revision))
+		d, e := f.st.SaveMailDraft(ctx, f.member, company.Draft{MailboxID: f.shared.ID, Payload: company.DraftPayload{Subject: "before authorization wait"}})
+		r5UIMust(t, e)
+		rights, e := f.st.GetWorkMailbox(ctx, f.member, f.shared.ID)
+		r5UIMust(t, e)
+		wire := r5UICall(t, f, r5UIToken(t, f.employee), "GET", "/api/v1/company/drafts/"+d.ID.String(), nil, 200)
+		var envelope struct{ Data json.RawMessage }
+		r5UIMust(t, json.Unmarshal(wire, &envelope))
+		// Initial props come from the actual HTTP DTO, including production
+		// required-list normalization, not a raw store model bypassing wire.
+		data["draft"] = envelope.Data
+		data["mailboxes"] = []*company.MailboxAccess{rights}
+		data["auth"] = map[string]any{"token": r5UIToken(t, f.employee), "user": f.employee}
+		r5UIGrantBarrier(t, f, d)
+	default:
+		r5UICall(t, f, token, "PUT", "/api/v1/admin/users/"+f.employee.ID.String()+"/permissions", map[string]any{"can_send": false, "allowed_zone_ids": []uuid.UUID{f.zone.ID}, "daily_send_quota": 19}, 200)
+	}
+	return data
+}
+
+// The component's real PUT must reach the real draft row wait. Only then does
+// the administrator command race it; pg_blocking_pids, not sleeps, orders them.
+func r5UIGrantBarrier(t *testing.T, f *r5UIFixture, d *company.Draft) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	t.Cleanup(cancel)
+	hold, e := f.pool.Begin(ctx)
+	r5UIMust(t, e)
+	t.Cleanup(func() { _ = hold.Rollback(context.Background()) })
+	_, e = hold.Exec(ctx, `SELECT id FROM mail_drafts WHERE id=$1 FOR UPDATE`, d.ID)
+	r5UIMust(t, e)
+	mb, e := f.st.GetWorkMailbox(ctx, f.actor, f.shared.ID)
+	r5UIMust(t, e)
+	done := make(chan error, 1)
+	go func() {
+		defer close(done)
+		ticker := time.NewTicker(10 * time.Millisecond)
+		defer ticker.Stop()
+		var writer int32
+		for {
+			e := f.pool.QueryRow(ctx, `SELECT pid FROM pg_stat_activity WHERE datname=current_database() AND state='active' AND $1::int=ANY(pg_blocking_pids(pid)) AND query LIKE '%UPDATE mail_drafts%' LIMIT 1`, int32(hold.Conn().PgConn().PID())).Scan(&writer)
+			if e == nil {
+				break
+			}
+			select {
+			case <-ctx.Done():
+				done <- fmt.Errorf("actual component draft lock wait not observed")
+				return
+			case <-ticker.C:
+			}
+		}
+		revoked := make(chan error, 1)
+		go func() {
+			revoked <- f.st.SetWorkGrant(ctx, f.actor, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}, mb.Revision)
+		}()
+		completed := false
+	observe:
+		for {
+			select {
+			case e := <-revoked:
+				if e != nil {
+					done <- e
+					return
+				}
+				completed = true
+				break observe
+			default:
+			}
+			var blocked bool
+			if e := f.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND $1::int=ANY(pg_blocking_pids(pid)))`, writer).Scan(&blocked); e != nil {
+				done <- e
+				return
+			}
+			if blocked {
+				break
+			}
+			select {
+			case <-ctx.Done():
+				done <- fmt.Errorf("actual component authority order not observed")
+				return
+			case <-ticker.C:
+			}
+		}
+		if e := hold.Rollback(ctx); e != nil {
+			done <- e
+			return
+		}
+		if !completed {
+			select {
+			case e := <-revoked:
+				done <- e
+			case <-ctx.Done():
+				done <- fmt.Errorf("revocation did not finish after actual writer release")
+			}
+		} else {
+			done <- nil
+		}
+	}()
+	t.Cleanup(func() {
+		cancel()
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+		}
+	})
+}
+func r5UIState(t *testing.T, f *r5UIFixture) map[string]any {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var active bool
+	var version, audits int64
+	r5UIMust(t, f.pool.QueryRow(ctx, `SELECT is_active,session_version FROM users WHERE id=$1`, f.employee.ID).Scan(&active, &version))
+	r5UIMust(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM audit_log WHERE action='employee.offboard' AND resource_id=$1`, f.employee.ID).Scan(&audits))
+	perm, e := f.st.EffectivePermission(ctx, f.employee.ID)
+	r5UIMust(t, e)
+	return map[string]any{"employee_active": active, "employee_session_version": version, "disposition_audits": audits, "effective_can_send": perm.CanSend, "effective_zone_count": len(perm.AllowedZoneIDs)}
+}
+func TestR5ProtocolComponentObservations(t *testing.T) {
+	if os.Getenv("TABMAIL_TEST_DB_DSN") == "" || os.Getenv("TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE") == "" {
+		t.Fatal("Explicit disposable DSN and fresh component evidence root required; no skip")
+	}
+	if _, e := exec.LookPath("node"); e != nil {
+		t.Fatal("Actual installed Node frontend toolchain required")
+	}
+	_, file, _, _ := runtime.Caller(0)
+	root := filepath.Clean(filepath.Join(filepath.Dir(file), "../../.."))
+	raw, e := os.ReadFile(filepath.Join(root, "docs/company-mail/evidence/R5-PROTOCOL-CASES.json"))
+	r5UIMust(t, e)
+	hash := sha256.Sum256(raw)
+	caseHash := hex.EncodeToString(hash[:])
+	var manifest struct{ Cases []r5UICase }
+	r5UIMust(t, json.Unmarshal(raw, &manifest))
+	wanted := map[string]bool{"RC01": true, "RC03": true, "RC04": true, "RC05": true, "LF01": true, "LF02": true, "LF03": true, "LF04": true, "LF05": true, "LF06": true, "LF07": true, "PE01": true, "PE02": true, "PE03": true, "PE04": true, "PE05": true}
+	executed := 0
+	for _, c := range manifest.Cases {
+		if !wanted[c.ID] {
+			continue
+		}
+		executed++
+		variants := []string{"default"}
+		if c.ID == "PE02" {
+			variants = []string{"omitted", "null", "false", "0", "[]"}
+		}
+		if c.ID == "LF05" {
+			variants = r5UIInput[[]string](t, c, "successor_state")
+		}
+		for _, variant := range variants {
+			t.Run(c.ID+"/"+variant, func(t *testing.T) {
+				f := r5UISeed(t)
+				fixture := r5UISetup(t, f, c, variant, caseHash)
+				out := filepath.Join(os.Getenv("TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE"), c.ID, strings.ReplaceAll(variant, "[]", "empty_array"))
+				r5UIMust(t, os.MkdirAll(out, 0700))
+				reportPath := filepath.Join(out, "vitest.json")
+				if _, e := os.Stat(reportPath); !os.IsNotExist(e) {
+					t.Fatal("fresh component evidence required")
+				}
+				private := filepath.Join(t.TempDir(), "private-fixture.json")
+				b, e := json.Marshal(fixture)
+				r5UIMust(t, e)
+				r5UIMust(t, os.WriteFile(private, b, 0600))
+				ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
+				defer cancel()
+				cmd := exec.CommandContext(ctx, "node", filepath.Join(root, "web/node_modules/vitest/vitest.mjs"), "run", "--config", "vitest.r5protocol.config.ts", "--reporter=json", "--outputFile", reportPath)
+				cmd.Dir = filepath.Join(root, "web")
+				cmd.Env = append(os.Environ(), "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE="+private)
+				f.mu.Lock()
+				f.trace = nil
+				f.mu.Unlock()
+				logs, runErr := cmd.CombinedOutput()
+				r5UIMust(t, os.WriteFile(filepath.Join(out, "vitest.log"), logs, 0600))
+				if ctx.Err() != nil {
+					t.Fatal("component process timed out; never target red")
+				}
+				var result struct {
+					NumTotalTests, NumFailedTests, NumPendingTests, NumRuntimeErrorTestSuites int
+					TestResults                                                               []struct {
+						AssertionResults []struct {
+							FullName, Status string
+							FailureMessages  []string
+						}
+					}
+				}
+				b, e = os.ReadFile(reportPath)
+				r5UIMust(t, e)
+				r5UIMust(t, json.Unmarshal(b, &result))
+				expectedName := "R5 protocol component " + c.ID + " " + variant + " secure behavior"
+				if result.NumTotalTests != 1 || result.NumPendingTests != 0 || result.NumRuntimeErrorTestSuites != 0 || len(result.TestResults) != 1 || len(result.TestResults[0].AssertionResults) != 1 {
+					t.Fatal("missing/setup/skipped component execution")
+				}
+				assertion := result.TestResults[0].AssertionResults[0]
+				if assertion.FullName != expectedName {
+					t.Fatal("unexpected real component test identity")
+				}
+				f.mu.Lock()
+				trace := append([]r5UITrace(nil), f.trace...)
+				f.mu.Unlock()
+				childExit := 0
+				if runErr != nil {
+					var childError *exec.ExitError
+					if errors.As(runErr, &childError) {
+						childExit = childError.ExitCode()
+					} else {
+						childExit = -1
+					}
+				}
+				observations := map[string]any{"schema_version": 1, "case_id": c.ID, "variant": variant, "case_sha256": caseHash, "component_process_exit_code": childExit, "scope": "actual shipping component/API client/fetch/HTTP/PostgreSQL; host auth context only is supplied", "trace": trace, "state": r5UIState(t, f)}
+				b, e = json.MarshalIndent(observations, "", "  ")
+				r5UIMust(t, e)
+				r5UIMust(t, os.WriteFile(filepath.Join(out, "observations.json"), b, 0600))
+				if assertion.Status == "passed" && runErr == nil && result.NumFailedTests == 0 && len(trace) > 0 {
+					if c.ID == "LF02" {
+						executes := []r5UITrace{}
+						for _, v := range trace {
+							if v.Method == "POST" && strings.HasSuffix(v.Path, "/offboard") {
+								executes = append(executes, v)
+							}
+						}
+						state := observations["state"].(map[string]any)
+						if len(executes) != 2 || executes[0].Status != 200 || executes[1].Status != 200 || executes[0].ResponseSHA256 != executes[1].ResponseSHA256 || state["disposition_audits"] != int64(1) || state["employee_session_version"] != f.employee.SessionVersion+1 {
+							t.Fatal("actual same-plan replay changed receipt/effects")
+						}
+					}
+					return
+				}
+				allowed := map[string][]string{
+					"RC01": {"R5_PROTOCOL_UI_TARGET_RC01_BCC"}, "RC03": {"R5_PROTOCOL_UI_TARGET_RC03_BCC"}, "LF01": {"R5_PROTOCOL_UI_TARGET_LF01_FROZEN"}, "LF06": {"R5_PROTOCOL_UI_TARGET_LF06_LIFECYCLE"},
+					"PE01": {"R5_PROTOCOL_UI_TARGET_PE01_OMITTED"}, "PE02": {"R5_PROTOCOL_UI_TARGET_PE02_NULL", "R5_PROTOCOL_UI_TARGET_PE02_OMITTED"}, "PE03": {"R5_PROTOCOL_UI_TARGET_PE03_STALE"}, "PE04": {"R5_PROTOCOL_UI_TARGET_PE04_ABA"},
+				}
+				failure := strings.Join(assertion.FailureMessages, "\n")
+				matches := regexp.MustCompile(`(?m)^Error: (R5_PROTOCOL_UI_TARGET_[A-Z0-9_]+): `).FindAllStringSubmatch(failure, -1)
+				marker := ""
+				if len(matches) == 1 {
+					for _, candidate := range allowed[c.ID] {
+						if matches[0][1] == candidate {
+							marker = candidate
+						}
+					}
+				}
+				var exit *exec.ExitError
+				if assertion.Status != "failed" || result.NumFailedTests != 1 || !errors.As(runErr, &exit) || exit.ExitCode() != 1 || marker == "" || len(trace) == 0 {
+					t.Fatalf("unexpected component failure (not target); inspect isolated %s", out)
+				}
+				t.Errorf("%s: actual component and Go-owned HTTP/PG evidence at %s", marker, out)
+			})
+		}
+	}
+	if executed != 16 {
+		t.Fatalf("shared component case coverage drift: %d", executed)
+	}
+}

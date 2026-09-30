@@ -277,5 +277,80 @@ class ApplicableStatusTests(unittest.TestCase):
 
     def test_registration_still_does_not_certify_missing_components(self):
         report=protocol.summary(protocol.load_cases())
-        self.assertIn('RC01',report['remaining_semantic_or_layer_gaps'])
+        self.assertIn('RC02',report['remaining_semantic_or_layer_gaps'])
         self.assertFalse(report['task_complete'])
+
+class SharedInfrastructureCannotBeProductGreenTests(unittest.TestCase):
+    def run_fixture(self, failure):
+        from unittest.mock import patch
+        import subprocess
+        row=copy.deepcopy(next(r for r in protocol.load_cases()['cases'] if r['id']=='RT01'))
+        data={'cases':[row]};parent='TestR5ProtocolRetentionSharedCases';leaf=parent+'/RT01/default';package='tabmail/internal/store/postgres'
+        if failure=='compile':
+            events=[{'Package':package,'Action':'output','Output':'# tabmail/internal/store/postgres\nfile.go:1: compile error\n'}, {'Package':package,'Action':'fail'}]
+        elif failure=='missing_runtime_consumer':
+            events=[{'Package':package,'Action':'run','Test':parent},{'Package':package,'Action':'pass','Test':parent},{'Package':package,'Action':'pass'}]
+        else:
+            diagnostic={'panic':'panic: invalid memory address','timeout':'panic: test timed out after 120s','unknown_error':'    fixture_test.go:1: unexpected SQL error'}[failure]
+            events=[{'Package':package,'Action':'run','Test':parent},{'Package':package,'Action':'run','Test':leaf},
+                    {'Package':package,'Action':'output','Test':leaf,'Output':diagnostic+'\n'},
+                    {'Package':package,'Action':'fail','Test':leaf},{'Package':package,'Action':'fail','Test':parent},{'Package':package,'Action':'fail'}]
+        def process(command,**kwargs):
+            if command[0]=='git':return subprocess.CompletedProcess(command,0,'fixture-source\n','')
+            return subprocess.CompletedProcess(command,0 if failure=='missing_runtime_consumer' else 1,'\n'.join(map(json.dumps,events)),'')
+        with tempfile.TemporaryDirectory() as tmp,patch.object(protocol,'source_closure',return_value={}),patch.object(protocol.subprocess,'run',side_effect=process),patch.dict(protocol.os.environ,{'TABMAIL_TEST_DB_DSN':'disposable-unit-test-not-connected'}):
+            return protocol.run_shared(data,'db',Path(tmp)/'fresh')
+
+    def test_compile_panic_timeout_unknown_error_and_missing_runtime_are_not_green(self):
+        for failure in ['compile','panic','timeout','unknown_error','missing_runtime_consumer']:
+            with self.subTest(failure=failure):
+                report=self.run_fixture(failure)
+                self.assertEqual(report['status'],'shared_scoped_evidence_failed')
+                self.assertFalse(report['product_green'])
+                self.assertFalse(report['task_complete'])
+                self.assertTrue(report['reports'][0]['errors'])
+
+    def test_unregistered_matching_runtime_consumer_cannot_be_green(self):
+        parent='TestUnregisteredSharedConsumer';package='tabmail/internal/store/postgres'
+        events=[{'Package':package,'Action':'run','Test':parent},{'Package':package,'Action':'pass','Test':parent},{'Package':package,'Action':'pass'}]
+        report=protocol.classify_shared_events('\n'.join(map(json.dumps,events)),package,{parent},0,{'cases':[]})
+        self.assertTrue(report['errors'])
+        self.assertFalse(report['product_green'])
+
+
+class GoOwnedComponentAdapterTests(unittest.TestCase):
+    def fixtures(self):
+        row=copy.deepcopy(next(r for r in protocol.load_cases()['cases'] if r['id']=='RC01'))
+        adapter=next(a for a in row['shared_adapters'] if a.get('component_source'))
+        return row,adapter
+
+    def test_exact_adapter_target_is_separate_from_original_db(self):
+        row,adapter=self.fixtures()
+        result=protocol.validate_adapter_targets(row,adapter)
+        self.assertEqual(len(result),1)
+        self.assertEqual(next(iter(result.values()))['marker'],'R5_PROTOCOL_UI_TARGET_RC01_BCC')
+
+    def test_unknown_path_marker_audit_or_acceptance_rejected(self):
+        for mutation in ['path','marker','audit','acceptance','task']:
+            row,adapter=self.fixtures();path=next(iter(adapter['target_failures']))
+            if mutation=='path':adapter['target_failures'][path+'/invented']=adapter['target_failures'].pop(path)
+            else:adapter['target_failures'][path][mutation]='invented'
+            with self.subTest(mutation=mutation),self.assertRaises(ValueError):protocol.validate_adapter_targets(row,adapter)
+
+    def test_same_case_go_ui_target_does_not_replace_db_target(self):
+        row=copy.deepcopy(next(r for r in protocol.load_cases()['cases'] if r['id']=='RC03'))
+        adapter=next(a for a in row['shared_adapters'] if a.get('component_source'));path=next(iter(adapter['target_failures']));parent=adapter['test'];package='tabmail/'+adapter['package'].removeprefix('./')
+        events=[{'Package':package,'Action':'run','Test':parent},{'Package':package,'Action':'run','Test':path},
+                {'Package':package,'Action':'output','Test':path,'Output':'    producer_test.go:1: R5_PROTOCOL_UI_TARGET_RC03_BCC: actual receipt rendered private BCC\n'},
+                {'Package':package,'Action':'fail','Test':path},{'Package':package,'Action':'fail','Test':parent},{'Package':package,'Action':'fail'}]
+        original=copy.deepcopy(row['baseline_target_failure'])
+        report=protocol.classify_shared_events('\n'.join(map(json.dumps,events)),package,{parent},1,{'cases':[row]})
+        self.assertFalse(report['errors']);self.assertEqual(report['target_red'][path],'R5_PROTOCOL_UI_TARGET_RC03_BCC')
+        self.assertEqual(row['baseline_target_failure'],original);self.assertFalse(report['product_green'])
+
+    def test_no_real_packet_keeps_component_layer_unverified(self):
+        row,adapter=self.fixtures()
+        selected={(adapter['package'],adapter['build_tag']):{adapter['test']}}
+        with tempfile.TemporaryDirectory() as tmp:
+            reports,verified=protocol.classify_go_component_packets({'cases':[row]},selected,Path(tmp),'a'*64)
+            self.assertFalse(verified);self.assertTrue(reports[0]['errors']);self.assertFalse(reports[0]['product_green'])

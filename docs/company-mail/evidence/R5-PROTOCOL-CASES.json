@@ -853,9 +853,7 @@
           "scope": "Reference test only; case target needs shared-input assertions for every required layer."
         }
       ],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -870,6 +868,29 @@
           "runtime_test_paths": [
             "TestR5ProtocolReceiptSharedCases/RC01"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/RC01/default"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/RC01/default": {
+              "marker": "R5_PROTOCOL_UI_TARGET_RC01_BCC",
+              "task": "R5-P2-050",
+              "audit": "A03",
+              "acceptance": "AC-05"
+            }
+          }
         }
       ]
     },
@@ -1074,6 +1095,29 @@
           "runtime_test_paths": [
             "TestR5ProtocolReceiptSharedCases/RC03"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/RC03/default"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/RC03/default": {
+              "marker": "R5_PROTOCOL_UI_TARGET_RC03_BCC",
+              "task": "R5-P2-050",
+              "audit": "A03",
+              "acceptance": "AC-06"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -1198,6 +1242,22 @@
           "runtime_test_paths": [
             "TestR5ProtocolReceiptSharedCases/RC04"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/RC04/default"
+          ],
+          "target_failures": {}
         }
       ]
     },
@@ -1320,6 +1380,22 @@
           "runtime_test_paths": [
             "TestR5ProtocolReceiptSharedCases/RC05"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/RC05/default"
+          ],
+          "target_failures": {}
         }
       ]
     },
@@ -2789,9 +2865,7 @@
           "build_tag": "r5audit"
         }
       ],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -2806,6 +2880,29 @@
           "runtime_test_paths": [
             "TestR5ProtocolOffboardingSharedCases/LF01"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/LF01/default"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/LF01/default": {
+              "marker": "R5_PROTOCOL_UI_TARGET_LF01_FROZEN",
+              "task": "R5-P4-030",
+              "audit": "A04",
+              "acceptance": "AC-15"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -2852,9 +2949,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -2869,6 +2964,22 @@
           "runtime_test_paths": [
             "TestR5ProtocolOffboardingSharedCases/LF02"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/LF02/default"
+          ],
+          "target_failures": {}
         }
       ]
     },
@@ -2904,9 +3015,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -2921,6 +3030,22 @@
           "runtime_test_paths": [
             "TestR5ProtocolOffboardingSharedCases/LF03"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/LF03/default"
+          ],
+          "target_failures": {}
         }
       ]
     },
@@ -2957,9 +3082,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -2974,6 +3097,22 @@
           "runtime_test_paths": [
             "TestR5ProtocolOffboardingSharedCases/LF04"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/LF04/default"
+          ],
+          "target_failures": {}
         }
       ]
     },
@@ -3059,9 +3198,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3079,6 +3216,25 @@
             "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/self",
             "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/higher_role"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/LF05/frozen",
+            "TestR5ProtocolComponentObservations/LF05/foreign_tenant",
+            "TestR5ProtocolComponentObservations/LF05/self",
+            "TestR5ProtocolComponentObservations/LF05/higher_role"
+          ],
+          "target_failures": {}
         }
       ],
       "applicability": {
@@ -3122,9 +3278,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3139,6 +3293,29 @@
           "runtime_test_paths": [
             "TestR5ProtocolOffboardingSharedCases/LF06"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/LF06/default"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/LF06/default": {
+              "marker": "R5_PROTOCOL_UI_TARGET_LF06_LIFECYCLE",
+              "task": "R5-P4-100",
+              "audit": "A04",
+              "acceptance": "AC-18"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -3183,9 +3360,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3200,6 +3375,22 @@
           "runtime_test_paths": [
             "TestR5ProtocolOffboardingSharedCases/LF07"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/LF07/default"
+          ],
+          "target_failures": {}
         }
       ]
     },
@@ -3265,9 +3456,7 @@
           "build_tag": "r5audit"
         }
       ],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3282,6 +3471,29 @@
           "runtime_test_paths": [
             "TestR5ProtocolPermissionIntentSharedCases/PE01/quota_patch"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/PE01/default"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/PE01/default": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE01_OMITTED",
+              "task": "R5-P1-050",
+              "audit": "A01",
+              "acceptance": "AC-01"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -3334,9 +3546,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3355,6 +3565,57 @@
             "TestR5ProtocolPermissionIntentSharedCases/PE02/0",
             "TestR5ProtocolPermissionIntentSharedCases/PE02/[]"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/PE02/omitted",
+            "TestR5ProtocolComponentObservations/PE02/null",
+            "TestR5ProtocolComponentObservations/PE02/false",
+            "TestR5ProtocolComponentObservations/PE02/0",
+            "TestR5ProtocolComponentObservations/PE02/[]"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/PE02/omitted": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE02_OMITTED",
+              "task": "R5-P1-050",
+              "audit": "A01",
+              "acceptance": "AC-03"
+            },
+            "TestR5ProtocolComponentObservations/PE02/null": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE02_NULL",
+              "task": "R5-P1-100",
+              "audit": "A01",
+              "acceptance": "AC-03"
+            },
+            "TestR5ProtocolComponentObservations/PE02/false": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE02_OMITTED",
+              "task": "R5-P1-050",
+              "audit": "A01",
+              "acceptance": "AC-03"
+            },
+            "TestR5ProtocolComponentObservations/PE02/0": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE02_OMITTED",
+              "task": "R5-P1-050",
+              "audit": "A01",
+              "acceptance": "AC-03"
+            },
+            "TestR5ProtocolComponentObservations/PE02/[]": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE02_OMITTED",
+              "task": "R5-P1-050",
+              "audit": "A01",
+              "acceptance": "AC-03"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -3430,9 +3691,7 @@
           "build_tag": "r5audit"
         }
       ],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3447,6 +3706,29 @@
           "runtime_test_paths": [
             "TestR5ProtocolPermissionStaleSharedCases/PE03"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/PE03/default"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/PE03/default": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE03_STALE",
+              "task": "R5-P1-060",
+              "audit": "A01",
+              "acceptance": "AC-02"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -3497,9 +3779,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3514,6 +3794,29 @@
           "runtime_test_paths": [
             "TestR5ProtocolPermissionStaleSharedCases/PE04"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/PE04/default"
+          ],
+          "target_failures": {
+            "TestR5ProtocolComponentObservations/PE04/default": {
+              "marker": "R5_PROTOCOL_UI_TARGET_PE04_ABA",
+              "task": "R5-P1-040",
+              "audit": "A01",
+              "acceptance": "AC-03"
+            }
+          }
         }
       ],
       "baseline_target_failure": {
@@ -3578,9 +3881,7 @@
         "components"
       ],
       "reference_adapters": [],
-      "unresolved": [
-        "Required real shared-input component consumer is not registered; Go/DB/HTTP evidence does not substitute this layer."
-      ],
+      "unresolved": [],
       "shared_adapters": [
         {
           "source": "internal/store/postgres/r5_protocol_shared_test.go",
@@ -3595,6 +3896,22 @@
           "runtime_test_paths": [
             "TestR5ProtocolDraftGrantOrderingSharedCases/PE05"
           ]
+        },
+        {
+          "source": "internal/api/handlers/r5_protocol_component_observations_test.go",
+          "package": "./internal/api/handlers",
+          "test": "TestR5ProtocolComponentObservations",
+          "build_tag": "r5protocol",
+          "layers": [
+            "components"
+          ],
+          "component_source": "web/components/company/r5-protocol-shared-components.test.tsx",
+          "consumes_shared_input": true,
+          "scope": "Go-owned disposable PostgreSQL and real shipping HTTP -> production API client/fetch -> shipping component; exact source/CASE hash, HTTP trace and post-DB observations; not shipping browser journey",
+          "runtime_test_paths": [
+            "TestR5ProtocolComponentObservations/PE05/default"
+          ],
+          "target_failures": {}
         }
       ],
       "baseline_target_failure": {
@@ -3611,5 +3928,30 @@
         "not_claimed": "browser multiwindow interaction; components remain separate evidence"
       }
     }
-  ]
+  ],
+  "component_scope_decisions": {
+    "registered_source_linked_cases": [
+      "RC01",
+      "RC03",
+      "RC04",
+      "RC05",
+      "LF01",
+      "LF02",
+      "LF03",
+      "LF04",
+      "LF05",
+      "LF06",
+      "LF07",
+      "PE01",
+      "PE02",
+      "PE03",
+      "PE04",
+      "PE05"
+    ],
+    "runtime_leafs": 23,
+    "known_target_leafs": 12,
+    "remaining_case": "RC02",
+    "RC02": "legacy outbound list/detail/submit-replay has no independent tracked UI consumer for this exact operation; current company SubmissionPane/Compose are different routes. Required components remains unresolved, no exemption or fabricated equivalent consumer. P0-110/P2-040/P2-140/P5-110 adjudication pending",
+    "boundary": "registration is not runtime evidence; fresh same-source components run required after metadata/hash change; product target red remains red"
+  }
 }

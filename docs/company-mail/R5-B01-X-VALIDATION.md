@@ -19,7 +19,7 @@
 
 ## 新交付与证据级别
 
-- `R5-TRANSACTION-COVERAGE.md/json`：49生产PG文件、350函数、445 SQL调用、126字面直接写候选、141名称闭包写候选、14迁移Up定义。66重要事务逐函数手工顺序断言；其余保留精确local operations/helper/branch trace。名字匹配caller只是候选，不是假动态dispatch证明。
+- `R5-TRANSACTION-COVERAGE.md/json`：49生产PG文件、350函数、447 SQL调用、126字面直接写候选、141名称闭包写候选、14迁移Up定义。66重要事务逐函数手工顺序断言；其余保留精确local operations/helper/branch trace。名字匹配caller只是候选，不是假动态dispatch证明。
 - Go AST工具与Python校验/19反例验证新增/删除/动态SQL/caller/FK/source漂移会拒绝。结构PASS仅证明目录未漏未漂移，不证明全部锁图无死锁；既有与本批动态关系逐档标注，其余风险/后续任务保留。
 - 全46协议明确实际error.code/message、per-entry reason absent/optional/exact。保留typed retry的真实reason，不再以统一reason=null伪造额外阻塞。层适用性/不可构造organize-only/后台无HTTP公开说明，不绕约束构造假状态。
 - shared-db报告17个components层未整合；其中RC03/04/05已有同CASE SHA的真实Go production-policy→SubmissionPane组件scoped证据，14例仍缺共享组件消费者。该3例不是DB/HTTP→UI完整旅程；BC02/03实际schema和现存HTTP产物证明缺快照/unknown，不声称运行不存在的正式回填命令。未来迁移/backfill完整写入证明属于后续真实实现，父080仍需跨层审核。
@@ -59,3 +59,5 @@ go test -mod=readonly -json -race -count=1 -timeout=180s ./...
 - ActivateEmployee实际普通locator SELECT→T UPDATE→invitation FOR UPDATE；配套目录旧反序断言已校正，无生产改动，剩余期限/重复token/当前资格风险不涂绿。
 - final-vitest.json中RC03/04/05全部passed；beforeAll真实调用Go生产delivery policy并核CASE SHA，渲染shipping SubmissionPane。shared-db报告仍保留原17缺components记录；附加3例scoped层证据不冒充DB/HTTP→UI端到端，14例缺消费者。
 - 唯一integration operator复算两个backend JSONL、207必跑门禁、协议精确29目标红/无extra errors、710源manifest与179归档SHA及成员安全；PG stop0/PID文件消失，TODO171复选框仍6且逐项未改。原raw与原失败均不可变；只本地集成，不push/发布/部署。
+
+SQL目录计数勘误：对X exact程序独立重提AST为447个词法SQL执行call site；原445未累计改密定位tenant/父键两QueryRow。原raw及被测程序/运行成绩不变，Y新增Activate两call site另为449。

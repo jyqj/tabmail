@@ -4,7 +4,7 @@
 
 ## 1. 结论与复验
 
-- 精确 Go AST：49 个非 test postgres 文件、350 个函数、445 个 SQL 执行调用；126 个字面 SQL 写候选、141 个名称闭包写候选。此前 grep 的669含测试，不是实际生产函数数。
+- 精确 Go AST：49 个非 test postgres 文件、350 个函数、451 个 SQL 执行调用；126 个字面 SQL 写候选、141 个名称闭包写候选。此前 grep 的669含测试，不是实际生产函数数。
 - 所有350函数均有 owner、入口/调用候选、源码哈希、函数专用操作序列或手工边界、锁/隐式FK范围、证据级别、具体风险及后续任务。49源码类型已人工复核；不将它等同350条运行验收。
 - 14个迁移的Up源定义：77处REFERENCES声明、7个trigger；包含FK替换/DROP及第14迁移停写/表锁。声明计数不是最终生效FK数。
 - 本工具仅验证目录新鲜和结构覆盖；`task_complete=false` / `runtime_verified=false` 是本结构产物级别，不裁决整个070。人工验收可引用本目录及其它动态证据独立作决定。
@@ -124,11 +124,11 @@ E-TX-CACHE原日志当前由主线程持有 `/tmp/tabmail-r5-b01x.8ht5RWf6/evide
 | `BootstrapCompanyAdmin` / CTX27 | Begin→super tenant INSERT/plan FK→super_admin user INSERT→audit INSERT→Commit；空用户表检测并发需独立启动测试。 | source-only |
 | `DeleteMailDraft` / TX09 | companyReadTx actor/profile→精确tenant/user/id/revision且未sealed D DELETE→Commit；不删creation receipt，也不显式锁M。 | source-only |
 | `FinishMailAttachment` / TX10 | companyReadTx actor/profile→预定位M→M SHARE/current send→精确A UPDATE锁→state/expires clock条件A ready W→Commit；不是对象Put。 | source-only |
-| `MutateWorkMessage` / CTX29 | companyReferencedTx T KEY SHARE→actor/profile→M SHARE/current access→personal state UPSERT或messageMutation（按action）→companyAudit/outbox→Commit。 | source-only |
+| `MutateWorkMessage` / CTX29 | companyReferencedTx T KEY SHARE→current actor/profile→M SHARE/current rights→organize/owner seen source NOKEY UPDATE NOWAIT，或nonowner sparse source KEY SHARE NOWAIT→原W/state→audit/outbox→Commit；latebusy409同tx rollback，保留不同state owners。 | actual-batch-linked-relationship（Y精确子集；统一full待freeze） |
 | `ReserveMailAttachment` / TX10 | companyReadTx actor/profile→M SHARE/send资格→attachment-budget tenant:user advisory→sum→A上传占位INSERT/FK M/U→Commit；真正对象上传在外层。 | source-only |
 | `SaveMailDraft` / TX08 | companyReadTx actor/profile→M SHARE/当前send资格→逐A SHARE→新建receipt INSERT或现D revision CAS→模板版本填充→Commit；receipt FK到user，不直接到T。 | source-only |
-| `TrashCompanyMessages` / CTX29 | 独立Begin→lockMemberTenant T UPDATE→work M UPDATE→messages批trash W/event trigger→audit/outbox→Commit；不调用currentMemberActor。 | source-only |
-| `ActivateEmployee` / TX01 | 独立Begin→普通SELECT invitation定位tenant（不授信）→T UPDATE→invitation FOR UPDATE且expires>now/未consumed/revoked→当前sponsor/domain/profile资格读→必要默认profile UPSERT→new U INSERT→personal M INSERT/FK U/zone→invitation consumed W→audit/outbox→Commit；不是invitation→T反序；now事务时间待锁后期限仍待实证。 | source-only |
+| `TrashCompanyMessages` / CTX29 | 独立Begin→T UPDATE→work M UPDATE→single id的messageMutation NOKEY NOWAIT，或bulk MATERIALIZED精确tenant/mailbox/deleted_atNULL按id NOKEY NOWAIT，仅locked ids+复核原predicate更新30day→audit/outbox→Commit；trusted actor标签不自动重读actor，bulk旧trash不改。 | actual-batch-linked-relationship（Y精确子集；统一full待freeze） |
+| `ActivateEmployee` / TX01 | 独立Begin→普通invitation定位tenant（不授信）→T UPDATE→hash+tenant绑定invitation UPDATE锁/原expires_at→锁后DB clock期限→当前sponsor/domain/profile资格→U/M/consumption→audit/outbox→原primary/zone/domain verified+mx SHARE NOWAIT→最终原expires DBclock→Commit；late无资格400/busy409均整体rollback，不新增T锁。 | actual-batch-linked-relationship（Y最终同14事件三轮） |
 | `ConfigureCompany` / TX01 | companyTx T UPDATE→actor/profile→primary zone verified/mx资格读→settings revision比较及INSERT/UPDATE CAS→tenant mail_send_policy W→audit/outbox→Commit；提交后另读返回设置。 | source-only |
 | `ConvertSharedMailbox` / TX03 | companyTx T UPDATE→actor/profile→M UPDATE锁/current owner/revision→mailbox CAS→M类型/期限/password清除W→活message expires清除W/event trigger→audit/outbox→Commit。 | source-only |
 | `CreateWorkMailbox` / TX01 | companyTx T UPDATE→actor/profile→公司domain及owner active资格→M INSERT/FK zone/user→audit/outbox→重读新M→Commit。 | source-only |
@@ -357,7 +357,7 @@ FK目录保留迁移中的DROP/重建；例如domain mailbox-zone原CASCADE已�
 | ChangePassword旧U→R→audit T FK vs 管理T→U | 主线程完整命令原版真实40P01/victim回滚；新T KEY SHARE→条件U写候选3/3三轮，父键顺序和audit回滚已验。不扩展其它user维护 | 本批关系已验证；其它P0-070 / P1-120 |
 | 旧DeleteUser Key→U vs member freeze U→Key；tenant/mailbox删除cascade及event T FK | 所有caller权限边界、删除拒绝/cascade、取消与victim回滚 | P0-070 / P1-030 / P3-040 |
 | 消息维护M→message与message→M；cache关系已修，不代表其它维护组合安全 | 除已验证cache/三物理delete外的实际并发、multi-mailbox顺序和event隐式父键 | P0-070 / P3-040 |
-| 模板publish template→version vs revoke version→template | 同/不同版本冲突、T锁模式/actor/profile参与、条件CAS回滚 | P0-070 / P5-010 |
+| publish T UPDATE vs revoke T KEY SHARE | 同tenant在父T先互斥，不把template/version相反词法顺序当40P01证据；其它caller、取消/CAS单列 | P0-070 / P5-010 |
 | Activate普通定位tenant→T→invitation/profile/new U/M | expire等待和重复token、FK/unique等待以及邀请实际期限 | P0-070 / P4阶段 |
 | profile DELETE→U SET NULL vs reader U→profile NOWAIT | NOWAIT受限拒绝已设计；旧管理writer的授权/CAS/字段意图仍需整链 | P1-030/060/070/120 |
 | rawobject Ensure/Delete成功→Commit错误，附件写者rawkey参与性 | callback取消、提交不明不抢删、完整引用协议与重试 | P3-050/060/130 |
@@ -378,3 +378,29 @@ FK目录保留迁移中的DROP/重建；例如domain mailbox-zone原CASCADE已�
 ### 集成事实校正
 
 当前 `ActivateEmployee` 是普通SELECT定位tenant后先T UPDATE，再invitation FOR UPDATE。先前人工表错误把locator读写成邀请锁；结构校验未捕获该人工语义错误。本次只校正文档，不制造invitation→T死锁。期限使用事务now()、重复token及当前sponsor/domain/profile窗口仍需真实命令验收。
+
+## 10. P0-070逐要求闭合矩阵（验收映射，不新增平行TODO）
+
+当前唯一进度仍R5-TODO，070尚未勾选；本矩阵分开source inventory、已有动态链接、本批fresh执行与真正未证关系，不用测试总数替代闭合。
+
+| 要求ID | 实际入口/证据 | 当前层级 | 真正未证明或后续边界 |
+|---|---|---|---|
+| 070-FINITE | non-test postgres writes/helpers/dynamic SQL/external callbacks complete finite inventory；all49files/350functions with exact AST+hash; per-entry assertions and migration sources | source_inventory_current | call-name candidates are not interface dispatch proof; legacy public/internal reachability needs per-entry triage |
+| 070-TENANT-USER | tenant/user parent and audit FK order；TX01-07/18/19; X real cache/password/member freeze outcomes; Y Activate T-first locator correction and current clock/domain fence | source_reviewed_and_selected_runtime_links | Y full regression pending; direct/internal legacy writers and cascade intersections remain source-only |
+| 070-REFRESH | refresh-family/user/token/advisory order；TX16 family->U->R; TX17 family->R; TX18 Tparent->U->R for password, U->R for revoke | source_reviewed_existing_regression_link | no new claim of every direct user delete/family GC combination; current Y full regression pending |
+| 070-MAILBOX-DRAFT-ATTACHMENT | M/D/A resource locks, revision and authorization window；TX08/09/10: actor/profile->M SHARE->A SHARE or exact A UPDATE/CAS; FK child set explicit | source_reviewed_selected_runtime_links | all legacy mailbox/message deletion/cascade/event parent combinations not dynamically proved; P3 GC fairness/reference followups remain |
+| 070-JOBS | job/lease/quota/retry/ingress order and final authorization；TX11 T->dependencies/A/quota->J; TX12 token/clock checkpoints; TX13/15 NOWAIT; TX14 I->target->T->zone/M->effects->sameclock fences; TX22 source->indexjob | source_reviewed_existing_runtime_links | all independent queue tokenless ack/fanout boundaries and cross-day/content/profile schedules not globally certified |
+| 070-HELPERS | companyReadTx/companyTx/companyReferencedTx call effects；three tenant lock modes, actor/profile locks, callbacks and actual direct writes tracked per entry | source_inventory_current | name Read does not prove no writes; callbacks are reviewed current callsites, not future no-I/O enforcement |
+| 070-FK-TRIGGERS | enqueue trigger, message event/index/archive/pins and FK wait paths；14 Up migrations/77 REFERENCES declarations/7 triggers; X actual mail_documents parent classification | source_definitions_and_selected_runtime_catalog_links | declaration count not final catalog; full FK/cascade/NO ACTION and DDL lifecycle relation matrix not newly run on Y |
+| 070-GC-OBJECT | GC and transaction-held external object callback wait/cancel/atomic effects；TX20 auto-commit prefix plus attachment delete/orphan CTE; TX21 rawkey lock ensureObject/del tx callbacks; P3 source references | source_reviewed_existing_tests_and_explicit_followups | protected-prefix/tenant fairness, complete rawkey participants, commit-unknown and storage/provider failure layers not closed |
+| 070-AUTH-WINDOW | every multi-resource write identifies checks vs effects and waits；exact local source traces/manual66, phase-specific eligibility fences and linked outcomes | per_entry_source_and_selected_runtime_evidence | no all350 execution assertion; final predicate clocks and caller reachability must be adjudicated per remaining entry |
+
+Reachability复核：当前非test direct caller：DeleteMessage/PurgeMailbox在internal/app/messages，DeleteMailbox在internal/app/mailboxes；DeleteUser无非test direct caller，正式成员删除调用Guarded。只有名称候选不能把internal legacy端口当公开入口。Y全量尚未运行，历史绿不冒充fresh本批全图验收。
+
+SQL计数校正：初版445未随X改密新增两QueryRow更新；对X exact程序重提AST是447，当前Y Activate额外两call site后449。计数指词法SQL执行call site，不是一次请求实际查询数。门禁现直接输出sql_execution_calls，避免沿旧口述计数。
+
+Y Activate最终同测试：14事件/6top/11leaf；原版6pass8fail（含2个parent rollup），候选三轮各14pass。三种真实等待越期限、已提交verified/mx撤验、正式UpdateZone事务被测试advisory暂挡时final域NOWAIT409，以及late拒绝全state rollback均已验。原0test平台文件名与DSN环境错误留存但不当产品红；当前Y全量仍待冻结后执行。
+
+Y消息实际关系：三种helper caller（trusted work Trash、organize、owner seen）对retention原10事件4pass6fail含3parent rollup；同637aa新source三轮各10pass。nonowner seen/star首次sparse FK原5事件2pass3fail含parent；同4da84新source三轮各5pass。当前0dc统一full尚待冻结，不把不同源码phase分数合并冒full成绩。
+
+Z新restore testcase06cbbc尚未纳Y：当前真实restore-first在已成功restore后被旧candidate-id物理删除，reverse409/normal expiry控制绿。messages.go本Y不改，Z需actual-row完整资格复检/trueRETURNING证明，不擅改strict cutoff或永久owner/shared政策。

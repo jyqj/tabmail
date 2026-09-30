@@ -293,11 +293,27 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	var id, inviter uuid.UUID
 	var email, name, address string
 	var profile *uuid.UUID
-	e = tx.QueryRow(ctx, `SELECT id,email,display_name,mailbox_address,permission_profile_id,invited_by FROM employee_invitations WHERE token_hash=$1 AND expires_at>now() AND consumed_at IS NULL AND revoked_at IS NULL FOR UPDATE`, hash).Scan(&id, &email, &name, &address, &profile, &inviter)
+	var expires time.Time
+	e = tx.QueryRow(ctx, `SELECT id,email,display_name,mailbox_address,permission_profile_id,invited_by,expires_at FROM employee_invitations WHERE token_hash=$1 AND tenant_id=$2 AND expires_at>clock_timestamp() AND consumed_at IS NULL AND revoked_at IS NULL FOR UPDATE`, hash, tenant).Scan(&id, &email, &name, &address, &profile, &inviter, &expires)
 	if errors.Is(e, pgx.ErrNoRows) {
 		return app.BadRequest("invalid or expired invitation")
 	}
 	if e != nil {
+		return e
+	}
+	// A predicate can be evaluated before the invitation row lock waits. Keep
+	// the original deadline and use the database's elapsed clock after waits.
+	checkDeadline := func() error {
+		var now time.Time
+		if err := tx.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now); err != nil {
+			return err
+		}
+		if !expires.After(now) {
+			return app.BadRequest("invalid or expired invitation")
+		}
+		return nil
+	}
+	if e = checkDeadline(); e != nil {
 		return e
 	}
 	var sponsor bool
@@ -343,6 +359,25 @@ func (s *PgStore) ActivateEmployee(ctx context.Context, hash, passwordHash strin
 	}
 	a := authz.Actor{ID: uid, Type: authz.PrincipalUser, TenantID: tenant}
 	if e = companyAudit(ctx, tx, a, "employee.activate", "user", uid, map[string]any{"invitation_id": id, "mailbox": address}); e != nil {
+		return e
+	}
+	// Zone verification uses independent non-key updates. Mailbox FK key
+	// protection alone does not fence those updates while mandatory audit waits.
+	// Recheck the original company/domain and protect it through this commit;
+	// NOWAIT avoids adding a late reverse-order dependency wait.
+	var currentZone uuid.UUID
+	e = tx.QueryRow(ctx, `SELECT z.id FROM company_settings c JOIN domain_zones z ON z.id=c.primary_zone_id AND z.tenant_id=c.tenant_id WHERE c.tenant_id=$1 AND z.id=$2 AND z.domain=$3 AND z.is_verified AND z.mx_verified FOR SHARE OF c,z NOWAIT`, tenant, zone, domain).Scan(&currentZone)
+	if errors.Is(e, pgx.ErrNoRows) {
+		return app.BadRequest("configure a verified primary company domain first")
+	}
+	if e != nil {
+		var pg *pgconn.PgError
+		if errors.As(e, &pg) && pg.Code == "55P03" {
+			return app.Conflict("company domain is changing; try again")
+		}
+		return e
+	}
+	if e = checkDeadline(); e != nil {
 		return e
 	}
 	return tx.Commit(ctx)

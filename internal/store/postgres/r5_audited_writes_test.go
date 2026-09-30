@@ -3,6 +3,7 @@ package postgres_test
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -32,7 +33,19 @@ func r5AuditedFixture(t *testing.T, f *companyFixture, kind string) r5AuditedCas
 	if kind == "message" {
 		m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.personal.ID, ZoneID: f.zone.ID, Sender: "fixture@sender.test", Recipients: []string{f.personal.FullAddress}, Subject: "audited boundary", RawObjectKey: "audit-" + uuid.NewString()}
 		must(t, f.st.CreateMessage(ctx, m))
-		return r5AuditedCase{f.u, `SELECT id FROM messages WHERE id=$1 FOR UPDATE`, []any{m.ID}, func(ctx context.Context) error {
+		// A busy source now correctly fails fast. Arrange the required audit
+		// wait instead, after this command owns its real parent/user/source
+		// locks. The trigger matches only this resource: another message must
+		// still proceed, preserving the independent-writer assertion below.
+		name := "r5_audited_message_" + strings.ReplaceAll(m.ID.String(), "-", "")
+		key := "r5-audited-message:" + m.ID.String()
+		_, e := f.pool.Exec(ctx, `CREATE FUNCTION `+name+`() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
+ IF NEW.resource_id='`+m.ID.String()+`'::uuid AND NEW.action='message.archive' THEN
+  PERFORM pg_advisory_xact_lock(hashtextextended('`+key+`',0));
+ END IF; RETURN NEW; END $$;
+ CREATE TRIGGER `+name+` BEFORE INSERT ON audit_log FOR EACH ROW EXECUTE FUNCTION `+name+`()`)
+		must(t, e)
+		return r5AuditedCase{f.u, `SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, []any{key}, func(ctx context.Context) error {
 			return f.st.MutateWorkMessage(ctx, f.u, f.personal.ID, m.ID, "archive")
 		}}
 	}

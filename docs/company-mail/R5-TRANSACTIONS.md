@@ -190,3 +190,10 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 - 070剩余具体风险及未证明caller分档在有限目录，不一律确认为漏洞，也不因本批三关系绿涂全部图。080 tagged基线46执行/29target red与普通backend207必跑严格分开，未来产品绿色不由基线controller通过替代。
 
 - 集成事实核验：ActivateEmployee并非invitation→T反序；普通SELECT仅定位tenant，然后T UPDATE→invitation FOR UPDATE。旧配套目录已校正，now()待锁后期限/当前sponsor与域资格仍待正式命令证据；不能凭人工错序制造死锁候选。
+
+## B01-Y：实际有限新增，不外推全图
+
+- Activate保locator→T UPDATE→绑定invitation，锁后/必要audit后DB当前clock检查原expires；final原primary/zone/domain verified+mx SHARE NOWAIT，400/409整体rollback。
+- messageMutation action先验证，精确源NO KEY UPDATE NOWAIT后原W/predicate/COALESCE；bulk仅MATERIALIZED active锁定subset+30day，旧trash不改。nonowner state于UPSERT前匹配FK的KEY SHARE NOWAIT，保state CASE/owner fastpath。
+- 原同测试三正式source-M反序/首次state FK真实40P01→候选各三轮；旧审计测试只resource/action独立advisory屏障兼容改变，不放宽父锁/不同writer/rollback断言，也不假称历史同阶段红绿。
+- fresh9dfd720默认1382/0/1、218必跑；080组件16/23仍12精确政策红，RC02/BCC未来写边界保留。Z restore stale eligibility实红尚未修，messages.go未改，Z测试未纳Y。

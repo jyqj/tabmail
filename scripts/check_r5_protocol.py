@@ -20,6 +20,20 @@ CASES = ROOT / 'docs/company-mail/evidence/R5-PROTOCOL-CASES.json'
 EXPECTED_IDS = {f'{prefix}{i:02d}' for prefix, n in [('CT',10),('RC',5),('OP',4),('RT',7),('BC',6),('GC',2),('LF',7),('PE',5)] for i in range(1,n+1)}
 
 
+def validate_adapter_targets(row, adapter):
+    targets = adapter.get('target_failures', {})
+    if not isinstance(targets, dict):
+        raise ValueError('adapter targets must be an exact path mapping')
+    for path, target in targets.items():
+        if path not in adapter.get('runtime_test_paths', []):
+            raise ValueError('adapter target path is not a declared runtime path')
+        if not isinstance(target, dict) or not re.fullmatch(r'R5_PROTOCOL_UI_TARGET_[A-Z0-9_]+', target.get('marker','')):
+            raise ValueError('adapter requires exact UI marker')
+        if target.get('audit') not in row['audit'] or target.get('acceptance') not in row['acceptance'] or not re.fullmatch(r'R5-P[0-9]+-[0-9]+',target.get('task','')):
+            raise ValueError('adapter target needs row audit/acceptance and successor task')
+    return targets
+
+
 def load_cases(path=CASES, root=ROOT):
     data = json.loads(Path(path).read_text())
     if data.get('schema_version') != 1 or data.get('task_complete') is not False:
@@ -84,6 +98,11 @@ def load_cases(path=CASES, root=ROOT):
                 prefix = adapter['test']+'/'+row['id']
                 if not paths or len(paths) != len(set(paths)) or any(path != prefix and not path.startswith(prefix+'/') for path in paths):
                     raise ValueError('shared adapter requires exact per-case runtime paths')
+            validate_adapter_targets(row,adapter)
+            if adapter.get('component_source'):
+                component = (root / adapter['component_source']).resolve()
+                if not shared or adapter.get('runner') == 'vitest' or adapter['layers'] != ['components'] or not component.is_relative_to(root.resolve()) or component.suffix != '.tsx' or not component.is_file():
+                    raise ValueError('invalid Go-owned component adapter/source')
             if adapter.get('runner') == 'vitest':
                 if not shared or source.suffix != '.tsx' or adapter['layers'] != ['components']:
                     raise ValueError('invalid shared component adapter')
@@ -106,7 +125,7 @@ def load_cases(path=CASES, root=ROOT):
 
 def source_closure():
     names = subprocess.run(['git','ls-files','--cached','--others','--exclude-standard',
-                            'cmd','internal','web','go.mod','go.sum','docs/company-mail/R5-PROTOCOL.md','docs/company-mail/evidence/R5-PROTOCOL-CASES.json','scripts/check_r5_protocol.py','scripts/tests/test_r5_protocol.py'],cwd=ROOT,
+                            'cmd','internal','web','go.mod','go.sum','docs/company-mail/R5-PROTOCOL.md','docs/company-mail/evidence/R5-PROTOCOL-CASES.json','scripts/check_r5_protocol.py','scripts/tests/test_r5_protocol.py','scripts/tests/test_r5_protocol_component_evidence.py'],cwd=ROOT,
                            capture_output=True,text=True,check=True).stdout.splitlines()
     return {name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest()
             for name in sorted(set(names)) if (ROOT/name).is_file()}
@@ -223,12 +242,21 @@ def classify_shared_events(text, package, expected, exit_code, data):
     """Admit only exact, documented target assertions; never setup failures."""
     allowed = {}
     for row in data['cases']:
-        target = row.get('baseline_target_failure')
-        if target:
-            for adapter in row.get('shared_adapters', []):
-                if adapter.get('package') == './' + package.removeprefix('tabmail/'):
-                    for path in target.get('test_paths', []):
-                        allowed[path] = target['marker']
+        for adapter in row.get('shared_adapters', []):
+            if adapter.get('package') != './'+package.removeprefix('tabmail/') or adapter.get('test') not in expected:
+                continue
+            targets = validate_adapter_targets(row,adapter)
+            original = row.get('baseline_target_failure')
+            if original:
+                for path in original.get('test_paths', []):
+                    if path in adapter.get('runtime_test_paths', []):
+                        if path in allowed and allowed[path] != original['marker']:
+                            raise ValueError('conflicting exact target markers')
+                        allowed[path] = original['marker']
+            for path,target in targets.items():
+                if path in allowed and allowed[path] != target['marker']:
+                    raise ValueError('conflicting exact target markers')
+                allowed[path] = target['marker']
     events = [json.loads(line) for line in text.splitlines() if line.strip()]
     infrastructure = ['WARNING: DATA RACE', 'panic:', 'runtime error:', 'fatal error:', 'test timed out', '[build failed]', 'context deadline exceeded', 'deadline exceeded']
     if any(value in ''.join(e.get('Output','') for e in events) for value in infrastructure):
@@ -242,6 +270,8 @@ def classify_shared_events(text, package, expected, exit_code, data):
     required_paths = {path for row in data['cases'] for a in row.get('shared_adapters', [])
                       if a.get('runner') != 'vitest' and a.get('package') == './'+package.removeprefix('tabmail/')
                       and a['test'] in expected for path in a.get('runtime_test_paths', [])}
+    if not required_paths:
+        errors.append('no matching declared runtime shared consumers')
     for path in sorted(required_paths):
         lifecycle = [e['Action'] for e in events if e.get('Test') == path and e.get('Action') in {'run','pass','fail','skip'}]
         if lifecycle not in [['run','pass'], ['run','fail']]:
@@ -298,6 +328,38 @@ def shared_command(package, tag, tests):
     return cmd + ['-run','^('+ '|'.join(sorted(tests)) + ')$',package]
 
 
+def classify_go_component_packets(data, selected, output, cases_hash):
+    # Import the tested pure validator; it never supplies response data.
+    import importlib.util
+    module_path = ROOT/'scripts/tests/test_r5_protocol_component_evidence.py'
+    spec = importlib.util.spec_from_file_location('r5_component_packet_validation',module_path)
+    validator = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(validator)
+    reports=[];verified=set()
+    for row in data['cases']:
+        for adapter in row.get('shared_adapters', []):
+            if not adapter.get('component_source') or adapter['test'] not in selected.get((adapter['package'],adapter.get('build_tag','')),set()):
+                continue
+            prefix = adapter['test']+'/'+row['id']+'/'
+            for path in adapter['runtime_test_paths']:
+                variant = path.removeprefix(prefix)
+                directory = output/'http-pg-components'/row['id']/variant.replace('[]','empty_array')
+                try:
+                    observed=json.loads((directory/'observations.json').read_text())
+                    vitest=json.loads((directory/'vitest.json').read_text())
+                    report=validator.classify_packet(observed,vitest,observed.get('component_process_exit_code'),row['id'],variant,cases_hash)
+                    declared=adapter.get('target_failures',{}).get(path,{}).get('marker')
+                    if report.get('target_marker') and report['target_marker'] != declared:
+                        report['errors'].append('component marker is not declared for this exact adapter path')
+                except (OSError,ValueError,TypeError,KeyError) as error:
+                    report={'errors':['missing/invalid real Go-owned component packet: '+type(error).__name__],'status':'invalid','product_green':False,'task_complete':False}
+                report.update(case_id=row['id'],variant=variant,runtime_test_path=path)
+                reports.append(report)
+            case_reports=[r for r in reports if r.get('case_id')==row['id']]
+            if case_reports and all(not r['errors'] for r in case_reports):verified.add(row['id'])
+    return reports,verified
+
+
 def run_shared(data, layer, output):
     selected = {}
     for row in data['cases']:
@@ -314,6 +376,7 @@ def run_shared(data, layer, output):
     source = subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip()
     env = dict(os.environ)
     env['TABMAIL_R5_PROTOCOL_OBSERVATIONS'] = str((output/'observations.json').resolve())
+    env['TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE'] = str((output/'http-pg-components').resolve())
     reports = []
     for index, ((package, tag), tests) in enumerate(sorted(selected.items())):
         cmd = shared_command(package,tag,tests)
@@ -324,6 +387,10 @@ def run_shared(data, layer, output):
         report.update(command=cmd,package=package)
         reports.append(report)
     go_pass = all(not r['errors'] for r in reports)
+    go_component_verified=set()
+    if layer == 'components':
+        packets,go_component_verified=classify_go_component_packets(data,selected,output,cases_hash)
+        reports.extend(packets)
     component_pass = False
     if layer == 'components' and go_pass:
         component_file = output/'vitest.json'
@@ -346,12 +413,12 @@ def run_shared(data, layer, output):
     for row in data['cases']:
         layers = set()
         for adapter in row.get('shared_adapters', []):
-            if stable and go_pass and adapter.get('runner')!='vitest' and adapter['test'] in selected.get((adapter['package'],adapter.get('build_tag','')),set()): layers.update(adapter['layers'])
+            if stable and go_pass and adapter.get('runner')!='vitest' and adapter['test'] in selected.get((adapter['package'],adapter.get('build_tag','')),set()) and (not adapter.get('component_source') or row['id'] in go_component_verified): layers.update(adapter['layers'])
             if stable and component_pass and adapter.get('runner')=='vitest': layers.add('components')
         if layers: verified[row['id']] = sorted(layers)
     report = summary(data)
     report.update(status='shared_scoped_evidence_passed' if all(not r['errors'] for r in reports) else 'shared_scoped_evidence_failed',
-                  task_complete=False,product_green=not any(r.get('target_red') for r in reports),source_sha=source,layer=layer,source_closure_before=tested_closure,
+                  task_complete=False,product_green=bool(reports) and stable and go_pass and all(not r['errors'] for r in reports) and not any(r.get('target_red') for r in reports),source_sha=source,layer=layer,source_closure_before=tested_closure,
                   source_closure_after=final_closure,cases_sha256=cases_hash,reports=reports,
                   shared_input_verified_cases=len(verified),shared_input_verified_layers=verified,
                   missing_required_layers={row['id']:sorted(set(row['required_layers'])-set(verified.get(row['id'],[]))) for row in data['cases']},

@@ -282,7 +282,7 @@
   "transaction_catalog": {
     "files": 49,
     "functions": 350,
-    "sql_calls": 445,
+    "sql_calls": 447,
     "direct_writes": 126,
     "write_closure": 141,
     "migrations": 14,
@@ -337,6 +337,7 @@
     "checkbox_bits_unchanged_from_base": true,
     "archive_hash_and_members_recomputed": true,
     "high_signal_dsn_credentials_or_responses_not_found": true,
-    "code_execution_scope": "prior frozen exact program; new corrections are docs/inventory metadata only, not a fresh runtime claim"
+    "code_execution_scope": "prior frozen exact program; new corrections are docs/inventory metadata only, not a fresh runtime claim",
+    "sql_call_count_erratum": "AST re-extraction of exact X program yields447; initial445 missed two password locator/parent QueryRow calls; raw evidence and runtime scores unchanged"
   }
 }

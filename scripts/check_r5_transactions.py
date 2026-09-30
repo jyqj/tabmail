@@ -120,7 +120,7 @@ def validate(data, ast, migrations):
     if set(reviewed)!=set(f['path'] for f in pgfiles): errors.append('file-type review coverage drift')
     if any(not v for v in reviewed.values()): errors.append('empty file-type review')
     if errors: raise ValueError('\n'.join(errors))
-    return {'status':'PASS','postgres_files':len(pgfiles),'functions':len(entries),'direct_write_functions':sum(c['direct_write'] for c in classes.values()),'write_closure_functions':sum(c['write_closure'] for c in classes.values()),'migration_files':len(migrations),'task_complete':False,'runtime_verified':False,'meaning':'syntax inventory current; no concurrency or behavior equivalence claim'}
+    return {'status':'PASS','postgres_files':len(pgfiles),'functions':len(entries),'sql_execution_calls':sum(c['name'] in SQL_CALLS for f in funcs.values() for c in f['calls']),'direct_write_functions':sum(c['direct_write'] for c in classes.values()),'write_closure_functions':sum(c['write_closure'] for c in classes.values()),'migration_files':len(migrations),'task_complete':False,'runtime_verified':False,'meaning':'syntax inventory current; no concurrency or behavior equivalence claim'}
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
