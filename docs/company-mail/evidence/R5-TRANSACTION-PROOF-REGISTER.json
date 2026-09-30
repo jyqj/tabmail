@@ -1128,11 +1128,11 @@
       "entry": "DeleteSuppressionAudited",
       "group": "TX11",
       "applicability": "formal_or_assembled_role_scoped",
-      "adjudication_class": "finite_actual_condition_pending",
-      "safety_condition": "formal outbound-enabled suppression DELETE via scope/admin guard; S UPDATE->delete->late audit T FK. S-only tenant deletion AB normal-control/actual order pending; messages NO ACTION refusal does not exempt this shape",
+      "adjudication_class": "formal_bounded_runtime",
+      "safety_condition": "exacttenant KEY SHARE precedes S UPDATE/delete and audit FK; deleted parent typed404 rolls back all S effects. Actual c874/ff50 three rounds both orders and normal controls. Request-before actor authorization remains unproved after wait.",
       "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
       "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
-      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "actual_reference": "AB same final560c originalproduction baseline and candidate1/2/3; exact scope not whole-slotPASS",
       "followup_tasks": [
         "R5-P0-070",
         "R5-P6-080"
@@ -1141,7 +1141,7 @@
       "inherited_family_context": [
         "幂等回放早返回保留协议；低层trusted变体不走validate；其它outbound claim/attempt/suppression单写并非enqueue；quota等待日界策略需独立覆盖"
       ],
-      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+      "authorization_wait_effect_condition": "Requires caller authorization to remain current across parent wait; middleware snapshot plus tenantID/AuditEntry does not prove current actor reload."
     },
     {
       "slot": 54,
@@ -1476,5 +1476,6 @@
   ],
   "catalog": "R5-TRANSACTION-DB-CATALOG.json actual75FK/7triggers",
   "static_bootstrap_correction": "already global advisory, loweremail check before writes; do not invent unlocked-empty-users gap",
-  "review_source": "read-only 68-slot finite conditions; integration owner classifies without altering raw/runtime evidence"
+  "review_source": "read-only 68-slot finite conditions; integration owner classifies without altering raw/runtime evidence",
+  "post_AA_note": "AB53 actual parent/S order proof only; authorization wait window remains finite pending, all closed_entire_slot flags unchanged."
 }

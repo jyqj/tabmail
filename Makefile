@@ -1,4 +1,4 @@
-.PHONY: build run dev test vet lint web-lint web-test web-build contract-deps contract-check transaction-check protocol-baseline http-contract-check i18n-check validation-tools-test i18n-source-test check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
+.PHONY: build run dev test vet lint web-lint web-test web-build contract-deps contract-check compatibility-check transaction-check protocol-baseline http-contract-check i18n-check validation-tools-test i18n-source-test check backup-db restore-db backup-obj backup-obj-s3 restore-obj restore-obj-s3 docker-up docker-down clean
 
 BINARY  := tabmail
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -39,6 +39,10 @@ contract-deps:
 contract-check:
 	python3 scripts/check_contract_drift.py
 
+# Fresh route/client AST inventory and coordinated upgrade plan, not product approval.
+compatibility-check:
+	python3 -B scripts/check_r5_compatibility.py
+
 # Syntax/caller/FK inventory drift, NOT runtime lock correctness.
 transaction-check:
 	python3 -B scripts/check_r5_transactions.py
@@ -66,7 +70,7 @@ i18n-source-test:
 
 lint: vet web-lint
 
-check: test vet transaction-check contract-check http-contract-check protocol-baseline validation-tools-test i18n-source-test i18n-check web-lint web-test web-build
+check: test vet transaction-check contract-check compatibility-check http-contract-check protocol-baseline validation-tools-test i18n-source-test i18n-check web-lint web-test web-build
 
 
 backup-db:

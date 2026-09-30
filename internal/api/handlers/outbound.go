@@ -248,6 +248,11 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 		}),
 	}
 	if err := h.store.DeleteSuppressionAudited(ctx, tenant.ID, id, entry); err != nil {
+		var appErr *app.Error
+		if errors.As(err, &appErr) {
+			respondAppError(w, h.logger, err)
+			return
+		}
 		h.logger.Err(err).Msg("deleting suppression")
 		errInternal(w)
 		return

@@ -203,3 +203,9 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 - Retention DELETE target actual m重复完整原资格＋RETURNING实际row，EPQ后恢复源不再stale删；原cutoff/order/limit/permanent/counter/commit-afterkeys保持。
 - Convert保T/actor/M/revision与字段，源active subset按id NOKEY NOWAIT，绑定tenant/mailbox并只locked ids清expiry；55原409且metadata/source/audit同rollback。template两个角色先T互斥已有781a实际7事件控制。
 - Actual空DB最终75FK/7usertriggers与350保守entrylink已导出，Table关联名单不等op实际fire；TX21无FK不等无回调effect。fresh1ec0/726默认1405/0/1+226必跑，tenant/AA排除；070080未闭，见Z报告。
+
+## B01-AB：S／T真实父序，不是授权窗口闭合
+
+官方 suppression DELETE 与仅含S的 superadmin tenant DELETE 正常可行，双方向完整命令原版真实40P01。AB先exacttenant KEY SHARE，再S锁／删除／同事务required audit，父消失typedNotFound由正式handler映404；其它DB／audit仍500，跨tenant无S的原204不改。最终560c同测试原版两红，候选三轮8/8；fresh全量1417/0/1、229必跑、20门禁0，见[AB证据](R5-B01-AB-VALIDATION.md)。
+
+父锁只是FK／排序fence，不重载等待后actor，middleware已接受JWT／Key的授权窗口仍待AC正式命令验证。070/G0未关闭；68slot只代表有限条件登记，不是68whole-slot PASS。

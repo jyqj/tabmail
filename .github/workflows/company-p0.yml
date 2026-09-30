@@ -63,6 +63,8 @@ jobs:
         run: python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
       - name: DTO field contract
         run: python3 scripts/check_contract_drift.py
+      - name: Fresh route/client compatibility inventory and upgrade plan
+        run: python3 -B scripts/check_r5_compatibility.py
       - name: Transaction syntax and review inventory drift
         run: python3 -B scripts/check_r5_transactions.py
       - name: Real protocol baseline with explicit target failures

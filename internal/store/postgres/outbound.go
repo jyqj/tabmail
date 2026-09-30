@@ -647,6 +647,16 @@ func (s *PgStore) DeleteSuppressionAudited(ctx context.Context, tenantID uuid.UU
 		return err
 	}
 	defer tx.Rollback(ctx)
+	// The required audit takes the tenant FK key after deleting the child.
+	// Protect that same parent first, before acquiring the suppression lock,
+	// so tenant deletion cannot hold the parent while waiting on this child.
+	var parentID uuid.UUID
+	if err := tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, tenantID).Scan(&parentID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return app.NotFound("company not found")
+		}
+		return err
+	}
 	var address string
 	if err := tx.QueryRow(ctx,
 		`SELECT address FROM suppression_list WHERE id=$1 AND tenant_id=$2 FOR UPDATE`,

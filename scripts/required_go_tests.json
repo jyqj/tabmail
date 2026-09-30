@@ -442,6 +442,14 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5TenantDeleteNormalCatalogControls"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionTenantNormalControls"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionTenantCompleteCommandsOrder"
         ]
       ],
       "allowed_skips": []
@@ -1560,6 +1568,14 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5TenantDeleteNormalCatalogControls"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionTenantNormalControls"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5SuppressionTenantCompleteCommandsOrder"
         ]
       ],
       "allowed_skips": [
