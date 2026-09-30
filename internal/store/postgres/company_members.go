@@ -808,7 +808,13 @@ func (s *PgStore) ConvertSharedMailbox(ctx context.Context, actor authz.Actor, i
 		if _, err := tx.Exec(ctx, `UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`, id); err != nil {
 			return err
 		}
-		if _, err := tx.Exec(ctx, `UPDATE messages SET expires_at=NULL WHERE mailbox_id=$1 AND deleted_at IS NULL`, id); err != nil {
+		// Physical retention may already own a source and later need this
+		// mailbox/tenant. Only clear expiry on our locked active subset; never
+		// wait in that opposite order while the conversion holds T/M.
+		if _, err := tx.Exec(ctx, `WITH locked AS MATERIALIZED (
+ SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT
+) UPDATE messages m SET expires_at=NULL FROM locked l
+ WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`, a.TenantID, id); err != nil {
 			return err
 		}
 		return companyAudit(ctx, tx, a, "mailbox.convert_shared", "mailbox", id, map[string]any{"reason": reason, "revision": revision})

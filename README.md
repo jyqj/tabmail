@@ -8,11 +8,11 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-最新执行为 **B01-Y（2026-10-01）**：开通当前时钟／域资格、消息与首次个人状态FK竞争已实证修复；fresh默认1382pass/0fail/1明确browser skip、218必跑、clean前端118通过。DB46案例29目标红；真实API到组件16案例23variant中12目标红独立保留，产品非全绿。见 [B01-Y记录](docs/company-mail/R5-B01-Y-VALIDATION.md)。
+最新执行为 **B01-Z（2026-10-01）**：恢复／共享转换后实际删除资格与source顺序已实证修复，模板父序互斥有完整控制；fresh默认1405pass/0fail/1明确browser skip、226必跑、clean前端118通过。actual新空DB75FK/7triggers已归档；协议目标红仍独立，产品非全绿。见 [B01-Z记录](docs/company-mail/R5-B01-Z-VALIDATION.md)。
 
 唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段/171工作包/25批次/38验收场景。目前仍 **6/171，P0为6/12**。新增 [有限事务目录](docs/company-mail/R5-TRANSACTION-COVERAGE.md) 覆盖350函数/66重点，结构清点不冒称全runtime正确；070具体未验证关系与080的RC02精确组件入口／BC02–03未来写入适用性等仍待验收，G0不提前关闭。
 
-已上传B01-U见 [检查点](docs/company-mail/R5-CHECKPOINT-20260930.md)；V/W/X/Y为后续本地工作，不代表主线合并、远端CI通过、R5正式发布或部署。
+已上传B01-U见 [检查点](docs/company-mail/R5-CHECKPOINT-20260930.md)；V/W/X/Y/Z为后续本地工作，不代表主线合并、远端CI通过、R5正式发布或部署。
 
 ## 公司工作流
 

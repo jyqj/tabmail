@@ -9,7 +9,7 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | B01-Y已实证修复开通资格及消息／个人状态竞争；fresh1382/0/1与218必跑，16真实API→组件/23variant目标红分离，参B01-Y报告。070/080/G0未闭，Z两测试排除本批 |
+| 当前阶段 | B01-Z actual source eligibility／共享转换竞争修复，fresh1405/0/1、226必跑，最终75FK/7trigger catalog；070080未闭，下一tenant/AA独立scope不沿旧绿 |
 | 下一可执行任务 | 070逐要求matrix：Z恢复与retention实际候选复检、模板T互斥/CAS；080保RC02精确legacy组件consumer／BC02–03正式未来写入适用性裁决；不以子集绿勾父项 |
 | 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
 | 实现完成数 | 6 / 171；P0 为 6 / 12。已完成010/020/030/040/050/060；070仍未勾选，建档表保留初始值 |
@@ -1630,3 +1630,12 @@ review结论及风险：
 - DB46实际29target-red；真实HTTP/PG→组件16case23variant=12target-red11scope-pass，controller0/product_green=false。union仅RC02.components缺，BC02/03未来正式backfill写未证明。adapter UI exact marker不覆盖原DB scalar红。
 - [报告](R5-B01-Y-VALIDATION.md)/[摘要](evidence/R5-B01-Y-VALIDATION.json)/[603成员raw归档](evidence/R5-B01-Y-LOGS.tar.gz)随本地集成，无responses/DSN/私有fixture/源码tar/DB/node_modules。Y所有process terminal；PG34679专属noTCP持续唯一Z租约，不假报停止。无push/PR/merge/release/deploy。
 - 父仍6/171。Z restore64fc和template781a排除Y720/full/提交，下一批实测；070全要求/080剩余适用性/原G0后P1–P11依赖不缩减。
+
+### B01-Z：当前删除行资格／转换／实际catalog（2026-10-01）
+
+- 基线354dd71e；最终被测tree1ec0abde9887cf7f7609dfb5dcd5e3ad68f9d77b/726文件SHA，tenant9c679及080mutable文件排除，独立private Git只供上下文。
+- restore最终64fc10事件原8pass2fail→三轮10pass；actual m资格重筛＋RETURNING m不改strict/永久保护/cutoff/计数/receipt。convert d8fb原6事件3pass3fail→三轮6pass，原stale及40P01完整回滚实证，active源NOKEY NOWAIT/current资格共同修。template781a7事件全绿，T先互斥/CAS/audit/immutable，不虚构倒序死锁。
+- fresh默认./...原180s：1405pass0fail1明确browser skip/52包/226必跑，PG166.044s；19step全0、Python247/Node23/defaultVite118/cleanNext/tsc/lint、HTTP80/65/66、negative、modules验证。DB46/29目标红，组件16/23中12红11限定绿，controller0不代表产品绿。
+- 实际官方New/Migrate空DB catalog75FK/7usertriggers，Up77≠final75；350link是table/nameclosure保守关联不是dispatch/fire证明。Convert expiry UPDATE/Publish versionINSERT操作敏感触发器及TX21回调effect已注明。
+- [报告](R5-B01-Z-VALIDATION.md)/[摘要](evidence/R5-B01-Z-VALIDATION.json)/[175成员归档](evidence/R5-B01-Z-LOGS.tar.gz)/[actualcatalog](evidence/R5-TRANSACTION-DB-CATALOG.json)随本地集成；无DSN/私有fixture/responses/源码tar/DB。Zprocess全terminal，PG34679唯一后续租约继续不假报stop。无push/PR/merge/deploy。
+- 仍6/171；070有限matrix剩余caller/config/明确关系、080原条款/RC02/未来backfill写，G0后P1–P11原依赖不缩。下一tenant9c正常constraint控制不当总体PASS，AA源码实际freeze后再runtime。

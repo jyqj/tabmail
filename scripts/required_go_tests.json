@@ -406,6 +406,38 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5PersonalMessageStateAndRetentionCompleteCommands"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5RestoreAndRetentionSnapshotEligibility"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5RestoreRetentionExpiredSourceControl"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5RestoreRetentionEligibilityControls"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5TemplatePublishRevokeCompleteCommandsParentOrder"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5TemplateVersionRequiredAuditFailureRollsBack"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5TemplateVersionAlreadyRevokedIsNoOp"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5ConvertSharedRetentionCompleteCommands"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5ConvertSharedRetentionNormalAndAuditRollback"
         ]
       ],
       "allowed_skips": []
@@ -1488,6 +1520,38 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5PersonalMessageStateAndRetentionCompleteCommands"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5RestoreAndRetentionSnapshotEligibility"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5RestoreRetentionExpiredSourceControl"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5RestoreRetentionEligibilityControls"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5TemplatePublishRevokeCompleteCommandsParentOrder"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5TemplateVersionRequiredAuditFailureRollsBack"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5TemplateVersionAlreadyRevokedIsNoOp"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5ConvertSharedRetentionCompleteCommands"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5ConvertSharedRetentionNormalAndAuditRollback"
         ]
       ],
       "allowed_skips": [

@@ -347,7 +347,11 @@ func (s *PgStore) DeleteExpiredMessagesReturningKeys(ctx context.Context, before
 		),
 		deleted AS (
 			DELETE FROM messages m USING doomed d WHERE m.id = d.id
-			RETURNING d.mailbox_id, d.raw_object_key
+			  AND ((m.deleted_at IS NOT NULL AND m.purge_after < $1)
+			    OR (m.deleted_at IS NULL AND m.expires_at < $1 AND NOT EXISTS (
+			      SELECT 1 FROM mailboxes mb WHERE mb.id=m.mailbox_id
+			      AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))
+			RETURNING m.mailbox_id, m.raw_object_key
 		)
 		SELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key`, before, limit)
 	if err != nil {

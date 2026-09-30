@@ -197,3 +197,9 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 - messageMutation action先验证，精确源NO KEY UPDATE NOWAIT后原W/predicate/COALESCE；bulk仅MATERIALIZED active锁定subset+30day，旧trash不改。nonowner state于UPSERT前匹配FK的KEY SHARE NOWAIT，保state CASE/owner fastpath。
 - 原同测试三正式source-M反序/首次state FK真实40P01→候选各三轮；旧审计测试只resource/action独立advisory屏障兼容改变，不放宽父锁/不同writer/rollback断言，也不假称历史同阶段红绿。
 - fresh9dfd720默认1382/0/1、218必跑；080组件16/23仍12精确政策红，RC02/BCC未来写边界保留。Z restore stale eligibility实红尚未修，messages.go未改，Z测试未纳Y。
+
+## B01-Z：实际源资格与关系，不代整图
+
+- Retention DELETE target actual m重复完整原资格＋RETURNING实际row，EPQ后恢复源不再stale删；原cutoff/order/limit/permanent/counter/commit-afterkeys保持。
+- Convert保T/actor/M/revision与字段，源active subset按id NOKEY NOWAIT，绑定tenant/mailbox并只locked ids清expiry；55原409且metadata/source/audit同rollback。template两个角色先T互斥已有781a实际7事件控制。
+- Actual空DB最终75FK/7usertriggers与350保守entrylink已导出，Table关联名单不等op实际fire；TX21无FK不等无回调effect。fresh1ec0/726默认1405/0/1+226必跑，tenant/AA排除；070080未闭，见Z报告。

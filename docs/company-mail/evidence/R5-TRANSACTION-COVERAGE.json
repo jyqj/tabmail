@@ -38,7 +38,7 @@
     },
     {
       "path": "internal/store/postgres/company_members.go",
-      "sha256": "5c83ae5d2b44fce0831aae1bf9e9e55e31120da3ac96f4fe25e6c633cf80e1e9"
+      "sha256": "103e0e29b07e865c2a8c601f565cce4f9868af832afda8311f9556a767e545be"
     },
     {
       "path": "internal/store/postgres/company_message_read.go",
@@ -106,7 +106,7 @@
     },
     {
       "path": "internal/store/postgres/messages.go",
-      "sha256": "8a5f50c4d6129d65da9d316c736bce9aa40a1082151c052f6b8537febc93ed86"
+      "sha256": "3bdff0c9a2ecc32544bb81985a0debac8d6710199eced17565aa16cb430abf34"
     },
     {
       "path": "internal/store/postgres/migrate.go",
@@ -7406,8 +7406,8 @@
         "name": "ConvertSharedMailbox",
         "receiver": "*PgStore",
         "line": 788,
-        "end": 816,
-        "sha256": "fcce16ce341033f02a4b3966d76a9cc4d0e75547ae0d8221a8d39b68b6343590",
+        "end": 822,
+        "sha256": "53575e11a2ed0edb920f3db7eb7766e793c319e7536b0310af2c809dc813da33",
         "calls": [
           {
             "line": 789,
@@ -7457,13 +7457,13 @@
             "sql_expr": "`UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`"
           },
           {
-            "line": 811,
+            "line": 814,
             "expr": "tx.Exec",
             "name": "Exec",
-            "sql_expr": "`UPDATE messages SET expires_at=NULL WHERE mailbox_id=$1 AND deleted_at IS NULL`"
+            "sql_expr": "`WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`"
           },
           {
-            "line": 814,
+            "line": 820,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
@@ -7494,23 +7494,23 @@
             "value": "UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1"
           },
           {
-            "line": 811,
-            "value": "UPDATE messages SET expires_at=NULL WHERE mailbox_id=$1 AND deleted_at IS NULL"
+            "line": 814,
+            "value": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           },
           {
-            "line": 814,
+            "line": 820,
             "value": "mailbox.convert_shared"
           },
           {
-            "line": 814,
+            "line": 820,
             "value": "mailbox"
           },
           {
-            "line": 814,
+            "line": 820,
             "value": "reason"
           },
           {
-            "line": 814,
+            "line": 820,
             "value": "revision"
           }
         ],
@@ -7526,13 +7526,14 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "companyTx T UPDATE→actor/profile→M UPDATE锁/current owner/revision→mailbox CAS→M类型/期限/password清除W→活message expires清除W/event trigger→audit/outbox→Commit。",
+      "lock_fk_wait_fence": "companyTx T UPDATE→current actor/profile→M UPDATE/unchangedownerlesslegacy+revision→M revision及原shared/token/noexpiry/retention0/password清除W→MATERIALIZED精确tenant/mailbox active源按id NOKEY NOWAIT→仅locked ids+复核predicate清expires→audit/outbox→Commit；55由companyTxScope409，metadata/source同txrollback。",
       "evidence": [
-        "internal/store/postgres/company_members.go:788-816 sha256=fcce16ce341033f02a4b3966d76a9cc4d0e75547ae0d8221a8d39b68b6343590",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/company_members.go:788-822 sha256=53575e11a2ed0edb920f3db7eb7766e793c319e7536b0310af2c809dc813da33",
+        "migration source definitions; no current runtime catalog claim",
+        "Z exact-source fixture64fc/d8fb isolated baseline and three candidates; separate from Y720 default green."
       ],
       "unverified_risks": [
-        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+        "Z原d8fb旧messages6事件3pass3fail有stale-delete和40P01→same-test候选三轮6pass；当前103e/3bdff统一full未跑。批多source、其它旧port与权限外层不因本关系全证。"
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -7546,14 +7547,18 @@
             "sql_fragment": "UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1"
           },
           {
-            "line": 811,
-            "sql_fragment": "UPDATE messages SET expires_at=NULL WHERE mailbox_id=$1 AND deleted_at IS NULL"
+            "line": 814,
+            "sql_fragment": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           }
         ],
         "direct_lock_fragments": [
           {
             "line": 797,
             "sql_fragment": "SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
+          },
+          {
+            "line": 814,
+            "sql_fragment": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           }
         ],
         "transaction_helper_calls": [
@@ -7577,10 +7582,10 @@
             "sql_expr": "`UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`"
           },
           {
-            "line": 811,
+            "line": 814,
             "expr": "tx.Exec",
             "name": "Exec",
-            "sql_expr": "`UPDATE messages SET expires_at=NULL WHERE mailbox_id=$1 AND deleted_at IS NULL`"
+            "sql_expr": "`WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`"
           }
         ],
         "effect_status": "source-fragments-not-evaluated-SQL",
@@ -7588,7 +7593,7 @@
         "entry_role": "store-exported-interface-candidate"
       },
       "file_family_context": "companyTxScope三种T模式：UPDATE/KEY SHARE/无T→actor SHARE→profile SHARE NOWAIT→callback→Commit；grant/移交先mailbox revision；Activate独立事务",
-      "evidence_level": "source-only"
+      "evidence_level": "actual-batch-linked-relationship"
     },
     {
       "id": "internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox",
@@ -11392,7 +11397,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 814,
+          "line": 820,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26752,8 +26757,8 @@
         "name": "DeleteExpiredMessagesReturningKeys",
         "receiver": "*PgStore",
         "line": 333,
-        "end": 395,
-        "sha256": "0701a78bdff3014c017a63773ac451e9fc4e40d9bda1e6ef9627ecddc3c75ece",
+        "end": 399,
+        "sha256": "e74a29ce55656352f30577425f1e587d04e662e6b537f25867f601b6c77c64ce",
         "calls": [
           {
             "line": 334,
@@ -26769,51 +26774,51 @@
             "line": 340,
             "expr": "tx.Query",
             "name": "Query",
-            "sql_expr": "`\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\tRETURNING d.mailbox_id, d.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key`"
+            "sql_expr": "`\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\t  AND ((m.deleted_at IS NOT NULL AND m.purge_after < $1)\n\t\t\t    OR (m.deleted_at IS NULL AND m.expires_at < $1 AND NOT EXISTS (\n\t\t\t      SELECT 1 FROM mailboxes mb WHERE mb.id=m.mailbox_id\n\t\t\t      AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tRETURNING m.mailbox_id, m.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key`"
           },
           {
-            "line": 356,
+            "line": 360,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 366,
+            "line": 370,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 370,
+            "line": 374,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 375,
-            "expr": "append",
-            "name": "append"
-          },
-          {
-            "line": 377,
-            "expr": "append",
-            "name": "append"
-          },
-          {
             "line": 379,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 381,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 383,
             "expr": "rows.Err",
             "name": "Err"
           },
           {
-            "line": 382,
+            "line": 386,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 385,
+            "line": 389,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\t\tUPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1`"
           },
           {
-            "line": 391,
+            "line": 395,
             "expr": "tx.Commit",
             "name": "Commit"
           }
@@ -26821,14 +26826,14 @@
         "strings": [
           {
             "line": 340,
-            "value": "\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\tRETURNING d.mailbox_id, d.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key"
+            "value": "\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\t  AND ((m.deleted_at IS NOT NULL AND m.purge_after < $1)\n\t\t\t    OR (m.deleted_at IS NULL AND m.expires_at < $1 AND NOT EXISTS (\n\t\t\t      SELECT 1 FROM mailboxes mb WHERE mb.id=m.mailbox_id\n\t\t\t      AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tRETURNING m.mailbox_id, m.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key"
           },
           {
-            "line": 374,
+            "line": 378,
             "value": ""
           },
           {
-            "line": 385,
+            "line": 389,
             "value": "\n\t\t\tUPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1"
           }
         ],
@@ -26844,14 +26849,15 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "Begin→有界expiry/trash候选CTE→messages DELETE/cascades/event trigger→按分组M count扣减W→Commit→返回rawkeys供外层回收；不在本函数删除对象；group结果未显式排序。",
+      "lock_fk_wait_fence": "Begin→原cutoff/ORDER/LIMIT candidate→DELETE target actual m重复完整原eligibility（strict<、owner/shared保护）→RETURNING actual m mailbox/key→实际deleted分组→M计数扣减→Commit后返回keys；EPQ仅source current tuple，不把mailbox策略子查询称全新快照。",
       "evidence": [
-        "internal/store/postgres/messages.go:333-395 sha256=0701a78bdff3014c017a63773ac451e9fc4e40d9bda1e6ef9627ecddc3c75ece",
+        "internal/store/postgres/messages.go:333-399 sha256=e74a29ce55656352f30577425f1e587d04e662e6b537f25867f601b6c77c64ce",
         "migration source definitions; no current runtime catalog claim",
-        "B01-X cache-parent/physical-delete relationship: 主线程提供17事件baseline9pass8fail/candidate17pass三轮；见runtime_relationship_evidence；不扩展到全entry"
+        "B01-X cache-parent/physical-delete relationship: 主线程提供17事件baseline9pass8fail/candidate17pass三轮；见runtime_relationship_evidence；不扩展到全entry",
+        "Z exact-source fixture64fc/d8fb isolated baseline and three candidates; separate from Y720 default green."
       ],
       "unverified_risks": [
-        "消息插入M→message与删除message→M相反；message event晚期T FK；不同消息同行M交叉等待待验证。rawkey锁协议不能证明附件原件写者都参加；对象回调可能阻塞/提交不明"
+        "Z64fc原10事件8pass2fail→same-test三轮10pass；scope恢复源当前资格复检及严格相等/正常legacyTTL/永久owner共享控制。未证明新mailbox policy snapshot、所有多tenant/M顺序或Commit不明。"
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -26863,10 +26869,10 @@
         "direct_sql_effects": [
           {
             "line": 340,
-            "sql_fragment": "\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\tRETURNING d.mailbox_id, d.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key"
+            "sql_fragment": "\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\t  AND ((m.deleted_at IS NOT NULL AND m.purge_after < $1)\n\t\t\t    OR (m.deleted_at IS NULL AND m.expires_at < $1 AND NOT EXISTS (\n\t\t\t      SELECT 1 FROM mailboxes mb WHERE mb.id=m.mailbox_id\n\t\t\t      AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tRETURNING m.mailbox_id, m.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key"
           },
           {
-            "line": 385,
+            "line": 389,
             "sql_fragment": "\n\t\t\tUPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1"
           }
         ],
@@ -26883,10 +26889,10 @@
             "line": 340,
             "expr": "tx.Query",
             "name": "Query",
-            "sql_expr": "`\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\tRETURNING d.mailbox_id, d.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key`"
+            "sql_expr": "`\n\t\tWITH doomed AS (\n\t\t\tSELECT id, mailbox_id, raw_object_key\n\t\t\tFROM messages\n\t\t\tWHERE ((deleted_at IS NOT NULL AND purge_after < $1) OR (deleted_at IS NULL AND expires_at < $1 AND NOT EXISTS (SELECT 1 FROM mailboxes mb WHERE mb.id=messages.mailbox_id AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tORDER BY expires_at, id\n\t\t\tLIMIT $2\n\t\t),\n\t\tdeleted AS (\n\t\t\tDELETE FROM messages m USING doomed d WHERE m.id = d.id\n\t\t\t  AND ((m.deleted_at IS NOT NULL AND m.purge_after < $1)\n\t\t\t    OR (m.deleted_at IS NULL AND m.expires_at < $1 AND NOT EXISTS (\n\t\t\t      SELECT 1 FROM mailboxes mb WHERE mb.id=m.mailbox_id\n\t\t\t      AND (mb.owner_user_id IS NOT NULL OR (mb.mailbox_kind='shared' AND COALESCE(mb.retention_hours_override,0)=0)))))\n\t\t\tRETURNING m.mailbox_id, m.raw_object_key\n\t\t)\n\t\tSELECT mailbox_id, raw_object_key, count(*) FROM deleted GROUP BY mailbox_id, raw_object_key`"
           },
           {
-            "line": 385,
+            "line": 389,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\t\tUPDATE mailboxes SET message_count = GREATEST(message_count - $2, 0) WHERE id=$1`"
@@ -34757,7 +34763,7 @@
           "caller_id": "internal/store/postgres/messages.go:*PgStore:DeleteExpiredMessagesReturningKeys",
           "file": "internal/store/postgres/messages.go",
           "function": "DeleteExpiredMessagesReturningKeys",
-          "line": 370,
+          "line": 374,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41422,7 +41428,7 @@
           "caller_id": "internal/store/postgres/messages.go:*PgStore:DeleteExpiredMessagesReturningKeys",
           "file": "internal/store/postgres/messages.go",
           "function": "DeleteExpiredMessagesReturningKeys",
-          "line": 356,
+          "line": 360,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41430,7 +41436,7 @@
           "caller_id": "internal/store/postgres/messages.go:*PgStore:DeleteExpiredMessagesReturningKeys",
           "file": "internal/store/postgres/messages.go",
           "function": "DeleteExpiredMessagesReturningKeys",
-          "line": 382,
+          "line": 386,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -57090,7 +57096,7 @@
       "effect": "documentation only; no new concurrency proof; invitation/tenant reverse-cycle allegation removed"
     }
   ],
-  "last_review_base_commit": "777eaa83a0b61bc2f68c105efbe5bfbfc4189a61",
+  "last_review_base_commit": "354dd71e124946c8a0d3fb52c268c9bf1a1cd6dd",
   "acceptance_matrix": [
     {
       "id": "070-FINITE",
@@ -57279,10 +57285,10 @@
     "not_proved": "all caller dispatch/public auth; multisource busy; existing sparse conflict; restore/GC fresh lifecycle eligibility"
   },
   "restore_followup": {
-    "batch": "Z",
+    "batch": "B01-Z",
     "test": "internal/store/postgres/r5_restore_retention_snapshot_test.go",
     "sha256": "06cbbc09254fff6c7a7625812f2761fa5ef57b5828893fb295c6d2747c88feb1",
-    "status": "actual source0dc restore-first stale-retention failure; reverse409/expired control pass",
+    "status": "same64fc actual-row eligibility candidate10/10 three rounds; Z fresh full pending",
     "included_in_Y_tested_tree": false,
     "failure": "retention selected old eligible source then deletes restored actual row by id; successful restore followed by committed rawkey receipt",
     "owner": "single integration operator; messages.go unchanged in Y; no Y result used as fix proof"

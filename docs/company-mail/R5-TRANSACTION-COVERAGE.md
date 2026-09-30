@@ -404,3 +404,9 @@ Y Activate最终同测试：14事件/6top/11leaf；原版6pass8fail（含2个par
 Y消息实际关系：三种helper caller（trusted work Trash、organize、owner seen）对retention原10事件4pass6fail含3parent rollup；同637aa新source三轮各10pass。nonowner seen/star首次sparse FK原5事件2pass3fail含parent；同4da84新source三轮各5pass。当前0dc统一full尚待冻结，不把不同源码phase分数合并冒full成绩。
 
 Z新restore testcase06cbbc尚未纳Y：当前真实restore-first在已成功restore后被旧candidate-id物理删除，reverse409/normal expiry控制绿。messages.go本Y不改，Z需actual-row完整资格复检/trueRETURNING证明，不擅改strict cutoff或永久owner/shared政策。
+
+## 11. 实际最终数据库catalog（Z文档交付，非迁移声明替代）
+
+独立新空测试DB经正式PgStore.New/Migrate后actual PG16.13 pg_constraint/getdef导出75 FK、7个user triggers及实际delete/update动作、validation/deferrable状态、函数body。来源SHA 0f8072788e9b621a2af1496d6d2f5d85e46f837f5717fc9ece97eb0f132c7799，完整[机器catalog与350entry conservative links](evidence/R5-TRANSACTION-DB-CATALOG.json)。14Up源的77 REFERENCES仅声明历史，绝不叫最终FK75；本catalog也不是生产DB快照。每entry按literal DML+name closure映child FK检查与delete CASCADE/SET NULL/NO ACTION扇出，不将conservative closure冒dynamic dispatch。
+
+有限caller纠偏：Publish/Revoke已有781a完整两方向T前序互斥/CAS/immutable/auditrollback/idempotent实际7事件，不因V/template词法倒序制造40P01；DeleteMailbox只有未连formal route的legacy app内部链且拒personal/shared，不能制造公司删除关系；CreateMessageWithQuota仅ingest Durable=false legacy fallback，公司config强Durable=true走DeliverIngress；DeleteTenant正式superadmin route的current行为待9c679后续control，约束拒绝也不等任务整体完成。
