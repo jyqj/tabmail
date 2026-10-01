@@ -1651,3 +1651,5 @@ review结论及风险：
 - 范围：仅Python证据校验。全Python发现250测试/18错误，原因包括缺少date-time格式校验依赖和Go编译器不可用；不记完整回归通过
 - 被测文件SHA256、实际日志：[验证收据](evidence/r5-p0-100-strict-types/validation.json)；基线587ba75c0d76b26d3f5a060b131d77fbc12495ac；GitHub PR/commit由同批发布记录关联
 - 不覆盖：此前独立云环境未发布的Go校准修复，实际数据库测试、S/M规模、真实DB/对象卷容量预检。100/120/G0仍未完成，完成数10/171不变
+
+- 同子项后续复验：在当前工作区安装并校验官方 Go 1.25.7、仓库锁定Python和Node依赖后，全Python脚本278/278通过，go build ./...及go vet ./...均退出0。旧环境失败日志保留；实际DB/原S/M仍未运行，100/G0不变。见同目录suite-final-environment.txt及validation.json.followup_validation。

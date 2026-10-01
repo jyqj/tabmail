@@ -30,5 +30,20 @@
   "M_executed": false,
   "task_complete": false,
   "product_green": false,
-  "scope": "Python evidence validation only; no database or Go execution certified"
+  "scope": "Python evidence validation only; no database or Go execution certified",
+  "followup_validation": {
+    "observed_at_utc": "2026-10-01T06:08:23.834603+00:00",
+    "toolchain": "go1.25.7 linux/amd64; official SHA256 12e6d6a191091ae27dc31f6efc630e3a3b8ba409baf3573d955b196fdf086005",
+    "python_dependencies": "scripts/requirements-contract.txt locked isolated venv",
+    "frontend_dependencies": "web/package-lock.json npm ci",
+    "full_python_suite": {
+      "tests": 278,
+      "passed": 278,
+      "errors": 0
+    },
+    "go_build_exit": 0,
+    "go_vet_exit": 0,
+    "database_runtime": "not_run",
+    "S_M": "not_run"
+  }
 }

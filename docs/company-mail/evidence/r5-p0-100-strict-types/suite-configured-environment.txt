@@ -1,0 +1,16 @@
+.......................................................................................................................................................................................E......................................................................................
+======================================================================
+ERROR: setUpClass (test_r5_compatibility.CompatibilityGateTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_compatibility.py", line 18, in setUpClass
+    cls.clients=json.loads(subprocess.run(['node','scripts/collect_api_calls.cjs'],cwd=ROOT,check=True,capture_output=True,text=True).stdout)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['node', 'scripts/collect_api_calls.cjs']' returned non-zero exit status 1.
+
+----------------------------------------------------------------------
+Ran 269 tests in 11.238s
+
+FAILED (errors=1)
