@@ -9,8 +9,8 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | 用户2026-10-01明确暂停实现；本次仅GitHub上传已验收10项与未验收benchmark WIP、安全失败证据，不新起实现或测试 |
-| 下一可执行任务 | 等用户恢复；先benchmark observer/schema及actualtoolcontract修复，再原S/M独立预算窗口；100/120/G0与全P1–P11保持未验 |
+| 当前阶段 | 用户2026-10-01恢复推进，改由当前工作区直接实施；已完成100子范围证据类型严格化，原S/M与G0仍未验收 |
+| 下一可执行任务 | 继续benchmark observer/schema、真实存储卷预检与actualtoolcontract修复，再原S/M独立预算窗口；100/120/G0与全P1–P11保持未验 |
 | 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
 | 实现完成数 | 10 / 171；P0 为 10 / 12。010–090及110基线已验收；100原S/M实测与120/G0仍未过 |
 | 当前阻塞 | 100 S/M真实基线尚未执行；G0未过；后续权限/内容/留存/离职/收发/索引等精确产品目标红仍未修，不借P0材料验收产品全绿 |
@@ -1643,3 +1643,20 @@ review结论及风险：
 - 实际官方New/Migrate空DB catalog75FK/7usertriggers，Up77≠final75；350link是table/nameclosure保守关联不是dispatch/fire证明。Convert expiry UPDATE/Publish versionINSERT操作敏感触发器及TX21回调effect已注明。
 - [报告](R5-B01-Z-VALIDATION.md)/[摘要](evidence/R5-B01-Z-VALIDATION.json)/[175成员归档](evidence/R5-B01-Z-LOGS.tar.gz)/[actualcatalog](evidence/R5-TRANSACTION-DB-CATALOG.json)随本地集成；无DSN/私有fixture/responses/源码tar/DB。Zprocess全terminal，PG34679唯一后续租约继续不假报stop。无push/PR/merge/deploy。
 - 仍6/171；070有限matrix剩余caller/config/明确关系、080原条款/RC02/未来backfill写，G0后P1–P11原依赖不缩。下一tenant9c正常constraint控制不当总体PASS，AA源码实际freeze后再runtime。
+
+### 2026-10-01｜R5-P0-100 子项：证据类型严格化
+
+- 完成：冻结数据集嵌套整数/布尔类型精确比较；规模证据整数身份字段严格校验；safety_assertions_passed只接受JSON true；tool-only校准强制冻结seed及正整数RSS/磁盘观测
+- 修复前：原12测试通过，新增反例后15测试出现43个失败子例；修复后15/15通过
+- 范围：仅Python证据校验。全Python发现250测试/18错误，原因包括缺少date-time格式校验依赖和Go编译器不可用；不记完整回归通过
+- 被测文件SHA256、实际日志：[验证收据](evidence/r5-p0-100-strict-types/validation.json)；基线587ba75c0d76b26d3f5a060b131d77fbc12495ac；GitHub PR/commit由同批发布记录关联
+- 不覆盖：此前独立云环境未发布的Go校准修复，实际数据库测试、S/M规模、真实DB/对象卷容量预检。100/120/G0仍未完成，完成数10/171不变
+
+- 同子项后续复验：在当前工作区安装并校验官方 Go 1.25.7、仓库锁定Python和Node依赖后，全Python脚本278/278通过，go build ./...及go vet ./...均退出0。旧环境失败日志保留；实际DB/原S/M仍未运行，100/G0不变。见同目录suite-final-environment.txt及validation.json.followup_validation。
+
+### 2026-10-01｜R5-P0-100 子项：真实数据观察器修复
+
+- 已复现并修复：真实PG校准在mailboxes.kind处SQLSTATE42703失败，改为真实mailbox_kind；ready计数绑定当前messages原件、持久文档与ready索引作业，拒绝只数文档行；流式数据指纹纳入持久解析摘要、parser版本和内容
+- 实测：4项Go race（生成器、真实SQL计数、20/100/1000校准、解析版本及原件/作业状态篡改回归）全通过0跳过；15项Python通过；benchmark-tag Go vet通过；实际结果通过Python CLI二次验收
+- 证据与被测本地commit/文件hash：[验证收据](evidence/r5-p0-100-observer/validation.json)。GitHub远端可能因提交元数据使用不同commit，以文件hash核对实际被测内容，不把旧源码测试改写为新结果
+- 完成的是P0-100内的观察器正确性子项；S/M原规模、实际存储卷预算验证和G0仍未完成，10/171不变。以上测试只使用全新私有测试PG及合成邮件，没有真实用户数据

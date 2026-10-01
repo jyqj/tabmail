@@ -1,0 +1,22 @@
+{"Time":"2026-09-30T23:28:00.508578226-07:00","Action":"start","Package":"tabmail/internal/store/postgres"}
+{"Time":"2026-09-30T23:28:00.533821262-07:00","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkGeneratorContract"}
+{"Time":"2026-09-30T23:28:00.533876405-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkGeneratorContract","Output":"=== RUN   TestR5BenchmarkGeneratorContract\n"}
+{"Time":"2026-09-30T23:28:00.752608199-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkGeneratorContract","Output":"--- PASS: TestR5BenchmarkGeneratorContract (0.22s)\n"}
+{"Time":"2026-09-30T23:28:00.752653167-07:00","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkGeneratorContract","Elapsed":0.22}
+{"Time":"2026-09-30T23:28:00.752691645-07:00","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkSQLTracerCalibration"}
+{"Time":"2026-09-30T23:28:00.75269534-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkSQLTracerCalibration","Output":"=== RUN   TestR5BenchmarkSQLTracerCalibration\n"}
+{"Time":"2026-09-30T23:28:01.172256893-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkSQLTracerCalibration","Output":"    r5_benchmark_test.go:755: TOOL_ONLY_SQL_CALIBRATION actual_queries=20 no_S_M_L_population_created\n"}
+{"Time":"2026-09-30T23:28:01.187662157-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkSQLTracerCalibration","Output":"--- PASS: TestR5BenchmarkSQLTracerCalibration (0.43s)\n"}
+{"Time":"2026-09-30T23:28:01.187718963-07:00","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkSQLTracerCalibration","Elapsed":0.43}
+{"Time":"2026-09-30T23:28:01.187777662-07:00","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkToolOnlyDatasetCalibration"}
+{"Time":"2026-09-30T23:28:01.187780966-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkToolOnlyDatasetCalibration","Output":"=== RUN   TestR5BenchmarkToolOnlyDatasetCalibration\n"}
+{"Time":"2026-09-30T23:28:12.901278629-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkToolOnlyDatasetCalibration","Output":"    r5_benchmark_test.go:806: TOOL_ONLY_DATASET_CALIBRATION actual20/100/1000 distributions/streamSHA/index/ACL/shippingplan observed; noS_M_Lbaseline\n"}
+{"Time":"2026-09-30T23:28:12.91282696-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkToolOnlyDatasetCalibration","Output":"--- PASS: TestR5BenchmarkToolOnlyDatasetCalibration (11.72s)\n"}
+{"Time":"2026-09-30T23:28:12.912857606-07:00","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkToolOnlyDatasetCalibration","Elapsed":11.72}
+{"Time":"2026-09-30T23:28:12.912864727-07:00","Action":"run","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkObservedIdentityBinding"}
+{"Time":"2026-09-30T23:28:12.912867581-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkObservedIdentityBinding","Output":"=== RUN   TestR5BenchmarkObservedIdentityBinding\n"}
+{"Time":"2026-09-30T23:28:24.074390309-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkObservedIdentityBinding","Output":"--- PASS: TestR5BenchmarkObservedIdentityBinding (11.16s)\n"}
+{"Time":"2026-09-30T23:28:24.074432733-07:00","Action":"pass","Package":"tabmail/internal/store/postgres","Test":"TestR5BenchmarkObservedIdentityBinding","Elapsed":11.16}
+{"Time":"2026-09-30T23:28:24.075135764-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Output":"PASS\n"}
+{"Time":"2026-09-30T23:28:25.090677272-07:00","Action":"output","Package":"tabmail/internal/store/postgres","Output":"ok  \ttabmail/internal/store/postgres\t24.582s\n"}
+{"Time":"2026-09-30T23:28:25.090727048-07:00","Action":"pass","Package":"tabmail/internal/store/postgres","Elapsed":24.582}

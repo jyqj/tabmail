@@ -420,6 +420,17 @@ var r5BenchResourceScope = map[string]string{
 	"cache":  "app_reset_and_reused_no_os_db_cold_claim",
 }
 
+// Only documents bound to the current original and a completed index job are ready.
+func (s *r5BenchState) observedIndexReady(t *testing.T) int {
+	t.Helper()
+	var n int
+	r5BenchCheck(t, s.pool.QueryRow(s.ctx, `SELECT count(*) FROM messages m
+ JOIN mail_documents d ON d.tenant_id=m.tenant_id AND d.message_id=m.id
+ JOIN mail_index_jobs j ON j.tenant_id=m.tenant_id AND j.message_id=m.id
+ WHERE d.source_key=m.raw_object_key AND j.source_key=m.raw_object_key AND j.state='ready'`).Scan(&n))
+	return n
+}
+
 func (s *r5BenchState) observations(t *testing.T, size [3]int) (map[string]any, string) {
 	t.Helper()
 	ctx := s.ctx
@@ -428,13 +439,13 @@ func (s *r5BenchState) observations(t *testing.T, size [3]int) (map[string]any, 
 		"employees":          count(`SELECT count(*) FROM users WHERE role='user'`),
 		"mailboxes":          count(`SELECT count(*) FROM mailboxes`),
 		"messages":           count(`SELECT count(*) FROM messages`),
-		"index_ready_count":  count(`SELECT count(*) FROM mail_documents`),
-		"personal_mailboxes": count(`SELECT count(*) FROM mailboxes WHERE kind='personal'`),
-		"shared_mailboxes":   count(`SELECT count(*) FROM mailboxes WHERE kind='shared'`),
-		"shared_grant_rows":  count(`SELECT count(*) FROM mailbox_grants g JOIN mailboxes b ON b.id=g.mailbox_id WHERE b.kind='shared'`),
+		"index_ready_count":  s.observedIndexReady(t),
+		"personal_mailboxes": count(`SELECT count(*) FROM mailboxes WHERE mailbox_kind='personal'`),
+		"shared_mailboxes":   count(`SELECT count(*) FROM mailboxes WHERE mailbox_kind='shared'`),
+		"shared_grant_rows":  count(`SELECT count(*) FROM mailbox_grants g JOIN mailboxes b ON b.id=g.mailbox_id WHERE b.mailbox_kind='shared'`),
 	}
 	var lo, hi int
-	r5BenchCheck(t, s.pool.QueryRow(ctx, `SELECT min(n),max(n) FROM (SELECT b.id,count(DISTINCT g.user_id)::int n FROM mailboxes b LEFT JOIN mailbox_grants g ON g.mailbox_id=b.id WHERE b.kind='shared' GROUP BY b.id) x`).Scan(&lo, &hi))
+	r5BenchCheck(t, s.pool.QueryRow(ctx, `SELECT min(n),max(n) FROM (SELECT b.id,count(DISTINCT g.user_id)::int n FROM mailboxes b LEFT JOIN mailbox_grants g ON g.mailbox_id=b.id WHERE b.mailbox_kind='shared' GROUP BY b.id) x`).Scan(&lo, &hi))
 	distribution["min_distinct_shared_grantees"], distribution["max_distinct_shared_grantees"] = lo, hi
 	life := map[string]int{"inbox": 0, "archived": 0, "trash_expired": 0, "hard_expired": 0}
 	rows, e := s.pool.Query(ctx, `SELECT CASE WHEN deleted_at IS NOT NULL THEN 'trash_expired' WHEN expires_at IS NOT NULL AND expires_at<clock_timestamp() THEN 'hard_expired' WHEN archived_at IS NOT NULL THEN 'archived' ELSE 'inbox' END,count(*)::int FROM messages GROUP BY 1`)
@@ -484,10 +495,11 @@ func (s *r5BenchState) observations(t *testing.T, size [3]int) (map[string]any, 
 	// row IDs and wall-clock timestamps are not parameter hashes or dataset bytes.
 	h := sha256.New()
 	streams := []string{
+		`SELECT jsonb_build_array(m.id,d.source_key,d.source_sha256,d.parser_version,d.text_body,d.html_body,d.body_access,d.parts,d.thread_key,d.search_text,j.state,j.source_key)::text FROM mail_documents d JOIN messages m ON m.id=d.message_id AND m.tenant_id=d.tenant_id JOIN mail_index_jobs j ON j.message_id=m.id AND j.tenant_id=m.tenant_id ORDER BY m.id`,
 		`SELECT jsonb_build_array(t.name,b.full_address,m.subject,m.size,m.raw_object_key,m.archived_at IS NOT NULL,m.deleted_at IS NOT NULL,m.expires_at IS NOT NULL AND m.expires_at<clock_timestamp())::text FROM messages m JOIN mailboxes b ON b.id=m.mailbox_id JOIN tenants t ON t.id=m.tenant_id ORDER BY m.id`,
 		`SELECT jsonb_build_array(b.full_address,u.email,g.can_read,g.can_organize,g.can_send)::text FROM mailbox_grants g JOIN mailboxes b ON b.id=g.mailbox_id JOIN users u ON u.id=g.user_id ORDER BY b.full_address,u.email`,
 		`SELECT jsonb_build_array(t.name,u.email,u.role,u.is_active)::text FROM users u JOIN tenants t ON t.id=u.tenant_id ORDER BY t.name,u.email`,
-		`SELECT jsonb_build_array(t.name,b.full_address,b.kind,u.email)::text FROM mailboxes b JOIN tenants t ON t.id=b.tenant_id LEFT JOIN users u ON u.id=b.owner_user_id ORDER BY b.full_address`,
+		`SELECT jsonb_build_array(t.name,b.full_address,b.mailbox_kind,u.email)::text FROM mailboxes b JOIN tenants t ON t.id=b.tenant_id LEFT JOIN users u ON u.id=b.owner_user_id ORDER BY b.full_address`,
 	}
 	for i, q := range streams {
 		fmt.Fprintf(h, "stream:%d\n", i)
@@ -792,4 +804,50 @@ func TestR5BenchmarkToolOnlyDatasetCalibration(t *testing.T) {
 	r5BenchCheck(t, e)
 	r5BenchCheck(t, f.Close())
 	t.Log("TOOL_ONLY_DATASET_CALIBRATION actual20/100/1000 distributions/streamSHA/index/ACL/shippingplan observed; noS_M_Lbaseline")
+}
+
+// A real owned dataset must distinguish current indexing from row existence,
+// and bind persisted parse identity rather than only raw-message parameters.
+func TestR5BenchmarkObservedIdentityBinding(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
+	defer cancel()
+	state := r5BenchOwned(t, ctx)
+	size := [3]int{20, 100, 1000}
+	state.seed(t, size)
+	_, baseline := state.observations(t, size)
+	id := state.messages[0].ID
+	_, err := state.pool.Exec(ctx, `UPDATE mail_documents SET parser_version=parser_version+1 WHERE message_id=$1`, id)
+	r5BenchCheck(t, err)
+	_, changed := state.observations(t, size)
+	if changed == baseline {
+		t.Fatal("persisted parser identity change did not affect fingerprint")
+	}
+	_, err = state.pool.Exec(ctx, `UPDATE mail_documents SET parser_version=parser_version-1 WHERE message_id=$1`, id)
+	r5BenchCheck(t, err)
+	_, restored := state.observations(t, size)
+	if restored != baseline {
+		t.Fatal("restored logical dataset did not restore fingerprint")
+	}
+	for _, mutation := range []string{
+		`UPDATE mail_documents SET source_key='stale-original' WHERE message_id=$1`,
+		`UPDATE mail_index_jobs SET source_key='stale-original' WHERE message_id=$1`,
+		`UPDATE mail_index_jobs SET state='failed' WHERE message_id=$1`,
+	} {
+		tx, err := state.pool.Begin(ctx)
+		r5BenchCheck(t, err)
+		// Commit within our isolated fixture so the observer's pool sees it.
+		_, err = tx.Exec(ctx, mutation, id)
+		r5BenchCheck(t, err)
+		r5BenchCheck(t, tx.Commit(ctx))
+		if got := state.observedIndexReady(t); got != 999 {
+			t.Fatalf("stale index counted ready: %d", got)
+		}
+		_, err = state.pool.Exec(ctx, `UPDATE mail_documents d SET source_key=m.raw_object_key FROM messages m WHERE d.message_id=m.id AND m.id=$1`, id)
+		r5BenchCheck(t, err)
+		_, err = state.pool.Exec(ctx, `UPDATE mail_index_jobs j SET source_key=m.raw_object_key,state='ready' FROM messages m WHERE j.message_id=m.id AND m.id=$1`, id)
+		r5BenchCheck(t, err)
+		if got := state.observedIndexReady(t); got != 1000 {
+			t.Fatalf("restored index ready count: %d", got)
+		}
+	}
 }

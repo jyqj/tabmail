@@ -35,20 +35,34 @@ def read_json(path):
   return number
  return json.loads(Path(path).read_text(),object_pairs_hook=pairs,parse_constant=constant,parse_float=finite_float)
 
+def same_json_value(actual,expected):
+ """Frozen JSON values compare types too: True/1 and 20.0/20 differ."""
+ if type(actual) is not type(expected):return False
+ if type(expected) is dict:return actual.keys()==expected.keys() and all(same_json_value(actual[k],v) for k,v in expected.items())
+ if type(expected) is list:return len(actual)==len(expected) and all(same_json_value(a,e) for a,e in zip(actual,expected))
+ return actual==expected
+
+def require_integer_fields(value,fields):
+ for field in fields:
+  if type(value.get(field)) is not int:raise ValueError('integer field required: '+field)
+
 def validate_contract(data):
  if type(data) is not dict:raise ValueError('dataset JSON object required')
+ require_integer_fields(data,['schema_version','seed','concurrency'])
  if data.get('schema_version')!=1 or data.get('task_complete') is not False or data.get('product_green') is not False:raise ValueError('explicit uncompleted benchmark contract required')
  if type(data.get('seed')) is not int or data['seed']!=3893945 or data.get('concurrency')!=20:raise ValueError('frozen seed/20 concurrency changed')
  if set(data.get('scales',{}))!=set(SCALES):raise ValueError('S/M/L scales required')
  for scale,size in SCALES.items():
   row=data['scales'][scale]
+  if type(row) is not dict:raise ValueError('scale JSON object required')
+  require_integer_fields(row,['employees','mailboxes','messages','budget_seconds','disk_budget_gib'])
   if tuple(row.get(k) for k in ['employees','mailboxes','messages'])!=size:raise ValueError('original S/M/L population cannot be reduced')
   if type(row.get('budget_seconds')) is not int or row['budget_seconds']<=0 or type(row.get('disk_budget_gib')) is not int or row['disk_budget_gib']<=0:raise ValueError('scale resource budget missing')
- if data.get('message_sizes')!=[{'bytes':4096,'weight_per_1000':800},{'bytes':32768,'weight_per_1000':180},{'bytes':262144,'weight_per_1000':19},{'bytes':2097152,'weight_per_1000':1}]:raise ValueError('message-size distribution changed')
+ if not same_json_value(data.get('message_sizes'),[{'bytes':4096,'weight_per_1000':800},{'bytes':32768,'weight_per_1000':180},{'bytes':262144,'weight_per_1000':19},{'bytes':2097152,'weight_per_1000':1}]):raise ValueError('message-size distribution changed')
  if set(data.get('workloads',[]))!=WORKLOADS or len(data['workloads'])!=len(WORKLOADS):raise ValueError('all real workloads required')
  if set(data.get('required_metrics',[]))!=METRICS:raise ValueError('required actual metrics cannot be omitted')
- if data.get('candidate_thresholds')!={'S_list_p95_ms':300,'M_list_p95_ms':500,'M_index_ready_query_p95_ms':1000,'unexplained_regression_percent':10,'attachment_and_public_SMTP':'not_list_latency_threshold'}:raise ValueError('original candidate thresholds changed')
- if data.get('population')!={'tenant_ratio':[80,20],'personal_per_employee':1,'shared_per_employee':4,'shared_grants_per_mailbox':4,'lifecycle':{'active_inbox_percent':80,'archived_percent':10,'trash_past_purge_percent':5,'shared_hard_expired_percent':5},'historical_personal_permanent':'never reinterpret anomalous expiry as shared finite retention'}:raise ValueError('ACL/lifecycle population changed')
+ if not same_json_value(data.get('candidate_thresholds'),{'S_list_p95_ms':300,'M_list_p95_ms':500,'M_index_ready_query_p95_ms':1000,'unexplained_regression_percent':10,'attachment_and_public_SMTP':'not_list_latency_threshold'}):raise ValueError('original candidate thresholds changed')
+ if not same_json_value(data.get('population'),{'tenant_ratio':[80,20],'personal_per_employee':1,'shared_per_employee':4,'shared_grants_per_mailbox':4,'lifecycle':{'active_inbox_percent':80,'archived_percent':10,'trash_past_purge_percent':5,'shared_hard_expired_percent':5},'historical_personal_permanent':'never reinterpret anomalous expiry as shared finite retention'}):raise ValueError('ACL/lifecycle population changed')
  if data.get('cache_modes')!=['app_cold_db_os_unspecified','app_hot_db_os_unspecified']:raise ValueError('cannot invent complete DB/OS cold cache')
  if data['scales']['L'].get('execution')!='not_requested_this_batch' or not data['scales']['L'].get('release_necessity'):raise ValueError('L budget/release necessity required without implicit run')
  return data
@@ -107,6 +121,8 @@ def validate_observations(result,size,scale,expected_source):
 def validate_tool_result(result,contract,expected_source):
  validate_contract(contract)
  if type(result) is not dict or result.get('mode')!='TOOL_ONLY_DATASET_CALIBRATION' or result.get('scale')!='tool_only' or result.get('S_M_L_executed') is not False:raise ValueError('tool-only evidence cannot certify S/M/L')
+ require_integer_fields(result,['employees','mailboxes','messages','seed','rss_bytes','disk_bytes'])
+ if result['seed']!=contract['seed'] or result['rss_bytes']<=0 or result['disk_bytes']<=0:raise ValueError('tool calibration requires frozen seed and positive resource observations')
  if tuple(result.get(k) for k in ['employees','mailboxes','messages'])!=(20,100,1000) or result.get('source_sha')!=expected_source:raise ValueError('wrong tool-only source/population')
  if result.get('dataset_sha256')!=hashlib.sha256(DATASET.read_bytes()).hexdigest() or type(result.get('schema_version')) is not int or result['schema_version']<15:raise ValueError('tool dataset/schema mismatch')
  if result.get('task_complete') is not False or result.get('product_green') is not False:raise ValueError('tool-only evidence cannot approve a task/product')
@@ -116,13 +132,14 @@ def validate_tool_result(result,contract,expected_source):
 def validate_result(result,contract,scale,expected_source):
  validate_contract(contract)
  if type(result) is not dict:raise ValueError('result JSON object required')
+ require_integer_fields(result,['employees','mailboxes','messages','seed','concurrency','index_ready_count','sql_tracer_calibration_count','sql_tracer_calibration_expected','pool_size'])
  if result.get('scale')!=scale or tuple(result.get(k) for k in ['employees','mailboxes','messages'])!=SCALES[scale] or result.get('source_sha')!=expected_source:raise ValueError('wrong scale/source evidence')
  if result.get('seed')!=contract['seed'] or result.get('concurrency')!=20:raise ValueError('wrong seed/concurrency')
  if result.get('dataset_sha256')!=hashlib.sha256(DATASET.read_bytes()).hexdigest():raise ValueError('dataset contract hash mismatch')
  if result.get('index_ready_count')!=SCALES[scale][2]:raise ValueError('index-ready prerequisite not satisfied')
  if result.get('sql_tracer_calibration_count')!=20 or result.get('sql_tracer_calibration_expected')!=20:raise ValueError('real SQL tracer calibration required')
  if not isinstance(result.get('hardware'),dict) or not result['hardware'] or type(result.get('schema_version')) is not int or result['schema_version']<15 or not result.get('dataset_fingerprint') or not result.get('safety_assertions'):raise ValueError('actual hardware/schema/fingerprint/safety observations required')
- if not result.get('safety_assertions_passed') or result.get('task_complete') is not False or result.get('product_green') is not False:raise ValueError('safety/policy evidence is not overall task approval')
+ if result.get('safety_assertions_passed') is not True or result.get('task_complete') is not False or result.get('product_green') is not False:raise ValueError('safety/policy evidence is not overall task approval')
  hardware=result['hardware']
  if not isinstance(hardware.get('os'),str) or not hardware['os'] or not isinstance(hardware.get('arch'),str) or not hardware['arch'] or type(hardware.get('cpu')) is not int or hardware['cpu']<=0:raise ValueError('observed runtime hardware required')
  if result.get('pool_size')!=24:raise ValueError('frozen actual application pool size required')

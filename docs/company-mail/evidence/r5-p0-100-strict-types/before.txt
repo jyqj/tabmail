@@ -1,0 +1,469 @@
+.FFFFFFFFFFFFF......FFFFFFFFFFFFF...FFFFFFFFFFFFFFFFF..
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (field='schema_version', value=1.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 45, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field,value=value):self.reject(lambda d:d.__setitem__(field,value))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (field='schema_version', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 45, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field,value=value):self.reject(lambda d:d.__setitem__(field,value))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (field='concurrency', value=20.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 45, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field,value=value):self.reject(lambda d:d.__setitem__(field,value))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='S', field='employees')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='S', field='mailboxes')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='S', field='messages')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='M', field='employees')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='M', field='mailboxes')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='M', field='messages')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='L', field='employees')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='L', field='mailboxes')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases) (scale='L', field='messages')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 48, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_contract_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkContractTests.test_integer_contract_fields_reject_float_and_boolean_aliases)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 49, in test_integer_contract_fields_reject_float_and_boolean_aliases
+    self.reject(lambda d:d['message_sizes'][0].__setitem__('bytes',4096.0))
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 15, in reject
+    with self.assertRaises(ValueError):bench.validate_contract(data)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='employees')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='mailboxes')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='messages')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='seed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='concurrency')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='index_ready_count')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='sql_tracer_calibration_count')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='sql_tracer_calibration_expected')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (field='pool_size')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 108, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (value=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 110, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(value=value):self.reject(lambda d:d.__setitem__('safety_assertions_passed',value))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (value='true')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 110, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(value=value):self.reject(lambda d:d.__setitem__('safety_assertions_passed',value))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (value=[True])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 110, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(value=value):self.reject(lambda d:d.__setitem__('safety_assertions_passed',value))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_integer_result_fields_reject_float_and_boolean_aliases (test_r5_benchmark.BenchmarkEvidenceTests.test_integer_result_fields_reject_float_and_boolean_aliases) (value={'passed': True})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 110, in test_integer_result_fields_reject_float_and_boolean_aliases
+    with self.subTest(value=value):self.reject(lambda d:d.__setitem__('safety_assertions_passed',value))
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 64, in reject
+    with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='seed', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='seed', value=1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='seed', value=3893945.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='seed', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='rss_bytes', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='rss_bytes', value=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='rss_bytes', value=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='rss_bytes', value=1.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='rss_bytes', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='disk_bytes', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='disk_bytes', value=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='disk_bytes', value=-1)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='disk_bytes', value=1.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='disk_bytes', value=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='employees', value=20.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='mailboxes', value=100.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+======================================================================
+FAIL: test_tool_calibration_requires_strict_seed_and_positive_resources (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_calibration_requires_strict_seed_and_positive_resources) (field='messages', value=1000.0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_benchmark.py", line 118, in test_tool_calibration_requires_strict_seed_and_positive_resources
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ValueError not raised
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.021s
+
+FAILED (failures=43)
