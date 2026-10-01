@@ -10,6 +10,8 @@
 
 最新执行为 **B01-AI（2026-10-01）**：默认1456/0/1、247必跑，tag18pass/12必跑、23controller门禁0；070事务原四条与090设施/deps经独立实物审验收，完成10/171。100 S/M未实跑、G0未过，后续产品目标红不豁免。见 [AI记录](docs/company-mail/R5-B01-AI-VALIDATION.md)。
 
+**2026-10-01 用户暂停实现，当前10/171；全部已验收提交与未验收benchmark WIP/安全失败日志上传工作分支，不宣S/M或G0通过。** 见[暂停状态](docs/company-mail/R5-PAUSED-20261001.md)。
+
 唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段/171工作包/25批次/38验收场景。目前仍 **6/171，P0为6/12**。新增 [有限事务目录](docs/company-mail/R5-TRANSACTION-COVERAGE.md) 覆盖350函数/66重点，结构清点不冒称全runtime正确；070具体未验证关系与080的RC02精确组件入口／BC02–03未来写入适用性等仍待验收，G0不提前关闭。
 
 已上传B01-U见 [检查点](docs/company-mail/R5-CHECKPOINT-20260930.md)；V/W/X/Y/Z为后续本地工作，不代表主线合并、远端CI通过、R5正式发布或部署。

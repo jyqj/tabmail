@@ -1,0 +1,69 @@
+{
+  "status": "implementation_goal_paused_at_user_request",
+  "accepted_tasks": 10,
+  "total_tasks": 171,
+  "last_accepted_commit": "fae4450e68b208f1b5e357840c1471f2eebcf418",
+  "last_accepted_program_tree": "c372902572c2b0b00bbc1281ed83906d62476495",
+  "accepted_runtime": {
+    "default_pass": 1456,
+    "default_fail": 0,
+    "default_skip": 1,
+    "default_required": 247,
+    "fixture_tag_pass": 18,
+    "fixture_tag_required": 12,
+    "controller_steps_pass": 23
+  },
+  "unaccepted_benchmark": {
+    "source_state": "WIP legalcode/documentation, no furtherfix orvalidation afterpause",
+    "six_source_sha256": {
+      "docs/company-mail/R5-BENCHMARK.md": "089a5e8ef20e739d12f8031cd4a6b8f9a403ebc6277aef46a5d01b864116c2f2",
+      "docs/company-mail/evidence/R5-BENCHMARK-DATASETS.json": "540be9fe8b6eb600780407bbb69017dcd7836eedf4ba2967d601b3cf4ccabcdc",
+      "docs/company-mail/evidence/R5-BENCHMARK-RUNS.json": "73d27ca2c3c8af7af946ec1837ef41cf0350f53e468ee9be96196cbb904b9a7a",
+      "internal/store/postgres/r5_benchmark_test.go": "b963bc81467e2fb74a81c32dd67e3944664aef0cbe9dd5177a8f7310efe852ae",
+      "scripts/run_r5_benchmark.py": "d6561087aa0578160079f37a15a00475239df3cd9b018ede1e3cbf110e8fb423",
+      "scripts/tests/test_r5_benchmark.py": "cbb91893b35b2834d5f99939e711528699d5e66bc90c7e899354adea748bf10f"
+    },
+    "actual_SQL20": "toolonlyactual20querypass, noSMLdataset",
+    "actual_dataset_tool": "TOOL_ONLY20employees100mailboxes1000messages, source44c7,exit1SQLSTATE42703mailboxes.kindwrongcolumn; noresult/EXPLAIN/runtimevalidator",
+    "S_M_L_executed": false,
+    "task100_complete": false,
+    "G0_passed": false,
+    "performance_supported_capacity_claimed": false
+  },
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-PAUSED-20261001-TOOL-LOGS.tar.gz",
+    "sha256": "6b5dec3bb7d0b39bdc41dc35aceca0052a7fa320f81a28c66ac4cc029380efaf",
+    "members": 14,
+    "members_sha256": {
+      "evidence-calibration/benchmark-source.sha256": "629cf1320659ab4d271fb66a123ec5e8965f0c6fee5d5907140ae457c1e0c428",
+      "evidence-calibration/disk.txt": "a6c7db2e123a51a5d00dda4817d9cef65c576938faade7d91aa488dd8057a094",
+      "evidence-calibration/hw-logicalcpu.txt": "e6c21e8d260fe71882debdb339d2402a2ca7648529bc2303f48649bce0380017",
+      "evidence-calibration/hw-memsize.txt": "57d5473bac8c93f9991ae91cf27dcff110029feff9821e24a4502928d1861a74",
+      "evidence-calibration/new-tool-compile.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "evidence-calibration/new-tool-compile.log": "9ad802e2d3924b6a66f356bd202c882bf7bd91aa4edabe594e5f9588d51c4dbd",
+      "evidence-calibration/sql20.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "evidence-calibration/sql20.jsonl": "8a58e0cf96e9182e022c4c0266f5b634b32a9ef1cb46c8f43f52e8a8e68bdd84",
+      "evidence-calibration/sql20.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidence-tool-dataset/run.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "evidence-tool-dataset/run.jsonl": "2d01282952ee662d223ee2ed45e79be848e2938eb9b455e9dbb050afa2e17040",
+      "evidence-tool-dataset/run.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "evidence-tool-dataset/source.json": "6c51d344f6f646564410b7cb0134b23c8ee34fb98c0a15485b7ab18aa1c3cb2c",
+      "evidence-tool-dataset/tested-tree.txt": "9fb85a5dd87ea8fd76fbaec3ec1f40e70a7acb73883b9f1e9a9757096ddb5238"
+    }
+  },
+  "stopped_resources": {
+    "postgres_owned_pid": 34679,
+    "pg_ctl_stop_exit": 0,
+    "process_absent": true,
+    "postmaster_pid_removed": true,
+    "no_active_agent_test_handles": true
+  },
+  "upload_scope": "allcurrentlegalcommits andWIPcode/docs to existingorigin currentworkbranch; noforce/PR/merge/release/deploy",
+  "excluded_upload": [
+    ".env/privateDSN/APIJWTtokens/rawresponses/privatefixtures",
+    "/tmpactualdatabase/objectseed",
+    "node_modules/.next/runtimecache",
+    "largeSMLsyntheticpopulation"
+  ],
+  "next_when_user_resumes": "fixbench observer actualmailbox_kind, newexactsource toolonlyrepeat+strictobservations/SQLplans/sampling/foreignACL; then originalS/Mbudget preflight windows; noexecutionwhilepaused"
+}
