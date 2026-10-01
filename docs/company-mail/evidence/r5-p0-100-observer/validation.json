@@ -1,0 +1,24 @@
+{
+  "task": "R5-P0-100",
+  "component": "owned dataset observation correctness",
+  "observed_at_utc": "2026-10-01T06:30:15.779154+00:00",
+  "base_remote_sha": "b647ec8b34fb72c86885aa622d9dc088831edeca",
+  "tested_local_commit": "89eaa2f724063b8655fa54f9cfd32f5d55095656",
+  "source_sha256": {
+    "internal/store/postgres/r5_benchmark_test.go": "487a4de6342b288b82ad5a7e145935a34666479ec6392ee4643004a34a79cac4"
+  },
+  "baseline": "actual DB calibration failed SQLSTATE 42703 missing kind column",
+  "after": {
+    "go_race_tests": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "python_tests": 15,
+    "python_passed": 15,
+    "go_vet_benchmark_exit": 0,
+    "actual_result_cli": "tool_only_observations_validated"
+  },
+  "S_M_L_executed": false,
+  "task_complete": false,
+  "G0_accepted": false
+}

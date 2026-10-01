@@ -1,0 +1,5 @@
+--- FAIL: TestR5BenchmarkToolOnlyDatasetCalibration (12.87s)
+    r5_benchmark_test.go:426: ERROR: column "kind" does not exist (SQLSTATE 42703)
+FAIL
+FAIL	tabmail/internal/store/postgres	12.911s
+FAIL

@@ -1,0 +1,141 @@
+{
+  "S_M_L_executed": false,
+  "actual_distribution": {
+    "employees": 20,
+    "index_ready_count": 1000,
+    "lifecycle_counts": {
+      "archived": 100,
+      "hard_expired": 50,
+      "inbox": 800,
+      "trash_expired": 50
+    },
+    "mailboxes": 100,
+    "max_distinct_shared_grantees": 4,
+    "messages": 1000,
+    "mime_size_counts": {
+      "2097152": 1,
+      "262144": 19,
+      "32768": 180,
+      "4096": 800
+    },
+    "min_distinct_shared_grantees": 4,
+    "personal_mailboxes": 20,
+    "shared_grant_rows": 320,
+    "shared_mailboxes": 80,
+    "tenant_message_counts": {
+      "bench-0.test": 800,
+      "bench-1.test": 200
+    }
+  },
+  "dataset_fingerprint": "42f33f8bc58a57accb93ce79e368d4158a88bd0d1e0236838882c01762f2ca05",
+  "dataset_sha256": "540be9fe8b6eb600780407bbb69017dcd7836eedf4ba2967d601b3cf4ccabcdc",
+  "disk_bytes": 31390743,
+  "employees": 20,
+  "mailboxes": 100,
+  "messages": 1000,
+  "mode": "TOOL_ONLY_DATASET_CALIBRATION",
+  "parameter_fingerprint": "b5f199ca4e4a20199747e2a62c17bb3c6ec61397b98433eab01a09594e9455ca",
+  "product_green": false,
+  "resource_scope": {
+    "cache": "app_reset_and_reused_no_os_db_cold_claim",
+    "disk": "owned_raw_objects_plus_owned_pg_database_bytes",
+    "gc": "raw_reference_read_only_not_sweep_throughput",
+    "memory": "go_alloc_and_process_high_water_rss_not_pg_redis_system",
+    "sql": "application_and_worker_pool_not_server_trigger_sql"
+  },
+  "rss_bytes": 308576256,
+  "scale": "tool_only",
+  "schema_version": 15,
+  "seed": 3893945,
+  "source_sha": "89eaa2f724063b8655fa54f9cfd32f5d55095656",
+  "sql_plans": [
+    {
+      "index_ready_count": 1000,
+      "origin": "captured_shipping_query_same_parameters",
+      "parameters_sha256": "c4e6e5585dddfca38ba1b23333a612c55e3eabc62dfcbe354cc3dc4634359d8c",
+      "plan": [
+        {
+          "Plan": {
+            "Async Capable": false,
+            "Inner Unique": true,
+            "Join Type": "Left",
+            "Node Type": "Nested Loop",
+            "Parallel Aware": false,
+            "Plan Rows": 1,
+            "Plan Width": 28,
+            "Plans": [
+              {
+                "Async Capable": false,
+                "Inner Unique": true,
+                "Join Type": "Inner",
+                "Node Type": "Nested Loop",
+                "Parallel Aware": false,
+                "Parent Relationship": "Outer",
+                "Plan Rows": 1,
+                "Plan Width": 44,
+                "Plans": [
+                  {
+                    "Alias": "t",
+                    "Async Capable": false,
+                    "Index Cond": "(id = 'ae065979-02fc-5350-9c31-d49af2fc7efd'::uuid)",
+                    "Index Name": "tenants_pkey",
+                    "Node Type": "Index Scan",
+                    "Parallel Aware": false,
+                    "Parent Relationship": "Outer",
+                    "Plan Rows": 1,
+                    "Plan Width": 32,
+                    "Relation Name": "tenants",
+                    "Scan Direction": "Forward",
+                    "Startup Cost": 0.14,
+                    "Total Cost": 8.16
+                  },
+                  {
+                    "Alias": "p",
+                    "Async Capable": false,
+                    "Index Cond": "(id = t.plan_id)",
+                    "Index Name": "plans_pkey",
+                    "Node Type": "Index Scan",
+                    "Parallel Aware": false,
+                    "Parent Relationship": "Inner",
+                    "Plan Rows": 1,
+                    "Plan Width": 44,
+                    "Relation Name": "plans",
+                    "Scan Direction": "Forward",
+                    "Startup Cost": 0.15,
+                    "Total Cost": 8.17
+                  }
+                ],
+                "Startup Cost": 0.29,
+                "Total Cost": 16.37
+              },
+              {
+                "Alias": "o",
+                "Async Capable": false,
+                "Index Cond": "(tenant_id = 'ae065979-02fc-5350-9c31-d49af2fc7efd'::uuid)",
+                "Index Name": "tenant_overrides_tenant_id_key",
+                "Node Type": "Index Scan",
+                "Parallel Aware": false,
+                "Parent Relationship": "Inner",
+                "Plan Rows": 1,
+                "Plan Width": 44,
+                "Relation Name": "tenant_overrides",
+                "Scan Direction": "Forward",
+                "Startup Cost": 0.15,
+                "Total Cost": 8.17
+              }
+            ],
+            "Startup Cost": 0.44,
+            "Total Cost": 24.55
+          }
+        }
+      ],
+      "query_sha256": "7e26dfa3d70557207bca22b8eaa9f63d32291e3e1c9058667d9ca0e82ed9b5bb",
+      "scale": "tool_only",
+      "schema_version": 15,
+      "source_sha": "89eaa2f724063b8655fa54f9cfd32f5d55095656",
+      "workload": "inbox_list"
+    }
+  ],
+  "system_memory_observation": "not_measured",
+  "task_complete": false
+}

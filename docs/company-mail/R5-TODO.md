@@ -1653,3 +1653,10 @@ review结论及风险：
 - 不覆盖：此前独立云环境未发布的Go校准修复，实际数据库测试、S/M规模、真实DB/对象卷容量预检。100/120/G0仍未完成，完成数10/171不变
 
 - 同子项后续复验：在当前工作区安装并校验官方 Go 1.25.7、仓库锁定Python和Node依赖后，全Python脚本278/278通过，go build ./...及go vet ./...均退出0。旧环境失败日志保留；实际DB/原S/M仍未运行，100/G0不变。见同目录suite-final-environment.txt及validation.json.followup_validation。
+
+### 2026-10-01｜R5-P0-100 子项：真实数据观察器修复
+
+- 已复现并修复：真实PG校准在mailboxes.kind处SQLSTATE42703失败，改为真实mailbox_kind；ready计数绑定当前messages原件、持久文档与ready索引作业，拒绝只数文档行；流式数据指纹纳入持久解析摘要、parser版本和内容
+- 实测：4项Go race（生成器、真实SQL计数、20/100/1000校准、解析版本及原件/作业状态篡改回归）全通过0跳过；15项Python通过；benchmark-tag Go vet通过；实际结果通过Python CLI二次验收
+- 证据与被测本地commit/文件hash：[验证收据](evidence/r5-p0-100-observer/validation.json)。GitHub远端可能因提交元数据使用不同commit，以文件hash核对实际被测内容，不把旧源码测试改写为新结果
+- 完成的是P0-100内的观察器正确性子项；S/M原规模、实际存储卷预算验证和G0仍未完成，10/171不变。以上测试只使用全新私有测试PG及合成邮件，没有真实用户数据
