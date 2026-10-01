@@ -1,0 +1,206 @@
+.....................................................................................EE..E....EEEEEEEEEEEE........E....................................................................E...................................................................E
+======================================================================
+ERROR: test_public_cache_directive_cannot_hide_among_download_requirements (test_http_contract.AdditionalWireSafetyTests.test_public_cache_directive_cannot_hide_among_download_requirements)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 148, in test_public_cache_directive_cannot_hide_among_download_requirements
+    validator = runtime.HTTPContractValidator(d)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_encoded_body_is_rejected_before_allocation (test_http_contract.CaptureBoundTests.test_encoded_body_is_rejected_before_allocation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 234, in test_encoded_body_is_rejected_before_allocation
+    validator = runtime.HTTPContractValidator(document())
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_missing_cases_and_duplicate_ids_fail (test_http_contract.CaptureCompletenessTests.test_missing_cases_and_duplicate_ids_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 257, in test_missing_cases_and_duplicate_ids_fail
+    result = runtime.validate_capture(document(), capture, 'hash', inventory)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 308, in validate_capture
+    validator = HTTPContractValidator(document)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_binary_headers_and_sse_framing (test_http_contract.RuntimeResponseTests.test_binary_headers_and_sse_framing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_capture_types_and_base64_are_strict (test_http_contract.RuntimeResponseTests.test_capture_types_and_base64_are_strict)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_false_zero_and_wrong_scalar_are_not_coerced (test_http_contract.RuntimeResponseTests.test_false_zero_and_wrong_scalar_are_not_coerced)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_json_duplicates_and_nonfinite_numbers_are_rejected (test_http_contract.RuntimeResponseTests.test_json_duplicates_and_nonfinite_numbers_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_missing_required_and_unexpected_field_fail (test_http_contract.RuntimeResponseTests.test_missing_required_and_unexpected_field_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_nullable_collection_is_not_an_array (test_http_contract.RuntimeResponseTests.test_nullable_collection_is_not_an_array)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_real_format_checks_are_enabled (test_http_contract.RuntimeResponseTests.test_real_format_checks_are_enabled)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_remote_refs_are_rejected_before_any_network_access (test_http_contract.RuntimeResponseTests.test_remote_refs_are_rejected_before_any_network_access)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_resolves_local_response_and_nested_component_refs (test_http_contract.RuntimeResponseTests.test_resolves_local_response_and_nested_component_refs)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_schema_error_messages_do_not_echo_response_content (test_http_contract.RuntimeResponseTests.test_schema_error_messages_do_not_echo_response_content)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_secret_fields_fail_even_in_permissive_old_components (test_http_contract.RuntimeResponseTests.test_secret_fields_fail_even_in_permissive_old_components)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_status_method_route_and_content_type_are_checked (test_http_contract.RuntimeResponseTests.test_status_method_route_and_content_type_are_checked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 54, in setUp
+    self.validator = runtime.HTTPContractValidator(document())
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: test_binary_public_directive_cannot_override_private_no_store (test_http_contract.WireSafetyRegressionTests.test_binary_public_directive_cannot_override_private_no_store)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_http_contract.py", line 183, in test_binary_public_directive_cannot_override_private_no_store
+    self.assertTrue(runtime.HTTPContractValidator(d).validate_response(r))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_http_contract.py", line 181, in __init__
+    raise RuntimeError(f'missing required format validator: {name}')
+RuntimeError: missing required format validator: date-time
+
+======================================================================
+ERROR: setUpClass (test_r5_compatibility.CompatibilityGateTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_compatibility.py", line 18, in setUpClass
+    cls.clients=json.loads(subprocess.run(['node','scripts/collect_api_calls.cjs'],cwd=ROOT,check=True,capture_output=True,text=True).stdout)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['node', 'scripts/collect_api_calls.cjs']' returned non-zero exit status 1.
+
+======================================================================
+ERROR: setUpClass (test_r5_transactions.TransactionInventoryTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/tests/test_r5_transactions.py", line 16, in setUpClass
+    cls.ast = tx.extract()
+              ^^^^^^^^^^^^
+  File "/workspace/scratch/92d36e4d0acd/projects/tabmail/scripts/check_r5_transactions.py", line 33, in extract
+    raise ValueError('AST extraction failed: ' + run.stderr.strip())
+ValueError: AST extraction failed: Go: Unknown option: run
+
+----------------------------------------------------------------------
+Ran 250 tests in 4.294s
+
+FAILED (errors=18)

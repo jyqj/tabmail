@@ -39,6 +39,17 @@ class BenchmarkContractTests(unittest.TestCase):
     p.write_text('{"metric":'+value+'}')
     with self.subTest(value=value),self.assertRaises(ValueError):bench.read_json(p)
 
+ def test_integer_contract_fields_reject_float_and_boolean_aliases(self):
+  for field in ['schema_version','seed','concurrency']:
+   for value in [float(self.data[field]), True]:
+    with self.subTest(field=field,value=value):self.reject(lambda d:d.__setitem__(field,value))
+  for scale in bench.SCALES:
+   for field in ['employees','mailboxes','messages']:
+    with self.subTest(scale=scale,field=field):self.reject(lambda d:d['scales'][scale].__setitem__(field,float(d['scales'][scale][field])))
+  self.reject(lambda d:d['message_sizes'][0].__setitem__('bytes',4096.0))
+  self.reject(lambda d:d['population'].__setitem__('personal_per_employee',True))
+  self.reject(lambda d:d['candidate_thresholds'].__setitem__('S_list_p95_ms',300.0))
+
 class BenchmarkEvidenceTests(unittest.TestCase):
  def setUp(self):
   self.contract=bench.read_json(bench.DATASET)
@@ -81,7 +92,7 @@ class BenchmarkEvidenceTests(unittest.TestCase):
   self.reject(lambda d:d['resource_scope'].__setitem__('sql','all_server_SQL'))
   self.reject(lambda d:d.__setitem__('system_memory_observation','all_system_measured'))
  def test_tool_only_shape_never_certifies_original_scale(self):
-  result={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'source_sha':'a'*40,'schema_version':15,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,**self.observations(20,1000,'tool_only')}
+  result={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'seed':3893945,'rss_bytes':123,'disk_bytes':456,'source_sha':'a'*40,'schema_version':15,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,**self.observations(20,1000,'tool_only')}
   observed=bench.validate_tool_result(result,self.contract,'a'*40)
   self.assertFalse(observed['S_M_L_executed'])
   with self.assertRaises(ValueError):bench.validate_result(result,self.contract,'S','a'*40)
@@ -91,5 +102,19 @@ class BenchmarkEvidenceTests(unittest.TestCase):
  def test_validated_shape_still_not_task_or_product_approval(self):
   result=bench.validate_result(self.result,self.contract,'S','a'*40)
   self.assertFalse(result['task_complete']);self.assertFalse(result['product_green'])
+
+ def test_integer_result_fields_reject_float_and_boolean_aliases(self):
+  for field in ['employees','mailboxes','messages','seed','concurrency','index_ready_count','sql_tracer_calibration_count','sql_tracer_calibration_expected','pool_size']:
+   with self.subTest(field=field):self.reject(lambda d:d.__setitem__(field,float(d[field])))
+  for value in [1,'true',[True],{'passed':True}]:
+   with self.subTest(value=value):self.reject(lambda d:d.__setitem__('safety_assertions_passed',value))
+
+ def test_tool_calibration_requires_strict_seed_and_positive_resources(self):
+  result={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'seed':3893945,'rss_bytes':123,'disk_bytes':456,'source_sha':'a'*40,'schema_version':15,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,**self.observations(20,1000,'tool_only')}
+  bench.validate_tool_result(result,self.contract,'a'*40)
+  for field,values in [('seed',[None,1,3893945.0,True]),('rss_bytes',[None,0,-1,1.0,True]),('disk_bytes',[None,0,-1,1.0,True]),('employees',[20.0]),('mailboxes',[100.0]),('messages',[1000.0])]:
+   for value in values:
+    altered=copy.deepcopy(result);altered[field]=value
+    with self.subTest(field=field,value=value),self.assertRaises(ValueError):bench.validate_tool_result(altered,self.contract,'a'*40)
 
 if __name__=='__main__':unittest.main()
