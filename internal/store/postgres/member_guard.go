@@ -8,7 +8,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 
+	"tabmail/internal/app"
 	"tabmail/internal/authz"
 	"tabmail/internal/models"
 	"tabmail/internal/store"
@@ -106,15 +108,22 @@ func (s *PgStore) UpdateUserGuarded(ctx context.Context, actor authz.Actor, tena
 	if err = guardMemberRemoval(ctx, tx, old, &next); err != nil {
 		return nil, err
 	}
-	// Recheck profile tenant under the same transaction, not only in the handler.
+	// Recheck and fence the requested FK parent. A deleting profile may be
+	// waiting on this transaction's actor/target user locks through SET NULL;
+	// never wait back on that parent while those user locks are held.
 	if patch.SetPermissionProfile && patch.PermissionProfileID != nil {
-		var allowed bool
-		if err = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2))`, *patch.PermissionProfileID, tenant).Scan(&allowed); err != nil {
+		var profileID uuid.UUID
+		if err = tx.QueryRow(ctx, `SELECT id FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR KEY SHARE NOWAIT`, *patch.PermissionProfileID, tenant).Scan(&profileID); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return nil, authz.ErrForbidden("permission profile unavailable in this company")
+			}
+			var pg *pgconn.PgError
+			if errors.As(err, &pg) && pg.Code == "55P03" {
+				return nil, app.Conflict("permission profile is changing; reload before retrying")
+			}
 			return nil, err
 		}
-		if !allowed {
-			return nil, authz.ErrForbidden("permission profile unavailable in this company")
-		}
+		next.PermissionProfileID = &profileID
 	}
 	if old.IsActive != next.IsActive || old.Role != next.Role {
 		next.SessionVersion++

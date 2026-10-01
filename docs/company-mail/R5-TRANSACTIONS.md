@@ -154,7 +154,9 @@ attempts和ledger读取后执行最终回执准入及内容检查；失败无半
 
 worker及重试共用ValidateJobAuthorization核心，模板和发送身份查询原位抽出tx适配，不经过外层连接池或网络。历史无SenderMailboxID的verified identity回退另外持mailboxes/send_identities SHARE NOWAIT表锁，保护邮箱/更高优先级精确身份的缺失；繁忙409，存在跨租户写竞争成本，未宣称已完成性能验收。客户端未收到commit确认、worker校验到SMTP接受及全部JWT session版本不因此原子化。
 
-## 6. P0-070收口前的剩余范围
+## 6. P0-070收口前的剩余范围（历史候选，当前裁决见AI矩阵）
+
+> 本节为早期清点快照，不当current pending清单。AC/AE/AF/AH原同源码红绿已归证；domain/plan按当前准入时点，P1/P4/P7与callback物理effect仅列未来边界。当前352/70/15实际证据及原四要求见 [AI最终审材料](evidence/R5-P0-070-FINAL-REVIEW.json)。
 
 B01-O已关闭K的局部PG运行缺口，B01-P又完成四个审计FK候选的实际修复和完整验收；两批证据分别保留，不再将它们列为未执行。Q已补当前普通用户的公司事务profile/override保护，R已独立验收目标用户说明，S已统一旧正文/诊断与owned Key内容资格，T已补回执当前主体与语句级整页读取，U已闭合手工重试的最终事务；剩余新入队完整授权、其他凭据/旧POST协议、普通收件历史期限、其他隐式FK、GC与多资源交叉。不能从物理GC保护直接推导新可读政策，完整070/080与G0仍未关闭。
 
@@ -214,6 +216,10 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 
 正式S DELETE改DeleteSuppressionAuthorized显式Actor，T/U/K/S及required audit/finalKeyclock同Tx；旧Audited是trusted兼容不当前HTTP。正常5和role/active当前403、U/Key行fence线性化三轮11/11；不是撤权后都拒。15修真实合法KeyPOST23514，不绕CHECK。fresh75FK/7trigger/34CHECK及最终1431/0/1／234门禁见[AC证据](R5-B01-AC-VALIDATION.md)。070其他多资源关系不由此全闭。
 
-## AG当前有限归证与原要求收敛
+## AG批次有限归证（历史，当前AI裁决优先）
 
-Webhook fanout复制URL稳定排序解决实际unique批环；Invite exactPKEYSHARENOWNOWAIT解决已证U/P反序，InvP实际NOACTION、usersPSETNULL不同；Actor/requiredAudit错误分类及16fixture同源23gate0见[AG报告](R5-B01-AG-VALIDATION.md)。070唯一新精确待证slot46 Guarded user请求P晚FK不能借Invite绿外推；domain/plan按当前准入时点不加futurecommit政策，callback外部effect不DB物理rollback。090设施证明完整仍受070依赖，任务8/171。
+Webhook fanout复制URL稳定排序解决实际unique批环；Invite exactPKEYSHARENOWNOWAIT解决已证U/P反序，InvP实际NOACTION、usersPSETNULL不同；Actor/requiredAudit错误分类及16fixture同源23gate0见[AG报告](R5-B01-AG-VALIDATION.md)。AG当时唯一待证slot46后由AH65e51/8fac原two40P01→三轮5pass及AI冷回归补证，不能仅借Invite绿外推；domain/plan按当前准入时点不加futurecommit政策，callback外部effect不DB物理rollback。090设施证明完整仍受070依赖，任务8/171。
+
+## AI当前原P0-070四条最终材料
+
+当前352函数／70手工轨迹（68原slot家族+Actor/helper）／15migration实际catalog75FK/7trigger/34CHECK与原四条任务要求逐项绑定：[最终审材料](evidence/R5-P0-070-FINAL-REVIEW.json)。14/46profile、53Actor、61URL批序有同finaltest真实red-green与当前AI23门禁；domain与plan仅按现准入点合同，callback外部effect／GC前缀非物理整TX保证，未来产品任务未豁免。独立审核裁决层与syntax runtime=false登记层分清，不按全branch计数验收。

@@ -494,6 +494,18 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5InvitationProfileCompleteCommandsLockOrder"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5UserProfileNormalAssignmentAndDelete"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5UserProfileRequiredAuditFailureRollsBack"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5UserProfileCompleteCommandsLockOrder"
         ]
       ],
       "allowed_skips": []
@@ -1680,6 +1692,18 @@
         [
           "tabmail/internal/testutil",
           "TestR5SMTPRequiresBoundedOwnership"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5UserProfileNormalAssignmentAndDelete"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5UserProfileRequiredAuditFailureRollsBack"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5UserProfileCompleteCommandsLockOrder"
         ]
       ],
       "allowed_skips": [

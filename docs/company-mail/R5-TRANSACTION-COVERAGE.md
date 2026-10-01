@@ -132,7 +132,7 @@ E-TX-CACHE原日志当前由主线程持有 `/tmp/tabmail-r5-b01x.8ht5RWf6/evide
 | `ConfigureCompany` / TX01 | companyTx T UPDATE→actor/profile→primary zone verified/mx资格读→settings revision比较及INSERT/UPDATE CAS→tenant mail_send_policy W→audit/outbox→Commit；提交后另读返回设置。 | source-only |
 | `ConvertSharedMailbox` / TX03 | companyTx T UPDATE→actor/profile→M UPDATE锁/current owner/revision→mailbox CAS→M类型/期限/password清除W→活message expires清除W/event trigger→audit/outbox→Commit。 | source-only |
 | `CreateWorkMailbox` / TX01 | companyTx T UPDATE→actor/profile→公司domain及owner active资格→M INSERT/FK zone/user→audit/outbox→重读新M→Commit。 | source-only |
-| `InviteEmployee` / TX01 | companyTx T UPDATE→actor/profile→公司domain读→email/address占用读→可选profile tenant资格读→invitation INSERT/FK tenant/profile→audit/outbox→Commit；expires在事务前Go时钟生成。 | source-only |
+| `InviteEmployee` / TX01 | T UPDATE→currentactor U SHARE→domain/address检查→可选exactP id+tenant/global KEY SHARE NOWAIT→绑定lockedP INSERT→required audit/outbox→Commit；missing/foreign400、busy409，P持锁到commit。 | AF最终ccf同test原two40P01/0660三轮5pass＋AI冷回归 |
 | `OffboardEmployee` / TX01 | companyTx T UPDATE→actor/profile→offboardingTarget U/继任U/J锁→applyOffboarding→Commit；没有preview plan，也不同于新ExecuteOffboarding的fingerprint协议。 | source-only |
 | `RevokeEmployeeInvitation` / TX01 | companyTx T UPDATE→actor/profile→未consumed/revoked invitation条件UPDATE→RowsAffected冲突判定→audit/outbox→Commit。 | source-only |
 | `SetWorkGrant` / TX02 | companyTx T UPDATE→actor/profile→M访问/owner层级资格→目标activeCompanyUser→mailbox revision CAS W→grant DELETE或UPSERT/FK M/U/granted_by→audit/outbox→Commit。 | source-only |
@@ -179,7 +179,7 @@ E-TX-CACHE原日志当前由主线程持有 `/tmp/tabmail-r5-b01x.8ht5RWf6/evide
 | `RequeueOutboundJobAuthorized` / CTX33 | Begin→T SHARE→缺M分支table SHARE NOWAIT→validate observed依赖NOWAIT→J UPDATE→validate locked generation NOWAIT→recipient SHARE NOWAIT/拒uncertain→J requeue+audit/outbox→final reader deadline clock→Commit。 | source-only |
 | `permissionOverrideTx` / TX24 | Begin→指定user NO KEY UPDATE（missingOK分支）→write callback→Commit；callback当前仅override UPSERT/DELETE。 | source-only |
 | `CreateIngestJob` / TX21 | Begin→rawkey advisory→ensureObject对象回调→legacy ingest_jobs INSERT→Commit；不是CreateIngress固定目标事务。 | source-only |
-| `CreateWebhookDeliveries` / CTX35 | Begin→按url逐webhook_deliveries INSERT(event FK)/ON CONFLICT(event,url) DO NOTHING→Commit；没有HTTP callback，外层worker执行发送。 | source-only |
+| `CreateWebhookDeliveries` / CTX35 | 复制caller URL slice并sort.Strings→Begin→按稳定exactURL序获取unique(event_id,url) INSERT/FK、ON CONFLICT DO NOTHING→wholeTx Commit；不改input/ACK/外部发送。 | AE346535同test原two40P01/3102三轮5pass＋AI冷回归 |
 | `RevokeRefreshTokenByHash` / TX17 | Begin→lockRefreshFamily→族R未revoked UPDATE→Commit；不锁U。 | source-only |
 | `RotateRefreshToken` / TX16 | Begin→普通family查找→family advisory→U SHARE/active→旧R UPDATE→重放族撤销或单token撤销+后代INSERT→Commit。 | source-only |
 | `deleteExpiredRefreshFamily` / TX17 | Begin→族advisory→全族无未到期者条件DELETE→Commit；不锁U。 | source-only |
@@ -350,7 +350,9 @@ E-TX-CACHE原日志当前由主线程持有 `/tmp/tabmail-r5-b01x.8ht5RWf6/evide
 
 FK目录保留迁移中的DROP/重建；例如domain mailbox-zone原CASCADE已在00009改NO ACTION。draft/doc/pins有复合tenant约束但并不因此直接引用tenant。CASCADE/SET NULL会在删除父表时写子行；状态停用不能豁免历史FK。77是源声明数而非当前catalog基数。
 
-## 8. 未验证竞争候选和后续阶段
+## 8. 未验证竞争候选和后续阶段（历史候选，当前裁决见AI矩阵）
+
+> 本节为早期清点快照，不当current pending清单。AC/AE/AF/AH原同源码红绿已归证；domain/plan按当前准入时点，P1/P4/P7与callback物理effect仅列未来边界。当前352/70/15实际证据及原四要求见 [AI最终审材料](evidence/R5-P0-070-FINAL-REVIEW.json)。
 
 | 关系 / 已知边界 | 尚需证据 | 对应任务 |
 |---|---|---|
@@ -379,54 +381,36 @@ FK目录保留迁移中的DROP/重建；例如domain mailbox-zone原CASCADE已�
 
 当前 `ActivateEmployee` 是普通SELECT定位tenant后先T UPDATE，再invitation FOR UPDATE。先前人工表错误把locator读写成邀请锁；结构校验未捕获该人工语义错误。本次只校正文档，不制造invitation→T死锁。期限使用事务now()、重复token及当前sponsor/domain/profile窗口仍需真实命令验收。
 
-## 10. P0-070逐要求闭合矩阵（验收映射，不新增平行TODO）
+## 10. AI当前P0-070原四要求矩阵
 
-当前唯一进度仍R5-TODO，070尚未勾选；本矩阵分开source inventory、已有动态链接、本批fresh执行与真正未证关系，不用测试总数替代闭合。
+当前49 postgres源码／352函数／70函数专用手工轨迹（原68slot家族+新Actor/helper）／456SQL执行调用／15 migrations。逐要求证据与明确不能证明的边界以[最终审材料](evidence/R5-P0-070-FINAL-REVIEW.json)为准；typed寄存仍不填closed_entire_slot=true，不借247测试数量代表每branchruntime。
 
-| 要求ID | 实际入口/证据 | 当前层级 | 真正未证明或后续边界 |
-|---|---|---|---|
-| 070-FINITE | non-test postgres writes/helpers/dynamic SQL/external callbacks complete finite inventory；all49files/350functions with exact AST+hash; per-entry assertions and migration sources | source_inventory_current | call-name candidates are not interface dispatch proof; legacy public/internal reachability needs per-entry triage |
-| 070-TENANT-USER | tenant/user parent and audit FK order；TX01-07/18/19; X real cache/password/member freeze outcomes; Y Activate T-first locator correction and current clock/domain fence | source_reviewed_and_selected_runtime_links | Y full regression pending; direct/internal legacy writers and cascade intersections remain source-only |
-| 070-REFRESH | refresh-family/user/token/advisory order；TX16 family->U->R; TX17 family->R; TX18 Tparent->U->R for password, U->R for revoke | source_reviewed_existing_regression_link | no new claim of every direct user delete/family GC combination; current Y full regression pending |
-| 070-MAILBOX-DRAFT-ATTACHMENT | M/D/A resource locks, revision and authorization window；TX08/09/10: actor/profile->M SHARE->A SHARE or exact A UPDATE/CAS; FK child set explicit | source_reviewed_selected_runtime_links | all legacy mailbox/message deletion/cascade/event parent combinations not dynamically proved; P3 GC fairness/reference followups remain |
-| 070-JOBS | job/lease/quota/retry/ingress order and final authorization；TX11 T->dependencies/A/quota->J; TX12 token/clock checkpoints; TX13/15 NOWAIT; TX14 I->target->T->zone/M->effects->sameclock fences; TX22 source->indexjob | source_reviewed_existing_runtime_links | all independent queue tokenless ack/fanout boundaries and cross-day/content/profile schedules not globally certified |
-| 070-HELPERS | companyReadTx/companyTx/companyReferencedTx call effects；three tenant lock modes, actor/profile locks, callbacks and actual direct writes tracked per entry | source_inventory_current | name Read does not prove no writes; callbacks are reviewed current callsites, not future no-I/O enforcement |
-| 070-FK-TRIGGERS | enqueue trigger, message event/index/archive/pins and FK wait paths；14 Up migrations/77 REFERENCES declarations/7 triggers; X actual mail_documents parent classification | source_definitions_and_selected_runtime_catalog_links | declaration count not final catalog; full FK/cascade/NO ACTION and DDL lifecycle relation matrix not newly run on Y |
-| 070-GC-OBJECT | GC and transaction-held external object callback wait/cancel/atomic effects；TX20 auto-commit prefix plus attachment delete/orphan CTE; TX21 rawkey lock ensureObject/del tx callbacks; P3 source references | source_reviewed_existing_tests_and_explicit_followups | protected-prefix/tenant fairness, complete rawkey participants, commit-unknown and storage/provider failure layers not closed |
-| 070-AUTH-WINDOW | every multi-resource write identifies checks vs effects and waits；exact local source traces/manual68, phase-specific eligibility fences and linked outcomes | per_entry_source_and_selected_runtime_evidence | no all350 execution assertion; final predicate clocks and caller reachability must be adjudicated per remaining entry |
+- 原multi-resource规则/actor等待窗口/异常atomic均按当前真实入口和owner作用域审核，14/46/profile晚FK、53Actor、61URL批序都有原完整命令真红→同最终test候选→当前冷回归。
+- freshcatalog75FK／7enabledusertrigger／34CHECK、goose0..15；source声明14Up/77REFERENCES只是历史。tableclosure不是triggerfire，PublishINSERT与Convertexpires分别不触发immutableUPDATE/rawkeyUPDATEOF。
+- companyReadTx/Tx/Referenced及enqueue/GC/callback作用明确；没有SQL不等没有external effect，del成功/commit不明不能物理回滚，metadataGC pool前缀非整TX。
+- 7internal未装配、1legacycfg与正式caller分清。普通domain verified及plan期限按已有准入时点，不自创最终commit合同。未以未来P1/P4/P6/P7商用验收豁免或无限扩P0。
 
-Reachability复核：当前非test direct caller：DeleteMessage/PurgeMailbox在internal/app/messages，DeleteMailbox在internal/app/mailboxes；DeleteUser无非test direct caller，正式成员删除调用Guarded。只有名称候选不能把internal legacy端口当公开入口。Y全量尚未运行，历史绿不冒充fresh本批全图验收。
 
-SQL计数校正：初版445未随X改密新增两QueryRow更新；对X exact程序重提AST是447，当前Y Activate额外两call site后449。计数指词法SQL执行call site，不是一次请求实际查询数。门禁现直接输出sql_execution_calls，避免沿旧口述计数。
+## 11. AI当前最终catalog与保守entry链接
 
-Y Activate最终同测试：14事件/6top/11leaf；原版6pass8fail（含2个parent rollup），候选三轮各14pass。三种真实等待越期限、已提交verified/mx撤验、正式UpdateZone事务被测试advisory暂挡时final域NOWAIT409，以及late拒绝全state rollback均已验。原0test平台文件名与DSN环境错误留存但不当产品红；当前Y全量仍待冻结后执行。
+实际fresh官方New/Migrate15 catalog SHA `c51f6d858c9d12ba037c769e8e83a03ab8a251b8b5f980272d31700571e86736`：75FK／7enabled usertrigger／34CHECK，Goose0..15；[机器catalog](evidence/R5-TRANSACTION-DB-CATALOG.json)352 entry的literal/name closure保守关联不冒dispatch/triggerfire。Publish version INSERT不触发immutable BEFORE UPDATE；Convertexpires UPDATE不触发rawkey UPDATE OF index。旧Z的0f807/14/350仅历史批次，非当前最终数据。
 
-Y消息实际关系：三种helper caller（trusted work Trash、organize、owner seen）对retention原10事件4pass6fail含3parent rollup；同637aa新source三轮各10pass。nonowner seen/star首次sparse FK原5事件2pass3fail含parent；同4da84新source三轮各5pass。当前0dc统一full尚待冻结，不把不同源码phase分数合并冒full成绩。
 
-Z新restore testcase06cbbc尚未纳Y：当前真实restore-first在已成功restore后被旧candidate-id物理删除，reverse409/normal expiry控制绿。messages.go本Y不改，Z需actual-row完整资格复检/trueRETURNING证明，不擅改strict cutoff或永久owner/shared政策。
+## 12. AI当前70轨迹／68原slot家族寄存
 
-## 11. 实际最终数据库catalog（Z文档交付，非迁移声明替代）
+[逐slot寄存](evidence/R5-TRANSACTION-PROOF-REGISTER.json)保留68原编号，新增Actor/helper两个函数是70手工轨迹，352总inventory。7internal未装配、1Durable=false legacycfg与正式caller分清。14/46精确P NOWAIT、53Actor同Tx、61稳定URL批序实际归证，domain/plan按原准入policy checkpoint。当前原070任务需验证的有限条件在独立最终审中无额外缺项，closed_entire_slot=false不是任务否决票亦不代表everybranch runtime；外部callback物理rollback／GC前缀／P1P4P6P7产品政策依然明确未认证。slot1全局bootstrap advisory只收敛同端口同email，不假全库唯一政策。当前最终裁决见[四条审材料](evidence/R5-P0-070-FINAL-REVIEW.json)。
 
-独立新空测试DB经正式PgStore.New/Migrate后actual PG16.13 pg_constraint/getdef导出75 FK、7个user triggers及实际delete/update动作、validation/deferrable状态、函数body。来源SHA 0f8072788e9b621a2af1496d6d2f5d85e46f837f5717fc9ece97eb0f132c7799，完整[机器catalog与350entry conservative links](evidence/R5-TRANSACTION-DB-CATALOG.json)。14Up源的77 REFERENCES仅声明历史，绝不叫最终FK75；本catalog也不是生产DB快照。每entry按literal DML+name closure映child FK检查与delete CASCADE/SET NULL/NO ACTION扇出，不将conservative closure冒dynamic dispatch。
 
-有限caller纠偏：Publish/Revoke已有781a完整两方向T前序互斥/CAS/immutable/auditrollback/idempotent实际7事件，不因V/template词法倒序制造40P01；DeleteMailbox只有未连formal route的legacy app内部链且拒personal/shared，不能制造公司删除关系；CreateMessageWithQuota仅ingest Durable=false legacy fallback，公司config强Durable=true走DeliverIngress；DeleteTenant正式superadmin route的current行为待9c679后续control，约束拒绝也不等任务整体完成。
-
-## 12. 当前68个人工slot的typed条件登记
-
-[逐slot寄存](evidence/R5-TRANSACTION-PROOF-REGISTER.json)：68（不是历史66）、350总inventory；7internal未装配、1Durable=false legacycfg、其余formal/helper按实际role条件。字段不是PASS票：源码条件/代表动态/精确未证/不适用配置分列，closed_entire_slot=false避免静态涂全绿；source-only既不是56漏洞也不是必须56新case。slot1已有globalbootstrap advisory可静态收敛同端口同email，不假全库唯一政策。原功能史报告分数不变，只current登记修事实。
-
-实际有限remaining：53 S-onlytenant形态不能被messages NOACTION拒绝豁免，AB先正常可行再双完整命令；11/13/14普通zone/profile读末次资格不借Activate；offboard Execute早Go clock不能借别处DB最终clock；raw callback物理effect与commit unknown不当DBrollback；其余role/caller/stable batch与operation-sensitive trigger证据条件明确。070仍不勾，新增动态只针对无法静态收敛且真实可达的有限条件，不无限增总数。
-
-## 13. AB slot53实际有限归证
+## 13. AB slot53实际有限归证（历史批次）
 
 当前49 postgres非test文件／350函数／452 SQL执行调用结构清单更新；exact T KEY SHARE→S UPDATE/delete→required audit FK→Commit是DeleteSuppressionAudited自己的函数序列，不套enqueue家族风险。same final560c原生产双向40P01和victim全回滚、c874/ff50候选三轮8/8明确归证；正式HTTP父消失404／未知500／原无S204分别保留。
 
 授权仍由请求前middleware决定；tenantID/AuditEntry没有等待后currentactor重载。slot53 parent/S/audit关系安全不等whole-slot070或权限窗口PASS。继承family_context非精确函数phase；未来AC新测试排AB被测744文件。
 
-## AC current snapshot闭包
+## AC snapshot闭包（历史批次，当前优先AI）
 
 49 postgres文件／352函数／456 SQL执行调用／15 migrations，caller清单来自独立AC source闭包而非AD未提交helper；实际catalog15是75FK／7trigger／34CHECK。slot53当前正式Authorized Actor路径与trusted Audited/helper分清，九leaf仅bounded准入／线性化proof，不涂全slot或全070。见AC报告。
 
-## AG同源实物证据
+## AG同源实物证据（历史批次，46随后AH归证）
 
-9516／774 source含AD16／AEAFfinal，ASTcaller从snapshot内生成49files／352fn／456SQL／15migration，不混未提交未来helper。真实23gate、default244／tag12 required及emptyGo0拒门禁不等各writer全证明；14/61 bounded动态与当前domain/planpolicycheckpoint已收敛，46 Guarded requestedP晚FK待AH。精确外部callback/error/operationtrigger boundary保持，见AG报告。
+9516／774 source含AD16／AEAFfinal，ASTcaller从snapshot内生成49files／352fn／456SQL／15migration，不混未提交未来helper。真实23gate、default244／tag12 required及emptyGo0拒门禁不等各writer全证明；14/61 bounded动态与当前domain/planpolicycheckpoint已收敛，46 Guarded requestedP晚FK当时待AH；现AH65e51/8fac三轮5pass及AI冷回归已归证。精确外部callback/error/operationtrigger boundary保持，见AG报告。

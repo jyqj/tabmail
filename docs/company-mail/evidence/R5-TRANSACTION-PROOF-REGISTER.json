@@ -293,7 +293,7 @@
       "safety_condition": "T/actor and invitation INSERT/expiry; profile/domain qualification conditions distinct from activation",
       "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
       "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
-      "actual_reference": "AG samefrozen9516 full + independentAE346535/AFccf samefinaltestredgreen; exactscope see AGreport",
+      "actual_reference": "AG samefrozen9516 full + independentAE346535/AFccf samefinaltestredgreen; exactscope see AGreport; freshAIc372 validates samestablesource/default+tag",
       "followup_tasks": [
         "R5-P0-070",
         "R5-P1-030"
@@ -975,11 +975,11 @@
       "entry": "UpdateUserGuarded",
       "group": "TX04",
       "applicability": "formal_or_assembled_role_scoped",
-      "adjudication_class": "precise_formal_lock_condition_pending",
-      "safety_condition": "Begin→T UPDATE→current actor SHARE→target UPDATE→角色/最后管理员/profile核对→refresh/Key撤销→target U W→member audit→Commit。; requestedP ordinaryEXISTS thenFKKEY whileactorUSHARE can oppose formalProfileDeleteP→actorUSETNULL; AH actualnormal/orders still needed",
+      "adjudication_class": "formal_bounded_runtime",
+      "safety_condition": "T/currentactorUSHARE/targetUUPDATE then exactrequestedP KEYSHARENOWNOWAIT, boundlockedid, missingoriginalForbidden/only55Conflict; role/SV/RFkeys/audit sameTx; normalusersSETNULL and realtwo40P01 repaired",
       "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
       "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
-      "actual_reference": "source review and named existing package tests; no invented all-branch execution",
+      "actual_reference": "AHsame8fac baseline2pass3fail realtwo40P01 +65e51 same8fac three5pass, AIc372freshdefault247/tag12coldgates",
       "followup_tasks": [
         "R5-P0-070",
         "R5-P1-070"
@@ -988,7 +988,7 @@
       "inherited_family_context": [
         "target-profile读取与profile删除SET NULL、self target锁提升、所有历史资产FK拒绝未由此静态目录关闭"
       ],
-      "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
+      "authorization_wait_effect_condition": "Currentactor reread and locks heldcommit; optionalrequestedprofile stale/deleting rejectswithouttarget/profile/actor/auditprefix, otherexistingrole/SV contracts unchanged."
     },
     {
       "slot": 47,
@@ -1310,7 +1310,7 @@
       "safety_condition": "batch event/url uniqueness INSERT->event FK; repeated event-worker concurrency/URL traversal requires current actual dispatcher conditions",
       "explicit_lock_wait_error_proof_scope": "precise locks/SQL/errors/transaction helper and source hash in linked inventory assertions; NOWAIT and CAS reject plus rollback only within current caller",
       "fk_trigger_advisory_effect_scope": "actual final catalog75/7 links plus operation-sensitive effects; table association/name closure not runtime dispatch",
-      "actual_reference": "AG samefrozen9516 full + independentAE346535/AFccf samefinaltestredgreen; exactscope see AGreport",
+      "actual_reference": "AG samefrozen9516 full + independentAE346535/AFccf samefinaltestredgreen; exactscope see AGreport; freshAIc372 validates samestablesource/default+tag",
       "followup_tasks": [
         "R5-P6-030",
         "R5-P7-080",
@@ -1470,15 +1470,8 @@
       "authorization_wait_effect_condition": "Function-specific safety_condition is a condition, not a whole-slot proof; inherited_family_context is broader family context, not exact execution phase."
     }
   ],
-  "boundary": "Typed fields classify proof conditions and actual applicability, not 68 PASS nor 56 vulnerabilities/missing test cases; remaining precise formal conditions require targeted evidence only",
-  "real_pending_conditions": [
-    "suppression S-only tenant normal viability then actual reverse edge AB",
-    "ordinary configure/create/invite domain/profile qualification against independent zone writer (not Activate fence)",
-    "ExecuteOffboarding final elapsed deadline distinct from preview/early clock",
-    "external callback effect success then commit error/reference participants; no physical DB rollback claim",
-    "event/url repeated dispatcher and batch atomic boundaries; preserve real worker ownership",
-    "exact actual dispatch and phase-sensitive trigger mapping"
-  ],
+  "boundary": "original68 slotfamilies + newActor/helper=70 function-specific handwritten traces; closed_entire_slot=false kept, currentfiniteorder task scope reviewed not allbranchesruntime; Parent070accepted ascurrentfinite mapping/order task, syntaxandwhole-slot runtime flagsremainconservative",
+  "real_pending_conditions": [],
   "catalog": "R5-TRANSACTION-DB-CATALOG.json actual75FK/7triggers",
   "static_bootstrap_correction": "already global advisory, loweremail check before writes; do not invent unlocked-empty-users gap",
   "review_source": "read-only 68-slot finite conditions; integration owner classifies without altering raw/runtime evidence",
@@ -1487,5 +1480,16 @@
   "legacy_numbering_boundary": "Original68 reviewed slot families retained; slot53 now covers new formal Actor port and two trusted/shared implementation entries, not a claim all new functions dynamically closed.",
   "original_inventory_functions": 350,
   "post_AC_scope": "slot53 bounded current Actor/fences real proofs; other current profile/event pairs pending; domain/plan no invented final-commit policy",
-  "post_AG_boundary": "Current070 blocker exactslot46profileFK; sourceconditions retained, no entire-slotPASS fromtestcount or default244."
+  "post_AG_boundary": "Current070 blocker exactslot46profileFK; sourceconditions retained, no entire-slotPASS fromtestcount or default244.",
+  "handwritten_function_traces_current": 70,
+  "original_slot_families": 68,
+  "remaining_future_boundaries": [
+    "physicalobject callbacksuccess/commituncertainty notDBrollback",
+    "GCpoolprefixcommits/fairness futureP3",
+    "P4 finalcommittime policy notcurrentlyspecified",
+    "P7ACKepoch notwebhookbatchmutexproof",
+    "future newcallers/writeprotocols require renewedproof"
+  ],
+  "review_status": "manualfiniteorder accepted after source/material/runtime independentinspection; notwholefunctionruntime",
+  "independent_current_task_scope_accepted": true
 }
