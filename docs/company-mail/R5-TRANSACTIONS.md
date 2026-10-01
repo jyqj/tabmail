@@ -213,3 +213,7 @@ B01-C的历史观察见其验证说明；B01-D原始失败、生产修复、普�
 ## AC：Actor准入与15schema同源证明
 
 正式S DELETE改DeleteSuppressionAuthorized显式Actor，T/U/K/S及required audit/finalKeyclock同Tx；旧Audited是trusted兼容不当前HTTP。正常5和role/active当前403、U/Key行fence线性化三轮11/11；不是撤权后都拒。15修真实合法KeyPOST23514，不绕CHECK。fresh75FK/7trigger/34CHECK及最终1431/0/1／234门禁见[AC证据](R5-B01-AC-VALIDATION.md)。070其他多资源关系不由此全闭。
+
+## AG当前有限归证与原要求收敛
+
+Webhook fanout复制URL稳定排序解决实际unique批环；Invite exactPKEYSHARENOWNOWAIT解决已证U/P反序，InvP实际NOACTION、usersPSETNULL不同；Actor/requiredAudit错误分类及16fixture同源23gate0见[AG报告](R5-B01-AG-VALIDATION.md)。070唯一新精确待证slot46 Guarded user请求P晚FK不能借Invite绿外推；domain/plan按当前准入时点不加futurecommit政策，callback外部effect不DB物理rollback。090设施证明完整仍受070依赖，任务8/171。

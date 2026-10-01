@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"sort"
 	"time"
 
 	"tabmail/internal/models"
@@ -94,6 +95,10 @@ func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.Out
 	if event == nil || len(urls) == 0 {
 		return nil
 	}
+	// Reclaimed handlers may fan out the same event concurrently. Acquire
+	// unique (event_id,url) keys in one order without mutating caller config.
+	orderedURLs := append([]string(nil), urls...)
+	sort.Strings(orderedURLs)
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -101,7 +106,7 @@ func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.Out
 	defer tx.Rollback(ctx)
 
 	now := time.Now().UTC()
-	for _, url := range urls {
+	for _, url := range orderedURLs {
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO webhook_deliveries (id,event_id,url,event_type,payload,state,attempts,next_attempt_at,created_at,updated_at)
 			VALUES ($1,$2,$3,$4,$5,'pending',0,$6,$6,$6)

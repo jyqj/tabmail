@@ -125,19 +125,19 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	req.CC = append([]string{}, req.CC...)
 	req.BCC = append([]string{}, req.BCC...)
 	if !s.cfg.Enabled {
-		return nil, false, fmt.Errorf("outbound sending is disabled")
+		return nil, false, app.BadRequest("outbound sending is disabled")
 	}
 
 	canonical, err := authz.CanonicalSender(req.From)
 	if err != nil {
-		return nil, false, err
+		return nil, false, app.BadRequest("invalid from address")
 	}
 	req.From = canonical
 	for _, group := range [][]string{req.To, req.CC, req.BCC} {
 		for i, a := range group {
 			parsed, parseErr := mail.ParseAddress(a)
 			if parseErr != nil {
-				return nil, false, parseErr
+				return nil, false, app.BadRequest("invalid recipient address")
 			}
 			group[i] = strings.ToLower(parsed.Address)
 		}
@@ -174,27 +174,27 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		}
 		req.Subject, req.TextBody, req.HTMLBody, e = company.Render(v.Snapshot, req.TemplateVars, employee, name, req.From)
 		if e != nil {
-			return nil, false, e
+			return nil, false, app.BadRequest("invalid template variables")
 		}
 	}
 
 	// Validate all email addresses using RFC 5322 parsing.
 	if _, err := mail.ParseAddress(req.From); err != nil {
-		return nil, false, fmt.Errorf("invalid from address %q: %w", req.From, err)
+		return nil, false, app.BadRequest("invalid from address")
 	}
 	for _, addr := range req.To {
 		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, false, fmt.Errorf("invalid to address %q: %w", addr, err)
+			return nil, false, app.BadRequest("invalid to address")
 		}
 	}
 	for _, addr := range req.CC {
 		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, false, fmt.Errorf("invalid cc address %q: %w", addr, err)
+			return nil, false, app.BadRequest("invalid cc address")
 		}
 	}
 	for _, addr := range req.BCC {
 		if _, err := mail.ParseAddress(addr); err != nil {
-			return nil, false, fmt.Errorf("invalid bcc address %q: %w", addr, err)
+			return nil, false, app.BadRequest("invalid bcc address")
 		}
 	}
 
@@ -205,19 +205,19 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	allRcpt = append(allRcpt, req.BCC...)
 
 	if len(allRcpt) == 0 {
-		return nil, false, fmt.Errorf("at least one recipient required")
+		return nil, false, app.BadRequest("at least one recipient required")
 	}
 	if len(allRcpt) > 50 {
-		return nil, false, fmt.Errorf("too many recipients (max 50)")
+		return nil, false, app.BadRequest("too many recipients (max 50)")
 	}
 	if req.Subject == "" {
-		return nil, false, fmt.Errorf("subject is required")
+		return nil, false, app.BadRequest("subject is required")
 	}
 	if len(req.Subject) > 998 {
-		return nil, false, fmt.Errorf("subject too long (max 998 chars)")
+		return nil, false, app.BadRequest("subject too long (max 998 chars)")
 	}
 	if req.TextBody == "" && req.HTMLBody == "" {
-		return nil, false, fmt.Errorf("text_body or html_body required")
+		return nil, false, app.BadRequest("text_body or html_body required")
 	}
 
 	// Build Message-ID header.
@@ -230,7 +230,7 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	if len(req.Headers) > 0 {
 		b, err := json.Marshal(req.Headers)
 		if err != nil {
-			return nil, false, fmt.Errorf("invalid headers: %w", err)
+			return nil, false, app.Internal(err)
 		}
 		headersJSON = b
 	}

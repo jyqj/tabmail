@@ -222,13 +222,16 @@ func (s *PgStore) InviteEmployee(ctx context.Context, a authz.Actor, in company.
 			return app.Conflict("employee or address already exists or is invited")
 		}
 		if in.PermissionProfileID != nil {
-			var ok bool
-			if e = tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM permission_profiles WHERE id=$1 AND (tenant_id=$2 OR tenant_id IS NULL))`, *in.PermissionProfileID, a.TenantID).Scan(&ok); e != nil {
+			// Actor U is already protected. Never wait for a deleting profile
+			// whose SET NULL action may itself be waiting for that same U.
+			var profileID uuid.UUID
+			if e = tx.QueryRow(ctx, `SELECT id FROM permission_profiles WHERE id=$1 AND (tenant_id=$2 OR tenant_id IS NULL) FOR KEY SHARE NOWAIT`, *in.PermissionProfileID, a.TenantID).Scan(&profileID); e != nil {
+				if errors.Is(e, pgx.ErrNoRows) {
+					return app.BadRequest("permission profile is outside company")
+				}
 				return e
 			}
-			if !ok {
-				return app.BadRequest("permission profile is outside company")
-			}
+			in.PermissionProfileID = &profileID
 		}
 		if e = tx.QueryRow(ctx, `INSERT INTO employee_invitations(id,tenant_id,email,display_name,mailbox_address,permission_profile_id,token_hash,invited_by,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING created_at`, out.ID, a.TenantID, out.Email, out.DisplayName, out.Address, in.PermissionProfileID, hash, a.ID, out.ExpiresAt).Scan(&out.CreatedAt); e != nil {
 			return e

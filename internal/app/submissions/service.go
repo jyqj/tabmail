@@ -368,7 +368,9 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 			return nil, false, appFailure(err)
 		}
 		s.logger.Err(err).Msg("submitting outbound job")
-		return nil, false, plainFailure(err.Error())
+		// Business validation is typed at its origin. Unclassified repository or
+		// infrastructure errors are never a client 400 or raw error message.
+		return nil, false, appFailure(app.Internal(err))
 	}
 
 	return job, replayed, nil

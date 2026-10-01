@@ -470,6 +470,30 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5SuppressionScopesMigrationFreshUpgradeRepeat"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5WebhookFanoutClaimReclaimAndUniqueReplay"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5WebhookFanoutBatchFailureRollsBack"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5WebhookFanoutCompleteCommandsURLLockOrder"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5InvitationProfileNormalAssignedDelete"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5InvitationProfileForeignTenantDeleteDenied"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5InvitationProfileCompleteCommandsLockOrder"
         ]
       ],
       "allowed_skips": []
@@ -1616,6 +1640,46 @@
         [
           "tabmail/internal/store/postgres",
           "TestR5SuppressionScopesMigrationFreshUpgradeRepeat"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5WebhookFanoutClaimReclaimAndUniqueReplay"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5WebhookFanoutBatchFailureRollsBack"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5WebhookFanoutCompleteCommandsURLLockOrder"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5InvitationProfileNormalAssignedDelete"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5InvitationProfileForeignTenantDeleteDenied"
+        ],
+        [
+          "tabmail/internal/store/postgres",
+          "TestR5InvitationProfileCompleteCommandsLockOrder"
+        ],
+        [
+          "tabmail/internal/testutil",
+          "TestR5ObjectFaultRealPortAndPrivacy"
+        ],
+        [
+          "tabmail/internal/testutil",
+          "TestR5ObjectFaultCancellationAndInvalidConfiguration"
+        ],
+        [
+          "tabmail/internal/testutil",
+          "TestR5SMTPRealRelayPhasesAndCleanup"
+        ],
+        [
+          "tabmail/internal/testutil",
+          "TestR5SMTPRequiresBoundedOwnership"
         ]
       ],
       "allowed_skips": [
@@ -1633,6 +1697,59 @@
         [
           "tabmail/internal/store/postgres",
           "TestR3BrowserJourney"
+        ]
+      ],
+      "allowed_skips": []
+    },
+    "r5fixtures": {
+      "required_tests": [
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureTenantRolesAndMailboxIdentity"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureExactBlockingBarrierAndRealClock"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureHTTPJWTAndTenantBoundary"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureHTTPQuotaAndRequiredAuditRollback"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureHTTPKeyScopeRevocationAndExpiry"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureLifecycleSealedDraftAndReceipt"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureIndexSourceLeaseAndObjectBoundary"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureWorkerRealSMTPAndRecipientLedger"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureMixedLedgerNeverResendsAcceptedRecipient"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureHTTPObjectPutAndFinishFailurePreserveReservation"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureHTTPObjectShortReadIntegrityAndStableMetadata"
+        ],
+        [
+          "tabmail/internal/testpg",
+          "TestR5FixtureFailureCleanup"
         ]
       ],
       "allowed_skips": []

@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "task": "R5-P0-090",
+  "task_complete": false,
+  "product_green": false,
+  "dependency": {"R5-P0-040": "accepted", "R5-P0-070": "not_accepted"},
+  "scope": "AD finite first executable fixture/port segment; not complete P0-090 acceptance",
+  "implemented": [
+    {"entry": "testpg.NewR5Fixture", "source": "internal/testpg/r5_fixture.go", "truth": "real PgStore company commands and isolated testpg owned database", "test": "TestR5FixtureTenantRolesAndMailboxIdentity", "execution": "compiled_only_PG_run_pending"},
+    {"entry": "testpg.R5WaitBlockedBy/R5DatabaseNow", "source": "internal/testpg/r5_barrier.go", "truth": "actual clock_timestamp and exact pg_blocking_pids wait edge; deadline required", "test": "TestR5FixtureExactBlockingBarrierAndRealClock", "execution": "compiled_only_PG_run_pending"},
+    {"entry": "testutil.R5ObjectFault", "source": "internal/testutil/r5_object_fault.go", "truth": "actual ObjectStore delegation with explicit single-shot faults/short stream/cancellation", "tests": ["TestR5ObjectFaultRealPortAndPrivacy", "TestR5ObjectFaultCancellationAndInvalidConfiguration"], "execution": "real_port_race_tests_passed_not_DB_rollback"},
+    {"entry": "testutil.StartR5SMTP", "source": "internal/testutil/r5_smtp_script.go", "truth": "real loopback listener and production outbound.DeliverRelay", "tests": ["TestR5SMTPRealRelayPhasesAndCleanup", "TestR5SMTPRequiresBoundedOwnership"], "variants": ["accepted", "rcpt_temporary", "rcpt_permanent", "data_rejected", "final_reply_lost", "accepted_quit_lost"], "execution": "real_SMTP_transport_race_tests_passed_not_worker_ledger"}
+  ],
+  "pending_required_contracts": [
+    "formal HTTP/JWT and normal/revoked/expired/missing-scope Key authentication",
+    "real quota UTC window and mailbox/user authorization changes through reserve/draft/submit",
+    "legal lifecycle/expiry and sealed draft/offboarding receipts",
+    "trusted sent asset/job/recipient mixed delivery ledger and index source/hash/parser/lease fixtures",
+    "object/audit/submit failure rollback via real HTTP and PostgreSQL",
+    "actual worker and ledger observations through loopback SMTP",
+    "fresh PG first segment and failure cleanup isolation",
+    "default full normal regression and explicit tagged mandatory evidence by operator"
+  ],
+  "not_claimed": ["P0-090 completion", "P0-070 dependency closure", "future P0-100 S/M/L performance baseline", "production clock/provider/router changes", "fake HTTP or fake expected adapter outputs"],
+  "privacy": "DSN remains child environment; no payload/body/token/raw object key is archived"
+}

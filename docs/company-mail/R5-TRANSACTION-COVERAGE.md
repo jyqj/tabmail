@@ -426,3 +426,7 @@ Z新restore testcase06cbbc尚未纳Y：当前真实restore-first在已成功rest
 ## AC current snapshot闭包
 
 49 postgres文件／352函数／456 SQL执行调用／15 migrations，caller清单来自独立AC source闭包而非AD未提交helper；实际catalog15是75FK／7trigger／34CHECK。slot53当前正式Authorized Actor路径与trusted Audited/helper分清，九leaf仅bounded准入／线性化proof，不涂全slot或全070。见AC报告。
+
+## AG同源实物证据
+
+9516／774 source含AD16／AEAFfinal，ASTcaller从snapshot内生成49files／352fn／456SQL／15migration，不混未提交未来helper。真实23gate、default244／tag12 required及emptyGo0拒门禁不等各writer全证明；14/61 bounded动态与当前domain/planpolicycheckpoint已收敛，46 Guarded requestedP晚FK待AH。精确外部callback/error/operationtrigger boundary保持，见AG报告。
