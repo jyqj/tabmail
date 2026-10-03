@@ -2074,3 +2074,11 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - 本地whole-PG180由另Goose owner验证，本批NOTSTARTED；不复跑全Web/Go/fork/browser/audit或真实benchmark。原PG180 mandatory未完及audit8high/0critical历史FAIL保，normalPG180及audit gate不skip/降级。详[本批附录](R5-INTEGRATION-BATCH5-20261003.md)、[actual IDs/分类](evidence/R5-INTEGRATION-BATCH5-20261003/receipt.json)、[剩余错误](evidence/R5-INTEGRATION-BATCH5-20261003/remaining-errors.json)。
 - 普通origin首次push成功且固定SHA de1b7d3经ls-remote确认；新三线组合唯一一次gh draftPR创建（base=batch4）exit1 `Post https://api.github.com/graphql: Forbidden`。PR未创建，随后停止PR/API动作，无旧拒PR重试、身份/connector/route切换；reviewable body保留。新CI NOTSTARTED-by-this-task/UNOBSERVED，不能借旧aeed CI冒认新head结果；workflow及PG180原门禁保持。
 - **父10/171保持，无新增勾，无merge/deploy/force。** 本附录/证据/TODO随后仅docs-only提交与普通push；固定交付remote SHA由终态ls-remote回执交父继续，不称其未观察CI全绿。
+
+
+### RC receipt 独立验收契约修复包 — 2026-10-03
+
+- 基线 e5e6a2b，首次 commit/push 5387b2c；原 RC01 真实 GET200 后 Attachments 等待失败仍保留，未分类原失败不转 accepted target red。核对 closed DTO/产品组件/原 case 后确认为旧验收债，未恢复主题/附件/BCC 内容。RC02 subject/旧标签与 RC03–RC05 共用旧断言一起限定更新。
+- 首次41均既存 unit；新增22个 RC-only oracle unit 验证合法字段重排、逐字段缺失/错误值和 extra 拒绝，合计63/63 PASS。精确字段集合+逐值比较不依赖 JSON order；author seed oracle不从response生成。TS/ESLint/tagged Go compile PASS，compile零测试不称runtime。
+- 专项诊断、历史边界、修改/验证/交接见 [RC receipt 报告](R5-RC-RECEIPT-CONTRACT-20261003.md)及 [safe hashes/metadata](evidence/R5-RC-RECEIPT-CONTRACT-20261003.json)。无fixture/response/token发布；固定JSON/markers、helper/launch/cache、sharedDB另一owner修复、Go/锁/120/180和LF/权限保。
+- 本包不再formalrun，待cacheowner完成后由Root安排同source真实Go/PG/Vitest整合。唯一draftPR API Forbidden后停止且不重试，无PR创建/merge/deploy。**中央10/171不变，无新增父项勾选；formal RC/task_complete/product_green均未关闭。**

@@ -18,9 +18,10 @@ import { executeOffboarding } from "@/features/company/api";
 import { company, type MailDraft, type WorkMailbox } from "@/lib/company";
 import { listUsers, getUserPermission, updateUser, updatePermissionProfile, listPermissionProfiles, setUserPermissionOverride, deleteUserPermissionOverride } from "@/lib/api";
 import { validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
-import { parseReceiptListResponse, parseReceiptResponse, type OrdinaryReceipt, type ReceiptCounts } from "@/lib/receipt-types";
+import { parseReceiptListResponse, parseReceiptResponse, type OrdinaryReceipt, type ReceiptCounts, type RetryBlockReason } from "@/lib/receipt-types";
 import { installSession } from "@/lib/session";
 import type { AuthUser } from "@/lib/types";
+import { receiptCapabilitiesMatch, receiptCountsMatch } from "./r5-receipt-contract-oracle";
 
 // Host identity is supplied; API functions, session, SWR, controls, fetch,
 // shipping HTTP handlers and PostgreSQL are never response-mocked.
@@ -39,7 +40,7 @@ const path = process.env.TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE;
 if (!path) throw new Error("Explicit Go-owned protocol component fixture is required; no skip or response fallback");
 const fixture = JSON.parse(readFileSync(path, "utf8")) as Fixture;
 const raw = readFileSync(resolve(process.cwd(), "../docs/company-mail/evidence/R5-PROTOCOL-CASES.json"));
-const cases = (JSON.parse(raw.toString()) as { cases: { id: string; input: unknown; expected?: { projection?: { status: OrdinaryReceipt["status"]; label_en: string; retry: boolean; delivery_uncertain: boolean; retry_block_reason: string | null } } }[] }).cases;
+const cases = (JSON.parse(raw.toString()) as { cases: { id: string; input: unknown; expected?: { projection?: { status: OrdinaryReceipt["status"]; label_en: string; retry: boolean; delivery_uncertain: boolean; retry_block_reason: RetryBlockReason | null } } }[] }).cases;
 const shared = cases.find(c => c.id === fixture.case_id);
 const origin = new URL(fixture.api_url);
 if (fixture.schema_version !== 1 || !shared || fixture.case_sha256 !== createHash("sha256").update(raw).digest("hex") || JSON.stringify(shared.input) !== JSON.stringify(fixture.input) || origin.protocol !== "http:" || origin.hostname !== "127.0.0.1") {
@@ -98,11 +99,11 @@ function assertReceipt(data: unknown, id: string): OrdinaryReceipt {
   expect(Boolean(receipt.created_at && receipt.updated_at && receipt.attempt_count === 0)).toBe(true);
   expect(receipt.state === (fixture.receipt_state ?? fixture.input.job_state)).toBe(true);
   expect(receipt.progress.completeness === "known" &&
-    JSON.stringify(receipt.progress.counts) === JSON.stringify(expectedCounts())).toBe(true);
+    receiptCountsMatch(receipt.progress.counts, expectedCounts())).toBe(true);
   const projection = shared!.expected?.projection;
   expect(receipt.status === (projection?.status ?? (receipt.state === "pending" ? "submitted" : "needs_attention"))).toBe(true);
   expect(receipt.delivery_uncertain === (projection?.delivery_uncertain ?? false)).toBe(true);
-  expect(JSON.stringify(receipt.capabilities) === JSON.stringify({ view_content: false,
+  expect(receiptCapabilitiesMatch(receipt.capabilities, { view_content: false,
     retry: projection?.retry ?? false, retry_block_reason: projection ? (projection.retry_block_reason ?? "") : "state_not_retryable" })).toBe(true);
   return receipt;
 }
