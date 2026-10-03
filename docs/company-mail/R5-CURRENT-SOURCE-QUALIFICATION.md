@@ -1,3 +1,5 @@
+> 当前第四批SOURCE资格以 [batch4回执](R5-INTEGRATION-BATCH4-20261003.md) 为准，freeze `aeed47f0e1998d9925acb680992b051463821d69`。原下文保留第三批历史范围，不能转授第四批wholeCI/runtime。第四批仍blocked：prepared full版本FAIL、root PG/audit FAIL；10/171保持。
+
 # R5 当前 SOURCE 资格边界 — 第三批整合
 
 本轮固定 base 为二批 `b4803fe6722ba05b83799459e88d4a014f546da2`，新分支 `integration/company-mail-r5-batch3-20261003` stack 于二批；二批又依赖首批 integration，未改 R5 工作分支。组合源码冻结点 `c808fbe1699804d2f7f2c4de08f31975950e3f36`，tree `2ed953a6d9e51c892e45b7fad311ca45a47dcd9d`。本文件和本轮证据是当前解释；历史 snapshot、失败、skip 与回执保持原字节。

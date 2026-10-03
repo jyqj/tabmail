@@ -2043,3 +2043,24 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - **10/171保持，父任务不关闭。** 无真实邮件/PG/Redis/外SMTP/被拒watchdog、秘密/权限变更、merge/forcepush/deploy。当前source清单与语义详 [current SOURCE qualification](R5-CURRENT-SOURCE-QUALIFICATION.md)，本轮真实证据详 [receipt](evidence/R5-INTEGRATION-BATCH3-20261003/receipt.json)。新分支push/连接GitHub PR API与固定headCI结果分别追加；拒绝即停对应动作，不换身份remote路线。
 
 - 本轮远端实际交付：首次普通 Git push 成功，`504b59731adb219c41ed685cd2029759f3c116d1` 已 ls-remote 同值确认；已连接 GitHub `create_pull_request` 首次成功创建 [draft PR #19](https://github.com/jyqj/tabmail/pull/19)，精确 base 二批 `b4803fe`。该固定 head CI 实际可读，0 workflow runs / 0 statuses / 0 check runs，原 main-only workflow 未改，不称四CI绿。交付head fresh验证与冻结SOURCE attestation匹配；随后仅docs-only交付状态commit/push。无拒绝动作重试、身份/remote/路线替换、merge/forcepush/deploy，10/171保持，本批完成即停。
+
+
+## 第四批固定组合 checkpoint — 2026-10-03
+
+- 新分支 `integration/company-mail-r5-batch4-20261003` 从 PR21 `41b015c30c66b3ba58a3c1395e8559ebcd27a65f` 派生；draft base 为既有 batch3 `5ae68c2d037603cd0151e1b9188f2df4db1e45a1`。无冲突合并 archive `66eb5e8`、clientscanner `d9713c1`、legacyalias `139b701`、browserjourney `1be7c84`、依赖 `d6640db`、lint `e044808`；保 ancestry 去重。旧 selected helper 未改，不纳入 209d stablefix；archive 独审仍另 session review 中，不称全 accepted。
+- 中央 client/API 清单按实际组合重新扫描并严格映射：134 branches / 7 explicit forwarders / 127 mapped，旧 recipients 通过 existing detail 实现；`node scripts/collect_api_calls.cjs --check` PASS，扫描门未改。历史 135 分支/recipients 未注册失败记录保持。
+- workspace 私有 venv 成功安装原官方 pinned requirements；未写 /home/agent/.local，不修改权限。源码 freeze 后组合 test/type/lint/build、archive/version/fresh cold-warm 与真实 CI 结果继续本批记录；本 checkpoint 不转授单支 PASS。
+- audit 已知 8 high / 0 critical（omit-dev 6）仍是 gate FAIL；PG 整包累计180s timeout、usage_held_allows_retry 与 SMTP ownerTailLogger.Printf 重复 close(entered) 由父另修，本批不修改这些文件。原 archive 全量2fail/64error/1skip/16未执行仅历史结果，正常依赖后按本组合实际重新分类。
+- 两 fork replace/schema19/root ./...、36 history bytes/528旧 evidence、current v4/v2 与旧四 actual-root 语义保留；10/171 不变。无 merge/deploy/force、Method19/SML/perf/真实邮件服务资格。
+
+- 组合实际发现 Go AST route matrix 漂移；按中央 API owner 范围重新导出132路由，完整 route inventory/negative drift tests 与 strict client check PASS。新 `current-api-client-source-map.json` 逐路由绑定 handler/middleware/OpenAPI/client/test/源码closure；不替历史 wire runtime 盖章。528个基线 evidence 中526路径字节原封不动，只有获授权的两个 generated 当前清单（API-MATRIX/CLIENT-CALLS）刷新；这两份 PR21 原始 bytes 已另外原样保存本批 historical-*，36受保护历史文件完全不变。历史 R5-COMPATIBILITY-GATES/schema/registry/tars 保持，不更改旧资格。
+
+
+### 第四批最终实际增量（含两项后授权tests-only）
+
+- 实际组合SOURCE冻结 `aeed47f0e1998d9925acb680992b051463821d69`；原六fixed heads之外仅新增明确授权SMTP c083d05、router-touch989171d，保ancestry，无冲突。[draftPR23](https://github.com/jyqj/tabmail/pull/23)已创建/push，base精确batch3；原workflow真实CI已触发。
+- 本组合archiveguard/sixmodules/threearchive markers/36history、default与race v4/v2 freshcoldwarm、Go build/vet、两fork全race、touch文件三顶层race（含usage retry）PASS；静稳Web527/527、type/lint/build、Node49、DTO、严格134client/132route PASS。原Web timeout与旧PG/SMTP失败保留，窄修PASS不代wholePG性能。
+- 正确ownedvenv/Go cache后，clean版本当前631started/9F/43E/1skip/9NOTRUN；明确官方TypeScript regular-file工具prep+短TMPDIR后current640全started/10F/40E/1skip，历史4/4，644无漏无重，overall仍FAIL。40E=26schema16、10actual migration drift、/Users、旧compat routes、旧wire spec/case、transaction各1；10F含8descriptor regular replacement子例，真实预期未满足保，不洗environment；唯一fresh typedfixture skip仍NOTRUN。无runner/扫描门/白名单改动。
+- 最新root完整 ./... race/真实性gate仍FAIL：API与PG各包累计180s截止，mandatory未完成；新tests未解决统包预算。audit实际8high/0critical，omitdev6，gate保。exactsource CI production-web/browser/source evidence PASS，backend/frontend FAIL，下游步骤NOTRUN；四CI不全绿。
+- 36history byte不变；528旧evidence中仅两个owner授权generated当前清单更新，原两份字节另外historical-*保，其余526不动；schema19、两replace、root./...、旧helper/v1四actual-root/冷bug与currentv4/v2历史边界保。archive独审de4ae883 bounded结论引用，不全accepted/fullCI。详[本批完整回执](R5-INTEGRATION-BATCH4-20261003.md)与[机器状态](evidence/R5-INTEGRATION-BATCH4-20261003/receipt.json)。
+- **10/171不变，无父项关闭。** 无merge/deploy/force/Method19/SML/perf/真实邮件服务/全局安装/身份route绕行；ownedPG已停。源码freeze之后仅文档/证据交付更新，新HEAD CI资格单独读取，不复用sourcefreeze回执冒称新run PASS。

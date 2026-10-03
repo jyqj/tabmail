@@ -1,7 +1,7 @@
 [
   {
     "source": "web/app/(dashboard)/company/recovery/page.tsx",
-    "line": 22,
+    "line": 31,
     "branch": 0,
     "callee": "request",
     "owner": "receipts",
@@ -17,7 +17,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/recovery/page.tsx",
-    "line": 27,
+    "line": 36,
     "branch": 0,
     "callee": "request",
     "owner": "runtime",
@@ -33,7 +33,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/recovery/page.tsx",
-    "line": 96,
+    "line": 123,
     "branch": 0,
     "callee": "company",
     "owner": "next",
@@ -49,7 +49,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/recovery/page.tsx",
-    "line": 185,
+    "line": 212,
     "branch": 0,
     "callee": "company",
     "owner": "RecoveryPage",
@@ -65,11 +65,11 @@
   },
   {
     "source": "web/app/(dashboard)/company/recovery/page.tsx",
-    "line": 242,
+    "line": 277,
     "branch": 0,
     "callee": "company",
     "owner": "value",
-    "expression": "`/outbound/${encodeURIComponent(jobId)}/inspect`",
+    "expression": "`/outbound/${encodeURIComponent(target)}/inspect`",
     "path": "/api/v1/company/outbound/{id}/inspect",
     "methods": [
       "POST"
@@ -81,7 +81,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/recovery/page.tsx",
-    "line": 321,
+    "line": 371,
     "branch": 0,
     "callee": "company",
     "owner": "RecoveryPage",
@@ -97,7 +97,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 36,
+    "line": 37,
     "branch": 0,
     "callee": "company",
     "owner": "templates",
@@ -113,7 +113,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 75,
+    "line": 76,
     "branch": 0,
     "callee": "company",
     "owner": "retireTemplate",
@@ -129,7 +129,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 97,
+    "line": 98,
     "branch": 0,
     "callee": "company",
     "owner": "onPublished",
@@ -161,7 +161,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 82,
+    "line": 83,
     "branch": 0,
     "callee": "company",
     "owner": "makeWriter",
@@ -177,7 +177,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 82,
+    "line": 83,
     "branch": 1,
     "callee": "company",
     "owner": "makeWriter",
@@ -193,7 +193,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 85,
+    "line": 86,
     "branch": 0,
     "callee": "company",
     "owner": "makeWriter",
@@ -209,7 +209,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 100,
+    "line": 101,
     "branch": 0,
     "callee": "company",
     "owner": "templates",
@@ -225,7 +225,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 473,
+    "line": 474,
     "branch": 0,
     "callee": "company",
     "owner": "Compose",
@@ -241,7 +241,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 551,
+    "line": 552,
     "branch": 0,
     "callee": "company",
     "owner": "a",
@@ -257,7 +257,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 574,
+    "line": 575,
     "branch": 0,
     "callee": "downloadCompanyFile",
     "owner": "Compose",
@@ -305,7 +305,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 168,
+    "line": 170,
     "branch": 0,
     "callee": "company",
     "owner": "GrantEditor",
@@ -321,7 +321,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 177,
+    "line": 179,
     "branch": 0,
     "callee": "company",
     "owner": "GrantEditor",
@@ -337,7 +337,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 60,
+    "line": 61,
     "branch": 0,
     "callee": "company",
     "owner": "res",
@@ -353,7 +353,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 60,
+    "line": 61,
     "branch": 1,
     "callee": "company",
     "owner": "res",
@@ -369,7 +369,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 308,
+    "line": 310,
     "branch": 0,
     "callee": "company",
     "owner": "TemplateEditorView",
@@ -509,6 +509,22 @@
     "forwarding": false,
     "routes": [
       "GET /api/v1/company/audit"
+    ]
+  },
+  {
+    "source": "web/features/company/company-event-consumer.tsx",
+    "line": 58,
+    "branch": 0,
+    "callee": "request",
+    "owner": "refresh",
+    "expression": "\"/api/v1/company/overview\"",
+    "path": "/api/v1/company/overview",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/overview"
     ]
   },
   {
@@ -865,11 +881,11 @@
   },
   {
     "source": "web/features/mail/components/submission-content.tsx",
-    "line": 39,
+    "line": 68,
     "branch": 0,
     "callee": "downloadCompanyFile",
-    "owner": "SubmissionContentView",
-    "expression": "`/submissions/${encodeURIComponent(id)}/attachments/${encodeURIComponent(f.id)}/download`",
+    "owner": "LiveSubmissionContent",
+    "expression": "`/submissions/${encodeURIComponent(id)}/attachments/${encodeURIComponent(file.id)}/download`",
     "path": "/api/v1/company/submissions/{id}/attachments/{id}/download",
     "methods": [
       "GET"
@@ -877,22 +893,6 @@
     "forwarding": false,
     "routes": [
       "GET /api/v1/company/submissions/{id}/attachments/{aid}/download"
-    ]
-  },
-  {
-    "source": "web/features/mail/components/submission-pane.tsx",
-    "line": 96,
-    "branch": 0,
-    "callee": "request",
-    "owner": "SubmissionPane",
-    "expression": "`/api/v1/outbound/${id}/retry`",
-    "path": "/api/v1/outbound/{dynamic}/retry",
-    "methods": [
-      "POST"
-    ],
-    "forwarding": false,
-    "routes": [
-      "POST /api/v1/outbound/{id}/retry"
     ]
   },
   {
@@ -913,7 +913,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 25,
+    "line": 27,
     "branch": 0,
     "callee": "streamEvents",
     "owner": "streamAdminMonitorEvents",
@@ -929,7 +929,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 35,
+    "line": 37,
     "branch": 0,
     "callee": "request",
     "owner": "listMonitorHistory",
@@ -945,7 +945,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 43,
+    "line": 45,
     "branch": 0,
     "callee": "request",
     "owner": "listSettings",
@@ -961,7 +961,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 47,
+    "line": 49,
     "branch": 0,
     "callee": "request",
     "owner": "updateSettings",
@@ -977,7 +977,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 56,
+    "line": 58,
     "branch": 0,
     "callee": "request",
     "owner": "getSMTPPolicy",
@@ -993,7 +993,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 60,
+    "line": 62,
     "branch": 0,
     "callee": "request",
     "owner": "updateSMTPPolicy",
@@ -1009,7 +1009,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 67,
+    "line": 69,
     "branch": 0,
     "callee": "request",
     "owner": "listTenants",
@@ -1025,7 +1025,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 71,
+    "line": 73,
     "branch": 0,
     "callee": "request",
     "owner": "createTenant",
@@ -1041,7 +1041,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 78,
+    "line": 80,
     "branch": 0,
     "callee": "request",
     "owner": "updateTenantOverrides",
@@ -1057,7 +1057,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 85,
+    "line": 87,
     "branch": 0,
     "callee": "request",
     "owner": "deleteTenant",
@@ -1073,7 +1073,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 89,
+    "line": 91,
     "branch": 0,
     "callee": "request",
     "owner": "getTenantConfig",
@@ -1089,7 +1089,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 96,
+    "line": 98,
     "branch": 0,
     "callee": "request",
     "owner": "createAPIKey",
@@ -1105,7 +1105,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 103,
+    "line": 105,
     "branch": 0,
     "callee": "request",
     "owner": "listAPIKeys",
@@ -1121,7 +1121,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 107,
+    "line": 109,
     "branch": 0,
     "callee": "request",
     "owner": "revokeAPIKey",
@@ -1137,7 +1137,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 115,
+    "line": 117,
     "branch": 0,
     "callee": "request",
     "owner": "createUserAPIKey",
@@ -1153,7 +1153,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 122,
+    "line": 124,
     "branch": 0,
     "callee": "request",
     "owner": "listUserAPIKeys",
@@ -1169,7 +1169,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 126,
+    "line": 128,
     "branch": 0,
     "callee": "request",
     "owner": "revokeUserAPIKey",
@@ -1185,7 +1185,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 130,
+    "line": 132,
     "branch": 0,
     "callee": "request",
     "owner": "listPlans",
@@ -1201,7 +1201,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 134,
+    "line": 136,
     "branch": 0,
     "callee": "request",
     "owner": "createPlan",
@@ -1217,7 +1217,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 141,
+    "line": 143,
     "branch": 0,
     "callee": "request",
     "owner": "updatePlan",
@@ -1233,7 +1233,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 148,
+    "line": 150,
     "branch": 0,
     "callee": "request",
     "owner": "deletePlan",
@@ -1249,7 +1249,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 152,
+    "line": 154,
     "branch": 0,
     "callee": "request",
     "owner": "getStats",
@@ -1265,7 +1265,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 156,
+    "line": 158,
     "branch": 0,
     "callee": "request",
     "owner": "listAudit",
@@ -1281,7 +1281,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 168,
+    "line": 170,
     "branch": 0,
     "callee": "request",
     "owner": "listIngestJobs",
@@ -1297,7 +1297,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 180,
+    "line": 182,
     "branch": 0,
     "callee": "request",
     "owner": "listWebhookDeliveries",
@@ -1313,7 +1313,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 188,
+    "line": 190,
     "branch": 0,
     "callee": "request",
     "owner": "inviteAdmin",
@@ -1329,7 +1329,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 195,
+    "line": 197,
     "branch": 0,
     "callee": "request",
     "owner": "listUsers",
@@ -1345,7 +1345,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 204,
+    "line": 206,
     "branch": 0,
     "callee": "request",
     "owner": "updateUser",
@@ -1361,7 +1361,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 211,
+    "line": 213,
     "branch": 0,
     "callee": "request",
     "owner": "deleteUser",
@@ -1526,6 +1526,22 @@
     "routes": []
   },
   {
+    "source": "web/lib/api/company-events.ts",
+    "line": 51,
+    "branch": 0,
+    "callee": "streamEvents",
+    "owner": "streamCompanyEvents",
+    "expression": "COMPANY_EVENTS_PATH",
+    "path": "/api/v1/company/events",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/events"
+    ]
+  },
+  {
     "source": "web/lib/api/domains.ts",
     "line": 5,
     "branch": 0,
@@ -1559,7 +1575,7 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 12,
+    "line": 14,
     "branch": 0,
     "callee": "request",
     "owner": "listPermissionProfiles",
@@ -1575,7 +1591,7 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 16,
+    "line": 18,
     "branch": 0,
     "callee": "request",
     "owner": "createPermissionProfile",
@@ -1591,10 +1607,10 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 23,
+    "line": 27,
     "branch": 0,
     "callee": "request",
-    "owner": "updatePermissionProfile",
+    "owner": "response",
     "expression": "`/api/v1/admin/permissions/${id}`",
     "path": "/api/v1/admin/permissions/{dynamic}",
     "methods": [
@@ -1607,7 +1623,23 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 30,
+    "line": 35,
+    "branch": 0,
+    "callee": "request",
+    "owner": "response",
+    "expression": "`/api/v1/admin/permissions/${id}/deletion-preview`",
+    "path": "/api/v1/admin/permissions/{dynamic}/deletion-preview",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/permissions/{id}/deletion-preview"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 40,
     "branch": 0,
     "callee": "request",
     "owner": "deletePermissionProfile",
@@ -1623,7 +1655,7 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 36,
+    "line": 46,
     "branch": 0,
     "callee": "request",
     "owner": "getUserPermission",
@@ -1639,7 +1671,7 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 40,
+    "line": 50,
     "branch": 0,
     "callee": "request",
     "owner": "setUserPermissionOverride",
@@ -1655,7 +1687,7 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 47,
+    "line": 57,
     "branch": 0,
     "callee": "request",
     "owner": "deleteUserPermissionOverride",
@@ -1671,7 +1703,7 @@
   },
   {
     "source": "web/lib/api/permissions.ts",
-    "line": 53,
+    "line": 63,
     "branch": 0,
     "callee": "request",
     "owner": "getMyPermissions",
@@ -1683,6 +1715,54 @@
     "forwarding": false,
     "routes": [
       "GET /api/v1/auth/me/permissions"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 69,
+    "branch": 0,
+    "callee": "request",
+    "owner": "response",
+    "expression": "`/api/v1/admin/users/${userId}/permission-editor`",
+    "path": "/api/v1/admin/users/{dynamic}/permission-editor",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/users/{id}/permission-editor"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 75,
+    "branch": 0,
+    "callee": "request",
+    "owner": "response",
+    "expression": "`/api/v1/admin/users/${userId}/permission-editor`",
+    "path": "/api/v1/admin/users/{dynamic}/permission-editor",
+    "methods": [
+      "PATCH"
+    ],
+    "forwarding": false,
+    "routes": [
+      "PATCH /api/v1/admin/users/{id}/permission-editor"
+    ]
+  },
+  {
+    "source": "web/lib/api/permissions.ts",
+    "line": 84,
+    "branch": 0,
+    "callee": "request",
+    "owner": "response",
+    "expression": "`/api/v1/admin/users/${userId}/permission-editor/assignment`",
+    "path": "/api/v1/admin/users/{dynamic}/permission-editor/assignment",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/admin/users/{id}/permission-editor/assignment"
     ]
   },
   {
@@ -1703,7 +1783,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 279,
+    "line": 253,
     "branch": 0,
     "callee": "company",
     "owner": "companyDomains",
@@ -1719,7 +1799,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 281,
+    "line": 255,
     "branch": 0,
     "callee": "company",
     "owner": "addCompanyDomain",
@@ -1735,7 +1815,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 287,
+    "line": 261,
     "branch": 0,
     "callee": "company",
     "owner": "verifyCompanyDomain",
@@ -1751,7 +1831,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 293,
+    "line": 267,
     "branch": 0,
     "callee": "company",
     "owner": "companyDomainVerification",
@@ -1767,7 +1847,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 298,
+    "line": 272,
     "branch": 0,
     "callee": "company",
     "owner": "deleteCompanyDomain",
@@ -1783,7 +1863,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 310,
+    "line": 284,
     "branch": 0,
     "callee": "company",
     "owner": "setMailboxSendPolicy",
@@ -1799,7 +1879,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 323,
+    "line": 297,
     "branch": 0,
     "callee": "company",
     "owner": "revokeTemplateVersion",
@@ -1815,7 +1895,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 333,
+    "line": 307,
     "branch": 0,
     "callee": "company",
     "owner": "submitDraft",
@@ -1831,7 +1911,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 346,
+    "line": 320,
     "branch": 0,
     "callee": "request",
     "owner": "res",
@@ -1845,7 +1925,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 350,
+    "line": 324,
     "branch": 0,
     "callee": "company",
     "owner": "workMailboxes",
@@ -1861,7 +1941,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 357,
+    "line": 331,
     "branch": 0,
     "callee": "request",
     "owner": "workMessages",
@@ -1877,7 +1957,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 363,
+    "line": 337,
     "branch": 0,
     "callee": "company",
     "owner": "workMessage",
@@ -1893,10 +1973,10 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 368,
+    "line": 344,
     "branch": 0,
     "callee": "request",
-    "owner": "submissions",
+    "owner": "result",
     "expression": "\"/api/v1/company/submissions\"",
     "path": "/api/v1/company/submissions",
     "methods": [
@@ -1909,11 +1989,11 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 374,
+    "line": 351,
     "branch": 0,
-    "callee": "company",
-    "owner": "submission",
-    "expression": "`/submissions/${encodeURIComponent(id)}`",
+    "callee": "request",
+    "owner": "result",
+    "expression": "`/api/v1/company/submissions/${encodeURIComponent(id)}`",
     "path": "/api/v1/company/submissions/{id}",
     "methods": [
       "GET"
@@ -1925,11 +2005,11 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 377,
+    "line": 357,
     "branch": 0,
-    "callee": "company",
-    "owner": "submissionContent",
-    "expression": "`/submissions/${encodeURIComponent(id)}/content`",
+    "callee": "request",
+    "owner": "result",
+    "expression": "`/api/v1/company/submissions/${encodeURIComponent(id)}/content`",
     "path": "/api/v1/company/submissions/{id}/content",
     "methods": [
       "GET"
@@ -1941,7 +2021,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 382,
+    "line": 362,
     "branch": 0,
     "callee": "company",
     "owner": "submissionAttachments",
@@ -1957,7 +2037,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 389,
+    "line": 370,
     "branch": 0,
     "callee": "request",
     "owner": "res",
@@ -1973,7 +2053,7 @@
   },
   {
     "source": "web/lib/company.ts",
-    "line": 408,
+    "line": 389,
     "branch": 0,
     "callee": "request",
     "owner": "blob",
@@ -1987,7 +2067,7 @@
   },
   {
     "source": "web/lib/legacy-outbound.ts",
-    "line": 17,
+    "line": 12,
     "branch": 0,
     "callee": "request",
     "owner": "result",
@@ -2003,11 +2083,11 @@
   },
   {
     "source": "web/lib/legacy-outbound.ts",
-    "line": 21,
+    "line": 18,
     "branch": 0,
     "callee": "request",
     "owner": "result",
-    "expression": "`/api/v1/outbound/${encodeURIComponent(id)}`",
+    "expression": "`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`",
     "path": "/api/v1/outbound/{id}",
     "methods": [
       "GET"
@@ -2015,6 +2095,38 @@
     "forwarding": false,
     "routes": [
       "GET /api/v1/outbound/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/legacy-outbound.ts",
+    "line": 18,
+    "branch": 1,
+    "callee": "request",
+    "owner": "result",
+    "expression": "`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`",
+    "path": "/api/v1/outbound/{id}/attempts",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/outbound/{id}/attempts"
+    ]
+  },
+  {
+    "source": "web/lib/legacy-outbound.ts",
+    "line": 29,
+    "branch": 0,
+    "callee": "request",
+    "owner": "result",
+    "expression": "`/api/v1/outbound/${encodeURIComponent(id)}/retry`",
+    "path": "/api/v1/outbound/{id}/retry",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/outbound/{id}/retry"
     ]
   }
 ]

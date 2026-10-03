@@ -9,7 +9,8 @@ import type {
 } from "./types";
 import { DraftWriter } from "@/features/mail/draft-writer";
 
-type RequiredKeys<T> = { [K in keyof T]-?: {} extends Pick<T, K> ? never : K }[keyof T];
+// Required properties already satisfy the required form of their own picked shape.
+type RequiredKeys<T> = { [K in keyof T]-?: Pick<T, K> extends Required<Pick<T, K>> ? K : never }[keyof T];
 
 describe("wire response and editable input boundaries", () => {
   it("requires all 21 server-present fields without making input metadata mandatory", () => {

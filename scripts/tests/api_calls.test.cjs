@@ -29,3 +29,64 @@ test("client drift checks reject missing/new/verb/route mismatch",()=>{
  assert.throws(()=>validate(rows,[{...doc[0],methods:["POST"]}],routes),/drift/);
  assert.throws(()=>validate(rows,[{...doc[0],routes:[]}],routes),/mapping/);
 });
+test("private helper suffixes enumerate actual routes including omitted default",()=>{
+ const rows=run('function aggregate(id: string, suffix = "") { return request(`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`); } aggregate(id); aggregate(id, "/recipients"); aggregate(id, "/attempts");');
+ assert.deepEqual(rows.map(r=>[r.branch,r.path]),[[0,"/api/v1/outbound/{id}"],[1,"/api/v1/outbound/{id}/recipients"],[2,"/api/v1/outbound/{id}/attempts"]]);
+ const routes=rows.map(r=>({method:"GET",path:r.path}));
+ const doc=rows.map(r=>({...r,routes:[`GET ${r.path}`]}));
+ validate(rows,doc,routes);
+ assert.throws(()=>validate(rows,doc.slice(1),routes),/count/);
+ assert.throws(()=>validate(rows,[...doc,doc[0]],routes),/count/);
+ assert.throws(()=>validate(rows,doc,routes.slice(1)),/unregistered/);
+ assert.throws(()=>validate(rows.map((r,i)=>i===1?{...r,methods:["POST"]}:r),doc,routes),/source drift/);
+ assert.throws(()=>validate(rows.map((r,i)=>i===1?{...r,path:"/api/v1/outbound/{id}/unknown"}:r),doc,routes),/source drift/);
+});
+test("unknown, exported, escaped and spread helper suffixes stay unresolved",()=>{
+ for (const source of [
+  'function aggregate(id: string, suffix = "") { request(`/api/v1/outbound/${id}${suffix}`); } aggregate(id, unknown);',
+  'export function aggregate(id: string, suffix = "") { request(`/api/v1/outbound/${id}${suffix}`); } aggregate(id);',
+  'function aggregate(id: string, suffix = "") { request(`/api/v1/outbound/${id}${suffix}`); } aggregate(id); const escaped = aggregate;',
+  'function aggregate(id: string, suffix = "") { request(`/api/v1/outbound/${id}${suffix}`); } aggregate(...args);',
+ ]) {
+  const rows=run(source);
+  assert.equal(rows.length,1);
+  assert.equal(rows[0].path,"/api/v1/outbound/{dynamic}{dynamic}");
+  assert.throws(()=>validate(rows,rows.map(r=>({...r,routes:[]})),[{method:"GET",path:"/api/v1/outbound/{id}"}]),/unregistered/);
+ }
+});
+test("recipient suffix cannot inherit the registered aggregate route",()=>{
+ const rows=run('function aggregate(id: string, suffix = "") { request(`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`); } aggregate(id); aggregate(id, "/recipients"); aggregate(id, "/attempts");');
+ const routes=[{method:"GET",path:"/api/v1/outbound/{id}"},{method:"GET",path:"/api/v1/outbound/{id}/attempts"}];
+ const doc=rows.map((r,i)=>({...r,routes:i===1?[]:[`GET ${r.path}`]}));
+ assert.throws(()=>validate(rows,doc,routes),/branch 1: GET \/api\/v1\/outbound\/\{id\}\/recipients/);
+ assert.throws(()=>validate(rows,[doc[0],{...doc[1],routes:doc[0].routes},doc[2]],routes),/unregistered/);
+});
+for (const [name, mutation] of [
+ ["assignment", 'suffix = "/other";'],
+ ["compound assignment", 'suffix += "/other";'],
+ ["logical assignment", 'suffix ||= "/other";'],
+ ["prefix update", '++suffix;'],
+ ["postfix update", 'suffix++;'],
+ ["closure write", 'const change = () => { suffix = "/other"; }; change();'],
+ ["array destructuring", '[suffix] = ["/other"];'],
+ ["object destructuring", '({suffix} = {suffix: "/other"});'],
+ ["renamed object destructuring", '({value: suffix} = {value: "/other"});'],
+ ["nested destructuring", '({value: [suffix]} = {value: ["/other"]});'],
+ ["loop target", 'for (suffix of ["/other"]) {}'],
+ ["direct eval", 'eval(\'suffix = "/other"\');'],
+]) test(`helper parameter ${name} prevents finite expansion`,()=>{
+ const rows=run(`function aggregate(id: string, suffix = "") { ${mutation} request(\`/api/v1/outbound/\${encodeURIComponent(id)}\${suffix}\`); } aggregate(id); aggregate(id, "/attempts");`);
+ assert.equal(rows.length,1);
+ assert.equal(rows[0].path,"/api/v1/outbound/{id}{dynamic}");
+ assert.throws(()=>validate(rows,rows.map(r=>({...r,routes:[]})),[{method:"GET",path:"/api/v1/outbound/{id}"},{method:"GET",path:"/api/v1/outbound/{id}/attempts"}]),/unregistered/);
+});
+test("writes to a shadowed parameter do not invalidate immutable helper parameter",()=>{
+ const rows=run('function aggregate(id: string, suffix = "") { function other(suffix: string) { suffix = "/other"; } request(`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`); } aggregate(id); aggregate(id, "/attempts");');
+ assert.deepEqual(rows.map(r=>r.path),["/api/v1/outbound/{id}","/api/v1/outbound/{id}/attempts"]);
+});
+test("explicit undefined remains unresolved rather than assuming its binding",()=>{
+ const rows=run('function aggregate(id: string, suffix = "") { request(`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`); } aggregate(id, undefined);');
+ assert.equal(rows.length,1);
+ assert.equal(rows[0].path,"/api/v1/outbound/{id}{dynamic}");
+ assert.throws(()=>validate(rows,rows.map(r=>({...r,routes:[]})),[{method:"GET",path:"/api/v1/outbound/{id}"}]),/unregistered/);
+});
