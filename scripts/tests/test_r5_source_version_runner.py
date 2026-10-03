@@ -21,6 +21,20 @@ class SourceVersionRunnerTests(unittest.TestCase):
     def test_no_fresh_actual_root_class(self):
         with self.assertRaises(ValueError):runner.partition(list(runner.HISTORICAL_IDS))
 
+    def test_optional_stable_revision_exact_ids_bytes_and_pin(self):
+        import tempfile,hashlib
+        with tempfile.TemporaryDirectory() as temp:
+            root=Path(temp);p=root/runner.STABLE_SUITE_PATH;p.parent.mkdir(parents=True);p.write_bytes(b'known version')
+            ids=self.ids+sorted(runner.STABLE_IDS)
+            with mock.patch.object(runner,'STABLE_SUITE_SHA256',hashlib.sha256(p.read_bytes()).hexdigest()):
+                groups=runner.version_partition(ids,root)
+                self.assertEqual(groups[-1][1],runner.STABLE_BASELINE)
+                self.assertEqual(set(groups[-1][2]),runner.STABLE_IDS)
+                all_ids=[i for _,_,group in groups for i in group]
+                self.assertEqual(set(all_ids),set(ids));self.assertEqual(len(all_ids),len(set(all_ids)))
+                with self.assertRaises(ValueError):runner.version_partition(ids[:-1],root)
+            with self.assertRaises(ValueError):runner.version_partition(ids,root)
+
     def test_child_failure_and_skip_not_green(self):
         import tempfile,json
         class Bad(unittest.TestCase):

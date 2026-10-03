@@ -18,6 +18,15 @@ BASELINE = '41b015c30c66b3ba58a3c1395e8559ebcd27a65f'
 HISTORICAL_IDS = frozenset('test_r5_selected_source_binding.ActualRootBindingTests.'+name for name in (
     'test_actual_full_scope_fresh_hashes','test_real_receipt_roundtrip',
     'test_omission_extra_hash_flags_abi_and_historical_rejected','test_capture_midflight_drift_refused'))
+STABLE_BASELINE = '209d2f5db801dc4385cafd72d22301a056a3bd73'
+STABLE_SUITE_PATH = 'scripts/tests/test_r5_selected_stable_capture.py'
+STABLE_SUITE_SHA256 = '88baa95dc1ea090630b82265dec335d7f4fe51992983b0ad5c7df2f4086c4b08'
+STABLE_IDS = frozenset('test_r5_selected_stable_capture.StableCaptureTests.'+name for name in (
+    'test_01_cold_capture_immediate_validate','test_02_hot_capture_immediate_validate',
+    'test_raw_mvs_drift_even_when_normalized_equal_rejected','test_resigned_raw_hash_forgery_rejected_by_live_recapture',
+    'test_old_selected_v1_refused_before_dispatch','test_actual_selected_file_change_rejected',
+    'test_actual_source_change_during_initial_selection_rejected','test_actual_module_change_rejected'))
+
 FRESH_CLASS = 'test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.'
 
 
@@ -47,6 +56,22 @@ def partition(ids):
     verify(ids,current,frozen,BASELINE)
     return current,frozen
 
+
+
+def version_partition(ids,root):
+    import hashlib
+    stable={i for i in ids if i.startswith('test_r5_selected_stable_capture.')}
+    if stable:
+        if stable!=STABLE_IDS or hashlib.sha256((Path(root)/STABLE_SUITE_PATH).read_bytes()).hexdigest()!=STABLE_SUITE_SHA256:
+            raise ValueError('unknown stable revision suite IDs/bytes')
+    remaining=[i for i in ids if i not in stable]
+    current,frozen=partition(remaining)
+    groups=[('current',None,current),('frozen-v1',BASELINE,frozen)]
+    if stable:groups.append(('frozen-stable-rev2',STABLE_BASELINE,sorted(stable)))
+    dispatched=[i for _,_,group in groups for i in group]
+    if len(dispatched)!=len(set(dispatched)) or set(dispatched)!=set(ids):
+        raise ValueError('version dispatch missing/overlap')
+    return groups
 
 def verify(ids,current,frozen,baseline):
     if baseline != BASELINE or set(frozen) != HISTORICAL_IDS:
@@ -83,6 +108,19 @@ def child(root,ids,output):
     legacy.GO = Path(shutil.which(go) or go).resolve()
     legacy.CACHE = Path(os.environ.get('R5_TEST_CACHE') or git_go_env(go,'GOCACHE'))
     legacy.MODULECACHE = Path(os.environ.get('R5_TEST_MODULECACHE') or git_go_env(go,'GOMODCACHE'))
+    if any(i in STABLE_IDS for i in ids):
+        import types
+        stable = importlib.import_module('test_r5_selected_stable_capture')
+        stable.GO = legacy.GO
+        # Historical test input configuration only. The original source/helper
+        # bytes, cache hydration rules and strict observations stay frozen.
+        original_copytree = shutil.copytree
+        def configured_seed(source,*args,**kwargs):
+            if str(source)=='/workspace/tabmail-cloud/gomod':
+                source=legacy.MODULECACHE
+            return original_copytree(source,*args,**kwargs)
+        stable.shutil = types.SimpleNamespace(**{k:getattr(shutil,k) for k in dir(shutil) if not k.startswith('_')})
+        stable.shutil.copytree = configured_seed
     suite = unittest.TestLoader().loadTestsFromNames(ids)
     actual = [t.id() for t in flatten(suite)]
     if actual != ids:
@@ -104,12 +142,15 @@ def run(root,output):
     root = Path(root).resolve(); output = Path(output).resolve(); output.parent.mkdir(parents=True,exist_ok=True)
     sha = git(root,'rev-parse','HEAD'); groups=[]
     with tempfile.TemporaryDirectory(prefix='r5-version-') as temp:
-        current = Path(temp)/'current'; frozen = Path(temp)/'frozen'
-        checkout(root,current,sha);checkout(root,frozen,BASELINE)
+        current = Path(temp)/'current'
+        checkout(root,current,sha)
         # The clone is the discovery authority; a dirty invocation root (npm ci)
         # neither deletes third-party files nor grants them Go authority.
-        ids = discover(current); current_ids,frozen_ids = partition(ids)
-        for name,source,selection in [('current',current,current_ids),('frozen',frozen,frozen_ids)]:
+        ids = discover(current)
+        specs=version_partition(ids,current)
+        for name,pin,selection in specs:
+            source=current if pin is None else Path(temp)/name
+            if pin is not None:checkout(root,source,pin)
             request = Path(temp)/(name+'-ids.json'); reportfile = Path(temp)/(name+'-report.json')
             request.write_text(json.dumps(selection))
             # Dispatch through the NEW runner for both groups, but load tests
