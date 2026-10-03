@@ -121,43 +121,79 @@ def bound_environment(context, environment):
 
 
 def _check_excluded_metadata(root, path, budget):
-    """Inspect types/names only; never open a regular file or follow a link.
+    """Inspect metadata without body reads, using Linux O_PATH handles.
 
-    Descriptor-relative opens also reject a directory replaced with a symlink
-    between stat and descent. Unsupported platforms and unreadable/raced entries
-    fail closed. Iteration is streaming, bounded before the next stat/descent.
+    For each entry, compare no-follow path stat with a metadata-only handle's
+    type/device/inode, and repeat that comparison after inspection. Directories
+    are enumerated through an identity-matched no-follow directory descriptor.
+    The closing O_PATH acquisition catches replacement after the closing stat,
+    including the review's second-stat scheduling hook. These are observation
+    points, not an atomic snapshot or a promise about future filesystem changes.
+    O_PATH never opens FIFO/device I/O; unsupported primitives fail closed.
     """
+    def identity(info):
+        return (stat.S_IFMT(info.st_mode), info.st_dev, info.st_ino)
+
+    def bound_metadata(parent_fd, name, expected):
+        handle = os.open(name, metadata_flags, dir_fd=parent_fd)
+        try:
+            observed = os.fstat(handle)
+            if identity(observed) != identity(expected):
+                raise ValueError('excluded metadata unavailable or changed (identity mismatch)')
+        except BaseException:
+            os.close(handle)
+            raise
+        return handle
+
     def visit(parent_fd, name, depth):
         budget[0] += 1
         if budget[0] > EXCLUDED_METADATA_MAX_ENTRIES:
             raise ValueError('excluded metadata entry budget exceeded')
         if depth > EXCLUDED_METADATA_MAX_DEPTH:
             raise ValueError('excluded metadata depth budget exceeded')
-        mode = os.stat(name, dir_fd=parent_fd, follow_symlinks=False).st_mode
+        before = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        mode = before.st_mode
         if stat.S_ISLNK(mode):
             raise ValueError('symlinked excluded inventory entry')
         if name == 'go.mod':
             raise ValueError('unknown nested module in excluded directory')
-        if stat.S_ISREG(mode):
-            return
-        if not stat.S_ISDIR(mode):
+        if not (stat.S_ISREG(mode) or stat.S_ISDIR(mode)):
             raise ValueError('special or unknown excluded inventory entry')
-        fd = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW,
-                     dir_fd=parent_fd)
+        handle = bound_metadata(parent_fd, name, before)
         try:
-            with os.scandir(fd) as entries:
-                for entry in entries:
-                    visit(fd, entry.name, depth + 1)
+            if stat.S_ISDIR(mode):
+                fd = os.open(name, directory_flags, dir_fd=parent_fd)
+                try:
+                    if identity(os.fstat(fd)) != identity(before):
+                        raise ValueError('excluded metadata unavailable or changed (identity mismatch)')
+                    with os.scandir(fd) as entries:
+                        for entry in entries:
+                            visit(fd, entry.name, depth + 1)
+                finally:
+                    os.close(fd)
+            after = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+            if identity(after) != identity(before):
+                raise ValueError('excluded metadata unavailable or changed (identity mismatch)')
+            closing_handle = bound_metadata(parent_fd, name, before)
+            os.close(closing_handle)
         finally:
-            os.close(fd)
+            # Keep the original object bound until the closing observation;
+            # unlink/recreate cannot recycle its inode while this FD is held.
+            os.close(handle)
+
     try:
-        # Resolve each repository-relative ancestor through directory FDs so
-        # aliases introduced in an ancestor cannot redirect metadata descent.
-        flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
-        fd = os.open(root, flags)
+        # O_PATH is Linux-specific. Do not substitute ordinary open on a
+        # platform lacking metadata-only, no-follow acquisition.
+        import sys
+        if sys.platform != 'linux' or not all(hasattr(os, flag) for flag in
+                ('O_PATH', 'O_NOFOLLOW', 'O_DIRECTORY')):
+            raise ValueError('excluded metadata platform unsupported')
+        metadata_flags = os.O_PATH | os.O_NOFOLLOW
+        directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+        fd = os.open(root, directory_flags)
         try:
             for component in path.relative_to(root).parts[:-1]:
-                child_fd = os.open(component, flags, dir_fd=fd)
+                child_fd = os.open(component, directory_flags, dir_fd=fd)
                 os.close(fd)
                 fd = child_fd
             visit(fd, path.name, 1)
