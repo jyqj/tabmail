@@ -1,0 +1,41 @@
+[
+  {
+    "name": "typed-go",
+    "argv": [
+      "/workspace/tabmail-cloud/tools/go/bin/go",
+      "test",
+      "-p",
+      "1",
+      "-count=1",
+      "-timeout=90s",
+      "-v",
+      "./internal/api/handlers",
+      "-run",
+      "^TestOrdinaryReceiptOpenAPIWireFixtures$"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 27.537931755000017
+  },
+  {
+    "name": "contracts",
+    "argv": [
+      "/tmp/r5-batch2-venv/bin/python",
+      "-B",
+      "-m",
+      "unittest",
+      "-v",
+      "scripts.tests.test_permission_editor_contract",
+      "scripts.tests.test_company_admin_events_contract",
+      "scripts.tests.test_ordinary_receipt_contract",
+      "scripts.tests.test_outbound_inspection_contract",
+      "scripts.tests.test_openapi_contract",
+      "scripts.tests.test_contract_drift",
+      "scripts.tests.test_contract_source_aliases",
+      "scripts.tests.test_http_contract",
+      "scripts.tests.test_i18n_keys",
+      "scripts.tests.test_r5_smtp_owner_source_inventory"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 10.928531948
+  }
+]
