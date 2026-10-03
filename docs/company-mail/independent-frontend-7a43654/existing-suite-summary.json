@@ -1,0 +1,7 @@
+{
+  "command": "npm test -- --reporter=json --outputFile=/tmp/frontend-author-profile-results.json features/company/profile-management.consumer.test.tsx",
+  "passed": 28,
+  "failed": 0,
+  "total": 28,
+  "scope": "existing author suite, jsdom, supporting only; not the independent oracle"
+}

@@ -1,0 +1,1100 @@
+{
+  "attempts": [
+    {
+      "attempt": 1,
+      "scope": "real Chromium, candidate component on Vite; synthetic API and auth; real locale, Base UI, SWR, API/session/event transport. NOT shipping Next runtime, PG authz or durable acceptance.",
+      "candidate": "7a436549ace77d1baf30f33f6fb8e163077fe34c",
+      "baseline": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+      "chromium": "151.0.7922.173",
+      "passed": 6,
+      "failed": 1,
+      "results": [
+        {
+          "name": "description-only conflict preserves all remote revocations/quotas and raw NULL",
+          "status": "passed"
+        },
+        {
+          "name": "explicit false / zero / empty list survive conflict confirmation",
+          "status": "fixture_error",
+          "error": "locator.click: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('switch').first()\u001b[22m\n\u001b[2m    - locator resolved to <span tabindex=\"0\" role=\"switch\" data-size=\"sm\" data-checked=\"\" data-slot=\"switch\" id=\"base-ui-_r_1l_\" aria-checked=\"true\" class=\"peer group/switch relative inline-flex shrink-0 items-center rounded-full border border-transparent transition-all outline-none after:absolute after:-inset-x-3 after:-inset-y-2 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-[size=default]:h-[18.4px] data-[s\u2026>\u2026</span>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not visible\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    11 \u00d7 waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m       - element is not visible\u001b[22m\n\u001b[2m     - retrying click action\u001b[22m\n\u001b[2m       - waiting 500ms\u001b[22m\n\u001b[2m    - waiting for element to be visible, enabled and stable\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "NULL profile zones remain omitted on ordinary description save; no override inherit field",
+          "status": "passed"
+        },
+        {
+          "name": "unchanged form cannot submit",
+          "status": "passed"
+        },
+        {
+          "name": "same-field remote conflict is visible and deliberate preserved edit wins only after confirmation",
+          "status": "passed"
+        },
+        {
+          "name": "explicit same-field choice of ORIGINAL quota after seeing remote change is transmitted",
+          "status": "failed",
+          "error": "explicit post-review choice of 10 must not silently disappear\n\nundefined !== 10\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "keep description",
+                "daily_send_quota": 15,
+                "expected_revision": "9007199254740993"
+              }
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "keep description",
+                "expected_revision": "9007199254740999"
+              }
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "refresh GET 500 freezes draft and successful retry recovers",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('alert') to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "refresh GET 409 freezes draft and successful retry recovers",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('alert') to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "read 401 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "page.evaluate: ReferenceError: seam is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:1:20)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "write 401 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "page.evaluate: ReferenceError: seam is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:1:20)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "read 403 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "page.evaluate: ReferenceError: seam is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:1:20)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "write 403 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "page.evaluate: ReferenceError: seam is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:1:20)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "cancel close/reopen discards edits and binds fresh baseline; A to B has no leaked intent",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new account draft",
+          "status": "fixture_error",
+          "error": "page.evaluate: ReferenceError: mode is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:1:36)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new tenant draft",
+          "status": "fixture_error",
+          "error": "page.evaluate: ReferenceError: mode is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:1:36)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new relogin draft",
+          "status": "fixture_error",
+          "error": "page.evaluate: ReferenceError: mode is not defined\n    at eval (eval at evaluate (:311:30), <anonymous>:1:36)\n    at UtilityScript.evaluate (<anonymous>:313:16)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "delayed old PATCH cannot close or unlock a new session PATCH",
+          "status": "fixture_error",
+          "error": "locator.isEnabled: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('button', { name: 'Saving\u2026' })\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "old write",
+                "expected_revision": "9007199254740993"
+              }
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000012",
+              "method": "PATCH",
+              "body": {
+                "description": "new write",
+                "expected_revision": "9007199254740993"
+              }
+            }
+          ]
+        },
+        {
+          "name": "repeated 409 never blindly replays and can recover after new refresh",
+          "status": "passed"
+        },
+        {
+          "name": "SSE invalidation drops prior confirmation and requires fresh manual review",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('alert') to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        }
+      ],
+      "fixture_errors": 12,
+      "note": "Development attempt; candidate unchanged. Fixture corrections described in checkpoint. Development screenshots not retained; final run screenshot is retained."
+    },
+    {
+      "attempt": 2,
+      "scope": "real Chromium, candidate component on Vite; synthetic API and auth; real locale, Base UI, SWR, API/session/event transport. NOT shipping Next runtime, PG authz or durable acceptance.",
+      "candidate": "7a436549ace77d1baf30f33f6fb8e163077fe34c",
+      "baseline": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+      "chromium": "151.0.7922.173",
+      "passed": 13,
+      "failed": 1,
+      "results": [
+        {
+          "name": "description-only conflict preserves all remote revocations/quotas and raw NULL",
+          "status": "passed"
+        },
+        {
+          "name": "explicit false / zero / empty list survive conflict confirmation",
+          "status": "passed"
+        },
+        {
+          "name": "NULL profile zones remain omitted on ordinary description save; no override inherit field",
+          "status": "passed"
+        },
+        {
+          "name": "unchanged form cannot submit",
+          "status": "passed"
+        },
+        {
+          "name": "same-field remote conflict is visible and deliberate preserved edit wins only after confirmation",
+          "status": "passed"
+        },
+        {
+          "name": "explicit same-field choice of ORIGINAL quota after seeing remote change is transmitted",
+          "status": "failed",
+          "error": "explicit post-review choice of 10 must not silently disappear\n\nundefined !== 10\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "keep description",
+                "daily_send_quota": 15,
+                "expected_revision": "9007199254740993"
+              }
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "keep description",
+                "expected_revision": "9007199254740999"
+              }
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "refresh GET 500 freezes draft and successful retry recovers",
+          "status": "passed"
+        },
+        {
+          "name": "refresh GET 409 freezes draft and successful retry recovers",
+          "status": "passed"
+        },
+        {
+          "name": "read 401 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('alert').filter({ hasText: 'synthetic-401' }) to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/auth/refresh",
+              "method": "POST",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "write 401 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('alert').filter({ hasText: 'synthetic-401' }) to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "denied draft",
+                "expected_revision": "9007199254740993"
+              }
+            },
+            {
+              "path": "/api/v1/auth/refresh",
+              "method": "POST",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "read 403 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('alert').filter({ hasText: 'synthetic-403' }) to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "write 403 locks current session and SAME account re-login recovers",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('alert').filter({ hasText: 'synthetic-403' }) to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "denied draft",
+                "expected_revision": "9007199254740993"
+              }
+            }
+          ]
+        },
+        {
+          "name": "cancel close/reopen discards edits and binds fresh baseline; A to B has no leaked intent",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new account draft",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new tenant draft",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new relogin draft",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old PATCH cannot close or unlock a new session PATCH",
+          "status": "passed"
+        },
+        {
+          "name": "repeated 409 never blindly replays and can recover after new refresh",
+          "status": "passed"
+        },
+        {
+          "name": "SSE invalidation drops prior confirmation and requires fresh manual review",
+          "status": "fixture_error",
+          "error": "locator.waitFor: Timeout 6000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('dialog').getByRole('alert') to be visible\u001b[22m\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        }
+      ],
+      "fixture_errors": 5,
+      "note": "Development attempt; candidate unchanged. Fixture corrections described in checkpoint. Development screenshots not retained; final run screenshot is retained."
+    },
+    {
+      "attempt": 3,
+      "scope": "real Chromium, candidate component on Vite; synthetic API and auth; real locale, Base UI, SWR, API/session/event transport. NOT shipping Next runtime, PG authz or durable acceptance.",
+      "candidate": "7a436549ace77d1baf30f33f6fb8e163077fe34c",
+      "baseline": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+      "chromium": "151.0.7922.173",
+      "passed": 20,
+      "failed": 1,
+      "results": [
+        {
+          "name": "description-only conflict preserves all remote revocations/quotas and raw NULL",
+          "status": "passed"
+        },
+        {
+          "name": "explicit false / zero / empty list survive conflict confirmation",
+          "status": "passed"
+        },
+        {
+          "name": "NULL profile zones remain omitted on ordinary description save; no override inherit field",
+          "status": "passed"
+        },
+        {
+          "name": "unchanged form cannot submit",
+          "status": "passed"
+        },
+        {
+          "name": "same-field remote conflict is visible and deliberate preserved edit wins only after confirmation",
+          "status": "passed"
+        },
+        {
+          "name": "explicit same-field choice of ORIGINAL quota after seeing remote change is transmitted",
+          "status": "failed",
+          "error": "explicit post-review choice of 10 must not silently disappear\n\nundefined !== 10\n",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "keep description",
+                "daily_send_quota": 15,
+                "expected_revision": "9007199254740993"
+              }
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions/40000000-0000-4000-8000-000000000011",
+              "method": "PATCH",
+              "body": {
+                "description": "keep description",
+                "expected_revision": "9007199254740999"
+              }
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "refresh GET 500 freezes draft and successful retry recovers",
+          "status": "passed"
+        },
+        {
+          "name": "refresh GET 409 freezes draft and successful retry recovers",
+          "status": "passed"
+        },
+        {
+          "name": "read 401 locks current session and SAME account re-login recovers",
+          "status": "passed"
+        },
+        {
+          "name": "write 401 locks current session and SAME account re-login recovers",
+          "status": "passed"
+        },
+        {
+          "name": "read 403 locks current session and SAME account re-login recovers",
+          "status": "passed"
+        },
+        {
+          "name": "write 403 locks current session and SAME account re-login recovers",
+          "status": "passed"
+        },
+        {
+          "name": "cancel close/reopen discards edits and binds fresh baseline; A to B has no leaked intent",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new account draft",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new tenant draft",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old refresh cannot contaminate new relogin draft",
+          "status": "passed"
+        },
+        {
+          "name": "delayed old PATCH cannot close or unlock a new session PATCH",
+          "status": "passed"
+        },
+        {
+          "name": "repeated 409 never blindly replays and can recover after new refresh",
+          "status": "passed"
+        },
+        {
+          "name": "SSE invalidation drops prior confirmation and requires fresh manual review",
+          "status": "passed"
+        },
+        {
+          "name": "missing target during refresh freezes; close and select valid B recovers",
+          "status": "passed"
+        },
+        {
+          "name": "unchecking confirmation and refreshing again remove write eligibility",
+          "status": "fixture_error",
+          "error": "page.waitForFunction: Timeout 6000ms exceeded.",
+          "pageErrors": [],
+          "requests": [
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/domains",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/events",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/company/overview",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            },
+            {
+              "path": "/api/v1/admin/permissions",
+              "method": "GET",
+              "body": null
+            }
+          ]
+        },
+        {
+          "name": "refresh 500 then page reload restores editing without frozen old draft",
+          "status": "passed"
+        }
+      ],
+      "fixture_errors": 1,
+      "note": "Development attempt; candidate unchanged. Fixture corrections described in checkpoint. Development screenshots not retained; final run screenshot is retained."
+    }
+  ]
+}

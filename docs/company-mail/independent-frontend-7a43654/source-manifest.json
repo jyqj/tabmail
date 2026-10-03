@@ -1,0 +1,14 @@
+{
+  "sha256": {
+    "web/review-independent/style.css": "20c3167ea517924f6a444e54025d7ae135395102356885dff20ca1058cb73261",
+    "web/review-independent/run.cjs": "d6c4492d0c38c9c98f9b1426a7a77f1ce24178627cc2d512982c4e4980a1cafc",
+    "web/review-independent/vite.config.mjs": "a6529dbf503475c2f41f07c76dd3c50393450d6a794ef7fd64eeed276083c6ff",
+    "web/review-independent/entry.jsx": "1cb1a6dc93c91612cf608947cf813143b19ed07e40fbaf06e645cbb696b8f856",
+    "web/review-independent/index.html": "49ac7b9bd7ca1ce7ac437b31202e9be2fc26715175bcfe1062d9447e2ce48930",
+    "web/review-independent/header.jsx": "cdbc158cb02ff834ae4f6bddf1058c9778023bab99bdc8223595e0427955ddf6",
+    "web/review-independent/auth.js": "95cd5a1085e859e64257959d9e9522cc22450d559bd3ccf36e3573b62109057d",
+    "web/features/company/profile-management.tsx": "849ffaa1d4d0475a56d331f91d616500e30da17b817a72e58554525af70a55d1",
+    "web/package-lock.json": "bd31660c52baa389e6d66a4ebf02a7ecd952bab72da6b16460f9d484b0be38c0"
+  },
+  "source_commit": "7a436549ace77d1baf30f33f6fb8e163077fe34c"
+}
