@@ -68,6 +68,22 @@ class R5CIWiringTests(unittest.TestCase):
             self.assertEqual(jobs[name]['env']['GODEBUG'], 'asynctimerchan=0')
             self.assertEqual(jobs[name]['services']['postgres']['image'], 'postgres:16')
 
+    def test_archive_guard_order_and_version_dispatch(self):
+        jobs = load('company-p0.yml')['jobs']
+        steps = jobs['backend']['steps']
+        guard = next(i for i,s in enumerate(steps) if s.get('name')=='Exact immutable archive boundary')
+        build = next(i for i,s in enumerate(steps) if s.get('name')=='Build')
+        self.assertLess(guard,build)
+        self.assertEqual(steps[build]['run'],'go build ./...')
+        self.assertTrue(any(s.get('run')=='go vet ./...' for s in steps))
+        self.assertTrue(any('go test -json -race -count=1 -timeout=180s ./...' in s.get('run','') for s in steps))
+        self.assertTrue(any('run_r5_source_version_tests.py' in s.get('run','') for s in steps))
+        frontend = jobs['frontend']['steps']
+        npm = next(i for i,s in enumerate(frontend) if s.get('run')=='npm ci')
+        runner = next(i for i,s in enumerate(frontend) if 'run_r5_source_version_tests.py' in s.get('run',''))
+        self.assertLess(npm,runner)
+        self.assertFalse(any('unittest discover' in s.get('run','') for steps in [steps,frontend] for s in steps))
+
 
 if __name__ == '__main__':
     unittest.main()

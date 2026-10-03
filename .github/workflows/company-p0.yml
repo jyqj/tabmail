@@ -44,6 +44,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y postgresql-client-16
           echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
+      - name: Exact immutable archive boundary
+        run: python3 -B scripts/r5_archive_boundary.py --root .
       - name: Build
         run: go build ./...
       - name: Race tests with PostgreSQL
@@ -64,7 +66,7 @@ jobs:
       - name: Install pinned contract checker dependency
         run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
       - name: Validation tool regressions
-        run: python3 -B -m unittest discover -s scripts/tests -p 'test_*.py' -v
+        run: python3 -B scripts/run_r5_source_version_tests.py --root . --output source-version-tests.json
       - name: DTO field contract
         run: python3 scripts/check_contract_drift.py
       - name: Fresh route/client compatibility inventory and upgrade plan
@@ -87,6 +89,7 @@ jobs:
         with:
           name: company-p0-test-evidence
           path: |
+            source-version-tests.json
             go-test.jsonl
             go-test-source-sha.txt
             go-test-evidence.json
@@ -102,6 +105,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -110,8 +114,12 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - name: Install pinned version-test checker dependency
+        run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
       - run: npm ci
         working-directory: web
+      - name: Versioned source tests from independent clean Git checkouts
+        run: python3 -B scripts/run_r5_source_version_tests.py --root . --output frontend-source-version-tests.json
       - name: Catalog and TypeScript source validation
         run: |
           node --test scripts/tests/*.test.cjs
