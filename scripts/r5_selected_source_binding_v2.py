@@ -291,7 +291,8 @@ def capture(root, go, *, cache, modulecache, context=None):
     # Selection may download test dependencies and hydrate MVS Dir fields.
     # Bind both observations only after that hydration, retaining raw hashes.
     run(argv)
-    commands.pop()  # dependency hydration is not formal evidence or identity
+    hydration = commands.pop()
+    hydration['role'] = 'unbound_dependency_hydration_not_attested'  # retained diagnostics, excluded from identity
     selected_raw = run(argv)
     rows = stream(selected_raw)
     mvs_raw = run(MVS_ARGV)
@@ -322,7 +323,7 @@ def capture(root, go, *, cache, modulecache, context=None):
                    generated_testmain=generated,external_modulecache_inputs=external,native_inputs=native,toolchain_source_inputs=toolchain,
                    selected_local_packages=local_packages,package_records=len(rows), qualification=dict(overall='blocked',excluded_metadata_boundary='descriptor_checked',local_static_binding='captured',generated='unknown',external_modulecache='unknown',compiler_native='unknown',Method19='unknown',SML='unknown',wholeCI='unknown'),
                    boundary='Metadata/static local bytes only; no product tests, cold build or runtime qualification')
-    return dict(payload,attestation_sha256=hashlib.sha256(inventory.canonical(payload)).hexdigest())
+    return dict(payload,hydration_diagnostics=hydration,attestation_sha256=hashlib.sha256(inventory.canonical(payload)).hexdigest())
 
 
 def validate(receipt, root, go, *, cache, modulecache):
@@ -332,9 +333,10 @@ def validate(receipt, root, go, *, cache, modulecache):
     def identity(value):
         value = dict(value)
         value.pop('attestation_sha256',None)
+        value.pop('hydration_diagnostics',None)
         value['commands'] = [{k:v for k,v in command.items() if k!='stderr'} for command in value['commands']]
         return inventory.canonical(value)
-    payload = {k:v for k,v in receipt.items() if k!='attestation_sha256'}
+    payload = {k:v for k,v in receipt.items() if k not in ('attestation_sha256','hydration_diagnostics')}
     if receipt.get('attestation_sha256')!=hashlib.sha256(inventory.canonical(payload)).hexdigest() or identity(receipt)!=identity(observed):
         raise ValueError('selected attestation missing/extra/drifted/context mismatch')
     return observed

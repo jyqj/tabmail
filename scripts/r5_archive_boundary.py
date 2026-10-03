@@ -85,6 +85,9 @@ def topology(root):
             names = sorted(entry.name for entry in entries)
         for name in names:
             if not prefix and name == '.git':
+                vcs = os.stat(name,dir_fd=fd,follow_symlinks=False)
+                if not (stat.S_ISDIR(vcs.st_mode) or stat.S_ISREG(vcs.st_mode)):
+                    raise ValueError('symlink/special VCS metadata boundary')
                 continue
             budget[0] += 1
             if budget[0] > MAX_ENTRIES:
@@ -153,6 +156,9 @@ def check(root):
     archive_family = 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE'
     if {p for p in files if p.startswith(archive_family)} != set(historical)|set(markers):
         raise ValueError('archive family added/missing file')
+    family_dirs = {str(parent) for p in set(historical)|set(markers) for parent in Path(p).parents if str(parent).startswith(archive_family)}
+    if {p for p in dirs if p.startswith(archive_family)} != family_dirs:
+        raise ValueError('archive family added/missing directory')
     sums = {'go.sum', *(r['path']+'/go.sum' for r in inventory.CURRENT_REPLACEMENTS)}
     if {p for p in files if Path(p).name=='go.sum'} != sums:
         raise ValueError('unknown/missing module sums')

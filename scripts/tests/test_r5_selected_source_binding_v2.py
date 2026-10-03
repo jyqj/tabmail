@@ -60,13 +60,15 @@ class ActualRootBindingV2Tests(unittest.TestCase):
                 self.assertEqual(r['production_coverage']['root_packages'],r['production_coverage']['explicit_packages'])
                 self.assertTrue(r['production_coverage']['root_packages'])
                 self.assertEqual(r['go_env']['GOVERSION'],'go1.25.7')
+                self.assertEqual(r['hydration_diagnostics']['role'],'unbound_dependency_hydration_not_attested')
+                self.assertEqual(len(r['production_coverage']['variant_directory_records']),len(r['base_source']['archive_boundary']['production_variant_directories']))
                 for fork in ['third_party/go-smtp/','third_party/enmime-v2.3.0/']:
                     self.assertTrue(any(p.startswith(fork) for p in r['selected_local']))
                 self.assertEqual({p:row['sha256'] for p,row in r['selected_local'].items()},binding.digest(ROOT,r['selected_local']))
 
     def test_real_receipt_roundtrip(self):
         for r in self.receipts.values():
-            self.assertEqual(binding.validate(r,ROOT,GO,cache=CACHE,modulecache=MODULECACHE),r)
+            self.assertEqual(binding.validate(r,ROOT,GO,cache=CACHE,modulecache=MODULECACHE)['attestation_sha256'],r['attestation_sha256'])
 
     def test_capture_marker_registry_archive_source_drift(self):
         actual=binding.digest;calls=0
