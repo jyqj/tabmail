@@ -1,7 +1,7 @@
 """Run every discovered test exactly once in its declared source checkout.
 
-Current tests run in an independent clean Git clone at HEAD, before npm artifacts
-can affect Go discovery. Only the four original selected v1 actual-root IDs run
+Current tests run in an independent clean Git clone at HEAD, with only verified
+locked TypeScript and fresh typed wire evidence. Only the four original selected v1 actual-root IDs run
 in their frozen baseline clone. Preserve failures and skips as non-green evidence.
 """
 from __future__ import annotations
@@ -13,6 +13,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import r5_source_runner_prepare as preparation
 
 BASELINE = '41b015c30c66b3ba58a3c1395e8559ebcd27a65f'
 HISTORICAL_IDS = frozenset('test_r5_selected_source_binding.ActualRootBindingTests.'+name for name in (
@@ -111,6 +112,16 @@ def run(root,output):
         # neither deletes third-party files nor grants them Go authority.
         ids = discover(current)
         current_ids,frozen_ids=partition(ids)
+        # Preparation is part of this runner, never a caller wrapper or npm ci.
+        # Preserve build/run artifacts outside the disposable source clones.
+        evidence = Path(tempfile.mkdtemp(prefix='r5-source-preparation-',dir=output.parent))
+        try:
+            prepared, prepared_env = preparation.prepare(current,evidence/'current',os.environ.get('R5_TEST_GO','go'))
+        except Exception as error:
+            output.write_text(json.dumps(dict(schema_version=1,status='failed',source_sha=sha,
+                preparation_error=str(error),preparation_output=str(evidence),discovered_test_ids=ids,
+                groups=[],missing_test_ids=ids,no_missing=False,no_overlap=True),indent=2)+'\n')
+            return 1
         specs=[('current',None,current_ids),('frozen-v1',BASELINE,frozen_ids)]
         for name,pin,selection in specs:
             source=current if pin is None else Path(temp)/name
@@ -121,12 +132,16 @@ def run(root,output):
             # from the exact clone. The frozen helper itself is never replaced.
             argv = [sys.executable,'-B',str(Path(__file__).resolve()),'--child-root',str(source),
                     '--ids',str(request),'--output',str(reportfile)]
-            result = subprocess.run(argv,cwd=source,env={**os.environ,'R5_TEST_GO':os.environ.get('R5_TEST_GO','go')})
+            env = {key:value for key,value in os.environ.items() if key not in
+                   ('ORDINARY_RECEIPT_WIRE_FIXTURE','R5_SOURCE_PREPARATION','R5_SOURCE_PREPARATION_SHA256','R5_SOURCE_RUN_ID')}
+            if pin is None:env.update(prepared_env)
+            result = subprocess.run(argv,cwd=source,env={**env,'R5_TEST_GO':os.environ.get('R5_TEST_GO','go')})
             report = json.loads(reportfile.read_text()) if reportfile.exists() else dict(error='child report missing')
             groups.append(dict(group=name,source_sha=git(source,'rev-parse','HEAD'),requested_test_ids=selection,argv=argv,exit=result.returncode,report=report))
     good = all(g['exit']==0 and g['report'].get('actual_test_ids')==g['requested_test_ids'] and g['report'].get('source_sha')==g['source_sha'] for g in groups)
     executed = [i for g in groups for i in g['report'].get('actual_test_ids',[])]
-    report = dict(schema_version=1,discovered_test_ids=ids,groups=groups,
+    report = dict(schema_version=1,discovered_test_ids=ids,groups=groups,preparation=prepared,
+        preparation_output=str(evidence),
         dispatch_no_missing=True,dispatch_no_overlap=True,
         no_missing=set(executed)==set(ids),no_overlap=len(executed)==len(set(executed)),
         missing_test_ids=sorted(set(ids)-set(executed)),status='pass' if good else 'failed')
