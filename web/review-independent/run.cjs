@@ -1,8 +1,12 @@
-const { chromium } = require('playwright');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const out = path.resolve(__dirname,'../../docs/company-mail/evidence/R5-INTEGRATION-BATCH2-20261003/browser');
+async function main() {
+const { createRequire } = await import('node:module');
+// Playwright is an external CommonJS tool: preserve the documented NODE_PATH CLI.
+const loadCommonJS = createRequire(__filename);
+const { chromium } = loadCommonJS('playwright');
+const { default: assert } = await import('node:assert/strict');
+const { default: fs } = await import('node:fs');
+const { default: path } = await import('node:path');
+const out = process.env.REVIEW_OUTPUT_DIR ? path.resolve(process.env.REVIEW_OUTPUT_DIR) : path.resolve(__dirname,'../../docs/company-mail/evidence/R5-INTEGRATION-BATCH2-20261003/browser');
 fs.mkdirSync(out,{recursive:true});
 const results=[];
 const tests=[];
@@ -59,4 +63,7 @@ test('batch2 independent: successful rebase then interrupted refresh retains bas
  await setup(p,()=>window.review.readError=0);await refresh(p).click();await dialog(p).getByRole('checkbox').waitFor();assert.equal(await save(p).isEnabled(),false);assert.equal(await dialog(p).locator('input[type=number]').nth(0).inputValue(),'10');assert.equal((await writes(p)).length,0);
  await dialog(p).getByRole('checkbox').check();await save(p).click();await count(p,1);assert.deepEqual((await writes(p))[0].body,{expected_revision:'9007199254741000',description:'independent keep',daily_send_quota:10});assert.equal(await p.evaluate(()=>window.review.profiles[0].can_send),false);
 });
-(async()=>{const browser=await chromium.launch({executablePath:process.env.REVIEW_CHROMIUM||'/usr/bin/chromium',args:['--no-sandbox']});const version=browser.version();for(const {name,fn} of tests){const context=await browser.newContext();const p=await context.newPage();p.setDefaultTimeout(6000);const errors=[];p.on('pageerror',e=>errors.push(e.message));await p.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());try{await p.goto('http://127.0.0.1:4179/review-independent/index.html');await p.getByText('Review A',{exact:true}).waitFor();await fn(p);assert.deepEqual(errors,[]);results.push({name,status:'passed'});}catch(e){const artifact=`failure-${results.length+1}.png`;await p.screenshot({path:path.join(out,artifact),fullPage:true});results.push({name,status:'failed',error:e.message,pageErrors:errors,requests:await p.evaluate(()=>window.review?.calls),artifact});}console.log(results.at(-1).status.toUpperCase(),name,results.at(-1).error||'');await context.close();}await browser.close();const report={scope:'real Chromium, candidate component on Vite; synthetic API and auth; real locale, Base UI, SWR, API/session/event transport. NOT shipping Next runtime, PG authz or durable acceptance.',candidate:process.env.PROFILE_CANDIDATE||'working-tree',baseline:'eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d',chromium:version,passed:results.filter(r=>r.status==='passed').length,failed:results.filter(r=>r.status==='failed').length,results};fs.writeFileSync(path.join(out,'browser-results.json'),JSON.stringify(report,null,2)+'\n');process.exitCode=report.failed?1:0;})();
+await (async()=>{const browser=await chromium.launch({executablePath:process.env.REVIEW_CHROMIUM||'/usr/bin/chromium',args:['--no-sandbox']});const version=browser.version();for(const {name,fn} of tests){const context=await browser.newContext();const p=await context.newPage();p.setDefaultTimeout(6000);const errors=[];p.on('pageerror',e=>errors.push(e.message));await p.route('**/*',r=>new URL(r.request().url()).hostname==='127.0.0.1'?r.continue():r.abort());try{await p.goto('http://127.0.0.1:4179/review-independent/index.html');await p.getByText('Review A',{exact:true}).waitFor();await fn(p);assert.deepEqual(errors,[]);results.push({name,status:'passed'});}catch(e){const artifact=`failure-${results.length+1}.png`;await p.screenshot({path:path.join(out,artifact),fullPage:true});results.push({name,status:'failed',error:e.message,pageErrors:errors,requests:await p.evaluate(()=>window.review?.calls),artifact});}console.log(results.at(-1).status.toUpperCase(),name,results.at(-1).error||'');await context.close();}await browser.close();const report={scope:'real Chromium, candidate component on Vite; synthetic API and auth; real locale, Base UI, SWR, API/session/event transport. NOT shipping Next runtime, PG authz or durable acceptance.',candidate:process.env.PROFILE_CANDIDATE||'working-tree',baseline:'eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d',chromium:version,passed:results.filter(r=>r.status==='passed').length,failed:results.filter(r=>r.status==='failed').length,results};fs.writeFileSync(path.join(out,'browser-results.json'),JSON.stringify(report,null,2)+'\n');process.exitCode=report.failed?1:0;})();
+
+}
+main().catch(error => { console.error(error); process.exitCode = 1; });
