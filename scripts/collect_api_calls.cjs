@@ -43,6 +43,26 @@ function scan(root = ROOT) {
   }
   // Expand finite string parameters only for private, directly called helpers.
   // An exported/escaped helper or any unknown argument stays unresolved.
+  function parameterMayBeWritten(fn, symbol) {
+    function containsParameter(n) {
+      if (ts.isIdentifier(n) && (checker.getSymbolAtLocation(n) === symbol ||
+          (ts.isShorthandPropertyAssignment(n.parent) && checker.getShorthandAssignmentValueSymbol(n.parent) === symbol))) return true;
+      return !!ts.forEachChild(n, containsParameter);
+    }
+    function visit(n) {
+      // Inspect the entire body, including nested closures and unreachable code;
+      // this is an immutability check, not a control-flow proof.
+      if (ts.isBinaryExpression(n) && n.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+          n.operatorToken.kind <= ts.SyntaxKind.LastAssignment && containsParameter(n.left)) return true;
+      if ((ts.isPrefixUnaryExpression(n) || ts.isPostfixUnaryExpression(n)) &&
+          [ts.SyntaxKind.PlusPlusToken, ts.SyntaxKind.MinusMinusToken].includes(n.operator) && containsParameter(n.operand)) return true;
+      if ((ts.isForInStatement(n) || ts.isForOfStatement(n)) && containsParameter(n.initializer)) return true;
+      // Direct eval/with prevent proving that lexical parameters are immutable.
+      if (ts.isWithStatement(n) || (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === "eval")) return true;
+      return !!ts.forEachChild(n, visit);
+    }
+    return !!fn.body && visit(fn.body);
+  }
   function pathBindings(input, sf) {
     let bindings = [new Map()];
     const parameters = new Set();
@@ -58,6 +78,7 @@ function scan(root = ROOT) {
     for (const symbol of parameters) {
       const parameter = symbol.valueDeclaration, fn = parameter.parent;
       if (!ts.isFunctionDeclaration(fn) || !fn.name || fn.modifiers?.some(m => [ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DefaultKeyword].includes(m.kind))) continue;
+      if (parameterMayBeWritten(fn, symbol)) continue;
       const fnSymbol = checker.getSymbolAtLocation(fn.name), index = fn.parameters.indexOf(parameter);
       const values = new Set();
       let unresolved = false;

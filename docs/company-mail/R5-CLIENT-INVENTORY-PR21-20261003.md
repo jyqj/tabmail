@@ -36,3 +36,11 @@
 逐行独立验证：135行全部源码字段与清单严格深相等；127个映射分支+7个forwarding通过原validate，且恰1项因上述未注册路径拒绝。此诊断不替代全量 `--check`，未过滤生产检查。
 
 该未知路径须由后续 Web 或后端归属任务修正；本轮不得修改相应业务文件，故不能宣称 frontend/check 或整体CI绿。未运行 Go测试、Web build/typecheck/browser/Vitest、数据库/邮件/生产操作；未使用生产凭据，未合并或部署。
+
+## 同项收口：后缀参数写入边界
+
+初次实现未核定参数不变性：例如 `function aggregate(id, suffix = "") { suffix = "/other"; request(...) } aggregate(id)` 会错误沿用默认空串。收口修正只在参数无可见写入时展开调用点值；检查整个函数体（含闭包、不可达代码），不尝试推断写入先后或执行条件。普通/复合/逻辑赋值、prefix/postfix update、array/object/renamed/nested解构赋值、for-in/of目标均保守拒绝。解构shorthand使用TypeScript值符号，避免只识别属性符号而漏掉参数。direct eval/with亦拒绝，不能证明词法参数不变性时保持 unresolved。阴影参数的写入按符号区分，不误认成外层参数写入。
+
+省略实参仍使用默认值。JavaScript真正的undefined实参会触发默认，但收集器暂不证明标识符 `undefined` 的运行时绑定，因此未解析的显式 `undefined` 保守记作 unresolved；不把该拒绝声称为运行时无默认值。新增负例固定这一边界，不放宽路由验证。
+
+本次 `GODEBUG=asynctimerchan=0 node --test scripts/tests/*.test.cjs` 为49/49 PASS（API27项，新增14项，原35项保留），0失败/跳过。i18n再次PASS，计数同上；`git diff --check` PASS。实际135行与清单严格相等，逐行134项通过、恰1个recipients分支拒绝；全量 `--check` 仍exit 1，准确报同一未注册路径。未改Web业务或清单、未运行额外Go/Web/生产验证，未重试已Forbidden的PR动作。

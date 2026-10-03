@@ -61,3 +61,32 @@ test("recipient suffix cannot inherit the registered aggregate route",()=>{
  assert.throws(()=>validate(rows,doc,routes),/branch 1: GET \/api\/v1\/outbound\/\{id\}\/recipients/);
  assert.throws(()=>validate(rows,[doc[0],{...doc[1],routes:doc[0].routes},doc[2]],routes),/unregistered/);
 });
+for (const [name, mutation] of [
+ ["assignment", 'suffix = "/other";'],
+ ["compound assignment", 'suffix += "/other";'],
+ ["logical assignment", 'suffix ||= "/other";'],
+ ["prefix update", '++suffix;'],
+ ["postfix update", 'suffix++;'],
+ ["closure write", 'const change = () => { suffix = "/other"; }; change();'],
+ ["array destructuring", '[suffix] = ["/other"];'],
+ ["object destructuring", '({suffix} = {suffix: "/other"});'],
+ ["renamed object destructuring", '({value: suffix} = {value: "/other"});'],
+ ["nested destructuring", '({value: [suffix]} = {value: ["/other"]});'],
+ ["loop target", 'for (suffix of ["/other"]) {}'],
+ ["direct eval", 'eval(\'suffix = "/other"\');'],
+]) test(`helper parameter ${name} prevents finite expansion`,()=>{
+ const rows=run(`function aggregate(id: string, suffix = "") { ${mutation} request(\`/api/v1/outbound/\${encodeURIComponent(id)}\${suffix}\`); } aggregate(id); aggregate(id, "/attempts");`);
+ assert.equal(rows.length,1);
+ assert.equal(rows[0].path,"/api/v1/outbound/{id}{dynamic}");
+ assert.throws(()=>validate(rows,rows.map(r=>({...r,routes:[]})),[{method:"GET",path:"/api/v1/outbound/{id}"},{method:"GET",path:"/api/v1/outbound/{id}/attempts"}]),/unregistered/);
+});
+test("writes to a shadowed parameter do not invalidate immutable helper parameter",()=>{
+ const rows=run('function aggregate(id: string, suffix = "") { function other(suffix: string) { suffix = "/other"; } request(`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`); } aggregate(id); aggregate(id, "/attempts");');
+ assert.deepEqual(rows.map(r=>r.path),["/api/v1/outbound/{id}","/api/v1/outbound/{id}/attempts"]);
+});
+test("explicit undefined remains unresolved rather than assuming its binding",()=>{
+ const rows=run('function aggregate(id: string, suffix = "") { request(`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`); } aggregate(id, undefined);');
+ assert.equal(rows.length,1);
+ assert.equal(rows[0].path,"/api/v1/outbound/{id}{dynamic}");
+ assert.throws(()=>validate(rows,rows.map(r=>({...r,routes:[]})),[{method:"GET",path:"/api/v1/outbound/{id}"}]),/unregistered/);
+});
