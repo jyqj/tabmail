@@ -17,7 +17,7 @@ args = parser.parse_args()
 args.output.mkdir(exist_ok=False)
 status = dict(policy=runtime.POLICY,status='UNADOPTED',task_complete=False,product_green=False,
               manifest_sha256=args.manifest_sha256,concurrency_boundary=runtime.BOUNDARY,
-              dynamic_loader_coverage='unknown',final_missing_layers='all until producer verifies exact layers')
+              dynamic_loader_coverage='unknown',final_missing_layers={row['id']:row['required_layers'] for row in json.loads((args.source/'docs/company-mail/evidence/R5-PROTOCOL-CASES.json').read_text())['cases']})
 try:
     manifest = runtime.load_pinned(args.manifest,args.manifest_sha256)
     if manifest['source']['path'] != str(args.source):

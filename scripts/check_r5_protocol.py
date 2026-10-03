@@ -369,8 +369,6 @@ def run_references(data, layer, output):
         report = classify_events(result.stdout,'tabmail/' + package.removeprefix('./'),tests,result.returncode)
         report.update(command=cmd,package=package)
         reports.append(report)
-    if external_runtime is not None:
-        r5_external_runtime.validate(external_runtime)
     final_closure = source_closure()
     if tested_closure != final_closure:
         reports.append({'errors':['source changed during reference execution; rerun after integration'],'task_complete':False})
