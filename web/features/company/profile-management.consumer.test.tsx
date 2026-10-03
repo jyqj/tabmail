@@ -93,6 +93,25 @@ describe("formal profile management CAS consumer", () => {
     expect(writes()[0].body).not.toHaveProperty("tenant_id");
     expect(writes()[0].body).not.toHaveProperty("fields");
   });
+  it("rebases quota intent so choosing original 10 after reviewing remote 20 is transmitted", async () => {
+    profile.daily_send_quota = 10;
+    mount(); await action("permissions.edit");
+    const dialog = screen.getByRole("dialog");
+    const quota = dialog.querySelectorAll("input[type=number]")[0];
+    fireEvent.change(quota, { target: { value: "15" } });
+    rejectWrite = true;
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    await waitFor(() => expect(within(dialog).getByRole("button", { name: "permissions.save" })).toBeDisabled());
+    profile.daily_send_quota = 20; profile.revision = "9007199254740999"; rejectWrite = false;
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.refreshRevision" }));
+    await userEvent.click(await within(dialog).findByRole("checkbox"));
+    expect(quota).toHaveValue(15);
+    fireEvent.change(quota, { target: { value: "10" } });
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
+    await waitFor(() => expect(writes()).toHaveLength(2));
+    expect(writes()[1].body).toEqual({ expected_revision: "9007199254740999", daily_send_quota: 10 });
+  });
   it("keeps draft on conflict, blocks blind retry and requires manual revision refresh", async () => {
     mount(); await action("permissions.edit");
     const dialog = screen.getByRole("dialog");
