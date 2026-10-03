@@ -35,7 +35,9 @@ if (origin.protocol !== "http:" || origin.hostname !== "127.0.0.1" || !["A01", "
   throw new Error("Invalid loopback-only component fixture");
 }
 
+const profileWriteStatuses: number[] = [];
 beforeEach(() => {
+  profileWriteStatuses.length = 0;
   process.env.NEXT_PUBLIC_API_URL = origin.origin;
   host.user = fixture.admin;
   installSession(fixture.token, fixture.admin);
@@ -49,7 +51,10 @@ beforeEach(() => {
   vi.stubGlobal("fetch", (input: RequestInfo | URL, init?: RequestInit) => {
     const target = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
     if (target.origin !== origin.origin) throw new Error("Component attempted a non-fixture network request");
-    return realFetch(input, init);
+    return realFetch(input, init).then(response => {
+      if (init?.method === "PATCH" && target.pathname === `/api/v1/admin/permissions/${fixture.profile_id}`) profileWriteStatuses.push(response.status);
+      return response;
+    });
   });
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); delete process.env.NEXT_PUBLIC_API_URL; });
@@ -99,12 +104,16 @@ test(`${fixture.case} secure editor behavior`, async () => {
     await user.clear(description);
     await user.type(description, "R5 stale description");
     await user.click(within(dialog).getByRole("button", { name: /^Save$/ }));
-    await waitFor(async () => {
-      const p = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
-      expect(p?.description).toBe("R5 stale description");
-    });
+    // The current CAS contract rejects this stale write. Do not wait for
+    // the historical full-form update to succeed: that was the A02 defect.
+    await waitFor(() => expect(within(dialog).getByRole("button", { name: /^Save$/ })).toBeDisabled());
+    expect(profileWriteStatuses).toEqual([200, 409]);
+    expect(description).toHaveValue("R5 stale description");
+    expect(within(dialog).getByRole("button", { name: /Refresh revision/i })).toBeEnabled();
     const after = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
     if (after?.can_send) throw new Error("R5_COMPONENT_DEFECT_A02: real stale editor restored revoked sending");
     expect(after).toBeDefined();
+    expect(after?.revision).toBe(revoked.revision);
+    expect(after?.description).toBe(revoked.description);
   }
 });
