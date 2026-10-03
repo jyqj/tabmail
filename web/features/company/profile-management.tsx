@@ -74,6 +74,22 @@ const defaultForm: PermissionFormData = {
     can_create_routes: false,
     can_create_api_keys: false,
 };
+function profileForm(profile: PermissionProfile): PermissionFormData {
+    return {
+        tenant_id: profile.tenant_id ?? null,
+        name: profile.name,
+        description: profile.description,
+        can_send: profile.can_send,
+        daily_send_quota: String(profile.daily_send_quota),
+        daily_receive_quota: String(profile.daily_receive_quota),
+        max_mailboxes: String(profile.max_mailboxes),
+        max_domains: String(profile.max_domains),
+        allowed_zone_ids: [...(profile.allowed_zone_ids ?? [])],
+        can_create_domains: profile.can_create_domains,
+        can_create_routes: profile.can_create_routes,
+        can_create_api_keys: profile.can_create_api_keys,
+    };
+}
 function formatQuota(value: number): string {
     return value === 0 ? "∞" : String(value);
 }
@@ -232,9 +248,11 @@ export default function PermissionsPage() {
     const [creating, setCreating] = useState(false);
     const [form, setForm] = useState<PermissionFormData>(defaultForm);
     const [editOpen, setEditOpen] = useState(false);
-    const [editingProfile, setEditingProfile] = useState<PermissionProfile | null>(null);
-    const [editForm, setEditForm] = useState<PermissionFormData>(defaultForm);
-    const editBaseline = useRef<PermissionFormData>(defaultForm);
+    // Revision, baseline and draft commit together, including refresh rebases.
+    const [editor, setEditor] = useState({ profile: null as PermissionProfile | null, baseline: defaultForm, form: defaultForm });
+    const { profile: editingProfile, baseline: editBaseline, form: editForm } = editor;
+    const setEditingProfile = (profile: PermissionProfile | null) => setEditor(prev => ({ ...prev, profile }));
+    const setEditForm: Dispatch<SetStateAction<PermissionFormData>> = update => setEditor(prev => ({ ...prev, form: typeof update === "function" ? update(prev.form) : update }));
     const [accessError, setAccessError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [editStale, setEditStale] = useState(false);
@@ -323,36 +341,22 @@ export default function PermissionsPage() {
             return;
         }
         ++operation.current;
-        setEditingProfile(profile);
         setEditStale(false); setFreshProfile(null); setReviewFresh(false);
-        const initial: PermissionFormData = {
-            tenant_id: profile.tenant_id ?? null,
-            name: profile.name,
-            description: profile.description,
-            can_send: profile.can_send,
-            daily_send_quota: String(profile.daily_send_quota),
-            daily_receive_quota: String(profile.daily_receive_quota),
-            max_mailboxes: String(profile.max_mailboxes),
-            max_domains: String(profile.max_domains),
-            allowed_zone_ids: [...(profile.allowed_zone_ids ?? [])],
-            can_create_domains: profile.can_create_domains,
-            can_create_routes: profile.can_create_routes,
-            can_create_api_keys: profile.can_create_api_keys,
-        };
-        editBaseline.current = initial; setEditForm(initial);
+        const initial = profileForm(profile);
+        setEditor({ profile, baseline: initial, form: initial });
         setEditOpen(true);
     };
     const handleEdit = async () => {
         if (session !== sessionScope() || writeBusy.current || !editingProfile || !mayManage(editingProfile) || !observedProfile(editingProfile) || editStale || reviewFresh || !editForm.name.trim() || !validQuotas(editForm))
             return;
-        if (!Object.keys(profileFieldPatch(editForm, editBaseline.current)).length) return;
+        if (!Object.keys(profileFieldPatch(editForm, editBaseline)).length) return;
         const token = ++operation.current, scope = session;
         writeBusy.current = true;
         setSaving(true);
         try {
             await updatePermissionProfile(editingProfile.id, {
                 expected_revision: editingProfile.revision!,
-                fields: profileFieldPatch(editForm, editBaseline.current),
+                fields: profileFieldPatch(editForm, editBaseline),
             });
             if (!isCurrent(token, scope)) return;
             setEditOpen(false);
@@ -381,9 +385,17 @@ export default function PermissionsPage() {
             const current = response.data.find(profile => profile.id === editingProfile.id);
             if (!current || !canManageScope(current) || !observedProfile(current)) throw new Error("revision unavailable");
             setFreshProfile(current); setReviewFresh(true);
-            // Advance only the reviewed revision. The original form baseline
-            // remains fixed, so untouched stale values cannot become field intent.
-            setEditingProfile(current);
+            const baseline = profileForm(current);
+            setEditor(prev => {
+                if (!isCurrent(token, scope)) return prev;
+                // Three-way rebase: carry only old-base -> draft user intent.
+                // Untouched fields follow the fresh snapshot (including revocations).
+                const form = { ...baseline };
+                for (const key of Object.keys(profileFieldPatch(prev.form, prev.baseline)) as (keyof PermissionFormData)[]) {
+                    Object.assign(form, { [key]: prev.form[key] });
+                }
+                return { profile: current, baseline, form };
+            });
             setEditStale(false);
             mutateProfiles(response, { revalidate: false });
         } catch (error) {
@@ -589,7 +601,7 @@ export default function PermissionsPage() {
             <DialogFooter>
               {(!observedProfile(editingProfile) || editStale) && <div role="alert">{t(editStale ? "permissions.profileConflict" : "permissions.revisionUnavailable")}</div>}
               <Button variant="outline" onClick={refreshEdit} disabled={!!accessError || saving || refreshing}>{t("permissions.refreshRevision")}</Button>
-              <Button onClick={handleEdit} disabled={!!accessError || !!profilesError || loading || saving || refreshing || editStale || reviewFresh || !observedProfile(editingProfile) || !Object.keys(profileFieldPatch(editForm, editBaseline.current)).length || !validQuotas(editForm) || !editForm.name.trim()}>
+              <Button onClick={handleEdit} disabled={!!accessError || !!profilesError || loading || saving || refreshing || editStale || reviewFresh || !observedProfile(editingProfile) || !Object.keys(profileFieldPatch(editForm, editBaseline)).length || !validQuotas(editForm) || !editForm.name.trim()}>
                 {saving ? t("permissions.saving") : t("permissions.save")}
               </Button>
             </DialogFooter>
