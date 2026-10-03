@@ -20,6 +20,7 @@ import { TemplateVersionsView } from "./versions";
 import type { MailTemplate, TemplateVersion } from "@/lib/company";
 
 const template: MailTemplate = {
+  updated_at: "2026-10-02T12:00:00Z",
   id: "tpl-1",
   name: "Welcome",
   revision: 7,

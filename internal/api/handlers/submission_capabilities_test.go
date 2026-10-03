@@ -105,16 +105,26 @@ func TestSubmissionReceiptCapabilities(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Actual send-only shared mailbox: current grant permits sending but
+	// confers no content read. A valid From and initialized nonempty ledger
+	// keep this a sender-authority control, not an accidental unknown fixture.
+	sendOnly := &models.Mailbox{ID: uuid.New(), TenantID: f.tenantID, ZoneID: zone.ID, FullAddress: "send-only@caps.test", Kind: "shared", AccessMode: models.AccessAPIKey}
+	f.st.SeedMailbox(sendOnly)
+	if err := f.st.SetMailboxGrant(context.Background(), &models.MailboxGrant{TenantID: f.tenantID, MailboxID: sendOnly.ID, UserID: f.userA.ID, CanSend: true}); err != nil {
+		t.Fatal(err)
+	}
+
 	readableJob := uuid.New()
 	if err := f.st.CreateOutboundJob(context.Background(), &models.OutboundJob{
 		ID: readableJob, TenantID: f.tenantID, UserID: &f.userA.ID, SenderUserID: &f.userA.ID,
-		SenderMailboxID: &mb.ID, ZoneID: zone.ID, State: models.OutboundDead, CreatedAt: time.Now(),
+		SenderMailboxID: &mb.ID, MailFrom: mb.FullAddress, To: []string{"caps@recipient.test"}, RcptTo: []string{"caps@recipient.test"}, ZoneID: zone.ID, State: models.OutboundDead, CreatedAt: time.Now(),
 	}); err != nil {
 		t.Fatal(err)
 	}
 	ownJob := uuid.New()
 	if err := f.st.CreateOutboundJob(context.Background(), &models.OutboundJob{
 		ID: ownJob, TenantID: f.tenantID, UserID: &f.userA.ID, SenderUserID: &f.userA.ID,
+		SenderMailboxID: &sendOnly.ID, MailFrom: sendOnly.FullAddress, To: []string{"caps@recipient.test"}, RcptTo: []string{"caps@recipient.test"},
 		ZoneID: zone.ID, State: models.OutboundFailed, CreatedAt: time.Now(),
 	}); err != nil {
 		t.Fatal(err)
@@ -122,6 +132,7 @@ func TestSubmissionReceiptCapabilities(t *testing.T) {
 	uncertainJob := uuid.New()
 	if err := f.st.CreateOutboundJob(context.Background(), &models.OutboundJob{
 		ID: uncertainJob, TenantID: f.tenantID, UserID: &f.userA.ID, SenderUserID: &f.userA.ID,
+		SenderMailboxID: &sendOnly.ID, MailFrom: sendOnly.FullAddress, To: []string{"caps@recipient.test"}, RcptTo: []string{"caps@recipient.test"},
 		ZoneID: zone.ID, State: models.OutboundDead, InFlightDomain: "smtp.example.test", CreatedAt: time.Now(),
 	}); err != nil {
 		t.Fatal(err)
@@ -129,9 +140,36 @@ func TestSubmissionReceiptCapabilities(t *testing.T) {
 	sentJob := uuid.New()
 	if err := f.st.CreateOutboundJob(context.Background(), &models.OutboundJob{
 		ID: sentJob, TenantID: f.tenantID, UserID: &f.userA.ID, SenderUserID: &f.userA.ID,
+		SenderMailboxID: &sendOnly.ID, MailFrom: sendOnly.FullAddress, To: []string{"caps@recipient.test"}, RcptTo: []string{"caps@recipient.test"},
 		ZoneID: zone.ID, State: models.OutboundSent, CreatedAt: time.Now(),
 	}); err != nil {
 		t.Fatal(err)
+	}
+
+	emptyJob := uuid.New()
+	if err := f.st.CreateOutboundJob(context.Background(), &models.OutboundJob{ID: emptyJob, TenantID: f.tenantID, UserID: &f.userA.ID, SenderUserID: &f.userA.ID, SenderMailboxID: &sendOnly.ID, MailFrom: sendOnly.FullAddress, ZoneID: zone.ID, State: models.OutboundDead}); err != nil {
+		t.Fatal(err)
+	}
+	// Inspect only persisted FakeStore facts: do not manufacture known-zero.
+	for _, id := range []uuid.UUID{readableJob, ownJob, uncertainJob, sentJob, emptyJob} {
+		receipt, err := f.st.GetOutboundReceipt(context.Background(), authz.Actor{Type: authz.PrincipalUser, ID: f.userA.ID, TenantID: f.tenantID}, id, "send:read")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if receipt == nil || !receipt.LedgerKnown {
+			t.Fatal("actual enqueue did not initialize ledger")
+		}
+		if id == emptyJob {
+			if len(receipt.RecipientStates) != 0 {
+				t.Fatal("empty control has invented ledger outcomes")
+			}
+			projected := company.ProjectOutboundReceipt(receipt.Job, receipt.RecipientStates, receipt.LedgerKnown)
+			if projected.Progress.Completeness != "unknown" || projected.Progress.Counts != nil {
+				t.Fatal("empty ledger fabricated known-zero")
+			}
+		} else if len(receipt.RecipientStates) != 1 || receipt.RecipientStates[0] != "pending" {
+			t.Fatal("capability positive did not use real nonempty ledger")
+		}
 	}
 
 	for _, tc := range []struct {
@@ -144,6 +182,7 @@ func TestSubmissionReceiptCapabilities(t *testing.T) {
 		{"send authority without content right", ownJob, f.userA, company.SubmissionCapabilities{Retry: true}},
 		{"delivery uncertain", uncertainJob, f.userA, company.SubmissionCapabilities{RetryBlockReason: submissions.CapabilityDeliveryUncertain}},
 		{"state not retryable", sentJob, f.userA, company.SubmissionCapabilities{RetryBlockReason: submissions.CapabilityStateNotRetryable}},
+		{"empty ledger remains unknown", emptyJob, f.userA, company.SubmissionCapabilities{RetryBlockReason: submissions.CapabilityUnknown}},
 	} {
 		if got := fetchSubmissionCapabilities(t, h, f, tc.job, tc.user); got != tc.want {
 			t.Fatalf("%s: capabilities = %+v, want %+v", tc.name, got, tc.want)

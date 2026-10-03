@@ -41,7 +41,7 @@ func TestOutboundReceiptProjectionUsesOneAuthorizedPage(t *testing.T) {
 	a := authz.Actor{Type: authz.PrincipalUser, ID: uuid.New(), TenantID: tenant.ID}
 	p := &receiptProjectionProbe{FakeStore: testutil.NewFakeStore()}
 	for i := 0; i < 50; i++ {
-		p.rows = append(p.rows, store.OutboundReceipt{Job: &models.OutboundJob{ID: uuid.New(), TenantID: tenant.ID, Subject: "receipt", TextBody: "private", BCC: []string{"hidden@fixture.test"}, RawMIME: []byte("private raw"), To: []string{"client@fixture.test"}}, ContentAllowed: i%2 == 0})
+		p.rows = append(p.rows, store.OutboundReceipt{Job: &models.OutboundJob{ID: uuid.New(), TenantID: tenant.ID, Subject: "receipt", State: models.OutboundSent, RecipientLedger: true, TextBody: "private", BCC: []string{"hidden@fixture.test"}, RawMIME: []byte("private raw"), To: []string{"client@fixture.test"}}, ContentAllowed: i%2 == 0, RecipientStates: []string{"accepted", "permanent"}, LedgerKnown: true})
 	}
 	svc := NewService(nil, p, nil, zerolog.Nop())
 	rows, total, e := svc.ListOutboundReceiptViews(context.Background(), tenant, a, models.Page{})
@@ -49,14 +49,12 @@ func TestOutboundReceiptProjectionUsesOneAuthorizedPage(t *testing.T) {
 		t.Fatalf("page assembly: count=%d calls=%d err=%v", total, p.calls, e)
 	}
 	for i, row := range rows {
-		if row.RawMIME != nil || row.DeliveryToken != nil {
-			t.Fatal("internal transport fields exposed")
+		requireOrdinaryReceiptWhitelist(t, row)
+		if row.Capabilities == nil || row.Capabilities.ViewContent != (i%2 == 0) {
+			t.Fatal("actual content authority hint lost")
 		}
-		if row.ContentRedacted != (i%2 == 1) {
-			t.Fatal("page authorization ignored")
-		}
-		if row.ContentRedacted && (row.TextBody != "" || len(row.BCC) != 0) {
-			t.Fatal("restricted page row exposed content")
+		if row.Status != "partially_accepted" || row.Progress.Counts == nil || row.Progress.Counts.Total != 2 || row.Progress.Counts.Permanent != 1 {
+			t.Fatal("complete ledger aggregation lost")
 		}
 		if p.rows[i].Job.TextBody != "private" || len(p.rows[i].Job.BCC) != 1 {
 			t.Fatal("projection mutated shared data")

@@ -1,0 +1,96 @@
+{
+  "S1": "Requested generation plus monotonic production start/end and sequence; explicit post-leader-exit census barrier; missing or unknown forbids releasing sole unreaped group anchor. New mocks use accept_census.",
+  "S2": "1199 unified MacOSPort.dispatch fence covers kqueue/read/write/identity/signal/reap/spawn; boundary crossings and entry/loop finish caught without traceback I/O.",
+  "S3": "Independent reviewed launcher literal root/backend/protocol/Python SHA/CDHASH; same verified bytes compiled, existing modules refused, current-image readonly csops candidate, controller captured bytes inherited and explicit bound entry; no mutable controller/interpreter re-exec.",
+  "S4": "ControllerClient drains complete cached frames before any read, EAGAIN or EOF decision.",
+  "S5": "libproc uid/ruid preserved and checked against owner UID at bind/verify/census.",
+  "after_pins": {
+    "test_watchdog_s1_s5_new_mock.py": "8d8098686c10a5a85d0ff6d100ead2ab338333446b19ca73e5e046f9b79a24db",
+    "watchdog_macos_backend.py": "72df041fe1b84318e4171b2202fe85229ecb4825500dbedef917536988559181",
+    "watchdog_trusted_launcher.py": "f554f257e600780c91fddb486102836c151f88330eb0c7f0661832ea54de4dba"
+  },
+  "backend_protocol_sha256": "d12ae57c9e441d38ed81d4e67d61b9f284b40d1f4a16bc7470fa86e82c5ff54e",
+  "before_pins": {
+    "test_watchdog_macos_backend_mock.py": "52b0b72e227e9c54554fb72221e1306000780b10c2d8cc9d803cb313a8acaaf8",
+    "watchdog_macos_backend.py": "108711a9a1c534e023a85e2bdaf8d94a92706bffacbd661d29ec89e4c48b4567"
+  },
+  "capture_wrapper": {
+    "error": "zsh: read-only variable: status",
+    "raw_assertion_exit": 0,
+    "raw_assertion_tool_chunk": "aa317f",
+    "raw_checked_without_test_rerun": true,
+    "shell_exit": 1,
+    "test_raw_completed_OK": true,
+    "tool_chunk": "7b1558"
+  },
+  "evidence": {
+    "watchdog-s1-s5-new-mock.raw": {
+      "bytes": 4545,
+      "sha256": "1f48c5a8b5d8952f892a133459e055373f2cc0ebdc162df0ec7bbbedfdb52113"
+    },
+    "watchdog-s1-s5-source.patch": {
+      "bytes": 58973,
+      "sha256": "be0ea62c69dd2f26fe9bdbb1bce99dedb38faa2f7213d87b7914371fafb05be1"
+    }
+  },
+  "launcher_trust_origin": "Reader-approved launcher artifact hash and literal pins out-of-band; never self-authorized envelope expected pins. New root or source pin requires fresh SOURCE review. Launcher remains unconditionally blocked.",
+  "minimal_future_author_integration": [
+    "add approved loader/backend artifacts and update source pins",
+    "controller exports watchdog_controller_entry(origin_wire, read_fd, write_fd) and uses captured-byte fork contract",
+    "packet/auth adds launch_binding_sha256 and backend protocol v3 pins",
+    "controller command/native PG integration and parser admission remain undone; retain existing HARD1200 runtime gate"
+  ],
+  "mock": {
+    "actual_os_hardkill": false,
+    "after_pins": {
+      "test_watchdog_s1_s5_new_mock.py": "8d8098686c10a5a85d0ff6d100ead2ab338333446b19ca73e5e046f9b79a24db",
+      "watchdog_macos_backend.py": "72df041fe1b84318e4171b2202fe85229ecb4825500dbedef917536988559181",
+      "watchdog_trusted_launcher.py": "f554f257e600780c91fddb486102836c151f88330eb0c7f0661832ea54de4dba"
+    },
+    "backend_protocol_sha256": "d12ae57c9e441d38ed81d4e67d61b9f284b40d1f4a16bc7470fa86e82c5ff54e",
+    "before_pins": {
+      "test_watchdog_macos_backend_mock.py": "52b0b72e227e9c54554fb72221e1306000780b10c2d8cc9d803cb313a8acaaf8",
+      "watchdog_macos_backend.py": "108711a9a1c534e023a85e2bdaf8d94a92706bffacbd661d29ec89e4c48b4567"
+    },
+    "errors": 0,
+    "failures": 0,
+    "kind": "ONLY_NEW_S1_S5_PURE_MOCK",
+    "old_33_and_37_suites_rerun": false,
+    "real_csops_executed": false,
+    "tests_run": 25
+  },
+  "not_closed": [
+    "HARD1200_WATCHDOG_NOT_CLOSED",
+    "WATCHDOG_DEATH_KERNEL_FAILSTOP_NOT_CLOSED",
+    "ARBITRARY_FORK_SETSID_ESCAPE_CONTAINMENT_NOT_CLOSED",
+    "KERNEL_SYSCALL_AND_SCHEDULING_HARD_BOUND_NOT_CLOSED",
+    "FORK_RETURN_LEDGER_FATAL_INTERRUPT_NOT_CLOSED",
+    "TERMINAL_PUBLICATION_ATOMIC_DEADLINE_NOT_CLOSED",
+    "ACTUAL_OS_HARDKILL_ACCEPTANCE_NOT_PERFORMED",
+    "CONTROLLER_PACKET_PARSER_INTEGRATION_NOT_PERFORMED",
+    "TRUSTED_LAUNCHER_PREFORK_HARD_BOUND_NOT_CLOSED",
+    "INTERPRETER_DYLIB_STDLIB_CLOSURE_NOT_ATTESTED"
+  ],
+  "not_performed": [
+    "real fork/exec/subprocess",
+    "real kqueue/libproc/csops/process query/signal",
+    "PG/Go/network/runtime",
+    "old33 suite",
+    "old37 suite",
+    "R3 or main-tree changes",
+    "serial integration",
+    "independent acceptance"
+  ],
+  "source_write_set": [
+    "watchdog_macos_backend.py",
+    "watchdog_trusted_launcher.py",
+    "test_watchdog_s1_s5_new_mock.py"
+  ],
+  "status": "SOURCE_S1_S5_REVISED_PENDING_INDEPENDENT_REVIEW_RUNTIME_BLOCKED",
+  "unchanged_old_artifacts": {
+    "test_watchdog_macos_backend_mock.py": "52b0b72e227e9c54554fb72221e1306000780b10c2d8cc9d803cb313a8acaaf8",
+    "test_watchdog_new_mock_branches.py": "459c78f2bc1ca18ce514ddaa172d0b7c7e19be47b46ee8d60006c1b9beeb922e",
+    "watchdog_candidate.py": "56ca8c4edbf464e2273c8c6a14ba00f554167809095b91f97f6ec461c95365b2",
+    "watchdog_protocol.py": "ad7c1c35b3aa92ad2f4119cc7c7c6cb3ba404dd4f00b24d29b3ed20dc63b4670"
+  }
+}

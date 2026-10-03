@@ -1,0 +1,73 @@
+{
+  "bind_early_spawn_note": "spawn event historically occurred before ownedstartreceipt I/O; bind never replays spawn as a newparentclock observation; earliest resource origin retained in Freshness sampling gap without rolling parentprevious back",
+  "contracts_or_oldraw_modified": false,
+  "delta_patch_sha256": "811f96d712ab1feeb0a551d4fd9921d177fa66f911ec9b4ad3f4f155df50c9b4",
+  "fresh_mock_layers": [
+    {
+      "actual_repair_PASS": 1,
+      "actual_repair_exit": 0,
+      "first_attempt": "ERROR expected RSSsamplegap guard rejected synthetic0.9s sample call before intended clock case; raw V4-first-mock.stderr/exit1 preserved",
+      "raw": "V4-new1-mock-repair.stderr",
+      "repair": "only new mock adds actual100ms samples during simulated1second, no expected guard/assertion change",
+      "target": "C18RSSV4ParentClockWiringTests.test_controller_exit_to_cleanup_small_rollback_above_previous_write",
+      "tested_byte_boundary": "passed before final narrowbind removehistoricalclockreplay correction; not exactfinalcontroller-bytePASSclaim"
+    },
+    {
+      "actual_PASS": 1,
+      "actual_exit": 0,
+      "final_tested_byte_pins": {
+        "c18_audited_child.py": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+        "c18_rss_controller_prepared_only.py": "8ad568e1a54af8cdf1c82ca6ca5a2377f618f5f7d2b89d354a18ecb264bbaaf5",
+        "c18_rss_protocol.py": "626421068e52d7bdb51c70313fd06f8f8453930b9c409042553478869ce512fa",
+        "test_c18_rss_resource_new.py": "b93c2844efe216e87319f2e6e537d4b1c212a282b2bb29399ed3ec5ff9db5b9a"
+      },
+      "raw": "V4-new2-bind-mock.stderr",
+      "target": "C18RSSV4ParentClockWiringTests.test_controller_bind_does_not_replay_old_spawn_after_start_receipt_clock"
+    }
+  ],
+  "new_shared_clock_wiring": "One WholeClock original pre-capture origin object, actualcontroller observe_parent_clock feeds write/remain/runloop/seal; Freshness.parent_clock sameobject feeds every sample/tick/finalize, no handoff reconstruction/reset. exitlatestwall110 retained, cleanup109.98 rejected sticky, regardless <100ms wallmono gap",
+  "not_singlefresh_all25": true,
+  "old15_and8mocks_not_repeated": true,
+  "original7C18_closure_sha256": "52c2f082061b4fa8e9c66d8f3a6990d765f0f2481ee0b75d8724ef42be10623e",
+  "original7C18_source_sha": "6710e89d677d027f3baa0498206e0baf226f3a16",
+  "prospective_argv": [
+    "/usr/bin/env",
+    "-u",
+    "PYTHONOPTIMIZE",
+    "-u",
+    "PYTHONHOME",
+    "-u",
+    "PYTHONPATH",
+    "TABMAIL_C18_RSS_RUNTIME_APPROVED=1",
+    "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+    "-B",
+    "/private/tmp/r5-C18-RSS-resource-V4-prepared/c18_rss_controller_prepared_only.py"
+  ],
+  "prospective_entry": "/private/tmp/r5-C18-RSS-resource-V4-prepared/c18_rss_controller_prepared_only.py",
+  "remaining_protocol_conditions": "same original90whole/75work15cleanup/CPU60childreadback/1GiBownedRSSsample100target250max/nonhardquota/firstlastdedicatedposthandshakeRSS/maxtailgapreceipt/armedfixtureaudit/nochildprocesssocketnative/UIDsessionstartunreapedanchor/wholeproofpostsealclockgateadmissionrevoke",
+  "runtime_approval_pending_root_after_newsource_review": true,
+  "runtime_controller_main_Go_PG_signals_C18_21_executed": false,
+  "source4_before_after": {
+    "c18_audited_child.py": {
+      "after_sha256": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+      "before_sha256": "3809276f44346a516febd75e9039242e98503cdd70110b1a018b66f57ce9a713",
+      "changed": false
+    },
+    "c18_rss_controller_prepared_only.py": {
+      "after_sha256": "8ad568e1a54af8cdf1c82ca6ca5a2377f618f5f7d2b89d354a18ecb264bbaaf5",
+      "before_sha256": "8782431660bff8f41901794f25f6eb843e41560026172bf5c32b42fb633eb1b2",
+      "changed": true
+    },
+    "c18_rss_protocol.py": {
+      "after_sha256": "626421068e52d7bdb51c70313fd06f8f8453930b9c409042553478869ce512fa",
+      "before_sha256": "4751fe8e8ecd41d31b7e5737347fd9555b713d3390338201d2136bd5dbbf0005",
+      "changed": true
+    },
+    "test_c18_rss_resource_new.py": {
+      "after_sha256": "b93c2844efe216e87319f2e6e537d4b1c212a282b2bb29399ed3ec5ff9db5b9a",
+      "before_sha256": "290b18e005d5ad44585363f237111a6f420fda1b37d34617cf950f1c0708c05b",
+      "changed": true
+    }
+  },
+  "status": "SOURCE_PREPARED_RUNTIME_NOT_AUTHORIZED"
+}

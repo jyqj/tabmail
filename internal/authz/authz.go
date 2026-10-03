@@ -160,7 +160,8 @@ func CanManageZone(actor Actor, zone *models.DomainZone) bool {
 
 // ZoneAllowed reports whether the zone is within the actor's allowed-zone
 // list. Admins and super admins always pass; an absent permission or an
-// empty allowlist means all zones are allowed.
+// legacy empty allowlist means all zones are allowed. Canonical domain modes
+// are interpreted by EffectivePermission.AllowsZone.
 func ZoneAllowed(actor Actor, zoneID uuid.UUID) bool {
 	if actor.IsTenantAdmin() {
 		return true
@@ -244,7 +245,9 @@ type ZoneListFilter struct {
 // exactly one of UserID / APIKeyID is set. TenantID is always set and must be
 // applied as WHERE tenant_id = $1.
 type OwnerListFilter struct {
-	ReaderUserID   *uuid.UUID
+	ReaderUserID *uuid.UUID
+	// RestrictZones distinguishes an empty denied set from legacy unrestricted.
+	RestrictZones  bool
 	AllowedZoneIDs []uuid.UUID
 	TenantID       uuid.UUID
 	AllInTenant    bool
@@ -253,7 +256,9 @@ type OwnerListFilter struct {
 }
 
 // ZoneListScope resolves the zone-scoped list filter for an actor within a
-// tenant. Rules (must match the previous in-memory filters exactly):
+// tenant. Canonical domain modes use EffectivePermission.ZoneScope; none,
+// unknown and an empty canonical list always produce AllZones=false. The
+// following rules describe the preserved legacy allowlist semantics:
 //
 //   - Tenant admin (or super admin) with an empty allowlist: AllZones=true,
 //     OwnerUserID=nil. The owner dimension is unrestricted.
@@ -273,21 +278,10 @@ type OwnerListFilter struct {
 // stays in the mailboxes service.
 func ZoneListScope(actor Actor, tenantID uuid.UUID) ZoneListFilter {
 	f := ZoneListFilter{TenantID: tenantID}
-	allowlist := actor.allowlist()
-	if actor.IsTenantAdmin() || actor.TenantWide {
-		if len(allowlist) > 0 {
-			f.ZoneIDs = allowlist
-		} else {
-			f.AllZones = true
-		}
-		return f
-	}
-	// Regular user or user-owned API key.
-	f.OwnerUserID = actor.EffectiveUserID()
-	if len(allowlist) > 0 {
-		f.ZoneIDs = allowlist
-	} else {
-		f.AllZones = true
+	restricted, ids := actor.Permission.ZoneScope()
+	f.AllZones, f.ZoneIDs = !restricted, ids
+	if !actor.IsTenantAdmin() && !actor.TenantWide {
+		f.OwnerUserID = actor.EffectiveUserID()
 	}
 	return f
 }
@@ -295,9 +289,11 @@ func ZoneListScope(actor Actor, tenantID uuid.UUID) ZoneListFilter {
 // OwnerListScope resolves the owner-scoped list filter for an actor within a
 // tenant. It mirrors the legacy ListScope(actor) rule and additionally pins
 // TenantID so the store can apply WHERE tenant_id = $1. The three owner
-// dimensions are mutually exclusive by construction.
+// dimensions are mutually exclusive by construction. The independent zone
+// dimension is taken from the canonical permission scope, including deny-all.
 func OwnerListScope(actor Actor, tenantID uuid.UUID) OwnerListFilter {
-	f := OwnerListFilter{TenantID: tenantID}
+	restricted, ids := actor.Permission.ZoneScope()
+	f := OwnerListFilter{TenantID: tenantID, RestrictZones: restricted, AllowedZoneIDs: ids}
 	if actor.IsTenantAdmin() {
 		f.AllInTenant = true
 		return f
@@ -311,15 +307,6 @@ func OwnerListScope(actor Actor, tenantID uuid.UUID) OwnerListFilter {
 		f.APIKeyID = &id
 	}
 	return f
-}
-
-// allowlist returns the actor's zone allowlist, or nil when the actor has no
-// permission profile (treated as unrestricted, matching ZoneAllowed).
-func (a Actor) allowlist() []uuid.UUID {
-	if a.Permission == nil {
-		return nil
-	}
-	return a.Permission.AllowedZoneIDs
 }
 
 // CanAccessOwned reports whether the actor may access a single resource owned by

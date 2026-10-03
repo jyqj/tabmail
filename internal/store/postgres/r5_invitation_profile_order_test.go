@@ -23,6 +23,7 @@ type r5InviteProfileFixture struct {
 	super                    authz.Actor
 	userBefore, userDetached string
 	profileBefore            string
+	userRevision             int64
 }
 
 func r5InviteProfileSeed(t *testing.T) *r5InviteProfileFixture {
@@ -43,7 +44,7 @@ func r5InviteProfileSeed(t *testing.T) *r5InviteProfileFixture {
 	_, err = f.st.UpdateUserGuarded(ctx, super, f.tenant.ID, f.admin.ID, models.UserAdminPatch{SetPermissionProfile: true, PermissionProfileID: &profile.ID})
 	must(t, err)
 	s := &r5InviteProfileFixture{f: f, profile: profile, super: super}
-	must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text,(to_jsonb(u)||jsonb_build_object('permission_profile_id',NULL))::text FROM users u WHERE id=$1 AND permission_profile_id=$2`, f.admin.ID, profile.ID).Scan(&s.userBefore, &s.userDetached))
+	must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text,(to_jsonb(u)||jsonb_build_object('permission_profile_id',NULL))::text,permission_revision FROM users u WHERE id=$1 AND permission_profile_id=$2`, f.admin.ID, profile.ID).Scan(&s.userBefore, &s.userDetached, &s.userRevision))
 	must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(p)::text FROM permission_profiles p WHERE id=$1`, profile.ID).Scan(&s.profileBefore))
 	// Actual catalog semantics differ: users detach, existing invitations
 	// retain their parent through NO ACTION. Do not invent invitation SET NULL.
@@ -266,14 +267,18 @@ func r5InviteProfileEffects(t *testing.T, s *r5InviteProfileFixture, email strin
 			t.Fatal("profile deletion refusal or victim rollback rewrote parent fields")
 		}
 	}
-	var user string
-	must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text FROM users u WHERE id=$1`, f.admin.ID).Scan(&user))
+	var user, detachedExpected string
+	var revision int64
+	must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text,permission_revision,($2::jsonb||jsonb_build_object('permission_revision',u.permission_revision))::text FROM users u WHERE id=$1`, f.admin.ID, s.userDetached).Scan(&user, &revision, &detachedExpected))
 	wantUser := s.userBefore
 	if deleted {
-		wantUser = s.userDetached
+		if revision <= s.userRevision {
+			t.Fatal("profile SET NULL did not advance administrator permission revision")
+		}
+		wantUser = detachedExpected
 	}
 	if user != wantUser {
-		t.Fatal("profile SET NULL or victim rollback changed administrator fields beyond its profile reference")
+		t.Fatal("profile SET NULL or victim rollback changed administrator fields beyond its profile reference/revision")
 	}
 	if email == "" {
 		return

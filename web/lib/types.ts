@@ -21,8 +21,8 @@ export interface Tenant {
 }
 
 export interface TenantOverride {
-  id?: string;
-  tenant_id?: string;
+  id: string;
+  tenant_id: string;
   max_domains?: number | null;
   max_mailboxes_per_domain?: number | null;
   max_messages_per_mailbox?: number | null;
@@ -30,8 +30,9 @@ export interface TenantOverride {
   retention_hours?: number | null;
   rpm_limit?: number | null;
   daily_quota?: number | null;
-  updated_at?: string;
+  updated_at: string;
 }
+export type TenantOverrideInput = Omit<TenantOverride, "id" | "tenant_id" | "updated_at">;
 
 export interface TenantAPIKey {
   id: string;
@@ -90,7 +91,7 @@ export interface DomainZone {
 export type AccessMode = "public" | "token" | "api_key";
 
 export interface Mailbox {
-  kind?: "personal" | "shared" | "legacy";
+  kind: "personal" | "shared" | "legacy";
   owner_user_id?: string;
   id: string;
   tenant_id: string;
@@ -314,8 +315,9 @@ export interface SMTPPolicy {
   store_domains: string[];
   discard_domains: string[];
   reject_origin_domains: string[];
-  updated_at?: string;
+  updated_at: string;
 }
+export type SMTPPolicyInput = Omit<SMTPPolicy, "updated_at">;
 
 export interface IngestJob {
   id: string;
@@ -327,7 +329,7 @@ export interface IngestJob {
   metadata?: unknown;
   state: string;
   attempts: number;
-  last_error?: string;
+  last_error: string;
   next_attempt_at: string;
   claimed_at?: string | null;
   lease_until?: string | null;
@@ -340,10 +342,10 @@ export interface WebhookDelivery {
   event_id: string;
   url: string;
   event_type: string;
-  payload?: unknown;
+  payload: unknown;
   state: string;
   attempts: number;
-  last_error?: string;
+  last_error: string;
   next_attempt_at: string;
   claimed_at?: string | null;
   lease_until?: string | null;
@@ -374,6 +376,7 @@ export interface PermissionProfile {
   is_system: boolean;
   created_at: string;
   updated_at: string;
+  revision?: string;
 }
 
 export interface UserPermissionOverride {
@@ -401,6 +404,7 @@ export interface EffectivePermission {
   can_create_domains: boolean;
   can_create_routes: boolean;
   can_create_api_keys: boolean;
+  domain_access_mode?: string;
 }
 
 // ============================================================
@@ -420,8 +424,8 @@ export type OutboundState =
 export interface OutboundJob {
   template_version_id?: string;
   attachment_ids?: string[];
-  delivery_uncertain?: boolean;
-  content_redacted?: boolean;
+  delivery_uncertain: boolean;
+  content_redacted: boolean;
   delivered_domains: string[];
   in_flight_domain?: string;
   id: string;
@@ -458,4 +462,3 @@ export interface SendEmailResponse {
   state: OutboundState;
   created_at: string;
 }
-

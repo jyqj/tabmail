@@ -1,0 +1,462 @@
+{
+  "GoListmetadata_exit": 0,
+  "actualGOMAXPROCS": 2,
+  "actualGoexit": 0,
+  "actual_actions": {
+    "TestExponentialBackoff_DeadBoundary": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestExponentialBackoff_IngestFormula": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestExponentialCappedBackoff_OutboundFormula": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestFixedBackoff_WebhookOutboxFormula": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestLinearBackoff_WebhookDeliveryFormula": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestNilHooksAreNoop": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestProcessOne_DeadPath": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestProcessOne_DonePath": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestProcessOne_LeaseLostOnMarkDoneIsSkipped": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestProcessOne_LeaseLostOnMarkRetryIsSkipped": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestProcessOne_RetryPath_UsesNextAttempt": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryCancelledEntryDoesNotClaim": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryClaimStopRaceDoesNotDispatch": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryConcurrentCancelUpgradesGracefulStop": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryConcurrentRunsKeepCapacity": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryCooperativeCancelLeavesDurableLease": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryCooperativeCancelLeavesDurableLease/handler_error": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryCooperativeCancelLeavesDurableLease/handler_nil_after_cancel": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryJoinIncludesMarkAndHook": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryJoinIncludesMarkAndHook/hook": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryJoinIncludesMarkAndHook/mark": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryLegacyStopStillDrainsWholeBatch": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryParentCancellationStopsRemainder": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryRepeatedStartStopGenerations": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryStopBeforeFirstPollDoesNotClaim": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5ShutdownBoundaryUncooperativeDeadlineRetainsGeneration": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestRun_ExitsOnContextCancel": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestStartStop_GoroutineExits": [
+      "run",
+      "output",
+      "output",
+      "pause",
+      "cont",
+      "output",
+      "output",
+      "pass"
+    ]
+  },
+  "actual_counts": {
+    "PASSnodes": 28,
+    "fail_skip_unfinished": 0,
+    "leaf": 26,
+    "newR5tops": 11,
+    "olddefaulttops": 13,
+    "tops": 24
+  },
+  "actual_leaf": [
+    "TestR5ShutdownBoundaryCancelledEntryDoesNotClaim",
+    "TestR5ShutdownBoundaryCooperativeCancelLeavesDurableLease/handler_error",
+    "TestR5ShutdownBoundaryCooperativeCancelLeavesDurableLease/handler_nil_after_cancel",
+    "TestR5ShutdownBoundaryUncooperativeDeadlineRetainsGeneration",
+    "TestR5ShutdownBoundaryClaimStopRaceDoesNotDispatch",
+    "TestR5ShutdownBoundaryParentCancellationStopsRemainder",
+    "TestR5ShutdownBoundaryJoinIncludesMarkAndHook/mark",
+    "TestR5ShutdownBoundaryJoinIncludesMarkAndHook/hook",
+    "TestR5ShutdownBoundaryLegacyStopStillDrainsWholeBatch",
+    "TestR5ShutdownBoundaryConcurrentRunsKeepCapacity",
+    "TestR5ShutdownBoundaryRepeatedStartStopGenerations",
+    "TestR5ShutdownBoundaryStopBeforeFirstPollDoesNotClaim",
+    "TestR5ShutdownBoundaryConcurrentCancelUpgradesGracefulStop",
+    "TestExponentialBackoff_IngestFormula",
+    "TestExponentialBackoff_DeadBoundary",
+    "TestLinearBackoff_WebhookDeliveryFormula",
+    "TestFixedBackoff_WebhookOutboxFormula",
+    "TestExponentialCappedBackoff_OutboundFormula",
+    "TestProcessOne_DonePath",
+    "TestProcessOne_RetryPath_UsesNextAttempt",
+    "TestProcessOne_DeadPath",
+    "TestProcessOne_LeaseLostOnMarkRetryIsSkipped",
+    "TestProcessOne_LeaseLostOnMarkDoneIsSkipped",
+    "TestRun_ExitsOnContextCancel",
+    "TestStartStop_GoroutineExits",
+    "TestNilHooksAreNoop"
+  ],
+  "actual_race": true,
+  "actual_top": [
+    "TestR5ShutdownBoundaryCancelledEntryDoesNotClaim",
+    "TestR5ShutdownBoundaryCooperativeCancelLeavesDurableLease",
+    "TestR5ShutdownBoundaryUncooperativeDeadlineRetainsGeneration",
+    "TestR5ShutdownBoundaryClaimStopRaceDoesNotDispatch",
+    "TestR5ShutdownBoundaryParentCancellationStopsRemainder",
+    "TestR5ShutdownBoundaryJoinIncludesMarkAndHook",
+    "TestR5ShutdownBoundaryLegacyStopStillDrainsWholeBatch",
+    "TestR5ShutdownBoundaryConcurrentRunsKeepCapacity",
+    "TestR5ShutdownBoundaryRepeatedStartStopGenerations",
+    "TestR5ShutdownBoundaryStopBeforeFirstPollDoesNotClaim",
+    "TestR5ShutdownBoundaryConcurrentCancelUpgradesGracefulStop",
+    "TestExponentialBackoff_IngestFormula",
+    "TestExponentialBackoff_DeadBoundary",
+    "TestLinearBackoff_WebhookDeliveryFormula",
+    "TestFixedBackoff_WebhookOutboxFormula",
+    "TestExponentialCappedBackoff_OutboundFormula",
+    "TestProcessOne_DonePath",
+    "TestProcessOne_RetryPath_UsesNextAttempt",
+    "TestProcessOne_DeadPath",
+    "TestProcessOne_LeaseLostOnMarkRetryIsSkipped",
+    "TestProcessOne_LeaseLostOnMarkDoneIsSkipped",
+    "TestRun_ExitsOnContextCancel",
+    "TestStartStop_GoroutineExits",
+    "TestNilHooksAreNoop"
+  ],
+  "actualruntime_race_true": true,
+  "cleanup": {
+    "all_owned_phasegroups_gone": true,
+    "noPG_Redis_SMTP_HTTPservices_started": true,
+    "original300elapsed": 4.2905120849609375,
+    "source_same": true,
+    "within300": true
+  },
+  "clock_boundary": "selfreportedcontroller wall+mono not trustedexternalclock; no retroactive templateclock correction",
+  "companysigned2_exists_in_SOURCE_but_notselected": {
+    "internal/company/r5_template_encoding_boundary_test.go": "91a28cb6c48d7f928e0461db15b468fcaef6d45588c1d6cef4261cc24f73cc74",
+    "internal/company/templates.go": "e35aecef4feb2929c4140dd75c825570e8dfd25722513f0d785c6b3e50ee6010"
+  },
+  "compile_evidence": {
+    "implicitgo_test_build_success_actualwholepackage_testsran": true,
+    "metadataGoListnotBuildPASS": true,
+    "separatecompilerelapsed_unknown_noextra_build_or_nonrace_run": true
+  },
+  "errors": [],
+  "newR5testset_exact": [
+    "TestR5ShutdownBoundaryCancelledEntryDoesNotClaim",
+    "TestR5ShutdownBoundaryCooperativeCancelLeavesDurableLease",
+    "TestR5ShutdownBoundaryUncooperativeDeadlineRetainsGeneration",
+    "TestR5ShutdownBoundaryClaimStopRaceDoesNotDispatch",
+    "TestR5ShutdownBoundaryParentCancellationStopsRemainder",
+    "TestR5ShutdownBoundaryJoinIncludesMarkAndHook",
+    "TestR5ShutdownBoundaryLegacyStopStillDrainsWholeBatch",
+    "TestR5ShutdownBoundaryConcurrentRunsKeepCapacity",
+    "TestR5ShutdownBoundaryRepeatedStartStopGenerations",
+    "TestR5ShutdownBoundaryStopBeforeFirstPollDoesNotClaim",
+    "TestR5ShutdownBoundaryConcurrentCancelUpgradesGracefulStop"
+  ],
+  "noGoPG_HTTP_Redis_SMTP_services_credentials_or_wholeCI": true,
+  "notOutboundIngestHooksMain_callers_or_P6or171": true,
+  "olddefaulttestset_exact": [
+    "TestExponentialBackoff_IngestFormula",
+    "TestExponentialBackoff_DeadBoundary",
+    "TestLinearBackoff_WebhookDeliveryFormula",
+    "TestFixedBackoff_WebhookOutboxFormula",
+    "TestExponentialCappedBackoff_OutboundFormula",
+    "TestProcessOne_DonePath",
+    "TestProcessOne_RetryPath_UsesNextAttempt",
+    "TestProcessOne_DeadPath",
+    "TestProcessOne_LeaseLostOnMarkRetryIsSkipped",
+    "TestProcessOne_LeaseLostOnMarkDoneIsSkipped",
+    "TestRun_ExitsOnContextCancel",
+    "TestStartStop_GoroutineExits",
+    "TestNilHooksAreNoop"
+  ],
+  "original_budget_serialized": {
+    "budget_seconds": 300,
+    "cleanup_reserved_seconds": 30,
+    "clock_source": "controller time.time/time.monotonic self-reported; not trusted external attestation",
+    "origin_mono_actual_before_capture": 242353.162900625,
+    "origin_wall_actual_before_capture": 1791009850.977855,
+    "original_deadline_mono": 242653.162900625,
+    "original_deadline_wall": 1791010150.977855,
+    "sequence": "origin -> resourcepreflight -> SOURCE capture -> GoList actualcontext -> go test -> cleanup/post",
+    "workstop_mono": 242623.162900625,
+    "workstop_wall": 1791010120.977855
+  },
+  "package_terminal": [
+    {
+      "Action": "pass",
+      "Elapsed": 1.8900000000000001,
+      "Package": "tabmail/internal/workqueue",
+      "Time": "2026-10-03T14:44:15.160969+08:00"
+    }
+  ],
+  "protected_supervisor_source": "/private/tmp/tm-r5usage19-driver-v8-Cexecpost-SOURCE/usage19_driver_prepared_only.py",
+  "results": {
+    "actual-race-workqueue-deps-GoList": {
+      "absolute_phase_deadline": 1791009911.799246,
+      "actual_child_environment_allowlist": {
+        "CC": "/usr/bin/cc",
+        "CGO_ENABLED": "1",
+        "GOCACHE": "/Users/jin/Library/Caches/go-build",
+        "GOFLAGS": "-mod=readonly -p=1",
+        "GOMAXPROCS": "2",
+        "GOMODCACHE": "/Users/jin/.cache/go-mod",
+        "GOPROXY": "off",
+        "GOSUMDB": "sum.golang.org",
+        "GOTOOLCHAIN": "local",
+        "GOWORK": "off",
+        "HOME": "/private/tmp/tm-r5worker-shutdown.04xp8szc/home",
+        "LANG": "en_US.UTF-8",
+        "PATH": "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "SDKROOT": "/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk",
+        "TMPDIR": "/private/tmp/tm-r5worker-shutdown.04xp8szc/tmp/"
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "list",
+        "-race",
+        "-mod=readonly",
+        "-deps",
+        "-test",
+        "-json",
+        "./internal/workqueue"
+      ],
+      "cwd": "/private/tmp/tm-r5worker-shutdown.04xp8szc/src",
+      "exit": 0,
+      "failures": [],
+      "groupgone": true,
+      "initial_identity": {
+        "pgid": 27168,
+        "pid": 27168,
+        "start": "Sat Oct 3 14:44:11 2026",
+        "uid": 501
+      },
+      "observer_joined": true,
+      "owned_start_PID": 27168,
+      "owned_start_UID": 501,
+      "private_DSN_value_omitted": true,
+      "signal_actions": []
+    },
+    "whole-workqueue-race": {
+      "absolute_phase_deadline": 1791010120.977855,
+      "actual_child_environment_allowlist": {
+        "CC": "/usr/bin/cc",
+        "CGO_ENABLED": "1",
+        "GOCACHE": "/Users/jin/Library/Caches/go-build",
+        "GOFLAGS": "-mod=readonly -p=1",
+        "GOMAXPROCS": "2",
+        "GOMODCACHE": "/Users/jin/.cache/go-mod",
+        "GOPROXY": "off",
+        "GOSUMDB": "sum.golang.org",
+        "GOTOOLCHAIN": "local",
+        "GOWORK": "off",
+        "HOME": "/private/tmp/tm-r5worker-shutdown.04xp8szc/home",
+        "LANG": "en_US.UTF-8",
+        "PATH": "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin",
+        "SDKROOT": "/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk",
+        "TMPDIR": "/private/tmp/tm-r5worker-shutdown.04xp8szc/tmp/"
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-race",
+        "-p=1",
+        "-parallel=1",
+        "-count=1",
+        "-timeout=90s",
+        "-json",
+        "./internal/workqueue"
+      ],
+      "cwd": "/private/tmp/tm-r5worker-shutdown.04xp8szc/src",
+      "exit": 0,
+      "failures": [],
+      "groupgone": true,
+      "initial_identity": {
+        "pgid": 27219,
+        "pid": 27219,
+        "start": "Sat Oct 3 14:44:12 2026",
+        "uid": 501
+      },
+      "observer_joined": true,
+      "owned_start_PID": 27219,
+      "owned_start_UID": 501,
+      "private_DSN_value_omitted": true,
+      "signal_actions": []
+    }
+  },
+  "runtime_boundary": "boundedstop workqueue component only; legacyStop unbounded remains, calleroutbound/main/ingesthooks not integrated, durabletwo-workerSMTP parentgap notclosed",
+  "source_closure": "7ea884bd8c77d6864068859b5774562eedeaee65dcec496266ce2fd9f26ac1d7",
+  "source_sha": "c0732a3f0673b507cf0acf66f3c757cae3c35d71",
+  "source_task2pins": {
+    "internal/workqueue/r5_shutdown_boundary_test.go": "7e881ef0f61c3bffbcc854ab4fdbab5e1e6624bcf3dfb65c9d667bbcec1538ab",
+    "internal/workqueue/worker.go": "0416ecca3f5aac0af0b6c4c1d17035d7cd86548385bcb55d2be07f21b9721de6"
+  },
+  "status": "BOUNDED_PURE_DOMAIN_PASS",
+  "unfinished": []
+}

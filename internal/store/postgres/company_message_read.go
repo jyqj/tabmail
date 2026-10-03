@@ -18,24 +18,16 @@ import (
 func (s *PgStore) GetWorkMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*models.Message, error) {
 	var out *models.Message
 	err := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, current authz.Actor) error {
-		// Keep mailbox, owner, revision and grant reads on one boundary with
-		// company grant/policy/handover writers, without a tenant-wide lock.
-		if err := lockMailboxAuthorization(ctx, tx, current.TenantID, mailbox); err != nil {
+		if err := s.authorizeReceivedMailboxTx(ctx, tx, current, mailbox); err != nil {
 			return err
-		}
-		rights, err := s.mailboxAccessTx(ctx, tx, current, mailbox)
-		if err != nil {
-			return err
-		}
-		if !rights.CanRead {
-			return app.Forbidden("mailbox read permission required")
 		}
 		viewer := uuid.Nil
 		if uid := current.EffectiveUserID(); uid != nil {
 			viewer = *uid
 		}
+		var err error
 		out, err = scanWorkMessage(tx.QueryRow(ctx, workMessageSelect("$4")+
-			` WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.id=$3`, current.TenantID, mailbox, id, viewer))
+			` WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.id=$3 AND `+receivedContentEligible, current.TenantID, mailbox, id, viewer))
 		if errors.Is(err, pgx.ErrNoRows) {
 			return app.NotFound("message not found")
 		}

@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "task_complete": false,
+  "runtime_verified": false,
+  "official_coverage_regenerated_or_accepted": false,
+  "ast_source": "/tmp/tm-r5txast.scRc2qsk/rawAST.json",
+  "ast_sha256_from_executor": "802eb7f397cc6dfe1e8ee0643739f959fff11f4633af732d574fae19a6fee33e",
+  "AST_runtime": "sole static cmd/r5txinventory once exit0, noPG/noTests",
+  "PG_function_count_at_snapshot": 380,
+  "previous_function_count": 352,
+  "new_functions": 28,
+  "body_changed_functions": 14,
+  "source_location_only_changes": 47,
+  "removed_function_count": 0,
+  "delivered_static_owner_reviews": [
+    {
+      "owner": "revision_owner",
+      "functions": [
+        "GetPermissionEditorSnapshot",
+        "permissionEditorSnapshotTx",
+        "PatchPermissionEditor",
+        "applyPermissionPatchTx",
+        "permissionFieldParam",
+        "permissionDomainPatchParams",
+        "permissionPatchFields",
+        "AssignPermissionEditor",
+        "permissionAssignmentChangedFields",
+        "permissionPositiveRevision",
+        "permissionProfileChangedFields",
+        "permissionProfileMutationTx",
+        "permissionProfileMembersTx",
+        "UpdatePermissionProfileCAS",
+        "DeletePermissionProfileCAS",
+        "GetPermissionProfileDeletionPreview",
+        "permissionProfileAudit",
+        "effectivePermissionAfterProfileRemoval",
+        "effectivePermissionPolicy",
+        "ListVisiblePermissionProfiles"
+      ],
+      "boundary": "raw/effective/snapshot locks+completeCAS+assignment+profileCAS/exactdeletepreview+no-op+required global fanout source-reviewed; legacy pool Create notfresh, helperapply notindependentCAS; callbacks/currentroles/implicitFK detailed owner handoff, no latest fullruntime certification"
+    },
+    {
+      "owner": "baseline_dispatch/company_event_transport",
+      "functions": [
+        "ListCompanyAdminEvents",
+        "WithCompanyAdminEventAccess"
+      ],
+      "boundary": "transaction-or-callback, no directDBmutation/lockfragments; transitive companyReadTx noTlock+currentuserFORSHARE freshrole/session. Listreadoriginaloutbox noack/audit; With currentresolvedcallback real singleframe networkwrite+Flush 2s, arbitrary otherpubliccallback effects not constrained. Store does not prove tenantexists; Auth/Revalidate supplies that boundary."
+    },
+    {
+      "owner": "principal_stage_matrix",
+      "functions": [
+        "outboundJobsScopeSQL",
+        "ListOutboundJobsScoped",
+        "readOutboundReceipts",
+        "submissionScopeFor",
+        "ExplainMailboxAccess"
+      ],
+      "boundary": "predicatehelper pure; tenant AND independent of receipt OR; canonical explicitempty None while untaggedlegacy nil/[]all. ListScoped pool count/page separate statements/nofresh reload/currentshipping onlyreceipts proven, not arbitrarylist dispatch. readReceipts inner singleCTE snapshot, Txowner companyReadTx/outboundPrincipalTx freshuser/ownedkey/profile/expiry; receiptmetadata independent currentcontentlifetime/ACL. Explain companyTx TUPDATE/currentadminSHARE->targetuserSHARE->active nonadmin profileNOWAIT->M SHARE; source explanation only/noauditoutbox. Owner source review, not latestruntime/allrole proof."
+    },
+    {
+      "owner": "permission_contract",
+      "functions": [
+        "InspectOutboundRecovery"
+      ],
+      "boundary": "direct pool.Begin/deferRollback owner; recoveryReferencedActor TKEYSHARE->freshuserSHARE/super/session->jobSHARENOWAIT->ledger sorted LIMIT51SHARENOWAIT; limit50 sentinel/busy409; requiredcompanyAudit audit/outbox sameTx and onlyreturn safeprojection afterCommit. Explicit14headerallowlist/diagnostic typedextract/BCC breakglass, notordinarycontent or object fetch. audittenantFKprotected, outbox no resourceFK, no arbitrarycallerCB. Historical source251 runtime10top25leaf is bounded, currentprotectedclosure freshness stillpending."
+    }
+  ],
+  "pending_new_function_reviews": [
+    {
+      "id": "internal/store/postgres/content_eligibility.go:*PgStore:authorizeReceivedMailboxTx",
+      "file": "internal/store/postgres/content_eligibility.go",
+      "name": "authorizeReceivedMailboxTx",
+      "review_state": "named_owner_source_review_pending_no_unknown0"
+    },
+    {
+      "id": "internal/store/postgres/content_eligibility.go::readReceivedPageTx",
+      "file": "internal/store/postgres/content_eligibility.go",
+      "name": "readReceivedPageTx",
+      "review_state": "named_owner_source_review_pending_no_unknown0"
+    },
+    {
+      "id": "internal/store/postgres/content_eligibility.go::requireReceivedContentTx",
+      "file": "internal/store/postgres/content_eligibility.go",
+      "name": "requireReceivedContentTx",
+      "review_state": "named_owner_source_review_pending_no_unknown0"
+    },
+    {
+      "id": "internal/store/postgres/content_eligibility.go::requireReceivedMailboxLiveTx",
+      "file": "internal/store/postgres/content_eligibility.go",
+      "name": "requireReceivedMailboxLiveTx",
+      "review_state": "named_owner_source_review_pending_no_unknown0"
+    }
+  ],
+  "body_changed_ids": [
+    "internal/store/postgres/company_access_explanation.go:*PgStore:ExplainMailboxAccess",
+    "internal/store/postgres/company_mail.go:*PgStore:ListWorkMessages",
+    "internal/store/postgres/company_message_read.go:*PgStore:GetWorkMessage",
+    "internal/store/postgres/mail_content.go:*PgStore:ContentIndexStatus",
+    "internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage",
+    "internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage",
+    "internal/store/postgres/mail_conversation.go:*PgStore:ListMessageConversation",
+    "internal/store/postgres/outbound.go:*PgStore:ListOutboundJobsScoped",
+    "internal/store/postgres/outbound_receipts.go::readOutboundReceipts",
+    "internal/store/postgres/permissions.go:*PgStore:CreatePermissionProfile",
+    "internal/store/postgres/permissions.go:*PgStore:UpsertUserPermissionOverride",
+    "internal/store/postgres/permissions.go::effectivePermission",
+    "internal/store/postgres/permissions.go::scanPermProfile",
+    "internal/store/postgres/submissions.go::submissionScopeFor"
+  ],
+  "position_only_ids": [
+    "internal/store/postgres/company_mail.go:*PgStore:DeleteMailDraft",
+    "internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment",
+    "internal/store/postgres/company_mail.go:*PgStore:GetMailDraft",
+    "internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment",
+    "internal/store/postgres/company_mail.go:*PgStore:ListMailDrafts",
+    "internal/store/postgres/company_mail.go:*PgStore:ListMailboxEvents",
+    "internal/store/postgres/company_mail.go:*PgStore:MutateWorkMessage",
+    "internal/store/postgres/company_mail.go:*PgStore:OutboundAttachments",
+    "internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment",
+    "internal/store/postgres/company_mail.go:*PgStore:SaveMailDraft",
+    "internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages",
+    "internal/store/postgres/company_mail.go:*PgStore:fillDraftTemplateVersions",
+    "internal/store/postgres/company_mail.go:*PgStore:writePersonalMessageState",
+    "internal/store/postgres/company_mail.go::fillDraftTemplateVersion",
+    "internal/store/postgres/company_mail.go::messageMutation",
+    "internal/store/postgres/company_mail.go::messageOutbox",
+    "internal/store/postgres/company_mail.go::validateAttachmentIDs",
+    "internal/store/postgres/mail_content.go:*PgStore:ClaimMailIndexJobs",
+    "internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob",
+    "internal/store/postgres/mail_content.go:*PgStore:FailMailIndexJob",
+    "internal/store/postgres/mail_content.go:*PgStore:RetryFailedMailIndex",
+    "internal/store/postgres/mail_content.go::lockMailIndexLease",
+    "internal/store/postgres/mail_content.go::saveParsed",
+    "internal/store/postgres/outbound.go:*PgStore:AddSuppression",
+    "internal/store/postgres/outbound.go:*PgStore:ClaimOutboundJobs",
+    "internal/store/postgres/outbound.go:*PgStore:CountOutboundByIdentitySince",
+    "internal/store/postgres/outbound.go:*PgStore:CountOutboundSince",
+    "internal/store/postgres/outbound.go:*PgStore:CreateOutboundAttempt",
+    "internal/store/postgres/outbound.go:*PgStore:DeleteSuppression",
+    "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited",
+    "internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized",
+    "internal/store/postgres/outbound.go:*PgStore:IsSuppressed",
+    "internal/store/postgres/outbound.go:*PgStore:ListOutboundAttempts",
+    "internal/store/postgres/outbound.go:*PgStore:ListSuppressions",
+    "internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobFailed",
+    "internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobRetry",
+    "internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobSent",
+    "internal/store/postgres/outbound.go:*PgStore:RequeueOutboundJob",
+    "internal/store/postgres/outbound.go::countOutboundByIdentitySinceQuery",
+    "internal/store/postgres/outbound.go::countOutboundSinceQuery",
+    "internal/store/postgres/outbound.go::deleteSuppressionAuditedTx",
+    "internal/store/postgres/outbound.go::mergeAuditDetail",
+    "internal/store/postgres/outbound.go::requeueOutboundJob",
+    "internal/store/postgres/outbound.go::requireDeliveryUpdate",
+    "internal/store/postgres/permissions.go:*PgStore:DeleteUserPermissionOverride",
+    "internal/store/postgres/permissions.go:*PgStore:EffectivePermission",
+    "internal/store/postgres/permissions.go::uuidSliceParam"
+  ],
+  "migration16_source_map": {
+    "sequence": "global bigint NO CYCLE; defaults nextval for user/profile",
+    "bindings": [
+      {
+        "trigger": "permission_user_assignment_revision",
+        "table": "users",
+        "event": "BEFORE UPDATE OF permission_profile_id WHEN DISTINCT, inclFKSETNULL",
+        "effect": "consume user revision; A->B->A noABA"
+      },
+      {
+        "trigger": "permission_profile_revision",
+        "table": "permission_profiles",
+        "event": "BEFORE actual UPDATE",
+        "effect": "nextval, no timestamp revision"
+      },
+      {
+        "trigger": "permission_override_revision",
+        "table": "user_permission_overrides",
+        "event": "AFTER INSERT/UPDATE/DELETE",
+        "effect": "users versionnextval; moved user_id UPDATE explicit23514 rejects"
+      }
+    ],
+    "new_foreign_keys": false,
+    "existing_FK_behavior": "user_profile SETNULL; override_user CASCADE; invitation_profile NOACTION23503->409 rollback",
+    "allocator_rollback": "sequence gaps legal, not proofbusinesscommit",
+    "Down": "irreversible/failclosed",
+    "extractor_child_context_limitation": "migration_inventory childcontext incorrectlyinherits lastALTERoverrides for newtriggerfunction definitions; actualONtable above explicit source-map, do not pretend inferredcontext proves binding"
+  },
+  "historical_DB_catalog": "R5-TRANSACTION-DB-CATALOG.json actualGoose15/7usertriggers remains historical; nofake current16/10",
+  "current_later_family_not_in_AST802": [
+    "permission_profile_create.go:CreatePermissionProfileGuarded + app ProfileCreationStore routing afterMstable8529; owner source signed but runtime targets prepared, not in802; newAST source required"
+  ],
+  "required_next": [
+    "each pending production family owner specific review",
+    "M-after current newAST after laterProfileCreate release",
+    "legal classify(ast)/migration_inventory + explicitmanualmetadata, not sourcehash-only",
+    "sole current16 New/Migrate catalog withprovenance",
+    "only affectedr5-transactions/Python targets, no oldgreenrerun"
+  ],
+  "boundary": "This is a bounded snapshot delta and honest pending owner map, not newlyofficialcoverage current or uniformunknown0; old coverage/raw/DBcatalog untouched.",
+  "new_owner_reviewed_count_at_802": 24
+}

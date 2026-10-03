@@ -1,0 +1,32 @@
+{
+  "CLI_exit": 0,
+  "actual_PASS": 1,
+  "actual_methods": [
+    [
+      "test_frozen_S2_must_not_be_backfilled_with_new_pipeline_metadata",
+      "scripts.tests.test_r5_benchmark.BenchmarkRegistryTests.test_frozen_S2_must_not_be_backfilled_with_new_pipeline_metadata",
+      "ok"
+    ]
+  ],
+  "actual_skips": 0,
+  "actual_source_closure_sha256": "aecaee0a4dad378849e9ce0d51b8b82b26b6481a4cefbde9f3d0579d9c8b3587",
+  "cleanup": {
+    "absolute_deadline_wall": 1790937321.263613,
+    "elapsed_including_capture_and_cleanup": 0.27617311477661133,
+    "historical_raw_and_SourceMethod_unchanged": true,
+    "nativePG_Go_Node_not_started": true,
+    "origin_wall": 1790937141.263613,
+    "original_budget_seconds": 180,
+    "owned_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "within_original180": true
+  },
+  "expected_exact1": true,
+  "not_prior_whole_sourcePASS": true,
+  "original22P_2P_CLI0_not_reexecuted": true,
+  "prior23exec22P1infraERROR_and_controller_TypeError_preserved": "/private/tmp/tm-r5registry23-depfix.xwl7j0q4",
+  "source_sha": "58c7cfe30aed11dfff91e0c32a03aae58a55a5ed"
+}

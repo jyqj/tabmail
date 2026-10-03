@@ -1,0 +1,1704 @@
+{
+  "Go_exit": 1,
+  "P6_parent_or_whole_or_fullprocess_resource_PASS_claimed": false,
+  "actual_GOMAXPROCS": "2",
+  "actual_all_testnodes": 129,
+  "actual_failed_leaves": [
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true"
+    },
+    {
+      "elapsed": 0,
+      "output": "=== RUN   TestMIMEPreparseBudgetCompatibility/14\n    mime_budget_test.go:257: node walk differs from enmime\n--- FAIL: TestMIMEPreparseBudgetCompatibility/14 (0.00s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/14"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetCompatibility/15\n    mime_budget_test.go:257: node walk differs from enmime\n--- FAIL: TestMIMEPreparseBudgetCompatibility/15 (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/15"
+    }
+  ],
+  "actual_leaf_count": 123,
+  "actual_source_closure_sha256": "5f37cf9e51cee9d28a51cac15e4ca7c3343ee74a1f27d2291dcd19bbb19306a4",
+  "actual_top_count": 8,
+  "auto_retry": false,
+  "case_actions": [
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetAcquisitionErrorClosesReader"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetAuthorityAndAuditBeforeRead"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_false/deep"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_false/legal"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_false/malformed"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_false/many_body_nodes"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_false/read_failure"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_true/deep"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_true/legal"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_true/malformed"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_true/many_body_nodes"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/app/messages",
+      "test": "TestMessagesMIMEPreparseBudgetRealBodyPaths/breakglass_true/read_failure"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4097/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4097/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4097/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4097/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4098/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4098/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4098/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4098/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4097/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4097/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4097/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4097/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4098/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4098/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4098/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4098/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4097/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4097/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4097/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4097/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4098/final_false/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4098/final_false/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4098/final_true/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4098/final_true/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/recursive_boundary_4091_rejected/nested_false"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/recursive_boundary_4091_rejected/nested_true"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/0"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/1"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/10"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/11"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/12"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/13"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/14"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "output",
+        "fail"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/15"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/16"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/17"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/2"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/3"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/4"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/5"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/6"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/7"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/8"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/9"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/attachment_exact"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/attachment_plus_one"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/body_nodes_plus_one"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/depth_exact"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/depth_plus_one"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/missing_type_nodes_plus_one"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/nodes_exact"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetDepthAndAllNodes/other_nodes_plus_one"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetProjectionCompatibility"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetProjectionCompatibility/empty_attachment"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetProjectionCompatibility/empty_inline"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetProjectionCompatibility/missing_attachment"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetProjectionCompatibility/missing_inline"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetProjectionCompatibility/octet_inline_256"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetProjectionCompatibility/octet_inline_257"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetReaderBoundaries"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetReaderBoundaries/canceled_during_read"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetReaderBoundaries/depth_limit"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetReaderBoundaries/malformed"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetReaderBoundaries/short_read_error"
+    },
+    {
+      "actions": [
+        "run",
+        "output",
+        "output",
+        "pass"
+      ],
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetReaderBoundaries/short_reads"
+    }
+  ],
+  "cleanup": {
+    "Go_group_gone": true,
+    "final_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "native_PG_started": false,
+    "network_services_started": false,
+    "old_resources_not_touched": true,
+    "original_outer300_elapsed_seconds": 10.032655000686646,
+    "owned_process_group": 12079,
+    "within_original300": true
+  },
+  "expected_anchored8tops": [
+    "TestMIMEPreparseBudgetDepthAndAllNodes",
+    "TestMIMEPreparseBudgetCompatibility",
+    "TestMIMEPreparseBudgetReaderBoundaries",
+    "TestMIMEPreparseBudgetProjectionCompatibility",
+    "TestMIMEPreparseBudgetBoundaryOffsets",
+    "TestMessagesMIMEPreparseBudgetRealBodyPaths",
+    "TestMessagesMIMEPreparseBudgetAuthorityAndAuditBeforeRead",
+    "TestMessagesMIMEPreparseBudgetAcquisitionErrorClosesReader"
+  ],
+  "failed_leaf_count": 26,
+  "failure_summary": "24 direct/nested nonfinal boundary offsets 4093..4096 across lengths1/70/4090 + Compatibility14/15 node walk differ from pinned enmime; 2 parent top failures",
+  "missing_expected_tops": [],
+  "outer_budget_seconds": 300,
+  "package_terminals": {
+    "tabmail/internal/app/messages": {
+      "elapsed": 1.584,
+      "terminal": "pass"
+    },
+    "tabmail/internal/mailcontent": {
+      "elapsed": 5.566,
+      "terminal": "fail"
+    }
+  },
+  "package_timeout_seconds": 60,
+  "parallel_flag": 1,
+  "passed_leaf_count": 97,
+  "race": true,
+  "source_sha": "853e4a22e81462d61dce4f8f0496d6f4cd408bb7",
+  "test_failures": [
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4093/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4094/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4095/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_1/offset_4096/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4093/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4094/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4095/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.04,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true (0.04s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_70/offset_4096/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4093/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4094/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4095/final_false/nested_true"
+    },
+    {
+      "elapsed": 0.05,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false (0.05s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_false"
+    },
+    {
+      "elapsed": 0.06,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true\n    mime_budget_test.go:192: offset preflight/projection differs from enmime\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true (0.06s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets/len_4090/offset_4096/final_false/nested_true"
+    },
+    {
+      "elapsed": 3.3,
+      "output": "=== RUN   TestMIMEPreparseBudgetBoundaryOffsets\n--- FAIL: TestMIMEPreparseBudgetBoundaryOffsets (3.30s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetBoundaryOffsets"
+    },
+    {
+      "elapsed": 0,
+      "output": "=== RUN   TestMIMEPreparseBudgetCompatibility/14\n    mime_budget_test.go:257: node walk differs from enmime\n--- FAIL: TestMIMEPreparseBudgetCompatibility/14 (0.00s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/14"
+    },
+    {
+      "elapsed": 0.03,
+      "output": "=== RUN   TestMIMEPreparseBudgetCompatibility/15\n    mime_budget_test.go:257: node walk differs from enmime\n--- FAIL: TestMIMEPreparseBudgetCompatibility/15 (0.03s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility/15"
+    },
+    {
+      "elapsed": 0.1,
+      "output": "=== RUN   TestMIMEPreparseBudgetCompatibility\n--- FAIL: TestMIMEPreparseBudgetCompatibility (0.10s)\n",
+      "package": "tabmail/internal/mailcontent",
+      "test": "TestMIMEPreparseBudgetCompatibility"
+    }
+  ],
+  "testnodes_fail": 28,
+  "testnodes_pass": 101,
+  "testnodes_skip": 0,
+  "unexpected_tops": [],
+  "unfinished": []
+}

@@ -42,9 +42,40 @@ func r5SetSenderProfile(t *testing.T, f *testpg.R5HTTPFixture, quota int) {
 	c := f.Companies[0]
 	status, raw := f.Request(t, ctx, f.JWT(0, "admin"), "POST", "/api/v1/admin/permissions", map[string]any{"name": "Fixture sender profile", "can_send": true, "can_create_api_keys": true, "daily_send_quota": quota, "max_mailboxes": 10, "max_domains": 2, "allowed_zone_ids": []uuid.UUID{c.Zone.ID}}, "")
 	r5RequireStatus(t, status, 201)
-	p := r5Data[struct{ ID uuid.UUID }](t, raw)
-	status, _ = f.Request(t, ctx, f.JWT(0, "admin"), "PATCH", "/api/v1/admin/users/"+c.Users["sender"].ID.String(), map[string]any{"permission_profile_id": p.ID}, "")
+	p := r5Data[struct {
+		ID       uuid.UUID
+		Revision string
+	}](t, raw)
+	if p.ID == uuid.Nil || p.Revision == "" {
+		t.Fatal("actual created profile identity/revision missing")
+	}
+	// Only the two quota/key tests use this setup. Profile assignment now
+	// consumes the actual shipping editor observation, not the retired member
+	// PATCH shortcut. Compound nullable profile fields serialize explicitly.
+	editor := "/api/v1/admin/users/" + c.Users["sender"].ID.String() + "/permission-editor"
+	status, raw = f.Request(t, ctx, f.JWT(0, "admin"), "GET", editor, nil, "")
 	r5RequireStatus(t, status, 200)
+	before := r5Data[company.PermissionEditorSnapshot](t, raw)
+	if err := before.Revision.Validate(); err != nil {
+		t.Fatal("actual editor compound revision invalid")
+	}
+	if before.UserID != c.Users["sender"].ID || before.TenantID != c.Tenant.ID {
+		t.Fatal("actual editor observation belongs to another sender/company")
+	}
+	status, raw = f.Request(t, ctx, f.JWT(0, "admin"), "POST", editor+"/assignment", map[string]any{
+		"expected_revision": before.Revision,
+		"profile_id":        p.ID,
+		"profile_revision":  p.Revision,
+		"patch":             map[string]any{},
+	}, "")
+	r5RequireStatus(t, status, 200)
+	after := r5Data[company.PermissionEditorSnapshot](t, raw)
+	if err := after.Revision.Validate(); err != nil {
+		t.Fatal("actual assignment returned invalid compound revision")
+	}
+	if after.UserID != before.UserID || after.TenantID != before.TenantID || after.Profile == nil || after.Profile.ID != p.ID || after.Profile.Revision != p.Revision || after.Effective == nil || !after.Effective.CanSend || !after.Effective.CanCreateAPIKeys || after.Effective.DailySendQuota != quota || after.Revision.Equal(before.Revision) {
+		t.Fatal("formal assignment did not establish selected profile/quota for actual fixture sender")
+	}
 	f.RefreshJWT(t, 0, "sender")
 }
 func r5HTTPDraft(t *testing.T, f *testpg.R5HTTPFixture) company.Draft {

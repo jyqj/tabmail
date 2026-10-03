@@ -133,17 +133,14 @@ func (h *OutboundHandler) RetryJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if updatedJob != nil {
-		// Mutation already committed. A later redaction lookup must not report
-		// retry failure (and encourage a duplicate action); fail CLOSED on
-		// content while retaining the truthful successful operation receipt.
-		view, viewErr := h.subs.RedactOutboundJob(ctx, middleware.ActorFromContext(ctx), updatedJob)
-		if viewErr != nil {
-			h.logger.Err(viewErr).Str("job_id", jobID.String()).Msg("retry committed; receipt content restricted")
-			view = submissions.RedactOutboundJobView(updatedJob, false)
-		}
+		// A committed command survives a later failed display-authority read.
+		// The service returns a typed minimal fallback, never a raw job copy.
+		view := h.subs.CommittedReceiptView(ctx, middleware.ActorFromContext(ctx), updatedJob)
 		ok(w, view)
 	} else {
-		ok(w, map[string]string{"status": "requeued"})
+		// A successful adapter with no display record still must not expose a
+		// made-up successful ledger or encourage replaying a committed command.
+		ok(w, h.subs.CommittedReceiptView(ctx, middleware.ActorFromContext(ctx), &models.OutboundJob{ID: jobID, TenantID: job.TenantID, State: "unknown"}))
 	}
 }
 

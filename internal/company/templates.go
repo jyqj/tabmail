@@ -26,7 +26,7 @@ const MaxTemplateBytes = 256 * 1024
 // loops, functions, includes or dynamic format widths. Variable data is never
 // parsed as template source. Identity variables cannot be supplied by clients.
 func ValidateTemplate(t TemplateDraft) error {
-	if t.Subject == "" || len(t.Subject) > 998 || strings.ContainsAny(t.Subject, "\r\n") {
+	if t.Subject == "" || len(t.Subject) > 998 || !utf8.ValidString(t.Subject) || strings.ContainsAny(t.Subject, "\r\n") {
 		return app.BadRequest("invalid template subject")
 	}
 	if t.TextBody == "" && t.HTMLBody == "" {
@@ -34,6 +34,9 @@ func ValidateTemplate(t TemplateDraft) error {
 	}
 	if len(t.TextBody)+len(t.HTMLBody) > MaxTemplateBytes || len(t.Variables) > 32 {
 		return app.BadRequest("template size limit exceeded")
+	}
+	if !utf8.ValidString(t.TextBody) || !utf8.ValidString(t.HTMLBody) {
+		return app.BadRequest("invalid template body encoding")
 	}
 	declared := map[string]bool{"employee_name": true, "company_name": true, "sender_address": true}
 	for _, v := range t.Variables {
@@ -49,6 +52,9 @@ func ValidateTemplate(t TemplateDraft) error {
 			return app.BadRequest("too many variable options")
 		}
 		for _, option := range v.Options {
+			if !utf8.ValidString(option) {
+				return app.BadRequest("invalid variable option encoding")
+			}
 			if utf8.RuneCountInString(option) > v.MaxLength {
 				return app.BadRequest("oversized variable option")
 			}
@@ -78,6 +84,11 @@ func ValidateTemplate(t TemplateDraft) error {
 func Render(t TemplateDraft, values map[string]string, employee, companyName, sender string) (string, string, string, error) {
 	if err := ValidateTemplate(t); err != nil {
 		return "", "", "", err
+	}
+	// Server-owned identity values are data too: reject malformed bytes before
+	// either renderer can preserve or replace them, even if not referenced.
+	if !utf8.ValidString(employee) || !utf8.ValidString(companyName) || !utf8.ValidString(sender) {
+		return "", "", "", app.BadRequest("invalid template identity encoding")
 	}
 	data := map[string]string{"employee_name": employee, "company_name": companyName, "sender_address": sender}
 	allowed := map[string]Variable{}

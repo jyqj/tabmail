@@ -454,11 +454,11 @@ func (s *Service) OutboundCapabilities(ctx context.Context, tenant *models.Tenan
 	if s.outbound == nil || tenant == nil {
 		return caps
 	}
-	job, err := s.AccessibleOutboundJob(ctx, tenant, actor, jobID)
-	if err != nil || job == nil {
+	receipt, err := s.outboundReceipt(ctx, tenant, actor, jobID, "send:read")
+	if err != nil || receipt == nil {
 		return caps
 	}
-	return s.capabilitiesForJob(ctx, actor, job)
+	return s.projectReceipt(ctx, actor, receipt, true).Capabilities
 }
 
 // capabilitiesForJob fills the capability block for an already-resolved job.

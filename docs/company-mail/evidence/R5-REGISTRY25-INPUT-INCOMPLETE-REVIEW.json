@@ -1,0 +1,31 @@
+{
+  "actual_source_closure_sha256": "cdc39ed2c9373e5b469611086f2d17f61367bdbd81c4ce1d687a6093c1d2cad1",
+  "new_M_typed_failure_admission": "known852900/d286/schema16failed record only; never validMbaseline; no schema waiver or review fabrication",
+  "product_green": false,
+  "requested_unittest_count": 25,
+  "results": {
+    "real-registry-CLI": {
+      "CLI_exit": 1,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 0.21173691749572754
+    },
+    "registry25": {
+      "CLI_exit": 1,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false,
+      "wall_seconds": 0.31694984436035156
+    }
+  },
+  "source_sha": "9b777bea8cd99cca8319a018959690a8a6ffb1f8",
+  "task_complete": false,
+  "test_pass_not_claimed_from_static_SOURCE": true
+}

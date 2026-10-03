@@ -350,6 +350,197 @@ class RuntimeSSETests(unittest.TestCase):
         self.assertTrue(self.validate(b'event: ready\ndata: {}\n'))
 
 
+class CompanyAdminStreamCaptureTests(unittest.TestCase):
+    def setUp(self):
+        self.admin_path = '/api/v1/company/events'
+        self.mailbox_path = '/api/v1/company/mailboxes/{id}/events'
+        self.required = {
+            name: runtime.REQUIRED_CASES[name]
+            for name in ('company.events.ready', 'events.ready')
+        }
+        self.assertEqual(self.required['company.events.ready'], ('GET', self.admin_path, 200))
+        self.assertEqual(runtime.contracts.COMPANY_STREAMS['adminEvents.Events'], 'text/event-stream')
+        self.document = {'openapi': '3.1.0', 'paths': {
+            path: {'get': {'responses': {'200': {'content': {
+                'text/event-stream': {'schema': {'type': 'string'}}}}}}}
+            for path in (self.admin_path, self.mailbox_path)
+        }}
+        self.inventory = [
+            {'method': 'GET', 'path': self.admin_path, 'handler': 'adminEvents.Events'},
+            {'method': 'GET', 'path': self.mailbox_path, 'handler': 'c.Events.Events'},
+        ]
+
+    def capture(self):
+        cases = []
+        for name, (_, route, _) in self.required.items():
+            cases.append({
+                'id': name, 'method': 'GET', 'route': route,
+                'path': route.replace('{id}', '11111111-1111-4111-8111-111111111111'),
+                'status': 200,
+                'headers': {'Content-Type': 'text/event-stream',
+                            'Cache-Control': 'private, no-store, no-transform',
+                            'X-Accel-Buffering': 'no'},
+                'body_base64': base64.b64encode(
+                    b'event: ready\ndata: {"tenant_id":"11111111-1111-4111-8111-111111111111"}\n\n'
+                ).decode(),
+            })
+        return {'version': 1, 'producer': 'TestCompanyHTTPContract',
+                'spec_sha256': 'hash', 'cases': cases}
+
+    def validate(self, capture):
+        from unittest.mock import patch
+        # Only isolate unrelated required scenarios; use the real inventory,
+        # response/media validator and SSE framing/secret checks throughout.
+        with patch.object(runtime, 'REQUIRED_CASES', self.required):
+            return runtime.validate_capture(self.document, capture, 'hash', self.inventory)
+
+    def test_distinct_admin_and_mailbox_sse_captures_pass(self):
+        result = self.validate(self.capture())
+        self.assertEqual(result['status'], 'pass', result['errors'])
+        self.assertEqual(result['successful_operations'], 2)
+
+    def test_mailbox_stream_cannot_cover_missing_admin_capture(self):
+        capture = self.capture()
+        capture['cases'] = [c for c in capture['cases'] if c['id'] != 'company.events.ready']
+        result = self.validate(capture)
+        self.assertEqual(result['status'], 'fail')
+        self.assertIn('[http-missing-case] company.events.ready', result['errors'])
+        self.assertTrue(any('[http-missing-success]' in e and self.admin_path in e
+                            for e in result['errors']), result['errors'])
+
+    def test_admin_name_on_mailbox_route_cannot_cover_admin_operation(self):
+        capture = self.capture()
+        admin, mailbox = capture['cases']
+        admin['path'], admin['route'] = mailbox['path'], mailbox['route']
+        result = self.validate(capture)
+        self.assertEqual(result['status'], 'fail')
+        self.assertTrue(any('[http-case-mismatch] company.events.ready' in e
+                            for e in result['errors']), result['errors'])
+
+    def test_admin_json_response_cannot_replace_sse_media(self):
+        capture = self.capture()
+        capture['cases'][0]['headers']['Content-Type'] = 'application/json'
+        capture['cases'][0]['body_base64'] = base64.b64encode(b'{"data":{}}').decode()
+        result = self.validate(capture)
+        self.assertEqual(result['status'], 'fail')
+        self.assertTrue(any('[http-content-type] company.events.ready' in e
+                            for e in result['errors']), result['errors'])
+
+    def test_admin_missing_or_unterminated_frame_is_not_execution(self):
+        for payload in (b'', b': keepalive\n\n', b'event: ready\ndata: {}\n'):
+            with self.subTest(payload=payload):
+                capture = self.capture()
+                capture['cases'][0]['body_base64'] = base64.b64encode(payload).decode()
+                result = self.validate(capture)
+                self.assertEqual(result['status'], 'fail')
+                self.assertTrue(any('[http-stream] company.events.ready' in e
+                                    for e in result['errors']), result['errors'])
+
+
+class RecipientsAggregateContractTests(unittest.TestCase):
+    route = '/api/v1/company/outbound/{id}/recipients'
+
+    @classmethod
+    def setUpClass(cls):
+        cls.document, errors = runtime.contracts.parse_openapi_text(
+            (ROOT / 'internal/api/openapi.yaml').read_text())
+        if errors:
+            raise AssertionError(errors)
+        cls.validator = runtime.HTTPContractValidator(cls.document)
+
+    def receipt(self, known=True):
+        progress = {'completeness': 'unknown'}
+        if known:
+            progress = {'completeness': 'known', 'counts': {
+                'total': 3, 'accepted': 1, 'pending': 1,
+                'temporary': 0, 'permanent': 1, 'uncertain': 0,
+            }}
+        return {'id': '11111111-1111-4111-8111-111111111111',
+                'state': 'failed', 'status': 'needs_attention',
+                'progress': progress, 'delivery_uncertain': False,
+                'capabilities': {'view_content': True, 'retry': False,
+                                 'retry_block_reason': 'sender_authority'}}
+
+    def validate(self, data):
+        case = {'id': 'recipients.list', 'method': 'GET', 'route': self.route,
+                'path': self.route.replace('{id}', '11111111-1111-4111-8111-111111111111'),
+                'status': 200, 'headers': {'Content-Type': 'application/json; charset=utf-8',
+                                         'Cache-Control': 'private, no-store'},
+                'body_base64': base64.b64encode(json.dumps({'data': data}).encode()).decode()}
+        return self.validator.validate_response(case)
+
+    def test_actual_operation_and_binding_are_one_existing_strict_receipt(self):
+        self.assertEqual(runtime.contracts.COMPANY_RESPONSES['c.Recovery.Recipients'],
+                         ('200', 'one', 'OutboundReceipt'))
+        envelope = self.document['paths'][self.route]['get']['responses']['200'][
+            'content']['application/json']['schema']
+        self.assertEqual(envelope['required'], ['data'])
+        self.assertIs(envelope['additionalProperties'], False)
+        self.assertEqual(envelope['properties'], {
+            'data': {'$ref': '#/components/schemas/OutboundReceipt'}})
+
+    def test_known_complete_counts_and_unknown_without_counts_pass(self):
+        for known in (True, False):
+            with self.subTest(known=known):
+                self.assertEqual(self.validate(self.receipt(known)), [])
+
+    def test_old_per_address_array_is_not_an_aggregate_receipt(self):
+        for rows in ([], [{'address': 'private@fixture.test', 'state': 'pending',
+                          'smtp_code': 0, 'attempts': 0,
+                          'updated_at': '2026-10-02T00:00:00Z'}]):
+            with self.subTest(rows=bool(rows)):
+                self.assertTrue(self.validate(rows))
+
+    def test_known_missing_counts_and_unknown_fabricated_counts_fail(self):
+        for progress in ({'completeness': 'known'},
+                         {'completeness': 'unknown', 'counts': self.receipt()['progress']['counts']},
+                         {'completeness': 'unknown', 'counts': None}):
+            with self.subTest(progress=progress):
+                value = self.receipt()
+                value['progress'] = progress
+                self.assertTrue(self.validate(value))
+
+    def test_content_authority_does_not_admit_sensitive_or_unknown_fields(self):
+        fields = {'address', 'to', 'cc', 'bcc', 'rcpt_to', 'recipients', 'subject',
+                  'from', 'mail_from', 'text_body', 'html_body', 'headers', 'headers_json',
+                  'smtp_code', 'smtp_response', 'diagnostic', 'last_error',
+                  'raw_object_key', 'object_key', 'raw_mime', 'delivery_token',
+                  'lease_until', 'content_redacted', 'unknown_future_field'}
+        for field in fields:
+            with self.subTest(field=field):
+                value = self.receipt()
+                self.assertTrue(value['capabilities']['view_content'])
+                value[field] = 'PRIVATE-AGGREGATE-CANARY'
+                errors = self.validate(value)
+                self.assertTrue(errors)
+                self.assertNotIn('PRIVATE-AGGREGATE-CANARY', repr(errors))
+
+    def test_nested_progress_counts_and_capabilities_remain_closed(self):
+        for path in (('progress',), ('progress', 'counts'), ('capabilities',)):
+            for key in ('address', 'bcc', 'diagnostic', 'object_key', 'unknown_future_field'):
+                with self.subTest(path=path, key=key):
+                    value = self.receipt()
+                    node = value
+                    for name in path:
+                        node = node[name]
+                    node[key] = 'PRIVATE-NESTED-CANARY'
+                    errors = self.validate(value)
+                    self.assertTrue(errors)
+                    self.assertNotIn('PRIVATE-NESTED-CANARY', repr(errors))
+
+    def test_counts_keep_complete_nonnegative_integer_shape(self):
+        for name in self.receipt()['progress']['counts']:
+            with self.subTest(missing=name):
+                value = self.receipt()
+                del value['progress']['counts'][name]
+                self.assertTrue(self.validate(value))
+        for name, number in (('total', 0), ('pending', -1), ('accepted', True), ('uncertain', None)):
+            with self.subTest(name=name, number=number):
+                value = self.receipt()
+                value['progress']['counts'][name] = number
+                self.assertTrue(self.validate(value))
+
+
 class ProcessLifetimeTests(unittest.TestCase):
     def test_timeout_terminates_the_child_process_group(self):
         import subprocess

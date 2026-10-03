@@ -23,6 +23,7 @@ import (
 
 type Config struct {
 	URLs         string
+	AllowedCIDRs string
 	Secret       string
 	Timeout      time.Duration
 	MaxRetries   int
@@ -71,6 +72,10 @@ type Dispatcher struct {
 	batchSize    int
 	store        dispatcherStore
 
+	// Policy and its private connection pool share one immutable lifetime.
+	destinationPolicy    *destinationPolicy
+	destinationPolicyErr error
+
 	// outboxWorker fans claimed outbox events out into webhook_delivery rows.
 	// deliveryWorker POSTs each delivery to its URL. Both are built lazily in
 	// Run so a dispatcher without a store stays a no-op.
@@ -114,17 +119,30 @@ func New(cfg Config, logger zerolog.Logger) *Dispatcher {
 		batchSize = 100
 	}
 	metrics.WebhooksConfigured(len(urls))
+	destination, destinationErr := newDestinationPolicy(cfg.AllowedCIDRs, timeout)
+	transport := newDestinationTransport(destination, destinationErr)
 	return &Dispatcher{
-		urls:         urls,
-		secret:       cfg.Secret,
-		client:       &http.Client{Timeout: timeout},
-		logger:       logger.With().Str("component", "hooks").Logger(),
-		enabled:      len(urls) > 0,
-		maxRetries:   maxRetries,
-		retryDelay:   retryDelay,
-		deadLimit:    deadLimit,
-		pollInterval: pollInterval,
-		batchSize:    batchSize,
+		urls:   urls,
+		secret: cfg.Secret,
+		client: &http.Client{
+			Timeout:   timeout,
+			Transport: transport,
+			// A redirect is not an authorized webhook destination, even on the
+			// same origin. Keep its 3xx response on the normal retry/error path
+			// without forwarding the payload or signature to a second URL.
+			CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+				return http.ErrUseLastResponse
+			},
+		},
+		logger:               logger.With().Str("component", "hooks").Logger(),
+		enabled:              len(urls) > 0,
+		maxRetries:           maxRetries,
+		retryDelay:           retryDelay,
+		deadLimit:            deadLimit,
+		pollInterval:         pollInterval,
+		batchSize:            batchSize,
+		destinationPolicy:    destination,
+		destinationPolicyErr: destinationErr,
 	}
 }
 
@@ -370,9 +388,18 @@ func (d *Dispatcher) dispatch(ctx context.Context, delivery *models.WebhookDeliv
 		return nil
 	}
 	var lastErr string
+	if d.destinationPolicyErr != nil {
+		return d.rejectDestination(delivery, d.destinationPolicyErr)
+	}
+	if d.destinationPolicy == nil {
+		return d.rejectDestination(delivery, destinationDenied("invalid_policy"))
+	}
+	if err := d.destinationPolicy.validateURL(delivery.URL); err != nil {
+		return d.rejectDestination(delivery, err)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, delivery.URL, bytes.NewReader(delivery.Payload))
 	if err != nil {
-		return err
+		return d.rejectDestination(delivery, destinationDenied("invalid_url"))
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-TabMail-Event", delivery.EventType)
@@ -382,16 +409,29 @@ func (d *Dispatcher) dispatch(ctx context.Context, delivery *models.WebhookDeliv
 	}
 	resp, err := d.client.Do(req)
 	if err != nil {
-		d.logger.Warn().Err(err).Str("url", delivery.URL).Int("attempt", delivery.Attempts).Msg("webhook request failed")
+		var denied *destinationPolicyError
+		if errors.As(err, &denied) {
+			// Client.Do wraps errors in url.Error, whose Error includes the query.
+			return d.rejectDestination(delivery, denied)
+		}
+		err = redactWebhookURLError(err)
+		d.logger.Warn().Err(err).Str("delivery_id", delivery.ID.String()).Int("attempt", delivery.Attempts).Msg("webhook request failed")
 		return err
 	}
-	_ = resp.Body.Close()
+	// No response payload is part of the webhook contract. Close without
+	// draining an unbounded or slow body, including a rejected redirect.
+	defer resp.Body.Close()
 	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return nil
 	}
 	lastErr = "status " + strconv.Itoa(resp.StatusCode)
-	d.logger.Warn().Str("url", delivery.URL).Int("status", resp.StatusCode).Int("attempt", delivery.Attempts).Msg("webhook non-2xx response")
+	d.logger.Warn().Str("delivery_id", delivery.ID.String()).Int("status", resp.StatusCode).Int("attempt", delivery.Attempts).Msg("webhook non-2xx response")
 	return errors.New(lastErr)
+}
+
+func (d *Dispatcher) rejectDestination(delivery *models.WebhookDelivery, err error) error {
+	d.logger.Warn().Err(err).Str("delivery_id", delivery.ID.String()).Int("attempt", delivery.Attempts).Msg("webhook destination rejected")
+	return err
 }
 
 func (d *Dispatcher) pushDeadLetter(dl models.DeadLetter) {

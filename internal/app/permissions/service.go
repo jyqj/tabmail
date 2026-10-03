@@ -29,6 +29,19 @@ type Store interface {
 	EffectivePermission(ctx context.Context, userID uuid.UUID) (*models.EffectivePermission, error)
 }
 
+// ProfileVisibilityStore owns the current interactive administrator check and
+// list qualification in one read transaction. Missing support fails closed;
+// the legacy unguarded list is not an authorization fallback.
+type ProfileVisibilityStore interface {
+	ListVisiblePermissionProfiles(context.Context, authz.Actor, *uuid.UUID) ([]*models.PermissionProfile, error)
+}
+
+// ProfileCreationStore is the atomic current-authority creation port.
+// Missing support fails closed; the legacy pool writer is not a fallback.
+type ProfileCreationStore interface {
+	CreatePermissionProfileGuarded(context.Context, authz.Actor, *uuid.UUID, *models.PermissionProfile) (*models.PermissionProfile, error)
+}
+
 type Service struct {
 	store Store
 }
@@ -56,6 +69,7 @@ type CreateInput struct {
 // the patch semantics of the original handler: nil means "leave unchanged",
 // a non-nil slice (including empty) replaces the list.
 type UpdateInput struct {
+	ExpectedRevision  string      `json:"expected_revision"`
 	Name              *string     `json:"name,omitempty"`
 	Description       *string     `json:"description,omitempty"`
 	CanSend           *bool       `json:"can_send,omitempty"`
@@ -70,15 +84,20 @@ type UpdateInput struct {
 }
 
 // ListProfiles returns profiles visible to the actor: all profiles for a
-// super admin, system + own-tenant profiles otherwise.
+// current super admin, global + own-tenant profiles for a current tenant admin.
 func (s *Service) ListProfiles(ctx context.Context, actor authz.Actor, tenantCtx *uuid.UUID) ([]*models.PermissionProfile, error) {
-	if actor.IsSuperAdmin {
-		return s.listProfiles(ctx, nil)
+	if actor.Type != authz.PrincipalUser || actor.ID == uuid.Nil {
+		return nil, app.Forbidden("interactive administrator required")
 	}
-	if tenantCtx == nil {
-		return nil, app.Forbidden("no tenant context")
+	port, ok := s.store.(ProfileVisibilityStore)
+	if !ok {
+		return nil, app.Internal(fmt.Errorf("permission profile visibility port unavailable"))
 	}
-	return s.listProfiles(ctx, tenantCtx)
+	items, err := port.ListVisiblePermissionProfiles(ctx, actor, tenantCtx)
+	if err != nil {
+		return nil, editorError(err)
+	}
+	return items, nil
 }
 
 // CreateProfile creates a non-system profile. Super admins choose the target
@@ -87,30 +106,16 @@ func (s *Service) CreateProfile(ctx context.Context, actor authz.Actor, tenantCt
 	if in.Name == "" {
 		return nil, app.BadRequest("name is required")
 	}
-
-	var profileTenantID *uuid.UUID
-	if actor.IsSuperAdmin {
-		profileTenantID = in.TenantID
-	} else {
-		if tenantCtx == nil {
-			return nil, app.Forbidden("no tenant context")
+	for _, n := range []int{in.DailySendQuota, in.DailyReceiveQuota, in.MaxMailboxes, in.MaxDomains} {
+		if n < 0 || int64(n) > 2147483647 {
+			return nil, app.BadRequest("quota must be a nonnegative database integer")
 		}
-		profileTenantID = tenantCtx
-	}
-
-	// Global profiles (TenantID=nil) are reusable across tenants and therefore
-	// cannot carry tenant-local zone IDs.
-	if len(in.AllowedZoneIDs) > 0 && profileTenantID == nil {
-		return nil, app.BadRequest("allowed_zone_ids require a tenant-scoped permission profile")
-	}
-	if err := s.validateZones(ctx, in.AllowedZoneIDs, profileTenantID, "target tenant"); err != nil {
-		return nil, err
 	}
 
 	now := time.Now()
 	profile := &models.PermissionProfile{
 		ID:                uuid.New(),
-		TenantID:          profileTenantID,
+		TenantID:          in.TenantID,
 		Name:              in.Name,
 		Description:       in.Description,
 		CanSend:           in.CanSend,
@@ -126,10 +131,18 @@ func (s *Service) CreateProfile(ctx context.Context, actor authz.Actor, tenantCt
 		CreatedAt:         now,
 		UpdatedAt:         now,
 	}
-	if err := s.store.CreatePermissionProfile(ctx, profile); err != nil {
-		return nil, app.Internal(err)
+	port, ok := s.store.(ProfileCreationStore)
+	if !ok {
+		return nil, app.Internal(fmt.Errorf("guarded permission profile creation port unavailable"))
 	}
-	return profile, nil
+	out, err := port.CreatePermissionProfileGuarded(ctx, actor, tenantCtx, profile)
+	if err != nil {
+		return nil, editorError(err)
+	}
+	if out == nil {
+		return nil, app.Internal(fmt.Errorf("guarded profile creation returned no persisted profile"))
+	}
+	return out, nil
 }
 
 // UpdateProfile applies the patch to an existing profile after enforcing the

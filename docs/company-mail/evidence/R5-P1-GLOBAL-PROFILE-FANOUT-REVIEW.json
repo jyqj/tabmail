@@ -1,0 +1,88 @@
+{
+  "S_M_L_executed": false,
+  "actual_leaf_cases": [
+    "TestR5GlobalProfileFanoutAuthority/admin",
+    "TestR5GlobalProfileFanoutAuthority/api-key",
+    "TestR5GlobalProfileFanoutAuthority/foreign-selected-admin",
+    "TestR5GlobalProfileFanoutAuthority/forged-super",
+    "TestR5GlobalProfileFanoutAuthority/inactive",
+    "TestR5GlobalProfileFanoutAuthority/no-selected-tenant",
+    "TestR5GlobalProfileFanoutAuthority/stale-session",
+    "TestR5GlobalProfileFanoutCurrentMembership/committed-reassignment-removes-recipient",
+    "TestR5GlobalProfileFanoutCurrentMembership/delete/busy-existing-member",
+    "TestR5GlobalProfileFanoutCurrentMembership/update/busy-existing-member",
+    "TestR5GlobalProfileFanoutNoAssignmentPhantom",
+    "TestR5GlobalProfileFanoutRecipients/delete/no-references",
+    "TestR5GlobalProfileFanoutRecipients/delete/selected-not-referenced",
+    "TestR5GlobalProfileFanoutRecipients/delete/three-tenants-deduped",
+    "TestR5GlobalProfileFanoutRecipients/update/no-references",
+    "TestR5GlobalProfileFanoutRecipients/update/selected-not-referenced",
+    "TestR5GlobalProfileFanoutRecipients/update/three-tenants-deduped",
+    "TestR5GlobalProfileFanoutRequiredRollback/delete/audit",
+    "TestR5GlobalProfileFanoutRequiredRollback/delete/outbox-0",
+    "TestR5GlobalProfileFanoutRequiredRollback/delete/outbox-1",
+    "TestR5GlobalProfileFanoutRequiredRollback/delete/outbox-2",
+    "TestR5GlobalProfileFanoutRequiredRollback/update/audit",
+    "TestR5GlobalProfileFanoutRequiredRollback/update/outbox-0",
+    "TestR5GlobalProfileFanoutRequiredRollback/update/outbox-1",
+    "TestR5GlobalProfileFanoutRequiredRollback/update/outbox-2",
+    "TestR5GlobalProfileFanoutTenantLocalAndNoop/global",
+    "TestR5GlobalProfileFanoutTenantLocalAndNoop/tenant-local"
+  ],
+  "actual_source_closure_sha256": "fc51b9ba45bbe8a9d8bdc45e9fc0e8478ea2240bc1631166c9d22ff349a3c930",
+  "actual_top_tests": [
+    "TestR5GlobalProfileFanoutAuthority",
+    "TestR5GlobalProfileFanoutCurrentMembership",
+    "TestR5GlobalProfileFanoutNoAssignmentPhantom",
+    "TestR5GlobalProfileFanoutRecipients",
+    "TestR5GlobalProfileFanoutRequiredRollback",
+    "TestR5GlobalProfileFanoutTenantLocalAndNoop"
+  ],
+  "base_frozen_source_sha": "32307f6579ab2e5d7e0241752c388e4c30cf6c5d",
+  "coverage": [
+    "global selected caller not presumed recipient, current actually referenced multi-tenant recipients sorted and deduplicated; zero audience keeps selected primary audit and no tenant event",
+    "global one primary selected audit plus one original company.admin.changed three-metadata event per unique affected tenant; no cross-tenant PII",
+    "same-transaction fault at each sorted event insertion position or required audit rolls all profile rows/revisions/effects back",
+    "tenant-local original one event and authorized CAS raw noop no allocator/write/bump/audit/event",
+    "fresh super actor and original tenant boundary denial preserved",
+    "current referenced-member fences, committed reassignment removal and no new-assignment phantom"
+  ],
+  "created_utc": "2026-10-01T23:03:14.507706+00:00",
+  "go_exit": 0,
+  "leaf_case_count": 27,
+  "named_residuals": [
+    "global visible profile list P7",
+    "platform global no-audience notification policy/UI",
+    "actual SSE consumer behavior",
+    "P1-130/G7/P0/M full acceptance not closed by this event-producing leaf suite"
+  ],
+  "owned_process_group_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "package_elapsed_seconds": 8.504,
+  "product_green": false,
+  "race_enabled": true,
+  "raw_sha256": "c276269f04eca89b3fc683393d1f0d1f7dec5a31c1ca3fcf6281b3c17095f779",
+  "scope": "new fanout only; no old outbox/stage/P1/A/B/S/received/pure/compile gates rerun, executor receipt not full171 independent audit",
+  "source_delta": [
+    {
+      "actual_current_author_sha256": "e2b5d159554be2b639f2995a0c1dc482343d57f9ee08053565d3a5b718870435",
+      "base_sha256": "a96cd8d1b9ae3e90193a43f258274515b66bcef6de37efcc94cac53677fe1cf9",
+      "path": "internal/store/postgres/permission_profile_cas.go"
+    },
+    {
+      "actual_current_author_sha256": "128485297bee11b83cfbacb0de3013a694d778d9364c95345117790a59c92864",
+      "base_sha256": null,
+      "path": "internal/store/postgres/r5_global_profile_fanout_test.go"
+    }
+  ],
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "source_receipt": "source-receipt.json",
+  "source_sha": "abea755a5d9707d94a7ddc7c37fe0c492dd5e30b",
+  "status": "new_P1_global_profile_fanout_actual_PG_passed",
+  "task_complete": false,
+  "top_test_count": 6,
+  "total_top_and_subtest_pass_events": 32
+}

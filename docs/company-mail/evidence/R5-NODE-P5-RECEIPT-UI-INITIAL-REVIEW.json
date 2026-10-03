@@ -1,0 +1,707 @@
+{
+  "actual_source_closure_sha256": "f7034be7135e4e71c5bf0364dcff5fa15b3fa7577454ba1b0fbbda3e8c3d9dd0",
+  "boundary": "Vitest real production consumers with controlled transport; no real network/PG/build/browser/full web gate",
+  "fullCI_green": false,
+  "results": {
+    "p5-green": {
+      "by_file": [
+        {
+          "counts": {
+            "failed": 0,
+            "passed": 41,
+            "pending": 0,
+            "skipped": 0
+          },
+          "file": "/private/tmp/tm-r5node-new.p36ab721/green/web/features/mail/draft-writer-snapshot.test.ts"
+        }
+      ],
+      "exit": 0,
+      "numFailedTests": 0,
+      "numPassedTests": 41,
+      "numPendingTests": 0,
+      "numTotalTests": 41,
+      "owned_group_gone": true,
+      "runtime_report_present": true,
+      "success": true,
+      "tests": [
+        {
+          "name": "DraftWriter owns confirmed response snapshots isolates mutable ack responses and every returned copy from the revision lane",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots isolates mutable readback responses and every returned copy from the revision lane",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots isolates mutable reload responses and every returned copy from the revision lane",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots detaches constructor input and save input before the queued write starts",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots pins lost-response UUID/revision/payload while new typing queues, even when transport mutates its command",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision NaN without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision Infinity without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision -Infinity without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision -1 without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision 0 without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision 1.5 without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision 9007199254740992 without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision NaN",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision Infinity",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision -Infinity",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision -1",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision 1.5",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision 9007199254740992",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries accepts the last safe acknowledgement but never sends an overflowing next revision",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision NaN and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision Infinity and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision -Infinity and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision -1 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 0 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 1.5 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 9007199254740992 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 2 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects an acknowledgement for another UUID without replacing the pinned command",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not recover lost acknowledgement from wrong identity readback and keeps the conflict latch",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not recover lost acknowledgement from unsafe revision readback and keeps the conflict latch",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision NaN after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision Infinity after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision -Infinity after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision -1 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision 0 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision 1.5 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision 9007199254740992 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects wrong-identity reload without clearing an existing conflict",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter guard and wire semantics stay unchanged rejects late readback and queued work after close without touching the replacement editor",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter guard and wire semantics stay unchanged rejects late readback and queued work after session switch without touching the replacement editor",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter guard and wire semantics stay unchanged preserves Go omitempty/object-key semantics while recipient and attachment array order remains meaningful",
+          "status": "passed"
+        }
+      ],
+      "timed_out": false,
+      "wall_seconds": 0.7300510406494141
+    },
+    "p5-red": {
+      "by_file": [
+        {
+          "counts": {
+            "failed": 14,
+            "passed": 27,
+            "pending": 0,
+            "skipped": 0
+          },
+          "file": "/private/tmp/tm-r5node-new.p36ab721/red/web/features/mail/draft-writer-snapshot.test.ts"
+        }
+      ],
+      "exit": 1,
+      "numFailedTests": 14,
+      "numPassedTests": 27,
+      "numPendingTests": 0,
+      "numTotalTests": 41,
+      "owned_group_gone": true,
+      "runtime_report_present": true,
+      "success": false,
+      "tests": [
+        {
+          "name": "DraftWriter owns confirmed response snapshots isolates mutable ack responses and every returned copy from the revision lane",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots isolates mutable readback responses and every returned copy from the revision lane",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots isolates mutable reload responses and every returned copy from the revision lane",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots detaches constructor input and save input before the queued write starts",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter owns confirmed response snapshots pins lost-response UUID/revision/payload while new typing queues, even when transport mutates its command",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision NaN without replacing the confirmed snapshot",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision Infinity without replacing the confirmed snapshot",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision -Infinity without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision -1 without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision 0 without replacing the confirmed snapshot",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision 1.5 without replacing the confirmed snapshot",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects reload revision 9007199254740992 without replacing the confirmed snapshot",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision NaN",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision Infinity",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision -Infinity",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision -1",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision 1.5",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not issue CAS from unrepresentable initial revision 9007199254740992",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries accepts the last safe acknowledgement but never sends an overflowing next revision",
+          "status": "failed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision NaN and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision Infinity and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision -Infinity and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision -1 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 0 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 1.5 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 9007199254740992 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not adopt acknowledgement revision 2 and replays the exact command after offline readback",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects an acknowledgement for another UUID without replacing the pinned command",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not recover lost acknowledgement from wrong identity readback and keeps the conflict latch",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries does not recover lost acknowledgement from unsafe revision readback and keeps the conflict latch",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision NaN after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision Infinity after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision -Infinity after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision -1 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision 0 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision 1.5 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries never adopts invalid readback revision 9007199254740992 after a lost response",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter revision and acknowledgement boundaries rejects wrong-identity reload without clearing an existing conflict",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter guard and wire semantics stay unchanged rejects late readback and queued work after close without touching the replacement editor",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter guard and wire semantics stay unchanged rejects late readback and queued work after session switch without touching the replacement editor",
+          "status": "passed"
+        },
+        {
+          "name": "DraftWriter guard and wire semantics stay unchanged preserves Go omitempty/object-key semantics while recipient and attachment array order remains meaningful",
+          "status": "passed"
+        }
+      ],
+      "timed_out": false,
+      "wall_seconds": 1.2509498596191406
+    },
+    "receipt-page-affected": {
+      "by_file": [
+        {
+          "counts": {
+            "failed": 0,
+            "passed": 8,
+            "pending": 0,
+            "skipped": 3
+          },
+          "file": "/private/tmp/tm-r5node-new.p36ab721/green/web/app/(dashboard)/mail/page.test.tsx"
+        }
+      ],
+      "exit": 0,
+      "numFailedTests": 0,
+      "numPassedTests": 8,
+      "numPendingTests": 3,
+      "numTotalTests": 11,
+      "owned_group_gone": true,
+      "runtime_report_present": true,
+      "success": true,
+      "tests": [
+        {
+          "name": "SubmissionPane sent-content view reveals the sent body and attachment download on demand",
+          "status": "passed"
+        },
+        {
+          "name": "SubmissionPane sent-content view shows the redaction notice instead of a body when content is redacted",
+          "status": "passed"
+        },
+        {
+          "name": "SubmissionPane sent-content view keeps the content collapsed until requested",
+          "status": "passed"
+        },
+        {
+          "name": "MessagePane personal-state vs shared-organizing actions shows personal-state actions but not organizing actions to a read-only member",
+          "status": "skipped"
+        },
+        {
+          "name": "MessagePane personal-state vs shared-organizing actions shows both action groups to an organizer",
+          "status": "skipped"
+        },
+        {
+          "name": "SubmissionPane capabilities shows content but not retry when the server grants view only",
+          "status": "passed"
+        },
+        {
+          "name": "SubmissionPane capabilities shows retry but not content when the server grants retry only",
+          "status": "passed"
+        },
+        {
+          "name": "SubmissionPane capabilities surfaces the uncertain-outcome notice on a delivery_uncertain conflict",
+          "status": "passed"
+        },
+        {
+          "name": "Revocation while a sent message is open unmounts open content, clears cached bytes and requires an explicit reopen after regrant",
+          "status": "passed"
+        },
+        {
+          "name": "Revocation while a sent message is open does not leave cached attachment metadata visible after a denied revalidation",
+          "status": "passed"
+        },
+        {
+          "name": "Template-only fallback sender sends the reply preparation request with the template-only identity, not the unreadable sender",
+          "status": "skipped"
+        }
+      ],
+      "timed_out": false,
+      "wall_seconds": 1.0362770557403564
+    },
+    "receipt-ui": {
+      "by_file": [
+        {
+          "counts": {
+            "failed": 1,
+            "passed": 34,
+            "pending": 0,
+            "skipped": 0
+          },
+          "file": "/private/tmp/tm-r5node-new.p36ab721/green/web/lib/receipt-types.test.ts"
+        },
+        {
+          "counts": {
+            "failed": 0,
+            "passed": 19,
+            "pending": 0,
+            "skipped": 0
+          },
+          "file": "/private/tmp/tm-r5node-new.p36ab721/green/web/features/mail/components/receipt-consumer.test.tsx"
+        }
+      ],
+      "exit": 1,
+      "numFailedTests": 1,
+      "numPassedTests": 53,
+      "numPendingTests": 0,
+      "numTotalTests": 54,
+      "owned_group_gone": true,
+      "runtime_report_present": true,
+      "success": false,
+      "tests": [
+        {
+          "name": "closed ordinary receipt runtime DTO preserves full-ledger aggregate outcomes and scopes exact IDs/tenant",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO accepts the committed unknown fallback without counts or current authority",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw subject instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw mail_from instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw attachment_count instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw recipients instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw bcc instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw text_body instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw raw_headers instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw smtp_code instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw smtp_response instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw last_error instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw diagnostic instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw lease instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw delivery_token instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw object_key instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw user_id instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects private/raw api_key_id instead of stripping it",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects nested private extensions and arbitrary categories/reasons",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects unsafe/invalid count -1",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects unsafe/invalid count 0.5",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects unsafe/invalid count 9007199254740992",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects unsafe/invalid count Infinity",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects unsafe/invalid count NaN",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO rejects unsafe/invalid count 2",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO requires a finite complete-ledger sum and never turns unknown into accepted/zero",
+          "status": "passed"
+        },
+        {
+          "name": "closed ordinary receipt runtime DTO checks list envelope, metadata and every row without accepting old array detail DTOs",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC distinguishes known populated, known empty and historical unknown",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC fails closed on incompatible BCC marker {\"bcc\":null,\"recipient_completeness\":\"complete\"}",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC fails closed on incompatible BCC marker {\"bcc\":[],\"recipient_completeness\":\"legacy_unknown\"}",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC fails closed on incompatible BCC marker {\"bcc\":[\"bcc@fixture.test\"],\"recipient_completeness\":\"legacy_unknown\"}",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC fails closed on incompatible BCC marker {\"bcc\":\"bcc@fixture.test\",\"recipient_completeness\":\"complete\"}",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC fails closed on incompatible BCC marker {\"bcc\":[null],\"recipient_completeness\":\"complete\"}",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC fails closed on incompatible BCC marker {\"bcc\":[],\"recipient_completeness\":\"unknown\"}",
+          "status": "passed"
+        },
+        {
+          "name": "current-readable sent-content structured BCC rejects absent markers, cross-ID content, queue fallbacks and custom BCC headers",
+          "status": "failed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers lists neutral task IDs and full-ledger mixed results without automatic content reads",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers renders unknown evidence without inventing zero, acceptance or status-based content/retry authority",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers fails closed on old raw-job response extensions rather than displaying/stripping them",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers uses the same aggregate DTO on compatibility detail, attempts, recipients and retry transports",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers fetches live body/BCC lazily with the current tenant/token and then attachments",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers shows complete BCC semantics only from the live structured marker",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers shows legacy_unknown BCC semantics only from the live structured marker",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers does not display custom headers or accept a custom BCC fallback",
+          "status": "passed"
+        },
+        {
+          "name": "shipping ordinary receipt consumers renders sent-folder detail from the current live content, not the queue or list sender",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses clears old private body and attachments after final 401 during live revalidation",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses clears old private body and attachments after final 403 during live revalidation",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses clears old private body and attachments after final 404 during live revalidation",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses capability revocation closes the disclosure, clears private state, and re-grant never auto-opens it",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses aborts partial old JSON and never admits its late body after Switch company",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses aborts partial old JSON and never admits its late body after Switch account",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses aborts partial old JSON and never admits its late body after Logout",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses aborts a collapsed disclosure and discards an otherwise valid late response without caching it",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses token-only rotation preserves disclosure scope and authorized private content",
+          "status": "passed"
+        },
+        {
+          "name": "live content lifecycle and epoch-bound ReadableStream responses successful existing refresh retries the live read with a rotated token without inventing a new identity scope",
+          "status": "passed"
+        }
+      ],
+      "timed_out": false,
+      "wall_seconds": 1.550379991531372
+    }
+  },
+  "source_postcheck_equal": true,
+  "source_sha": "d6bd8c8df1051e7cea11b334074f05d005dfb507",
+  "whole29_consumer_old_not_retested": true
+}

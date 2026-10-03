@@ -63,24 +63,65 @@ func r5ExpectStatus(t *testing.T, got, want int) {
 	}
 }
 
+func r5AuditEditorSnapshot(t *testing.T, s *httptest.Server, token string, user uuid.UUID) company.PermissionEditorSnapshot {
+	t.Helper()
+	status, body := r5AuditHTTP(t, s, token, "GET", "/api/v1/admin/users/"+user.String()+"/permission-editor", nil)
+	r5ExpectStatus(t, status, 200)
+	var data struct {
+		Data company.PermissionEditorSnapshot `json:"data"`
+	}
+	must(t, json.Unmarshal(body, &data))
+	if data.Data.UserID != user || data.Data.Effective == nil {
+		t.Fatal("formal editor setup returned incorrect subject or no effective permission")
+	}
+	must(t, data.Data.Revision.Validate())
+	return data.Data
+}
+
+func r5AuditProfileSnapshot(t *testing.T, s *httptest.Server, token string, id uuid.UUID) models.PermissionProfile {
+	t.Helper()
+	status, body := r5AuditHTTP(t, s, token, "GET", "/api/v1/admin/permissions", nil)
+	r5ExpectStatus(t, status, 200)
+	var data struct {
+		Data []models.PermissionProfile `json:"data"`
+	}
+	must(t, json.Unmarshal(body, &data))
+	for _, profile := range data.Data {
+		if profile.ID == id {
+			if profile.Revision == "" {
+				t.Fatal("formal profile setup returned no CAS revision")
+			}
+			return profile
+		}
+	}
+	t.Fatal("created profile missing from formal administrator listing")
+	return models.PermissionProfile{}
+}
+
 func TestR5AuditA01OverridePreservesUneditedRestriction(t *testing.T) {
 	f := seedCompany(t)
 	s := r5AuditServer(t, f)
 	token := r3Token(t, f.admin)
-	p := "/api/v1/admin/users/" + f.employee.ID.String() + "/permissions"
-	status, _ := r5AuditHTTP(t, s, token, "PUT", p, map[string]any{"can_send": false, "allowed_zone_ids": []uuid.UUID{f.zone.ID}})
+	p := "/api/v1/admin/users/" + f.employee.ID.String() + "/permission-editor"
+	observed := r5AuditEditorSnapshot(t, s, token, f.employee.ID)
+	status, _ := r5AuditHTTP(t, s, token, "PATCH", p, map[string]any{
+		"expected_revision": observed.Revision,
+		"patch":             map[string]any{"can_send": false, "domain_access": map[string]any{"mode": "list", "zone_ids": []uuid.UUID{f.zone.ID}}},
+	})
 	r5ExpectStatus(t, status, 200)
 	before, e := f.st.EffectivePermission(context.Background(), f.employee.ID)
 	must(t, e)
 	if before.CanSend {
 		t.Fatal("fixture was not restricted")
 	}
-	status, _ = r5AuditHTTP(t, s, token, "PUT", p, map[string]any{"daily_send_quota": 25})
+	restricted := r5AuditEditorSnapshot(t, s, token, f.employee.ID)
+	status, _ = r5AuditHTTP(t, s, token, "PATCH", p, map[string]any{"expected_revision": restricted.Revision, "patch": map[string]any{"daily_send_quota": 25}})
 	if status != 200 && status != 400 && status != 409 {
 		t.Fatalf("unexpected patch response %d", status)
 	}
 	after, e := f.st.EffectivePermission(context.Background(), f.employee.ID)
 	must(t, e)
+	t.Logf("R5_CURRENT_A01: formal quota-only status=%d can_send=%t allowed_zone_count=%d daily_send_quota=%d", status, after.CanSend, len(after.AllowedZoneIDs), after.DailySendQuota)
 	if after.CanSend || len(after.AllowedZoneIDs) != 1 {
 		t.Fatal("R5_BASELINE_DEFECT_A01: quota-only request erased existing restriction")
 	}
@@ -96,19 +137,26 @@ func TestR5AuditA02StaleProfileCannotRestoreRevocation(t *testing.T) {
 	}
 	must(t, json.Unmarshal(b, &data))
 	p := "/api/v1/admin/permissions/" + data.Data.ID.String()
-	status, _ = r5AuditHTTP(t, s, token, "PATCH", p, map[string]any{"can_send": false})
+	selected := r5AuditProfileSnapshot(t, s, token, data.Data.ID)
+	member := r5AuditEditorSnapshot(t, s, token, f.employee.ID)
+	status, _ = r5AuditHTTP(t, s, token, "POST", "/api/v1/admin/users/"+f.employee.ID.String()+"/permission-editor/assignment", map[string]any{
+		"expected_revision": member.Revision, "profile_id": selected.ID, "profile_revision": selected.Revision, "patch": map[string]any{},
+	})
+	r5ExpectStatus(t, status, 200)
+	status, _ = r5AuditHTTP(t, s, token, "PATCH", p, map[string]any{"expected_revision": selected.Revision, "can_send": false})
 	r5ExpectStatus(t, status, 200)
 	revoked, e := f.st.GetPermissionProfile(context.Background(), data.Data.ID)
 	must(t, e)
 	if revoked.CanSend {
 		t.Fatal("fixture revocation failed")
 	}
-	status, _ = r5AuditHTTP(t, s, token, "PATCH", p, map[string]any{"description": "unrelated edit from stale form", "can_send": true})
+	status, _ = r5AuditHTTP(t, s, token, "PATCH", p, map[string]any{"expected_revision": selected.Revision, "description": "unrelated edit from stale form", "can_send": true})
 	if status != 200 && status != 400 && status != 409 {
 		t.Fatalf("unexpected stale-write response %d", status)
 	}
 	current, e := f.st.GetPermissionProfile(context.Background(), data.Data.ID)
 	must(t, e)
+	t.Logf("R5_CURRENT_A02: formal stale-write status=%d observed_revision=%s revoked_revision=%s current_revision=%s can_send=%t", status, selected.Revision, revoked.Revision, current.Revision, current.CanSend)
 	if current.CanSend {
 		t.Fatal("R5_BASELINE_DEFECT_A02: stale profile write restored revoked capability")
 	}
@@ -117,13 +165,34 @@ func TestR5AuditA03ExpiredContentDeniedAcrossEntrypoints(t *testing.T) {
 	f := seedCompany(t)
 	s := r5AuditServer(t, f)
 	j := archJob(t, f, models.OutboundSent)
+	token := r3Token(t, f.employee)
+	liveStatus, liveBody := r5AuditHTTP(t, s, token, "GET", "/api/v1/company/submissions/"+j.ID.String()+"/content", nil)
+	r5ExpectStatus(t, liveStatus, 200)
+	var liveContent struct {
+		Data company.SubmissionContent `json:"data"`
+	}
+	must(t, json.Unmarshal(liveBody, &liveContent))
+	if liveContent.Data.ID != j.ID || liveContent.Data.TextBody != j.TextBody || j.TextBody == "" {
+		t.Fatal("live content positive control did not return this subject's actual body")
+	}
+	liveReceiptStatus, liveReceiptBody := r5AuditHTTP(t, s, token, "GET", "/api/v1/outbound/"+j.ID.String(), nil)
+	r5ExpectStatus(t, liveReceiptStatus, 200)
+	var liveReceipt struct {
+		Data models.OutboundJob `json:"data"`
+	}
+	must(t, json.Unmarshal(liveReceiptBody, &liveReceipt))
+	if liveReceipt.Data.ID != j.ID || liveReceipt.Data.TextBody != j.TextBody || liveReceipt.Data.ContentRedacted {
+		t.Fatal("live legacy receipt positive control was missing or already redacted")
+	}
+	t.Logf("R5_CURRENT_A03: live_content_status=%d live_receipt_status=%d live_receipt_redacted=%t live_body_match=true", liveStatus, liveReceiptStatus, liveReceipt.Data.ContentRedacted)
 	_, e := f.pool.Exec(context.Background(), `UPDATE sent_mail_items SET expires_at=clock_timestamp()-interval '1 second' WHERE asset_id=$1`, j.ID)
 	must(t, e)
-	token := r3Token(t, f.employee)
 	status, _ := r5AuditHTTP(t, s, token, "GET", "/api/v1/company/submissions/"+j.ID.String()+"/content", nil)
 	r5ExpectStatus(t, status, 404)
+	t.Logf("R5_CURRENT_A03: expired_content_status=%d", status)
 	status, b := r5AuditHTTP(t, s, token, "GET", "/api/v1/outbound/"+j.ID.String(), nil)
 	if status == 403 || status == 404 {
+		t.Logf("R5_CURRENT_A03: expired_receipt_status=%d redaction=receipt_not_returned", status)
 		return
 	}
 	r5ExpectStatus(t, status, 200)
@@ -131,6 +200,7 @@ func TestR5AuditA03ExpiredContentDeniedAcrossEntrypoints(t *testing.T) {
 		Data models.OutboundJob `json:"data"`
 	}
 	must(t, json.Unmarshal(b, &data))
+	t.Logf("R5_CURRENT_A03: expired_receipt_status=%d content_redacted=%t text_present=%t html_present=%t", status, data.Data.ContentRedacted, data.Data.TextBody != "", data.Data.HTMLBody != "")
 	if data.Data.TextBody != "" || data.Data.HTMLBody != "" {
 		t.Fatal("R5_BASELINE_DEFECT_A03: legacy receipt returned expired body")
 	}

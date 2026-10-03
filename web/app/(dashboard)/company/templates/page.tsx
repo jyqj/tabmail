@@ -5,6 +5,7 @@ import {
   company,
   workMailboxes,
   type MailTemplate,
+  type MailTemplateEditor,
 } from "@/lib/company";
 import {
   ActionButton,
@@ -37,7 +38,7 @@ export default function TemplatesPage() {
   );
   const boxes = useAPI("template-mailboxes", workMailboxes);
   const [tab, setTab] = useState<TemplateTab>("library");
-  const [edit, setEdit] = useState<MailTemplate | null>(null);
+  const [edit, setEdit] = useState<MailTemplateEditor | null>(null);
   const [mailbox, setMailbox] = useState("");
   const [versionKey, setVersionKey] = useState(0);
   const activeMailbox = mailbox || boxes.data?.[0]?.mailbox.id || "";
@@ -169,14 +170,14 @@ export default function TemplatesPage() {
         </TabsContent>
         <TabsContent value="versions">
           <TemplateVersionsView
-            template={edit}
+            template={edit?.id ? edit : null}
             refreshKey={versionKey}
             onRevoked={onVersionRevoked}
           />
         </TabsContent>
         <TabsContent value="grants">
           <TemplateGrantsView
-            template={edit}
+            template={edit?.id ? edit : null}
             mailboxes={boxes.data ?? []}
             mailbox={activeMailbox}
             setMailbox={setMailbox}

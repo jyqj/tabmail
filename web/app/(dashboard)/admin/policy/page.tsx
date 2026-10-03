@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { SlidersHorizontal } from "lucide-react";
 
 import { getSMTPPolicy, updateSMTPPolicy } from "@/lib/api";
-import type { SMTPPolicy } from "@/lib/types";
+import type { SMTPPolicyInput } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useCRUDPage } from "@/hooks/use-crud-page";
 import { PageHeader } from "@/components/layout/page-header";
@@ -57,7 +57,7 @@ export default function AdminPolicyPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload: SMTPPolicy = {
+      const payload: SMTPPolicyInput = {
         default_accept: form.default_accept,
         accept_domains: parseList(form.accept_domains),
         reject_domains: parseList(form.reject_domains),

@@ -1,0 +1,740 @@
+--- a/internal/mailcontent/parser.go
++++ b/internal/mailcontent/parser.go
+@@ -3,7 +3,6 @@
+ package mailcontent
+ 
+ import (
+-	"bytes"
+ 	"container/list"
+ 	"context"
+ 	"crypto/sha256"
+@@ -73,22 +72,11 @@
+ 	return append(append([]*enmime.Part{}, env.Attachments...), env.Inlines...)
+ }
+ 
+-// ParseBounded enforces the package limits (MaxBytes raw, maxParts parts) on an
+-// in-memory message and returns the parsed envelope. It is the single bounded
+-// parse entry: Parser.load uses it for the HTTP read path and the ingest
+-// acceptance paths call it directly, so no caller parses unbounded MIME.
++// ParseBounded admits a byte-, node- and depth-bounded MIME tree before
++// enmime allocates decoded bodies. Ingest calls this entry directly; Parser
++// uses the same admission with its existing shared-work context.
+ func ParseBounded(raw []byte) (*enmime.Envelope, error) {
+-	if int64(len(raw)) > MaxBytes {
+-		return nil, errors.New("message exceeds 25 MiB parser limit")
+-	}
+-	env, err := enmime.ReadEnvelope(bytes.NewReader(raw))
+-	if err != nil {
+-		return nil, errors.New("MIME parsing failed")
+-	}
+-	if len(Parts(env)) > maxParts {
+-		return nil, errors.New("MIME part limit exceeded")
+-	}
+-	return env, nil
++	return parseBoundedContext(context.Background(), raw)
+ }
+ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
+ 	if err := ctx.Err(); err != nil {
+@@ -123,7 +111,7 @@
+ 		if e != nil {
+ 			return nil, e
+ 		}
+-		env, e := ParseBounded(raw)
++		env, e := parseBoundedContext(parseCtx, raw)
+ 		if e != nil {
+ 			return nil, e
+ 		}
+--- a/internal/mailcontent/mime_budget.go
++++ b/internal/mailcontent/mime_budget.go
+@@ -0,0 +1,236 @@
++package mailcontent
++
++import (
++	"bufio"
++	"bytes"
++	"context"
++	"errors"
++	"io"
++	"strings"
++	"sync"
++	"unicode"
++
++	"github.com/jhillyerd/enmime/v2"
++	"github.com/jhillyerd/enmime/v2/mediatype"
++)
++
++// Root is node 1 at depth 1. Containers, body parts, attachments and inlines
++// all consume nodes, not just the attachment projection. These admission
++// limits intentionally reject formerly accepted pathological MIME trees.
++const MaxMIMEDepth = 32
++const MaxMIMENodes = 1024
++
++var ErrMIMEDepth = errors.New("MIME depth limit exceeded")
++var ErrMIMENodes = errors.New("MIME node limit exceeded")
++var ErrMIMEParts = errors.New("MIME part limit exceeded")
++var ErrMIMEBytes = errors.New("message exceeds 25 MiB parser limit")
++var ErrMIMEParse = errors.New("MIME parsing failed")
++
++// ParseBoundedReader takes ownership of r, including on cancellation/error.
++// Close must unblock Read for prompt cancellation. No unbounded worker is
++// started, and Reader's optional WriterTo cannot bypass byte/context checks.
++func ParseBoundedReader(ctx context.Context, r io.ReadCloser) (*enmime.Envelope, error) {
++	if r == nil {
++		return nil, errors.New("object reader unavailable")
++	}
++	var once sync.Once
++	closeReader := func() { once.Do(func() { _ = r.Close() }) }
++	stop := context.AfterFunc(ctx, closeReader)
++	defer func() { stop(); closeReader() }()
++	raw, err := io.ReadAll(io.LimitReader(&sourceProgressReader{ctx: ctx, reader: r}, MaxBytes+1))
++	if cancelled := ctx.Err(); cancelled != nil {
++		return nil, cancelled
++	}
++	if err != nil {
++		return nil, err
++	}
++	return parseBoundedContext(ctx, raw)
++}
++
++func parseBoundedContext(ctx context.Context, raw []byte) (*enmime.Envelope, error) {
++	if err := ctx.Err(); err != nil {
++		return nil, err
++	}
++	if int64(len(raw)) > MaxBytes {
++		return nil, ErrMIMEBytes
++	}
++	b := mimeBudget{ctx: ctx}
++	if err := b.walk(raw, 1); err != nil {
++		return nil, err
++	}
++	// Only after admission may enmime allocate decoded bodies/the MIME tree.
++	// The same default header/media-type interpretation is used in both passes.
++	env, err := enmime.ReadEnvelope(&sourceProgressReader{ctx: ctx, reader: bytes.NewReader(raw)})
++	if cancelled := ctx.Err(); cancelled != nil {
++		return nil, cancelled
++	}
++	if err != nil {
++		return nil, ErrMIMEParse
++	}
++	if len(Parts(env)) > maxParts {
++		return nil, ErrMIMEParts
++	}
++	return env, nil
++}
++
++type mimeBudget struct {
++	ctx          context.Context
++	nodes, parts int
++	multipart    bool
++}
++
++// Header warnings are replayed by the real parser, not retained twice here.
++type budgetHeaderErrors struct{}
++
++func (budgetHeaderErrors) AddError(string, string, ...any)   {}
++func (budgetHeaderErrors) AddWarning(string, string, ...any) {}
++
++func (b *mimeBudget) walk(raw []byte, depth int) error {
++	if err := b.ctx.Err(); err != nil {
++		return err
++	}
++	if depth > MaxMIMEDepth {
++		return ErrMIMEDepth
++	}
++	b.nodes++
++	if b.nodes > MaxMIMENodes {
++		return ErrMIMENodes
++	}
++	reader := bytes.NewReader(raw)
++	br := bufio.NewReader(&sourceProgressReader{ctx: b.ctx, reader: reader})
++	header, err := enmime.ReadHeader(br, budgetHeaderErrors{})
++	if cancelled := b.ctx.Err(); cancelled != nil {
++		return cancelled
++	}
++	if err != nil {
++		return ErrMIMEParse
++	}
++	ctype := header.Get("Content-Type")
++	if ctype == "" && depth == 1 {
++		ctype = `text/plain; charset="us-ascii"`
++	}
++	mtype, params, _, err := mediatype.Parse(ctype)
++	if ctype != "" && err != nil {
++		return ErrMIMEParse
++	}
++	boundary := params["boundary"]
++	if depth == 1 {
++		b.multipart = strings.HasPrefix(mtype, "multipart/")
++	}
++	if b.multipart {
++		disposition, _, _, _ := mediatype.Parse(header.Get("Content-Disposition"))
++		if disposition == "attachment" || mtype == "application/octet-stream" {
++			b.parts++
++		}
++		if disposition == "inline" && !strings.HasPrefix(mtype, "multipart/") {
++			b.parts++
++		}
++		if b.parts > maxParts {
++			return ErrMIMEParts
++		}
++	}
++	// enmime v2.3.0 does not recurse into message/rfc822 or transfer-decode
++	// containers before splitting them. Child non-text data with a boundary
++	// DOES recurse; child text/plain and text/html with a boundary do not.
++	recurse := b.multipart && depth == 1
++	if depth != 1 {
++		recurse = boundary != "" && mtype != "text/plain" && mtype != "text/html"
++	}
++	if !recurse {
++		return nil
++	}
++	body := raw[len(raw)-reader.Len()-br.Buffered():]
++	prefix := []byte("--" + boundary)
++	final := appendBoundaryFinal(prefix)
++	cursor, children := 0, 0
++	for cursor < len(body) {
++		if err := b.ctx.Err(); err != nil {
++			return err
++		}
++		line, next, newline := budgetLine(body, cursor)
++		cursor = next
++		if len(line) > 0 && (line[0] == '\r' || line[0] == '\n') {
++			continue
++		}
++		if bytes.Contains(line, final) {
++			return nil
++		}
++		if newline && budgetDelimiter(line, prefix) {
++			end, err := budgetPartEnd(b.ctx, body[cursor:], prefix)
++			if err != nil {
++				return err
++			}
++			if err := b.walk(body[cursor:cursor+end], depth+1); err != nil {
++				return err
++			}
++			cursor += end
++			children++
++			continue
++		}
++		if !newline {
++			return nil
++		} // unclosed multipart: retain enmime's tolerance
++		if children != 0 {
++			return ErrMIMEParse
++		}
++	}
++	return nil
++}
++
++func appendBoundaryFinal(prefix []byte) []byte {
++	return append(append([]byte(nil), prefix...), '-', '-')
++}
++func budgetDelimiter(buf, prefix []byte) bool {
++	i := bytes.Index(buf, prefix)
++	return i >= 0 && i+len(prefix) < len(buf) && unicode.IsSpace(rune(buf[i+len(prefix)]))
++}
++func budgetLine(body []byte, cursor int) ([]byte, int, bool) {
++	i := bytes.IndexByte(body[cursor:], '\n')
++	if i < 0 {
++		return body[cursor:], len(body), false
++	}
++	return body[cursor : cursor+i+1], cursor + i + 1, true
++}
++
++// Match enmime v2.3.0 boundaryReader.Read's small look-ahead, including its
++// tolerant delimiter/terminator matching and omission of the separator CRLF.
++// This works on raw slices: no bodies, decoded content or complete tree are
++// allocated. Each ancestor scans a byte at most once (depth <= 32), while
++// traversal uses at most 32 stack frames and 1024 header admissions.
++func budgetPartEnd(ctx context.Context, raw, prefix []byte) (int, error) {
++	final := appendBoundaryFinal(prefix)
++	for pos := 0; pos < len(raw); {
++		if err := ctx.Err(); err != nil {
++			return 0, err
++		}
++		padding := 0
++		if raw[pos] == '\r' {
++			padding = 2
++		} else if raw[pos] == '\n' {
++			padding = 1
++		}
++		peekLen := len(prefix) + padding + 2
++		if len(raw)-pos >= peekLen {
++			peek := raw[pos : pos+peekLen]
++			repeated := bytes.HasPrefix(peek, []byte("\n\n")) || bytes.HasPrefix(peek, []byte("\n\r")) || bytes.HasPrefix(peek, []byte("\r\n\r")) || bytes.HasPrefix(peek, []byte("\r\n\n"))
++			if !repeated && (budgetDelimiter(peek[padding:], prefix) || bytes.Contains(peek[padding:], final)) {
++				return pos, nil
++			}
++		}
++		// enmime wraps each new part in a default 4096-byte bufio.Reader.
++		// boundaryReader keeps atPartStart true for that entire first fill,
++		// not just byte zero, so even a mid-line marker can end that fill.
++		// Reproduce this quirk rather than undercounting its allocated nodes.
++		if pos < 4095 {
++			pos++
++			continue
++		}
++		// Subsequent fills only inspect CR/LF candidates.
++		i := bytes.IndexAny(raw[pos+1:], "\r\n")
++		if i < 0 {
++			return len(raw), nil
++		}
++		pos += i + 1
++	}
++	return len(raw), nil
++}
+--- a/internal/mailcontent/mime_budget_test.go
++++ b/internal/mailcontent/mime_budget_test.go
+@@ -0,0 +1,199 @@
++package mailcontent
++
++import (
++	"bytes"
++	"context"
++	"errors"
++	"fmt"
++	"io"
++	"reflect"
++	"strings"
++	"sync/atomic"
++	"testing"
++
++	"github.com/jhillyerd/enmime/v2"
++)
++
++func budgetNested(depth int) []byte {
++	raw := "Content-Type: text/plain\r\n\r\nbody"
++	for level := depth - 1; level > 0; level-- {
++		boundary := fmt.Sprintf("depth%d", level)
++		raw = fmt.Sprintf("Content-Type: multipart/mixed; boundary=%s\r\n\r\n--%s\r\n%s\r\n--%s--\r\n", boundary, boundary, raw, boundary)
++	}
++	return []byte(raw)
++}
++func budgetWide(children int, childHeader string) []byte {
++	var raw strings.Builder
++	raw.WriteString("Content-Type: multipart/mixed; boundary=W\r\n\r\n")
++	for i := 0; i < children; i++ {
++		fmt.Fprintf(&raw, "--W\r\n%s\r\n\r\nbody\r\n", childHeader)
++	}
++	raw.WriteString("--W--\r\n")
++	return []byte(raw.String())
++}
++func TestMIMEPreparseBudgetDepthAndAllNodes(t *testing.T) {
++	for _, tc := range []struct {
++		name string
++		raw  []byte
++		want error
++	}{
++		{"depth_exact", budgetNested(MaxMIMEDepth), nil},
++		{"depth_plus_one", budgetNested(MaxMIMEDepth + 1), ErrMIMEDepth},
++		{"nodes_exact", budgetWide(MaxMIMENodes-1, "Content-Type: text/plain"), nil},
++		{"body_nodes_plus_one", budgetWide(MaxMIMENodes, "Content-Type: text/plain"), ErrMIMENodes},
++		{"missing_type_nodes_plus_one", budgetWide(MaxMIMENodes, "X-Test: no-content-type"), ErrMIMENodes},
++		{"other_nodes_plus_one", budgetWide(MaxMIMENodes, "Content-Type: message/rfc822"), ErrMIMENodes},
++		{"attachment_exact", budgetWide(maxParts, "Content-Type: text/plain\r\nContent-Disposition: attachment"), nil},
++		{"attachment_plus_one", budgetWide(maxParts+1, "Content-Type: text/plain\r\nContent-Disposition: attachment"), ErrMIMEParts},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			// Test preflight directly as well: rejection is before envelope decode,
++			// not a count of an already allocated enmime tree.
++			b := mimeBudget{ctx: context.Background()}
++			if err := b.walk(tc.raw, 1); !errors.Is(err, tc.want) {
++				t.Fatalf("preflight = %v, want %v", err, tc.want)
++			}
++			env, err := ParseBounded(tc.raw)
++			if !errors.Is(err, tc.want) {
++				t.Fatalf("parse = %v, want %v", err, tc.want)
++			}
++			if tc.want != nil && env != nil {
++				t.Fatal("rejected tree exposed")
++			}
++			if tc.want == nil {
++				want, err := enmime.ReadEnvelope(bytes.NewReader(tc.raw))
++				if err != nil {
++					t.Fatal(err)
++				}
++				if !reflect.DeepEqual(env, want) {
++					t.Fatal("admitted envelope changed")
++				}
++				actual := len(env.Root.DepthMatchAll(func(*enmime.Part) bool { return true }))
++				if b.nodes != actual {
++					t.Fatalf("preflight nodes %d != allocated nodes %d", b.nodes, actual)
++				}
++			}
++		})
++	}
++}
++func TestMIMEPreparseBudgetCompatibility(t *testing.T) {
++	fixtures := [][]byte{
++		[]byte(multipartFixture),
++		[]byte("Subject: plain\r\n\r\nbody"),
++		[]byte("Content-Type: text/html; charset=utf-8\r\n\r\n<p>Body</p>"),
++		[]byte("Content-Type: text/plain\r\nContent-Transfer-Encoding: base64\r\n\r\n%%%corrupt%%%"),
++		[]byte("Content-Type: text/plain\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\nbody=ZZ"),
++		[]byte(strings.ReplaceAll(multipartFixture, "\r\n", "\n")),
++		[]byte(strings.ReplaceAll(multipartFixture, "boundary=boundary", "boundary=\r\n boundary")),
++		[]byte(strings.ReplaceAll(multipartFixture, "Content-Type:", "Content-Type :")),
++		[]byte(strings.TrimSuffix(multipartFixture, "--boundary--\r\n")),
++		[]byte(strings.ReplaceAll(multipartFixture, "--boundary\r\n", "--boundary \t\r\n")),
++		[]byte("Content-Type: message/rfc822\r\n\r\n" + string(budgetNested(MaxMIMEDepth+1))),
++		[]byte("Content-Type: multipart/mixed; boundary=W\r\nContent-Transfer-Encoding: base64\r\n\r\nLS1XCg=="),
++		[]byte("Content-Type: multipart/mixed; boundary=W\r\n\r\n--W\r\nContent-Type: text/plain; boundary=ignored\r\n\r\n--ignored\r\nbody\r\n--ignored--\r\n--W--\r\n"),
++		[]byte("Content-Type: multipart/mixed; boundary=W\r\n\r\npreamble --W\r\nContent-Type: application/x-custom; boundary=C\r\n\r\n--C\r\nContent-Type: text/plain\r\n\r\nbody\r\n--C--\r\n--W--\r\nepilogue"),
++	}
++	// v2.3.0 atPartStart remains true throughout the first 4096-byte fill;
++	// compare shifted/mid-line markers on both sides of that boundary.
++	for _, padding := range []int{0, 4000, 4096, 4200} {
++		fixtures = append(fixtures, []byte("Content-Type: multipart/mixed; boundary=W\r\n\r\n--W\r\nContent-Type: text/plain\r\n\r\n"+strings.Repeat("x", padding)+"literal --W\r\nContent-Type: text/plain\r\n\r\nsecond\r\n--W--\r\n"))
++	}
++	for i, raw := range fixtures {
++		t.Run(fmt.Sprint(i), func(t *testing.T) {
++			want, originalErr := enmime.ReadEnvelope(bytes.NewReader(raw))
++			got, err := ParseBounded(raw)
++			if (err == nil) != (originalErr == nil) {
++				t.Fatalf("error changed: original %v, bounded %v", originalErr, err)
++			}
++			if err == nil {
++				if !reflect.DeepEqual(got, want) {
++					t.Fatal("envelope changed")
++				}
++				b := mimeBudget{ctx: context.Background()}
++				if err := b.walk(raw, 1); err != nil {
++					t.Fatal(err)
++				}
++				if b.nodes != len(want.Root.DepthMatchAll(func(*enmime.Part) bool { return true })) {
++					t.Fatal("node walk differs from enmime")
++				}
++			}
++		})
++	}
++}
++
++type budgetTestReader struct {
++	raw     []byte
++	step    int
++	failure error
++	cancel  context.CancelFunc
++	closes  atomic.Int32
++}
++
++func (r *budgetTestReader) Read(p []byte) (int, error) {
++	if len(r.raw) == 0 {
++		if r.failure != nil {
++			return 0, r.failure
++		}
++		return 0, io.EOF
++	}
++	n := len(p)
++	if r.step > 0 && n > r.step {
++		n = r.step
++	}
++	if n > len(r.raw) {
++		n = len(r.raw)
++	}
++	copy(p, r.raw[:n])
++	r.raw = r.raw[n:]
++	if r.cancel != nil {
++		r.cancel()
++		r.cancel = nil
++	}
++	if len(r.raw) == 0 {
++		return n, r.failure
++	}
++	return n, nil
++}
++func (r *budgetTestReader) Close() error { r.closes.Add(1); return nil }
++func TestMIMEPreparseBudgetReaderBoundaries(t *testing.T) {
++	fault := errors.New("short object read")
++	for _, tc := range []struct {
++		name   string
++		raw    []byte
++		step   int
++		fault  error
++		cancel bool
++		want   error
++	}{
++		{"short_reads", []byte(multipartFixture), 3, nil, false, nil},
++		{"short_read_error", []byte(multipartFixture), 3, fault, false, fault},
++		{"malformed", []byte(badMIMEFixture), 2, nil, false, ErrMIMEParse},
++		{"depth_limit", budgetNested(MaxMIMEDepth + 1), 5, nil, false, ErrMIMEDepth},
++		{"canceled_during_read", []byte(multipartFixture), 3, nil, true, context.Canceled},
++	} {
++		t.Run(tc.name, func(t *testing.T) {
++			ctx, cancel := context.WithCancel(context.Background())
++			defer cancel()
++			r := &budgetTestReader{raw: tc.raw, step: tc.step, failure: tc.fault}
++			if tc.cancel {
++				r.cancel = cancel
++			}
++			_, err := ParseBoundedReader(ctx, r)
++			if !errors.Is(err, tc.want) {
++				t.Fatalf("error %v want %v", err, tc.want)
++			}
++			if r.closes.Load() != 1 {
++				t.Fatalf("closed %d times", r.closes.Load())
++			}
++		})
++	}
++	ctx, cancel := context.WithCancel(context.Background())
++	cancel()
++	r := &budgetTestReader{raw: []byte(multipartFixture)}
++	if _, err := ParseBoundedReader(ctx, r); !errors.Is(err, context.Canceled) {
++		t.Fatal(err)
++	}
++	if len(r.raw) != len(multipartFixture) || r.closes.Load() != 1 {
++		t.Fatal("canceled entry read or leaked reader")
++	}
++}
+--- a/internal/app/messages/service.go
++++ b/internal/app/messages/service.go
+@@ -5,12 +5,12 @@
+ 	"io"
+ 
+ 	"github.com/google/uuid"
+-	"github.com/jhillyerd/enmime/v2"
+ 	"github.com/rs/zerolog"
+ 	"tabmail/internal/app"
+ 	"tabmail/internal/app/credentials"
+ 	"tabmail/internal/authz"
+ 	"tabmail/internal/hooks"
++	"tabmail/internal/mailcontent"
+ 	"tabmail/internal/models"
+ 	"tabmail/internal/policy"
+ 	"tabmail/internal/rawobject"
+@@ -132,11 +132,13 @@
+ 	if msg.RawObjectKey != "" {
+ 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
+ 		if err != nil {
++			if rc != nil {
++				_ = rc.Close()
++			}
+ 			return nil, app.Internal(err)
+ 		}
+ 		if err == nil {
+-			defer rc.Close()
+-			env, parseErr := enmime.ReadEnvelope(rc)
++			env, parseErr := mailcontent.ParseBoundedReader(ctx, rc)
+ 			if parseErr != nil {
+ 				return nil, app.Internal(parseErr)
+ 			}
+@@ -291,11 +293,13 @@
+ 	if msg.RawObjectKey != "" {
+ 		rc, err := s.obj.Get(ctx, msg.RawObjectKey)
+ 		if err != nil {
++			if rc != nil {
++				_ = rc.Close()
++			}
+ 			return nil, app.Internal(err)
+ 		}
+ 		{
+-			defer rc.Close()
+-			env, err := enmime.ReadEnvelope(rc)
++			env, err := mailcontent.ParseBoundedReader(ctx, rc)
+ 			if err != nil {
+ 				return nil, app.Internal(err)
+ 			}
+--- a/internal/app/messages/mime_budget_boundary_test.go
++++ b/internal/app/messages/mime_budget_boundary_test.go
+@@ -0,0 +1,202 @@
++package messageapp
++
++import (
++	"bytes"
++	"context"
++	"errors"
++	"fmt"
++	"io"
++	"reflect"
++	"strings"
++	"sync/atomic"
++	"testing"
++
++	"github.com/google/uuid"
++	"tabmail/internal/app"
++	"tabmail/internal/mailcontent"
++	"tabmail/internal/models"
++	"tabmail/internal/testutil"
++)
++
++type mimeBoundaryObject struct {
++	*testutil.MemoryObjectStore
++	raw     []byte
++	events  *[]string
++	getErr  error
++	readErr error
++	opens   int
++	last    *mimeBoundaryReader
++}
++
++func (o *mimeBoundaryObject) Get(context.Context, string) (io.ReadCloser, error) {
++	o.opens++
++	*o.events = append(*o.events, "object.get")
++	o.last = &mimeBoundaryReader{Reader: bytes.NewReader(o.raw), failure: o.readErr, events: o.events}
++	return o.last, o.getErr
++}
++
++type mimeBoundaryReader struct {
++	*bytes.Reader
++	failure error
++	events  *[]string
++	closes  atomic.Int32
++}
++
++func (r *mimeBoundaryReader) Read(p []byte) (int, error) {
++	*r.events = append(*r.events, "object.read")
++	if r.failure != nil {
++		return 0, r.failure
++	}
++	if len(p) > 7 {
++		p = p[:7]
++	}
++	return r.Reader.Read(p)
++}
++func (r *mimeBoundaryReader) Close() error { r.closes.Add(1); return nil }
++
++type mimeBoundaryAuditStore struct {
++	*testutil.FakeStore
++	events   *[]string
++	auditErr error
++}
++
++func (s *mimeBoundaryAuditStore) InsertAudit(ctx context.Context, entry *models.AuditEntry) error {
++	*s.events = append(*s.events, "audit.required")
++	if s.auditErr != nil {
++		return s.auditErr
++	}
++	return s.FakeStore.InsertAudit(ctx, entry)
++}
++func mimeBoundaryFixture(t *testing.T, raw []byte) (*Service, *mimeBoundaryObject, *mimeBoundaryAuditStore, *models.Message, *models.Mailbox, Viewer) {
++	t.Helper()
++	st, svc, tenant, mb := seededMessageService(t, models.AccessPublic, nil)
++	msg := &models.Message{ID: uuid.New(), TenantID: tenant.ID, MailboxID: mb.ID, RawObjectKey: "mime-boundary", OTPCode: "123456"}
++	st.SeedMessage(msg)
++	events := []string{}
++	obj := &mimeBoundaryObject{MemoryObjectStore: testutil.NewMemoryObjectStore(), raw: raw, events: &events}
++	audit := &mimeBoundaryAuditStore{FakeStore: st, events: &events}
++	svc.obj = obj
++	svc.store = audit
++	return svc, obj, audit, msg, mb, Viewer{Tenant: tenant, AuthMode: AuthModePublic}
++}
++func mimeBoundaryDeep() []byte {
++	raw := "Content-Type: text/plain\r\n\r\nbody"
++	for level := mailcontent.MaxMIMEDepth; level > 0; level-- {
++		b := fmt.Sprintf("depth%d", level)
++		raw = fmt.Sprintf("Content-Type: multipart/mixed; boundary=%s\r\n\r\n--%s\r\n%s\r\n--%s--\r\n", b, b, raw, b)
++	}
++	return []byte(raw)
++}
++func mimeBoundaryWide() []byte {
++	var raw strings.Builder
++	raw.WriteString("Content-Type: multipart/mixed; boundary=W\r\n\r\n")
++	for i := 0; i < mailcontent.MaxMIMENodes; i++ {
++		raw.WriteString("--W\r\nContent-Type: text/plain\r\n\r\nbody\r\n")
++	}
++	raw.WriteString("--W--\r\n")
++	return []byte(raw.String())
++}
++func TestMessagesMIMEPreparseBudgetRealBodyPaths(t *testing.T) {
++	fault := errors.New("object read failed")
++	for _, breakGlass := range []bool{false, true} {
++		for _, tc := range []struct {
++			name    string
++			raw     []byte
++			readErr error
++			want    error
++		}{
++			{"legal", []byte("Content-Type: text/plain\r\n\r\nbody"), nil, nil},
++			{"deep", mimeBoundaryDeep(), nil, mailcontent.ErrMIMEDepth},
++			{"many_body_nodes", mimeBoundaryWide(), nil, mailcontent.ErrMIMENodes},
++			{"malformed", []byte("Subject broken no colon\r\n\r\nbody"), nil, mailcontent.ErrMIMEParse},
++			{"read_failure", []byte("Subject: valid\r\n\r\nbody"), fault, fault},
++		} {
++			t.Run(fmt.Sprintf("breakglass_%v/%s", breakGlass, tc.name), func(t *testing.T) {
++				svc, obj, _, msg, mb, viewer := mimeBoundaryFixture(t, tc.raw)
++				obj.readErr = tc.readErr
++				var detail *models.MessageDetail
++				var err error
++				if breakGlass {
++					viewer.AuthMode = AuthModeUser
++					viewer.IsAdmin = true
++					detail, err = svc.BreakGlassRead(context.Background(), mb.FullAddress, msg.ID, viewer, "admin", "investigate delivery issue")
++				} else {
++					detail, err = svc.GetMessageDetail(context.Background(), mb.FullAddress, msg.ID, viewer)
++				}
++				if tc.want == nil {
++					if err != nil || detail.TextBody != "body" {
++						t.Fatalf("detail %+v, error %v", detail, err)
++					}
++				} else {
++					appErr, ok := app.As(err)
++					if !ok || appErr.Kind != app.KindInternal || !errors.Is(err, tc.want) {
++						t.Fatalf("error %v want internal/%v", err, tc.want)
++					}
++					if detail != nil {
++						t.Fatal("rejected content returned")
++					}
++				}
++				if obj.opens != 1 || obj.last.closes.Load() != 1 {
++					t.Fatal("object reopen or leaked close")
++				}
++				if breakGlass && (*obj.events)[0] != "audit.required" {
++					t.Fatalf("order %v", *obj.events)
++				}
++			})
++		}
++	}
++}
++func TestMessagesMIMEPreparseBudgetAuthorityAndAuditBeforeRead(t *testing.T) {
++	svc, obj, audit, msg, mb, viewer := mimeBoundaryFixture(t, mimeBoundaryDeep())
++	viewer.AuthMode = AuthModeUser
++	viewer.IsAdmin = true
++	detail, err := svc.GetMessageDetail(context.Background(), mb.FullAddress, msg.ID, viewer)
++	if err != nil || !detail.BodyRedacted || detail.OTPCode != "" || obj.opens != 0 {
++		t.Fatalf("redacted detail %+v, error %v, opens %d", detail, err, obj.opens)
++	}
++	audit.auditErr = errors.New("required audit failed")
++	if _, err := svc.BreakGlassRead(context.Background(), mb.FullAddress, msg.ID, viewer, "admin", "investigate delivery issue"); !errors.Is(err, audit.auditErr) {
++		t.Fatal(err)
++	}
++	if obj.opens != 0 || !reflect.DeepEqual(*obj.events, []string{"audit.required"}) {
++		t.Fatalf("object touched before audit: %v", *obj.events)
++	}
++	viewer.IsAdmin = false
++	if _, err := svc.BreakGlassRead(context.Background(), mb.FullAddress, msg.ID, viewer, "user", "investigate delivery issue"); appErrKind(err) != app.KindForbidden {
++		t.Fatal(err)
++	}
++	if obj.opens != 0 {
++		t.Fatal("nonadmin opened object")
++	}
++}
++func appErrKind(err error) app.ErrorKind {
++	if e, ok := app.As(err); ok {
++		return e.Kind
++	}
++	return ""
++}
++func TestMessagesMIMEPreparseBudgetAcquisitionErrorClosesReader(t *testing.T) {
++	for _, breakGlass := range []bool{false, true} {
++		svc, obj, _, msg, mb, viewer := mimeBoundaryFixture(t, []byte("Subject: valid\r\n\r\nbody"))
++		obj.getErr = errors.New("get failed with reader")
++		var err error
++		if breakGlass {
++			viewer.AuthMode = AuthModeUser
++			viewer.IsAdmin = true
++			_, err = svc.BreakGlassRead(context.Background(), mb.FullAddress, msg.ID, viewer, "admin", "investigate delivery issue")
++		} else {
++			_, err = svc.GetMessageDetail(context.Background(), mb.FullAddress, msg.ID, viewer)
++		}
++		if !errors.Is(err, obj.getErr) || obj.last.closes.Load() != 1 {
++			t.Fatalf("error %v, closes %d", err, obj.last.closes.Load())
++		}
++		if !reflect.DeepEqual(*obj.events, func() []string {
++			if breakGlass {
++				return []string{"audit.required", "object.get"}
++			}
++			return []string{"object.get"}
++		}()) {
++			t.Fatalf("read after failed get: %v", *obj.events)
++		}
++	}
++}

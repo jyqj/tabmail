@@ -1,0 +1,211 @@
+{
+  "CLI_exit": 2,
+  "actual_TS_error_count": 27,
+  "actual_source_closure_sha256": "cc079260793ab3b027be4b6fc4e50d278caaea36482a477f26717f257f8aa325",
+  "all_diagnostics_raw": "/private/tmp/tm-r5wire-tsdiag.f219fnl3/stdout",
+  "cleanup": {
+    "no_tests_Go_PG_browser_or_build": true,
+    "original180_within": true,
+    "owned_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "selected_owned_pins_equal": true,
+    "window_including_capture_and_cleanup_elapsed": 5.167696952819824
+  },
+  "diagnostics": [
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 150,
+      "message": "Cannot find module '../../../app/(dashboard)/console/domains/[id]/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 159,
+      "message": "Cannot find module '../../../app/(dashboard)/console/domains/[id]/routes/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 168,
+      "message": "Cannot find module '../../../app/(dashboard)/console/domains/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 177,
+      "message": "Cannot find module '../../../app/(dashboard)/console/keys/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 186,
+      "message": "Cannot find module '../../../app/(dashboard)/console/mailboxes/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 195,
+      "message": "Cannot find module '../../../app/(dashboard)/console/outbound/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 204,
+      "message": "Cannot find module '../../../app/(dashboard)/console/send-identities/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 213,
+      "message": "Cannot find module '../../../app/(dashboard)/console/webhooks/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 222,
+      "message": "Cannot find module '../../../app/auth/accept-invite/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2307",
+      "column": 39,
+      "file": ".next/dev/types/validator.ts",
+      "line": 240,
+      "message": "Cannot find module '../../../app/inbox/[address]/page.js' or its corresponding type declarations."
+    },
+    {
+      "code": "TS2741",
+      "column": 3,
+      "file": "app/(dashboard)/mail/page.test.tsx",
+      "line": 165,
+      "message": "Property 'kind' is missing in type '{ id: string; tenant_id: string; zone_id: string; local_part: string; resolved_domain: string; full_address: string; access_mode: \"public\"; retention_hours_override: null; expires_at: null; created_at: string; }' but required in type 'Mailbox'."
+    },
+    {
+      "code": "TS2741",
+      "column": 3,
+      "file": "components/company/compose.test.tsx",
+      "line": 28,
+      "message": "Property 'kind' is missing in type '{ id: string; tenant_id: string; zone_id: string; local_part: string; resolved_domain: string; full_address: string; access_mode: \"public\"; retention_hours_override: null; expires_at: null; created_at: string; }' but required in type 'Mailbox'."
+    },
+    {
+      "code": "TS2322",
+      "column": 66,
+      "file": "components/company/compose.test.tsx",
+      "line": 47,
+      "message": "Type '{ id?: string | undefined; mailbox_id: string; payload: DraftPayload; template_version?: DraftTemplateVersion | undefined; revision: number; updated_at?: string | undefined; }' is not assignable to type 'MailDraft'."
+    },
+    {
+      "code": "TS2741",
+      "column": 11,
+      "file": "components/company/compose.test.tsx",
+      "line": 78,
+      "message": "Property 'updated_at' is missing in type '{ id: string; mailbox_id: string; revision: number; payload: { to: string[]; subject: string; text_body: string; template_vars: {}; }; }' but required in type 'MailDraft'."
+    },
+    {
+      "code": "TS2741",
+      "column": 11,
+      "file": "components/company/compose.test.tsx",
+      "line": 155,
+      "message": "Property 'updated_at' is missing in type '{ id: string; mailbox_id: string; revision: number; payload: { to: string[]; subject: string; text_body: string; template_version_id: string; template_vars: { customer: string; }; }; template_version: { ...; }; }' but required in type 'MailDraft'."
+    },
+    {
+      "code": "TS2339",
+      "column": 22,
+      "file": "components/company/r5-protocol.test.tsx",
+      "line": 56,
+      "message": "Property 'recipients' does not exist on type 'OrdinaryReceipt'."
+    },
+    {
+      "code": "TS7006",
+      "column": 38,
+      "file": "components/company/r5-protocol.test.tsx",
+      "line": 56,
+      "message": "Parameter 'r' implicitly has an 'any' type."
+    },
+    {
+      "code": "TS2741",
+      "column": 7,
+      "file": "components/company/templates/versions.test.tsx",
+      "line": 22,
+      "message": "Property 'updated_at' is missing in type '{ id: string; name: string; revision: number; retired: false; draft: { subject: string; text_body: string; html_body: string; variables: never[]; }; }' but required in type 'MailTemplate'."
+    },
+    {
+      "code": "TS2741",
+      "column": 5,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 7,
+      "message": "Property 'updated_at' is missing in type '{ id: string; revision: number; mailbox_id: string; payload: { to: string[]; cc: string[]; bcc: string[]; subject: string; text_body: string; html_body: string; headers: { \"X-First\": string; \"X-Second\": string; }; attachment_ids: string[]; template_version_id: string; template_vars: { ...; }; }; template_version: { ...' but required in type 'MailDraft'."
+    },
+    {
+      "code": "TS2322",
+      "column": 49,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 52,
+      "message": "Type 'Mock<(command: MailDraft) => Promise<{ revision: number; id: string; mailbox_id: string; payload: DraftPayload; template_version?: DraftTemplateVersion | undefined; updated_at: string; }>>' is not assignable to type '(draft: MailDraftInput, create: boolean) => Promise<MailDraft>'."
+    },
+    {
+      "code": "TS2322",
+      "column": 49,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 78,
+      "message": "Type 'Mock<(command: MailDraft) => Promise<{ revision: number; id: string; mailbox_id: string; payload: DraftPayload; template_version?: DraftTemplateVersion | undefined; updated_at: string; }>>' is not assignable to type '(draft: MailDraftInput, create: boolean) => Promise<MailDraft>'."
+    },
+    {
+      "code": "TS2322",
+      "column": 49,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 102,
+      "message": "Type 'Mock<(command: MailDraft, create: boolean) => Promise<MailDraft>>' is not assignable to type '(draft: MailDraftInput, create: boolean) => Promise<MailDraft>'."
+    },
+    {
+      "code": "TS2322",
+      "column": 49,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 136,
+      "message": "Type 'Mock<(command: MailDraft) => Promise<{ revision: number; id: string; mailbox_id: string; payload: DraftPayload; template_version?: DraftTemplateVersion | undefined; updated_at: string; }>>' is not assignable to type '(draft: MailDraftInput, create: boolean) => Promise<MailDraft>'."
+    },
+    {
+      "code": "TS2322",
+      "column": 49,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 156,
+      "message": "Type 'Mock<(command: MailDraft) => Promise<{ revision: number; id: string; mailbox_id: string; payload: DraftPayload; template_version?: DraftTemplateVersion | undefined; updated_at: string; }>>' is not assignable to type '(draft: MailDraftInput, create: boolean) => Promise<MailDraft>'."
+    },
+    {
+      "code": "TS2322",
+      "column": 65,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 254,
+      "message": "Type 'Mock<(command: MailDraft) => Promise<{ revision: number; id: string; mailbox_id: string; payload: DraftPayload; template_version?: DraftTemplateVersion | undefined; updated_at: string; }>>' is not assignable to type '(draft: MailDraftInput, create: boolean) => Promise<MailDraft>'."
+    },
+    {
+      "code": "TS2322",
+      "column": 49,
+      "file": "features/mail/draft-writer-snapshot.test.ts",
+      "line": 275,
+      "message": "Type 'Mock<(command: MailDraft) => Promise<{ revision: number; id: string; mailbox_id: string; payload: DraftPayload; template_version?: DraftTemplateVersion | undefined; updated_at: string; }>>' is not assignable to type '(draft: MailDraftInput, create: boolean) => Promise<MailDraft>'."
+    },
+    {
+      "code": "TS2739",
+      "column": 7,
+      "file": "features/mail/draft-writer.test.ts",
+      "line": 4,
+      "message": "Type '{ mailbox_id: string; revision: number; payload: { to: never[]; subject: string; text_body: string; }; }' is missing the following properties from type 'MailDraft': id, updated_at"
+    }
+  ],
+  "not_autorepaired": true,
+  "scope": "firstversion construction compiler diagnostic only; no SOURCE_acceptance/runtime/scopedtests/wholefrontend green",
+  "source_sha": "1c976aafb989ffb84b864c5c29c5f766b192d783"
+}

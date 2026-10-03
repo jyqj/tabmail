@@ -1,0 +1,41 @@
+{
+  "artifact_kind": "central_summary_of_delivered_independent_runtime_verdict_NOT_machine_raw",
+  "verdict": "BOUNDED_COMPOSED_HOOKS_CONFIG137_PLUS_BC05_2_PASS",
+  "independent_verdict_delivered_by": "/root via original independent webhook reader",
+  "source_sha": "ff73f8ea4d26e87f483cb73d5a29cd32f06fe5bf",
+  "source_closure_sha256": "97ba558ec6159c10b759624250cfb2299b267f4d3ba01ec134b236baf57c5357",
+  "source_files": 720,
+  "scoped_ninefile_closure_prefix": "27f5",
+  "hooks": [
+    22,
+    123,
+    132
+  ],
+  "config": [
+    1,
+    4,
+    5
+  ],
+  "old_BC05_product_tests": 0,
+  "old_BC05_setuperror": "unquoted uppercase CREATE foldedlower vs uppercase DSN",
+  "old_nativePID": 32698,
+  "old_elapsed_seconds": 22.388,
+  "old_original_seconds": 420,
+  "new_BC05_race_parent_and_child_PASS": 2,
+  "new_BC05_exit": 0,
+  "actual_scope": "realoutbox worker POSTmetadata/BCCnegative/persistedackdelivered/join only",
+  "new_nativePID": 41825,
+  "new_elapsed_seconds": 17.993,
+  "new_original_seconds": 240,
+  "new_child_available_seconds": 224.82,
+  "new_Go_budget_seconds": 120,
+  "new_residual_base": "tm_webhook_v2_validation zero connections private stoppedroot retained NOT_allDB0",
+  "old_tmpquery_did_not_cover_base": true,
+  "compiled_audit_label_correction_preserves_original75": true,
+  "single_fresh139_exit0": false,
+  "P7_110_parent_complete": false,
+  "dualconsumer_external_exactlyonce_proven": false,
+  "whole_backend_pass": false,
+  "task_complete": false,
+  "product_green": false
+}

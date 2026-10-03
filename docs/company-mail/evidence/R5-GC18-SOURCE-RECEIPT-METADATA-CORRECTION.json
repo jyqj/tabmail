@@ -1,0 +1,20 @@
+{
+  "artifact_kind": "independent_metadata_correction_not_raw_rewrite",
+  "raw_receipt": "/private/tmp/tm-r5gc18.8ikjdljj/source-receipt.json",
+  "raw_archive": "/private/tmp/tm-r5gc18.8ikjdljj/GC18-FAIRNESS-ACTUAL-evidence.tar.gz",
+  "source_sha": "cb03f7a27e9e9cf45fd815c141ad2cb645e08134",
+  "field": "frozen_parent_product_bytes_reused_signed_test_delta_only",
+  "raw_observed_value": true,
+  "corrected_interpretation_value": false,
+  "reason": "The GC18 phase rebased parent source 7ffe88737b4b846ad96978b2a69a105caccf3914 with product outer scheduling/inner Begin seam, new scheduler product file, and migration18, as well as tests; it was not a signed test-only change.",
+  "production_delta_files": [
+    "internal/store/postgres/company_ops.go",
+    "internal/store/postgres/company_attachment_gc_scheduler.go",
+    "internal/store/postgres/migrations/00018_attachment_gc_cursor.sql"
+  ],
+  "raw_and_archive_modified": false,
+  "actual_pass_relabelled": false,
+  "current_helper_entry_delta_is_test_only": true,
+  "current_helper_entry_packet": "/tmp/tabmail-gc-helper-entry-source-1-20261002T093144Z/receipt.json",
+  "owner_for_repository_evidence_integration": "/root/evidence_integration"
+}

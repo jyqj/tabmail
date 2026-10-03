@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "deliveries": [
+    {
+      "archive": "R5-WEBHOOK-V2-HOOKS-CONFIG-PG-INFRA-LOGS.tar.gz",
+      "review": "R5-WEBHOOK-V2-HOOKS-CONFIG-PG-INFRA-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5webhookV2-exact.546tf6cp/WEBHOOK-V2-with-compile-label-appendonly-correction-evidence.tar.gz",
+      "archive_sha256_from_executor": "447074631d1373fabe7a8711e162c11c762041d7e7c5e66f709736577787b257",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 76,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-WEBHOOK-BC05-ONLY-LOGS.tar.gz",
+      "review": null,
+      "original_archive": "/private/tmp/tm-r5BC05-V2-launch.9vtiracm/BC05-WEBHOOK-only-V2-BOUNDED-PASS-evidence.tar.gz",
+      "archive_sha256_from_executor": "e675018cbca1d9f53e4d93f5603cceecb6e577e7edbd88cd151915612f7b5409",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 83,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-CURRENT-WHOLE-Go0cf-FAILED-LOGS.tar.gz",
+      "review": "R5-CURRENT-WHOLE-Go0cf-FAILED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5wholeGo0cf-current.y6d2weuq/CURRENT-WHOLE-Go0cf-FIRST-FAIL-evidence.tar.gz",
+      "archive_sha256_from_executor": "2963d327d4180c421b9b4852ed4fa985d05c7a5f668dcfb9b8cb3623a54d9acc",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 83,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-C18-V2-PURE21-RESOURCE-INFRA-LOGS.tar.gz",
+      "review": "R5-C18-V2-PURE21-RESOURCE-INFRA-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5C18V2-pure21.r51udhhi/C18-V2-pure21-INFRAERROR-appendonly-evidence.tar.gz",
+      "archive_sha256_from_executor": "2593fc5910a11fb07fea315480df225e5a0b221fd9a552f32b2a9e047532471b",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 20,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-C18-RSS-V2-SOURCE-BLOCKED-LOGS.tar.gz",
+      "review": "R5-C18-RSS-V2-SOURCE-BLOCKED-REVIEW.json",
+      "original_archive": "/private/tmp/r5-C18-RSS-resource-V2-prepared/C18-RSS-resource-V2-SOURCE-prepared-evidence.tar.gz",
+      "archive_sha256_from_executor": "43ae23974ec05f600348223ad90c14d1821cefecb1dabb27e0defa50c9d1e7a2",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 15,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-CURRENT-SOURCE-V4-LAST1-LOGS.tar.gz",
+      "review": "R5-CURRENT-SOURCE-V4-LAST1-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5currentSource-V4-last.lmse66rz/SOURCE-V4-last-only-bounded-PASS-evidence.tar.gz",
+      "archive_sha256_from_executor": "41f0b9a6497adfc679ee9dc8297422a0545d07b15c88881b4c7285ccb95471ef",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 10,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-MIME-FORK-V5-NARRATIVE-CORRECTED-LOGS.tar.gz",
+      "review": null,
+      "original_archive": "/private/tmp/tm-r5MIME-forkV5-four.90yu5jcq/MIME-FORK-V5-with-appendonly-narrative-corrections-evidence.tar.gz",
+      "archive_sha256_from_executor": "7de4101fbbbc848a0790c005d475f9983d6f9aa653958869f0bf6510b33b3b82",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 34,
+      "payload_bytes_changed": false
+    }
+  ],
+  "webhook_original75_hash_from_executor": "4887f9aa6b0d8be05b29d7cb9e0ee0be0a384ee43c3b6d9af03ce181e1e609a1",
+  "C18_original18_hash_from_executor": "991a1d040db0e9083bee30725a765fc805cf30f1836bc8fac94982e998f276f1",
+  "MIME_original33_retained": "R5-MIME-FORK-V5-FOUR-TARGETS-LOGS.tar.gz",
+  "C18_pure21_executed": false,
+  "wholeGo0cf_pass": false,
+  "new_current18_METHOD_run_authorized": false,
+  "original_raw_review_or_archives_modified": false,
+  "tests_repeated_by_docs": false,
+  "task_complete": false,
+  "product_green": false
+}

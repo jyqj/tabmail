@@ -111,6 +111,7 @@ type S3 struct {
 
 type Webhook struct {
 	URLs         string        `default:"" desc:"Comma-separated inbound event webhook URLs"`
+	AllowedCIDRs string        `envconfig:"ALLOWED_CIDRS" default:"" desc:"Explicitly authorized webhook destination CIDRs; ordinary public addresses are allowed by default; webhooks connect directly without environment proxies"`
 	Secret       string        `default:"" desc:"Optional webhook signature secret"`
 	Timeout      time.Duration `default:"5s" desc:"Webhook request timeout"`
 	MaxRetries   int           `default:"3" desc:"Max webhook retry attempts"`
@@ -157,6 +158,9 @@ func Load() (*Root, error) {
 	if err := envconfig.Process(envPrefix, c); err != nil {
 		return nil, fmt.Errorf("config: %w", err)
 	}
+	// This deployment authorization has no generic envconfig tag fallback.
+	// Absence and explicit empty both mean public-only, never ALLOWED_CIDRS.
+	c.Webhook.AllowedCIDRs = os.Getenv("TABMAIL_WEBHOOK_ALLOWED_CIDRS")
 	// Canonical split_words spelling wins. Retain the historical documented
 	// spelling only as an explicit compatibility alias.
 	if _, present := os.LookupEnv("TABMAIL_OBJECT_STORE"); !present {

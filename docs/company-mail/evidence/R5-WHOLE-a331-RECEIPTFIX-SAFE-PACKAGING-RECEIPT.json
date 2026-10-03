@@ -1,0 +1,15 @@
+{
+  "original_archive": "/private/tmp/tm-r5wholeGo-receiptfix-current.4u6qbotj/FRESH-WHOLE-receiptfix-FIRST-FAIL-evidence.tar.gz",
+  "original_sha256_from_executor": "4b1b5bc45989b6a802276eede24935ba2cca037dc8fc260cb06d07dd88043e75",
+  "original_members": 107,
+  "safe_archive": "R5-WHOLE-a331-RECEIPTFIX-FAILED-SAFE105-LOGS.tar.gz",
+  "safe_members": 105,
+  "safe_wrapper_sha256_once": "bb1dd848790083f5792e3571b451206c8308c32d22b135d4b51e2d9b95fae876",
+  "excluded_connection_URI_members": [
+    "executed-native-controller-source.py",
+    "executed-recovered-controller-source.py"
+  ],
+  "retained_payload_original_bytes_changed": false,
+  "original_archive_or_raw_modified": false,
+  "test_or_fulltreehash_repeated": false
+}

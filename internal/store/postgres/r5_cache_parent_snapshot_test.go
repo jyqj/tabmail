@@ -8,7 +8,10 @@ import (
 	"time"
 
 	"tabmail/internal/app"
+	"tabmail/internal/app/companymail"
+	"tabmail/internal/company"
 	"tabmail/internal/models"
+	"tabmail/internal/testutil"
 )
 
 // A document references the message, not its tenant ancestor. Pin the actual
@@ -192,9 +195,20 @@ func TestR5CacheWriteVersusPhysicalDeleteLockOrder(t *testing.T) {
 			_, d := r5IndexFixture(t, f, false)
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			defer cancel()
+			var purgeDeadline *time.Time
 			if mode == "expired" {
+				// Already elapsed content is rejected before INSERT, not a
+				// candidate for the later cache/delete lock-order barrier.
 				_, err := f.pool.Exec(ctx, `UPDATE messages SET deleted_at=clock_timestamp()-interval '1 day',purge_after=clock_timestamp()-interval '1 hour' WHERE id=$1`, d.MessageID)
 				must(t, err)
+				r5CacheInitiallyExpiredHasNoEffects(t, f, ctx, d)
+				// Independent new source: do not extend/restore the elapsed
+				// fixture's deadline merely to make it enter the INSERT wait.
+				f = seedCompany(t)
+				_, d = r5IndexFixture(t, f, false)
+				var deadline time.Time
+				must(t, f.pool.QueryRow(ctx, `UPDATE messages SET deleted_at=clock_timestamp()-interval '1 day',purge_after=clock_timestamp()+interval '2 seconds' WHERE id=$1 RETURNING purge_after`, d.MessageID).Scan(&deadline))
+				purgeDeadline = &deadline
 			}
 			r5CacheParents(t, f, ctx)
 			hold, err := f.pool.Begin(ctx)
@@ -205,6 +219,9 @@ func TestR5CacheWriteVersusPhysicalDeleteLockOrder(t *testing.T) {
 			cacheDone := make(chan error, 1)
 			go func() { cacheDone <- f.st.SaveParsedMessage(ctx, f.u, f.personal.ID, d) }()
 			cachePID := r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "INSERT INTO mail_documents")
+			if purgeDeadline != nil {
+				r5AwaitSentDeadline(t, f, ctx, cachePID, *purgeDeadline)
+			}
 			deleteDone := make(chan error, 1)
 			go func() {
 				if mode == "single" {
@@ -215,7 +232,14 @@ func TestR5CacheWriteVersusPhysicalDeleteLockOrder(t *testing.T) {
 					deleteDone <- f.st.PurgeMailbox(ctx, f.personal.ID)
 					return
 				}
-				_, _, e := f.st.DeleteExpiredMessagesReturningKeys(ctx, time.Now(), 1)
+				// Use the same actual DB clock as the crossed purge deadline;
+				// host-clock skew must not make the GC candidate disappear.
+				var cutoff time.Time
+				if e := f.pool.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&cutoff); e != nil {
+					deleteDone <- e
+					return
+				}
+				_, _, e := f.st.DeleteExpiredMessagesReturningKeys(ctx, cutoff, 1)
 				deleteDone <- e
 			}()
 			// Baseline waits at the cascade table holding message DELETE. A
@@ -236,6 +260,13 @@ func TestR5CacheWriteVersusPhysicalDeleteLockOrder(t *testing.T) {
 			must(t, hold.Rollback(ctx))
 			cacheErr := r5ConcurrentResult(t, ctx, cacheDone)
 			deleteErr := r5ConcurrentResult(t, ctx, deleteDone)
+			if mode == "expired" {
+				value, ok := app.As(cacheErr)
+				if !ok || value.Kind != app.KindNotFound {
+					t.Fatalf("cache crossing real purge deadline must roll back with 404: %v", cacheErr)
+				}
+				must(t, deleteErr)
+			}
 			cacheDead := r5SQLState(cacheErr) == "40P01"
 			deleteDead := r5SQLState(deleteErr) == "40P01"
 			var messages, documents, jobs, count int
@@ -409,4 +440,48 @@ func TestR5CacheBusySourceRejectsBeforePhysicalDeleteCounterRelease(t *testing.T
 			}
 		})
 	}
+}
+
+// The elapsed negative control retains the source and index evidence, blocks
+// would-be INSERT, and checks both real service zero-object I/O and SQL effects.
+func r5CacheInitiallyExpiredHasNoEffects(t *testing.T, f *companyFixture, ctx context.Context, d company.ParsedMessage) {
+	t.Helper()
+	snapshot := func() string {
+		var v string
+		must(t, f.pool.QueryRow(ctx, `SELECT jsonb_build_object('message',to_jsonb(m),'document',(SELECT to_jsonb(doc) FROM mail_documents doc WHERE doc.message_id=m.id),'index',(SELECT to_jsonb(j) FROM mail_index_jobs j WHERE j.message_id=m.id),'mailbox_count',(SELECT message_count FROM mailboxes WHERE id=m.mailbox_id),'audit_count',(SELECT count(*) FROM audit_log),'outbox_count',(SELECT count(*) FROM outbox_events))::text FROM messages m WHERE m.id=$1`, d.MessageID).Scan(&v))
+		return v
+	}
+	before := snapshot()
+	hold, err := f.pool.Begin(ctx)
+	must(t, err)
+	defer hold.Rollback(context.Background())
+	_, err = hold.Exec(ctx, `LOCK TABLE mail_documents IN SHARE MODE`)
+	must(t, err)
+	err = f.st.SaveParsedMessage(ctx, f.u, f.personal.ID, d)
+	value, ok := app.As(err)
+	if !ok || value.Kind != app.KindNotFound {
+		t.Fatalf("already expired cache must reject before INSERT: %v", err)
+	}
+	objects := &r5ReadObjects{MemoryObjectStore: testutil.NewMemoryObjectStore()}
+	svc := companymail.NewService(f.st, objects)
+	detail, err := svc.Message(ctx, f.u, f.personal.ID, d.MessageID)
+	value, ok = app.As(err)
+	if detail != nil || !ok || value.Kind != app.KindNotFound {
+		t.Fatalf("already expired detail returned payload: %v", err)
+	}
+	source, err := svc.Source(ctx, f.u, f.personal.ID, d.MessageID)
+	if source != nil {
+		source.Close()
+	}
+	value, ok = app.As(err)
+	if source != nil || !ok || value.Kind != app.KindNotFound {
+		t.Fatalf("already expired source returned reader: %v", err)
+	}
+	if objects.gets.Load() != 0 {
+		t.Fatal("already expired content opened object store")
+	}
+	if after := snapshot(); after != before {
+		t.Fatal("already expired rejection changed source/cache/index/count/audit/outbox")
+	}
+	must(t, hold.Rollback(ctx))
 }

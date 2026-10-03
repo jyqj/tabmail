@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+  "original_archive": "/tmp/tm-r5schema17compile.A82wlgmR/FIRST-SCHEMA17-B5-PROFILECREATE-evidence.tar.gz",
+  "original_archive_sha256_from_author": "c0b8f1a80e451955a957fa63008ab60464ef03f11b0d73541dfc7053d6c4cc1f",
+  "original_archive_hash_recomputed": false,
+  "archive": "R5-FIRST-SCHEMA17-B5-PROFILECREATE-LOGS.tar.gz",
+  "safe_archive_sha256": "90f720ffea9ed7ca4f3864683bd672cd0674b5eae31f02ff60cf8a2ac840f1dd",
+  "payload_file_count": 46,
+  "excluded_members": [
+    {
+      "member": "schema17/postgres.log",
+      "reason": "sidecar_or_owned_private_serverlog"
+    }
+  ],
+  "payload_bytes_changed": false,
+  "old_M16_source_or_residual_root_touched": false,
+  "task_complete": false,
+  "product_green": false,
+  "default_compile_build_runtime_claim": false,
+  "test_reexecuted_by_docs": false,
+  "per_file_hashes_recomputed": false
+}

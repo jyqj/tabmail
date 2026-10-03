@@ -1,0 +1,10 @@
+{
+  "internal/mailcontent/mime_budget.go": {
+    "exists": true,
+    "sha256": "b2d93567f4556971b9967ad80157cc9d70ace8dd31a6393075c4eba6e2521364"
+  },
+  "internal/mailcontent/mime_budget_test.go": {
+    "exists": true,
+    "sha256": "36858895bd2b84b84b7be6316c9e4bbd950a21fc797e137e46ef5553dc6c6758"
+  }
+}

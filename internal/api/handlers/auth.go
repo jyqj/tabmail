@@ -7,6 +7,7 @@ import (
 	"tabmail/internal/app/credentials"
 	"time"
 
+	"tabmail/internal/api/lifecycle"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
 	"tabmail/internal/models"
@@ -40,6 +41,7 @@ type settingsReader interface {
 
 // AuthHandler handles authentication endpoints.
 type AuthHandler struct {
+	background              *lifecycle.Owner
 	companyOnly             bool
 	store                   authStore
 	jwtSecret               string
@@ -50,8 +52,16 @@ type AuthHandler struct {
 	logger                  zerolog.Logger
 }
 
-func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, cookieSecure bool, l zerolog.Logger) *AuthHandler {
+func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, openRegistration bool, settings settingsReader, cookieSecure bool, l zerolog.Logger, owners ...*lifecycle.Owner) *AuthHandler {
+	var owner *lifecycle.Owner
+	if len(owners) > 0 {
+		owner = owners[0]
+	}
+	if owner == nil {
+		owner = lifecycle.New()
+	}
 	return &AuthHandler{
+		background:              owner,
 		store:                   s,
 		jwtSecret:               jwtSecret,
 		defaultPlanID:           defaultPlanID,
@@ -61,6 +71,12 @@ func NewAuthHandler(s authStore, jwtSecret string, defaultPlanID uuid.UUID, open
 		logger:                  l.With().Str("handler", "auth").Logger(),
 	}
 }
+
+// StopContext joins the standalone Login handler's detached work, or the shared
+// Router owner when injected at construction. It never creates a new budget.
+func (h *AuthHandler) StopContext(ctx context.Context) error { return h.background.StopContext(ctx) }
+func (h *AuthHandler) CloseAdmission()                       { h.background.CloseAdmission() }
+func (h *AuthHandler) Done() <-chan struct{}                 { return h.background.Done() }
 
 // RefreshCookieName is the httpOnly cookie that carries the refresh token.
 // The token never appears in a JSON response body, so XSS cannot exfiltrate
@@ -106,6 +122,13 @@ func refreshTokenFromRequest(r *http.Request, bodyToken string) string {
 
 // Login handles POST /api/v1/auth/login
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	ctx, release, enterErr := h.background.Enter(r.Context())
+	if enterErr != nil {
+		writeJSON(w, http.StatusServiceUnavailable, envelope{Error: &apiErr{Code: "UNAVAILABLE", Message: "API request admission unavailable"}})
+		return
+	}
+	defer release()
+	r = r.WithContext(ctx)
 	var req struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
@@ -147,7 +170,11 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go func() { _ = h.store.TouchUserLogin(context.Background(), user.ID) }()
+	if err := h.background.Go(r.Context(), func() { _ = h.store.TouchUserLogin(context.Background(), user.ID) }); err != nil {
+		h.logger.Error().Err(err).Msg("login: background ownership unavailable")
+		errInternal(w)
+		return
+	}
 
 	h.setRefreshCookie(w, refreshToken)
 	ok(w, map[string]any{

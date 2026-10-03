@@ -1,0 +1,14 @@
+{
+  "original_archive": "/private/tmp/tm-r5keytouch-causal.ru_wi1kj/KEYTOUCH-causal-only-BOUNDED-PASS-evidence.tar.gz",
+  "original_sha256_from_executor": "3aa0216b79afafc0e468f080035cfc126aabc653f644e726f852394b3ed1f8a9",
+  "original_members": 88,
+  "safe_archive": "R5-KEYTOUCH-CAUSAL-SAFE87-LOGS.tar.gz",
+  "safe_members": 87,
+  "safe_wrapper_sha256_once": "f61b1cefd89f63e278af1938ee738f102f46b3975f2189a5d4bbcedf990c9206",
+  "excluded_private_connection_URI_member": [
+    "executed-controller-source.py"
+  ],
+  "included_payload_bytes_changed": false,
+  "original_raw_or_archive_modified": false,
+  "no_per_member_or_tree_hash": true
+}

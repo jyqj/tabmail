@@ -220,7 +220,7 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	if parent != nil && !authz.ZoneAllowed(actor, parent.ID) {
 		return nil, app.Forbidden("parent zone not in allowed list")
 	}
-	if actor.Permission != nil && !isAdmin && parent == nil && len(actor.Permission.AllowedZoneIDs) > 0 {
+	if actor.Permission != nil && !isAdmin && parent == nil && actor.Permission.RestrictsZones() {
 		return nil, app.Forbidden("restricted credentials cannot create root domains")
 	}
 	cfg, err := s.store.EffectiveConfig(ctx, tenant.ID)

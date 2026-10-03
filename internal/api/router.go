@@ -18,6 +18,7 @@ import (
 	"github.com/rs/zerolog"
 
 	"tabmail/internal/api/handlers"
+	"tabmail/internal/api/lifecycle"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app/companymail"
 	"tabmail/internal/app/submissions"
@@ -118,7 +119,13 @@ type policyInvalidatorProvider interface {
 	InvalidateSMTPPolicy()
 }
 
-func NewRouter(cfg RouterConfig) http.Handler {
+// Router owns requests and detached API work as one instance lifecycle.
+// ServeHTTP remains compatible with every existing http.Handler caller.
+type Router struct{ *lifecycle.Handler }
+
+func NewRouter(cfg RouterConfig) *Router {
+	owner := lifecycle.New()
+	authState := middleware.NewAuthState(owner)
 	st := cfg.Store
 	cached := cfg.AuthCache
 	if cached == nil {
@@ -137,7 +144,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		MaxAge:           86400,
 	}))
 
-	r.Use(middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID))
+	r.Use(middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID, authState))
 	r.Use(middleware.PermissionLoader(cached))
 	r.Use(cfg.RateLimiter.Middleware)
 
@@ -145,10 +152,10 @@ func NewRouter(cfg RouterConfig) http.Handler {
 	adm := handlers.NewAdminHandler(st, cfg.Dispatcher, cfg.DefaultPolicy, cfg.Settings, cfg.IngestInvalidator, cfg.Logger)
 	mon := handlers.NewMonitorHandler(st, cfg.Hub, cfg.Logger)
 	refreshStream := func(r *http.Request) (*http.Request, error) {
-		return middleware.RevalidateRequest(r, st, cfg.JWTSecret, cfg.PublicTenantID)
+		return middleware.RevalidateRequest(r, st, cfg.JWTSecret, cfg.PublicTenantID, authState)
 	}
 	mon.SetStreamRevalidator(refreshStream)
-	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger)
+	auth := handlers.NewAuthHandler(st, cfg.JWTSecret, cfg.DefaultPlanID, cfg.OpenRegistration, cfg.Settings, cfg.HTTP.CookieSecure, cfg.Logger, owner)
 	auth.SetCompanyOnly(cfg.CompanyOnly)
 	ua := handlers.NewUserAdminHandler(st, cfg.Logger)
 	perm := handlers.NewPermissionHandler(st, cfg.Logger)
@@ -168,6 +175,10 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			mailService := companymail.NewService(cfg.CompanyRepository, cfg.ObjectStore)
 			workbench := handlers.NewCompanyMailHandler(cfg.CompanyRepository, mailService, subs, cfg.Logger)
 			events := handlers.NewMailboxEventHandler(cfg.CompanyRepository, refreshStream, cfg.Logger)
+			if reader, ok := cfg.CompanyRepository.(handlers.CompanyAdminEventReader); ok {
+				adminEvents := handlers.NewCompanyAdminEventHandler(reader, refreshStream, cfg.Logger)
+				r.With(middleware.RequireAuth, middleware.RequireAdmin).Get("/company/events", adminEvents.Events)
+			}
 			handlers.RegisterCompanyRoutes(r, handlers.CompanyRoutes{
 				Setup:     handlers.NewCompanySetupHandler(cfg.CompanyRepository, cfg.Logger),
 				Mailboxes: handlers.NewMailboxAdminHandler(cfg.CompanyRepository, cfg.Logger),
@@ -230,12 +241,16 @@ func NewRouter(cfg RouterConfig) http.Handler {
 
 			// -- Permission profiles --
 			r.Get("/admin/permissions", perm.ListProfiles)
+			r.Get("/admin/permissions/{id}/deletion-preview", perm.ProfileDeletionPreview)
 			r.Post("/admin/permissions", perm.CreateProfile)
 			r.Patch("/admin/permissions/{id}", perm.UpdateProfile)
 			r.Delete("/admin/permissions/{id}", perm.DeleteProfile)
 
 			// -- User permissions --
 			r.Get("/admin/users/{id}/permissions", perm.GetUserPermission)
+			r.Get("/admin/users/{id}/permission-editor", perm.PermissionEditor)
+			r.Patch("/admin/users/{id}/permission-editor", perm.PatchPermissionEditor)
+			r.Post("/admin/users/{id}/permission-editor/assignment", perm.AssignPermissionEditor)
 			r.Put("/admin/users/{id}/permissions", perm.SetUserPermissionOverride)
 			r.Delete("/admin/users/{id}/permissions", perm.DeleteUserPermissionOverride)
 
@@ -357,7 +372,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 		_, _ = w.Write([]byte(body))
 	})
 
-	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	return &Router{Handler: owner.Wrap(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		// Health endpoints must not depend on identity-store lookups before
 		// reporting their own dependency status.
 		if req.Method == http.MethodGet && (req.URL.Path == "/health" || req.URL.Path == "/ready") {
@@ -378,7 +393,7 @@ func NewRouter(cfg RouterConfig) http.Handler {
 			return
 		}
 		r.ServeHTTP(w, req)
-	})
+	}))}
 }
 
 // metricsAuthorized allows a request to scrape /metrics when it carries the

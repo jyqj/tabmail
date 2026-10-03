@@ -180,7 +180,22 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 				}
 			} else {
 				must(t, err)
+				var rows, initialRows int
+				must(t, pool.QueryRow(ctx, `SELECT count(*),count(*) FILTER (WHERE singleton AND last_tenant IS NULL) FROM company_attachment_gc_cursor`).Scan(&rows, &initialRows))
+				if rows != 1 || initialRows != 1 {
+					t.Fatal("schema18 did not initialize exactly one empty GC cursor")
+				}
+				// A boundary is deliberately not a live-tenant FK. Restart must
+				// preserve scheduler progress instead of reapplying initial state.
+				boundary := uuid.New()
+				_, err = pool.Exec(ctx, `UPDATE company_attachment_gc_cursor SET last_tenant=$1 WHERE singleton`, boundary)
+				must(t, err)
 				must(t, postgres.Migrate(ctx, cfg))
+				var persistedRows int
+				must(t, pool.QueryRow(ctx, `SELECT count(*),count(*) FILTER (WHERE singleton AND last_tenant=$1) FROM company_attachment_gc_cursor`, boundary).Scan(&rows, &persistedRows))
+				if rows != 1 || persistedRows != 1 {
+					t.Fatal("restart reset or duplicated committed schema18 GC cursor")
+				}
 			}
 			var n int
 			must(t, pool.QueryRow(ctx, `SELECT count(*) FROM send_as_grants WHERE id=7`).Scan(&n))
@@ -189,7 +204,7 @@ func TestP0GooseRestartAndHistoricalGrantSafety(t *testing.T) {
 			}
 			var version int
 			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
-			want := 15 // 00015_suppression_key_scopes; the released chain remains append-only
+			want := 19 // 00019_api_key_usage; current startup applies the append-only chain
 			if conflict {
 				want = 1
 			}

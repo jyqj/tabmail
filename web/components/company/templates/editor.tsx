@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import {
   company,
   type MailTemplate,
+  type MailTemplateEditor,
   type RenderedTemplate,
   type TemplateDraft,
   type TemplateVariable,
@@ -31,8 +32,8 @@ export function TemplateEditorView({
   onSaved,
   onPublished,
 }: {
-  edit: MailTemplate | null;
-  setEdit: (update: (prev: MailTemplate | null) => MailTemplate | null) => void;
+  edit: MailTemplateEditor | null;
+  setEdit: (update: (prev: MailTemplateEditor | null) => MailTemplateEditor | null) => void;
   mailboxes: WorkMailbox[];
   mailbox: string;
   setMailbox: (id: string) => void;
@@ -62,7 +63,8 @@ export function TemplateEditorView({
       {
         method: edit.id ? "PUT" : "POST",
         body: {
-          ...edit,
+          name: edit.name,
+          revision: edit.revision,
           draft: {
             ...edit.draft,
             variables: edit.draft.variables.map((v) => ({

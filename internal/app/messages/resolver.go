@@ -184,6 +184,9 @@ func (r *mailboxResolver) canAccess(ctx context.Context, mb *models.Mailbox, vie
 }
 
 func viewerZoneAllowed(viewer Viewer, zoneID uuid.UUID) bool {
+	if viewer.Permission != nil {
+		return viewer.Permission.AllowsZone(zoneID)
+	}
 	return models.ZoneAllowed(viewer.AllowedZoneIDs, zoneID)
 }
 

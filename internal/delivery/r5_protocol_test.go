@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/google/uuid"
@@ -136,7 +137,34 @@ func TestR5ProtocolDeliverySharedCases(t *testing.T) {
 			if caps.Retry != want.Retry || (want.RetryBlockReason != nil && caps.RetryBlockReason != *want.RetryBlockReason) {
 				t.Fatalf("production retry capabilities %+v target retry=%v reason=%v", caps, want.Retry, want.RetryBlockReason)
 			}
-			projection := company.Submission{ID: job.ID, MailboxID: mb.ID, MailFrom: job.MailFrom, Subject: job.Subject, Recipients: recipients, Status: status, DeliveryUncertain: view.DeliveryUncertain, ContentRedacted: true, Capabilities: caps}
+			// Raw compatibility redaction above retains the shared manifest's
+			// address semantics, but is NEVER the ordinary wire receipt. The
+			// real production projector aggregates the complete raw ledger.
+			projection := company.ProjectOutboundReceipt(job, states, true)
+			projection.Capabilities = caps
+			if projection.Status != want.Status || projection.DeliveryUncertain != want.DeliveryUncertain || projection.Progress.Completeness != "known" || projection.Progress.Counts == nil || projection.Progress.Counts.Total != len(states) {
+				t.Fatalf("full-ledger receipt=%+v target=%+v", projection, want)
+			}
+			expectedCounts := company.OutboundReceiptCounts{Total: len(states)}
+			for _, state := range states {
+				switch state {
+				case "accepted":
+					expectedCounts.Accepted++
+				case "pending":
+					expectedCounts.Pending++
+				case "temporary":
+					expectedCounts.Temporary++
+				case "permanent":
+					expectedCounts.Permanent++
+				case "uncertain":
+					expectedCounts.Uncertain++
+				default:
+					t.Fatalf("unsupported raw ledger state %q", state)
+				}
+			}
+			if *projection.Progress.Counts != expectedCounts {
+				t.Fatal("private ledger state omitted from receipt aggregate")
+			}
 			encoded, err := json.Marshal(projection)
 			if err != nil {
 				t.Fatal(err)
@@ -144,6 +172,45 @@ func TestR5ProtocolDeliverySharedCases(t *testing.T) {
 			var fields map[string]any
 			if err = json.Unmarshal(encoded, &fields); err != nil {
 				t.Fatal(err)
+			}
+			allowed := map[string]bool{"id": true, "tenant_id": true, "state": true, "status": true, "progress": true, "created_at": true, "updated_at": true, "attempt_count": true, "next_retry": true, "delivery_uncertain": true, "capabilities": true}
+			for name := range fields {
+				if !allowed[name] {
+					t.Fatalf("ordinary receipt field outside strict whitelist: %q", name)
+				}
+			}
+			for _, spec := range []struct {
+				name    string
+				allowed map[string]bool
+			}{{"progress", map[string]bool{"completeness": true, "counts": true}}, {"capabilities", map[string]bool{"view_content": true, "retry": true, "retry_block_reason": true}}} {
+				nested, ok := fields[spec.name].(map[string]any)
+				if !ok {
+					t.Fatalf("receipt missing typed %s", spec.name)
+				}
+				for name := range nested {
+					if !spec.allowed[name] {
+						t.Fatalf("receipt %s.%s outside whitelist", spec.name, name)
+					}
+				}
+				if counts, ok := nested["counts"].(map[string]any); ok {
+					for name := range counts {
+						switch name {
+						case "total", "accepted", "pending", "temporary", "permanent", "uncertain":
+						default:
+							t.Fatalf("receipt progress.counts.%s outside whitelist", name)
+						}
+					}
+				}
+			}
+			for _, address := range job.RcptTo {
+				if strings.Contains(string(encoded), address) {
+					t.Fatalf("ordinary receipt disclosed recipient %q", address)
+				}
+			}
+			for _, private := range []string{job.Subject, job.MailFrom, job.TextBody, job.SMTPResponse, c.Input.DeliveryToken, "private diagnostic"} {
+				if private != "" && strings.Contains(string(encoded), private) {
+					t.Fatalf("ordinary receipt disclosed private source %q", private)
+				}
 			}
 			for _, name := range want.ForbiddenFields {
 				if _, exists := fields[name]; exists {
@@ -157,7 +224,7 @@ func TestR5ProtocolDeliverySharedCases(t *testing.T) {
 					}
 				}
 			}
-			observations[c.ID] = projection
+			observations[c.ID] = *projection
 		})
 	}
 	if executed != 3 {

@@ -1,0 +1,25 @@
+{
+  "archive": "R5-MIME-FORK-V5-FOUR-TARGETS-LOGS.tar.gz",
+  "original_archive": "/private/tmp/tm-r5MIME-forkV5-four.90yu5jcq/MIME-FORK-V5-four-targets-BOUNDED-PASS-evidence.tar.gz",
+  "archive_sha256_from_executor": "050b85dc71aab1b6bd35ec3969baf57c5a2f37aa40392edf8e58ff8a88e69688",
+  "archive_hash_recomputed": false,
+  "regular_payload_count": 33,
+  "payload_bytes_changed": false,
+  "actual_component_top_leaf_nodes": [
+    25,
+    154,
+    164
+  ],
+  "actual_Go_exits": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "actual_source_sha": "3de31b158fe93dcab40f6b449fe9ce827331ea0d",
+  "actual_closure_sha256": "e180c78fb151ab250b8dbf2e8acf04d618eae5e2e61e3d75c9940f45c453790c",
+  "extra_independent_runtime_final_delivered": false,
+  "no_whole_upstream_messages_or_Docker_build": true,
+  "task_complete": false,
+  "product_green": false
+}

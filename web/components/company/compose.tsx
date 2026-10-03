@@ -15,6 +15,7 @@ import {
   errorText,
   type MailAttachment,
   type MailDraft,
+  type MailDraftEditor,
   type DraftPayload,
   type DraftTemplateVersionStatus,
   type RenderedTemplate,
@@ -63,7 +64,7 @@ export function Compose({
   onSent,
 }: {
   mailboxes: WorkMailbox[];
-  initial: MailDraft;
+  initial: MailDraftEditor;
   onClose: () => void;
   onSent: () => void;
 }) {
@@ -76,7 +77,7 @@ export function Compose({
   const [writer, setWriter] = useState(() => makeWriter(initial));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<unknown>(null);
-  function makeWriter(value: MailDraft) {
+  function makeWriter(value: MailDraftEditor) {
     const scope = sessionScope();
     return new DraftWriter(value, {
       write: (d, create) => company<MailDraft>(create ? "/drafts" : `/drafts/${d.id}`, {
@@ -276,7 +277,7 @@ export function Compose({
           })}>{t("载入服务器版本", "Reload server draft")}</ActionButton>
           <ActionButton disabled={busy || saving || Boolean(pending) || !from?.can_send} onClick={() => {
             if (!window.confirm(t("创建独立草稿，不会自动发送。提交结果不确定时请先核对发送状态。", "Create a separate draft, without sending. Check delivery status first if submission was uncertain."))) return;
-            writer.close();const copy: MailDraft = {mailbox_id: mailboxId, payload, revision: 0};
+            writer.close();const copy: MailDraftEditor = {mailbox_id: mailboxId, payload, revision: 0};
             setDraft(copy);setWriter(makeWriter(copy));setSaveError(null);
           }}>{t("保留编辑为新草稿", "Keep edits as a new draft")}</ActionButton>
           {!isDeterministicErrorCode(errorCode(saveError)) && <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => { await save(); })}>{t("重试保存", "Retry save")}</ActionButton>}

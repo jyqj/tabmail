@@ -1,0 +1,481 @@
+{
+  "GCdedicated_session_selected_body": "source reviewed and original NoSession/end-before-release assertions PASS, extra session allowance included",
+  "actual_acquire_count": 15,
+  "actual_admission_overlap_logs": [
+    {
+      "active": [
+        "TestR5EnqueueRechecksAuthorityAfterParentWait"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:45.486336+08:00",
+      "top": "TestR5EnqueueRechecksAuthorityAfterParentWait"
+    },
+    {
+      "active": [
+        "TestR5EnqueueAuditWaitExpiryAndCancellation",
+        "TestR5EnqueueRechecksAuthorityAfterParentWait"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:45.486644+08:00",
+      "top": "TestR5EnqueueAuditWaitExpiryAndCancellation"
+    },
+    {
+      "active": [
+        "TestR5EnqueueAuditWaitExpiryAndCancellation"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:50.459003+08:00",
+      "top": "TestR5EnqueueRechecksAuthorityAfterParentWait"
+    },
+    {
+      "active": [
+        "TestR5EnqueueAuditWaitExpiryAndCancellation",
+        "TestR5IndexCompleteRechecksAfterDocumentWait"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:50.45907+08:00",
+      "top": "TestR5IndexCompleteRechecksAfterDocumentWait"
+    },
+    {
+      "active": [
+        "TestR5IndexCompleteRechecksAfterDocumentWait"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:50.487257+08:00",
+      "top": "TestR5EnqueueAuditWaitExpiryAndCancellation"
+    },
+    {
+      "active": [
+        "TestR5IndexCompleteRechecksAfterDocumentWait",
+        "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:50.487321+08:00",
+      "top": "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"
+    },
+    {
+      "active": [
+        "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:52.749045+08:00",
+      "top": "TestR5IndexCompleteRechecksAfterDocumentWait"
+    },
+    {
+      "active": [
+        "TestR5IndexCompleteRechecksAfterJobWait",
+        "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:52.749151+08:00",
+      "top": "TestR5IndexCompleteRechecksAfterJobWait"
+    },
+    {
+      "active": [
+        "TestR5IndexCompleteRechecksAfterJobWait"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:52.776062+08:00",
+      "top": "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack"
+    },
+    {
+      "active": [
+        "TestR5GlobalProfileFanoutAuthority",
+        "TestR5IndexCompleteRechecksAfterJobWait"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:52.776127+08:00",
+      "top": "TestR5GlobalProfileFanoutAuthority"
+    },
+    {
+      "active": [
+        "TestR5IndexCompleteRechecksAfterJobWait"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:54.631087+08:00",
+      "top": "TestR5GlobalProfileFanoutAuthority"
+    },
+    {
+      "active": [
+        "TestR5IndexCompleteRechecksAfterJobWait",
+        "TestR5IndexFailRechecksAfterJobWait"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:54.631161+08:00",
+      "top": "TestR5IndexFailRechecksAfterJobWait"
+    },
+    {
+      "active": [
+        "TestR5IndexFailRechecksAfterJobWait"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:55.080239+08:00",
+      "top": "TestR5IndexCompleteRechecksAfterJobWait"
+    },
+    {
+      "active": [
+        "TestR5GlobalProfileFanoutRequiredRollback",
+        "TestR5IndexFailRechecksAfterJobWait"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:55.080291+08:00",
+      "top": "TestR5GlobalProfileFanoutRequiredRollback"
+    },
+    {
+      "active": [
+        "TestR5GlobalProfileFanoutRequiredRollback"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:56.907283+08:00",
+      "top": "TestR5IndexFailRechecksAfterJobWait"
+    },
+    {
+      "active": [
+        "TestR5GlobalProfileFanoutRecipients",
+        "TestR5GlobalProfileFanoutRequiredRollback"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:56.90734+08:00",
+      "top": "TestR5GlobalProfileFanoutRecipients"
+    },
+    {
+      "active": [
+        "TestR5GlobalProfileFanoutRecipients"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:57.22632+08:00",
+      "top": "TestR5GlobalProfileFanoutRequiredRollback"
+    },
+    {
+      "active": [
+        "TestR5AttachmentGCTenantLockTimeoutContinuesRound",
+        "TestR5GlobalProfileFanoutRecipients"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:57.226389+08:00",
+      "top": "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+    },
+    {
+      "active": [
+        "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:47:58.513419+08:00",
+      "top": "TestR5GlobalProfileFanoutRecipients"
+    },
+    {
+      "active": [
+        "TestR5AttachmentFinishUsesTimeAfterLockWait",
+        "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:47:58.513495+08:00",
+      "top": "TestR5AttachmentFinishUsesTimeAfterLockWait"
+    },
+    {
+      "active": [
+        "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:48:00.748454+08:00",
+      "top": "TestR5AttachmentFinishUsesTimeAfterLockWait"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationPreservesCanonicalDecisions",
+        "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:48:00.748507+08:00",
+      "top": "TestR5AccessExplanationPreservesCanonicalDecisions"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationPreservesCanonicalDecisions"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:48:02.52995+08:00",
+      "top": "TestR5AttachmentGCTenantLockTimeoutContinuesRound"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationFailureReturnsNoProjection",
+        "TestR5AccessExplanationPreservesCanonicalDecisions"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:48:02.530001+08:00",
+      "top": "TestR5AccessExplanationFailureReturnsNoProjection"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationFailureReturnsNoProjection"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:48:02.84535+08:00",
+      "top": "TestR5AccessExplanationPreservesCanonicalDecisions"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationFailureReturnsNoProjection",
+        "TestR5AccessExplanationOrdersPermissionChanges"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:48:02.845425+08:00",
+      "top": "TestR5AccessExplanationOrdersPermissionChanges"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationFailureReturnsNoProjection"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:48:04.39258+08:00",
+      "top": "TestR5AccessExplanationOrdersPermissionChanges"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationFailureReturnsNoProjection",
+        "TestR5AccessExplanationWaitsForTargetWrites"
+      ],
+      "event": "acquired_beforefixture",
+      "time": "2026-10-02T21:48:04.392651+08:00",
+      "top": "TestR5AccessExplanationWaitsForTargetWrites"
+    },
+    {
+      "active": [
+        "TestR5AccessExplanationWaitsForTargetWrites"
+      ],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:48:04.649492+08:00",
+      "top": "TestR5AccessExplanationFailureReturnsNoProjection"
+    },
+    {
+      "active": [],
+      "event": "released_afterfixturecleanup",
+      "time": "2026-10-02T21:48:05.596678+08:00",
+      "top": "TestR5AccessExplanationWaitsForTargetWrites"
+    }
+  ],
+  "actual_admission_peak": 2,
+  "actual_end_permits0": true,
+  "actual_parallel_overlap_parser_pending": true,
+  "actual_pause_cont": [
+    {
+      "event": "pause",
+      "test": "TestR5AccessExplanationWaitsForTargetWrites",
+      "time": "2026-10-02T21:47:45.483371+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5AccessExplanationOrdersPermissionChanges",
+      "time": "2026-10-02T21:47:45.483387+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5AccessExplanationFailureReturnsNoProjection",
+      "time": "2026-10-02T21:47:45.483412+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5AccessExplanationPreservesCanonicalDecisions",
+      "time": "2026-10-02T21:47:45.483437+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5AttachmentFinishUsesTimeAfterLockWait",
+      "time": "2026-10-02T21:47:45.483671+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5AttachmentGCTenantLockTimeoutContinuesRound",
+      "time": "2026-10-02T21:47:45.483887+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5EnqueueRechecksAuthorityAfterParentWait",
+      "time": "2026-10-02T21:47:45.484577+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5EnqueueAuditWaitExpiryAndCancellation",
+      "time": "2026-10-02T21:47:45.484641+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5GlobalProfileFanoutRecipients",
+      "time": "2026-10-02T21:47:45.484757+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5GlobalProfileFanoutRequiredRollback",
+      "time": "2026-10-02T21:47:45.48478+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5GlobalProfileFanoutAuthority",
+      "time": "2026-10-02T21:47:45.484823+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5IndexCompleteRechecksAfterJobWait",
+      "time": "2026-10-02T21:47:45.484882+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5IndexFailRechecksAfterJobWait",
+      "time": "2026-10-02T21:47:45.484911+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5IndexCompleteRechecksAfterDocumentWait",
+      "time": "2026-10-02T21:47:45.484969+08:00"
+    },
+    {
+      "event": "pause",
+      "test": "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack",
+      "time": "2026-10-02T21:47:45.48505+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5EnqueueRechecksAuthorityAfterParentWait",
+      "time": "2026-10-02T21:47:45.48625+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5EnqueueAuditWaitExpiryAndCancellation",
+      "time": "2026-10-02T21:47:45.486551+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5IndexCompleteRechecksAfterDocumentWait",
+      "time": "2026-10-02T21:47:50.45905+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5IngressLeaseExpiryAfterTenantWaitRollsBack",
+      "time": "2026-10-02T21:47:50.487306+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5IndexCompleteRechecksAfterJobWait",
+      "time": "2026-10-02T21:47:52.749071+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5GlobalProfileFanoutAuthority",
+      "time": "2026-10-02T21:47:52.776084+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5IndexFailRechecksAfterJobWait",
+      "time": "2026-10-02T21:47:54.631106+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5GlobalProfileFanoutRequiredRollback",
+      "time": "2026-10-02T21:47:55.08028+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5GlobalProfileFanoutRecipients",
+      "time": "2026-10-02T21:47:56.907332+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5AttachmentGCTenantLockTimeoutContinuesRound",
+      "time": "2026-10-02T21:47:57.226354+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5AttachmentFinishUsesTimeAfterLockWait",
+      "time": "2026-10-02T21:47:58.51344+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5AccessExplanationPreservesCanonicalDecisions",
+      "time": "2026-10-02T21:48:00.748485+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5AccessExplanationFailureReturnsNoProjection",
+      "time": "2026-10-02T21:48:02.529975+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5AccessExplanationOrdersPermissionChanges",
+      "time": "2026-10-02T21:48:02.845388+08:00"
+    },
+    {
+      "event": "cont",
+      "test": "TestR5AccessExplanationWaitsForTargetWrites",
+      "time": "2026-10-02T21:48:04.392613+08:00"
+    }
+  ],
+  "actual_pure_top1_PASS": true,
+  "actual_real_leaf": 73,
+  "actual_real_serial_child_events": 67,
+  "actual_real_test_subtestPASS": 82,
+  "actual_real_top": 15,
+  "actual_release_count": 15,
+  "actual_source_closure_sha256": "a5049ce041a384698977a9411be05f2c3045585b3ae8dde55e5621006c290877",
+  "actual_tempDB_removed_count_terminal": 73,
+  "actual_unique_DB_created_catalog_observed": 73,
+  "cleanup": {
+    "budget_seconds": 600,
+    "elapsed_total_capture_pure_init_real_observation_cleanup": 35.47019696235657,
+    "oldpartialstoppedroots_not_touched": true,
+    "original_deadline": 1790949451.4361339,
+    "original_origin": 1790948851.4361339,
+    "owned_pg_pid": 42028,
+    "owned_pid_observation": "absent",
+    "owned_root": "/private/tmp/tm-r5pgparallel15-run.s3xi51pg",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "query_exit": 0,
+    "socket_absent": true,
+    "temporaryDB_connections": [],
+    "within_original600": true
+  },
+  "direct_sample_schema18_observed_count": 15,
+  "direct_schema_seed_sampling_gap": "15of73 DBs sampled at completed schema18; short other fixtures disappear between probes, not fabricated73directschema samples. PositiveGo retainedNew/Migrate/fullseed assertions; no migratedtemplate/cache.",
+  "not_whole180_fit_or206completion": true,
+  "not_whole180_solution_or206completion": true,
+  "observed_fixture_clients_peak_lower_bound": 8,
+  "old4_and_otheroldpure_not_executed": true,
+  "original4real_and3pureold_notreexecuted": true,
+  "pure_fake_not_PG_evidence": true,
+  "results": {
+    "pure-updated-exact-whitelist-only": {
+      "CLI_exit": 0,
+      "actual_run_count": 1,
+      "failed": [],
+      "group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "leaf": 1,
+      "passed": 1,
+      "skipped": [],
+      "timed_out": false,
+      "top": 1
+    },
+    "realPG-only-added15-originalchildren": {
+      "CLI_exit": 0,
+      "actual_run_count": 82,
+      "failed": [],
+      "group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "leaf": 73,
+      "passed": 82,
+      "skipped": [],
+      "timed_out": false,
+      "top": 15
+    }
+  },
+  "scope_verdict": "PASS_only_added15_newparallel_entries_plus_exactWhitelist_pure",
+  "source_sha": "18bde9aab572886cfa95c472377c15b25f5e1792",
+  "unknown_connection_samples": 0
+}

@@ -2,9 +2,11 @@ package submissions
 
 import (
 	"context"
+	"errors"
 	"github.com/google/uuid"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/company"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/store"
@@ -14,7 +16,7 @@ import (
 // A revoked JWT/key must not become a successful redacted POST simply because
 // a content predicate failed closed. Conversely, new-send policy changes do
 // not undo a committed historical submission or require another send attempt.
-func (s *Service) ReplayReceiptView(ctx context.Context, a authz.Actor, original *models.OutboundJob) (*models.OutboundJob, error) {
+func (s *Service) ReplayReceiptView(ctx context.Context, a authz.Actor, original *models.OutboundJob) (*company.OutboundReceipt, error) {
 	if original == nil || original.TenantID != a.TenantID {
 		return nil, app.Forbidden("submission replay authority unavailable")
 	}
@@ -43,7 +45,7 @@ func (s *Service) ReplayReceiptView(ctx context.Context, a authz.Actor, original
 	if receipt == nil || receipt.Job == nil || receipt.Job.ID != original.ID || receipt.Job.SubmitActor != identity || receipt.Job.TenantID != a.TenantID {
 		return nil, app.Forbidden("submission replay receipt unavailable")
 	}
-	return RedactOutboundJobView(receipt.Job, receipt.ContentAllowed), nil
+	return s.projectReceipt(ctx, a, receipt, true), nil
 }
 
 func (s *Service) outboundReceipt(ctx context.Context, tenant *models.Tenant, a authz.Actor, id uuid.UUID, scope string) (*store.OutboundReceipt, error) {
@@ -60,23 +62,23 @@ func (s *Service) outboundReceipt(ctx context.Context, tenant *models.Tenant, a 
 		}
 		return nil, err
 	}
-	if v == nil || v.Job == nil {
+	if v == nil || v.Job == nil || v.Job.ID != id || v.Job.TenantID != a.TenantID {
 		return nil, ErrOutboundJobNotFound
 	}
 	return v, nil
 }
 
-func (s *Service) OutboundReceiptView(ctx context.Context, tenant *models.Tenant, a authz.Actor, id uuid.UUID) (*models.OutboundJob, error) {
+func (s *Service) OutboundReceiptView(ctx context.Context, tenant *models.Tenant, a authz.Actor, id uuid.UUID) (*company.OutboundReceipt, error) {
 	v, err := s.outboundReceipt(ctx, tenant, a, id, "send:read")
 	if err != nil {
 		return nil, err
 	}
-	return RedactOutboundJobView(v.Job, v.ContentAllowed), nil
+	return s.projectReceipt(ctx, a, v, true), nil
 }
 
 // Every row's visibility and content decision came from the same store read.
 // There is no per-row I/O that can mix current credentials with an old page.
-func (s *Service) ListOutboundReceiptViews(ctx context.Context, tenant *models.Tenant, a authz.Actor, page models.Page) ([]*models.OutboundJob, int, error) {
+func (s *Service) ListOutboundReceiptViews(ctx context.Context, tenant *models.Tenant, a authz.Actor, page models.Page) ([]*company.OutboundReceipt, int, error) {
 	if tenant == nil {
 		return nil, 0, ErrOutboundJobAuthRequired
 	}
@@ -87,30 +89,78 @@ func (s *Service) ListOutboundReceiptViews(ctx context.Context, tenant *models.T
 	if err != nil {
 		return nil, 0, err
 	}
-	out := make([]*models.OutboundJob, 0, len(rows))
+	out := make([]*company.OutboundReceipt, 0, len(rows))
 	for _, row := range rows {
-		out = append(out, RedactOutboundJobView(row.Job, row.ContentAllowed))
+		if row.Job == nil || row.Job.TenantID != a.TenantID {
+			return nil, 0, app.Internal(errors.New("invalid authorized receipt snapshot"))
+		}
+		out = append(out, s.projectReceipt(ctx, a, &row, false))
 	}
 	return out, total, nil
 }
 
-func (s *Service) OutboundAttemptViews(ctx context.Context, tenant *models.Tenant, a authz.Actor, id uuid.UUID) ([]*models.OutboundAttempt, error) {
-	if _, err := s.outboundReceipt(ctx, tenant, a, id, "send:read"); err != nil {
-		return nil, err
+// Ordinary attempt history exposes only the safe job-level attempt count and
+// full-ledger aggregate. Protocol/remote-target/individual attempt rows belong
+// to the independent controlled inspection surface, never to this receipt.
+func (s *Service) OutboundAttemptViews(ctx context.Context, tenant *models.Tenant, a authz.Actor, id uuid.UUID) (*company.OutboundReceipt, error) {
+	return s.OutboundReceiptView(ctx, tenant, a, id)
+}
+
+// CommittedReceiptView runs AFTER a successful fresh submit/retry commit.
+// Failed presentation authority is not a failed command: return only a safe
+// committed-ID fallback with unknown progress and no usable capabilities.
+func (s *Service) CommittedReceiptView(ctx context.Context, a authz.Actor, job *models.OutboundJob) *company.OutboundReceipt {
+	if job == nil {
+		return nil
 	}
-	attempts, err := s.store.ListOutboundAttempts(ctx, id)
-	if err != nil {
-		return nil, err
+	r, err := s.store.GetOutboundReceipt(ctx, a, job.ID, "send:write")
+	if err != nil || r == nil || r.Job == nil || r.Job.ID != job.ID || r.Job.TenantID != a.TenantID {
+		if err != nil {
+			s.logger.Err(err).Str("job_id", job.ID.String()).Msg("command committed; receipt authority unavailable")
+		}
+		return company.CommittedOutboundReceiptFallback(job)
 	}
-	// Reading attempts can block across expiry or revocation. Only this last
-	// credential/receipt check may authorize the previously gathered diagnostics.
-	receipt, err := s.outboundReceipt(ctx, tenant, a, id, "send:read")
-	if err != nil {
-		return nil, err
+	return s.projectReceipt(ctx, a, r, true)
+}
+
+func (s *Service) projectReceipt(ctx context.Context, a authz.Actor, r *store.OutboundReceipt, retryHint bool) *company.OutboundReceipt {
+	if r == nil || r.Job == nil {
+		return nil
 	}
-	out := make([]*models.OutboundAttempt, 0, len(attempts))
-	for _, attempt := range attempts {
-		out = append(out, RedactOutboundAttemptView(attempt, receipt.ContentAllowed))
+	view := company.ProjectOutboundReceipt(r.Job, r.RecipientStates, r.LedgerKnown)
+	caps := &company.SubmissionCapabilities{ViewContent: r.ContentAllowed, RetryBlockReason: CapabilityUnknown}
+	if retryHint {
+		switch {
+		case view.DeliveryUncertain || r.Job.InFlightDomain != "":
+			caps.RetryBlockReason = CapabilityDeliveryUncertain
+		case view.Progress.Completeness != "known":
+			caps.RetryBlockReason = CapabilityUnknown
+		case r.Job.State != models.OutboundDead && r.Job.State != models.OutboundFailed:
+			caps.RetryBlockReason = CapabilityStateNotRetryable
+		default:
+			if s.outbound == nil {
+				break
+			}
+			if err := s.RetryAuthority(ctx, a, r.Job); err != nil {
+				if authz.IsAuthzError(err) {
+					caps.RetryBlockReason = CapabilitySenderAuthority
+				}
+				break
+			}
+			// A receipt/read right cannot substitute for the original sender's
+			// currently valid authority, which the actual retry also revalidates.
+			if err := s.outbound.ValidateJobAuthorization(ctx, r.Job); err != nil {
+				if errors.Is(err, store.ErrOutboundUncertain) {
+					caps.RetryBlockReason = CapabilityDeliveryUncertain
+				} else if authz.IsAuthzError(err) {
+					caps.RetryBlockReason = CapabilitySenderAuthority
+				}
+				break
+			}
+			caps.Retry = true
+			caps.RetryBlockReason = ""
+		}
 	}
-	return out, nil
+	view.Capabilities = caps
+	return view
 }

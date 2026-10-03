@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "deliveries": [
+    {
+      "archive": "R5-CURRENT18-BACKEND-FULLGO-FAILED-LOGS.tar.gz",
+      "review": "R5-CURRENT18-BACKEND-FULLGO-FAILED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5backend18.7ddg5oms/CURRENT18-BACKEND-FULLGO-FAILED-evidence.tar.gz",
+      "archive_sha256_from_executor": "0c9abbf5f860ec1577172150a0ca96eb5daf89755364a3efcf4f420df3250caa",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 59,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-STATS-PUBLIC-PROJECTION5-LOGS.tar.gz",
+      "review": "R5-STATS-PUBLIC-PROJECTION5-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5stats5.efhjqmbm/STATS-PUBLIC-PROJECTION-FIVE-TOP-evidence.tar.gz",
+      "archive_sha256_from_executor": "7b1ba4fd90c885ab3c1143d4fd1cdfe69dd8c8cd03355d3a1997b19a98c646b5",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 16,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-WIRE-V2-TYPEGEN-TSC-11FILES-LOGS.tar.gz",
+      "review": "R5-WIRE-V2-TYPEGEN-TSC-11FILES-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5wire-v2.3cwhwwb8/WIRE-V2-FRESH-TYPEGEN-TSC-11FILES-evidence.tar.gz",
+      "archive_sha256_from_executor": "a327f9300780d246d3c8e815e4f3de46612e12f26e9a590c8cdc9d7a5e0636e2",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 32,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-ABC-C2-GO-PASS-CAPTURE-FAIL-LOGS.tar.gz",
+      "review": "R5-ABC-C2-GO-PASS-CAPTURE-FAIL-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5ABC-C2.8db5ic64/ABC-C2-ACTUAL-GO-PASS-CAPTURE-FAIL-evidence.tar.gz",
+      "archive_sha256_from_executor": "8cfa59699d7c420371e2be3ae73514048d4fbb5d5df4b3b12c3b9cd605b9930b",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 58,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-PG-PHASE-OLDDFB-DIAGNOSTIC-LOGS.tar.gz",
+      "review": "R5-PG-PHASE-OLDDFB-DIAGNOSTIC-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5pgphase-run.c9i8fx_c/PG-PHASE-DIAGNOSTIC-OLDDFB-ACTUAL-evidence.tar.gz",
+      "archive_sha256_from_executor": "98f91d17aa4b762276407cd2ab9a7a498d2a94b524bf215bd980fa2691a98e61",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 27,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-RECIPIENTS-OLDCAPTURE-NEWDOC-READONLY-LOGS.tar.gz",
+      "review": "R5-RECIPIENTS-OLDCAPTURE-NEWDOC-READONLY-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5recipients-revalidate.qlv5uqzt/RECIPIENTS-OLDCAPTURE-NEWDOC-READONLY-FINAL-evidence.tar.gz",
+      "archive_sha256_from_executor": "27dbcf7ccbd0752b5a809b9b4712d5ae715de16cab3b106f5aa7e5cd7d96d1e0",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 19,
+      "payload_bytes_changed": false
+    }
+  ],
+  "raw_responses_secrets_objects_DB_postgreslog_or_src_included": false,
+  "original_capture_and_embedded_spec_modified": false,
+  "original_failed_raw_or_reviews_modified": false,
+  "M_or_S_history_modified": false,
+  "tests_repeated_by_docs": false,
+  "current_fullbackend_green": false,
+  "current_fullTS_green": false,
+  "freshformal_HTTP_CLI_green": false,
+  "task_complete": false,
+  "product_green": false
+}

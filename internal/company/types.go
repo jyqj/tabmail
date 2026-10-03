@@ -324,6 +324,7 @@ type SubmissionContentReader interface {
 
 // DeliveryRecovery is an operations capability, not an employee content port.
 type DeliveryRecovery interface {
+	OutboundRecoveryInspector
 	ListOutboundRecipients(context.Context, uuid.UUID, uuid.UUID) ([]Recipient, error)
 	ReconcileOutbound(context.Context, authz.Actor, uuid.UUID, time.Time, []Recipient, string) error
 }

@@ -1,0 +1,168 @@
+{
+  "actual_source_receipt": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source-receipt.json",
+  "actual_tests": {
+    "actual_failed": 0,
+    "actual_passed": 82,
+    "actual_pending": 0,
+    "actual_total": 82,
+    "by_file": [
+      {
+        "count": 4,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/lib/compose-identity.test.ts",
+        "passed": 4,
+        "skipped": []
+      },
+      {
+        "count": 2,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/lib/wire-response-input.test.ts",
+        "passed": 2,
+        "skipped": []
+      },
+      {
+        "count": 3,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/components/company/compose.test.tsx",
+        "passed": 3,
+        "skipped": []
+      },
+      {
+        "count": 1,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/components/company/domain-onboarding.test.tsx",
+        "passed": 1,
+        "skipped": []
+      },
+      {
+        "count": 2,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/components/company/grants.test.tsx",
+        "passed": 2,
+        "skipped": []
+      },
+      {
+        "count": 41,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/features/mail/draft-writer-snapshot.test.ts",
+        "passed": 41,
+        "skipped": []
+      },
+      {
+        "count": 10,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/features/mail/draft-writer.test.ts",
+        "passed": 10,
+        "skipped": []
+      },
+      {
+        "count": 11,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/app/(dashboard)/mail/page.test.tsx",
+        "passed": 11,
+        "skipped": []
+      },
+      {
+        "count": 3,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/components/company/templates/versions.test.tsx",
+        "passed": 3,
+        "skipped": []
+      },
+      {
+        "count": 2,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/app/(dashboard)/admin/policy/page.test.tsx",
+        "passed": 2,
+        "skipped": []
+      },
+      {
+        "count": 3,
+        "failed": [],
+        "name": "/private/tmp/tm-r5wire-v2.3cwhwwb8/source/web/app/(dashboard)/admin/tenants/page.test.tsx",
+        "passed": 3,
+        "skipped": []
+      }
+    ]
+  },
+  "actual_typecheck_diagnostics": [
+    {
+      "code": "TS2339",
+      "column": 22,
+      "file": "components/company/r5-protocol.test.tsx",
+      "line": 56,
+      "message": "Property 'recipients' does not exist on type 'OrdinaryReceipt'."
+    },
+    {
+      "code": "TS7006",
+      "column": 38,
+      "file": "components/company/r5-protocol.test.tsx",
+      "line": 56,
+      "message": "Parameter 'r' implicitly has an 'any' type."
+    }
+  ],
+  "bounded11files_not_wholeFrontend_or_browser_or_fourCI": true,
+  "cleanup": {
+    "absolute_deadline_wall": 1790940419.206827,
+    "all_owned_groups_absent": true,
+    "budget_seconds": 600,
+    "elapsed_including_capture_typegen_tsc_tests_groupcleanup": 12.246757984161377,
+    "origin_wall": 1790939819.206827,
+    "owned18_source_pins_equal": true,
+    "user_next_untouched_noGoPGbrowser_build": true,
+    "within_original600": true
+  },
+  "old27diag_and_old41_and_false2_source_histories_preserved": true,
+  "results": {
+    "current-v2-typecheck": {
+      "CLI_exit": 2,
+      "elapsed_wall_seconds": 3.626585006713867,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "exact11-affected-consumer-tests": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 7.7354888916015625,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "fresh-private-official-Next-typegen": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 0.4159688949584961,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "installed-Next-typegen-help": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 0.10698199272155762,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    },
+    "installed-Next-version": {
+      "CLI_exit": 0,
+      "elapsed_wall_seconds": 0.10721182823181152,
+      "owned_group_observation": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "timed_out": false
+    }
+  }
+}

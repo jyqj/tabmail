@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
-import { company, workPath, type WorkGrant, type WorkMailbox, type MailboxGrantSnapshot } from "@/lib/company";
+import { company, workPath, type WorkGrantInput, type WorkMailbox, type MailboxGrantSnapshot } from "@/lib/company";
 import type { AdminUser } from "@/lib/types";
 import { isConflict } from "@/lib/error-code";
 import { EmployeeField } from "./employee-field";
@@ -24,7 +24,7 @@ export function GrantEditor({
   );
   const [grantRevision, setGrantRevision] = useState<number | null>(null);
   const [conflict, setConflict] = useState(false);
-  const empty: WorkGrant = {
+  const empty: WorkGrantInput = {
     user_id: "",
     can_read: false,
     can_organize: false,
@@ -103,7 +103,9 @@ export function GrantEditor({
             try {
               await company(`${workPath(mailbox.mailbox.id)}/grants`, {
                 method: "PUT",
-                body: { ...grant, revision: grantRevision },
+                body: { user_id: grant.user_id, can_read: grant.can_read,
+                  can_organize: grant.can_organize, can_send: grant.can_send,
+                  template_only: grant.template_only, revision: grantRevision },
               });
             } catch (error) {
               if (isConflict(error)) setConflict(true);

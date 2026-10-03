@@ -1,0 +1,730 @@
+{
+  "Go_database_rawobjects_profiles_disk_measurement_peak": 125888168,
+  "Go_event_clocks": {
+    "package_pass_elapsed": 60.639,
+    "test_pass_elapsed": 60.07
+  },
+  "Go_exit": 0,
+  "Go_internal_parser_deadline_is_later_by_compile_seconds": 6.306409120559692,
+  "Go_process_compile_execution_cleanup_wall_seconds": 66.4668459892273,
+  "Go_process_high_water_RSS_bytes": 265404416,
+  "Mvalidbaseline_registry_fullbackend_fourCI_171_claimed": false,
+  "PG_observations": {
+    "actual_blocking_PID_edges": 1,
+    "actual_max_query_start_gap_seconds": 0.48366299999999995,
+    "queries": 428,
+    "rows": 6775,
+    "sampling_boundary": "rows/edges are samples, not time proportion; short waits missed; client-phase labeling is observer association not SQL serverduration",
+    "target_interval_seconds": 0.1,
+    "wait_phase_categories": [
+      {
+        "client_sql_phase": "quota_mailbox_update",
+        "rows": 1847,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "after/advisory_raw_key",
+        "rows": 1387,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "insert_message_including_trigger",
+        "rows": 1100,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "advisory_raw_key",
+        "rows": 1034,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 598,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "quota_mailbox_update",
+        "rows": 157,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 152,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "begin",
+        "rows": 146,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "insert_message_including_trigger",
+        "rows": 138,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "life_archived",
+        "rows": 40,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 28,
+        "wait_event": "WALWrite",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 18,
+        "wait_event": "WALWrite",
+        "wait_type": "IO"
+      },
+      {
+        "client_sql_phase": "life_trash_expired",
+        "rows": 18,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "advisory_raw_key",
+        "rows": 17,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "life_hard_expired",
+        "rows": 13,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "life_archived",
+        "rows": 11,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 7,
+        "wait_event": "BufferContent",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "life_archived",
+        "rows": 7,
+        "wait_event": "WALWrite",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "insert_message_including_trigger",
+        "rows": 6,
+        "wait_event": "BufferContent",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "life_hard_expired",
+        "rows": 4,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "after/quota_mailbox_update",
+        "rows": 4,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "quota_mailbox_update",
+        "rows": 4,
+        "wait_event": "XidGen",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "life_archived",
+        "rows": 4,
+        "wait_event": "WALWrite",
+        "wait_type": "IO"
+      },
+      {
+        "client_sql_phase": "life_trash_expired",
+        "rows": 3,
+        "wait_event": "WALWrite",
+        "wait_type": "IO"
+      },
+      {
+        "client_sql_phase": "quota_mailbox_update",
+        "rows": 3,
+        "wait_event": "BufferContent",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "life_hard_expired",
+        "rows": 3,
+        "wait_event": "WALWrite",
+        "wait_type": "IO"
+      },
+      {
+        "client_sql_phase": "life_trash_expired",
+        "rows": 3,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 2,
+        "wait_event": "DataFileExtend",
+        "wait_type": "IO"
+      },
+      {
+        "client_sql_phase": "after/insert_message_including_trigger",
+        "rows": 2,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "insert_message_including_trigger",
+        "rows": 2,
+        "wait_event": "WALInsert",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "life_hard_expired",
+        "rows": 2,
+        "wait_event": "WALWrite",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "after/begin",
+        "rows": 2,
+        "wait_event": "ClientRead",
+        "wait_type": "Client"
+      },
+      {
+        "client_sql_phase": "begin",
+        "rows": 2,
+        "wait_event": "",
+        "wait_type": ""
+      },
+      {
+        "client_sql_phase": "insert_message_including_trigger",
+        "rows": 2,
+        "wait_event": "LockManager",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "life_trash_expired",
+        "rows": 2,
+        "wait_event": "WALWrite",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 1,
+        "wait_event": "extend",
+        "wait_type": "Lock"
+      },
+      {
+        "client_sql_phase": "life_hard_expired",
+        "rows": 1,
+        "wait_event": "WALInsert",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 1,
+        "wait_event": "WALInsert",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "quota_mailbox_update",
+        "rows": 1,
+        "wait_event": "WALInsert",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "insert_message_including_trigger",
+        "rows": 1,
+        "wait_event": "XidGen",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "commit",
+        "rows": 1,
+        "wait_event": "LockManager",
+        "wait_type": "LWLock"
+      },
+      {
+        "client_sql_phase": "insert_message_including_trigger",
+        "rows": 1,
+        "wait_event": "DataFileExtend",
+        "wait_type": "IO"
+      }
+    ],
+    "wait_type_rows": {
+      "": 484,
+      "Client": 6191,
+      "IO": 31,
+      "LWLock": 68,
+      "Lock": 1
+    }
+  },
+  "UTC_derived": "2026-10-02T17:14:11.358803+00:00",
+  "actual_Go_GOMAXPROCS": "2",
+  "actual_Go_race": false,
+  "actual_distribution": {
+    "employees": 1000,
+    "index_ready_count": 4000,
+    "lifecycle_counts": {
+      "archived": 400,
+      "hard_expired": 200,
+      "inbox": 3200,
+      "trash_expired": 200
+    },
+    "mailboxes": 5000,
+    "max_distinct_shared_grantees": 4,
+    "messages": 4000,
+    "mime_size_counts": {
+      "2097152": 4,
+      "262144": 76,
+      "32768": 720,
+      "4096": 3200
+    },
+    "min_distinct_shared_grantees": 4,
+    "personal_mailboxes": 1000,
+    "shared_grant_rows": 16000,
+    "shared_mailboxes": 4000,
+    "tenant_message_counts": {
+      "bench-0.test": 3200,
+      "bench-1.test": 800
+    }
+  },
+  "actual_emitted_permutation4000_verified": true,
+  "actual_min_parser_start_remaining_to_parent180_deadline": 114.4759168794403,
+  "actual_outer_Go_absolute180_deadline": 1790960730.8599648,
+  "actual_population": [
+    1000,
+    5000,
+    4000
+  ],
+  "actual_schema": 16,
+  "actual_source_closure_sha256": "a9c6f61a953a656300ffa89da095edebb0e4e523012aef3430d1769b7dd4c446",
+  "actual_source_files": 490,
+  "all_persistent_uuid_receivedtime_UID_equal_not_claimed": true,
+  "call_spans_25_all_exact_counts_errors0": {
+    "blob_exists": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 3.087950000000012,
+      "errors": 0,
+      "max_call_ms": 356.344,
+      "max_wall_monotonic_gap_ms": 0.011083,
+      "min_call_ms": 0.029
+    },
+    "blob_put_including_original_durability": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 206.87216000000015,
+      "errors": 0,
+      "max_call_ms": 609.939,
+      "max_wall_monotonic_gap_ms": 0.007291,
+      "min_call_ms": 8.22
+    },
+    "ensure": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 210.61202299999863,
+      "errors": 0,
+      "max_call_ms": 610.015,
+      "max_wall_monotonic_gap_ms": 0.006709,
+      "min_call_ms": 8.273
+    },
+    "fs/copy_and_declared_length_validation": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 1.5028550000000054,
+      "errors": 0,
+      "max_call_ms": 123.782,
+      "max_wall_monotonic_gap_ms": 0.001708,
+      "min_call_ms": 0.008
+    },
+    "fs/dir_close": {
+      "calls": 12000,
+      "elapsed_call_seconds_sum": 0.06406600000000938,
+      "errors": 0,
+      "max_call_ms": 34.756,
+      "max_wall_monotonic_gap_ms": 0.001125,
+      "min_call_ms": 0
+    },
+    "fs/dir_sync_leaf": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 83.80348199999992,
+      "errors": 0,
+      "max_call_ms": 403.236,
+      "max_wall_monotonic_gap_ms": 0.004958,
+      "min_call_ms": 3.607
+    },
+    "fs/dir_sync_parent": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 52.93757599999948,
+      "errors": 0,
+      "max_call_ms": 177.954,
+      "max_wall_monotonic_gap_ms": 0.002791,
+      "min_call_ms": 0
+    },
+    "fs/dir_sync_root": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 10.88212599999972,
+      "errors": 0,
+      "max_call_ms": 156.21,
+      "max_wall_monotonic_gap_ms": 0.002209,
+      "min_call_ms": 0
+    },
+    "fs/file_close": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 0.040298000000000056,
+      "errors": 0,
+      "max_call_ms": 0.059,
+      "max_wall_monotonic_gap_ms": 0.001,
+      "min_call_ms": 0.003
+    },
+    "fs/file_sync": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 31.822073000000053,
+      "errors": 0,
+      "max_call_ms": 389.348,
+      "max_wall_monotonic_gap_ms": 0.00425,
+      "min_call_ms": 3.635
+    },
+    "fs/rename": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 2.0026230000000034,
+      "errors": 0,
+      "max_call_ms": 175.561,
+      "max_wall_monotonic_gap_ms": 0.001583,
+      "min_call_ms": 0.11
+    },
+    "lifecycle/archived": {
+      "calls": 400,
+      "elapsed_call_seconds_sum": 1.8886309999999988,
+      "errors": 0,
+      "max_call_ms": 107.981,
+      "max_wall_monotonic_gap_ms": 0.001333,
+      "min_call_ms": 0.069
+    },
+    "lifecycle/hard_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 0.850678,
+      "errors": 0,
+      "max_call_ms": 82.944,
+      "max_wall_monotonic_gap_ms": 0.00125,
+      "min_call_ms": 0.091
+    },
+    "lifecycle/trash_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 1.1525710000000002,
+      "errors": 0,
+      "max_call_ms": 56.936,
+      "max_wall_monotonic_gap_ms": 0.001167,
+      "min_call_ms": 0.074
+    },
+    "pool_acquire": {
+      "calls": 4800,
+      "elapsed_call_seconds_sum": 0.5285160000000467,
+      "errors": 0,
+      "max_call_ms": 43.938,
+      "max_wall_monotonic_gap_ms": 0.001166,
+      "min_call_ms": 0
+    },
+    "reference_transaction_including_ensure": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 742.7345560000016,
+      "errors": 0,
+      "max_call_ms": 634.762,
+      "max_wall_monotonic_gap_ms": 0.008,
+      "min_call_ms": 13.089
+    },
+    "sql/advisory_raw_key": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 250.98242300000072,
+      "errors": 0,
+      "max_call_ms": 210.858,
+      "max_wall_monotonic_gap_ms": 0.002792,
+      "min_call_ms": 0.011
+    },
+    "sql/begin": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 52.6406050000002,
+      "errors": 0,
+      "max_call_ms": 191.666,
+      "max_wall_monotonic_gap_ms": 0.002584,
+      "min_call_ms": 0.006
+    },
+    "sql/commit": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 27.13415400000001,
+      "errors": 0,
+      "max_call_ms": 150.028,
+      "max_wall_monotonic_gap_ms": 0.002167,
+      "min_call_ms": 0.039
+    },
+    "sql/insert_message_including_trigger": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 61.953775000000036,
+      "errors": 0,
+      "max_call_ms": 162.324,
+      "max_wall_monotonic_gap_ms": 0.002125,
+      "min_call_ms": 0.099
+    },
+    "sql/life_archived": {
+      "calls": 400,
+      "elapsed_call_seconds_sum": 1.881706000000001,
+      "errors": 0,
+      "max_call_ms": 107.977,
+      "max_wall_monotonic_gap_ms": 0.001833,
+      "min_call_ms": 0.067
+    },
+    "sql/life_hard_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 0.8494630000000002,
+      "errors": 0,
+      "max_call_ms": 82.937,
+      "max_wall_monotonic_gap_ms": 0.001708,
+      "min_call_ms": 0.086
+    },
+    "sql/life_trash_expired": {
+      "calls": 200,
+      "elapsed_call_seconds_sum": 1.146098,
+      "errors": 0,
+      "max_call_ms": 54.888,
+      "max_wall_monotonic_gap_ms": 0.001125,
+      "min_call_ms": 0.069
+    },
+    "sql/quota_mailbox_update": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 133.8060830000002,
+      "errors": 0,
+      "max_call_ms": 176.912,
+      "max_wall_monotonic_gap_ms": 0.002542,
+      "min_call_ms": 0.067
+    },
+    "store": {
+      "calls": 4000,
+      "elapsed_call_seconds_sum": 742.7357890000018,
+      "errors": 0,
+      "max_call_ms": 634.762,
+      "max_wall_monotonic_gap_ms": 0.007917,
+      "min_call_ms": 13.09
+    }
+  },
+  "cleanup": {
+    "Go": {
+      "budget_seconds": 300,
+      "complete": true,
+      "elapsed_wall_seconds_including_init_execution_cleanup": 71.357305,
+      "owned_database_absent": true,
+      "owned_object_root_absent": true,
+      "profiles_stopped_and_closed": true,
+      "watcher_joined": true
+    },
+    "Go_owned_rawobjects_deleted_profiles_private_retained": true,
+    "actual_native_ps_afterward_exit": 1,
+    "all_phase_groups_gone": true,
+    "base_database_and_stopped_native_cluster_data_private_retained": true,
+    "diagnostic_DB_remaining": [],
+    "native_PID_socket_pidfile_absent": {
+      "native_PID_absent": true,
+      "pidfile_absent": true,
+      "socket_absent": true
+    },
+    "native_owned_PID": 47104,
+    "native_stop_exit": 0,
+    "parent_group_gone": true,
+    "separate_profile_analysis_groups_gone": true
+  },
+  "controller_exact_approved_sha256": "f5b3b8a18b624aa966b0324b42bfc0420a75e6edc6754ce37943baed9ebfc474",
+  "controller_exit": 0,
+  "entry_source_path": "/private/tmp/tm-r5mcause490-source-candidate.m6i__06a/mcause-controller-v4-prepared-only.py",
+  "first487_infra_error_not_overwritten": true,
+  "local_cause_observations": [
+    "Fresh4k captured only1PG Lock row/blockingPIDedge; cannot attribute advisory250.982s or quota133.806s CLIENT aggregate callspan to actualPG lockwait. Most sampled rows6191/6775 are ClientRead.",
+    "FS dirsync call sums83.803leaf/52.938parent/10.882root and FileSync31.822 are observed call-wall sums including rescheduling, not hardwareIO; nestedPut206.872 is not additive to those or Store742.736.",
+    "FirstStore20s trace sched Fsync47.373s is aggregate runnable scheduling delay, explicitly not FileSync/device latency; syscall34.85s pgx read and CPU3.43s separate profile categories.",
+    "Fresh4k/initial5k mailbox shape does not certify late753k heap behavior or million-message capacity. No durability/SQL/index/planner override or M budget change."
+  ],
+  "lookahead": {
+    "emitted_inputs": 4000,
+    "fifo_gate_call_elapsed_seconds_sum": 1.628108,
+    "generated_inputs": 4000,
+    "joined_fifo_inflight": 0,
+    "max_unpersisted_buffered_inputs": 100,
+    "ordinal_fifo_completed_jobs": 4000
+  },
+  "observer_overhead_overlapping_sums_not_extraWall": {
+    "record_callback_wall_seconds_sum": 10.910539,
+    "resource_walk_query_wall_seconds_sum": 1.438636,
+    "sampler_call_wall_seconds_sum": 18.55541,
+    "scope": "actual observer callback/query elapsed sums overlap workloads, not added wall, not total instrumentation CPU"
+  },
+  "original_M_10800_failure_and_source_unchanged": true,
+  "original_absolute300_deadline": 1790960845.8643909,
+  "original_origin_ns": 1790960545864391000,
+  "outer_disk_guard": {
+    "atomic_quota": false,
+    "cap1GiB": 1073741824,
+    "complete": 519,
+    "incomplete": 2,
+    "maximum_actual_complete_gap_seconds": 0.49329614639282227,
+    "peak_observed_allocated_bytes": 344551424,
+    "samples": 521,
+    "scope": "nativePGdataWALlogs+ownedTMPDIRobjectsprofilesbootstrapcompiler",
+    "sticky_history_failures": [],
+    "wall_reversal_sticky": false
+  },
+  "parent_observed_controller_exit_since_original_native_origin": 71.88752222061157,
+  "parser_actual_parent31s_admission_fits": true,
+  "postcapture_profile_analysis": {
+    "elapsed_seconds": 3.715643882751465,
+    "noGoTest_noPG_noFSbenchmarkrerun": true,
+    "results": {
+      "CPU-top": {
+        "elapsed": 0.9216411113739014,
+        "exit": 0,
+        "group_gone": true
+      },
+      "sched-top": {
+        "elapsed": 0.21019411087036133,
+        "exit": 0,
+        "group_gone": true
+      },
+      "sync-top": {
+        "elapsed": 0.21174097061157227,
+        "exit": 0,
+        "group_gone": true
+      },
+      "syscall-top": {
+        "elapsed": 0.20667815208435059,
+        "exit": 0,
+        "group_gone": true
+      },
+      "trace-sched": {
+        "elapsed": 0.6284408569335938,
+        "exit": 0,
+        "group_gone": true
+      },
+      "trace-sync": {
+        "elapsed": 0.7224991321563721,
+        "exit": 0,
+        "group_gone": true
+      },
+      "trace-syscall": {
+        "elapsed": 0.5266890525817871,
+        "exit": 0,
+        "group_gone": true
+      }
+    },
+    "scope": "postcapture profile analysis only, separately bounded; not included in measured diagnostic stagewall",
+    "within30": true
+  },
+  "profile_files_bytes": {
+    "cpu.pprof": 14258,
+    "runtime.trace": 7246559
+  },
+  "profiles_actual_closed": {
+    "closed_unix_seconds": 1790960593.571646,
+    "elapsed_wall_seconds": 20.063016,
+    "started_unix_seconds": 1790960573.50863,
+    "target_seconds": 20
+  },
+  "schema_version": 1,
+  "scope": "1000employees5000mailboxes4000 fresh M-shaped Store cause diagnostic only; not original1M retry or baseline",
+  "six_actual_canonical_streams": [
+    {
+      "row_count": 2,
+      "sha256": "52bb8abf43f2b8d1c70a857875517f9d67f71d29c71df8fd8c4d422782214319",
+      "stream_id": 0
+    },
+    {
+      "row_count": 4000,
+      "sha256": "60a2ca1e7156e99cddb8e08f0d4c15b664f5f6204496d9edcb0ee2b36e798086",
+      "stream_id": 1
+    },
+    {
+      "row_count": 4000,
+      "sha256": "76b20d67be2af5c868dd7854505ecbd07b42e5dba6ff693e6ff6df662a893324",
+      "stream_id": 2
+    },
+    {
+      "row_count": 16000,
+      "sha256": "dc20099987e1f66f9d5c9d74a2ecab5ff36db49df92ca9409cc3c6f0c602d1c6",
+      "stream_id": 3
+    },
+    {
+      "row_count": 1002,
+      "sha256": "522251080c0cbc14729d9aff2155dc8cbd549cf47435fa0f669dafd460136ba6",
+      "stream_id": 4
+    },
+    {
+      "row_count": 5000,
+      "sha256": "19f3515a9fd90626e4615217c4c85758cbb6283dc4268d7e192d416d5607a9db",
+      "stream_id": 5
+    }
+  ],
+  "skips": 0,
+  "source_provenance": "original16 M declared482 + same7observer changes +3 originalMphysical goEmbed assets; first4870test infra preserved separately",
+  "source_sha": "7091c32e26f40d97edff38a6a49b1c22bfa12378",
+  "span_measurement_boundary": "overlapping client/call wall including rescheduling; nested+parallel sums are not stagewall or hardware IO duration",
+  "stage_wall_seconds": {
+    "Go_body_capture_wall_seconds": 59.749077,
+    "claim_stage_wall_seconds": 0.15443699999999994,
+    "company_wall_seconds": 16.168787000000002,
+    "parse_complete_stage_wall_seconds": 2.4396609999999983,
+    "pipeline_wall_seconds": 42.901191,
+    "store_stage_wall_seconds": 40.20706099999999
+  },
+  "subtests": 0,
+  "terminal_preparation": {
+    "active_budget": 20,
+    "claim_calls": 201,
+    "claim_parameters_sha256": "49e165525ebdb26f765e7bbab7689c4772a55771dd3ce3b1786d75188895cf03",
+    "claim_query_sha256": "8930cfa62fdbc458ed9fea0200e07074adeebc1583d37375d5b3f29615ebf9a0",
+    "claim_wall_seconds": 0.15443699999999994,
+    "company_wall_seconds": 16.168787000000002,
+    "final_empty_claim": true,
+    "joined_completed_jobs": 4000,
+    "joined_inflight": 0,
+    "joined_ready_before_last_claim": 4000,
+    "joined_stored_messages": 4000,
+    "last_claim_batch": 0,
+    "last_claim_wall_seconds": 0.0006659999999999999,
+    "max_active": 20,
+    "max_claim_batch": 20,
+    "max_wall_monotonic_gap_ms": 0.183375,
+    "max_window_messages": 20,
+    "method": "bounded_store_claim_complete_window_v1",
+    "parse_complete_wall_seconds": 2.4396609999999983,
+    "parser_canceled_joined_calls": 0,
+    "parser_join_policy": "uncancelled_document_wait_with_31s_absolute_wall_admission_guard",
+    "parser_join_reserve_seconds": 31,
+    "parser_joined_call_wall_seconds_sum": 17.680221,
+    "parser_joined_calls": 4000,
+    "parser_joined_inflight": 0,
+    "parser_min_start_remaining_wall_seconds": 120.782326,
+    "parser_original_deadline_unix_seconds": 1790960737.166374,
+    "parser_quiescent": true,
+    "pending_upper_bound": 20,
+    "phase": "terminal",
+    "pipeline_wall_seconds": 42.901191,
+    "producer_done": true,
+    "sql_ready_count": 4000,
+    "store_wall_seconds": 40.20706099999999
+  },
+  "test_actual_run_pass_count": 1,
+  "unexpected_tests": [],
+  "verdict": "BOUNDED_DIAGNOSTIC_ACTUAL_PASS_pending_independent_actual_review"
+}

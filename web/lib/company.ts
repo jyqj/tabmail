@@ -7,20 +7,25 @@ import type {
   AdminUser,
 } from "./types";
 import { request, type RequestOptions } from "./api/base";
+import { parseReceiptListResponse, parseReceiptResponse, parseContentResponse,
+  type OrdinaryReceipt, type ReceiptCapabilities, type ReceiptStatus, type LiveSubmissionContent } from "./receipt-types";
+import { assertSession, sessionScope } from "./session";
 
 // Outbound send policy vocabulary shared by the company default and the
 // per-mailbox override. Kept in sync with authz.MailSendPolicy on the server.
 export type MailSendPolicy = "free" | "template_required" | "disabled";
 
 export interface CompanySettings {
-  tenant_id?: string;
+  tenant_id: string;
   name: string;
   primary_zone_id: string;
-  domain?: string;
+  domain: string;
   revision: number;
   /** Company-wide default send policy. Omitted on input = leave unchanged. */
   mail_send_policy?: MailSendPolicy;
 }
+export type CompanySettingsInput = Pick<CompanySettings,
+  "name" | "primary_zone_id" | "revision" | "mail_send_policy">;
 export interface WorkMailbox {
   mailbox: Mailbox;
   can_read: boolean;
@@ -30,18 +35,19 @@ export interface WorkMailbox {
   revision: number;
 }
 export interface WorkGrant {
-  /** Read-side metadata is optional while constructing an editable grant. */
-  tenant_id?: string;
-  mailbox_id?: string;
+  tenant_id: string;
+  mailbox_id: string;
   granted_by?: string;
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
   user_id: string;
   can_read: boolean;
   can_organize: boolean;
   can_send: boolean;
   template_only: boolean;
 }
+export type WorkGrantInput = Pick<WorkGrant,
+  "user_id" | "can_read" | "can_organize" | "can_send" | "template_only">;
 export interface MailboxGrantSnapshot {
   revision: number;
   grants: WorkGrant[];
@@ -70,13 +76,15 @@ export interface TemplateDraft {
   variables: TemplateVariable[];
 }
 export interface MailTemplate {
-  id?: string;
+  id: string;
   name: string;
   draft: TemplateDraft;
   revision: number;
-  retired?: boolean;
-  updated_at?: string;
+  retired: boolean;
+  updated_at: string;
 }
+export type MailTemplateInput = Pick<MailTemplate, "name" | "draft" | "revision">;
+export type MailTemplateEditor = MailTemplate | (MailTemplateInput & { id?: never; retired?: never });
 export interface TemplateVersion {
   id: string;
   template_id: string;
@@ -125,13 +133,22 @@ export interface DraftTemplateVersion {
   snapshot?: TemplateDraft;
 }
 export interface MailDraft {
-  id?: string;
+  id: string;
   mailbox_id: string;
   payload: DraftPayload;
   template_version?: DraftTemplateVersion;
   revision: number;
-  updated_at?: string;
+  updated_at: string;
 }
+// Creation may supply a client-owned id for exact replay. Response metadata
+// can be echoed, but neither an id nor a server timestamp is invented by a form.
+export type MailDraftInput = Omit<MailDraft, "id" | "updated_at"> &
+  Partial<Pick<MailDraft, "id" | "updated_at">>;
+export type NewMailDraft = Pick<MailDraft, "mailbox_id" | "payload" | "template_version"> & {
+  id?: string;
+  revision: 0;
+};
+export type MailDraftEditor = MailDraft | NewMailDraft;
 export interface MailAttachment {
   id: string;
   mailbox_id: string;
@@ -167,59 +184,16 @@ export interface RecoveryTarget {
   state: string;
   error?: string;
 }
-export type SubmissionStatus =
-  | "cancelled"
-  | "submitted"
-  | "waiting"
-  | "sending"
-  | "partially_accepted"
-  | "accepted"
-  | "needs_attention";
+// Ordinary receipts never contain addresses, subjects, headers or body data.
+export type SubmissionStatus = ReceiptStatus;
 export interface SubmissionRecipient {
   address: string;
   state: string;
 }
-// Employee-facing projection of an outbound submission. Queue-internal fields
-// (attempts, leases, SMTP responses) stay in the recovery/operations surface.
-// Interaction hints projected by the server for one submission receipt. They
-// express what the interface may offer — they are never authorization
-// credentials, and every action re-runs the full authorization chain
-// server-side. Omitted on stale cached data.
-export interface SubmissionCapabilities {
-  view_content: boolean;
-  retry: boolean;
-  retry_block_reason?: string;
-}
-export interface Submission {
-  id: string;
-  mailbox_id: string;
-  from: string;
-  subject: string;
-  recipients: SubmissionRecipient[];
-  status: SubmissionStatus;
-  template_version_id?: string;
-  draft_consumed: boolean;
-  attachment_count: number;
-  created_at: string;
-  content_redacted: boolean;
-  delivery_uncertain: boolean;
-  capabilities?: SubmissionCapabilities;
-}
-// The actual sent message for a readable submission. Recipients are the
-// structural To/CC columns; BCC and queue internals are never projected, and
-// custom headers arrive already filtered to the wire-safe subset.
-export interface SubmissionContent {
-  id: string;
-  subject: string;
-  from: string;
-  to: string[];
-  cc?: string[];
-  headers?: Record<string, string>;
-  text_body?: string;
-  html_body?: string;
-  created_at: string;
-  content_redacted: boolean;
-}
+export type SubmissionCapabilities = ReceiptCapabilities;
+export type Submission = OrdinaryReceipt;
+// Only a current-readable live content GET may expose structural recipients.
+export type SubmissionContent = LiveSubmissionContent;
 // Metadata of an attachment pinned to a sent submission. Storage keys stay
 // server-side; downloads go through the per-submission download endpoint.
 export interface SubmissionAttachment {
@@ -364,23 +338,30 @@ export function workMessage(id: string, message: string) {
     `${workPath(id)}/messages/${encodeURIComponent(message)}`,
   );
 }
-export function submissions(page: number) {
-  return request<APIListResponse<Submission>>(
-    "/api/v1/company/submissions",
-    { params: { page, per_page: 30 } },
-  );
+export async function submissions(page: number) {
+  const scope = sessionScope();
+  const tenantId = typeof window === "undefined" ? undefined : localStorage.getItem("tabmail_tenant_id");
+  const result = await request<unknown>("/api/v1/company/submissions", { params: { page, per_page: 30 } });
+  assertSession(scope);
+  return parseReceiptListResponse(result, { tenantId });
 }
-export function submission(id: string) {
-  return company<Submission>(`/submissions/${encodeURIComponent(id)}`);
+export async function submission(id: string) {
+  const scope = sessionScope();
+  const tenantId = typeof window === "undefined" ? undefined : localStorage.getItem("tabmail_tenant_id");
+  const result = await request<unknown>(`/api/v1/company/submissions/${encodeURIComponent(id)}`);
+  assertSession(scope);
+  return parseReceiptResponse(result, { id, tenantId });
 }
-export function submissionContent(id: string) {
-  return company<SubmissionContent>(
-    `/submissions/${encodeURIComponent(id)}/content`,
-  );
+export async function submissionContent(id: string, signal?: AbortSignal) {
+  const scope = sessionScope();
+  const result = await request<unknown>(`/api/v1/company/submissions/${encodeURIComponent(id)}/content`, { signal });
+  assertSession(scope);
+  return parseContentResponse(result, id);
 }
-export function submissionAttachments(id: string) {
+export function submissionAttachments(id: string, signal?: AbortSignal) {
   return company<SubmissionAttachment[]>(
     `/submissions/${encodeURIComponent(id)}/attachments`,
+    { signal },
   );
 }
 export async function allEmployees(): Promise<AdminUser[]> {

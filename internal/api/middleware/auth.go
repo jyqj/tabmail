@@ -232,10 +232,17 @@ func PermissionLoader(st permStore) func(http.Handler) http.Handler {
 //  1. Authorization: Bearer <JWT>  → logged-in user (admin or regular user)
 //  2. X-API-Key                    → tenant API key
 //  3. no credentials               → public tenant
-func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handler) http.Handler {
+func Auth(st authStore, jwtSecret string, publicTenantID string, states ...*AuthState) func(http.Handler) http.Handler {
+	var state *AuthState
+	if len(states) > 0 {
+		state = states[0]
+	}
+	if state == nil {
+		state = NewAuthState(nil)
+	}
 	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
+		return state.owner.Wrap(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), authStateKey{}, state)
 
 			// Layer 1: JWT Bearer token (logged-in user)
 			if bearer := extractBearer(r); bearer != "" {
@@ -317,7 +324,10 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 				ctx = context.WithValue(ctx, ctxTenant, tenant)
 				if keyID != nil {
 					ctx = context.WithValue(ctx, ctxAPIKeyID, keyID)
-					touchAPIKeyAsync(st, *keyID, r.RemoteAddr)
+					if err := touchAPIKeyAsync(ctx, st, state, *keyID, r.RemoteAddr); err != nil {
+						writeError(w, http.StatusInternalServerError, "INTERNAL", "background ownership unavailable")
+						return
+					}
 				}
 
 				// If the API key has an owner, verify the owner is still active
@@ -343,7 +353,7 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 					// Merge zone allowlists fail-closed: the key may only narrow the owner's
 					// current permission, never expand it if the owner's profile changes later.
 					if len(allowedZoneIDs) > 0 {
-						ownerPerm.AllowedZoneIDs = intersectAllowedZones(ownerPerm.AllowedZoneIDs, allowedZoneIDs)
+						ownerPerm.NarrowZones(allowedZoneIDs)
 					}
 					ctx = context.WithValue(ctx, ctxPermission, ownerPerm)
 					ctx = context.WithValue(ctx, ctxOwnerUserID, ownerUserID)
@@ -376,7 +386,7 @@ func Auth(st authStore, jwtSecret string, publicTenantID string) func(http.Handl
 			ctx = context.WithValue(ctx, ctxAuthMode, AuthModePublic)
 			ctx = context.WithValue(ctx, ctxTenant, pub)
 			next.ServeHTTP(w, r.WithContext(ctx))
-		})
+		}))
 	}
 }
 

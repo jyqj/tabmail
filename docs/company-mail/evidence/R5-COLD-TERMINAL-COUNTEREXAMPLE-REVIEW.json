@@ -1,0 +1,29 @@
+{
+  "scope": "new independent mock CLI terminal alarm counterexample; no Node/npm/build/PG",
+  "candidate_runner_sha256": "baccc2cea142716cf713cb93b44ff8bfa86ec8e93e63614beac91e2f52b653e2",
+  "actual_cli_return_code": 1,
+  "elapsed_seconds": 1.0097377079999998,
+  "raw_stdout": "{\"status\": \"cold_next_build_passed\", \"evidence\": \"/private/tmp/tabmail-r5-cold-finalreceipt-counterexample.funRtyBT/cli-evidence\"}\n{\"status\": \"failed\", \"error\": \"absolute cold-build lifecycle deadline expired\", \"passed\": false}\n",
+  "trace": [
+    {
+      "stage": "final_receipt",
+      "timer_remaining": 0.997475,
+      "status_before_write": "cold_next_build_passed"
+    }
+  ],
+  "cold_receipt_status": "cold_next_build_passed",
+  "cold_receipt_pass": true,
+  "lifecycle_receipt_exists": false,
+  "error_json_exists": false,
+  "handler_restored": true,
+  "timer_after": [
+    0.0,
+    0.0
+  ],
+  "timer_before": [
+    0.0,
+    0.0
+  ],
+  "no_children_spawned": true,
+  "counterexample_confirmed": true
+}

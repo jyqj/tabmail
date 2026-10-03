@@ -57,10 +57,10 @@ type RetryPolicy[T any] interface {
 // ExponentialBackoff implements ingest's backoff: base*2^min(attempts-1, capExp)
 // plus uniform jitter in [0, jitter). A job is dead once Attempts >= maxRetries.
 type ExponentialBackoff[T any] struct {
-	Base    time.Duration
-	CapExp  int        // exponent cap (ingest uses 8)
-	Jitter  func() time.Duration
-	Max     int        // dead boundary in post-claim attempts (>= maxRetries)
+	Base   time.Duration
+	CapExp int // exponent cap (ingest uses 8)
+	Jitter func() time.Duration
+	Max    int // dead boundary in post-claim attempts (>= maxRetries)
 }
 
 func (p ExponentialBackoff[T]) Dead(job *Job[T]) bool { return job.Attempts >= p.Max }
@@ -113,9 +113,9 @@ func (p FixedBackoff[T]) NextAttempt(*Job[T]) time.Duration { return p.Base }
 // policy reads it via the maxAttempts func so the concrete payload type stays
 // out of this package.
 type ExponentialCappedBackoff[T any] struct {
-	Base         time.Duration
-	Cap          time.Duration
-	MaxAttempts  func(job *Job[T]) int
+	Base        time.Duration
+	Cap         time.Duration
+	MaxAttempts func(job *Job[T]) int
 }
 
 func (p ExponentialCappedBackoff[T]) Dead(job *Job[T]) bool {
@@ -155,7 +155,7 @@ type Hooks[T any] interface {
 // noopHooks is the default when none are supplied.
 type noopHooks[T any] struct{}
 
-func (noopHooks[T]) OnDone(context.Context, *Job[T])        {}
+func (noopHooks[T]) OnDone(context.Context, *Job[T])         {}
 func (noopHooks[T]) OnRetry(context.Context, *Job[T], error) {}
 func (noopHooks[T]) OnDead(context.Context, *Job[T], error)  {}
 
@@ -167,8 +167,8 @@ func (noopHooks[T]) OnDead(context.Context, *Job[T], error)  {}
 type Handler[T any] func(ctx context.Context, job *Job[T]) error
 
 // Worker drives a claim loop against one Store. Run blocks until ctx is
-// cancelled (ingest/hooks shape); Start launches a goroutine and Stop waits
-// for the in-flight batch to finish (outbound shape).
+// cancelled (ingest/hooks shape); Start launches a goroutine. Stop preserves
+// the legacy graceful batch join; StopContext cancels and bounds the join.
 type Worker[T any] struct {
 	store        Store[T]
 	handler      Handler[T]
@@ -179,9 +179,25 @@ type Worker[T any] struct {
 	batchSize    int
 	logger       zerolog.Logger
 
-	wg       sync.WaitGroup
-	stopCh   chan struct{}
-	stopOnce sync.Once
+	// lifecycleMu protects generation membership and admission, never I/O.
+	lifecycleMu sync.Mutex
+	generation  *workerGeneration
+}
+
+// A timed-out shutdown retains its generation until every registered runner
+// actually exits. In particular, timeout is not permission to start a replacement.
+// Multiple Run callers share the generation without serializing their work.
+type workerGeneration struct {
+	stopCh    chan struct{}
+	done      chan struct{}
+	stopping  bool
+	cancelled bool
+	runners   map[*workerRun]struct{}
+}
+
+type workerRun struct {
+	ctx    context.Context
+	cancel context.CancelFunc
 }
 
 // NewWorker constructs a Worker. leaseTTL is kept for readability but the
@@ -219,68 +235,177 @@ func NewWorker[T any](
 	}
 }
 
-// Run processes batches until ctx is cancelled. Each iteration claims a batch,
-// runs every job through processOne, then waits for either ctx.Done or the
-// poll ticker. Matches the legacy ingest/hooks loop shape.
+// Run processes immediately, then polls until its context or the generation is
+// stopped. Concurrent Run callers retain their independent processing capacity.
 func (w *Worker[T]) Run(ctx context.Context) {
+	g, r := w.register(ctx, false)
+	if r == nil {
+		return
+	}
+	w.run(g, r, true)
+}
+
+// Start launches one background runner, preserving the initial poll delay.
+// Repeated Start calls while any runner is active are no-ops, including during a
+// timed-out shutdown. A new generation can start only after the old one exits.
+func (w *Worker[T]) Start(ctx context.Context) {
+	g, r := w.register(ctx, true)
+	if r != nil {
+		go w.run(g, r, false)
+	}
+}
+
+func (w *Worker[T]) register(ctx context.Context, start bool) (*workerGeneration, *workerRun) {
+	w.lifecycleMu.Lock()
+	defer w.lifecycleMu.Unlock()
+	if ctx.Err() != nil {
+		return nil, nil
+	}
+	g := w.generation
+	if g != nil && len(g.runners) != 0 {
+		if g.stopping || start {
+			return nil, nil
+		}
+	} else {
+		g = &workerGeneration{stopCh: make(chan struct{}), done: make(chan struct{}), runners: make(map[*workerRun]struct{})}
+		w.generation = g
+	}
+	runCtx, cancel := context.WithCancel(ctx)
+	r := &workerRun{ctx: runCtx, cancel: cancel}
+	g.runners[r] = struct{}{}
+	return g, r
+}
+
+func (w *Worker[T]) finish(g *workerGeneration, r *workerRun) {
+	r.cancel()
+	w.lifecycleMu.Lock()
+	defer w.lifecycleMu.Unlock()
+	delete(g.runners, r)
+	if len(g.runners) == 0 {
+		close(g.done)
+	}
+}
+
+func (w *Worker[T]) run(g *workerGeneration, r *workerRun, immediate bool) {
+	defer w.finish(g, r)
 	ticker := time.NewTicker(w.pollInterval)
 	defer ticker.Stop()
+	if immediate {
+		w.processManagedBatch(r.ctx, g)
+	}
 	for {
-		w.processBatch(ctx)
 		select {
-		case <-ctx.Done():
+		case <-g.stopCh:
+			return
+		case <-r.ctx.Done():
 			return
 		case <-ticker.C:
+			w.processManagedBatch(r.ctx, g)
 		}
 	}
 }
 
-// Start launches Run in a goroutine. Use Stop to wait for the in-flight batch
-// to finish. Matches the legacy outbound loop shape.
-func (w *Worker[T]) Start(ctx context.Context) {
-	w.stopCh = make(chan struct{})
-	w.wg.Add(1)
-	go func() {
-		defer w.wg.Done()
-		ticker := time.NewTicker(w.pollInterval)
-		defer ticker.Stop()
-		for {
-			select {
-			case <-w.stopCh:
-				return
-			case <-ctx.Done():
-				return
-			case <-ticker.C:
-				w.processBatch(ctx)
-			}
+// stopGeneration linearizes shutdown with claim/handler admission. Calls that
+// were admitted before shutdown are in flight and receive cancellation; no
+// lock is held across Store, Handler or Hooks code that might ignore context.
+func (w *Worker[T]) stopGeneration(cancel bool) *workerGeneration {
+	w.lifecycleMu.Lock()
+	defer w.lifecycleMu.Unlock()
+	g := w.generation
+	if g == nil {
+		return nil
+	}
+	if !g.stopping {
+		g.stopping = true
+		close(g.stopCh)
+	}
+	if cancel && !g.cancelled {
+		g.cancelled = true
+		for r := range g.runners {
+			r.cancel()
 		}
-	}()
+	}
+	return g
 }
 
-// Stop signals a Start-ed worker to exit and waits for the goroutine to drain.
-// In-flight processOne calls finish before the goroutine returns because
-// processBatch is synchronous.
+// Stop preserves the legacy graceful contract: stop new claims, finish the
+// already-claimed batch and wait for all registered runners, without cancelling
+// their contexts. It is intentionally unbounded. A concurrent StopContext may
+// upgrade that same generation to cancellation. Production callers that need a
+// deadline must explicitly migrate to StopContext and handle its error.
 func (w *Worker[T]) Stop() {
-	if w.stopCh != nil {
-		w.stopOnce.Do(func() { close(w.stopCh) })
+	if g := w.stopGeneration(false); g != nil {
+		<-g.done
 	}
-	w.wg.Wait()
 }
 
-// ProcessBatch runs a single claim+process cycle without waiting on the poll
-// ticker. It is intended for tests and synchronous drivers; the normal entry
-// points are Run (blocking) and Start/Stop (background).
+// StopContext stops new claims and job dispatch, cancels in-flight contexts and
+// waits for actual runner exit. nil means all runners (including marks/hooks)
+// have exited, NOT that all durable jobs completed successfully. ctx.Err() means
+// drain was not observed by the deadline/cancellation; the generation remains
+// owned and cannot overlap a replacement. Retrying StopContext waits on it again.
+// Even an already-cancelled ctx signals shutdown. No goroutine is detached to
+// fake a successful join. The caller must supply a deadline for a bounded wait.
+// Unfinished/unstarted jobs retain their existing durable lease for recovery;
+// this method does not acknowledge, requeue, or release them.
+func (w *Worker[T]) StopContext(ctx context.Context) error {
+	g := w.stopGeneration(true)
+	if g == nil {
+		return nil
+	}
+	select {
+	case <-g.done:
+		return nil
+	default:
+	}
+	select {
+	case <-g.done:
+		return nil
+	case <-ctx.Done():
+		// Prefer an already-completed join over a simultaneously expired budget.
+		select {
+		case <-g.done:
+			return nil
+		default:
+			return ctx.Err()
+		}
+	}
+}
+
+// ProcessBatch registers one synchronous claim+process cycle in the current
+// generation. It can run concurrently with Run; shutdown joins it as well.
 func (w *Worker[T]) ProcessBatch(ctx context.Context) {
-	w.processBatch(ctx)
+	g, r := w.register(ctx, false)
+	if r == nil {
+		return
+	}
+	defer w.finish(g, r)
+	w.processManagedBatch(r.ctx, g)
 }
 
 func (w *Worker[T]) processBatch(ctx context.Context) {
+	w.processManagedBatch(ctx, nil)
+}
+
+func (w *Worker[T]) admit(ctx context.Context, g *workerGeneration, claim bool) bool {
+	w.lifecycleMu.Lock()
+	defer w.lifecycleMu.Unlock()
+	return ctx.Err() == nil && (g == nil || (!g.cancelled && (!claim || !g.stopping)))
+}
+
+func (w *Worker[T]) processManagedBatch(ctx context.Context, g *workerGeneration) {
+	if !w.admit(ctx, g, true) {
+		return
+	}
 	jobs, err := w.store.Claim(ctx, time.Now().UTC(), w.batchSize)
 	if err != nil {
 		w.logger.Warn().Err(err).Msg("workqueue: claim")
 		return
 	}
 	for _, job := range jobs {
+		if !w.admit(ctx, g, false) {
+			return
+		}
 		w.processOne(ctx, job)
 	}
 }
@@ -291,6 +416,12 @@ func (w *Worker[T]) processBatch(ctx context.Context) {
 // panicking (the job was re-claimed by another worker).
 func (w *Worker[T]) processOne(ctx context.Context, job *Job[T]) {
 	err := w.handler(ctx, job)
+	// Cancellation is not a terminal job outcome. A handler may have returned
+	// nil despite cancellation, or may have performed its own durable checkpoint.
+	// Do not invent a completion/retry/dead mark; leave recovery to the lease owner.
+	if ctx.Err() != nil {
+		return
+	}
 	if err == nil {
 		if markErr := w.store.MarkDone(ctx, job); markErr != nil {
 			if errors.Is(markErr, ErrLeaseLost) {

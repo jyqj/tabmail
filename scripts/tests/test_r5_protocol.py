@@ -301,7 +301,9 @@ class SharedInfrastructureCannotBeProductGreenTests(unittest.TestCase):
         def process(command,**kwargs):
             if command[0]=='git':return subprocess.CompletedProcess(command,0,'fixture-source\n','')
             return subprocess.CompletedProcess(command,0 if failure=='missing_runtime_consumer' else 1,'\n'.join(map(json.dumps,events)),'')
-        with tempfile.TemporaryDirectory() as tmp,patch.object(protocol,'source_closure',return_value={}),patch.object(protocol.subprocess,'run',side_effect=process),patch.dict(protocol.os.environ,{'TABMAIL_TEST_DB_DSN':'disposable-unit-test-not-connected'}):
+        # Classifier-only synthetic metadata; real v2 capture is tested separately.
+        identity={'source_sha':'a'*40,'source_identity_kind':protocol.source_inventory.KIND,'policy':protocol.source_inventory.POLICY,'source_identity_boundary':'synthetic classifier fixture, not captured source evidence'}
+        with tempfile.TemporaryDirectory() as tmp,patch.object(protocol,'source_closure',return_value={}),patch.object(protocol,'protocol_source_metadata',return_value=identity),patch.object(protocol,'current_protocol_environment',return_value={}),patch.object(protocol.subprocess,'run',side_effect=process),patch.dict(protocol.os.environ,{'TABMAIL_TEST_DB_DSN':'disposable-unit-test-not-connected'}):
             return protocol.run_shared(data,'db',Path(tmp)/'fresh')
 
     def test_compile_panic_timeout_unknown_error_and_missing_runtime_are_not_green(self):

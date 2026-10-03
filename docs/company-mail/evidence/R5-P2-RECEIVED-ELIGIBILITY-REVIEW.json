@@ -1,0 +1,351 @@
+{
+  "M_L_executed": false,
+  "actual_composed_leaf_case_count": 53,
+  "actual_full_prefix_top_count": 10,
+  "actual_security_RED_leaf_failures": 15,
+  "actual_security_RED_phases": [
+    "original-red-canonical",
+    "late-red-canonical",
+    "late-red-canonical-remainder2"
+  ],
+  "baseline_active_EOF_positive_passed": true,
+  "composed_leaf_cases": [
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/db-error"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/domain"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/epoch"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/foreign"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/frozen"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/grant"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/id-reuse"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/none"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPCurrentAuthorityAndResourceBinding/wrong-mailbox"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPDeadlineAfterMailboxWait/conversation"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPDeadlineAfterMailboxWait/detail"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPDeadlineAfterMailboxWait/list"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPDeadlineAfterMailboxWait/source"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPDeadlineAfterMailboxWait/summary"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPEmptyEOFRechecksAuthority/active"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPEmptyEOFRechecksAuthority/db-error"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPEmptyEOFRechecksAuthority/grant"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPEmptyEOFRechecksAuthority/mailbox-expiry"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPEmptyEOFRechecksAuthority/message-expiry"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPExpiryAndWarmCache/archive-expiry"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPExpiryAndWarmCache/expiry"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPExpiryAndWarmCache/purge"
+    },
+    {
+      "package": "tabmail/internal/api",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentHTTPExpiryAndWarmCache/trash-expiry"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/active"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/archive-expiry"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/equality"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/expiry"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/null-deadline"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/purge"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/shared-null-historical"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/shared-zero-historical"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/trash-expiry"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentEligibilityMatrix/trash-live"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait/conversation"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait/detail"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait/list"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait/parsed"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait/save-parsed"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksDeadlineAfterAuthorizationWait/summary"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksExpiryAtObjectBoundaries/detail"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksExpiryAtObjectBoundaries/first-byte"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksExpiryAtObjectBoundaries/ordinal"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksExpiryAtObjectBoundaries/source"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedContentRechecksExpiryAtObjectBoundaries/stable-part"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedConversationMembersAndSearchAreEligible"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "206d862c56884ca827d14a52366e091968c805f9",
+      "test": "TestR5ReceivedEligibilityAfterLaterWaits/conversation-root"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "206d862c56884ca827d14a52366e091968c805f9",
+      "test": "TestR5ReceivedEligibilityAfterLaterWaits/list-count-page"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedEligibilityAfterLaterWaits/save-mailbox"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedEligibilityAfterLaterWaits/save-message"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedEligibilityAfterLaterWaits/save-new-document"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedEligibilityAfterLaterWaits/summary-personal-mailbox"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedEligibilityAfterLaterWaits/summary-shared-mailbox"
+    },
+    {
+      "package": "tabmail/internal/store/postgres",
+      "passed_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+      "test": "TestR5ReceivedPersonalHistoricalExpiryIsExempt"
+    }
+  ],
+  "coverage": [
+    "shared actual expiry snapshot/null/zero historical cases, independent purge/archive/trash and owner-personal historical exemption",
+    "fresh deadline recheck after actor/mailbox authorization waits; source/parts/object-open/first-byte/cache boundaries",
+    "conversation eligible members/search, typed list count/page merged state coherent under relation lock waits",
+    "existing/new parsed document UPSERT deadline rollback; shared/personal mailbox summary postwait deadline",
+    "HTTP warm cache/all received endpoints/current frozen/epoch/grant/domain/foreign/resource binding/DB fault no payload",
+    "shipping empty EOF active200; current message/mailbox expiry404, grant403, DB fault500 with no stale success"
+  ],
+  "created_utc": "2026-10-01T22:19:41.856450+00:00",
+  "full_prefix_total_test_and_subtest_lifecycles": 61,
+  "initial_full_selector_failure": "exactly2 late-wait test observation barriers matched truncated tail query token; not product failure",
+  "initial_full_selector_go_exit": 1,
+  "initial_green_HTTP_package": "pass_all4top",
+  "initial_green_actual_closure_sha256": "42d17929ba846b28b5d1e9ba2fcf6db00a10c5bae1e4999ec0d6b629bd59265c",
+  "initial_green_source_sha": "dea20bfbaf757029243c4a26d4499b0536375dc4",
+  "initial_wrong_overlay_alias_attempts_preserved_not_RED": true,
+  "necessary2_actual_closure_sha256": "9e8793988d6b8db828a62b61196874557613f7fe602a95442e86bd78413ab08a",
+  "necessary2_source_sha": "206d862c56884ca827d14a52366e091968c805f9",
+  "necessary_revalidation_tests_and_subtests": 3,
+  "necessary_two_child_go_exit": 0,
+  "owned_process_group_observations": {
+    "green": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "late-red": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "late-red-canonical": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "late-red-canonical-remainder2": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "necessary2-green": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "original-red": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "original-red-canonical": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    }
+  },
+  "product_green": false,
+  "race_enabled": true,
+  "review_scope": "new received only; required pure12/EOF pure/S/P2/DIAG not re-executed; not full171/P0/G0 completion",
+  "source_boundary": "production bytes identical across immutable sources by single-test-file delta; no original raw/source relabelling, no claim of one full fresh all-tests Go0 at newest source",
+  "source_delta": [
+    {
+      "after_sha256": "01aae5c36abaf0bfd62806d7497626590ed8b3cd76030fd65d53dc5b1bcc7e2b",
+      "before_sha256": "53bccfa39c952dfbde6fa98cb81a7b6a491de72a5489320071ed6237bf25956b",
+      "path": "internal/store/postgres/r5_received_content_eligibility_test.go",
+      "scope": "only barrier query visible prefix FROM messages m; production/expected404/count0 untouched"
+    }
+  ],
+  "source_identity_kind": "canonical_source_closure_sha1",
+  "status": "received_new_base_and_late_boundaries_actual_composed_runtime_passed",
+  "task_complete": false
+}

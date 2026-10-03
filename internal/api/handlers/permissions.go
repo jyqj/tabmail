@@ -9,7 +9,8 @@ import (
 
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app/permissions"
-	"tabmail/internal/models"
+	"tabmail/internal/authz"
+	"tabmail/internal/company"
 	"tabmail/internal/store"
 )
 
@@ -47,11 +48,12 @@ func (h *PermissionHandler) ListProfiles(w http.ResponseWriter, r *http.Request)
 }
 
 // CreateProfile creates a new permission profile.
-// Platform admin can create system profiles (tenant_id=nil) or tenant-scoped.
+// A current platform administrator may create ordinary global or tenant profiles;
+// system profiles are never created through this management endpoint.
 // Tenant admin always creates tenant-scoped profiles.
 func (h *PermissionHandler) CreateProfile(w http.ResponseWriter, r *http.Request) {
 	var body permissions.CreateInput
-	if err := decodeBody(r, &body); err != nil {
+	if err := decodePermissionProfileBody(w, r, &body, false); err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
@@ -72,12 +74,12 @@ func (h *PermissionHandler) UpdateProfile(w http.ResponseWriter, r *http.Request
 		return
 	}
 	var body permissions.UpdateInput
-	if err := decodeBody(r, &body); err != nil {
+	if err := decodePermissionProfileBody(w, r, &body, true); err != nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
 
-	profile, err := h.service.UpdateProfile(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id, body)
+	profile, err := h.service.UpdateProfileVersioned(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id, body.ExpectedRevision, body)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
@@ -93,7 +95,19 @@ func (h *PermissionHandler) DeleteProfile(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := h.service.DeleteProfile(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id); err != nil {
+	var body struct {
+		ExpectedRevision string                       `json:"expected_revision"`
+		ConfirmedMembers []company.PermissionRevision `json:"confirmed_members"`
+	}
+	if err := decodePermissionVersionedBody(w, r, &body); err != nil {
+		errBadRequest(w, "invalid profile deletion confirmation")
+		return
+	}
+	if body.ConfirmedMembers == nil {
+		errBadRequest(w, "explicit affected member confirmation required")
+		return
+	}
+	if err := h.service.DeleteProfileVersioned(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id, body.ExpectedRevision, body.ConfirmedMembers); err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
@@ -118,38 +132,45 @@ func (h *PermissionHandler) GetUserPermission(w http.ResponseWriter, r *http.Req
 
 // SetUserPermissionOverride sets or updates a user's permission override.
 func (h *PermissionHandler) SetUserPermissionOverride(w http.ResponseWriter, r *http.Request) {
-	userID, err := uuid.Parse(chi.URLParam(r, "id"))
-	if err != nil {
-		errBadRequest(w, "invalid user id")
-		return
-	}
-	var body models.UserPermissionOverride
-	if err := decodeBody(r, &body); err != nil {
-		errBadRequest(w, "invalid body")
-		return
-	}
-
-	override, err := h.service.SetUserPermissionOverride(r.Context(), tenantCtx(r), userID, &body)
-	if err != nil {
-		respondAppError(w, h.logger, err)
-		return
-	}
-	ok(w, override)
+	errConflict(w, "permission write protocol upgraded; load permission-editor and submit expected_revision")
 }
 
 // DeleteUserPermissionOverride deletes a user's permission override.
 func (h *PermissionHandler) DeleteUserPermissionOverride(w http.ResponseWriter, r *http.Request) {
-	userID, err := uuid.Parse(chi.URLParam(r, "id"))
+	errConflict(w, "permission clear protocol upgraded; use versioned permission-editor field inheritance")
+}
+
+func (h *PermissionHandler) PermissionEditor(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "id"))
 	if err != nil {
 		errBadRequest(w, "invalid user id")
 		return
 	}
-
-	if err := h.service.DeleteUserPermissionOverride(r.Context(), tenantCtx(r), userID); err != nil {
+	out, err := h.service.EditorSnapshot(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id)
+	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
-	noContent(w)
+	ok(w, out)
+}
+func (h *PermissionHandler) PatchPermissionEditor(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid user id")
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
+	cmd, err := company.DecodePermissionEditorCommand(r.Body)
+	if err != nil {
+		errBadRequest(w, "invalid permission editor command")
+		return
+	}
+	out, err := h.service.PatchEditor(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id, cmd)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, out)
 }
 
 // MyPermissions returns the calling user's own effective permission.
@@ -160,10 +181,72 @@ func (h *PermissionHandler) MyPermissions(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	actor := middleware.ActorFromContext(r.Context())
+	if actor.Type == authz.PrincipalUser && actor.IsTenantAdmin() {
+		// Display the same principal policy that PermissionLoader installed. The
+		// editor remains a separate raw/canonical profile observation; this is only
+		// a view and never substitutes for transaction-time write authorization.
+		perm := middleware.PermissionFromCtx(r.Context())
+		if perm == nil {
+			errInternal(w)
+			return
+		}
+		ok(w, perm)
+		return
+	}
 	perm, err := h.service.MyPermissions(r.Context(), user.ID)
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return
 	}
 	ok(w, perm)
+}
+
+func decodePermissionVersionedBody(w http.ResponseWriter, r *http.Request, out any) error {
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
+	return company.DecodePermissionJSONObject(r.Body, out, []string{"expected_revision", "confirmed_members"}, nil)
+}
+
+func (h *PermissionHandler) ProfileDeletionPreview(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid profile id")
+		return
+	}
+	out, err := h.service.ProfileDeletionPreview(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, out)
+}
+func (h *PermissionHandler) AssignPermissionEditor(w http.ResponseWriter, r *http.Request) {
+	id, err := uuid.Parse(chi.URLParam(r, "id"))
+	if err != nil {
+		errBadRequest(w, "invalid user id")
+		return
+	}
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
+	cmd, err := company.DecodePermissionAssignmentCommand(r.Body)
+	if err != nil {
+		errBadRequest(w, "invalid permission assignment command")
+		return
+	}
+	out, err := h.service.AssignEditor(r.Context(), middleware.ActorFromContext(r.Context()), tenantCtx(r), id, cmd)
+	if err != nil {
+		respondAppError(w, h.logger, err)
+		return
+	}
+	ok(w, out)
+}
+
+func decodePermissionProfileBody(w http.ResponseWriter, r *http.Request, out any, update bool) error {
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
+	allowed := []string{"name", "description", "can_send", "daily_send_quota", "daily_receive_quota", "max_mailboxes", "max_domains", "allowed_zone_ids", "can_create_domains", "can_create_routes", "can_create_api_keys"}
+	if update {
+		allowed = append(allowed, "expected_revision")
+	} else {
+		allowed = append(allowed, "tenant_id")
+	}
+	return company.DecodePermissionJSONObject(r.Body, out, allowed, nil)
 }

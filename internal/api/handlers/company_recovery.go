@@ -6,11 +6,9 @@ import (
 	"net/http"
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/app"
-	"tabmail/internal/app/credentials"
 	"tabmail/internal/app/recovery"
 	"tabmail/internal/app/submissions"
 	"tabmail/internal/company"
-	"tabmail/internal/models"
 	"time"
 )
 
@@ -19,15 +17,16 @@ type recoveryRepository interface {
 	company.DeliveryRecovery
 }
 type CompanyRecoveryHandler struct {
-	repo    recoveryRepository
-	store   app.AuditStore
-	objects recovery.Objects
-	subs    *submissions.Service
-	logger  zerolog.Logger
+	repo      recoveryRepository
+	store     app.AuditStore
+	objects   recovery.Objects
+	subs      *submissions.Service
+	logger    zerolog.Logger
+	inspector *recovery.Service
 }
 
 func NewCompanyRecoveryHandler(repo recoveryRepository, st app.AuditStore, obj recovery.Objects, subs *submissions.Service, l zerolog.Logger) *CompanyRecoveryHandler {
-	return &CompanyRecoveryHandler{repo, st, obj, subs, l}
+	return &CompanyRecoveryHandler{repo: repo, store: st, objects: obj, subs: subs, logger: l, inspector: recovery.New(repo)}
 }
 func (h *CompanyRecoveryHandler) result(w http.ResponseWriter, v any, e error) {
 	companyResponse(w, h.logger, v, e)
@@ -95,26 +94,14 @@ func (h *CompanyRecoveryHandler) Recipients(w http.ResponseWriter, r *http.Reque
 		errNotFound(w, "outbound disabled")
 		return
 	}
-	j, e := h.subs.AccessibleOutboundJob(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
-	if e != nil {
-		writeOutboundJobAccessError(w, h.logger, e, "listing recipient outcomes")
-		return
-	}
-	rows, e := h.repo.ListOutboundRecipients(r.Context(), j.TenantID, id)
+	// A ledger outcome endpoint is still an ordinary operation receipt. Current
+	// content read does not grant addresses or diagnostics on this surface.
+	view, e := h.subs.OutboundReceiptView(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
 	if e != nil {
 		h.result(w, nil, e)
 		return
 	}
-	// Recheck after the ledger read, which may wait across expiry/revocation.
-	view, e := h.subs.OutboundReceiptView(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), j.ID)
-	if e != nil {
-		h.result(w, nil, e)
-		return
-	}
-	// The BCC filter and diagnostic placeholder copy come from the same
-	// redaction view the job receipt uses — no handler-side second policy.
-	rows = submissions.FilterRecipientsForJobView(view, rows)
-	h.result(w, rows, nil)
+	h.result(w, view, nil)
 }
 
 func (h *CompanyRecoveryHandler) Reconcile(w http.ResponseWriter, r *http.Request) {
@@ -144,30 +131,10 @@ func (h *CompanyRecoveryHandler) InspectOutbound(w http.ResponseWriter, r *http.
 	if !ok {
 		return
 	}
-	var reasonErr error
-	v.Reason, reasonErr = credentials.AuditReason(v.Reason)
-	if reasonErr != nil {
-		errBadRequest(w, reasonErr.Error())
-		return
-	}
 	if h.subs == nil || !h.subs.OutboundEnabled() {
 		errNotFound(w, "outbound disabled")
 		return
 	}
-	j, e := h.subs.AccessibleOutboundJob(r.Context(), middleware.TenantFromCtx(r.Context()), companyActor(r), id)
-	if e != nil {
-		writeOutboundJobAccessError(w, h.logger, e, "inspecting outbound")
-		return
-	}
-	a := companyActor(r)
-	e = app.InsertAuditRequired(r.Context(), h.store, models.AuditEntry{TenantID: &a.TenantID, Actor: a.AuditLabel(), Action: "outbound.break_glass", ResourceType: "outbound_job", ResourceID: &id, Details: app.MustJSON(map[string]any{"reason": v.Reason})})
-	if e != nil {
-		errInternal(w)
-		return
-	}
-	// Break-glass with an audit row: content stays visible to the inspected
-	// view, but the same copy rule as the redacted path strips claim secrets.
-	cp := submissions.StripJobSecrets(j)
-	rows, e := h.repo.ListOutboundRecipients(r.Context(), a.TenantID, id)
-	h.result(w, map[string]any{"job": cp, "recipients": rows}, e)
+	inspection, e := h.inspector.InspectOutboundRecovery(r.Context(), companyActor(r), id, v.Reason)
+	h.result(w, inspection, e)
 }

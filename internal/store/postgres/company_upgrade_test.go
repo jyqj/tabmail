@@ -75,7 +75,7 @@ func TestArchitectureUpgradeBackfillsExistingEmployeeAssets(t *testing.T) {
 	must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
 	must(t, pool.QueryRow(ctx, `SELECT count(*) FROM mail_index_jobs WHERE message_id=$1 AND source_key='old-original'`, msg.ID).Scan(&pending))
 	must(t, pool.QueryRow(ctx, `SELECT count(*) FROM draft_creation_receipts WHERE id=$1`, draft).Scan(&receipts))
-	if version != 15 || pending != 1 || receipts != 1 {
+	if version != 19 || pending != 1 || receipts != 1 {
 		t.Fatalf("incomplete backfill v%d index%d receipts%d", version, pending, receipts)
 	}
 	_, e = pool.Exec(ctx, `DELETE FROM outbound_jobs WHERE id=$1`, job.ID)

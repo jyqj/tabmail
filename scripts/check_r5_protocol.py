@@ -15,6 +15,13 @@ import re
 import subprocess
 import sys
 
+# Absolute file loading also supports archived importlib-based validator tests.
+import importlib.util
+_inventory_spec = importlib.util.spec_from_file_location(
+    "r5_source_inventory", Path(__file__).with_name("r5_source_inventory.py"))
+source_inventory = importlib.util.module_from_spec(_inventory_spec)
+_inventory_spec.loader.exec_module(source_inventory)
+
 ROOT = Path(__file__).resolve().parents[1]
 CASES = ROOT / 'docs/company-mail/evidence/R5-PROTOCOL-CASES.json'
 EXPECTED_IDS = {f'{prefix}{i:02d}' for prefix, n in [('CT',10),('RC',5),('OP',4),('RT',7),('BC',6),('GC',2),('LF',7),('PE',5)] for i in range(1,n+1)}
@@ -148,12 +155,141 @@ def load_cases(path=CASES, root=ROOT):
     return data
 
 
+SOURCE_MANIFEST = None
+SOURCE_MANIFEST_SHA256 = None
+SOURCE_IDENTITY = {}
+SOURCE_POLICY = None
+PROTOCOL_FIXED_SOURCES = {
+    'go.mod', 'go.sum', 'docs/company-mail/R5-PROTOCOL.md',
+    'docs/company-mail/evidence/R5-PROTOCOL-CASES.json',
+    'scripts/check_r5_protocol.py', 'scripts/tests/test_r5_protocol.py',
+    'scripts/tests/test_r5_protocol_component_evidence.py',
+    'scripts/tests/test_r5_protocol_source_inventory.py',
+}
+PROTOCOL_ARTIFACT_DIRS = {'node_modules', '.next', 'out', '.vercel', 'coverage', 'build', '__pycache__', '.git'}
+
+
+def protocol_source_paths(root):
+    """Archived v1 path scope; never a fallback for current v2 evidence.
+
+    This never supplies a fallback inventory or source identity. Runtime/build
+    artifacts and secret env files are excluded; .env.example remains source.
+    """
+    names = set(PROTOCOL_FIXED_SOURCES)
+    def walk_error(error):
+        raise error
+    for directory in ['cmd', 'internal', 'web']:
+        base = root / directory
+        if not base.is_dir() or base.is_symlink():
+            raise ValueError('required protocol source directory missing or symlinked: '+directory)
+        for current, dirs, files in os.walk(base, followlinks=False, onerror=walk_error):
+            dirs[:] = sorted(d for d in dirs if d not in PROTOCOL_ARTIFACT_DIRS)
+            for d in dirs:
+                if (Path(current)/d).is_symlink():
+                    raise ValueError('symlinked protocol source directory')
+            for filename in files:
+                if (filename == '.DS_Store' or filename == 'next-env.d.ts'
+                        or filename.endswith(('.log', '.tsbuildinfo'))
+                        or filename.startswith('.env') and filename != '.env.example'):
+                    continue
+                names.add((Path(current)/filename).relative_to(root).as_posix())
+    return names
+
+
+def strict_manifest_json(raw):
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result: raise ValueError('duplicate manifest key: '+key)
+            result[key] = value
+        return result
+    return json.loads(raw, object_pairs_hook=unique)
+
+
+def manifest_source_closure(path, pinned_sha256, root):
+    """Read-only archived v1 scope, or explicitly matched v2/v3 source policy."""
+    if not isinstance(pinned_sha256, str) or not re.fullmatch('[0-9a-f]{64}', pinned_sha256):
+        raise ValueError('external manifest SHA256 required')
+    raw = Path(path).read_bytes()
+    if hashlib.sha256(raw).hexdigest() != pinned_sha256:
+        raise ValueError('explicit manifest byte hash differs from supplied proof')
+    manifest = strict_manifest_json(raw)
+    if isinstance(manifest, dict) and manifest.get('schema_version') in {2, source_inventory.CURRENT_SCHEMA_VERSION}:
+        receipt = source_inventory.validate_current_source(manifest, root, purpose='protocol', policy=SOURCE_POLICY)
+        return receipt['files'], current_source_metadata(receipt, pinned_sha256)
+    keys = {'schema_version','snapshot_root','source_identity_kind','source_sha','files'}
+    if not isinstance(manifest, dict) or set(manifest) != keys or type(manifest['schema_version']) is not int or manifest['schema_version'] != 1:
+        raise ValueError('exact protocol manifest schema v1 required')
+    if manifest['snapshot_root'] != str(root.resolve()) or root.is_symlink():
+        raise ValueError('manifest belongs to another actual snapshot root')
+    if manifest['source_identity_kind'] != 'canonical_protocol_dependency_closure_sha256':
+        raise ValueError('canonical protocol closure identity required, not Git HEAD/commit/deployment')
+    files = manifest['files']
+    if not isinstance(files, dict) or not files:
+        raise ValueError('explicit nonempty source mapping required')
+    for name, digest in files.items():
+        if (not isinstance(name,str) or not name or Path(name).is_absolute()
+                or '..' in Path(name).parts or Path(name).as_posix() != name
+                or any(part in {'','.'} for part in name.split('/'))
+                or not isinstance(digest,str) or not re.fullmatch('[0-9a-f]{64}',digest)):
+            raise ValueError('noncanonical source path/hash in explicit manifest')
+        actual = root / name
+        if not actual.resolve().is_relative_to(root.resolve()) or not actual.is_file():
+            raise ValueError('manifest source missing or escapes actual root: '+name)
+        current = actual
+        while current != root:
+            if current.is_symlink(): raise ValueError('symlinked manifest source: '+name)
+            current = current.parent
+    expected = protocol_source_paths(root)
+    if set(files) != expected:
+        raise ValueError('protocol source manifest has missing or extra important paths')
+    cases = strict_manifest_json((root/'docs/company-mail/evidence/R5-PROTOCOL-CASES.json').read_bytes())
+    for row in cases.get('cases', []):
+        for adapter in row.get('reference_adapters', []) + row.get('shared_adapters', []):
+            for field in ['source','component_source']:
+                if adapter.get(field) and adapter[field] not in files:
+                    raise ValueError('adapter dependency omitted from explicit manifest')
+    observed = {name:hashlib.sha256((root/name).read_bytes()).hexdigest() for name in sorted(files)}
+    if observed != files:
+        raise ValueError('actual protocol source bytes drifted from explicit manifest')
+    digest = hashlib.sha256(json.dumps(files,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    if manifest['source_sha'] != digest:
+        raise ValueError('canonical protocol source identity differs from closure')
+    return observed, {'source_sha':digest,'source_identity_kind':manifest['source_identity_kind'],
+                      'source_manifest_sha256':pinned_sha256,'snapshot_root':str(root.resolve()),
+                      'source_identity_boundary':'Archived v1 scoped inventory only; excludes undeclared local replacements and is not current complete certification'}
+
+
+def current_source_metadata(receipt, pinned_sha256):
+    # A source scope is not the runtime/target-red report boundary. Never let
+    # receipt metadata overwrite the independently classified execution scope.
+    identity = {key:value for key,value in receipt.items() if key not in {'files','boundary'}}
+    identity['source_identity_boundary'] = receipt['boundary']
+    identity['source_manifest_sha256'] = pinned_sha256
+    return identity
+
+
+def protocol_source_metadata():
+    if SOURCE_POLICY not in source_inventory.SUPPORTED_POLICIES or not SOURCE_IDENTITY or SOURCE_IDENTITY.get('policy') != SOURCE_POLICY:
+        raise ValueError('protocol evidence requires an explicit matching source policy and receipt')
+    return dict(SOURCE_IDENTITY)
+
+
 def source_closure():
-    names = subprocess.run(['git','ls-files','--cached','--others','--exclude-standard',
-                            'cmd','internal','web','go.mod','go.sum','docs/company-mail/R5-PROTOCOL.md','docs/company-mail/evidence/R5-PROTOCOL-CASES.json','scripts/check_r5_protocol.py','scripts/tests/test_r5_protocol.py','scripts/tests/test_r5_protocol_component_evidence.py'],cwd=ROOT,
-                           capture_output=True,text=True,check=True).stdout.splitlines()
-    return {name:hashlib.sha256((ROOT/name).read_bytes()).hexdigest()
-            for name in sorted(set(names)) if (ROOT/name).is_file()}
+    global SOURCE_IDENTITY
+    if SOURCE_POLICY not in source_inventory.SUPPORTED_POLICIES or SOURCE_MANIFEST is None:
+        raise ValueError('current protocol requires explicit source policy and manifest; no Git/v1 fallback')
+    receipt = source_inventory.load_current_source(SOURCE_MANIFEST, SOURCE_MANIFEST_SHA256, ROOT,
+                                                  purpose='protocol', policy=SOURCE_POLICY)
+    SOURCE_IDENTITY = current_source_metadata(receipt, SOURCE_MANIFEST_SHA256)
+    return receipt['files']
+
+
+def current_protocol_environment(tag_sets):
+    context = SOURCE_IDENTITY.get('build_context')
+    if not context or [list(tags) for tags in sorted(tag_sets)] != context['build_tag_sets']:
+        raise ValueError('selected protocol adapters differ from pinned build tags')
+    return source_inventory.bound_environment(context, os.environ)
 
 
 def classify_events(text, package, expected, exit_code):
@@ -215,16 +351,17 @@ def run_references(data, layer, output):
     if layer != 'unit' and not os.environ.get('TABMAIL_TEST_DB_DSN'):
         raise ValueError('explicit disposable TABMAIL_TEST_DB_DSN required; no silent skip')
     output.mkdir(parents=True, exist_ok=False)
-    source = subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip()
-    dirty = subprocess.run(['git','status','--porcelain'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.splitlines()
-    reports = []
     tested_closure = source_closure()
+    identity = protocol_source_metadata()
+    source = identity['source_sha']
+    dirty = None  # v2 source identity is manifest-bound, never a Git fallback.
+    env = current_protocol_environment(sorted({(tag,) if tag else () for _, tag in selected}))
+    reports = []
     for index, ((package, tag), tests) in enumerate(sorted(selected.items())):
         cmd = ['go','test','-json','-race','-count=1','-timeout=240s']
         if tag:
             cmd += ['-tags='+tag]
         cmd += ['-run','^('+ '|'.join(sorted(tests)) + ')$',package]
-        env = dict(os.environ)
         env['TABMAIL_R5_COMPONENT_EVIDENCE'] = str((output/'components').resolve())
         result = subprocess.run(cmd,cwd=ROOT,env=env,capture_output=True,text=True,timeout=300)
         (output/f'{index}.jsonl').write_text(result.stdout)
@@ -240,6 +377,7 @@ def run_references(data, layer, output):
                   source_sha=source,dirty_paths=dirty,layer=layer,reports=reports,
                   cases_sha256=hashlib.sha256(CASES.read_bytes()).hexdigest(),
                   adapter_source_sha256={a['source']:hashlib.sha256((ROOT/a['source']).read_bytes()).hexdigest() for row in data['cases'] for a in row['reference_adapters']})
+    report.update(identity)
     (output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     return report
 
@@ -398,8 +536,9 @@ def run_shared(data, layer, output):
     output.mkdir(parents=True, exist_ok=False)
     tested_closure = source_closure()
     cases_hash = hashlib.sha256(CASES.read_bytes()).hexdigest()
-    source = subprocess.run(['git','rev-parse','HEAD'],cwd=ROOT,capture_output=True,text=True,check=True).stdout.strip()
-    env = dict(os.environ)
+    identity = protocol_source_metadata()
+    source = identity['source_sha']
+    env = current_protocol_environment(sorted({(tag,) if tag else () for _, tag in selected}))
     env['TABMAIL_R5_PROTOCOL_OBSERVATIONS'] = str((output/'observations.json').resolve())
     env['TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE'] = str((output/'http-pg-components').resolve())
     reports = []
@@ -448,15 +587,28 @@ def run_shared(data, layer, output):
                   shared_input_verified_cases=len(verified),shared_input_verified_layers=verified,
                   missing_required_layers={row['id']:sorted(set(row['required_layers'])-set(verified.get(row['id'],[]))) for row in data['cases']},
                   boundary='Only the recorded scoped layers and exact runtime paths are verified. Accepted target red is not product green; missing component journeys and future backfill/migration implementation remain separate gaps.')
+    report.update(identity)
     (output/'report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     return report
 
 
 def main():
+    global SOURCE_MANIFEST, SOURCE_MANIFEST_SHA256, SOURCE_POLICY
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run', choices=['unit','db','http','components','shared-unit','shared-components','shared-db','shared-http'])
     parser.add_argument('--output-dir',type=Path)
+    parser.add_argument('--source-policy', choices=source_inventory.SUPPORTED_POLICIES)
+    parser.add_argument('--source-manifest',type=Path)
+    parser.add_argument('--source-manifest-sha256')
     args = parser.parse_args()
+    if (args.source_manifest is None) != (args.source_manifest_sha256 is None):
+        parser.error('--source-manifest and --source-manifest-sha256 must be supplied together')
+    SOURCE_MANIFEST, SOURCE_MANIFEST_SHA256 = args.source_manifest, args.source_manifest_sha256
+    SOURCE_POLICY = args.source_policy
+    if args.run and (SOURCE_POLICY not in source_inventory.SUPPORTED_POLICIES or SOURCE_MANIFEST is None):
+        parser.error('execution requires explicit --source-policy and matching versioned source manifest')
+    if SOURCE_MANIFEST is not None:
+        source_closure()
     if args.run and args.output_dir is None:
         parser.error('--run requires fresh --output-dir')
     data = load_cases()

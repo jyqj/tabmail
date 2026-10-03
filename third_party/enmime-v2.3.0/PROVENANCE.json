@@ -1,0 +1,36 @@
+{
+  "upstream_module": "github.com/jhillyerd/enmime/v2",
+  "upstream_version": "v2.3.0",
+  "upstream_repository": "https://github.com/jhillyerd/enmime",
+  "tag_commit": "c223c7aa433d1ec601b13adbff1a0b94f6f40eb2",
+  "tag_observation": "git ls-remote read-only result in preceding approved design turn; no network in implementation turn",
+  "module_h1": "h1:Y/pzQanyU8nkSgB2npXX8Dha5OItJE/QwbDJM4sf/kU=",
+  "go_mod_h1": "h1:mGKXAP45l6pF6HZiaLhgSYsgteJskaSIYmEZXpw6ZpI=",
+  "cached_zip_sha256": "a059d885451387bcfe402d4b2bce133755ac87702cfa19c8d6bae5e7c49dea1a",
+  "archive_source": "Go module cache v2.3.0.zip; all 213 files copied without source pruning",
+  "upstream_file_count": 213,
+  "upstream_uncompressed_bytes": 678597,
+  "license": "MIT, original LICENSE retained unchanged; upstream authored by James Hillyerd/contributors, not original tabmail source",
+  "upstream_manifest": "UPSTREAM-MANIFEST.json",
+  "upstream_manifest_sha256": "897f8da078bb175bf4ba739306029dd95de2689a7a233990e41624d5f28ae772",
+  "modified_upstream_files": [
+    "part.go"
+  ],
+  "unchanged_upstream_file_count": 212,
+  "modified_upstream_patch": "UPSTREAM-DELTA.patch",
+  "tabmail_added_go_files": [
+    "parse_budget.go",
+    "parse_budget_test.go"
+  ],
+  "other_added_files": [
+    "PROVENANCE.json",
+    "UPSTREAM-MANIFEST.json",
+    "UPSTREAM-DELTA.patch",
+    "TABMAIL-FORK.md"
+  ],
+  "delta_purpose": "Per-call guards at actual root/child Part allocation and actual header/recursion events. Original boundary/header/content decoding/EnvelopeFromPart implementations unchanged.",
+  "disabled_api_semantics": "ReadParts/ReadEnvelope use nil budget with no context/clock/header-interpretation side effects. Parser/Part structs and all public upstream APIs unchanged.",
+  "build_integration": "root go.mod version-specific replace v2.3.0 => ./third_party/enmime-v2.3.0; fork go.mod/go.sum untouched; root go.sum untouched",
+  "upgrade_policy": "Reimport complete new upstream archive, preserve new provenance/license, review all Part allocation/header/recursive call sites and Envelope projection predicates, reapply narrow guards, rerun new guards + original upstream legacy tests under actual main-module dependency graph, then independently review/admit. Never update require while silently bypassing the fork.",
+  "status": "SOURCE_ONLY_UNEXECUTED_PENDING_NEW_INDEPENDENT_REVIEW"
+}

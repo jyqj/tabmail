@@ -1,0 +1,270 @@
+{
+  "created_utc": "2026-10-02T03:15:13.830016+00:00",
+  "status": "formal_once_currentdirty_fullGo_and_CI_actual_failed_not_fullgreen",
+  "source_sha": "2aa9a91a5c80d3d926861bc5e90cf25e13ded5fd",
+  "source_receipt": "source-receipt.json",
+  "source_identity_kind": "canonical_actual_current_dirty_backend_dependency_closure_sha1",
+  "source_pre_post_equality": "source-post-execution-proof.json",
+  "currentdefault_package_count": 51,
+  "package_terminals_complete": true,
+  "default_actual_Go_exit": 1,
+  "default_outer_seconds": 295.93607687950134,
+  "default_package_timeout_seconds": 180,
+  "default_outer_ceiling_seconds": 1200,
+  "default_started": 7583,
+  "default_passed_events": 7573,
+  "default_failed_events": 7,
+  "original_backend247_classifier_exit": 1,
+  "current773_classifier_exit": 1,
+  "default_failure_clusters": [
+    "TestReleaseMemberPatchNullVersusAbsent: oldnullprotocolexpect200 now409",
+    "TestR5RouteInventory: actual132 documented127",
+    "TestP0GooseRestartAndHistoricalGrantSafety/upgrade_and_restart: actual16 oldexpected15",
+    "TestR3SoftDeleteRestoreRetentionAndEvents: searchmissing result",
+    "TestR5CacheWriteVersusPhysicalDeleteLockOrder/expired: lockwaiter not observed15s"
+  ],
+  "phase_actual_results": {
+    "audit-db": {
+      "actual_exit": 1,
+      "elapsed_wall_seconds": 7.010805130004883,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "scripts/run_r5_audit_baseline.py",
+        "--layer",
+        "db",
+        "--output-dir",
+        "/tmp/tm-r5fullgo.aeyasm7F/phases/audit-db-original",
+        "--source-sha",
+        "2aa9a91a5c80d3d926861bc5e90cf25e13ded5fd"
+      ]
+    },
+    "build": {
+      "actual_exit": 0,
+      "elapsed_wall_seconds": 6.146191120147705,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "build",
+        "-mod=readonly",
+        "-p",
+        "1",
+        "./..."
+      ]
+    },
+    "contract-drift": {
+      "actual_exit": 0,
+      "elapsed_wall_seconds": 0.31142401695251465,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "scripts/check_contract_drift.py"
+      ]
+    },
+    "default-full-go": {
+      "actual_exit": 1,
+      "elapsed_wall_seconds": 295.93607687950134,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=180s",
+        "./..."
+      ]
+    },
+    "http-contract": {
+      "actual_exit": 0,
+      "elapsed_wall_seconds": 4.251583099365234,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "scripts/check_http_contract.py",
+        "--output-dir",
+        "/tmp/tm-r5fullgo.aeyasm7F/phases/http-original",
+        "--source-sha",
+        "2aa9a91a5c80d3d926861bc5e90cf25e13ded5fd"
+      ]
+    },
+    "protocol-shared-db": {
+      "actual_exit": 1,
+      "elapsed_wall_seconds": 0.10974407196044922,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "scripts/check_r5_protocol.py",
+        "--run",
+        "shared-db",
+        "--output-dir",
+        "/tmp/tm-r5fullgo.aeyasm7F/phases/protocol-shared-db-original"
+      ]
+    },
+    "r5-compatibility": {
+      "actual_exit": 1,
+      "elapsed_wall_seconds": 0.7383251190185547,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ]
+    },
+    "r5-fixtures": {
+      "actual_exit": 1,
+      "elapsed_wall_seconds": 7.337774991989136,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=180s",
+        "-tags=r5fixtures",
+        "./internal/testpg"
+      ]
+    },
+    "r5-transactions": {
+      "actual_exit": 1,
+      "elapsed_wall_seconds": 0.7483072280883789,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ]
+    },
+    "validation-python": {
+      "actual_exit": 1,
+      "elapsed_wall_seconds": 34.27159380912781,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "scripts/tests",
+        "-p",
+        "test_*.py",
+        "-v"
+      ]
+    },
+    "vet": {
+      "actual_exit": 0,
+      "elapsed_wall_seconds": 5.478162050247192,
+      "timeout": false,
+      "owned_group_absence": {
+        "status": "observed",
+        "members": [],
+        "non_zombie_live_pids": []
+      },
+      "command": [
+        "/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go",
+        "vet",
+        "-mod=readonly",
+        "-p",
+        "1",
+        "./..."
+      ]
+    }
+  },
+  "negative_official4": {
+    "driver_exit": 0,
+    "actual_categories": [
+      "Go0 mandatoryPGmissing exactskip/gate1",
+      "Go0 zerotests/gate1",
+      "Go0 browserdisabled exactskip/gate1",
+      "Go1 exactnamedcurrentDSNhardfail/gate1"
+    ],
+    "unknown0_all": true,
+    "raw": "phases/negative-official",
+    "product_green": false
+  },
+  "separate_phase_failures": {
+    "r5fixtures": "2 oldfixture usersPATCH profile protocol409 vs expected200; Go1/classifier1",
+    "validationPython": "421tests/25errors; 21 registry snapshotmissing archive dependencies (capture omission, not productRED) plus route/transactioninventory drift",
+    "r5compatibility": "route127/132 invariant fail",
+    "r5transactions": "current architecture/hash/inventory/FK/trigger drift actual fail",
+    "auditDB": "A04\u2013A07 exacttarget redreproduced; A01\u2013A03 missingexactassertion notaccepted; preserve actualGo1 and classifier",
+    "protocolsharedDB": "gitlsfiles nonGit snapshot128 before taggedGo; executor/tool inventory dependencyinfra, noPGtestexecuted"
+  },
+  "passed_independent_phases": [
+    "build./...",
+    "vet./...",
+    "http-contract realnativeGo+privatecapture",
+    "contract-drift",
+    "official4realGonegatives"
+  ],
+  "allowed_browser_skip": "backend optionalTestR3BrowserJourney notexecuted, not browser/G0PASS",
+  "privateHTTPresponses_excluded": true,
+  "cleanup": "cleanup-receipt.json",
+  "leftover_test_db_before_cluster_stop": "tm_test_94902cbe existed with0connections; preserved failed cluster datadir, fullnativecluster stopped; not claimtestDB0",
+  "M_browser_started": false,
+  "task_complete": false,
+  "product_green": false,
+  "fullGo_pass": false
+}

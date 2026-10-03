@@ -1,0 +1,31 @@
+{
+  "module": "github.com/emersion/go-smtp",
+  "version": "v0.24.0",
+  "zip_sha256": "97bf5eadba6d4c8671805e2a9038e554bb6fecdb8786db4ac65e116e0c5fc454",
+  "module_h1": "h1:g6AfoF140mvW0vLNPD/LuCBLEAdlxOjIXqbIkJIS6Wk=",
+  "files_sha256": {
+    ".build.yml": "d1ae2fea7401b061ed9d0b2969434cd77373b43dd15f5e7f682b5a52f77e441e",
+    ".github/ISSUE_TEMPLATE/config.yml": "1862a3a03d992ba1d95d2b3b253d027082d50c00647eacbc4211d172a4f8d708",
+    ".github/ISSUE_TEMPLATE/issue_template.md": "a0253867be44b5480f97bd5344552da896a67a588edc48dc1cf6954aa1403682",
+    ".gitignore": "c1e244c0520af51e2c4762a68defbda93ed24d4dbbbec2d60c4ea4d8c075a897",
+    "LICENSE": "ed667a24be2a9c3f2fbcd275c70aa9cf19f61345836d08dd5669f4b5737ab036",
+    "README.md": "3847e839321356cf5ececaf6fd4f74a1ca7f57969253322bfbe00ce897d4c421",
+    "backend.go": "7792120dd25e43fbb79656fb31ff3290e7884a3c4ea3c8266a0ff9c6d89b2438",
+    "client.go": "7adcc4610ff4810ab903d0a811e8a32382a2490e06d340631ef425e9cb6597de",
+    "client_test.go": "39f4eeac6088d41c3502534bd2fa8d5b6a88df0e7f28a0ca41473993b66cfd93",
+    "cmd/smtp-debug-server/main.go": "ba8d5652ecc64121fbb84314ce43036a8ffd93503935a5e71b947f8d7edb820f",
+    "conn.go": "c450cdcf7d052a91acd995f1a11a4273205b380ebf02fea4b50eb5e9a5a91ee3",
+    "data.go": "9dd19f115369da72cb36668f953bcc19f73fd1994e8063db5c3a75ca7481d0c8",
+    "example_server_test.go": "3b25705ecbe3679140e7f7deaceeb5f8357513d10b3c2b83d733629118afc958",
+    "example_test.go": "1ea3e758d34c28ad3eed4b70a27ce0eb6c54d669475b6eef3ec7e0dda81f4ac2",
+    "go.mod": "c90914c039d7a1eba0c1c07c00435f0561607cb0e56bf43664c63a45c6e17900",
+    "go.sum": "91f0cc69b3e71d54c3de263a771da33435278b78aad1b4be6608d0f149da8a1f",
+    "lengthlimit_reader.go": "ce4040c9285a3620285dcce853ef2359872a375577a6f3d2034da3b049b024f6",
+    "lmtp_server_test.go": "d0f53be6fdc352d1b0549bddf5fd3b06d78cf575a6dfc180a0166dbd3d98ecdc",
+    "parse.go": "47346dc8ef668dc34132b7d143016b1e186da22ecd389c51ba820e16a8d6e722",
+    "parse_test.go": "c6ef7e37e399a7b8a041e29a445fe0ef3f1256b701b4b74ce57638be653e9cd7",
+    "server.go": "46cfb62f79791182770e0477955d25493eed3e2aba549ea9c251bee2ecd821e9",
+    "server_test.go": "14e20d0dd3db489d9158eb00a26aa648c8dec08a9f57c4015dacc1d809c6428b",
+    "smtp.go": "fd93bf53ff98cc529960272d1ff46acee127f37114ee724bf7fd9ff96dcbda43"
+  }
+}

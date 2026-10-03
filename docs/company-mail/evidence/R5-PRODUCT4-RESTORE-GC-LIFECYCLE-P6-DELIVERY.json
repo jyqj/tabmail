@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "source_sha": "7ffe88737b4b846ad96978b2a69a105caccf3914",
+  "actual_source_closure_sha256": "567f05e8d5edd1067afb16e80f5b5a8638e5aeb49c292aad122925fc737729db",
+  "source_archive": "/private/tmp/tm-r5product4.4euihhiy/RESTORE-GC-LIFECYCLE-P6-evidence.tar.gz",
+  "original_archive_sha256_from_author": "6ca27b645499cdc8dacd66c453b868c92803662877e1ef2da6368201d4989b0a",
+  "original_archive_hash_recomputed": false,
+  "archive": "R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-LOGS.tar.gz",
+  "safe_archive_sha256": "6ca27b645499cdc8dacd66c453b868c92803662877e1ef2da6368201d4989b0a",
+  "archive_bytes": 134682,
+  "payload_file_count": 120,
+  "excluded_members": [],
+  "payload_bytes_changed": false,
+  "source_raw_and_history_modified": false,
+  "tests_or_hashes_reexecuted_by_docs": false,
+  "default_compile_build_reexecuted": false,
+  "actual_schema_version": 17,
+  "current_green_top_leaf_pass_events": [
+    30,
+    96,
+    111
+  ],
+  "P6_red_preserved": true,
+  "P6_fault_layer": "fakeStore around shippingdeliverRecipients, notrealSMTP/PG",
+  "two_bootstrap_product_test_counts": [
+    0,
+    0
+  ],
+  "bootstrap_failure_layer": "ConnMaxLifetime0 config infra, notproductRED",
+  "task_complete": false,
+  "fullCI_green": false,
+  "M_retry": false,
+  "cleanup": "three newownedclustersstop0/PIDsocketgone; final92502/testDB0, oldMprivateResidualuntouched"
+}

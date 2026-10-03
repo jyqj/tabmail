@@ -3,7 +3,6 @@
 package mailcontent
 
 import (
-	"bytes"
 	"container/list"
 	"context"
 	"crypto/sha256"
@@ -73,22 +72,11 @@ func Parts(env *enmime.Envelope) []*enmime.Part {
 	return append(append([]*enmime.Part{}, env.Attachments...), env.Inlines...)
 }
 
-// ParseBounded enforces the package limits (MaxBytes raw, maxParts parts) on an
-// in-memory message and returns the parsed envelope. It is the single bounded
-// parse entry: Parser.load uses it for the HTTP read path and the ingest
-// acceptance paths call it directly, so no caller parses unbounded MIME.
+// ParseBounded checks bytes before parsing and structural limits at the real
+// allocation/header events. Ingest calls this entry directly; Parser
+// uses the same admission with its existing shared-work context.
 func ParseBounded(raw []byte) (*enmime.Envelope, error) {
-	if int64(len(raw)) > MaxBytes {
-		return nil, errors.New("message exceeds 25 MiB parser limit")
-	}
-	env, err := enmime.ReadEnvelope(bytes.NewReader(raw))
-	if err != nil {
-		return nil, errors.New("MIME parsing failed")
-	}
-	if len(Parts(env)) > maxParts {
-		return nil, errors.New("MIME part limit exceeded")
-	}
-	return env, nil
+	return parseBoundedContext(context.Background(), raw)
 }
 func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 	if err := ctx.Err(); err != nil {
@@ -123,7 +111,7 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 		if e != nil {
 			return nil, e
 		}
-		env, e := ParseBounded(raw)
+		env, e := parseBoundedContext(parseCtx, raw)
 		if e != nil {
 			return nil, e
 		}

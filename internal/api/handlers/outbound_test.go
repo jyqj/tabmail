@@ -15,6 +15,7 @@ import (
 
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authn"
+	"tabmail/internal/company"
 	"tabmail/internal/config"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
@@ -52,7 +53,8 @@ func TestOutboundJobAccessCheckCoversGetRetryAndAttempts(t *testing.T) {
 	if err := f.st.CreateOutboundJob(context.Background(), &models.OutboundJob{
 		ID:           ownerJobID,
 		SenderUserID: &f.userA.ID, SenderMailboxID: &mb.ID, ZoneID: zone.ID, MailFrom: mb.FullAddress,
-		TenantID:  f.tenantID,
+		TenantID: f.tenantID,
+		RcptTo:   []string{"visible@fixture.test", "hidden@fixture.test"}, To: []string{"visible@fixture.test"}, BCC: []string{"hidden@fixture.test"}, Attempts: 1,
 		UserID:    &f.userA.ID,
 		State:     models.OutboundDead,
 		CreatedAt: time.Now().Add(-time.Minute),
@@ -64,7 +66,7 @@ func TestOutboundJobAccessCheckCoversGetRetryAndAttempts(t *testing.T) {
 		JobID:    ownerJobID,
 		TenantID: f.tenantID,
 		Attempt:  1,
-		Error:    "failed",
+		Error:    "PRIVATE_ATTEMPT_DIAGNOSTIC", SMTPResponse: "hidden@fixture.test",
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -91,8 +93,17 @@ func TestOutboundJobAccessCheckCoversGetRetryAndAttempts(t *testing.T) {
 		t.Fatalf("owner get expected 200, got %d body=%s", rr.Code, rr.Body.String())
 	}
 	rr = doOutboundHandlerRequest(t, f.st, h.ListAttempts, http.MethodGet, "/api/v1/outbound/"+ownerJobID.String()+"/attempts", map[string]string{"id": ownerJobID.String()}, outboundUserHeaders(t, f.userA))
-	if rr.Code != http.StatusOK || outboundDataLen(t, rr) != 1 {
-		t.Fatalf("owner attempts expected one item, got %d body=%s", rr.Code, rr.Body.String())
+	if rr.Code != http.StatusOK {
+		t.Fatalf("owner attempts expected aggregate receipt, got %d body=%s", rr.Code, rr.Body.String())
+	}
+	receipt := outboundReceiptData(t, rr)
+	if receipt.ID != ownerJobID || receipt.AttemptCount == nil || *receipt.AttemptCount != 1 || receipt.Progress.Completeness != "known" || receipt.Progress.Counts == nil || *receipt.Progress.Counts != (company.OutboundReceiptCounts{Total: 2, Pending: 2}) {
+		t.Fatalf("attempt receipt did not preserve aggregate evidence: %+v", receipt)
+	}
+	for _, private := range []string{"PRIVATE_ATTEMPT_DIAGNOSTIC", "visible@fixture.test", "hidden@fixture.test", mb.FullAddress} {
+		if strings.Contains(rr.Body.String(), private) {
+			t.Fatal("ordinary attempts leaked source details", private)
+		}
 	}
 	rr = doOutboundHandlerRequest(t, f.st, h.RetryJob, http.MethodPost, "/api/v1/outbound/"+ownerJobID.String()+"/retry", map[string]string{"id": ownerJobID.String()}, outboundUserHeaders(t, f.userA))
 	if rr.Code != http.StatusOK {
@@ -308,6 +319,62 @@ func outboundUserHeaders(t *testing.T, user *models.User) map[string]string {
 		t.Fatal(err)
 	}
 	return map[string]string{"Authorization": "Bearer " + token}
+}
+
+// Single-receipt decoder is deliberately separate from list-array length:
+// attempts now expose job-level aggregate metadata, never per-attempt rows.
+func outboundReceiptData(t *testing.T, rr *httptest.ResponseRecorder) company.OutboundReceipt {
+	t.Helper()
+	var envelope struct {
+		Data json.RawMessage `json:"data"`
+	}
+	if err := json.Unmarshal(rr.Body.Bytes(), &envelope); err != nil {
+		t.Fatal(err)
+	}
+	var fields map[string]json.RawMessage
+	if err := json.Unmarshal(envelope.Data, &fields); err != nil {
+		t.Fatal(err)
+	}
+	allowed := map[string]bool{"id": true, "tenant_id": true, "state": true, "status": true, "progress": true, "created_at": true, "updated_at": true, "attempt_count": true, "next_retry": true, "delivery_uncertain": true, "capabilities": true}
+	for name := range fields {
+		if !allowed[name] {
+			t.Fatalf("ordinary outbound receipt outside whitelist: %s", name)
+		}
+	}
+	for _, spec := range []struct {
+		name    string
+		allowed map[string]bool
+	}{{"progress", map[string]bool{"completeness": true, "counts": true}}, {"capabilities", map[string]bool{"view_content": true, "retry": true, "retry_block_reason": true}}} {
+		if raw, ok := fields[spec.name]; ok {
+			var nested map[string]json.RawMessage
+			if err := json.Unmarshal(raw, &nested); err != nil {
+				t.Fatal(err)
+			}
+			for name := range nested {
+				if !spec.allowed[name] {
+					t.Fatalf("receipt %s.%s outside whitelist", spec.name, name)
+				}
+			}
+			if counts, ok := nested["counts"]; ok {
+				var aggregate map[string]json.RawMessage
+				if err := json.Unmarshal(counts, &aggregate); err != nil {
+					t.Fatal(err)
+				}
+				for name := range aggregate {
+					switch name {
+					case "total", "accepted", "pending", "temporary", "permanent", "uncertain":
+					default:
+						t.Fatalf("receipt progress.counts.%s outside whitelist", name)
+					}
+				}
+			}
+		}
+	}
+	var receipt company.OutboundReceipt
+	if err := json.Unmarshal(envelope.Data, &receipt); err != nil {
+		t.Fatal(err)
+	}
+	return receipt
 }
 
 func outboundDataLen(t *testing.T, rr *httptest.ResponseRecorder) int {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"net/url"
 	"os"
+	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -22,37 +24,80 @@ func NewPostgres(t *testing.T) (*postgres.PgStore, *pgxpool.Pool, string) {
 	if dsn == "" {
 		t.Skip("TABMAIL_TEST_DB_DSN is required for real PostgreSQL integration tests")
 	}
+	u, err := url.Parse(dsn)
+	if err != nil {
+		t.Fatalf("parse test database URL: %T", err)
+	}
 	ctx := context.Background()
 	admin, err := pgxpool.New(ctx, dsn)
 	if err != nil {
 		t.Fatal(err)
 	}
-	name := "tm_test_" + uuid.New().String()[:8]
+	owned := &postgresFixtureResources{closeAdmin: admin.Close}
+	t.Cleanup(func() {
+		if err := owned.close(); err != nil {
+			// Driver errors can include connection inputs. Report the failure,
+			// never the DSN or the error's potentially sensitive contents.
+			t.Errorf("owned PostgreSQL database cleanup failed: %T", err)
+		}
+	})
+	name := "tm_test_" + strings.ReplaceAll(uuid.NewString(), "-", "")
 	if _, err = admin.Exec(ctx, "CREATE DATABASE "+pgx.Identifier{name}.Sanitize()); err != nil {
-		admin.Close()
 		t.Fatal(err)
 	}
-	u, err := url.Parse(dsn)
-	if err != nil {
-		t.Fatal(err)
+	// A failed CREATE never grants ownership of an existing database name.
+	owned.dropDatabase = func(cleanupCtx context.Context) error {
+		_, err := admin.Exec(cleanupCtx, "DROP DATABASE "+pgx.Identifier{name}.Sanitize()+" WITH (FORCE)")
+		return err
 	}
 	u.Path = "/" + name
 	testDSN := u.String()
 	st, err := postgres.New(ctx, config.DB{DSN: testDSN, MaxOpenConns: 10, MaxIdleConns: 1, ConnMaxLifetime: time.Minute})
 	if err != nil {
-		_, _ = admin.Exec(ctx, "DROP DATABASE "+pgx.Identifier{name}.Sanitize()+" WITH (FORCE)")
-		admin.Close()
 		t.Fatal(err)
 	}
+	owned.closeStore = func() { _ = st.Close() }
 	pool, err := pgxpool.New(ctx, testDSN)
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() {
-		pool.Close()
-		st.Close()
-		_, _ = admin.Exec(ctx, "DROP DATABASE "+pgx.Identifier{name}.Sanitize()+" WITH (FORCE)")
-		admin.Close()
-	})
+	owned.closeObserver = pool.Close
 	return st, pool, testDSN
+}
+
+const postgresFixtureDropTimeout = 10 * time.Second
+
+// Registration is incremental, immediately after each resource is acquired.
+// These closures are fixture-owned, not shared connections or a migrated DB
+// template. Close remains synchronous: a leaked borrower is not hidden by a
+// background cleanup goroutine.
+type postgresFixtureResources struct {
+	closeObserver func()
+	closeStore    func()
+	dropDatabase  func(context.Context) error
+	closeAdmin    func()
+	once          sync.Once
+	dropErr       error
+}
+
+func (r *postgresFixtureResources) close() error {
+	r.once.Do(func() {
+		if r.closeAdmin != nil {
+			defer r.closeAdmin()
+		}
+		if r.closeObserver != nil {
+			r.closeObserver()
+		}
+		if r.closeStore != nil {
+			r.closeStore()
+		}
+		if r.dropDatabase != nil {
+			// testing cancels t.Context before cleanup. Use an independent
+			// bounded context, created only after borrowers have been closed.
+			ctx, cancel := context.WithTimeout(context.Background(), postgresFixtureDropTimeout)
+			defer cancel()
+			r.dropErr = r.dropDatabase(ctx)
+		}
+	})
+	return r.dropErr
 }

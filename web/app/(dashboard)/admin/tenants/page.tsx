@@ -52,7 +52,7 @@ import {
   revokeAPIKey,
 } from "@/lib/api";
 import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
-import type { Tenant, TenantAPIKey, APIKeyCreated, TenantOverride, EffectiveConfig } from "@/lib/types";
+import type { Tenant, TenantAPIKey, APIKeyCreated, TenantOverrideInput, EffectiveConfig } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -225,7 +225,7 @@ export default function TenantsPage() {
         key,
         value.trim() === "" ? null : Number(value),
       ])
-    ) as Pick<TenantOverride, TenantOverrideEditableKey>;
+    ) as TenantOverrideInput;
     setOverrideSaving(true);
     try {
       await updateTenantOverrides(overrideTenant.id, body);

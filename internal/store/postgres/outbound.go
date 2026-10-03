@@ -356,37 +356,11 @@ func (s *PgStore) FindOutboundJobByDraft(ctx context.Context, tenantID, draftID 
 // exclusivity; this method asserts it defensively.
 func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerListFilter, pg models.Page) ([]*models.OutboundJob, int, error) {
 	pg = pg.Normalize()
-	args := []any{scope.TenantID}
-	where := []string{"tenant_id=$1"}
-	n := 1
-	switch {
-	case scope.AllInTenant:
-		// No owner filter — admins see the whole tenant.
-	case scope.UserID != nil:
-		n++
-		where = append(where, "user_id=$"+strconv.Itoa(n))
-		args = append(args, *scope.UserID)
-	case scope.APIKeyID != nil:
-		n++
-		where = append(where, "api_key_id=$"+strconv.Itoa(n))
-		args = append(args, *scope.APIKeyID)
-	default:
-		// Unknown principal: return empty rather than the whole tenant.
+	whereSQL, args, visible := outboundJobsScopeSQL(scope)
+	if !visible {
 		return []*models.OutboundJob{}, 0, nil
 	}
-
-	if scope.ReaderUserID != nil && !scope.AllInTenant {
-		n++
-		args = append(args, *scope.ReaderUserID)
-		shared := `sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE ` + readableMailboxPredicate(1, n) + `)`
-		where[len(where)-1] = "(" + where[len(where)-1] + " OR " + shared + ")"
-	}
-	if len(scope.AllowedZoneIDs) > 0 {
-		n++
-		where = append(where, "zone_id=ANY($"+strconv.Itoa(n)+")")
-		args = append(args, scope.AllowedZoneIDs)
-	}
-	whereSQL := strings.Join(where, " AND ")
+	n := len(args)
 	var total int
 	if err := s.pool.QueryRow(ctx,
 		"SELECT count(*) FROM outbound_jobs WHERE "+whereSQL, args...).Scan(&total); err != nil {
@@ -410,6 +384,42 @@ func (s *PgStore) ListOutboundJobsScoped(ctx context.Context, scope authz.OwnerL
 		out = append(out, job)
 	}
 	return out, total, rows.Err()
+}
+
+// outboundJobsScopeSQL is the production listing predicate, kept pure so the
+// tagged empty-domain scope can be verified without querying a live database.
+func outboundJobsScopeSQL(scope authz.OwnerListFilter) (string, []any, bool) {
+	args := []any{scope.TenantID}
+	where := []string{"tenant_id=$1"}
+	n := 1
+	switch {
+	case scope.AllInTenant:
+		// No owner filter — admins see the whole tenant.
+	case scope.UserID != nil:
+		n++
+		where = append(where, "user_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.UserID)
+	case scope.APIKeyID != nil:
+		n++
+		where = append(where, "api_key_id=$"+strconv.Itoa(n))
+		args = append(args, *scope.APIKeyID)
+	default:
+		// Unknown principal: return empty rather than the whole tenant.
+		return "", nil, false
+	}
+
+	if scope.ReaderUserID != nil && !scope.AllInTenant {
+		n++
+		args = append(args, *scope.ReaderUserID)
+		shared := `sender_mailbox_id IN (SELECT m.id FROM mailboxes m WHERE ` + readableMailboxPredicate(1, n) + `)`
+		where[len(where)-1] = "(" + where[len(where)-1] + " OR " + shared + ")"
+	}
+	if scope.RestrictZones || len(scope.AllowedZoneIDs) > 0 {
+		n++
+		where = append(where, "zone_id=ANY($"+strconv.Itoa(n)+")")
+		args = append(args, scope.AllowedZoneIDs)
+	}
+	return strings.Join(where, " AND "), args, true
 }
 
 // Claim one job using database time, holding ambiguous expired sends instead

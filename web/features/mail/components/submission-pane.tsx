@@ -1,135 +1,65 @@
 "use client";
-import { useEffect, useState } from "react";
-import { useSWRConfig } from "swr";
+import { useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
-import { request } from "@/lib/api/base";
-import { errorReason, isConflict } from "@/lib/error-code";
-import { submission } from "@/lib/company";
-import { useSessionScope } from "@/lib/session";
-import { ActionButton, LoadError, useAction, useText } from "@/components/company/common";
+import { submission, type Submission } from "@/lib/company";
+import { retryOutboundReceipt } from "@/lib/legacy-outbound";
+import { sessionScope, useSessionScope } from "@/lib/session";
+import { useI18n } from "@/lib/i18n";
+import { ActionButton, LoadError, useAction } from "@/components/company/common";
 import { StatusBadge } from "./delivery-status";
 import { SubmissionContentView } from "./submission-content";
-const RECIPIENT_STATE_LABELS: Record<string, [
-    string,
-    string
-]> = {
-    pending: ["待处理", "Pending"],
-    accepted: ["已接受", "Accepted"],
-    temporary: ["临时失败", "Temporary failure"],
-    permanent: ["永久失败", "Permanent failure"],
-    uncertain: ["结果不确定", "Uncertain"],
-};
-export function SubmissionPane({ id }: {
-    id: string;
-}) {
-    const t = useText();
-    const { busy, run } = useAction();
-    const detail = useAPI(["submission", id], () => submission(id), {
-        refreshInterval: 10000,
-    });
-    const s = detail.error ? undefined : detail.data;
-    const canViewContent = Boolean(s && !s.content_redacted && s.capabilities?.view_content !== false);
-    const scope = useSessionScope();
-    const { mutate: mutateCache } = useSWRConfig();
-    useEffect(() => {
-        if (canViewContent)
-            return;
-        for (const key of ["submission-content", "submission-attachments"]) {
-            // Invalidate request deduplication too; clearing data alone can leave a
-            // just-regranted disclosure stuck on a discarded pre-revocation promise.
-            void mutateCache(["session", scope, [key, id]], undefined, { revalidate: true });
-        }
-    }, [canViewContent, id, scope, mutateCache]);
-    return (<div className="mt-4 space-y-3 rounded-md border p-4">
-      <LoadError error={detail.error} onRetry={() => void detail.mutate()}/>
-      {s && (<>
-          <p className="text-sm break-words">
-            {s.from} →{" "}
-            {(s.recipients ?? []).map((v) => v.address).join(", ") || "—"}
-          </p>
-          <p className="text-sm">
-            <StatusBadge status={s.status}/>
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {t("附件", "Attachments")}: {s.attachment_count}
-            {s.draft_consumed
-                ? ` · ${t("来自草稿", "from a draft")}`
-                : ""}
-            {s.template_version_id
-                ? ` · ${t("模板版本", "Template version")}: ${s.template_version_id}`
-                : ""}
-          </p>
-          {/* capabilities is an interaction hint, not a credential; absent on
-                stale cached data keeps the current behavior. The content
-                endpoint re-checks read access on every call. */}
-          {canViewContent && <SubmissionContentDisclosure id={id}/>}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr>
-                  <th>{t("收件人", "Recipient")}</th>
-                  <th>{t("结果", "Outcome")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(s.recipients ?? []).map((v) => {
-                const l = RECIPIENT_STATE_LABELS[v.state] ?? [
-                    v.state,
-                    v.state,
-                ];
-                return (<tr key={v.address}>
-                      <td className="py-2 break-all">{v.address}</td>
-                      <td>{t(l[0], l[1])}</td>
-                    </tr>);
-            })}
-              </tbody>
-            </table>
-          </div>
-          {/* capabilities.retry is the interaction hint; when absent (old
-                cached data) fall back to the status heuristic. The retry POST
-                re-authorizes server-side either way. */}
-          {(s.capabilities
-                ? s.capabilities.retry
-                : s.status === "needs_attention") && (<ActionButton disabled={busy} onClick={() => run(async () => {
-                    try {
-                        await request(`/api/v1/outbound/${id}/retry`, {
-                            method: "POST",
-                            body: {},
-                        });
-                        toast.success(t("已请求安全重试", "Safe retry requested"));
-                        void detail.mutate();
-                    }
-                    catch (e) {
-                        if (isConflict(e)) {
-                            const reason = errorReason(e);
-                            toast.error(reason === "state_changed"
-                                ? t("任务状态已变化，请刷新后查看。", "The task state has changed; refresh to see the latest status.")
-                                : t("结果不确定，已禁止重试。请到恢复中心核实下一跳记录后再处理。", "Uncertain outcome: retry is blocked. Review next-hop evidence in the recovery center."));
-                            return;
-                        }
-                        throw e;
-                    }
-                })}>
-              {t("重试未成功目标（服务端重新鉴权）", "Retry unfinished recipients (re-authorized by server)")}
-            </ActionButton>)}
-          {s.delivery_uncertain && (<p role="status" className="text-sm">
-              {t("结果不确定，已禁止重试。请联系平台运维核实下一跳记录后再处理。", "Uncertain outcome: retry is blocked. Ask an operator to verify next-hop evidence.")}
-            </p>)}
-        </>)}
-    </div>);
+
+export function ReceiptSummary({ receipt }: { receipt: Submission }) {
+  const { t } = useI18n();
+  const counts = receipt.progress.completeness === "known" ? receipt.progress.counts : undefined;
+  return <div data-testid="ordinary-receipt-aggregate" className="space-y-2">
+    <p className="break-all text-sm">{t("ordinaryReceipt.task")}: {receipt.id}</p>
+    <p className="text-sm"><StatusBadge status={receipt.status} /></p>
+    <p className="text-xs text-muted-foreground">{t("ordinaryReceipt.nextHopNotice")}</p>
+    {counts ? <dl className="flex flex-wrap gap-3 text-sm">{(["total", "accepted", "pending", "temporary", "permanent", "uncertain"] as const).map(key =>
+      <div key={key} data-testid={`receipt-count-${key}`}><dt>{t(`ordinaryReceipt.counts.${key}`)}</dt><dd>{counts[key]}</dd></div>)}
+    </dl> : <p role="status">{t("ordinaryReceipt.progressUnknown")}</p>}
+    {receipt.created_at && <time className="text-xs">{new Date(receipt.created_at).toLocaleString()}</time>}
+  </div>;
 }
-// The disclosure owns its state so capability revocation unmounts and resets
-// it. Re-granting access never reopens a previously expanded body implicitly.
-function SubmissionContentDisclosure({ id }: {
-    id: string;
-}) {
-    const t = useText();
-    const [open, setOpen] = useState(false);
-    return <>
-    <ActionButton aria-expanded={open} onClick={() => setOpen((v) => !v)}>
-      {open ? t("收起内容", "Hide content") : t("查看内容", "View content")}
+// Mount only for an affirmative CURRENT backend capability. A scope/key change
+// unmounts disclosure state; token-only rotation is deliberately not a key.
+export function ReceiptContentDisclosure({ id }: { id: string }) {
+  const { t } = useI18n();
+  const [open, setOpen] = useState(false);
+  return <>
+    <ActionButton data-testid="receipt-content-disclosure" aria-expanded={open} onClick={() => setOpen(value => !value)}>
+      {t(open ? "ordinaryReceipt.hideContent" : "ordinaryReceipt.viewContent")}
     </ActionButton>
-    {open && <SubmissionContentView id={id}/>}
+    {open && <SubmissionContentView id={id} />}
   </>;
+}
+export function SubmissionPane({ id }: { id: string }) {
+  const { t } = useI18n();
+  const scope = useSessionScope();
+  const { busy, run } = useAction();
+  const detail = useAPI(["submission", id], () => submission(id), { refreshInterval: 10000 });
+  const receipt = detail.error ? undefined : detail.data;
+  return <div data-testid="ordinary-submission-pane" className="mt-4 space-y-3 rounded-md border p-4">
+    <LoadError error={detail.error} onRetry={() => void detail.mutate()} />
+    {receipt && <>
+      <ReceiptSummary receipt={receipt} />
+      {receipt.capabilities?.view_content === true && <ReceiptContentDisclosure key={`${scope}:${id}`} id={id} />}
+      {receipt.capabilities?.retry === true && <ActionButton data-testid="receipt-retry" disabled={busy} onClick={() => run(async () => {
+        try {
+          await retryOutboundReceipt(id);
+          if (scope !== sessionScope()) return;
+          toast.success(t("ordinaryReceipt.retryRequested"));
+          await detail.mutate();
+        } catch {
+          if (scope !== sessionScope()) return;
+          // Do not leak server diagnostics through an operation-status toast.
+          toast.error(t("ordinaryReceipt.retryBlocked"));
+          void detail.mutate();
+        }
+      })}>{t("ordinaryReceipt.retry")}</ActionButton>}
+      {receipt.delivery_uncertain && <p role="status">{t("ordinaryReceipt.retryBlocked")}</p>}
+    </>}
+  </div>;
 }

@@ -23,14 +23,14 @@ func (s *PgStore) CreatePermissionProfile(ctx context.Context, p *models.Permiss
 	now := time.Now()
 	p.CreatedAt = now
 	p.UpdatedAt = now
-	_, err := s.pool.Exec(ctx, `
+	err := s.pool.QueryRow(ctx, `
 		INSERT INTO permission_profiles (id, tenant_id, name, description, can_send, daily_send_quota, daily_receive_quota,
 			max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
 			can_create_api_keys, is_system, created_at, updated_at)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING permission_revision::text`,
 		p.ID, p.TenantID, p.Name, p.Description, p.CanSend, p.DailySendQuota, p.DailyReceiveQuota,
 		p.MaxMailboxes, p.MaxDomains, uuidSliceParam(p.AllowedZoneIDs), p.CanCreateDomains, p.CanCreateRoutes,
-		p.CanCreateAPIKeys, p.IsSystem, p.CreatedAt, p.UpdatedAt)
+		p.CanCreateAPIKeys, p.IsSystem, p.CreatedAt, p.UpdatedAt).Scan(&p.Revision)
 	return err
 }
 
@@ -91,7 +91,7 @@ func (s *PgStore) DeletePermissionProfile(ctx context.Context, id uuid.UUID, ten
 
 const permProfileSelect = `SELECT id, tenant_id, name, description, can_send, daily_send_quota, daily_receive_quota,
 	max_mailboxes, max_domains, allowed_zone_ids, can_create_domains, can_create_routes,
-	can_create_api_keys, is_system, created_at, updated_at
+	can_create_api_keys, is_system, created_at, updated_at, permission_revision::text
 	FROM permission_profiles`
 
 func scanPermProfile(row pgx.Row) (*models.PermissionProfile, error) {
@@ -99,7 +99,7 @@ func scanPermProfile(row pgx.Row) (*models.PermissionProfile, error) {
 	var allowedZones []uuid.UUID
 	err := row.Scan(&p.ID, &p.TenantID, &p.Name, &p.Description, &p.CanSend, &p.DailySendQuota, &p.DailyReceiveQuota,
 		&p.MaxMailboxes, &p.MaxDomains, &allowedZones, &p.CanCreateDomains, &p.CanCreateRoutes,
-		&p.CanCreateAPIKeys, &p.IsSystem, &p.CreatedAt, &p.UpdatedAt)
+		&p.CanCreateAPIKeys, &p.IsSystem, &p.CreatedAt, &p.UpdatedAt, &p.Revision)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, nil
 	}
@@ -135,6 +135,7 @@ func (s *PgStore) UpsertUserPermissionOverride(ctx context.Context, o *models.Us
 			can_create_domains=EXCLUDED.can_create_domains,
 			can_create_routes=EXCLUDED.can_create_routes,
 			can_create_api_keys=EXCLUDED.can_create_api_keys,
+			domain_access_mode=NULL,
 			updated_at=EXCLUDED.updated_at
 		RETURNING id, updated_at`,
 			o.ID, o.UserID, o.CanSend, o.DailySendQuota, o.DailyReceiveQuota,
@@ -155,9 +156,23 @@ func (s *PgStore) EffectivePermission(ctx context.Context, userID uuid.UUID) (*m
 	return effectivePermission(ctx, s.pool, userID)
 }
 
-func effectivePermission(ctx context.Context, query interface {
+type permissionQuerier interface {
 	QueryRow(context.Context, string, ...any) pgx.Row
-}, userID uuid.UUID) (*models.EffectivePermission, error) {
+}
+
+func effectivePermission(ctx context.Context, q permissionQuerier, userID uuid.UUID) (*models.EffectivePermission, error) {
+	return effectivePermissionPolicy(ctx, q, userID, false)
+}
+
+// Preview uses the identical canonical merge with only the selected-profile
+// join absent; it never mutates the real user or creates an alternate policy.
+func effectivePermissionAfterProfileRemoval(ctx context.Context, q permissionQuerier, userID uuid.UUID) (*models.EffectivePermission, error) {
+	return effectivePermissionPolicy(ctx, q, userID, true)
+}
+
+func effectivePermissionPolicy(ctx context.Context, query interface {
+	QueryRow(context.Context, string, ...any) pgx.Row
+}, userID uuid.UUID, withoutProfile bool) (*models.EffectivePermission, error) {
 	ep := &models.EffectivePermission{}
 	var allowedZones []uuid.UUID
 	err := query.QueryRow(ctx, `
@@ -170,14 +185,15 @@ func effectivePermission(ctx context.Context, query interface {
 			COALESCE(o.allowed_zone_ids,    p.allowed_zone_ids),
 			COALESCE(o.can_create_domains,  p.can_create_domains,  FALSE),
 			COALESCE(o.can_create_routes,   p.can_create_routes,   FALSE),
-			COALESCE(o.can_create_api_keys, p.can_create_api_keys, TRUE)
+			COALESCE(o.can_create_api_keys, p.can_create_api_keys, TRUE),
+			CASE WHEN o.domain_access_mode IN ('all','list','none') THEN o.domain_access_mode ELSE '' END
 		FROM users u
-		LEFT JOIN permission_profiles p ON p.id = u.permission_profile_id
+		LEFT JOIN permission_profiles p ON p.id = u.permission_profile_id AND NOT $2
 		LEFT JOIN user_permission_overrides o ON o.user_id = u.id
-		WHERE u.id = $1`, userID).
+		WHERE u.id = $1`, userID, withoutProfile).
 		Scan(&ep.CanSend, &ep.DailySendQuota, &ep.DailyReceiveQuota,
 			&ep.MaxMailboxes, &ep.MaxDomains, &allowedZones,
-			&ep.CanCreateDomains, &ep.CanCreateRoutes, &ep.CanCreateAPIKeys)
+			&ep.CanCreateDomains, &ep.CanCreateRoutes, &ep.CanCreateAPIKeys, &ep.DomainAccessMode)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return nil, fmt.Errorf("user %s not found", userID)
 	}

@@ -6,13 +6,15 @@ import UsersPage from "./user-management";
 import PermissionsPage from "./profile-management";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { getUserPermission, listPermissionProfiles, updatePermissionProfile } from "@/lib/api";
+import { validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
 import { installSession } from "@/lib/session";
 import type { AuthUser } from "@/lib/types";
 
 // Only the host identity context is supplied by the test. Real React editors,
 // Base UI controls, SWR, locale provider, session scope, API functions, fetch,
 // HTTP authentication and PostgreSQL writes all remain in the execution path.
-vi.mock("@/contexts/auth-context", () => ({ useAuth: () => ({ level: "admin" }) }));
+const host = vi.hoisted(() => ({ user: null as AuthUser | null }));
+vi.mock("@/contexts/auth-context", () => ({ useAuth: () => ({ user: host.user, level: host.user?.role ?? "user", tenantId: host.user?.tenant_id ?? null }) }));
 
 interface Fixture {
   case: "A01" | "A02";
@@ -35,6 +37,7 @@ if (origin.protocol !== "http:" || origin.hostname !== "127.0.0.1" || !["A01", "
 
 beforeEach(() => {
   process.env.NEXT_PUBLIC_API_URL = origin.origin;
+  host.user = fixture.admin;
   installSession(fixture.token, fixture.admin);
   // jsdom lacks layout observers; no production UI component is replaced.
   vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
@@ -87,8 +90,12 @@ test(`${fixture.case} secure editor behavior`, async () => {
     const description = within(dialog).getByPlaceholderText("Profile description (optional)");
     // A separate administrator action AFTER opening the real editor. It goes
     // through the unmodified API client and server, not a response mock.
-    const revoked = (await updatePermissionProfile(fixture.profile_id, { can_send: false })).data;
+    const observed = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
+    if (!observed) throw new Error("Actual profile GET omitted the fixture profile");
+    validateObservedPermissionProfile(observed);
+    const revoked = (await updatePermissionProfile(fixture.profile_id, { expected_revision: observed.revision, fields: { can_send: false } })).data;
     expect(revoked.can_send).toBe(false);
+    expect(revoked.revision).not.toBe(observed.revision);
     await user.clear(description);
     await user.type(description, "R5 stale description");
     await user.click(within(dialog).getByRole("button", { name: /^Save$/ }));

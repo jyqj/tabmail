@@ -191,12 +191,18 @@ func (s *PgStore) DeleteUserGuarded(ctx context.Context, actor authz.Actor, tena
 	if owns {
 		return store.ErrMemberOwnsMailbox
 	}
+	if err = guardMemberHistoricalIdentity(ctx, tx, tenant, target); err != nil {
+		return err
+	}
 	if _, err = tx.Exec(ctx, `DELETE FROM tenant_api_keys WHERE owner_user_id=$1 AND tenant_id=$2`, target, tenant); err != nil {
 		return err
 	}
 	tag, err := tx.Exec(ctx, `DELETE FROM users WHERE id=$1 AND tenant_id=$2`, target, tenant)
 	if err != nil {
-		return err
+		// The FK remains the final fence, including future incoming references.
+		// Rollback also restores the key deletion above. Do not expose the FK's
+		// database identity or delete its referencing evidence to make progress.
+		return memberIdentityDeleteError(err)
 	}
 	if tag.RowsAffected() != 1 {
 		return store.ErrMemberNotFound
@@ -204,5 +210,37 @@ func (s *PgStore) DeleteUserGuarded(ctx context.Context, actor authz.Actor, tena
 	if err = insertMemberAudit(ctx, tx, actor, old, "user.delete", map[string]any{"role": old.Role}); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	// Current schema18 parents are immediate. A future deferred FK must retain
+	// the same domain semantics when PostgreSQL rejects the commit instead.
+	return memberIdentityDeleteError(tx.Commit(ctx))
+}
+
+func memberIdentityDeleteError(err error) error {
+	var pg *pgconn.PgError
+	if errors.As(err, &pg) && pg.Code == "23503" {
+		return store.ErrMemberHasHistoricalIdentity
+	}
+	return err
+}
+
+// Called only after tenant -> current actor -> target fences and the existing
+// role/self/last-administrator/mailbox checks. Formal draft/upload/send writers
+// fence their user row, so they cannot add evidence behind this target lock.
+// Keep all plan states and tombstones: expiry/completion is not evidence GC.
+// The sent archive has mailbox provenance, not a user FK; never infer its old
+// sender from a mailbox's current owner. Jobs retain explicit sender identity.
+func guardMemberHistoricalIdentity(ctx context.Context, tx pgx.Tx, tenant, target uuid.UUID) error {
+	var retained bool
+	if err := tx.QueryRow(ctx, `SELECT
+ EXISTS(SELECT 1 FROM employee_offboarding_plans WHERE tenant_id=$1 AND (target_id=$2 OR successor_id=$2))
+ OR EXISTS(SELECT 1 FROM draft_creation_receipts WHERE tenant_id=$1 AND user_id=$2)
+ OR EXISTS(SELECT 1 FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2)
+ OR EXISTS(SELECT 1 FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NOT NULL)
+ OR EXISTS(SELECT 1 FROM outbound_jobs WHERE tenant_id=$1 AND (user_id=$2 OR sender_user_id=$2))`, tenant, target).Scan(&retained); err != nil {
+		return err
+	}
+	if retained {
+		return store.ErrMemberHasHistoricalIdentity
+	}
+	return nil
 }

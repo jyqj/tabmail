@@ -42,10 +42,15 @@ func (f *FileStore) putAtomic(ctx context.Context, key string, r io.Reader, size
 	closed := false
 	defer func() {
 		if !closed {
-			_ = out.Close()
+			finish := beginFileDiagnostic(ctx, "file_close_failure_cleanup")
+			closeErr := out.Close()
+			if finish != nil {
+				finish(closeErr)
+			}
 		}
 	}()
 	reader := &contextReader{ctx: ctx, r: r}
+	copyFinished := beginFileDiagnostic(ctx, "copy_and_declared_length_validation")
 	if size < 0 {
 		_, err = io.Copy(out, reader)
 	} else {
@@ -65,16 +70,28 @@ func (f *FileStore) putAtomic(ctx context.Context, key string, r io.Reader, size
 			}
 		}
 	}
+	if copyFinished != nil {
+		copyFinished(err)
+	}
 	if err != nil {
 		return err
 	}
 	if err = ctx.Err(); err != nil {
 		return err
 	}
-	if err = out.Sync(); err != nil {
+	syncFinished := beginFileDiagnostic(ctx, "file_sync")
+	err = out.Sync()
+	if syncFinished != nil {
+		syncFinished(err)
+	}
+	if err != nil {
 		return err
 	}
+	closeFinished := beginFileDiagnostic(ctx, "file_close")
 	err = out.Close()
+	if closeFinished != nil {
+		closeFinished(err)
+	}
 	closed = true
 	if err != nil {
 		return err
@@ -84,17 +101,39 @@ func (f *FileStore) putAtomic(ctx context.Context, key string, r io.Reader, size
 	}
 	// Resolve both names through the original root, not an unchecked absolute
 	// path. A swapped parent symlink cannot redirect publication elsewhere.
-	if err = root.Rename(filepath.Join(dir, name), key); err != nil {
+	renameFinished := beginFileDiagnostic(ctx, "rename")
+	err = root.Rename(filepath.Join(dir, name), key)
+	if renameFinished != nil {
+		renameFinished(err)
+	}
+	if err != nil {
 		return err
 	}
 	// Sync newly created ancestor directories as well as the rename's directory.
+	depth := 0
 	for current := dir; ; current = filepath.Dir(current) {
 		d, err := root.Open(current)
 		if err != nil {
 			return err
 		}
+		stage := "dir_sync_ancestor"
+		if current == "." {
+			stage = "dir_sync_root"
+		} else if depth == 0 {
+			stage = "dir_sync_leaf"
+		} else if depth == 1 {
+			stage = "dir_sync_parent"
+		}
+		dirSyncFinished := beginFileDiagnostic(ctx, stage)
 		syncErr := d.Sync()
+		if dirSyncFinished != nil {
+			dirSyncFinished(syncErr)
+		}
+		dirCloseFinished := beginFileDiagnostic(ctx, "dir_close")
 		closeErr := d.Close()
+		if dirCloseFinished != nil {
+			dirCloseFinished(closeErr)
+		}
 		if syncErr != nil {
 			return syncErr
 		}
@@ -104,6 +143,7 @@ func (f *FileStore) putAtomic(ctx context.Context, key string, r io.Reader, size
 		if current == "." {
 			break
 		}
+		depth++
 	}
 	return nil
 }

@@ -9,11 +9,13 @@ import type {
   MonitorEvent,
   Plan,
   SMTPPolicy,
+  SMTPPolicyInput,
   SystemSetting,
   SystemStats,
   Tenant,
   TenantAPIKey,
   TenantOverride,
+  TenantOverrideInput,
   UpdateUserRequest,
   WebhookDelivery,
 } from "../types";
@@ -56,7 +58,7 @@ export function getSMTPPolicy() {
   return request<APIResponse<SMTPPolicy>>("/api/v1/admin/policy");
 }
 
-export function updateSMTPPolicy(body: SMTPPolicy) {
+export function updateSMTPPolicy(body: SMTPPolicyInput) {
   return request<APIResponse<SMTPPolicy>>("/api/v1/admin/policy", {
     method: "PATCH",
     body,
@@ -74,7 +76,7 @@ export function createTenant(body: { name: string; plan_id: string }) {
   });
 }
 
-export function updateTenantOverrides(id: string, overrides: TenantOverride) {
+export function updateTenantOverrides(id: string, overrides: TenantOverrideInput) {
   return request<APIResponse<TenantOverride>>(`/api/v1/admin/tenants/${id}`, {
     method: "PATCH",
     body: overrides,

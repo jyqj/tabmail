@@ -19,13 +19,14 @@ func (s *Service) recheckMessage(ctx context.Context, actor authz.Actor, mailbox
 	if err != nil {
 		return err
 	}
-	if current.RawObjectKey != observed.RawObjectKey {
+	if current.RawObjectKey != observed.RawObjectKey || current.ZoneID != observed.ZoneID || !current.ReceivedAt.Equal(observed.ReceivedAt) {
 		return app.Conflict("message source changed; reload")
 	}
 	return nil
 }
 
-// authorizedSource protects the first successful read as well as Source's
+// authorizedSource protects the first successful read and a terminal empty EOF
+// (which also causes HTTP success headers), as well as Source's
 // object-open boundary: some object adapters defer their slow work until Read.
 // Once bytes have been released, the stream keeps its established authorization
 // rather than doing database queries for every chunk. Read has the usual Reader
@@ -46,7 +47,7 @@ func (r *authorizedSource) Read(p []byte) (int, error) {
 		return 0, nil
 	}
 	n, err := r.ReadCloser.Read(p)
-	if n > 0 && r.check != nil {
+	if (n > 0 || err == io.EOF) && r.check != nil {
 		if denied := r.check(); denied != nil {
 			// io.Copy must receive neither a successful byte count nor stale
 			// bytes left in the destination buffer after failed authorization.

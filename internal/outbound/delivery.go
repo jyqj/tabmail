@@ -10,33 +10,32 @@ import (
 	"net/textproto"
 	"strings"
 	"tabmail/internal/store"
-	"time"
 
 	"tabmail/internal/config"
 )
 
 // DeliverRelay sends email through a configured SMTP relay.
 func DeliverRelay(ctx context.Context, cfg config.Outbound, from string, to []string, mime []byte) error {
+	return deliverRelayTLS(ctx, cfg, from, to, mime, &tls.Config{ServerName: cfg.RelayHost})
+}
+
+// deliverRelayTLS is the relay adapter's transport path. Its caller owns the
+// trust policy; the exported entry point always uses normal system trust.
+func deliverRelayTLS(ctx context.Context, cfg config.Outbound, from string, to []string, mime []byte, tlsConf *tls.Config) (err error) {
+	defer func() { err = smtpContextError(ctx, err) }()
 	addr := fmt.Sprintf("%s:%d", cfg.RelayHost, cfg.RelayPort)
 
-	var conn net.Conn
-	var err error
-	dialer := &net.Dialer{Timeout: 30 * time.Second}
-
-	switch strings.ToLower(cfg.RelayTLS) {
-	case "tls":
-		tlsConf := &tls.Config{ServerName: cfg.RelayHost}
-		conn, err = tls.DialWithDialer(dialer, "tcp", addr, tlsConf)
-	default:
-		conn, err = dialer.DialContext(ctx, "tcp", addr)
-	}
+	conn, release, err := dialSMTPContext(ctx, addr)
 	if err != nil {
 		return fmt.Errorf("connect relay %s: %w", addr, err)
 	}
-	if deadline, ok := ctx.Deadline(); ok {
-		_ = conn.SetDeadline(deadline)
-	} else {
-		_ = conn.SetDeadline(time.Now().Add(2 * time.Minute))
+	defer release()
+	if strings.ToLower(cfg.RelayTLS) == "tls" {
+		tlsConn := tls.Client(conn, tlsConf)
+		if err := tlsConn.HandshakeContext(ctx); err != nil {
+			return fmt.Errorf("connect relay %s: %w", addr, smtpContextError(ctx, err))
+		}
+		conn = tlsConn
 	}
 
 	client, err := smtp.NewClient(conn, cfg.RelayHost)
@@ -47,7 +46,6 @@ func DeliverRelay(ctx context.Context, cfg config.Outbound, from string, to []st
 	defer client.Close()
 
 	if strings.ToLower(cfg.RelayTLS) == "starttls" {
-		tlsConf := &tls.Config{ServerName: cfg.RelayHost}
 		if err := client.StartTLS(tlsConf); err != nil {
 			return fmt.Errorf("starttls: %w", err)
 		}
@@ -67,9 +65,15 @@ func DeliverRelay(ctx context.Context, cfg config.Outbound, from string, to []st
 // When requireTLS is true, delivery fails if STARTTLS is unavailable or negotiation fails,
 // preventing MITM downgrade attacks.
 func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, requireTLS bool) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	byDomain := groupByDomain(to)
 	var failures []error
 	for domain, rcpts := range byDomain {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
 		var lastErr error
 		mxs, err := lookupMX(ctx, domain)
 		if err != nil {
@@ -80,60 +84,14 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 		for _, mx := range mxs {
 			host := strings.TrimSuffix(mx, ".")
 			addr := fmt.Sprintf("%s:25", host)
-			conn, err := net.DialTimeout("tcp", addr, 30*time.Second)
+			err := deliverDirectMX(ctx, host, addr, from, rcpts, mime, requireTLS)
 			if err != nil {
-				continue
-			}
-			if deadline, ok := ctx.Deadline(); ok {
-				_ = conn.SetDeadline(deadline)
-			} else {
-				_ = conn.SetDeadline(time.Now().Add(2 * time.Minute))
-			}
-			client, err := smtp.NewClient(conn, mx)
-			if err != nil {
-				conn.Close()
-				continue
-			}
-
-			if ok, _ := client.Extension("STARTTLS"); ok {
-				tlsConf := &tls.Config{ServerName: host}
-				if tlsErr := client.StartTLS(tlsConf); tlsErr != nil {
-					client.Close()
-					if requireTLS {
-						lastErr = fmt.Errorf("STARTTLS required but negotiation failed for %s: %w", host, tlsErr)
-						continue
-					}
-					conn2, err2 := net.DialTimeout("tcp", addr, 30*time.Second)
-					if err2 != nil {
-						lastErr = fmt.Errorf("reconnect to %s after TLS failure: %w", host, err2)
-						continue
-					}
-					if deadline, ok := ctx.Deadline(); ok {
-						_ = conn2.SetDeadline(deadline)
-					} else {
-						_ = conn2.SetDeadline(time.Now().Add(2 * time.Minute))
-					}
-					client, err = smtp.NewClient(conn2, mx)
-					if err != nil {
-						conn2.Close()
-						continue
-					}
-				}
-			} else if requireTLS {
-				client.Close()
-				lastErr = fmt.Errorf("STARTTLS required but not supported by %s", host)
-				continue
-			}
-
-			if err := sendSMTP(client, from, rcpts, mime); err != nil {
-				client.Close()
-				if errors.Is(err, store.ErrOutboundUncertain) {
+				if errors.Is(err, store.ErrOutboundUncertain) || ctx.Err() != nil {
 					return err
 				}
 				lastErr = err
 				continue
 			}
-			client.Close()
 			delivered = true
 			break
 		}
@@ -145,6 +103,56 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 		}
 	}
 	return errors.Join(failures...)
+}
+
+// deliverDirectMX is the production per-MX session, including opportunistic
+// plaintext reconnect when the caller explicitly allows that existing policy.
+func deliverDirectMX(ctx context.Context, host, addr, from string, to []string, mime []byte, requireTLS bool) error {
+	return deliverDirectMXTLS(ctx, host, addr, from, to, mime, requireTLS, &tls.Config{ServerName: host})
+}
+
+func deliverDirectMXTLS(ctx context.Context, host, addr, from string, to []string, mime []byte, requireTLS bool, tlsConf *tls.Config) (err error) {
+	defer func() { err = smtpContextError(ctx, err) }()
+	conn, release, err := dialSMTPContext(ctx, addr)
+	if err != nil {
+		return err
+	}
+	defer func() { release() }()
+	client, err := smtp.NewClient(conn, host)
+	if err != nil {
+		return fmt.Errorf("smtp client: %w", err)
+	}
+	defer func() {
+		if client != nil {
+			_ = client.Close()
+		}
+	}()
+	if ok, _ := client.Extension("STARTTLS"); ok {
+		if tlsErr := client.StartTLS(tlsConf); tlsErr != nil {
+			_ = client.Close()
+			release()
+			// A canceled handshake is not a reason to reconnect or try another MX.
+			if ctx.Err() != nil {
+				return smtpContextError(ctx, tlsErr)
+			}
+			if requireTLS {
+				return fmt.Errorf("STARTTLS required but negotiation failed for %s: %w", host, tlsErr)
+			}
+			conn, release, err = dialSMTPContext(ctx, addr)
+			// Keep cleanup callable even when no replacement socket was allocated.
+			if err != nil {
+				release = func() {}
+				return fmt.Errorf("reconnect to %s after TLS failure: %w", host, err)
+			}
+			client, err = smtp.NewClient(conn, host)
+			if err != nil {
+				return fmt.Errorf("smtp client after reconnect: %w", err)
+			}
+		}
+	} else if requireTLS {
+		return fmt.Errorf("STARTTLS required but not supported by %s", host)
+	}
+	return sendSMTP(client, from, to, mime)
 }
 
 func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error {

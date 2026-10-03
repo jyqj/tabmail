@@ -17,13 +17,14 @@ import { Compose } from "@/components/company/compose";
 import { executeOffboarding } from "@/features/company/api";
 import { company, type MailDraft, type WorkMailbox } from "@/lib/company";
 import { listUsers, getUserPermission, updateUser, updatePermissionProfile, listPermissionProfiles, setUserPermissionOverride, deleteUserPermissionOverride } from "@/lib/api";
+import { validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
 import { installSession } from "@/lib/session";
 import type { AuthUser } from "@/lib/types";
 
 // Host identity is supplied; API functions, session, SWR, controls, fetch,
 // shipping HTTP handlers and PostgreSQL are never response-mocked.
 const host = vi.hoisted(() => ({ user: null as AuthUser | null }));
-vi.mock("@/contexts/auth-context", () => ({ useAuth: () => ({ user: host.user, level: host.user?.role ?? "user" }) }));
+vi.mock("@/contexts/auth-context", () => ({ useAuth: () => ({ user: host.user, level: host.user?.role ?? "user", tenantId: host.user?.tenant_id ?? null }) }));
 interface Fixture {
   schema_version: number; case_id: string; variant: string; case_sha256: string;
   api_url: string; auth: { token: string; user: AuthUser };
@@ -186,7 +187,14 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     if (!fixture.profile_id || !fixture.profile_name) throw new Error("Actual profile fixture missing");
     render(<SidebarProvider><PermissionsPage /></SidebarProvider>);
     const dialog = await rowDialog(fixture.profile_name, "Edit");
-    await updatePermissionProfile(fixture.profile_id, { can_send: false });
+    // Observe the current persistent version through the real authorized GET;
+    // the shipping editor retains the older snapshot opened above.
+    const observed = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
+    if (!observed) throw new Error("Actual profile GET omitted the fixture profile");
+    validateObservedPermissionProfile(observed);
+    const revoked = (await updatePermissionProfile(fixture.profile_id, { expected_revision: observed.revision, fields: { can_send: false } })).data;
+    expect(revoked.can_send).toBe(false);
+    expect(revoked.revision).not.toBe(observed.revision);
     const input = within(dialog).getByPlaceholderText("Profile description (optional)");
     await userEvent.clear(input); await userEvent.type(input, "Shared stale description");
     await userEvent.click(within(dialog).getByRole("button", { name: /^Save$/ }));

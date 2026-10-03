@@ -305,6 +305,10 @@ type OutboundContentAuthority interface {
 type OutboundReceipt struct {
 	Job            *models.OutboundJob
 	ContentAllowed bool
+	// RecipientStates belongs to the same authorized snapshot as Job; it is
+	// the complete ledger, not a public address-filtered view.
+	RecipientStates []string
+	LedgerKnown     bool
 }
 
 type OutboundReceiptReader interface {

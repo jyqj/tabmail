@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -13,6 +14,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"tabmail/internal/app/submissions"
+	"tabmail/internal/company"
 	"tabmail/internal/config"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
@@ -103,6 +105,121 @@ func r5ReceiptRequest(ctx context.Context, h http.Handler, path, token, key stri
 	return done, rr
 }
 
+// These boundary-only helpers do not change the already accepted key10 fixture.
+// Inspect raw JSON before decoding the DTO, so a future DTO field cannot silently
+// widen the ordinary receipt contract, including list items and nested objects.
+func r5ReceiptBoundaryView(t *testing.T, w *httptest.ResponseRecorder, j *models.OutboundJob, list, viewContent bool, retryReason string) company.OutboundReceipt {
+	t.Helper()
+	raw := w.Body.Bytes()
+	for _, private := range append([]string{"PRIVATE_", j.Subject, j.MailFrom}, j.RcptTo...) {
+		if private != "" && strings.Contains(string(raw), private) {
+			t.Fatal("ordinary receipt leaked content, subject, address or protocol diagnostics")
+		}
+	}
+	fieldsAllowed, fieldsRequired := "data", "data"
+	if list {
+		fieldsAllowed, fieldsRequired = "data meta", "data meta"
+	}
+	env := r5LegacyReceiptObject(t, raw, fieldsAllowed, fieldsRequired)
+	data := env["data"]
+	if list {
+		r5LegacyReceiptObject(t, env["meta"], "total page per_page", "total page per_page")
+		var meta struct {
+			Total   int `json:"total"`
+			Page    int `json:"page"`
+			PerPage int `json:"per_page"`
+		}
+		must(t, json.Unmarshal(env["meta"], &meta))
+		if meta.Total != 1 || meta.Page != 1 || meta.PerPage < 1 {
+			t.Fatal("receipt list lost exact fixture total or pagination metadata")
+		}
+		var rows []json.RawMessage
+		must(t, json.Unmarshal(data, &rows))
+		if len(rows) != 1 {
+			t.Fatalf("expected exactly the fixture receipt, got %d rows", len(rows))
+		}
+		data = rows[0]
+	}
+	fields := r5LegacyReceiptObject(t, data,
+		"id tenant_id state status progress created_at updated_at attempt_count next_retry delivery_uncertain capabilities",
+		"id tenant_id state status progress created_at updated_at attempt_count delivery_uncertain capabilities")
+	progress := r5LegacyReceiptObject(t, fields["progress"], "completeness counts", "completeness counts")
+	r5LegacyReceiptObject(t, progress["counts"], "total accepted pending temporary permanent uncertain", "total accepted pending temporary permanent uncertain")
+	r5LegacyReceiptObject(t, fields["capabilities"], "view_content retry retry_block_reason", "view_content retry retry_block_reason")
+	var v company.OutboundReceipt
+	must(t, json.Unmarshal(data, &v))
+	status := company.SubmissionNeedsAttention
+	if j.State == models.OutboundPending {
+		status = company.SubmissionSubmitted
+	}
+	if v.ID != j.ID || v.TenantID == nil || *v.TenantID != j.TenantID || v.State != j.State || v.Status != status {
+		t.Fatal("receipt lost exact identity, tenant, state or conservative ledger status")
+	}
+	counts := company.OutboundReceiptCounts{Total: len(j.RcptTo), Pending: len(j.RcptTo)}
+	if v.Progress.Completeness != "known" || v.Progress.Counts == nil || *v.Progress.Counts != counts || v.DeliveryUncertain {
+		t.Fatal("receipt lost the complete pending recipient aggregate")
+	}
+	if v.CreatedAt == nil || v.CreatedAt.IsZero() || v.UpdatedAt == nil || v.UpdatedAt.IsZero() || v.AttemptCount == nil || *v.AttemptCount != j.Attempts || v.NextRetry != nil {
+		t.Fatal("receipt lost durable operation metadata")
+	}
+	if v.Capabilities == nil || v.Capabilities.ViewContent != viewContent || v.Capabilities.Retry || v.Capabilities.RetryBlockReason != retryReason {
+		t.Fatal("receipt confused current content, retry and operation-read authority")
+	}
+	return v
+}
+
+func r5ReceiptBoundarySameMetadata(t *testing.T, before, after company.OutboundReceipt) {
+	t.Helper()
+	before.Capabilities, after.Capabilities = nil, nil
+	if !reflect.DeepEqual(before, after) {
+		t.Fatal("content authority change altered durable safe receipt metadata")
+	}
+}
+
+// Retention is configured through the real mailbox API before enqueue. Verify
+// the real archive trigger created an already-finite item; never invent an
+// expiry for the permanently retained personal mailbox used by other tests.
+func r5ReceiptBoundaryFiniteJob(t *testing.T, f *companyFixture) *models.OutboundJob {
+	t.Helper()
+	ctx := context.Background()
+	hours := 1
+	mailbox, err := f.st.CreateWorkMailbox(ctx, f.a, company.MailboxInput{LocalPart: "receipt-boundary", Kind: "shared", RetentionHours: &hours})
+	must(t, err)
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: mailbox.ID, UserID: f.employee.ID, CanRead: true, CanSend: true}))
+	copyFixture := *f
+	copyFixture.personal = mailbox
+	j := r5LegacyJob(t, &copyFixture)
+	var finite bool
+	must(t, f.pool.QueryRow(ctx, `SELECT i.expires_at IS NOT NULL AND i.expires_at=a.created_at+make_interval(hours=>m.retention_hours_override)
+ AND i.expires_at>clock_timestamp() AND m.mailbox_kind='shared' AND m.retention_hours_override=1
+ FROM sent_mail_items i JOIN sent_mail_assets a ON a.tenant_id=i.tenant_id AND a.id=i.asset_id
+ JOIN mailboxes m ON m.tenant_id=i.tenant_id AND m.id=i.mailbox_id
+ WHERE i.tenant_id=$1 AND i.asset_id=$2 AND i.mailbox_id=$3`, j.TenantID, j.ID, mailbox.ID).Scan(&finite))
+	if !finite {
+		t.Fatal("normal enqueue did not create the configured finite archive")
+	}
+	return j
+}
+
+func r5ReceiptBoundaryExpire(t *testing.T, f *companyFixture, ctx context.Context, j *models.OutboundJob) {
+	t.Helper()
+	tag, err := f.pool.Exec(ctx, `UPDATE sent_mail_items SET expires_at=clock_timestamp()-interval '1 second'
+ WHERE tenant_id=$1 AND asset_id=$2 AND mailbox_id=$3 AND expires_at IS NOT NULL`, j.TenantID, j.ID, j.SenderMailboxID)
+	must(t, err)
+	if tag.RowsAffected() != 1 {
+		t.Fatal("expiry did not shorten exactly the original finite item")
+	}
+}
+
+func r5ReceiptBoundaryStillWaiting(t *testing.T, done <-chan error) {
+	t.Helper()
+	select {
+	case err := <-done:
+		t.Fatalf("receipt request completed before its exact blocker was released: %v", err)
+	default:
+	}
+}
+
 func TestR5OutboundReceiptKeyExpiryAfterQueryWait(t *testing.T) {
 	for _, pathMode := range []string{"detail", "list", "attempts"} {
 		t.Run(pathMode, func(t *testing.T) {
@@ -111,19 +228,12 @@ func TestR5OutboundReceiptKeyExpiryAfterQueryWait(t *testing.T) {
 			defer cancel()
 			k, _ := r5LegacyKey(t, f)
 			j := r5LegacyJob(t, f, &k.ID)
+			must(t, f.st.CreateOutboundAttempt(ctx, &models.OutboundAttempt{TenantID: j.TenantID, JobID: j.ID, Attempt: 1, SMTPCode: 451, SMTPResponse: "PRIVATE_ATTEMPT_SMTP", RemoteHost: "PRIVATE_ATTEMPT_HOST", Error: "PRIVATE_ATTEMPT_ERROR"}))
+			_, e := f.pool.Exec(ctx, `UPDATE outbound_jobs SET attempts=1 WHERE id=$1 AND tenant_id=$2`, j.ID, j.TenantID)
+			must(t, e)
+			j.Attempts = 1
 			svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, f.st, zerolog.Nop())
 			h := companyRouter(t, f, testutil.NewMemoryObjectStore(), svc)
-			var deadline time.Time
-			must(t, f.pool.QueryRow(ctx, `UPDATE tenant_api_keys SET expires_at=clock_timestamp()+interval '2 seconds' WHERE id=$1 RETURNING expires_at`, k.ID).Scan(&deadline))
-			hold, e := f.pool.Begin(ctx)
-			must(t, e)
-			defer hold.Rollback(context.Background())
-			table := "outbound_jobs"
-			if pathMode == "attempts" {
-				table = "outbound_attempts"
-			}
-			_, e = hold.Exec(ctx, `LOCK TABLE `+table+` IN ACCESS EXCLUSIVE MODE`)
-			must(t, e)
 			path := "/api/v1/outbound"
 			if pathMode != "list" {
 				path += "/" + j.ID.String()
@@ -131,19 +241,34 @@ func TestR5OutboundReceiptKeyExpiryAfterQueryWait(t *testing.T) {
 			if pathMode == "attempts" {
 				path += "/attempts"
 			}
-			done, rr := r5ReceiptRequest(ctx, h, path, "", "tm_content_"+k.ID.String())
-			pid := r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), table)
+			key := "tm_content_" + k.ID.String()
+			reason := "state_not_retryable"
+			if pathMode == "list" {
+				reason = "unknown"
+			}
+			// Fresh-key positive control uses the same real endpoint. Attempts is a
+			// receipt with attempt_count, not a per-attempt protocol/host array.
+			r5ReceiptBoundaryView(t, r5LegacyKeyHTTP(t, h, key, path, 200), j, pathMode == "list", true, reason)
+			var deadline time.Time
+			must(t, f.pool.QueryRow(ctx, `UPDATE tenant_api_keys SET expires_at=clock_timestamp()+interval '2 seconds' WHERE id=$1 RETURNING expires_at`, k.ID).Scan(&deadline))
+			hold, e := f.pool.Begin(ctx)
+			must(t, e)
+			defer hold.Rollback(context.Background())
+			// All three shipping endpoints read the ordinary receipt query. The
+			// attempts endpoint no longer reads/locks outbound_attempts.
+			_, e = hold.Exec(ctx, `LOCK TABLE outbound_jobs IN ACCESS EXCLUSIVE MODE`)
+			must(t, e)
+			done, rr := r5ReceiptRequest(ctx, h, path, "", key)
+			pid := r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "WITH visible AS MATERIALIZED")
+			t.Logf("%s receipt waiter=%d exact blocker=%d key deadline=%s", pathMode, pid, hold.Conn().PgConn().PID(), deadline.UTC().Format(time.RFC3339Nano))
+			r5ReceiptBoundaryStillWaiting(t, done)
 			r5AwaitSentDeadline(t, f, ctx, pid, deadline)
+			t.Log("database clock reached key deadline before receipt blocker release")
+			r5ReceiptBoundaryStillWaiting(t, done)
 			must(t, hold.Rollback(ctx))
 			r5AwaitOperation(t, ctx, done)
-			if rr.Code == 200 && strings.Contains(rr.Body.String(), "safe receipt") {
-				t.Fatal("expired key received receipt metadata after database wait")
-			}
-			if pathMode == "attempts" && rr.Code == 200 {
-				t.Fatal("expired key still received attempts after wait")
-			}
 			if rr.Code != 403 && rr.Code != 404 {
-				t.Fatalf("invalid key should fail closed, got %d", rr.Code)
+				t.Fatalf("key expired across real receipt wait must fail closed, got %d", rr.Code)
 			}
 		})
 	}
@@ -153,7 +278,7 @@ func TestR5OutboundReceiptListOrdersMemberFreeze(t *testing.T) {
 	f := seedCompany(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)
 	defer cancel()
-	r5LegacyJob(t, f)
+	j := r5LegacyJob(t, f)
 	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, f.st, zerolog.Nop())
 	h := companyRouter(t, f, testutil.NewMemoryObjectStore(), svc)
 	token := r3Token(t, f.employee)
@@ -163,7 +288,7 @@ func TestR5OutboundReceiptListOrdersMemberFreeze(t *testing.T) {
 	_, e = hold.Exec(ctx, `LOCK TABLE outbound_jobs IN ACCESS EXCLUSIVE MODE`)
 	must(t, e)
 	done, rr := r5ReceiptRequest(ctx, h, "/api/v1/outbound", token, "")
-	reader := r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "outbound_jobs")
+	reader := r5WaitBlockedBy(t, f, ctx, hold.Conn().PgConn().PID(), "WITH visible AS MATERIALIZED")
 	changed := make(chan error, 1)
 	go func() {
 		_, err := f.pool.Exec(ctx, `UPDATE users SET is_active=false WHERE id=$1`, f.employee.ID)
@@ -176,11 +301,17 @@ func TestR5OutboundReceiptListOrdersMemberFreeze(t *testing.T) {
 	if waits {
 		r5AwaitOperation(t, ctx, changed)
 	}
-	if !waits && rr.Code == 200 && strings.Contains(rr.Body.String(), "safe receipt") {
-		t.Fatal("freeze committed before receipt query, stale actor still returned metadata")
-	}
-	if waits && rr.Code != 200 {
-		t.Fatalf("reader ordered before freeze unexpectedly failed: %d", rr.Code)
+	if !waits {
+		// Subject is never in this DTO. Any 200 (even an empty list) after
+		// the freeze won the ordering race would accept the stale principal.
+		if rr.Code != 401 && rr.Code != 403 && rr.Code != 404 {
+			t.Fatalf("freeze committed before receipt query, stale actor returned status %d", rr.Code)
+		}
+	} else {
+		if rr.Code != 200 {
+			t.Fatalf("reader ordered before freeze unexpectedly failed: %d", rr.Code)
+		}
+		r5ReceiptBoundaryView(t, rr, j, true, true, "unknown")
 	}
 	r3HTTP(t, h, token, "GET", "/api/v1/outbound", nil, 401)
 }
@@ -188,24 +319,32 @@ func TestR5OutboundReceiptListOrdersMemberFreeze(t *testing.T) {
 func TestR5OutboundReceiptListMatchesDetailScope(t *testing.T) {
 	f := seedCompany(t)
 	ctx := context.Background()
-	j := r5LegacyJob(t, f)
-	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: f.personal.ID, UserID: f.other.ID, CanRead: true}))
+	j := r5ReceiptBoundaryFiniteJob(t, f)
+	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{TenantID: f.tenant.ID, MailboxID: *j.SenderMailboxID, UserID: f.other.ID, CanRead: true}))
 	svc := outbound.NewService(config.Outbound{Enabled: true}, f.st, f.st, zerolog.Nop())
 	h := companyRouter(t, f, testutil.NewMemoryObjectStore(), svc)
-	token := r3Token(t, f.other)
-	r3HTTP(t, h, token, "GET", "/api/v1/outbound/"+j.ID.String(), nil, 200)
-	_, e := f.pool.Exec(ctx, `UPDATE sent_mail_items SET expires_at=clock_timestamp() WHERE asset_id=$1`, j.ID)
-	must(t, e)
-	r3HTTP(t, h, token, "GET", "/api/v1/outbound/"+j.ID.String(), nil, 404)
+	token, owner := r3Token(t, f.other), r3Token(t, f.employee)
+	path := "/api/v1/outbound/" + j.ID.String()
+	contentPath := "/api/v1/company/submissions/" + j.ID.String() + "/content"
+	before := r5ReceiptBoundaryView(t, r3HTTP(t, h, token, "GET", path, nil, 200), j, false, true, "state_not_retryable")
+	r5ReceiptBoundaryView(t, r3HTTP(t, h, token, "GET", "/api/v1/outbound", nil, 200), j, true, true, "unknown")
+	content := r3Data[company.SubmissionContent](t, r3HTTP(t, h, owner, "GET", contentPath, nil, 200))
+	if content.ID != j.ID || content.TextBody != j.TextBody || content.ContentRedacted {
+		t.Fatal("real owner JWT lost the live canonical archive")
+	}
+	r5ReceiptBoundaryExpire(t, f, ctx, j)
+	r3HTTP(t, h, token, "GET", path, nil, 404)
 	rr := r3HTTP(t, h, token, "GET", "/api/v1/outbound", nil, 200)
-	if strings.Contains(rr.Body.String(), j.ID.String()) {
+	if rows := r3Data[[]json.RawMessage](t, rr); len(rows) != 0 || strings.Contains(rr.Body.String(), j.ID.String()) {
 		t.Fatal("list revealed a shared receipt denied by the detail endpoint")
 	}
-	// The historical submitter's own receipt must remain independently visible.
-	rr = r3HTTP(t, h, r3Token(t, f.employee), "GET", "/api/v1/outbound/"+j.ID.String(), nil, 200)
-	if !strings.Contains(rr.Body.String(), "safe receipt") || strings.Contains(rr.Body.String(), "PRIVATE_LEGACY") {
-		t.Fatal("owner receipt lifetime/content split regressed")
-	}
+	// Operation ownership preserves only metadata, never expired content.
+	after := r5ReceiptBoundaryView(t, r3HTTP(t, h, owner, "GET", path, nil, 200), j, false, false, "state_not_retryable")
+	r5ReceiptBoundarySameMetadata(t, before, after)
+	listed := r5ReceiptBoundaryView(t, r3HTTP(t, h, owner, "GET", "/api/v1/outbound", nil, 200), j, true, false, "unknown")
+	r5ReceiptBoundarySameMetadata(t, after, listed)
+	r3HTTP(t, h, owner, "GET", contentPath, nil, 404)
+	r3HTTP(t, h, token, "GET", contentPath, nil, 404)
 }
 
 func TestR5OutboundReceiptOwnerlessKeyAndRetryScope(t *testing.T) {
@@ -240,10 +379,28 @@ func TestR5OutboundReceiptOwnerlessKeyAndRetryScope(t *testing.T) {
 			path := "/api/v1/outbound/" + j.ID.String()
 			if mode == "ownerless" {
 				rr := call("GET", path, 200)
-				if strings.Contains(rr.Body.String(), "PRIVATE_OWNERLESS") || !strings.Contains(rr.Body.String(), "integration receipt") {
-					t.Fatal("ownerless key content/receipt distinction changed")
+				detail := r5ReceiptBoundaryView(t, rr, j, false, false, "sender_authority")
+				listed := r5ReceiptBoundaryView(t, call("GET", "/api/v1/outbound", 200), j, true, false, "unknown")
+				r5ReceiptBoundarySameMetadata(t, detail, listed)
+				call("GET", "/api/v1/company/submissions/"+j.ID.String()+"/content", 403)
+				call("POST", path+"/retry", 403)
+				for _, foreignTenant := range []bool{false, true} {
+					tenantID := f.tenant.ID
+					if foreignTenant {
+						tenant := &models.Tenant{Name: "Foreign ownerless receipt", PlanID: f.tenant.PlanID}
+						must(t, f.st.CreateTenant(ctx, tenant))
+						tenantID = tenant.ID
+					}
+					otherKey := &models.TenantAPIKey{ID: uuid.New(), TenantID: tenantID, KeyPrefix: "fixture", Label: "other ownerless key", Scopes: []string{"send:read"}}
+					otherToken := "tm_content_" + otherKey.ID.String()
+					otherKey.KeyHash = company.Hash(otherToken)
+					must(t, f.st.CreateAPIKey(ctx, otherKey))
+					otherList := r5LegacyKeyHTTP(t, h, otherToken, "/api/v1/outbound", 200)
+					if rows := r3Data[[]json.RawMessage](t, otherList); len(rows) != 0 {
+						t.Fatal("another key or tenant listed the ownerless operation")
+					}
+					r5LegacyKeyHTTP(t, h, otherToken, path, 404)
 				}
-				call("GET", "/api/v1/outbound", 200)
 			} else {
 				call("POST", path+"/retry", 403)
 				_, e := f.pool.Exec(ctx, `UPDATE tenant_api_keys SET scopes='["send:write"]'::jsonb WHERE id=$1`, k.ID)
@@ -259,12 +416,13 @@ func TestR5OutboundReceiptOwnerlessKeyAndRetryScope(t *testing.T) {
 				if e = svc.ValidateJobAuthorization(ctx, currentJob); e != nil {
 					t.Fatalf("positive retry sender validation: %v", e)
 				}
-				call("POST", path+"/retry", 200)
+				retried := call("POST", path+"/retry", 200)
 				updated, e := f.st.GetOutboundJob(ctx, j.ID)
 				must(t, e)
-				if updated.State != models.OutboundPending {
+				if updated == nil || updated.State != models.OutboundPending {
 					t.Fatal("write-only retry did not reach existing queue transition")
 				}
+				r5ReceiptBoundaryView(t, retried, updated, false, true, "state_not_retryable")
 			}
 		})
 	}

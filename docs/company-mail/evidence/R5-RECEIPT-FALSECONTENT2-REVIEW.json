@@ -1,0 +1,32 @@
+{
+  "CLI_exit": 0,
+  "actual_source_closure_sha256": "8e9cb3a0f834d7ce18b0f42a78681758fb061726cea05674ef8d333b6ec1d011",
+  "actual_targets": [
+    {
+      "name": "current-readable sent-content structured BCC requires literal false for successful live sent-content responses",
+      "status": "passed"
+    },
+    {
+      "name": "SubmissionPane sent-content view shows the redaction notice instead of a body when content is redacted",
+      "status": "passed"
+    }
+  ],
+  "cleanup": {
+    "noPG_API_SMTP_NodeServer_browser_build_npmci": true,
+    "owned_group_observation": {
+      "members": [],
+      "non_zombie_live_pids": [],
+      "status": "observed"
+    },
+    "owned_groups_gone": true,
+    "source_selected_pin_equal": true
+  },
+  "expected_exact2_matches": true,
+  "filtered_not_executed_count": 47,
+  "fullCI_or_whole_file_green": false,
+  "passed_actual": 2,
+  "prior_TDZ2_and_first54_boundaries_preserved": "/private/tmp/tm-r5receipt-status.ieglz4k6",
+  "source_sha": "3d2217ebd7fa37fc583eb0dd9b2143c8f1f64a1f",
+  "timed_out": false,
+  "wall_seconds": 1.863821029663086
+}

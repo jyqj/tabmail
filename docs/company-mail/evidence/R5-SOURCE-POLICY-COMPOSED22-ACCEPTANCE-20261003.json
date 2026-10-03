@@ -1,0 +1,33 @@
+{
+  "artifact_kind": "central_summary_of_delivered_independent_runtime_verdict_NOT_machine_raw",
+  "verdict": "BOUNDED_COMPOSED22_LOGIC_PASS_NOT_FRESH22",
+  "independent_verdict_delivered_by": "/root via original current source policy reader",
+  "V2_actual_capture": {
+    "source": "07910a04d7e4020542fa07da88ab2c19056985b0",
+    "closure_sha256": "bf0b91942e273ca7803d80a5a26121ed4e6fd5f8053230fcadaff88ee86a484c",
+    "count": 972,
+    "purpose": "protocol",
+    "single_capture_exit": 0
+  },
+  "V2_synthetic_PASS_ERROR": [
+    20,
+    2
+  ],
+  "V2_two_setup_errors_body0": true,
+  "V3_first_case_stderr_PASS": 1,
+  "V3_second_before_spawn_audit_exit": 97,
+  "V3_second_terminal_result_or_argv": "notobserved; preserve unknown, platformcall only sourcecandidate not measuredcause",
+  "V4_fixture_only_source": "1d790f024ff2ac406140b51e8ba8575e7d602216",
+  "V4_fixture_only_closure": "139ca1793e170bab513697f460844ffcee7bcb771d85a91ff8886199ef537091",
+  "V4_onlylast_PASS": 1,
+  "V4_exit": 0,
+  "V4_noRealSubprocessAudit": true,
+  "V4_platform_platform_seam": "named synthetic host literal/mockcalledonce; realpreflight source METHOD budget and dispatch refusal preserved",
+  "V4_elapsed_seconds": 0.517,
+  "V4_original_seconds": 60,
+  "single_fresh22_exit0": false,
+  "V4_actual_current_capture_repeated": false,
+  "unknown_current_METHOD_or_S_M_L_accepted": false,
+  "task_complete": false,
+  "product_green": false
+}

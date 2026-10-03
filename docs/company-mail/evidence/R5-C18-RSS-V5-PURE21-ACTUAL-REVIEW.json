@@ -1,0 +1,50 @@
+{
+  "CPU_readback": [
+    60,
+    60
+  ],
+  "RSS_actual_samples": 10,
+  "RSS_hardquota": false,
+  "RSS_intersample_peaks_excluded": false,
+  "RSS_max_allowed_gap_seconds": 0.25,
+  "RSS_max_gap_seconds": 0.1108685829967726,
+  "RSS_observed_peak_bytes": 38010880,
+  "RSS_target_interval_seconds": 0.1,
+  "UNITTEST_reported_seconds": 0.725,
+  "actual_discovery_exact21": true,
+  "actual_exact_PASS": 21,
+  "actual_started": 21,
+  "all_requirements_jointly_verified_not_acceptedbool_alone": true,
+  "audit_armed_before_test_import": true,
+  "audit_summary": {
+    "audit_denials": [],
+    "audit_events_observed": 773463,
+    "owned_tmp_write_events": 0,
+    "summary": true
+  },
+  "child_exit": 0,
+  "cleanup": {
+    "live_pids": [],
+    "members": [],
+    "status": "observed"
+  },
+  "controller_exit": 0,
+  "dedicated_first_last_RSS_sample_after_complete_handshake": true,
+  "failure_only_extra_containment_used": false,
+  "final_admission_exists": true,
+  "historical_partial_catalog_runtime_qualification": false,
+  "old_AS_infra0test_and_mock_layer_evidence_unchanged": true,
+  "original90_deadline_wall": 1790976974.119892,
+  "original90_origin_wall": 1790976884.119892,
+  "original90wall_elapsed_to_terminal": 1.1643462181091309,
+  "owned_child_PID": 78726,
+  "scope": "21 actual first C18V2 grammar bodies only; not current_METHODruntime/fullcatalog/benchmark/SML",
+  "seven_signed_contractbytes_not_newcatalog_writer_inputs": true,
+  "skip_fail_error_unfinished": 0,
+  "source_closure_sha256": "52c2f082061b4fa8e9c66d8f3a6990d765f0f2481ee0b75d8724ef42be10623e",
+  "source_postcheck": true,
+  "source_sha": "6710e89d677d027f3baa0498206e0baf226f3a16",
+  "status": "RSS_SAMPLED_BOUNDED_PURE_GRAMMAR_PASS",
+  "subtest_PASS_events": 20,
+  "synthetic_API_results_are_not_runtime_admission": true
+}

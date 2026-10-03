@@ -1,0 +1,140 @@
+{
+  "M_retry": false,
+  "actual_catalog": {
+    "bytes": 194779,
+    "goose_version": 17,
+    "migration_sha256_count": 17,
+    "observed_counts": {
+      "columns": 505,
+      "constraints": 183,
+      "foreign_keys": 75,
+      "indexes": 153,
+      "sequences": 3,
+      "tables": 50,
+      "trigger_functions": 11,
+      "triggers": 11
+    },
+    "path": "/private/tmp/tm-r5catalog17.8vo9oarn/schema17-actual-catalog.json",
+    "restart_catalog_unchanged": true,
+    "sha256": "398e67a97eff3b4e10c01db3a043b6eef0cc4512e953a0e764c6692b4fbc4dd7"
+  },
+  "actual_leaf_count": 3,
+  "actual_schema_version": "17",
+  "actual_source_closure_sha256": "77714ddf99157760e9da1162362316a514a4acec6602bf383fef1374fb9a318f",
+  "actual_test_and_subtest_pass": 4,
+  "actual_top_count": 3,
+  "catalog_scope": "actual TestR5SchemaInventoryAndRestart output O_EXCL; original15/16 historical bytes unchanged",
+  "cleanup": {
+    "base_database": "tm_catalog17_validation",
+    "old_resources_untouched": true,
+    "owned_pg_pid": 44570,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5catalog17.8vo9oarn",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_database_query_exit": 0,
+    "test_databases": [],
+    "utc": "2026-10-02T08:43:31.800492+00:00"
+  },
+  "fullCI_green": false,
+  "historical_catalog15_16_unchanged": true,
+  "parent_code_compile0_only_three_new_signed_test_deltas_runtime_here": true,
+  "results": {
+    "official-schema17-bootstrap": {
+      "execution": {
+        "absolute_deadline_wall_time": 1790930678.571607,
+        "budget_seconds": 90,
+        "elapsed_wall_seconds": 5.586036920547485,
+        "final_owned_group_observation": {
+          "members": [],
+          "non_zombie_live_pids": [],
+          "status": "observed"
+        },
+        "observed_wall_time": 1790930594.157644,
+        "owned_process_group": 44582,
+        "process_returncode": 0,
+        "process_returncode_status": "observed_parent_poll",
+        "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+        "started_wall_time": 1790930588.571607,
+        "timed_out": false
+      },
+      "exit": 0
+    },
+    "schema17-catalog-restart": {
+      "actual_test_names": [
+        "TestR5SchemaInventoryAndRestart"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 1,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 2.072,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 1,
+      "run_count": 1,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    },
+    "schema17-goose-upgrade": {
+      "actual_test_names": [
+        "TestP0GooseRestartAndHistoricalGrantSafety",
+        "TestP0GooseRestartAndHistoricalGrantSafety/upgrade_and_restart"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 1,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 2.078,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 2,
+      "run_count": 2,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    },
+    "schema17-populated-upgrade": {
+      "actual_test_names": [
+        "TestArchitectureUpgradeBackfillsExistingEmployeeAssets"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 1,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 2.185,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 1,
+      "run_count": 1,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 1
+    }
+  },
+  "scope": "new_schema17_catalog_and_two_affected_upgrade_targets_only",
+  "scope_verdict": "PASS_new_schema17_actual_catalog_restart_and_both_affected_upgrades_only",
+  "source_postcheck_equal": true,
+  "source_sha": "1a15faf7d4bfe0b1d0cdd610ad4d9fb14618b7f4"
+}

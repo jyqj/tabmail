@@ -3,7 +3,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import { ActionButton, Field, inputClass, LoadError, Section, useAction, useText } from "@/components/company/common";
-import { company, companyDomains, type CompanySettings } from "@/lib/company";
+import { company, companyDomains, type CompanySettings, type CompanySettingsInput } from "@/lib/company";
 import { CompanyDomainsSection } from "@/components/company/domains";
 import { CompanyMailSendPolicyField, sendPolicyDescription } from "@/components/company/send-policy";
 export function DomainSettings() {
@@ -11,8 +11,8 @@ export function DomainSettings() {
     const { busy, run } = useAction();
     const settings = useAPI("company-settings", () => company<CompanySettings | null>("/settings"));
     const zones = useAPI("company-domains", companyDomains);
-    const [editing, setEditing] = useState<CompanySettings | null>(null);
-    const config = editing ?? settings.data ?? { name: "", primary_zone_id: "", revision: 0 };
+    const [editing, setEditing] = useState<CompanySettingsInput | null>(null);
+    const config: CompanySettingsInput = editing ?? settings.data ?? { name: "", primary_zone_id: "", revision: 0 };
     return <div className="space-y-5"><LoadError error={settings.error || zones.error} onRetry={() => { void settings.mutate(); void zones.mutate(); }}/>
       <CompanyDomainsSection />
       <Section title={t("公司主域名", "Company primary domain")}>
@@ -48,7 +48,10 @@ export function DomainSettings() {
           {"。"}
         </p>
         <ActionButton disabled={busy || !config.name.trim() || !config.primary_zone_id} onClick={() => run(async () => {
-            await company("/settings", { method: "PUT", body: config });
+            await company<CompanySettings>("/settings", { method: "PUT", body: {
+                name: config.name, primary_zone_id: config.primary_zone_id,
+                revision: config.revision, mail_send_policy: config.mail_send_policy,
+            } satisfies CompanySettingsInput });
             await settings.mutate();
             setEditing(null);
             toast.success(t("公司设置已保存", "Company settings saved"));

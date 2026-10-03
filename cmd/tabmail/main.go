@@ -53,15 +53,30 @@ func main() {
 	}
 	setLogLevel(&logger, cfg.LogLevel)
 
-	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer cancel()
+	signalCtx, signalCancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer signalCancel()
+	shutdown := newShutdownCoordinator(10 * time.Second)
+	defer shutdown.release()
+	ctx := shutdown.context()
+	cancel := func() { shutdown.requestStop("server_error") }
+	shutdown.goRun("signal", func(run context.Context) {
+		select {
+		case <-signalCtx.Done():
+			shutdown.requestStop("signal")
+		case <-run.Done():
+		}
+	}, nil)
 
 	// --- PostgreSQL ---
 	pg, err := postgres.New(ctx, cfg.DB)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("connecting to postgres")
 	}
-	defer pg.Close()
+	defer func() {
+		if shutdown.dependenciesMayClose() {
+			_ = pg.Close()
+		}
+	}()
 	logger.Info().Msg("connected to PostgreSQL and initialized schema")
 
 	// --- Redis ---
@@ -74,7 +89,11 @@ func main() {
 	if err := rdb.Ping(ctx).Err(); err != nil {
 		logger.Fatal().Err(err).Msg("connecting to redis")
 	}
-	defer rdb.Close()
+	defer func() {
+		if shutdown.dependenciesMayClose() {
+			_ = rdb.Close()
+		}
+	}()
 	logger.Info().Msg("connected to Redis")
 
 	// --- Object store ---
@@ -126,6 +145,7 @@ func main() {
 	hub := realtime.NewHub(cfg.MonitorHistory, pg)
 	dispatcher := hooks.New(hooks.Config{
 		URLs:         cfg.Webhook.URLs,
+		AllowedCIDRs: cfg.Webhook.AllowedCIDRs,
 		Secret:       cfg.Webhook.Secret,
 		Timeout:      cfg.Webhook.Timeout,
 		MaxRetries:   cfg.Webhook.MaxRetries,
@@ -178,7 +198,7 @@ func main() {
 		}
 	}
 	heartbeat()
-	go func() {
+	shutdown.goRun("heartbeat", func(context.Context) {
 		t := time.NewTicker(30 * time.Second)
 		defer t.Stop()
 		for {
@@ -189,7 +209,7 @@ func main() {
 				heartbeat()
 			}
 		}
-	}()
+	}, nil)
 	probePrefix := "readiness-" + instanceID + "-"
 	routerCfg := api.RouterConfig{
 		CompanyOnly: cfg.CompanyOnly,
@@ -254,7 +274,7 @@ func main() {
 
 	// The content index is a rebuildable worker role, separate from SMTP delivery.
 	if cfg.CompanyOnly && (role == "all" || role == "worker") {
-		go mailindex.New(pg, obj, logger).Run(ctx)
+		shutdown.goRun("mailindex", mailindex.New(pg, obj, logger).Run, nil)
 	}
 
 	// --- Retention scanner ---
@@ -264,50 +284,54 @@ func main() {
 
 	switch strings.ToLower(strings.TrimSpace(cfg.Role)) {
 	case "", "all":
-		go ret.Run(ctx)
-		go dispatcher.Run(ctx)
-		go ingestSvc.Run(ctx)
+		shutdown.goRun("retention", ret.Run, nil)
+		shutdown.goRun("hooks", dispatcher.Run, nil)
+		shutdown.goRun("ingest", ingestSvc.Run, nil)
 		if outboundSvc != nil {
-			outboundSvc.StartWorker(ctx)
+			shutdown.start("outbound", outboundSvc.StartWorker, outboundSvc.StopContext)
 		}
 
 		smtpSrv = smtpsrv.NewServer(cfg.SMTP, ingestSvc, res, logger)
-		go func() {
-			if err := smtpSrv.Start(ctx); err != nil {
+		shutdown.goRun("smtp", func(run context.Context) {
+			if err := smtpSrv.Start(run); err != nil {
 				logger.Error().Err(err).Msg("SMTP server error")
 				cancel()
 			}
-		}()
+		}, smtpSrv.Shutdown)
 
 		rl := middleware.NewRateLimiter(rdb, authCache, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		routerCfg.RateLimiter = rl
 		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
-		go serveHTTP(ctx, cancel, httpSrv, logger)
+		shutdown.goRun("http", func(run context.Context) { serveHTTP(run, cancel, httpSrv, logger) }, func(stop context.Context) error {
+			return stopHTTPAndAPI(stop, httpSrv.Shutdown, handler)
+		})
 	case "api":
-		go dispatcher.Run(ctx)
-		go ingestSvc.Run(ctx)
+		shutdown.goRun("hooks", dispatcher.Run, nil)
+		shutdown.goRun("ingest", ingestSvc.Run, nil)
 		rl := middleware.NewRateLimiter(rdb, authCache, cfg.HTTP.PublicIPRPM, cfg.HTTP.TrustedProxies)
 		routerCfg.RateLimiter = rl
 		handler := api.NewRouter(routerCfg)
 		httpSrv = newHTTPServer(cfg.HTTP.Addr, handler)
-		go serveHTTP(ctx, cancel, httpSrv, logger)
+		shutdown.goRun("http", func(run context.Context) { serveHTTP(run, cancel, httpSrv, logger) }, func(stop context.Context) error {
+			return stopHTTPAndAPI(stop, httpSrv.Shutdown, handler)
+		})
 	case "smtp":
 		smtpSrv = smtpsrv.NewServer(cfg.SMTP, ingestSvc, res, logger)
-		go func() {
-			if err := smtpSrv.Start(ctx); err != nil {
+		shutdown.goRun("smtp", func(run context.Context) {
+			if err := smtpSrv.Start(run); err != nil {
 				logger.Error().Err(err).Msg("SMTP server error")
 				cancel()
 			}
-		}()
+		}, smtpSrv.Shutdown)
 	case "worker":
-		go dispatcher.Run(ctx)
-		go ingestSvc.Run(ctx)
+		shutdown.goRun("hooks", dispatcher.Run, nil)
+		shutdown.goRun("ingest", ingestSvc.Run, nil)
 		if outboundSvc != nil {
-			outboundSvc.StartWorker(ctx)
+			shutdown.start("outbound", outboundSvc.StartWorker, outboundSvc.StopContext)
 		}
 	case "retention":
-		go ret.Run(ctx)
+		shutdown.goRun("retention", ret.Run, nil)
 	default:
 		logger.Fatal().Str("role", cfg.Role).Msg("invalid role; expected all, api, smtp, worker, retention")
 	}
@@ -317,18 +341,13 @@ func main() {
 	<-ctx.Done()
 	logger.Info().Msg("shutting down...")
 
-	shutCtx, shutCancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer shutCancel()
+	if err := shutdown.drain(); err != nil {
+		logger.Error().Err(err).Msg("shutdown incomplete; dependencies remain owned until failed process exit")
+		// Do not execute dependency defers while any owner may still use them.
+		// This is an explicit failed process exit, never a graceful drain.
+		os.Exit(1)
+	}
 
-	if httpSrv != nil {
-		_ = httpSrv.Shutdown(shutCtx)
-	}
-	if smtpSrv != nil {
-		_ = smtpSrv.Shutdown(shutCtx)
-	}
-	if outboundSvc != nil {
-		outboundSvc.Shutdown()
-	}
 	logger.Info().Msg("shutdown complete")
 }
 

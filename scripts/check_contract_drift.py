@@ -10,7 +10,8 @@ Beyond field-name equality, the Go->TS wire projection below is verified:
     bool                                 -> boolean
     []T                                  -> TS type must contain an array
                                             member (`X[]` or `Array<X>`)
-    map[K]V / json.RawMessage / structs
+    map[K]V                             -> Record<string, V>, recursively checked
+    json.RawMessage / structs
     without a declared mapping           -> opaque (name-level checks only)
 
 Wire nullability follows what encoding/json actually emits, not Go nil
@@ -28,7 +29,7 @@ field names inside one struct/interface all fail the check.
 
 OpenAPI: internal/api/openapi.yaml is parsed with the pinned PyYAML dependency
 using a duplicate-key-rejecting loader. The same Go/TS projection is checked
-against the 32 explicit internal/company DTO component schemas for fields,
+against the explicit internal/company DTO component schemas for fields,
 required/optional/nullability, scalar/array/map shapes, nested references and
 string-literal enums. Storage-backed shared models are intentionally excluded
 until R5-P8-070 gives them allow-list response DTOs; the gate must never force
@@ -40,7 +41,7 @@ from __future__ import annotations
 import re
 import json
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 try:
@@ -90,6 +91,9 @@ company_pairs = {
     "Recipient": "RecipientResult", "RecoveryTarget": "RecoveryTarget",
     "RecoveryReceipt": "Receipt",
     "Submission": "Submission", "SubmissionRecipient": "SubmissionRecipient",
+    "OutboundReceipt": "OrdinaryReceipt",
+    "OutboundReceiptProgress": "ReceiptProgress",
+    "OutboundReceiptCounts": "ReceiptCounts",
     "SubmissionContent": "SubmissionContent", "SubmissionAttachment": "SubmissionAttachment",
     "Domain": "CompanyDomain", "DNSCheck": "DomainDNSCheck",
     "DomainVerificationChecks": "DomainVerificationChecks",
@@ -131,6 +135,9 @@ OPENAPI_COMPANY_COMPONENTS = {
     "RecoveryTarget": "CompanyRecoveryTarget",
     "RecoveryReceipt": "CompanyRecoveryReceipt",
     "Submission": "Submission",
+    "OutboundReceipt": "OutboundReceipt",
+    "OutboundReceiptProgress": "OutboundReceiptProgress",
+    "OutboundReceiptCounts": "OutboundReceiptCounts",
     "SubmissionRecipient": "SubmissionRecipient",
     "SubmissionContent": "SubmissionContent",
     "SubmissionAttachment": "SubmissionAttachment",
@@ -169,6 +176,7 @@ class GoField:
 class GoSource:
     structs: dict[str, dict[str, GoField]]
     string_types: set[str]
+    aliases: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -183,7 +191,28 @@ class TsSource:
     aliases: dict[str, str]
 
 
+def _without_source_comments(text: str) -> str:
+    # Preserve quoted strings (including Go tags) while removing comments, so
+    # examples in documentation cannot create phantom declarations or aliases.
+    token = r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`[^`]*`|//[^\n]*|/\*[\s\S]*?\*/'
+    return re.sub(token, lambda m: re.sub(r'[^\n]', ' ', m[0])
+                  if m[0].startswith(('//', '/*')) else m[0], text)
+
+
+def _resolve_alias(name: str, aliases: dict[str, str]) -> str:
+    seen: set[str] = set()
+    while name in aliases:
+        if name in seen:
+            raise ValueError(f'cyclic alias: {name}')
+        seen.add(name)
+        name = aliases[name]
+        if not re.fullmatch(r'[A-Za-z_]\w*', name):
+            raise ValueError(f'unsupported alias target: {name}')
+    return name
+
+
 def parse_go_source(text: str) -> tuple[GoSource, list[str]]:
+    text = _without_source_comments(text)
     string_types = set(re.findall(r"^type\s+(\w+)\s+string\s*$", text, flags=re.M))
     structs: dict[str, dict[str, GoField]] = {}
     problems: list[str] = []
@@ -220,7 +249,14 @@ def parse_go_source(text: str) -> tuple[GoSource, list[str]]:
                 omitempty="omitempty" in opts.split(","),
             )
         structs[name] = fields
-    return GoSource(structs, string_types), problems
+    aliases: dict[str, str] = {}
+    for match in re.finditer(r'^type\s+(\w+)\s*=\s*([^\n;]+)', text, flags=re.M):
+        name, target = match.groups()
+        if name in aliases or name in structs or name in string_types:
+            problems.append(f'[duplicate-go] {name}')
+        else:
+            aliases[name] = target.strip()
+    return GoSource(structs, string_types, aliases), problems
 
 
 def merge_go_sources(texts: list[str], problems: list[str]) -> GoSource:
@@ -229,11 +265,31 @@ def merge_go_sources(texts: list[str], problems: list[str]) -> GoSource:
         src, parse_problems = parse_go_source(text)
         problems.extend(parse_problems)
         for name, fields in src.structs.items():
-            if name in merged.structs:
+            if name in merged.structs or name in merged.aliases or name in merged.string_types:
                 problems.append(f"[duplicate-go] {name}")
                 continue
             merged.structs[name] = fields
-        merged.string_types |= src.string_types
+        for name in src.string_types:
+            if name in merged.structs or name in merged.aliases or name in merged.string_types:
+                problems.append(f'[duplicate-go] {name}')
+            else:
+                merged.string_types.add(name)
+        for name, target in src.aliases.items():
+            if name in merged.aliases or name in merged.structs or name in merged.string_types:
+                problems.append(f'[duplicate-go] {name}')
+            else:
+                merged.aliases[name] = target
+    for name in merged.aliases:
+        try:
+            target = _resolve_alias(name, merged.aliases)
+            if target in merged.structs:
+                merged.structs[name] = merged.structs[target]
+            elif target in merged.string_types or target == 'string':
+                merged.string_types.add(name)
+            else:
+                raise ValueError(f'missing target: {target}')
+        except ValueError as exc:
+            problems.append(f'[go-alias] {name}: {exc}')
     return merged
 
 
@@ -264,6 +320,7 @@ def split_ts_statements(body: str) -> list[str]:
 
 
 def parse_ts_source(text: str) -> tuple[TsSource, list[str]]:
+    text = _without_source_comments(text)
     aliases: dict[str, str] = {}
     interfaces: dict[str, dict[str, TsField]] = {}
     problems: list[str] = []
@@ -276,15 +333,22 @@ def parse_ts_source(text: str) -> tuple[TsSource, list[str]]:
             while not buf.rstrip().endswith(";") and i + 1 < len(lines):
                 i += 1
                 buf += " " + re.sub(r"//.*$", "", lines[i]).strip()
-            aliases[name] = buf.strip().rstrip(";").strip()
+            if name in aliases:
+                problems.append(f'[duplicate-ts] {name}')
+            else:
+                aliases[name] = buf.strip().rstrip(";").strip()
         i += 1
-    for match in re.finditer(
-        r"export\s+interface\s+(\w+)\s*(?:extends\s+[\w.,\s<>]+?)?\s*\{(.*?)\n\}",
-        text,
-        flags=re.S,
-    ):
-        name, body = match.group(1), match.group(2)
-        if name in interfaces:
+    for match in re.finditer(r'export\s+interface\s+(\w+)\s*([^{}]*?)\{', text):
+        name = match.group(1)
+        # As before, inherited members are outside the explicitly mapped DTO
+        # subset; preserve the local-body projection for non-mapped interfaces.
+        try:
+            end = _ts_object_end(text, match.end() - 1)
+        except ValueError as exc:
+            problems.append(f'[unparsed-ts] {name}: {exc}')
+            continue
+        body = text[match.end():end]
+        if name in interfaces or name in aliases:
             problems.append(f"[duplicate-ts] {name}")
             continue
         fields: dict[str, TsField] = {}
@@ -308,12 +372,87 @@ def merge_ts_sources(texts: list[str], problems: list[str]) -> TsSource:
         src, parse_problems = parse_ts_source(text)
         problems.extend(parse_problems)
         for name, fields in src.interfaces.items():
-            if name in merged.interfaces:
+            if name in merged.interfaces or name in merged.aliases:
                 problems.append(f"[duplicate-ts] {name}")
                 continue
             merged.interfaces[name] = fields
-        merged.aliases.update(src.aliases)
+        for name, definition in src.aliases.items():
+            if name in merged.aliases or name in merged.interfaces:
+                problems.append(f'[duplicate-ts] {name}')
+            else:
+                merged.aliases[name] = definition
     return merged
+
+
+def _ts_object_end(text: str, start: int) -> int:
+    depth = 0
+    # Comments have already been removed. Strings cannot terminate an object.
+    for token in re.finditer(r'"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`[^`]*`|[{}]', text[start:]):
+        if token[0] == '{':
+            depth += 1
+        elif token[0] == '}':
+            depth -= 1
+            if depth == 0:
+                return start + token.start()
+    raise ValueError('unterminated object type')
+
+
+def _ts_reference_name(name: str, aliases: dict[str, str]) -> str:
+    seen: set[str] = set()
+    while name in aliases:
+        if name in seen:
+            raise ValueError(f'cyclic alias: {name}')
+        seen.add(name)
+        target = aliases[name].strip()
+        if not re.fullmatch(r'[A-Za-z_]\w*', target):
+            break
+        name = target
+    return name
+
+
+def _ts_fields(name: str, source: TsSource) -> dict[str, TsField] | None:
+    name = _ts_reference_name(name, source.aliases)
+    if name in source.interfaces:
+        return source.interfaces[name]
+    definition = source.aliases.get(name)
+    if definition is None:
+        return None
+    # A bounded projection of object-only unions, such as ReceiptProgress.
+    # This verifies the union's wire field superset, types and optionality;
+    # discriminant/value correlations remain a separate runtime schema gate.
+    branches: list[dict[str, TsField]] = []
+    for member in ts_members(definition):
+        if not member.startswith('{') or _ts_object_end(member, 0) != len(member) - 1:
+            raise ValueError(f'unsupported object alias: {name}')
+        fields: dict[str, TsField] = {}
+        for statement in split_ts_statements(member[1:-1]):
+            match = re.fullmatch(r'(?:readonly\s+)?(\w+)(\?)?\s*:\s*(.+)', statement)
+            if not match:
+                raise ValueError(f'unparsed alias field: {name}: {statement}')
+            key, optional, value = match.groups()
+            if key in fields:
+                raise ValueError(f'duplicate alias field: {name}.{key}')
+            fields[key] = TsField(bool(optional), value.strip())
+        branches.append(fields)
+    result: dict[str, TsField] = {}
+    for key in sorted(set().union(*(set(branch) for branch in branches))):
+        values: list[str] = []
+        optional = False
+        for branch in branches:
+            field = branch.get(key)
+            if field is None:
+                optional = True
+                continue
+            optional |= field.optional
+            if field.ts_type == 'never' and field.optional:
+                continue
+            for value in ts_members(field.ts_type):
+                if value not in values:
+                    values.append(value)
+        if not values:
+            raise ValueError(f'alias field has no wire value: {name}.{key}')
+        result[key] = TsField(optional, ' | '.join(values))
+    return result
 
 
 def ts_members(ts_type: str) -> list[str]:
@@ -381,7 +520,7 @@ def array_elem_ts(member: str) -> str:
     member = member.strip()
     if member.startswith("Array<") and member.endswith(">"):
         return member[6:-1].strip()
-    return re.sub(r"(\[\])+$", "", member).strip()
+    return member[:-2].strip() if member.endswith('[]') else member
 
 
 def check_projection(
@@ -392,13 +531,49 @@ def check_projection(
     nested_map: dict[str, str],
     go_string_types: set[str],
     ts_aliases: dict[str, str],
+    *,
+    allow_undefined: bool = False,
+    require_null: bool | None = None,
 ) -> list[str]:
     errors: list[str] = []
     bare = go_type.lstrip("*")
     projection = SCALAR_PROJECTION.get(bare) or SCALAR_PROJECTION.get(bare.split(".")[-1])
-    relevant = [m for m in ts_members(ts_type) if m != "null"]
+    expanded = _expanded_ts_members(ts_type, ts_aliases)
+    collection = bare.startswith(('[]', 'map['))
+    nullable = go_type.startswith('*') or collection
+    if 'null' in expanded and not nullable:
+        errors.append(f'[null-drift] {label}.{field_name}: Go `{go_type}` cannot emit null here')
+    if 'undefined' in expanded and not allow_undefined:
+        errors.append(f'[optional-drift] {label}.{field_name}: undefined is not permitted here')
+    if require_null is None:
+        require_null = go_type.startswith('*')
+    if require_null and 'null' not in expanded:
+        errors.append(f'[missing-null] {label}.{field_name}: Go `{go_type}` requires null here')
+    scalar = projection is not None or bare.split('.')[-1] in go_string_types
+    members = expanded if scalar or collection else ts_members(ts_type)
+    relevant = [m for m in members if m not in ('null', 'undefined')]
     if not relevant or any(not m for m in relevant):
-        return [f"[type-drift] {label}.{field_name}: TS must represent a non-null Go value"]
+        return errors + [f"[type-drift] {label}.{field_name}: TS must represent a non-null Go value"]
+    if bare.startswith('[]'):
+        for member in relevant:
+            if not (member.endswith('[]') or (member.startswith('Array<') and member.endswith('>'))):
+                errors.append(f'[array-drift] {label}.{field_name}: Go `{go_type}` vs TS `{ts_type}`')
+                continue
+            # Element scope has no omitempty; container null/undefined rights
+            # never flow down to the element (including nested collections).
+            errors.extend(check_projection(label, field_name + '[]', bare[2:],
+                array_elem_ts(member), nested_map, go_string_types, ts_aliases))
+        return errors
+    map_match = re.fullmatch(r'map\[[^]]+\](.+)', bare)
+    if map_match:
+        for member in relevant:
+            value = re.fullmatch(r'Record<\s*string\s*,\s*(.+)>', member)
+            if value is None:
+                errors.append(f'[type-drift] {label}.{field_name}: typed Go map requires a TS Record')
+                continue
+            errors.extend(check_projection(label, field_name + '{}', map_match[1].strip(),
+                value[1].strip(), nested_map, go_string_types, ts_aliases))
+        return errors
     if projection == "string" or (
         projection is None and bare.split(".")[-1] in go_string_types
     ):
@@ -414,7 +589,7 @@ def check_projection(
                 f"TS `{ts_type}` is not number-compatible"
             )
     elif projection == "boolean":
-        if any(m != "boolean" for m in relevant):
+        if any(m not in ('boolean', 'true', 'false') for m in relevant):
             errors.append(
                 f"[type-drift] {label}.{field_name}: Go `{go_type}` projects to boolean; "
                 f"TS `{ts_type}` is not boolean"
@@ -422,7 +597,12 @@ def check_projection(
     elif projection is None and not go_type.startswith("map["):
         expected = nested_map.get(bare.split(".")[-1])
         if expected is not None:
-            if any(member != expected for member in relevant):
+            try:
+                mismatch = any(_ts_reference_name(member, ts_aliases) !=
+                               _ts_reference_name(expected, ts_aliases) for member in relevant)
+            except ValueError:
+                mismatch = True
+            if mismatch:
                 errors.append(
                     f"[nested-drift] {label}.{field_name}: Go `{go_type}` maps to TS "
                     f"`{expected}`; TS says `{ts_type}`"
@@ -450,17 +630,12 @@ def compare_struct(
         )
     for field_name in sorted(go_names & ts_names):
         go_field, ts_field = go_fields[field_name], ts_fields[field_name]
-        members = ts_members(ts_field.ts_type)
-        non_null = [m for m in members if m != "null"]
-        has_null = len(non_null) < len(members)
+        members = _expanded_ts_members(ts_field.ts_type, ts_aliases)
+        has_null = 'null' in members
         go_type = go_field.go_type
         is_array = go_type.startswith("[]")
         is_map = go_type.startswith("map[")
 
-        if is_array and (not non_null or not all(m.endswith("[]") or (m.startswith("Array<") and m.endswith(">")) for m in non_null)):
-            errors.append(
-                f"[array-drift] {label}.{field_name}: Go `{go_type}` vs TS `{ts_field.ts_type}`"
-            )
         # Wire nullability: what encoding/json emits decides, not Go nil.
         if go_field.pointer and not go_field.omitempty and not has_null:
             errors.append(
@@ -471,6 +646,11 @@ def compare_struct(
             errors.append(
                 f"[optional-drift] {label}.{field_name}: Go `{go_type}` with omitempty may "
                 f"be absent; TS must be optional (nullable is not optional)"
+            )
+        if not go_field.omitempty and (ts_field.optional or 'undefined' in members):
+            errors.append(
+                f'[optional-drift] {label}.{field_name}: required Go field cannot '
+                'be optional or undefined in TS'
             )
         if not go_field.pointer and not go_field.omitempty and has_null and not is_array and not is_map:
             errors.append(
@@ -483,20 +663,12 @@ def compare_struct(
                 f"emits null; TS `{ts_field.ts_type}` claims null"
             )
 
-        if is_array:
-            array_members = [m for m in non_null if m.endswith("[]") or (m.startswith("Array<") and m.endswith(">"))]
-            projections = [(go_type[2:], array_elem_ts(m)) for m in array_members]
-        elif is_map:
-            continue
-        else:
-            projections = [(go_type, ts_field.ts_type)]
-        for elem_go, elem_ts in projections:
-            errors.extend(
-                check_projection(
-                    label, field_name, elem_go, elem_ts,
-                    nested_map, go_string_types, ts_aliases,
-                )
-            )
+        errors.extend(check_projection(
+            label, field_name, go_type, ts_field.ts_type,
+            nested_map, go_string_types, ts_aliases,
+            allow_undefined=go_field.omitempty and ts_field.optional,
+            require_null=go_field.pointer and not go_field.omitempty,
+        ))
     return errors
 
 
@@ -512,7 +684,11 @@ def check_pairs(
     errors = list(problems)
     for go_name, ts_name in pairs.items():
         go_fields = go.structs.get(go_name)
-        ts_fields = ts.interfaces.get(ts_name)
+        try:
+            ts_fields = _ts_fields(ts_name, ts)
+        except ValueError as exc:
+            errors.append(f'[ts-alias] {ts_name}: {exc}')
+            continue
         if go_fields is None:
             errors.append(f"[missing-go] {go_name}")
             continue
@@ -663,7 +839,7 @@ def _expanded_ts_members(
 def _ts_string_enum(ts_type: str, aliases: dict[str, str]) -> list[str] | None:
     members = [
         member for member in _expanded_ts_members(ts_type, aliases)
-        if member != "null"
+        if member not in ('null', 'undefined')
     ]
     if not members:
         return None
@@ -676,6 +852,15 @@ def _ts_string_enum(ts_type: str, aliases: dict[str, str]) -> list[str] | None:
         if value not in values:
             values.append(value)
     return values
+
+
+def _ts_boolean_enum(ts_type: str, aliases: dict[str, str]) -> list[bool] | None:
+    members = [m for m in _expanded_ts_members(ts_type, aliases) if m not in ('null', 'undefined')]
+    if not members or any(m not in ('boolean', 'true', 'false') for m in members):
+        return None
+    if 'boolean' in members:
+        return [False, True]
+    return list(dict.fromkeys(m == 'true' for m in members))
 
 
 def _expected_scalar(
@@ -709,11 +894,30 @@ def _compare_openapi_value(
     nested_components: dict[str, str],
     go_string_types: set[str],
     ts_aliases: dict[str, str],
+    *,
+    allow_undefined: bool = False,
+    require_null: bool | None = None,
 ) -> list[str]:
     errors: list[str] = []
     bare = go_type.lstrip("*")
     if not isinstance(schema, dict):
         return [f"[openapi-shape] {label}: schema must be an object"]
+
+    expanded = _expanded_ts_members(ts_type, ts_aliases)
+    schema_nullable = _schema_nullable(schema)
+    if schema_nullable and not (go_type.startswith('*') or bare.startswith(('[]', 'map['))):
+        errors.append(f'[openapi-null] {label}: Go `{go_type}` cannot emit null at this node')
+    if require_null is None:
+        require_null = go_type.startswith('*')
+    if require_null and not schema_nullable:
+        errors.append(f'[openapi-null] {label}: Go `{go_type}` requires null at this node')
+    if ('null' in expanded) != schema_nullable:
+        errors.append(f'[openapi-null] {label}: expanded TS nullability differs from this schema node')
+    if 'undefined' in expanded and not allow_undefined:
+        errors.append(f'[openapi-optional] {label}: undefined is not permitted at this schema node')
+    members = [m for m in expanded if m not in ('null', 'undefined')]
+    if not members or any(not m for m in members):
+        return errors + [f'[openapi-source] {label}: TS must represent a non-null Go value']
 
     if "nullable" in schema:
         errors.append(f"[openapi-dialect] {label}: use JSON Schema null, not nullable")
@@ -730,8 +934,8 @@ def _compare_openapi_value(
                     or any(k in schema for k in ('type', '$ref'))):
                 return errors + [f"[openapi-shape] {label}: unsupported composite {keyword}"]
             return errors + _compare_openapi_value(
-                label, go_type, ts_type, non_null[0], schemas, nested_components,
-                go_string_types, ts_aliases)
+                label, go_type, ' | '.join(members), non_null[0], schemas, nested_components,
+                go_string_types, ts_aliases, require_null=False)
     if any(k in schema for k in ('not', 'if', 'then', 'else', '$dynamicRef')):
         return errors + [f"[openapi-shape] {label}: unsupported conditional schema"]
 
@@ -739,25 +943,23 @@ def _compare_openapi_value(
         if _schema_types(schema) != {"array"}:
             return [f"[openapi-type] {label}: Go `{go_type}` requires type array"]
         items = schema.get("items")
-        members = [m for m in ts_members(ts_type) if m != "null"]
         array_members = [
             m for m in members
             if m.endswith("[]") or (m.startswith("Array<") and m.endswith(">"))
         ]
-        if not isinstance(items, dict) or not array_members:
+        if not isinstance(items, dict) or len(array_members) != len(members):
             return [f"[openapi-array] {label}: array items are missing or TS is not an array"]
-        errors.extend(
-            _compare_openapi_value(
+        for member in array_members:
+            errors.extend(_compare_openapi_value(
                 f"{label}[]",
                 bare[2:],
-                array_elem_ts(array_members[0]),
+                array_elem_ts(member),
                 items,
                 schemas,
                 nested_components,
                 go_string_types,
                 ts_aliases,
-            )
-        )
+            ))
         return errors
 
     map_match = re.fullmatch(r"map\[[^]]+\](.+)", bare)
@@ -770,18 +972,15 @@ def _compare_openapi_value(
                 f"[openapi-map] {label}: typed Go map requires an explicit "
                 "additionalProperties schema"
             ]
-        ts_match = re.fullmatch(r"Record<\s*string\s*,\s*(.+)>", ts_type.strip())
-        value_ts = ts_match.group(1).strip() if ts_match else "unknown"
-        return _compare_openapi_value(
-            f"{label}{{}}",
-            map_match.group(1).strip(),
-            value_ts,
-            additional,
-            schemas,
-            nested_components,
-            go_string_types,
-            ts_aliases,
-        )
+        for member in members:
+            ts_match = re.fullmatch(r"Record<\s*string\s*,\s*(.+)>", member)
+            if ts_match is None:
+                errors.append(f'[openapi-map] {label}: typed Go map requires a TS Record')
+                continue
+            errors.extend(_compare_openapi_value(
+                f"{label}{{}}", map_match.group(1).strip(), ts_match.group(1).strip(),
+                additional, schemas, nested_components, go_string_types, ts_aliases))
+        return errors
 
     if bare == "json.RawMessage":
         if "object" not in _schema_types(schema):
@@ -801,11 +1000,17 @@ def _compare_openapi_value(
                 f"[openapi-format] {label}: Go `{go_type}` requires format "
                 f"{expected_format!r}"
             )
-        expected_enum = _ts_string_enum(ts_type, ts_aliases)
+        expected_enum = (_ts_boolean_enum(ts_type, ts_aliases)
+                         if expected_type == 'boolean' else _ts_string_enum(ts_type, ts_aliases))
         actual_enum = schema.get("enum")
+        # The complete boolean domain is equivalent with or without an enum;
+        # a literal-only TS member still requires the exact restricted enum.
+        if expected_type == 'boolean' and expected_enum is not None and len(expected_enum) == 2 and actual_enum is None:
+            return errors
         if expected_enum is not None:
+            enum_type = bool if expected_type == 'boolean' else str
             if (not isinstance(actual_enum, list)
-                    or any(not isinstance(v, str) for v in actual_enum)
+                    or any(type(v) is not enum_type for v in actual_enum)
                     or len(actual_enum) != len(set(actual_enum))
                     or set(actual_enum) != set(expected_enum)):
                 errors.append(
@@ -853,9 +1058,17 @@ def check_openapi_pairs(
         return ["[openapi-shape] components.schemas must be an object"]
     for go_name, ts_name in pairs.items():
         component_name = components[go_name]
-        schema = schemas.get(component_name)
+        try:
+            schema = resolve_schema_alias(document, schemas.get(component_name))
+        except ValueError as exc:
+            errors.append(f'[openapi-alias] {component_name}: {exc}')
+            continue
         go_fields = go.structs.get(go_name)
-        ts_fields = ts.interfaces.get(ts_name)
+        try:
+            ts_fields = _ts_fields(ts_name, ts)
+        except ValueError as exc:
+            errors.append(f'[openapi-source] {ts_name}: {exc}')
+            continue
         label = f"{go_name}->{ts_name}->{component_name}"
         if go_fields is None or ts_fields is None:
             errors.append(f"[openapi-source] {label}: Go or TS source is missing")
@@ -868,6 +1081,9 @@ def check_openapi_pairs(
         if _schema_types(schema) != {"object"}:
             errors.append(f"[openapi-shape] {label}: component must have type object")
             continue
+        if (component_name in CLOSED_WIRE_COMPONENTS
+                and schema.get('additionalProperties') is not False):
+            errors.append(f'[openapi-closed] {label}: additionalProperties must be false')
         properties = schema.get("properties")
         if not isinstance(properties, dict):
             errors.append(f"[openapi-shape] {label}: properties must be an object")
@@ -901,6 +1117,23 @@ def check_openapi_pairs(
             go_field = go_fields[field_name]
             ts_field = ts_fields[field_name]
             property_schema = properties[field_name]
+            ts_values = _expanded_ts_members(ts_field.ts_type, ts.aliases)
+            if not any(value and value not in ('null', 'undefined') for value in ts_values):
+                errors.append(
+                    f'[openapi-source] {label}.{field_name}: TS must represent '
+                    'a non-null Go value'
+                )
+            if (ts_field.optional != go_field.omitempty
+                    or ('undefined' in ts_values and not go_field.omitempty)):
+                errors.append(
+                    f'[openapi-optional] {label}.{field_name}: TS presence differs '
+                    'from the required/optional Go wire field'
+                )
+            if ('null' in ts_values) != _schema_nullable(property_schema):
+                errors.append(
+                    f'[openapi-null] {label}.{field_name}: expanded TS nullability '
+                    'differs from OpenAPI'
+                )
             collection = (
                 go_field.go_type.lstrip("*").startswith("[]")
                 or go_field.go_type.lstrip("*").startswith("map[")
@@ -924,6 +1157,8 @@ def check_openapi_pairs(
                     nested_components,
                     go.string_types,
                     ts.aliases,
+                    allow_undefined=go_field.omitempty and ts_field.optional,
+                    require_null=go_field.pointer and not go_field.omitempty,
                 )
             )
     return errors
@@ -954,6 +1189,35 @@ def _resolve_local_ref(document: dict, ref: object) -> object:
         else:
             raise ValueError('reference target does not exist')
     return node
+
+
+# Explicit public projections, never models.OutboundJob (a persistence object).
+CLOSED_WIRE_COMPONENTS = {
+    'Submission', 'OutboundJob', 'OutboundReceipt', 'OutboundReceiptProgress',
+    'OutboundReceiptCounts', 'SubmissionCapabilities', 'SubmissionContent',
+}
+
+
+def resolve_schema_alias(document: dict, schema: object) -> object:
+    """Resolve pure local schema aliases, not JSON Schema compositions.
+
+    Validation siblings would constrain a reference; silently dropping them
+    could admit an ambiguous contract. Only inert annotations are accepted.
+    """
+    seen: set[str] = set()
+    while isinstance(schema, dict) and '$ref' in schema:
+        if set(schema) - {'$ref', 'description', 'summary', 'title'}:
+            raise ValueError('schema alias has validation siblings')
+        ref = schema['$ref']
+        if not isinstance(ref, str) or not ref.startswith('#/components/schemas/'):
+            raise ValueError('schema alias must reference a local component')
+        if ref in seen:
+            raise ValueError(f'cyclic schema alias: {ref}')
+        seen.add(ref)
+        schema = _resolve_local_ref(document, ref)
+        if not isinstance(schema, dict):
+            raise ValueError('schema alias target must be an object')
+    return schema
 
 
 def _check_local_openapi_refs(document: dict) -> list[str]:
@@ -1016,6 +1280,11 @@ def check_openapi_contract(
             dynamic_nested,
         )
     )
+    # The legacy component name is still public, but its source owner is the
+    # closed company DTO. Never bind it back to the shared storage job fields.
+    errors.extend(check_openapi_pairs(
+        {'OutboundReceipt': 'OrdinaryReceipt'}, {'OutboundReceipt': 'OutboundJob'},
+        company_go, company_ts, document, dynamic_nested))
     return errors
 
 
@@ -1046,7 +1315,7 @@ COMPANY_RESPONSES = {
     'c.Mail.UploadAttachment': ('200', 'one', 'CompanyAttachment'),
     'c.Recovery.Recovery': ('200', 'page', 'CompanyRecoveryReceipt'),
     'c.Recovery.InspectReceipt': ('200', 'one', 'CompanyRecoveryInspection'),
-    'c.Recovery.Recipients': ('200', 'list', 'CompanyRecipient'),
+    'c.Recovery.Recipients': ('200', 'one', 'OutboundReceipt'),
     'c.Archive.List': ('200', 'page', 'ArchivedMail'),
     'c.Index.Status': ('200', 'one', 'ContentIndexStatus'),
     'c.Employees.Preview': ('200', 'one', 'OffboardingPlan'),
@@ -1071,7 +1340,7 @@ COMPANY_RESPONSES = {
     'c.Mail.Message': ('200', 'one', 'MessageDetail'),
     'c.Mail.InboundAttachments': ('200', 'list', 'CompanyParsedAttachment'),
     'c.Mail.MessageAction': ('200', 'one', 'CompanyUpdated'),
-    'c.Mail.SubmitDraft': ('201', 'one', 'OutboundJob'),
+    'c.Mail.SubmitDraft': ('201', 'one', 'OutboundReceipt'),
     'c.Index.Conversation': ('200', 'page', 'Message'),
     'c.Console.RetryIndex': ('200', 'one', 'CompanyIndexRetryResult'),
     'c.Archive.Change': ('200', 'one', 'CompanyRevisionUpdated'),
@@ -1086,7 +1355,7 @@ COMPANY_RESPONSES = {
 }
 # A fresh submit and an idempotent replay have distinct success codes.
 COMPANY_ALTERNATE_RESPONSES = {
-    'c.Mail.SubmitDraft': ('200', 'one', 'OutboundJob'),
+    'c.Mail.SubmitDraft': ('200', 'one', 'OutboundReceipt'),
 }
 # Non-JSON bodies must not pass through a JSON envelope checker.
 COMPANY_STREAMS = {
@@ -1096,6 +1365,7 @@ COMPANY_STREAMS = {
     'c.Mail.Source': 'message/rfc822',
     'c.Mail.SubmissionAttachmentDownload': 'application/octet-stream',
     'c.Events.Events': 'text/event-stream',
+    'adminEvents.Events': 'text/event-stream',
 }
 COMPANY_ACK_FIELDS = {
     'CompanyDeleted': 'deleted', 'CompanyRevoked': 'revoked',
@@ -1288,6 +1558,7 @@ def main() -> int:
     company_go_texts.append((ROOT / 'internal/models/mailbox_grants.go').read_text())
     company_ts_texts = [
         (ROOT / "web/lib/company.ts").read_text(),
+        (ROOT / "web/lib/receipt-types.ts").read_text(),
         (ROOT / "web/features/mail/api.ts").read_text(),
         (ROOT / "web/features/company/api.ts").read_text(),
     ]
@@ -1299,6 +1570,9 @@ def main() -> int:
     shared_go = merge_go_sources([shared_go_text], parse_problems)
     shared_ts = merge_ts_sources([shared_ts_text], parse_problems)
     company_go = merge_go_sources(company_go_texts, parse_problems)
+    # Qualified models.OutboundState is a declared string type in the actual
+    # shared source, not an exemption that treats unknown Go names as strings.
+    company_go.string_types |= shared_go.string_types
     company_ts = merge_ts_sources(company_ts_texts, parse_problems)
     # check_shared/check_company already report these; do not duplicate them.
 

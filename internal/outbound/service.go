@@ -319,14 +319,32 @@ func (s *Service) StartWorker(ctx context.Context) {
 // Stop drains a StartWorker-launched goroutine, waiting for the in-flight
 // batch to finish. Absorbs the legacy Shutdown() semantics.
 func (s *Service) Stop() {
-	if s.worker == nil {
-		return
+	s.workerMu.Lock()
+	worker := s.worker
+	s.workerMu.Unlock()
+	if worker != nil {
+		worker.Stop()
 	}
-	s.worker.Stop()
 }
 
-// Shutdown is retained for the main goroutine's existing call site; it
-// forwards to Stop.
+// StopContext cancels the current worker generation and waits for its actual
+// exit within ctx. A non-nil error is an incomplete drain, not permission to
+// release the store or start a replacement. The process lifecycle owner must
+// first seal startup, cancel its run context, and join any pending StartWorker
+// invocation before calling this method; an idle snapshot cannot join a future
+// start. Legacy Stop/Shutdown retain their graceful, unbounded contract.
+func (s *Service) StopContext(ctx context.Context) error {
+	s.workerMu.Lock()
+	worker := s.worker
+	s.workerMu.Unlock()
+	if worker == nil {
+		return nil
+	}
+	return worker.StopContext(ctx)
+}
+
+// Shutdown is retained for legacy callers and forwards to graceful Stop.
+// The process shutdown coordinator uses StopContext instead.
 func (s *Service) Shutdown() { s.Stop() }
 
 // ensureWorker builds the workqueue.Worker once. Idempotent.

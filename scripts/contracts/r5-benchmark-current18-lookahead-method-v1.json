@@ -1,0 +1,86 @@
+{
+  "L_execution_authorized": false,
+  "activation": "external_owner_evi_root_admission_required_no_implicit_runtime_authorization",
+  "authorized_scale_without_attempt_admission": [],
+  "catalog_contract": {
+    "path": "scripts/contracts/r5-benchmark-current18-catalog-v1.json",
+    "sha256": "61b983278a8f3c685fd13a4f402617c7e5688da93196a51b7f6da6c6cdb80796"
+  },
+  "clock_contract": {
+    "clock_contract_version": 1,
+    "deadline": "minimum_of_origin_plus_original_budget_and_all_approved_deadlines",
+    "descriptor_binding": "independently_trusted_canonical_descriptor_bytes_and_SHA256_not_archive_self_digest",
+    "descriptor_pin_in_admission": "parent_clock_descriptor_sha256",
+    "descriptor_reuse": "one_sealed_descriptor_per_attempt_no_reorigin_with_same_admission",
+    "go_new_budget_origin_allowed": false,
+    "integer_unit": "unix_nanoseconds",
+    "late_containment_cleanup": "retain_as_failure_never_extra_success_budget",
+    "max_wall_monotonic_gap_ms": 100,
+    "origin": "single_outer_owner_before_native_init_and_compile",
+    "parser_min_remaining_ns_exclusive": 31000000000,
+    "raw_go_time_semantics": "test2json_recorded_Time_within_declared_owned_Go_phase_go_started_through_go_exit_before_cleanup_not_parent_wait",
+    "success_budget_covers": [
+      "native_init",
+      "compile",
+      "Go_init",
+      "population",
+      "measurements",
+      "drain",
+      "result_seal",
+      "successful_cleanup",
+      "parent_wait"
+    ],
+    "suspend": "reject_observed_deadline_overrun_no_asleep_kill_claim",
+    "wall_rollback": "reject"
+  },
+  "contract_kind": "r5_current18_method_v1",
+  "contract_schema_version": 1,
+  "database_schema_version": 18,
+  "evidence_generation": "r5_current18_fork_source_v2_parentclock_v1",
+  "identity_boundary": {
+    "A_random_commit_order_not_preserved_or_claimed": true,
+    "all_persistent_equivalent": false,
+    "all_physical_uuid_time_protocol_uid_fields_not_covered_by_six_streams": true,
+    "canonical_streams_unchanged_no_added_normalization": true,
+    "generator_ordinal_mailbox_fifo_preserved": true,
+    "protocol_UID_certified": false,
+    "received_at_and_received_order_may_change_with_B_scheduling": true,
+    "uncovered_fields": "received_at/received-order, lifecycle clock timestamps, indexed_at, next_attempt_at, lease tokens, random actor/mailbox row UUIDs; protocol UID not certified"
+  },
+  "legacy_METHOD_DATASET_and_archives_unchanged": true,
+  "local_replacement": {
+    "module": "github.com/jhillyerd/enmime/v2",
+    "path": "third_party/enmime-v2.3.0",
+    "version": "v2.3.0"
+  },
+  "method_id": "r5_current18_fork_v2_lookahead100_fifo20_parentclock_v1",
+  "product_green": false,
+  "required_qualification_receipts": [
+    "C18-02",
+    "C18-03",
+    "C18-05",
+    "C18-06",
+    "C18-07",
+    "C18-09"
+  ],
+  "result_schema_path": "scripts/contracts/r5-benchmark-current18-evidence.schema.json",
+  "runtime_qualification_status": "BLOCKED_C18_07_partial_catalog_and_other_unimplemented_runtime_qualifications",
+  "scheduler": {
+    "buffer_scope": "unpersisted_inputs_only_no_database_job_backlog",
+    "failure_policy": "predecessor_error_stops_dependents_cancel_and_join_all_workers",
+    "kind": "lookahead100_unpersisted_inputs_distinct_mailbox_windows20_ordinal_fifo",
+    "leased_prefetch": false,
+    "lookahead_limit": 100,
+    "mailbox_order": "generator_ordinal_fifo_predecessor_success_before_store_and_lifecycle",
+    "selection": "earliest_ordinal_mailbox_heads_distinct_first_then_earliest_remaining_sorted_ordinal",
+    "window_messages": 20
+  },
+  "source_final_hash_binding": "external_attempt_admission_receipt_only_no_self_reference",
+  "source_identity_kind": "policy_bound_local_input_superset_sha1_v2",
+  "source_policy": "r5_current_local_inputs_v2",
+  "task_complete": false,
+  "workload_contract": {
+    "path": "scripts/contracts/r5-benchmark-current18-workload-v1.json",
+    "sha256": "ad5685e7febf41d77f0deb6eb33cab713f9d2e1a06ee902a4b6e5ee2ac5a96e5"
+  }
+}

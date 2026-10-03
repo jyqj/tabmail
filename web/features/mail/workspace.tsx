@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useSWRConfig } from "swr";
 import { useAPI } from "@/hooks/use-api";
-import { workMailboxes, type DraftPayload, type MailDraft } from "@/lib/company";
+import { workMailboxes, type DraftPayload, type MailDraftEditor } from "@/lib/company";
 import { streamEvents } from "@/lib/api/base";
 import { useSessionScope } from "@/lib/session";
 import { composeIdentity } from "@/lib/compose-identity";
@@ -25,7 +25,7 @@ export function MailWorkspace() {
     const scope = useSessionScope();
     const { mutate } = useSWRConfig();
     const [editor, setEditor] = useState<{
-        draft: MailDraft;
+        draft: MailDraftEditor;
         key: string;
     } | null>(null);
     const boxes = useAPI("work-mailboxes", workMailboxes, { refreshInterval: 15000 });

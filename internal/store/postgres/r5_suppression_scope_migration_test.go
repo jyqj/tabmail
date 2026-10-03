@@ -65,19 +65,22 @@ func TestR5SuppressionScopesMigrationFreshUpgradeRepeat(t *testing.T) {
 			var prior string
 			if mode == "actual-14-upgrade" {
 				// Run the exact released 1..14 bytes through Goose, not hand-written DDL
-				// or a CHECK-disabled fixture. The new binary then performs real Up15.
+				// or a CHECK-disabled fixture. The historical provider then performs real Up15.
 				all, err := fs.Sub(r5ScopeMigrationFiles, "migrations")
 				must(t, err)
 				old := fstest.MapFS{}
 				entries, err := fs.ReadDir(all, ".")
 				must(t, err)
 				for _, e := range entries {
-					if strings.HasPrefix(e.Name(), "00015_") {
+					if e.Name() >= "00015_" {
 						continue
 					}
 					b, err := fs.ReadFile(all, e.Name())
 					must(t, err)
 					old[e.Name()] = &fstest.MapFile{Data: b}
+				}
+				if len(old) != 14 {
+					t.Fatalf("expected exact released 1..14 migration set, got %d", len(old))
 				}
 				db := stdlib.OpenDB(*cfg)
 				defer db.Close()
@@ -95,7 +98,31 @@ func TestR5SuppressionScopesMigrationFreshUpgradeRepeat(t *testing.T) {
 				must(t, pool.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(k) ORDER BY id)::text FROM tenant_api_keys k`).Scan(&prior))
 				r5ScopeInsert(t, ctx, pool, tenant, nil, []string{"suppression:manage"}, false)
 			}
-			must(t, postgres.Migrate(ctx, cfg))
+			// Freeze 1..15 for this historical scope migration/Down14 contract.
+			// Migration16 has its own irreversible Down and must not replace the
+			// original scope CHECK witness or be silently downgraded for this test.
+			allHistorical, err := fs.Sub(r5ScopeMigrationFiles, "migrations")
+			must(t, err)
+			historical := fstest.MapFS{}
+			entries, err := fs.ReadDir(allHistorical, ".")
+			must(t, err)
+			for _, entry := range entries {
+				if entry.Name() >= "00016_" {
+					continue
+				}
+				raw, err := fs.ReadFile(allHistorical, entry.Name())
+				must(t, err)
+				historical[entry.Name()] = &fstest.MapFile{Data: raw}
+			}
+			if len(historical) != 15 {
+				t.Fatalf("expected exact released 1..15 migration set, got %d", len(historical))
+			}
+			dbHistorical := stdlib.OpenDB(*cfg)
+			defer dbHistorical.Close()
+			providerHistorical, err := goose.NewProvider(goose.DialectPostgres, dbHistorical, historical)
+			must(t, err)
+			_, err = providerHistorical.Up(ctx)
+			must(t, err)
 			var version int64
 			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
 			if version != 15 {
@@ -119,7 +146,8 @@ func TestR5SuppressionScopesMigrationFreshUpgradeRepeat(t *testing.T) {
 			var before string
 			must(t, pool.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(k) ORDER BY id)::text FROM tenant_api_keys k`).Scan(&before))
 			for i := 0; i < 2; i++ {
-				must(t, postgres.Migrate(ctx, cfg))
+				_, err = providerHistorical.Up(ctx)
+				must(t, err)
 			}
 			var after string
 			must(t, pool.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(k) ORDER BY id)::text FROM tenant_api_keys k`).Scan(&after))
@@ -128,9 +156,7 @@ func TestR5SuppressionScopesMigrationFreshUpgradeRepeat(t *testing.T) {
 			}
 			// Real Goose Down refuses new-scope data atomically, never erases keys.
 			dbDown := stdlib.OpenDB(*cfg)
-			allDown, err := fs.Sub(r5ScopeMigrationFiles, "migrations")
-			must(t, err)
-			providerDown, err := goose.NewProvider(goose.DialectPostgres, dbDown, allDown)
+			providerDown, err := goose.NewProvider(goose.DialectPostgres, dbDown, historical)
 			must(t, err)
 			_, downErr := providerDown.DownTo(ctx, 14)
 			dbDown.Close()
@@ -151,7 +177,34 @@ func TestR5SuppressionScopesMigrationFreshUpgradeRepeat(t *testing.T) {
 			if !strings.Contains(definition, "suppression:read") || !strings.Contains(definition, "suppression:manage") || !strings.Contains(definition, "jsonb_array_length") {
 				t.Fatal("final catalog CHECK lost required scope/array/nonempty predicate")
 			}
-			t.Log("actual version15 scope catalog verified; old12+new2, ownerless/owned, invalid/empty rejection, existing bytes/two repeats intact; real Down14 refused with version15/check/data preserved")
+			// Only after the historical refusal witness, exercise the actual current
+			// startup chain. No Down16 is attempted or bypassed.
+			for i := 0; i < 2; i++ {
+				must(t, postgres.Migrate(ctx, cfg))
+			}
+			must(t, pool.QueryRow(ctx, `SELECT max(version_id) FROM goose_db_version WHERE is_applied`).Scan(&version))
+			if version != 19 {
+				t.Fatal("current startup did not install migration19")
+			}
+			must(t, pool.QueryRow(ctx, `SELECT jsonb_agg(to_jsonb(k) ORDER BY id)::text FROM tenant_api_keys k`).Scan(&after))
+			if before != after {
+				t.Fatal("current migration19/repeat rewrote historical key bytes")
+			}
+			// Re-prove the live scope constraint under current19, not merely the
+			// applied version or historical rows: later migrations must not widen it.
+			currentTenant, currentUser := r5ScopeSeedIdentity(t, ctx, pool)
+			for _, scope := range allowed {
+				r5ScopeInsert(t, ctx, pool, currentTenant, nil, []string{scope}, true)
+				r5ScopeInsert(t, ctx, pool, currentTenant, &currentUser, []string{scope}, true)
+			}
+			r5ScopeInsert(t, ctx, pool, currentTenant, nil, []string{}, false)
+			r5ScopeInsert(t, ctx, pool, currentTenant, nil, []string{"suppression:unknown"}, false)
+			var currentDefinition string
+			must(t, pool.QueryRow(ctx, `SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conrelid='tenant_api_keys'::regclass AND conname='tenant_api_keys_scopes_check'`).Scan(&currentDefinition))
+			if currentDefinition != definition {
+				t.Fatal("current migration19 changed the scope CHECK definition")
+			}
+			t.Log("actual version15 scope catalog verified; old12+new2, ownerless/owned, invalid/empty rejection, existing bytes/two repeats intact; real Down14 refused with version15/check/data preserved; current version19 startup/repeat retains key bytes")
 		})
 	}
 }

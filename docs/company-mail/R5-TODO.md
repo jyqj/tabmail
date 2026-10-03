@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | 用户2026-10-01明确暂停实现；本次仅GitHub上传已验收10项与未验收benchmark WIP、安全失败证据，不新起实现或测试 |
-| 下一可执行任务 | 等用户恢复；先benchmark observer/schema及actualtoolcontract修复，再原S/M独立预算窗口；100/120/G0与全P1–P11保持未验 |
+| 当前阶段 | Current19 D1九leaf/D2clean/D3BS六top8leaf10race各独审actualP，C0/V8 pretestINFRA_UNKNOWN无终态，V9只SOURCE待审不C资格；原A/旧D2F保。P5编码8top34P非race与workqueue24top28raceP独审限定，不PGHTTP/send或正式shutdown。PGphaseR3 B2/B5仍SOURCEblock/watchdog N1合同接受但formalexact8/runtime拒；C18/Method19/Docker四CI未资格，10/171保 |
+| 下一可执行任务 | V9 Conly observer SOURCE独审→root单次C；PGphase lifecycle竞态/native后代与watchdog drained真实证/terminalflush独立修，HARD1200不删；formalcaller boundedshutdown和SMTP ctx/sessionjoin分写集→新实际门禁；编码PGHTTP权限链、C18-09/07/02/05/06/current19Method/完整CI-shipping，不复已绿scope |
 | 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
 | 实现完成数 | 10 / 171；P0 为 10 / 12。010–090及110基线已验收；100原S/M实测与120/G0仍未过 |
-| 当前阻塞 | 100 S/M真实基线尚未执行；G0未过；后续权限/内容/留存/离职/收发/索引等精确产品目标红仍未修，不借P0材料验收产品全绿 |
+| 当前阻塞 | P0-100有效1M baseline缺、原M10800FAILED；usage19 C未知/未资格，legacyStop/caller未接与authasyncTouchjoin/拒409边界仍缺。watchdog scope_drained无true路径/terminal需flush、phase采样/native后代BLOCK，runtime拒；P5pure不业务链/P6组件不durableSMTP。Docker未ready/四CI/Method当前19/全角色/事务coverage/长期SSE/received残项保 |
 | 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
@@ -23,7 +23,7 @@
 
 复选框只表示最终完成：`[ ]` 包括 pending/in_progress/blocked，`[x]` 只用于全部验收通过。进行中/阻塞原因记在执行日志，不使用多个互相矛盾的状态文件。任务 ID 永不重用；拆分添加后缀编号并写依赖，取消任务保留决策与范围变更，不通过删除任务虚增进度。
 
-依赖必须全部关闭后才能开始依赖它的实现；资料阅读与独立测试设计可并行，不预先勾选。表内未显式依赖的同阶段任务可并行，但共享 migration、DTO、事务辅助的 PR 必须指定集成顺序。任何七项审计发现必须通过基线与修复后对照关闭；若当前源码已变化，先记录原基线到新 SHA 的映射。
+依赖必须全部关闭后才能开始依赖它的实现；资料阅读与独立测试设计可并行，不预先勾选。 用户后续明确授权未验的并行WIP作为执行例外：原依赖、171父任务验收和最终门禁不改变；WIP不能据局部green勾完成，运行源/参考源分开，待真实依赖与整批验收后逐项裁决。表内未显式依赖的同阶段任务可并行，但共享 migration、DTO、事务辅助的 PR 必须指定集成顺序。任何七项审计发现必须通过基线与修复后对照关闭；若当前源码已变化，先记录原基线到新 SHA 的映射。
 
 每个完成项在文末执行日志登记：任务 ID、PR/commit、被测 SHA/树、实际命令、测试总数/pass/fail/skip、结果证据路径、兼容变化、未覆盖边界。日志没有凭据、邮件正文、真实个人信息或可用激活链接。测试名称只是要求，不是结果。
 
@@ -121,6 +121,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
   - 实施：建立 S/M/L 合成规模、随机种子、消息大小和共享授权分布；记录硬件、SQL数、延迟与内存；冻结候选阈值。
   - 交付：性能基线数据、运行清单和拟新增 R5-BENCHMARK.md；不提交大数据或真实邮件。
   - 验收/测试：S/M 至少一轮实际基线；L 明确预算/发布必要性；不存在先优化后挑好看的基线。
+  - 当前证据：历史S2、schema16 v1原S3d07及selected opt-in原S4074分别完整采集，精确source/冻结contract各保；新source均canonical closure SHA1非Git。原M/M2仍failed/incomplete（M2缺Go码），B4k/1000工具不是M；新M只有条件准入。故本项仍未验；见[最新有限集成](R5-OPTIN-S-COLD-INTEGRATION-20261002.md)。
 
 - [x] **R5-P0-110｜建立契约与迁移兼容门禁地图**
   - 依赖：`R5-P0-020`、`R5-P0-050`、`R5-P0-080`；优先级：高。
@@ -1643,3 +1644,367 @@ review结论及风险：
 - 实际官方New/Migrate空DB catalog75FK/7usertriggers，Up77≠final75；350link是table/nameclosure保守关联不是dispatch/fire证明。Convert expiry UPDATE/Publish versionINSERT操作敏感触发器及TX21回调effect已注明。
 - [报告](R5-B01-Z-VALIDATION.md)/[摘要](evidence/R5-B01-Z-VALIDATION.json)/[175成员归档](evidence/R5-B01-Z-LOGS.tar.gz)/[actualcatalog](evidence/R5-TRANSACTION-DB-CATALOG.json)随本地集成；无DSN/私有fixture/responses/源码tar/DB。Zprocess全terminal，PG34679唯一后续租约继续不假报stop。无push/PR/merge/deploy。
 - 仍6/171；070有限matrix剩余caller/config/明确关系、080原条款/RC02/未来backfill写，G0后P1–P11原依赖不缩。下一tenant9c正常constraint控制不当总体PASS，AA源码实际freeze后再runtime。
+
+
+### B01-AJ：恢复实施与原规模benchmark验收准备（2026-10-01，进行中）
+
+- 用户要求继续依据本TODO多轮multiagent；历史明确暂停与上传记录保留，不将旧暂停当当前执行状态。起点工作区干净，分支`work/company-mail-r5-goal-20260930`，HEAD `587ba75`。根线程只分派，benchmark operator唯一持有PG/Go执行，runner reviewer与contract owner各持独占写集。
+- 当前仍10/171；P0-100与120不勾。上一TOOL_ONLY真实20员工/100邮箱/1000邮件在observer的`mailboxes.kind`处42703，无result/EXPLAIN/validator成功；SQL20已实际通过但不算原S/M。旧失败证据不覆盖。
+- 先修schema/观测合同并独立校准，再冻结同源S/M原人口、20并发、seed及预算；S/M各实际完整baseline之前不得写registry成功，不先进入依赖G0的产品实现。
+- 原验收范围与逐项证据要求见[R5-P0-G0-REVIEW-20261001](R5-P0-G0-REVIEW-20261001.md)。源闭包包含datasets，metadata改动需在operator锁源之前同步，不把旧source label贴到新运行。未提交、push、PR、merge、release或deploy。
+- AJ限定校准：TOOL1 Go0但错误quota计划拒；TOOL2五race/425closure限定观测合格；TOOL3–5样本/权限正控/入站403精确预期修正后，TOOL6同源treefc992真实5race/0skip、14组×200小20/100/1000完整shipping/worker、安全200→403→200与foreign200→404，双独审仅准原S/M窗口。见[G0审表](R5-P0-G0-REVIEW-20261001.md)及两安全机器/raw归档；SQL20/tool成绩不是原规模，仍10/171，不勾100/120。
+- AJ原S首次100/500/100000／1800s窗口实际Go1800.600超时1、runner1，无result／14×200 sampling；ownedDB100k ready只准备不算性能。源fc992及18安全原成员保留，见[S失败独审](evidence/R5-B01-AJ-S-FIRST-FAILED-REVIEW.json)。准仅fixture准备20worker/pool24并行且合同等价/race新证，不改产品/原预算/采样安全/人口，重新锁源tool→原S/M；M不跳过。datasets真实状态修正、runs仍空，10/171不变。
+- AJ并发准备准入：仅fixture20worker/queue20/pool24，原parser4gate保持；新tree68cafcc，两轮真实工具第一6top+2failure子例race36.003s、第二1top完整14×200复跑22.979s均0，425closure一致、canonicalactualSHA与旧串行TOOL6相同b36d2070；双独审准原S2(1800s)再原M(10800s)，不变预算/人口/seed/安全。原S失败保，见[并发审查](evidence/R5-B01-AJ-PARALLEL-CALIBRATION-REVIEW.json)；10/171、100/120未验，metadata新0b828冻结。
+- AJ原S2同68cafcc实际1270.63s／Go runner0，原100/500/100k、14×200/SQL20/plan/actual分布/安全/425closure及清理齐，双独审S初始采集完成。列表p95冷10.968542／热3.983833ms通过300候选，真实search5602.020292／5865.429958ms保P7/P10具名性能缺口、不冒整体绿。见[S2独审](evidence/R5-B01-AJ-S2-REVIEW.json)；registry据实S complete但100false，原M同源10800s已启动，metadata0b828冻结。100/120和10/171不变。
+- AJ首原M终态失败：10800s原墙钟预算绝对20:40:12，host睡眠期间不能执行kill，guard首次resume20:52:07观察wall11515.358s后TERM/KILL，Go-15／runner1，无result/完整1M/index/采样（实际messages484744/index0）。不是按时停止／性能候选红／完成M；[原M失败独审](evidence/R5-B01-AJ-M-FIRST-FAILED-REVIEW.json)及安全raw/清理档保18选定host事件、累计boot差非M独占。用户同意下一接电开盖3h窗口；先新wall/clock/registry工具严格校准再新源原M2，不延长旧M或降人口/预算。datasets只当前状态新66550，S2真实旧contract0b828单列绑定旧source/result，不贴新元数据；10/171不变。
+- AJ新clock双准入：newtreec9a8c299/dataset9af57，first8top+5真实fault/clock子例race34.922s、second1top完整14×200复跑22.869s，Go/CLI0/425closure齐，rootwall20.741105/20.682516≤300、maxrowgap0.007167/0.621292≤100ms仪表界限，canonical与旧toolb36f相同；双审准原M2(1000/5000/1M、10800s/80GiB)接电开盖窗，保原失败/旧S2合同，不补旧结果新clock字段。见[clock准入审查](evidence/R5-B01-AJ-CLOCK-CALIBRATION-REVIEW.json)，仍10/171、不勾100/120。
+
+### B02-WIP：用户授权并行权限原子slice与隔离收发WIP（2026-10-02，未验）
+
+- 用户明确不能被100w长测试卡住其他进度，并将并发提高17；此为提前并行WIP授权，不改变171父条目或G0/P1/P6原依赖，不提前勾任一项。主checkout HEAD587ba75，root只调度，integration owner持共享state/API/DTO/service/model/locale，实际M源c9a8 immutable与主树新16产品WIP分层。
+- 原M2实际失败：runner1/EPERM，缺go.exit/execution-budget/result，仅Go run无pass；1M入库/47420ready/5processing/952575pending、0sampling不是M baseline，不捏造Go码。见[M2缺观察独审](evidence/R5-B01-AJ-M2-FAILED-REVIEW.json)与33安全原成员档。actualclaim请求100被正式clamp5、90s lease，owned实际SeqScan/Sort计划与legal20仅假设EXPLAIN分开；不机械再跑3h先修真准备瓶颈/cleanup并小等价证。
+- P1-010/020/040最小slice以及必要060/070正式消费已具名施工：新16非回退sequence版本owner/trigger保override/profile同ID ABA；raw快照+effective/source/compounddecimal revision同Tx；formalPATCH字段意图/CAS/hierarchy/audit、ProfileCAS与删除精确影响preview/确认、assignment+override一命令；真GET/PATCH/preview/assignment routes/strictdecoder接通，旧PUT/DELETE/userprofile更新旁路409退出，None canonical全consumer不以[]冒all。rawprofile/create/scan真实revision从SQL返回，不timestamp伪造。
+- 独占：revision owner16/快照/profileCAS/assignment叶；patch ownerstrictdecoder+唯一共用applyPermissionPatchTx；contract ownerOpenAPI/新schema tests；backend tests仅新PG/H/DTO测试；migration regression5旧测试合法version预期；domain consumer资格/list/scope/resolver域；frontend ownerAPI/types/editor；profile UI仅profile panel/helper/newtest；UI tests独立新增；integration owner只共享入口/模型/core canonical/service/locale/文档，交接SHA后停写，operator唯一PG/全回归。M2终态后先新16真实产品target再fresh集成，未跑PG不冒通过。
+- P6-010/040/100隔离leaf保真实单测/源码closure/故障边界；nil或空ledger/非法状态不冒accepted，SMTP context/TLS/socket清理与250后QUIT语义保，正式Accept重复规范化地址只一次Resolve/alias按identity去重。局部target不等完整发送状态/每MX:25/DB commit或G6；独立复审与完整门禁待集成。
+- 当前仍10/171；原M/fresh回归/120 PR、P1全要求与P6全部父scope未验。fourpkg轻量compile0全部no-tests-to-run不冒unit，i18n0、前端source-onlytsc/Vitest等真局部限定，旧.next全build/PG/HTTP/全Go/full gates未跑的不算绿。完整171、API身份边界/域限/版本/审计回滚/迁移/恢复与原要求不缩。
+- B02真实产品证据已分源安全交付：b927 PG32top0；同源H6pass2fail→081a strict修只2case(1pass1wirefixturefail)→0ecb正式wire单casepass；authority4PG+4HTTP、必要stage24/6/12race通过，真实ownerless同key/legacyID SMTP1vsretry403红保，按原legacy边界/currentkey/disabled/templatepolicy新增最小源收口不清ID/禁全部legacy讨绿。见[产品WIP运行记录](R5-B02-WIP-RUNTIME-20261002.md)与[evidence](evidence/R5-B02-WIP-PERMISSION-RUNTIME.json)，47安全成员分source不贴新源。globaleventfanout/080综合/full门禁仍待，10/171不变。
+- 新fixture schema16合同9e810锁定，唯一新runtime once采SQL20、双fresh1000完整14×200各Go/CLI0+3真fault/positive，六actualstream/b36f全等；[44文件安全工具交付](evidence/R5-B01-AJ-PIPELINE-TOOL-REVIEW.json)仅小校准不原S/M或deep容量。source3d07为closureSHA1非Git/tree，未来registry不得伪identity；原历史S2/失败M/M2不补新字段。deep100k/1M只有资源计划，未跑不外推，P0-100/G0继续未验。
+- Ownerless原true RED经新独立guard source087849最小resolver/sendpolicy/retry收口，必要4top/23leaf race实际绿：samekey/真实legacyID shippingretry+SMTP正控、disabled/template-required不得绕、19拒绝/noeffects、accepted不重发；原744e红保。见[guard有限运行证据](evidence/R5-B02-OWNERLESS-GUARD-REVIEW.json)，不以此关完整080或global fanout/130/G7/G0；pipeline工具3d07和此生产source不贴。同scope安全交付剔Mac sidecars，仅保原payload+原tarhash，10/171继续保。
+
+
+### B01-AJ / B02-WIP：新 S、4k诊断与 P2 有限证据集成（2026-10-02）
+
+- 本轮只核作者原必要raw终态/scope/脱敏，不重跑PG/Go/Web/基准、不重复已绿命令/全文件hash。主checkout HEAD587ba75+dirty与各immutable source分离；实际原父checkbox仍**10/171**，P0-100/120/G0、P1–P11不勾，原依赖及用户并行WIP例外不变。未提交/push/PR/merge/release/deploy。
+- 新**原S**100/500/100000、schema16/合同9e810，source3d07 canonicalclosureSHA1（非Git/tree）、actualclosure3e3e；墙钟1518.898/1800s，Go/runner/strictCLI0，ready100000/14×200、actual分布/六SQLstreams/安全/资源/清理完整，合法actualClaim20在ready99980实际1.085ms。registry新增独立complete S，旧S2和failedM/M2原字段不覆盖；M2缺Go退出回执保持unknown，M/L未新run。见[新S原review](evidence/R5-B01-AJ-S-PIPELINE-REVIEW.json)。
+- S列表冷/热p95=9.118/4.145ms仅通过S300ms候选，搜索5932.551/6092.991ms是实际S观测，不拿M1s阈值判Sfail/认证M。Store1203.258s×10超过M10800s只线性规划风险，非实际M失败下界。RSS328728576/disk1892809751bytes，scope非整机内存；不称P0/性能全绿。
+- 新**DIAGNOSTIC4k-only**sourceb45，Go0/ready4000，execution55.761/180s、native init→stop63.462/300s、disk97820075bytes。quota lock21.843%只是sample rows，100ms target实际maxgap1.034s；并发call span/CPU/sched不可当墙钟criticalpath/fsync时长。lookahead100仅新代码尚未実run，不S/M/tool admission，不入successful-scale。见[原诊断review](evidence/R5-B01-AJ-STORE-DIAGNOSTIC-4K-REVIEW.json)。
+- 新**P2-060 inspection**source251436，真PG/H/F10top25leaf raceGo0：fresh selected-company platform super、actor/ledger busy fence、safe allowlist及required audit/outbox fault零payload/effects。专用OpenAPI schema/static10与UI专用type121pure/scopedtsc/lint是作者静态/consumer层，不PG→UI/browser。普通DTO未扩，不凭此关P2-060/140父scope。见[原inspectionreview](evidence/R5-P2-060-INSPECTION-REVIEW.json)。
+- 新**received eligibility**实际期限/purge/个人historical非空hard-expiry豁免/shared0或NULL历史与actualnonNULL期限、IOReceivedAtZoneID/空EOF四gap按作者delivered_static_review接纳。真runtime来源dea20 full10top53leaf HTTP4top全pass、PG仅2child锁观测屏障fail（query1kB截断1033外token）；206d只test可见FROMmessages修保exactblockingPID/deadline，必要2childraceGo0，生产字节不变。53leaf为分源composed，不冒新源一次fullGo0；canonical overlay15leaf实际RED与旧alias未应用attempt分别保。MATERIALIZED不等全面线性一致性，legacyunpin/完全同字段incarnation无schema仍未闭。见[原receivedreview](evidence/R5-P2-RECEIVED-ELIGIBILITY-REVIEW.json)。
+- 安全归档本轮**27/39/14/64原payload**，不动旧历史档；剔AppleDouble，DIAG剔trace/CPU/衍生pprof二进制，保hashed样本/聚合文本/原exit/redactedenv。不full私有DSN/JWT/rawmail/objects/DB/生产配置；原tarhash仅作者receipt包装证，新safehash另列[交付清单](evidence/R5-BOUNDED-DELIVERY-20261002.json)。各ownedPG/socket/caffeinate按作者真terminal已清，无借旧PID启动/清理，root不重复测试。
+
+#### 本轮残余工单（父171内拆分，全部未完成）
+
+| 具名工单 | 父项／依赖 | 可施工与验收 |
+|---|---|---|
+| RES-M-01｜B到benchmark方法准入 | P0-100；040/090已验，新方法独审 | B4k诊断实际已交（非race）；aggregate/parameters/六streams等价但时序/UID不全字段等价。下一只读新方法方案、独审freeze/必要race/tool/actualS；未授权不换9e810原方法或M/L |
+| RES-M-02｜原M完整baseline | P0-100；M-01准入或接受原方法、唯一operator窗 | 原1000/5000/1M/C20/10800s/80GiB/14×200/ready1M，raw+Go/runner/CLI+clock/resource/cleanup全终态；失败/缺观察保，不用S外推 |
+| RES-PERF-01｜shipping indexed_search热点 | P7-010/040、P10-020/030；原依赖保 | 真实S5.93/6.09s，同参数计划/资格前分页/冷热定位；产品改动另源等价安全，新M实际再判1s，不先取消阈值 |
+| RES-G0-01｜100后逐条G0评审 | P0-120；P0-100及原全部依赖 | S/M完整，必跑/目标红/未知分类、原PR交付条件逐条；不借局部绿/无新授权自动PR |
+| RES-RCV-01｜legacy unpin真实身份边界 | P2-020/030、P7-020；原P2-010等依赖保 | exactcaller/身份保存与丢失政策；正式HTTP/object/EOF负控与合法legacy正控，不全禁legacy或改永久政策讨绿 |
+| RES-RCV-02｜同字段完全重建incarnation fence | P2-020/030、P7-020；RCV-01设计/P0-060及原依赖 | 持久不可回退身份版本/升级兼容单owner，新ABA真PG/H/object/stream负控与合法重建正控；当前无schema不称已闭 |
+| RES-RCV-03｜received受影响集成fresh全prefix | P2-030/140；testdelta集成、原依赖保 | 唯一operator新freeze allprefixGo0/exactwait；保原deaGo1与206d2child，不重贴composed为full |
+| RES-INSPECT-01｜inspection父scope逐条覆盖 | P2-060/140；原P2-010/P1-030等依赖保 | 现10top25leaf仅新窄检查；所有入口/字段/必要审计/兼容reason/noeffects逐项，不靠静态test/operation数结案 |
+| RES-UI-01｜shipping服务到UI真实旅程 | P1-100/110/140、P2-130/140、P9-130；原依赖保 | Go+PG真实权限/recovery UI、多窗口409保draft、company切换/撤权/error清private；pure121/scopedtsc不browser |
+| RES-P1-EVENT-01｜global profile跨tenant event生产者 | P1-130、P7-070/080；原P1-100/110/120等依赖保 | 已有后续6top27leaf真PG/race，多tenant受众/requiredrollback窄证；不关P1-130/G7，global list/平台通知/SSE消费者拆为-02/-03/-04分别待验 |
+| RES-GATES-01｜新集成树完整门禁 | P1-140、P2-150、P6-160、P11-130；原全部依赖保 | freshfullGo/race/PG/H/protocol/契约/迁移/必跑、cleanNextcold、shippingbrowser+独立终审；其余P3–P11具名父项仍全保不聚合吸收 |
+
+下一可独占3项现更新为**RES-M-01、RES-RCV-01/02、RES-P1-EVENT-02/03/04**（后续B/fanout实际来源见末节）；完整写集/来源与验收见[本轮报告](R5-BOUNDED-INTEGRATION-20261002.md)。共享schema/DTO/中央状态串行owner协调；ownerless guard087849及旧P1/P6交付不重跑，待集成新问题才追加必要验证。修改后提醒Code-Index `refresh_index`，本轮不昂贵全树重建。
+
+
+### B01-AJ / B02-WIP：有界 B4k 与 global-profile fanout 后续交付（2026-10-02）
+
+- 本轮只集成作者必要原terminal/source/scope，A/旧passedPG/Go/Web/benchmark不重跑、不逐filehash、不改产品/原DATASETS、不提交/push/PR。实际父checkbox仍10/171；P0-100/120/G0/full父门禁不勾。前述“A时点lookahead未run/fanout生产者未验”保为历史，现以本段新actual为准，未观察最新WIP CLI/source不伪更新。
+- B controlled DIAGNOSTIC4k source32307 canonicalclosureSHA1（非Git）/closure7cfd，Go0、ready4000，exec42.801670/180s、native init→stop51.709025/300s。原AJSON原字节复制、A未重跑；aggregate/parameters/六actualstream精确等，timestamps/received-order/randomUUID/lease/protocolUID不全字段等。Store47.978513→38.957427s(-18.802%)只一次非同时A/B本地观测；A quota1652/7563+matchededges1844→B0/6301，B仍11其它lock rows，不零wait/wall0%，原S/M方法未换不登记S/M候选成功。首次A pin误GoJSONL97af而非AJSONb6e2，仅前置blocked无PG/Go/origin，不当执行RED。见[原Breview](evidence/R5-B01-AJ-STORE-DIAGNOSTIC-LOOKAHEAD-B-REVIEW.json)。
+- fanout sourceabea canonical/closurefc51，从B immutable+released2filedelta，仅新的global-profile生产者6top27leaf/32passevents实际raceGo0。原companyAudit主record1、actualaffectedtenants sortedunique events各三metadata、emptyglobal audit/noevent、local/noop/rawnowrite/CAS/required audit及event位置故障allrollback、current membership/busy/phantom实证；不是全HTTP/UI/平台通知/G7。见[原fanoutreview](evidence/R5-P1-GLOBAL-PROFILE-FANOUT-REVIEW.json)。
+- 新安全档38/14原payload；B剔CPUtrace/衍生pprof二进制，保hashedsamples/aggregate文本/A原JSON副本/终态/redactedenv；原tarhash只作者wrapper receipt，新safehash另列[后续交付清单](evidence/R5-BOUNDED-FOLLOWUP-DELIVERY-20261002.json)。无privateDSN/JWT/rawmail/objects/DB/fullsource；oldarchives不改。ownedPG/socket/caffeinate按实际作者terminal已清，不触旧资源。
+- inspection UI精确transcript-only chunks8f74a3RED/99bc57tracergreen/4fc235121+scopedtsc+lint0/685f6fscopedtsc/a3bacfdiff；contractc2b8b9RED/c4dc15PASS10/2a934eordinaryunmodified/4a6709diff/723cae矩阵127operations/index109单条五field。作者无persistentraw/report/log，不聊天伪raw、不再跑旧pass。received仍dea20fullGo1+206d仅2barriertestfix childGo0的53leaf **composed provenance**、HTTP4top实green/其它PG实green、canonical15overlayRED；不冒最新一次fullGo0，workspacelegacyunpin/完全同字段incarnation无schema残项保。
+
+#### Global-profile 消费者残余（各具名，不合桶验收）
+
+| 工单 | 原父项／依赖 | 验收 |
+|---|---|---|
+| RES-P1-EVENT-02｜global可见profile list | P1-010/030/090、P7-010；原依赖全保 | current跨tenant引用/选公司/readlist资格、super/admin/reader/key矩阵真PG/HTTP、分页total/metadata隐私，event受众正确不替list |
+| RES-P1-EVENT-03｜空受众平台通知政策 | P1-110/130、P7-070；原依赖全保 | 显式裁决emptyglobal是否平台invalidation及受众/UI刷新；若需实现窄payload与controlled证据，不全tenant广播/无event冒平台全验 |
+| RES-P1-EVENT-04｜真实SSE consumer | P7-080/090/100、P9-130；原依赖全保 | Go+PG真实SSE→UI重读，多tenant/profile/role切换、撤权、断线cursor/重放/重复事件最终一致且不扩权；生产者单PG不是多实例消费 |
+
+RES-M-01更新为**B到benchmark方法准入只读方案**：诊断B已有限绿，不原方法替换/tool admission；作者准备新methodfreeze/必要race工具/actualS与是否值得M的方案，未授权不改9e810、不新M/L、不以未观测当前CLI判绿。后续仍RES-M-02原M、RES-RCV-01/02/03、RES-UI-01/RES-GATES-01/RES-G0-01及原171全部scope保留。
+
+下一三独占：**RES-M-01方法方案、RES-RCV-01/02身份fence、RES-P1-EVENT-02/03/04消费者**。完整source/Evidence→Finding→Path与预算/政策边界见[后续有限报告](R5-BOUNDED-FOLLOWUP-20261002.md)。文档修改提醒Code-Index `refresh_index`，本次未昂贵全树重建。
+
+
+### B01-AJ / B02-WIP：显式新方法原S与profile可见性/native cold（2026-10-02）
+
+- root新批准显式opt-in B方法实现→独立review→fresh完整tool门禁→唯一一次原S；默认v1和原DATASETS9e810不改，METHOD独占writer为baseline_dispatch/lookahead_contract_validator，本证据owner只改中央TODO/benchmark/runs/有界交付。历史S/M失败/unknown不补字段，不重跑旧pass/整树filehash，父checkbox仍10/171、P0-100/120/G0与full171不勾。
+- 新source407428 canonicalclosureSHA1非Git、closure83a7、METHOD87c41/DATASETS9e810同source完整tool真Go0/strictCLI0：20/100/1000/ready1000、14×200/SQL20/7safety/actualscheduler/UIDcatalog/receivedprojection齐，六stream/aggregate/parameters等旧tool，不重复旧工具。之后同源原S100/500/100000/schema16/ready100000/14×200完整，Go/runner/strictCLI0，execution1377.669084/1800s、rawpkg1387.807s、独审runner1393.058s，原budget不减。见[原toolreview](evidence/R5-B01-AJ-LOOKAHEAD-TOOL-REVIEW.json)及[原Sreview](evidence/R5-B01-AJ-LOOKAHEAD-S-REVIEW.json)。
+- 原S actualscheduler100k permutation/FIFO/join0/buffer≤100/window20、PG真实UID列0/received100k400boxes违例0、5checkpoint/4actualjoined/terminal齐，RSS395558912/disk1892809751bytes、sameparamClaim20 at99980ready0.502ms/terminal100kempty0.303ms；原S3d07六streams/aggregate/parameters直接档比等。不全persistent/time/UUID/lease/protocolUID认证，旧source shipping SQL资格/分页不同，不能把oldsearch~6s→current16.251/15.802ms纯归因调度或认证M。S列表14.449/7.839ms只过300ms候选，relative10%仍未cert；Store×10=11731.872s>10800只风险非实测M失败下界/扩预算。
+- 新S独立只读review接受，result/go原hash缺项由executor只两已采文件一次boundedSHA新增[独立bindingreceipt](evidence/R5-B01-AJ-LOOKAHEAD-S-RESULT-BINDING.json)，原Sreview/tar不改。registry只追加第三独立S tuple；旧两S与failedM/M2 exactdict保，B4k仍diagnostic。新S87c41 frozen METHOD原bytes+archive methodselection argv/env/closure为history依据；current METHOD后续M可新digest，但不拿current文件误污染oldS，也不回填新SHA。
+- profilevisibility source5c879/closure32fc由abea+6releasedfiles，3必要servicepure/5leaf及4PG3HTTP/40leaf各raceGo0：currentglobal/platform/selectedtenant与local的正式readerport/failclosed、global引用不裸授normaladmin/reader、缺失/foreign/zero/Key拒绝、role/epoch/freeze变化、exactwriterPID真FORSHAREwait后fresh重核。此前fanout生产者PG与本次visibility消费者服务/PG/H分别source，不把10top45leaf数量当P1/G7全部。见[原visibilityreview](evidence/R5-P1-PROFILE-VISIBILITY-REVIEW.json)。
+- nativecold唯一实际sourcepin532a=HEAD587ba75 trackedweb+17dirty、runtime旧v2runner86645，Node22.23.2/npm10.9.8全fresh source/HOME/cache/emptyconfig原lock，npmci0(12.327s)+Nextbuild0(9.263s)，actualstandalone/static/BUILD_ID、wall22.306615<600/ownedgroupsabsent。仅Darwinarm64 sourcecold，不Go/PG/Docker/browser/G0。v2独审接受实际运行但generic hard600捕获/deadline及独立2scleanup风险未全证；后续baccc2候选9新增pure7+2PASS不贴oldruntime，tinyCLI1/machinePASS冲突原raw保，atomic8新候选未runtime。见[原coldreview](evidence/R5-NATIVE-NODE22-COLD-REVIEW.json)。
+- 新四档22/19/19/27原payload：visibility用作者clean包（已剔21AppleDouble），tool/S原Python tar无sidecars原封copy；cold原7ce包也有AppleDouble，仅剔sidecars新safewrapper分hash，22regular payload原字节不改。无privateDSN/JWT/rawmail/objects/DB/CPUtrace/pprof/fullsource/node_modules/.next/HOMEcache，原hash沿作者receipt，未每file重hash。见[最新交付清单](evidence/R5-OPTIN-S-COLD-DELIVERY-20261002.json)。本轮nativeowned资源真cleanup，无signal旧资源；无commit/push/PR/deploy。
+
+#### 当前必要后续（具名，不能据prepared勾父项）
+
+| 工单 | 原父项/依赖 | 状态与验收 |
+|---|---|---|
+| RES-M-03｜新M条件准入 | P0-100；本次selectedS已有限交付，新M targets+全新独审 | root仅条件批准：新allowedscale METHOD/hash/source、最小Go/runner/METHOD目标全绿+全新独审后，soleoperator才原1000/5000/1M/C20/10800s/80GiB/14×200/ready1M/fullterminal。current d286 METHOD/4newtarget已prepared/purePASS，新Go/runtime/独审未cert；M未启动/L拒，不旧S87c直接开M |
+| RES-SSE-TRANSPORT-01｜actualflush权限frame窗口 | P7-080/090/100、P9-130；原依赖保 | read→release批鉴权到flush静态blocker正修singleframe FORSHARE+actualFlush+2sdeadline，新target未runtime；DB锁等待/慢writer/实际flush/撤权fault拒无泄露/无ownedgroup泄漏须新独占短窗，不纯sourcePASS |
+| RES-P1-EVENT-04｜consumer真实刷新/EOF | P7-080/090/100、P9-130；原依赖保 | consumer29含EOF/actualrefresh3新增prepared，fakeclock反例在修非PASS；newtransport配套真实SSE→UI读资格/断线cursor/replay与多tenant边界后才验，原producer/visibility局部绿不替 |
+| RES-COLD-02｜terminalatomic/hard600一致拒 | P11-130、P9-130；新source独审与原依赖保 | actualtinyCLI1/machinePASS原反例不能覆盖；atomic8候选待必要newtargets/真实最小CLI，capture/main绝对origin/remainingcleanup/unknown不absence，不能old22秒PASS贴newrunner |
+| RES-BROWSER-01｜shipping实际浏览器 | P9-130、P11-130；standalone/Go/PG资格及原依赖保 | 7pure仅frozen532a旧UIqualification，新独审threadlimit可阻，实际browser未run；不能dev/mock/Nextsourcebuild冒shipping |
+
+新S方法子层交付不等RES-M-02/P0-100、RES-G0-01；RES-P1-EVENT-02visibility窄层已有实际证，-03平台空受众通知政策与-04transport/consumer仍开；RES-RCV-01/02/03（legacy/incarnation/composed≠singlefreshfull）、RES-GATES-01和原171余scope全保。
+
+下一三独占为**RES-M-03新M条件准入、RES-P1-EVENT-04/RES-SSE-TRANSPORT-01必要sole短窗、RES-COLD-02terminalatomic验收**。精确Evidence→Finding→Path/source/历史方法归属见[最新报告](R5-OPTIN-S-COLD-INTEGRATION-20261002.md)。文档修改后执行Code-Index refresh_index（只文件索引，不deepbuild）；主线程不复跑已交pass。
+
+
+### B02-WIP / B01-AJ：consumer、transport与coldatomic新增实际短窗（2026-10-02）
+
+- 仅新作者原raw/selector/source/终态集成，不复跑测试/validator或每filehash。前述“prepared非PASS”是当时状态，现按本段新actual分层；不改原history/失败/unknown，不勾父项，实际checkbox仍10/171。M只有prepared，受新agent threadlimit全新独审阻，未run；currentMETHOD不污染S4074/87c，L拒。
+- consumer basecold532a+7capturednewfiles，首whole29=16PASS+13SidebarProvider fixtureFAIL/CLI1/5.219s原raw保；testdd8515→18fd仅12renders真实provider包装(13leaf)，生产/expect/clock不改，sole exact13 CLI0/13PASS/3.429s，14registered中1个先前PASS permissioneditorcase显式filterexclude，不必跑skip。首16未复，29unique各有actualPASS来源 **composed，不latestwhole29exit0**。EOF/actualrefresh3/dirtyCAS/scopeeviction为组件ReadableStream线控，非GoPGactualSSE/browser。见[原consumerreview](evidence/R5-COMPANY-EVENT-CONSUMER-REVIEW.json)。
+- transport firstsourcea9e8/closure15b4 pure17/Go0+PGscope/fence4pass，初HTTPtop原combinedGo1/FAIL保（未消费全initial合法precommit帧oracle不成立，不冒productRED）。newsourcebc8234/closurecceb仅APItestbf38严格修，soleHTTPtop-raceGo0/test2.35s/pkg4.457s，initial15帧→末syntheticbarrier→formaldemotecommit→freshsuperConfigureCompany唯一原marker→oldEOF拒任新帧/freshcurrentexactmarker正控过。合4top23leaf **分source组合，不新whole4统一exit0**，oldpure/PG不复、生产不改。source receipt oldvisibilitynames仅包装meta纠正+保origcopy，不files/label/raw假改。新PG4570stop0/DB0conn0/PIDsocket/ownedgroupsabsent。见[原transportreview](evidence/R5-COMPANY-EVENT-TRANSPORT-REVIEW.json)。
+- coldlatest有效v2 runnerb4db8/tests02185首次8newmockfixtures PASS4.925s/controller5.028<10/CLI0，raw/两source/cmd/exit/ownedgroupabsent，独审接受仅guard adversarial资格；不Node/npm/Go/PG/Next/browser/newactualcold。parser前guard/noabbrev/fullreceipt后唯一atomicpublish/BaseExceptionrevoke/workexpiry与hardremainingboundedfailure可测；SIGKILL/不可恢复OS不保证Python必有终态，仍需outerexit0+controllercompleteproof。原baccc2 tinyCLI1/machinePASS真反例[原review](evidence/R5-COLD-TERMINAL-COUNTEREXAMPLE-REVIEW.json)保，旧candidate9pass和native22s runner86645/source532a分层不回贴新b4db8。见[原coldatomicreview](evidence/R5-COLD-ATOMIC8-REVIEW.json)与[作者final](evidence/R5-COLD-ATOMIC8-FINAL-DELIVERY.json)。
+- 新安全档18/34/7选中原payload字节保；consumer原failedtest源码含Bearer-shaped fixture literal，预防性不公开该source，原件私有保且source-delta/failed/repair raw全保；transport剔ownedserverpostgres.log避query/params，其余selector/raw/exit/closure/cleanup原样；cold原safe包直接copy。原wrapperhash和新safehash分列[交付清单](evidence/R5-EVENT-COLDATOMIC-DELIVERY-20261002.json)，不privateDSN/JWT/rawmail/objects/DB/CPUtrace/fullsource/dependencies上仓。旧archive/registry三S与failedM2 dict不变。无commit/push/PR/deploy。
+
+#### 新增具名剩余（有限子层已交不等父完成）
+
+| 工单 | 原父项/依赖 | 精确验收 |
+|---|---|---|
+| RES-EVENT-UI-CHAIN-01｜真实端到端UI链 | P7-100/130、P9-130；当前consumer/transport子层+原父依赖 | actualGo+PG/companyevents→shippingstandalone UI，company/role/epoch/freeze/EOF/refresh/late403、draft保留与privateeviction；29组件与单HTTPtop不替同次browser |
+| RES-EVENT-PERIODIC-01｜25s/retention/提交倒序 | P7-090/100；原依赖保 | 真25s周期与长期撤权、retention/cursor倒序/断线缺口resync；模拟clock/2sframe不是长期runtime |
+| RES-EVENT-MULTIINSTANCE-01｜claim/ackloss跨实例 | P7-080/130；原依赖保 | 两实例互斥/ackloss重复恢复/cursor切换与tenant隐私，单进程PGHTTP不认证多实例 |
+| RES-EVENT-CAPACITY-01｜outbox index/capacity | P7-060、P10-020/060；原依赖保 | 冻结源真实queryplan/索引/积压/前台影响，mailsearch和indexClaim20不是event读容量 |
+| RES-COLD-03｜当前受影响源码真实cold | P11-130、P9-130；newguard/currentwebsource独审与原依赖 | b4db8只有新mock资格；新consumer/UI source无最新cold/standalone/Docker/browser实际证，不能把旧532a/86645 actual22s贴新源 |
+
+RES-P1-EVENT-04组件、RES-SSE-TRANSPORT-01窄U/D/H、RES-COLD-02新guardmock子层已有限交付；RES-P1-EVENT-03平台无受众policy仍待。RES-M-03/02、RES-RCV-01/02/03、RES-GATES-01/RES-G0-01与原171各scope全保，不合桶吸收或删除未完成增进度。下一三独占**RES-EVENT-UI-CHAIN-01、RES-EVENT-PERIODIC-01、RES-COLD-03**，M独审threadlimit保持真实阻塞不继承旧审绕过。
+
+准确Evidence→Finding→Path/source/selector/分层FAIL/原cold边界见[最新报告](R5-EVENT-COLDATOMIC-INTEGRATION-20261002.md)。修改后Code-Index仅refresh_index，不deepbuild；root不重复已交通过命令。
+
+
+### 官方CI维护：132真实路由/14dep与分源失败保留（2026-10-02）
+
+- 正式fullGo原source2aa9/504dep prepost相等，default./...race Go1/7fail events/5簇/51pkg终态，295.936<1200，original247/current773两classifier1；build/vet/httpcontract/contractdrift各0及official4真实负验独立保，不局部洗full。原PG已停，但tm_test_94902cbe残余DB0connections不假DB0。见[原full失败review](evidence/R5-CURRENT-DIRTY-FULLGO-FAILED-REVIEW.json)与[133安全payload档](evidence/R5-CURRENT-DIRTY-FULLGO-FAILED-LOGS.tar.gz)。
+- 132matrix真实缺5=4P1+managementSSE；独立AST mapping旧127 method/path/handler/mid/conditions/source不变/extra0。文档owner完整新增request/response/auth/resource/version/audit/TODO，6受影响旧P1语义依source CAS/409退出/list更新，Create当时仍legacypool非fresh/audit，existinginspection边界不扩大。正式文件R5-API-MATRIX.md+JSON，不是不存在OPERATION文件，不改/放宽checker；frozen两doc→sole^TestR5RouteInventory$真实Go0。OpenAPI作者仅SSE3专用schemas+4newtarget prepared，旧profilequota int64/int32差异不吸收。见[132integration](evidence/R5-API-MATRIX-132-INTEGRATION-20261002.json)。
+- newshortsource5d1b/23delta+14原字节直接safe refs，api-null/goose16/received2/fixtures2/route132五簇affectedGo都0；不复default旧green。protocolexplicitmanifest644接头合法accepted且真跑19taggedPG，但legacy409/retention/BCC等FAIL仍1，原nonGit128修不fakeHEAD。registry21已补files，sole21失败setUp现在KeyError review['archive'] line472，真实CLI1/21errors，不产品RED/不PASS，不给旧authorreview伪补archive字段。见[cutoffreview](evidence/R5-M-PRE-CUTOFF-REVIEW.json)/[50原payload档](evidence/R5-M-PRE-CUTOFF-LOGS.tar.gz)/[14exactrefs](evidence/R5-BENCHMARK-REQUIRED-ARTIFACT-CLOSURE-20261002.json)。
+- sole一次静态cmd/r5txinventory exit0 raw802eb7，snapshot当时380PGfunc=352旧+28新，14真实body变/47仅位置变/0删。P1owner20、transport2、principalNone1、inspection1共24新函数具名source/effect map，received4仍待；callername非dispatch、arbitrarycallback effect未知保持具名。官方coverage/catalog仍未final，不换hash假unknown0。migration16三trigger明确ONtable、sequence/FK/noaction/rollbackgap/Down边界；提取器child_context末ALTER继承局限分列，旧catalog真15/7不能静改16/10。见[当前snapshot map](evidence/R5-TRANSACTION-CURRENT-SNAPSHOT-REVIEW-20261002.json)。
+- root后授权later guarded ProfileCreate新family当前source签署/targetsprepared（portnilpurecase补中），不在旧AST802/M8529，不给已审绿；legacyCreate保低层但formal新port禁止fallback、global空audience仍仅required主audit/合法tenantanchor、不假outboxsuccess，tenant-scoped需同Txaudit/outbox，平台无受众通知政策仍开。需owner新map/新AST/current16actualcatalog/必要target后才覆盖新source，不能旧132 sourcefreeze语义直接冒current全合。
+- M前cutoff清理PG45525stop0/DB0/PIDsocketabsent与fullfailed残余DB边界分开。旧M threadlimit条件已变化：全新独审可推进且root已授stable8529/d286唯一M原10800s/80GiB，截止cutoff receipt未start，实际Mstart/result另接，不改S87/旧M2unknown、不L。后source/metadataWIP不混immutableM。
+
+#### CI具名未闭与依赖
+
+| 工单 | 依赖/验收 |
+|---|---|
+| RES-REGISTRY-FIXTURE-01 | 14artifactdep真实修后，owner按原row/archive/review/sidecar形状支持且强tuple验证；原review不造archive/oldcanonicalproof，candidateadapter32targets待全新独审/soleM后实际，不21已PASS |
+| RES-TX-CURRENT-01 | 每new/bodychanged family owner具体review（unknown具名保）+laterCreate release后freshAST→合法classify/migration/4assertions/caller及sourceFKtriggermetadata；官方current未final，不只hash换成PASS |
+| RES-TX-CATALOG16-01 | M后freshowned officialNew/Migrate current16实际FK/trigger/functiondefs/checks/sequence/source/Goose/cleanup provenance，新catalog文件保旧15history，不静填10触发器 |
+| RES-PROTOCOL-CURRENT-01 | manifestGitless接头已真通，19PG真实FAIL对齐currentpolicy/fixture，精确expectedtarget/red与未知不混；nonGit128不是产品RED，不能入口修等于taggreen |
+| RES-CI-FULL-FRESH-01 | 5affected0只是局部；全部正式CI缺口合并后稳定source唯一freshwholeGo/classifiers/phase，原full2aa9Go1不洗 |
+| RES-API-QUOTA32-01 | profilequota OpenAPI int64和实际DBint32边界/外部兼容精确裁决，4SSEstatic不覆盖全schema |
+| RES-PROFILE-CREATE-01 | 新guarded create sourcefamily/freshanchor/revision/audit/outbox/globalempty/role/key/nilport全部必要actual；newcreate不旧802/Msource，legacy低层与formalnoFallback分离 |
+
+原SSE长期/多实例/事件capacity/平台通知、当前cold、实际GoPG→shippingbrowser、receivedlegacy/incarnation和原171其余scope全保。Browser新driver746d4bd/test02e510仅late2newpure actualPASS/controller0.221409s、全新独审限定签署；旧7不同source不拼9，actualbrowser尚未执行，frozen532a/UI-only≤180s也不P9fullshippingchain。
+
+本轮新FULL安全档133payload排CIYAML/源码diff的credential/rawcontent形状，cutoff50原safe包copy；旧raw/source/archive不覆，未复tests/validator/每filehash，no私DSN/JWT/mail/object/DB/CPUtrace/fullsource上传，无commit/push/PR/deploy。父checkbox保持10/171，P0/G0/full未绿。详细链与source时点见[本轮维护报告](R5-CI-132-DEPENDENCY-MAINTENANCE-20261002.md)，修改后仅Code-Index refresh。
+
+
+### 原M真实absolute timeout与M后首schema17（2026-10-02）
+
+- 唯一原M source8529007132f1d61a2571e43aaabfe15b8452baa1/closure49d04、METHODd286/DATA9e810/schema16 freeze前后相等，原requested1000/5000/1M/C20/pool24/10800s/80GiB不变。actualabsolute到10800.004052s，ownedGo父wait观察-15（SIGTERM，不GoJSONFAIL1/PASS0），runner1/strictrejected/noresult/noGoTestterminal，0workloads。SQLstored753380/docs+sourceboundready753360/processing20、5000mailboxes、1000employees+2admins=1002users；不是1Mbaseline/性能候选结果。见[原Mreview](evidence/R5-B01-AJ-M-ABSOLUTE-TIMEOUT-REVIEW.json)/[34原payload档](evidence/R5-B01-AJ-M-ABSOLUTE-TIMEOUT-LOGS.tar.gz)。
+- 原raw14:47:28.938305(+08)先报parser admission requires remaining>31s/context deadline，parent14:47:53.594719绝对限SIGTERM；不能称“直到deadline无失败”。TERMINAL命名实际phasebefore_claim、producerfalse/finalemptyfalse/defaultsqlready0非finalSQL，worker/parserjoin0/quiescenttrue/minstartremain31.166936只是已started join，不完成producer/1M。GoTempDir大清理随后被watchdog截，privatepartial DB tm_benchmark_7f0de3284219及object树保在已停Root，不DB0/objectgone；PG56228/assertion56215/Go56516/runner56512/allknownsocketgroup真absent/nativeStop0、不触外部。
+- 新M独立只读裁决ACCEPTED_AS_ACTUAL_FAILED_ATTEMPT_ONLY，非baseline/非p95目标红/非已证infra故障，currentgenericSadapter typedMfailed准入仍pending。原executor review7个actualclaim null为摘要漏项，原GoOutput有相邻sameparameter checkpoint/ACTUAL_CLAIM_JOINED，ready20/1k/10k/100k/250k/500k/750k实际Claim20分别0.000600/0.000544/0.000830/0.000625/0.003775/0.008557/0.009925s；不EXPLAIN或precedingclaim替代，不1M容量。只读[纠正旁证](evidence/R5-B01-AJ-M-ABSOLUTE-TIMEOUT-READONLY-CORRECTIONS.json)保原review/tar字节，不重Go/hash。registry只追加新failed_attempt，旧三S与三failed dict不改，M_attemptedtrue/M_executedfalse无成功M，oldM2null不被-15覆盖，Mretry未授/Lfalse。
+- M后首newsource7ffe/schema17：defaultcompile/build0仅no-tests资格，B5 actual5top12leaf14pass-race0，真空17/旧populated16→17upgrade及trustedbounded backfill，保recipient不可变/atomic、jobledger清后资产完整、currentread/期限/等锁截止负控。firstURI uppercasebase折叠infraGo1原raw保，修actualownedlowercasebase后必要B5真0，不productRED/不源码预期修改。guardedProfileCreate actualpure7top35leaf39pass0、PG8+HTTP5 top45leaf51pass0，批准source7pins匹配、freshscope/role/key/session/anchor/zone/revision/requiredauditoutbox/nilport/nilreturned禁止fallback实证；global空audience只required主audit不捏tenant事件，platform全局通知仍未闭。见[首17review](evidence/R5-FIRST-SCHEMA17-B5-PROFILECREATE-REVIEW.json)。
+- 新PG80633stop0/DB0conn0/PIDsocketabsent仅current17窗口，oldM16残Root未碰。首17安全档46原payload剔private serverlog，其余原raw/URIinfraFAIL与newtarget保，原wrapperhash/新safehash分列[交付清单](evidence/R5-FIRST-SCHEMA17-B5-PROFILECREATE-DELIVERY.json)。currentAPI矩阵POSTcreate单行按new7ffe guarded语义更新，原5d1blegacy/Create非fresh事实留[旧/新独立记录](evidence/R5-API-PROFILECREATE-GUARDED-UPDATE-20261002.json)，原route132target不回贴新create，ordinaryDTO/BCC OAS owner尚未唤醒实scopegap，不能132count/SSEschema假同步。
+
+#### 新M失败后的精确未闭
+
+| 工单 | 依赖与验收 |
+|---|---|
+| RES-M-PREP-BUDGET-01 | actual753k准备预算fail后新批准短诊断/方案；不关Store/parser/durability/safety，不放宽原population/budget，method变更新freeze/独审/必要toolS，未授权不blind3h retry |
+| RES-M-TERMINAL-CLEANUP-01 | workerjoin与大GoTempDir删除分层，有界stop/观察、private失败树保，不无证rm或写allremoved |
+| RES-REGISTRY-M-FAILVARIANT-01 | 新Mtypedknownreview专属identity/raw/exit/timeout/argv/env/preflight/postproof/partialSQL/cleanup严格验，缺result/GoJSONterminal保，不Sadapter泛吞future错误；分类accepted≠strictadmissiongreen |
+| RES-OPENAPI-ORDINARY-BCC-01 | A普通receipt+B长期recipient actualpolicy/DTO/未知来源→独占OAS/TS/真实response；ownerthreadlimit分支未开始实scope缺，不已同步 |
+| RES-TX-CURRENT-CATALOG17-01 | laterCreate/B5/migration17不旧AST802/catalog15/M16；owner分类+freshAST+currentactualcatalog/SQL/provenance，unknown具名不归零/hash-onlyPASS |
+| RES-CI-CURRENT17-FRESH-01 | oldfull2aa9Go1/shortfix局部0/当前17selected0分source；prepared各family必要actual合并后稳定source完整formalCI/roles/cold/browser另验 |
+
+M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-PREPARED-SOURCE-QUEUE-20261002.json)：Restoreactual2pin ddce/e5b（compiletranscriptonly）、GC7top9leaf、Lifecycle新11top42leaf旧HOLD不回贴、P5DraftWriter41、P6checkpoint7、registry候选34+CLI、新A22+5source/独立consumer、B5（现已此7ffeactual）、UI12+page独立delta与ordinaryOAS缺；只有各family收到source/command/raw/exit/cleanup新receipt才升层，不prepared总PASS/unknown0，不重复旧绿/每filehash。当前ProfileCreate/B5 actual更新单列，其它仍sourceprepared。
+
+详细Evidence→Finding→Path、partial状态不删与独审补正文见[原M失败报告](R5-M-ABSOLUTE-TIMEOUT-20261002.md)、[M后首17报告](R5-POST-M-FIRST-SCHEMA17-PROFILECREATE-20261002.md)。本轮未GoPG/validator重跑、未每filehash、无发布；父10/171与P0-100/120/G0全保，原171余scope不取消。文档后只Code-Index文件refresh。
+
+
+### M后product4与Node滚动实际子层、叶级完整性裁决（2026-10-02）
+
+- 继续前已只读核无product4半写档，未覆盖unknown dirty；没有model切换、产品测试/hash重跑。sole7ffe88737b4b846ad96978b2a69a105caccf3914/closure567f05实际officialNew17与8signedpin同，Restore5top30leaf35pass、GC7/9/10、Offboarding11/42/47、P6green7/15/19，合30top96leaf111pass全部raceGo0/0fail/skip/missing。fullcompile/build0仅继承没复，不当fullCI。见[product4原review](evidence/R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-REVIEW.json)/[120原payload](evidence/R5-PRODUCT4-RESTORE-GC-LIFECYCLE-P6-LOGS.tar.gz)。
+- 新全独立remaining_gate_dispatch_audit逐raw/source复核签BOUNDED_RUNTIME_PASS，本族无source/raw blocker。P6productiononly canonicaloverlay0911原Go1真对拍：19nodes6PASS13FAIL，15leaf5PASS10FAIL，7top2PASS5FAIL，不9failedleaf；只是shippingdeliverRecipients+FakeStore屏障，不PGdurable/SMTP。两bootstrap ConnMaxLifetime0 infra1=0产品tests，各原raw+cleanup保，改executor300s后actual，源码/预期没改。三ownedPG均stop/PIDsocketgone、最终92502/schema17/tempDB空；旧M16partial残Root未碰。
+- root允许真满scope叶合法勾，本轮未机械锁10；独审逐原TODO核无一可仅此包新增完成：P3-030 received技术有证但010/020政策历史迁移未验；040缺sentrestore/旧restorefirst期限；060缺多附件逆序/finish/consume/transfer全引用竞争；070第101/allprotected/logical100有证但physicalscan不是100cap且050/060未闭；080缺21tenant/restart/multiscanner；090无commitunknown/真实objectdelete全链。P4-030缺020可靠legacy/unique事实，040/050/060缺allqueue/key/grant rollbackseed/samecount资产替换/双管理员lostresponse/legacy一步completion，100/110全reentry/harddelete未验。P6-060缺PGcheckpoint/realsmtp250取消/lease变/workerrestart不重发。详[叶级裁决](evidence/R5-PRODUCT4-BOUNDED-VERDICT-TODO-ASSESSMENT-20261002.json)，因此具体缺证下仍10/171，不111数量勾父。
+- Node新独立窗source d6bd8/closuref703、187ordinarywebfiles+15signedpins、原lockprivate模块reuse非newcold：P5oldproductionwriteroverlay41=27PASS14REDCLI1→current41PASSCLI0；receipt-types35=34PASS1productionTDZFAIL(headers143)，consumer19PASS，两file初whole54 CLI1保，不fixtureFAIL。page仅3signeddescribe8PASS，另3oldfiltered不exec。新TDZ onlyprod/test454db/d2e、sourcef00be/closure595b，exactsafeheader+原rejectleaf2PASSCLI0/.731932s，34filtered不复53/page8/P5；原whole54不改/newwholefile36或54没跑，不完整UI/API/GoPG/SMTP/browser。全部4Nodegroups与repairgroupgone。见[Node原review](evidence/R5-NODE-P5-RECEIPT-UI-INITIAL-REVIEW.json)/[TDZonly2原review](evidence/R5-RECEIPT-TDZ-REPAIR2-REVIEW.json)。
+- product4/Node/TDZ原安全档120/36/11 payload直接copy/hash沿作者receipt，原P6RED/infra/NodeTDZfail全保，不objects/DB/DSN/JWT/mail/CPUtrace/modules/source树上仓；无perfilehash或重tests，原Mfailed/full2aa9字典不洗，无commit/push/PR/deploy。
+
+#### 此批真实剩余（不静态unknown0或scope缩减）
+
+| 工单 | 依赖与验收 |
+|---|---|
+| RES-PRODUCT4-FORMAL-SCOPE-01 | 按独审逐原P3/P4缺项补政策/历史迁移/完整引用建立竞争/21tenant公平/commit与对象删全链/asset与queuekeygrant/双管理员失答/legacycompletion等；已有bounded技术别反复测 |
+| RES-P6-DURABLE-SMTP-01 | P6-050/060原scope真实PGcheckpoint/250回复取消/lease/workerrestart无重发；FakeStore不能代durable或SMTP |
+| RES-NODE-CURRENT-CHAIN-01 | P5单file41和TDZonly2不同source层，稳定currentUI/API/GoPG/shipping/当前cold必要；原whole54CLI1不假latestfullgreen |
+| RES-OPENAPI-ORDINARY-BCC-01 | actualordinary/BCC DTO与policy→formalOAS/TS/wire验证，132/SSEschema不假同步 |
+| RES-TX-CURRENT-CATALOG17/PROTOCOL/CI-FRESH | 当前newfamilyAST与actual17catalog、protocol/typedMfailedadmission、currentsecure/fullCI仍缺，原15/802/full2aa9不充当新sourceallPASS |
+
+最新Evidence→Finding→Path与全scope叶裁决见[product4/Node有界报告](R5-PRODUCT4-NODE-BOUNDED-INTEGRATION-20261002.md)。原171与P0/G0/full门禁保，M无validbaseline/retry/L，资源清理只归各owned新窗。文档后仅Code-Index refresh，不deepbuild。
+
+### 追加GC18、receipt/OAS与registry实际层（2026-10-02，替代此前同名“待实采”状态，不覆盖历史源）
+
+- 当前catalog已有**独立新文件**：1a15实际17（50tables/75FK/11triggers）及cb03实际18（51tables/75FK/11triggers）；旧15/16/17 JSON与M852900/schema16不升级回贴。GC18 sole15top/21leaf/24racePASS、pkg22.846s/原600窗36.043427s；新全独立审bounded通过，稳定eligible集ceil(N/20)、中断只推进尝试前缀，无限新租户不固定轮数、logical20/100不物理scan上限。
+- GC helper-entry仅两test delta/source9f58、4top9leaf11PASS/0skip/pkg14.302s，不复GC12/三head；首次controller NameError0产品test清理保。原137.106437s是清理前receipt时间，独立后置原postcheck137.262806s/outer137.263358s均原600内；原raw/tar不改，另纠正。GC18原test-only继承字段另纠为三production delta，不旧7ffe绿。两窗DB空+stop0/PIDsocketgone有证，无独立停库前conn0查询不写已观测。
+- A初8aea whole24top81leaf6FAIL/CLI1保；新f759仅两testfixture delta，exact3top6leaf8events race0，production未改，不latestwhole81green。ordinaryOAS8bff新exporter1 race0+Python8 wirePASS，21typed+shipping envelope实导，capabilities构造不PGHTTP授权；schema→formalentry/alias/genericchecker仍具名门禁。UIstatus66618只有新leaf1PASS/CLI0，36filtered不执行；falseContent2仍prepared，非当前wholeUI通过。
+- Registry34原requested34只13exec=12PASS+1ERROR，21classsetup未exec/realCLI1保。S3d/4074 rowelapsed分别1518.898014/1377.669084源绑定result execution wall，Go PASS1528.68/1386.62不同scope，旧row/raw不改；M原archive0ab842与registry失败档27fe12无repack关系。新明确授权tinyrunner/test最后cf156af9/79b3d443，13typedM机器摘要及completionflags/packageclock严格绑定，3mutation组保原25方法；原全新独审SOURCE PASS、AST/diff0，仅source准入，sole25+CLI尚待raw不写green。
+
+| 新精确活动工单 | 依赖与验收（旧局部通过不重跑） |
+|---|---|
+| RES-P3-080-DEPENDENCY-01 | 新GC18公平技术层与原P3-070/P3-050/060依赖分开；依原完整叶scope审21+tenant/重启/持续写/多scanner/规定轮数，前置完整引用竞争与扫描界不悄删，不以15数量关P3 |
+| RES-TX-CURRENT-INVENTORY-01 | 新18actualcatalog已取得；新Create/B5/GC18/received叶等owner逐族source/Tx/锁/callback/FK-trigger分类→fresh AST→合法currentcoverage；旧802/15coverage不能hash-onlyunknown0 |
+| RES-REGISTRY-CLOCK-TYPED-M-01 | 最后cf156/79b SOURCE准入→sole原25+realCLI新实际exit/raw/cleanup；不把未来schema/type泛豁免，不造M缺失result/Go terminal；原failed M不有效baseline |
+| RES-CONTRACT-CURRENT-ENTRY-01 | ordinary新schema→精确formaloperation与source-alias→新static/checker实际验证；ordinary metadata/currentcontent/inspection隔离，typed wire fixture不代真实API鉴权 |
+| RES-UI-FALSECONTENT-01 | status1actual与TDZ2/初whole54不同source保；新falseContent2只prepared，需独立准入/sole新target及后续真实server/browser/current链，不伪最新全filegreen |
+| RES-CI-CURRENT-FRESH-01 | 原full2aa9 FAILED、protocol/A/registry/Node原fails与partialfix分层；稳定current完整formalCI、secure roles/tenant、shipping cold/browser及P6 PGSMTP另实际验收，不把catalog/typedfixture合成父绿 |
+
+细节与七原安全档见[本次追加报告](R5-GC18-RECEIPT-OAS-REGISTRY-INTEGRATION-20261002.md)及[交付](evidence/R5-GC18-RECEIPT-OAS-REGISTRY-DELIVERY-20261002.json)。原171 scope不缩减；实际仍10勾，父P0/G0/freshCI不关；无产品重测、全filehash、commit/push/PR/deploy。
+
+**Registry25随后实际尝试（不覆盖上方SOURCE时点）：** source9b777bea/cdc39ed仅4exec=2PASS/2ERROR、Registry21 setupERROR未exec/CLI1；capture漏row真实readonly_reporting_corrections，分类inputincomplete而非产品RED，原e64871档保。6252B原corrections存在/source852900/rawM-goJSON绑定，root显式单file boundedSHA d98be876…交sole；只补声明key输入closure/freshcapture，不改runner/test/旧rows，后仅23affected+CLI，不复新2PASS/旧12PASS。原M/fullCI/10/171结论不变，见[精确依赖receipt](evidence/R5-REGISTRY-CORRECTIONS-DEPENDENCY-RECEIPT-20261002.json)。
+
+### Registry已知版本adapter有限完成；alias/UI仍按实际层（2026-10-02）
+
+- 原全新reader实际终审接受3windows composed25uniquePASS/0missingextra/duplicate：原25窗口2P/2ERROR+21setup未exec→depfix23窗口22P/1缺migrations ERROR且realCLI0→only1实际PASS/.276173s含capturecleanup≤180。common cf156/79b与三manifest共同项不变，28→29只加原corrections→47只加18actual SQL静态输入，没运行SQL/改rows/旧review。depfix23 origin Path遮蔽TypeError导致aggregate clock UNKNOWN保，phase原raw/childexit不改，不singlefresh25exit0。
+- **合规关闭RES-REGISTRY-CLOCK-TYPED-M-01及RES-REGISTRY-M-FAILVARIANT-01的已知三S/唯一852900-d286-schema16失败adapter和原25目标子scope**；不是M有效baseline、futuremethod泛豁免、wholeCI/P0/G0或原171叶完成。真实CLI0只接受3S + known FAILED M且baseline/task/productfalse。详[有限闭合报告](R5-REGISTRY-COMPOSED-ALIAS-UI-INTEGRATION-20261002.md)。
+- Alias sourceccd389/010b new43方法全P、affected3=1P2FAIL，actual46exec44P2F/0skip/CLI1，realcheckerCLI1仍25drifts；工具反例绿非repo合同绿。TS13files typed诊断待实际修，Stats[]AuditEntry新writercapacity两次拒未实现，三source映射patch由独占owner处理，OAS required不削弱讨绿。
+- UI falseContent source3d2217/8e9cb三签delta，仅2exactleaf PASS/CLI0/1.863821s、47filtered未exec；只invalid wire failclosed，不真实撤权/期限/最新wholefile绿，独审续待其实际结论。原TDZ/status/whole54来源保；nodegroupgone/no服务。
+
+| 当前活动工单 | 明确依赖与验收 |
+|---|---|
+| RES-CONTRACT-CURRENT-ENTRY-01 | TS13file生产typed修复+alias三正式mapping+实际affected/static/realchecker，不OAS required降级 |
+| RES-STATS-AUDITENTRY-PROJECTION-01 | 新owner容量目前blocked，真实安全[]AuditEntry→专用DTO投影→新target；未实施不假派 |
+| RES-TX-CURRENT-INVENTORY-01 | new18实际catalog不代currentAST/owner族Tx/FK-trigger/callback/caller分类与coverage，未知逐名不归零 |
+| RES-CI-CURRENT-FRESH-01 | current18完整sourcecapture已获授但尚未wholeGo结果，原full2aa9 FAIL保；secure roles/shippingcold/browser/P6 PGSMTP另门禁，不合partial绿 |
+
+原171完整范围/10已勾与M失败保，不新validbaseline/retry/L，无产品重测或发布。
+
+**WireSplit首版随后实际施工诊断：** source1c976/cc079、194inputs/13pins/5既有generated ambient provenance，CLI2/27diagnostics=10 stale .next/dev路由validator missing+17真实TS consumer/test shape错误，原180s窗5.167697s/Nodegroupgone。不是SOURCE绿或全generated噪声，writer持原stdout仅修其owned生产/必要测试类型，不ignore/削OAS；current18 backendfullsourcecapture独立不被此diagnostic虚阻。详[诊断原review](evidence/R5-WIRE-SPLIT-FIRST-TYPECHECK-DIAGNOSTIC-REVIEW.json)。
+
+### Current18整个backend真实FAIL与后续限定修验（2026-10-02）
+
+- **最新整个backend实际Go1，不再只“待fullGo”：** dfb054d/3c5d999、724真实deps source前后等；实际AST863声明top/862required/51pkg，7425run7416P6F1合法BrowserSkip及2无terminal；全部51pkg有terminal、outer313.629729s≤1200。PGpackage180.682s包累计到限，当时Invite/invite-first只~1s，206该source top未start，不证Invite死锁，不延180/自动补尾。fail：HTTPContract缺SSE200capture、两legacyreceipt fixture、PG旧receiptshape、Goose18旧want17。old247/current862 classifier均1，missing181/445含failedpkg效应不全“未执行”。PG16851stop0/PIDsocketgone/allGohelperminiredisgroupgone；残tm_test_6e4584f9观察0conn保stopped root，不DB0。Stats后cut不回贴此源。
+- Stats新fc7c7c/f0cfe限定app3top5leaf6P+handler2top6leaf7P=5top11leaf13raceP，原new独审bounded接受：audit []值数组/空[]/nilentryfailclosed及handler/独立缺身份guard，不fullrouter矩阵/全store阻断/嵌套深拷贝。原“Stats尚未实施”仅当时时点，现投影已实现与有限runtime闭合，不等整backend绿。
+- Wire v2新7d829/423d18pins，freshinstalled Next16.3.3 officialtypegen0→tsc2仍旧r5-protocol.test.tsx:56两shapeerror；11file82PASS/0skip，原600窗12.246758s含capture/typegen/tsc/test/cleanup，不借旧41/全frontendgreen。旧ambient隔离、用户.next不动、四freshambient原来源有证；不是productionNextbuild。旧protocol1fixture仍prepared。
+- ABC-C2 source33307/68cf新17top59leaf73racePASS，含formal内部HTTPContract Go0，但capturevalidator1：recipients actualaggregateDTO vs旧OASarray同根两errors。81原bytecapture private保；新SSEready真实200完整帧/noStore-noTransform/noBuffered/bodyonlytenantfield有安全hashproof，不借旧transport PASS。原600 total46.096282/nativecleanup齐，不补dfb206。
+- Recipients新doc9afe/三SOURCE独审+交付7pure通过；旧81×newdoc只读复验81/81P、67/67successvariants/66ops、check_company_operations0/noerrors，source459010/a07ca。不是freshformalCLI0/newGoPGproducer；原capture b09/embedded a493/source33307/CLI1/result不改，specHash守卫不删。第一次orchestrator import ERROR0cases/CLI1保，只修导入context，原180累计141.248612s含两attemptcleanup。GETrecipients/adminstats matrix仅content/evidence两row精确更新，132登记/guards/authority与其余130不变。
+- PG phase olddfb派生6183诊断8top21leaf27run=24P3FAIL/Go1，472phase=221pairs+30marks/15fixtures/v2allclosed，noGo60/outer180timeout；40.377948s含nativecleanup。store_new_total179.0985ms≠new_migrate_total175.162ms/up172.930125ms，return→cleanup2023ms含seed/body/defers，不purebody/nested sum/full包cause。rawSuppression只旧!=16断言，actual18从source+Migrate推断非rawSQL查询。v2 packet重序列化bytes/hash不同但独审JSONequal，不偷换bytes proof；原review/raw另metadata纠正不改。不是产品PASS/206补测。
+
+| 当前下一可独占工单 | 原依赖与完整验收 |
+|---|---|
+| RES-PG-FIXTURE-LIFECYCLE-180-01 | 五file/fourtop parallel SOURCEprepared全新审→sole新affected actual→稳定整个backend预算内/应跑集合无遗漏，原180累计/2无terminal/206未start保，不延期或猜死锁 |
+| RES-TS-LEGACY-PROTOCOL-FIXTURE-01 | 原单fixture只适配ordinary aggregate metadata类型→新SOURCE独审/sole affected+fresh typegen/tsc；82PASS不复、不降低OAS/扩私字段 |
+| RES-HTTP-FRESH-CAPTURE-01 | current精确recipients对象contract+稳定source→正式producer freshcapture和原specHash validator，旧wire只读对新doc不代鲜formalCLI |
+| RES-TX-CURRENT-INVENTORY-01 | actual18结构不代全currentproduction族owner分类/freshAST/Tx/FK-trigger/callback/caller与合法coverage，unknown具名保 |
+| RES-CI-CURRENT-FRESH-01 | 最新dfb整个backendFAILED与后cutStats/82Node/73Go/readonly分层；完整四job/secure/shippingcold/browser/P6durableSMTP另真实门禁，不局部组装父绿 |
+
+详[新当前18失败/限定层报告](R5-CURRENT18-BACKEND-STATS-WIRE-ABC-DIAG-INTEGRATION-20261002.md)、[六原档交付](evidence/R5-CURRENT18-BACKEND-STATS-WIRE-ABC-DIAG-DELIVERY-20261002.json)。171 scope完整/10已勾未因测试数变化，M失败/三S历史不覆盖；没有产品重测、全filehash或发布。
+
+### Parallel首4/新增15、Legacy新TSC0与MCAUSE/shipping准入（2026-10-02）
+
+- source74f627/0f92首4 real4top11leaf15raceP+pure4top8leaf9P，原new独审真实review已归档；实际2lane overlap/end permits0，11fresh DB→schema18/users3/mailboxes**至少2**→terminal不存在，32.459019s原300窗含cleanup。metadata mailbox2不冒exact2、actual_overlap_parser_pending旧值由raw独审重建完成，不改原raw。不是全invalidDSN/CREATE/DROP/Fatal故障链。
+- source18bde9/a504新增15 real15top67children73leaf82raceP+pure ExactWhitelist1P/CLI0/0skip，pkg21.722s，独审bounded接受；15pause/cont/acquire/release max2/end0，73DB存在后全部清理。直接schema18采得15/73，58个短fixture probegap保，不把static成功冒73raw schema实测；完整New/Migrate/seed/断言不缩。35.470197s原600窗含cleanup，command.outer300_origin残名不改真实600。旧4/其他pure没复，不全19当前一次/wholePG180已适合证明。
+- 两scope cached pgxD16/business10/sqlDBOpenMax0/局部goose sessionLocker、PG100-reserved3/GCextra1/其他packages0源事实保；fixture conn峰值8是采样下界，首4非observer全部client10亦下界，不7×2/84总硬界。ownedPG25043/42028stop0/PIDsocketgone/testDB0conn0/全部groupsgone。
+- Legacy新ca194/3e06、七pins稳定，fake/shippingProject Go producer1top3leaf4raceP先行/fresh observations源绑→官方privatetypegen0→**全该currentwebTSC0**→only RC03/04/05 known3leafP。env传obs禁止beforeAll自动Go，9.445788s原600含cleanup，无PG/HTTPauth/browser/build。旧TSprotocol两错误于新源scope闭，原27/2/82历史保，不复旧绿，不known冒unknown/按钮visible冒retryHTTP成功。RES-TS-LEGACY-PROTOCOL-FIXTURE-01最小适配+freshTSC子scope可闭，不whole frontend/171/G0。
+- MCAUSE7file原新独审SOURCE_BOUNDED_PASS，FS次序/次数/error优先/durability保、normalconstnil/no clock/context lookup；actualdefault1+observer4 PASS但**cached4/fresh1**，仅PGExactInterval fresh2.162s。量FS callwall非设备IO/nested累计wall。原capsule待审字段保冻结时点，后verdict另派生；4000执行协议pending、没有runtime，不准current18套schema16。需原M852900私有base+7pin注入新freeze/controller/外层dataWALlogobjectsprofiles1GiB/init前300s含native停/execution180含drain，最终4000 generated/emitted/FIFO/buffer≤100/join0外验；4k也不原753kcause/Mvalidbaseline。
+- Shipping只有会话工具输出，无新原始日志包。13:46–13:50Z DockerDesktop4.48.0 installed/backend文件存在，仅vmnetd无backend，本地desktop-linux version/info1 Cannot connect；无远端/daemon启动。settings429B open阻塞中断无内容，hostnetwork/ECIunknown不false。主树Next16.2.1/lock16.3.3与executorprivate16.3.3分开，PATHGo1.21/go.mod1.25自动解析失败。sourcewiringtrue/environmentreadyfalse/shippingexecutedfalse/browsershippingfalse仅该观察snapshot，不伪archive/用户之后准备结果。
+- 新27633d96 closure whole873declared/872required/51pkg已授sole，原180/package+1200总不变，**等待actual、不预填PASS或将旧206gap照搬新源**。ABC/recipients原new独审已接受17top73P与旧81×newdoc readonly0，旧formalCLI1/spec/capturebytes保持，不freshformal。
+
+| 当前依赖工单 | 验收 |
+|---|---|
+| RES-CI-CURRENT-FRESH-01 | 新whole actual命令/raw/exit/应跑集合/终态/资源/预算；局部PG4+15/TSC0不代whole，四job/shipping另门禁 |
+| RES-MCAUSE-EXECUTION-PROTOCOL-01 | M16base+7file身份freeze/新独审+外层300/180/1GiBguard及完整4000观察，协议未就绪不能执行，不Mretry |
+| RES-SHIPPING-ENV-01 | 人工启动Desktop确认hostnetwork/ECI→sole原18080/3000双向probe→原shippingworkflow实际receipt；无记录不假配置值/正式browserPASS |
+| RES-HTTP-FRESH-CAPTURE-01 | 精确currentspec正式freshproducer+原hash门禁；readonly旧81对newdoc不是producer或formalCLI0 |
+| RES-TX-CURRENT-INVENTORY-01 | 当前族新AST/owner分类/合法coverage与全caller锁FK-trigger/callback，不旧source结构数字清unknown |
+
+细节/源与证据层见[本轮报告](R5-PG-PARALLEL-LEGACY-MCAUSE-SHIPPING-INTEGRATION-20261002.md)和[三原runtime档+MCAUSE源/TEST交付](evidence/R5-PG-PARALLEL-LEGACY-MCAUSE-DELIVERY-20261002.json)；原171/10勾/P0G0/M失败保，无重test/hashwhole/发布。
+
+**随后最新whole27633真实FAIL，不再“等待actual”：** source27633d96f6bc93d226ce158d71dc215b19ae429a/closurece40c097，873decl872required51pkg，Go1/7395run7373P1FAIL1BrowserSkip20unfinished/201top未run；唯一LegacyContentKeyHTTPPreservesSafeReceipt:233失败。PG180.847包累计timeout/19白名单PAUSE0CONT、尾ExpiryAfterMailboxWait~1s；controller actualGOMAX1偏离批准2必须具名capture执行合同偏离，不能双lane资格/预算效果认证或猜死锁。job342.683<1200/nativePG58695stop/groupsgone；残testDB0conn私留不是DB0，两classifiers1，53原档e3f6b9保。
+
+新增RES-WHOLE-EXECUTION-CONTRACT-01：真实GOMAX2 argv/env/controller freeze→新独审→PM裁决下一合规whole；RES-LEGACY-CONTENT-KEY-HTTP-01：唯一失败leaf按metadata安全契约核源/fixture，不放宽权限/改原raw。原180/package/1200不自动延；旧dfb206和新201分开，不关闭wholeCI/171/P0G0。见[原失败review](evidence/R5-CURRENT18-WHOLE27633-FAILED-REVIEW.json)。
+
+### 2026-10-03｜MCAUSE490实际微诊断、历史身份composed与MIME/sourcePolicy分层
+
+- 原M10800s FAILED/753380stored/753360ready/20processing/0workload不改。MCAUSE487只0test capture/build INFRA：遗漏原M三go:embed CSS/JS，e08a自manifest487相等不完整编译closure，controller/Go1无profile/span/ready。原cacb95/74payload保，native29730stop0/诊断DB[]/objects未创建/allgroupsgone。3embed新候选490由原M482+7observer+3actualasset组成，GoList401pkg/311local selected **含20embeds**/nonembed291是静态层，不311+20/测试PASS。
+- 新7091c32e/a9c6f61a/f5b controller唯一次schema16 1000/5000/4000/ready4000诊断controllerGo0/恰1run+P/noSkip/noRace/GOMAX2，25classes精确error0/dirclose12000/FIFO4000/buffer100/join0/parserquiescent/六streams/profile20.063闭合，原new独审BOUNDED_DIAGNOSTIC_ACTUAL_PASS。body59.749/外Go66.466846/preNative→parentexit71.887522原300内，parserdeadline晚parent6.306409，本次换算minremaining114.475917>31不一般nearreserve证明。521samples519complete2churn/peak344551424/maxgap.493296/sticky0 sampled非atomicquota，Go DBobjectsprofilespeak125888168另一口径。native47104stop0/SQL[]/诊断objectgone/allgroupsgone，postprofile7tool0/3.7156s另层。ClientRead6191/6775仅1Lockedge不advisory250s serverwait，schedFsync47.373是runnable delay非deviceIO/nested sums非wall，不推753k因果/有效M。
+- MCAUSE原114member4ec6包私留，中央安全109UTF8 payload另wrapper，剔CPU/runtime trace及3binary derived profiles5件；原review/raw/包不改，包装receipt列原/新sha与exclusions，没每memberhash，不CPUtrace/objects/DB/credentials/source树上仓。
+- 历史identity V2首run PG7top23leaf27raceP但handler importcycleGo1/0产品tests保5714de。V3 onlyhandlers_test修复、三产品+PGtest不变，新512ff19c/fb07538e713manifest含218fork、actualraceGoList398pkg/281selectedlocal（22embed34fork）/missing0；3top8leaf10raceP、4库**0direct final18**（采到中间态）与base实18+四HTTPleafMigrateP分层，15.865s原300/native71735clean，newreaderaccepted。旧27+新10有限composed37不singlefresh37。RES-P4-110-HISTORICAL-IDENTITY-01最小NOACTION/seal/outbound持久identity子scope可闭，attribution/SETNULL不永久拒删，父P4-070/P2-110及sent归属残余未闭，原171 P4-110不勾。
+- legacykey原615pin/source853e4a22/5f37 only1top10leaf11raceP/Go0实际GOMAX2，Key strictmetadata scope/delete/TTL/crossTenant/owner与独立ownerJWTcontent/APIKeycontent403有实际；10freshDB直接final18仅4，其余中间9/17，19.015s原300/native9942clean。普通receipt不body/subject，不APIKey正文链恢复，原wholeFAIL/GOMAX1不回贴；额外runtime独审最终未交则不假补。
+- MIME V2 source853 sameclosure不同scope实际8top123leaf129nodes101P28F=26leafF+2parents/Go1，mailcontent5.566FAIL/messages1.584PASS原raw/95b746/10payload保。V3祖先temporary logicalEOF重读子树SOURCE结构BLOCK未runtime。停私有slice近似walker，固定完整enmime2.3.0 MIT fork真实`&Part`前budget/context/depth、header后decode前投影sticky；V4/V5（Docker metadata/双reader隔离）新SOURCE审准入，32层/1024root-inclusive节点与25MiB/512attachments/4slots/cache保，不单扫描或linearCPUheap claim。
+- 后续MIME V5 source3de31b15/e180c78f/715capture/fullfork219/224pins actualrootmodule/githubimport/noNested/readOnlymodsum。四target T1=13P/T2=3Pparallel2 realactive2隔离cancel/T3=137P/T4=11P，合25top154leaf164raceP/四Go0/0skipmissing、原600资源22.797s/groupsgone/noPGNodeSMTPDockerbench，旧messages/整个upstream不复。原readeractual审进行中未final不假签；组件P不P6parent/CPUheapcost/完整closure/Dockercold/currentMETHOD。
+- SOURCEpolicy V2 actual protocolpurpose唯一972files capture0/07910a04/bf0b919、newCurrent15+affected5P，但两Lookahead legacy16 setup被当前18校验390拒/body0，22exec20P2ERROR/CLI1整体FAIL不是sourcecaptureFAIL。map C被错搜mapC的false原review保，原3a8967/15members不改，e1c540新16只append fd767真实literal纠正。V3 onlytestfile隔离2methods fromlegacy setup SOURCE审P，MIME后only2补测待raw，不复20P/capture972，不singlefresh22/不V2receipt回贴V3。
+
+| 当前可派发工单 | 独占与验收依赖 |
+|---|---|
+| RES-METHOD-CURRENT18-FORK-POLICY-01 | 新命名METHOD文件+runner显式optin/newtests（等现scripts窗release）；current18/fork完整inputs/embed/mod/helper/sourcePolicyV2 namespace、旧16/files-only精确分支保。原DATASET/三S/M失败/constants/旧METHOD/archive只读；原人口/seed/workload/budget/durability/7safety/UIDFIFO不削。新pure/新独审→PM另批准完整tool及必要freshS，M/L不自动授，unknownmethodfailclosed |
+| RES-MIME-FORK-ACTUAL-01 | V5四target actual后独审、完整rootMVS/selectedinput/coldmodule/sourceclosure各层；不旧26FAIL抹除或复messages，不native局部代Dockercold/P6full |
+| RES-CURRENT-SOURCE-TWO-BODY-01 | V3 only2此前没执行body新source/raw/exit，已有20P/实际972capture不复；METHOD18vs16/oldLOOKAHEAD binding仍BLOCK，不metadata替runtime |
+| RES-SHIPPING-ENV-01 | 用户将启动非readyreceipt；actual本地daemon/hostnetworkECI/双向18080-3000probe/原workflow/shippingbrowser，不能截图外话或native合成替代 |
+| RES-TX-CURRENT-INVENTORY/RES-CI-CURRENT-FRESH | 完整current族AST/合法coverage/secure/父whole预算及应跑全集，原fail/source边界不洗，10/171范围不缩 |
+
+详[本轮报告](R5-MCAUSE-HISTORICAL-MIME-CURRENT-SOURCE-INTEGRATION-20261003.md)/[安全交付](evidence/R5-MCAUSE-HISTORICAL-MIME-SOURCE-DELIVERY-20261003.json)。所有SOURCE、实际、cache、composed、blocked各层分开，无重测试/hashwhole/commit/push/PR/部署。
+
+### 2026-10-03｜新whole0cf失败、Webhook/source逻辑有限完成与C18硬依赖
+
+- 新0cf5eaa/53201fc frozen1229、908decl907required51pkg，正式actualGOMAX2/readonly-p1/race/count1/package180与总1200不改。8021run7993P6F=4leaf2parent/1允许BrowserSkip21unfinished，51pkg全terminal仅PG180.693fail；19白名单PAUSE0CONT/128top未start，尾ProfileCreate/admin-stale-super-hint约0秒在seed/migrate即被包alarm截断，不单例死锁。old247/current907 classifiers1/missing-notpass180/395含failedpkg已P目标，不395未run。原init→cleanup336.792381s/native53862stop0/groupsgone，base及残tm_test39f80e35…0conn私留不DB0；1500known samples/531distinctDB/peak17下界不硬cap。新whole独审boundedfailed接受，旧27633 GOMAX1与dfb206不回填。
+- 唯一四FAIL叶为legacyledgerwaiter、KeyExpiry/attempts waiter、ListMatchesDetail lifetime/hint、Ownerlesshint；新两testfile SOURCE独审，仅5targets（4fail+freeze邻falsegreen）新5373e23/b3d0ea actual5top8leaf10raceP、四wait/blocker/deadline日志、productionGo与0cf相同/compileproof无缺。26.169s≤360/native71914stop0/groupsgone/tempDB无、base0conn私留；原key10不复、不whole回填。exact14是用已有两manifest补全部引用sha同，不伪原独立14pinmanifest。原90/新91中controller-source有literalprivateURI，保privateorigin不直接上仓；中央safe89/safe90只剔1成员、其他原bytes不改，新wrapper一次hash/无每memberhash。
+- Webhook同720/ff73f8/97ba558九pin27f5：hooks132+config5 raceP，BC05首uppercasefold/DSN setupERROR0产品test保，不生产RED；22.388s≤420/native32698stop/groupsgone，tmpquery不涵base不假DB0。新quotedlowercase actual18 onlyBC05 parent+child2raceP/Go0，真实worker POSTmetadata/BCCnegative/ackdelivered/join，child224.820≥120、17.993s≤240/native41825clean、base0conn私留。全新readercomposed139接受，旧75/4887与new76/4470 compilelabel-only correction保，非singlefresh139/P7parent/双consumer外exactlyonce/whole。
+- SOURCEpolicy真实972capture仅V2/07910a/bf0b919，20PASS+V3 firststderrP+V4 last1PythonP/noSubprocessAudittrigger/0.517s≤60 independentcomposed22接受。V2两setupERROR与V3 secondaudit-before-spawn97/unknownargv/无terminal-result保，不把静态platform候选说成实测uname；V4 fixtureOnly1d790f/139ca179不checkoutrecapture，不fresh22/currentMETHOD。
+- MIME fixedforkV5164 actual独审boundedP，原33/050b不改，新34/7de410只appendnarrative：新V5 T3实重26旧counterexample leafP，未重旧V2 implementation/run；T2 cancel/success才active1waiting，refusal initialactive2共同release，一拒一P，不混同断言。messages/整个upstream/Dockercold不复，不全CPUheap/P6parent/METHOD。
+- C18-01/03七SOURCE V1四BLOCK修V2独审P，只准申请pure21；外canonicaldescriptor/admissionpin、GoTime真实go_start..exit/cleanup前、maintenance/具名负控保。旧actual18 raw02a585七集合是真，但缺typmod/triggerenabled/indexvalidready/seqcacheownership/普通functions，11是trigger_functions，不fullC18ref；source明示partial/reference_readyfalse，admission/archivefailclosed待07，不静态补默认/qualhash升full。
+- pure21首6710e89/52c2f082 source匹配，Darwin AS1GiB ValueError setupINFRA/child66823exit1/0tests/discovery与audit未armed/memory未知；CPU60 set调用返但没childgetrlimit回读，不0违规即P，不90timeout，review.162856817/交付.178023815另界。原18/991a与20append2593保，新独审接受boundedINFRA，未测试断言RED。
+- RSS V2首SyntaxError0→修括号15newmockP.003，后childaudit拓展只AST；原独审3SOURCE BLOCK90seal/sourcepost、ps采样早于handshake、tailgap不计保。V3新8mockP/old15不复，前三修但Freshness/WholeClock跨状态回拨仍BLOCK。V4仅SOURCE候选，new两mock分次P/首RSSgapfixtureERROR保，不singlefresh25；原跨状态回拨已修，**新独审仍BLOCK：sticky remain在finally cleanup timeout与最终receipt再抛，可能不身份核验/TERM-KILL-join/封证**。qualification失败永不P须与独立有界containment分离。pure21/实际controller/GoPG从未重跑，sampleRSS非hardquota。
+
+| 下一具体工单 | 窄owner与先验/验收 |
+|---|---|
+| C18-02｜unique attempt runner/trustroot | 新runner/newtests，nativeinit/compile前一次origin/D最早/外descriptorpin/owner-evi-root/current source与15phase；noresult/cleanupfailclosed，旧runner/history不改，先SOURCE+pure不SML |
+| C18-05｜Go current harness/producers | 新Go文件/targets先定独占边界，旧M16/diagnostic不全局18替换；真实PGGoose/fork/2800/7safety/UIDFIFO/typed输入输出与parentdescriptor绑定；当前未接线 |
+| C18-06｜critical parentclock/join | 与05划文件/函数；31s±/compileoffset/更早D/4flight16waiters真join/suspend/rollback/cleanupnoresult，不MCAUSE4k min114秒代临界，actual另批 |
+| C18-07｜fullcatalog reference | 新readonly完整SQL/schema/parser/tests/新catalog，与migration18/runtime source pins签准；缺typmod/triggerenabled/indexvalidready/seqcacheownership/普通functions全部实采，旧02a585/15/17不改 |
+| C18-09｜rootMVS/compile/embed/cache/toolchain | 新readonly verifier/newtests/receipt，actual buildcontext/fullfork/selected/22embed/generatedmain/Go选入与externalcache versionchecksum/freshbyte层分开，GoList/组件编译不代统包资格 |
+
+当前schema18/fork/sourcePolicyV2与frozen16/旧LOOKAHEAD算法仍BLOCK，不SOURCEmetadata盖runtime、不currentunknown自动SML；archiveproducer/currentregistry/cold/crossplatform/tool300双method与freshS/M逐次签另依赖，L拒。Docker仍无用户ready确认，原百万FAILED/10-171/full四job/P0G0/secure/事务coverage/shipping门禁保。详[本轮报告](R5-WHOLE-Go0cf-WEBHOOK-C18-SOURCE-INTEGRATION-20261003.md)。
+
+**RSS V5随后新SOURCE独审准入（不是pure21 P）：** controller174da8fb/child3809276f/protocol62642106/test77fad549，12member1f3ca13b原包pins一致；V4finally clocksticky清理阻断闭，qualification失败与有界containment/失败封证分离。原90内不扩，只有已失败到deadline后root允许最多5s monotonic containment，不可转成功。原2mockP+后来1mockP，不fresh3/fresh25；root可另授sole pure21一次，actualcontroller/tests/signals/GoPG仍0。须exit0/finaladmission/原90/21exact/auditCPU/RSS首尾握手/尾gap/cleanup全部实际，不21零测试或SOURCE=绿。[准确分层](evidence/R5-C18-RESOURCE-PURE21-STATUS-20261003.json)。
+
+### 2026-10-03｜Current19 usage实际失败/限定诊断与C18已测语法层
+
+- 当前physicalapi_key_usage原9+2 SOURCE独审P，**Stop无显式deadline、原retry401/403/404拒409、auth asyncTouch无显式join**仍具名边界。frozen18完整editable树c7bf9155/47fd3642/1309files20,747,066B/migrations1..18私留，只SOURCEcheckpoint不当前19/编译Method签，sole原9receipt安全包归档不重hash/导出全树。
+- usage19原A755a647/95a9c821实际12top26leaf32nodes25P7F=21Pleaf5Fleaf/Go1，safe0725b222与private→safeSHA映射保；内部6P因ConnString回base不能转授。TwoPoolsDeadline/migrationpair/upgrade_not18/heldhelper/R4runtimeinput缺口不改期待讨绿。baseSQL19，原300total40.779/native35560stop0/allDBonlybase-otherclient0/PIDsocket/groupsgone，base私留不DB0；B/S/C NOT_RUN、无SMTP/miniredis/Cobserver，外部Redis13082未触。
+- DSNfixture修正独审后V4实际D1P→D2F→D3NOTRUN。code54a46523/794b2991 +runtime R4JSON/19SQL20inputs4d76b35c/jointbb162191独立捕获/sourceprepost同，不反称oldsourcepolicy覆盖R4或D3P。D1 5top9leaf12raceP/Go0、26connectionidentity断言九freshDB，17.577712≤300不重跑；D2 only1top1leaf2F/Go1，authority-free usagewaiterjoin P后independentrouter404nonJSON/current500、精确200拒，15.169748≤300。独审定位ctx污染chi.RouteContext，8158445c clean-parent一testfile只SOURCE待审/新D2，不产品cause或已经修验。两PG48630/49858SQL19/stop0/allDBonlybase-client0/PIDsocketgroupsgone，base私留；安全111包49889618/privacy映射保，原A/D2失败及D3BSC未跑不回填。
+- C18pure21真实原readerRSS_SAMPLED_BOUNDED_PURE_GRAMMAR_PASS：七6710/52c2 unchanged/V5controller174da8，21exactstart/P+20subtestP/62monotonic/no skipfailerrorunfinished，outer0+child78726exit0+finaladmission共验。CPU60/60实际/audit773463/0denials，十RSSsamplespeak38010880/maxgap.110868583、首尾专属query afterfullhandshake/正确import次序，groupsgone/no signals/noextra5。时间**to terminal1.164346s/finaladmission约1.164481s/原90gate过**，非精确outerexit；RSS采样非atomic/globalquota，原AS0test与mock分层保。safe34/dff28970仅grammar/resource子scope，不METHOD/fullcatalog/build/toolSML/171。
+- catalog15pure实际frozen18c7bf/collectorcbc7，15top155children157leaf170raceP/Go0/0skipunfinished/OwnedSQL0，rootMVSreadonly/tagr5benchmark/GOMAX2/racep1；GoList402pkg371local22embed34fork/no缺。package3.917/Go含compile14.395/原30015.524128，144RSSknownpeak499302400/maxgap.126619非hardquota，CPUps+GOMAX2非硬CPU限；sandboxdeny network*，无DSN/owner/extref/PGSQL。safe23/8bc52ad，runtime_reference_ready/fullsemanticfalse，额外machine独审未交不伪报告；C18-09/owned/profile/Method仍blocked，主树19不继承18。
+- 旧18 KEYTOUCH42126f8/85fd37c：1top4leaf5raceP/Go0/GOMAX2，samekey blocker/asyncTouch oncecommit各四actual因果fixture见证，不历史holder89451证明/产品fix/wholebudget或19资格。原180资源22.929187/native97643stop0/tempDB无/base0conn私留/allgroupsgone，原88/3aa021私留，controller-source URI成员剔1安全87wrapper绑定、不原raw改或每memberhash。
+- PGa331 exact8 phase1256private18派生/十二delta其它1255同，独审SOURCE BLOCK：packetselector/controllerhash未绑定；parser completeness/emiterror/unmatched/Go8terminal缺；samplerhealth缺；全DB/group/nativecleanup漏；terminal/postcheck预算异常；实例wait聚合不fixture归因/sourceattrs丢。未Go/compile/PG/controller，无8P或current19原因。原Suppression16vs18矛盾保；当前fixture次数unknown，旧a331272terminal含skip、179.996s才RunRequiredOutbox/104未start不推单例死锁/迁移大头。报告路径未定位仅PM已交独审结论，不聊天伪raw。
+- 最近已交formalwhole仍**frozen18a331/da7e97 Go1**，908/907/51、8230run8206P2Fnodes（WorkerRevocation/key-zone leaf409 changing-key）/1Browser合法skip21unfinished104top未run、PG180.689，19白名单PAUSE0CONT（全pkg39pause20cont不同）。同origin手握0testINFRA与恢复原raw保，1200预算资源504.122s，native81837stop0/base+残testDB0conn私留。当前19组件/小诊断/170pureP不洗whole；原107控制器URI剔2安全105包、原4b1b5私留。
+
+| 排序 / 下一具名施工 | 依赖与完整验收 |
+|---|---|
+| 1 RES-USAGE19-CLEAN-CONTEXT-D2 | 815单fixtureSOURCE独审→sole onlyD2 exact200/ctx与连接identity/cleanup，D1不复；不放宽retry拒409/产品期待、不自动D3BSC |
+| 2 RES-USAGE19-D3-RUNTIME-INPUT | D2过后PMonlyD3；code/runtimeR4+19SQL独立freeze/joint/current19schema/原budget/allDBclient0，输入捕获不代D3P，原A失败保 |
+| 3 RES-USAGE19-BSC-REMAINING | A分级/必要gate真实合格及新审再授后B/S/C逐唯一executor；各SMTP/miniredis/ownedobserver/Stopdeadline/asyncjoin/401-404拒409具名原scope，无Source资格转授 |
+| 4 RES-PG-PHASE-A331-PROTOCOL | 私有18 observer原owner修六SOURCEBLOCK/原budget/fullcleanup/集合completeness；独审后soleexact8，主树19不并改或借因果，旧16断言保 |
+| 5 C18-09/C18-07-OWNED-REFERENCE | frozen18真实build/profile/distribution/initdb/extension/owner外签与完整ownedcatalog/支持定义，refs缺连接前拒；主树19另signedversion，不继承旧18/15pure |
+| 6 C18-02/05/06/Method | runner唯一parentorigin/earliestD/harness/31s±/join/cleanup真实资格；新current版本SOURCE/独审逐签，旧16S/M/DATASETS/METHOD/knownstrict不改不自动SML |
+| 7 RES-CI-CURRENT/RES-SHIPPING | stable19组件合格后的完整source/应跑集/原budgetwhole和四job；Docker实际ready/原shippingreceipt，未ready不预填、不auto重跑或放宽180/百万预算 |
+
+待证具名：catalog15/KEYTOUCH额外machine审未交；PGphase原machine报告路径未定位；815 SOURCE/重验待；Stopdeadline与authjoin仍stateowner缺口。**10/171**原每叶全部验收/父依赖不降，Docker用户未确认actualready、四CI未完成。[完整本轮报告](R5-CURRENT19-USAGE-DIAGNOSTIC-C18-STATUS-20261003.md)/[安全交付](evidence/R5-CURRENT19-USAGE-C18-INCREMENTAL-DELIVERY-20261003.json)。无源码修改、重测试、fullhash或发布。
+
+### 2026-10-03｜Usage19余scope与编码/worker组件、PG诊断运行拒绝
+
+- D1原九leaf资格保/不复；D2clean f79eb4d7/e281399a+R4/19SQL runtime4d76b35c/jointaca2dcc2，1top1leaf2raceP/Go0独审接受，57safe fe9809c8、19.040209≤300/native71177clean/allDBonlybase-client0私留。D3/B/S同source六top八leaf十raceP独审接受，原219 c843与220append7428仅多C0观测boundary、旧字节不改。原A755FAILED/旧D2F保、六回base内部P仍不可转授，不全部A/wholeP。
+- C0/V8 qualified0test/无JSONL start-testpackage终态/Go parent-15，pretestobserverINFRA_UNKNOWN不productRED。C0 memberidentity没记录不推名；V8 basenameNULL/SIDNULL/ProcessLookupError整体UNKNOWN不从PID/start猜身份，6.273192≤300/native95235/allgroupsgone/baseclient0私留。未采到endpoint/start不证明任何未见goroutine绝不曾brief运行/listen，不C资源资格；safe57/818605和原C0原件不改。
+- V9 observere8532e6d、entry9e01 V8byteequal，仅basename先memory/SID独立error仍overallUNKNOWN、unsafeNameNULL、不确定owner不query/提取；三newmockP.001不旧集/实际GoPG/query。SOURCE待原reader/root单签，未actualC/whole/Method。原九包cf5ab driver URI候选剔1安全八包，原source/raw私留不改，不新增allowlist/猜旧PIDcomm/改250gap与joinbudget。
+- P5两file e35/91a签SOURCE+actual独审接受：source51e5785a/1a50523f，8top29leaf34PASS非race/Go0/GOMAX2readonlyp1/无skipfailunfinished，packageElapsed.874 **不是body/compile**。wrappercapture-implicitcompile-cleanup3.5408988自报300guard，不后打包；originepochnull未serialize不mtime回填/外钟保证。GoListmetadata与implicitGoTestbuild分层，独立compiler耗时unknown/非cold，policyrace目录superset不此nonrace资格。原18a21b与新19append746c8e保，无PG/HTTPpublishsend/RedisSMTP/业务network，不P5parent。
+- boundedworker两file0416/7e88，sourcec0732a3f/7ea884bd全workqueue package首次race24top(old13new11)26leaf28P/Go0/0skipfailunfinished，原readerACTUAL ACCEPT；packageElapsed1.89不是body/compile。真实serializedwall1791009850.977855/mono242353.162900625仍selfreport非externalattest，原300work270cleanup30总4.290512/sourcepost同/groupsgone，无PG业务服务。20safe148494B1096750d保，GoListmetadata/implicitbuild/未知独立编译时长分层，不补nonrace或fullproject。
+- **旧Stop仍无界，正式outbound/main/ingest/hooks未接boundedAPI**，durable两worker/SMTP/P6父门缺。原author只读proposal指出SMTP.Shutdown忽ctx/Close不joinSession，Mail/Rcpt/Data Background，main不join heartbeat/mailindex/retention/ingest/hooks便defer关PGRedis，只有待施工sourcefinding，不已实现/已测；未给machinepath不伪raw。
+- PGphaseR3 privatea331/18 `/private/tmp/tm-r5-pg-phase-a331-r3-1u46l7uw` B1/B3/B4 SOURCE闭，B2/B5两lifecycle采样竞态/native后代缺仍BLOCK，没exact8 runtime或19因果。watchdog `/private/tmp/tm-r5-pg-watchdog-source.9cPrcRsx` backend1d47/launcherdb568/protocolv4，新readerN1_SERIAL_SOURCE_CONTRACT_ACCEPTED但**FORMAL_EXACT8_BLOCKED/RUNTIME_DENIED**：scope_drained无true路径，任意descendant未证不能推进下一阶段；terminalsend非blockingbufferwrite仍需真实flush。S1–5 SOURCE闭，33/37/25/19各pure开发失败/PASS/source层非freshsuite，没有actualOS csops/hardkill/census/controller；HARD1200不得删或SOURCE当run许可。
+
+| 下一排序 / 工单 | 窄owner/完整验收依赖 |
+|---|---|
+| 1 RES-USAGE19-C-V9-OBSERVER | 原observerSOURCE新审→rootConly单次；真实member与首尾LISTEN/预算/Go未reap到join/cleanup证据齐，unknown不推身份，D1D2D3BS不复 |
+| 2 RES-PG-PHASE-R3 / RES-WATCHDOG-DRAIN-FLUSH | 分开sourcewriter修两采样竞态/native后代与scope_drained可证/terminal实际flush，UID-epoch-anchor/nooverlap/HARD1200保，SOURCE→OS资格→formal精确8逐批新授 |
+| 3 RES-SHUTDOWN-FORMAL-CALLERS | main/outbound/ingest/hooks接boundedAPI及error传播，heartbeat/mailindex/retention加入join后才关PGRedis，旧legacy兼容明确；源写集先和SMTP分开，不组件28P代durable链 |
+| 4 RES-SMTP-CONTEXT-SESSION-JOIN | ctx贯穿Shutdown/CloseSession/Mail/Rcpt/Data；本地真实慢连接/取消/DATA250不确定性与ledger，禁止真实外部邮件；不已有worker组件父勾 |
+| 5 RES-TEMPLATE-ENCODING-HTTP-PG | sameversion preview/publish/use/render、PGHTTP资格/身份/XSS/encoding/撤权链新sourceactual；原nonracepure/自报nullorigin/implicitbuild保，不复34P凑数 |
+| 6 C18-current19/RES-CI-SHIPPING | C18-09/07/02/05/06 source/profile/build/fullref/Method另签，旧18/16不继承；stablewhole/原180+HARD1200/四job/secure/Docker实际ready原shipping，不组件升父 |
+
+最新[完整报告](R5-USAGE19-C-OBSERVER-SHUTDOWN-ENCODING-STATUS-20261003.md)/[安全交付](evidence/R5-USAGE19-SHUTDOWN-ENCODING-OBSERVER-DELIVERY-20261003.json)，原171scope/10勾/三S与百万FAILED保持，Docker未confirmedready/四CI/METHOD当前19未资格。无源码修改/重测/fullhash/发布。

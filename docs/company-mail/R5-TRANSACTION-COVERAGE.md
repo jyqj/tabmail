@@ -1,5 +1,14 @@
 # R5 全入口事务／FK／trigger／等待覆盖目录
 
+> **当前19不继承18（2026-10-03）：** 新physical usageSOURCE合格不完整runtime，A失败/D1P/D2F/D3BSC未run；catalog15 170pureP无owned/fullref，旧18 partialcatalog/完整源码checkpoint不当19catalog或全caller事务覆盖。Stopdeadline/asyncTouchjoin/原retry拒409边界与新族freshAST/coverage具名待验。[当前层级](R5-CURRENT19-USAGE-DIAGNOSTIC-C18-STATUS-20261003.md)，未知不统一归零。
+
+> **2026-10-03 边界补充：** 新旧actualcatalog结构观察不等完整reference或函数coverage。现schema18七集合缺typmod/triggerenabled/indexvalid-ready/seqcacheownership/普通functions，11是trigger_functions；C18-07 fullreference尚待actual采集签准，原02a585 bytes不改。[分类](evidence/R5-CATALOG18-HISTORICAL-PARTIAL-C18-BOUNDARY-20261003.json)另文件，不静态填默认或统一清unknown。
+
+> **最新追加：** cb03/2c3ea72f实际schema18 catalog独立实采51tables/75FK/11triggers，GC/head限定15top21leaf race0；新生产family AST/分类/全coverage仍pending，不清全unknown。见[新18报告](R5-GC18-RECEIPT-OAS-REGISTRY-INTEGRATION-20261002.md)。
+
+> **此前source实际catalog17（历史独立层）：** source1a15/closure77714、officialNew/Migrate/O_EXCL原194779字节、50tables/75FK/11triggers及3upgrade/catalog目标race通过，见[独立新17报告](R5-SCHEMA17-ACTUAL-CATALOG-20261002.md)与[原catalog](evidence/R5-TRANSACTION-DB-CATALOG-SCHEMA17-ACTUAL-20261002.json)。原15/16历史JSON和下方旧批source边界保，不currentAST/每函数全runtime，不17回贴18。
+
+
 > 结构目录补充 [R5-TRANSACTIONS](R5-TRANSACTIONS.md)，不替代其事务图和运行验收。开始基线 `3893945`；当前目录包含 B01-X 主线程的 source-message NOWAIT 、ChangePassword tenant-first 及 queue nullable读取改动。未勾选 P0-070。
 
 ## 1. 结论与复验
@@ -414,3 +423,6 @@ FK目录保留迁移中的DROP/重建；例如domain mailbox-zone原CASCADE已�
 ## AG同源实物证据（历史批次，46随后AH归证）
 
 9516／774 source含AD16／AEAFfinal，ASTcaller从snapshot内生成49files／352fn／456SQL／15migration，不混未提交未来helper。真实23gate、default244／tag12 required及emptyGo0拒门禁不等各writer全证明；14/61 bounded动态与当前domain/planpolicycheckpoint已收敛，46 Guarded requestedP晚FK当时待AH；现AH65e51/8fac三轮5pass及AI冷回归已归证。精确外部callback/error/operationtrigger boundary保持，见AG报告。
+## 实际18结构证据不等current函数覆盖（2026-10-02）
+
+[新actual18catalog](evidence/R5-TRANSACTION-DB-CATALOG-SCHEMA18-ACTUAL-20261002.json)是sourcecb03官方实采51tables/75FK/11triggers/18migration hashes，不旧catalog升version。新source1a15实际17、旧15/16与M852900保历史。GC18/head15top21leaf racePASS有限运行不清全library unknown；fresh AST、新production owner family/caller/锁/FK-trigger/callback分类与合法coverage派生仍pending，旧静态统计按原source看。原171/fullCI/M有效baseline未闭。

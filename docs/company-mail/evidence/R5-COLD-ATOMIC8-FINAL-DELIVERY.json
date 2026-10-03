@@ -1,0 +1,32 @@
+{
+  "status": "released_candidate_8_new_mock_targets_passed_not_real_cold_revalidated",
+  "runner_sha256": "b4db8da6207512ca30333430204a2a62331629d2fc17fec9d1f63f8c98726a7a",
+  "tests_sha256": "02185f041b06d830a36e5855512a49c7b9315ea82e8322d3942628b59a4d969d",
+  "released_source_files": [
+    "/Users/jin/Desktop/tabmail/scripts/run_r5_cold_web.py",
+    "/Users/jin/Desktop/tabmail/scripts/tests/test_r5_cold_web.py"
+  ],
+  "execution_packet": "/tmp/tabmail-r5-cold-atomic-target-svlnsc0g/pending-target-command-v2.json",
+  "executor": "/root/calibration_executor",
+  "new_target_count": 8,
+  "executor_reported_elapsed_seconds": 4.925,
+  "executor_reported_exit_code": 0,
+  "executor_review": "/tmp/tm-r5cold-atomic._78yi7jm/coldatomic-runtime-review.json",
+  "executor_archive": "/tmp/tm-r5cold-atomic._78yi7jm/COLD-ATOMIC-8TARGET-evidence.tar.gz",
+  "executor_reported_archive_sha256": "6189019a73d4683b6a2d7d55aa411e79e64b6213ad3d57d3027d9b8c8d663432",
+  "executor_reported_owned_group_absent": true,
+  "writer_repeated_executor_tests_or_hashes": false,
+  "old_pure_suites_rerun": false,
+  "new_actual_npm_or_next_build": false,
+  "supersedes_candidate_only": "baccc2cea142716cf713cb93b44ff8bfa86ec8e93e63614beac91e2f52b653e2",
+  "prior_failed_actual_counterexample": "/tmp/tabmail-r5-cold-finalreceipt-counterexample.funRtyBT/review.json",
+  "historical_native_real_cold_build": "/tmp/tabmail-r5-cold-web-20261002-native22-exec/cold-runtime-review.json",
+  "historical_runtime_runner_sha256": "86645b99a56ece120fa80873cc88a8e7d9f81b44208f8491fed0d18b2bcaef1e",
+  "historical_22_second_actual_cold_pass_unchanged_not_relabelled": true,
+  "requires_outer_exit_zero_and_controller_complete_proof": true,
+  "uncatchable_SIGKILL_or_unrecoverable_OS_failure_cannot_guarantee_Python_terminal_receipt": true,
+  "shipping_image_passed": false,
+  "browser_passed": false,
+  "G0_passed": false,
+  "review_ownership": "baseline_dispatch independent acceptance and evidence integration; no TODO/G0 edits by writer"
+}

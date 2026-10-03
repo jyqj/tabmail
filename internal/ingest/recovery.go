@@ -25,8 +25,18 @@ func (s *Service) acceptDurable(ctx context.Context, env Envelope, raw []byte) (
 	// delete/recreate must never send accepted mail into a different mailbox.
 	targets := []store.IngressTarget{}
 	seen := map[uuid.UUID]bool{}
+	seenAddresses := map[string]bool{}
 	for _, address := range env.Recipients {
-		resolved, err := s.resolver.Resolve(ctx, policy.SanitizeAddr(address))
+		address = policy.SanitizeAddr(address)
+		// Resolve each canonical envelope recipient once. Otherwise duplicate
+		// spellings can observe routing changes within one accept and freeze
+		// multiple identities for the same recipient. Distinct aliases below
+		// still deduplicate by the resolved mailbox ID.
+		if seenAddresses[address] {
+			continue
+		}
+		seenAddresses[address] = true
+		resolved, err := s.resolver.Resolve(ctx, address)
 		if err != nil {
 			return AcceptResult{}, err
 		}

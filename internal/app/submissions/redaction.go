@@ -45,7 +45,9 @@ func StripJobSecrets(job *models.OutboundJob) *models.OutboundJob {
 	return &cp
 }
 
-// RedactOutboundJobView is the pure projection behind
+// RedactOutboundJobView is a historical non-wire compatibility transform.
+// It MUST NOT serialize an ordinary response; those use company.OutboundReceipt
+// via Service.OutboundReceiptView/CommittedReceiptView, independently of read.
 // Service.RedactOutboundJob: contentAllowed is the caller's resolved
 // ContentAllowed decision and the only policy input. Copy before redacting:
 // cached/shared store objects and delivery state must not be mutated by
@@ -100,7 +102,9 @@ func RedactOutboundAttemptView(a *models.OutboundAttempt, contentAllowed bool) *
 	return &cp
 }
 
-// FilterRecipientsForJobView projects the recipient ledger rows through a job
+// FilterRecipientsForJobView is a historical non-wire compatibility helper,
+// not the ordinary recipient endpoint (which returns a typed aggregate receipt).
+// It projects the recipient ledger rows through a job
 // view built by RedactOutboundJobView. An authorized view returns the rows
 // untouched; a restricted view keeps only the addresses the job view still
 // exposes (To+CC, BCC hidden) and replaces each diagnostic with the

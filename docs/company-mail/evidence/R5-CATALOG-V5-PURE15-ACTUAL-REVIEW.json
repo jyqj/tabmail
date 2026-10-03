@@ -1,0 +1,1132 @@
+{
+  "DSN_owner_approval_externalreference_env": "none inherited; root explicit whitelist actualchild env; ownedtop not selected",
+  "FAILnodes": 0,
+  "OS_network_denial_profile": {
+    "not_a_syscall_trace_zero_attempt_claim": true,
+    "path": "fixture-no-network.sb",
+    "profile": "(version 1) (allow default) (deny network*)",
+    "sandbox_exec_both_actual_exits0": true,
+    "sha256": "5c358b8d847211333e7ba22df82d84f796b5f30a41a2682209a949d783adbd08"
+  },
+  "PASSnodes": 170,
+  "RSS_CPU_resource_scope": "ownedphasewholeprocessgroup sumRSS bytes(psKiB*1024) sampledtarget100ms/max250; 2GiB ceiling nonhardquota/intersamplepeaks not excluded; CPU onlyobservedps%/GOMAX2 noCPU-hardtime-limit requested",
+  "RSS_compile_and_fixture_peak_bytes": 499302400,
+  "RSS_max_observed_gap_seconds": 0.1266188621520996,
+  "SKIPnodes": 0,
+  "SQL_serializer_full_actual_certified": false,
+  "actual_children": 155,
+  "actual_embed_inputs": 22,
+  "actual_goList_metadata_packages": 402,
+  "actual_leaf_count": 157,
+  "actual_localfork_inputs": 34,
+  "actual_nodes": 170,
+  "actual_test_actions": {
+    "TestR5Current18FullCatalogCanonicalBinding": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogCanonicalOrder": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogCleanupAlwaysClosesAdmin": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogCleanupAlwaysClosesAdmin/close_failed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogCleanupAlwaysClosesAdmin/database_remains": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogCleanupAlwaysClosesAdmin/drop_failed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogCleanupAlwaysClosesAdmin/success": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogCleanupAlwaysClosesAdmin/verification_failed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogExternalProvenanceGate": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogExternalProvenanceGate/approved_extension_then_wrong_membership": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogExternalProvenanceGate/extension_membership_not_bootstrap": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogExternalProvenanceGate/missing_initdb_source": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogExternalProvenanceGate/same_identity_changed_definition": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogExternalProvenanceGate/system_schema_name_is_not_provenance": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogExternalProvenanceGate/unapproved_origin": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/expired": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/missing_trust_inputs": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/no_fixture_superuser_attestation": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/not_dedicated": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/unapproved_pg_catalog_probe": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/unapproved_role_scope": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/unapproved_system_schema_probe": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed/wrong_attempt": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/beyond_horizon": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/both_extremes": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/exact_600": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/max_issue": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/maximum_boundary": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/minimum_boundary": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/negative_expiry": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/negative_issue_overflow": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogOwnerTTLBounds/over_600": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/coverage_not_dependency_edges": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/gen_random_uuid_cost": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/gen_random_uuid_volatility": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/missing_approved_builtin": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/missing_live_builtin": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/profile_omits_builtin": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/required_set_cannot_drop_builtin": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile/unknown_profile": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/cleanup_failed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/failed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/fatal": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/filtered": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/function_definition": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/outside_schema": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sequence_cache": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sequence_ownership": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/skipped": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_acl_member_direction": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_attached_dependency_address_coverage": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_custom_pg_catalog_function": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_database_acl_member_direction": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_external_attached_view": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_persistent_lock_timeout_store_reopen": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_policy_comment": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_rule_comment": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_toast_options": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_trigger_comment": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/sql_trigger_extension_dependency": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/trigger_disabled": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogRequiredCaseLedger/varchar255_to_1": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/analyzed_public_tables": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/casts": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/conversions": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/custom_access_methods": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/custom_languages": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/event_triggers": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/extended_statistics": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/extensions": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/foreign_relations": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/foreign_schema": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/foreign_servers": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/foreign_wrappers": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/largeobjects": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/publications": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/security_labels": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/subscriptions": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/text_search": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/transforms": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/unsupported_functions": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogScopeFailClosed/unsupported_types": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/am_operators": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/am_procedures": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/collations": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/columns": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/comments": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/constraints": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/db_role_settings": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/default_acl": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/dependencies": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/effective_acl": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/enums": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/extensions": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/external_objects": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/functions": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/goose": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/indexes": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/inheritance": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/opclasses": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/operators": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/opfamilies": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/policies": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/required_external_objects": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/role_memberships": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/roles": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/rules": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/schemas": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/sequences": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/tables": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/toast": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/triggers": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogShapeFailClosed/types": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/constraint_not_validated": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/index_invalid": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/index_not_live": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/index_not_ready": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/missing_migration": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/outside_dependency": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/trigger_disabled": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/unapplied_migration": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/unexpected_extension": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/unknown_migration": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogStateFailClosed/unknown_typmod": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/external_information_schema_owner": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/external_information_schema_reference": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/null_attached_owner": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/toast_nondefault_options": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/unknown_dependency_class": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/unknown_persistent_setting": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/unknown_reference_class": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/unresolved_attached_owner": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSupplementalFailClosed/unsupported_persistent_setting": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/acl": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/dependency": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/domain_base": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/enum_label": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/function_definition": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/index_invalid": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/index_not_ready": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/ordinary_function_security": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/owner": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/sequence_cache": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/sequence_owner_column": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/sequence_owner_table": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/sequence_ownership_kind": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/trigger_disabled": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/typmod255_to_1": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSyntheticDrift/varchar255_to_1": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSystemSchemaNeedsFullCoverage": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSystemSchemaNeedsFullCoverage/custom_pg_catalog_identity": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSystemSchemaNeedsFullCoverage/empty_function_definition": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSystemSchemaNeedsFullCoverage/missing_pg_catalog_definition": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogSystemSchemaNeedsFullCoverage/schema_name_is_not_origin": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogUnsafeSettings": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogUnsafeSettings/autovacuum": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogUnsafeSettings/fsync": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogUnsafeSettings/full_page_writes": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogUnsafeSettings/row_security": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogUnsafeSettings/synchronous_commit": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ],
+    "TestR5Current18FullCatalogUnsafeSettings/track_counts": [
+      "run",
+      "output",
+      "output",
+      "pass"
+    ]
+  },
+  "actual_top_tests": [
+    "TestR5Current18FullCatalogSyntheticDrift",
+    "TestR5Current18FullCatalogShapeFailClosed",
+    "TestR5Current18FullCatalogCanonicalOrder",
+    "TestR5Current18FullCatalogUnsafeSettings",
+    "TestR5Current18FullCatalogStateFailClosed",
+    "TestR5Current18FullCatalogCanonicalBinding",
+    "TestR5Current18FullCatalogScopeFailClosed",
+    "TestR5Current18FullCatalogCleanupAlwaysClosesAdmin",
+    "TestR5Current18FullCatalogSupplementalFailClosed",
+    "TestR5Current18FullCatalogRequiredCaseLedger",
+    "TestR5Current18FullCatalogOwnerReceiptFailClosed",
+    "TestR5Current18FullCatalogOwnerTTLBounds",
+    "TestR5Current18FullCatalogExternalProvenanceGate",
+    "TestR5Current18FullCatalogSystemSchemaNeedsFullCoverage",
+    "TestR5Current18FullCatalogPinnedBuiltinRequiredProfile"
+  ],
+  "actualselected_rootMVS_tagged_compile_inputs": 371,
+  "all15root_and155child_terminal_PASS": true,
+  "cleanup": {
+    "all_phase_groups_gone": true,
+    "all_resource_observers_joined": true,
+    "no_nativePG_SQL_HTTP_SMTPservices_started": true,
+    "original300elapsed": 15.524127960205078,
+    "within300": true
+  },
+  "full_semantic_reference_qualified": false,
+  "no_owned_qualification_or_SML_whole_C18Python21_repeated": true,
+  "owner_or_reference_producer_executed": false,
+  "package_terminal": [
+    {
+      "Action": "pass",
+      "Elapsed": 3.917,
+      "Package": "tabmail/internal/store/postgres",
+      "Time": "2026-10-03T08:06:08.729699+08:00"
+    }
+  ],
+  "phase_receipts": {
+    "catalog-r5benchmark-actual-race-rootMVS-GoList": {
+      "CPU_scope": "GOMAXPROCS2 actualenv, sampled ps%CPU lowerbound; no CPU time hardlimit requested",
+      "RSS_max_gap": 0.11034584045410156,
+      "RSS_peak_observed": 46039040,
+      "RSS_sample_count": 9,
+      "RSS_unit": "psKiB*1024 bytes groupSUM, sampling nothardquota",
+      "elapsed_seconds": 0.9636170864105225,
+      "errors": [],
+      "exit": 0,
+      "expected_uid": 501,
+      "group_final": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "pgid": 16166,
+      "pid": 16166,
+      "source_sha": "c7bf9155f89cd10371665cbd896309385a20dbc0",
+      "status": "terminal_observed"
+    },
+    "catalog15-pure-only": {
+      "CPU_scope": "GOMAXPROCS2 actualenv, sampled ps%CPU lowerbound; no CPU time hardlimit requested",
+      "RSS_max_gap": 0.1266188621520996,
+      "RSS_peak_observed": 499302400,
+      "RSS_sample_count": 135,
+      "RSS_unit": "psKiB*1024 bytes groupSUM, sampling nothardquota",
+      "elapsed_seconds": 14.395118951797485,
+      "errors": [],
+      "exit": 0,
+      "expected_uid": 501,
+      "group_final": {
+        "members": [],
+        "non_zombie_live_pids": [],
+        "status": "observed"
+      },
+      "pgid": 16205,
+      "pid": 16205,
+      "source_sha": "c7bf9155f89cd10371665cbd896309385a20dbc0",
+      "status": "terminal_observed"
+    }
+  },
+  "runtime_boundary": "synthetic-only shapes/definition/gate puretests; not SQLserializer/C18-07 productionreference/C18-09/bootstrap qualifications; no SML/defaultwhole or oldC18Python21 repeated",
+  "runtime_reference_ready": false,
+  "scopedcollector_sha256": "cbc7b296edd81836a6268c2d8fa9d7ad0721344d5b4c28d4d89f308c81f9acb8",
+  "source_closure_sha256": "47fd3642eefab51ed9c19db7bc31167ce19f87f864781f36ffbcb3d8ecce9f0f",
+  "source_sha": "c7bf9155f89cd10371665cbd896309385a20dbc0",
+  "status": "BOUNDED_PURE_SYNTHETIC_PASS",
+  "unfinished": [],
+  "unknown_or_missing_compileinput": false
+}

@@ -15,21 +15,20 @@ import (
 func (s *PgStore) GetParsedMessage(ctx context.Context, a authz.Actor, mailbox, id uuid.UUID) (*company.ParsedMessage, error) {
 	var out *company.ParsedMessage
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
+		if e := s.authorizeReceivedMailboxTx(ctx, tx, a, mailbox); e != nil {
 			return e
 		}
-		mb, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
-		if e != nil {
+
+		if e := requireReceivedContentTx(ctx, tx, a.TenantID, mailbox, id); e != nil {
 			return e
-		}
-		if !mb.CanRead {
-			return app.NotFound("message not found")
 		}
 		d := &company.ParsedMessage{MessageID: id}
 		var parts []byte
-		e = tx.QueryRow(ctx, `SELECT d.source_key,d.source_sha256,d.parser_version,d.text_body,d.html_body,d.body_access,d.parts,d.thread_key FROM mail_documents d JOIN messages m ON m.id=d.message_id AND m.tenant_id=d.tenant_id AND m.raw_object_key=d.source_key WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.id=$3 AND d.parser_version=1`, a.TenantID, mailbox, id).Scan(&d.SourceKey, &d.SourceSHA256, &d.ParserVersion, &d.TextBody, &d.HTMLBody, &d.BodyAccess, &parts, &d.ThreadKey)
+		e := tx.QueryRow(ctx, `SELECT d.source_key,d.source_sha256,d.parser_version,d.text_body,d.html_body,d.body_access,d.parts,d.thread_key FROM mail_documents d JOIN messages m ON m.id=d.message_id AND m.tenant_id=d.tenant_id AND m.raw_object_key=d.source_key WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.id=$3 AND d.parser_version=1 AND `+receivedContentEligible, a.TenantID, mailbox, id).Scan(&d.SourceKey, &d.SourceSHA256, &d.ParserVersion, &d.TextBody, &d.HTMLBody, &d.BodyAccess, &parts, &d.ThreadKey)
 		if errors.Is(e, pgx.ErrNoRows) {
-			return nil
+			// A deadline can cross between the initial qualification and cache
+			// lookup. Only an eligible cache miss may fall back to object I/O.
+			return requireReceivedContentTx(ctx, tx, a.TenantID, mailbox, id)
 		}
 		if e != nil {
 			return e
@@ -38,7 +37,7 @@ func (s *PgStore) GetParsedMessage(ctx context.Context, a authz.Actor, mailbox, 
 			return e
 		}
 		out = d
-		return nil
+		return requireReceivedContentTx(ctx, tx, a.TenantID, mailbox, id)
 	})
 	if e != nil {
 		return nil, e
@@ -67,43 +66,49 @@ func saveParsed(ctx context.Context, tx pgx.Tx, tenant uuid.UUID, d company.Pars
 }
 func (s *PgStore) SaveParsedMessage(ctx context.Context, a authz.Actor, mailbox uuid.UUID, d company.ParsedMessage) error {
 	return s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		if e := lockMailboxAuthorization(ctx, tx, a.TenantID, mailbox); e != nil {
+		if e := s.authorizeReceivedMailboxTx(ctx, tx, a, mailbox); e != nil {
 			return e
 		}
-		mb, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
-		if e != nil {
-			return e
-		}
-		if !mb.CanRead {
-			return app.NotFound("message not found")
-		}
+
 		// The document's FK protects this message, not an ancestor tenant.
 		// Physical delete owns the message before updating mailbox count;
 		// never wait in the opposite direction while holding mailbox SHARE.
 		var source uuid.UUID
-		e = tx.QueryRow(ctx, `SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 AND raw_object_key=$4 FOR SHARE NOWAIT`, a.TenantID, mailbox, d.MessageID, d.SourceKey).Scan(&source)
+		e := tx.QueryRow(ctx, `SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND id=$3 AND raw_object_key=$4 FOR SHARE NOWAIT`, a.TenantID, mailbox, d.MessageID, d.SourceKey).Scan(&source)
 		if errors.Is(e, pgx.ErrNoRows) {
 			return app.NotFound("message not found")
 		}
 		if e != nil {
 			return e
 		}
-		return saveParsed(ctx, tx, a.TenantID, d)
+		if e = requireReceivedContentTx(ctx, tx, a.TenantID, mailbox, d.MessageID); e != nil {
+			return e
+		}
+		if e = saveParsed(ctx, tx, a.TenantID, d); e != nil {
+			return e
+		}
+		// ON CONFLICT can wait on the document row even with the parent
+		// source SHARE already held. Reject and roll back an elapsed deadline
+		// AFTER that wait, before this transaction may commit derived bytes.
+		return requireReceivedContentTx(ctx, tx, a.TenantID, mailbox, d.MessageID)
 	})
 }
 func (s *PgStore) ContentIndexStatus(ctx context.Context, a authz.Actor, mailbox uuid.UUID) (*company.ContentIndexStatus, error) {
 	out := &company.ContentIndexStatus{}
 	e := s.companyReadTx(ctx, a, false, func(tx pgx.Tx, a authz.Actor) error {
-		mb, e := s.mailboxAccessTx(ctx, tx, a, mailbox)
-		if e != nil {
+		if e := s.authorizeReceivedMailboxTx(ctx, tx, a, mailbox); e != nil {
 			return e
 		}
-		if !mb.CanRead {
-			return app.Forbidden("mailbox read permission required")
+
+		if e := tx.QueryRow(ctx, `SELECT count(*),count(d.message_id),count(*) FILTER(WHERE j.state='failed') FROM messages m LEFT JOIN mail_documents d ON d.tenant_id=m.tenant_id AND d.message_id=m.id AND d.source_key=m.raw_object_key AND d.parser_version=1 LEFT JOIN mail_index_jobs j ON j.tenant_id=m.tenant_id AND j.message_id=m.id WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL AND `+receivedContentEligible, a.TenantID, mailbox).Scan(&out.Total, &out.Indexed, &out.Failed); e != nil {
+			return e
 		}
-		return tx.QueryRow(ctx, `SELECT count(*),count(d.message_id),count(*) FILTER(WHERE j.state='failed') FROM messages m LEFT JOIN mail_documents d ON d.tenant_id=m.tenant_id AND d.message_id=m.id AND d.source_key=m.raw_object_key AND d.parser_version=1 LEFT JOIN mail_index_jobs j ON j.tenant_id=m.tenant_id AND j.message_id=m.id WHERE m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`, a.TenantID, mailbox).Scan(&out.Total, &out.Indexed, &out.Failed)
+		return requireReceivedMailboxLiveTx(ctx, tx, a.TenantID, mailbox)
 	})
-	return out, e
+	if e != nil {
+		return nil, e
+	}
+	return out, nil
 }
 func (s *PgStore) ClaimMailIndexJobs(ctx context.Context, limit int) ([]company.MailIndexJob, error) {
 	if limit < 1 || limit > 20 {

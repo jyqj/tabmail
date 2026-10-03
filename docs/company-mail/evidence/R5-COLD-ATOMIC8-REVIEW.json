@@ -1,0 +1,21 @@
+{
+  "created_utc": "2026-10-02T01:55:21.412459+00:00",
+  "status": "only8new_cold_atomic_guard_fixture_targets_passed",
+  "exit": 0,
+  "tests": 8,
+  "unittest_seconds": 4.925,
+  "controller_wall_seconds": 5.028105020523071,
+  "budget_seconds": 10,
+  "source_receipt": "source-receipt.json",
+  "owned_group_absence": {
+    "status": "observed",
+    "members": [],
+    "non_zombie_live_pids": []
+  },
+  "no_Node_npm_Go_PG_Next_browser_started": true,
+  "previous_pure_reexecuted": false,
+  "historical22second_cold_source_and_verdict_not_relabelled": true,
+  "candidate_boundary": "new guarded runner b4db8... verified only via fresh adversarial fixtures, no new actual native cold build or Docker/browser/G0",
+  "task_complete": false,
+  "product_green": false
+}

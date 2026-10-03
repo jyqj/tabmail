@@ -65,8 +65,8 @@ func readOutboundReceipts(ctx context.Context, tx pgx.Tx, observed, current auth
 	// Current permissions and the original credential envelope can only narrow
 	// one another; an old request must not gain newly expanded credential scope.
 	for _, permission := range []*models.EffectivePermission{observed.Permission, current.Permission} {
-		if permission != nil && len(permission.AllowedZoneIDs) > 0 {
-			filter = append(filter, "j.zone_id=ANY("+bind(permission.AllowedZoneIDs)+")")
+		if restricted, ids := permission.ZoneScope(); restricted {
+			filter = append(filter, "j.zone_id=ANY("+bind(ids)+")")
 		}
 	}
 	if key != nil && len(key.AllowedZoneIDs) > 0 {
@@ -88,7 +88,9 @@ func readOutboundReceipts(ctx context.Context, tx pgx.Tx, observed, current auth
 	sql := `WITH visible AS MATERIALIZED (
  SELECT j.id,j.created_at FROM outbound_jobs j WHERE ` + strings.Join(filter, " AND ") + ` AND (` + owner + ` OR ` + content + `)
  ), page AS (SELECT * FROM visible ORDER BY created_at DESC,id DESC LIMIT ` + limit + ` OFFSET ` + offset + `), totals AS (SELECT count(*) AS total FROM visible)
- SELECT j.*,` + content + ` AS content_allowed,totals.total FROM totals
+ SELECT j.*,` + content + ` AS content_allowed,
+  (SELECT array_agg(r.state ORDER BY r.address) FROM outbound_recipients r WHERE r.tenant_id=j.tenant_id AND r.job_id=j.id) AS recipient_states,
+  totals.total FROM totals
  LEFT JOIN page p ON TRUE LEFT JOIN (` + outboundJobSelect + `) j ON j.id=p.id
  ORDER BY p.created_at DESC,p.id DESC`
 	rows, err := tx.Query(ctx, sql, args...)
@@ -112,11 +114,12 @@ func readOutboundReceipts(ctx context.Context, tx pgx.Tx, observed, current auth
 			continue
 		}
 		contentAllowed := false
-		job, e := scanOutboundJob(outboundReceiptRow{Row: rows, content: &contentAllowed, total: &total})
+		var states []string
+		job, e := scanOutboundJob(outboundReceiptRow{Row: rows, content: &contentAllowed, states: &states, total: &total})
 		if e != nil {
 			return nil, 0, e
 		}
-		out = append(out, store.OutboundReceipt{Job: job, ContentAllowed: contentAllowed})
+		out = append(out, store.OutboundReceipt{Job: job, ContentAllowed: contentAllowed, RecipientStates: states, LedgerKnown: job.RecipientLedger && len(states) > 0})
 	}
 	if err = rows.Err(); err != nil {
 		return nil, 0, err
@@ -127,9 +130,10 @@ func readOutboundReceipts(ctx context.Context, tx pgx.Tx, observed, current auth
 type outboundReceiptRow struct {
 	pgx.Row
 	content *bool
+	states  *[]string
 	total   *int
 }
 
 func (r outboundReceiptRow) Scan(dest ...any) error {
-	return r.Row.Scan(append(dest, r.content, r.total)...)
+	return r.Row.Scan(append(dest, r.content, r.states, r.total)...)
 }

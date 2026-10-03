@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "original_deliveries": [
+    {
+      "archive": "R5-USAGE19-FIRST-A-FAILED-LOGS.tar.gz",
+      "original_archive": "/private/tmp/tm-r5usage19-components.iets6i4k/USAGE19-first-A-FAIL-publicsafe-evidence.tar.gz",
+      "original_archive_sha256_from_executor": "0725b2229f7ac985da837ff81a9e7ebb9c50c5a6369eedc91c632b6583cc930b",
+      "archive_hash_recomputed": false,
+      "regular_members": 55,
+      "payload_bytes_modified_by_docs": false,
+      "public_safe_transform_by_executor": true,
+      "private_raw_bytes_not_copied_when_sanitized": true,
+      "review_source": "sanitized archive member"
+    },
+    {
+      "archive": "R5-USAGE19-D1P-D2F-D3NOTRUN-LOGS.tar.gz",
+      "original_archive": "/private/tmp/tm-r5usage19-triage-diagnostic.el6i0vxj/USAGE19-D1PASS-D2FAIL-D3NOTRUN-publicsafe-evidence.tar.gz",
+      "original_archive_sha256_from_executor": "49889618affb945a4e92b911a7ae606c2b5443599cc4ea98381b3bac63d797d8",
+      "archive_hash_recomputed": false,
+      "regular_members": 111,
+      "payload_bytes_modified_by_docs": false,
+      "public_safe_transform_by_executor": true,
+      "private_raw_bytes_not_copied_when_sanitized": true,
+      "review_source": "sanitized archive member"
+    },
+    {
+      "archive": "R5-C18-RSS-V5-PURE21-ACTUAL-LOGS.tar.gz",
+      "original_archive": "/private/tmp/tm-r5C18V2-RSS21.q19hso6j/C18-V2-RSS-V5-pure21-BOUNDED-PASS-evidence.tar.gz",
+      "original_archive_sha256_from_executor": "dff289708d95ef0d73cbe20169b3a8df6d10b59b5e921dee8770ebe5ea42ad84",
+      "archive_hash_recomputed": false,
+      "regular_members": 34,
+      "payload_bytes_modified_by_docs": false,
+      "public_safe_transform_by_executor": false,
+      "private_raw_bytes_not_copied_when_sanitized": false,
+      "review_source": "archive original member"
+    },
+    {
+      "archive": "R5-CATALOG-V5-PURE15-ACTUAL-LOGS.tar.gz",
+      "original_archive": "/private/tmp/tm-r5catalog15pure.y2bkb9x1/CATALOG15-PURE-BOUNDED-PASS-evidence.tar.gz",
+      "original_archive_sha256_from_executor": "8bc52ad10ba6f7ed56ac87afedf7e52c27578f7fdbbb5df1d836ef6e2c0166bb",
+      "archive_hash_recomputed": false,
+      "regular_members": 23,
+      "payload_bytes_modified_by_docs": false,
+      "public_safe_transform_by_executor": false,
+      "private_raw_bytes_not_copied_when_sanitized": false,
+      "review_source": "archive original member"
+    },
+    {
+      "archive": "R5-CURRENT18-COMPLETE-SOURCE-CHECKPOINT-LOGS.tar.gz",
+      "original_archive": "/private/tmp/tm-r5current18-complete-SOURCE.7vf5gy3_/CURRENT18-SOURCE-checkpoint-receipts.tar.gz",
+      "original_archive_sha256_from_executor": "4f885c675817d5da33a1e5d17a3b34eb7a90e5285378b63baf4dd112308c7314",
+      "archive_hash_recomputed": false,
+      "regular_members": 9,
+      "payload_bytes_modified_by_docs": false,
+      "public_safe_transform_by_executor": false,
+      "private_raw_bytes_not_copied_when_sanitized": false,
+      "review_source": "archive original member"
+    }
+  ],
+  "keytouch_safe_repack": {
+    "original_archive": "/private/tmp/tm-r5keytouch-causal.ru_wi1kj/KEYTOUCH-causal-only-BOUNDED-PASS-evidence.tar.gz",
+    "original_sha256_from_executor": "3aa0216b79afafc0e468f080035cfc126aabc653f644e726f852394b3ed1f8a9",
+    "original_members": 88,
+    "safe_archive": "R5-KEYTOUCH-CAUSAL-SAFE87-LOGS.tar.gz",
+    "safe_members": 87,
+    "safe_wrapper_sha256_once": "f61b1cefd89f63e278af1938ee738f102f46b3975f2189a5d4bbcedf990c9206",
+    "excluded_private_connection_URI_member": [
+      "executed-controller-source.py"
+    ],
+    "included_payload_bytes_changed": false,
+    "original_raw_or_archive_modified": false,
+    "no_per_member_or_tree_hash": true
+  },
+  "full_editable18_tree_not_copied_or_rehashed_by_docs": true,
+  "scope_is_not_current19_whole_or_C18_method_qualification": true,
+  "tests_repeated": false,
+  "source_changed_by_docs": false,
+  "original_private_raw_archives_reviews_unchanged": true,
+  "M_baseline_complete": false,
+  "fullCI_green": false,
+  "task_complete": false,
+  "product_green": false
+}

@@ -128,12 +128,15 @@ func r5IndexDeadlineCase(t *testing.T, table string, fail bool, marker string) {
 	t.Log("expired command rejected without effects; fresh token completed and old failure rejected")
 }
 func TestR5IndexCompleteRechecksAfterJobWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5IndexDeadlineCase(t, "mail_index_jobs", false, "COMPLETE_WAIT")
 }
 func TestR5IndexFailRechecksAfterJobWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5IndexDeadlineCase(t, "mail_index_jobs", true, "FAIL_WAIT")
 }
 func TestR5IndexCompleteRechecksAfterDocumentWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	r5IndexDeadlineCase(t, "mail_documents", false, "DOCUMENT_WAIT")
 }
 

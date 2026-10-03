@@ -1,0 +1,97 @@
+{
+  "status": "bounded_WIP_runtime_evidence_not_parent_task_approval",
+  "base_commit": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "scope": "User-authorized ahead-of-dependency P1 slice, original171/G0 requirements retained",
+  "phases": [
+    {
+      "source_tree": "b927cf13a4e2ea6f4e1749619361a84cb8d80d8f",
+      "pg": "32top=23new+9legacy migration-related, actual0fail/skip/missing, raw69testevents+packagepass",
+      "http": "8top:6pass2fail, preserve raw; not HTTP allgreen"
+    },
+    {
+      "source_tree": "081a537e6d78333bc20b7439fefc491c6d46ed31",
+      "http": "Only two formerlyfailed cases: strictparser fixed pass, assignment producer still fails (internal intent serialized instead of public wire)"
+    },
+    {
+      "source_tree": "0ecbe11adefc464e889c09a7a97c26707e3d532b",
+      "http": "Only formal assignment/profiledelete case actualpass after explicit public wire fixture repair; not fresh whole8"
+    },
+    {
+      "source_identity": "product16-authorityfix-evidence/source-identity.json",
+      "authority": "4PG+4HTTP actualrace8top pass after fixture sequence-as-row assertion repair; no product shortcut"
+    },
+    {
+      "source_tree": "744ef189acb36b40a82a7e1a7be604ed99720585",
+      "stage": "Necessary truth24/admin-key6/ownerless-scope12 cases pass with parentrollups25/7/13; source/fixture correction not adminKey exemption",
+      "remaining_red": "PRINCIPAL-OWNERLESS-SENDER-PROVENANCE-DIVERGENCE same real legacy sender ID/key SMTPDATA1 vs retry exactsend403, preserved actualexit1"
+    }
+  ],
+  "missing_for_parent_acceptance": [
+    "current-final-source integrated full backend/Python/Node/HTTP/protocol/frontend gates",
+    "shipping browser source and session journeys",
+    "global profile affected-tenant outbox fanout (P1-130/G7)",
+    "ownerless free/policy/template final qualification closure with negative controls",
+    "original complete M baseline and P0-120 B01 PR/G0"
+  ],
+  "accepted_task_count": 10,
+  "total_original_tasks": 171,
+  "task010_complete": false,
+  "task020_complete": false,
+  "task040_complete": false,
+  "P1_or_G0_green": false,
+  "historical_resource_note": "runtime-handoff historicalPG3344 note was written before observed01:49smart shutdown; cluster later restarted/leasedPG88440 by unique operator. Do not interpret historical alive note as current state.",
+  "archive": {
+    "path": "docs/company-mail/evidence/R5-B02-WIP-PERMISSION-RUNTIME-LOGS.tar.gz",
+    "sha256": "e35b1562d06e0d462d54601d7083940a73bbccf9e52066150b3f32a20414f088",
+    "members": {
+      "product16-assignmentfix-evidence/http-assignment.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "product16-assignmentfix-evidence/http-assignment.jsonl": "27d50a6a1733e06d087fed1a4c5d3f979b78f8672f91206089f0dda63d9ae50a",
+      "product16-assignmentfix-evidence/http-assignment.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-assignmentfix-evidence/source-identity.json": "f052dd18fca5190396ca09e330054b35d882a78cdfa6d95e3bd324c637451f84",
+      "product16-assignmentfix-evidence/summary.json": "9a5d3449dacee54ec0e81a7e16eb397ad3cda1d21e481e60571567cece1f268e",
+      "product16-authorityfix-evidence/expected-tests.json": "4a55bd6e6418253dcb97999458ec858242d20165f6aef910176a1e179eddd5be",
+      "product16-authorityfix-evidence/source-identity.json": "7786cc2a019a1e106efb9ffe4c130d092a90b36dd145a377666b8f958fde40a2",
+      "product16-authorityfix-evidence/summary.json": "bd361c55d3e51c3fb1ea55603159d189ea953c6ef04176b574639369b81f002e",
+      "product16-authorityfix-evidence/targets.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "product16-authorityfix-evidence/targets.jsonl": "e18d8894184c76c39598c019e967b82a29c7a248ecb0ed6e18763e65e118d439",
+      "product16-authorityfix-evidence/targets.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-evidence/expected-new-tests.json": "9d63c66f1dda9029e1967c1057302db77ac82effbac43447c1775c254bafb222",
+      "product16-evidence/http-command.json": "0ab508617ef04363a3efb00f366de3e00aaa4d41e38019b281cc165fac67eb7b",
+      "product16-evidence/http-target-summary.json": "326444c8224b8c51f503a14812cf72524167d4066a2d24894976aedd9c839e16",
+      "product16-evidence/http-target.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "product16-evidence/http-target.jsonl": "0463441f84c8772dc58dcf7551b099d91c48e3625dc089ea9b960169ef7c14d8",
+      "product16-evidence/http-target.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-evidence/pg-command.json": "53b99bc0406e3b6c6506b963f440296f6e6aeb60797afbcc897bc9ea8e5898b5",
+      "product16-evidence/pg-target-summary.json": "8974de00d543a2e1492d246e5996e6193a7ca442b5031c74b6ae76b781c362a5",
+      "product16-evidence/pg-target.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "product16-evidence/pg-target.jsonl": "406933f6d884500054a70d04367adb719fac3db89fa8a9f36d385646b2c6bdc5",
+      "product16-evidence/pg-target.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-evidence/runtime-handoff.json": "21975fdaa02df2d316e8e69a158f4f86e8f2d8aa4952c10008a73e5b880f2869",
+      "product16-evidence/source-closure-before.json": "2b9ecc8c8ed2db7c27f95a4e71823a344eac2bd1b1cb0c92d27e49b87163881e",
+      "product16-httpfix-evidence/http-fix-summary.json": "05f3f1c6a5abfe6455cd3760788f1596ffb19809ff26afb5e7998c7384bba3fa",
+      "product16-httpfix-evidence/http-fix.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "product16-httpfix-evidence/http-fix.jsonl": "8d81aaa338e0a77154d26e8afd54c5a1dbf5e9d6bd2a960355724fe7d353e648",
+      "product16-httpfix-evidence/http-fix.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-httpfix-evidence/source-identity.json": "5bb7957b6f4804ac3d72e9b9722b327437546536b50c11fbb1ebefb02c5bf4e8",
+      "product16-stagefix-evidence/admin_inherit_zone_false.command.json": "b9d72eaf4855487b31f2e0d7cd578fdceb8af833ca7451eb11ac7c240b3b774b",
+      "product16-stagefix-evidence/admin_inherit_zone_false.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "product16-stagefix-evidence/admin_inherit_zone_false.jsonl": "b50688a46456af819fbd110b0ae65d5f09808f86e472a401cb26a9aa6b218a64",
+      "product16-stagefix-evidence/admin_inherit_zone_false.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-stagefix-evidence/ownerless_provenance.command.json": "0e5a76841ec59a98d62117e6ad902301c38d55543f4753a3a40a255056920ce4",
+      "product16-stagefix-evidence/ownerless_provenance.exit": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "product16-stagefix-evidence/ownerless_provenance.jsonl": "a261ba539f6ff5b21b20cf0a9689b7a63731a4a1d1b114f5fbc2055999fea3e0",
+      "product16-stagefix-evidence/ownerless_provenance.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-stagefix-evidence/ownerless_scope.command.json": "cea3e95ddbc213a3dda48f5a5669074967654380a689ca0c6e9f1de07077edc2",
+      "product16-stagefix-evidence/ownerless_scope.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "product16-stagefix-evidence/ownerless_scope.jsonl": "3fbf3b3c9f912d0d3492a2e31951ebef256181865049c4fc89795efb0652678a",
+      "product16-stagefix-evidence/ownerless_scope.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "product16-stagefix-evidence/source-identity.json": "0020c35d7c6db4802ac1173fb2249b449ea4b17c1b42823fd093b9ec7a1c6266",
+      "product16-stagefix-evidence/summary.json": "605005271080b4480cc4d2860c3977b2f398b1b6846fb9a02837c3aa25bd9635",
+      "product16-stagefix-evidence/truth_all_none.command.json": "fef2163e403add9b2755ba95e02452c5a4d5564b9e25737e7aa313e23daad961",
+      "product16-stagefix-evidence/truth_all_none.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "product16-stagefix-evidence/truth_all_none.jsonl": "b8dfcc8aff9bb9a302d15230d541bcbf0a656fe747ed7136e8c26580496046e0",
+      "product16-stagefix-evidence/truth_all_none.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "excluded": "actualDSN/JWT/rawHTTPpayload/DB/source tar/objects/cache; only original test events/exit/command/safe summaries/closure identities"
+}

@@ -93,6 +93,7 @@ func TestR5AttachmentFinishRejectsExpiryAfterWait(t *testing.T) {
 // worker starts. Observing the database clock cross the saved deadline catches
 // stale transaction/statement-time checks even without a concurrent UPDATE.
 func TestR5AttachmentFinishUsesTimeAfterLockWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	a := r5UploadingAttachment(t, f, f.personal.ID)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)

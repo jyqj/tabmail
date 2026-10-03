@@ -9,11 +9,7 @@ import (
 )
 
 func (h *OutboundHandler) writeOutboundView(w http.ResponseWriter, r *http.Request, job *models.OutboundJob) {
-	view, err := h.subs.RedactOutboundJob(r.Context(), middleware.ActorFromContext(r.Context()), job)
-	if err != nil {
-		respondAppError(w, h.logger, err)
-		return
-	}
+	view := h.subs.CommittedReceiptView(r.Context(), middleware.ActorFromContext(r.Context()), job)
 	ok(w, view)
 }
 

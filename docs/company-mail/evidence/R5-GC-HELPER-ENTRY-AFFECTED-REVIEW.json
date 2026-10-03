@@ -1,0 +1,119 @@
+{
+  "GC_scope_boundaries": "Formal default full CI still must run separately to prove overall noSkip. Existing cb03f7a results remain historical and do not cover this new test-binary entry.",
+  "M_retry": false,
+  "actual_leaf_count": 9,
+  "actual_schema_version": "18",
+  "actual_source_closure_sha256": "4be2c8b152b1e20a90c518016cb581df418ddc276a1a3ebe1465d90bf88786b4",
+  "actual_test_subtest_pass_count": 11,
+  "actual_top_count": 4,
+  "catalog_scope": "oldactual18cb03 unchanged, official bootstrap only; no repeated catalogue/currentheads",
+  "cleanup": {
+    "base_database": "tm_gc_helper_validation",
+    "old_resources_untouched": true,
+    "owned_pg_pid": 70212,
+    "owned_pid_observation": "absent",
+    "owned_pid_ps_exit": 1,
+    "owned_root": "/private/tmp/tm-r5gc-helper.y556_yzt",
+    "pg_stop_exit": 0,
+    "pidfile_absent": true,
+    "socket_absent": true,
+    "test_database_query_exit": 0,
+    "test_databases": [],
+    "utc": "2026-10-02T09:40:52.370683+00:00"
+  },
+  "fullCI_green": false,
+  "old_backend_and_context_subcases_not_selected": true,
+  "old_cb03_gc12_and_catalog18_unchanged": true,
+  "original600_combined_budget": {
+    "actual_combined_elapsed_including_initial_infra_cleanup_and_repair": 137.10643696784973,
+    "budget_seconds": 600,
+    "initial_attempt_actual_cleanup": {
+      "base_database": "tm_gc_helper_validation",
+      "old_resources_untouched": true,
+      "owned_pg_pid": 69781,
+      "owned_pid_observation": "absent",
+      "owned_pid_ps_exit": 1,
+      "owned_root": "/private/tmp/tm-r5gc-helper.6ay5axpz",
+      "pg_stop_exit": 0,
+      "pidfile_absent": true,
+      "socket_absent": true,
+      "test_database_query_exit": 0,
+      "test_databases": [],
+      "utc": "2026-10-02T09:38:38.935291+00:00"
+    },
+    "initial_attempt_failure": "controller stale reference head_packet NameError before selected Go targets; no source/test modifications",
+    "initial_attempt_path": "/private/tmp/tm-r5gc-helper.6ay5axpz",
+    "initial_attempt_product_test_count": 0,
+    "last_native_cleanup_observed_wall": 1790934052.370683,
+    "mainGo_guard_absolute_deadline_before_original_window_deadline": true,
+    "original_first_absolute_deadline_wall": 1790934515.264246,
+    "original_first_native_window_origin_wall": 1790933915.264246,
+    "raw_local_attempt_clocks_preserved_not_relabelled": true,
+    "within_original600": true
+  },
+  "outer_deadline_wall": 1790934626.58566,
+  "outer_elapsed_seconds": 25.941943883895874,
+  "outer_origin_wall": 1790934026.58566,
+  "outer_within600_including_nativecleanup": true,
+  "production_migration_bytes_same_cb03": true,
+  "results": {
+    "GC-helper-protocol-and-three-affected-parent-controls": {
+      "actual_test_names": [
+        "TestR5AttachmentGCTenantProcessEntryProtocol",
+        "TestR5AttachmentGCTenantProcessEntryProtocol/entry_helper_not_registered",
+        "TestR5AttachmentGCTenantProcessEntryProtocol/entry_normal_mode_ignores_child_env",
+        "TestR5AttachmentGCTenantProcessEntryProtocol/entry_child_missing_dsn",
+        "TestR5AttachmentGCTenantProcessEntryProtocol/entry_unknown_child_argument",
+        "TestR5AttachmentGCTenantProcessEntryProtocol/entry_duplicate_child_argument",
+        "TestR5AttachmentGCTenantProcessEntryProtocol/entry_child_with_unexpected_argument",
+        "TestR5AttachmentGCTenantActualProcessRestart",
+        "TestR5AttachmentGCTenantDoubleProcessDoesNotReenterBatch",
+        "TestR5AttachmentGCTenantInterruptedSessionResumes",
+        "TestR5AttachmentGCTenantInterruptedSessionResumes/process_killed"
+      ],
+      "exit": 0,
+      "failed_names": [],
+      "json_decode_error_count": 0,
+      "leaf_count": 9,
+      "missing_terminal": [],
+      "owned_group_gone": true,
+      "package_terminal": [
+        {
+          "action": "pass",
+          "elapsed": 14.302,
+          "package": "tabmail/internal/store/postgres"
+        }
+      ],
+      "pass_count": 11,
+      "run_count": 11,
+      "skipped_names": [],
+      "timed_out": false,
+      "top_count": 4
+    },
+    "official-schema18-bootstrap": {
+      "execution": {
+        "absolute_deadline_wall_time": 1790934117.342439,
+        "budget_seconds": 90,
+        "elapsed_wall_seconds": 2.174619197845459,
+        "final_owned_group_observation": {
+          "members": [],
+          "non_zombie_live_pids": [],
+          "status": "observed"
+        },
+        "observed_wall_time": 1790934029.5170581,
+        "owned_process_group": 70224,
+        "process_returncode": 0,
+        "process_returncode_status": "observed_parent_poll",
+        "scope": "absolute wall deadline including host suspension; cleanup is observed after resume, never guaranteed during sleep",
+        "started_wall_time": 1790934027.342439,
+        "timed_out": false
+      },
+      "exit": 0
+    }
+  },
+  "scope": "GC_OSentry_protocol_and_only_three_affected_process_parent_controls_testonly_delta",
+  "scope_verdict": "PASS_exact_GC_entry_protocol_plus_three_affected_parent_process_controls_only",
+  "source_postcheck_equal": true,
+  "source_sha": "9f58e14c09e3dcf5ea334db93b0cde13bb5db3eb",
+  "two_signed_OSentry_testonly_changes_current_production_migration_same_cb03": true
+}

@@ -51,7 +51,7 @@ func (s *PgStore) ExplainMailboxAccess(ctx context.Context, a authz.Actor, mailb
 		if rights.Mailbox.ExpiresAt != nil && !rights.Mailbox.ExpiresAt.After(time.Now()) {
 			v.Reasons = append(v.Reasons, "expired")
 		}
-		if target.Permission != nil && !models.ZoneAllowed(target.Permission.AllowedZoneIDs, rights.Mailbox.ZoneID) {
+		if target.Permission != nil && !target.Permission.AllowsZone(rights.Mailbox.ZoneID) {
 			v.Reasons = append(v.Reasons, "zone_restricted")
 		}
 		if !target.IsTenantAdmin() && (target.Permission == nil || !target.Permission.CanSend) {

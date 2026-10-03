@@ -749,6 +749,90 @@ func TestR5ProtocolOffboardingSharedCases(t *testing.T) {
 	}
 }
 
+// PE-only transport helpers adapt shared legacy field intent to the shipping
+// editor protocol. They do not change shared inputs, expected values or policy.
+func r5PEEditorResponse(t *testing.T, w *httptest.ResponseRecorder, user uuid.UUID) company.PermissionEditorSnapshot {
+	t.Helper()
+	if w.Code != http.StatusOK {
+		t.Fatalf("formal PE setup status: want 200 got %d: %s", w.Code, w.Body.String())
+	}
+	snapshot := r3Data[company.PermissionEditorSnapshot](t, w)
+	if snapshot.UserID != user || snapshot.Effective == nil {
+		t.Fatal("formal PE editor returned incorrect subject or absent effective permission")
+	}
+	must(t, snapshot.Revision.Validate())
+	return snapshot
+}
+
+func r5PEEditorSnapshot(t *testing.T, h http.Handler, token string, user uuid.UUID) company.PermissionEditorSnapshot {
+	t.Helper()
+	return r5PEEditorResponse(t, r5Observed(t, h, token, "GET", "/api/v1/admin/users/"+user.String()+"/permission-editor", nil), user)
+}
+
+func r5PEProfileSnapshot(t *testing.T, h http.Handler, token string, id uuid.UUID) models.PermissionProfile {
+	t.Helper()
+	w := r5Observed(t, h, token, "GET", "/api/v1/admin/permissions", nil)
+	if w.Code != http.StatusOK {
+		t.Fatalf("formal PE profile listing: want 200 got %d: %s", w.Code, w.Body.String())
+	}
+	for _, profile := range r3Data[[]models.PermissionProfile](t, w) {
+		if profile.ID == id {
+			if profile.Revision == "" {
+				t.Fatal("formal PE profile has no CAS revision")
+			}
+			return profile
+		}
+	}
+	t.Fatal("formal PE profile not visible in administrator listing")
+	return models.PermissionProfile{}
+}
+
+func r5PEWirePatch(t *testing.T, original map[string]any) map[string]any {
+	t.Helper()
+	wire := map[string]any{}
+	for field, value := range original {
+		if field != "allowed_zone_ids" {
+			wire[field] = value
+			continue
+		}
+		if value == nil {
+			wire["domain_access"] = nil
+			continue
+		}
+		raw, err := json.Marshal(value)
+		must(t, err)
+		var zones []uuid.UUID
+		must(t, json.Unmarshal(raw, &zones))
+		mode := "list"
+		if len(zones) == 0 {
+			// The declared legacy [] intent is explicit all, not inherit/none.
+			mode, zones = "all", []uuid.UUID{}
+		}
+		wire["domain_access"] = map[string]any{"mode": mode, "zone_ids": zones}
+	}
+	return wire
+}
+
+func r5PEAssignEditor(t *testing.T, h http.Handler, token string, user uuid.UUID, expected company.PermissionRevision, selected *models.PermissionProfile, patch map[string]any) company.PermissionEditorSnapshot {
+	t.Helper()
+	body := map[string]any{"expected_revision": expected, "profile_id": nil, "profile_revision": nil, "patch": patch}
+	if selected != nil {
+		body["profile_id"], body["profile_revision"] = selected.ID, selected.Revision
+	}
+	return r5PEEditorResponse(t, r5Observed(t, h, token, "POST", "/api/v1/admin/users/"+user.String()+"/permission-editor/assignment", body), user)
+}
+
+func r5PEUserRevisionAdvanced(t *testing.T, before, after company.PermissionRevision) {
+	t.Helper()
+	must(t, before.Validate())
+	must(t, after.Validate())
+	// Validated positive canonical decimal strings avoid float precision loss.
+	advanced := len(after.UserRevision) > len(before.UserRevision) || len(after.UserRevision) == len(before.UserRevision) && after.UserRevision > before.UserRevision
+	if before.UserID != after.UserID || before.TenantID != after.TenantID || !advanced {
+		t.Fatal("formal PE assignment did not advance its stable subject revision")
+	}
+}
+
 func TestR5ProtocolPermissionIntentSharedCases(t *testing.T) {
 	executed := 0
 	for _, c := range r5SharedCases(t) {
@@ -774,12 +858,15 @@ func TestR5ProtocolPermissionIntentSharedCases(t *testing.T) {
 				f := seedCompany(t)
 				ctx := context.Background()
 				h := r5SharedRouter(t, f)
-				path := "/api/v1/admin/users/" + f.employee.ID.String() + "/permissions"
+				path := "/api/v1/admin/users/" + f.employee.ID.String() + "/permission-editor"
 				setup := c
 				setup.Expected.Status = 200
 				setup.Expected.Wire.Code = ""
 				seed := map[string]any{"can_send": false, "allowed_zone_ids": []uuid.UUID{f.zone.ID}, "daily_send_quota": 19}
-				r5Wire(t, h, r3Token(t, f.admin), "PUT", path, seed, setup)
+				token := r3Token(t, f.admin)
+				observed := r5PEEditorSnapshot(t, h, token, f.employee.ID)
+				seededWire := r5Wire(t, h, token, "PATCH", path, map[string]any{"expected_revision": observed.Revision, "patch": r5PEWirePatch(t, seed)}, setup)
+				seeded := r5PEEditorResponse(t, seededWire, f.employee.ID)
 				var beforeSend *bool
 				var beforeZones []uuid.UUID
 				must(t, f.pool.QueryRow(ctx, `SELECT can_send,allowed_zone_ids FROM user_permission_overrides WHERE user_id=$1`, f.employee.ID).Scan(&beforeSend, &beforeZones))
@@ -805,7 +892,11 @@ func TestR5ProtocolPermissionIntentSharedCases(t *testing.T) {
 						t.Fatal("unknown field intent")
 					}
 				}
-				r5Wire(t, h, r3Token(t, f.admin), "PUT", path, patch, setup)
+				current := r5PEEditorSnapshot(t, h, token, f.employee.ID)
+				if !current.Revision.Equal(seeded.Revision) {
+					t.Fatal("formal PE setup changed before the shared field-intent request")
+				}
+				r5Wire(t, h, token, "PATCH", path, map[string]any{"expected_revision": current.Revision, "patch": r5PEWirePatch(t, patch)}, setup)
 				var afterSend *bool
 				var afterZones []uuid.UUID
 				var quota *int
@@ -833,6 +924,10 @@ func TestR5ProtocolPermissionIntentSharedCases(t *testing.T) {
 				case "[]":
 					if afterZones == nil || len(afterZones) != 0 {
 						t.Fatal("explicit empty domain set collapsed to inheritance")
+					}
+					snapshot := r5PEEditorSnapshot(t, h, token, f.employee.ID)
+					if snapshot.Overrides == nil || snapshot.Overrides.DomainAccess.Mode != "all" || snapshot.FieldSources["domain_access"] != "override" {
+						t.Fatal("explicit legacy [] domain intent lost all/override provenance")
 					}
 				}
 			})
@@ -1113,8 +1208,11 @@ func TestR5ProtocolPermissionStaleSharedCases(t *testing.T) {
 			marker := r5Input[string](t, c, "target_failure_marker")
 			if r5Input[string](t, c, "operation") == "profile_patch" {
 				profile := r3Data[models.PermissionProfile](t, r3HTTP(t, h, token, "POST", "/api/v1/admin/permissions", map[string]any{"name": "Protocol stale profile", "can_send": true}, 201))
+				profile = r5PEProfileSnapshot(t, h, token, profile.ID)
+				member := r5PEEditorSnapshot(t, h, token, f.employee.ID)
+				r5PEAssignEditor(t, h, token, f.employee.ID, member.Revision, &profile, map[string]any{})
 				path := "/api/v1/admin/permissions/" + profile.ID.String()
-				r3HTTP(t, h, token, "PATCH", path, map[string]any{"can_send": false}, 200)
+				r3HTTP(t, h, token, "PATCH", path, map[string]any{"expected_revision": profile.Revision, "can_send": false}, 200)
 				revoked, e := f.st.GetPermissionProfile(ctx, profile.ID)
 				must(t, e)
 				if revoked.CanSend {
@@ -1123,7 +1221,7 @@ func TestR5ProtocolPermissionStaleSharedCases(t *testing.T) {
 				if !r5Input[bool](t, c, "stale_revision") || !r5Input[bool](t, c, "patch_contains_old_security_fields") {
 					t.Fatal("stale profile scenario inputs missing")
 				}
-				w := r5Observed(t, h, token, "PATCH", path, map[string]any{"description": "Stale editor unrelated change", "can_send": profile.CanSend})
+				w := r5Observed(t, h, token, "PATCH", path, map[string]any{"expected_revision": profile.Revision, "description": "Stale editor unrelated change", "can_send": profile.CanSend})
 				current, e := f.st.GetPermissionProfile(ctx, profile.ID)
 				must(t, e)
 				if w.Code == 200 && current.CanSend {
@@ -1138,17 +1236,32 @@ func TestR5ProtocolPermissionStaleSharedCases(t *testing.T) {
 				}
 				return
 			}
-			path := "/api/v1/admin/users/" + f.employee.ID.String() + "/permissions"
-			old := r3Data[models.UserPermissionOverride](t, r3HTTP(t, h, token, "PUT", path, map[string]bool{"can_send": true}, 200))
+			path := "/api/v1/admin/users/" + f.employee.ID.String() + "/permission-editor"
+			observed := r5PEEditorSnapshot(t, h, token, f.employee.ID)
+			old := r5PEEditorResponse(t, r5Observed(t, h, token, "PATCH", path, map[string]any{"expected_revision": observed.Revision, "patch": map[string]any{"can_send": true}}), f.employee.ID)
+			if old.Overrides == nil || old.Overrides.CanSend == nil || !*old.Overrides.CanSend || !old.Effective.CanSend {
+				t.Fatal("formal PE old-revision positive control did not enable send")
+			}
 			if !r5Input[bool](t, c, "old_revision") || !r5Input[bool](t, c, "override_recreated_or_profile_reassigned") {
 				t.Fatal("ABA scenario inputs missing")
 			}
-			r3HTTP(t, h, token, "DELETE", path, nil, 204)
-			fresh := r3Data[models.UserPermissionOverride](t, r3HTTP(t, h, token, "PUT", path, map[string]bool{"can_send": false}, 200))
-			if old.ID == fresh.ID {
-				t.Fatal("override identity was not recreated")
+			// The shared input permits profile reassignment. Use that formal ABA
+			// path rather than an obsolete DELETE/recreate override-row protocol.
+			alternate := r3Data[models.PermissionProfile](t, r3HTTP(t, h, token, "POST", "/api/v1/admin/permissions", map[string]any{"name": "Protocol ABA alternate profile", "can_send": false}, 201))
+			alternate = r5PEProfileSnapshot(t, h, token, alternate.ID)
+			different := r5PEAssignEditor(t, h, token, f.employee.ID, old.Revision, &alternate, map[string]any{"can_send": false})
+			r5PEUserRevisionAdvanced(t, old.Revision, different.Revision)
+			originalProfile := old.Profile
+			if originalProfile != nil {
+				currentProfile := r5PEProfileSnapshot(t, h, token, originalProfile.ID)
+				originalProfile = &currentProfile
 			}
-			w := r5Observed(t, h, token, "PUT", path, map[string]any{"can_send": old.CanSend, "updated_at": old.UpdatedAt, "id": old.ID})
+			fresh := r5PEAssignEditor(t, h, token, f.employee.ID, different.Revision, originalProfile, map[string]any{"can_send": false})
+			r5PEUserRevisionAdvanced(t, different.Revision, fresh.Revision)
+			if !reflect.DeepEqual(old.Revision.ProfileID, fresh.Revision.ProfileID) || old.Revision.Equal(fresh.Revision) || fresh.Overrides == nil || fresh.Overrides.CanSend == nil || *fresh.Overrides.CanSend || fresh.Effective.CanSend {
+				t.Fatal("formal PE ABA restored profile identity but lost stable revision or revoked raw send intent")
+			}
+			w := r5Observed(t, h, token, "PATCH", path, map[string]any{"expected_revision": old.Revision, "patch": map[string]any{"can_send": *old.Overrides.CanSend}})
 			after, e := f.st.EffectivePermission(ctx, f.employee.ID)
 			must(t, e)
 			if w.Code == 200 && after.CanSend {
@@ -1561,7 +1674,7 @@ func TestR5ProtocolBCCSurfacesSharedCases(t *testing.T) {
 					if actualEventType == "" {
 						t.Fatal("actual outbox producer emitted no event type")
 					}
-					dispatch := hooks.New(hooks.Config{URLs: server.URL, Timeout: time.Second, PollInterval: 10 * time.Millisecond, BatchSize: 100}, zerolog.Nop()).BindStore(f.st)
+					dispatch := hooks.New(hooks.Config{URLs: server.URL, AllowedCIDRs: "127.0.0.1/32,::1/128", Timeout: time.Second, PollInterval: 10 * time.Millisecond, BatchSize: 100}, zerolog.Nop()).BindStore(f.st)
 					workerCtx, cancel := context.WithTimeout(ctx, 8*time.Second)
 					defer cancel()
 					done := make(chan struct{})

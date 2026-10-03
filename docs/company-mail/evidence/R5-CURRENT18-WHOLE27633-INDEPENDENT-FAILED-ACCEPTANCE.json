@@ -1,0 +1,50 @@
+{
+  "artifact_kind": "central_summary_of_delivered_independent_readonly_failed_attempt_review_NOT_machine_raw",
+  "reviewer": "/root/whole_backend_failure_independent_review",
+  "verdict": "ACCEPTED_BOUNDED_FAILED_ATTEMPT_WITH_EXECUTION_CONTRACT_DEVIATION",
+  "source_sha": "27633d96f6bc93d226ce158d71dc215b19ae429a",
+  "source_closure_sha256": "ce40c0979d2a93deae5381b4f169a07bb736f84a09d2d02521c4574af7fcff17",
+  "source_manifest_entries": 733,
+  "actual_raw_events": 30290,
+  "actual_started_PASS_FAIL_SKIP_unfinished": [
+    7395,
+    7373,
+    1,
+    1,
+    20
+  ],
+  "actual_declared_required_packages": [
+    873,
+    872,
+    51
+  ],
+  "actual_declared_top_not_started": 201,
+  "PG_PAUSE_CONT": [
+    19,
+    0
+  ],
+  "actual_GOMAXPROCS": 1,
+  "approved_GOMAXPROCS": 2,
+  "actual_Go_exit": 1,
+  "unique_failure": "TestR5LegacyContentKeyHTTPPreservesSafeReceipt:233 HTTP200 missing oldfixture privatebody marker",
+  "PG_package_elapsed_seconds": 180.847,
+  "KeyExpiryAfterMailboxWait_running_seconds_at_timeout": 1,
+  "deadlock_or_single_test180_cause_proven": false,
+  "classifier_exit_both": 1,
+  "current872_missing_notpass": 388,
+  "original247_missing_notpass": 180,
+  "classifier_missing_notpass_are_NOT_actual_failure_counts": true,
+  "actual_job_elapsed_seconds": 342.683,
+  "original_total_budget_seconds": 1200,
+  "cleanup": "nativePG58695 stop0/groupsgone/PIDsocketabsent; one residualtestDB zero connections retained in stoppedroot NOT_DB0",
+  "original_archive_sha256_from_reviewer": "e3f6b9d578d303c253a3c58518e19bde7e8f5b0e2ad9649e88984bff76f8c367",
+  "archive_regular_members": 53,
+  "archive_bytes": 415871,
+  "reviewer_reran_tests_or_modified_source": false,
+  "original_raw_modified": false,
+  "whole_backend_pass": false,
+  "dual_lane_contract_qualified": false,
+  "fourjobCI_G0_pass": false,
+  "task_complete": false,
+  "product_green": false
+}

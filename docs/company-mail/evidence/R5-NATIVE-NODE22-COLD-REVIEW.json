@@ -1,0 +1,56 @@
+{
+  "G0_passed": false,
+  "Go_or_PG_started": false,
+  "S_M_L_executed": false,
+  "absolute_python": "/private/tmp/tabmail-r5-enqueue.LUPWmvR1/tooling/venv/bin/python3",
+  "all_owned_native_groups_no_live": true,
+  "artifact_presence": {
+    ".next/BUILD_ID": true,
+    ".next/standalone/server.js": true,
+    ".next/static": true
+  },
+  "browser_passed": false,
+  "cleanup": "all Node/npm/runner/owned idle assertion process groups observed absent; no native server/Go/Docker launched",
+  "cold_before_install": true,
+  "controller_runner_group_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "created_utc": "2026-10-02T00:24:24.999123+00:00",
+  "dirty_delta_count": 17,
+  "frozen_runner_and_pure_input_contract": "/tmp/tabmail-r5-cold-prepared-078c30697acd/frozen-execution-v2.json",
+  "frozen_runner_sha256": "86645b99a56ece120fa80873cc88a8e7d9f81b44208f8491fed0d18b2bcaef1e",
+  "node": "v22.23.2",
+  "npm": "10.9.8",
+  "npm_build_exit": 0,
+  "npm_build_seconds": 9.263,
+  "npm_ci_exit": 0,
+  "npm_ci_seconds": 12.327,
+  "original_lock_and_package_unchanged": true,
+  "outer_execution_plus_capture_cleanup_wall_seconds": 22.306615114212036,
+  "owned_idle_assertion_group_observation": {
+    "members": [],
+    "non_zombie_live_pids": [],
+    "status": "observed"
+  },
+  "private_cache_and_home": "new empty owned directories; no workspace node_modules/.next or user npm config reused; generated private source/dependency/build artifacts retained for evidence",
+  "product_green": false,
+  "pure_boundary": "16 baseline new pure + 2 newpin + 4 newbudget cleanup +1 npmrc targets recorded in distinct old/repair receipts; executor did not rerun them or claim a newest all-suite count",
+  "runner_exit": 0,
+  "runtime_window": "R5-COLD-WEB-20261002-sole-calibration",
+  "shipping_image_passed": false,
+  "source_identity_kind": "tracked_web_archive_sha256_and_explicit_17_dirty_delta_receipt",
+  "source_identity_sha256": "532a491c673dfd7f384f514041b465dbbdb1ae63ac4dc018bb80eb3d2046aa59",
+  "source_receipt": "source-receipt.json",
+  "source_root": "/private/tmp/tabmail-r5-cold-web-20261002-native22-exec/source",
+  "stage_ceiling_seconds": 300,
+  "status": "native_Darwin_arm64_cold_original_lock_Next_source_build_passed",
+  "task_complete": false,
+  "total_wall_ceiling_seconds": 600,
+  "tracked_HEAD": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+  "tracked_regular_file_count": 171,
+  "warnings": [
+    "npm node-domexception@1.0.0 deprecation warning only, npm-ci exit0; no unsupported success inferred"
+  ]
+}

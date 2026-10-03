@@ -346,53 +346,7 @@ components:
           html_body:
             type: string
     Submission:
-      type: object
-      required: [id, mailbox_id, from, subject, recipients, status, draft_consumed, attachment_count, created_at, content_redacted, delivery_uncertain]
-      description: Employee-facing projection of an outbound submission; queue internals (attempts, lease,
-        SMTP responses, delivery tokens) are excluded.
-      properties:
-        id:
-          type: string
-          format: uuid
-        mailbox_id:
-          type: string
-          format: uuid
-        from:
-          type: string
-        subject:
-          type: string
-        recipients:
-          type: array
-          items:
-            $ref: '#/components/schemas/SubmissionRecipient'
-        status:
-          type: string
-          enum:
-          - cancelled
-          - submitted
-          - waiting
-          - sending
-          - partially_accepted
-          - accepted
-          - needs_attention
-        template_version_id:
-          type:
-          - string
-          - 'null'
-          format: uuid
-        draft_consumed:
-          type: boolean
-        attachment_count:
-          type: integer
-        created_at:
-          type: string
-          format: date-time
-        content_redacted:
-          type: boolean
-        delivery_uncertain:
-          type: boolean
-        capabilities:
-          $ref: '#/components/schemas/SubmissionCapabilities'
+      $ref: '#/components/schemas/OutboundReceipt'
     APIKeyScope:
       type: string
       enum:
@@ -823,53 +777,98 @@ components:
       - failed
       - dead
     OutboundJob:
+      $ref: '#/components/schemas/OutboundReceipt'
+    OutboundReceipt:
       type: object
+      additionalProperties: false
+      required: [id, state, status, progress, delivery_uncertain]
+      description: Strict metadata-only ordinary receipt, independent of content-read authority.
+        Accepted means next-hop acceptance, not final delivery. No subject, sender or recipient
+        addresses, content, protocol diagnostics, storage references or principal identifiers
+        are returned. After an already committed submit or retry, unavailable presentation
+        authority returns only the committed ID, normalized state, needs_attention, unknown
+        progress, false delivery_uncertain and all-false capabilities with unknown reason;
+        tenant, timestamps, attempt count and next retry are omitted, not invented or null.
       properties:
-        content_redacted:
-          type: boolean
-          description: Content and BCC have been removed for a metadata-only viewer.
-        id:
-          type: string
-          format: uuid
+        id: {type: string, format: uuid}
         tenant_id:
           type: string
           format: uuid
-        mail_from:
-          type: string
-        rcpt_to:
-          type: array
-          items:
-            type: string
-        subject:
-          type: string
-        delivered_domains:
-          type: array
-          items:
-            type: string
-          description: Domains accepted by the next hop; normal retries skip these domains
-        in_flight_domain:
-          type: string
-          description: Nonempty on a failed job means acceptance is uncertain and blind retry is forbidden
+          description: Present only from the current authorized receipt snapshot.
         state:
-          $ref: '#/components/schemas/OutboundState'
-        attempts:
-          type: integer
-        max_attempts:
-          type: integer
-        last_error:
           type: string
-        smtp_code:
-          type: integer
-        smtp_response:
+          enum: [pending, processing, sent, retry, failed, dead, cancelled, unknown]
+        status:
           type: string
-        message_id_header:
-          type: string
-        created_at:
+          enum: [cancelled, submitted, sending, partially_accepted, accepted, needs_attention]
+        progress:
+          $ref: '#/components/schemas/OutboundReceiptProgress'
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
+        attempt_count: {type: integer, minimum: 0}
+        next_retry:
           type: string
           format: date-time
-        updated_at:
-          type: string
-          format: date-time
+          description: Omitted unless a retry-state snapshot has a known next attempt time.
+        delivery_uncertain:
+          type: boolean
+          description: Known delivery ambiguity; false alone does not prove delivery or a known ledger.
+        capabilities:
+          $ref: '#/components/schemas/SubmissionCapabilities'
+    OutboundReceiptProgress:
+      type: object
+      additionalProperties: false
+      required: [completeness]
+      properties:
+        completeness: {type: string, enum: [known, unknown]}
+        counts:
+          $ref: '#/components/schemas/OutboundReceiptCounts'
+      oneOf:
+      - properties:
+          completeness: {enum: [known]}
+        required: [counts]
+      - properties:
+          completeness: {enum: [unknown]}
+        not:
+          required: [counts]
+      description: Counts cover the complete durable ledger, including all recipient categories,
+        never a filtered visible-recipient subset. Missing, empty or malformed ledger evidence
+        is unknown with counts omitted, not an invented zero-recipient success.
+    OutboundReceiptCounts:
+      type: object
+      additionalProperties: false
+      required: [total, accepted, pending, temporary, permanent, uncertain]
+      properties:
+        total: {type: integer, minimum: 1}
+        accepted: {type: integer, minimum: 0}
+        pending: {type: integer, minimum: 0}
+        temporary: {type: integer, minimum: 0}
+        permanent: {type: integer, minimum: 0}
+        uncertain: {type: integer, minimum: 0}
+    OutboundReceiptResponse:
+      type: object
+      additionalProperties: false
+      required: [data]
+      properties:
+        data:
+          $ref: '#/components/schemas/OutboundReceipt'
+    OutboundReceiptListResponse:
+      type: object
+      additionalProperties: false
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/OutboundReceipt'
+        meta:
+          type: object
+          additionalProperties: false
+          required: [total, page, per_page]
+          properties:
+            total: {type: integer, minimum: 0}
+            page: {type: integer, minimum: 1}
+            per_page: {type: integer, minimum: 1}
     PermissionProfile:
       type: object
       properties:
@@ -915,9 +914,793 @@ components:
         updated_at:
           type: string
           format: date-time
+    PermissionEditorAssignmentCommand:
+      type: object
+      additionalProperties: false
+      required:
+      - expected_revision
+      - profile_id
+      - profile_revision
+      - patch
+      properties:
+        expected_revision:
+          $ref: '#/components/schemas/PermissionEditorRevision'
+        profile_id:
+          anyOf:
+          - type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+          - type: 'null'
+        profile_revision:
+          anyOf:
+          - type: string
+            pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+            description: Canonical positive signed-int64 decimal string; never a JSON
+              number.
+          - type: 'null'
+        patch:
+          $ref: '#/components/schemas/PermissionEditorPatch'
+      oneOf:
+      - properties:
+          profile_id:
+            type: 'null'
+          profile_revision:
+            type: 'null'
+      - properties:
+          profile_id:
+            type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+          profile_revision:
+            type: string
+            pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+            description: Canonical positive signed-int64 decimal string; never a JSON
+              number.
+      description: Observe current editor and newly selected profile; assignment and patch
+        are one atomic transaction. Explicit null/null removes assignment. Missing profile
+        keys are not removal intent.
+    PermissionProfileDeletionChange:
+      type: object
+      additionalProperties: false
+      required:
+      - revision
+      - before
+      - after
+      properties:
+        revision:
+          $ref: '#/components/schemas/PermissionEditorRevision'
+        before:
+          $ref: '#/components/schemas/EffectivePermission'
+        after:
+          $ref: '#/components/schemas/EffectivePermission'
+    PermissionProfileDeletionPreview:
+      type: object
+      additionalProperties: false
+      required:
+      - profile_id
+      - profile_revision
+      - members
+      - changes
+      properties:
+        profile_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+        profile_revision:
+          type: string
+          pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+          description: Canonical positive signed-int64 decimal string; never a JSON number.
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionEditorRevision'
+        changes:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionProfileDeletionChange'
+    PermissionProfileDeletionPreviewResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/PermissionProfileDeletionPreview'
+    PermissionProfileDeleteCommand:
+      type: object
+      additionalProperties: false
+      required:
+      - expected_revision
+      - confirmed_members
+      properties:
+        expected_revision:
+          type: string
+          pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+          description: Canonical positive signed-int64 decimal string; never a JSON number.
+        confirmed_members:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionEditorRevision'
+      description: Submit observed profile revision and the exact confirmed member observations
+        from the impact preview. Empty array explicitly confirms no members; stale/member-set
+        changes conflict. Empty body is 400; a valid object missing revision is 409.
+    PermissionProfileUpdateCommand:
+      type: object
+      additionalProperties: false
+      required:
+      - expected_revision
+      properties:
+        expected_revision:
+          type: string
+          pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+          description: Canonical positive signed-int64 decimal string; never a JSON number.
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+        can_send:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        can_create_domains:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        can_create_routes:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        can_create_api_keys:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        daily_send_quota:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        daily_receive_quota:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        max_mailboxes:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        max_domains:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        allowed_zone_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+      description: Versioned profile patch. Omitted/null pointer fields keep current profile
+        value (unlike personal override null inheritance); explicit false/0 replace it.
+        allowed_zone_ids null/omitted keeps it, [] replaces with the legacy unrestricted
+        list. Missing revision yields 409.
+    CompanyAdminEventMetadata:
+      type: object
+      additionalProperties: false
+      required:
+      - action
+      - resource_type
+      - resource_id
+      properties:
+        action:
+          type: string
+          enum:
+          - company.configure
+          - company.index_retry
+          - employee.invite
+          - employee.invite_revoke
+          - employee.activate
+          - employee.offboard.preview
+          - employee.offboard
+          - permission.override.patch
+          - permission.profile.assign
+          - mailbox.provision
+          - mailbox.handover
+          - mailbox.grant
+          - mailbox.send_policy
+          - mailbox.convert_shared
+          - template.save
+          - template.publish
+          - template.retire
+          - template.version.revoke
+          - template.grant
+          - permission.profile.update
+          - permission.profile.delete
+          - ingress.inspect
+          - ingress.retry
+          - outbound.retry
+          - outbound.reconcile
+          - outbound.break_glass
+        resource_type:
+          type: string
+          enum:
+          - company
+          - ingest_job
+          - invitation
+          - mailbox
+          - outbound_job
+          - permission_profile
+          - template
+          - user
+        resource_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+      oneOf:
+      - properties:
+          action:
+            enum:
+            - company.configure
+            - company.index_retry
+          resource_type:
+            const: company
+      - properties:
+          action:
+            enum:
+            - ingress.inspect
+            - ingress.retry
+          resource_type:
+            const: ingest_job
+      - properties:
+          action:
+            enum:
+            - employee.invite
+            - employee.invite_revoke
+          resource_type:
+            const: invitation
+      - properties:
+          action:
+            enum:
+            - mailbox.provision
+            - mailbox.handover
+            - mailbox.grant
+            - mailbox.send_policy
+            - mailbox.convert_shared
+          resource_type:
+            const: mailbox
+      - properties:
+          action:
+            enum:
+            - outbound.retry
+            - outbound.reconcile
+            - outbound.break_glass
+          resource_type:
+            const: outbound_job
+      - properties:
+          action:
+            enum:
+            - permission.profile.update
+            - permission.profile.delete
+          resource_type:
+            const: permission_profile
+      - properties:
+          action:
+            enum:
+            - template.save
+            - template.publish
+            - template.retire
+            - template.version.revoke
+            - template.grant
+          resource_type:
+            const: template
+      - properties:
+          action:
+            enum:
+            - employee.activate
+            - employee.offboard.preview
+            - employee.offboard
+            - permission.override.patch
+            - permission.profile.assign
+          resource_type:
+            const: user
+    CompanyAdminInvalidation:
+      type: object
+      additionalProperties: false
+      required:
+      - type
+      - tenant_id
+      - occurred_at
+      - metadata
+      properties:
+        type:
+          type: string
+          const: company.admin.changed
+        tenant_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+        occurred_at:
+          type: string
+          format: date-time
+        metadata:
+          $ref: '#/components/schemas/CompanyAdminEventMetadata'
+    CompanyAdminStreamScope:
+      type: object
+      additionalProperties: false
+      required:
+      - tenant_id
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+    PermissionEditorRevision:
+      type: object
+      additionalProperties: false
+      required:
+      - user_id
+      - tenant_id
+      - user_revision
+      - profile_id
+      - profile_revision
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+        tenant_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+        user_revision:
+          type: string
+          pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+          description: Canonical positive signed-int64 decimal string; never a JSON number.
+        profile_id:
+          anyOf:
+          - type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+          - type: 'null'
+        profile_revision:
+          anyOf:
+          - type: string
+            pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+            description: Canonical positive signed-int64 decimal string; never a JSON
+              number.
+          - type: 'null'
+      oneOf:
+      - properties:
+          profile_id:
+            type: 'null'
+          profile_revision:
+            type: 'null'
+      - properties:
+          profile_id:
+            type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+          profile_revision:
+            type: string
+            pattern: ^([1-9][0-9]{0,17}|[1-8][0-9]{18}|9[0-1][0-9]{17}|92[0-1][0-9]{16}|922[0-2][0-9]{15}|9223[0-2][0-9]{14}|92233[0-6][0-9]{13}|922337[0-1][0-9]{12}|92233720[0-2][0-9]{10}|922337203[0-5][0-9]{9}|9223372036[0-7][0-9]{8}|92233720368[0-4][0-9]{7}|922337203685[0-3][0-9]{6}|9223372036854[0-6][0-9]{5}|92233720368547[0-6][0-9]{4}|922337203685477[0-4][0-9]{3}|9223372036854775[0-7][0-9]{2}|922337203685477580[0-6][0-9]{0}|9223372036854775807)$
+            description: Canonical positive signed-int64 decimal string; never a JSON
+              number.
+      description: Persistent user observation bound to URL target and current tenant.
+        Profile identity/revision must both be null or both present; assignment/override
+        deletion never resets user revision. A stale observation conflicts.
+    PermissionEditorDomainAccess:
+      type: object
+      additionalProperties: false
+      required:
+      - mode
+      properties:
+        mode:
+          type: string
+          enum:
+          - inherit
+          - all
+          - none
+          - list
+        zone_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+          uniqueItems: true
+      oneOf:
+      - properties:
+          mode:
+            enum:
+            - inherit
+            - all
+            - none
+          zone_ids:
+            anyOf:
+            - type: 'null'
+            - type: array
+              maxItems: 0
+      - required:
+        - zone_ids
+        properties:
+          mode:
+            const: list
+          zone_ids:
+            type: array
+            minItems: 1
+      description: inherit restores profile/default policy; all explicitly allows every
+        zone; none denies every zone; list allows nonempty distinct zone UUIDs. For non-list
+        modes zone_ids may be omitted, null or []; never infer none/all from an effective
+        empty allowlist.
+    PermissionEditorPatch:
+      type: object
+      additionalProperties: false
+      required: []
+      properties:
+        can_send:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        daily_send_quota:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        daily_receive_quota:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        max_mailboxes:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        max_domains:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        can_create_domains:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        can_create_routes:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        can_create_api_keys:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        domain_access:
+          anyOf:
+          - $ref: '#/components/schemas/PermissionEditorDomainAccess'
+          - type: 'null'
+      description: 'Only touched fields are sent: omitted keeps existing raw state; null
+        restores inheritance; false and 0 are explicit overrides. Empty patch is not a
+        clear command. Unknown fields are rejected; profile assignment is unsupported
+        in this slice.'
+    PermissionEditorCommand:
+      type: object
+      additionalProperties: false
+      required:
+      - expected_revision
+      - patch
+      properties:
+        expected_revision:
+          $ref: '#/components/schemas/PermissionEditorRevision'
+        patch:
+          $ref: '#/components/schemas/PermissionEditorPatch'
+    PermissionEditorRawDomainAccess:
+      type: object
+      additionalProperties: false
+      required:
+      - mode
+      - zone_ids
+      properties:
+        mode:
+          type: string
+          enum:
+          - inherit
+          - all
+          - none
+          - list
+        zone_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+          uniqueItems: true
+      oneOf:
+      - properties:
+          mode:
+            enum:
+            - inherit
+            - all
+            - none
+          zone_ids:
+            anyOf:
+            - type: 'null'
+            - type: array
+              maxItems: 0
+      - required:
+        - zone_ids
+        properties:
+          mode:
+            const: list
+          zone_ids:
+            type: array
+            minItems: 1
+      description: Raw domain policy; zone_ids is always present. Non-list null and []
+        are compatible wire forms; list requires a nonempty UUID array. Preserve raw allowed_zone_ids
+        SQL NULL independently of normalized value objects.
+    PermissionEditorRawOverrides:
+      type: object
+      additionalProperties: false
+      required:
+      - can_send
+      - daily_send_quota
+      - daily_receive_quota
+      - max_mailboxes
+      - max_domains
+      - can_create_domains
+      - can_create_routes
+      - can_create_api_keys
+      - allowed_zone_ids
+      - domain_access
+      properties:
+        can_send:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        daily_send_quota:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        daily_receive_quota:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        max_mailboxes:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        max_domains:
+          anyOf:
+          - type: integer
+            minimum: 0
+            maximum: 9223372036854775807
+          - type: 'null'
+        can_create_domains:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        can_create_routes:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        can_create_api_keys:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+        allowed_zone_ids:
+          type:
+          - array
+          - 'null'
+          items:
+            type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+        domain_access:
+          $ref: '#/components/schemas/PermissionEditorRawDomainAccess'
+      description: Raw persisted overrides, not reverse-engineered from effective values.
+        Null scalar means inheritance even when effective equals the profile. The entire
+        object is null when no override row exists; legacy allowed_zone_ids must not decide
+        canonical domain mode.
+    PermissionEditorCapabilities:
+      type: object
+      additionalProperties: false
+      required:
+      - patch
+      - assign_profile
+      properties:
+        patch:
+          type: boolean
+        assign_profile:
+          type: boolean
+          const: false
+    PermissionEditorFieldSources:
+      type: object
+      additionalProperties: false
+      required:
+      - can_send
+      - daily_send_quota
+      - daily_receive_quota
+      - max_mailboxes
+      - max_domains
+      - can_create_domains
+      - can_create_routes
+      - can_create_api_keys
+      - domain_access
+      properties:
+        can_send:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        daily_send_quota:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        daily_receive_quota:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        max_mailboxes:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        max_domains:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        can_create_domains:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        can_create_routes:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        can_create_api_keys:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+        domain_access:
+          type: string
+          enum:
+          - override
+          - profile
+          - default
+    PermissionEditorSnapshot:
+      type: object
+      additionalProperties: false
+      required:
+      - user_id
+      - tenant_id
+      - profile
+      - overrides
+      - effective
+      - field_sources
+      - revision
+      - capabilities
+      properties:
+        user_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+        tenant_id:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+        profile:
+          anyOf:
+          - $ref: '#/components/schemas/PermissionProfile'
+          - type: 'null'
+        overrides:
+          anyOf:
+          - $ref: '#/components/schemas/PermissionEditorRawOverrides'
+          - type: 'null'
+        effective:
+          $ref: '#/components/schemas/EffectivePermission'
+        field_sources:
+          $ref: '#/components/schemas/PermissionEditorFieldSources'
+        revision:
+          $ref: '#/components/schemas/PermissionEditorRevision'
+        capabilities:
+          $ref: '#/components/schemas/PermissionEditorCapabilities'
+      description: One consistent raw/profile/effective observation with persistent composite
+        revision. Do not initialize editable values from effective. Null profile means
+        no assigned profile.
+    PermissionEditorResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/PermissionEditorSnapshot'
+    PermissionEditorError:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+              enum:
+              - BAD_REQUEST
+              - UNAUTHORIZED
+              - FORBIDDEN
+              - NOT_FOUND
+              - CONFLICT
+              - INTERNAL
+            message:
+              type: string
+            reason:
+              type: string
+
     EffectivePermission:
       type: object
       properties:
+        domain_access_mode:
+          type: string
+          enum: [all, list, none]
+          description: Canonical effective zone policy. Optional for legacy payloads; none denies every zone even when allowed_zone_ids is empty.
         can_send:
           type: boolean
         daily_send_quota:
@@ -1655,12 +2438,20 @@ components:
         snapshot: {$ref: '#/components/schemas/CompanyTemplateDraft'}
     SubmissionCapabilities:
       type: object
-      description: Interaction hints only; every operation rechecks current server-side authority.
+      additionalProperties: false
+      description: Current interaction hints only; each action rechecks server-side authority.
+        view_content is the current content-read verdict, not an indication that this receipt
+        contains content or was redacted. Content also requires a live durable content item.
+        False view_content never turns an authorized receipt into a content response. Retry
+        hints may conservatively degrade to false with unknown reason, including list views;
+        they never substitute for actual retry admission or current sender authority.
       required: [view_content, retry, retry_block_reason]
       properties:
         view_content: {type: boolean}
         retry: {type: boolean}
-        retry_block_reason: {type: string}
+        retry_block_reason:
+          type: string
+          enum: ['', delivery_uncertain, state_not_retryable, sender_authority, unknown]
     SubmissionRecipient:
       type: object
       required: [address, state]
@@ -1669,19 +2460,38 @@ components:
         state: {type: string}
     SubmissionContent:
       type: object
-      description: Current mailbox read authority is required; BCC and queue-internal fields are not returned.
-      required: [id, subject, from, to, created_at, content_redacted]
+      additionalProperties: false
+      description: Independent current sender-mailbox read authority AND live durable sent content
+        are required on every request. Historical submitter/admin status and receipt visibility
+        do not bypass revoked read rights or expired/purged content. Structured BCC appears only
+        here, never in ordinary receipts or Bcc headers. complete with bcc [] means known empty;
+        legacy_unknown with bcc null means unrecoverable original structured recipients, not empty.
+      required: [id, subject, from, to, bcc, recipient_completeness, created_at, content_redacted]
       properties:
         id: {type: string, format: uuid}
         subject: {type: string}
         from: {type: string}
         to: {type: array, items: {type: string}}
         cc: {type: array, items: {type: string}}
-        headers: {type: object, additionalProperties: {type: string}}
+        bcc:
+          type: [array, 'null']
+          items: {type: string}
+        recipient_completeness: {type: string, enum: [complete, legacy_unknown]}
+        headers:
+          type: object
+          additionalProperties: {type: string}
+          description: Wire-safe display-filtered custom headers; never a Bcc header or raw MIME.
         text_body: {type: string}
         html_body: {type: string}
         created_at: {type: string, format: date-time}
-        content_redacted: {type: boolean}
+        content_redacted: {type: boolean, enum: [false]}
+      oneOf:
+      - properties:
+          recipient_completeness: {enum: [complete]}
+          bcc: {type: array, items: {type: string}}
+      - properties:
+          recipient_completeness: {enum: [legacy_unknown]}
+          bcc: {type: 'null'}
     SubmissionAttachment:
       type: object
       required: [id, filename, content_type, size, state]
@@ -1971,16 +2781,178 @@ components:
       additionalProperties: false
     CompanyOutboundInspection:
       type: object
+      description: Audited platform-operations exception projection, not an ordinary submission receipt.
       required:
       - job
       - recipients
       properties:
         job:
-          $ref: '#/components/schemas/OutboundJob'
+          $ref: '#/components/schemas/CompanyOutboundInspectionJob'
         recipients:
           type: array
+          maxItems: 50
+          description: Complete fenced recipient ledger, including structured BCC. Oversized or busy snapshots fail
+            with 409 rather than returning a truncated ledger.
           items:
-            $ref: '#/components/schemas/CompanyRecipient'
+            $ref: '#/components/schemas/CompanyOutboundInspectionRecipient'
+      additionalProperties: false
+    CompanyOutboundInspectionJob:
+      type: object
+      description: Explicit content and structured BCC projection for the current super administrator's audited
+        inspection exception only. This does not grant ordinary mailbox body access or widen ordinary receipts.
+        Storage keys, raw MIME, leases, claim tokens, credentials and raw SMTP diagnostics are never exposed.
+      required:
+      - id
+      - tenant_id
+      - state
+      - status
+      - created_at
+      - updated_at
+      - mail_from
+      - to
+      - cc
+      - bcc
+      - subject
+      - text_body
+      - html_body
+      - headers
+      properties:
+        id:
+          type: string
+          format: uuid
+        tenant_id:
+          type: string
+          format: uuid
+        state:
+          type: string
+          enum: [pending, processing, sent, retry, failed, dead, cancelled]
+        status:
+          type: string
+          enum: [submitted, cancelled, sending, partially_accepted, accepted, needs_attention]
+          description: Derived from the job and complete ledger; accepted means next-hop acceptance, not final
+            delivery. Missing, malformed or uncertain ledger evidence yields needs_attention.
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        mail_from:
+          type: string
+        to:
+          type: array
+          items:
+            type: string
+        cc:
+          type: array
+          items:
+            type: string
+        bcc:
+          type: array
+          description: Structured hidden recipients in this audited exception only; never a wire Bcc header.
+          items:
+            type: string
+        subject:
+          type: string
+        text_body:
+          type: string
+        html_body:
+          type: string
+        headers:
+          $ref: '#/components/schemas/CompanyOutboundInspectionHeaders'
+      additionalProperties: false
+    CompanyOutboundInspectionRecipient:
+      type: object
+      required:
+      - address
+      - kind
+      - state
+      - attempts
+      - smtp_code
+      - diagnostic_class
+      - updated_at
+      properties:
+        address:
+          type: string
+        kind:
+          type: string
+          enum: [to, cc, bcc, envelope]
+          description: Structured recipient category; envelope when no To, Cc or Bcc category matches.
+        state:
+          type: string
+          enum: [pending, accepted, temporary, permanent, uncertain, unknown]
+          description: accepted is next-hop acceptance, not final delivery. Unrecognized storage states are
+            sanitized to unknown, never emitted as raw strings.
+        attempts:
+          type: integer
+        smtp_code:
+          type: integer
+          anyOf:
+          - enum: [0]
+          - minimum: 200
+            maximum: 599
+          description: Numeric SMTP code from 200 through 599, or 0 when absent or invalid; no raw SMTP response.
+        enhanced_code:
+          type: string
+          pattern: '^[245]\.[0-9]{1,3}\.[0-9]{1,3}(?![\s\S])'
+          description: Optional sanitized enhanced status code only; omitted if no valid token exists in the
+            diagnostic. Never includes surrounding raw diagnostic text.
+        diagnostic_class:
+          type: string
+          enum: [pending, accepted, temporary, permanent, uncertain, unknown]
+          description: Sanitized recipient state class, not the raw diagnostic message.
+        updated_at:
+          type: string
+          format: date-time
+      additionalProperties: false
+    CompanyOutboundInspectionHeaders:
+      type: object
+      description: Canonical header names from this exact structural allowlist only. Values containing CR or LF
+        are rejected by the projection. No general Content-* or X-* wildcard, Bcc, Received, authentication,
+        DKIM signature or system-secret header is permitted. Empty or malformed storage headers project to {}.
+      properties:
+        From:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        To:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Cc:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Subject:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Date:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Message-Id:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Reply-To:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        In-Reply-To:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        References:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Mime-Version:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Content-Type:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Content-Transfer-Encoding:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Content-Disposition:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
+        Content-Id:
+          type: string
+          pattern: '^[^\r\n]*(?![\s\S])'
       additionalProperties: false
     CompanyErrorEnvelope:
       type: object
@@ -2470,11 +3442,10 @@ paths:
           $ref: '#/components/responses/NotFound'
   /api/v1/outbound:
     get:
-      tags:
-      - Sending
-      summary: List outbound jobs
+      tags: [Sending]
+      summary: List ordinary outbound receipts
       operationId: listOutboundJobs
-      description: List outbound email delivery jobs for the current tenant.
+      description: Current authorized metadata-only receipts. API keys require send:read.
       security:
       - BearerAuth: []
       - APIKey: []
@@ -2483,25 +3454,17 @@ paths:
       - $ref: '#/components/parameters/PerPageParam'
       responses:
         '200':
-          description: Paginated list of outbound jobs
+          description: Paginated ordinary receipts with no content or protocol diagnostics
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/OutboundJob'
-                  total:
-                    type: integer
+                $ref: '#/components/schemas/OutboundReceiptListResponse'
   /api/v1/outbound/{id}:
     get:
-      tags:
-      - Sending
-      summary: Get outbound job status
+      tags: [Sending]
+      summary: Get ordinary outbound receipt
       operationId: getOutboundJob
-      description: Get the delivery status of a specific outbound email job.
+      description: Current authorized metadata-only receipt. API keys require send:read.
       security:
       - BearerAuth: []
       - APIKey: []
@@ -2509,18 +3472,76 @@ paths:
       - name: id
         in: path
         required: true
-        schema:
-          type: string
-          format: uuid
+        schema: {type: string, format: uuid}
       responses:
         '200':
-          description: Outbound job details
+          description: Ordinary receipt, wrapped in data
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OutboundJob'
+                $ref: '#/components/schemas/OutboundReceiptResponse'
         '404':
           $ref: '#/components/responses/NotFound'
+  /api/v1/outbound/{id}/attempts:
+    get:
+      tags: [Sending]
+      summary: Get safe outbound attempt aggregate
+      operationId: listOutboundAttempts
+      description: Returns the same ordinary receipt with attempt_count and complete-ledger progress,
+        not individual attempts, remote targets or SMTP diagnostics. API keys require send:read.
+      security:
+      - BearerAuth: []
+      - APIKey: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Ordinary receipt, not an attempt array
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutboundReceiptResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /api/v1/outbound/{id}/retry:
+    post:
+      tags: [Sending]
+      summary: Retry an authorized failed or dead outbound job
+      operationId: retryOutboundJob
+      description: Revalidates current principal and sender authority before atomic retry.
+        Read or receipt visibility alone cannot authorize retry. API keys require send:write.
+        After commit, unavailable display authority yields a minimal unknown-progress receipt,
+        not a failed command response encouraging duplicate delivery.
+      security:
+      - BearerAuth: []
+      - APIKey: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Committed retry receipt; local requeue is not delivery confirmation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OutboundReceiptResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Retry rejected because state changed or delivery is uncertain
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /api/v1/admin/domains:
     get:
       tags:
@@ -2650,34 +3671,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                description:
-                  type: string
-                can_send:
-                  type: boolean
-                daily_send_quota:
-                  type: integer
-                daily_receive_quota:
-                  type: integer
-                max_mailboxes:
-                  type: integer
-                max_domains:
-                  type: integer
-                allowed_zone_ids:
-                  type: array
-                  items:
-                    type: string
-                    format: uuid
-                  nullable: true
-                can_create_domains:
-                  type: boolean
-                can_create_routes:
-                  type: boolean
-                can_create_api_keys:
-                  type: boolean
+              $ref: '#/components/schemas/PermissionProfileUpdateCommand'
       responses:
         '200':
           description: Updated
@@ -2689,13 +3683,47 @@ paths:
                   data:
                     $ref: '#/components/schemas/PermissionProfile'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: Invalid profile patch
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '403':
+          description: Unauthorized profile scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '409':
+          description: Missing or stale revision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '500':
+          description: Internal error; rollback
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+      description: Requires observed expected_revision; missing or stale revision returns
+        409, never unversioned overwrite.
     delete:
       tags:
       - Permissions
-      summary: Delete permission profile
+      summary: Delete profile with confirmed impact and revision
       operationId: deletePermissionProfile
       security:
       - BearerAuth: []
@@ -2706,13 +3734,53 @@ paths:
         schema:
           type: string
           format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
       responses:
         '204':
-          description: Deleted
+          description: Deleted after exact impact confirmation and CAS
         '400':
-          description: Cannot delete system profiles
+          description: Malformed body or ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '403':
+          description: Actor/tenant/system or hierarchy restriction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Target not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '409':
+          description: Missing/stale observation or changed impact; reload and review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '500':
+          description: Internal failure; no partial committed mutation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionProfileDeleteCommand'
   /api/v1/admin/users/{id}/permissions:
     get:
       tags:
@@ -2743,7 +3811,7 @@ paths:
     put:
       tags:
       - Permissions
-      summary: Set user permission override
+      summary: Retired unversioned permission write
       operationId: setUserPermissionOverride
       security:
       - BearerAuth: []
@@ -2754,63 +3822,29 @@ paths:
         schema:
           type: string
           format: uuid
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                profile_id:
-                  type: string
-                  format: uuid
-                  description: Permission profile to assign
-                overrides:
-                  type: object
-                  description: Field-level overrides on top of the profile
-                  properties:
-                    can_send:
-                      type: boolean
-                    daily_send_quota:
-                      type: integer
-                    daily_receive_quota:
-                      type: integer
-                    max_mailboxes:
-                      type: integer
-                    max_domains:
-                      type: integer
-                    allowed_zone_ids:
-                      type: array
-                      items:
-                        type: string
-                        format: uuid
-                      nullable: true
-                    can_create_domains:
-                      type: boolean
-                    can_create_routes:
-                      type: boolean
-                    can_create_api_keys:
-                      type: boolean
       responses:
-        '200':
-          description: Updated
+        '409':
+          description: Protocol upgraded; versioned editor required
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    $ref: '#/components/schemas/EffectivePermission'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+        '403':
+          description: Route authorization rejected
+      deprecated: true
+      description: Always rejects with 409 CONFLICT after route authentication. Load
+        permission-editor and use its versioned atomic patch; this operation cannot
+        mutate overrides.
     delete:
       tags:
       - Permissions
-      summary: Delete user permission override
+      summary: Retired unversioned permission write
       operationId: deleteUserPermissionOverride
-      description: Remove user-specific permission override, reverting to the default profile.
+      description: Always rejects with 409 CONFLICT after route authentication. Load
+        permission-editor and use its versioned atomic patch; this operation cannot
+        mutate overrides.
       security:
       - BearerAuth: []
       parameters:
@@ -2821,10 +3855,363 @@ paths:
           type: string
           format: uuid
       responses:
-        '204':
-          description: Override removed
+        '409':
+          description: Protocol upgraded; versioned editor required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+        '403':
+          description: Route authorization rejected
+      deprecated: true
+  /api/v1/admin/users/{id}/permission-editor:
+    get:
+      tags:
+      - Permissions
+      summary: Read raw permission editor snapshot
+      operationId: getPermissionEditor
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+      responses:
+        '200':
+          description: Consistent editor snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorResponse'
+        '400':
+          description: Malformed body, UUID, revision or field intent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '403':
+          description: Actor, target hierarchy or tenant rejected; API keys cannot edit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: Target missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '409':
+          description: Stale composite observation; reload and review without automatic
+            replay
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '500':
+          description: Internal failure; transaction is not partially committed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+    patch:
+      tags:
+      - Permissions
+      summary: Atomically patch raw permission overrides
+      operationId: patchPermissionEditor
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+      responses:
+        '200':
+          description: Consistent editor snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorResponse'
+        '400':
+          description: Malformed body, UUID, revision or field intent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '403':
+          description: Actor, target hierarchy or tenant rejected; API keys cannot edit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '404':
+          description: Target missing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '409':
+          description: Stale composite observation; reload and review without automatic
+            replay
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '500':
+          description: Internal failure; transaction is not partially committed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionEditorCommand'
+  /api/v1/admin/permissions/{id}/deletion-preview:
+    get:
+      tags:
+      - Permissions
+      summary: Preview profile deletion impact
+      operationId: getPermissionProfileDeletionPreview
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+      responses:
+        '200':
+          description: Consistent observed result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionProfileDeletionPreviewResponse'
+        '400':
+          description: Malformed body or ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '403':
+          description: Actor/tenant/system or hierarchy restriction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '404':
+          description: Target not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '409':
+          description: Missing/stale observation or changed impact; reload and review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '500':
+          description: Internal failure; no partial committed mutation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+  /api/v1/admin/users/{id}/permission-editor/assignment:
+    post:
+      tags:
+      - Permissions
+      summary: Atomically assign profile and patch overrides
+      operationId: assignPermissionEditor
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+          not:
+            const: 00000000-0000-0000-0000-000000000000
+      responses:
+        '200':
+          description: Consistent observed result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorResponse'
+        '400':
+          description: Malformed body or ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '403':
+          description: Actor/tenant/system or hierarchy restriction
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '404':
+          description: Target not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '409':
+          description: Missing/stale observation or changed impact; reload and review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+        '500':
+          description: Internal failure; no partial committed mutation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PermissionEditorError'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PermissionEditorAssignmentCommand'
+  /api/v1/company/events:
+    get:
+      tags:
+      - Company
+      summary: Stream selected-company administrative invalidations
+      operationId: streamCompanyAdminEvents
+      description: Interactive JWT administrators only, scoped to the selected company;
+        not platform broadcasts or personal message/sent events. Authorization, tenant,
+        role and session are revalidated for each read and bounded frame write/flush;
+        revocation terminates the stream. ready/resync request an authoritative reload.
+        Recent outbox windows may repeat or miss retained/late events; UUID Last-Event-ID
+        is advisory deduplication only, never a commit-ordered replay cursor. Read-only
+        transport neither claims nor acknowledges outbox events. Connection and periodic
+        resync require fresh authoritative snapshots.
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: Last-Event-ID
+        in: header
+        required: false
+        description: Advisory event UUID only; no guaranteed replay, ordering or delivery.
+          Does not select tenant or authorize access.
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 'SSE frames: ready and resync data contain only tenant_id; company.admin.changed
+            has UUID id and exact invalidation metadata. No MIME, body, BCC, credentials,
+            object keys or arbitrary audit payload.'
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: private, no-store, no-transform
+            X-Accel-Buffering:
+              schema:
+                type: string
+                const: 'no'
+          content:
+            text/event-stream:
+              schema:
+                type: string
+              example: 'event: ready
+  
+                data: {"tenant_id":"11111111-1111-4111-8111-111111111111"}
+  
+  
+                event: resync
+  
+                data: {"tenant_id":"11111111-1111-4111-8111-111111111111"}
+  
+  
+                '
+        '400':
+          description: Invalid selected-tenant header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: JWT authentication required or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Interactive administrator or selected-company access rejected;
+            API keys cannot subscribe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Stream/read port unavailable or internal error before headers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      x-sse-events:
+        ready:
+          data:
+            $ref: '#/components/schemas/CompanyAdminStreamScope'
+        resync:
+          data:
+            $ref: '#/components/schemas/CompanyAdminStreamScope'
+        company.admin.changed:
+          id:
+            type: string
+            format: uuid
+            not:
+              const: 00000000-0000-0000-0000-000000000000
+          data:
+            $ref: '#/components/schemas/CompanyAdminInvalidation'
   /api/v1/auth/me/permissions:
     get:
       tags:
@@ -5777,9 +7164,9 @@ paths:
       tags:
       - Company mail
       summary: List Submissions
-      description: Employee-facing projection of outbound submissions the caller sent or that originate from a mailbox
-        the caller can read. Queue internals (attempts, lease, SMTP responses) are never included; the diagnostic
-        view stays in the recovery surface.
+      description: Current-authorized metadata-only receipts for submissions the caller sent or that originate
+        from a currently readable mailbox. attempt_count and complete-ledger aggregates are safe metadata;
+        recipient details, content and protocol diagnostics require their independent authorized surfaces.
       operationId: companySubmissionsList
       security:
       - BearerAuth: []
@@ -6084,6 +7471,10 @@ paths:
       tags:
       - Company mail
       summary: Recipients
+      description: Metadata-only operation receipt with aggregate outcomes from the complete ledger.
+        Known progress includes counts; unknown progress omits counts rather than inventing zero outcomes.
+        Current content-read capability never exposes recipient addresses, content or protocol diagnostics
+        on this route; those require their independent authorized surfaces.
       operationId: companyRecipientsGet
       security:
       - BearerAuth: []
@@ -6098,9 +7489,7 @@ paths:
                 - data
                 properties:
                   data:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/CompanyRecipient'
+                    $ref: '#/components/schemas/OutboundReceipt'
                 additionalProperties: false
         '400':
           $ref: '#/components/responses/CompanyFailure'
@@ -6201,7 +7590,7 @@ paths:
       - BearerAuth: []
       responses:
         '200':
-          description: Operation completed. Creating a send task is not delivery confirmation.
+          description: Audited inspection committed successfully; accepted means next-hop acceptance, not final delivery.
           content:
             application/json:
               schema:
@@ -6244,12 +7633,18 @@ paths:
                   type: string
                   minLength: 8
                   maxLength: 1000
+                  description: Required nonblank audit reason; server trims whitespace and enforces 8-1000 UTF-8 bytes.
+                    Character length constraints alone do not replace the server byte check.
               required:
               - reason
               additionalProperties: false
-      description: Current super administrator in the selected tenant only. Inspections and writes require durable
-        audit. Retry/reconciliation must use the inspected updated_at and proven outcomes; unknown acceptance is never
-        blindly replayed.
+      description: Formal recovery inspection capability for a currently active interactive JWT super administrator
+        in the selected tenant; API keys and ordinary receipt visibility cannot grant this exception. The database
+        revalidates current actor authority and fences the job and complete recipient ledger in one transaction.
+        Explicit body and structured BCC projection is returned only after required audit and outbox commit; any
+        authorization, snapshot, audit, outbox or commit failure returns no inspection payload. This is not ordinary
+        mailbox body authorization. Busy or oversized ledger snapshots return 409; raw diagnostics, leases, claim
+        tokens, storage keys, raw MIME and system credentials never enter this response.
   /ready:
     get:
       summary: Dependency readiness (no authentication)
@@ -7281,7 +8676,7 @@ paths:
         '404':
           $ref: '#/components/responses/CompanyFailure'
         '200':
-          description: Original receipt replayed with current content redaction
+          description: Original metadata-only receipt replayed after current command-principal admission
           content:
             application/json:
               schema:
@@ -7290,7 +8685,7 @@ paths:
                 - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/OutboundJob'
+                    $ref: '#/components/schemas/OutboundReceipt'
                 additionalProperties: false
         '201':
           description: New outbound submission accepted locally
@@ -7302,7 +8697,7 @@ paths:
                 - data
                 properties:
                   data:
-                    $ref: '#/components/schemas/OutboundJob'
+                    $ref: '#/components/schemas/OutboundReceipt'
                 additionalProperties: false
         '409':
           $ref: '#/components/responses/CompanyFailure'
@@ -7327,7 +8722,10 @@ paths:
           minLength: 1
         description: At most 128 UTF-8 bytes; CR/LF forbidden. Reuse the same key only for an identical submission.
       description: Consumes the observed draft revision atomically. A repeated Idempotency-Key replays the original
-        receipt with current redaction; local acceptance is not final delivery.
+        metadata-only receipt after current command-principal admission. Content-read revocation alone
+        does not reject an otherwise authorized replay, but revoked command credentials do. Fresh committed
+        submissions may return minimal unknown-progress fallback if display authority becomes unavailable;
+        local acceptance is not final delivery.
       requestBody:
         required: true
         content:

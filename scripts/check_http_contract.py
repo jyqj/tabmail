@@ -46,6 +46,7 @@ REQUIRED_CASES = {
     'message.attachment.id': ('GET', BASE + '/mailboxes/{id}/messages/{message}/parts/{attachment}', 200),
     'submissions.download': ('GET', BASE + '/submissions/{id}/attachments/{aid}/download', 200),
     'events.ready': ('GET', BASE + '/mailboxes/{id}/events', 200),
+    'company.events.ready': ('GET', BASE + '/events', 200),
     'archive.change': ('POST', BASE + '/mailboxes/{id}/sent/{message}/actions', 200),
     'recovery.inspect': ('POST', BASE + '/recovery/{id}/inspect', 200),
     'recovery.retry': ('POST', BASE + '/recovery/{id}/retry', 200),

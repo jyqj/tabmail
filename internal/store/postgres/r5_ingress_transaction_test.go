@@ -76,6 +76,7 @@ func r5IngressEffects(t *testing.T, f *companyFixture, c *store.IngressClaim, wa
 }
 
 func TestR5IngressLeaseExpiryAfterTenantWaitRollsBack(t *testing.T) {
+	r5ParallelFreshDB(t)
 	f := seedCompany(t)
 	c, m := r5ClaimIngress(t, f)
 	ctx, cancel := context.WithTimeout(context.Background(), 12*time.Second)

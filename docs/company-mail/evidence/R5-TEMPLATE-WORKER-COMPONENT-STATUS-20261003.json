@@ -1,0 +1,72 @@
+{
+  "artifact_kind": "central_summary_of_delivered_independent_component_runtime_verdict_NOT_machine_raw",
+  "template": {
+    "source": "51e5785a894f603742d54a963bdedd2f469b4cb9",
+    "closure": "1a50523f961c484c52fbd2466ef101978cf181e2fbc4b94126eadf3ddb5f1a0d",
+    "pins_prefix": [
+      "e35a",
+      "91a"
+    ],
+    "top_leaf_nodes": [
+      8,
+      29,
+      34
+    ],
+    "Go_exit": 0,
+    "race": false,
+    "independent_bounded_actual_accepted": true,
+    "package_Elapsed_seconds": 0.874,
+    "not_body_or_compile_elapsed": true,
+    "wrapper_source_guard_capture_compile_cleanup_seconds": 3.5408987998962402,
+    "original300_gate": true,
+    "origin_epoch_serialized": null,
+    "clock": "selfreported notexternallytrusted; no mtime backfill",
+    "postpackaging_not_in_measured_wrapper_elapsed": true,
+    "GoTest_implicit_compile": "actualsuccess; separatecompiler elapsed UNKNOWN; notcoldbuild",
+    "GoList": "metadataonly separatelayer",
+    "noPG_HTTPpublishsend_Redis_SMTP": true,
+    "sourcepolicyrace_superset_not_nonrace_qualification": true,
+    "P5_parent_complete": false
+  },
+  "worker": {
+    "source": "c0732a3f0673b507cf0acf66f3c757cae3c35d71",
+    "closure": "7ea884bd8c77d6864068859b5774562eedeaee65dcec496266ce2fd9f26ac1d7",
+    "pins_prefix": [
+      "0416ecca",
+      "7e881"
+    ],
+    "top_leaf_nodes": [
+      24,
+      26,
+      28
+    ],
+    "old_new_top": [
+      13,
+      11
+    ],
+    "race": true,
+    "Go_exit": 0,
+    "independent_actual_accepted": true,
+    "package_Elapsed_seconds": 1.8900000000000001,
+    "not_body_or_compile_elapsed": true,
+    "sourcewall_origin_serialized": 1791009850.977855,
+    "monotonic_origin_serialized": 242353.162900625,
+    "selfreported_not_external_attestation": true,
+    "capture_compile_cleanup_seconds": 4.2905120849609375,
+    "original300_work270cleanup30": true,
+    "allgroupsgone": true,
+    "noPG_business_services": true,
+    "legacy_Stop": "stillunbounded",
+    "formalcaller_outbound_main_ingest_hooks": "notconnected to newboundedAPI",
+    "P6_parent_complete": false
+  },
+  "shutdown_proposal_delivered_readonly_not_implemented": {
+    "SMTP_Shutdown": "ignorescontext and Close doesnotjoinSession",
+    "Mail_Rcpt_Data": "Backgroundcontext",
+    "main": "no heartbeat/mailindex/retention/ingest/hooks joins before defer closes PGRedis",
+    "machine_proposal_file_not_provided": true,
+    "source_change_runtime_proof": false
+  },
+  "task_complete": false,
+  "product_green": false
+}

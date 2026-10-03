@@ -1,0 +1,13 @@
+{
+  "164actualPASS_noScopechange": true,
+  "T2_actual_active1_wait_assertion_only_branch": "cancellation_and_success",
+  "T2_refusal_branch_actual": "both initiallyactive2 and released together; root0 rejectsnodebudget while independentroot1 succeeds equalcompletelegacyenvelope; no active1waitingassertion claimed",
+  "UTC": "2026-10-02T18:26:47.330001+00:00",
+  "kind": "independent_actual_readonly_narrative_corrections_no_rerun",
+  "no_test_source_raw_or_original_archive_changes": true,
+  "not_claim_counterexample_leaves_never_executed": true,
+  "oldV2_26_counterexample_leaves_reexecuted_under_new_V5_T3_and_passed": true,
+  "oldV2_implementation_and_original_run_not_rerun": true,
+  "old_archive_retained": "/private/tmp/tm-r5MIME-forkV5-four.90yu5jcq/MIME-FORK-V5-four-targets-BOUNDED-PASS-evidence.tar.gz",
+  "old_archive_sha256": "050b85dc71aab1b6bd35ec3969baf57c5a2f37aa40392edf8e58ff8a88e69688"
+}

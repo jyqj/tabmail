@@ -1,5 +1,5 @@
 "use client";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listPermissionProfiles, createPermissionProfile, updatePermissionProfile, deletePermissionProfile, listDomains, listAdminDomains, listTenants, } from "@/lib/api";
+import { listDomains, listAdminDomains, listTenants, } from "@/lib/api";
+import { useSessionScope, sessionScope } from "@/lib/session";
 import type { DomainZone, PermissionProfile, Tenant } from "@/lib/types";
 import { Plus, MoreHorizontal, Trash2, Shield, Copy, Pencil, } from "lucide-react";
 import { toast } from "sonner";
@@ -22,7 +23,11 @@ import { useCRUDPage } from "@/hooks/use-crud-page";
 import { useAuth } from "@/contexts/auth-context";
 import { isSuperAdminLevel } from "@/lib/permissions";
 import { useI18n } from "@/lib/i18n";
-import { safeConfirm } from "@/lib/utils";
+import { listPermissionProfiles, createPermissionProfile, updatePermissionProfile, deletePermissionProfile, getPermissionProfileDeletionPreview } from "@/lib/api/permissions";
+import { useCompanyEventConsumer } from "./company-event-consumer";
+type DeletionPreview = Awaited<ReturnType<typeof getPermissionProfileDeletionPreview>>["data"];
+function hasRevision(profile: PermissionProfile): boolean { return typeof profile.revision === "string" && profile.revision.length <= 19 && /^[1-9][0-9]*$/.test(profile.revision) && BigInt(profile.revision) <= BigInt("9223372036854775807"); }
+function validQuotas(form: PermissionFormData): boolean { return [form.daily_send_quota, form.daily_receive_quota, form.max_mailboxes, form.max_domains].every(value => /^(0|[1-9][0-9]*)$/.test(value) && Number.isSafeInteger(Number(value))); }
 const GLOBAL_PROFILE_SCOPE = "__global__";
 interface PermissionFormData {
     tenant_id: string | null;
@@ -194,7 +199,7 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
     </div>);
 }
 export default function PermissionsPage() {
-    const { level } = useAuth();
+    const { level, tenantId } = useAuth();
     const { t } = useI18n();
     // UX-only gate; the backend authz seam is authoritative.
     const isPlatformAdmin = isSuperAdminLevel(level);
@@ -213,9 +218,53 @@ export default function PermissionsPage() {
     const [editingProfile, setEditingProfile] = useState<PermissionProfile | null>(null);
     const [editForm, setEditForm] = useState<PermissionFormData>(defaultForm);
     const [saving, setSaving] = useState(false);
+    const [editStale, setEditStale] = useState(false);
+    const [reviewFresh, setReviewFresh] = useState(false);
+    const [freshProfile, setFreshProfile] = useState<PermissionProfile | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const [deletingProfile, setDeletingProfile] = useState<PermissionProfile | null>(null);
+    const [preview, setPreview] = useState<DeletionPreview | null>(null);
+    const [previewBusy, setPreviewBusy] = useState(false);
+    const [deleteBusy, setDeleteBusy] = useState(false);
+    const [confirmed, setConfirmed] = useState(false);
+    const operation = useRef(0);
+    const writeBusy = useRef(false);
+    const session = useSessionScope();
+    const isCurrent = (token: number, scope: string) => token === operation.current && scope === sessionScope();
+    useEffect(() => {
+        ++operation.current;
+        writeBusy.current = false; setCreating(false); setSaving(false); setDeleteBusy(false); setRefreshing(false);
+        setEditOpen(false); setEditingProfile(null); setEditStale(false); setFreshProfile(null); setReviewFresh(false);
+        setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false);
+        setDialogOpen(false); setForm(defaultForm);
+        return () => { ++operation.current; };
+    }, [session]);
+    const eventRevoked = useCompanyEventConsumer({
+        tenantId, enabled: level === "admin" || isPlatformAdmin,
+        cacheKeys: ["permission-profiles", "permission-profile-admin-domains", "permission-profile-domains", "permission-profile-tenants"],
+        onInvalidate: () => {
+            // Fence background revision/preview GETs, without unlocking an
+            // in-flight business write or rebasing any dirty form fields.
+            if (!writeBusy.current) { ++operation.current; setRefreshing(false); setPreviewBusy(false); }
+            if (editingProfile) setEditStale(true);
+            setFreshProfile(null); setReviewFresh(false); setPreview(null); setConfirmed(false);
+        },
+        revalidate: () => mutateProfiles(),
+        onRevoked: () => {
+            ++operation.current; writeBusy.current = false;
+            setCreating(false); setSaving(false); setDeleteBusy(false); setRefreshing(false);
+            setEditOpen(false); setEditingProfile(null); setEditForm(defaultForm);
+            setFreshProfile(null); setReviewFresh(false); setEditStale(false);
+            setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false);
+            setDialogOpen(false); setForm(defaultForm);
+        },
+    });
+    const mayManage = (profile: PermissionProfile) => !eventRevoked && !profile.is_system && (isPlatformAdmin || (level === "admin" && !!tenantId && profile.tenant_id === tenantId));
     const handleCreate = async () => {
-        if (!form.name.trim())
+        if (eventRevoked || session !== sessionScope() || writeBusy.current || (level !== "admin" && !isPlatformAdmin) || !form.name.trim() || !validQuotas(form))
             return;
+        const token = ++operation.current, scope = session;
+        writeBusy.current = true;
         setCreating(true);
         try {
             await createPermissionProfile({
@@ -232,12 +281,14 @@ export default function PermissionsPage() {
                 can_create_routes: form.can_create_routes,
                 can_create_api_keys: form.can_create_api_keys,
             });
+            if (!isCurrent(token, scope)) return;
             setForm(defaultForm);
             setDialogOpen(false);
             toast.success(t("permissions.created"));
             mutateProfiles();
         }
         catch (e: unknown) {
+            if (!isCurrent(token, scope)) return;
             const err = e as {
                 error?: {
                     message?: string;
@@ -246,15 +297,17 @@ export default function PermissionsPage() {
             toast.error(err?.error?.message || t("permissions.createFailed"));
         }
         finally {
-            setCreating(false);
+            if (isCurrent(token, scope)) { writeBusy.current = false; setCreating(false); }
         }
     };
     const openEdit = (profile: PermissionProfile) => {
-        if (profile.is_system) {
+        if (!mayManage(profile)) {
             toast.error(t("permissions.systemCannotEdit"));
             return;
         }
+        ++operation.current;
         setEditingProfile(profile);
+        setEditStale(false); setFreshProfile(null); setReviewFresh(false);
         setEditForm({
             tenant_id: profile.tenant_id ?? null,
             name: profile.name,
@@ -272,11 +325,15 @@ export default function PermissionsPage() {
         setEditOpen(true);
     };
     const handleEdit = async () => {
-        if (!editingProfile || !editForm.name.trim())
+        if (session !== sessionScope() || writeBusy.current || !editingProfile || !mayManage(editingProfile) || !hasRevision(editingProfile) || editStale || reviewFresh || !editForm.name.trim() || !validQuotas(editForm))
             return;
+        const token = ++operation.current, scope = session;
+        writeBusy.current = true;
         setSaving(true);
         try {
             await updatePermissionProfile(editingProfile.id, {
+                expected_revision: editingProfile.revision!,
+                fields: {
                 name: editForm.name.trim(),
                 description: editForm.description.trim(),
                 can_send: editForm.can_send,
@@ -288,48 +345,73 @@ export default function PermissionsPage() {
                 can_create_domains: editForm.can_create_domains,
                 can_create_routes: editForm.can_create_routes,
                 can_create_api_keys: editForm.can_create_api_keys,
+                },
             });
+            if (!isCurrent(token, scope)) return;
             setEditOpen(false);
             setEditingProfile(null);
             toast.success(t("permissions.updated"));
             mutateProfiles();
         }
         catch (e: unknown) {
+            if (!isCurrent(token, scope)) return;
             const err = e as {
                 error?: {
                     message?: string;
                 };
             };
-            toast.error(err?.error?.message || t("permissions.updateFailed"));
+            setEditStale(true);
+            toast.error(err?.error?.message || t("permissions.profileConflict"));
         }
         finally {
-            setSaving(false);
+            if (isCurrent(token, scope)) { writeBusy.current = false; setSaving(false); }
         }
     };
-    const handleDelete = async (profile: PermissionProfile) => {
-        if (profile.is_system) {
-            toast.error(t("permissions.systemCannotDelete"));
-            return;
-        }
-        if (!safeConfirm(t("permissions.confirmDelete")))
-            return;
+    const refreshEdit = async () => {
+        if (session !== sessionScope() || !editingProfile || refreshing || writeBusy.current) return;
+        const token = ++operation.current, scope = session;
+        setRefreshing(true);
         try {
-            await deletePermissionProfile(profile.id);
-            toast.success(t("permissions.deleted"));
+            const response = await listPermissionProfiles();
+            if (!isCurrent(token, scope)) return;
+            const current = response.data.find(profile => profile.id === editingProfile.id);
+            if (!current || !mayManage(current) || !hasRevision(current)) throw new Error("revision unavailable");
+            setFreshProfile(current); setReviewFresh(true);
+            setEditingProfile(current); // Keep every draft field; never replay the failed command.
+            setEditStale(false);
             mutateProfiles();
-        }
-        catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("permissions.deleteFailed"));
-        }
+        } catch { if (isCurrent(token, scope)) toast.error(t("permissions.revisionUnavailable")); }
+        finally { if (isCurrent(token, scope)) setRefreshing(false); }
+    };
+    const loadPreview = async (profile: PermissionProfile) => {
+        if (session !== sessionScope() || !mayManage(profile) || writeBusy.current) return;
+        const token = ++operation.current, scope = session;
+        setDeletingProfile(profile); setPreview(null); setConfirmed(false); setPreviewBusy(true);
+        try {
+            const response = await getPermissionProfileDeletionPreview(profile.id);
+            if (isCurrent(token, scope)) setPreview(response.data);
+        } catch { if (isCurrent(token, scope)) toast.error(t("permissions.previewFailed")); }
+        finally { if (isCurrent(token, scope)) setPreviewBusy(false); }
+    };
+    const handleDelete = async () => {
+        if (session !== sessionScope() || writeBusy.current || !deletingProfile || !mayManage(deletingProfile) || !preview || !confirmed || previewBusy) return;
+        const token = ++operation.current, scope = session;
+        writeBusy.current = true; setDeleteBusy(true);
+        try {
+            await deletePermissionProfile(deletingProfile.id, { expected_revision: preview.profile_revision, confirmed_members: preview.members });
+            if (!isCurrent(token, scope)) return;
+            setDeletingProfile(null); setPreview(null); setConfirmed(false);
+            toast.success(t("permissions.deleted")); mutateProfiles();
+        } catch {
+            if (!isCurrent(token, scope)) return;
+            // Every failed write invalidates confirmation, including an unknown commit outcome.
+            setPreview(null); setConfirmed(false);
+            toast.error(t("permissions.profileConflict"));
+        } finally { if (isCurrent(token, scope)) { writeBusy.current = false; setDeleteBusy(false); } }
     };
     return (<div className="flex flex-col">
-      <PageHeader title={t("permissions.title")} description={t("permissions.total", { count: total })} actions={<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger render={<Button size="sm" className="gap-1.5"/>}>
+      <PageHeader title={t("permissions.title")} description={t("permissions.total", { count: total })} actions={<Dialog open={dialogOpen} onOpenChange={open => { if (!creating) setDialogOpen(open); }}>
+            <DialogTrigger render={<Button size="sm" className="gap-1.5" disabled={level !== "admin" && !isPlatformAdmin}/>}>
               <Plus className="h-3.5 w-3.5"/>
               {t("permissions.create")}
             </DialogTrigger>
@@ -342,7 +424,7 @@ export default function PermissionsPage() {
               </DialogHeader>
               <PermissionFormFields form={form} setForm={setForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants}/>
               <DialogFooter>
-                <Button onClick={handleCreate} disabled={creating || !form.name.trim()}>
+                <Button onClick={handleCreate} disabled={creating || !form.name.trim() || !validQuotas(form)}>
                   {creating ? t("permissions.creating") : t("permissions.create")}
                 </Button>
               </DialogFooter>
@@ -441,7 +523,7 @@ export default function PermissionsPage() {
                               <MoreHorizontal className="h-4 w-4"/>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem disabled={profile.is_system} onClick={() => openEdit(profile)}>
+                              <DropdownMenuItem disabled={!mayManage(profile)} onClick={() => openEdit(profile)}>
                                 <Pencil className="h-4 w-4 mr-2"/>
                                 {t("permissions.edit")}
                               </DropdownMenuItem>
@@ -453,7 +535,7 @@ export default function PermissionsPage() {
                                 {t("permissions.copyId")}
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem disabled={profile.is_system} onClick={() => handleDelete(profile)} className="text-destructive focus:text-destructive">
+                              <DropdownMenuItem disabled={!mayManage(profile)} onClick={() => loadPreview(profile)} className="text-destructive focus:text-destructive">
                                 <Trash2 className="h-4 w-4 mr-2"/>
                                 {t("permissions.delete")}
                               </DropdownMenuItem>
@@ -469,7 +551,7 @@ export default function PermissionsPage() {
         </Card>
       </div>
 
-      {editingProfile && (<Dialog open={editOpen} onOpenChange={setEditOpen}>
+      {editingProfile && (<Dialog open={editOpen} onOpenChange={(open) => { if (!saving && !refreshing) { if (!open) ++operation.current; setEditOpen(open); } }}>
           <DialogContent className="sm:max-w-lg">
             <DialogHeader>
               <DialogTitle>{t("permissions.editTitle")}</DialogTitle>
@@ -478,12 +560,39 @@ export default function PermissionsPage() {
               </DialogDescription>
             </DialogHeader>
             <PermissionFormFields form={editForm} setForm={setEditForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants} tenantScopeLocked/>
+            {freshProfile && <section className="max-h-48 overflow-auto rounded border p-3 text-xs">
+              <p>{t("permissions.latestProfileVersion")} · {freshProfile.revision}</p>
+              <pre className="whitespace-pre-wrap break-all">{JSON.stringify({ name: freshProfile.name, description: freshProfile.description, can_send: freshProfile.can_send, daily_send_quota: freshProfile.daily_send_quota, daily_receive_quota: freshProfile.daily_receive_quota, max_mailboxes: freshProfile.max_mailboxes, max_domains: freshProfile.max_domains, allowed_zone_ids: freshProfile.allowed_zone_ids, can_create_domains: freshProfile.can_create_domains, can_create_routes: freshProfile.can_create_routes, can_create_api_keys: freshProfile.can_create_api_keys }, null, 2)}</pre>
+              <label className="flex gap-2"><input type="checkbox" disabled={saving || refreshing} checked={!reviewFresh} onChange={event => setReviewFresh(!event.target.checked)} />{t("permissions.confirmFreshVersion")}</label>
+            </section>}
             <DialogFooter>
-              <Button onClick={handleEdit} disabled={saving || !editForm.name.trim()}>
+              {(!hasRevision(editingProfile) || editStale) && <div role="alert">{t(editStale ? "permissions.profileConflict" : "permissions.revisionUnavailable")}</div>}
+              <Button variant="outline" onClick={refreshEdit} disabled={saving || refreshing}>{t("permissions.refreshRevision")}</Button>
+              <Button onClick={handleEdit} disabled={saving || refreshing || editStale || reviewFresh || !hasRevision(editingProfile) || !validQuotas(editForm) || !editForm.name.trim()}>
                 {saving ? t("permissions.saving") : t("permissions.save")}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>)}
+      {deletingProfile && <Dialog open onOpenChange={(open) => { if (!open && !deleteBusy) { ++operation.current; setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false); } }}>
+        <DialogContent className="sm:max-w-3xl">
+          <DialogHeader><DialogTitle>{t("permissions.deletionPreviewTitle")}: {deletingProfile.name}</DialogTitle><DialogDescription>{t("permissions.deletionPreviewDesc")}</DialogDescription></DialogHeader>
+          {previewBusy && <p role="status">{t("permissions.previewLoading")}</p>}
+          {preview && <div className="max-h-[55vh] overflow-auto space-y-3">
+            <p>{t("permissions.affectedMembers", { count: preview.members.length })} · {preview.profile_revision}</p>
+            {preview.changes.map(change => <section key={change.revision.user_id} className="rounded border p-3">
+              <p className="text-xs break-all">{change.revision.tenant_id} / {change.revision.user_id}</p>
+              <Table><TableHeader><TableRow><TableHead>{t("permissions.name")}</TableHead><TableHead>{t("permissions.beforeDeletion")}</TableHead><TableHead>{t("permissions.afterDeletion")}</TableHead></TableRow></TableHeader><TableBody>
+                {(Object.keys(change.before) as (keyof typeof change.before)[]).map(field => <TableRow key={field}><TableCell>{field}</TableCell><TableCell>{JSON.stringify(change.before[field])}</TableCell><TableCell>{JSON.stringify(change.after[field])}</TableCell></TableRow>)}
+              </TableBody></Table>
+            </section>)}
+            <label className="flex items-center gap-2"><input type="checkbox" checked={confirmed} disabled={deleteBusy} onChange={event => setConfirmed(event.target.checked)} />{t("permissions.confirmEffects")}</label>
+          </div>}
+          <DialogFooter>
+            <Button variant="outline" disabled={previewBusy || deleteBusy} onClick={() => loadPreview(deletingProfile)}>{t("permissions.refreshPreview")}</Button>
+            <Button variant="destructive" disabled={!preview || !confirmed || previewBusy || deleteBusy} onClick={handleDelete}>{t("permissions.delete")}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>}
     </div>);
 }

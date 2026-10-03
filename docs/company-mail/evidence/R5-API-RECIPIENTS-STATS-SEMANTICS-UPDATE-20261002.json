@@ -1,0 +1,41 @@
+{
+  "artifact_kind": "central_derived_current_semantics_two_row_update_not_runtime_raw",
+  "operation_count": 132,
+  "registration_guard_condition_source_location_and_authority_fields_unchanged": true,
+  "other130_rows_unchanged": true,
+  "changed_fields": [
+    "content",
+    "evidence"
+  ],
+  "rows": [
+    {
+      "index": 22,
+      "method": "GET",
+      "path": "/api/v1/admin/stats",
+      "before_fields": {
+        "content": "管理元数据",
+        "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
+      },
+      "after_fields": {
+        "content": "SystemStats管理元数据；recent_audit投影为完整AuditEntry值数组（空集合[]），nil存储entry failclosed无成功payload；值复制不宣称嵌套深拷贝",
+        "evidence": "internal/app/admin/service.go:Stats + internal/api/handlers/admin.go:Stats；fc7c7c Stats5 app/handler bounded race5top11leaf13PASS，不全router鉴权矩阵"
+      }
+    },
+    {
+      "index": 55,
+      "method": "GET",
+      "path": "/api/v1/company/outbound/{id}/recipients",
+      "before_fields": {
+        "content": "逐目标结果；无当前read时过滤BCC/diagnostic，A03资格期限缺口仍适用",
+        "evidence": "internal/api/handlers/company_recovery.go:Recipients + internal/app/submissions/service.go"
+      },
+      "after_fields": {
+        "content": "APIResponse<OutboundReceipt>单聚合metadata对象，完整ledger聚合outcomes；progress unknown时counts省略非伪零。即使有当前content-read也不在此路由透出逐地址/BCC/正文/SMTP诊断；内容与inspection走独立资格面",
+        "evidence": "internal/api/handlers/company_recovery.go:Recipients + internal/app/submissions/service.go；source33307实际wire聚合DTO，9afe新OAS精确对象契约/旧81capture只读复验，非freshformalCLI0"
+      }
+    }
+  ],
+  "fresh_route_inventory_or_allrole_tests_executed": false,
+  "task_complete": false,
+  "product_green": false
+}

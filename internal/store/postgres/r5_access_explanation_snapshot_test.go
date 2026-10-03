@@ -17,6 +17,7 @@ import (
 // All observations use a new testpg database and production commands. A waiter
 // or actual completion is observed; a sleep is never evidence of lock ordering.
 func TestR5AccessExplanationWaitsForTargetWrites(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"frozen", "profile-assignment", "override-insert", "override-clear", "role-change"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -112,6 +113,7 @@ func TestR5AccessExplanationRejectsBusyTargetProfile(t *testing.T) {
 }
 
 func TestR5AccessExplanationOrdersPermissionChanges(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"profile-update", "profile-delete", "override-insert", "override-update", "override-clear"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -215,6 +217,7 @@ func TestR5AccessExplanationNeverCombinesTargetGenerations(t *testing.T) {
 }
 
 func TestR5AccessExplanationFailureReturnsNoProjection(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"missing-mailbox", "missing-user", "foreign-user", "foreign-mailbox", "employee", "frozen-actor", "cancelled"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)
@@ -303,6 +306,7 @@ func TestR5AccessExplanationCancellationReleasesSnapshot(t *testing.T) {
 }
 
 func TestR5AccessExplanationPreservesCanonicalDecisions(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, kind := range []string{"owner", "grant", "empty-grant", "none", "admin", "inactive", "zone-restricted", "template-only"} {
 		t.Run(kind, func(t *testing.T) {
 			f := seedCompany(t)

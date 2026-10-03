@@ -64,6 +64,18 @@ func ResolveSendAuthorization(ctx context.Context, st SendAddressStore, actor au
 		if err := authz.CheckMailboxSender(ctx, st, actor, mb, hasPublishedTemplate); err != nil {
 			res.MailboxSenderErr = err
 		}
+	} else {
+		// Integration scope is not a company/mailbox send-policy exemption.
+		// A published-version claim only passes this policy gate; the worker
+		// still resolves its current immutable template grant through governance.
+		switch authz.MailboxSendPolicy(mb) {
+		case authz.SendPolicyDisabled:
+			res.MailboxSenderErr = authz.ErrForbidden("mailbox sending disabled by company policy")
+		case authz.SendPolicyTemplateRequired:
+			if !hasPublishedTemplate {
+				res.MailboxSenderErr = authz.ErrForbidden("a granted published template version is required")
+			}
+		}
 	}
 	if mb == nil {
 		identity, err := st.FindSendIdentityForAddress(ctx, tenantID, address)

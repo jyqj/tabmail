@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "deliveries": [
+    {
+      "archive": "R5-PG-LIFECYCLE-FOUR-TWO-LANE-LOGS.tar.gz",
+      "review": "R5-PG-LIFECYCLE-FOUR-TWO-LANE-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5pgparallel-run.4korz_mk/PG-LIFECYCLE-FOUR-TOP-TWO-LANE-ACTUAL-evidence.tar.gz",
+      "archive_sha256_from_executor": "1f64d251d5eb737fa7fff458f91053d35378887e25b9015ce01a74e6a3852d1c",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 40,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-PG-PARALLEL-ADDED15-LOGS.tar.gz",
+      "review": "R5-PG-PARALLEL-ADDED15-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5pgparallel15-run.s3xi51pg/PG-PARALLEL-ADDED15-EXACTWHITELIST-ACTUAL-evidence.tar.gz",
+      "archive_sha256_from_executor": "2cc0889f8133eac384d734e97038cd4eff1fd6a9fc592c1a662d2370a5490cff",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 35,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-LEGACY-RC3-FRESH-GO-TSC-LOGS.tar.gz",
+      "review": "R5-LEGACY-RC3-FRESH-GO-TSC-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5legacyRC3.ao543o4j/LEGACY-RC3-FRESH-GO-OBSERVATIONS-TSC-evidence.tar.gz",
+      "archive_sha256_from_executor": "ebd5b86bce6bbdbd7fcfae59379f274e7b5f825db594745b9e8456758df5524f",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 28,
+      "payload_bytes_changed": false
+    }
+  ],
+  "MCAUSE_source_capsule": {
+    "file": "R5-MCAUSE-SOURCE-CAPSULE.tar.gz",
+    "copied_original_bytes": true,
+    "archive_digest_not_provided_or_recomputed": true,
+    "raw_pin_manifest": "R5-MCAUSE-SOURCE-CAPSULE.json",
+    "level": "SOURCE_BOUNDED_PASS_NOT_4000_RUNTIME"
+  },
+  "MCAUSE_new_tests": {
+    "file": "R5-MCAUSE-NEWTESTS-RAW.tar.gz",
+    "raw_root": "/tmp/tm-mcause-newtests-final.M5DELgFG",
+    "payload_files": [
+      "default.exit",
+      "default.jsonl",
+      "default.stderr",
+      "observer.exit",
+      "observer.jsonl",
+      "observer.stderr"
+    ],
+    "payload_bytes_changed": false,
+    "packaging_new_only_not_tests_reexecuted": true,
+    "actual_pass": 5,
+    "cached": 4,
+    "fresh": 1,
+    "MCAUSE4000_executed": false
+  },
+  "old_raw_review_source_dict_modified": false,
+  "tests_repeated_by_docs": false,
+  "fullbackend_180_pass_claimed": false,
+  "shipping_executed": false,
+  "task_complete": false,
+  "product_green": false
+}

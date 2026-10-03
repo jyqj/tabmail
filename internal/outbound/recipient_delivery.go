@@ -64,16 +64,21 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 		} else {
 			result, deliveryErr = s.adapter.Deliver(ctx, &attempt, mime)
 		}
-		if result != nil {
-			// Protocol diagnostics are also retained on the recipient in the fenced
-			// completion transaction. Attempt telemetry failure cannot erase progress.
-			err = s.store.CreateOutboundAttempt(ctx, &models.OutboundAttempt{ID: uuid.New(), JobID: j.ID, TenantID: j.TenantID, Adapter: result.Adapter, Attempt: j.Attempts, SMTPCode: result.SMTPCode, SMTPResponse: result.SMTPResponse, RemoteHost: result.RemoteHost, StartedAt: result.StartedAt, FinishedAt: result.FinishedAt, Error: result.Error})
-			if err != nil {
-				s.logger.Warn().Err(err).Msg("recording delivery telemetry")
+		recordAttempt := func() {
+			if result != nil {
+				// The fenced recipient completion (or uncertain terminal marker)
+				// precedes optional telemetry, including slow writes and cancellation.
+				if err := s.store.CreateOutboundAttempt(ctx, &models.OutboundAttempt{ID: uuid.New(), JobID: j.ID, TenantID: j.TenantID, Adapter: result.Adapter, Attempt: j.Attempts, SMTPCode: result.SMTPCode, SMTPResponse: result.SMTPResponse, RemoteHost: result.RemoteHost, StartedAt: result.StartedAt, FinishedAt: result.FinishedAt, Error: result.Error}); err != nil {
+					s.logger.Warn().Err(err).Msg("recording delivery telemetry")
+				}
 			}
 		}
 		if errors.Is(deliveryErr, store.ErrOutboundUncertain) {
-			return s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance uncertain: "+rcpt.Address, false)
+			if err := s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance uncertain: "+rcpt.Address, false); err != nil {
+				return err
+			}
+			recordAttempt()
+			return nil
 		}
 		state, code, diagnostic := delivery.Accepted, 250, "Accepted by next hop"
 		if deliveryErr != nil {
@@ -89,8 +94,9 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 			}
 		}
 		if err = st.CompleteOutboundRecipient(ctx, j.ID, token, rcpt.Address, state, code, diagnostic); err != nil {
-			return fmt.Errorf("%w: recipient checkpoint: %v", store.ErrOutboundUncertain, err)
+			return fmt.Errorf("%w: recipient checkpoint: %w", store.ErrOutboundUncertain, err)
 		}
+		recordAttempt()
 		if state == delivery.Temporary {
 			temporary++
 		}

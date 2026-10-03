@@ -1,0 +1,32 @@
+{
+  "artifact_kind": "central_summary_of_delivered_independent_SOURCE_verdict_NOT_OS_runtime",
+  "phase_R3": {
+    "capsule": "/private/tmp/tm-r5-pg-phase-a331-r3-1u46l7uw",
+    "scope": "privatea331/schema18 notmain19",
+    "B1_B3_B4_SOURCE_closed": true,
+    "remaining_B2_B5": [
+      "two lifecycle sampling races",
+      "native descendants missing"
+    ],
+    "exact8_runtime": false
+  },
+  "watchdog": {
+    "capsule": "/private/tmp/tm-r5-pg-watchdog-source.9cPrcRsx",
+    "backend_sha": "1d47fd7718ced7772af2d8293192b6191b9239853e8ebe45bba16fe724520f2d",
+    "launcher_sha": "db5686e38392017425f0f4199c8905c1382ac4006bee9ed17ef81c0333bdac5c",
+    "protocol_version": 4,
+    "protocol_sha": "8dcea5fc6f2e7ea806a154a657f129bc0945b5fe2d55921817a134ec04125466",
+    "independent_SOURCE_contract": "N1_SERIAL_SOURCE_CONTRACT_ACCEPTED",
+    "formal_exact8": "BLOCKED",
+    "runtime": "DENIED",
+    "scope_drained": "no true path for arbitrary descendants; nextresource stage refuses",
+    "terminal_send": "nonblocking bufferwrite is not proofflushed to peer; realflushneeded",
+    "S1_S5_SOURCE_closed": true,
+    "pure_developer_layers": "33/37/25/19 failures/proofs kept separate not onefreshsuite",
+    "actual_OS_csops_hardkill_census": false,
+    "HARD1200_required": true,
+    "machine_final_review_path_notprovided": true
+  },
+  "task_complete": false,
+  "product_green": false
+}

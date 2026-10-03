@@ -208,33 +208,10 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 		patch.DisplayName = req.DisplayName
 	}
 	if req.PermissionProfileID != nil {
-		patch.SetPermissionProfile = true
-		raw := strings.TrimSpace(string(req.PermissionProfileID))
-		if raw == "" || raw == "null" {
-			patch.PermissionProfileID = nil
-		} else {
-			var profileID uuid.UUID
-			if err := json.Unmarshal(req.PermissionProfileID, &profileID); err != nil {
-				errBadRequest(w, "invalid permission_profile_id")
-				return
-			}
-			profile, err := h.store.GetPermissionProfile(r.Context(), profileID)
-			if err != nil {
-				h.logger.Err(err).Msg("update user: lookup permission profile")
-				errInternal(w)
-				return
-			}
-			if profile == nil {
-				errBadRequest(w, "permission profile not found")
-				return
-			}
-			if profile.TenantID != nil && *profile.TenantID != user.TenantID {
-				errForbidden(w, "permission profile belongs to a different tenant")
-				return
-			}
-			patch.PermissionProfileID = &profileID
-		}
+		errConflict(w, "profile assignment protocol upgraded; use permission-editor/assignment with expected_revision")
+		return
 	}
+
 	updated, err := h.store.UpdateUserGuarded(r.Context(), actor, tenant.ID, userID, patch)
 	if err != nil {
 		h.writeMemberError(w, err)

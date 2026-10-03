@@ -1,5 +1,14 @@
 # R5 事务、锁顺序与授权检查地图
 
+> **2026-10-03 当前19限定：** physical api_key_usage迁移19/原9+2SOURCE审通过，但原A FAILED、D1诊断P/D2 ctx污染F、D3BSC未run；C18 catalog15只frozen18 synthetic/gates170P无owned/fullreference。18历史结构/catalog、1309 SOURCEcheckpoint和旧16M不当前19资格，whole/事务族freshAST与coverage仍缺。[最新证据](R5-CURRENT19-USAGE-DIAGNOSTIC-C18-STATUS-20261003.md)。
+
+> **2026-10-03 参考资格限定：** 历史schema18实际catalog七集合/18migration SHA真实，但不是C18-07 full reference；缺typmod、triggerenabled、indexvalid-ready、seqcache/ownership和普通functions，11仅trigger_functions。原raw不补默认或改字节，实际runtime reference仍未准入；[准确分类](evidence/R5-CATALOG18-HISTORICAL-PARTIAL-C18-BOUNDARY-20261003.json)。当前full族AST/事务coverage仍独立缺口。
+
+> **最新追加：** cb03/2c3ea72f实际schema18 catalog独立实采51tables/75FK/11triggers，GC18及head限定15top21leaf race0；新Create/B5/GC18/current AST与全coverage仍未整体验收。见[新18报告](R5-GC18-RECEIPT-OAS-REGISTRY-INTEGRATION-20261002.md)，旧catalog/source不回贴。
+
+> **此前source实际catalog17（历史独立层）：** source1a15/closure77714、officialNew/Migrate/O_EXCL原194779字节、50tables/75FK/11triggers及3upgrade/catalog目标race通过，见[独立新17报告](R5-SCHEMA17-ACTUAL-CATALOG-20261002.md)与[原catalog](evidence/R5-TRANSACTION-DB-CATALOG-SCHEMA17-ACTUAL-20261002.json)。原15/16历史JSON和下方旧批source边界保，不currentAST/每函数全runtime，不17回贴18。
+
+
 > **B01-U 当前状态：** 手工重试最终授权与requeue/audit/outbox现同事务，锁后再次验证实际job及recipient不确定性，最终DB时钟检查Key/邮箱期限；提交成功后投影失败返回受限成功回执。55组204事件三轮、backend1151pass/1 browser skip、160必跑、HTTP80响应通过。T中重试尚未原子化的描述保留历史含义，见 [B01-U](R5-B01-U-VALIDATION.md)。
 
 > **B01-T 当前状态：** 旧回执现在由当前主体事务和同条SQL返回可见ID/total/页面/内容决定，Key查询后按实际时钟再验截止；attempts及recipient在读取后重验。47组PG173事件三轮、完整backend1117pass/1 browser skip、149必跑、HTTP80响应通过。另修复Key非空inet使用IP解码，重试最终写入授权仍未合并，见 [B01-T](R5-B01-T-VALIDATION.md)。
@@ -223,3 +232,6 @@ Webhook fanout复制URL稳定排序解决实际unique批环；Invite exactPKEYSH
 ## AI当前原P0-070四条最终材料
 
 当前352函数／70手工轨迹（68原slot家族+Actor/helper）／15migration实际catalog75FK/7trigger/34CHECK与原四条任务要求逐项绑定：[最终审材料](evidence/R5-P0-070-FINAL-REVIEW.json)。14/46profile、53Actor、61URL批序有同finaltest真实red-green与当前AI23门禁；domain与plan仅按现准入点合同，callback外部effect／GC前缀非物理整TX保证，未来产品任务未豁免。独立审核裁决层与syntax runtime=false登记层分清，不按全branch计数验收。
+## 新实际catalog18边界（2026-10-02）
+
+sourcecb03/closure2c3ea72f正式Migrate→O_EXCL[actual18catalog](evidence/R5-TRANSACTION-DB-CATALOG-SCHEMA18-ACTUAL-20261002.json)，51tables/507cols/185constraints/75FK/154indexes/11triggers/11functions/3seq，18migration hashes/restart一致；15top21leaf GC/head bounded race0，不全事务运行证明。source1a15实际17及旧15/16catalog保持原bytes，M852900仍schema16失败；新Create/B5/GC18及received族fresh AST/coverage owner分类尚未完整，旧AST802/旧352coverage不能改hash称currentunknown0。详[追加证据](R5-GC18-RECEIPT-OAS-REGISTRY-INTEGRATION-20261002.md)。

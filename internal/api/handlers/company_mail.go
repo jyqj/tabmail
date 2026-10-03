@@ -332,5 +332,5 @@ func (h *CompanyMailHandler) SubmitDraft(w http.ResponseWriter, r *http.Request)
 		ok(w, view)
 		return
 	}
-	created(w, job)
+	created(w, h.subs.CommittedReceiptView(r.Context(), companyActor(r), job))
 }

@@ -1,10 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import { request } from "@/lib/api/base";
-import type { APIListResponse, APIResponse, OutboundJob } from "@/lib/types";
-import { company, type Receipt, type RecipientResult } from "@/lib/company";
+import type { APIListResponse, APIResponse } from "@/lib/types";
+import { company, type Receipt } from "@/lib/company";
+import { useAuth } from "@/contexts/auth-context";
+import {
+  isInspectionID,
+  parseOutboundInspection,
+  validInspectionReason,
+  type OutboundInspection,
+} from "@/lib/outbound-inspection-types";
 import {
   ActionButton,
   Field,
@@ -16,6 +23,8 @@ import {
 } from "@/components/company/common";
 export default function RecoveryPage() {
   const t = useText();
+  const auth = useAuth();
+  const canInspect = auth.hydrated && auth.level === "super_admin" && isInspectionID(auth.tenantId);
   const { busy, run } = useAction();
   const [page, setPage] = useState(1);
   const receipts = useAPI(["recovery-receipts", page], () =>
@@ -35,11 +44,30 @@ export default function RecoveryPage() {
   const [targets, setTargets] = useState<string[]>([]);
   const [reason, setReason] = useState("");
   const [jobId, setJobId] = useState("");
-  const [jobInspection, setJobInspection] = useState<{
-    job: OutboundJob;
-    recipients: RecipientResult[];
-  } | null>(null);
+  const [jobInspection, setJobInspection] = useState<OutboundInspection | null>(null);
+  // Target edits fence in-page requests. Account/company/session changes use
+  // the existing request lease and AuthProvider's session-keyed subtree.
+  const inspectionVersion = useRef(0);
   const [outcomes, setOutcomes] = useState<Record<string, string>>({});
+  const recipientStateLabel = (state: string) => ({
+    pending: t("待处理", "Pending"),
+    accepted: t("下一跳已接受（不代表最终送达）", "Next-hop accepted (not final delivery)"),
+    temporary: t("临时拒绝", "Temporary rejection"),
+    permanent: t("永久拒绝", "Permanent rejection"),
+    uncertain: t("结果不确定", "Uncertain outcome"),
+  }[state] ?? t("未知类别，需核查", "Unknown category; review required"));
+  const jobStatusLabel = (status: string) => ({
+    submitted: t("已提交", "Submitted"),
+    cancelled: t("已取消", "Cancelled"),
+    sending: t("发送中", "Sending"),
+    partially_accepted: t("部分目标获下一跳接受（不代表最终送达）", "Partially next-hop accepted (not final delivery)"),
+    accepted: recipientStateLabel("accepted"),
+    needs_attention: t("需要核查", "Needs attention"),
+  }[status] ?? t("未知类别，需核查", "Unknown category; review required"));
+  const recipientKindLabel = (kind: string) => ({
+    to: t("收件人", "To"), cc: t("抄送", "Cc"), bcc: t("密送（受审计例外）", "Bcc (audited exception)"),
+    envelope: t("信封收件人", "Envelope recipient"),
+  }[kind] ?? t("未知类别，需核查", "Unknown category; review required"));
   return (
     <main className="mx-auto w-full max-w-6xl space-y-6 p-4 md:p-7">
       <header>
@@ -55,8 +83,8 @@ export default function RecoveryPage() {
       </header>
       <Field
         label={t(
-          "本次检查 / 恢复原因（至少 8 个字符）",
-          "Inspection / recovery reason (8+ characters)",
+          "本次检查 / 恢复原因（去除首尾空白后 8–1000 UTF-8 字节）",
+          "Inspection / recovery reason (8–1000 UTF-8 bytes after trimming)",
         )}
       >
         {(id) => (
@@ -64,7 +92,6 @@ export default function RecoveryPage() {
             id={id}
             className={inputClass}
             value={reason}
-            minLength={8}
             maxLength={1000}
             rows={2}
             onChange={(e) => setReason(e.target.value)}
@@ -217,8 +244,8 @@ export default function RecoveryPage() {
       >
         <p className="text-sm text-muted-foreground">
           {t(
-            "检查会先写审计，再显示正文、密送和协议诊断。只有确认了服务器记录，才能标记接收或明确未接收；不能把“未知”改成“重试”来猜测。",
-            "Inspection records an audit before revealing content, Bcc and diagnostics. Confirm server evidence before recording acceptance or non-acceptance; never guess by retrying.",
+            "仅当前有效的平台超级管理员可在所选公司范围内使用受审计例外。审计提交后显示正文、结构化密送和安全诊断类别/状态码，不显示原始协议诊断。下一跳接受不代表最终送达；核对服务器证据，不可猜测重试。",
+            "Only a current platform super administrator may use this audited exception in the selected company. A committed audit reveals content, structured Bcc and safe diagnostic classes/codes, never raw protocol diagnostics. Next-hop acceptance is not final delivery; verify server evidence, never guess by retrying.",
           )}
         </p>
         <Field label={t("发送任务 ID", "Outbound job ID")}>
@@ -228,6 +255,7 @@ export default function RecoveryPage() {
               className={inputClass}
               value={jobId}
               onChange={(e) => {
+                inspectionVersion.current++;
                 setJobId(e.target.value);
                 setJobInspection(null);
                 setOutcomes({});
@@ -236,42 +264,62 @@ export default function RecoveryPage() {
           )}
         </Field>
         <ActionButton
-          disabled={busy || !jobId || reason.trim().length < 8}
+          disabled={busy || !canInspect || !isInspectionID(jobId.trim()) || !validInspectionReason(reason)}
           onClick={() =>
             run(async () => {
-              const value = await company<{
-                job: OutboundJob;
-                recipients: RecipientResult[];
-              }>(`/outbound/${encodeURIComponent(jobId)}/inspect`, {
-                method: "POST",
-                body: { reason },
-              });
-              setJobInspection(value);
+              if (!canInspect || !auth.tenantId || !validInspectionReason(reason)) return;
+              const target = jobId.trim();
+              if (!isInspectionID(target)) return;
+              const version = ++inspectionVersion.current;
+              const tenantId = auth.tenantId;
+              setJobInspection(null);
               setOutcomes({});
+              const value = await company<unknown>(`/outbound/${encodeURIComponent(target)}/inspect`, {
+                method: "POST",
+                body: { reason: reason.trim() },
+              });
+              if (version !== inspectionVersion.current) return;
+              setJobInspection(parseOutboundInspection(value, { jobId: target, tenantId }));
             })
           }
         >
           {t("记录审计并检查", "Audit and inspect")}
         </ActionButton>
-        {jobInspection && (
-          <div className="rounded border p-4 space-y-3">
+        {canInspect && jobInspection && (
+          <div className="rounded border p-4 space-y-3" aria-label={t("受审计出站检查结果", "Audited outbound inspection result")}>
             <h3 className="font-medium">{jobInspection.job.subject}</h3>
             <p className="text-sm">
-              {jobInspection.job.mail_from} · {jobInspection.job.state}
+              {jobInspection.job.mail_from} · {jobStatusLabel(jobInspection.job.status)}
             </p>
-            <pre className="whitespace-pre-wrap text-sm">
-              {jobInspection.job.text_body}
-            </pre>
+            <dl className="grid gap-2 text-sm md:grid-cols-2">
+              <div><dt>{t("任务 / 公司", "Job / company")}</dt><dd className="break-all">{jobInspection.job.id} / {jobInspection.job.tenant_id}</dd></div>
+              <div><dt>{t("队列状态", "Queue state")}</dt><dd>{jobInspection.job.state}</dd></div>
+              <div><dt>{t("创建时间", "Created at")}</dt><dd>{jobInspection.job.created_at}</dd></div>
+              <div><dt>{t("检查版本", "Inspection version")}</dt><dd>{jobInspection.job.updated_at}</dd></div>
+              <div><dt>{t("收件人", "To")}</dt><dd>{jobInspection.job.to.join(", ") || "—"}</dd></div>
+              <div><dt>{t("抄送", "Cc")}</dt><dd>{jobInspection.job.cc.join(", ") || "—"}</dd></div>
+              <div><dt>{t("密送（仅本次受审计例外）", "Bcc (this audited exception only)")}</dt><dd>{jobInspection.job.bcc.join(", ") || "—"}</dd></div>
+            </dl>
+            <div><p className="text-sm font-medium">{t("文本正文", "Text body")}</p>
+              <pre className="whitespace-pre-wrap break-words text-sm">{jobInspection.job.text_body}</pre></div>
+            <div><p className="text-sm font-medium">{t("HTML 源文（不执行）", "HTML source (not executed)")}</p>
+              <pre className="whitespace-pre-wrap break-words text-sm">{jobInspection.job.html_body}</pre></div>
+            <div><p className="text-sm font-medium">{t("允许的结构化邮件头", "Allowlisted structural headers")}</p>
+              <dl className="space-y-1 text-xs">{Object.entries(jobInspection.job.headers).map(([name, value]) => (
+                <div className="break-words" key={name}><dt className="inline font-medium">{name}: </dt><dd className="inline">{value}</dd></div>
+              ))}</dl></div>
             {jobInspection.recipients.map((v) => (
               <div
                 className="grid gap-2 md:grid-cols-2 text-sm"
                 key={v.address}
               >
                 <div>
-                  {v.address} · {v.state}
+                  {v.address} · {recipientKindLabel(v.kind)} · {recipientStateLabel(v.state)}
                   <p className="break-words text-muted-foreground">
-                    {v.diagnostic}
+                    {t("安全诊断类别", "Safe diagnostic class")}: {recipientStateLabel(v.diagnostic_class)}
+                    {" · SMTP "}{v.smtp_code || "—"}{v.enhanced_code ? ` · ${v.enhanced_code}` : ""}
                   </p>
+                  <p className="text-xs text-muted-foreground">{t("尝试次数", "Attempts")}: {v.attempts} · {v.updated_at}</p>
                 </div>
                 {v.state === "uncertain" && (
                   <select
@@ -313,11 +361,13 @@ export default function RecoveryPage() {
             <ActionButton
               disabled={
                 busy ||
-                reason.trim().length < 8 ||
+                !canInspect ||
+                !validInspectionReason(reason) ||
                 !Object.values(outcomes).some(Boolean)
               }
               onClick={() =>
                 run(async () => {
+                  if (!canInspect || !validInspectionReason(reason)) return;
                   await company(`/outbound/${jobInspection.job.id}/reconcile`, {
                     method: "POST",
                     body: {

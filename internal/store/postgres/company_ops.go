@@ -343,34 +343,19 @@ func (s *PgStore) SweepCompanyMetadata(ctx context.Context) error {
 			return err
 		}
 	}
-	rows, err := s.pool.Query(ctx, `SELECT DISTINCT tenant_id FROM mail_attachments WHERE expires_at<now() LIMIT 20`)
-	if err != nil {
-		return err
-	}
-	tenants := []uuid.UUID{}
-	for rows.Next() {
-		var id uuid.UUID
-		if err = rows.Scan(&id); err != nil {
-			rows.Close()
-			return err
-		}
-		tenants = append(tenants, id)
-	}
-	err = rows.Err()
-	rows.Close()
-	if err != nil {
-		return err
-	}
-	for _, tenant := range tenants {
-		if err = s.sweepCompanyAttachments(ctx, tenant); err != nil {
-			return err
-		}
-	}
-	return nil
+	return s.sweepCompanyAttachmentTenants(ctx)
 }
 
 func (s *PgStore) sweepCompanyAttachments(ctx context.Context, tenant uuid.UUID) error {
-	tx, err := s.pool.Begin(ctx)
+	return sweepCompanyAttachmentsWith(ctx, s.pool, tenant)
+}
+
+// The scheduler supplies the same session that owns its advisory lock. Only
+// transaction creation is parameterized; attachment locks and SQL are shared.
+func sweepCompanyAttachmentsWith(ctx context.Context, db interface {
+	Begin(context.Context) (pgx.Tx, error)
+}, tenant uuid.UUID) error {
+	tx, err := db.Begin(ctx)
 	if err != nil {
 		return err
 	}
@@ -378,12 +363,21 @@ func (s *PgStore) sweepCompanyAttachments(ctx context.Context, tenant uuid.UUID)
 	// The tenant lock orders this sweep with company-wide disposition, not
 	// with ordinary draft/finish paths (which do not take a tenant lock).
 	// Draft and enqueue writers retain shared attachment-row locks; the
-	// candidate scan skips those busy rows. Recheck JSON and FK-backed pins
-	// after selecting candidates, and commit deletion with orphan registration.
+	// candidate scan skips those busy rows. Exclude every existing metadata
+	// reference BEFORE LIMIT, so a protected prefix cannot starve later orphans.
+	// At most 100 candidates are returned/locked/deleted per tenant and there is
+	// no pagination loop. SQL may inspect more protected rows to find them;
+	// this is not a bound on physical query-plan work or cross-tenant fairness.
+	// Recheck the same JSON and FK-backed pins in a new statement after locking,
+	// and commit deletion with orphan registration. Held ingress/message object
+	// references remain protected by the separate raw-object release authority.
 	if err = lockMemberTenant(ctx, tx, tenant); err != nil {
 		return err
 	}
-	rows, err := tx.Query(ctx, `SELECT id FROM mail_attachments WHERE tenant_id=$1 AND expires_at<now() ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED`, tenant)
+	unreferenced := `NOT EXISTS(SELECT 1 FROM outbound_attachments o WHERE o.attachment_id=a.id)
+       AND NOT EXISTS(SELECT 1 FROM sent_asset_attachments o WHERE o.attachment_id=a.id)
+       AND NOT EXISTS(SELECT 1 FROM mail_drafts d WHERE d.tenant_id=a.tenant_id AND d.payload->'attachment_ids' ? a.id::text)`
+	rows, err := tx.Query(ctx, `SELECT a.id FROM mail_attachments a WHERE a.tenant_id=$1 AND a.expires_at<now() AND `+unreferenced+` ORDER BY a.id LIMIT 100 FOR UPDATE OF a SKIP LOCKED`, tenant)
 	if err != nil {
 		return err
 	}
@@ -403,9 +397,7 @@ func (s *PgStore) sweepCompanyAttachments(ctx context.Context, tenant uuid.UUID)
 	}
 	_, err = tx.Exec(ctx, `WITH gone AS (
        DELETE FROM mail_attachments a WHERE a.tenant_id=$1 AND a.id=ANY($2::uuid[]) AND a.expires_at<now()
-       AND NOT EXISTS(SELECT 1 FROM outbound_attachments o WHERE o.attachment_id=a.id)
-       AND NOT EXISTS(SELECT 1 FROM sent_asset_attachments o WHERE o.attachment_id=a.id)
-       AND NOT EXISTS(SELECT 1 FROM mail_drafts d WHERE d.tenant_id=a.tenant_id AND d.payload->'attachment_ids' ? a.id::text)
+       AND `+unreferenced+`
        RETURNING object_key)
        INSERT INTO orphan_objects(object_key,first_failed_at,last_failed_at,attempts)
        SELECT object_key,now(),now(),1 FROM gone ON CONFLICT DO NOTHING`, tenant, ids)

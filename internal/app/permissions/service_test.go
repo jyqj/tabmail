@@ -29,6 +29,17 @@ type stubStore struct {
 	getZoneErr error
 	listErr    error
 	createErr  error
+
+	// Guarded creation is an explicitly observed port, never a legacy writer
+	// fallback or a fake current-authority/revision engine.
+	guardedCreateActor     authz.Actor
+	guardedCreateSelected  *uuid.UUID
+	guardedCreateRequested *models.PermissionProfile
+	guardedCreateCalls     int
+	guardedCreateResult    *models.PermissionProfile
+	guardedCreateErr       error
+	// Explicit fault injection; false retains every existing fixture outcome.
+	guardedCreateNilSuccess bool
 }
 
 func (s *stubStore) ListPermissionProfiles(_ context.Context, tenantID *uuid.UUID) ([]*models.PermissionProfile, error) {
@@ -49,6 +60,24 @@ func (s *stubStore) ListPermissionProfiles(_ context.Context, tenantID *uuid.UUI
 	return out, nil
 }
 
+// This is the legacy list-use-case fake, not a model of transactional identity
+// refresh. PostgreSQL boundary tests cover the current stored administrator.
+func (s *stubStore) ListVisiblePermissionProfiles(ctx context.Context, actor authz.Actor, selected *uuid.UUID) ([]*models.PermissionProfile, error) {
+	if actor.Type != authz.PrincipalUser || actor.ID == uuid.Nil {
+		return nil, app.Forbidden("interactive administrator required")
+	}
+	if actor.IsSuperAdmin {
+		return s.ListPermissionProfiles(ctx, nil)
+	}
+	if selected == nil {
+		return nil, app.Forbidden("no tenant context")
+	}
+	if !actor.IsAdmin || actor.TenantID != *selected {
+		return nil, app.Forbidden("company administrator required")
+	}
+	return s.ListPermissionProfiles(ctx, selected)
+}
+
 func (s *stubStore) GetPermissionProfile(_ context.Context, id uuid.UUID) (*models.PermissionProfile, error) {
 	if p := s.profiles[id]; p != nil {
 		cp := *p
@@ -63,6 +92,23 @@ func (s *stubStore) CreatePermissionProfile(_ context.Context, p *models.Permiss
 	}
 	s.created = p
 	return nil
+}
+
+func (s *stubStore) CreatePermissionProfileGuarded(_ context.Context, actor authz.Actor, selected *uuid.UUID, requested *models.PermissionProfile) (*models.PermissionProfile, error) {
+	s.guardedCreateCalls++
+	s.guardedCreateActor, s.guardedCreateSelected, s.guardedCreateRequested = actor, selected, requested
+	if s.guardedCreateErr != nil {
+		return nil, s.guardedCreateErr
+	}
+	if s.guardedCreateNilSuccess {
+		return nil, nil
+	}
+	if s.guardedCreateResult != nil {
+		return s.guardedCreateResult, nil
+	}
+	// Echoing the service request is a pure consumer fixture. No persisted
+	// revision, role refresh, zone qualification or tenant policy is synthesized.
+	return requested, nil
 }
 
 func (s *stubStore) UpdatePermissionProfile(_ context.Context, p *models.PermissionProfile) error {
@@ -142,11 +188,14 @@ func assertKind(t *testing.T, err error, want app.ErrorKind, wantMsg string) {
 func TestListProfiles(t *testing.T) {
 	tenantID := uuid.New()
 	otherID := uuid.New()
+	version := int64(0)
+	super := authz.Actor{Type: authz.PrincipalUser, ID: uuid.New(), TenantID: tenantID, Role: models.RoleSuperAdmin, IsSuperAdmin: true, SessionVersion: &version}
+	admin := authz.Actor{Type: authz.PrincipalUser, ID: uuid.New(), TenantID: tenantID, Role: models.RoleAdmin, IsAdmin: true, SessionVersion: &version}
 
 	t.Run("super admin lists all profiles", func(t *testing.T) {
 		st := newStub()
 		svc := New(st)
-		items, err := svc.ListProfiles(context.Background(), superAdmin(), &tenantID)
+		items, err := svc.ListProfiles(context.Background(), super, &tenantID)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -163,7 +212,7 @@ func TestListProfiles(t *testing.T) {
 		st.profiles[uuid.New()] = &models.PermissionProfile{ID: uuid.New(), TenantID: &tenantID}
 		st.profiles[uuid.New()] = &models.PermissionProfile{ID: uuid.New(), TenantID: &otherID}
 		svc := New(st)
-		items, err := svc.ListProfiles(context.Background(), tenantAdmin(), &tenantID)
+		items, err := svc.ListProfiles(context.Background(), admin, &tenantID)
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
@@ -177,127 +226,78 @@ func TestListProfiles(t *testing.T) {
 
 	t.Run("tenant admin without tenant context is forbidden", func(t *testing.T) {
 		svc := New(newStub())
-		_, err := svc.ListProfiles(context.Background(), tenantAdmin(), nil)
+		_, err := svc.ListProfiles(context.Background(), admin, nil)
 		assertKind(t, err, app.KindForbidden, "no tenant context")
 	})
 }
 
 func TestCreateProfile(t *testing.T) {
-	tenantID := uuid.New()
-	unknownZoneID := uuid.New()
-	zoneInTenant := &models.DomainZone{ID: uuid.New(), TenantID: tenantID}
-	zoneOtherTenant := &models.DomainZone{ID: uuid.New(), TenantID: uuid.New()}
-
+	tenantID, foreignTenant, zoneID := uuid.New(), uuid.New(), uuid.New()
+	version := int64(0)
+	admin := authz.Actor{Type: authz.PrincipalUser, ID: uuid.New(), TenantID: tenantID, Role: models.RoleAdmin, IsAdmin: true, SessionVersion: &version}
+	super := authz.Actor{Type: authz.PrincipalUser, ID: uuid.New(), TenantID: tenantID, Role: models.RoleSuperAdmin, IsSuperAdmin: true, SessionVersion: &version}
 	tests := []struct {
-		name      string
-		actor     authz.Actor
-		tenantCtx *uuid.UUID
-		in        CreateInput
-		zones     []*models.DomainZone
-		wantKind  app.ErrorKind
-		wantMsg   string
+		name     string
+		actor    authz.Actor
+		selected *uuid.UUID
+		in       CreateInput
+		portErr  error
+		wantKind app.ErrorKind
+		wantMsg  string
+		calls    int
 	}{
-		{
-			name:     "missing name is bad request",
-			actor:    tenantAdmin(),
-			in:       CreateInput{Name: ""},
-			wantKind: app.KindBadRequest,
-			wantMsg:  "name is required",
-		},
-		{
-			name:     "tenant admin without tenant context is forbidden",
-			actor:    tenantAdmin(),
-			in:       CreateInput{Name: "p"},
-			wantKind: app.KindForbidden,
-			wantMsg:  "no tenant context",
-		},
-		{
-			name:     "global profile cannot carry zone ids",
-			actor:    superAdmin(),
-			in:       CreateInput{Name: "p", AllowedZoneIDs: []uuid.UUID{zoneInTenant.ID}},
-			wantKind: app.KindBadRequest,
-			wantMsg:  "allowed_zone_ids require a tenant-scoped permission profile",
-		},
-		{
-			name:      "zone of another tenant is rejected",
-			actor:     tenantAdmin(),
-			tenantCtx: &tenantID,
-			in:        CreateInput{Name: "p", AllowedZoneIDs: []uuid.UUID{zoneOtherTenant.ID}},
-			wantKind:  app.KindBadRequest,
-			wantMsg:   "zone " + zoneOtherTenant.ID.String() + " not found or does not belong to target tenant",
-		},
-		{
-			name:      "unknown zone is rejected",
-			actor:     tenantAdmin(),
-			tenantCtx: &tenantID,
-			in:        CreateInput{Name: "p", AllowedZoneIDs: []uuid.UUID{unknownZoneID}},
-			wantKind:  app.KindBadRequest,
-			wantMsg:   "zone " + unknownZoneID.String() + " not found or does not belong to target tenant",
-		},
+		{name: "missing name is bad request", actor: admin, in: CreateInput{}, wantKind: app.KindBadRequest, wantMsg: "name is required"},
+		// Scope/domain checks now belong to the guarded transaction. These rows
+		// exercise error mapping and request forwarding, not fake DB enforcement.
+		{name: "guarded port rejects admin without selected company", actor: admin, in: CreateInput{Name: "p"}, portErr: app.Forbidden("selected tenant is required for company administrators"), wantKind: app.KindForbidden, calls: 1},
+		{name: "guarded port rejects global profile zone ids", actor: super, in: CreateInput{Name: "p", AllowedZoneIDs: []uuid.UUID{zoneID}}, portErr: app.BadRequest("global permission profiles cannot carry tenant-local domains"), wantKind: app.KindBadRequest, calls: 1},
+		{name: "guarded port rejects foreign tenant zone", actor: admin, selected: &tenantID, in: CreateInput{Name: "p", AllowedZoneIDs: []uuid.UUID{zoneID}}, portErr: app.BadRequest("domain zone is unavailable in the target company"), wantKind: app.KindBadRequest, calls: 1},
+		{name: "guarded port rejects unknown zone", actor: super, selected: &tenantID, in: CreateInput{Name: "p", TenantID: &tenantID, AllowedZoneIDs: []uuid.UUID{uuid.New()}}, portErr: app.BadRequest("domain zone is unavailable in the target company"), wantKind: app.KindBadRequest, calls: 1},
+		{name: "guarded port zone-store failure is internal", actor: super, selected: &tenantID, in: CreateInput{Name: "p", TenantID: &tenantID, AllowedZoneIDs: []uuid.UUID{zoneID}}, portErr: errors.New("zone DB down"), wantKind: app.KindInternal, calls: 1},
+		{name: "guarded port create-store failure is internal", actor: admin, selected: &tenantID, in: CreateInput{Name: "p"}, portErr: errors.New("create DB down"), wantKind: app.KindInternal, calls: 1},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			st := newStub()
-			for _, z := range tt.zones {
-				st.zones[z.ID] = z
-			}
-			_, err := New(st).CreateProfile(context.Background(), tt.actor, tt.tenantCtx, tt.in)
+			st.guardedCreateErr = tt.portErr
+			out, err := New(st).CreateProfile(context.Background(), tt.actor, tt.selected, tt.in)
 			assertKind(t, err, tt.wantKind, tt.wantMsg)
-			if st.created != nil {
-				t.Fatal("store must not be called on validation failure")
+			if out != nil || st.created != nil || st.guardedCreateCalls != tt.calls {
+				t.Fatal("failed create returned profile, used legacy writer or bypassed expected port")
+			}
+			if tt.calls == 1 && (st.guardedCreateActor.ID != tt.actor.ID || st.guardedCreateSelected != tt.selected || st.guardedCreateRequested.Name != tt.in.Name || st.guardedCreateRequested.TenantID != tt.in.TenantID) {
+				t.Fatal("guarded create input/scope was rewritten before current authority")
 			}
 		})
 	}
-
-	t.Run("tenant admin creates in own tenant ignoring body tenant_id", func(t *testing.T) {
+	t.Run("tenant admin forwards raw body scope and consumes guarded result", func(t *testing.T) {
 		st := newStub()
-		st.zones[zoneInTenant.ID] = zoneInTenant
-		in := CreateInput{
-			Name:           "p",
-			TenantID:       ptr(uuid.New()),
-			AllowedZoneIDs: []uuid.UUID{zoneInTenant.ID},
-		}
-		profile, err := New(st).CreateProfile(context.Background(), tenantAdmin(), &tenantID, in)
+		// The configured response expresses the store's result. The fake does not
+		// derive scope from IsAdmin/IsSuperAdmin hints or emulate persisted revision.
+		result := &models.PermissionProfile{TenantID: &tenantID, Name: "p"}
+		st.guardedCreateResult = result
+		in := CreateInput{Name: "p", TenantID: &foreignTenant, AllowedZoneIDs: []uuid.UUID{zoneID}}
+		out, err := New(st).CreateProfile(context.Background(), admin, &tenantID, in)
 		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
+			t.Fatal(err)
 		}
-		if profile.TenantID == nil || *profile.TenantID != tenantID {
-			t.Fatalf("expected tenant-scoped profile, got %v", profile.TenantID)
+		if out != result || st.guardedCreateRequested.TenantID != in.TenantID || st.guardedCreateSelected != &tenantID || st.guardedCreateActor.ID != admin.ID || st.created != nil {
+			t.Fatal("raw requested tenant/selected company or guarded response was not preserved")
 		}
-		if profile.IsSystem {
-			t.Fatal("created profile must not be system")
-		}
-		if profile.ID == uuid.Nil || profile.CreatedAt.IsZero() {
-			t.Fatal("expected id and timestamps to be populated")
+		if st.guardedCreateRequested.IsSystem || st.guardedCreateRequested.ID == uuid.Nil || st.guardedCreateRequested.CreatedAt.IsZero() || st.guardedCreateRequested.Revision != "" {
+			t.Fatal("service request identity/timestamps/system/revision changed")
 		}
 	})
-
-	t.Run("super admin creates global profile with valid zones", func(t *testing.T) {
+	t.Run("super admin forwards requested tenant independently of selected company", func(t *testing.T) {
 		st := newStub()
-		st.zones[zoneInTenant.ID] = zoneInTenant
-		in := CreateInput{Name: "p", TenantID: &tenantID, AllowedZoneIDs: []uuid.UUID{zoneInTenant.ID}}
-		profile, err := New(st).CreateProfile(context.Background(), superAdmin(), nil, in)
+		in := CreateInput{Name: "p", TenantID: &foreignTenant, AllowedZoneIDs: []uuid.UUID{zoneID}}
+		out, err := New(st).CreateProfile(context.Background(), super, &tenantID, in)
 		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
+			t.Fatal(err)
 		}
-		if profile.TenantID == nil || *profile.TenantID != tenantID {
-			t.Fatalf("expected super-admin chosen tenant, got %v", profile.TenantID)
+		if out != st.guardedCreateRequested || out.TenantID != in.TenantID || st.guardedCreateSelected != &tenantID || st.created != nil {
+			t.Fatal("super raw target was replaced with selected company or legacy create used")
 		}
-	})
-
-	t.Run("zone store failure is internal", func(t *testing.T) {
-		st := newStub()
-		st.getZoneErr = errors.New("db down")
-		in := CreateInput{Name: "p", TenantID: &tenantID, AllowedZoneIDs: []uuid.UUID{uuid.New()}}
-		_, err := New(st).CreateProfile(context.Background(), superAdmin(), nil, in)
-		assertKind(t, err, app.KindInternal, "")
-	})
-
-	t.Run("store failure is internal", func(t *testing.T) {
-		st := newStub()
-		st.createErr = errors.New("db down")
-		_, err := New(st).CreateProfile(context.Background(), tenantAdmin(), &tenantID, CreateInput{Name: "p"})
-		assertKind(t, err, app.KindInternal, "")
 	})
 }
 

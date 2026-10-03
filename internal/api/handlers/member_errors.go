@@ -20,6 +20,9 @@ func memberAppError(err error) error {
 		return appcore.Forbidden(err.Error())
 	case errors.Is(err, store.ErrMemberNotFound):
 		return appcore.NotFound(err.Error())
+	case errors.Is(err, store.ErrMemberHasHistoricalIdentity):
+		// Never render a wrapped database cause (SQL, table or constraint name).
+		return appcore.Conflict(store.ErrMemberHasHistoricalIdentity.Error())
 	case errors.Is(err, store.ErrLastAdministrator), errors.Is(err, store.ErrMemberOwnsMailbox):
 		return appcore.Conflict(err.Error())
 	default:

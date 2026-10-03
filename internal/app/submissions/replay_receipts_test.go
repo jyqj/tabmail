@@ -9,6 +9,7 @@ import (
 	"github.com/rs/zerolog"
 	"tabmail/internal/app"
 	"tabmail/internal/authz"
+	"tabmail/internal/company"
 	"tabmail/internal/models"
 	"tabmail/internal/outbound"
 	"tabmail/internal/store"
@@ -43,18 +44,18 @@ func (p *replayReceiptPort) EffectivePermission(context.Context, uuid.UUID) (*mo
 func replayReceiptFixture() (*replayReceiptPort, *Service, authz.Actor, *models.OutboundJob) {
 	v := int64(0)
 	a := authz.Actor{Type: authz.PrincipalUser, ID: uuid.New(), TenantID: uuid.New(), SessionVersion: &v, Permission: &models.EffectivePermission{CanSend: false}}
-	j := &models.OutboundJob{ID: uuid.New(), TenantID: a.TenantID, UserID: &a.ID, SubmitActor: outbound.SubmissionActor(&a.ID, nil), TextBody: "STALE_ORIGINAL_BODY", Subject: "historical receipt"}
+	j := &models.OutboundJob{ID: uuid.New(), TenantID: a.TenantID, UserID: &a.ID, SubmitActor: outbound.SubmissionActor(&a.ID, nil), State: models.OutboundSent, RecipientLedger: true, TextBody: "STALE_ORIGINAL_BODY", Subject: "historical receipt"}
 	current := *j
 	current.TextBody = "CURRENT_SNAPSHOT_BODY"
 	current.HTMLBody = "<b>CURRENT_SNAPSHOT_BODY</b>"
 	current.BCC = []string{"private@fixture.test"}
 	current.RawMIME = []byte("transport private")
 	current.DeliveryToken = &current.ID
-	p := &replayReceiptPort{FakeStore: testutil.NewFakeStore(), result: &store.OutboundReceipt{Job: &current, ContentAllowed: true}}
+	p := &replayReceiptPort{FakeStore: testutil.NewFakeStore(), result: &store.OutboundReceipt{Job: &current, ContentAllowed: true, RecipientStates: []string{"accepted", "permanent"}, LedgerKnown: true}}
 	return p, NewService(nil, p, nil, zerolog.Nop()), a, j
 }
 
-func requireReplayForbidden(t *testing.T, v *models.OutboundJob, e error) {
+func requireReplayForbidden(t *testing.T, v *company.OutboundReceipt, e error) {
 	t.Helper()
 	a, ok := app.As(app.FromAuthz(e))
 	if v != nil || !ok || a.Kind != app.KindForbidden {
@@ -73,14 +74,12 @@ func TestReplayReceiptUsesCurrentSnapshotWithoutNewSendPolicy(t *testing.T) {
 		if p.calls != 1 || p.id != j.ID || p.scope != "send:write" || p.actor.SessionVersion != a.SessionVersion {
 			t.Fatalf("current credential/command scope lost: %+v", p)
 		}
-		if v.RawMIME != nil || v.DeliveryToken != nil {
-			t.Fatal("transport secrets escaped safe projection")
+		requireOrdinaryReceiptWhitelist(t, v)
+		if v.Capabilities == nil || v.Capabilities.ViewContent != body {
+			t.Fatal("ordinary projection changed actual current-read hint")
 		}
-		if body && v.TextBody != "CURRENT_SNAPSHOT_BODY" {
-			t.Fatal("returned stale original instead of current authorized snapshot")
-		}
-		if !body && (v.TextBody != "" || v.HTMLBody != "" || len(v.BCC) != 0 || !v.ContentRedacted) {
-			t.Fatal("body-ineligible historical receipt exposed content")
+		if v.Status != "partially_accepted" || v.Progress.Counts == nil || v.Progress.Counts.Total != 2 {
+			t.Fatal("replay did not consume full current snapshot ledger")
 		}
 		if p.result.Job.TextBody != "CURRENT_SNAPSHOT_BODY" || len(p.result.Job.BCC) != 1 {
 			t.Fatal("replay mutated shared receipt snapshot")

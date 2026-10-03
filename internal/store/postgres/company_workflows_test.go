@@ -312,7 +312,13 @@ func TestR3SoftDeleteRestoreRetentionAndEvents(t *testing.T) {
 	ctx := context.Background()
 	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true, CanOrganize: true}))
 	past := time.Now().Add(-time.Hour)
-	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.shared.ID, ZoneID: f.zone.ID, Sender: "sender@client.test", Recipients: []string{f.shared.FullAddress}, Subject: "Quarterly proposal", RawObjectKey: "test-original", ExpiresAt: &past}
+	// Retain the historical shared-zero + recorded-past-expiry row as a
+	// physical-GC control. Physical protection is not ordinary read authority.
+	legacy := &models.Message{TenantID: f.tenant.ID, MailboxID: f.shared.ID, ZoneID: f.zone.ID, Sender: "sender@client.test", Recipients: []string{f.shared.FullAddress}, Subject: "Historical proposal", RawObjectKey: "test-historical-original", ExpiresAt: &past}
+	must(t, f.st.CreateMessage(ctx, legacy))
+	// Normal permanent received mail records no deadline; keep the public
+	// search/trash/restore positive on this independently valid source.
+	m := &models.Message{TenantID: f.tenant.ID, MailboxID: f.shared.ID, ZoneID: f.zone.ID, Sender: "sender@client.test", Recipients: []string{f.shared.FullAddress}, Subject: "Quarterly proposal", RawObjectKey: "test-original"}
 	must(t, f.st.CreateMessage(ctx, m))
 	n, _, e := f.st.DeleteExpiredMessagesReturningKeys(ctx, time.Now(), 100)
 	must(t, e)
@@ -321,9 +327,20 @@ func TestR3SoftDeleteRestoreRetentionAndEvents(t *testing.T) {
 	}
 	rows, total, e := f.st.ListWorkMessages(ctx, f.u, f.shared.ID, "inbox", "proposal", models.Page{})
 	must(t, e)
-	if total != 1 || len(rows) != 1 {
-		t.Fatal("search missing result")
+	if total != 1 || len(rows) != 1 || rows[0].ID != m.ID {
+		t.Fatal("search lost valid permanent message or exposed expired historical row")
 	}
+	hidden, err := f.st.GetWorkMessage(ctx, f.u, f.shared.ID, legacy.ID)
+	value, ok := app.As(err)
+	if hidden != nil || !ok || value.Kind != app.KindNotFound {
+		t.Fatalf("historical recorded expiry must deny ordinary read: %v", err)
+	}
+	retained, err := f.st.GetMessage(ctx, legacy.ID)
+	must(t, err)
+	if retained == nil || retained.ExpiresAt == nil || !retained.ExpiresAt.Equal(past.Truncate(time.Microsecond)) {
+		t.Fatal("read denial deleted, cleared or changed protected historical source deadline")
+	}
+
 	must(t, f.st.MutateWorkMessage(ctx, f.u, f.shared.ID, m.ID, "trash"))
 	_, total, e = f.st.ListWorkMessages(ctx, f.u, f.shared.ID, "inbox", "", models.Page{})
 	must(t, e)

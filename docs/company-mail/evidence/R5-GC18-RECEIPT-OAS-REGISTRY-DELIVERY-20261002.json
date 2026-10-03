@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "scope": "additional bounded actual evidence only",
+  "deliveries": [
+    {
+      "archive": "R5-GC18-FAIRNESS-LOGS.tar.gz",
+      "review": "R5-GC18-FAIRNESS-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5gc18.8ikjdljj/GC18-FAIRNESS-ACTUAL-evidence.tar.gz",
+      "archive_sha256_from_executor": "8f87b0e00c9a3210d5f380498547f942c7189485c30a3c7e8e1eec1feaec0954",
+      "archive_hash_recomputed_by_docs": false,
+      "payload_count": 39,
+      "payload_bytes_changed": false,
+      "bounded_member_safety_checked": true
+    },
+    {
+      "archive": "R5-GC-HELPER-ENTRY-AFFECTED-LOGS.tar.gz",
+      "review": "R5-GC-HELPER-ENTRY-AFFECTED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5gc-helper.y556_yzt/GC-HELPER-ENTRY-AFFECTED-ACTUAL-evidence.tar.gz",
+      "archive_sha256_from_executor": "ce5b9ca44e70db31f50d7472868ea122e5d6fe01724d33d8d42738fc358f97d0",
+      "archive_hash_recomputed_by_docs": false,
+      "payload_count": 69,
+      "payload_bytes_changed": false,
+      "bounded_member_safety_checked": true
+    },
+    {
+      "archive": "R5-RECEIPT-STATUS1-LOGS.tar.gz",
+      "review": "R5-RECEIPT-STATUS1-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5receipt-status.ieglz4k6/RECEIPT-STATUS-ONE-TARGET-evidence.tar.gz",
+      "archive_sha256_from_executor": "7d259836863bde539a543c140b940f35733b6550042460b1d2086fbad7008f3a",
+      "archive_hash_recomputed_by_docs": false,
+      "payload_count": 10,
+      "payload_bytes_changed": false,
+      "bounded_member_safety_checked": true
+    },
+    {
+      "archive": "R5-RECEIPT-A-FIXTURE6-LOGS.tar.gz",
+      "review": "R5-RECEIPT-A-FIXTURE6-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5receipt6fix.0ndu5l3p/RECEIPT-A-FIVE-CONSUMER-ONE-FIXTURE-evidence.tar.gz",
+      "archive_sha256_from_executor": "157a692fe8c1de14919ad0ffb7b63337ad2a697fb986da4473933fd600cff5b3",
+      "archive_hash_recomputed_by_docs": false,
+      "payload_count": 41,
+      "payload_bytes_changed": false,
+      "bounded_member_safety_checked": true
+    },
+    {
+      "archive": "R5-ORDINARY-OAS-TYPED-WIRE-LOGS.tar.gz",
+      "review": "R5-ORDINARY-OAS-TYPED-WIRE-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5ordinary-oas.cobvab9e/ORDINARY-OAS-TYPED-WIRE-FINAL-evidence.tar.gz",
+      "archive_sha256_from_executor": "d1064656bdc9c98be4afcb4800d5704a27a5b99af6ab76bc2a9fa877c44c12cf",
+      "archive_hash_recomputed_by_docs": false,
+      "payload_count": 18,
+      "payload_bytes_changed": false,
+      "bounded_member_safety_checked": true
+    },
+    {
+      "archive": "R5-REGISTRY34-FAILED-LOGS.tar.gz",
+      "review": "R5-REGISTRY34-FAILED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5registry34.4ywnhl84/REGISTRY34-REALCLI-WITH-CLASSIFICATION-evidence.tar.gz",
+      "archive_sha256_from_executor": "27fe12abc8a88ecacca2925a8e1022e7fba5e50340a7d60b70ba4f7f35e1d5f7",
+      "archive_hash_recomputed_by_docs": false,
+      "payload_count": 17,
+      "payload_bytes_changed": false,
+      "bounded_member_safety_checked": true
+    },
+    {
+      "archive": "R5-RECEIPT-A-CONSUMER9-FAILED-LOGS.tar.gz",
+      "review": "R5-RECEIPT-A-CONSUMER9-FAILED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5receiptA.z1dsm2yo/ORDINARY-RECEIPT-A-CONSUMER9-FAILED-evidence.tar.gz",
+      "archive_sha256_from_executor": "90fc18390ec1c04d6da7ea7888697e1fe8bafdcf3d5b766ccea9799a01cd5063",
+      "archive_hash_recomputed_by_docs": false,
+      "payload_count": 78,
+      "payload_bytes_changed": false,
+      "bounded_member_safety_checked": true
+    }
+  ],
+  "catalog18": {
+    "file": "R5-TRANSACTION-DB-CATALOG-SCHEMA18-ACTUAL-20261002.json",
+    "source_tree": "cb03f7a27e9e9cf45fd815c141ad2cb645e08134",
+    "sha256_from_executor": "02a5850d03a8909ee95720e56d755128b4e6f923ab43cbeffb35fc0de1f14f94",
+    "bytes": 196143,
+    "observed_version": 18,
+    "counts": {
+      "tables": 51,
+      "columns": 507,
+      "constraints": 185,
+      "FK": 75,
+      "indexes": 154,
+      "triggers": 11,
+      "functions": 11,
+      "sequences": 3
+    }
+  },
+  "historical_catalogs_rows_reviews_raw_modified": false,
+  "M_failed_archive_identity": "0ab84228f6dcdc4049045303682385fbaf340d7b115fa57da35962d84fbcee76",
+  "registry_FAIL_archive_27fe_is_not_M_archive_or_repack": true,
+  "product_tests_repeated_by_docs": false,
+  "task_complete": false,
+  "fullCI_green": false
+}

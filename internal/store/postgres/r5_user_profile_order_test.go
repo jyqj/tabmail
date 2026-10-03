@@ -18,6 +18,7 @@ import (
 type r5UserProfileFixture struct {
 	profile                    *r5InviteProfileFixture
 	targetBefore, targetStable string
+	targetRevision             int64
 	audits, outbox             int
 }
 
@@ -30,7 +31,7 @@ func r5UserProfileSeed(t *testing.T) *r5UserProfileFixture {
 	// Preserve that real initial state, rather than demanding an unprofiled
 	// user or clearing a profile merely to make the concurrency fixture fit.
 	var initialProfile *uuid.UUID
-	must(t, f.pool.QueryRow(context.Background(), `SELECT to_jsonb(u)::text,(to_jsonb(u)-'permission_profile_id'-'updated_at')::text,permission_profile_id FROM users u WHERE id=$1 AND tenant_id=$2 AND role='user' AND is_active`, f.employee.ID, f.tenant.ID).Scan(&s.targetBefore, &s.targetStable, &initialProfile))
+	must(t, f.pool.QueryRow(context.Background(), `SELECT to_jsonb(u)::text,(to_jsonb(u)-'permission_profile_id'-'updated_at')::text,permission_profile_id,permission_revision FROM users u WHERE id=$1 AND tenant_id=$2 AND role='user' AND is_active`, f.employee.ID, f.tenant.ID).Scan(&s.targetBefore, &s.targetStable, &initialProfile, &s.targetRevision))
 	if initialProfile != nil && *initialProfile == p.profile.ID {
 		t.Fatal("target already has the selected admin profile; assignment would not exercise a new FK")
 	}
@@ -56,13 +57,15 @@ func TestR5UserProfileNormalAssignmentAndDelete(t *testing.T) {
 	must(t, err)
 	r5UserProfileEffects(t, s, value, true, false)
 	var assigned string
-	must(t, s.profile.f.pool.QueryRow(ctx, `SELECT (to_jsonb(u)||jsonb_build_object('permission_profile_id',NULL))::text FROM users u WHERE id=$1`, s.profile.f.employee.ID).Scan(&assigned))
+	var assignedRevision int64
+	must(t, s.profile.f.pool.QueryRow(ctx, `SELECT (to_jsonb(u)||jsonb_build_object('permission_profile_id',NULL))::text,permission_revision FROM users u WHERE id=$1`, s.profile.f.employee.ID).Scan(&assigned, &assignedRevision))
 	must(t, r5UserProfileDelete(s, ctx))
 	r5UserProfileEffects(t, s, value, true, true)
-	var detached string
-	must(t, s.profile.f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text FROM users u WHERE id=$1`, s.profile.f.employee.ID).Scan(&detached))
-	if detached != assigned {
-		t.Fatal("normal SET NULL changed target fields beyond its profile reference")
+	var detached, expectedDetached string
+	var detachedRevision int64
+	must(t, s.profile.f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text,permission_revision,($2::jsonb||jsonb_build_object('permission_revision',u.permission_revision))::text FROM users u WHERE id=$1`, s.profile.f.employee.ID, assigned).Scan(&detached, &detachedRevision, &expectedDetached))
+	if detachedRevision <= assignedRevision || detached != expectedDetached {
+		t.Fatal("normal SET NULL failed to advance revision or changed fields beyond profile reference/revision")
 	}
 }
 
@@ -204,16 +207,23 @@ func r5UserProfileEffects(t *testing.T, s *r5UserProfileFixture, receipt *models
 	// The shared normal helper checks exact P bytes and the actor's full U
 	// bytes, including the legal users SET NULL result after P deletion.
 	r5InviteProfileEffects(t, p, "", false, deleted)
-	var target, stable string
+	var target, stable, expectedStable string
+	var revision int64
 	var profile *uuid.UUID
-	must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text,(to_jsonb(u)-'permission_profile_id'-'updated_at')::text,permission_profile_id FROM users u WHERE id=$1`, f.employee.ID).Scan(&target, &stable, &profile))
-	if stable != s.targetStable {
+	must(t, f.pool.QueryRow(ctx, `SELECT to_jsonb(u)::text,(to_jsonb(u)-'permission_profile_id'-'updated_at')::text,permission_profile_id,permission_revision,($2::jsonb||jsonb_build_object('permission_revision',u.permission_revision))::text FROM users u WHERE id=$1`, f.employee.ID, s.targetStable).Scan(&target, &stable, &profile, &revision, &expectedStable))
+	if !assigned {
+		expectedStable = s.targetStable
+	}
+	if stable != expectedStable {
 		t.Fatal("assignment/profile deletion rewrote target role/active/SV/identity/body fields")
 	}
 	if !assigned && target != s.targetBefore {
 		t.Fatal("failed assignment retained a target profile/updated_at prefix")
 	}
 	if assigned {
+		if revision <= s.targetRevision {
+			t.Fatal("successful assignment/detach did not advance persistent permission revision")
+		}
 		if receipt == nil || receipt.ID != f.employee.ID || receipt.PermissionProfileID == nil || *receipt.PermissionProfileID != p.profile.ID {
 			t.Fatal("successful assignment receipt does not identify its target and selected profile")
 		}

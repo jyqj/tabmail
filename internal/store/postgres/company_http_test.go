@@ -158,8 +158,46 @@ func TestR3CompanyHTTPJourney(t *testing.T) {
 		t.Fatalf("MIME attachment/BCC failed: %s", mime)
 	}
 	view := r3HTTP(t, h, admin, "GET", "/api/v1/outbound/"+j.ID.String(), nil, 200).Body.String()
-	if strings.Contains(view, "hidden@recipient.test") || strings.Contains(view, "Confidential") || !strings.Contains(view, `"content_redacted":true`) {
+	if strings.Contains(view, "hidden@recipient.test") || strings.Contains(view, "Confidential") {
 		t.Fatal(view)
+	}
+	for _, secret := range []string{j.Subject, j.MailFrom, "client@recipient.test", "content_redacted"} {
+		if secret != "" && strings.Contains(view, secret) {
+			t.Fatal("admin ordinary receipt disclosed content or a retired marker")
+		}
+	}
+	var receiptEnvelope struct{ Data json.RawMessage }
+	must(t, json.Unmarshal([]byte(view), &receiptEnvelope))
+	assertFields := func(raw json.RawMessage, names string) map[string]json.RawMessage {
+		t.Helper()
+		var fields map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &fields); err != nil || fields == nil {
+			t.Fatalf("receipt object missing or malformed: %v", err)
+		}
+		allowed := map[string]bool{}
+		for _, name := range strings.Fields(names) {
+			allowed[name] = true
+		}
+		for name := range fields {
+			if !allowed[name] {
+				t.Fatalf("ordinary receipt field outside explicit whitelist: %s", name)
+			}
+		}
+		return fields
+	}
+	fields := assertFields(receiptEnvelope.Data, "id tenant_id state status progress created_at updated_at attempt_count next_retry delivery_uncertain capabilities")
+	progress := assertFields(fields["progress"], "completeness counts")
+	assertFields(progress["counts"], "total accepted pending temporary permanent uncertain")
+	assertFields(fields["capabilities"], "view_content retry retry_block_reason")
+	var receipt company.OutboundReceipt
+	decoder := json.NewDecoder(bytes.NewReader(receiptEnvelope.Data))
+	decoder.DisallowUnknownFields()
+	must(t, decoder.Decode(&receipt))
+	if receipt.ID != j.ID || receipt.TenantID == nil || *receipt.TenantID != f.tenant.ID || receipt.State != models.OutboundSent || receipt.Status != "accepted" || receipt.Progress.Completeness != "known" || receipt.Progress.Counts == nil || *receipt.Progress.Counts != (company.OutboundReceiptCounts{Total: 2, Accepted: 2}) || receipt.DeliveryUncertain || receipt.AttemptCount == nil || *receipt.AttemptCount != j.Attempts {
+		t.Fatal("admin receipt lost actual SMTP acceptance or complete ledger progress")
+	}
+	if receipt.Capabilities == nil || receipt.Capabilities.ViewContent || receipt.Capabilities.Retry || receipt.Capabilities.RetryBlockReason != "state_not_retryable" {
+		t.Fatal("admin receipt widened content or retry authority")
 	}
 	// A private original is readable, reply uses RFC-aware server parsing, and
 	// soft deletion is reversible through the employee endpoints.

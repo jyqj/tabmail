@@ -56,7 +56,22 @@ func (s *FakeStore) outboundReceiptLocked(a authz.Actor, j *models.OutboundJob) 
 	if !authz.CanAccessOwned(a, j.UserID, j.APIKeyID) && !content {
 		return nil
 	}
-	return &store.OutboundReceipt{Job: cloneOutboundJob(j), ContentAllowed: content}
+	// Read the real fixture ledger while the caller holds the same mutex as
+	// principal/job/content facts. Neither recipient addresses nor caller job
+	// fields manufacture outcome counts. A missing map or empty ledger remains
+	// distinguishable from a known nonempty ledger at the production projector.
+	rows, ledgerPresent := s.outboundRecipients[j.ID]
+	addresses := make([]string, 0, len(rows))
+	for address := range rows {
+		addresses = append(addresses, address)
+	}
+	sort.Strings(addresses)
+	states := make([]string, 0, len(addresses))
+	for _, address := range addresses {
+		states = append(states, rows[address].State)
+	}
+	return &store.OutboundReceipt{Job: cloneOutboundJob(j), ContentAllowed: content,
+		RecipientStates: states, LedgerKnown: ledgerPresent && j.RecipientLedger}
 }
 
 func (s *FakeStore) GetOutboundReceipt(ctx context.Context, a authz.Actor, id uuid.UUID, scope string) (*store.OutboundReceipt, error) {

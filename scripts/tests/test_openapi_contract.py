@@ -25,8 +25,11 @@ class OpenAPIRepositoryTests(unittest.TestCase):
         texts = [p.read_text() for p in sorted((ROOT / 'internal/company').glob('*.go')) if not p.name.endswith('_test.go')]
         texts.append((ROOT / 'internal/models/mailbox_grants.go').read_text())
         cls.go = gate.merge_go_sources(texts, problems)
+        shared_go = gate.merge_go_sources([(ROOT / 'internal/models/models.go').read_text()], problems)
+        cls.go.string_types |= shared_go.string_types
         cls.ts = gate.merge_ts_sources([(ROOT / p).read_text() for p in (
-            'web/lib/company.ts', 'web/features/mail/api.ts', 'web/features/company/api.ts')], problems)
+            'web/lib/company.ts', 'web/lib/receipt-types.ts',
+            'web/features/mail/api.ts', 'web/features/company/api.ts')], problems)
         if problems:
             raise AssertionError(problems)
 
@@ -44,7 +47,7 @@ class OpenAPIRepositoryTests(unittest.TestCase):
         for component in gate.OPENAPI_COMPANY_COMPONENTS.values():
             with self.subTest(component=component):
                 d = copy.deepcopy(self.document)
-                props = d['components']['schemas'][component]['properties']
+                props = gate.resolve_schema_alias(d, d['components']['schemas'][component])['properties']
                 del props[next(iter(props))]
                 self.assertTrue(self.check_dtos(d))
 
@@ -128,7 +131,7 @@ class OpenAPIRepositoryTests(unittest.TestCase):
 
     def test_real_enum_order_is_not_semantic_drift(self):
         d = copy.deepcopy(self.document)
-        d['components']['schemas']['Submission']['properties']['status']['enum'].reverse()
+        gate.resolve_schema_alias(d, d['components']['schemas']['Submission'])['properties']['status']['enum'].reverse()
         self.assertEqual(self.check_dtos(d), [])
 
     def test_storage_secrets_cannot_be_added_to_company_dtos(self):

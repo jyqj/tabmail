@@ -373,7 +373,7 @@ export async function streamEvents(
               lease.scope,
             ))
           )
-            throw new Error("Authentication required");
+            throw new DOMException("Stream permission revoked", "NotAllowedError");
           assertSession(lease.scope);
           const retry = buildHeaders(path);
           if (cursor) retry["Last-Event-ID"] = cursor;

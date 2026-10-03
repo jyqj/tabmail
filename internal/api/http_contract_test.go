@@ -363,6 +363,36 @@ func TestCompanyHTTPContract(t *testing.T) {
 	call("templates.retire", "POST", tp+"/retire", map[string]any{"revision": templateRevision, "retired": true}, admin, 200)
 	call("overview.get", "GET", base+"/overview", nil, admin, 200)
 	call("audit.list", "GET", base+"/audit", nil, admin, 200)
+	// The administrative stream is a distinct route from mailbox events. Read
+	// its real ready frame through the existing bounded SSE capture branch.
+	adminReady := call("company.events.ready", "GET", base+"/events", nil, admin, 200)
+	if strings.TrimSpace(strings.Split(adminReady.Headers["Content-Type"], ";")[0]) != "text/event-stream" || adminReady.Headers["X-Accel-Buffering"] != "no" {
+		t.Fatal("company events did not return the non-buffered SSE media contract")
+	}
+	cache := map[string]bool{}
+	for _, directive := range strings.Split(adminReady.Headers["Cache-Control"], ",") {
+		cache[strings.ToLower(strings.TrimSpace(directive))] = true
+	}
+	if !cache["private"] || !cache["no-store"] || !cache["no-transform"] || cache["public"] {
+		t.Fatal("company events lost private non-storable stream headers")
+	}
+	const readyPrefix = "event: ready\ndata: "
+	if !bytes.HasPrefix(adminReady.Body, []byte(readyPrefix)) || !bytes.HasSuffix(adminReady.Body, []byte("\n\n")) {
+		t.Fatal("company events capture is not a complete ready frame")
+	}
+	var readyScope struct {
+		TenantID uuid.UUID `json:"tenant_id"`
+	}
+	readyJSON := adminReady.Body[len(readyPrefix) : len(adminReady.Body)-2]
+	readyDecoder := json.NewDecoder(bytes.NewReader(readyJSON))
+	readyDecoder.DisallowUnknownFields()
+	must(readyDecoder.Decode(&readyScope))
+	if readyScope.TenantID != tenant.ID {
+		t.Fatal("company events ready frame has the wrong tenant scope")
+	}
+	if e := readyDecoder.Decode(new(any)); e != io.EOF {
+		t.Fatal("company events ready frame contains trailing data")
+	}
 
 	call("error.unauthenticated", "GET", base+"/submissions", nil, nil, 401)
 	call("error.forbidden", "GET", base+"/domains", nil, worker, 403)

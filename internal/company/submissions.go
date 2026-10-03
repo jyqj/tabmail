@@ -15,32 +15,9 @@ type SubmissionRecipient struct {
 	State   string `json:"state"`
 }
 
-// Submission is the employee-facing projection of an outbound submission.
-// It deliberately excludes every queue-internal field — attempts, leases,
-// SMTP responses, delivery tokens — which remain the recovery/operations
-// surface only.
-type Submission struct {
-	ID                uuid.UUID             `json:"id"`
-	MailboxID         uuid.UUID             `json:"mailbox_id"`
-	MailFrom          string                `json:"from"`
-	Subject           string                `json:"subject"`
-	Recipients        []SubmissionRecipient `json:"recipients"`
-	Status            string                `json:"status"`
-	TemplateVersionID *uuid.UUID            `json:"template_version_id,omitempty"`
-	// DraftConsumed reports that this submission originated from a consumed
-	// mail draft (provenance only; the draft id itself is not exposed).
-	DraftConsumed   bool      `json:"draft_consumed"`
-	AttachmentCount int       `json:"attachment_count"`
-	CreatedAt       time.Time `json:"created_at"`
-	// ContentRedacted is always false here: the projection exposes no message
-	// content at all, so there is nothing to redact. The field keeps the
-	// submission view contract-aligned with the outbound job view.
-	ContentRedacted   bool `json:"content_redacted"`
-	DeliveryUncertain bool `json:"delivery_uncertain"`
-	// Capabilities carries interaction hints only (never authorization
-	// credentials); it is omitted when the submissions engine is not wired.
-	Capabilities *SubmissionCapabilities `json:"capabilities,omitempty"`
-}
+// Submission preserves the company receipt port name while sharing the strict
+// ordinary-operation DTO. Content is available only through SubmissionContent.
+type Submission = OutboundReceipt
 
 // SubmissionCapabilities is the interaction-hint block for a submission
 // receipt. These fields express what the interface may offer; the backend
@@ -59,27 +36,26 @@ type SubmissionCapabilities struct {
 	RetryBlockReason string `json:"retry_block_reason"`
 }
 
-// SubmissionContent is the sent-message body projection for a submission the
-// actor may read. Recipients come from the structural To/CC columns — BCC is
-// envelope-only and is never projected. Custom headers pass through the
-// outbound safe-display filter, so stored-but-blocked header names (for
-// example a caller-supplied "Bcc") never reach a viewer.
-//
-// ContentRedacted is false for successful content reads: current sender-mailbox
-// read permission is required. Historical authors may retain a submission
-// receipt after revocation, but content/list/download return the same 404 as
-// an unknown submission. Administrator status is not a content bypass.
+// SubmissionContent is the current-readable durable sent-content projection.
+// Structured BCC is exposed only here, never on the ordinary receipt. A
+// complete snapshot includes known-empty BCC; legacy_unknown means the original
+// structured recipients were not recoverable, not that BCC was empty. Custom
+// headers still pass through the wire-safe display filter (including no Bcc).
+// Current sender-mailbox read rights are mandatory; historical authors and
+// administrative roles confer no bypass after revocation or lifecycle expiry.
 type SubmissionContent struct {
-	ID              uuid.UUID         `json:"id"`
-	Subject         string            `json:"subject"`
-	MailFrom        string            `json:"from"`
-	To              []string          `json:"to"`
-	CC              []string          `json:"cc,omitempty"`
-	Headers         map[string]string `json:"headers,omitempty"`
-	TextBody        string            `json:"text_body,omitempty"`
-	HTMLBody        string            `json:"html_body,omitempty"`
-	CreatedAt       time.Time         `json:"created_at"`
-	ContentRedacted bool              `json:"content_redacted"`
+	ID                    uuid.UUID         `json:"id"`
+	Subject               string            `json:"subject"`
+	MailFrom              string            `json:"from"`
+	To                    []string          `json:"to"`
+	CC                    []string          `json:"cc,omitempty"`
+	BCC                   []string          `json:"bcc"`
+	RecipientCompleteness string            `json:"recipient_completeness"`
+	Headers               map[string]string `json:"headers,omitempty"`
+	TextBody              string            `json:"text_body,omitempty"`
+	HTMLBody              string            `json:"html_body,omitempty"`
+	CreatedAt             time.Time         `json:"created_at"`
+	ContentRedacted       bool              `json:"content_redacted"`
 }
 
 // SubmissionAttachment is the metadata projection of an attachment pinned to a

@@ -22,10 +22,11 @@ vi.mock("@/lib/company", async (importOriginal) => ({
   submitDraft: (...args: unknown[]) => submitDraftMock(...args),
 }));
 
-import type { MailDraft, WorkMailbox } from "@/lib/company";
+import type { MailDraft, MailDraftEditor, NewMailDraft, WorkMailbox } from "@/lib/company";
 
 const baseMailbox = (): WorkMailbox => ({
   mailbox: {
+    kind: "shared",
     id: "mb-1",
     tenant_id: "tenant-1",
     zone_id: "zone-1",
@@ -44,7 +45,7 @@ const baseMailbox = (): WorkMailbox => ({
   revision: 0,
 });
 
-const baseDraft = (over: Partial<MailDraft> = {}): MailDraft => ({
+const baseDraft = (over: Partial<NewMailDraft> = {}): NewMailDraft => ({
   mailbox_id: "mb-1",
   revision: 0,
   payload: {
@@ -56,7 +57,7 @@ const baseDraft = (over: Partial<MailDraft> = {}): MailDraft => ({
   ...over,
 });
 
-function renderCompose(draft: MailDraft) {
+function renderCompose(draft: MailDraftEditor) {
   return render(
     <Compose
       mailboxes={[baseMailbox()]}
@@ -76,6 +77,7 @@ describe("Compose template eligibility", () => {
 
   it("shows the revoked notice, blocks sending, and can unpin the template", async () => {
     const saved: MailDraft = {
+      updated_at: "2026-10-02T12:00:00Z",
       id: "d-1",
       mailbox_id: "mb-1",
       revision: 1,
@@ -153,6 +155,7 @@ describe("Pinned template version survives newer publication", () => {
     const snapshot = { subject: "Hello {{customer}}", text_body: "Dear {{customer}}", html_body: "",
       variables: [{ name: "customer", type: "text" as const, required: true, max_length: 80 }] };
     const draft: MailDraft = {
+      updated_at: "2026-10-02T12:00:00Z",
       id: "saved-v1", mailbox_id: "mb-1", revision: 4,
       payload: { to: ["dest@client.test"], subject: "", text_body: "", template_version_id: "v1", template_vars: { customer: "Alice" } },
       template_version: { id: "v1", name: "Welcome", version: 1, status: "usable", snapshot },

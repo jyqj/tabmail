@@ -506,6 +506,15 @@ func (s *Service) Stats(ctx context.Context) (*models.SystemStats, error) {
 	if err != nil {
 		return nil, app.Internal(err)
 	}
+	// Storage retains its pointer API; the public projection is always an
+	// array of complete values, including [] when there are no recent rows.
+	recentAudit := make([]models.AuditEntry, len(audit))
+	for i, entry := range audit {
+		if entry == nil {
+			return nil, app.Internal(fmt.Errorf("recent audit contains nil entry at index %d", i))
+		}
+		recentAudit[i] = *entry
+	}
 	deadLetters := []models.DeadLetter{}
 	deadLetterSize := 0
 	webhooksEnabled := false
@@ -521,7 +530,7 @@ func (s *Service) Stats(ctx context.Context) (*models.SystemStats, error) {
 		MailboxesCount:  mailboxes,
 		MessagesCount:   messages,
 		Metrics:         metrics.Snapshot(webhooksEnabled, deadLetterSize),
-		RecentAudit:     audit,
+		RecentAudit:     recentAudit,
 		TenantDelivery:  metrics.TopTenantDelivery(10),
 		MailboxDelivery: metrics.TopMailboxDelivery(10),
 		DeadLetters:     deadLetters,

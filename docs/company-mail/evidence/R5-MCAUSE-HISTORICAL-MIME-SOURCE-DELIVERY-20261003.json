@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "original_deliveries": [
+    {
+      "archive": "R5-LEGACY-KEY-RECEIPT10-LOGS.tar.gz",
+      "review": "R5-LEGACY-KEY-RECEIPT10-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5legacy-key-runtime.990v7r27/LEGACY-KEY-RECEIPT-new-runtime-evidence.tar.gz",
+      "archive_sha256_from_executor": "1c33a13abc9e8ec6af81ab309461b979d75317607bb2ff9d6cf40d26a2bd87b1",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 55,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-HISTORICAL-IDENTITY-PG-PARTIAL-LOGS.tar.gz",
+      "review": "R5-HISTORICAL-IDENTITY-PG-PARTIAL-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5historical-identity-runtime.prv6elcl/HISTORICAL-IDENTITY-first-partial-FAIL-evidence.tar.gz",
+      "archive_sha256_from_executor": "5714de6981bea78fd80caa7bf2ba615ea9a1e7fa502a9c222c66de071ce3ebcf",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 62,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-HISTORICAL-IDENTITY-HANDLER-V3-LOGS.tar.gz",
+      "review": "R5-HISTORICAL-IDENTITY-HANDLER-V3-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5historical-handler-V3-runtime.xj7v5wlx/HISTORICAL-HANDLER-V3-new-three-only-evidence.tar.gz",
+      "archive_sha256_from_executor": "e2a274084ea018ca108f3a089f23e236850226e2c182e9a452892638f43a0ebf",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 72,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-MIME-WALKER-V2-FAILED-LOGS.tar.gz",
+      "review": "R5-MIME-WALKER-V2-FAILED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5mime-v2-runtime.64gyfkxv/MIME-V2-new-bounded-FAIL-evidence.tar.gz",
+      "archive_sha256_from_executor": "95b746cb3b2a9236d59eedc4e748d30b22a1032b97bbc68596e49884c45d1ce2",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 10,
+      "payload_bytes_changed": false
+    },
+    {
+      "archive": "R5-CURRENT-SOURCE-V2-MAP-C-CORRECTED-LOGS.tar.gz",
+      "review": "R5-CURRENT-SOURCE-V2-MAP-C-CORRECTED-REVIEW.json",
+      "original_archive": "/private/tmp/tm-r5currentSource-policyV2.9q7pqk7b/CURRENT-SOURCE-V2-with-map-C-appendonly-correction-evidence.tar.gz",
+      "archive_sha256_from_executor": "e1c540ec0bb9faf46bcd6261f82c563546376397f3fc74db862a732b032037e0",
+      "archive_hash_recomputed": false,
+      "regular_payload_count": 16,
+      "payload_bytes_changed": false
+    }
+  ],
+  "MCause490_safe_packaging": "R5-MCAUSE-490-SAFE-PACKAGING-RECEIPT.json",
+  "MCause487_original_archive_sha256_from_executor": "cacb95222c16be4d74c014ea89ed1bf1803da3b66442761e854da67666a27ed3",
+  "currentSource_original15_archive_sha256_from_executor": "3a8967dad99ebeb5fe41d4040dfa58fcbfac813b5152349db495441495995c6a",
+  "all_original_raw_reviews_archives_unchanged": true,
+  "tests_repeated_by_docs": false,
+  "M_baseline_complete": false,
+  "fullCI_green": false,
+  "task_complete": false,
+  "product_green": false
+}

@@ -60,6 +60,41 @@ func ValidateRetryRequester(ctx context.Context, st JobAuthorizationReader, a au
 		return authz.ErrForbidden("retry sending capability revoked")
 	}
 	if j.SenderMailboxID != nil {
+		if a.Type == authz.PrincipalAPIKey && a.TenantWide {
+			// This is the same current ownerless integration key, not a grant
+			// to operate another key's submission or an erased owned sender.
+			if j.SenderKeyID == nil || *j.SenderKeyID != a.ID || j.SenderUserID != nil {
+				return authz.ErrForbidden("retry integration sender identity changed")
+			}
+			address, e := authz.CanonicalSender(j.MailFrom)
+			if e != nil || address != j.MailFrom {
+				return authz.ErrForbidden("retry integration sender address invalid")
+			}
+			res, e := ResolveSendAuthorization(ctx, st, a, j.TenantID, address, j.TemplateVersionID != nil)
+			if e != nil {
+				return e
+			}
+			mb := res.Mailbox
+			if mb == nil || mb.ID != *j.SenderMailboxID || mb.TenantID != j.TenantID || mb.ZoneID != j.ZoneID || mb.FullAddress != address || mb.Kind != "legacy" {
+				return authz.ErrForbidden("retry integration sender mailbox changed")
+			}
+			if e := res.WorkerFailure(); e != nil {
+				return e
+			}
+			// Ownerless template governance is not supported by the current
+			// TemplateForSend port; a version ID never self-grants that authority.
+			if authz.MailboxSendPolicy(mb) != authz.SendPolicyFree || j.TemplateVersionID != nil {
+				return authz.ErrForbidden("retry integration template authority unavailable")
+			}
+			zone, e := st.GetZone(ctx, j.ZoneID)
+			if e != nil {
+				return e
+			}
+			if zone == nil || zone.TenantID != j.TenantID || zone.ID != mb.ZoneID || zone.Domain != extractDomain(address) || !zone.IsVerified || !zone.MXVerified {
+				return authz.ErrForbidden("retry integration sender zone unavailable")
+			}
+			return nil
+		}
 		mb, e := st.ForTenant(j.TenantID).GetMailbox(ctx, *j.SenderMailboxID)
 		if e != nil {
 			return e

@@ -1,23 +1,31 @@
 import { request } from "./api/base";
-import type { APIResponse } from "./types";
+import { assertSession, sessionScope } from "./session";
+import { parseReceiptListResponse, parseReceiptResponse, type OrdinaryReceipt } from "./receipt-types";
 
-// A compatibility transport, not another content-permission policy. Deliberately
-// no queue credentials, raw MIME/body, BCC or object-key fields in the UI type.
-export interface LegacyOutboundReceipt {
-  id: string;
-  subject: string;
-  mail_from: string;
-  state: string;
-  to?: string[];
-  cc?: string[];
-  created_at: string;
-  content_redacted?: boolean;
+// Compatibility paths have the SAME closed aggregate DTO, never raw queue jobs.
+export type LegacyOutboundReceipt = OrdinaryReceipt;
+function currentTenant() {
+  return typeof window === "undefined" ? undefined : localStorage.getItem("tabmail_tenant_id");
 }
 export async function legacyOutboundReceipts(page = 1): Promise<LegacyOutboundReceipt[]> {
-  const result = await request<APIResponse<LegacyOutboundReceipt[]>>("/api/v1/outbound", { params: { page, per_page: 20 } });
-  return result.data;
+  const scope = sessionScope(), tenantId = currentTenant();
+  const result = await request<unknown>("/api/v1/outbound", { params: { page, per_page: 20 } });
+  assertSession(scope);
+  return parseReceiptListResponse(result, { tenantId }).data;
 }
-export async function legacyOutboundReceipt(id: string): Promise<LegacyOutboundReceipt> {
-  const result = await request<APIResponse<LegacyOutboundReceipt>>(`/api/v1/outbound/${encodeURIComponent(id)}`);
-  return result.data;
+async function aggregate(id: string, suffix = "", signal?: AbortSignal): Promise<LegacyOutboundReceipt> {
+  const scope = sessionScope(), tenantId = currentTenant();
+  const result = await request<unknown>(`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`, { signal });
+  assertSession(scope);
+  return parseReceiptResponse(result, { id, tenantId });
+}
+export function legacyOutboundReceipt(id: string) { return aggregate(id); }
+// Historical endpoint names are retained, but arrays/details are not returned.
+export function legacyOutboundRecipients(id: string) { return aggregate(id, "/recipients"); }
+export function legacyOutboundAttempts(id: string) { return aggregate(id, "/attempts"); }
+export async function retryOutboundReceipt(id: string, signal?: AbortSignal): Promise<LegacyOutboundReceipt> {
+  const scope = sessionScope(), tenantId = currentTenant();
+  const result = await request<unknown>(`/api/v1/outbound/${encodeURIComponent(id)}/retry`, { method: "POST", body: {}, signal });
+  assertSession(scope);
+  return parseReceiptResponse(result, { id, tenantId });
 }

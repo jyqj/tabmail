@@ -1,0 +1,25 @@
+{
+  "AppleDouble_members": 0,
+  "Go_exit": 1,
+  "actual_GOMAXPROCS": "1",
+  "actual_source_closure_sha256": "ce40c0979d2a93deae5381b4f169a07bb736f84a09d2d02521c4574af7fcff17",
+  "archive": "/private/tmp/tm-r5whole-current-final.qr0c0h9c/CURRENT18-WHOLE-BACKEND-FAILED-evidence.tar.gz",
+  "archive_bytes": 415871,
+  "archive_sha256": "e3f6b9d578d303c253a3c58518e19bde7e8f5b0e2ad9649e88984bff76f8c367",
+  "authorized_GOMAXPROCS2_not_satisfied": true,
+  "auto_retry": false,
+  "default_package_timeout180_unchanged": true,
+  "members": 53,
+  "native_PID_socket_gone": true,
+  "payload_byte_identical": true,
+  "raw_go_sha256": "ad42a61fa4ed34a973235de26a21a531a02bf007dba4520ab1cf29ab4fb84350",
+  "residual_database_with_zero_connections_preserved": [
+    "tm_test_62338d4e07f746e1bebf019e0634b1f3|0"
+  ],
+  "review": "current18-backend-derived-failure-review.json",
+  "schema_version": 1,
+  "sensitive_DSNS_JWT_scan_hits": 0,
+  "source_sha": "27633d96f6bc93d226ce158d71dc215b19ae429a",
+  "total_original1200_elapsed_seconds": 342.68304896354675,
+  "whole_backend_pass": false
+}

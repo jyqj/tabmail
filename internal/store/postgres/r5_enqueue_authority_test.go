@@ -22,6 +22,7 @@ import (
 // committed by the blocker before releasing that wait, not by guessed sleeps.
 // Every case owns a disposable testpg database and calls the actual Service.
 func TestR5EnqueueRechecksAuthorityAfterParentWait(t *testing.T) {
+	r5ParallelFreshDB(t)
 	modes := []string{"authorized", "profile-local", "profile-global", "override-insert", "user-freeze", "key-scope", "key-delete", "key-owner", "key-zone", "key-expiry", "mailbox-grant", "mailbox-disable", "mailbox-expiry", "tenant-policy", "zone-unverify", "template-grant", "template-revoke", "template-retire"}
 	for _, mode := range modes {
 		t.Run(mode, func(t *testing.T) {
@@ -260,6 +261,7 @@ func r5EnqueueRequireRollback(t *testing.T, f *companyFixture, d *company.Draft)
 // authorization check and all archive/recipient/attachment writes succeeded.
 // Deadline checks must use the final database clock and roll back the draft.
 func TestR5EnqueueAuditWaitExpiryAndCancellation(t *testing.T) {
+	r5ParallelFreshDB(t)
 	for _, mode := range []string{"key-expiry", "mailbox-expiry", "cancel"} {
 		t.Run(mode, func(t *testing.T) {
 			f := seedCompany(t)
