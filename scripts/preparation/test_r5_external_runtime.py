@@ -77,6 +77,24 @@ class RuntimeControls(unittest.TestCase):
         runtime._DEPENDENCY_ROOT=str(self.root)
         with self.assertRaisesRegex(ValueError,'undeclared'):
             runtime.dependency_records({'bad':dict(type='link',target='/outside')},dict(packages={'':{}}))
+    def test_unknown_nested_package_root(self):
+        runtime._DEPENDENCY_ROOT=str(self.root)
+        with self.assertRaisesRegex(ValueError,'unknown installed'):
+            runtime.dependency_records({'tool/node_modules/unknown/package.json':dict(type='file')},dict(packages={'':{}}))
+    def test_root_descriptor_swap(self):
+        with runtime.descriptors() as d:
+            before=d.binding(self.source)
+            self.source.rename(self.root/'old')
+            self.source.mkdir()
+            self.assertNotEqual(before,d.binding(self.source))
+    def test_same_bytes_replaced_file_identity(self):
+        with runtime.descriptors() as d:
+            before=d.tree(self.source)
+        (self.source/'file').rename(self.source/'old')
+        (self.source/'file').write_text('bound bytes')
+        (self.source/'old').unlink()
+        with runtime.descriptors() as d:
+            self.assertNotEqual(before,d.tree(self.source))
     def test_missing_required_lock_package(self):
         runtime._DEPENDENCY_ROOT=str(self.root)
         with self.assertRaisesRegex(ValueError,'nonoptional'):

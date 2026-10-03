@@ -45,6 +45,7 @@ class Descriptors:
     """Anchor ancestors and read every entry with directory-relative NOFOLLOW."""
     def __init__(self):
         self.fds = []
+        self.anchors = {}
     def close(self):
         for fd in reversed(self.fds):
             os.close(fd)
@@ -55,6 +56,8 @@ class Descriptors:
             raise ValueError('canonical absolute directory required')
         fd = os.open('/', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
         self.fds.append(fd)
+        current = Path('/')
+        self.anchors[str(current)] = os.fstat(fd)
         for name in path.parts[1:]:
             before = os.stat(name, dir_fd=fd, follow_symlinks=False)
             child = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
@@ -62,6 +65,8 @@ class Descriptors:
             if preparation.identity(before) != preparation.identity(os.fstat(child)):
                 raise ValueError('directory binding changed')
             fd = child
+            current = current / name
+            self.anchors[str(current)] = os.fstat(fd)
         return fd
     def read(self, parent, name):
         before = os.stat(name, dir_fd=parent, follow_symlinks=False)
@@ -97,7 +102,7 @@ class Descriptors:
                     continue
                 if source and name == 'node_modules':
                     raise ValueError('shadow source node_modules')
-                row = dict(mode=stat.S_IMODE(info.st_mode))
+                row = dict(mode=stat.S_IMODE(info.st_mode),device=info.st_dev,inode=info.st_ino,uid=info.st_uid)
                 if info.st_uid != os.getuid():
                     raise ValueError('foreign owned entry')
                 if stat.S_ISDIR(info.st_mode):
@@ -132,7 +137,8 @@ class Descriptors:
         info = os.fstat(self.directory(path))
         if info.st_uid != os.getuid():
             raise ValueError('foreign owned root')
-        return dict(path=str(path), device=info.st_dev, inode=info.st_ino, uid=info.st_uid, mode=stat.S_IMODE(info.st_mode))
+        ancestors = {str(p):dict(device=self.anchors[str(p)].st_dev,inode=self.anchors[str(p)].st_ino,uid=self.anchors[str(p)].st_uid,mode=stat.S_IMODE(self.anchors[str(p)].st_mode)) for p in [*Path(path).parents,Path(path)]}
+        return dict(path=str(path), device=info.st_dev, inode=info.st_ino, uid=info.st_uid, mode=stat.S_IMODE(info.st_mode),ancestors=ancestors)
 
 @contextlib.contextmanager
 def descriptors():
