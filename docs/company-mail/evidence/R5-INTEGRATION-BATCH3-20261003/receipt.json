@@ -110,28 +110,50 @@
   },
   "progress": "10/171 unchanged; parent not closed",
   "remote": {
-    "push": "pending",
-    "draft_pr": "pending connected GitHub create_pull_request once on new branch only"
+    "push": "SUCCESS",
+    "confirmed_published_head": "504b59731adb219c41ed685cd2029759f3c116d1",
+    "confirmed_ref": "refs/heads/integration/company-mail-r5-batch3-20261003",
+    "draft_pr": "CREATED using connected GitHub create_pull_request",
+    "pr_url": "https://github.com/jyqj/tabmail/pull/19",
+    "pr_base": "integration/company-mail-r5-batch2-20261003",
+    "pr_base_sha": "b4803fe6722ba05b83799459e88d4a014f546da2",
+    "merge": false,
+    "followup": "docs-only delivery-status commit/push follows; final head reported separately"
   },
   "ci": {
-    "head": "pending published fixed head",
-    "state": "not yet read; no green claim"
+    "head": "504b59731adb219c41ed685cd2029759f3c116d1",
+    "read_success": true,
+    "workflow_runs": 0,
+    "statuses": 0,
+    "check_runs": 0,
+    "qualification": "NO_RUNS_OBSERVED; four-CI not verified; existing main-only triggers unchanged"
   },
   "prohibited_actions_performed": [],
   "evidence_sha256": {
     "attestation.log": "5996284f2dcc04345f32256a7f8fed9ed08aec913fb903fb89b98153c179a917",
     "capture-summary.json": "cfdbb6074c1b721ec99747e52e772487c39dd35fe08e32605ecd2fa2f23cc280",
+    "ci-fixed-head.json": "c4f239b26165d4683e0e23c7ec98b325ce29b4532b839cd44366c29d0dd2ae62",
     "descriptor.log": "ffec98a0fe22130bbe0ea8d9ed98ec3aa6a052a0224423a1627d6486790bf37b",
+    "draft-pr-body.md": "f516daa8180933213332b5bdd251b3e259cfff24080d5635cfe3b738ac0a425a",
     "excluded-legacy.log": "6c009db7979681e7fc5f38bf0c6da61aff20d807e35b66e84360487ef940b28b",
+    "final-source-validation.log": "3610a1d78134b6868179e7abd82aa6125a72c72de6fd15830d632e81ce8554e9",
+    "github-pr-result.json": "b4df490f0cbd9612d75a4a2751da36d95d6597c94d33ce288b6750d2476b3237",
     "independent-metadata.log": "d35dc98f772cc7dbfb3ea2dbb3cceb881291de2ed89d2fd51e1cd8983ecc16e2",
     "ordinary-wire.log": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
     "pins.log": "e380da04bc79ef8c7555c64e493c83db82d6d310b1f5937d01ccb88458ce3dd7",
     "pure-contract-fresh.log": "690d90a8800fed668d175e8f92a41d7e5250a77902fae3f01208345d1b4d1857",
     "pure-contract.log": "ac5955da68a863959243d62f063e6531f7809e558f0577b4fc52a82ef1494123",
+    "push.log": "a00232039f3e54be28c439c45bad68e4fa0c16ebf176b92a1462e9959b556622",
     "selected-checkout.log": "f3725fc69f8312a50e68e859b40512402cac8f3cd740de8b6235aa83db73a16b",
     "selected-pure.log": "820c87e8204f64682e9c9f17f87cf76d87ee3087ea86afd4de2c267aee35d70c",
     "source-inventory.log": "2478f3e19c31f3c0a4acf7850c7d7f7ddc701a073feb248945439b70573fa571",
     "source-negatives.log": "7990def508ab1592e6281aeafd85c98bcdab1e38c051243e9025b65e2a7db5e5",
     "typed-exporter.log": "a46cfc75fb5f41e29ea87c9f4f6615e11b835bd73b61d2d591ec26640b9f4617"
+  },
+  "delivery_validation": {
+    "head": "504b59731adb219c41ed685cd2029759f3c116d1",
+    "fresh_validation": "PASS",
+    "frozen_source_stable": true,
+    "diff_check": "Python/Markdown PASS; inherited raw historical failure logs have trailing whitespace retained byte-for-byte"
   }
 }

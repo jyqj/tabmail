@@ -24,3 +24,5 @@ Descriptor 的 regular artifact 仅用 Linux `O_PATH|O_NOFOLLOW` 类型/device/i
 上游 selected receipt 的 `overall=blocked` 与 `excluded_metadata_boundary=blocked_pending_separate_helper_race_fix` 是冻结实现中的保守标签，本轮不改 payload 语义或重写历史 receipt。实际 descriptor 组合验收已通过；该标签不是本轮失败断言，也不是可升级整体资格的票据。Generated testmain、external modulecache、toolchain/native/compiler 未验证字节各自 **unknown**；本轮静态本地绑定不授 Method19、Catalog/SML、百万 M、wholePG、四 CI、shipping 或 runtime。
 
 **10/171 未变化，父任务未关闭。** 旧 wholeFAIL/skip、百万 M FAILED、私有原件缺证与被拒 watchdog 保留。无真实邮箱/PG/Redis/外 SMTP、watchdog runtime、秘密/权限修改、merge、forcepush 或 deploy。交付状态按本轮实际 Git push、连接 GitHub PR API 与固定 head CI 读取分别记录；任何拒绝都不换身份/remote/路线重试。
+
+交付实况：新分支首次普通 push 成功，固定 `504b59731adb219c41ed685cd2029759f3c116d1` ls-remote 确认；连接 GitHub API 首次创建 [draft PR #19](https://github.com/jyqj/tabmail/pull/19)，base 精确二批 b4803fe。该 head CI 读取成功但 0 workflow runs / 0 statuses / 0 check runs，原 main-only workflow 未变，四 CI 未验。该 docs/evidence head fresh validation 与冻结 attestation 匹配；后续只本交付状态 docs-only commit/push，不改变冻结源码资格。
