@@ -87,7 +87,7 @@ class ActualRootBindingTests(unittest.TestCase):
 
     def test_actual_full_scope_fresh_hashes(self):
         receipt=self.receipt
-        self.assertEqual(receipt['commands'][2]['argv'][1:],binding.ARGV)
+        self.assertEqual(receipt['commands'][1]['argv'][1:],binding.ARGV)
         self.assertEqual(receipt['environment']['GODEBUG'],'asynctimerchan=0')
         self.assertEqual(receipt['go_env']['GOVERSION'],'go1.25.7')
         local=receipt['selected_local']

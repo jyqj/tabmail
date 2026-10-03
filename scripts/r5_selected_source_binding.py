@@ -1,4 +1,4 @@
-"""Incompatible companion attestation v1; historical v2/v3 identities stay unqualified.
+"""Incompatible companion attestation v2; historical v2/v3 identities stay unqualified.
 
 Only live, fixed root metadata commands authorize selection. No import API accepts
 metadata as a file-read capability. External/generated/native bytes remain unknown.
@@ -14,7 +14,7 @@ import subprocess
 import r5_source_inventory as inventory
 
 _IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-POLICY = 'r5_root_selected_local_attestation_v1'
+POLICY = 'r5_root_selected_local_attestation_v2'
 ARGV = ['list', '-mod=readonly', '-deps', '-test', '-race', '-tags=r5protocol',
         '-json', './...', 'github.com/jhillyerd/enmime/v2/...', 'github.com/emersion/go-smtp/...']
 MVS_ARGV = ['list', '-mod=readonly', '-m', '-json', 'all']
@@ -217,8 +217,12 @@ def capture(root, go, *, cache, modulecache):
     required = dict(GOVERSION='go1.25.7', GOOS='linux',GOARCH='amd64',GOHOSTOS='linux',GOHOSTARCH='amd64',CGO_ENABLED='1',GOWORK='off',GOENV='',GOFLAGS='',GOEXPERIMENT='',GOAMD64='v1',GOTOOLCHAIN='local')
     if any(envinfo.get(k)!=v for k,v in required.items()):
         raise ValueError('wrong Go version/flags/ABI')
-    mvs = normalize_mvs(stream(run(MVS_ARGV)),root)
-    rows = stream(run(ARGV))
+    # Selection may download test dependencies and hydrate MVS Dir fields.
+    # Bind both observations only after that hydration, retaining raw hashes.
+    selected_raw = run(ARGV)
+    rows = stream(selected_raw)
+    mvs_raw = run(MVS_ARGV)
+    mvs = normalize_mvs(stream(mvs_raw),root)
     local, generated, external, native, toolchain = classify(rows,root,authorized,envinfo,mvs)
     admitted_embeds = {path for paths in base['embed_inputs'].values() for path in paths}
     if any(set(fields) & set(FIELDS[4:7]) and path not in admitted_embeds for path,fields in local.items()):
@@ -227,11 +231,13 @@ def capture(root, go, *, cache, modulecache):
     after = inventory.capture_current_source(root,purpose='protocol',policy=inventory.CURRENT_POLICY,build_context=CONTEXT)
     if base!=after or before_go!=topology(root) or before!=digest(root,authorized) or any(before[p]!=h for p,h in fresh.items()):
         raise ValueError('source/hash/topology changed during capture')
-    if rows!=stream(run(ARGV)) or mvs!=normalize_mvs(stream(run(MVS_ARGV)),root):
+    repeated_selected_raw = run(ARGV)
+    repeated_mvs_raw = run(MVS_ARGV)
+    if selected_raw!=repeated_selected_raw or mvs_raw!=repeated_mvs_raw:
         raise ValueError('selected metadata changed during capture')
     if before!=digest(root,authorized) or before_go!=topology(root):
         raise ValueError('source changed after final metadata')
-    payload = dict(schema_version=1,policy=POLICY,incompatible_with='Historical v2/v3 receipts are not selected-input attestations',
+    payload = dict(schema_version=2,policy=POLICY,incompatible_with='Historical source v2/v3 and selected attestation v1 receipts do not bind this stable observation order',
                    base_source=base, environment=env,go_env=envinfo,commands=commands,root_mvs=mvs,
                    selected_local={p:dict(sha256=fresh[p],fields=fields) for p,fields in local.items()},
                    generated_testmain=generated,external_modulecache_inputs=external,native_inputs=native,toolchain_source_inputs=toolchain,
@@ -241,7 +247,7 @@ def capture(root, go, *, cache, modulecache):
 
 
 def validate(receipt, root, go, *, cache, modulecache):
-    if type(receipt) is not dict or receipt.get('policy')!=POLICY or type(receipt.get('schema_version')) is not int or receipt.get('schema_version')!=1:
+    if type(receipt) is not dict or receipt.get('policy')!=POLICY or type(receipt.get('schema_version')) is not int or receipt.get('schema_version')!=2:
         raise ValueError('explicit incompatible selected attestation required')
     observed = capture(root,go,cache=cache,modulecache=modulecache)
     def identity(value):
