@@ -1,11 +1,7 @@
 """Ordinary receipt OpenAPI witnesses; static checks are not runtime acceptance.
 
-The wire test requires fresh bytes exported by TestOrdinaryReceiptOpenAPIWireFixtures:
-  ORDINARY_RECEIPT_WIRE_FIXTURE=<new absolute file> go test ./internal/api/handlers \
-    -run '^TestOrdinaryReceiptOpenAPIWireFixtures$' -count=1 -v
-  ORDINARY_RECEIPT_WIRE_FIXTURE=<same file> python3 -m unittest \
-    scripts.tests.test_ordinary_receipt_contract -v
-Without that environment variable the wire test is explicitly skipped.
+The formal source-version runner prepares fresh bytes with the Go fixture test
+and supplies a source/build/run receipt. Missing evidence fails this test.
 """
 import copy
 import importlib.util
@@ -17,6 +13,7 @@ import sys
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / 'scripts'))
 spec = importlib.util.spec_from_file_location("ordinary_receipt_openapi_gate", ROOT / "scripts/check_contract_drift.py")
 gate = importlib.util.module_from_spec(spec)
 sys.modules[spec.name] = gate
@@ -187,9 +184,13 @@ class OrdinaryReceiptContractTests(unittest.TestCase):
         for name in ("OutboundReceipt", "OutboundReceiptProgress", "OutboundReceiptCounts", "SubmissionCapabilities"):
             self.assertNotIn("Inspection", repr(SCHEMAS[name]))
 
-    @unittest.skipUnless(os.getenv("ORDINARY_RECEIPT_WIRE_FIXTURE"), "requires fresh sole-executor typed wire fixture; static checks do not prove runtime")
     def test_fresh_typed_shipping_envelope_bytes(self):
-        data = json.loads(Path(os.environ["ORDINARY_RECEIPT_WIRE_FIXTURE"]).read_text())
+        import r5_source_runner_prepare as preparation
+        self.assertTrue(all(os.getenv(key) for key in ('ORDINARY_RECEIPT_WIRE_FIXTURE',
+            'R5_SOURCE_PREPARATION', 'R5_SOURCE_PREPARATION_SHA256', 'R5_SOURCE_RUN_ID')),
+            'fresh same-source typed wire build/run evidence required; use the source-version runner')
+        data = preparation.validate_wire(ROOT, os.environ['ORDINARY_RECEIPT_WIRE_FIXTURE'],
+            os.environ['R5_SOURCE_PREPARATION'], os.environ['R5_SOURCE_PREPARATION_SHA256'], os.environ['R5_SOURCE_RUN_ID'])
         self.assertEqual(data["evidence"], "typed-projection-and-shipping-envelope-only; not HTTP admission or PG acceptance")
         seen = set()
         for item in data["fixtures"]:
