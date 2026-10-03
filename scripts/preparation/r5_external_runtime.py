@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path
 import platform
+import re
 import secrets
 import shutil
 import stat
@@ -61,8 +62,6 @@ class Descriptors:
             if preparation.identity(before) != preparation.identity(os.fstat(child)):
                 raise ValueError('directory binding changed')
             fd = child
-        if os.fstat(fd).st_uid != os.getuid():
-            raise ValueError('foreign owned root')
         return fd
     def read(self, parent, name):
         before = os.stat(name, dir_fd=parent, follow_symlinks=False)
@@ -84,6 +83,8 @@ class Descriptors:
         return self.read(self.directory(path.parent), path.name)
     def tree(self, root, *, source=False):
         rootfd = self.directory(root)
+        if os.fstat(rootfd).st_uid != os.getuid():
+            raise ValueError('foreign owned root')
         result = {}
         total = 0
         def visit(fd, prefix):
@@ -129,6 +130,8 @@ class Descriptors:
         return result
     def binding(self, path):
         info = os.fstat(self.directory(path))
+        if info.st_uid != os.getuid():
+            raise ValueError('foreign owned root')
         return dict(path=str(path), device=info.st_dev, inode=info.st_ino, uid=info.st_uid, mode=stat.S_IMODE(info.st_mode))
 
 @contextlib.contextmanager
@@ -176,11 +179,9 @@ def dependency_records(tree, lock):
             resolved = os.path.normpath(str(Path(name).parent / row['target']))
             if Path(row['target']).is_absolute() or resolved not in declared.get(name, set()) or tree.get(resolved, {}).get('type') != 'file':
                 raise ValueError('escaping or undeclared dependency link')
-        if name.endswith('/package.json') and '/node_modules/' not in name:
+        if name.endswith('/package.json'):
             package_root = 'node_modules/' + name.removesuffix('/package.json')
-            # Some packages ship fixture metadata inside their own tarball.
-            parents = [p for p in packages if package_root == p or package_root.startswith(p + '/')]
-            if not parents:
+            if re.search(r'(?:^|/)node_modules/(?:@[^/]+/)?[^/]+$', package_root) and package_root not in packages:
                 raise ValueError('unknown installed package root')
     return dict(locked=packages, absent_optional=missing,
                 sri='official lock SRI verified by lifecycle-enabled npm ci; installed outputs are observed bytes',
