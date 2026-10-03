@@ -1,0 +1,49 @@
+{
+  "current_failure_events": 0,
+  "current_error_events": [
+    {
+      "test": "test_r5_cold_web.ColdWebTests.test_output_refuses_existing_checkout_and_non_temporary_path",
+      "category": "platform-path",
+      "reason": "FileNotFoundError /Users"
+    },
+    {
+      "test": "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+      "category": "historical-compatibility",
+      "reason": "ValueError missing/duplicate routes"
+    },
+    {
+      "test": "test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval",
+      "category": "historical-wire",
+      "reason": "ValueError wire spec/case differs from current source"
+    }
+  ],
+  "typed_fixture": {
+    "test": "test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_fresh_typed_shipping_envelope_bytes",
+    "status": "SKIPPED_BODY_NOT_STARTED",
+    "reason": "requires fresh sole-executor typed wire fixture"
+  },
+  "historical_migration_drift": {
+    "events": 10,
+    "status": "historical_errors_preserved; current synthetic fixtures PASS; product qualification unresolved"
+  },
+  "historical_PG180": {
+    "status": "NOT_STARTED_THIS_TASK",
+    "prior_status": "FAIL",
+    "owner": "separate Goose experiment owner"
+  },
+  "audit": {
+    "status": "NOT_STARTED_THIS_TASK",
+    "prior_status": "FAIL",
+    "prior_high": 8,
+    "prior_critical": 0
+  },
+  "other_notstarted": [
+    "independent Go build/vet/full fork race",
+    "whole PostgreSQL180",
+    "full Web test/type/lint/build",
+    "browser journey",
+    "real benchmark S/M/L",
+    "new migration runtime",
+    "new CI workflow/status/check reads"
+  ]
+}

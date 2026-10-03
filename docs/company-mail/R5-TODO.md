@@ -2064,3 +2064,13 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - 最新root完整 ./... race/真实性gate仍FAIL：API与PG各包累计180s截止，mandatory未完成；新tests未解决统包预算。audit实际8high/0critical，omitdev6，gate保。exactsource CI production-web/browser/source evidence PASS，backend/frontend FAIL，下游步骤NOTRUN；四CI不全绿。
 - 36history byte不变；528旧evidence中仅两个owner授权generated当前清单更新，原两份字节另外historical-*保，其余526不动；schema19、两replace、root./...、旧helper/v1四actual-root/冷bug与currentv4/v2历史边界保。archive独审de4ae883 bounded结论引用，不全accepted/fullCI。详[本批完整回执](R5-INTEGRATION-BATCH4-20261003.md)与[机器状态](evidence/R5-INTEGRATION-BATCH4-20261003/receipt.json)。
 - **10/171不变，无父项关闭。** 无merge/deploy/force/Method19/SML/perf/真实邮件服务/全局安装/身份route绕行；ownedPG已停。源码freeze之后仅文档/证据交付更新，新HEAD CI资格单独读取，不复用sourcefreeze回执冒称新run PASS。
+
+### 第五批三线独立组合实际增量
+
+- 从PR23 docshead `e5e23e21abfe4c7e9f082405e56a95a7f346fa9a` 新建 `integration/company-mail-r5-batch5-20261003`；完整合入 benchmark e9b2433、transaction 1c197e88→5bcfe6c、descriptor 879e203→f87830c，五作者提交皆为祖先。组合测试源 `de1b7d37edbb83004592e7a8f2d78c8434278457`，产品source仍aeed；1051受保护源码、36history原字节不变，591基线evidence仅授权transaction inventory更新，其余590不变。
+- 具名完成scope：synthetic schema16 grammar fixtures 111/111与相邻45/45；RES-TX-CURRENT-INVENTORY的PR23 source-only清单及26/26+CLI（62文件395函数19迁移、task_complete/runtime_verified false）；descriptor两fixture及相关81/81。以上不关RES-CI-CURRENT-FRESH/transaction runtime/benchmark产品迁移或原父项。
+- 默认完整versioned runner发现658，current645 started/0F/3E/1skip/9未启动，frozen4/4；完整官方锁TypeScript regular-package准备后current654/654 started/0F/3E/1skip、frozen4/4，658无漏无重，overall FAIL。原runner/扫描门/锁不改，准备前后default602pkg/589local、race604pkg/592local及全部输入fields/module/variants逐项一致。3E=/Users、旧127-route compatibility缺/重、历史wire spec/case；fresh typed fixture skip的body未执行。
+- 原26schema16与10migration-source ERROR事件完整保留；10旧Lookahead具名方法此组合仅synthetic grammar PASS，scope mock不改production expected_schema_version/validator/METHOD。schema19产品对旧schema16 pipeline/METHOD准入仍缺，无新benchmark/migration runtime；不再把原10事件伪写为最新10ERROR，也不将fixture通过写成产品迁移完成。
+- 本地whole-PG180由另Goose owner验证，本批NOTSTARTED；不复跑全Web/Go/fork/browser/audit或真实benchmark。原PG180 mandatory未完及audit8high/0critical历史FAIL保，normalPG180及audit gate不skip/降级。详[本批附录](R5-INTEGRATION-BATCH5-20261003.md)、[actual IDs/分类](evidence/R5-INTEGRATION-BATCH5-20261003/receipt.json)、[剩余错误](evidence/R5-INTEGRATION-BATCH5-20261003/remaining-errors.json)。
+- 普通origin首次push成功且固定SHA de1b7d3经ls-remote确认；新三线组合唯一一次gh draftPR创建（base=batch4）exit1 `Post https://api.github.com/graphql: Forbidden`。PR未创建，随后停止PR/API动作，无旧拒PR重试、身份/connector/route切换；reviewable body保留。新CI NOTSTARTED-by-this-task/UNOBSERVED，不能借旧aeed CI冒认新head结果；workflow及PG180原门禁保持。
+- **父10/171保持，无新增勾，无merge/deploy/force。** 本附录/证据/TODO随后仅docs-only提交与普通push；固定交付remote SHA由终态ls-remote回执交父继续，不称其未观察CI全绿。
