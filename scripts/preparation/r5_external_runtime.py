@@ -24,7 +24,7 @@ import r5_source_inventory as source_inventory
 import r5_selected_source_binding_v2 as selected
 import r5_external_dependencies as preparation
 
-POLICY = 'r5_external_dependency_runtime_v1'
+POLICY = 'r5_external_dependency_runtime_v2'
 BOUNDARY = 'not_qualified_for_hostile_concurrent_mutation'
 
 def canonical(value):
@@ -33,12 +33,13 @@ def canonical(value):
 def digest(raw):
     return hashlib.sha256(raw).hexdigest()
 
-def clean_environment():
+def clean_environment(environment=None):
+    environment = os.environ if environment is None else environment
     for key in ('NODE_OPTIONS', 'NODE_PATH'):
-        if os.environ.get(key):
+        if environment.get(key):
             raise ValueError('polluted runtime environment: ' + key)
-    for key in os.environ:
-        if key.lower().startswith('npm_config_') and os.environ[key]:
+    for key in environment:
+        if key.lower().startswith('npm_config_') and environment[key]:
             raise ValueError('unbound npm environment: ' + key)
 
 class Descriptors:
@@ -234,7 +235,7 @@ def observe(source, root, archive, default, race, node):
         lock = preparation.check_lock(files.file(root / 'package-lock.json'))
         records = dependency_records(installed, lock)
         cli = root / 'node_modules/vitest/vitest.mjs'
-        return dict(schema_version=1, policy=POLICY, status='UNADOPTED',
+        return dict(schema_version=2, policy=POLICY, status='UNADOPTED',
             source=files.binding(source), dependency_root=files.binding(root), git_commit=commit,
             git=dict(path=git,sha256=digest(files.file(Path(git)))),
             source_tree=source_tree, installed=installed, installed_content_root=digest(canonical(installed)),
@@ -245,11 +246,13 @@ def observe(source, root, archive, default, race, node):
             python=dict(path=str(Path(shutil.which('python3')).resolve()),sha256=digest(files.file(Path(shutil.which('python3')).resolve()))),
             cli=dict(path=str(cli),sha256=digest(files.file(cli))),
             helper_sha256=digest(files.file(Path(__file__).resolve())),
-            configs={name:digest(files.file(source/'web'/name)) for name in ('vitest.config.ts','vitest.r5protocol.config.ts','vitest.setup.ts')},
+            configs={name:digest(files.file(source/'web'/name)) for name in ('vitest.config.ts','vitest.r5protocol.config.ts','vitest.r5external-probe.config.ts','vitest.setup.ts')},
             platform=dict(os=platform.system(),arch=platform.machine(),node_version=subprocess.check_output([str(node),'--version'],text=True).strip()),
             execution=dict(cwd=str(source/'web'),go_race_seconds=120,process_seconds=180,
-                python_argv=['run','components/company/r5-protocol.test.tsx','--reporter=json','--outputFile=<fresh-report>'],
-                go_argv=['run','--config','vitest.r5protocol.config.ts','--reporter=json','--outputFile','<fresh-report>']),
+                cache_policy=dict(results=False,fs_module_cache=False,optimizer_default_enabled=False,on_disk_runtime_cache_root=None,config_loader='bundle',cli_options=['--cache=false','--experimental.fsModuleCache=false']),
+                probe_argv=['run','--cache=false','--experimental.fsModuleCache=false','--config','vitest.r5external-probe.config.ts','--reporter=json','--outputFile','<fresh-report>'],
+                python_argv=['run','--cache=false','--experimental.fsModuleCache=false','components/company/r5-protocol.test.tsx','--reporter=json','--outputFile=<fresh-report>'],
+                go_argv=['run','--cache=false','--experimental.fsModuleCache=false','--config','vitest.r5protocol.config.ts','--reporter=json','--outputFile','<fresh-report>']),
             resolution=dict(layout='normal ancestor lookup; no source node_modules',dynamic_loader_coverage='unknown; runtime observations do not enumerate all dynamic resolutions'),
             concurrency_boundary=BOUNDARY,task_complete=False,product_green=False)
 
@@ -275,6 +278,7 @@ def owner(manifest):
     token = Path(manifest['dependency_root']['path']) / '.r5-runtime-owner'
     fd = os.open(token, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
     nonce = secrets.token_hex(24)
+    info = os.fstat(fd)
     try:
         os.write(fd, canonical(dict(pid=os.getpid(),nonce=nonce)))
         info = os.fstat(fd)
@@ -283,21 +287,27 @@ def owner(manifest):
             raise ValueError('exclusive owner token changed')
     finally:
         os.close(fd)
-        if token.exists() and token.stat().st_ino == info.st_ino:
+        try:
+            terminal = token.lstat()
+        except FileNotFoundError:
+            terminal = None
+        if terminal is not None and (terminal.st_dev,terminal.st_ino)==(info.st_dev,info.st_ino):
             token.unlink()
 
 def launch(manifest, argv, env=None):
+    clean_environment(env)
     if argv[:2] != [manifest['node']['path'], manifest['cli']['path']]:
         raise ValueError('unknown executable/CLI')
     tail = argv[2:]
-    if not ((len(tail)==4 and tail[:3]==['run','components/company/r5-protocol.test.tsx','--reporter=json'] and tail[3].startswith('--outputFile=')) or
-            (len(tail)==6 and tail[:5]==['run','--config','vitest.r5protocol.config.ts','--reporter=json','--outputFile'])):
+    if not ((len(tail)==6 and tail[:5]==['run','--cache=false','--experimental.fsModuleCache=false','components/company/r5-protocol.test.tsx','--reporter=json'] and tail[5].startswith('--outputFile=')) or
+            (len(tail)==8 and tail[:4]==['run','--cache=false','--experimental.fsModuleCache=false','--config'] and tail[4] in ('vitest.r5protocol.config.ts','vitest.r5external-probe.config.ts') and tail[5:7]==['--reporter=json','--outputFile'])):
         raise ValueError('unbound runtime argv')
     report = Path(tail[-1].removeprefix('--outputFile='))
     if not report.is_absolute() or report.exists() or report.is_relative_to(Path(manifest['source']['path'])) or report.is_relative_to(Path(manifest['dependency_root']['path'])/'node_modules'):
         raise ValueError('fresh external report path required')
     with owner(manifest), descriptors() as held:
         held.directory(Path(manifest['source']['path']))
+        held.directory(Path(manifest['execution']['cwd']))
         held.directory(Path(manifest['dependency_root']['path']))
         validate(manifest)
         try:

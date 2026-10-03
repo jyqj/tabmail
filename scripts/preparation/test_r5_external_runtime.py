@@ -68,11 +68,24 @@ class RuntimeControls(unittest.TestCase):
     def test_unknown_executable(self):
         manifest=dict(node=dict(path='/fixed/node'),cli=dict(path='/fixed/cli'))
         with self.assertRaisesRegex(ValueError,'unknown executable'):
-            runtime.launch(manifest,['/unknown/node','/fixed/cli'])
+            runtime.launch(manifest,['/unknown/node','/fixed/cli'],env={})
     def test_unknown_argv(self):
         manifest=dict(node=dict(path='/fixed/node'),cli=dict(path='/fixed/cli'))
         with self.assertRaisesRegex(ValueError,'unbound runtime argv'):
-            runtime.launch(manifest,['/fixed/node','/fixed/cli','--eval','code'])
+            runtime.launch(manifest,['/fixed/node','/fixed/cli','--eval','code'],env={})
+    def test_supplied_child_environment_poison(self):
+        with self.assertRaisesRegex(ValueError,'polluted'):
+            runtime.launch({},[],env={'NODE_OPTIONS':'--require unknown.js'})
+    def test_old_policy_does_not_promote_to_v2(self):
+        path=self.root/'old.json'
+        path.write_bytes(runtime.canonical(dict(policy='r5_external_dependency_runtime_v1',status='UNADOPTED')))
+        with self.assertRaisesRegex(ValueError,'promotion'):
+            runtime.load_pinned(path,runtime.digest(path.read_bytes()))
+    def test_cache_enable_or_missing_disable_flags_rejected(self):
+        manifest=dict(node=dict(path='/fixed/node'),cli=dict(path='/fixed/cli'))
+        for flags in (['--cache=true'],['--cache=false']):
+            with self.assertRaisesRegex(ValueError,'unbound runtime argv'):
+                runtime.launch(manifest,['/fixed/node','/fixed/cli','run',*flags,'--config','vitest.r5external-probe.config.ts','--reporter=json','--outputFile','/fresh/report.json'],env={})
     def test_escaping_declared_link(self):
         runtime._DEPENDENCY_ROOT=str(self.root)
         with self.assertRaisesRegex(ValueError,'undeclared'):

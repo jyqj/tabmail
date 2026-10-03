@@ -523,6 +523,13 @@ def classify_go_component_packets(data, selected, output, cases_hash):
     return reports,verified
 
 
+def external_component_command(manifest, report, *, probe=False):
+    prefix = [manifest['node']['path'], manifest['cli']['path'], 'run', '--cache=false', '--experimental.fsModuleCache=false']
+    if probe:
+        return prefix + ['--config','vitest.r5external-probe.config.ts','--reporter=json','--outputFile',str(report)]
+    return prefix + ['components/company/r5-protocol.test.tsx','--reporter=json','--outputFile='+str(report)]
+
+
 def run_shared(data, layer, output):
     selected = {}
     for row in data['cases']:
@@ -564,8 +571,7 @@ def run_shared(data, layer, output):
     component_pass = False
     if layer == 'components' and go_pass:
         component_file = output/'vitest.json'
-        cmd = [external_runtime['node']['path'],external_runtime['cli']['path'],'run','components/company/r5-protocol.test.tsx',
-               '--reporter=json','--outputFile='+str(component_file.resolve())]
+        cmd = external_component_command(external_runtime,component_file.resolve())
         result = r5_external_runtime.launch(external_runtime,cmd,env)
         (output/'vitest.stdout').write_text(result.stdout)
         (output/'vitest.stderr').write_text(result.stderr)

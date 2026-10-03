@@ -495,7 +495,7 @@ func r5UIExternalRuntime(t *testing.T, root string) (string, string, string) {
 		HelperSHA256      string `json:"helper_sha256"`
 	}
 	r5UIMust(t, json.Unmarshal(raw, &manifest))
-	if manifest.Policy != "r5_external_dependency_runtime_v1" || manifest.Status != "UNADOPTED" || manifest.Source.Path != root {
+	if manifest.Policy != "r5_external_dependency_runtime_v2" || manifest.Status != "UNADOPTED" || manifest.Source.Path != root {
 		t.Fatal("external runtime policy, status or source differs")
 	}
 	helper := filepath.Join(root, "scripts/preparation/r5_external_runtime.py")
@@ -521,6 +521,12 @@ func r5UIExternalRuntime(t *testing.T, root string) (string, string, string) {
 		t.Fatalf("external runtime validation rejected: %v: %s", err, output)
 	}
 	return manifest.Python.Path, manifest.Node.Path, manifest.CLI.Path
+}
+
+func r5UIExternalVitestCommand(ctx context.Context, root, launcher, node, cli, config, report string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, launcher, filepath.Join(root, "scripts/preparation/r5_external_runtime.py"), "launch", "--source", root, "--", node, cli, "run", "--cache=false", "--experimental.fsModuleCache=false", "--config", config, "--reporter=json", "--outputFile", report)
+	cmd.Dir = filepath.Join(root, "web")
+	return cmd
 }
 
 func TestR5ProtocolComponentObservations(t *testing.T) {
@@ -569,7 +575,7 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 				r5UIMust(t, os.WriteFile(private, b, 0600))
 				ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
 				defer cancel()
-				cmd := exec.CommandContext(ctx, launcher, filepath.Join(root, "scripts/preparation/r5_external_runtime.py"), "launch", "--source", root, "--", node, cli, "run", "--config", "vitest.r5protocol.config.ts", "--reporter=json", "--outputFile", reportPath)
+				cmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, "vitest.r5protocol.config.ts", reportPath)
 				cmd.Dir = filepath.Join(root, "web")
 				cmd.Env = append(os.Environ(), "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE="+private)
 				f.mu.Lock()
