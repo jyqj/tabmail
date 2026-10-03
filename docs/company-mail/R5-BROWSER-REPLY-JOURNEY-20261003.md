@@ -41,4 +41,4 @@ Playwright 管理的 Chromium 1194 下载返回明确 `403 Domain forbidden`（�
 
 `gh pr create --draft --base ci/company-mail-r5-wiring-20261003 --head fix/browser-reply-journey-20261003 --title … --body-file /workspace/browser-reply-runtime/pr-body.md` 返回 exit 1，`Post "https://api.github.com/graphql": Forbidden`，见 pr-create-denied.txt。draft PR **未创建**；没有重试另一个 API/connector，没有合并或部署。需要恢复 GitHub API 访问后，按已准备的 PR 描述创建 draft。
 
-补交 build 原始日志时 `git diff --cached --check` 检出 Next 进度行的 CR/行尾空白；随后只规范该日志的行尾，保留输出内容，最终针对固定 head 的完整 diff check 通过。
+证据日志 whitespace 检查曾检出 Next 进度行的 CR/行尾空白及原 errors.txt 的末尾空行；仅规范文本行尾，保留错误/构建输出内容。最终针对固定 head 的完整 diff check 通过。

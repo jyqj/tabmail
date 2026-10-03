@@ -8,4 +8,3 @@ Error: element(s) not found
 Call log:
   - Expect "to.be.visible" with timeout 5000ms
   - waiting for getByRole('button', { name: /Re: Browser welcome/ })
-
