@@ -99,5 +99,18 @@
     "exit": 0,
     "log": "current-source-result.json",
     "wire_qualified": false
+  },
+  "publication": {
+    "code_commit": "006ff6939edbe5f9fa5732cd1ab1a2efb8ece4cf",
+    "branch": "codex/r5-compatibility-source-boundary",
+    "push_exit": 0,
+    "push_log": "push.raw.txt",
+    "draft_pr_attempts": 1,
+    "draft_pr_exit": 1,
+    "draft_pr_created": false,
+    "draft_pr_error": "Post \"https://api.github.com/graphql\": Forbidden",
+    "draft_pr_log": "draft-pr-once.raw.txt",
+    "draft_base": "integration/company-mail-r5-batch5-20261003",
+    "merge_or_deploy": false
   }
 }
