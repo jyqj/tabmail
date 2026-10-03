@@ -3,7 +3,10 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches:
+      - main
+      - work/company-mail-r5-goal-20260930
+      - integration/company-mail-r5-*
 permissions:
   contents: read
 concurrency:
@@ -26,6 +29,7 @@ jobs:
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
       GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
       TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
     steps:
       - uses: actions/checkout@v4
@@ -167,6 +171,7 @@ jobs:
           --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
           --health-interval 5s --health-timeout 5s --health-retries 12
     env:
+      GODEBUG: asynctimerchan=0
       TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
       INTERNAL_API_URL: http://127.0.0.1:18080
       TABMAIL_BROWSER_E2E: '1'
