@@ -1,0 +1,57 @@
+File: candidate-pg.test
+Build ID: 34891106cb2215e6cec190f5a6559eee6ce629bd
+Type: alloc_space
+Time: 2026-10-03 21:09:07 UTC
+Showing nodes accounting for 6918378995B, 98.13% of 7050034796B total
+Showing top 50 nodes out of 966
+      flat  flat%   sum%        cum   cum%
+6214712788B 88.15% 88.15% 6214712788B 88.15%  github.com/pressly/goose/v3/internal/sqlparser.init.func1
+141959678B  2.01% 90.17% 141959678B  2.01%  github.com/jackc/pgx/v5/internal/stmtcache.NewLRUCache (inline)
+115350388B  1.64% 91.80% 115350388B  1.64%  bufio.(*Scanner).Text (inline)
+ 42999289B  0.61% 92.41% 6460661765B 91.64%  github.com/pressly/goose/v3/internal/sqlparser.ParseSQLMigration
+ 34631184B  0.49% 92.90%  34631184B  0.49%  bytes.growSlice
+ 34098008B  0.48% 93.39%  61900696B  0.88%  fmt.Sprintf
+ 26753456B  0.38% 93.77%  26753456B  0.38%  bytes.(*Buffer).String (inline)
+ 24131560B  0.34% 94.11%  24131560B  0.34%  fmt.(*buffer).writeString (inline)
+ 19226390B  0.27% 94.38%  19226390B  0.27%  github.com/jackc/pgx/v5/internal/iobufpool.init.0.func1
+ 17830688B  0.25% 94.63%  17830688B  0.25%  github.com/jackc/pgx/v5.(*Conn).getRows
+ 15730224B  0.22% 94.86%  25168656B  0.36%  fmt.Errorf
+ 14680512B  0.21% 95.06%  14680512B  0.21%  strings.NewReader (inline)
+ 12965708B  0.18% 95.25%  12965708B  0.18%  regexp.(*bitState).reset
+ 12585408B  0.18% 95.43%  12585408B  0.18%  fmt.init.func1
+ 11535376B  0.16% 95.59%  12059768B  0.17%  context.AfterFunc
+  9962416B  0.14% 95.73%  22022184B  0.31%  github.com/jackc/pgx/v5/pgconn/ctxwatch.(*ContextWatcher).Watch
+  9456781B  0.13% 95.87% 154880915B  2.20%  github.com/jackc/pgx/v5/pgxpool.NewWithConfig.func3
+  9438984B  0.13% 96.00%  30040744B  0.43%  github.com/jackc/pgx/v5.(*baseRows).Scan
+  8018392B  0.11% 96.11%   8018392B  0.11%  github.com/jackc/pgx/v5/pgtype.scanPlanString.Scan
+  7340352B   0.1% 96.22%  69210156B  0.98%  github.com/jackc/pgx/v5/pgtype.(*encodePlanDriverValuer).Encode
+  6820472B 0.097% 96.31%  32087010B  0.46%  github.com/jackc/pgx/v5/pgconn.connectOne
+  6815952B 0.097% 96.41%  11010388B  0.16%  github.com/jackc/pgx/v5/pgtype.(*Map).planScan
+  6403083B 0.091% 96.50%   6403083B 0.091%  bufio.NewReaderSize
+  6296408B 0.089% 96.59% 182440320B  2.59%  github.com/jackc/pgx/v5.connect
+  6294128B 0.089% 96.68%  14691333B  0.21%  github.com/jackc/pgx/v5/pgconn.(*PgConn).Prepare
+  6291744B 0.089% 96.77%   6291744B 0.089%  github.com/pressly/goose/v3/internal/sqlparser.(*stateMachine).print
+  5768536B 0.082% 96.85%   9963032B  0.14%  github.com/jackc/pgx/v5/internal/stmtcache.StatementName
+  5767292B 0.082% 96.93%   5767292B 0.082%  strings.(*Builder).grow
+  5251328B 0.074% 97.01%   5251328B 0.074%  github.com/jackc/pgx/v5/pgproto3.(*Query).Encode
+  5243120B 0.074% 97.08%  13107632B  0.19%  github.com/jackc/pgx/v5/pgtype.scanPlanTextAnyToUUIDScanner.Scan
+  5242960B 0.074% 97.16%  30411616B  0.43%  github.com/jackc/pgx/v5/pgtype.newEncodeError
+  4719424B 0.067% 97.22%  10487064B  0.15%  tabmail/internal/store/postgres.scanUser
+  4719240B 0.067% 97.29%  20450332B  0.29%  tabmail/internal/store/postgres.companyAudit
+  4718736B 0.067% 97.36%  18361568B  0.26%  database/sql.(*DB).execDC
+  4718736B 0.067% 97.42%   7864512B  0.11%  github.com/jackc/pgx/v5/pgtype.parseUUID
+  4718684B 0.067% 97.49%  17826316B  0.25%  github.com/jackc/pgx/v5/pgtype.UUIDCodec.DecodeValue
+  4198912B  0.06% 97.55%  16351986B  0.23%  github.com/jackc/pgx/v5/pgproto3.NewFrontend
+  4194496B 0.059% 97.61%   4194496B 0.059%  encoding/hex.EncodeToString
+  3670480B 0.052% 97.66%   3670480B 0.052%  github.com/go-chi/chi/v5.endpoints.Value
+  3670184B 0.052% 97.71%   3670184B 0.052%  github.com/google/uuid.UUID.String
+  3670072B 0.052% 97.77%   3670072B 0.052%  github.com/jackc/pgx/v5/pgtype.TryWrapBuiltinTypeEncodePlan
+  3216046B 0.046% 97.81%   3216046B 0.046%  bufio.NewWriterSize
+  3148544B 0.045% 97.86%   3148544B 0.045%  github.com/jackc/pgx/v5/pgproto3.(*DataRow).Decode
+  3146352B 0.045% 97.90%   3146352B 0.045%  github.com/pressly/goose/v3.newSQLMigration
+  3145776B 0.045% 97.95%   3145776B 0.045%  encoding/hex.DecodeString
+  2627332B 0.037% 97.98%   2627332B 0.037%  github.com/jackc/pgx/v5/pgproto3.(*RowDescription).Decode
+  2625088B 0.037% 98.02%   2625088B 0.037%  github.com/jackc/pgx/v5/pgconn.(*PgConn).getFieldDescriptionSlice
+  2624000B 0.037% 98.06%   2624000B 0.037%  github.com/jackc/pgx/v5/pgproto3.(*Frontend).Flush
+  2622280B 0.037% 98.10%   6292352B 0.089%  github.com/jackc/pgx/v5/pgtype.(*Map).planEncodeDepth
+  2622008B 0.037% 98.13%   9438764B  0.13%  tabmail/internal/store/postgres.(*PgStore).scanMailbox

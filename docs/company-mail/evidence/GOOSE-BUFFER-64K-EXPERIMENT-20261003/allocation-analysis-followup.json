@@ -1,0 +1,521 @@
+{
+  "followup_authorization": "Analyze existing profiles with owned caches; no wholePG rerun; earlier default-cache OSError is not a tool review rejection",
+  "earlier_failure_record_preserved": "allocation-analysis-blocker.json",
+  "official_pprof_success": true,
+  "owned_analysis_environment": {
+    "PATH": "/workspace/tabmail-cloud/tools/go/bin:/usr/bin:/bin",
+    "GOCACHE": "/workspace/tabmail-cloud/gocache",
+    "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+    "GOPATH": "/workspace/goose-buffer-experiment/gopath",
+    "GOTOOLCHAIN": "local",
+    "GOWORK": "off",
+    "GOENV": "off",
+    "GODEBUG": "asynctimerchan=0",
+    "GOMAXPROCS": "2",
+    "TMPDIR": "/tmp",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "LD_LIBRARY_PATH": "/workspace/tabmail-cloud/sysroot/usr/lib/x86_64-linux-gnu"
+  },
+  "wholepg_rerun": false,
+  "runtime_environment_differences": [
+    "TABMAIL_TEST_DB_DSN"
+  ],
+  "baseline_candidate_comparable": false,
+  "wholepg_improvement_claim": false,
+  "formal_third_replace_eligible": false,
+  "allocation_semantics": "pprof weighted sampled cumulative allocation estimates at 524288-byte period; exact runtime.TotalAlloc not recorded",
+  "baseline_timeout_stage": "demote subtest initial fixture migration, in Goose Provider.runSQL -> database/sql/pgx I/O via testpg.NewPostgres fixture.go:55; not yet current-authority-after-wait body",
+  "baseline_cwd_impact": [
+    {
+      "test": "TestR3CoordinatedSnapshotRestoresIntoEmptyTargets",
+      "baseline_terminal": "fail",
+      "candidate_terminal": "pass",
+      "incorrect_path": "/scripts/company_snapshot.py",
+      "correct_path": "/workspace/tabmail/scripts/company_snapshot.py",
+      "source": "internal/store/postgres/company_backup_test.go:31",
+      "effect": "backup/restore rehearsal terminates before backup; different executed work"
+    },
+    {
+      "test": "TestP0GooseRestartAndHistoricalGrantSafety/upgrade_and_restart",
+      "baseline_terminal": "fail",
+      "candidate_terminal": "pass",
+      "incorrect_path": "/workspace/tabmail/migrations/00001_baseline.sql",
+      "correct_path": "/workspace/tabmail/internal/store/postgres/migrations/00001_baseline.sql",
+      "source": "internal/store/postgres/company_integration_test.go:157",
+      "effect": "early os.ReadFile failure after fresh fixture migration and DROP SCHEMA, before historical baseline provider/upgrade/restart assertions"
+    },
+    {
+      "test": "TestP0GooseRestartAndHistoricalGrantSafety/preserve_incompatible_grants",
+      "baseline_terminal": "fail",
+      "candidate_terminal": "pass",
+      "incorrect_path": "/workspace/tabmail/migrations/00001_baseline.sql",
+      "correct_path": "/workspace/tabmail/internal/store/postgres/migrations/00001_baseline.sql",
+      "source": "internal/store/postgres/company_integration_test.go:157",
+      "effect": "early os.ReadFile failure before historical conflicting-grant provider/assertions"
+    },
+    {
+      "test": "TestArchitectureUpgradeBackfillsExistingEmployeeAssets",
+      "baseline_terminal": "fail",
+      "candidate_terminal": "pass",
+      "incorrect_path": "/workspace/tabmail/migrations/0000*.sql",
+      "correct_path": "/workspace/tabmail/internal/store/postgres/migrations/0000*.sql",
+      "source": "internal/store/postgres/company_upgrade_test.go:31",
+      "effect": "glob returned 0 rather than 9 files; old-schema provider/backfill/upgrade assertions never executed"
+    }
+  ],
+  "candidate_timeout_stage": "freeze/assignment subtest initial fixture, runnable in uuid.NewString at testpg.NewPostgres fixture.go:44 before CREATE DATABASE; not yet in assignment lock-wait operation",
+  "candidate_timeout_is": "cumulative package 180s alarm; current top-level about 2s, current subtest about 0s; not a per-test 180s stall",
+  "arms": {
+    "baseline": {
+      "profile_sha256": "0488f90d5e0292451ef13164172b888fc1563a2954aed9f20a34ecd466e7c85e",
+      "binary_sha256": "1ec2e62487ed476b6bf5aaecca616c549f9308da007b8438ae83e9d5bec2028f",
+      "elf_gnu_build_id": "e655f3a0fb760815f08d692149f48786abe2f144",
+      "profile_mapping_matches_binary_path_and_elf_build_id": true,
+      "source_binding_file": "baseline-source-binding.json",
+      "source_binding_file_sha256": "433ed96b60f73ae35e8a7196684249e4212f324f8dbfd312d891a5d18f7184d4",
+      "all_3995_selected_file_hashes_revalidated": true,
+      "selected_source_binding_sha256": "a50ec23d93f138c0b2901276c30e72b53191b7a8231c52a9036f3aa3b6606d23",
+      "commands": [
+        {
+          "command": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=50",
+            "-nodefraction=0",
+            "-unit=bytes",
+            "-sample_index=alloc_space",
+            "/workspace/goose-buffer-experiment/baseline-pg.test",
+            "/workspace/goose-buffer-experiment/baseline-alloc.prof"
+          ],
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=30",
+            "-nodefraction=0",
+            "-sample_index=alloc_objects",
+            "/workspace/goose-buffer-experiment/baseline-pg.test",
+            "/workspace/goose-buffer-experiment/baseline-alloc.prof"
+          ],
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "tool",
+            "pprof",
+            "-raw",
+            "/workspace/goose-buffer-experiment/baseline-pg.test",
+            "/workspace/goose-buffer-experiment/baseline-alloc.prof"
+          ],
+          "exit": 0,
+          "stderr": ""
+        }
+      ],
+      "sampling_period_bytes": 524288,
+      "profile_time_utc": "2026-10-03 21:05:11.599001568 +0000 UTC",
+      "sample_stack_records": 842,
+      "weighted_alloc_objects": 9642438,
+      "weighted_alloc_bytes": 340803930185,
+      "weighted_inuse_objects": 34026,
+      "weighted_inuse_bytes": 23093796,
+      "pool_init_weighted_alloc_objects": 168469,
+      "pool_init_weighted_alloc_bytes": 340110667457,
+      "pool_init_alloc_space_percent": 99.79658018391288,
+      "pool_init_allocation_buckets": {
+        "24": {
+          "weighted_alloc_objects": 87383,
+          "weighted_alloc_bytes": 2097200,
+          "stack_sample_records": 1
+        },
+        "4194304": {
+          "weighted_alloc_objects": 81086,
+          "weighted_alloc_bytes": 340108570257,
+          "stack_sample_records": 4
+        }
+      },
+      "exact_TotalAlloc_or_Mallocs": "NOT_COLLECTED; cannot recover exact MemStats from default sampled protobuf profile",
+      "actual_working_directory": "/workspace/tabmail",
+      "only_package_that_executed": [
+        "tabmail/internal/store/postgres"
+      ],
+      "top_level_slowest_completed": [
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait",
+          "elapsed_seconds": 6.78,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AttachmentGCTenantInterruptedSessionResumes",
+          "elapsed_seconds": 6.73,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5OffboardingLifecycleOldCompletionEpochDenied",
+          "elapsed_seconds": 4.97,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+          "elapsed_seconds": 4.93,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AtomicRetryOrdersAuthorizationChanges",
+          "elapsed_seconds": 4.2,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+          "elapsed_seconds": 4.15,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5LegacyContentRechecksKeyAndOwner",
+          "elapsed_seconds": 4.04,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5CacheWriteVersusPhysicalDeleteLockOrder",
+          "elapsed_seconds": 3.68,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5MemberHistoricalDeleteRetainedReferences",
+          "elapsed_seconds": 3.62,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5MemberHistoricalDeleteAuthorityAndMailboxGuards",
+          "elapsed_seconds": 2.89,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AtomicRetryAuditWaitExpiryAndCancellation",
+          "elapsed_seconds": 2.78,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5OffboardingLifecycleProfileVersionFence",
+          "elapsed_seconds": 2.75,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5EnqueueQuotaUsesCurrentPermissionAfterParentWait",
+          "elapsed_seconds": 2.67,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR3CompanyHTTPJourney",
+          "elapsed_seconds": 2.63,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AttachmentGCTenantActualProcessRestart",
+          "elapsed_seconds": 2.6,
+          "terminal": "pass"
+        }
+      ],
+      "timeout_header": "panic: test timed out after 3m0s\n\trunning tests:\n\t\tTestR5OutboundInspectionPGCurrentAuthorityAfterWait (0s)\n\t\tTestR5OutboundInspectionPGCurrentAuthorityAfterWait/demote (0s)\n",
+      "timeout_active_test_stack_blocks": [
+        "goroutine 30060 [chan receive]:\ntesting.(*T).Run(0xc0002d3500, {0x1de4d1d, 0x6}, 0xc0004a6918)\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:2005 +0x9fe\ntabmail/internal/store/postgres_test.TestR5OutboundInspectionPGCurrentAuthorityAfterWait(0xc0002d3500)\n\t/workspace/tabmail/internal/store/postgres/r5_outbound_inspection_test.go:96 +0xdd\ntesting.tRunner(0xc0002d3500, 0x2153158)\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1934 +0x21d\ncreated by testing.(*T).Run in goroutine 1\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1997 +0x9d3\n\n",
+        "goroutine 30061 [runnable]:\nsyscall.Syscall(0x0, 0x9, 0xc000550000, 0x2000)\n\t/workspace/tabmail-cloud/tools/go/src/syscall/syscall_linux.go:74 +0x2b\nsyscall.read(0x9, {0xc000550000, 0x2000, 0x0?})\n\t/workspace/tabmail-cloud/tools/go/src/syscall/zsyscall_linux_amd64.go:736 +0x57\nsyscall.Read(0x9, {0xc000550000, 0x2000, 0x2000})\n\t/workspace/tabmail-cloud/tools/go/src/syscall/syscall_unix.go:183 +0x49\ninternal/poll.ignoringEINTRIO(...)\n\t/workspace/tabmail-cloud/tools/go/src/internal/poll/fd_unix.go:738\ninternal/poll.(*FD).Read(0xc0003ffd00, {0xc000550000, 0x2000, 0x2000})\n\t/workspace/tabmail-cloud/tools/go/src/internal/poll/fd_unix.go:161 +0x488\nnet.(*netFD).Read(0xc0003ffd00, {0xc000550000, 0x2000, 0x2000})\n\t/workspace/tabmail-cloud/tools/go/src/net/fd_posix.go:68 +0x4b\nnet.(*conn).Read(0xc000118928, {0xc000550000, 0x2000, 0x2000})\n\t/workspace/tabmail-cloud/tools/go/src/net/net.go:196 +0xad\ngithub.com/jackc/pgx/v5/pgconn/internal/bgreader.(*BGReader).Read(0xc00041d940, {0xc000550000, 0x2000, 0x2000})\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/pgconn/internal/bgreader/bgreader.go:100 +0x1db\nio.ReadAtLeast({0x2350400, 0xc00041d940}, {0xc000550000, 0x2000, 0x2000}, 0x5)\n\t/workspace/tabmail-cloud/tools/go/src/io/io.go:335 +0xcb\ngithub.com/jackc/pgx/v5/pgproto3.(*chunkReader).Next(0xc000935170, 0x5)\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/pgproto3/chunkreader.go:80 +0x82f\ngithub.com/jackc/pgx/v5/pgproto3.(*Frontend).Receive(0xc0004ed688)\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/pgproto3/frontend.go:313 +0x85\ngithub.com/jackc/pgx/v5/pgconn.(*PgConn).peekMessage(0xc0003d1088)\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/pgconn/pgconn.go:645 +0x1f8\ngithub.com/jackc/pgx/v5/pgconn.(*MultiResultReader).NextResult(0xc0003d11c0)\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/pgconn/pgconn.go:1620 +0x95\ngithub.com/jackc/pgx/v5.(*Conn).execSimpleProtocol(0xc00043e140, {0x23599e0, 0x2e0fd00}, {0xc0001b4300, 0x2e9}, {0x2e0fd00, 0x0, 0x0})\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/conn.go:589 +0x151\ngithub.com/jackc/pgx/v5.(*Conn).exec(0xc00043e140, {0x23599e0, 0x2e0fd00}, {0xc0001b4300, 0x2e9}, {0x2e0fd00, 0x0, 0x0})\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/conn.go:574 +0xc36\ngithub.com/jackc/pgx/v5.(*Conn).Exec(0xc00043e140, {0x23599e0, 0x2e0fd00}, {0xc0001b4300, 0x2e9}, {0x2e0fd00, 0x0, 0x0})\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/conn.go:481 +0x1f2\ngithub.com/jackc/pgx/v5/stdlib.(*Conn).ExecContext(0xc00027ab40, {0x23599e0, 0x2e0fd00}, {0xc0001b4300, 0x2e9}, {0x2e0fd00, 0x0, 0x0?})\n\t/workspace/tabmail-cloud/gomod/github.com/jackc/pgx/v5@v5.10.0/stdlib/sql.go:496 +0x2e5\ndatabase/sql.ctxDriverExec({0x23599e0, 0x2e0fd00}, {0x7f32013b7060, 0xc00027ab40}, {0x0, 0x0}, {0xc0001b4300, 0x2e9}, {0x2e0fd00, 0x0, ...})\n\t/workspace/tabmail-cloud/tools/go/src/database/sql/ctxutil.go:31 +0xeb\ndatabase/sql.(*DB).execDC.func2()\n\t/workspace/tabmail-cloud/tools/go/src/database/sql/sql.go:1713 +0x266\ndatabase/sql.withLock({0x23551f8, 0xc0003ffd80}, 0xc0005b0120)\n\t/workspace/tabmail-cloud/tools/go/src/database/sql/sql.go:3572 +0xa3\ndatabase/sql.(*DB).execDC(0x2dbe520?, {0x23599e0, 0x2e0fd00}, 0xc0003ffd80, 0xc000558640, {0xc0001b4300, 0x2e9}, {0x0, 0x0, 0x0})\n\t/workspace/tabmail-cloud/tools/go/src/database/sql/sql.go:1708 +0x405\ndatabase/sql.(*Tx).ExecContext(0xc0003a0000, {0x23599e0, 0x2e0fd00}, {0xc0001b4300, 0x2e9}, {0x0, 0x0, 0x0})\n\t/workspace/tabmail-cloud/tools/go/src/database/sql/sql.go:2516 +0x129\ngithub.com/pressly/goose/v3.(*Provider).runSQL(0xc0001c01c0, {0x23599e0, 0x2e0fd00}, {0x2358050, 0xc0003a0000}, 0xc000914f70, 0x1)\n\t/workspace/goose-buffer-experiment/baseline/provider_run.go:530 +0x5ce\ngithub.com/pressly/goose/v3.(*Provider).runMigration(0xc0001c01c0, {0x23599e0, 0x2e0fd00}, {0x2358050, 0xc0003a0000}, 0xc000914f70, 0x1)\n\t/workspace/goose-buffer-experiment/baseline/provider_run.go:471 +0x115\ngithub.com/pressly/goose/v3.(*Provider).runIndividually.func1(0xc0003a0000)\n\t/workspace/goose-buffer-experiment/baseline/provider_run.go:215 +0x86\ngithub.com/pressly/goose/v3.beginTx({0x23599e0, 0x2e0fd00}, 0xc00041da80, 0xc0005b06e0)\n\t/workspace/goose-buffer-experiment/baseline/provider_run.go:271 +0xfc\ngithub.com/pressly/goose/v3.(*Provider).runIndividually(0xc0001c01c0, {0x23599e0, 0x2e0fd00}, 0xc00041da80, 0xc000914f70, 0x1)\n\t/workspace/goose-buffer-experiment/baseline/provider_run.go:214 +0x445\ngithub.com/pressly/goose/v3.(*Provider).runMigrations(0xc0001c01c0, {0x23599e0, 0x2e0fd00}, 0xc00041da80, {0xc000312e00, 0x13, 0xc0005b0b00?}, {0x1de1dd9, 0x2}, 0x0)\n\t/workspace/goose-buffer-experiment/baseline/provider_run.go:158 +0xfed\ngithub.com/pressly/goose/v3.(*Provider).up(0xc0001c01c0, {0x23599e0, 0x2e0fd00}, 0x0, 0x7fffffffffffffff)\n\t/workspace/goose-buffer-experiment/baseline/provider.go:409 +0xe8c\ngithub.com/pressly/goose/v3.(*Provider).Up(0xc0001c01c0, {0x23599e0, 0x2e0fd00})\n\t/workspace/goose-buffer-experiment/baseline/provider.go:252 +0x72\ntabmail/internal/store/postgres.Migrate({0x23599e0, 0x2e0fd00}, 0xc000536300)\n\t/workspace/tabmail/internal/store/postgres/migrate.go:79 +0xd58\ntabmail/internal/store/postgres.New({0x23599e0, 0x2e0fd00}, {{0xc000514460, 0x5d}, 0xa, 0x1, 0xdf8475800})\n\t/workspace/tabmail/internal/store/postgres/postgres.go:38 +0x3b6\ntabmail/internal/testpg.NewPostgres(0xc0003261c0)\n\t/workspace/tabmail/internal/testpg/fixture.go:55 +0x7af\ntabmail/internal/testpg.NewR5Fixture(0xc0003261c0)\n\t/workspace/tabmail/internal/testpg/r5_fixture.go:41 +0xc5\ntabmail/internal/store/postgres_test.r5OutboundInspectionFixture(0xc0003261c0)\n\t/workspace/tabmail/internal/store/postgres/r5_outbound_inspection_test.go:30 +0x72\ntabmail/internal/store/postgres_test.TestR5OutboundInspectionPGCurrentAuthorityAfterWait.func1(0xc0003261c0)\n\t/workspace/tabmail/internal/store/postgres/r5_outbound_inspection_test.go:97 +0x85\ntesting.tRunner(0xc0003261c0, 0xc0004a6918)\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1934 +0x21d\ncreated by testing.(*T).Run in goroutine 30060\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1997 +0x9d3\n\n"
+      ],
+      "last_run_events": [
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/execute/session",
+          "time_utc": "2026-10-03T21:05:08.130001472Z",
+          "seconds_since_package_start": 176.557299
+        },
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/execute/successor-freeze",
+          "time_utc": "2026-10-03T21:05:08.587726815Z",
+          "seconds_since_package_start": 177.015024
+        },
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/demote",
+          "time_utc": "2026-10-03T21:05:09.042951012Z",
+          "seconds_since_package_start": 177.470249
+        },
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/freeze",
+          "time_utc": "2026-10-03T21:05:09.542725047Z",
+          "seconds_since_package_start": 177.970023
+        },
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/session",
+          "time_utc": "2026-10-03T21:05:10.122621504Z",
+          "seconds_since_package_start": 178.549919
+        },
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait/replay/successor-freeze",
+          "time_utc": "2026-10-03T21:05:10.78455453Z",
+          "seconds_since_package_start": 179.211852
+        },
+        {
+          "test": "TestR5OutboundInspectionPGCurrentAuthorityAfterWait",
+          "time_utc": "2026-10-03T21:05:11.436700745Z",
+          "seconds_since_package_start": 179.863998
+        },
+        {
+          "test": "TestR5OutboundInspectionPGCurrentAuthorityAfterWait/demote",
+          "time_utc": "2026-10-03T21:05:11.436756188Z",
+          "seconds_since_package_start": 179.864054
+        }
+      ],
+      "pause_events": 19,
+      "cont_events": 0,
+      "runtime_environment_public": {
+        "PATH": "/workspace/tabmail-cloud/tools/go/bin:/workspace/tabmail-cloud/sysroot/usr/lib/postgresql/17/bin:/usr/bin:/bin",
+        "LD_LIBRARY_PATH": "/workspace/tabmail-cloud/sysroot/usr/lib/x86_64-linux-gnu",
+        "GOMAXPROCS": "2",
+        "GODEBUG": "asynctimerchan=0",
+        "GOTOOLCHAIN": "local",
+        "GOENV": "off",
+        "GOWORK": "off",
+        "GOFLAGS": "-mod=readonly -p=1",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/goose-buffer-experiment/gopath",
+        "TMPDIR": "/tmp",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TABMAIL_TEST_DB_DSN": "<OWNED BASELINE ADMIN DATABASE; loopback 55437>"
+      }
+    },
+    "candidate": {
+      "profile_sha256": "0a09ce5ff322cccacf354b0d708dd1930bef38aa24478e17c58c2cc44578a91c",
+      "binary_sha256": "62bd128c8bf6fc63cc61cc6e38eab1f90a4469cf9abf2e77a2e24749312ce01a",
+      "elf_gnu_build_id": "34891106cb2215e6cec190f5a6559eee6ce629bd",
+      "profile_mapping_matches_binary_path_and_elf_build_id": true,
+      "source_binding_file": "candidate-source-binding.json",
+      "source_binding_file_sha256": "ab376cbde05ace9f036974e97f15e3284a53383702b556904b1c138e94f6cd11",
+      "all_3995_selected_file_hashes_revalidated": true,
+      "selected_source_binding_sha256": "261d98f67f5cb6a88a8175823b63d8bc41ba8dba076433d72925d5dbd1158481",
+      "commands": [
+        {
+          "command": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=50",
+            "-nodefraction=0",
+            "-unit=bytes",
+            "-sample_index=alloc_space",
+            "/workspace/goose-buffer-experiment/candidate-pg.test",
+            "/workspace/goose-buffer-experiment/candidate-alloc.prof"
+          ],
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "tool",
+            "pprof",
+            "-top",
+            "-nodecount=30",
+            "-nodefraction=0",
+            "-sample_index=alloc_objects",
+            "/workspace/goose-buffer-experiment/candidate-pg.test",
+            "/workspace/goose-buffer-experiment/candidate-alloc.prof"
+          ],
+          "exit": 0,
+          "stderr": ""
+        },
+        {
+          "command": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "tool",
+            "pprof",
+            "-raw",
+            "/workspace/goose-buffer-experiment/candidate-pg.test",
+            "/workspace/goose-buffer-experiment/candidate-alloc.prof"
+          ],
+          "exit": 0,
+          "stderr": ""
+        }
+      ],
+      "sampling_period_bytes": 524288,
+      "profile_time_utc": "2026-10-03 21:09:07.664976164 +0000 UTC",
+      "sample_stack_records": 970,
+      "weighted_alloc_objects": 11712243,
+      "weighted_alloc_bytes": 7050034796,
+      "weighted_inuse_objects": 3691,
+      "weighted_inuse_bytes": 1048904,
+      "pool_init_weighted_alloc_objects": 204016,
+      "pool_init_weighted_alloc_bytes": 6214712788,
+      "pool_init_alloc_space_percent": 88.15151935882729,
+      "pool_init_allocation_buckets": {
+        "24": {
+          "weighted_alloc_objects": 109229,
+          "weighted_alloc_bytes": 2621500,
+          "stack_sample_records": 1
+        },
+        "65536": {
+          "weighted_alloc_objects": 94787,
+          "weighted_alloc_bytes": 6212091288,
+          "stack_sample_records": 4
+        }
+      },
+      "exact_TotalAlloc_or_Mallocs": "NOT_COLLECTED; cannot recover exact MemStats from default sampled protobuf profile",
+      "actual_working_directory": "/workspace/tabmail/internal/store/postgres",
+      "only_package_that_executed": [
+        "tabmail/internal/store/postgres"
+      ],
+      "top_level_slowest_completed": [
+        {
+          "test": "TestR5OutboundReceiptKeyExpiryAfterQueryWait",
+          "elapsed_seconds": 6.79,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AttachmentGCTenantInterruptedSessionResumes",
+          "elapsed_seconds": 6.58,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5KeyUsageAuthorityAdmissionIsolation",
+          "elapsed_seconds": 4.78,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5OffboardingLifecycleHTTPRechecksAfterTenantWait",
+          "elapsed_seconds": 4.61,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5OutboundReceiptRejectsStalePrincipal",
+          "elapsed_seconds": 4.34,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5CacheWriteVersusPhysicalDeleteLockOrder",
+          "elapsed_seconds": 3.68,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AtomicRetryOrdersAuthorizationChanges",
+          "elapsed_seconds": 3.51,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5OffboardingLifecycleOldCompletionEpochDenied",
+          "elapsed_seconds": 3.31,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5LegacyContentKeyHTTPPreservesSafeReceipt",
+          "elapsed_seconds": 3.14,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5LegacyContentRechecksKeyAndOwner",
+          "elapsed_seconds": 3.01,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AtomicRetryAuditWaitExpiryAndCancellation",
+          "elapsed_seconds": 2.69,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AttachmentGCTenantDoubleProcessDoesNotReenterBatch",
+          "elapsed_seconds": 2.67,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5AttachmentGCTenantActualProcessRestart",
+          "elapsed_seconds": 2.57,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR5MemberHistoricalDeleteRetainedReferences",
+          "elapsed_seconds": 2.55,
+          "terminal": "pass"
+        },
+        {
+          "test": "TestR3CompanyHTTPJourney",
+          "elapsed_seconds": 2.49,
+          "terminal": "pass"
+        }
+      ],
+      "timeout_header": "panic: test timed out after 3m0s\n\trunning tests:\n\t\tTestR5PermissionAuthorityMatrixLockWaitRecheck (2s)\n\t\tTestR5PermissionAuthorityMatrixLockWaitRecheck/freeze/assignment (0s)\n",
+      "timeout_active_test_stack_blocks": [
+        "goroutine 34926 [chan receive]:\ntesting.(*T).Run(0xc0004ee1c0, {0xc000394000, 0x11}, 0xc0005b60a0)\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:2005 +0x9fe\ntabmail/internal/store/postgres_test.TestR5PermissionAuthorityMatrixLockWaitRecheck(0xc0004ee1c0)\n\t/workspace/tabmail/internal/store/postgres/r5_permission_authority_matrix_test.go:294 +0x2a5\ntesting.tRunner(0xc0004ee1c0, 0x2153210)\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1934 +0x21d\ncreated by testing.(*T).Run in goroutine 1\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1997 +0x9d3\n\n",
+        "goroutine 35357 [runnable]:\ngithub.com/google/uuid.UUID.String(...)\n\t/workspace/tabmail-cloud/gomod/github.com/google/uuid@v1.6.0/uuid.go:247\ngithub.com/google/uuid.NewString()\n\t/workspace/tabmail-cloud/gomod/github.com/google/uuid@v1.6.0/version4.go:22 +0x85\ntabmail/internal/testpg.NewPostgres(0xc0004ee540)\n\t/workspace/tabmail/internal/testpg/fixture.go:44 +0x405\ntabmail/internal/store/postgres_test.seedCompany(0xc0004ee540)\n\t/workspace/tabmail/internal/store/postgres/company_workflows_test.go:36 +0x52\ntabmail/internal/store/postgres_test.r5PermissionAuthoritySeed(0xc0004ee540)\n\t/workspace/tabmail/internal/store/postgres/r5_permission_authority_matrix_test.go:26 +0x93\ntabmail/internal/store/postgres_test.TestR5PermissionAuthorityMatrixLockWaitRecheck.func1(0xc0004ee540)\n\t/workspace/tabmail/internal/store/postgres/r5_permission_authority_matrix_test.go:295 +0x65\ntesting.tRunner(0xc0004ee540, 0xc0005b60a0)\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1934 +0x21d\ncreated by testing.(*T).Run in goroutine 34926\n\t/workspace/tabmail-cloud/tools/go/src/testing/testing.go:1997 +0x9d3\n\n"
+      ],
+      "last_run_events": [
+        {
+          "test": "TestR5PermissionAuthorityMatrixEmptyCASAndNullableIntent",
+          "time_utc": "2026-10-03T21:09:05.876369208Z",
+          "seconds_since_package_start": 178.235986
+        },
+        {
+          "test": "TestR5PermissionAuthorityMatrixLockWaitRecheck",
+          "time_utc": "2026-10-03T21:09:06.151650977Z",
+          "seconds_since_package_start": 178.511267
+        },
+        {
+          "test": "TestR5PermissionAuthorityMatrixLockWaitRecheck/demote/patch",
+          "time_utc": "2026-10-03T21:09:06.151718588Z",
+          "seconds_since_package_start": 178.511335
+        },
+        {
+          "test": "TestR5PermissionAuthorityMatrixLockWaitRecheck/demote/assignment",
+          "time_utc": "2026-10-03T21:09:06.428823853Z",
+          "seconds_since_package_start": 178.78844
+        },
+        {
+          "test": "TestR5PermissionAuthorityMatrixLockWaitRecheck/demote/profile-cas",
+          "time_utc": "2026-10-03T21:09:06.683474929Z",
+          "seconds_since_package_start": 179.043091
+        },
+        {
+          "test": "TestR5PermissionAuthorityMatrixLockWaitRecheck/demote/delete",
+          "time_utc": "2026-10-03T21:09:07.04680434Z",
+          "seconds_since_package_start": 179.406421
+        },
+        {
+          "test": "TestR5PermissionAuthorityMatrixLockWaitRecheck/freeze/patch",
+          "time_utc": "2026-10-03T21:09:07.310399222Z",
+          "seconds_since_package_start": 179.670016
+        },
+        {
+          "test": "TestR5PermissionAuthorityMatrixLockWaitRecheck/freeze/assignment",
+          "time_utc": "2026-10-03T21:09:07.697350137Z",
+          "seconds_since_package_start": 180.056967
+        }
+      ],
+      "pause_events": 19,
+      "cont_events": 0,
+      "runtime_environment_public": {
+        "PATH": "/workspace/tabmail-cloud/tools/go/bin:/workspace/tabmail-cloud/sysroot/usr/lib/postgresql/17/bin:/usr/bin:/bin",
+        "LD_LIBRARY_PATH": "/workspace/tabmail-cloud/sysroot/usr/lib/x86_64-linux-gnu",
+        "GOMAXPROCS": "2",
+        "GODEBUG": "asynctimerchan=0",
+        "GOTOOLCHAIN": "local",
+        "GOENV": "off",
+        "GOWORK": "off",
+        "GOFLAGS": "-mod=readonly -p=1",
+        "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+        "GOCACHE": "/workspace/tabmail-cloud/gocache",
+        "GOPATH": "/workspace/goose-buffer-experiment/gopath",
+        "TMPDIR": "/tmp",
+        "LANG": "C",
+        "LC_ALL": "C",
+        "TABMAIL_TEST_DB_DSN": "<OWNED CANDIDATE ADMIN DATABASE; loopback 55438>"
+      }
+    }
+  }
+}

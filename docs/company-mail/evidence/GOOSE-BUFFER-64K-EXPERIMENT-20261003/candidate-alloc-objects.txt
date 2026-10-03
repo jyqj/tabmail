@@ -1,0 +1,37 @@
+File: candidate-pg.test
+Build ID: 34891106cb2215e6cec190f5a6559eee6ce629bd
+Type: alloc_objects
+Time: 2026-10-03 21:09:07 UTC
+Showing nodes accounting for 8773911, 74.91% of 11712243 total
+Showing top 30 nodes out of 966
+      flat  flat%   sum%        cum   cum%
+   3537273 30.20% 30.20%    3537273 30.20%  bufio.(*Scanner).Text (inline)
+    523173  4.47% 34.67%    5347382 45.66%  github.com/pressly/goose/v3/internal/sqlparser.ParseSQLMigration
+    458766  3.92% 38.59%     458766  3.92%  strings.NewReader (inline)
+    327680  2.80% 41.38%     670066  5.72%  github.com/jackc/pgx/v5/pgtype.newEncodeError
+    283992  2.42% 43.81%     283992  2.42%  strings.(*Builder).grow
+    240297  2.05% 45.86%     693591  5.92%  github.com/jackc/pgx/v5/pgtype.UUIDCodec.DecodeValue
+    229376  1.96% 47.82%     229376  1.96%  github.com/jackc/pgx/v5/pgtype.TryWrapBuiltinTypeEncodePlan
+    215330  1.84% 49.66%     217851  1.86%  context.AfterFunc
+    212992  1.82% 51.48%     404140  3.45%  github.com/jackc/pgx/v5/pgtype.(*Map).planScan
+    208896  1.78% 53.26%     342386  2.92%  fmt.Errorf
+    204016  1.74% 55.00%     204016  1.74%  github.com/pressly/goose/v3/internal/sqlparser.init.func1
+    196608  1.68% 56.68%     196608  1.68%  encoding/hex.DecodeString
+    174767  1.49% 58.17%    2106405 17.98%  github.com/jackc/pgx/v5/pgtype.(*encodePlanDriverValuer).Encode
+    147456  1.26% 59.43%     351185  3.00%  database/sql.(*DB).execDC
+    147456  1.26% 60.69%     344064  2.94%  github.com/jackc/pgx/v5/pgtype.parseUUID
+    135625  1.16% 61.85%     213461  1.82%  fmt.Sprintf
+    131077  1.12% 62.97%     131077  1.12%  github.com/pressly/goose/v3/internal/sqlparser.(*stateMachine).print
+    131072  1.12% 64.09%     131072  1.12%  github.com/jackc/pgx/v5/pgconn.(*PgConn).makeCommandTag (inline)
+    131072  1.12% 65.20%     674499  5.76%  github.com/pressly/goose/v3.(*Provider).runSQL
+    131071  1.12% 66.32%     185686  1.59%  github.com/jackc/pgx/v5/pgtype.UUIDCodec.DecodeDatabaseSQLValue
+    124049  1.06% 67.38%     341900  2.92%  github.com/jackc/pgx/v5/pgconn/ctxwatch.(*ContextWatcher).Watch
+    109230  0.93% 68.32%     453294  3.87%  github.com/jackc/pgx/v5/pgtype.scanPlanTextAnyToUUIDScanner.Scan
+    106712  0.91% 69.23%     106712  0.91%  fmt.(*buffer).writeString (inline)
+    100880  0.86% 70.09%     100880  0.86%  bytes.(*Buffer).String (inline)
+    100695  0.86% 70.95%     100695  0.86%  bytes.growSlice
+     98304  0.84% 71.79%      98304  0.84%  database/sql.(*Tx).grabConn
+     98304  0.84% 72.63%     147456  1.26%  github.com/jackc/pgx/v5/pgproto3.(*ParameterStatus).Decode
+     92432  0.79% 73.42%      92432  0.79%  github.com/jackc/pgx/v5/internal/stmtcache.NewLRUCache
+     87926  0.75% 74.17%     147983  1.26%  github.com/jackc/pgx/v5/pgconn.(*PgConn).Prepare
+     87384  0.75% 74.91%      87384  0.75%  encoding/hex.EncodeToString

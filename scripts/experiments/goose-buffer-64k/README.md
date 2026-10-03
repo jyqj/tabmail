@@ -64,3 +64,12 @@ The historical allocation-profile analysis encountered a readonly-default-cache
 failure; it was not retried or bypassed. Profile pins are kept and wholePG
 allocation totals are unparsed. Any future run/analysis requires a separately
 decided scope, rather than silently exhausting another baseline.
+
+Root subsequently authorized analyzing the existing profiles with owned caches.
+`analyze_profiles.py --root EXPERIMENT_ROOT --evidence EVIDENCE_PATH --tool-root
+TOOL_ROOT` launches only official installed Go pprof/readelf, never a test or
+native service. It checks original profile/binary SHA-256 pins, ELF/profile
+mapping build IDs and every selected source hash, and sums raw sample values to
+verify official top totals. It retains the original cache-error record. Its
+weighted sampled allocation totals are not exact runtime.TotalAlloc, and the
+historical wrong-cwd baseline remains an invalid controlled comparison.
