@@ -20,25 +20,64 @@ function scan(root = ROOT) {
   const program = ts.createProgram(files, { noResolve: true, noLib: true, jsx: ts.JsxEmit.Preserve });
   const checker = program.getTypeChecker();
   const rows = [];
-  function symbolic(n, seen = new Set()) {
+  function symbolic(n, seen = new Set(), bindings = new Map()) {
     if (!n) return "";
+    if (ts.isIdentifier(n) && bindings.has(checker.getSymbolAtLocation(n))) return bindings.get(checker.getSymbolAtLocation(n));
     if (ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) return n.text;
-    if (ts.isParenthesizedExpression(n) || ts.isAsExpression(n)) return symbolic(n.expression, seen);
+    if (ts.isParenthesizedExpression(n) || ts.isAsExpression(n)) return symbolic(n.expression, seen, bindings);
     if (ts.isCallExpression(n)) {
       if (n.expression.getText() === "workPath") return "/mailboxes/{id}";
       if (n.expression.getText() === "encodeURIComponent") return "{id}";
       if (n.expression.getText() === "getBaseUrl") return "";
     }
-    if (ts.isTemplateExpression(n)) return n.head.text + n.templateSpans.map(s => symbolic(s.expression, seen) + s.literal.text).join("");
-    if (ts.isBinaryExpression(n) && n.operatorToken.kind === ts.SyntaxKind.PlusToken) return symbolic(n.left, seen) + symbolic(n.right, seen);
+    if (ts.isTemplateExpression(n)) return n.head.text + n.templateSpans.map(s => symbolic(s.expression, seen, bindings) + s.literal.text).join("");
+    if (ts.isBinaryExpression(n) && n.operatorToken.kind === ts.SyntaxKind.PlusToken) return symbolic(n.left, seen, bindings) + symbolic(n.right, seen, bindings);
     if (ts.isIdentifier(n)) {
       const sym = checker.getSymbolAtLocation(n);
       const decl = sym?.valueDeclaration;
       if (decl && ts.isVariableDeclaration(decl) && decl.initializer && !seen.has(decl)) {
-        const next = new Set(seen); next.add(decl); return symbolic(decl.initializer, next);
+        const next = new Set(seen); next.add(decl); return symbolic(decl.initializer, next, bindings);
       }
     }
     return "{dynamic}";
+  }
+  // Expand finite string parameters only for private, directly called helpers.
+  // An exported/escaped helper or any unknown argument stays unresolved.
+  function pathBindings(input, sf) {
+    let bindings = [new Map()];
+    const parameters = new Set();
+    function find(n) {
+      if (ts.isIdentifier(n)) {
+        const symbol = checker.getSymbolAtLocation(n);
+        const decl = symbol?.valueDeclaration;
+        if (decl && ts.isParameter(decl) && decl.initializer && ts.isStringLiteral(decl.initializer)) parameters.add(symbol);
+      }
+      ts.forEachChild(n, find);
+    }
+    if (input) find(input);
+    for (const symbol of parameters) {
+      const parameter = symbol.valueDeclaration, fn = parameter.parent;
+      if (!ts.isFunctionDeclaration(fn) || !fn.name || fn.modifiers?.some(m => [ts.SyntaxKind.ExportKeyword, ts.SyntaxKind.DefaultKeyword].includes(m.kind))) continue;
+      const fnSymbol = checker.getSymbolAtLocation(fn.name), index = fn.parameters.indexOf(parameter);
+      const values = new Set();
+      let unresolved = false;
+      function references(n) {
+        if (ts.isIdentifier(n) && n !== fn.name && checker.getSymbolAtLocation(n) === fnSymbol) {
+          const call = n.parent;
+          if (!ts.isCallExpression(call) || call.expression !== n || call.arguments.some(ts.isSpreadElement)) unresolved = true;
+          else {
+            const arg = call.arguments[index];
+            const value = symbolic(arg || parameter.initializer);
+            if (value.includes("{dynamic}") || value.includes("{id}")) unresolved = true;
+            else values.add(value);
+          }
+        }
+        ts.forEachChild(n, references);
+      }
+      references(sf);
+      if (!unresolved && values.size) bindings = bindings.flatMap(binding => [...values].map(value => new Map([...binding, [symbol, value]])));
+    }
+    return bindings;
   }
   function methods(options) {
     if (!options) return ["GET"];
@@ -63,12 +102,13 @@ function scan(root = ROOT) {
         const options = n.arguments[1];
         const methodNode = options && ts.isObjectLiteralExpression(options) ? options.properties.find(p => ts.isPropertyAssignment(p) && p.name.getText().replace(/["']/g, "") === "method")?.initializer : null;
         const paired = input && ts.isConditionalExpression(input) && methodNode && ts.isConditionalExpression(methodNode) && input.condition.getText() === methodNode.condition.getText();
-        variants.forEach((variant, branch) => {
-          const target = (["company", "downloadCompanyFile"].includes(callee) ? "/api/v1/company" : "") + symbolic(variant);
+        let branch = 0;
+        variants.forEach((variant, variantIndex) => pathBindings(variant, sf).forEach(bindings => {
+          const target = (["company", "downloadCompanyFile"].includes(callee) ? "/api/v1/company" : "") + symbolic(variant, new Set(), bindings);
           const source = path.relative(root, name).split(path.sep).join("/");
           const forwarding = (source === "web/lib/api/base.ts" && !target.startsWith("/api/v1")) || (source === "web/lib/company.ts" && callee === "request" && target === "/api/v1/company{dynamic}");
-          rows.push({ source, line: sf.getLineAndCharacterOfPosition(n.getStart()).line + 1, branch, callee, owner, expression: variant?.getText() || "", path: target, methods: paired && variants.length === ms.length ? [ms[branch]] : ms, forwarding });
-        });
+          rows.push({ source, line: sf.getLineAndCharacterOfPosition(n.getStart()).line + 1, branch: branch++, callee, owner, expression: variant?.getText() || "", path: target, methods: paired && variants.length === ms.length ? [ms[variantIndex]] : ms, forwarding });
+        }));
       }
       ts.forEachChild(n, visit);
     }
@@ -86,7 +126,7 @@ function validate(actual, documented, routes) {
     for (const key of Object.keys(row)) if (JSON.stringify(row[key]) !== JSON.stringify(stored[key])) throw new Error(`client source drift: ${row.source}:${row.line} ${key}`);
     const matched = row.forwarding ? [] : row.methods.map(method => {
       const route = routeMap.get(`${method} ${normalize(row.path)}`);
-      if (!route) throw new Error(`unregistered/unresolved client call: ${row.source}:${row.line}`);
+      if (!route) throw new Error(`unregistered/unresolved client call: ${row.source}:${row.line} branch ${row.branch}: ${method} ${row.path}`);
       return route;
     });
     if (JSON.stringify(matched) !== JSON.stringify(stored.routes)) throw new Error(`client route mapping drift: ${row.source}:${row.line}`);
