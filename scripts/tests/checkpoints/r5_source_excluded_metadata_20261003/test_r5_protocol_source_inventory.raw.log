@@ -1,0 +1,12 @@
+test_current_missing_policy_and_git_inventory_are_not_fallback (test_r5_protocol_source_inventory.ProtocolSourceInventoryTests.test_current_missing_policy_and_git_inventory_are_not_fallback) ... ok
+test_duplicate_json_keys_and_missing_adapter_dependency_rejected (test_r5_protocol_source_inventory.ProtocolSourceInventoryTests.test_duplicate_json_keys_and_missing_adapter_dependency_rejected) ... ok
+test_explicit_canonical_closure_not_head_commit (test_r5_protocol_source_inventory.ProtocolSourceInventoryTests.test_explicit_canonical_closure_not_head_commit) ... ok
+test_known_runtime_artifacts_are_not_source_inventory_fallback (test_r5_protocol_source_inventory.ProtocolSourceInventoryTests.test_known_runtime_artifacts_are_not_source_inventory_fallback) ... ok
+test_manifest_pin_kind_root_digest_and_schema_cannot_be_inferred (test_r5_protocol_source_inventory.ProtocolSourceInventoryTests.test_manifest_pin_kind_root_digest_and_schema_cannot_be_inferred) ... ok
+test_missing_extra_important_source_or_actual_byte_drift_rejected (test_r5_protocol_source_inventory.ProtocolSourceInventoryTests.test_missing_extra_important_source_or_actual_byte_drift_rejected) ... ok
+test_path_traversal_absolute_noncanonical_and_symlink_rejected (test_r5_protocol_source_inventory.ProtocolSourceInventoryTests.test_path_traversal_absolute_noncanonical_and_symlink_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.077s
+
+OK
