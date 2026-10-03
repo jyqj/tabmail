@@ -28,9 +28,21 @@ def identity(s):
 
 def root_fd(root):
     root = Path(root).absolute()
-    if any(p.is_symlink() for p in [root, *root.parents]):
-        raise ValueError('symlinked boundary root')
-    return os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+    fd = os.open('/',flags)
+    try:
+        for component in root.parts[1:]:
+            before = os.stat(component,dir_fd=fd,follow_symlinks=False)
+            if not stat.S_ISDIR(before.st_mode):
+                raise ValueError('symlink/non-directory boundary ancestor')
+            child = os.open(component,flags,dir_fd=fd)
+            if identity(os.fstat(child)) != identity(before):
+                os.close(child)
+                raise ValueError('boundary root ancestor identity changed')
+            os.close(fd);fd=child
+        return fd
+    except BaseException:
+        os.close(fd);raise
 
 
 def read(root, name):
