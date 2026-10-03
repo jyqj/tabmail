@@ -13,6 +13,10 @@ import tempfile
 
 ROOT=Path(__file__).resolve().parents[1]
 MAP=ROOT/'docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json'
+HISTORY=Path('docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json')
+CURRENT_CLIENTS=HISTORY.parent/'clients.json'
+HISTORICAL_WIRE_SUMMARY_SHA='6421a985979e1e61e187d7b51ac30d75c0ac11c1d8082904fa113037bd352e33'
+HISTORY_SHA='61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22'
 
 def contracts():
     spec=importlib.util.spec_from_file_location('r5_compat_contracts',ROOT/'scripts/check_contract_drift.py')
@@ -51,7 +55,7 @@ def refs(node):
 
 def release_batch(route):
     path=route['path']
-    if '/permissions' in path or path.endswith('/permission') or path.endswith('/send-policy') or ('/mailboxes/' in path and path.endswith('/grants')):return 'P1'
+    if '/permissions' in path or '/permission-editor' in path or path.endswith('/permission') or path.endswith('/send-policy') or ('/mailboxes/' in path and path.endswith('/grants')):return 'P1'
     if '/offboard' in path or any(x in path for x in ['/transfer','/convert','/activate']):return 'P4'
     if '/templates' in path or '/drafts' in path:return 'P5'
     if path.startswith('/api/v1/company/') and any(x in path for x in ['/events','/search','/index','/conversation']):return 'P7'
@@ -74,6 +78,12 @@ def source_facts(routes,clients):
         source=x.get('source','')
         if not source.startswith('web/') or Path(source).suffix not in {'.ts','.tsx'} or not (ROOT/source).resolve().is_relative_to(ROOT/'web') or not (ROOT/source).is_file():
             raise ValueError('invalid client producer source')
+    if clients!=strict_json((ROOT/CURRENT_CLIENTS).read_text()):
+        raise ValueError('client producer differs from reviewed current source inventory')
+    matrix=strict_json((ROOT/'docs/company-mail/evidence/R5-API-MATRIX.json').read_text())
+    keys=['method','path','handler','middleware','conditions','source','line']
+    if [{k:r.get(k) for k in keys} for r in routes]!=[{k:r.get(k) for k in keys} for r in matrix]:
+        raise ValueError('route producer differs from reviewed current source inventory')
     c=contracts();doc,errors=c.parse_openapi_text((ROOT/'internal/api/openapi.yaml').read_text())
     if errors:raise ValueError('; '.join(errors))
     result=[]
@@ -82,6 +92,20 @@ def source_facts(routes,clients):
         matched=[x for x in clients if not x['forwarding'] and r['method'] in x['methods'] and norm(r['path'])==norm(x['path'])]
         schema=refs(op or {})
         dto=[{'go':go,'ts':c.company_pairs.get(go),'schema':component} for go,component in c.OPENAPI_COMPANY_COMPONENTS.items() if component in schema]
+        # Explicit reviewed permission DTOs; response envelopes are recorded separately.
+        permission_bindings={
+            'PermissionEditorResponse':('PermissionEditorSnapshot','PermissionEditorSnapshot','data'),
+            'PermissionEditorCommand':('PermissionEditorCommand','PermissionEditorCommand',None),
+            'PermissionEditorAssignmentCommand':('PermissionAssignmentCommand','PermissionAssignmentCommand',None),
+            'PermissionProfileDeletionPreviewResponse':('PermissionProfileDeletionPreview','PermissionProfileDeletionPreview','data'),
+        }
+        for component,(go,ts,envelope) in permission_bindings.items():
+            if component not in schema:continue
+            go_source='internal/company/permission_editor.go';ts_source='web/lib/api/permission-editor-types.ts'
+            if not re.search(r'type '+go+r' struct', (ROOT/go_source).read_text()) or not re.search(r'export interface '+ts+r'\b',(ROOT/ts_source).read_text()):
+                raise ValueError('missing reviewed permission DTO symbol')
+            dto.append({'go':go,'ts':ts,'schema':component,'go_source':go_source,'ts_source':ts_source,
+                        'response_envelope':envelope,'limitation':'Reviewed named source binding; field/runtime compatibility requires independent contract consumers.'})
         shared=[{'go':name,'ts':name,'schema':name,'limitation':'storage model is not an allow-list wire DTO'} for name in c.SHARED_TYPES if name in schema]
         binding=c.COMPANY_RESPONSES.get(r['handler'])
         tests=[{'source':'internal/architecture/route_inventory_test.go','name':'TestR5RouteInventory','scope':'source Go AST route registration'}]
@@ -116,9 +140,13 @@ def closure(facts,clients):
     paths={'internal/api/openapi.yaml','scripts/check_contract_drift.py','scripts/collect_api_calls.cjs',
            'internal/models/models.go','internal/models/mailbox_grants.go','web/lib/types.ts',
            'internal/architecture/route_inventory_test.go','internal/api/http_contract_test.go',
-           'docs/company-mail/evidence/R5-API-MATRIX.json'}
+           'docs/company-mail/evidence/R5-API-MATRIX.json',str(CURRENT_CLIENTS)}
+    paths|={b[k] for r in facts for b in r['go_ts_dto_bindings'] for k in ['go_source','ts_source'] if k in b}
     paths|={r['route_source'] for r in facts}|{x['source'] for x in clients}|{t['source'] for r in facts for t in r['test_bindings']}
     paths|={str(p.relative_to(ROOT)) for p in (ROOT/'internal/company').glob('*.go') if not p.name.endswith('_test.go')}
+    # Bind handler implementation and middleware bytes as structure, never runtime proof.
+    paths|={str(p.relative_to(ROOT)) for folder in ['internal/api/handlers','internal/api/middleware']
+            for p in (ROOT/folder).glob('*.go') if not p.name.endswith('_test.go')}
     return {p:digest(ROOT/p) for p in sorted(paths)}
 
 def canonical_bytes(value):return (json.dumps(value,ensure_ascii=False,indent=2)+'\n').encode()
@@ -130,6 +158,8 @@ def validate_wire(data,facts,artifact_root=None):
         raise ValueError('missing/malformed safe wire summary')
     if hashlib.sha256(canonical_bytes(summary)).hexdigest()!=evidence.get('summary_sha256'):
         raise ValueError('wire summary hash mismatch')
+    if data.get('schema_version')!=1 or evidence.get('summary_sha256')!=HISTORICAL_WIRE_SUMMARY_SHA:
+        raise ValueError('unreviewed/re-signed historical wire summary')
     identity=summary['source_identity']
     if identity!=evidence.get('expected_source_identity') or set(identity)!={'frozen_tree','validation_commit'} or any(not re.fullmatch('[0-9a-f]{40}',str(v)) for v in identity.values()):
         raise ValueError('wrong wire report source identity')
@@ -205,7 +235,7 @@ def validate_wire(data,facts,artifact_root=None):
 
 
 def validate(data,routes,clients,artifact_root=None):
-    if data.get('schema_version')!=1 or data.get('scope')!='source_inventory_and_upgrade_plan' or data.get('task_complete') is not False or data.get('product_green') is not False:
+    if data.get('schema_version')!=2 or data.get('scope')!='source_inventory_and_upgrade_plan' or data.get('task_complete') is not False or data.get('product_green') is not False:
         raise ValueError('explicit source-only non-completion/non-product scope required')
     if data.get('dependencies')!=['R5-P0-020','R5-P0-050','R5-P0-080'] or data.get('dependency_acceptance')!='operator_review_required':
         raise ValueError('P0-110 dependency acceptance cannot be inferred by source gate')
@@ -237,7 +267,17 @@ def validate(data,routes,clients,artifact_root=None):
         for test in row['test_bindings']:
             if not re.search(r'func '+re.escape(test['name'])+r'\(', (ROOT/test['source']).read_text()):raise ValueError('missing actual test symbol')
     if data.get('source_closure')!=closure(actual,clients):raise ValueError('source hash drift')
-    wire=validate_wire(data,actual,artifact_root)
+    reference={'artifact_ref':str(HISTORY),'sha256':HISTORY_SHA,'qualification':'historical_metadata_only_not_current_wire'}
+    if data.get('historical_wire_reference')!=reference or digest(ROOT/HISTORY)!=HISTORY_SHA:
+        raise ValueError('historical wire archive/reference drift')
+    if 'wire_source_evidence' in data or any('wire_observations' in r or 'wire_evidence' in r for r in stored):
+        raise ValueError('current source map cannot re-sign historical runtime evidence')
+    if artifact_root is not None:
+        # Keep the actual wire validator strict; archive bytes cannot qualify current source.
+        validate_wire(data,actual,artifact_root)
+    wire={'wire_validation_scope':'not_checked_current_wire_required',
+          'historical_wire_reference':reference}
+
     return {**wire,'status':'source_inventory_and_upgrade_plan_checked','task_complete':False,'product_green':False,
             'routes':len(actual),'client_branches':len(clients),'source_files':len(data['source_closure']),
             'openapi_missing':[r['route'] for r in actual if not r['openapi_operation_present']],
