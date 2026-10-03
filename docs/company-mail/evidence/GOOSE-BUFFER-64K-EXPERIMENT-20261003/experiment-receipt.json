@@ -1,0 +1,65 @@
+{
+  "source_freeze": "aeed47f0e1998d9925acb680992b051463821d69",
+  "date_utc": "2026-10-03",
+  "base_pr": 23,
+  "pr23_docs_tip_observed": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+  "docs_tip_product_source_equal": true,
+  "scope": "isolated parser and whole postgres package experiment; not root ./... or whole CI",
+  "design": "official Goose v3.27.3 initial shared bufferPool allocation 4MiB -> 64KiB; scanner max remains 4MiB",
+  "parser_differential": "PASS, 600 raw result rows bytewise equal",
+  "wholepg": "FAIL both arms at original 180s timeout; one invocation each",
+  "comparability": "INVALID baseline cwd was repo root; candidate cwd fixed to package; no controlled performance conclusion",
+  "allocation": "serial migration diagnostic reported separately; wholePG profiles collected but unparsed due readonly-default-cache failure; no retry/bypass",
+  "baseline_wholepg_wall_seconds": 180.50564821399996,
+  "candidate_wholepg_wall_seconds": 180.10802972099998,
+  "runtime": {
+    "go": "1.25.7",
+    "goos": "linux",
+    "goarch": "amd64",
+    "race": true,
+    "GODEBUG": "asynctimerchan=0",
+    "GOMAXPROCS": 2,
+    "build_tags": "default",
+    "native_postgres": "17.11 Debian 17.11-0+deb13u1; local native distinct from PG16 CI",
+    "postgres_clusters": "two newly initialized, owned, loopback only, default durability",
+    "smtp": "original tests own loopback SMTP fixtures, no external SMTP service"
+  },
+  "compiler_proof": {
+    "baseline": "go version -m: -race=true CGO_ENABLED=1 GOAMD64=v1",
+    "candidate": "go version -m: -race=true CGO_ENABLED=1 GOAMD64=v1"
+  },
+  "compile_commands": {
+    "baseline": "go test -c -mod=readonly -modfile=/workspace/goose-buffer-experiment/baseline.mod -race -o /workspace/goose-buffer-experiment/baseline-pg.test ./internal/store/postgres",
+    "candidate": "go test -c -mod=readonly -modfile=/workspace/goose-buffer-experiment/candidate.mod -race -p=1 -o /workspace/goose-buffer-experiment/candidate-pg.test ./internal/store/postgres"
+  },
+  "cleanup": {
+    "baseline_cluster_stopped": true,
+    "candidate_cluster_stopped": true,
+    "baseline_timeout_owned_fixture_db_residual": [
+      "tm_test_a7f093962fba449ba97fe28f6c87d0eb"
+    ],
+    "candidate_timeout_fixture_db_residual": [],
+    "both_admin_dbs_remain_in_stopped_temporary_trees": true,
+    "original_fixture_synchronous_cleanup_source_unchanged": true
+  },
+  "product_files_changed": false,
+  "central_TODO_changed": false,
+  "existing_receipts_changed": false,
+  "third_replace_product_eligible": false,
+  "formal_dependency_strategy": "root decision required; candidate not promoted",
+  "published_payload_policy": "only self-authored diagnostics, small patch texts, filenames/hashes and synthetic redacted results; no third-party source tree/zip, binary, DB or keys",
+  "qualification": {
+    "wholePG": false,
+    "whole_root": false,
+    "wholeCI": false,
+    "Method19": false,
+    "SML": false,
+    "million_M": false,
+    "runtime": false,
+    "shipping": false
+  },
+  "merge": false,
+  "deploy": false,
+  "force_push": false,
+  "approval_auto_review_rejections": []
+}

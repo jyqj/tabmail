@@ -1,0 +1,37 @@
+File: baseline-pg.test
+Build ID: e655f3a0fb760815f08d692149f48786abe2f144
+Type: alloc_objects
+Time: 2026-10-03 21:05:11 UTC
+Showing nodes accounting for 7310513, 75.82% of 9642438 total
+Showing top 30 nodes out of 934
+      flat  flat%   sum%        cum   cum%
+   2513611 26.07% 26.07%    2513611 26.07%  bufio.(*Scanner).Text (inline)
+    518109  5.37% 31.44%    4043603 41.94%  github.com/pressly/goose/v3/internal/sqlparser.ParseSQLMigration
+    376843  3.91% 35.35%     376843  3.91%  strings.NewReader (inline)
+    360448  3.74% 39.09%     797988  8.28%  github.com/jackc/pgx/v5/pgtype.newEncodeError
+    266240  2.76% 41.85%     437540  4.54%  fmt.Errorf
+    218453  2.27% 44.11%     518828  5.38%  github.com/jackc/pgx/v5/pgtype.UUIDCodec.DecodeValue
+    212992  2.21% 46.32%     294912  3.06%  github.com/jackc/pgx/v5/pgtype.(*Map).planScan
+    196608  2.04% 48.36%     196608  2.04%  database/sql.(*Tx).grabConn
+    185687  1.93% 50.29%     185687  1.93%  strings.(*Builder).grow
+    183437  1.90% 52.19%     183437  1.90%  fmt.(*buffer).writeString (inline)
+    168469  1.75% 53.94%     168469  1.75%  github.com/pressly/goose/v3/internal/sqlparser.init.func1
+    163845  1.70% 55.64%     163845  1.70%  github.com/google/uuid.UUID.String (inline)
+    152917  1.59% 57.22%     218453  2.27%  github.com/jackc/pgx/v5/pgproto3.(*ParameterStatus).Decode
+    149796  1.55% 58.78%     159880  1.66%  context.AfterFunc
+    147456  1.53% 60.31%     245760  2.55%  github.com/jackc/pgx/v5/pgtype.parseUUID
+    141235  1.46% 61.77%     282562  2.93%  fmt.Sprintf
+    131075  1.36% 63.13%    2065025 21.42%  github.com/jackc/pgx/v5/pgtype.(*encodePlanDriverValuer).Encode
+    131072  1.36% 64.49%     240302  2.49%  github.com/google/uuid.UUID.Value
+    131072  1.36% 65.85%     131072  1.36%  github.com/jackc/pgx/v5/pgconn.(*PgConn).makeCommandTag (inline)
+    131072  1.36% 67.21%     131072  1.36%  github.com/jackc/pgx/v5/pgtype.TryWrapBuiltinTypeEncodePlan
+    114689  1.19% 68.40%     185675  1.93%  database/sql.(*DB).execDC
+     98308  1.02% 69.42%      98308  1.02%  github.com/pressly/goose/v3/internal/sqlparser.(*stateMachine).print
+     98304  1.02% 70.44%      98304  1.02%  encoding/hex.DecodeString
+     90006  0.93% 71.37%      90006  0.93%  bytes.(*Buffer).String (inline)
+     76459  0.79% 72.16%     511000  5.30%  tabmail/internal/store/postgres.(*PgStore).ActivateEmployee
+     76458  0.79% 72.96%     141996  1.47%  github.com/jackc/pgx/v5/pgtype.UUIDCodec.DecodeDatabaseSQLValue
+     73716  0.76% 73.72%     401490  4.16%  github.com/jackc/pgx/v5.(*baseRows).Scan
+     71061  0.74% 74.46%      71061  0.74%  bytes.growSlice
+     65538  0.68% 75.14%      65538  0.68%  github.com/jackc/pgx/v5/pgtype.encodeUUID
+     65537  0.68% 75.82%      65537  0.68%  github.com/jackc/pgx/v5/pgproto3.(*StartupMessage).Encode

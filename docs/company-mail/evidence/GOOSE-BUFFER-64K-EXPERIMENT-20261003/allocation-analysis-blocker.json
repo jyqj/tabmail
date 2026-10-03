@@ -1,0 +1,20 @@
+{
+  "command": [
+    "go",
+    "tool",
+    "pprof",
+    "-top",
+    "-unit=bytes",
+    "-sample_index=alloc_space",
+    "baseline-pg.test",
+    "baseline-alloc.prof"
+  ],
+  "failure": "failed to initialize build cache at /home/agent/.cache/go-build: mkdir /home/agent/.cache/go-build: read-only file system",
+  "cause": "analysis invocation omitted the owned GOCACHE setting",
+  "retried": false,
+  "bypass_attempted": false,
+  "baseline_profile_sha256": "0488f90d5e0292451ef13164172b888fc1563a2954aed9f20a34ecd466e7c85e",
+  "wholepg_sampled_allocation_totals": "UNPARSED; no performance claim",
+  "auto_review_rejection": false,
+  "candidate_profile_sha256": "0a09ce5ff322cccacf354b0d708dd1930bef38aa24478e17c58c2cc44578a91c"
+}

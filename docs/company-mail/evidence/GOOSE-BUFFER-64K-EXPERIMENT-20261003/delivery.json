@@ -1,0 +1,16 @@
+{
+  "status": "PUSH_CONFIRMED_AND_DRAFT_PR_CREATED",
+  "experiment_commit": "c33eb17294b449ae587e8334d3acb8a4511821f9",
+  "source_freeze": "aeed47f0e1998d9925acb680992b051463821d69",
+  "branch": "experiment/goose-buffer-64k",
+  "pr_url": "https://github.com/jyqj/tabmail/pull/24",
+  "pr_number": 24,
+  "draft": true,
+  "base": "integration/company-mail-r5-batch4-20261003",
+  "base_sha_at_creation": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+  "head_sha_at_creation": "c33eb17294b449ae587e8334d3acb8a4511821f9",
+  "merge": false,
+  "deploy": false,
+  "remote_source_validation": "ls-remote confirmed experiment head before creation",
+  "followup": "this docs-only delivery status is committed and pushed separately; final remote head is reported to parent"
+}

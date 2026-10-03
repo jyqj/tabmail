@@ -1,0 +1,11 @@
+--- a/internal/sqlparser/parser.go
++++ b/internal/sqlparser/parser.go
+@@ -85,7 +85,7 @@
+ 
+ var bufferPool = sync.Pool{
+ 	New: func() any {
+-		buf := make([]byte, scanBufSize)
++		buf := make([]byte, 64 * 1024)
+ 		return &buf
+ 	},
+ }

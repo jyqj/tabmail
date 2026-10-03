@@ -1,0 +1,13 @@
+--- product/go.mod
++++ experiment/baseline.mod
+@@ -63,6 +63,8 @@
+ )
+ 
+ // Fixed upstream v2.3.0 plus tabmail actual-allocation budget guards.
+-replace github.com/jhillyerd/enmime/v2 v2.3.0 => ./third_party/enmime-v2.3.0
++replace github.com/jhillyerd/enmime/v2 v2.3.0 => /workspace/tabmail/third_party/enmime-v2.3.0
+ 
+-replace github.com/emersion/go-smtp v0.24.0 => ./third_party/go-smtp
++replace github.com/emersion/go-smtp v0.24.0 => /workspace/tabmail/third_party/go-smtp
++
++replace github.com/pressly/goose/v3 v3.27.3 => /workspace/goose-buffer-experiment/baseline

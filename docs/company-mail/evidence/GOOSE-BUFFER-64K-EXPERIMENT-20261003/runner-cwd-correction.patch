@@ -1,0 +1,17 @@
+--- baseline-runner/run_wholepg.py
++++ candidate-runner/run_wholepg.py
+@@ -41,12 +41,13 @@
+ with (r/(a.arm+'-environment.json')).open('x') as f: json.dump(env,f,indent=2)
+ start=time.monotonic()
+ with (r/(a.arm+'-wholepg.jsonl')).open('x') as f, (r/(a.arm+'-wholepg.stderr')).open('x') as err:
+- done=subprocess.run(cmd,cwd=a.repo,env=env,stdout=f,stderr=err)
++ done=subprocess.run(cmd,cwd=a.repo/"internal/store/postgres",env=env,stdout=f,stderr=err)
+ wall=time.monotonic()-start
+ with (r/(a.arm+'-databases-after.txt')).open('x') as f:
+  subprocess.run(pgargs+['-At','-c',"SELECT datname FROM pg_database WHERE datname NOT IN ('template0','template1','postgres') ORDER BY datname"],env=env,stdout=f,check=True)
+ result={'arm':a.arm,'command':cmd,'test_timeout_seconds':180,'process_exit':done.returncode,
+  'wall_seconds_excluding_preparation_and_compilation':wall,'memprofile_exists':(r/(a.arm+'-alloc.prof')).exists(),
++ 'working_directory':str(a.repo/'internal/store/postgres'),
+  'package_scope':'entire unfiltered tabmail/internal/store/postgres; default build tags',
+  'equivalent_test_flags':['-race (compiled)','-count=1','-timeout=180s'],
+  'profiling':'default-rate allocation profile; sampled estimates, not exact TotalAlloc'}
