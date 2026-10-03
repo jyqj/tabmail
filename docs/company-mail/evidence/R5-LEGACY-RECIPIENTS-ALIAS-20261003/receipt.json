@@ -45,8 +45,9 @@
     "tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "targeted-lint.log": "2c0d557ac0fa3bb1e5a4c4029c4b5643d5acae0196ef888fb095365c1edad364",
     "full-lint-failed.log": "53261dcec2c62762c46841b19fac88c5eaa7d1a70f69dd2d8c8b03298aae9cf9",
-    "build.log": "3b65d87555f95c7f59684c1e8245704ac5f1b89805e107c603d98a33acde9a10",
     "npm-audit.json": "93ee3b50c9f9714f26131ddf901280dfc21e93890002ce1c1bbc5f54ec316a96",
-    "inventory-check-failed.log": "f7e7d3434a5bdd7edf32f032dd6f55d7ef2e7b6c44507066f409e8777cf674c5"
-  }
+    "inventory-check-failed.log": "f7e7d3434a5bdd7edf32f032dd6f55d7ef2e7b6c44507066f409e8777cf674c5",
+    "build-output.json": "55db178828037e9cb7eadf1b44423f5ab48b1fa7ab6e3b586216a2e801307d01"
+  },
+  "build_output_note": "JSON preserves original stdout bytes including carriage-return progress; decoded hash retained."
 }
