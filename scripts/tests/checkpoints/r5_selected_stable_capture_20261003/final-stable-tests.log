@@ -1,0 +1,13 @@
+test_01_cold_capture_immediate_validate (__main__.StableCaptureTests.test_01_cold_capture_immediate_validate) ... COLD_PASS MVS=138 packages=630 local=613 generated=60 historical=21
+ok
+test_02_hot_capture_immediate_validate (__main__.StableCaptureTests.test_02_hot_capture_immediate_validate) ... HOT_PASS
+ok
+test_actual_module_change_rejected (__main__.StableCaptureTests.test_actual_module_change_rejected) ... ok
+test_actual_selected_file_change_rejected (__main__.StableCaptureTests.test_actual_selected_file_change_rejected) ... ok
+test_raw_mvs_drift_even_when_normalized_equal_rejected (__main__.StableCaptureTests.test_raw_mvs_drift_even_when_normalized_equal_rejected) ... ok
+test_resigned_raw_hash_forgery_rejected_by_live_recapture (__main__.StableCaptureTests.test_resigned_raw_hash_forgery_rejected_by_live_recapture) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 36.362s
+
+OK

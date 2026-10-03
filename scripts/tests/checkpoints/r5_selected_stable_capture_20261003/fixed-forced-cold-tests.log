@@ -1,0 +1,20 @@
+test_01_cold_capture_immediate_validate (__main__.StableCaptureTests.test_01_cold_capture_immediate_validate) ... FAIL
+test_02_hot_capture_immediate_validate (__main__.StableCaptureTests.test_02_hot_capture_immediate_validate) ... HOT_PASS
+ok
+test_actual_module_change_rejected (__main__.StableCaptureTests.test_actual_module_change_rejected) ... ok
+test_actual_selected_file_change_rejected (__main__.StableCaptureTests.test_actual_selected_file_change_rejected) ... ok
+test_raw_mvs_drift_even_when_normalized_equal_rejected (__main__.StableCaptureTests.test_raw_mvs_drift_even_when_normalized_equal_rejected) ... ok
+test_resigned_raw_hash_forgery_rejected_by_live_recapture (__main__.StableCaptureTests.test_resigned_raw_hash_forgery_rejected_by_live_recapture) ... ok
+
+======================================================================
+FAIL: test_01_cold_capture_immediate_validate (__main__.StableCaptureTests.test_01_cold_capture_immediate_validate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_stable_capture.py", line 77, in test_01_cold_capture_immediate_validate
+    self.assertEqual(len(r['selected_local']), 611)
+AssertionError: 613 != 611
+
+----------------------------------------------------------------------
+Ran 6 tests in 36.776s
+
+FAILED (failures=1)

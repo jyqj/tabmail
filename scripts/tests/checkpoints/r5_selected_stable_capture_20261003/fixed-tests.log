@@ -1,0 +1,71 @@
+test_01_cold_capture_immediate_validate (__main__.StableCaptureTests.test_01_cold_capture_immediate_validate) ... ERROR
+test_02_hot_capture_immediate_validate (__main__.StableCaptureTests.test_02_hot_capture_immediate_validate) ... ERROR
+test_actual_module_change_rejected (__main__.StableCaptureTests.test_actual_module_change_rejected) ... ok
+test_actual_selected_file_change_rejected (__main__.StableCaptureTests.test_actual_selected_file_change_rejected) ... ok
+test_raw_mvs_drift_even_when_normalized_equal_rejected (__main__.StableCaptureTests.test_raw_mvs_drift_even_when_normalized_equal_rejected) ... FAIL
+test_resigned_raw_hash_forgery_rejected_by_live_recapture (__main__.StableCaptureTests.test_resigned_raw_hash_forgery_rejected_by_live_recapture) ... ERROR
+
+======================================================================
+ERROR: test_01_cold_capture_immediate_validate (__main__.StableCaptureTests.test_01_cold_capture_immediate_validate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_stable_capture.py", line 63, in test_01_cold_capture_immediate_validate
+    self.cold = self.roundtrip()
+                ^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_stable_capture.py", line 56, in roundtrip
+    receipt = b.capture(ROOT, GO, **self.kw)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 226, in capture
+    local, generated, external, native, toolchain = classify(rows,root,authorized,envinfo,mvs)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 159, in classify
+    raise ValueError('unclassified local Go input: '+rel)
+ValueError: unclassified local Go input: web/node_modules/flatted/golang/pkg/flatted/flatted.go
+
+======================================================================
+ERROR: test_02_hot_capture_immediate_validate (__main__.StableCaptureTests.test_02_hot_capture_immediate_validate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_stable_capture.py", line 84, in test_02_hot_capture_immediate_validate
+    self.roundtrip()
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_stable_capture.py", line 56, in roundtrip
+    receipt = b.capture(ROOT, GO, **self.kw)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 226, in capture
+    local, generated, external, native, toolchain = classify(rows,root,authorized,envinfo,mvs)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 159, in classify
+    raise ValueError('unclassified local Go input: '+rel)
+ValueError: unclassified local Go input: web/node_modules/flatted/golang/pkg/flatted/flatted.go
+
+======================================================================
+ERROR: test_resigned_raw_hash_forgery_rejected_by_live_recapture (__main__.StableCaptureTests.test_resigned_raw_hash_forgery_rejected_by_live_recapture)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_stable_capture.py", line 103, in test_resigned_raw_hash_forgery_rejected_by_live_recapture
+    receipt = b.capture(ROOT, GO, **self.kw)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 226, in capture
+    local, generated, external, native, toolchain = classify(rows,root,authorized,envinfo,mvs)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/r5_selected_source_binding.py", line 159, in classify
+    raise ValueError('unclassified local Go input: '+rel)
+ValueError: unclassified local Go input: web/node_modules/flatted/golang/pkg/flatted/flatted.go
+
+======================================================================
+FAIL: test_raw_mvs_drift_even_when_normalized_equal_rejected (__main__.StableCaptureTests.test_raw_mvs_drift_even_when_normalized_equal_rejected)
+----------------------------------------------------------------------
+ValueError: unclassified local Go input: web/node_modules/flatted/golang/pkg/flatted/flatted.go
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_selected_stable_capture.py", line 98, in test_raw_mvs_drift_even_when_normalized_equal_rejected
+    with self.assertRaisesRegex(ValueError, 'metadata changed'):
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "metadata changed" does not match "unclassified local Go input: web/node_modules/flatted/golang/pkg/flatted/flatted.go"
+
+----------------------------------------------------------------------
+Ran 6 tests in 22.204s
+
+FAILED (failures=1, errors=3)

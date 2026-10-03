@@ -1,0 +1,19 @@
+Traceback (most recent call last):
+  File "/tmp/repro-selected.py", line 9, in <module>
+    r=b.capture(root,go,**kw)
+      ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/tabmail-pr20-repro/scripts/r5_selected_source_binding.py", line 221, in capture
+    rows = stream(run(ARGV))
+                  ^^^^^^^^^
+  File "/tmp/tabmail-pr20-repro/scripts/r5_selected_source_binding.py", line 210, in run
+    raise ValueError('metadata command failed (stamping unchanged): '+result.stderr.decode())
+ValueError: metadata command failed (stamping unchanged): go: downloading github.com/go-test/deep v1.1.1
+go: downloading github.com/stretchr/testify v1.11.1
+go: downloading gopkg.in/yaml.v3 v3.0.1
+go: downloading github.com/davecgh/go-spew v1.1.1
+go: downloading github.com/pmezard/go-difflib v1.0.0
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+error obtaining VCS status: exit status 128
+	Use -buildvcs=false to disable VCS stamping.
+

@@ -1,0 +1,6 @@
+PR20_FIRST_CAPTURE_PASS 138 630 611
+Traceback (most recent call last):
+  File "/tmp/repro-selected.py", line 13, in <module>
+    else: raise AssertionError('baseline unexpectedly passed')
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: baseline unexpectedly passed
