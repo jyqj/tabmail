@@ -2054,3 +2054,13 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - 两 fork replace/schema19/root ./...、36 history bytes/528旧 evidence、current v4/v2 与旧四 actual-root 语义保留；10/171 不变。无 merge/deploy/force、Method19/SML/perf/真实邮件服务资格。
 
 - 组合实际发现 Go AST route matrix 漂移；按中央 API owner 范围重新导出132路由，完整 route inventory/negative drift tests 与 strict client check PASS。新 `current-api-client-source-map.json` 逐路由绑定 handler/middleware/OpenAPI/client/test/源码closure；不替历史 wire runtime 盖章。528个基线 evidence 中526路径字节原封不动，只有获授权的两个 generated 当前清单（API-MATRIX/CLIENT-CALLS）刷新；这两份 PR21 原始 bytes 已另外原样保存本批 historical-*，36受保护历史文件完全不变。历史 R5-COMPATIBILITY-GATES/schema/registry/tars 保持，不更改旧资格。
+
+
+### 第四批最终实际增量（含两项后授权tests-only）
+
+- 实际组合SOURCE冻结 `aeed47f0e1998d9925acb680992b051463821d69`；原六fixed heads之外仅新增明确授权SMTP c083d05、router-touch989171d，保ancestry，无冲突。[draftPR23](https://github.com/jyqj/tabmail/pull/23)已创建/push，base精确batch3；原workflow真实CI已触发。
+- 本组合archiveguard/sixmodules/threearchive markers/36history、default与race v4/v2 freshcoldwarm、Go build/vet、两fork全race、touch文件三顶层race（含usage retry）PASS；静稳Web527/527、type/lint/build、Node49、DTO、严格134client/132route PASS。原Web timeout与旧PG/SMTP失败保留，窄修PASS不代wholePG性能。
+- 正确ownedvenv/Go cache后，clean版本当前631started/9F/43E/1skip/9NOTRUN；明确官方TypeScript regular-file工具prep+短TMPDIR后current640全started/10F/40E/1skip，历史4/4，644无漏无重，overall仍FAIL。40E=26schema16、10actual migration drift、/Users、旧compat routes、旧wire spec/case、transaction各1；10F含8descriptor regular replacement子例，真实预期未满足保，不洗environment；唯一fresh typedfixture skip仍NOTRUN。无runner/扫描门/白名单改动。
+- 最新root完整 ./... race/真实性gate仍FAIL：API与PG各包累计180s截止，mandatory未完成；新tests未解决统包预算。audit实际8high/0critical，omitdev6，gate保。exactsource CI production-web/browser/source evidence PASS，backend/frontend FAIL，下游步骤NOTRUN；四CI不全绿。
+- 36history byte不变；528旧evidence中仅两个owner授权generated当前清单更新，原两份字节另外historical-*保，其余526不动；schema19、两replace、root./...、旧helper/v1四actual-root/冷bug与currentv4/v2历史边界保。archive独审de4ae883 bounded结论引用，不全accepted/fullCI。详[本批完整回执](R5-INTEGRATION-BATCH4-20261003.md)与[机器状态](evidence/R5-INTEGRATION-BATCH4-20261003/receipt.json)。
+- **10/171不变，无父项关闭。** 无merge/deploy/force/Method19/SML/perf/真实邮件服务/全局安装/身份route绕行；ownedPG已停。源码freeze之后仅文档/证据交付更新，新HEAD CI资格单独读取，不复用sourcefreeze回执冒称新run PASS。
