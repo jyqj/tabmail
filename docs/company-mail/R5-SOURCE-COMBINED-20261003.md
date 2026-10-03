@@ -31,6 +31,8 @@ aeed `aeed47f0e1998d9925acb680992b051463821d69` 的 1,051 个非 docs/test 基�
 
 本地 whole PG180、full Web/type/lint/build、browser、真实邮件服务均 NOTRUN；原 backend PG180 与完整 dependency audit 门禁保持。**10/171 不变，没有关闭 R5 父项，没有 merge/deploy/force。** 后续交付 HEAD 为安全 evidence/TODO docs-only 维护，不把它的未观察 CI 写成已通过。
 
-远端 push、唯一新 draft PR 请求及其精确 HEAD CI 结果另记交付记录；PR 若实际拒绝立即停止该动作，不换身份、connector、remote 或 route，不代重试旧 PR。
+普通 origin push exit 0；`ls-remote` 精确确认请求头 `7c8eba4526568943f682deded1b26f73c2cf7079`。新组合唯一一次 `gh pr create --draft`（base=batch5）实际 exit 1：`Post "https://api.github.com/graphql": Forbidden`。PR 未创建，立即停止 PR/API 动作，没有换身份、connector、remote 或 route，没有代重试旧 PR。该分支 push 不匹配原 main-only push trigger；没有 PR，所以本任务新 CI 未观察/未启动，不借旧 head 成绩宣称 green。原 PG180/audit gate 不变。随后只提交拒绝结果和普通 Git push，最终交付 SHA 用外部终态回执精确确认。
+
+在 replay 已结束、证据 commit 已冻结后，root 新批准 `89e7af39aa53408225b284548bffe39ce467aa2d`（test source `6138113c1896cb810db567605154b5023f0340de`）完整 RC02/BC03 分支。按 root 的“若已冻结跑完/发布，先交当前 head，不扩大”指示留待下一组合，未合入本轮。其 46 shared-DB verified 只属另分支 scoped PASS；本轮没有复跑旧泄露 subject oracle 或改 caseJSON/gate。
 
 证据入口：[summary](evidence/R5-SOURCE-COMBINED-20261003/summary.json)、[preservation](evidence/R5-SOURCE-COMBINED-20261003/preservation.json)、[完整默认报告](evidence/R5-SOURCE-COMBINED-20261003/versioned-hydrated.json.gz)、[首轮拒绝](evidence/R5-SOURCE-COMBINED-20261003/versioned.json.gz)、[payload hashes](evidence/R5-SOURCE-COMBINED-20261003/payload-sha256.json)。
