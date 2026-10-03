@@ -122,6 +122,18 @@ class ArchiveBoundaryTests(unittest.TestCase):
             return value
         with mock.patch.object(boundary.os,'stat',side_effect=replace),self.assertRaises(ValueError):boundary.topology(self.root)
 
+    def test_read_leaf_replacement_never_opens_fifo_body(self):
+        target=self.root/'cmd/main.go';actual=os.open;swapped=False
+        def swap(path,flags,*args,**kwargs):
+            nonlocal swapped
+            if str(path)=='main.go':self.assertTrue(flags & os.O_PATH)
+            fd=actual(path,flags,*args,**kwargs)
+            if str(path)=='main.go' and flags & os.O_PATH and not swapped:
+                swapped=True;target.unlink();os.mkfifo(target)
+            return fd
+        with mock.patch.object(boundary.os,'open',side_effect=swap),self.assertRaises(ValueError):boundary.read(self.root,'cmd/main.go')
+        self.assertTrue(swapped)
+
     def test_budget_and_unavailable_metadata_fail_closed(self):
         with mock.patch.object(boundary,'MAX_ENTRIES',1),self.assertRaisesRegex(ValueError,'budget'):boundary.check(self.root)
         with mock.patch.object(boundary,'MAX_DEPTH',1),self.assertRaisesRegex(ValueError,'budget'):boundary.check(self.root)

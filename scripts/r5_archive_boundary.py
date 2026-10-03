@@ -62,7 +62,9 @@ def read(root, name):
                 raise ValueError('nonregular or changed boundary file')
             if expected.st_size > MAX_BYTES:
                 raise ValueError('boundary byte budget exceeded')
-            body = os.open(leaf, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
+            # Reopen the already identity-bound regular object, never the
+            # mutable leaf name: a leaf swapped to a device/FIFO cannot gain I/O.
+            body = os.open('/proc/self/fd/'+str(handle), os.O_RDONLY | os.O_NONBLOCK)
             try:
                 if identity(os.fstat(body)) != identity(expected):
                     raise ValueError('boundary read identity mismatch')
@@ -145,11 +147,11 @@ def topology(root):
 
 def registry(root):
     raw = read(root, REGISTRY)
-    document = inventory.strict_json(raw)
     # This exact version is authorized by baseline Git blobs, never by mutable
     # selected metadata or a registry that can redefine its own authority.
     if hashlib.sha256(raw).hexdigest() != REGISTRY_SHA256:
         raise ValueError('registry version/bytes differ')
+    document = inventory.strict_json(raw)
     if set(document) != {'schema_version','policy','baseline_commit','modules','historical_files','protected_go_files','production_roots','allowed_new_control_files'} or document['baseline_commit'] != BASELINE:
         raise ValueError('registry schema differs')
     return document
