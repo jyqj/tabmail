@@ -34,3 +34,5 @@
 - `gofmt`、`git diff --check` 通过；以上运行 stderr 均为空。[运行摘要和 SHA256](r5-key-touch-two-router-evidence/summary.json)及[验证时测试源码](r5-key-touch-two-router-evidence/validated-test.go.txt)可复查。
 
 专项 TODO：已完成因果观测、最小测试修复及 race 验证。全量 `./...` 聚合 gate 本任务未跑；原 archive 的聚合失败证据未改，不宣称中央 CI 已通过。中央 TODO/CI 由整合 owner01a10366 负责。未 merge/deploy。
+
+交付：实现 commit `30a0fd7380a11b8f4d6a9fdbd5bd6f3757cb0593` 已推送 `fix/r5-router-touch-oracle`。针对固定 source 所在 `feat/r5-archive-boundary-v1` 创建 draft PR 的 `gh pr create` 请求返回 `Post "https://api.github.com/graphql": Forbidden`；该动作停止，未绕路、重试或进行 auth 探测。draft PR 尚未创建，需要恢复 GitHub PR 写权限后完成。
