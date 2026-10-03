@@ -2032,3 +2032,14 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - **10/171保持，未新增勾选。** 无真实PG/Redis/邮箱/外SMTP、watchdog runtime、merge/forcepush/deploy。本批完成即停；新分支commit/push/draftPR实际结果另附到同目录交付日志，不替旧拒分支换route/身份重试。详[本批执行回执](evidence/R5-INTEGRATION-BATCH2-20261003/receipt.json)。
 
 - 本批远端实际结果补记：新分支首次 push **成功**，`cb2d32ef73b2dff6e7fe00c0ad30db4fe38affa6` 已经 `ls-remote` 同值确认。`gh pr create --draft --base integration/company-mail-r5-20261003` 唯一次返回 `Post https://api.github.com/graphql: Forbidden` / exit1，**draft PR 未创建**，遵授权立即停止该动作，无route/身份切换、旧拒分支重试。完整reviewable PR body留本批 evidence/draft-pr-body.md；这里只对成功Git push追加docs-only交付状态，不借Git路线重试PR。四CI真实run不可读／未验，现有main-only触发配置不覆盖本stack分支/base，不改workflow／不称绿。10/171仍保。
+
+
+## 第三批 selected-attestation / descriptor 最小整合 — 2026-10-03
+
+- 固定二批 base `b4803fe6722ba05b83799459e88d4a014f546da2`，新分支 `integration/company-mail-r5-batch3-20261003` stack 于二批；源码冻结 `c808fbe1699804d2f7f2c4de08f31975950e3f36` / tree `2ed953a6d9e51c892e45b7fad311ca45a47dcd9d`。仅逐项整合 selected head529f547 与 descriptor headcb523295，三方合并保两个函数族，没有整文件覆盖或历史 docs snapshot 重写。980 个前端/API/SMTP/fork/锁/workflow等输入与二批字节相同，保三方 rebase/ordinary 契约。
+- 原30c25c独立 metadata oracle 字节核对后本组合 9/9 PASS；descriptor 12方法及96子例 PASS；source inventory38/v3 negatives5/旧excluded限定4 PASS。chmod(0)旧positive禁止未跑/未改，不报旧全套绿。原checkout selected8 negative PASS但actual-root setup ERROR（node_modules/flatted Go输入unclassified）实际日志保；同一冻结提交 standalone checkout selected12/12、fresh capture+recapturevalidate PASS。
+- 父方案A保完整Go选择范围与实际21个静态 evidenceGo，不挪走/忽略；实际630 package records / 613 local selected（新增二批API/SMTP两测试）/138 MVS /60 generatedtestmain，非硬写611。原Go1.25.7/真实GODEBUG=asynctimerchan=0/mod/sum/两replace/flags/roots和选中body/script/hash前后稳定。O_PATH|O_NOFOLLOW仅元数据类型/deviceinode、不读artifact，平台unsupported fail；有限观察点不声明原子敌对FS。上游新独立不兼容v1保守blocked标签原封保留，本轮实际descriptor acceptance单独记录；v2/v3历史只原资格。
+- 普通/inspection/alias purecontract 首轮63PASS/1合法SKIP日志保；原typed exporter21 synthetic wire后完整复跑64/64 PASS，不代HTTP/PG。UI二批全套不重跑，原结果只继承分层。Generated/externalcache/native/toolchain/compiler各unknown，不授Method19/Catalog/SML/百万M/wholePG/四CI/shipping/runtime，旧失败/skip不洗。
+- **10/171保持，父任务不关闭。** 无真实邮件/PG/Redis/外SMTP/被拒watchdog、秘密/权限变更、merge/forcepush/deploy。当前source清单与语义详 [current SOURCE qualification](R5-CURRENT-SOURCE-QUALIFICATION.md)，本轮真实证据详 [receipt](evidence/R5-INTEGRATION-BATCH3-20261003/receipt.json)。新分支push/连接GitHub PR API与固定headCI结果分别追加；拒绝即停对应动作，不换身份remote路线。
+
+- 本轮远端实际交付：首次普通 Git push 成功，`504b59731adb219c41ed685cd2029759f3c116d1` 已 ls-remote 同值确认；已连接 GitHub `create_pull_request` 首次成功创建 [draft PR #19](https://github.com/jyqj/tabmail/pull/19)，精确 base 二批 `b4803fe`。该固定 head CI 实际可读，0 workflow runs / 0 statuses / 0 check runs，原 main-only workflow 未改，不称四CI绿。交付head fresh验证与冻结SOURCE attestation匹配；随后仅docs-only交付状态commit/push。无拒绝动作重试、身份/remote/路线替换、merge/forcepush/deploy，10/171保持，本批完成即停。
