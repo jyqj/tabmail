@@ -18,6 +18,7 @@ import { executeOffboarding } from "@/features/company/api";
 import { company, type MailDraft, type WorkMailbox } from "@/lib/company";
 import { listUsers, getUserPermission, updateUser, updatePermissionProfile, listPermissionProfiles, setUserPermissionOverride, deleteUserPermissionOverride } from "@/lib/api";
 import { validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
+import { parseReceiptListResponse, parseReceiptResponse, type OrdinaryReceipt, type ReceiptCounts } from "@/lib/receipt-types";
 import { installSession } from "@/lib/session";
 import type { AuthUser } from "@/lib/types";
 
@@ -31,13 +32,14 @@ interface Fixture {
   employee_id: string; employee_email: string; successor_id: string; foreign_user_id?: string;
   zone_id: string; profile_id?: string; profile_name?: string; control_plan_id?: string;
   external_employee_token?: string; draft?: MailDraft; mailboxes?: WorkMailbox[];
+  receipt_state?: OrdinaryReceipt["state"]; receipt_counts?: ReceiptCounts;
   submission_id?: string; receipt_subject?: string; private_values?: string[]; private_addresses?: string[]; input: Record<string, unknown>;
 }
 const path = process.env.TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE;
 if (!path) throw new Error("Explicit Go-owned protocol component fixture is required; no skip or response fallback");
 const fixture = JSON.parse(readFileSync(path, "utf8")) as Fixture;
 const raw = readFileSync(resolve(process.cwd(), "../docs/company-mail/evidence/R5-PROTOCOL-CASES.json"));
-const cases = (JSON.parse(raw.toString()) as { cases: { id: string; input: unknown; expected?: { projection?: { label_en: string; retry: boolean; delivery_uncertain: boolean } } }[] }).cases;
+const cases = (JSON.parse(raw.toString()) as { cases: { id: string; input: unknown; expected?: { projection?: { status: OrdinaryReceipt["status"]; label_en: string; retry: boolean; delivery_uncertain: boolean; retry_block_reason: string | null } } }[] }).cases;
 const shared = cases.find(c => c.id === fixture.case_id);
 const origin = new URL(fixture.api_url);
 if (fixture.schema_version !== 1 || !shared || fixture.case_sha256 !== createHash("sha256").update(raw).digest("hex") || JSON.stringify(shared.input) !== JSON.stringify(fixture.input) || origin.protocol !== "http:" || origin.hostname !== "127.0.0.1") {
@@ -62,6 +64,59 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); delete process.env.NEXT_PUBLIC_API_URL; });
 function target(marker: string, detail: string): never { throw new Error(`${marker}: ${detail}`); }
+// Inspect the captured REAL response, including fields the UI parser could reject.
+// Boolean assertions avoid publishing response bodies or private canaries on failure.
+function assertNoReceiptSecrets(data: unknown) {
+  const recipients = fixture.input.recipients as { address: string }[] | undefined;
+  const secrets = [...(fixture.private_values ?? []), ...(fixture.private_addresses ?? []),
+    ...(recipients ?? []).map(r => r.address), fixture.receipt_subject,
+    ...["subject", "text_body", "smtp_response", "delivery_token"].map(key => fixture.input[key])]
+    .filter((value): value is string => typeof value === "string" && value.length > 0);
+  const encoded = JSON.stringify(data) ?? "";
+  if (secrets.some(value => encoded.includes(value))) {
+    target(fixture.case_id === "RC02" ? "R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS" :
+      fixture.case_id === "RC03" ? "R5_PROTOCOL_UI_TARGET_RC03_BCC" : "R5_PROTOCOL_UI_TARGET_RC01_BCC",
+    "actual receipt response contains private content or recipient data");
+  }
+}
+function expectedCounts(): ReceiptCounts {
+  if (fixture.receipt_counts) return fixture.receipt_counts;
+  const recipients = fixture.input.recipients as { state: string }[] | undefined;
+  if (!recipients?.length) throw new Error("Receipt seed ledger oracle missing");
+  const counts: ReceiptCounts = { total: recipients.length, accepted: 0, pending: 0, temporary: 0, permanent: 0, uncertain: 0 };
+  for (const recipient of recipients) {
+    if (!["accepted", "pending", "temporary", "permanent", "uncertain"].includes(recipient.state)) throw new Error("Invalid receipt seed state");
+    counts[recipient.state as Exclude<keyof ReceiptCounts, "total">]++;
+  }
+  return counts;
+}
+function assertReceipt(data: unknown, id: string): OrdinaryReceipt {
+  assertNoReceiptSecrets(data);
+  const receipt = parseReceiptResponse(data, { id, tenantId: fixture.auth.user.tenant_id });
+  // The seeded real job is NOT a degraded, scope-less committed fallback.
+  expect(receipt.tenant_id === fixture.auth.user.tenant_id).toBe(true);
+  expect(Boolean(receipt.created_at && receipt.updated_at && receipt.attempt_count === 0)).toBe(true);
+  expect(receipt.state === (fixture.receipt_state ?? fixture.input.job_state)).toBe(true);
+  expect(receipt.progress.completeness === "known" &&
+    JSON.stringify(receipt.progress.counts) === JSON.stringify(expectedCounts())).toBe(true);
+  const projection = shared!.expected?.projection;
+  expect(receipt.status === (projection?.status ?? (receipt.state === "pending" ? "submitted" : "needs_attention"))).toBe(true);
+  expect(receipt.delivery_uncertain === (projection?.delivery_uncertain ?? false)).toBe(true);
+  expect(JSON.stringify(receipt.capabilities) === JSON.stringify({ view_content: false,
+    retry: projection?.retry ?? false, retry_block_reason: projection ? (projection.retry_block_reason ?? "") : "state_not_retryable" })).toBe(true);
+  return receipt;
+}
+function assertRenderedReceipt(container: HTMLElement, receipt: OrdinaryReceipt) {
+  expect(container.textContent?.includes(receipt.id)).toBe(true);
+  const aggregate = within(container).getByTestId("ordinary-receipt-aggregate");
+  if (receipt.progress.completeness !== "known") throw new Error("Expected complete receipt ledger");
+  for (const [key, count] of Object.entries(receipt.progress.counts)) {
+    expect(within(aggregate).getByTestId(`receipt-count-${key}`).querySelector("dd")?.textContent === String(count)).toBe(true);
+  }
+  expect(within(container).queryByTestId("receipt-content-disclosure")).not.toBeInTheDocument();
+  expect(calls.some(c => /\/(content|attachments)(\/|$)/.test(c.path))).toBe(false);
+  assertNoReceiptSecrets(container.textContent);
+}
 async function rowDialog(text: string, action: string) {
   const cell = await screen.findByText(text); const row = cell.closest("tr");
   const button = row?.querySelector<HTMLButtonElement>('[data-slot="dropdown-menu-trigger"]');
@@ -93,6 +148,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
   const id = fixture.case_id;
   if (id === "RC02") {
     if (fixture.input.content_expired !== true) throw new Error("Original compatibility expiry scenario missing");
+    let receiptId = fixture.submission_id;
     if (fixture.variant === "submit_replay") {
       if (!fixture.draft || !fixture.mailboxes) throw new Error("Actual replay draft missing");
       render(<Compose initial={fixture.draft} mailboxes={fixture.mailboxes} onClose={() => {}} onSent={() => {}} />);
@@ -101,39 +157,48 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
       await userEvent.click(screen.getByRole("button", { name: "Retry same submission" }));
       await waitFor(() => expect(calls.some(c => c.method === "POST" && c.path.endsWith("/submit") && c.status === 200)).toBe(true));
       const replay = calls.find(c => c.method === "POST" && c.path.endsWith("/submit") && c.status === 200)!;
-      if (fixture.private_values?.some(value => JSON.stringify(replay.data).includes(value))) target("R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS", "actual replay response resurrected expired private content");
+      const replayReceipt = parseReceiptResponse(replay.data, { tenantId: fixture.auth.user.tenant_id });
+      receiptId = replayReceipt.id;
+      assertReceipt(replay.data, receiptId);
       cleanup(); render(<LegacyReceiptFolder />);
     } else {
       render(<ReceiptFolder page={1} selected="" onSelect={() => {}} onPage={() => {}} includeCompatibility />);
       await userEvent.click(screen.getByRole("button", { name: "Compatibility receipts" }));
       expect(screen.getByRole("button", { name: "Compatibility receipts" })).toHaveAttribute("aria-pressed", "true");
     }
-    await screen.findAllByText(fixture.receipt_subject!);
+    await screen.findAllByRole("button", { name: "View compatibility receipt" });
+    const listCall = calls.find(c => c.method === "GET" && c.path === "/api/v1/outbound" && c.status === 200);
+    if (!listCall) throw new Error("Real compatibility list response missing");
+    assertNoReceiptSecrets(listCall.data);
+    const list = parseReceiptListResponse(listCall.data, { tenantId: fixture.auth.user.tenant_id });
+    if (!receiptId) throw new Error("Seeded or replay receipt identity missing");
+    expect(list.data.length === 1 && list.data[0].id === receiptId).toBe(true);
+    assertReceipt({ data: list.data[0] }, receiptId);
     await userEvent.click(screen.getAllByRole("button", { name: "View compatibility receipt" })[0]);
     const detail = await screen.findByRole("region", { name: "Compatibility receipt detail" }).catch(async () => screen.findByLabelText("Compatibility receipt detail"));
-    expect(within(detail).queryByRole("button", { name: /Open preserved sent content/ })).not.toBeInTheDocument();
-    await screen.findByText("Content unavailable; the safe receipt is retained.");
-    const actual = calls.filter(c => c.path === "/api/v1/outbound" || /^\/api\/v1\/outbound\/[^/]+$/.test(c.path));
-    expect(actual.some(c => c.path === "/api/v1/outbound" && c.status === 200)).toBe(true);
-    expect(actual.some(c => c.path !== "/api/v1/outbound" && c.status === 200)).toBe(true);
-    if (actual.some(c => fixture.private_values?.some(value => JSON.stringify(c.data).includes(value)))) target("R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS", "actual legacy HTTP output contains expired body or private recipients even if the UI omits them");
-    expect(screen.queryByText("PRIVATE_COMPATIBILITY_BODY")).not.toBeInTheDocument();
+    await within(detail).findByTestId("ordinary-receipt-aggregate");
+    const detailCall = calls.find(c => c.method === "GET" && c.path === `/api/v1/outbound/${receiptId}` && c.status === 200);
+    if (!detailCall) throw new Error("Real compatibility detail response missing");
+    const receipt = assertReceipt(detailCall.data, receiptId);
+    assertRenderedReceipt(detail, receipt);
+    assertNoReceiptSecrets(screen.getByRole("region", { name: "Compatibility task receipts" }).textContent);
+    expect(within(detail).getByText(receipt.status === "submitted" ? "Submitted" : "Needs attention")).toBeInTheDocument();
     return;
   }
   if (id.startsWith("RC")) {
     if (!(fixture.input.content_expired === true || fixture.input.content_allowed === false) || !fixture.submission_id) throw new Error("Expired/redacted receipt scenario missing");
     render(<SubmissionPane id={fixture.submission_id} />);
-    await screen.findByText(/Attachments:/);
-    expect(screen.queryByRole("button", { name: /content/i })).not.toBeInTheDocument();
+    const aggregate = await screen.findByTestId("ordinary-receipt-aggregate");
+    const real = calls.find(c => c.method === "GET" && c.path === `/api/v1/company/submissions/${fixture.submission_id}` && c.status === 200);
+    if (!real) throw new Error("Real company submission response missing");
+    const receipt = assertReceipt(real.data, fixture.submission_id);
+    const pane = screen.getByTestId("ordinary-submission-pane");
+    assertRenderedReceipt(pane, receipt);
     const projection = shared!.expected?.projection;
-    if (projection) {
-      await screen.findByText(projection.label_en);
-      if (!projection.retry) expect(screen.queryByRole("button", { name: /Retry unfinished recipients/ })).not.toBeInTheDocument();
-      if (projection.delivery_uncertain) await screen.findByText(/Uncertain outcome: retry is blocked/);
-    }
-    if (fixture.private_addresses?.some(address => screen.queryAllByText(new RegExp(address.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))).length)) {
-      target(id === "RC03" ? "R5_PROTOCOL_UI_TARGET_RC03_BCC" : "R5_PROTOCOL_UI_TARGET_RC01_BCC", "actual HTTP receipt rendered a private BCC address");
-    }
+    expect(within(aggregate).getByText(projection?.label_en ?? "Needs attention")).toBeInTheDocument();
+    expect(Boolean(within(pane).queryByTestId("receipt-retry"))).toBe(receipt.capabilities!.retry);
+    expect(Boolean(within(pane).queryByRole("status"))).toBe(receipt.delivery_uncertain);
+    if (receipt.delivery_uncertain) expect(within(pane).getByRole("status")).toHaveTextContent("Retry is blocked; refresh the status.");
     return;
   }
   if (id.startsWith("LF")) {

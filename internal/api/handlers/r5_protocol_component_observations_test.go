@@ -214,11 +214,14 @@ func r5UISetup(t *testing.T, f *r5UIFixture, c r5UICase, variant, caseHash strin
 	case c.ID == "RC02":
 		payload := company.DraftPayload{To: []string{"visible@replay.test"}, CC: []string{"copy@replay.test"}, BCC: []string{"private@replay.test"}, Subject: "Owned legacy compatibility receipt", TextBody: "PRIVATE_COMPATIBILITY_BODY"}
 		data["private_addresses"] = payload.BCC
-		data["private_values"] = []string{payload.BCC[0], payload.TextBody}
+		data["private_values"] = append(append(append([]string{payload.Subject, payload.TextBody}, payload.To...), payload.CC...), payload.BCC...)
+		data["receipt_counts"] = company.OutboundReceiptCounts{Total: 3, Pending: 3}
+		data["receipt_state"] = models.OutboundSent
 		data["receipt_subject"] = payload.Subject
 		employeeToken := r5UIToken(t, f.employee)
 		data["auth"] = map[string]any{"token": employeeToken, "user": f.employee}
 		if variant == "submit_replay" {
+			data["receipt_state"] = models.OutboundPending
 			draft, e := f.st.SaveMailDraft(ctx, f.member, company.Draft{MailboxID: f.personal.ID, Payload: payload})
 			r5UIMust(t, e)
 			raw := r5UICall(t, f, employeeToken, "GET", "/api/v1/company/drafts/"+draft.ID.String(), nil, 200)
@@ -272,6 +275,9 @@ func r5UISetup(t *testing.T, f *r5UIFixture, c r5UICase, variant, caseHash strin
 		r5UIMust(t, e)
 		data["submission_id"] = j.ID
 		data["private_addresses"] = j.BCC
+		data["private_values"] = append(append([]string{j.Subject, j.TextBody}, j.To...), j.BCC...)
+		data["receipt_counts"] = company.OutboundReceiptCounts{Total: 2, Pending: 2}
+		data["receipt_state"] = j.State
 		data["auth"] = map[string]any{"token": r5UIToken(t, f.employee), "user": f.employee}
 	case strings.HasPrefix(c.ID, "RC"):
 		recipients := r5UIInput[[]struct{ Category, Address, State string }](t, c, "recipients")
