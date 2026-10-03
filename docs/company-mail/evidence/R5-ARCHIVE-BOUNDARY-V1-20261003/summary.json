@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "implementation_commit": "2f0ba47e200c2f6364db3f32adff0f1f53988b20",
+  "baseline_commit": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+  "design_commit": "05b4bb886164d0d85353a542fbb2881f104089b4",
+  "prior_evidence_files_unchanged": 528,
+  "historical_files": 36,
+  "protected_go_files": 21,
+  "new_archive_markers": 3,
+  "total_modules": 6,
+  "original_selected_helper_and_root_mod_sum_unchanged": true,
+  "production_bytes_identical_to_race_source": true,
+  "tests": {
+    "discovered": 644,
+    "current_requested": 640,
+    "current_started": 624,
+    "frozen_v1_started": 4,
+    "new_test_ids": [
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_extra_controls_and_files",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_family_extra_capsule_and_ancestor_symlink",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_budget_and_unavailable_metadata_fail_closed",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_descriptor_second_stat_replacement",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_every_historical_file_byte_delete_rename",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_exact_baseline_hashes_and_six_modules",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_import_embed_generate_archive_rejected",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_bytes_value_case_directives",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_deletion_and_module_in_all_roots",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_production_all_variants_change_static_domain",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_read_leaf_replacement_never_opens_fifo_body",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_registry_duplicate_traversal_forgery",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_symlink_ancestors_fifo_and_metadata_only",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_third_replace",
+      "test_r5_archive_boundary.ArchiveBoundaryTests.test_unknown_root_and_ignored_go_not_hidden",
+      "test_r5_ci_wiring.R5CIWiringTests.test_archive_guard_order_and_version_dispatch",
+      "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_actual_default_and_race_production_fork_coverage",
+      "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_capture_marker_registry_archive_source_drift",
+      "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_dirty_ignored_go_actual_selected_and_rejected",
+      "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_hydration_failure_retains_execution_and_raw_diagnostics",
+      "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_live_capture_control_and_archive_mutations",
+      "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip",
+      "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_unimported_package_and_undefined_build",
+      "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_coverage_omission_fork_mismatch_unknown_root",
+      "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_cross_identity_rejected_before_commands",
+      "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_metadata_never_authorizes_private_archive_or_unknown_body",
+      "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_selected_archive_package_rejected",
+      "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_unsupported_context",
+      "test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green",
+      "test_r5_source_version_runner.SourceVersionRunnerTests.test_exact_partition",
+      "test_r5_source_version_runner.SourceVersionRunnerTests.test_missing_overlap_duplicate_wrong_baseline",
+      "test_r5_source_version_runner.SourceVersionRunnerTests.test_no_fresh_actual_root_class"
+    ],
+    "failures": 2,
+    "errors": 64,
+    "skips": 1,
+    "missing": 16,
+    "expected_failures": [],
+    "dispatch_no_missing": true,
+    "dispatch_no_overlap": true,
+    "execution_no_missing": false,
+    "execution_no_overlap": true,
+    "baseline_failure_sets_unchanged": {
+      "failures": true,
+      "errors": true,
+      "skips": true,
+      "missing_test_ids": true
+    }
+  },
+  "frozen_v1_warm_cache_only": true,
+  "original_v1_first_cold_roundtrip_unfixed": true,
+  "stable_successor_integrated": false,
+  "expected_failure_negative": {
+    "source_sha": "2f0ba47e200c2f6364db3f32adff0f1f53988b20",
+    "loaded_test_ids": [
+      "__main__.ExpectedFailureNegativeFixture.test_deliberate_failure"
+    ],
+    "actual_test_ids": [
+      "__main__.ExpectedFailureNegativeFixture.test_deliberate_failure"
+    ],
+    "missing_test_ids": [],
+    "tests_run": 1,
+    "failures": [],
+    "errors": [],
+    "execution_paths": {
+      "go": "/workspace/tabmail-cloud/tools/go/bin/go",
+      "cache": "/workspace/tabmail-cloud/gocache",
+      "modulecache": "/workspace/tabmail-cloud/gomod"
+    },
+    "skips": [],
+    "expected_failures": [
+      "__main__.ExpectedFailureNegativeFixture.test_deliberate_failure"
+    ],
+    "unexpected_successes": []
+  },
+  "cold_roundtrips": {
+    "results": [
+      {
+        "context": "default",
+        "stable_identity": "9670436ea0cc4b35514fd5c8ec79c71cbd381c8471012480ec0cba1cb822b398",
+        "roundtrip": true,
+        "elapsed_seconds": 21.42705488204956,
+        "hydration_stderr_bytes": 3041,
+        "selected_packages": 602,
+        "local_files": 589,
+        "variants": 64
+      },
+      {
+        "context": "race-r5protocol",
+        "stable_identity": "f53001b73930085393669f592af3252f243c7d1996aaf67e2a8a49939f34ee58",
+        "roundtrip": true,
+        "elapsed_seconds": 13.792466640472412,
+        "hydration_stderr_bytes": 0,
+        "selected_packages": 604,
+        "local_files": 592,
+        "variants": 64
+      }
+    ],
+    "source_commit": "2f0ba47e200c2f6364db3f32adff0f1f53988b20"
+  },
+  "build_vet": {
+    "source_sha": "2f0ba47e200c2f6364db3f32adff0f1f53988b20",
+    "git_status_before": "",
+    "commands": [
+      {
+        "argv": [
+          "/workspace/tabmail-cloud/tools/go/bin/go",
+          "build",
+          "-mod=readonly",
+          "./..."
+        ],
+        "environment": {
+          "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+          "GOCACHE": "/workspace/tabmail-cloud/gocache",
+          "GOFLAGS": "",
+          "GOWORK": "off",
+          "GOENV": "off",
+          "GOTOOLCHAIN": "local",
+          "GODEBUG": "asynctimerchan=0"
+        },
+        "exit": 0,
+        "log": "/tmp/r5-build-release.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "argv": [
+          "/workspace/tabmail-cloud/tools/go/bin/go",
+          "vet",
+          "./..."
+        ],
+        "environment": {
+          "GOMODCACHE": "/workspace/tabmail-cloud/gomod",
+          "GOCACHE": "/workspace/tabmail-cloud/gocache",
+          "GOFLAGS": "",
+          "GOWORK": "off",
+          "GOENV": "off",
+          "GOTOOLCHAIN": "local",
+          "GODEBUG": "asynctimerchan=0"
+        },
+        "exit": 0,
+        "log": "/tmp/r5-vet-release.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ]
+  },
+  "runtime": {
+    "source_commit": "0c1f4f6f4cda1d39952df1fe9eeda87d74f56eb9",
+    "root_race_exit": 1,
+    "backend_gate_exit": 1,
+    "fork_race_exit": 1,
+    "postgres_cluster": "owned disposable /tmp/r5-archive-pg; loopback 55439; stopped",
+    "root_race_failed_tests": [
+      "TestR5RouteInventory",
+      "TestR5KeyUsageAuthorityAdmissionIsolation/usage_held_allows_retry"
+    ],
+    "postgres_timeout_seconds": 180,
+    "smtp_failure": "panic: close of closed channel in TestOwnerBDATPanicTailIncludedInShutdown",
+    "shipping": false,
+    "Method19": "unknown",
+    "SML": "unknown",
+    "tagged_protocol_runtime": "unknown"
+  },
+  "npm_dirty": {
+    "source_commit": "f76c2893fb9eb93d31fc1f432c613e3070a99ad8",
+    "node": "v24.19.0 (CI uses Node22; this is a boundary rehearsal)",
+    "npm": "11.9.0",
+    "npm_ci_exit": 0,
+    "flatted_actually_selected": true,
+    "guard_exit": 1,
+    "guard_reason": "symlink/special boundary entry: web/node_modules/.bin/acorn",
+    "third_party_files_deleted": false,
+    "version_runner_report": "version-npm-dirty.json"
+  },
+  "blockers": [
+    "Pinned pip install failed: /home/agent/.local/lib read-only; no alternative identity/path used",
+    "GitHub GraphQL PR query returned Forbidden; no alternate API credential/path used; draft creation blocked",
+    "cloud_threads.send_message not exposed in selected tool catalog"
+  ]
+}
