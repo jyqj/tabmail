@@ -1,4 +1,4 @@
-"""Incompatible companion attestation v2; historical v2/v3 identities stay unqualified.
+"""Incompatible companion attestation v1 stable-capture revision 2; historical v2/v3 identities stay unqualified.
 
 Only live, fixed root metadata commands authorize selection. No import API accepts
 metadata as a file-read capability. External/generated/native bytes remain unknown.
@@ -14,7 +14,7 @@ import subprocess
 import r5_source_inventory as inventory
 
 _IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-POLICY = 'r5_root_selected_local_attestation_v2'
+POLICY = 'r5_root_selected_local_attestation_v1_stable_capture_rev2'
 ARGV = ['list', '-mod=readonly', '-deps', '-test', '-race', '-tags=r5protocol',
         '-json', './...', 'github.com/jhillyerd/enmime/v2/...', 'github.com/emersion/go-smtp/...']
 MVS_ARGV = ['list', '-mod=readonly', '-m', '-json', 'all']
