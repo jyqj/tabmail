@@ -1,0 +1,6 @@
+{
+  "source_sha": "054492fd2ea8cc24699161a0ad91c17547c4ecb3",
+  "exit": 1,
+  "expected_exit": 1,
+  "missing_environment_fails": true
+}

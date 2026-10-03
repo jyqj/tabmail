@@ -1,0 +1,101 @@
+test_midflight_path_replacement_cannot_change_executed_inode_and_is_rejected (scripts.tests.test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_midflight_path_replacement_cannot_change_executed_inode_and_is_rejected) ... ok
+test_old_fixture_refused_before_execution (scripts.tests.test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_old_fixture_refused_before_execution) ... ok
+test_receipt_validation_rejects_replaced_executed_binary (scripts.tests.test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_receipt_validation_rejects_replaced_executed_binary) ... ok
+test_replaced_binary_refused_before_execution (scripts.tests.test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_replaced_binary_refused_before_execution) ... ok
+test_wrong_source_refused_before_execution (scripts.tests.test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_wrong_source_refused_before_execution) ... ok
+test_authenticated_archive_still_checks_member_and_dependency_boundary (scripts.tests.test_r5_source_version_runner.PreparationBoundaryTests.test_authenticated_archive_still_checks_member_and_dependency_boundary) ... ok
+test_extra_tampered_link_and_native_prepared_files_rejected (scripts.tests.test_r5_source_version_runner.PreparationBoundaryTests.test_extra_tampered_link_and_native_prepared_files_rejected) ... ok
+test_stale_source_fixture_and_receipt_tamper_rejected (scripts.tests.test_r5_source_version_runner.PreparationBoundaryTests.test_stale_source_fixture_and_receipt_tamper_rejected) ... ok
+test_unknown_lock_and_existing_dependency_tree_refused_before_write (scripts.tests.test_r5_source_version_runner.PreparationBoundaryTests.test_unknown_lock_and_existing_dependency_tree_refused_before_write) ... ok
+test_wrong_archive_hash_refused_before_any_mkdir (scripts.tests.test_r5_source_version_runner.PreparationBoundaryTests.test_wrong_archive_hash_refused_before_any_mkdir) ... ok
+test_child_failure_and_skip_not_green (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green) ... test_fail (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail) ... FAIL
+
+======================================================================
+FAIL: test_fail (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_source_version_runner.py", line 40, in test_fail
+    def test_fail(self):self.fail('intentional runner negative')
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: intentional runner negative
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+FAILED (failures=1)
+test_skip (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Skip.test_skip) ... skipped 'intentional runner negative'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (skipped=1)
+test_expected (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Expected.test_expected) ... expected failure
+
+----------------------------------------------------------------------
+Ran 1 test in 0.000s
+
+OK (expected failures=1)
+ok
+test_exact_partition (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_exact_partition) ... ok
+test_missing_overlap_duplicate_wrong_baseline (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_missing_overlap_duplicate_wrong_baseline) ... ok
+test_no_fresh_actual_root_class (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_no_fresh_actual_root_class) ... ok
+test_preparation_failure_reports_all_ids_missing_and_dispatches_none (scripts.tests.test_r5_source_version_runner.SourceVersionRunnerTests.test_preparation_failure_reports_all_ids_missing_and_dispatches_none) ... ok
+test_atomic_final_receipt_actual_alarm_never_leaves_machine_pass (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_final_receipt_actual_alarm_never_leaves_machine_pass) ... ok
+test_atomic_hard_expiry_interrupts_raw_read_without_unbounded_failure_io (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_hard_expiry_interrupts_raw_read_without_unbounded_failure_io) ... ok
+test_atomic_observe_expiry_propagates_and_failure_io_stays_hard_bounded (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_observe_expiry_propagates_and_failure_io_stays_hard_bounded) ... ok
+test_atomic_parser_is_under_alarm_before_constructor_path_work (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_parser_is_under_alarm_before_constructor_path_work) ... ok
+test_atomic_post_publication_baseexceptions_revoke_without_machine_pass (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_post_publication_baseexceptions_revoke_without_machine_pass) ... {"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-2b4wpm3o/atomic-baseexception-0"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-2b4wpm3o/atomic-baseexception-1"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-2b4wpm3o/atomic-baseexception-2"}
+ok
+test_atomic_post_publication_failure_revokes_machine_pass (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_post_publication_failure_revokes_machine_pass) ... {"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-6xruhdcd/atomic-revoke"}
+ok
+test_atomic_success_publishes_once_only_after_complete_receipts (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_success_publishes_once_only_after_complete_receipts) ... ok
+test_atomic_timeout_abbreviation_is_rejected_before_capture (scripts.tests.test_r5_cold_web.ColdWebTests.test_atomic_timeout_abbreviation_is_rejected_before_capture) ... ok
+test_cli_absolute_deadline_interrupts_slow_capture_without_node (scripts.tests.test_r5_cold_web.ColdWebTests.test_cli_absolute_deadline_interrupts_slow_capture_without_node) ... ok
+test_deadline_between_cleanup_probes_persists_unknown_not_absence (scripts.tests.test_r5_cold_web.ColdWebTests.test_deadline_between_cleanup_probes_persists_unknown_not_absence) ... ok
+test_dirty_capture_drift_refused (scripts.tests.test_r5_cold_web.ColdWebTests.test_dirty_capture_drift_refused) ... ok
+test_dirty_lockfile_and_bypassed_build_script_refused (scripts.tests.test_r5_cold_web.ColdWebTests.test_dirty_lockfile_and_bypassed_build_script_refused) ... ok
+test_environment_is_allowlisted_and_uses_private_empty_caches (scripts.tests.test_r5_cold_web.ColdWebTests.test_environment_is_allowlisted_and_uses_private_empty_caches) ... ok
+test_execute_cli_passes_only_matching_prepared_identity (scripts.tests.test_r5_cold_web.ColdWebTests.test_execute_cli_passes_only_matching_prepared_identity) ... {"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-elexxcgj/match"}
+ok
+test_execute_cli_rejects_source_identity_drift_before_npm (scripts.tests.test_r5_cold_web.ColdWebTests.test_execute_cli_rejects_source_identity_drift_before_npm) ... ok
+test_execute_inherits_capture_deadline_without_fresh_budget (scripts.tests.test_r5_cold_web.ColdWebTests.test_execute_inherits_capture_deadline_without_fresh_budget) ... ok
+test_execute_requires_window_and_explicit_tool_path (scripts.tests.test_r5_cold_web.ColdWebTests.test_execute_requires_window_and_explicit_tool_path) ... usage: python -m unittest [-h] [--repo REPO] --output-dir OUTPUT_DIR
+                          [--dirty-file DIRTY_FILE] [--execute]
+                          [--runtime-window RUNTIME_WINDOW]
+                          [--node-bin NODE_BIN]
+                          [--expected-source-identity EXPECTED_SOURCE_IDENTITY]
+                          [--timeout-seconds TIMEOUT_SECONDS]
+                          [--total-timeout-seconds TOTAL_TIMEOUT_SECONDS]
+python -m unittest: error: --execute requires runtime-owner window, trusted --node-bin and --expected-source-identity
+ok
+test_existing_alarm_is_not_overwritten (scripts.tests.test_r5_cold_web.ColdWebTests.test_existing_alarm_is_not_overwritten) ... ok
+test_explicit_dirty_overlay_untracked_and_delete (scripts.tests.test_r5_cold_web.ColdWebTests.test_explicit_dirty_overlay_untracked_and_delete) ... ok
+test_failed_build_preserves_red_raw_and_exit (scripts.tests.test_r5_cold_web.ColdWebTests.test_failed_build_preserves_red_raw_and_exit) ... ok
+test_fake_build_command_receipts_are_exact_and_not_shipping_browser_G0 (scripts.tests.test_r5_cold_web.ColdWebTests.test_fake_build_command_receipts_are_exact_and_not_shipping_browser_G0) ... ok
+test_group_probe_timeout_clips_remaining_and_expired_is_unknown (scripts.tests.test_r5_cold_web.ColdWebTests.test_group_probe_timeout_clips_remaining_and_expired_is_unknown) ... ok
+test_interruption_persists_current_group_cleanup_in_terminal_receipt (scripts.tests.test_r5_cold_web.ColdWebTests.test_interruption_persists_current_group_cleanup_in_terminal_receipt) ... ok
+test_lifecycle_timeout_cannot_leave_earlier_execution_pass_admitted (scripts.tests.test_r5_cold_web.ColdWebTests.test_lifecycle_timeout_cannot_leave_earlier_execution_pass_admitted) ... ok
+test_missing_extra_and_duplicate_review_rejected (scripts.tests.test_r5_cold_web.ColdWebTests.test_missing_extra_and_duplicate_review_rejected) ... ok
+test_output_refuses_existing_checkout_and_non_temporary_path (scripts.tests.test_r5_cold_web.ColdWebTests.test_output_refuses_existing_checkout_and_non_temporary_path) ... ok
+test_owned_child_group_cleanup_even_when_leader_exits_zero (scripts.tests.test_r5_cold_web.ColdWebTests.test_owned_child_group_cleanup_even_when_leader_exits_zero) ... ok
+test_preparation_never_runs_node_and_is_not_build_pass (scripts.tests.test_r5_cold_web.ColdWebTests.test_preparation_never_runs_node_and_is_not_build_pass) ... {"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-o89uscr5/prepared"}
+ok
+test_slow_cleanup_observation_cannot_get_fresh_final_probe_or_absence (scripts.tests.test_r5_cold_web.ColdWebTests.test_slow_cleanup_observation_cannot_get_fresh_final_probe_or_absence) ... ok
+test_source_git_clips_remaining_budget_and_rejects_late_return (scripts.tests.test_r5_cold_web.ColdWebTests.test_source_git_clips_remaining_budget_and_rejects_late_return) ... ok
+test_timeout_and_log_budget_are_failure_even_if_exit_zero (scripts.tests.test_r5_cold_web.ColdWebTests.test_timeout_and_log_budget_are_failure_even_if_exit_zero) ... ok
+test_total_deadline_clips_stage_budget_and_stops_before_ci (scripts.tests.test_r5_cold_web.ColdWebTests.test_total_deadline_clips_stage_budget_and_stops_before_ci) ... ok
+test_tracked_snapshot_excludes_credentials_and_caches_without_touching_checkout (scripts.tests.test_r5_cold_web.ColdWebTests.test_tracked_snapshot_excludes_credentials_and_caches_without_touching_checkout) ... ok
+test_tracked_symlink_and_dirty_symlink_refused (scripts.tests.test_r5_cold_web.ColdWebTests.test_tracked_symlink_and_dirty_symlink_refused) ... ok
+test_traversal_foreign_and_secret_paths_rejected (scripts.tests.test_r5_cold_web.ColdWebTests.test_traversal_foreign_and_secret_paths_rejected) ... ok
+test_unknown_or_foreign_cleanup_never_kills_or_passes (scripts.tests.test_r5_cold_web.ColdWebTests.test_unknown_or_foreign_cleanup_never_kills_or_passes) ... ok
+test_unobserved_live_owned_group_stops_precisely_but_never_certifies (scripts.tests.test_r5_cold_web.ColdWebTests.test_unobserved_live_owned_group_stops_precisely_but_never_certifies) ... ok
+test_user_and_global_npm_configs_are_distinct_empty_private_files (scripts.tests.test_r5_cold_web.ColdWebTests.test_user_and_global_npm_configs_are_distinct_empty_private_files) ... ok
+test_wrong_node_major_records_rejection (scripts.tests.test_r5_cold_web.ColdWebTests.test_wrong_node_major_records_rejection) ... ok
+test_zero_exit_without_standalone_artifacts_is_not_pass (scripts.tests.test_r5_cold_web.ColdWebTests.test_zero_exit_without_standalone_artifacts_is_not_pass) ... ok
+
+----------------------------------------------------------------------
+Ran 55 tests in 8.978s
+
+OK

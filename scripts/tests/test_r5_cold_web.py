@@ -177,8 +177,14 @@ esac
         self.assertEqual((output / 'untouched').read_text(), 'original')
         with self.assertRaisesRegex(gate.GateError, 'checkout'):
             gate.private_output(self.repo / 'evidence', self.repo)
-        with self.assertRaisesRegex(gate.GateError, 'temporary storage'):
-            gate.private_output(Path('/Users/new-cold-evidence'), self.repo)
+        # The filesystem root exists on every platform and is outside the
+        # permitted temporary roots. Never create anything there, even if the
+        # guard regresses: mkdir is observed and forbidden by this fixture.
+        parent = Path(tempfile.gettempdir()).resolve().anchor
+        with patch.object(Path, 'mkdir', side_effect=AssertionError('mkdir before rejection')) as mkdir:
+            with self.assertRaisesRegex(gate.GateError, 'temporary storage'):
+                gate.private_output(Path(parent) / 'new-cold-evidence', self.repo)
+            mkdir.assert_not_called()
 
     def test_environment_is_allowlisted_and_uses_private_empty_caches(self):
         output = self.output()

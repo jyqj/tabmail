@@ -40,6 +40,42 @@ go vet ./...
 
 The i18n gate now needs Node and the installed TypeScript compiler from `web/package-lock.json`; run `npm ci` first. It reads real JSON catalogs and production ASTs, including `features` and `hooks`. Both missing dependencies and empty scans fail. Inline `useText(zh,en)` and explicitly typed two-string callbacks are not catalog lookups; mixed files are checked per binding. Computed keys are reported as `dynamic_calls`, not certified as statically validated. No application module is evaluated to extract keys.
 
+For the versioned Python source suite, use the formal runner instead:
+
+```sh
+python3 -B scripts/run_r5_source_version_tests.py --root . --output /tmp/new-source-version-tests.json
+```
+
+It discovers IDs in a clean independent HEAD clone and keeps the four frozen v1
+tests at `41b015c30c66b3ba58a3c1395e8559ebcd27a65f`. Preparation is automatic:
+only the original complete lock SHA256 and official TypeScript 5.9.3 archive
+SHA256/SHA512 integrity are admitted. All 132 regular package files are checked;
+no npm invocation, lifecycle, `.bin`, whole dependency tree, links, native or Go
+files are installed. A pre-existing dependency tree is rejected. Both default
+and race/r5protocol root Go dependency/test selections must be identical before
+and after preparation. This grants no exemption to the archive/Go guards; dirty
+caller Go files remain outside the independently cloned execution source.
+
+With Go 1.25.7 and the existing owned module/build caches, the runner compiles
+the handler test binary and actually executes that same pinned inode using
+`go tool test2json -t -p tabmail/internal/api/handlers /proc/<parent-pid>/fd/<fd> -test.v=test2json -test.run='^TestOrdinaryReceiptOpenAPIWireFixtures$' -test.count=1`
+from the handler package directory, writing a new exclusive wire file. The
+parent keeps the executable FD open, so replacing the binary pathname cannot
+substitute the executed inode; pre/post byte and pathname identity checks reject
+tampering. The receipt records the executed argv/cwd/binary SHA256, equal to the
+compiled binary SHA256. The Python ordinary receipt test reads all route
+fixtures and requires the matching source SHA, fresh run ID, pinned receipt
+hash, binary hash and run log hashes. Missing, stale, wrong-source or tampered
+evidence fails; it is never a default skip. This proves typed projections and
+shipping envelopes only, not HTTP admission or PostgreSQL acceptance.
+
+The output report includes preparation hashes and actual started IDs for both
+source groups. The sibling unique `r5-source-preparation-*` directory retains
+the binary, complete wire bytes and build/run logs for review. Download or
+preparation errors fail the runner and list every undispatched ID as missing.
+The runner still reports all test failures/errors/skips as non-green. It does
+not run or change the separate whole PostgreSQL 180-second CI gate.
+
 `TestR3BrowserJourney` remains a separate, opt-in shipping-image check: the standalone frontend, real Go API, PostgreSQL and loopback SMTP must all be available. Running component tests does not satisfy this browser check. Lack of a browser, client tools or DSN must be recorded, not called a green full regression. Image tags are build inputs, not immutable evidence: record the resolved image IDs/digests and actual tool versions for every run.
 
 ## Native PostgreSQL 16 fallback
