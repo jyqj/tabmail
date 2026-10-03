@@ -129,11 +129,21 @@
     "private original proofs unavailable"
   ],
   "progress": "10/171 unchanged; no parent/leaf checkbox closed",
-  "remote": "pending authorized new-branch push; PR draft body prepared; no merge/forcepush/deploy",
+  "remote": {
+    "push": "SUCCESS",
+    "pushed_head": "cb2d32ef73b2dff6e7fe00c0ad30db4fe38affa6",
+    "confirmed_remote_ref": "refs/heads/integration/company-mail-r5-batch2-20261003",
+    "url": "https://github.com/jyqj/tabmail/tree/integration/company-mail-r5-batch2-20261003",
+    "draft_pr": "NOT_CREATED: GitHub GraphQL Forbidden; exit1; stopped, no alternate route/identity or old rejected branch retry",
+    "pr_base": "integration/company-mail-r5-20261003",
+    "pr_body": "draft-pr-body.md",
+    "followup": "documentation-only delivery-status commit/push follows; final head reported separately"
+  },
   "ci": {
     "head_sha": "81ee07262942ee824ee8a9226bfb8aef1a53db51",
     "status": "UNAVAILABLE",
-    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    "error": "<urlopen error Tunnel connection failed: 403 Forbidden>",
+    "four_job_state": "UNAVAILABLE / not verified; no successful run claimed. Existing company-p0 workflow triggers only push/main or PR/main; this stacked branch/base is outside those configured triggers; workflow unchanged."
   },
   "evidence_hashes": {
     "browser-terminal.txt": "1df3bf691c14897217166b67016d4f2e164e63de9c3cd57f4d330e48721d0ee9",
@@ -159,6 +169,9 @@
     "typed-go.stdout": "36b690e5c501ca892f0a117087fb1cc3a69ea93086fefdcce66aa4a332bfa777",
     "type-exit-verified.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "browser-first-inherited-labels/browser-results.json": "3db540af2199c9a6182847b1d74ef21008641e5d5dd2ea7c6a3da7475a770be5",
-    "browser/browser-results.json": "71c7cf97f7e10088a4c9e0934362310e661a07cdbfb5b3db32e0233ebb9bcfcd"
+    "browser/browser-results.json": "71c7cf97f7e10088a4c9e0934362310e661a07cdbfb5b3db32e0233ebb9bcfcd",
+    "push-terminal.txt": "c5563ea7f4a525564000249a1e058b942cb242667e7ac1513d25f0882d75a063",
+    "pr-terminal.txt": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725",
+    "draft-pr-body.md": "c8802f74142af8c59443b127c0e46ae7ce1e049dc6396dbd1b7895be6603c15b"
   }
 }
