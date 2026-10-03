@@ -1,0 +1,22 @@
+{
+  "status": "pass",
+  "source_sha": "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6",
+  "errors": [],
+  "responses": 81,
+  "successful_operations": 66,
+  "required_success_variants": 67,
+  "excluded_operations": [
+    {
+      "method": "GET",
+      "path": "/api/v1/company/domains/{id}/verification",
+      "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/company/domains/{id}/verify",
+      "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+    }
+  ],
+  "spec_sha256": "9afe1749637dc9cc2f66956f4026a89244735f1242f203a75003390723a0656f",
+  "capture_sha256": "f2fff9585f51e2c95b5b0aa77e7f2e999c486739ab3859cb5ccf8bd5fbc20f51"
+}

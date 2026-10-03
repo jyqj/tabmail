@@ -1,0 +1,159 @@
+{
+  "format_version": "r5_current_wire_join_proposal_v2",
+  "adoption": "operator_review_required",
+  "task_complete": false,
+  "product_green": false,
+  "base_commit": "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6",
+  "product_baseline": "aeed47f",
+  "source_policy": "r5_current_local_inputs_archive_boundary_v4",
+  "source_identity_kind": "policy_bound_local_input_superset_archive_boundary_sha1_v4",
+  "source_manifest_sha256": "064ea6672351b7f1536c40fec17c709da7f15ebcfd502f405a7267eb24dc2ce5",
+  "source_sha": "a2c7dd0c5728067126b5a5ea05218fda0167cda6",
+  "source_closure_sha256": "d00be3281cd1bc29f39c70f6f4f10bf39e531c07fce05e92b87924205626b242",
+  "current_spec_sha256": "9afe1749637dc9cc2f66956f4026a89244735f1242f203a75003390723a0656f",
+  "cases_sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7",
+  "packets": [
+    {
+      "path": "http-status-packet.json",
+      "sha256": "98d474d7d259ee65d39abfad5cefe25d8db2411fe5da48c2a587d7a9af19c3c7",
+      "kind": "actual_safe_packet"
+    },
+    {
+      "path": "db-status-packet.json",
+      "sha256": "6cd349e2bc2939d5fdc5891113c23b507f32ee3d84fe4dc664360abc4e328c03",
+      "kind": "actual_safe_packet"
+    }
+  ],
+  "input_refs": [
+    {
+      "path": "manifest-db-clean.json",
+      "sha256": "064ea6672351b7f1536c40fec17c709da7f15ebcfd502f405a7267eb24dc2ce5",
+      "kind": "source_receipt_or_failure"
+    },
+    {
+      "path": "manifest-components-clean.json",
+      "sha256": "f7e86df1a22eb3377fe0045e33ce4951f6dff077adde66859d51a22619701f12",
+      "kind": "source_receipt_or_failure"
+    },
+    {
+      "path": "selected-default-clean.json",
+      "sha256": "240157f5fab42b4b201f54d39c1446861cbc4f83ab8eb41b40f045f7687656a9",
+      "kind": "source_receipt_or_failure"
+    },
+    {
+      "path": "selected-race.json",
+      "sha256": "a780c4c0e378d67ba547f33ef4badab3ec94e04b2943bd7dc9e9445efd2da562",
+      "kind": "source_receipt_or_failure"
+    },
+    {
+      "path": "http-runtime.execution.json",
+      "sha256": "7a8937173b27ea6d95d5520a694c5d2e260914f30ddf13108a0da9bbaebf0a5c",
+      "kind": "invocation"
+    },
+    {
+      "path": "shared-db.execution.json",
+      "sha256": "954c1a659e6f0df0d21355bc21dc11668d2a9def64dfe3622afcecbdfdc01964",
+      "kind": "invocation"
+    },
+    {
+      "path": "http.execution.json",
+      "sha256": "178af26ee6e372f1fdc48e5179d585b675b10557ed8455fcc5065bb6f43a2c40",
+      "kind": "invocation"
+    },
+    {
+      "path": "http-status-packet.json",
+      "sha256": "98d474d7d259ee65d39abfad5cefe25d8db2411fe5da48c2a587d7a9af19c3c7",
+      "kind": "actual_safe_packet"
+    },
+    {
+      "path": "db-status-packet.json",
+      "sha256": "6cd349e2bc2939d5fdc5891113c23b507f32ee3d84fe4dc664360abc4e328c03",
+      "kind": "actual_safe_packet"
+    },
+    {
+      "path": "http-result.json",
+      "sha256": "5157cc32c40f0eafab89a44f511f20c39440072287486fa7c1f768f2e07cedd9",
+      "kind": "formal_result"
+    },
+    {
+      "path": "db-result-metadata.json",
+      "sha256": "b37d905b8f4a03644cc988b63344e7e205df252ad30e4a8b795130d19636b5f1",
+      "kind": "formal_result"
+    },
+    {
+      "path": "preparation-manifest-db.json",
+      "sha256": "49170630cd291184d4c761afc9cd5782619116048e4fc43ae59f65aa35d99e2d",
+      "kind": "preparation_failure"
+    },
+    {
+      "path": "preparation-manifest-components.json",
+      "sha256": "c2bbcad727224edf8a3efaf5be5d1bb0782a94e8cc4e5b2ddcaeb456fd5ba003",
+      "kind": "preparation_failure"
+    },
+    {
+      "path": "preparation-selected-default.stderr",
+      "sha256": "5289cf59d7e54f229476df1f322c841f8b1b55a6931763b6e464601f07bb8962",
+      "kind": "preparation_failure"
+    },
+    {
+      "path": "preparation-selected-default.exit",
+      "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+      "kind": "preparation_failure"
+    },
+    {
+      "path": "preparation-npm-ci.stderr",
+      "sha256": "9c06cf1a9709d4e19ec0a9b7488f4d9a8ea575baf77ab26cfe28e8c863cc376c",
+      "kind": "preparation_failure"
+    }
+  ],
+  "binary_tool_ids": {
+    "go1.25.7": "76ac600b41ad2eceee5d39d02af78009516f8b2a29f30bcc80f765c3e4b4f5a8",
+    "protocol": "9a4ab1e86c03a48c696ddbefaad27ed23a7445c0ca7114395fc929f332d3aff7",
+    "http": "431edb39ffd94d3775c529dbdb2d06f9bceb6d0dddfb9fa4b3c1d83148a5a344",
+    "inventory": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2",
+    "selected-v2": "b68131e4fc43cf1e2ee50238584a54f1a7c7c32071196cdbbe47c30a2343294d"
+  },
+  "producers": [
+    {
+      "name": "http",
+      "status": "PASS_HTTP_SHAPE",
+      "actualstarted": true,
+      "invocation": "http-runtime.execution.json",
+      "source_manifest_sha256": "064ea6672351b7f1536c40fec17c709da7f15ebcfd502f405a7267eb24dc2ce5"
+    },
+    {
+      "name": "shared-db",
+      "status": "FAIL",
+      "actualstarted": true,
+      "invocation": "shared-db.execution.json",
+      "source_manifest_sha256": "064ea6672351b7f1536c40fec17c709da7f15ebcfd502f405a7267eb24dc2ce5"
+    },
+    {
+      "name": "shared-components",
+      "status": "NOTRUN_POLICY_BLOCKED",
+      "actualstarted": false,
+      "source_manifest_sha256": "f7e86df1a22eb3377fe0045e33ce4951f6dff077adde66859d51a22619701f12"
+    }
+  ],
+  "observation_packet_files_produced_by_shared_db": [],
+  "exclusions": [
+    {
+      "method": "GET",
+      "path": "/api/v1/company/domains/{id}/verification",
+      "reason": "Live DNS status lookups are outside this loopback HTTP/PG fixture."
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/company/domains/{id}/verify",
+      "reason": "Live DNS verification is outside this loopback HTTP/PG fixture."
+    }
+  ],
+  "limitations": [
+    "HTTP Git commit argument is operator supplied; independent archive-v4 pre/post closure is required for this proposed join.",
+    "Selected default/race capture failed VCS status; no selected attestation or toolchain/native/external cache qualification.",
+    "Shared-db emitted no observations.json; db-status-packet preserves lifecycle only, not response wire.",
+    "No historical AB frozen_tree/validation_commit or 29 inputrefs are admitted.",
+    "HTTP shape does not prove authority/CAS; failed shared-db cannot claim case verification."
+  ],
+  "post_runtime_source_manifest_equal": true
+}
