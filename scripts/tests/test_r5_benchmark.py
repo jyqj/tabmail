@@ -62,6 +62,16 @@ class BenchmarkContractTests(unittest.TestCase):
      with self.subTest(scale=scale,field=field,value=value):self.reject(lambda d:d['scales'][scale].__setitem__(field,value))
   self.reject(lambda d:d['clock_contract'].__setitem__('max_wall_monotonic_gap_ms',1000))
   self.reject(lambda d:d['clock_contract'].__setitem__('run_deadline','monotonic_sleep_excluded'))
+ def test_synthetic_dispatch_capacity_keeps_real_disk_margin_gate(self):
+  required=self.data['scales']['S']['disk_budget_gib']*(1<<30)+10*(1<<30)
+  with mock.patch.object(bench.shutil,'disk_usage',return_value=shutil._ntuple_diskusage(required,1,required-1)):
+   with self.assertRaisesRegex(ValueError,'^insufficient disk safety margin$'):
+    bench.preflight(self.data,'S',Path('/synthetic'))
+  with mock.patch.object(bench.shutil,'disk_usage',return_value=shutil._ntuple_diskusage(required,0,required)):
+   report=bench.preflight(self.data,'S',Path('/synthetic'))
+  self.assertEqual(report['disk_budget_bytes'],10<<30)
+  self.assertFalse(report['actual_scale_run']);self.assertFalse(report['product_green'])
+
  def test_duplicate_json_rejected(self):
   with tempfile.TemporaryDirectory() as root:
    p=Path(root)/'bad.json';p.write_text('{"seed":1,"seed":2}')
@@ -81,11 +91,25 @@ class BenchmarkContractTests(unittest.TestCase):
     p.write_text('{"metric":'+value+'}')
     with self.subTest(value=value),self.assertRaises(ValueError):bench.read_json(p)
 
-class BenchmarkEvidenceTests(unittest.TestCase):
+class Schema16GrammarFixture(unittest.TestCase):
+ """Model the legacy pipeline source only within synthetic grammar tests.
+
+ Current migration discovery and current18 evidence have separate contracts.
+ Never patch the production validator or label these shapes as executed runs.
+ """
  def setUp(self):
+  super().setUp()
+  self.schema_source=mock.patch.object(bench,'expected_schema_version',return_value=16)
+  self.schema_source.start()
+  self.addCleanup(self.schema_source.stop)
+
+
+class BenchmarkEvidenceTests(Schema16GrammarFixture):
+ def setUp(self):
+  super().setUp()
   self.contract=bench.read_json(bench.DATASET)
   # Pure validator data, NOT simulated product HTTP/DB results or S evidence.
-  self.result={'scale':'S','employees':100,'mailboxes':500,'messages':100000,'seed':3893945,'concurrency':20,'source_sha':'a'*40,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'index_ready_count':100000,'sql_tracer_calibration_count':20,'sql_tracer_calibration_expected':20,'pool_size':24,'hardware':{'os':'darwin','arch':'arm64','cpu':16},'schema_version':bench.expected_schema_version(),'dataset_fingerprint':'validator-only','safety_assertions':[w+':foreign_and_revoked_current_source_denied' for w in bench.WORKLOADS],'safety_assertions_passed':True,'task_complete':False,'product_green':False,'measurements':[{'workload':w,'cache_mode':c,'samples':200,'sql_count':201,'p50_ms':1,'p95_ms':2,'p99_ms':3,'alloc_bytes':4,'rss_bytes':5,'disk_bytes':6} for w in bench.WORKLOADS for c in self.contract['cache_modes']]}
+  self.result={'scale':'S','employees':100,'mailboxes':500,'messages':100000,'seed':3893945,'concurrency':20,'source_sha':'a'*40,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'index_ready_count':100000,'sql_tracer_calibration_count':20,'sql_tracer_calibration_expected':20,'pool_size':24,'hardware':{'os':'darwin','arch':'arm64','cpu':16},'schema_version':16,'dataset_fingerprint':'validator-only','safety_assertions':[w+':foreign_and_revoked_current_source_denied' for w in bench.WORKLOADS],'safety_assertions_passed':True,'task_complete':False,'product_green':False,'measurements':[{'workload':w,'cache_mode':c,'samples':200,'sql_count':201,'p50_ms':1,'p95_ms':2,'p99_ms':3,'alloc_bytes':4,'rss_bytes':5,'disk_bytes':6} for w in bench.WORKLOADS for c in self.contract['cache_modes']]}
   self.result.update(self.observations(100,100000,'S'))
   elapsed=self.result['preparation']['company_wall_seconds']+self.result['preparation']['pipeline_wall_seconds']+1
   self.result.update(latency_clock=bench.LATENCY_CLOCK,execution_wall={'started_unix_seconds':100.0,'completed_unix_seconds':100.0+elapsed,'elapsed_wall_seconds':elapsed,'budget_seconds':1800})
@@ -103,16 +127,42 @@ class BenchmarkEvidenceTests(unittest.TestCase):
   checkpoints=[]
   for depth in [*bench.preparation_depths(messages),messages]:
    terminal=depth==messages;phase='terminal' if terminal else 'before_claim'
-   item={'origin':'captured_preparation_claim_same_parameters_observed_heap','phase':phase,'source_sha':'a'*40,'schema_version':bench.expected_schema_version(),'maintenance':'no_explicit_analyze_or_planner_override','claim_requested_limit':20,'observed_jobs_total':messages if terminal else depth+20,'observed_pending':0 if terminal else 20,'observed_processing':0,'observed_ready_jobs':depth,'observed_durable_source_bound_ready':depth,'observed_failed':0,'observed_attempts_gt1':0,'query_sha256':'5'*64,'parameters_sha256':hashlib.sha256(b'[20]').hexdigest(),'explain_only_not_actual_claim_latency':True,'plan':[{'Plan':{'Node Type':'Limit','Plans':[{'Node Type':'Seq Scan','Relation Name':'mail_index_jobs'}]}}],'preparation':stats(phase,depth)}
+   item={'origin':'captured_preparation_claim_same_parameters_observed_heap','phase':phase,'source_sha':'a'*40,'schema_version':16,'maintenance':'no_explicit_analyze_or_planner_override','claim_requested_limit':20,'observed_jobs_total':messages if terminal else depth+20,'observed_pending':0 if terminal else 20,'observed_processing':0,'observed_ready_jobs':depth,'observed_durable_source_bound_ready':depth,'observed_failed':0,'observed_attempts_gt1':0,'query_sha256':'5'*64,'parameters_sha256':hashlib.sha256(b'[20]').hexdigest(),'explain_only_not_actual_claim_latency':True,'plan':[{'Plan':{'Node Type':'Limit','Plans':[{'Node Type':'Seq Scan','Relation Name':'mail_index_jobs'}]}}],'preparation':stats(phase,depth)}
    if not terminal:item['actual_claim_joined']=stats('batch_joined',depth)
    checkpoints.append(item)
   return {'preparation':stats('terminal',messages),'preparation_checkpoints':checkpoints}
  @staticmethod
  def observations(employees,messages,scale):
-  return {**BenchmarkEvidenceTests.preparation(messages),'fingerprint_method':'six_actual_canonical_sql_streams_v1','fingerprint_streams':[{'stream_id':i,'row_count':n,'sha256':str(i+1)*64} for i,n in enumerate([2,messages,messages,employees*16,employees+2,employees*5])],'actual_distribution':{'employees':employees,'mailboxes':employees*5,'messages':messages,'index_ready_count':messages,'personal_mailboxes':employees,'shared_mailboxes':employees*4,'shared_grant_rows':employees*16,'min_distinct_shared_grantees':4,'max_distinct_shared_grantees':4,'lifecycle_counts':{'inbox':messages*80//100,'archived':messages*10//100,'trash_expired':messages*5//100,'hard_expired':messages*5//100},'mime_size_counts':{'4096':messages*800//1000,'32768':messages*180//1000,'262144':messages*19//1000,'2097152':messages//1000},'tenant_message_counts':{'bench-0.test':messages*80//100,'bench-1.test':messages*20//100}},'dataset_fingerprint':'1'*64,'parameter_fingerprint':'2'*64,'resource_scope':copy.deepcopy(bench.RESOURCE_SCOPE),'system_memory_observation':'not_measured','sql_plans':[{'workload':'inbox_list','origin':'captured_shipping_query_same_parameters','scale':scale,'source_sha':'a'*40,'schema_version':bench.expected_schema_version(),'index_ready_count':messages,'query_sha256':'3'*64,'parameters_sha256':'4'*64,'plan':[{'Plan':{'Node Type':'Seq Scan','Relation Name':'messages'}}]}]}
+  return {**BenchmarkEvidenceTests.preparation(messages),'fingerprint_method':'six_actual_canonical_sql_streams_v1','fingerprint_streams':[{'stream_id':i,'row_count':n,'sha256':str(i+1)*64} for i,n in enumerate([2,messages,messages,employees*16,employees+2,employees*5])],'actual_distribution':{'employees':employees,'mailboxes':employees*5,'messages':messages,'index_ready_count':messages,'personal_mailboxes':employees,'shared_mailboxes':employees*4,'shared_grant_rows':employees*16,'min_distinct_shared_grantees':4,'max_distinct_shared_grantees':4,'lifecycle_counts':{'inbox':messages*80//100,'archived':messages*10//100,'trash_expired':messages*5//100,'hard_expired':messages*5//100},'mime_size_counts':{'4096':messages*800//1000,'32768':messages*180//1000,'262144':messages*19//1000,'2097152':messages//1000},'tenant_message_counts':{'bench-0.test':messages*80//100,'bench-1.test':messages*20//100}},'dataset_fingerprint':'1'*64,'parameter_fingerprint':'2'*64,'resource_scope':copy.deepcopy(bench.RESOURCE_SCOPE),'system_memory_observation':'not_measured','sql_plans':[{'workload':'inbox_list','origin':'captured_shipping_query_same_parameters','scale':scale,'source_sha':'a'*40,'schema_version':16,'index_ready_count':messages,'query_sha256':'3'*64,'parameters_sha256':'4'*64,'plan':[{'Plan':{'Node Type':'Seq Scan','Relation Name':'messages'}}]}]}
  def reject(self,modify):
   data=copy.deepcopy(self.result);modify(data)
   with self.assertRaises(ValueError):bench.validate_result(data,self.contract,'S','a'*40)
+ def test_schema16_fixture_metadata_and_source_are_explicit(self):
+  self.assertEqual(bench.PIPELINE_SCHEMA_VERSION,16)
+  self.assertEqual(self.result['schema_version'],16)
+  self.assertEqual({p['schema_version'] for p in self.result['sql_plans']}, {16})
+  self.assertEqual({p['schema_version'] for p in self.result['preparation_checkpoints']}, {16})
+  bench.validate_result(self.result,self.contract,'S','a'*40)
+
+ def test_schema16_negative_reaches_checkpoint_validation(self):
+  data=copy.deepcopy(self.result);data.pop('preparation_checkpoints')
+  with self.assertRaisesRegex(ValueError,'^all actual deep-ready and terminal preparation checkpoints required$'):
+   bench.validate_result(data,self.contract,'S','a'*40)
+
+ def test_current_schema_cannot_relabel_schema16_preparation(self):
+  for schema in [18,19]:
+   data=copy.deepcopy(self.result);data['schema_version']=schema
+   for point in data['preparation_checkpoints']+data['sql_plans']:point['schema_version']=schema
+   with self.subTest(schema=schema),mock.patch.object(bench,'expected_schema_version',return_value=schema):
+    with self.assertRaisesRegex(ValueError,'^new preparation evidence requires exact schema16 pipeline contract$'):
+     bench.validate_result(data,self.contract,'S','a'*40)
+
+ def test_schema16_fixture_cannot_bypass_current_migration_source(self):
+  for schema in [18,19]:
+   with self.subTest(schema=schema),mock.patch.object(bench,'expected_schema_version',return_value=schema):
+    with self.assertRaisesRegex(ValueError,'^observed schema differs from actual migration source$'):
+     bench.validate_result(self.result,self.contract,'S','a'*40)
+
  def test_partial_or_fake_shape_does_not_certify_scale(self):
   self.reject(lambda d:d.__setitem__('messages',10));self.reject(lambda d:d.__setitem__('source_sha','b'*40));self.reject(lambda d:d.__setitem__('dataset_sha256','0'*64))
   self.reject(lambda d:d.__setitem__('index_ready_count',1));self.reject(lambda d:d.__setitem__('sql_tracer_calibration_count',0))
@@ -148,7 +198,7 @@ class BenchmarkEvidenceTests(unittest.TestCase):
   self.reject(lambda d:d['resource_scope'].__setitem__('sql','all_server_SQL'))
   self.reject(lambda d:d.__setitem__('system_memory_observation','all_system_measured'))
  def test_tool_only_shape_never_certifies_original_scale(self):
-  result={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'source_sha':'a'*40,'schema_version':bench.expected_schema_version(),'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,'seed':3893945,'rss_bytes':1,'disk_bytes':1,**self.observations(20,1000,'tool_only')}
+  result={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'source_sha':'a'*40,'schema_version':16,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,'seed':3893945,'rss_bytes':1,'disk_bytes':1,**self.observations(20,1000,'tool_only')}
   observed=bench.validate_tool_result(result,self.contract,'a'*40)
   self.assertFalse(observed['S_M_L_executed'])
   with self.assertRaises(ValueError):bench.validate_result(result,self.contract,'S','a'*40)
@@ -218,7 +268,7 @@ class BenchmarkEvidenceTests(unittest.TestCase):
   payload=json.dumps(self.result).replace('"joined_inflight": 0','"joined_inflight": 0, "joined_inflight": 0',1)
   with self.assertRaises(ValueError):bench.parse_json(payload)
   with tempfile.TemporaryDirectory() as directory:
-   root=Path(directory);path=root/'result.json';data={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'seed':3893945,'rss_bytes':1,'disk_bytes':1,'source_sha':'a'*40,'schema_version':bench.expected_schema_version(),'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,**self.observations(20,1000,'tool_only')};data.pop('preparation_checkpoints');path.write_text(json.dumps(data))
+   root=Path(directory);path=root/'result.json';data={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'seed':3893945,'rss_bytes':1,'disk_bytes':1,'source_sha':'a'*40,'schema_version':16,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,**self.observations(20,1000,'tool_only')};data.pop('preparation_checkpoints');path.write_text(json.dumps(data))
    command=[sys.executable,'-B',str(bench.ROOT/'scripts/run_r5_benchmark.py'),'--source-sha','a'*40,'--validate-tool-result',str(path)]
    completed=subprocess.run(command,capture_output=True,text=True)
    self.assertEqual(completed.returncode,1)
@@ -226,7 +276,7 @@ class BenchmarkEvidenceTests(unittest.TestCase):
  def test_direct_pipeline_shapes_tool_S_M_preserve_population_boundaries(self):
   for scale,size in [('tool_only',(20,100,1000)),('S',bench.SCALES['S']),('M',bench.SCALES['M'])]:
    with self.subTest(scale=scale):
-    observations=self.observations(size[0],size[2],scale);observations['schema_version']=bench.expected_schema_version()
+    observations=self.observations(size[0],size[2],scale);observations['schema_version']=16
     bench.validate_observations(observations,size,scale,'a'*40)
   self.assertEqual(bench.preparation_depths(1000),[20,980])
   self.assertEqual(bench.preparation_depths(100000),[20,1000,10000,99980])
@@ -264,7 +314,7 @@ class BenchmarkEvidenceTests(unittest.TestCase):
    self.reject(lambda d:d['measurements'][0].__setitem__(field,1.0))
    self.reject(lambda d:d['measurements'][0].__setitem__(field,True))
  def test_tool_resources_seed_and_sampling_unknown_rejected(self):
-  tool={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'seed':3893945,'rss_bytes':1,'disk_bytes':1,'source_sha':'a'*40,'schema_version':bench.expected_schema_version(),'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,**self.observations(20,1000,'tool_only')}
+  tool={'mode':'TOOL_ONLY_DATASET_CALIBRATION','scale':'tool_only','employees':20,'mailboxes':100,'messages':1000,'seed':3893945,'rss_bytes':1,'disk_bytes':1,'source_sha':'a'*40,'schema_version':16,'dataset_sha256':hashlib.sha256(bench.DATASET.read_bytes()).hexdigest(),'task_complete':False,'product_green':False,'S_M_L_executed':False,**self.observations(20,1000,'tool_only')}
   for field,value in [('rss_bytes',0),('disk_bytes',None),('rss_bytes',True),('seed',1),('messages',1000.0),('sampling_method','unknown')]:
    data=copy.deepcopy(tool);data[field]=value
    with self.subTest(field=field),self.assertRaises(ValueError):bench.validate_tool_result(data,self.contract,'a'*40)
@@ -867,9 +917,10 @@ class BenchmarkRegistryTests(unittest.TestCase):
   self.registry['failed_attempts'][0]['population'][0]=100;self.registry['product_green']=True
   with self.assertRaises(ValueError):self.validate()
 
-class BenchmarkLookaheadTests(unittest.TestCase):
+class BenchmarkLookaheadTests(Schema16GrammarFixture):
  """Strict grammar and mocked CLI only; never actual PG/S/performance evidence."""
  def setUp(self):
+  super().setUp()
   self.contract=bench.read_json(bench.DATASET)
   self.method=bench.read_json(bench.LOOKAHEAD_METHOD_FILE)
   self.digest=hashlib.sha256(bench.LOOKAHEAD_METHOD_FILE.read_bytes()).hexdigest()
@@ -892,7 +943,7 @@ class BenchmarkLookaheadTests(unittest.TestCase):
   self.assertLess(self.result['preparation_persistent_observations']['projected_mailboxes'],100)
   with self.assertRaises(ValueError):bench.validate_result(self.result,self.contract,'M','a'*40,preparation_method=bench.LOOKAHEAD_METHOD,method_contract=self.method,method_contract_digest=self.digest)
  def test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval(self):
-  fixture=BenchmarkEvidenceTests();fixture.setUp();data=copy.deepcopy(fixture.result)
+  fixture=BenchmarkEvidenceTests();self.addCleanup(fixture.doCleanups);fixture.setUp();data=copy.deepcopy(fixture.result)
   data.update({k:copy.deepcopy(self.result[k]) for k in bench.LOOKAHEAD_RESULT_FIELDS})
   for stats in [data['preparation'],*[c['preparation'] for c in data['preparation_checkpoints']],*[c['actual_claim_joined'] for c in data['preparation_checkpoints'][:-1]]]:stats['method']=bench.LOOKAHEAD_METHOD
   order=bench.expected_scheduler_order(100000,100);boxes=[bench.fixture_mailbox_ordinal(n,100) for n in order]
@@ -972,8 +1023,9 @@ class BenchmarkLookaheadTests(unittest.TestCase):
   with self.assertRaises(ValueError):bench.validate_archived_method_selection(row,review,closure,members,'run',files,'a'*40,'M')
  def test_cli_invalid_or_missing_optin_contract_rejected_without_go(self):
   for args in [[],['--preparation-method',bench.DEFAULT_METHOD,'--method-contract',str(bench.LOOKAHEAD_METHOD_FILE)],['--preparation-method',bench.LOOKAHEAD_METHOD],['--preparation-method',bench.LOOKAHEAD_METHOD,'--method-contract',str(bench.LOOKAHEAD_METHOD_FILE),'--scale','L'],['--preparation-method',bench.DEFAULT_METHOD,'--preparation-method',bench.DEFAULT_METHOD]]:
-   # Empty args is preflight-only and never dispatches an ambient opt-in.
-   with self.subTest(args=args),mock.patch.object(sys,'argv',['run_r5_benchmark.py',*args]),mock.patch.object(bench,'run_owned_process') as run,mock.patch.dict(os.environ,{bench.METHOD_ENV:bench.LOOKAHEAD_METHOD}),mock.patch('sys.stdout',new_callable=io.StringIO):
+   # Synthetic capacity admits the real preflight; empty args never dispatches
+   # an ambient opt-in. Disk rejection is tested at its exact real margin.
+   with self.subTest(args=args),mock.patch.object(sys,'argv',['run_r5_benchmark.py',*args]),mock.patch.object(bench,'run_owned_process') as run,mock.patch.dict(os.environ,{bench.METHOD_ENV:bench.LOOKAHEAD_METHOD}),mock.patch.object(bench.shutil,'disk_usage',return_value=shutil._ntuple_diskusage(40<<30,10<<30,30<<30)),mock.patch('sys.stdout',new_callable=io.StringIO):
     self.assertEqual(bench.main(),0 if not args else 1);run.assert_not_called()
 
 class BenchmarkCurrentSourcePolicyTests(unittest.TestCase):
@@ -1005,9 +1057,10 @@ class BenchmarkCurrentSourcePolicyTests(unittest.TestCase):
     self.assertEqual(actual['source_identity_kind'],bench.source_inventory.KIND)
     self.assertEqual(actual['source_sha'],receipt['source_sha'])
     raise ValueError('unit dispatch boundary only; no Go executed')
-   # Only descriptive host metadata is synthetic: platform.platform() may
-   # probe a subprocess on Python 3.12. Contract/disk/budget preflight stays real.
-   with mock.patch.object(sys,'argv',args),mock.patch.object(bench,'ROOT',root),mock.patch.dict(os.environ,{'TABMAIL_TEST_DB_DSN':'unit-fixture-not-credential',bench.METHOD_ENV:bench.LOOKAHEAD_METHOD,bench.METHOD_SHA_ENV:'ambient'},clear=True),mock.patch.object(bench.platform,'platform',return_value='synthetic-current-source-host-metadata') as host_platform,mock.patch.object(bench,'observed_git_head',return_value=None),mock.patch.object(bench,'run_owned_process',side_effect=dispatch) as run,mock.patch('sys.stdout',new_callable=io.StringIO) as output:
+   # Synthetic host capacity lets this dispatch grammar reach its boundary
+   # even on small /tmp mounts. The real preflight still enforces budgets.
+   # platform.platform() may probe a subprocess on Python 3.12.
+   with mock.patch.object(sys,'argv',args),mock.patch.object(bench,'ROOT',root),mock.patch.dict(os.environ,{'TABMAIL_TEST_DB_DSN':'unit-fixture-not-credential',bench.METHOD_ENV:bench.LOOKAHEAD_METHOD,bench.METHOD_SHA_ENV:'ambient'},clear=True),mock.patch.object(bench.platform,'platform',return_value='synthetic-current-source-host-metadata') as host_platform,mock.patch.object(bench.shutil,'disk_usage',return_value=shutil._ntuple_diskusage(40<<30,10<<30,30<<30)),mock.patch.object(bench,'observed_git_head',return_value=None),mock.patch.object(bench,'run_owned_process',side_effect=dispatch) as run,mock.patch('sys.stdout',new_callable=io.StringIO) as output:
     self.assertEqual(bench.main(),1);self.assertEqual(run.call_count,1)
     self.assertEqual(json.loads(output.getvalue().splitlines()[-1])['error'],'unit dispatch boundary only; no Go executed')
     host_platform.assert_called_once_with()

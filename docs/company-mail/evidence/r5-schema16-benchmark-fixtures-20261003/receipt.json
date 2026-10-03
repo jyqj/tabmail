@@ -1,0 +1,146 @@
+{
+  "base": "aeed47f0e1998d9925acb680992b051463821d69",
+  "readonly_integration_docs_head": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+  "target_ci_run": 37151630259,
+  "target_job": 111286597343,
+  "python": "3.12.14",
+  "source_migration_max": 19,
+  "synthetic_pipeline_schema": 16,
+  "test_file_sha256": "aba195d6505956b39819ec1d988438c990ef4bf99fd0b725abf1c9ae090e14be",
+  "tests": [
+    {
+      "log": "initial-test-r5-benchmark.log",
+      "status": "FAIL",
+      "tests": 106,
+      "failures": 1,
+      "errors": 36,
+      "failure_ids": [
+        "test_M_search_threshold_preserved (test_r5_benchmark.BenchmarkEvidenceTests.test_M_search_threshold_preserved)",
+        "test_actual_claim_digest_inflight_and_sixstream_evidence_required (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_claim_digest_inflight_and_sixstream_evidence_required)",
+        "test_actual_distribution_and_fingerprints_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_distribution_and_fingerprints_rejected)",
+        "test_actual_plan_metadata_and_resource_scope_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_plan_metadata_and_resource_scope_rejected)",
+        "test_actual_plan_relation_not_quota_or_parameter_substring (test_r5_benchmark.BenchmarkEvidenceTests.test_actual_plan_relation_not_quota_or_parameter_substring)",
+        "test_complete_tool_pipeline_and_workloads_still_not_S_M (test_r5_benchmark.BenchmarkEvidenceTests.test_complete_tool_pipeline_and_workloads_still_not_S_M)",
+        "test_current_pipeline_observation_absence_is_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_current_pipeline_observation_absence_is_rejected)",
+        "test_current_schema_cannot_select_frozen_legacy_exemption (test_r5_benchmark.BenchmarkEvidenceTests.test_current_schema_cannot_select_frozen_legacy_exemption)",
+        "test_direct_pipeline_shapes_tool_S_M_preserve_population_boundaries (test_r5_benchmark.BenchmarkEvidenceTests.test_direct_pipeline_shapes_tool_S_M_preserve_population_boundaries)",
+        "test_formal_parser_drain_observations_cannot_be_echo_or_unjoined (test_r5_benchmark.BenchmarkEvidenceTests.test_formal_parser_drain_observations_cannot_be_echo_or_unjoined)",
+        "test_missing_zero_duplicate_nonfinite_measurements_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_missing_zero_duplicate_nonfinite_measurements_rejected)",
+        "test_new_execution_requires_actual_wall_and_sample_clock (test_r5_benchmark.BenchmarkEvidenceTests.test_new_execution_requires_actual_wall_and_sample_clock)",
+        "test_observation_and_safety_scope_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_observation_and_safety_scope_rejected)",
+        "test_parser_guard_requires_actual_minimum_and_original_deadline (test_r5_benchmark.BenchmarkEvidenceTests.test_parser_guard_requires_actual_minimum_and_original_deadline)",
+        "test_partial_or_fake_shape_does_not_certify_scale (test_r5_benchmark.BenchmarkEvidenceTests.test_partial_or_fake_shape_does_not_certify_scale)",
+        "test_pipeline_actual_claim_counts_pairing_and_heap_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_actual_claim_counts_pairing_and_heap_rejected)",
+        "test_pipeline_checkpoint_missing_duplicate_unknown_or_wrong_phase_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_checkpoint_missing_duplicate_unknown_or_wrong_phase_rejected)",
+        "test_pipeline_duplicate_json_and_cli_absence_fail_closed (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_duplicate_json_and_cli_absence_fail_closed)",
+        "test_pipeline_stage_wall_cannot_escape_actual_execution_wall (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_stage_wall_cannot_escape_actual_execution_wall)",
+        "test_pipeline_window_terminal_and_illegal_number_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_pipeline_window_terminal_and_illegal_number_rejected)",
+        "test_preparation_explain_must_be_actual_mail_index_jobs_plan_tree (test_r5_benchmark.BenchmarkEvidenceTests.test_preparation_explain_must_be_actual_mail_index_jobs_plan_tree)",
+        "test_strict_types_unknown_sampling_schema_and_tool_mode (test_r5_benchmark.BenchmarkEvidenceTests.test_strict_types_unknown_sampling_schema_and_tool_mode)",
+        "test_tool_only_shape_never_certifies_original_scale (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_only_shape_never_certifies_original_scale)",
+        "test_tool_resources_seed_and_sampling_unknown_rejected (test_r5_benchmark.BenchmarkEvidenceTests.test_tool_resources_seed_and_sampling_unknown_rejected)",
+        "test_validated_shape_still_not_task_or_product_approval (test_r5_benchmark.BenchmarkEvidenceTests.test_validated_shape_still_not_task_or_product_approval)",
+        "test_validator_required_fields_match_actual_Go_preparation_json (test_r5_benchmark.BenchmarkEvidenceTests.test_validator_required_fields_match_actual_Go_preparation_json)",
+        "test_actual_permutation_fifo_fairness_mailbox_mapping_and_diversity_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_actual_permutation_fifo_fairness_mailbox_mapping_and_diversity_rejected)",
+        "test_actual_pg_observation_not_metadata_or_uid_equivalence_claim (test_r5_benchmark.BenchmarkLookaheadTests.test_actual_pg_observation_not_metadata_or_uid_equivalence_claim)",
+        "test_archived_selection_exact_source_method_contract_argv_environment (test_r5_benchmark.BenchmarkLookaheadTests.test_archived_selection_exact_source_method_contract_argv_environment)",
+        "test_cli_invalid_or_missing_optin_contract_rejected_without_go (test_r5_benchmark.BenchmarkLookaheadTests.test_cli_invalid_or_missing_optin_contract_rejected_without_go)",
+        "test_default_v1_and_history_cannot_auto_select_or_accept_new_fields (test_r5_benchmark.BenchmarkLookaheadTests.test_default_v1_and_history_cannot_auto_select_or_accept_new_fields)",
+        "test_explicit_contract_population_and_non_equivalence_boundary (test_r5_benchmark.BenchmarkLookaheadTests.test_explicit_contract_population_and_non_equivalence_boundary)",
+        "test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval (test_r5_benchmark.BenchmarkLookaheadTests.test_new_original_S_complete_grammar_preserves_all_workloads_and_not_approval)",
+        "test_pseudo_history_and_duplicate_selection_json_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_pseudo_history_and_duplicate_selection_json_rejected)",
+        "test_scheduler_complete_joined_counts_and_numeric_aliases_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_scheduler_complete_joined_counts_and_numeric_aliases_rejected)",
+        "test_unknown_missing_duplicate_and_type_alias_method_contract_rejected (test_r5_benchmark.BenchmarkLookaheadTests.test_unknown_missing_duplicate_and_type_alias_method_contract_rejected)",
+        "test_runner_default_overrides_ambient_optin_and_selected_source_must_match (test_r5_benchmark.BenchmarkCurrentSourcePolicyTests.test_runner_default_overrides_ambient_optin_and_selected_source_must_match)"
+      ]
+    },
+    {
+      "log": "after-fixture-test-r5-benchmark.log",
+      "status": "FAIL",
+      "tests": 109,
+      "failures": 2,
+      "errors": 0,
+      "failure_ids": [
+        "test_runner_default_overrides_ambient_optin_and_selected_source_must_match (test_r5_benchmark.BenchmarkCurrentSourcePolicyTests.test_runner_default_overrides_ambient_optin_and_selected_source_must_match)",
+        "test_cli_invalid_or_missing_optin_contract_rejected_without_go (test_r5_benchmark.BenchmarkLookaheadTests.test_cli_invalid_or_missing_optin_contract_rejected_without_go) (args=[])"
+      ]
+    },
+    {
+      "log": "final-test-r5-benchmark.log",
+      "status": "FAIL",
+      "tests": 110,
+      "failures": 1,
+      "errors": 0,
+      "failure_ids": [
+        "test_cli_invalid_or_missing_optin_contract_rejected_without_go (test_r5_benchmark.BenchmarkLookaheadTests.test_cli_invalid_or_missing_optin_contract_rejected_without_go) (args=[])"
+      ]
+    },
+    {
+      "log": "final2-test-r5-benchmark.log",
+      "status": "PASS",
+      "tests": 111,
+      "failures": 0,
+      "errors": 0,
+      "failure_ids": []
+    },
+    {
+      "log": "test-r5-current-benchmark.log",
+      "status": "PASS",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "failure_ids": []
+    },
+    {
+      "log": "test-r5-archive-boundary.log",
+      "status": "PASS",
+      "tests": 15,
+      "failures": 0,
+      "errors": 0,
+      "failure_ids": []
+    },
+    {
+      "log": "test-r5-ci-wiring.log",
+      "status": "PASS",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "failure_ids": []
+    },
+    {
+      "log": "test-r5-source-version-runner.log",
+      "status": "PASS",
+      "tests": 4,
+      "failures": 1,
+      "errors": 0,
+      "failure_ids": [
+        "test_fail (test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green.<locals>.Bad.test_fail)"
+      ]
+    }
+  ],
+  "final_pass_tests": 156,
+  "notrun": [
+    "full integration suite (existing fixed-source batch4 receipt consulted)",
+    "actual Go/PG/S/M/L benchmark runtime",
+    "new CI run",
+    "draft PR creation: GitHub API Forbidden"
+  ],
+  "production_validator_changed": false,
+  "historical_evidence_changed": false,
+  "central_todo_changed": false,
+  "skills_lookup": {
+    "/workspace/.agents": "empty",
+    "base .agents/skills": "absent at fixed commit"
+  },
+  "dependency_install": {
+    "lock": "scripts/requirements-contract.txt",
+    "registry": "https://pypi.org/simple",
+    "venv": "/workspace/r5-benchmark-venv",
+    "cache": "/workspace/r5-benchmark-cache"
+  },
+  "api_errors": [
+    "gh pr view 23: Post https://api.github.com/graphql: Forbidden",
+    "gh run view 37151630259 --job 111286597343 --log: Get https://api.github.com/repos/jyqj/tabmail/actions/jobs/111286597343: Forbidden"
+  ],
+  "authorization_boundary": "Stopped further GitHub API actions after Forbidden; origin git fetch succeeded independently. No merge/deploy."
+}
