@@ -279,10 +279,54 @@ func TestOwnerBDATCapturesPrivateResultEvenWhenNextChannelFull(t *testing.T) {
 type ownerTailLogger struct {
 	entered chan struct{}
 	release <-chan struct{}
+	once    sync.Once
 }
 
-func (l *ownerTailLogger) Printf(string, ...interface{}) { close(l.entered); <-l.release }
-func (*ownerTailLogger) Println(...interface{})          {}
+func (l *ownerTailLogger) Printf(string, ...interface{}) {
+	// Only the entry notification is one-shot; every logging tail owns the gate.
+	l.once.Do(func() { close(l.entered) })
+	<-l.release
+}
+func (*ownerTailLogger) Println(...interface{}) {}
+
+func TestOwnerTailLoggerRepeatedConcurrentCallsWaitForRelease(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		gate, release := ownerRelease(t)
+		logger := &ownerTailLogger{entered: make(chan struct{}), release: gate}
+		const concurrentCalls = 8
+		returned := make(chan struct{}, 1+concurrentCalls)
+		call := func() {
+			logger.Printf("tail")
+			returned <- struct{}{}
+		}
+		go call()
+		ownerAwait(t, logger.entered)
+		synctest.Wait()
+		select {
+		case <-returned:
+			t.Fatal("first Printf returned before release")
+		default:
+		}
+		// Entry has already been signaled: subsequent concurrent calls must
+		// still wait on the release gate.
+		for i := 0; i < concurrentCalls; i++ {
+			go call()
+		}
+		synctest.Wait()
+		select {
+		case <-returned:
+			t.Fatal("Printf returned before release")
+		default:
+		}
+		release()
+		for i := 0; i < 1+concurrentCalls; i++ {
+			ownerAwait(t, returned)
+		}
+		// Serve can log again after the DATA recovery tail exits.
+		logger.Printf("later tail")
+		logger.Printf("repeated later tail")
+	})
+}
 
 func TestOwnerBDATPanicTailIncludedInShutdown(t *testing.T) {
 	synctest.Test(t, func(t *testing.T) {
