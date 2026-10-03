@@ -1,0 +1,38 @@
+{
+  "baseline": "8de4809516a39ad43b0e17afa288bcedab8b40a7",
+  "central_todo_edits": false,
+  "go_invoked": false,
+  "inventory_sha256": {
+    "fixed": "174189678fd15e3c4b73d3adb9c82965be75e279c49efcf161ea748fcdbf735c",
+    "old": "b7d65a4d8f702a2aca14c608bc3be4bcda79e5f4fdcd3200c2c4706dfbbf0dae"
+  },
+  "logs_sha256": {
+    "fixed.raw.log": "7260f58fb1c37ddd3a666086abff6f3b4d9f1d31e938dc35af22becbbcc688c5",
+    "old.raw.log": "35129be8f5b7ac60a09efe08f82e8037cf726e0b5adf3fd6435ffe0c1ee665f4"
+  },
+  "oracle_sha256": "e9d8c6f413754452227cb0df249f98ce571107088af0384a57d12f264d26bcca",
+  "production_edits": false,
+  "python": "3.12.14",
+  "runs": {
+    "fixed": {
+      "exit": 1,
+      "failed_methods": 2,
+      "failed_subcases": 8,
+      "methods": 9,
+      "pass": 7,
+      "skip": 0
+    },
+    "old": {
+      "exit": 1,
+      "failed_methods": 6,
+      "failed_subcases": 48,
+      "methods": 9,
+      "pass": 1,
+      "skip": 2
+    }
+  },
+  "runtime_qualification": false,
+  "synthetic_only": true,
+  "target": "64cd11816cfd94c9dc80e65578edb06b92725e84",
+  "verdict": "bounded_reject"
+}
