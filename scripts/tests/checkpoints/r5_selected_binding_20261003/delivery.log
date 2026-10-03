@@ -1,0 +1,22 @@
+{
+  "Method19_SML_wholeCI": "unknown",
+  "actual_capture_exit": 0,
+  "actual_package_records": 630,
+  "actual_root_mvs": 138,
+  "actual_validate_exit": 0,
+  "attestation_sha256": "0c3183c111567a65f48f694a28be9abebfd3b8b1639f628a72864724ab24af7f",
+  "code_freeze_git_oid": "9d53d54035d62d31d122419a5d4f0a8770835476",
+  "draft_pr": "blocked_existing_GH_TOKEN_invalid_no_identity_remote_permissions_fallback",
+  "evidence_commit_boundary": "Evidence-only appends after code freeze do not claim a new VCS-stamped run on the append commit.",
+  "fresh_pure_methods": 60,
+  "generated_testmain_records": 60,
+  "metadata_checkout": "/workspace/tabmail-selected-checkout",
+  "metadata_helper_edited": false,
+  "overall": "BLOCKED_PENDING_SEPARATE_EXCLUDED_METADATA_RACE_REPAIR",
+  "product_tests_run": false,
+  "pure_seconds": 16.383,
+  "receipt_byte_sha256": "8a3bf63355ce3742baab9936c29c64a5232540321cb308008981d473a9b637da",
+  "source_closure_sha256": "94f241fcbddf972bb90636bb9afd1b6555a8f7670ad889b85649167bfb0018cc",
+  "source_sha": "f0a9b8162e56e0459d58e52bf6084a71b194200d",
+  "unique_selected_local": 611
+}
