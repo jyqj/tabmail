@@ -209,10 +209,14 @@ def observe(source, root, archive, default, race, node):
         receipts = {name:files.file(path) for name,path in [('archive',archive),('default',default),('race',race)]}
         archived = source_inventory.strict_json(receipts['archive'])
         source_inventory.validate_current_source(archived, source, purpose='protocol', policy=source_inventory.ARCHIVE_POLICY)
+        if archived.get('build_context') != dict(selected.CONTEXT,build_tag_sets=[[],['r5protocol']]):
+            raise ValueError('shared-components archive context must bind both consumer tag sets')
         for name, context in [('default', selected.DEFAULT_CONTEXT),('race',selected.CONTEXT)]:
             receipt = source_inventory.strict_json(receipts[name])
             if receipt.get('policy') != selected.POLICY or receipt.get('base_source',{}).get('build_context') != context or receipt.get('base_source',{}).get('snapshot_root') != str(source):
                 raise ValueError('selected context/root differs')
+            if receipt['base_source']['files'] != archived['files']:
+                raise ValueError('selected/archive source files differ')
         git = str(Path(shutil.which('git')).resolve())
         if not (source/'.git').is_dir() or (source/'.git').is_symlink():
             raise ValueError('real Git checkout required')
