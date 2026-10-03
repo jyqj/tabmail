@@ -292,6 +292,12 @@
     "origin_fetch": "success for exact source and integration evidence commits",
     "github_auth_probe": "failed token validation; not an origin git denial",
     "github_API": "actual Forbidden for CI job read; no alternative route or identity attempted",
-    "draft_PR": "BLOCKED by actual API denial; reviewable PR body supplied, no successful creation claimed"
+    "draft_PR": "BLOCKED by actual API denial; reviewable PR body supplied, no successful creation claimed",
+    "origin_push": {
+      "status": "success",
+      "branch": "fix/r5-transaction-inventory",
+      "first_commit": "1c197e88ea557b90a3581fa3cfdd1e10b7d7cc29",
+      "final_evidence_commit": "reported by final git HEAD; ordinary fast-forward push"
+    }
   }
 }
