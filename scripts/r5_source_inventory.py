@@ -4,6 +4,8 @@ This is a directory superset, NOT go list's selected compiler inputs, module
 cache/toolchain/native-library attestation, or a cross-platform runtime result.
 All build-tag variants are captured; only the declared context is admitted.
 Historical files-only identities must never be computed through this policy.
+The incompatible root-selected companion is scripts/r5_selected_source_binding.py;
+its attestation does not change v2/v3 qualification or admit METHOD/runtime.
 """
 from __future__ import annotations
 import hashlib
@@ -12,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import shlex
+import stat
 
 POLICY = 'r5_current_local_inputs_v2'
 KIND = 'policy_bound_local_input_superset_sha1_v2'
@@ -41,6 +44,10 @@ BOUNDARY = ('Complete declared repository-local directory input superset; includ
             'toolchain, native libraries, installed npm dependencies, or cross-platform execution')
 EXCLUDED_DIRS = {'.git', 'node_modules', '.next', '.vercel', 'coverage', '__pycache__',
                  '.pytest_cache', '.mypy_cache', '.cache', 'out', 'build', 'dist'}
+# Shared across all excluded subtrees of each exact local fork, per inventory
+# pass. Artifact bytes and names do not enter SOURCE; these limits do.
+EXCLUDED_METADATA_MAX_ENTRIES = 4096
+EXCLUDED_METADATA_MAX_DEPTH = 32
 ROOT_FILES = {'go.mod', 'go.sum', 'Dockerfile', 'Makefile', '.env.example', '.gitignore'}
 FIXED = {
     'protocol': {'docs/company-mail/R5-PROTOCOL.md', 'docs/company-mail/evidence/R5-PROTOCOL-CASES.json'},
@@ -115,9 +122,93 @@ def bound_environment(context, environment):
     return env
 
 
+def _check_excluded_metadata(root, path, budget):
+    """Inspect metadata without body reads, using Linux O_PATH handles.
+
+    For each entry, compare no-follow path stat with a metadata-only handle's
+    type/device/inode, and repeat that comparison after inspection. Directories
+    are enumerated through an identity-matched no-follow directory descriptor.
+    The closing O_PATH acquisition catches replacement after the closing stat,
+    including the review's second-stat scheduling hook. These are observation
+    points, not an atomic snapshot or a promise about future filesystem changes.
+    O_PATH never opens FIFO/device I/O; unsupported primitives fail closed.
+    """
+    def identity(info):
+        return (stat.S_IFMT(info.st_mode), info.st_dev, info.st_ino)
+
+    def bound_metadata(parent_fd, name, expected):
+        handle = os.open(name, metadata_flags, dir_fd=parent_fd)
+        try:
+            observed = os.fstat(handle)
+            if identity(observed) != identity(expected):
+                raise ValueError('excluded metadata unavailable or changed (identity mismatch)')
+        except BaseException:
+            os.close(handle)
+            raise
+        return handle
+
+    def visit(parent_fd, name, depth):
+        budget[0] += 1
+        if budget[0] > EXCLUDED_METADATA_MAX_ENTRIES:
+            raise ValueError('excluded metadata entry budget exceeded')
+        if depth > EXCLUDED_METADATA_MAX_DEPTH:
+            raise ValueError('excluded metadata depth budget exceeded')
+        before = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+        mode = before.st_mode
+        if stat.S_ISLNK(mode):
+            raise ValueError('symlinked excluded inventory entry')
+        if name == 'go.mod':
+            raise ValueError('unknown nested module in excluded directory')
+        if not (stat.S_ISREG(mode) or stat.S_ISDIR(mode)):
+            raise ValueError('special or unknown excluded inventory entry')
+        handle = bound_metadata(parent_fd, name, before)
+        try:
+            if stat.S_ISDIR(mode):
+                fd = os.open(name, directory_flags, dir_fd=parent_fd)
+                try:
+                    if identity(os.fstat(fd)) != identity(before):
+                        raise ValueError('excluded metadata unavailable or changed (identity mismatch)')
+                    with os.scandir(fd) as entries:
+                        for entry in entries:
+                            visit(fd, entry.name, depth + 1)
+                finally:
+                    os.close(fd)
+            after = os.stat(name, dir_fd=parent_fd, follow_symlinks=False)
+            if identity(after) != identity(before):
+                raise ValueError('excluded metadata unavailable or changed (identity mismatch)')
+            closing_handle = bound_metadata(parent_fd, name, before)
+            os.close(closing_handle)
+        finally:
+            # Keep the original object bound until the closing observation;
+            # unlink/recreate cannot recycle its inode while this FD is held.
+            os.close(handle)
+
+    try:
+        # O_PATH is Linux-specific. Do not substitute ordinary open on a
+        # platform lacking metadata-only, no-follow acquisition.
+        import sys
+        if sys.platform != 'linux' or not all(hasattr(os, flag) for flag in
+                ('O_PATH', 'O_NOFOLLOW', 'O_DIRECTORY')):
+            raise ValueError('excluded metadata platform unsupported')
+        metadata_flags = os.O_PATH | os.O_NOFOLLOW
+        directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+        fd = os.open(root, directory_flags)
+        try:
+            for component in path.relative_to(root).parts[:-1]:
+                child_fd = os.open(component, directory_flags, dir_fd=fd)
+                os.close(fd)
+                fd = child_fd
+            visit(fd, path.name, 1)
+        finally:
+            os.close(fd)
+    except (OSError, AttributeError, NotImplementedError) as error:
+        raise ValueError('excluded metadata unavailable or changed') from error
+
+
 def _walk(root, directory, *, complete_local_module=False):
     base = checked_path(root, directory, directory=True)
     names = set()
+    metadata_budget = [0]
     def fail(error):
         raise error
     for current, dirs, files in os.walk(base, followlinks=False, onerror=fail):
@@ -125,6 +216,10 @@ def _walk(root, directory, *, complete_local_module=False):
         for entry in dirs + files:
             if (Path(current) / entry).is_symlink():
                 raise ValueError('symlinked inventory entry')
+        if complete_local_module:
+            for entry in dirs:
+                if entry in EXCLUDED_DIRS:
+                    _check_excluded_metadata(root, Path(current) / entry, metadata_budget)
         dirs[:] = sorted(d for d in dirs if d not in EXCLUDED_DIRS)
         for filename in files:
             if filename == '.DS_Store':
@@ -450,6 +545,11 @@ def _capture_smtp_owner_v3(root, *, purpose, policy, build_context):
                   'declared_go':documents['go.mod']['go'], 'declared_toolchain':documents['go.mod']['toolchain'],
                   'declared_requires':documents['go.mod']['requires'], 'local_modules':local_modules,
                   'local_module_file_selection':'all_regular_files_not_suffix_filtered_except_explicit_artifact_directories_and_DS_Store',
+                  'excluded_local_module_metadata':{
+                      'inspection':'names_and_lstat_types_only_no_regular_file_reads_no_symlink_following',
+                      'reject':['symlinks','nested_go.mod','special_or_unknown_types','unavailable_metadata','budget_exceeded'],
+                      'max_entries_per_local_module_per_pass':EXCLUDED_METADATA_MAX_ENTRIES,
+                      'max_depth_including_excluded_root':EXCLUDED_METADATA_MAX_DEPTH},
                   'effective_root_MVS_observed':False, 'go_selected_inputs_observed':False,
                   'external_module_cache_verified':False,
                   'boundary':'Declared root/local module metadata and complete local input superset only; actual root MVS/go-list/build/external-cache qualification is separate'}
@@ -487,3 +587,37 @@ def load_current_source(path, pinned_sha256, root, *, purpose, policy):
     if hashlib.sha256(raw).hexdigest() != pinned_sha256:
         raise ValueError('current source receipt byte hash differs')
     return validate_current_source(strict_json(raw), root, purpose=purpose, policy=policy)
+
+
+def main(argv=None):
+    """SOURCE-only capture/validate entry point; no build or runtime admission."""
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('action', choices=('capture', 'validate'))
+    parser.add_argument('--root', type=Path, required=True)
+    parser.add_argument('--purpose', choices=sorted(FIXED), required=True)
+    parser.add_argument('--policy', choices=SUPPORTED_POLICIES, required=True)
+    parser.add_argument('--build-context', help='exact build context JSON for capture')
+    parser.add_argument('--receipt', type=Path)
+    parser.add_argument('--receipt-sha256')
+    args = parser.parse_args(argv)
+    try:
+        if args.action == 'capture':
+            if args.build_context is None or args.receipt is not None or args.receipt_sha256 is not None:
+                raise ValueError('capture requires only explicit build context')
+            receipt = capture_current_source(args.root, purpose=args.purpose, policy=args.policy,
+                                             build_context=strict_json(args.build_context))
+        else:
+            if args.build_context is not None or args.receipt is None or args.receipt_sha256 is None:
+                raise ValueError('validate requires only receipt and explicit byte hash')
+            receipt = load_current_source(args.receipt, args.receipt_sha256, args.root,
+                                          purpose=args.purpose, policy=args.policy)
+        print(canonical(receipt).decode())
+        return 0
+    except (ValueError, OSError) as error:
+        print(json.dumps({'error': str(error)}))
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
