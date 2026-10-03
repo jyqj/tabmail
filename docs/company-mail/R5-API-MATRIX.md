@@ -338,3 +338,6 @@ P2已有 POST `/company/outbound/{id}/inspect`不在缺5之列；其freshselecte
 5d1b历史freeze时CreateProfile确为legacy pool单INSERT；后续source7ffe guarded新pure/PG/HTTP实际通过，当前formal Create走ProfileCreationStore/事务fresh权限与required审计，表内POST单行已按新证据更新，旧低层store仍不当formal fallback。原132-route freeze与Go0不回贴成新Create runtime。既有profile quota OpenAPI int64上限与当前service/DB int32限制差异另记待裁决，未凭新增SSE就宣全部schema一致。
 
 新guardedCreate语义更新只对应source7ffe该family运行证据，源码/字段改动记录见[独立更新](evidence/R5-API-PROFILECREATE-GUARDED-UPDATE-20261002.json)；不表示ordinaryDTO/BCC OpenAPI、全部132角色矩阵已同步或通过。
+
+
+第四批组合调用清单（2026-10-03）：保原严格收集器，legacy recipients 使用 existing detail 后为134分支、7转发、127映射。`R5-CLIENT-CALLS.json` 从实际组合重新生成，完整 `--check` PASS；历史专项附录的未注册失败保持。其余组合资格见中央 TODO 和 batch4 evidence。

@@ -2104,20 +2104,6 @@
     "callee": "request",
     "owner": "result",
     "expression": "`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`",
-    "path": "/api/v1/outbound/{id}/recipients",
-    "methods": [
-      "GET"
-    ],
-    "forwarding": false,
-    "routes": []
-  },
-  {
-    "source": "web/lib/legacy-outbound.ts",
-    "line": 18,
-    "branch": 2,
-    "callee": "request",
-    "owner": "result",
-    "expression": "`/api/v1/outbound/${encodeURIComponent(id)}${suffix}`",
     "path": "/api/v1/outbound/{id}/attempts",
     "methods": [
       "GET"
@@ -2129,7 +2115,7 @@
   },
   {
     "source": "web/lib/legacy-outbound.ts",
-    "line": 28,
+    "line": 29,
     "branch": 0,
     "callee": "request",
     "owner": "result",

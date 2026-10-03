@@ -2043,3 +2043,12 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - **10/171保持，父任务不关闭。** 无真实邮件/PG/Redis/外SMTP/被拒watchdog、秘密/权限变更、merge/forcepush/deploy。当前source清单与语义详 [current SOURCE qualification](R5-CURRENT-SOURCE-QUALIFICATION.md)，本轮真实证据详 [receipt](evidence/R5-INTEGRATION-BATCH3-20261003/receipt.json)。新分支push/连接GitHub PR API与固定headCI结果分别追加；拒绝即停对应动作，不换身份remote路线。
 
 - 本轮远端实际交付：首次普通 Git push 成功，`504b59731adb219c41ed685cd2029759f3c116d1` 已 ls-remote 同值确认；已连接 GitHub `create_pull_request` 首次成功创建 [draft PR #19](https://github.com/jyqj/tabmail/pull/19)，精确 base 二批 `b4803fe`。该固定 head CI 实际可读，0 workflow runs / 0 statuses / 0 check runs，原 main-only workflow 未改，不称四CI绿。交付head fresh验证与冻结SOURCE attestation匹配；随后仅docs-only交付状态commit/push。无拒绝动作重试、身份/remote/路线替换、merge/forcepush/deploy，10/171保持，本批完成即停。
+
+
+## 第四批固定组合 checkpoint — 2026-10-03
+
+- 新分支 `integration/company-mail-r5-batch4-20261003` 从 PR21 `41b015c30c66b3ba58a3c1395e8559ebcd27a65f` 派生；draft base 为既有 batch3 `5ae68c2d037603cd0151e1b9188f2df4db1e45a1`。无冲突合并 archive `66eb5e8`、clientscanner `d9713c1`、legacyalias `139b701`、browserjourney `1be7c84`、依赖 `d6640db`、lint `e044808`；保 ancestry 去重。旧 selected helper 未改，不纳入 209d stablefix；archive 独审仍另 session review 中，不称全 accepted。
+- 中央 client/API 清单按实际组合重新扫描并严格映射：134 branches / 7 explicit forwarders / 127 mapped，旧 recipients 通过 existing detail 实现；`node scripts/collect_api_calls.cjs --check` PASS，扫描门未改。历史 135 分支/recipients 未注册失败记录保持。
+- workspace 私有 venv 成功安装原官方 pinned requirements；未写 /home/agent/.local，不修改权限。源码 freeze 后组合 test/type/lint/build、archive/version/fresh cold-warm 与真实 CI 结果继续本批记录；本 checkpoint 不转授单支 PASS。
+- audit 已知 8 high / 0 critical（omit-dev 6）仍是 gate FAIL；PG 整包累计180s timeout、usage_held_allows_retry 与 SMTP ownerTailLogger.Printf 重复 close(entered) 由父另修，本批不修改这些文件。原 archive 全量2fail/64error/1skip/16未执行仅历史结果，正常依赖后按本组合实际重新分类。
+- 两 fork replace/schema19/root ./...、36 history bytes/528旧 evidence、current v4/v2 与旧四 actual-root 语义保留；10/171 不变。无 merge/deploy/force、Method19/SML/perf/真实邮件服务资格。
