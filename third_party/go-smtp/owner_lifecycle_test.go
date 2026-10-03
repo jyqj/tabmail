@@ -700,3 +700,39 @@ func TestOwnerClosedParseErrorsDoNotDispatchBufferedCommands(t *testing.T) {
 		})
 	}
 }
+
+// The public fork Close/second Shutdown remain interrupt-only. A retained first
+// Shutdown must cover the actual Logout tail before allowing resource release.
+func TestOwnerR5CloudLogoutTailRetainedJoin(t *testing.T) {
+	synctest.Test(t, func(t *testing.T) {
+		gate, release := ownerRelease(t)
+		entered := make(chan struct{})
+		session := &ownerSession{data: func(r io.Reader) error { _, err := io.Copy(io.Discard, r); return err }, logout: func() { close(entered); <-gate }}
+		s, c, serveDone := ownerStart(t, session)
+		ownerCommand(t, c, "DATA", "354")
+		ownerCommand(t, c, "Subject: synthetic\r\n\r\nbody\r\n.", "250")
+		c.Close()
+		ownerAwait(t, entered)
+		stopped := make(chan error, 1)
+		go func() { stopped <- s.Shutdown(context.Background()) }()
+		if err := ownerError(t, serveDone); err != nil {
+			t.Fatal(err)
+		}
+		synctest.Wait()
+		if err := s.Shutdown(context.Background()); !errors.Is(err, ErrServerClosed) {
+			t.Fatalf("second Shutdown: %v", err)
+		}
+		if err := s.Close(); !errors.Is(err, ErrServerClosed) {
+			t.Fatalf("Close: %v", err)
+		}
+		select {
+		case err := <-stopped:
+			t.Fatalf("Logout tail escaped retained join: %v", err)
+		default:
+		}
+		release()
+		if err := ownerError(t, stopped); err != nil {
+			t.Fatal(err)
+		}
+	})
+}
