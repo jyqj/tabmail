@@ -1,0 +1,713 @@
+{
+  "schema_version": 1,
+  "base_commit": "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6",
+  "diagnostic_commit": "ac5db2ee72b97b027a14d6e885d3870276bfaf82",
+  "status": "PREPARED_CANDIDATE_UNADOPTED",
+  "historical_vcs_failure": "NOT_REPRODUCED_ORIGINAL_CWD_UNAVAILABLE",
+  "selected": {
+    "default": {
+      "exit": 0,
+      "attestation_sha256": "e975e2571dcaf612ce85f4524afbb796dd870810ff443b2db8f9380492d064a8",
+      "source_sha": "4be68ffe9da9481502df3f23a2bf2d6bc4d84796",
+      "source_closure_sha256": "a60ff5475ff3ca6003abc15e9564b689f49ccdae9fd7c190a5642021f16c9d9c",
+      "package_records": 602,
+      "qualification": {
+        "Method19": "unknown",
+        "SML": "unknown",
+        "compiler_native": "unknown",
+        "excluded_metadata_boundary": "descriptor_checked",
+        "external_modulecache": "unknown",
+        "generated": "unknown",
+        "local_static_binding": "captured",
+        "overall": "blocked",
+        "wholeCI": "unknown"
+      },
+      "commands": [
+        {
+          "role": "attested_observation",
+          "argv": [
+            "env",
+            "-json"
+          ],
+          "exit": 0,
+          "stdout_sha256": "5f0f597e8564a6fe0fa81382a962e77f5209819caba79dc5e96324a9d4a4574f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-json",
+            "./...",
+            "github.com/jhillyerd/enmime/v2/...",
+            "github.com/emersion/go-smtp/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "e48ab8a43a47e04d2e68e7f820285ebfbb57d2c842b79c6dd3c831203138645f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-m",
+            "-json",
+            "all"
+          ],
+          "exit": 0,
+          "stdout_sha256": "2ec1040649ed3bfc14c70e56725f724e8f3ca9ab2a4d12fd35155855f44b1867",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-json",
+            "./..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "b567de4cac085ab1f2c013b7f9de1cc353de479e2f17b4ffd697193d82cfa4fe",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-json",
+            "./cmd/...",
+            "./internal/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "d9332f1f481f5303e890670d4cfccb5be512f622790d5ea92d18d16f7f94ccee",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-e",
+            "-mod=readonly",
+            "-json",
+            "./cmd/r5txinventory",
+            "./cmd/tabmail",
+            "./internal/api",
+            "./internal/api/handlers",
+            "./internal/api/lifecycle",
+            "./internal/api/middleware",
+            "./internal/app",
+            "./internal/app/admin",
+            "./internal/app/companymail",
+            "./internal/app/credentials",
+            "./internal/app/domains",
+            "./internal/app/drafts",
+            "./internal/app/employees",
+            "./internal/app/mailarchive",
+            "./internal/app/mailboxes",
+            "./internal/app/mailindex",
+            "./internal/app/messages",
+            "./internal/app/permissions",
+            "./internal/app/recovery",
+            "./internal/app/submissions",
+            "./internal/app/templates",
+            "./internal/architecture",
+            "./internal/authn",
+            "./internal/authz",
+            "./internal/autocreate",
+            "./internal/classify",
+            "./internal/company",
+            "./internal/config",
+            "./internal/configcache",
+            "./internal/delivery",
+            "./internal/dkim",
+            "./internal/hooks",
+            "./internal/ingest",
+            "./internal/mailcontent",
+            "./internal/metrics",
+            "./internal/models",
+            "./internal/outbound",
+            "./internal/policy",
+            "./internal/rawobject",
+            "./internal/realtime",
+            "./internal/resolver",
+            "./internal/retention",
+            "./internal/sanitize",
+            "./internal/settings",
+            "./internal/smtp",
+            "./internal/store",
+            "./internal/store/fileobj",
+            "./internal/store/postgres",
+            "./internal/store/s3obj",
+            "./internal/testpg",
+            "./internal/testutil",
+            "./internal/workqueue",
+            "github.com/jhillyerd/enmime/v2",
+            "github.com/jhillyerd/enmime/v2/cmd",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+            "github.com/jhillyerd/enmime/v2/dsn",
+            "github.com/jhillyerd/enmime/v2/internal/coding",
+            "github.com/jhillyerd/enmime/v2/internal/stringutil",
+            "github.com/jhillyerd/enmime/v2/internal/test",
+            "github.com/jhillyerd/enmime/v2/internal/textproto",
+            "github.com/jhillyerd/enmime/v2/mediatype",
+            "github.com/emersion/go-smtp",
+            "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+          ],
+          "exit": 0,
+          "stdout_sha256": "449ac0af88760bf9bf015ea5136fdd513f77a94e698822dc4c93e09af04c376e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-json",
+            "./...",
+            "github.com/jhillyerd/enmime/v2/...",
+            "github.com/emersion/go-smtp/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "e48ab8a43a47e04d2e68e7f820285ebfbb57d2c842b79c6dd3c831203138645f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-m",
+            "-json",
+            "all"
+          ],
+          "exit": 0,
+          "stdout_sha256": "2ec1040649ed3bfc14c70e56725f724e8f3ca9ab2a4d12fd35155855f44b1867",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-json",
+            "./..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "b567de4cac085ab1f2c013b7f9de1cc353de479e2f17b4ffd697193d82cfa4fe",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-json",
+            "./cmd/...",
+            "./internal/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "d9332f1f481f5303e890670d4cfccb5be512f622790d5ea92d18d16f7f94ccee",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-e",
+            "-mod=readonly",
+            "-json",
+            "./cmd/r5txinventory",
+            "./cmd/tabmail",
+            "./internal/api",
+            "./internal/api/handlers",
+            "./internal/api/lifecycle",
+            "./internal/api/middleware",
+            "./internal/app",
+            "./internal/app/admin",
+            "./internal/app/companymail",
+            "./internal/app/credentials",
+            "./internal/app/domains",
+            "./internal/app/drafts",
+            "./internal/app/employees",
+            "./internal/app/mailarchive",
+            "./internal/app/mailboxes",
+            "./internal/app/mailindex",
+            "./internal/app/messages",
+            "./internal/app/permissions",
+            "./internal/app/recovery",
+            "./internal/app/submissions",
+            "./internal/app/templates",
+            "./internal/architecture",
+            "./internal/authn",
+            "./internal/authz",
+            "./internal/autocreate",
+            "./internal/classify",
+            "./internal/company",
+            "./internal/config",
+            "./internal/configcache",
+            "./internal/delivery",
+            "./internal/dkim",
+            "./internal/hooks",
+            "./internal/ingest",
+            "./internal/mailcontent",
+            "./internal/metrics",
+            "./internal/models",
+            "./internal/outbound",
+            "./internal/policy",
+            "./internal/rawobject",
+            "./internal/realtime",
+            "./internal/resolver",
+            "./internal/retention",
+            "./internal/sanitize",
+            "./internal/settings",
+            "./internal/smtp",
+            "./internal/store",
+            "./internal/store/fileobj",
+            "./internal/store/postgres",
+            "./internal/store/s3obj",
+            "./internal/testpg",
+            "./internal/testutil",
+            "./internal/workqueue",
+            "github.com/jhillyerd/enmime/v2",
+            "github.com/jhillyerd/enmime/v2/cmd",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+            "github.com/jhillyerd/enmime/v2/dsn",
+            "github.com/jhillyerd/enmime/v2/internal/coding",
+            "github.com/jhillyerd/enmime/v2/internal/stringutil",
+            "github.com/jhillyerd/enmime/v2/internal/test",
+            "github.com/jhillyerd/enmime/v2/internal/textproto",
+            "github.com/jhillyerd/enmime/v2/mediatype",
+            "github.com/emersion/go-smtp",
+            "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+          ],
+          "exit": 0,
+          "stdout_sha256": "449ac0af88760bf9bf015ea5136fdd513f77a94e698822dc4c93e09af04c376e",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "go_version": "go1.25.7"
+    },
+    "race-r5protocol": {
+      "exit": 0,
+      "attestation_sha256": "7047599f4e9160f5b759f839a417e78bdf9c9995a5dbd8588614ec953ec91106",
+      "source_sha": "22a698311321364c2065a04844172f57c90a3ad0",
+      "source_closure_sha256": "6e3fca9a5b2ea82923a9ce5e9aebdc5cda36cfba81c20d67533072757f6d5b51",
+      "package_records": 604,
+      "qualification": {
+        "Method19": "unknown",
+        "SML": "unknown",
+        "compiler_native": "unknown",
+        "excluded_metadata_boundary": "descriptor_checked",
+        "external_modulecache": "unknown",
+        "generated": "unknown",
+        "local_static_binding": "captured",
+        "overall": "blocked",
+        "wholeCI": "unknown"
+      },
+      "commands": [
+        {
+          "role": "attested_observation",
+          "argv": [
+            "env",
+            "-json"
+          ],
+          "exit": 0,
+          "stdout_sha256": "5f0f597e8564a6fe0fa81382a962e77f5209819caba79dc5e96324a9d4a4574f",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./...",
+            "github.com/jhillyerd/enmime/v2/...",
+            "github.com/emersion/go-smtp/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "d19a082206b8fa27d5d927de08cdc96321fbc1f0e79b25fbccddf7db199572f8",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-m",
+            "-json",
+            "all"
+          ],
+          "exit": 0,
+          "stdout_sha256": "2ec1040649ed3bfc14c70e56725f724e8f3ca9ab2a4d12fd35155855f44b1867",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "f10c13bc08362073b2f4dc5dd051e4869434c19e9e8ebb46be46807c25f877ff",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./cmd/...",
+            "./internal/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "9cece8ac59fb0566e3c629a929f0947eee3bd87e8fb2316460c9e2bde7ebb9ea",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-e",
+            "-mod=readonly",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./cmd/r5txinventory",
+            "./cmd/tabmail",
+            "./internal/api",
+            "./internal/api/handlers",
+            "./internal/api/lifecycle",
+            "./internal/api/middleware",
+            "./internal/app",
+            "./internal/app/admin",
+            "./internal/app/companymail",
+            "./internal/app/credentials",
+            "./internal/app/domains",
+            "./internal/app/drafts",
+            "./internal/app/employees",
+            "./internal/app/mailarchive",
+            "./internal/app/mailboxes",
+            "./internal/app/mailindex",
+            "./internal/app/messages",
+            "./internal/app/permissions",
+            "./internal/app/recovery",
+            "./internal/app/submissions",
+            "./internal/app/templates",
+            "./internal/architecture",
+            "./internal/authn",
+            "./internal/authz",
+            "./internal/autocreate",
+            "./internal/classify",
+            "./internal/company",
+            "./internal/config",
+            "./internal/configcache",
+            "./internal/delivery",
+            "./internal/dkim",
+            "./internal/hooks",
+            "./internal/ingest",
+            "./internal/mailcontent",
+            "./internal/metrics",
+            "./internal/models",
+            "./internal/outbound",
+            "./internal/policy",
+            "./internal/rawobject",
+            "./internal/realtime",
+            "./internal/resolver",
+            "./internal/retention",
+            "./internal/sanitize",
+            "./internal/settings",
+            "./internal/smtp",
+            "./internal/store",
+            "./internal/store/fileobj",
+            "./internal/store/postgres",
+            "./internal/store/s3obj",
+            "./internal/testpg",
+            "./internal/testutil",
+            "./internal/workqueue",
+            "github.com/jhillyerd/enmime/v2",
+            "github.com/jhillyerd/enmime/v2/cmd",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+            "github.com/jhillyerd/enmime/v2/dsn",
+            "github.com/jhillyerd/enmime/v2/internal/coding",
+            "github.com/jhillyerd/enmime/v2/internal/stringutil",
+            "github.com/jhillyerd/enmime/v2/internal/test",
+            "github.com/jhillyerd/enmime/v2/internal/textproto",
+            "github.com/jhillyerd/enmime/v2/mediatype",
+            "github.com/emersion/go-smtp",
+            "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+          ],
+          "exit": 0,
+          "stdout_sha256": "ab7326382694d74036e6664da8a1ebbc3dc33240afad70db24c9f7da45b7ddbe",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./...",
+            "github.com/jhillyerd/enmime/v2/...",
+            "github.com/emersion/go-smtp/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "d19a082206b8fa27d5d927de08cdc96321fbc1f0e79b25fbccddf7db199572f8",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-m",
+            "-json",
+            "all"
+          ],
+          "exit": 0,
+          "stdout_sha256": "2ec1040649ed3bfc14c70e56725f724e8f3ca9ab2a4d12fd35155855f44b1867",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "f10c13bc08362073b2f4dc5dd051e4869434c19e9e8ebb46be46807c25f877ff",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./cmd/...",
+            "./internal/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "9cece8ac59fb0566e3c629a929f0947eee3bd87e8fb2316460c9e2bde7ebb9ea",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "role": "attested_observation",
+          "argv": [
+            "list",
+            "-e",
+            "-mod=readonly",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./cmd/r5txinventory",
+            "./cmd/tabmail",
+            "./internal/api",
+            "./internal/api/handlers",
+            "./internal/api/lifecycle",
+            "./internal/api/middleware",
+            "./internal/app",
+            "./internal/app/admin",
+            "./internal/app/companymail",
+            "./internal/app/credentials",
+            "./internal/app/domains",
+            "./internal/app/drafts",
+            "./internal/app/employees",
+            "./internal/app/mailarchive",
+            "./internal/app/mailboxes",
+            "./internal/app/mailindex",
+            "./internal/app/messages",
+            "./internal/app/permissions",
+            "./internal/app/recovery",
+            "./internal/app/submissions",
+            "./internal/app/templates",
+            "./internal/architecture",
+            "./internal/authn",
+            "./internal/authz",
+            "./internal/autocreate",
+            "./internal/classify",
+            "./internal/company",
+            "./internal/config",
+            "./internal/configcache",
+            "./internal/delivery",
+            "./internal/dkim",
+            "./internal/hooks",
+            "./internal/ingest",
+            "./internal/mailcontent",
+            "./internal/metrics",
+            "./internal/models",
+            "./internal/outbound",
+            "./internal/policy",
+            "./internal/rawobject",
+            "./internal/realtime",
+            "./internal/resolver",
+            "./internal/retention",
+            "./internal/sanitize",
+            "./internal/settings",
+            "./internal/smtp",
+            "./internal/store",
+            "./internal/store/fileobj",
+            "./internal/store/postgres",
+            "./internal/store/s3obj",
+            "./internal/testpg",
+            "./internal/testutil",
+            "./internal/workqueue",
+            "github.com/jhillyerd/enmime/v2",
+            "github.com/jhillyerd/enmime/v2/cmd",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+            "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+            "github.com/jhillyerd/enmime/v2/dsn",
+            "github.com/jhillyerd/enmime/v2/internal/coding",
+            "github.com/jhillyerd/enmime/v2/internal/stringutil",
+            "github.com/jhillyerd/enmime/v2/internal/test",
+            "github.com/jhillyerd/enmime/v2/internal/textproto",
+            "github.com/jhillyerd/enmime/v2/mediatype",
+            "github.com/emersion/go-smtp",
+            "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+          ],
+          "exit": 0,
+          "stdout_sha256": "ab7326382694d74036e6664da8a1ebbc3dc33240afad70db24c9f7da45b7ddbe",
+          "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "go_version": "go1.25.7"
+    }
+  },
+  "after_install_validation": {
+    "validated": true,
+    "wrong_rehashed_identity_rejected": "selected attestation missing/extra/drifted/context mismatch",
+    "external_install_did_not_change_source": true,
+    "selected_local_identical": true,
+    "source_sha": "4be68ffe9da9481502df3f23a2bf2d6bc4d84796",
+    "attestation_sha256": "e975e2571dcaf612ce85f4524afbb796dd870810ff443b2db8f9380492d064a8"
+  },
+  "dependency_preparation": {
+    "npm_ci_exit": 0,
+    "lock_sha256": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3",
+    "package_sha256": "6e9773cbcd93725430a305ea0e9284fb753a6970bdf124a4747f16d57565f6e8",
+    "manifest_sha256": "de799627fb9b0bee6a7d104801982230bdf512091b7072b2800e698d6f928363",
+    "lock_package_records": 857,
+    "regular_files": 45584,
+    "exact_bin_links": 41,
+    "regular_bytes": 775103182,
+    "status": "PREPARED_CANDIDATE_UNADOPTED"
+  },
+  "negative_controls": {
+    "count": 12,
+    "result": "PASS",
+    "scope": "candidate preparation only"
+  },
+  "shared_components": {
+    "status": "NOTRUN_DEPENDENCY_POLICY_UNADOPTED",
+    "actual_started": false,
+    "go_race_budget_seconds": 120,
+    "process_budget_seconds": 180
+  },
+  "product_green": false,
+  "task_complete": false,
+  "raw_evidence": {
+    "selected-default-clean.json": {
+      "sha256": "45c9e748b1defb1fcd03bde8fd2d138e3b9a7f31b32a754ee7b0edb1a9e1a1bd",
+      "bytes": 1375953
+    },
+    "selected-default-clean.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "selected-race-clean.json": {
+      "sha256": "8ea826598040dbefae1954199cb9762696515cc1f70330976d996a52997f4219",
+      "bytes": 1378792
+    },
+    "selected-race-clean.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "selected-validation.json": {
+      "sha256": "a0b28bec864488048a05407d99fae4e86348deb13f2711956d092ad1c995b4ce",
+      "bytes": 349
+    },
+    "selected-validation.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "git-clean-probes.json": {
+      "sha256": "09f66f4075484c35af084634a4c19932bdeca37163c6f551f9df3969028dc2f4",
+      "bytes": 2578
+    },
+    "dependency-candidate.json": {
+      "sha256": "cdd857398f865b048567b5e446355d19b274f70b8e2ce3699d07807194202475",
+      "bytes": 7519245
+    },
+    "dependency-candidate.stderr": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "npm-ci.stdout": {
+      "sha256": "77f92e6f7c66cfa057bcb4c4ac46cc0d19c033ec7d8c628c9ff3f15a2dd19b25",
+      "bytes": 27
+    },
+    "npm-ci.stderr": {
+      "sha256": "9c06cf1a9709d4e19ec0a9b7488f4d9a8ea575baf77ab26cfe28e8c863cc376c",
+      "bytes": 93
+    },
+    "resolver-probes.json": {
+      "sha256": "5933b3ae3f5c0da24058ec39acc50e1d6bcd8b7fc9ac4a9f0a4cdc4d17c22092",
+      "bytes": 2933
+    },
+    "negative-controls.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "negative-controls.stderr": {
+      "sha256": "f14fa4d68125be780e9740d44119802d97d828ad67e5d698da64639170ef5df2",
+      "bytes": 111
+    }
+  }
+}
