@@ -9,11 +9,11 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | Current19 D1九leaf/D2clean/D3BS六top8leaf10race各独审actualP，C0/V8 pretestINFRA_UNKNOWN无终态，V9只SOURCE待审不C资格；原A/旧D2F保。P5编码8top34P非race与workqueue24top28raceP独审限定，不PGHTTP/send或正式shutdown。PGphaseR3 B2/B5仍SOURCEblock/watchdog N1合同接受但formalexact8/runtime拒；C18/Method19/Docker四CI未资格，10/171保 |
-| 下一可执行任务 | V9 Conly observer SOURCE独审→root单次C；PGphase lifecycle竞态/native后代与watchdog drained真实证/terminalflush独立修，HARD1200不删；formalcaller boundedshutdown和SMTP ctx/sessionjoin分写集→新实际门禁；编码PGHTTP权限链、C18-09/07/02/05/06/current19Method/完整CI-shipping，不复已绿scope |
+| 当前阶段 | 新组合树 API/SMTP/前端限定复验见文末集成日志；真实 caller/SMTP/API SOURCE 已接线，完整 fullcaller realPG/Redis 与 browser 仍未验。Current19 D1九leaf/D2clean/D3BS六top8leaf10race各独审actualP，C0/V8 pretestINFRA_UNKNOWN无终态，V9只SOURCE待审不C资格；原A/旧D2F保。P5编码8top34P非race与workqueue24top28raceP独审限定，不PGHTTP/send或正式shutdown。PGphaseR3 B2/B5仍SOURCEblock/watchdog N1合同接受但formalexact8/runtime拒；C18/Method19/Docker四CI未资格，10/171保 |
+| 下一可执行任务 | V9 Conly observer SOURCE独审→root单次C；PGphase lifecycle竞态/native后代与watchdog drained真实证/terminalflush独立修，HARD1200不删；已接线 formalcaller/SMTP/API → fullcaller realPG/Redis、真实角色signal与durable门禁；旧Go组件baseline producer另设计secure验收，不能拿历史insecure红宣布新安全通过；编码PGHTTP权限链、C18-09/07/02/05/06/current19Method/完整CI-shipping，不复已绿scope |
 | 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
 | 实现完成数 | 10 / 171；P0 为 10 / 12。010–090及110基线已验收；100原S/M实测与120/G0仍未过 |
-| 当前阻塞 | P0-100有效1M baseline缺、原M10800FAILED；usage19 C未知/未资格，legacyStop/caller未接与authasyncTouchjoin/拒409边界仍缺。watchdog scope_drained无true路径/terminal需flush、phase采样/native后代BLOCK，runtime拒；P5pure不业务链/P6组件不durableSMTP。Docker未ready/四CI/Method当前19/全角色/事务coverage/长期SSE/received残项保 |
+| 当前阻塞 | P0-100有效1M baseline缺、原M10800FAILED；usage19 C未知/未资格，旧legacy Stop兼容仍需界定；当前caller/SMTP/API已接线，auth asyncTouch已有owner限定测试但完整durable join/拒409边界仍缺。watchdog scope_drained无true路径/terminal需flush、phase采样/native后代BLOCK，runtime拒；P5pure不业务链/P6组件不durableSMTP。Docker未ready/四CI/Method当前19/全角色/事务coverage/长期SSE/received残项保 |
 | 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
 | 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
 
@@ -2008,3 +2008,15 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 | 6 C18-current19/RES-CI-SHIPPING | C18-09/07/02/05/06 source/profile/build/fullref/Method另签，旧18/16不继承；stablewhole/原180+HARD1200/四job/secure/Docker实际ready原shipping，不组件升父 |
 
 最新[完整报告](R5-USAGE19-C-OBSERVER-SHUTDOWN-ENCODING-STATUS-20261003.md)/[安全交付](evidence/R5-USAGE19-SHUTDOWN-ENCODING-OBSERVER-DELIVERY-20261003.json)，原171scope/10勾/三S与百万FAILED保持，Docker未confirmedready/四CI/METHOD当前19未资格。无源码修改/重测/fullhash/发布。
+
+### 2026-10-03｜唯一 owner 三路最小集成（待父完整验收）
+
+- 固定 base `work/company-mail-r5-goal-20260930@29a388a3c7d6da03641abe79bb5c728b90b75273`；实际父链确认其父为 `93005b644c1f39fa85072fe913156cf3d6c798e1`，delta 仅 handoff，已保留阅读。API `ca77a8a→8d357eba379e510fdcde0a94648cdcf62ceb11f9`、SMTP `b7ac8eb96bd8fabe7a7ddc3c3499679b13a19c87`、frontend `7a436549ace77d1baf30f33f6fb8e163077fe34c` 均源自93005。逐提交 cherry-pick，不整包覆盖；三块文件集不重叠，实际无合并冲突。新分支 `integration/company-mail-r5-20261003`（本地`work` ref阻止`work/…`命名，仅改新分支名）。
+- 组合被测 SOURCE commit `4016720586be817e5f1edcf0e45ef7d0cccc605a` / tree `10c72f860ad875aa35218357bf0c7385a708a3c9`；后续本批只中央TODO/证据文档变化。历史各原 checkpoint/source/test失败与unknown保留，其成绩不自动转授组合树。完整命令、计数、真实timer设置、source pins及限定结果见 [组合验证回执](evidence/R5-INTEGRATION-20261003/receipt.json)。
+- 最新源码事实：真实 main/formal caller、SMTP ctx/session join、API background owner 已在base接上；上方历史日志及旧报告的“未接boundedAPI/SMTP忽ctx/main不join/auth无join”是对应旧snapshot的finding，不是当前组合SOURCE状态。接线与本批有限race不证明全角色signal/fullcaller、真实PG/Redis关闭顺序、SSE长期重验、SMTP账本/ACK-loss/durable双worker。历史旧Stop边界单列，不借组件PASS宣布完整停机安全。
+- 前端保留field intent，冲突review不把untouched旧can_send复送；false/0/[]仍显式、NULL未改则省略，no-op不发命令，refresh/list失败或401/403封住后续命令。独立生产diff复审由父另进行。本批synthetic React/jsdom不是browser或PG验收，opt-in A02 audit只type/lint，未实际跑。
+- **RES-P1-SECURE-COMPONENT-PRODUCER-DESIGN（新增具名残项，不新增/勾171）**：`internal/store/postgres/r5_component_baseline_test.go`仍要求历史insecure状态、缺陷marker、child exit1及失败断言；保持源码原状，不运行它来宣称新安全验收。后续独占scope重设required secure-protocol producer，校验真实PATCH [200,409]、撤权后revision/description与权限未被旧draft复活，缺原件/缺运行不得PASS；A01也须对应新安全协议。
+- **未覆盖/仍阻塞**：fullcaller realPG/Redis、browser、current19 Method/Catalog/SML、四CI与shipping、百万M有效baseline、usage C unknown、PGphase B2/B5/native后代、watchdog drained/terminalflush/HARD1200/runtime拒绝均保持；原whole backend失败、原M10800失败及旧D2/A失败不删除。跨机private原件未随Git外传，缺失部分记unavailable/pending evidence，不补猜或借当前测试替代。无真实邮件/生产DB/外部SMTP/旧本机容器，无watchdog runtime/百万运行，无main/router/DTO/store/migration/依赖/CI或旧Go组件producer修改，无merge/forcepush/deploy。
+- **10 / 171保持**；RES-SHUTDOWN-FORMAL-CALLERS、RES-SMTP-CONTEXT-SESSION-JOIN、P8-020/P10-110、P1-090/100/110及P0-050仅新增有限证据，父scope与全部依赖未关闭。远端/PR/CI实际状态以本批交付回执为准。
+- 本组合实际结果：API **27top/29leaf/31nodes race PASS**；SMTP root **3top/6leaf/9nodes** + root-MVS fixed fork **1top/1leaf/1node race PASS**（合4top7leaf10nodes）；caller **18top/21leaf/22nodes race PASS**，含source wiring断言而非真实全角色进程；均0fail/skip/unfinished。前端五suite **150/150 PASS**，type0，target lint0/1 inherited warning；Go1.25.7 cached build0，真实`GODEBUG=asynctimerchan=0`。
+- pure contracts 首轮217tests/194top PASS/22top ERROR/1合法fresh typed fixture SKIP，25error events含subtests/setupclass；24为系统Python缺date-time工具validator，临时venv按已有锁补齐后仅受影响HTTP module **45/45 PASS**，不删除首轮。另1既有outbound别名测试`KeyError: properties`，单项复验1ERROR，测试/OpenAPI/parser与base相同；独立残项 **RES-CONTRACT-OUTBOUND-ALIAS-STALE-01**，本块不改。故不能称所有pure contracts全绿。contract drift CLI0（16 shared/36 DTO/68ops），i18n CLI0（1365keys/126source/657literal/33dynamic/474inline），i18n-source **13/13 PASS**；source-policy v3 pure16已包含首轮且16PASS，不转授完整capture/runtime。
