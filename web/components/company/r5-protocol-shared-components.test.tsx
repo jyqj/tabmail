@@ -21,7 +21,7 @@ import { validateObservedPermissionProfile } from "@/lib/api/permission-editor-t
 import { parseReceiptListResponse, parseReceiptResponse, type OrdinaryReceipt, type ReceiptCounts, type RetryBlockReason } from "@/lib/receipt-types";
 import { installSession } from "@/lib/session";
 import type { AuthUser } from "@/lib/types";
-import { receiptCapabilitiesMatch, receiptCountsMatch } from "./r5-receipt-contract-oracle";
+import { expectedReceiptCapabilities, receiptCapabilitiesMatch, receiptCountsMatch, type ReceiptSurface } from "./r5-receipt-contract-oracle";
 
 // Host identity is supplied; API functions, session, SWR, controls, fetch,
 // shipping HTTP handlers and PostgreSQL are never response-mocked.
@@ -91,20 +91,21 @@ function expectedCounts(): ReceiptCounts {
   }
   return counts;
 }
-function assertReceipt(data: unknown, id: string): OrdinaryReceipt {
+function assertReceipt(data: unknown, id: string, surface: ReceiptSurface): OrdinaryReceipt {
   assertNoReceiptSecrets(data);
   const receipt = parseReceiptResponse(data, { id, tenantId: fixture.auth.user.tenant_id });
   // The seeded real job is NOT a degraded, scope-less committed fallback.
   expect(receipt.tenant_id === fixture.auth.user.tenant_id).toBe(true);
   expect(Boolean(receipt.created_at && receipt.updated_at && receipt.attempt_count === 0)).toBe(true);
-  expect(receipt.state === (fixture.receipt_state ?? fixture.input.job_state)).toBe(true);
+  const expectedState = fixture.receipt_state ?? fixture.input.job_state;
+  expect(receipt.state === expectedState).toBe(true);
   expect(receipt.progress.completeness === "known" &&
     receiptCountsMatch(receipt.progress.counts, expectedCounts())).toBe(true);
   const projection = shared!.expected?.projection;
-  expect(receipt.status === (projection?.status ?? (receipt.state === "pending" ? "submitted" : "needs_attention"))).toBe(true);
+  expect(receipt.status === (projection?.status ?? (expectedState === "pending" ? "submitted" : "needs_attention"))).toBe(true);
   expect(receipt.delivery_uncertain === (projection?.delivery_uncertain ?? false)).toBe(true);
-  expect(receiptCapabilitiesMatch(receipt.capabilities, { view_content: false,
-    retry: projection?.retry ?? false, retry_block_reason: projection ? (projection.retry_block_reason ?? "") : "state_not_retryable" })).toBe(true);
+  expect(receiptCapabilitiesMatch(receipt.capabilities, expectedReceiptCapabilities(surface, { view_content: false,
+    retry: projection?.retry ?? false, retry_block_reason: projection ? (projection.retry_block_reason ?? "") : "state_not_retryable" }))).toBe(true);
   return receipt;
 }
 function assertRenderedReceipt(container: HTMLElement, receipt: OrdinaryReceipt) {
@@ -160,7 +161,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
       const replay = calls.find(c => c.method === "POST" && c.path.endsWith("/submit") && c.status === 200)!;
       const replayReceipt = parseReceiptResponse(replay.data, { tenantId: fixture.auth.user.tenant_id });
       receiptId = replayReceipt.id;
-      assertReceipt(replay.data, receiptId);
+      assertReceipt(replay.data, receiptId, "replay");
       cleanup(); render(<LegacyReceiptFolder />);
     } else {
       render(<ReceiptFolder page={1} selected="" onSelect={() => {}} onPage={() => {}} includeCompatibility />);
@@ -174,13 +175,13 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     const list = parseReceiptListResponse(listCall.data, { tenantId: fixture.auth.user.tenant_id });
     if (!receiptId) throw new Error("Seeded or replay receipt identity missing");
     expect(list.data.length === 1 && list.data[0].id === receiptId).toBe(true);
-    assertReceipt({ data: list.data[0] }, receiptId);
+    assertReceipt({ data: list.data[0] }, receiptId, "list");
     await userEvent.click(screen.getAllByRole("button", { name: "View compatibility receipt" })[0]);
     const detail = await screen.findByRole("region", { name: "Compatibility receipt detail" }).catch(async () => screen.findByLabelText("Compatibility receipt detail"));
     await within(detail).findByTestId("ordinary-receipt-aggregate");
     const detailCall = calls.find(c => c.method === "GET" && c.path === `/api/v1/outbound/${receiptId}` && c.status === 200);
     if (!detailCall) throw new Error("Real compatibility detail response missing");
-    const receipt = assertReceipt(detailCall.data, receiptId);
+    const receipt = assertReceipt(detailCall.data, receiptId, "detail");
     assertRenderedReceipt(detail, receipt);
     assertNoReceiptSecrets(screen.getByRole("region", { name: "Compatibility task receipts" }).textContent);
     expect(within(detail).getByText(receipt.status === "submitted" ? "Submitted" : "Needs attention")).toBeInTheDocument();
@@ -192,7 +193,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     const aggregate = await screen.findByTestId("ordinary-receipt-aggregate");
     const real = calls.find(c => c.method === "GET" && c.path === `/api/v1/company/submissions/${fixture.submission_id}` && c.status === 200);
     if (!real) throw new Error("Real company submission response missing");
-    const receipt = assertReceipt(real.data, fixture.submission_id);
+    const receipt = assertReceipt(real.data, fixture.submission_id, "detail");
     const pane = screen.getByTestId("ordinary-submission-pane");
     assertRenderedReceipt(pane, receipt);
     const projection = shared!.expected?.projection;
