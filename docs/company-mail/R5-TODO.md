@@ -2082,3 +2082,8 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - 首次41均既存 unit；新增22个 RC-only oracle unit 验证合法字段重排、逐字段缺失/错误值和 extra 拒绝，合计63/63 PASS。精确字段集合+逐值比较不依赖 JSON order；author seed oracle不从response生成。TS/ESLint/tagged Go compile PASS，compile零测试不称runtime。
 - 专项诊断、历史边界、修改/验证/交接见 [RC receipt 报告](R5-RC-RECEIPT-CONTRACT-20261003.md)及 [safe hashes/metadata](evidence/R5-RC-RECEIPT-CONTRACT-20261003.json)。无fixture/response/token发布；固定JSON/markers、helper/launch/cache、sharedDB另一owner修复、Go/锁/120/180和LF/权限保。
 - 本包不再formalrun，待cacheowner完成后由Root安排同source真实Go/PG/Vitest整合。唯一draftPR API Forbidden后停止且不重试，无PR创建/merge/deploy。**中央10/171不变，无新增父项勾选；formal RC/task_complete/product_green均未关闭。**
+
+
+### 2026-10-03 external batch lifecycle design handoff
+
+Base9fc345；catalog46/handler17IDs26variants。发现PE05 barrier/revoker未完整join与Go取消Python后Node子进程归属缺口，按用户条件先交root设计审查，未开启并行、未实施新batch资格、未重跑formal46。独立jsdom self-probe合法最小类型修复：full tsc P、v2 controls21P、local TSX probe1P（非external资格）。详见[R5-EXTERNAL-BATCH-DESIGN-20261003](R5-EXTERNAL-BATCH-DESIGN-20261003.md)。10/171、wholePG180/audit8high保open，default675/sharedDB89e7不整合。
