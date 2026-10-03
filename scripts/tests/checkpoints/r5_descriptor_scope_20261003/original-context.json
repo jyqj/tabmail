@@ -1,0 +1,20 @@
+{
+  "source_sha": "aeed47f0e1998d9925acb680992b051463821d69",
+  "evidence_head": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+  "original_report": "docs/company-mail/evidence/R5-INTEGRATION-BATCH4-20261003/execution-evidence.tar.gz:./prepared-current-report.json",
+  "prepared_suite_count": 640,
+  "scope_failure_ids": [
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='capture', entry='cli')",
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='capture', entry='api')",
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='validate', entry='cli')",
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/enmime-v2.3.0', fault='regular', phase=1, action='validate', entry='api')",
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/go-smtp', fault='regular', phase=1, action='capture', entry='cli')",
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/go-smtp', fault='regular', phase=1, action='capture', entry='api')",
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/go-smtp', fault='regular', phase=1, action='validate', entry='cli')",
+    "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_bounded_replacements_api_and_cli (fork='third_party/go-smtp', fault='regular', phase=1, action='validate', entry='api')",
+    "test_r5_source_excluded_metadata.ExcludedMetadataTests.test_valid_excluded_files_never_read_or_enter_source"
+  ],
+  "upstream_prepared_log_sha256": "ab2b46acfb599db6752849c47549ad65d697e01a4a9867f4d2d8b92395c468b9",
+  "upstream_prepared_report_sha256": "4113fee371ccc7ca3d3d654cf73eb0ba4245d621de9d4e1983603a4d0afa5d42",
+  "upstream_tar_sha256": "fa0f9996cce8751a1b7262f118d57482abfe3393a309d3d769bd11a16e8cf5d1"
+}

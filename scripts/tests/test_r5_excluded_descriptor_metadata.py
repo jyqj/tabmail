@@ -24,8 +24,9 @@ spec.loader.exec_module(module)
 target, fault, phase = pathlib.Path(sys.argv[2]), sys.argv[3], int(sys.argv[4])
 original = os.stat
 calls = 0
+replacement = None
 def injected(path, *args, **kwargs):
-    global calls
+    global calls, replacement
     result = original(path, *args, **kwargs)
     if path == "switch" and kwargs.get("dir_fd") is not None and kwargs.get("follow_symlinks") is False:
         calls += 1
@@ -34,11 +35,26 @@ def injected(path, *args, **kwargs):
             from types import SimpleNamespace
             return SimpleNamespace(st_mode=0)
         if calls == phase:
-            target.unlink()
-            if fault == "directory": target.mkdir()
-            elif fault == "fifo": os.mkfifo(target)
-            elif fault == "regular": target.touch()
-            elif fault == "symlink": target.symlink_to(target.parent / "absent")
+            # Keep the old inode allocated before unlink. Phase 1 runs before
+            # the implementation has a handle; unlink/touch alone can recycle
+            # that inode and fail to exercise a distinct-identity replacement.
+            anchor = os.open("switch", os.O_PATH | os.O_NOFOLLOW, dir_fd=kwargs["dir_fd"])
+            try:
+                assert os.fstat(anchor).st_ino == result.st_ino
+                target.unlink()
+                if fault == "directory": target.mkdir()
+                elif fault == "fifo": os.mkfifo(target)
+                elif fault == "regular": target.touch()
+                elif fault == "symlink": target.symlink_to(target.parent / "absent")
+                changed = original(path, *args, **kwargs)
+                old = [result.st_dev, result.st_ino]
+                new = [changed.st_dev, changed.st_ino]
+                assert old != new, "fixture did not replace identity"
+                replacement = {"old": old, "new": new, "phase": calls,
+                               "anchor_matches_old": True}
+                print("REPLACEMENT_OBSERVATION", json.dumps(replacement), file=sys.stderr)
+            finally:
+                os.close(anchor)
     return result
 os.stat = injected
 if fault == "unsupported": sys.platform = "synthetic-unsupported"
@@ -89,6 +105,17 @@ except (ValueError, OSError) as error:
                                     self.assertIn('error', json.loads(result.stdout))
                                     if fault in ['symlink', 'directory', 'fifo', 'regular']:
                                         self.assertIn(f'{fault} {phase} {phase}', result.stderr)
+                                        observation = next(line.removeprefix('REPLACEMENT_OBSERVATION ')
+                                            for line in result.stderr.splitlines()
+                                            if line.startswith('REPLACEMENT_OBSERVATION '))
+                                        replacement = json.loads(observation)
+                                        self.assertTrue(replacement['anchor_matches_old'])
+                                        self.assertEqual(replacement['phase'], phase)
+                                        self.assertNotEqual(replacement['old'], replacement['new'])
+                                        if fault == 'regular' and phase == 1:
+                                            print('DESCRIPTOR_REPLACEMENT ' + json.dumps(dict(
+                                                fork=fork, action=action, entry=entry,
+                                                rejected=result.returncode == 1, **replacement)), flush=True)
                         finally:
                             if target.is_dir(): target.rmdir()
                             else: target.unlink()
