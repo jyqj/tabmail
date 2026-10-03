@@ -22,7 +22,10 @@ KIND = 'policy_bound_local_input_superset_sha1_v2'
 CURRENT_POLICY = 'r5_current_local_inputs_smtp_owner_forks_v3'
 CURRENT_KIND = 'policy_bound_local_input_superset_smtp_owner_sha1_v3'
 CURRENT_SCHEMA_VERSION = 3
-SUPPORTED_POLICIES = (POLICY, CURRENT_POLICY)
+ARCHIVE_POLICY = 'r5_current_local_inputs_archive_boundary_v4'
+ARCHIVE_KIND = 'policy_bound_local_input_superset_archive_boundary_sha1_v4'
+ARCHIVE_SCHEMA_VERSION = 4
+SUPPORTED_POLICIES = (POLICY, CURRENT_POLICY, ARCHIVE_POLICY)
 _IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 REPLACEMENT = {'module': 'github.com/jhillyerd/enmime/v2', 'version': 'v2.3.0',
                'path': 'third_party/enmime-v2.3.0'}
@@ -501,14 +504,14 @@ def _upstream_file_inventory(root, replacement, names):
     return sorted(entries)
 
 
-def _capture_smtp_owner_v3(root, *, purpose, policy, build_context):
+def _capture_smtp_owner_v3(root, *, purpose, policy, build_context, _context_purpose=None):
     if policy != CURRENT_POLICY or purpose not in FIXED:
         raise ValueError('explicit v3 policy/purpose required; no legacy fallback')
     root = Path(root).absolute()
     if any(path.is_symlink() for path in [root, *root.parents]):
         raise ValueError('symlinked snapshot root')
     root = root.resolve()
-    validate_context(build_context, purpose)
+    validate_context(build_context, purpose if _context_purpose is None else _context_purpose)
     if any(root.glob('go.work*')) or (root/'vendor').exists() or (root/'vendor').is_symlink():
         raise ValueError('workspace/vendor replacement selection is not admitted')
     replacements = _module_binding(root, policy=policy)
@@ -561,7 +564,39 @@ def _capture_smtp_owner_v3(root, *, purpose, policy, build_context):
             'source_sha':hashlib.sha1(wire).hexdigest(), 'source_closure_sha256':hashlib.sha256(wire).hexdigest(), **payload}
 
 
+def _capture_archive_v4(root, *, purpose, policy, build_context):
+    import r5_archive_boundary as boundary
+    if policy != ARCHIVE_POLICY:
+        raise ValueError('explicit archive v4 policy required')
+    root = Path(root).absolute()
+    before = boundary.check(root)
+    # Retain v3's exact two-fork grammar/full-tree inputs; do not relax its
+    # historical module admission. Archive static inputs are a separate domain.
+    validate_context(build_context, purpose)
+    base = _capture_smtp_owner_v3(root, purpose='protocol' if purpose == 'selected' else purpose, policy=CURRENT_POLICY, build_context=build_context, _context_purpose=purpose)
+    base['build_context'] = build_context
+    base['purpose'] = purpose
+    names = set(base['files']) | {boundary.REGISTRY, 'scripts/r5_archive_boundary.py',
+        'scripts/r5_selected_source_binding_v2.py', 'scripts/run_r5_source_version_tests.py',
+        'scripts/tests/test_r5_archive_boundary.py', 'scripts/tests/test_r5_selected_source_binding_v2.py',
+        'scripts/tests/test_r5_source_version_runner.py'} | set(before['archive_markers'])
+    files = {p:hashlib.sha256(boundary.read(root,p)).hexdigest() for p in sorted(names)}
+    if before != boundary.check(root):
+        raise ValueError('archive/production changed during v4 capture')
+    if any(hashlib.sha256(boundary.read(root,p)).hexdigest() != h for p,h in files.items()):
+        raise ValueError('v4 inputs changed during capture')
+    payload = {k:v for k,v in base.items() if k not in
+        {'schema_version','source_identity_kind','source_sha','source_closure_sha256','snapshot_root'}}
+    payload.update(policy=policy, files=files, archive_static=before['archive_static'],
+                   archive_boundary=before, boundary='Versioned archive static bytes and production variant superset; selected metadata/runtime are separate')
+    wire = canonical(payload)
+    return dict(schema_version=ARCHIVE_SCHEMA_VERSION,snapshot_root=str(root),source_identity_kind=ARCHIVE_KIND,
+                source_sha=hashlib.sha1(wire).hexdigest(),source_closure_sha256=hashlib.sha256(wire).hexdigest(),**payload)
+
+
 def capture_current_source(root, *, purpose, policy, build_context):
+    if policy == ARCHIVE_POLICY:
+        return _capture_archive_v4(root, purpose=purpose, policy=policy, build_context=build_context)
     if policy == POLICY:
         return _capture_legacy_v2(root, purpose=purpose, policy=policy, build_context=build_context)
     if policy == CURRENT_POLICY:
@@ -570,11 +605,11 @@ def capture_current_source(root, *, purpose, policy, build_context):
 
 
 def validate_current_source(receipt, root, *, purpose, policy):
-    version = 2 if policy == POLICY else CURRENT_SCHEMA_VERSION if policy == CURRENT_POLICY else None
+    version = 2 if policy == POLICY else CURRENT_SCHEMA_VERSION if policy == CURRENT_POLICY else ARCHIVE_SCHEMA_VERSION if policy == ARCHIVE_POLICY else None
     if version is None or type(receipt) is not dict or type(receipt.get('schema_version')) is not int or receipt.get('schema_version') != version:
         raise ValueError('explicit policy/receipt version match required; no legacy downgrade')
     observed = capture_current_source(root, purpose=purpose, policy=policy, build_context=receipt.get('build_context'))
-    differs = canonical(receipt) != canonical(observed) if policy == CURRENT_POLICY else receipt != observed
+    differs = canonical(receipt) != canonical(observed) if policy in (CURRENT_POLICY, ARCHIVE_POLICY) else receipt != observed
     if differs:
         raise ValueError('current source receipt policy/context/files missing, extra, or drifted')
     return observed
@@ -595,7 +630,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=('capture', 'validate'))
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--purpose', choices=sorted(FIXED), required=True)
+    parser.add_argument('--purpose', choices=sorted(set(FIXED)|{'selected'}), required=True)
     parser.add_argument('--policy', choices=SUPPORTED_POLICIES, required=True)
     parser.add_argument('--build-context', help='exact build context JSON for capture')
     parser.add_argument('--receipt', type=Path)
