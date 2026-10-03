@@ -16,6 +16,8 @@
 
 机器可读注册/语义见 [R5-API-MATRIX.json](evidence/R5-API-MATRIX.json)，客户端每一调用位置/表达式/分支见 [R5-CLIENT-CALLS.json](evidence/R5-CLIENT-CALLS.json)。源码自动检查是有边界的当前chi写法解析，不声称可以分析任意Go元编程；新增装配方式应扩展收集器和失败测试。
 
+2026-10-03 固定 PR #21 head `41b015c30c66b3ba58a3c1395e8559ebcd27a65f` 的客户端专项复核已更新当前清单：130 个调用位置、135 分支，7 个显式转发、127 个已映射分支及 1 个未注册分支。`GET /api/v1/outbound/{id}/recipients` 在内部 helper 的有限后缀展开后暴露，`routes: []` 表示没有注册映射，不能视为合法转发；严格 `--check` 因此仍拒绝。历史 AST122/125 与注册132的证据边界保留，详细差异和验证见[专项附录](R5-CLIENT-INVENTORY-PR21-20261003.md)。
+
 ## 2. 每个入口的资格、资源、版本、审计与内容
 
 公共主体仍受全局CORS/限流等影响；health/ready例外。相同下游规则重复列入各行，避免只写“同上”遗漏API。
