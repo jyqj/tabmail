@@ -34,3 +34,9 @@ Playwright 管理的 Chromium 1194 下载返回明确 `403 Domain forbidden`（�
 | `node --check scripts/browser_company.cjs`、`git diff --check` | exit 0 | 本机执行 |
 
 未运行：全库 Go/frontend 套件、race、Docker 镜像构建、远端 CI、CI 锁定 Chromium 141。未合并或部署。`gh pr view 21 --json headRefName,baseRefName` 返回 `Post https://api.github.com/graphql: Forbidden`；没有换 API 路径绕过该拒绝。正常 Git `ls-remote` 确认固定提交对应 PR 源分支 `ci/company-mail-r5-wiring-20261003`，作为专项 draft 的目标分支。
+
+## 交付与阻塞
+
+已正常 Git commit 并 push 新分支，首次远端核对为 `e57ae919f65ed153717b834a68220535202ff8b9`。随后补交本专项被全局 `*.log` 规则忽略的日志；最终 SHA 以交付回复的 `git ls-remote` 核对值为准。
+
+`gh pr create --draft --base ci/company-mail-r5-wiring-20261003 --head fix/browser-reply-journey-20261003 --title … --body-file /workspace/browser-reply-runtime/pr-body.md` 返回 exit 1，`Post "https://api.github.com/graphql": Forbidden`，见 pr-create-denied.txt。draft PR **未创建**；没有重试另一个 API/connector，没有合并或部署。需要恢复 GitHub API 访问后，按已准备的 PR 描述创建 draft。

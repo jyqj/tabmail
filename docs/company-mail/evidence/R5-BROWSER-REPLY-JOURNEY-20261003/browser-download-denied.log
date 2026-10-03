@@ -1,0 +1,36 @@
+Downloading Chromium 141.0.7390.37 (playwright build v1194)[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip[22m
+Error: Download failed: server returned code 403 body 'Domain forbidden'. URL: https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip
+    at IncomingMessage.handleError (/workspace/browser-reply-tools/node_modules/playwright-core/lib/server/registry/oopDownloadBrowserMain.js:56:23)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chromium 141.0.7390.37 (playwright build v1194)[2m from https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip[22m
+Error: Download failed: server returned code 403 body 'Domain forbidden'. URL: https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip
+    at IncomingMessage.handleError (/workspace/browser-reply-tools/node_modules/playwright-core/lib/server/registry/oopDownloadBrowserMain.js:56:23)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chromium 141.0.7390.37 (playwright build v1194)[2m from https://cdn.playwright.dev/builds/chromium/1194/chromium-linux.zip[22m
+Error: Download failed: server returned code 403 body 'Domain forbidden'. URL: https://cdn.playwright.dev/builds/chromium/1194/chromium-linux.zip
+    at IncomingMessage.handleError (/workspace/browser-reply-tools/node_modules/playwright-core/lib/server/registry/oopDownloadBrowserMain.js:56:23)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chromium 141.0.7390.37 (playwright build v1194)[2m from https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip[22m
+Error: Download failed: server returned code 403 body 'Domain forbidden'. URL: https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip
+    at IncomingMessage.handleError (/workspace/browser-reply-tools/node_modules/playwright-core/lib/server/registry/oopDownloadBrowserMain.js:56:23)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Downloading Chromium 141.0.7390.37 (playwright build v1194)[2m from https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip[22m
+Error: Download failed: server returned code 403 body 'Domain forbidden'. URL: https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/chromium/1194/chromium-linux.zip
+    at IncomingMessage.handleError (/workspace/browser-reply-tools/node_modules/playwright-core/lib/server/registry/oopDownloadBrowserMain.js:56:23)
+    at IncomingMessage.emit (node:events:521:24)
+    at endReadableNT (node:internal/streams/readable:1736:12)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)
+Failed to install browsers
+Error: Failed to download Chromium 141.0.7390.37 (playwright build v1194), caused by
+Error: Download failure, code=1
+    at ChildProcess.<anonymous> (/workspace/browser-reply-tools/node_modules/playwright-core/lib/server/registry/browserFetcher.js:94:32)
+    at ChildProcess.emit (node:events:509:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:295:12)
