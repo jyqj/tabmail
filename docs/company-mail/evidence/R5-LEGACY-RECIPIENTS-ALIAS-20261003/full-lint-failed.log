@@ -1,0 +1,42 @@
+
+> web@0.1.0 lint
+> eslint
+
+
+/workspace/tabmail/web/features/company/profile-management.tsx
+  277:36  warning  The ref value 'operation.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'operation.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+/workspace/tabmail/web/features/mail/components/submission-content.tsx
+  52:43  warning  The ref value 'epoch.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'epoch.current' to a variable inside the effect, and use that variable in the cleanup function  react-hooks/exhaustive-deps
+
+/workspace/tabmail/web/lib/wire-response-input.test.ts
+  12:44  error  The `{}` ("empty object") type allows any non-nullish value, including literals like `0` and `""`.
+- If that's what you want, disable this lint rule with an inline comment or configure the 'allowObjectTypes' rule option.
+- If you want a type meaning "any object", you probably want `object` instead.
+- If you want a type meaning "any value", you probably want `unknown` instead  @typescript-eslint/no-empty-object-type
+
+/workspace/tabmail/web/profile-refresh-browser/entry.jsx
+  34:11  warning  'expected_revision' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/workspace/tabmail/web/profile-refresh-browser/run.cjs
+  1:22  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:16  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  4:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/workspace/tabmail/web/review-independent/entry.jsx
+  34:11  warning  'expected_revision' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+/workspace/tabmail/web/review-independent/run.cjs
+  1:22  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  2:16  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  3:12  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+  4:14  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+✖ 13 problems (9 errors, 4 warnings)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

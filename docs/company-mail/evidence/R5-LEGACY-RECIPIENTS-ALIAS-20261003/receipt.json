@@ -1,0 +1,53 @@
+{
+  "base_pr": 21,
+  "base_head": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+  "node": "v24.19.0",
+  "npm": "11.9.0",
+  "go": "go1.25.7 linux/amd64",
+  "ordinary_contract": "unchanged",
+  "direct_tests": 23,
+  "full_tests": {
+    "passed": 527,
+    "skipped": 0,
+    "failed": 0,
+    "suites": 39
+  },
+  "tsc": "PASS",
+  "targeted_lint": "PASS",
+  "build": "PASS",
+  "full_lint": {
+    "exit": 1,
+    "errors": 9,
+    "warnings": 4,
+    "baseline_files_unchanged": true
+  },
+  "audit": {
+    "info": 0,
+    "low": 0,
+    "moderate": 4,
+    "high": 21,
+    "critical": 1,
+    "total": 26
+  },
+  "inventory_check": "FAIL client inventory count drift; regeneration owned by scanner task",
+  "old_implementation_negative_control": "expected exit 1: exact GET detail test rejects old /recipients route",
+  "scope": "synthetic fetch; real request/session/parser; no HTTP/PG authorization qualification",
+  "source_sha256": {
+    "web/lib/legacy-outbound.ts": "4238af8ff874dd7dbd8a5104f161ceedb0d2d6275656ede4b0b80f3b72e7a934",
+    "web/lib/legacy-outbound.test.ts": "44e2be630a04f5fc018515a72d465e883e97f58ed39bad7de30c13118b451912"
+  },
+  "logs_sha256": {
+    "npm-ci.log": "889f9b9bb68dde1b01788243d1833758f7fbfb294e59287b3e1879a26c8cbb90",
+    "targeted-tests-initial.log": "b1dadcbf8a098a46f1d9d1898f1919e4376c4d20be4e1d188a199ec94af3ecb8",
+    "old-route-regression.log": "1239d4cdc37c3d79965177fd05a7da7e7d6884a10363a5709c7a49cb28dd1ec4",
+    "full-tests-initial-failed.log": "0424c7b5f3c16d310edee6c7cf13204829173b5f2e4f80d12f6505b0709a9156",
+    "full-tests-go1257.log": "3b70f1654161fe305580bbc87eaf520fb6b7431d5c747addd7ea912312625aca",
+    "tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "targeted-lint.log": "2c0d557ac0fa3bb1e5a4c4029c4b5643d5acae0196ef888fb095365c1edad364",
+    "full-lint-failed.log": "53261dcec2c62762c46841b19fac88c5eaa7d1a70f69dd2d8c8b03298aae9cf9",
+    "npm-audit.json": "93ee3b50c9f9714f26131ddf901280dfc21e93890002ce1c1bbc5f54ec316a96",
+    "inventory-check-failed.log": "f7e7d3434a5bdd7edf32f032dd6f55d7ef2e7b6c44507066f409e8777cf674c5",
+    "build-output.json": "55db178828037e9cb7eadf1b44423f5ab48b1fa7ab6e3b586216a2e801307d01"
+  },
+  "build_output_note": "JSON preserves original stdout bytes including carriage-return progress; decoded hash retained."
+}
