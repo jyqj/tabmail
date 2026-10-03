@@ -1,0 +1,17 @@
+test_first_capture_roundtrip_after_metadata_hydration (test_r5_selected_independent_review.IndependentSelectedReview.test_first_capture_roundtrip_after_metadata_hydration) ... ERROR
+
+======================================================================
+ERROR: test_first_capture_roundtrip_after_metadata_hydration (test_r5_selected_independent_review.IndependentSelectedReview.test_first_capture_roundtrip_after_metadata_hydration)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/selected-attestation-review/scripts/tests/test_r5_selected_independent_review.py", line 87, in test_first_capture_roundtrip_after_metadata_hydration
+    self.assertEqual(b.validate(first, ROOT, GO, **kw), first)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/selected-attestation-review/scripts/r5_selected_source_binding.py", line 254, in validate
+    raise ValueError('selected attestation missing/extra/drifted/context mismatch')
+ValueError: selected attestation missing/extra/drifted/context mismatch
+
+----------------------------------------------------------------------
+Ran 1 test in 17.454s
+
+FAILED (errors=1)
