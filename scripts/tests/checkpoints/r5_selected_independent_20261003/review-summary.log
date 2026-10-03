@@ -1,0 +1,30 @@
+{
+  "TODO": "10/171 unchanged",
+  "added_regression": {
+    "errors": 1,
+    "methods": 1
+  },
+  "artifact_hashes": {
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/README.md": "68c52458db025c8c04c3e620695a3903cde493406b671bfb3a1c02fa192ff50a",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/cache-hydration-repro.log": "14bb21f1e71af8e61e188784112e4326a0246d18a545d56ad079fad01e8e0843",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/first-capture-regression.log": "b3ec39797075ea2a23ae15816e860b3e0b1b2b23cebd20e559c1b065fb0755ac",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/independent-attestation.log.gz": "e075d29a591f682735689a0711a5a02dfe526194ed55a6640f0b1bc280f0903d",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/independent-tests.log": "3dadaacd3ab216889bb22f41eacf0d74a4f2ba20e794c9dc29080f4b8e6ee6ed",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/recapture-diagnostic.log.gz": "40d32ffe5bed6e2b16f5774c25faee39cfa5904140f80f15fd2e165ee72c47be",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-first-attestation.log.gz": "fd696c3cfbe3fae0fe5896508451091e305d17e2798f789ab96e0fa1fe4e39da",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-mvs-0.log": "0f6ee5082da7eb91d4d0c0ff3f52cf0fca7781c129e57faccd2959f639df0cbb",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-mvs-1.log": "a92cdc1d1c200a12eee80c51fd47568f1f0555f736b976d4176befd0525d1938",
+    "scripts/tests/checkpoints/r5_selected_independent_20261003/repro-warm-attestation.log.gz": "e42574ade44f59d65badca8f99cc81b057dbc384052d16891d13ccf3edc72c7d",
+    "scripts/tests/test_r5_selected_independent_review.py": "3daf5a39482d65c23e91559ee45c9601910bee923f0618b3a7d501f33b2f8897"
+  },
+  "initial_suite": {
+    "errors": 1,
+    "methods": 8,
+    "pass": 7
+  },
+  "known_metadata_race": "separate blocker; no cb523 applied",
+  "outcome": "BOUNDED_REJECT",
+  "production_diff": "empty",
+  "target": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+  "warm_roundtrip": "PASS"
+}

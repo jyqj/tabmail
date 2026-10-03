@@ -1,0 +1,7 @@
+FIRST_CAPTURE_PASS
+MVS_RAW_BEFORE 0f6ee5082da7eb91d4d0c0ff3f52cf0fca7781c129e57faccd2959f639df0cbb
+MVS_RAW_AFTER a92cdc1d1c200a12eee80c51fd47568f1f0555f736b976d4176befd0525d1938
+NORMALIZED_MVS_EQUAL True
+MVS_FIELD_DRIFT {"github.com/davecgh/go-spew": {"Dir": [null, "/workspace/selected-attestation-review-state/repro-gomod/github.com/davecgh/go-spew@v1.1.1"]}, "github.com/go-test/deep": {"Dir": [null, "/workspace/selected-attestation-review-state/repro-gomod/github.com/go-test/deep@v1.1.1"]}, "github.com/pmezard/go-difflib": {"Dir": [null, "/workspace/selected-attestation-review-state/repro-gomod/github.com/pmezard/go-difflib@v1.0.0"]}, "github.com/stretchr/testify": {"Dir": [null, "/workspace/selected-attestation-review-state/repro-gomod/github.com/stretchr/testify@v1.11.1"]}, "gopkg.in/yaml.v3": {"Dir": [null, "/workspace/selected-attestation-review-state/repro-gomod/gopkg.in/yaml.v3@v3.0.1"]}}
+FIRST_RECEIPT_VALIDATE_REJECT selected attestation missing/extra/drifted/context mismatch
+WARM_CAPTURE_AND_VALIDATE_PASS
