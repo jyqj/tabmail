@@ -248,6 +248,13 @@ def classify(rows, root, authorized, envinfo, mvs):
     return {p:sorted(fields) for p,fields in sorted(local.items())}, generated, external, native, toolchain
 
 
+
+class MetadataCommandFailure(ValueError):
+    """Keep actual execution diagnostics even when hydration/capture aborts."""
+    def __init__(self,command,stdout,stderr):
+        self.command=command;self.stdout=stdout;self.stderr=stderr
+        super().__init__('metadata command failed: '+inventory.canonical(command).decode())
+
 def capture(root, go, *, cache, modulecache, context=None):
     context = CONTEXT if context is None else context
     inventory.validate_context(context, "selected")
@@ -274,11 +281,11 @@ def capture(root, go, *, cache, modulecache, context=None):
                GOPROXY='https://proxy.golang.org', GOSUMDB='sum.golang.org', GOPATH=str(Path(modulecache).parent),
                GOMODCACHE=str(Path(modulecache).resolve()), GOCACHE=str(Path(cache).resolve()))
     commands = []
-    def run(argv):
+    def run(argv, *, role="attested_observation"):
         result = subprocess.run([str(go),*argv],cwd=root,env={**env,**{k:os.environ[k] for k in ('HTTPS_PROXY','HTTP_PROXY','ALL_PROXY','NO_PROXY') if k in os.environ}},capture_output=True,timeout=180)
-        commands.append(dict(argv=[str(go),*argv],exit=result.returncode,stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),stderr=result.stderr.decode()))
+        commands.append(dict(role=role,argv=[str(go),*argv],exit=result.returncode,stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),stderr=result.stderr.decode()))
         if result.returncode:
-            raise ValueError('metadata command failed (stamping unchanged): '+result.stderr.decode())
+            raise MetadataCommandFailure(commands[-1],result.stdout,result.stderr)
         return result.stdout
     envinfo = json.loads(run(['env','-json']))
     # go env reports GOENV='' when disabled; GOGCCFLAGS has a per-query temp prefix.
@@ -290,9 +297,8 @@ def capture(root, go, *, cache, modulecache, context=None):
         raise ValueError('wrong Go version/flags/ABI')
     # Selection may download test dependencies and hydrate MVS Dir fields.
     # Bind both observations only after that hydration, retaining raw hashes.
-    run(argv)
-    hydration = commands.pop()
-    hydration['role'] = 'unbound_dependency_hydration_not_attested'  # retained diagnostics, excluded from identity
+    run(argv,role='unbound_dependency_hydration_not_attested')
+    hydration = commands.pop()  # retained diagnostics, excluded from identity
     selected_raw = run(argv)
     rows = stream(selected_raw)
     mvs_raw = run(MVS_ARGV)
@@ -350,10 +356,14 @@ def main():
     parser.add_argument('--validate',type=Path)
     parser.add_argument('--context',choices=['default','race-r5protocol'],default='race-r5protocol')
     args=parser.parse_args()
-    if args.validate:
-        result=validate(inventory.strict_json(args.validate.read_bytes()),args.root,args.go,cache=args.cache,modulecache=args.modulecache)
-    else:
-        result=capture(args.root,args.go,cache=args.cache,modulecache=args.modulecache,context=DEFAULT_CONTEXT if args.context=='default' else CONTEXT)
+    try:
+        if args.validate:
+            result=validate(inventory.strict_json(args.validate.read_bytes()),args.root,args.go,cache=args.cache,modulecache=args.modulecache)
+        else:
+            result=capture(args.root,args.go,cache=args.cache,modulecache=args.modulecache,context=DEFAULT_CONTEXT if args.context=='default' else CONTEXT)
+    except MetadataCommandFailure as error:
+        print(inventory.canonical(dict(status='failed',command=error.command,stdout=error.stdout.decode(errors='replace'),stderr=error.stderr.decode(errors='replace'))).decode())
+        raise SystemExit(1)
     print(inventory.canonical(result).decode())
 
 if __name__=='__main__':

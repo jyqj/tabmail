@@ -21,20 +21,6 @@ class SourceVersionRunnerTests(unittest.TestCase):
     def test_no_fresh_actual_root_class(self):
         with self.assertRaises(ValueError):runner.partition(list(runner.HISTORICAL_IDS))
 
-    def test_optional_stable_revision_exact_ids_bytes_and_pin(self):
-        import tempfile,hashlib
-        with tempfile.TemporaryDirectory() as temp:
-            root=Path(temp);p=root/runner.STABLE_SUITE_PATH;p.parent.mkdir(parents=True);p.write_bytes(b'known version')
-            ids=self.ids+sorted(runner.STABLE_IDS)
-            with mock.patch.object(runner,'STABLE_SUITE_SHA256',hashlib.sha256(p.read_bytes()).hexdigest()):
-                groups=runner.version_partition(ids,root)
-                self.assertEqual(groups[-1][1],runner.STABLE_BASELINE)
-                self.assertEqual(set(groups[-1][2]),runner.STABLE_IDS)
-                all_ids=[i for _,_,group in groups for i in group]
-                self.assertEqual(set(all_ids),set(ids));self.assertEqual(len(all_ids),len(set(all_ids)))
-                with self.assertRaises(ValueError):runner.version_partition(ids[:-1],root)
-            with self.assertRaises(ValueError):runner.version_partition(ids,root)
-
     def test_child_failure_and_skip_not_green(self):
         import tempfile,json
         class Bad(unittest.TestCase):
@@ -42,11 +28,17 @@ class SourceVersionRunnerTests(unittest.TestCase):
         class Skip(unittest.TestCase):
             @unittest.skip('intentional runner negative')
             def test_skip(self):pass
-        for case in [Bad('test_fail'),Skip('test_skip')]:
+        class Expected(unittest.TestCase):
+            @unittest.expectedFailure
+            def test_expected(self):self.fail('intentional expected failure negative')
+        for case in [Bad('test_fail'),Skip('test_skip'),Expected('test_expected')]:
             with tempfile.TemporaryDirectory() as temp,mock.patch.object(runner.unittest.TestLoader,'loadTestsFromNames',return_value=unittest.TestSuite([case])),mock.patch.object(runner,'git',return_value=runner.BASELINE),mock.patch.object(runner,'git_go_env',return_value='/tmp/r5-runner-cache'):
                 before=Path.cwd()
                 try:
                     self.assertEqual(runner.child(temp,[case.id()],Path(temp)/'report.json'),1)
+                    report=json.loads((Path(temp)/'report.json').read_text())
+                    self.assertEqual(report['actual_test_ids'],[case.id()])
+                    self.assertEqual(report['expected_failures'],[case.id()] if isinstance(case,Expected) else [])
                 finally:
                     import os
                     os.chdir(before)

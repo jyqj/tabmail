@@ -66,6 +66,19 @@ class ActualRootBindingV2Tests(unittest.TestCase):
                     self.assertTrue(any(p.startswith(fork) for p in r['selected_local']))
                 self.assertEqual({p:row['sha256'] for p,row in r['selected_local'].items()},binding.digest(ROOT,r['selected_local']))
 
+    def test_hydration_failure_retains_execution_and_raw_diagnostics(self):
+        actual=subprocess.run
+        def fail(argv,*args,**kwargs):
+            if argv[1:]==binding.ARGV:
+                return subprocess.CompletedProcess(argv,7,b'partial actual command fixture stdout',b'hydration failed fixture stderr')
+            return actual(argv,*args,**kwargs)
+        with mock.patch.object(binding.subprocess,'run',side_effect=fail),self.assertRaises(binding.MetadataCommandFailure) as caught:
+            binding.capture(ROOT,GO,cache=CACHE,modulecache=MODULECACHE)
+        self.assertEqual(caught.exception.command['exit'],7)
+        self.assertEqual(caught.exception.command['role'],'unbound_dependency_hydration_not_attested')
+        self.assertEqual(caught.exception.stdout,b'partial actual command fixture stdout')
+        self.assertEqual(caught.exception.stderr,b'hydration failed fixture stderr')
+
     def test_real_receipt_roundtrip(self):
         for r in self.receipts.values():
             self.assertEqual(binding.validate(r,ROOT,GO,cache=CACHE,modulecache=MODULECACHE)['attestation_sha256'],r['attestation_sha256'])

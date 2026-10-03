@@ -577,11 +577,6 @@ def _capture_archive_v4(root, *, purpose, policy, build_context):
     base['build_context'] = build_context
     base['purpose'] = purpose
     import run_r5_source_version_tests as versions
-    stable_suite = root/versions.STABLE_SUITE_PATH
-    if stable_suite.exists():
-        if hashlib.sha256(boundary.read(root,versions.STABLE_SUITE_PATH)).hexdigest()!=versions.STABLE_SUITE_SHA256:
-            raise ValueError('unknown historical stable suite version')
-        base['files'][versions.STABLE_SUITE_PATH]=versions.STABLE_SUITE_SHA256
     names = set(base['files']) | {boundary.REGISTRY, 'scripts/r5_archive_boundary.py',
         'scripts/r5_selected_source_binding_v2.py', 'scripts/run_r5_source_version_tests.py',
         'scripts/tests/test_r5_archive_boundary.py', 'scripts/tests/test_r5_selected_source_binding_v2.py',
@@ -596,7 +591,7 @@ def _capture_archive_v4(root, *, purpose, policy, build_context):
     payload = {k:v for k,v in base.items() if k not in
         {'schema_version','source_identity_kind','source_sha','source_closure_sha256','snapshot_root'}}
     payload.update(policy=policy, files=files, archive_static=before['archive_static'],
-                   archive_boundary=before, version_test_contract=dict(frozen_v1=versions.BASELINE, frozen_stable_rev2=versions.STABLE_BASELINE, stable_suite_path=versions.STABLE_SUITE_PATH, stable_suite_sha256=versions.STABLE_SUITE_SHA256, stable_suite_present=stable_suite.exists()), boundary='Versioned archive static bytes and production variant superset; selected metadata/runtime are separate')
+                   archive_boundary=before, version_test_contract=dict(frozen_v1=versions.BASELINE, frozen_test_ids=sorted(versions.HISTORICAL_IDS), current_actual_class=versions.FRESH_CLASS, expected_failures_are_green=False), boundary='Versioned archive static bytes and production variant superset; selected metadata/runtime are separate')
     wire = canonical(payload)
     return dict(schema_version=ARCHIVE_SCHEMA_VERSION,snapshot_root=str(root),source_identity_kind=ARCHIVE_KIND,
                 source_sha=hashlib.sha1(wire).hexdigest(),source_closure_sha256=hashlib.sha256(wire).hexdigest(),**payload)
