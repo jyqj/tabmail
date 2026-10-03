@@ -57,9 +57,13 @@ and after preparation. This grants no exemption to the archive/Go guards; dirty
 caller Go files remain outside the independently cloned execution source.
 
 With Go 1.25.7 and the existing owned module/build caches, the runner compiles
-the handler test binary and actually runs
-`go test ./internal/api/handlers -run '^TestOrdinaryReceiptOpenAPIWireFixtures$' -count=1 -json`
-to a new exclusive wire file. The Python ordinary receipt test reads all route
+the handler test binary and actually executes that same pinned inode using
+`go tool test2json -t -p tabmail/internal/api/handlers /proc/<parent-pid>/fd/<fd> -test.v=test2json -test.run='^TestOrdinaryReceiptOpenAPIWireFixtures$' -test.count=1`
+from the handler package directory, writing a new exclusive wire file. The
+parent keeps the executable FD open, so replacing the binary pathname cannot
+substitute the executed inode; pre/post byte and pathname identity checks reject
+tampering. The receipt records the executed argv/cwd/binary SHA256, equal to the
+compiled binary SHA256. The Python ordinary receipt test reads all route
 fixtures and requires the matching source SHA, fresh run ID, pinned receipt
 hash, binary hash and run log hashes. Missing, stale, wrong-source or tampered
 evidence fails; it is never a default skip. This proves typed projections and

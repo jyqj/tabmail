@@ -1,0 +1,14 @@
+test_fresh_typed_shipping_envelope_bytes (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_fresh_typed_shipping_envelope_bytes) ... FAIL
+
+======================================================================
+FAIL: test_fresh_typed_shipping_envelope_bytes (scripts.tests.test_ordinary_receipt_contract.OrdinaryReceiptContractTests.test_fresh_typed_shipping_envelope_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_ordinary_receipt_contract.py", line 189, in test_fresh_typed_shipping_envelope_bytes
+    self.assertTrue(all(os.getenv(key) for key in ('ORDINARY_RECEIPT_WIRE_FIXTURE',
+AssertionError: False is not true : fresh same-source typed wire build/run evidence required; use the source-version runner
+
+----------------------------------------------------------------------
+Ran 1 test in 0.033s
+
+FAILED (failures=1)

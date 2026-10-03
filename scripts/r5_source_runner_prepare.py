@@ -12,6 +12,7 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import subprocess
+import stat
 import tarfile
 import urllib.request
 import uuid
@@ -126,6 +127,44 @@ def go_selection(root, go, env, output, phase):
     return result
 
 
+def execute_binary(root, go, binary, expected_hash, source_sha, fixture, env):
+    """Execute the pinned inode, even if its pathname is replaced midflight.
+
+    The selected-source policy already requires Linux. test2json opens the
+    parent's live proc FD path, so it cannot execute a substituted pathname.
+    The FD stays open until completion; both inode bytes and the original path
+    are checked again before any execution evidence is admitted.
+    """
+    if source_identity(root) != source_sha:
+        raise ValueError('typed binary wrong source before execution')
+    if fixture.exists() or fixture.is_symlink():
+        raise ValueError('stale typed wire fixture before execution')
+    fd = os.open(binary, os.O_RDONLY | os.O_NOFOLLOW)
+    try:
+        identity = os.fstat(fd)
+        def pinned_hash():
+            with os.fdopen(os.dup(fd), 'rb') as file:
+                file.seek(0)
+                return hashlib.file_digest(file, 'sha256').hexdigest()
+        if not stat.S_ISREG(identity.st_mode) or pinned_hash() != expected_hash:
+            raise ValueError('typed binary replaced/tampered before execution')
+        executable = f'/proc/{os.getpid()}/fd/{fd}'
+        if not Path(executable).exists():
+            raise ValueError('Linux pinned executable FD unavailable')
+        argv = [go, 'tool', 'test2json', '-t', '-p', 'tabmail/internal/api/handlers', executable,
+                '-test.v=test2json', '-test.run=^' + TEST_NAME + '$', '-test.count=1']
+        cwd = Path(root) / 'internal/api/handlers'
+        run = subprocess.run(argv, cwd=cwd, env={**env, 'ORDINARY_RECEIPT_WIRE_FIXTURE': str(fixture)}, capture_output=True)
+        current = binary.lstat()
+        if ((current.st_dev, current.st_ino) != (identity.st_dev, identity.st_ino) or
+                pinned_hash() != expected_hash or source_identity(root) != source_sha):
+            raise ValueError('typed binary/source replaced/tampered during execution')
+        return run, dict(run_argv=argv, run_cwd=str(cwd), executed_binary_source_path=str(binary),
+                         executed_binary_sha256=expected_hash, execution_binding='linux_parent_proc_fd_pinned_inode')
+    finally:
+        os.close(fd)
+
+
 def prepare(root, output, go):
     root, output = Path(root).resolve(), Path(output).resolve()
     output.mkdir(mode=0o700)  # New unique runner-owned directory only.
@@ -150,8 +189,8 @@ def prepare(root, output, go):
     build_argv = [go, 'test', '-c', '-o', str(binary), './internal/api/handlers']
     build = subprocess.run(build_argv, cwd=root, env=env, capture_output=True, check=True)
     fixture = output / 'ordinary-receipt-wire.json'
-    argv = [go, 'test', './internal/api/handlers', '-run', '^' + TEST_NAME + '$', '-count=1', '-json']
-    run = subprocess.run(argv, cwd=root, env={**env, 'ORDINARY_RECEIPT_WIRE_FIXTURE': str(fixture)}, capture_output=True)
+    build_hash = digest(binary.read_bytes())
+    run, execution = execute_binary(root, go, binary, build_hash, sha, fixture, env)
     exclusive(output / 'build.stdout', build.stdout)
     exclusive(output / 'build.stderr', build.stderr)
     exclusive(output / 'run.stdout', run.stdout)
@@ -165,9 +204,9 @@ def prepare(root, output, go):
     run_id = uuid.uuid4().hex
     receipt = dict(source_sha=sha, run_id=run_id, go_version=version, typescript=typescript, go_selection_before=before, go_selection_after=after,
                    go_selection_unchanged=True, fixture=str(fixture), fixture_sha256=digest(fixture.read_bytes()),
-                   build_argv=build_argv, build_sha256=digest(binary.read_bytes()),
+                   build_argv=build_argv, build_sha256=build_hash,
                    build_stdout_sha256=digest(build.stdout), build_stderr_sha256=digest(build.stderr),
-                   run_argv=argv, run_stdout_sha256=digest(run.stdout), run_stderr_sha256=digest(run.stderr),
+                   **execution, run_stdout_sha256=digest(run.stdout), run_stderr_sha256=digest(run.stderr),
                    actual_started_test_ids=[TEST_NAME], actual_passed_test_ids=[TEST_NAME], exit=run.returncode)
     receipt['run_sha256'] = digest(json.dumps(receipt, sort_keys=True).encode())
     path = output / 'preparation.json'
@@ -192,6 +231,15 @@ def validate_wire(root, fixture, receipt_path, receipt_hash, run_id):
         artifact = path.parent / name
         if artifact.is_symlink() or digest(artifact.read_bytes()) != receipt[key]:
             raise ValueError('typed wire build/run evidence tampered')
+    binary = path.parent / 'ordinary-receipt.test'
+    if (receipt['executed_binary_sha256'] != receipt['build_sha256'] or
+            receipt['executed_binary_source_path'] != str(binary) or
+            receipt['execution_binding'] != 'linux_parent_proc_fd_pinned_inode' or
+            receipt['run_cwd'] != str(Path(root) / 'internal/api/handlers') or
+            receipt['run_argv'][1:6] != ['tool','test2json','-t','-p','tabmail/internal/api/handlers'] or
+            receipt['run_argv'][7:] != ['-test.v=test2json','-test.run=^' + TEST_NAME + '$','-test.count=1'] or
+            not receipt['run_argv'][6].startswith('/proc/')):
+        raise ValueError('typed wire executed binary identity mismatch')
     run_hash = receipt.pop('run_sha256')
     if (digest(json.dumps(receipt, sort_keys=True).encode()) != run_hash or receipt['exit'] != 0 or
             receipt['actual_started_test_ids'] != [TEST_NAME] or receipt['actual_passed_test_ids'] != [TEST_NAME]):

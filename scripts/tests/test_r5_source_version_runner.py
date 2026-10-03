@@ -152,4 +152,57 @@ class PreparationBoundaryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'receipt tampered'):
             preparation.validate_wire(self.root,fixture,receipt,sha,'fresh')
 
+class ExecutedBinaryBoundaryTests(unittest.TestCase):
+    def setUp(self):
+        self.temp=tempfile.TemporaryDirectory(prefix='r5-executed-binary-unit-')
+        self.addCleanup(self.temp.cleanup)
+        self.root=Path(self.temp.name)
+        (self.root/'internal/api/handlers').mkdir(parents=True)
+        self.binary=self.root/'ordinary-receipt.test';self.binary.write_bytes(b'original pinned binary')
+        self.hash=preparation.digest(self.binary.read_bytes());self.sha='a'*40
+        self.fixture=self.root/'new-wire.json'
+
+    def execute(self):
+        return preparation.execute_binary(self.root,'go',self.binary,self.hash,self.sha,self.fixture,{})
+
+    def test_replaced_binary_refused_before_execution(self):
+        self.binary.unlink();self.binary.write_bytes(b'replaced binary')
+        with mock.patch.object(preparation,'source_identity',return_value=self.sha),mock.patch.object(preparation.subprocess,'run') as run:
+            with self.assertRaisesRegex(ValueError,'binary replaced/tampered before'):self.execute()
+            run.assert_not_called();self.assertFalse(self.fixture.exists())
+
+    def test_wrong_source_refused_before_execution(self):
+        with mock.patch.object(preparation,'source_identity',return_value='b'*40),mock.patch.object(preparation.subprocess,'run') as run:
+            with self.assertRaisesRegex(ValueError,'wrong source before'):self.execute()
+            run.assert_not_called();self.assertFalse(self.fixture.exists())
+
+    def test_old_fixture_refused_before_execution(self):
+        self.fixture.write_bytes(b'old wire')
+        with mock.patch.object(preparation,'source_identity',return_value=self.sha),mock.patch.object(preparation.subprocess,'run') as run:
+            with self.assertRaisesRegex(ValueError,'stale typed wire fixture'):self.execute()
+            run.assert_not_called();self.assertEqual(self.fixture.read_bytes(),b'old wire')
+
+    def test_midflight_path_replacement_cannot_change_executed_inode_and_is_rejected(self):
+        import subprocess
+        def replace_path(argv,**kwargs):
+            self.assertEqual(kwargs['cwd'],self.root/'internal/api/handlers')
+            self.assertEqual(argv[1:6],['tool','test2json','-t','-p','tabmail/internal/api/handlers'])
+            self.binary.unlink();self.binary.write_bytes(b'replacement that must never execute')
+            # The executed path still addresses the retained original inode.
+            self.assertEqual(Path(argv[6]).read_bytes(),b'original pinned binary')
+            return subprocess.CompletedProcess(argv,0,b'',b'')
+        with mock.patch.object(preparation,'source_identity',return_value=self.sha),mock.patch.object(preparation.subprocess,'run',side_effect=replace_path):
+            with self.assertRaisesRegex(ValueError,'binary/source replaced/tampered during'):self.execute()
+
+    def test_receipt_validation_rejects_replaced_executed_binary(self):
+        self.fixture.write_text('{}')
+        data=dict(source_sha=self.sha,run_id='fresh',fixture=str(self.fixture),fixture_sha256=preparation.digest(self.fixture.read_bytes()),build_sha256=self.hash)
+        for filename,key in [('run.stdout','run_stdout_sha256'),('run.stderr','run_stderr_sha256'),('build.stdout','build_stdout_sha256'),('build.stderr','build_stderr_sha256')]:
+            (self.root/filename).write_bytes(b'');data[key]=preparation.digest(b'')
+        receipt=self.root/'preparation.json';receipt.write_text(json.dumps(data));receipt_hash=preparation.digest(receipt.read_bytes())
+        self.binary.unlink();self.binary.write_bytes(b'replaced after execution')
+        with mock.patch.object(preparation,'source_identity',return_value=self.sha):
+            with self.assertRaisesRegex(ValueError,'build/run evidence tampered'):
+                preparation.validate_wire(self.root,self.fixture,receipt,receipt_hash,'fresh')
+
 if __name__=='__main__':unittest.main()
