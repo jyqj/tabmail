@@ -1,0 +1,33 @@
+
+> web@0.1.0 test
+> vitest run lib/legacy-outbound.test.ts -t requests exactly authorized GET detail
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/tabmail/web
+
+ ❯ lib/legacy-outbound.test.ts (22 tests | 1 failed | 21 skipped) 9ms
+     × requests exactly authorized GET detail and returns the same aggregate as detail 8ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  lib/legacy-outbound.test.ts > legacy recipients compatibility alias over the real transport/parser > requests exactly authorized GET detail and returns the same aggregate as detail
+{
+  error: { code: 'READ_UNAVAILABLE', message: 'Read unavailable' },
+  stacks: []
+}
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 21 skipped (22)
+   Start at  19:19:10
+   Duration  1.20s (transform 144ms, setup 192ms, import 49ms, tests 9ms, environment 772ms)
+
+npm notice
+npm notice New major version of npm available! 11.9.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

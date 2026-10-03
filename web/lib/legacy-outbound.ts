@@ -20,8 +20,9 @@ async function aggregate(id: string, suffix = "", signal?: AbortSignal): Promise
   return parseReceiptResponse(result, { id, tenantId });
 }
 export function legacyOutboundReceipt(id: string) { return aggregate(id); }
-// Historical endpoint names are retained, but arrays/details are not returned.
-export function legacyOutboundRecipients(id: string) { return aggregate(id, "/recipients"); }
+// Historical function names retain the closed aggregate contract. There is no
+// legacy /recipients route; use the authorized detail route for this alias.
+export function legacyOutboundRecipients(id: string) { return aggregate(id); }
 export function legacyOutboundAttempts(id: string) { return aggregate(id, "/attempts"); }
 export async function retryOutboundReceipt(id: string, signal?: AbortSignal): Promise<LegacyOutboundReceipt> {
   const scope = sessionScope(), tenantId = currentTenant();
