@@ -71,6 +71,56 @@ def compare_coverage(root_rows, explicit_rows, root, static, local):
                 all_variant_directories=static['production_variant_directories'],
                 other_contexts='static_only_not_executed')
 
+
+def variant_patterns(static):
+    patterns=[]
+    for directory in static['production_variant_directories']:
+        fork=next((r for r in inventory.CURRENT_REPLACEMENTS if directory==r['path'] or directory.startswith(r['path']+'/')),None)
+        patterns.append(fork['module']+directory[len(fork['path']):] if fork else './'+directory)
+    return patterns
+
+
+def variant_argv(context,static):
+    argv=selection_argv(context,variant_patterns(static))
+    return [a for a in argv if a not in ('-deps','-test')] + ['-e']
+
+
+def compare_variants(rows,root,static):
+    observed=set();records=[]
+    for row in rows:
+        error=row.get('Error',{}).get('Err','')
+        if row.get('DepsErrors') or row.get('InvalidGoFiles') or (error and 'build constraints exclude all Go files' not in error):
+            raise ValueError('invalid explicit production variant directory')
+        d=Path(row.get('Dir',''))
+        if not d.is_absolute() or not d.is_relative_to(root):
+            raise ValueError('variant directory outside static authority')
+        rel=d.relative_to(root).as_posix()
+        if rel not in static['production_variant_directories']:
+            raise ValueError('unknown explicit production variant directory')
+        module=row.get('Module',{});fork=next((r for r in inventory.CURRENT_REPLACEMENTS if rel==r['path'] or rel.startswith(r['path']+'/')),None)
+        if fork:
+            replace=module.get('Replace',{})
+            if module.get('Path')!=fork['module'] or module.get('Version')!=fork['version'] or replace.get('Path')!='./'+fork['path'] or Path(replace.get('Dir',''))!=root/fork['path']:
+                raise ValueError('wrong variant fork module')
+        elif module.get('Path')!='tabmail' or not module.get('Main') or Path(module.get('Dir',''))!=root:
+            raise ValueError('wrong variant main module')
+        fields={}
+        for field in ('GoFiles','CgoFiles','TestGoFiles','XTestGoFiles','IgnoredGoFiles'):
+            paths=[]
+            for name in row.get(field,[]):
+                if type(name) is not str or '/' in name or '\\' in name or not name.endswith('.go'):
+                    raise ValueError('invalid variant filename')
+                path=rel+'/'+name
+                if path not in static['production_go']:
+                    raise ValueError('variant outside static source authority')
+                observed.add(path);paths.append(path)
+            if paths:fields[field]=paths
+        records.append(dict(directory=rel,import_path=row['ImportPath'],module=module['Path'],fields=fields,
+                            selected_context=not bool(error),other_variants='static_only'))
+    if observed!=set(static['production_go']) or {r['directory'] for r in records}!=set(static['production_variant_directories']):
+        raise ValueError('static production variant directory/file coverage missing or extra')
+    return sorted(records,key=lambda r:r['directory'])
+
 STATIC_EVIDENCE = frozenset(['docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/app/messages/mime_budget_boundary_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/app/messages/service.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/mailcontent/mime_budget.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/mailcontent/mime_budget_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/mailcontent/parser.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/app/messages/mime_budget_boundary_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/app/messages/service.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/mailcontent/mime_budget.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/mailcontent/mime_budget_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/mailcontent/parser.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/after/internal/mailcontent/mime_budget.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/after/internal/mailcontent/mime_budget_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/before/internal/mailcontent/mime_budget.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/before/internal/mailcontent/mime_budget_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/app/messages/mime_budget_boundary_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/app/messages/service.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/mailcontent/mime_budget.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/mailcontent/mime_budget_test.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/mailcontent/parser.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/before/internal/app/messages/service.go', 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/before/internal/mailcontent/parser.go'])
 FIELDS = ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'EmbedFiles',
           'TestEmbedFiles', 'XTestEmbedFiles', 'CFiles', 'CXXFiles', 'MFiles',
@@ -253,13 +303,16 @@ def capture(root, go, *, cache, modulecache, context=None):
     root_raw = run(selection_argv(context, ['./...']))
     explicit_raw = run(selection_argv(context, ['./cmd/...','./internal/...']))
     coverage = compare_coverage(stream(root_raw),stream(explicit_raw),root,base['archive_boundary'],local)
+    variant_raw = run(variant_argv(context,base['archive_boundary']))
+    coverage['variant_directory_records'] = compare_variants(stream(variant_raw),root,base['archive_boundary'])
+    local_packages = [dict(import_path=r['ImportPath'],directory=Path(r['Dir']).relative_to(root).as_posix(),for_test=r.get('ForTest'),module=r['Module']['Path'],fields={f:r[f] for f in FIELDS if f in r}) for r in rows if Path(r.get('Dir','')).is_relative_to(root)]
     fresh = digest(root,local)
     after = inventory.capture_current_source(root,purpose='selected',policy=inventory.ARCHIVE_POLICY,build_context=context)
     if base!=after or before_go!=topology(root) or before!=digest(root,authorized) or any(before[p]!=h for p,h in fresh.items()):
         raise ValueError('source/hash/topology changed during capture')
     repeated_selected_raw = run(argv)
     repeated_mvs_raw = run(MVS_ARGV)
-    if selected_raw!=repeated_selected_raw or mvs_raw!=repeated_mvs_raw or root_raw!=run(selection_argv(context,['./...'])) or explicit_raw!=run(selection_argv(context,['./cmd/...','./internal/...'])):
+    if selected_raw!=repeated_selected_raw or mvs_raw!=repeated_mvs_raw or root_raw!=run(selection_argv(context,['./...'])) or explicit_raw!=run(selection_argv(context,['./cmd/...','./internal/...'])) or variant_raw!=run(variant_argv(context,base['archive_boundary'])):
         raise ValueError('selected metadata changed during capture')
     if before!=digest(root,authorized) or before_go!=topology(root):
         raise ValueError('source changed after final metadata')
@@ -267,7 +320,7 @@ def capture(root, go, *, cache, modulecache, context=None):
                    observation_order='env; unbound hydration; selected; MVS; coverage; selected; MVS; repeated coverage (raw equality)', base_source=base, archive_static=archive_static, production_coverage=coverage, environment=env,go_env=envinfo,commands=commands,root_mvs=mvs,
                    selected_local={p:dict(sha256=fresh[p],fields=fields) for p,fields in local.items()},
                    generated_testmain=generated,external_modulecache_inputs=external,native_inputs=native,toolchain_source_inputs=toolchain,
-                   package_records=len(rows), qualification=dict(overall='blocked',excluded_metadata_boundary='descriptor_checked',local_static_binding='captured',generated='unknown',external_modulecache='unknown',compiler_native='unknown',Method19='unknown',SML='unknown',wholeCI='unknown'),
+                   selected_local_packages=local_packages,package_records=len(rows), qualification=dict(overall='blocked',excluded_metadata_boundary='descriptor_checked',local_static_binding='captured',generated='unknown',external_modulecache='unknown',compiler_native='unknown',Method19='unknown',SML='unknown',wholeCI='unknown'),
                    boundary='Metadata/static local bytes only; no product tests, cold build or runtime qualification')
     return dict(payload,attestation_sha256=hashlib.sha256(inventory.canonical(payload)).hexdigest())
 

@@ -78,6 +78,36 @@ class ActualRootBindingV2Tests(unittest.TestCase):
         with mock.patch.object(binding,'digest',side_effect=drift),self.assertRaisesRegex(ValueError,'changed'):
             binding.capture(ROOT,GO,cache=CACHE,modulecache=MODULECACHE)
 
+    def test_live_capture_control_and_archive_mutations(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)/'checkout'
+            subprocess.run(['git','clone','--quiet','--no-hardlinks',str(ROOT),str(root)],check=True)
+            contract=binding.boundary.registry(root)
+            for name in [contract['modules'][0]['path'],binding.boundary.REGISTRY,contract['historical_files'][0]['path'],'cmd/tabmail/main.go']:
+                p=root/name
+                if not p.exists():
+                    name=next(p for p in binding.boundary.check(root)['production_go'] if p.startswith('cmd/'));p=root/name
+                raw=p.read_bytes();actual=subprocess.run;changed=False
+                def mutate(argv,*args,**kwargs):
+                    nonlocal changed
+                    result=actual(argv,*args,**kwargs)
+                    if len(argv)>1 and argv[1]=='env' and not changed:
+                        changed=True;p.write_bytes(raw+b'\n')
+                    return result
+                try:
+                    with self.subTest(name=name),mock.patch.object(binding.subprocess,'run',side_effect=mutate),self.assertRaises(ValueError):
+                        binding.capture(root,GO,cache=CACHE,modulecache=MODULECACHE)
+                    self.assertTrue(changed)
+                finally:p.write_bytes(raw)
+
+    def test_dirty_ignored_go_actual_selected_and_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)/'checkout';subprocess.run(['git','clone','--quiet','--no-hardlinks',str(ROOT),str(root)],check=True)
+            p=root/'web/node_modules/flatted/golang/pkg/flatted/flatted.go';p.parent.mkdir(parents=True);p.write_text('package flatted\n')
+            result=subprocess.run([str(GO),'list','-mod=readonly','./...'],cwd=root,env={**os.environ,'GOMODCACHE':str(MODULECACHE),'GOCACHE':str(CACHE),'GOWORK':'off','GOENV':'off','GOFLAGS':''},capture_output=True,text=True)
+            self.assertEqual(result.returncode,0,result.stderr);self.assertIn('tabmail/web/node_modules/flatted/golang/pkg/flatted',result.stdout)
+            with self.assertRaises(ValueError):binding.capture(root,GO,cache=CACHE,modulecache=MODULECACHE)
+
     def test_real_unimported_package_and_undefined_build(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)/'checkout'
