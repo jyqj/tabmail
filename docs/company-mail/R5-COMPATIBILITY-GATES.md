@@ -98,3 +98,41 @@ python3 -B -m unittest scripts.tests.test_r5_compatibility
 后者实际重哈希原manifest与29个safe inputrefs，读取report/observations metadata核对身份；当前实际运行exit0，报告scope=`actual_safe_artifacts_rehashed`。wrong tree/private commit、spec/case/closure/hash、错误DNS方法、unknown/private fields、错误status/aspect/marker及not-observed冒充observed均拒绝。PE02逻辑variant `[]` 的安全归档目录仅明确别名 `empty_array`，不改变原case或目标断言。
 
 原P0-110要求的是清点差异及兼容/升级方案，不要求本批提前修产品或使127endpoint全通过。现在可逐条追踪源码/已观测wire/未观测/未来方案：5缺OpenAPI、未绑明确DTO与外部Key使用unknown均保留；所有已知breaking变更有原任务、拒旧写和具体同批客户端条件。完成裁决仍由integration operator结合fresh门禁与逐条人工审查，不由checker自动`task_complete=true`。
+
+## 2026-10-03 当前结构与历史 wire 的独立版本边界
+
+本次独立任务基底为 `4aec142bcffd53c6ab91f2263436aaf980833fab`，产品 sourceaeed47f 不变。此前各节的 127 route、193 observation、75 observed route 成绩属于历史 v1，不代表当前结构。当前 [schema v2 地图](evidence/R5-COMPATIBILITY-GATES.json) 用正式 Go AST/TypeScript 5.9.3 AST 鲜源重建：132 route、134 client branches，其中 7 forwarder；route→handler→middleware/conditions→OpenAPI request/response→reviewed DTO→client→test registration→release batch→legacy disposition 全部重新对照。forwarder 保留在原 client producer 输出，不能算具体 route caller。
+
+旧地图原字节保存在 [historical-map-v1.json](evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json)，SHA256 `61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22`。旧 wire summary 原 SHA `6421a985979e1e61e187d7b51ac30d75c0ac11c1d8082904fa113037bd352e33`、source identity、spec/cases SHA 和所有 observations 不重签、不回写。历史正例只针对独立 historical-source fixture 的真实 Git 字节，来源提交与 SHA 见 [manifest](evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-source-manifest.json)。这只检查历史嵌入 metadata/pin，不声称重新读取原 safe runtime artifacts。
+
+当前 source validator 独立 PASS，输出 `wire_validation_scope=not_checked_current_wire_required`；当前地图禁止嵌入/重签历史 runtime summary 或 row observations，仅含固定 hash 的历史引用。原 `validate_wire` 当前 spec/cases 校验原样保留；旧 v1 加当前源码必拒绝 `wire spec/case differs from current source`。`--wire-evidence-root` 仍不能让 schema v2 source-only 地图变成 wire 成绩，无当前合格 receipt 时拒绝。两种 PASS 的区别是显式边界，不把 source PASS 改称 wire PASS。`task_complete=false`、`product_green=false`、依赖需 operator review 始终保留。
+
+### 逐 delta 人工复核
+
+完整逐 route/field 的 before/after 保存在 [route-deltas.json](evidence/R5-COMPATIBILITY-CURRENT-20261003/route-deltas.json)，没有删除旧 127 route。下表覆盖非行号/非全局 middleware/非 client 行号变化；所有 caller 的 source/owner/method/path/line 原值在新地图与 producer 输出逐条保留。
+
+| delta | 当前 source 对照与兼容裁决 |
+|---|---|
+| 新 GET/PATCH permission-editor、POST permission-editor/assignment、GET permission profile deletion-preview | 精确 perm handler、RequireAdmin、named request/response schema、真实 permission-editor TS caller；归 P1。PermissionEditorSnapshot/Command、PermissionAssignmentCommand、PermissionProfileDeletionPreview 命名 Go/TS DTO 实际符号与 source SHA 绑定；response 的 data envelope 显式记录。字段行为仍需独立 consumers，不能从类型名推导 CAS 已通过 |
+| 新 GET company/events | adminEvents.Events，cfg.CompanyRepository != nil 与 ok 条件、RequireAuth/RequireAdmin；CompanyAdminInvalidation/StreamScope、company-events caller；归 P7。SSE 手写 projection 不伪造成 company DTO type，本图保留无明确 Go/TS binding 缺口 |
+| PATCH profile、DELETE profile、旧 PUT/DELETE user permissions | 更新 versioned profile command/error/preview schema 与真实客户端；旧 PUT requestBody 已移除，不能继续将历史 inline override body 描述为当前支持。拒旧写与 P1 同批升级策略保留，未以结构事实声称全部协议绿 |
+| draft submit、company outbound recipients | 当前 OutboundReceipt→OrdinaryReceipt，替代 storage OutboundJob/Recipient wire 假设；P5 submit 与 P2 receipt 合同联合发布约束保留。本任务仅读取已有合同，不修改另一 worker 的 ordinary receipt 产品/工具 |
+| legacy outbound list/detail/attempts/retry | 当前 wrapper OutboundReceiptListResponse/OutboundReceiptResponse；attempts/retry 的 OpenAPI 已存在，旧两个缺口不能继续列为当前缺口。wrapper 未有显式 reviewed Go/TS direct binding 的格子仍为空，外部客户端/Key 使用量未知 |
+| company outbound inspect | 当前 reason 的 trim、8–1000 UTF-8 byte 说明同步 request schema；字符长度不替代服务器 byte 检查；仍归 P6 |
+| 全局 middleware 与所有 client 行号变化 | 实际 Auth(cached,…,authState)、PermissionLoader、原 Key/scope/admin middleware、route conditions 逐条重采；handler/middleware 实现字节纳入 current source closure。语法注册不证明 runtime authority；客户端新 branch/owner 与 source SHA 对照，不因 caller 消失宣布无外部使用者 |
+
+P1–P8 与 stable 的原 release_batches 内容逐字保留；仅把新 permission-editor 入口显式归 P1。外部 legacy disposition 两种 unknown 保留。当前尚无 OpenAPI 的实际 route 为 DELETE suppression/{id}、GET suppression、GET docs-assets/* 共 3 项，未造 schema，也未删除 route。
+
+### 负例和 producer 需求
+
+原 route/schema/client/test/source drift、duplicate/missing、依赖/产品/legacy unknown、P5–P7 task semantics、DNS exact method、safejoin source identity/status/private fields/hash/case/marker 负例全部保留。新增当前 producer 的 future route/wrong handler/middleware/allowed-source drift、权限入口批次、历史 wire/current spec 拒绝、重新嵌入历史 summary/row runtime 与改历史引用 hash 拒绝。历史正例使用原 spec/cases 独立 fixture，未 mock digest 或放松生产校验。历史 v1 safe summary 另绑定原固定 SHA：把旧 expected_spec、HTTP ref spec 和 summary hash 一起改成当前值也拒绝，不能重新签名旧 runtime。client producer 同时对照独立鲜源 clients.json，伪 owner/branch 不能自填地图后获得结构 PASS。
+
+本次不新跑 HTTP/PG wire，已选择用户授权的历史 source fixture 正例方案。若 integration operator 要生成当前 wire，必须先完成同一冻结当前 source 的正式 producer 身份闭包：
+
+1. `check_http_contract.py --output-dir <fresh-private-dir> --source-sha <exact-current-tree>` 使用现有 TestCompanyHTTPContract，隔离自有 PG 的 TABMAIL_TEST_DB_DSN、合成账户/邮件与 loopback，原 `-race -timeout=180s`、240s process ceiling 保持；两项 live DNS 排除不变。responses.json 含合成 secrets 只能私有存放，导出安全 status/hash/schema metadata。
+2. `check_r5_protocol.py --run shared-db` 与 `--run shared-components` 都要求正式 supported `--source-policy`、matching versioned `--source-manifest`、其原字节 `--source-manifest-sha256`、新的独立 output-dir；Go 原 race/120s test 与180s process 门禁不增加。PG/loopback/component 合成 fixtures，不接真实邮件或 DNS。
+3. 原 AB `validate_wire` 的身份结构是 frozen_tree/validation_commit 40hex 与旧 final-source manifest；当前 protocol versioned producer 的身份语义不同。新完整 packet 与 summary 需要 integration operator 明确新版本 join contract、实际 artifact hashes、精确 source/spec/cases closure、target red 分类和 exclusions 后单独审查；不得仅把 expected_spec_sha256 改成当前值，或混用旧 AB 29 个 input refs。此任务未触碰 versioned runner/prep/coldweb/ordinary receipt，也不替它们造当前 receipt。
+
+仓库和父工作区未提供可读 `.agents/skills` 文件；已检查 `.agents`（为空/仓库中不存在），读取现有 web/AGENTS.md。官方 Go1.25.7、TS5.9.3、锁定 Python requirements 在自有 `/workspace/r5-compatibility` venv/cache 使用，无锁、replace、权限或凭据修改。新结果/raw failure 与固定 remote SHA 见同目录 evidence 的 validation.json；整套范围外 ERROR 原始日志保留，不回写旧运行成绩。
+
+本次最终相关 suite **223 tests PASS**（其中独立 compatibility suite **19 tests PASS**），current source gate / contract checker / client AST **27 tests PASS**。宽范围 tools sweep **652 tests，3 ERROR，1 skipped** 是最终 fixed-summary pin 前的独立探索运行；最终受影响 suite 已重跑，不能把宽范围 sweep 改写为全绿。两个旧 compatibility ERROR 与一次 sibling import invocation ERROR 均保留原始日志。代码与证据 commit `006ff69` 已正常 origin push；唯一一次 draft PR 请求原始返回 `Post "https://api.github.com/graphql": Forbidden`，PR 未创建、不重试、不改凭据。该拒绝与 origin Git 无关，raw 在同目录 draft-pr-once.raw.txt。

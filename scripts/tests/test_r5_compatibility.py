@@ -2,7 +2,7 @@ import copy
 import importlib.util
 import json
 from pathlib import Path
-import subprocess
+from unittest import mock
 import unittest
 
 ROOT=Path(__file__).resolve().parents[2]
@@ -14,12 +14,14 @@ class CompatibilityGateTests(unittest.TestCase):
     def setUpClass(cls):
         cls.data=json.loads(gate.MAP.read_text())
         # Unit inputs are syntax facts, never canned HTTP or product outputs.
-        cls.routes=json.loads((ROOT/'docs/company-mail/evidence/R5-API-MATRIX.json').read_text())
-        cls.clients=json.loads(subprocess.run(['node','scripts/collect_api_calls.cjs'],cwd=ROOT,check=True,capture_output=True,text=True).stdout)
+        cls.routes,cls.clients=gate.collect()
 
     def test_current_source_map_is_not_product_or_dependency_completion(self):
         result=gate.validate(self.data,self.routes,self.clients)
-        self.assertEqual(result['routes'],127)
+        self.assertEqual(result['routes'],132)
+        self.assertEqual(result['client_branches'],134)
+        self.assertEqual(sum(x['forwarding'] for x in self.clients),7)
+        self.assertEqual(result['wire_validation_scope'],'not_checked_current_wire_required')
         self.assertFalse(result['task_complete']);self.assertFalse(result['product_green'])
         self.assertEqual(result['status'],'source_inventory_and_upgrade_plan_checked')
         self.assertTrue(result['openapi_missing'])
@@ -91,15 +93,19 @@ class CompatibilityGateTests(unittest.TestCase):
         for raw in ['{"schema_version":1,"schema_version":1}','{"value":NaN}','{"value":Infinity}']:
             with self.subTest(raw=raw),self.assertRaises(ValueError):gate.strict_json(raw)
 
-if __name__=='__main__':unittest.main()
+
 
 class SafeWireJoinTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.data=json.loads(gate.MAP.read_text())
+        cls.data=json.loads((ROOT/gate.HISTORY).read_text())
+        cls.historical_root=ROOT/gate.HISTORY.parent/'historical-source'
         cls.facts=[{'route':r['route']} for r in cls.data['routes']]
 
-    def validate(self,data):return gate.validate_wire(data,self.facts)
+    def validate(self,data):
+        # Independent historical source bytes, never patch a digest or current validator.
+        with mock.patch.object(gate,'ROOT',self.historical_root):
+            return gate.validate_wire(data,self.facts)
     def reject(self,modify,repin=False):
         data=copy.deepcopy(self.data);modify(data)
         if repin:data['wire_source_evidence']['summary_sha256']=__import__('hashlib').sha256(gate.canonical_bytes(data['wire_source_evidence']['summary'])).hexdigest()
@@ -140,3 +146,49 @@ class SafeWireJoinTests(unittest.TestCase):
         self.reject(lambda d:d['wire_source_evidence']['summary']['excluded_http_operations'][0].__setitem__('path','/api/v1/company/domains'),True)
         with __import__('tempfile').TemporaryDirectory() as root:
             with self.assertRaises(ValueError):gate.validate_wire(self.data,self.facts,root)
+
+
+class CurrentHistoricalBoundaryTests(unittest.TestCase):
+    setUpClass=classmethod(CompatibilityGateTests.setUpClass.__func__)
+    reject=CompatibilityGateTests.reject
+    def test_current_source_rejects_historical_wire(self):
+        historical=json.loads((ROOT/gate.HISTORY).read_text())
+        with self.assertRaisesRegex(ValueError,'wire spec/case differs from current source'):
+            gate.validate_wire(historical,[{'route':r['route']} for r in historical['routes']])
+
+    def test_re_signing_history_and_current_artifact_claims_rejected(self):
+        self.reject(lambda d:d.__setitem__('wire_source_evidence',json.loads((ROOT/gate.HISTORY).read_text())['wire_source_evidence']))
+        self.reject(lambda d:d['historical_wire_reference'].__setitem__('sha256','0'*64))
+        self.reject(lambda d:d['routes'][0].__setitem__('wire_evidence','observed_metadata_not_complete_behavior'))
+        with self.assertRaises(ValueError):gate.validate(self.data,self.routes,self.clients,ROOT)
+
+    def test_future_and_wrong_handler_producer_routes_rejected(self):
+        for field,value in [('path','/api/v1/future'),('handler','invented.Handler'),('middleware',[]),('source','internal/api/router.go')]:
+            routes=copy.deepcopy(self.routes)
+            # A different allowed source must also be rejected, not only path traversal.
+            if field=='source':value='internal/api/handlers/company_routes.go'
+            routes[0][field]=value
+            with self.subTest(field=field),self.assertRaises(ValueError):gate.validate(self.data,routes,self.clients)
+
+    def test_old_runtime_cannot_be_re_signed_with_current_spec(self):
+        historical=json.loads((ROOT/gate.HISTORY).read_text())
+        evidence=historical['wire_source_evidence'];current_spec=gate.digest(ROOT/'internal/api/openapi.yaml')
+        evidence['expected_spec_sha256']=current_spec
+        for ref in evidence['summary']['inputs']:
+            if ref['kind']=='http_contract':ref['spec_sha256']=current_spec
+        evidence['summary_sha256']=__import__('hashlib').sha256(gate.canonical_bytes(evidence['summary'])).hexdigest()
+        with self.assertRaisesRegex(ValueError,'re-signed historical wire'):
+            gate.validate_wire(historical,[{'route':r['route']} for r in historical['routes']])
+
+    def test_fabricated_client_producer_not_accepted_as_source(self):
+        clients=copy.deepcopy(self.clients);clients[0]['owner']='inventedClient'
+        with self.assertRaisesRegex(ValueError,'client producer differs'):
+            gate.validate(self.data,self.routes,clients)
+
+    def test_new_routes_preserve_release_semantics(self):
+        rows={r['route']:r for r in self.data['routes']}
+        for route in ['GET /api/v1/admin/users/{id}/permission-editor','PATCH /api/v1/admin/users/{id}/permission-editor','POST /api/v1/admin/users/{id}/permission-editor/assignment','GET /api/v1/admin/permissions/{id}/deletion-preview']:
+            self.assertEqual(rows[route]['release_batch'],'P1')
+        self.assertEqual(rows['GET /api/v1/company/events']['release_batch'],'P7')
+
+if __name__=='__main__':unittest.main()
