@@ -4,6 +4,8 @@ This is a directory superset, NOT go list's selected compiler inputs, module
 cache/toolchain/native-library attestation, or a cross-platform runtime result.
 All build-tag variants are captured; only the declared context is admitted.
 Historical files-only identities must never be computed through this policy.
+The incompatible root-selected companion is scripts/r5_selected_source_binding.py;
+its attestation does not change v2/v3 qualification or admit METHOD/runtime.
 """
 from __future__ import annotations
 import hashlib
