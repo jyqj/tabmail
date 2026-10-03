@@ -25,9 +25,26 @@ import { isSuperAdminLevel } from "@/lib/permissions";
 import { useI18n } from "@/lib/i18n";
 import { listPermissionProfiles, createPermissionProfile, updatePermissionProfile, deletePermissionProfile, getPermissionProfileDeletionPreview } from "@/lib/api/permissions";
 import { useCompanyEventConsumer } from "./company-event-consumer";
+import { validateObservedPermissionProfile, type PermissionProfileUpdateFields } from "@/lib/api/permission-editor-types";
 type DeletionPreview = Awaited<ReturnType<typeof getPermissionProfileDeletionPreview>>["data"];
-function hasRevision(profile: PermissionProfile): boolean { return typeof profile.revision === "string" && profile.revision.length <= 19 && /^[1-9][0-9]*$/.test(profile.revision) && BigInt(profile.revision) <= BigInt("9223372036854775807"); }
 function validQuotas(form: PermissionFormData): boolean { return [form.daily_send_quota, form.daily_receive_quota, form.max_mailboxes, form.max_domains].every(value => /^(0|[1-9][0-9]*)$/.test(value) && Number.isSafeInteger(Number(value))); }
+function observedProfile(profile: PermissionProfile): boolean {
+    try { validateObservedPermissionProfile(profile); return true; } catch { return false; }
+}
+function profileFieldPatch(form: PermissionFormData, baseline: PermissionFormData): PermissionProfileUpdateFields {
+    const fields: PermissionProfileUpdateFields = {};
+    for (const key of Object.keys(form) as (keyof PermissionFormData)[]) {
+        if (key === "tenant_id") continue;
+        const value = form[key], original = baseline[key];
+        const wire = typeof value === "string" ? (key === "name" || key === "description" ? value.trim() : Number(value)) : value;
+        const before = typeof original === "string" ? (key === "name" || key === "description" ? original.trim() : Number(original)) : original;
+        if (JSON.stringify(wire) !== JSON.stringify(before)) Object.assign(fields, { [key]: wire });
+    }
+    return fields;
+}
+function permissionError(error: unknown): { code?: string; message?: string } {
+    return (error as { error?: { code?: string; message?: string } })?.error ?? {};
+}
 const GLOBAL_PROFILE_SCOPE = "__global__";
 interface PermissionFormData {
     tenant_id: string | null;
@@ -203,7 +220,7 @@ export default function PermissionsPage() {
     const { t } = useI18n();
     // UX-only gate; the backend authz seam is authoritative.
     const isPlatformAdmin = isSuperAdminLevel(level);
-    const { data: profilesRes, isLoading: loading, mutate: mutateProfiles, } = useCRUDPage("permission-profiles", () => listPermissionProfiles(), "permissions.loadFailed");
+    const { data: profilesRes, isLoading: loading, error: profilesError, mutate: mutateProfiles, } = useCRUDPage("permission-profiles", () => listPermissionProfiles(), "permissions.loadFailed");
     const profiles = profilesRes?.data ?? [];
     const total = profiles.length;
     const { data: domainsRes } = useAPI(isPlatformAdmin ? "permission-profile-admin-domains" : "permission-profile-domains", () => (isPlatformAdmin ? listAdminDomains() : listDomains()));
@@ -217,6 +234,8 @@ export default function PermissionsPage() {
     const [editOpen, setEditOpen] = useState(false);
     const [editingProfile, setEditingProfile] = useState<PermissionProfile | null>(null);
     const [editForm, setEditForm] = useState<PermissionFormData>(defaultForm);
+    const editBaseline = useRef<PermissionFormData>(defaultForm);
+    const [accessError, setAccessError] = useState<string | null>(null);
     const [saving, setSaving] = useState(false);
     const [editStale, setEditStale] = useState(false);
     const [reviewFresh, setReviewFresh] = useState(false);
@@ -236,7 +255,7 @@ export default function PermissionsPage() {
         writeBusy.current = false; setCreating(false); setSaving(false); setDeleteBusy(false); setRefreshing(false);
         setEditOpen(false); setEditingProfile(null); setEditStale(false); setFreshProfile(null); setReviewFresh(false);
         setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false);
-        setDialogOpen(false); setForm(defaultForm);
+        setDialogOpen(false); setForm(defaultForm); setAccessError(null);
         return () => { ++operation.current; };
     }, [session]);
     const eventRevoked = useCompanyEventConsumer({
@@ -256,12 +275,13 @@ export default function PermissionsPage() {
             setEditOpen(false); setEditingProfile(null); setEditForm(defaultForm);
             setFreshProfile(null); setReviewFresh(false); setEditStale(false);
             setDeletingProfile(null); setPreview(null); setConfirmed(false); setPreviewBusy(false);
-            setDialogOpen(false); setForm(defaultForm);
+            setDialogOpen(false); setForm(defaultForm); setAccessError(null);
         },
     });
-    const mayManage = (profile: PermissionProfile) => !eventRevoked && !profile.is_system && (isPlatformAdmin || (level === "admin" && !!tenantId && profile.tenant_id === tenantId));
+    const canManageScope = (profile: PermissionProfile) => !accessError && !eventRevoked && !profile.is_system && (isPlatformAdmin || (level === "admin" && !!tenantId && profile.tenant_id === tenantId));
+    const mayManage = (profile: PermissionProfile) => !profilesError && !loading && canManageScope(profile);
     const handleCreate = async () => {
-        if (eventRevoked || session !== sessionScope() || writeBusy.current || (level !== "admin" && !isPlatformAdmin) || !form.name.trim() || !validQuotas(form))
+        if (accessError || profilesError || loading || eventRevoked || session !== sessionScope() || writeBusy.current || (level !== "admin" && !isPlatformAdmin) || !form.name.trim() || !validQuotas(form))
             return;
         const token = ++operation.current, scope = session;
         writeBusy.current = true;
@@ -289,11 +309,8 @@ export default function PermissionsPage() {
         }
         catch (e: unknown) {
             if (!isCurrent(token, scope)) return;
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
+            const err = { error: permissionError(e) };
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.error.code ?? "")) setAccessError(err.error.message || err.error.code!);
             toast.error(err?.error?.message || t("permissions.createFailed"));
         }
         finally {
@@ -308,7 +325,7 @@ export default function PermissionsPage() {
         ++operation.current;
         setEditingProfile(profile);
         setEditStale(false); setFreshProfile(null); setReviewFresh(false);
-        setEditForm({
+        const initial: PermissionFormData = {
             tenant_id: profile.tenant_id ?? null,
             name: profile.name,
             description: profile.description,
@@ -317,35 +334,25 @@ export default function PermissionsPage() {
             daily_receive_quota: String(profile.daily_receive_quota),
             max_mailboxes: String(profile.max_mailboxes),
             max_domains: String(profile.max_domains),
-            allowed_zone_ids: profile.allowed_zone_ids ?? [],
+            allowed_zone_ids: [...(profile.allowed_zone_ids ?? [])],
             can_create_domains: profile.can_create_domains,
             can_create_routes: profile.can_create_routes,
             can_create_api_keys: profile.can_create_api_keys,
-        });
+        };
+        editBaseline.current = initial; setEditForm(initial);
         setEditOpen(true);
     };
     const handleEdit = async () => {
-        if (session !== sessionScope() || writeBusy.current || !editingProfile || !mayManage(editingProfile) || !hasRevision(editingProfile) || editStale || reviewFresh || !editForm.name.trim() || !validQuotas(editForm))
+        if (session !== sessionScope() || writeBusy.current || !editingProfile || !mayManage(editingProfile) || !observedProfile(editingProfile) || editStale || reviewFresh || !editForm.name.trim() || !validQuotas(editForm))
             return;
+        if (!Object.keys(profileFieldPatch(editForm, editBaseline.current)).length) return;
         const token = ++operation.current, scope = session;
         writeBusy.current = true;
         setSaving(true);
         try {
             await updatePermissionProfile(editingProfile.id, {
                 expected_revision: editingProfile.revision!,
-                fields: {
-                name: editForm.name.trim(),
-                description: editForm.description.trim(),
-                can_send: editForm.can_send,
-                daily_send_quota: Number(editForm.daily_send_quota),
-                daily_receive_quota: Number(editForm.daily_receive_quota),
-                max_mailboxes: Number(editForm.max_mailboxes),
-                max_domains: Number(editForm.max_domains),
-                allowed_zone_ids: editForm.allowed_zone_ids,
-                can_create_domains: editForm.can_create_domains,
-                can_create_routes: editForm.can_create_routes,
-                can_create_api_keys: editForm.can_create_api_keys,
-                },
+                fields: profileFieldPatch(editForm, editBaseline.current),
             });
             if (!isCurrent(token, scope)) return;
             setEditOpen(false);
@@ -355,11 +362,8 @@ export default function PermissionsPage() {
         }
         catch (e: unknown) {
             if (!isCurrent(token, scope)) return;
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
+            const err = { error: permissionError(e) };
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.error.code ?? "")) setAccessError(err.error.message || err.error.code!);
             setEditStale(true);
             toast.error(err?.error?.message || t("permissions.profileConflict"));
         }
@@ -368,19 +372,27 @@ export default function PermissionsPage() {
         }
     };
     const refreshEdit = async () => {
-        if (session !== sessionScope() || !editingProfile || refreshing || writeBusy.current) return;
+        if (accessError || session !== sessionScope() || !editingProfile || refreshing || writeBusy.current) return;
         const token = ++operation.current, scope = session;
         setRefreshing(true);
         try {
             const response = await listPermissionProfiles();
             if (!isCurrent(token, scope)) return;
             const current = response.data.find(profile => profile.id === editingProfile.id);
-            if (!current || !mayManage(current) || !hasRevision(current)) throw new Error("revision unavailable");
+            if (!current || !canManageScope(current) || !observedProfile(current)) throw new Error("revision unavailable");
             setFreshProfile(current); setReviewFresh(true);
-            setEditingProfile(current); // Keep every draft field; never replay the failed command.
+            // Advance only the reviewed revision. The original form baseline
+            // remains fixed, so untouched stale values cannot become field intent.
+            setEditingProfile(current);
             setEditStale(false);
-            mutateProfiles();
-        } catch { if (isCurrent(token, scope)) toast.error(t("permissions.revisionUnavailable")); }
+            mutateProfiles(response, { revalidate: false });
+        } catch (error) {
+            if (!isCurrent(token, scope)) return;
+            setEditStale(true); setFreshProfile(null); setReviewFresh(false);
+            const err = permissionError(error);
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.code ?? "")) setAccessError(err.message || err.code!);
+            toast.error(err.message || t("permissions.revisionUnavailable"));
+        }
         finally { if (isCurrent(token, scope)) setRefreshing(false); }
     };
     const loadPreview = async (profile: PermissionProfile) => {
@@ -390,7 +402,13 @@ export default function PermissionsPage() {
         try {
             const response = await getPermissionProfileDeletionPreview(profile.id);
             if (isCurrent(token, scope)) setPreview(response.data);
-        } catch { if (isCurrent(token, scope)) toast.error(t("permissions.previewFailed")); }
+        } catch (error) {
+            if (isCurrent(token, scope)) {
+                const err = permissionError(error);
+                if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.code ?? "")) setAccessError(err.message || err.code!);
+                toast.error(err.message || t("permissions.previewFailed"));
+            }
+        }
         finally { if (isCurrent(token, scope)) setPreviewBusy(false); }
     };
     const handleDelete = async () => {
@@ -402,16 +420,18 @@ export default function PermissionsPage() {
             if (!isCurrent(token, scope)) return;
             setDeletingProfile(null); setPreview(null); setConfirmed(false);
             toast.success(t("permissions.deleted")); mutateProfiles();
-        } catch {
+        } catch (error) {
             if (!isCurrent(token, scope)) return;
             // Every failed write invalidates confirmation, including an unknown commit outcome.
             setPreview(null); setConfirmed(false);
-            toast.error(t("permissions.profileConflict"));
+            const err = permissionError(error);
+            if (["UNAUTHORIZED", "FORBIDDEN"].includes(err.code ?? "")) setAccessError(err.message || err.code!);
+            toast.error(err.message || t("permissions.profileConflict"));
         } finally { if (isCurrent(token, scope)) { writeBusy.current = false; setDeleteBusy(false); } }
     };
     return (<div className="flex flex-col">
       <PageHeader title={t("permissions.title")} description={t("permissions.total", { count: total })} actions={<Dialog open={dialogOpen} onOpenChange={open => { if (!creating) setDialogOpen(open); }}>
-            <DialogTrigger render={<Button size="sm" className="gap-1.5" disabled={level !== "admin" && !isPlatformAdmin}/>}>
+            <DialogTrigger render={<Button size="sm" className="gap-1.5" disabled={!!accessError || !!profilesError || loading || eventRevoked || (level !== "admin" && !isPlatformAdmin)}/>}>
               <Plus className="h-3.5 w-3.5"/>
               {t("permissions.create")}
             </DialogTrigger>
@@ -424,13 +444,14 @@ export default function PermissionsPage() {
               </DialogHeader>
               <PermissionFormFields form={form} setForm={setForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants}/>
               <DialogFooter>
-                <Button onClick={handleCreate} disabled={creating || !form.name.trim() || !validQuotas(form)}>
+                <Button onClick={handleCreate} disabled={!!accessError || !!profilesError || loading || eventRevoked || creating || !form.name.trim() || !validQuotas(form)}>
                   {creating ? t("permissions.creating") : t("permissions.create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>}/>
 
+      {(accessError || profilesError) && <p role="alert">{accessError || permissionError(profilesError).message || t("permissions.loadFailed")}</p>}
       <div className="p-4">
         <Card>
           <CardHeader className="pb-3">
@@ -566,9 +587,9 @@ export default function PermissionsPage() {
               <label className="flex gap-2"><input type="checkbox" disabled={saving || refreshing} checked={!reviewFresh} onChange={event => setReviewFresh(!event.target.checked)} />{t("permissions.confirmFreshVersion")}</label>
             </section>}
             <DialogFooter>
-              {(!hasRevision(editingProfile) || editStale) && <div role="alert">{t(editStale ? "permissions.profileConflict" : "permissions.revisionUnavailable")}</div>}
-              <Button variant="outline" onClick={refreshEdit} disabled={saving || refreshing}>{t("permissions.refreshRevision")}</Button>
-              <Button onClick={handleEdit} disabled={saving || refreshing || editStale || reviewFresh || !hasRevision(editingProfile) || !validQuotas(editForm) || !editForm.name.trim()}>
+              {(!observedProfile(editingProfile) || editStale) && <div role="alert">{t(editStale ? "permissions.profileConflict" : "permissions.revisionUnavailable")}</div>}
+              <Button variant="outline" onClick={refreshEdit} disabled={!!accessError || saving || refreshing}>{t("permissions.refreshRevision")}</Button>
+              <Button onClick={handleEdit} disabled={!!accessError || !!profilesError || loading || saving || refreshing || editStale || reviewFresh || !observedProfile(editingProfile) || !Object.keys(profileFieldPatch(editForm, editBaseline.current)).length || !validQuotas(editForm) || !editForm.name.trim()}>
                 {saving ? t("permissions.saving") : t("permissions.save")}
               </Button>
             </DialogFooter>
@@ -589,8 +610,8 @@ export default function PermissionsPage() {
             <label className="flex items-center gap-2"><input type="checkbox" checked={confirmed} disabled={deleteBusy} onChange={event => setConfirmed(event.target.checked)} />{t("permissions.confirmEffects")}</label>
           </div>}
           <DialogFooter>
-            <Button variant="outline" disabled={previewBusy || deleteBusy} onClick={() => loadPreview(deletingProfile)}>{t("permissions.refreshPreview")}</Button>
-            <Button variant="destructive" disabled={!preview || !confirmed || previewBusy || deleteBusy} onClick={handleDelete}>{t("permissions.delete")}</Button>
+            <Button variant="outline" disabled={!!accessError || previewBusy || deleteBusy} onClick={() => loadPreview(deletingProfile)}>{t("permissions.refreshPreview")}</Button>
+            <Button variant="destructive" disabled={!!accessError || !!profilesError || loading || !preview || !confirmed || previewBusy || deleteBusy} onClick={handleDelete}>{t("permissions.delete")}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>}

@@ -18,7 +18,7 @@ const user = "20000000-0000-4000-8000-000000000001";
 const effective = { can_send: true, daily_send_quota: 0, daily_receive_quota: 0, max_mailboxes: 0, max_domains: 0, allowed_zone_ids: null, can_create_domains: false, can_create_routes: false, can_create_api_keys: false };
 const revision = { user_id: user, tenant_id: auth.tenantId, user_revision: "9007199254740993", profile_id: id, profile_revision: "9007199254740995" };
 let profile: Record<string, unknown>;
-let calls: { method: string; path: string; body: any }[];
+let calls: { method: string; path: string; body: Record<string, unknown> }[];
 let rejectWrite: boolean;
 let previewVersion: string;
 let intercept: ((method: string, path: string, init?: RequestInit) => Promise<Response> | undefined) | undefined;
@@ -33,10 +33,24 @@ beforeEach(() => {
   vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
     const path = new URL(String(input), "http://localhost").pathname;
     const method = init?.method ?? "GET";
-    const body = init?.body ? JSON.parse(String(init.body)) : undefined;
+    const body = init?.body ? JSON.parse(String(init.body)) : {};
     calls.push({ path, method, body });
     const pending = intercept?.(method, path, init);
     if (pending) return pending;
+    if (path === "/api/v1/company/events") {
+      // Model a connected SSE stream, not an immediately closed JSON body
+      // that spuriously marks drafts stale on every one-second reconnect.
+      let close = () => {};
+      const abort = () => close();
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) { close = () => { controller.close(); close = () => {}; }; },
+        cancel() { close = () => {}; init?.signal?.removeEventListener("abort", abort); },
+      });
+      init?.signal?.addEventListener("abort", abort, { once: true });
+      if (init?.signal?.aborted) abort();
+      return new Response(body, { headers: { "Content-Type": "text/event-stream" } });
+    }
+
     if (method !== "GET" && rejectWrite) return response({ error: { code: "CONFLICT", message: "stale" } }, 409);
     if (path.endsWith("/deletion-preview")) return response({ profile_id: id, profile_revision: previewVersion, members: [{ ...revision, profile_revision: previewVersion }], changes: [{ revision: { ...revision, profile_revision: previewVersion }, before: effective, after: { ...effective, can_send: false } }] });
     if (method === "DELETE") return new Response(null, { status: 204 });
@@ -66,9 +80,12 @@ async function action(label: string) {
 const writes = () => calls.filter(call => call.method !== "GET");
 describe("formal profile management CAS consumer", () => {
   it("sends observed decimal revision, explicit false and zero in fields", async () => {
+    profile.daily_send_quota = 9; profile.allowed_zone_ids = [user];
     mount(); await action("permissions.edit");
     const dialog = screen.getByRole("dialog");
     fireEvent.change(dialog.querySelectorAll("input")[0], { target: { value: "Updated" } });
+    fireEvent.change(dialog.querySelectorAll("input[type=number]")[0], { target: { value: "0" } });
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.allowAllDomains" }));
     await userEvent.click(within(dialog).getAllByRole("switch")[0]);
     await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
     await waitFor(() => expect(writes()).toHaveLength(1));
@@ -96,10 +113,83 @@ describe("formal profile management CAS consumer", () => {
     await waitFor(() => expect(writes()).toHaveLength(2));
     expect(writes()[1].body.expected_revision).toBe("9007199254740999");
   });
+  it("opening and saving without field changes preserves raw NULL and sends no command", async () => {
+    profile.allowed_zone_ids = null;
+    mount(); await action("permissions.edit");
+    const save = within(screen.getByRole("dialog")).getByRole("button", { name: "permissions.save" });
+    expect(save).toBeDisabled();
+    await userEvent.click(save);
+    expect(writes()).toHaveLength(0);
+  });
+  it("preserves NULL zone storage when changing only description", async () => {
+    profile.allowed_zone_ids = null;
+    mount(); await action("permissions.edit");
+    const dialog = screen.getByRole("dialog");
+    fireEvent.change(dialog.querySelectorAll("input")[1], { target: { value: "Changed only description" } });
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    expect(writes()[0].body).toEqual({ expected_revision: "9007199254740995", description: "Changed only description" });
+  });
+  it("an incomplete observed profile cannot enable a write using default UI values", async () => {
+    delete profile.can_send;
+    mount(); await action("permissions.edit");
+    const dialog = screen.getByRole("dialog");
+    fireEvent.change(dialog.querySelectorAll("input")[1], { target: { value: "Unsafe snapshot" } });
+    expect(within(dialog).getByRole("button", { name: "permissions.save" })).toBeDisabled();
+    expect(writes()).toHaveLength(0);
+  });
+  it("denied profile loading disables creation and reports the server's reason", async () => {
+    intercept = (method, path) => method === "GET" && path === "/api/v1/admin/permissions"
+      ? Promise.resolve(response({ error: { code: "FORBIDDEN", message: "Profile access denied" } }, 403)) : undefined;
+    mount();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Profile access denied");
+    expect(screen.getByRole("button", { name: "permissions.create" })).toBeDisabled();
+    expect(writes()).toHaveLength(0);
+  });
+  it("does not restore untouched revoked fields after conflict refresh", async () => {
+    mount(); await action("permissions.edit");
+    const dialog = screen.getByRole("dialog");
+    fireEvent.change(dialog.querySelectorAll("input")[1], { target: { value: "Only description" } });
+    rejectWrite = true;
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
+    await waitFor(() => expect(writes()).toHaveLength(1));
+    await waitFor(() => expect(within(dialog).getByRole("button", { name: "permissions.save" })).toBeDisabled());
+    profile.can_send = false; profile.daily_send_quota = 17;
+    profile.revision = "9007199254740999"; rejectWrite = false;
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.refreshRevision" }));
+    await userEvent.click(await within(dialog).findByRole("checkbox"));
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
+    await waitFor(() => expect(writes()).toHaveLength(2));
+    expect(writes()[1].body).toEqual({ expected_revision: "9007199254740999", description: "Only description" });
+  });
+  it("blocks saves after a failed revision refresh even with a formerly valid revision", async () => {
+    mount(); await action("permissions.edit");
+    const dialog = screen.getByRole("dialog");
+    fireEvent.change(dialog.querySelectorAll("input")[1], { target: { value: "Draft remains" } });
+    intercept = (method, path) => method === "GET" && path === "/api/v1/admin/permissions"
+      ? Promise.resolve(response({ error: { code: "INTERNAL", message: "unavailable" } }, 500)) : undefined;
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.refreshRevision" }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(within(dialog).getByDisplayValue("Draft remains")).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: "permissions.save" })).toBeDisabled();
+    expect(writes()).toHaveLength(0);
+  });
+  it.each([[401, "UNAUTHORIZED"], [403, "FORBIDDEN"]] as const)("reports %s denial and blocks later submissions in this session", async (status, code) => {
+    mount(); await action("permissions.edit");
+    const dialog = screen.getByRole("dialog");
+    fireEvent.change(dialog.querySelectorAll("input")[1], { target: { value: "Denied draft" } });
+    intercept = (method) => method === "PATCH" ? Promise.resolve(response({ error: { code, message: code } }, status)) : undefined;
+    await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(code));
+    expect(within(dialog).getByRole("button", { name: "permissions.save" })).toBeDisabled();
+    expect(within(dialog).getByRole("button", { name: "permissions.refreshRevision" })).toBeDisabled();
+    expect(writes()).toHaveLength(1);
+  });
   it("does not manufacture a missing legacy revision or permit unsafe quotas", async () => {
     delete profile.revision;
     mount(); await action("permissions.edit");
     const dialog = screen.getByRole("dialog");
+    fireEvent.change(dialog.querySelectorAll("input")[1], { target: { value: "Changed description" } });
     expect(within(dialog).getByRole("button", { name: "permissions.save" })).toBeDisabled();
     profile.revision = "8";
     await userEvent.click(within(dialog).getByRole("button", { name: "permissions.refreshRevision" }));
@@ -153,6 +243,7 @@ describe("formal profile management CAS consumer", () => {
       return fresh.promise;
     };
     mount(); await action("permissions.edit");
+    fireEvent.change(screen.getByRole("dialog").querySelectorAll("input")[1], { target: { value: "Old identity edit" } });
     await userEvent.click(within(screen.getByRole("dialog")).getByRole("button", { name: "permissions.save" }));
     await waitFor(() => expect(writes()).toHaveLength(1));
     await switchIdentity(); expect(oldSignal?.aborted).toBe(true);
@@ -254,6 +345,7 @@ describe("formal profile management CAS consumer", () => {
     auth.level = "super_admin"; profile.tenant_id = null;
     mount(); await action("permissions.edit");
     const dialog = screen.getByRole("dialog");
+    fireEvent.change(dialog.querySelectorAll("input")[1], { target: { value: "Global edit" } });
     await userEvent.click(within(dialog).getByRole("button", { name: "permissions.save" }));
     await waitFor(() => expect(writes()).toHaveLength(1));
     expect(writes()[0].body.expected_revision).toBe("9007199254740995");
