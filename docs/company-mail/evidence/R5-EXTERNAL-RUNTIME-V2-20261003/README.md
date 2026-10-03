@@ -57,7 +57,9 @@ Results:
   retained as history; the approved closed-receipt assertion passes in this run.
 - RC02 legacy_outbound_list, legacy_outbound_detail and submit_replay have real
   Vitest/Go FAIL. The closed capabilities boolean assertion fails at TSX line107
-  (calls line177 for list/detail, line164 for replay); no target marker appears.
+  (all three calls fail at the list receipt check, line177); no target marker appears.
+  Replay reaches that subsequent list check; the detail HTTP request is not yet
+  made after the failing list assertion, so no detail-route success is credited.
   Recorded compatibility list HTTP is200. Full packet/report hashes and safe
   method/path/status metadata remain; no response/fixture/token bodies are public.
   No claim assigns a specific business or sharedDB cause from this boolean failure.
