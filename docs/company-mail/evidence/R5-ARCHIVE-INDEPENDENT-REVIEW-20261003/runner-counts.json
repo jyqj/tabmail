@@ -1,0 +1,66 @@
+{
+  "fixed": {
+    "discovered": 640,
+    "dispatch_union_exact": true,
+    "dispatch_disjoint": true,
+    "actual_disjoint": true,
+    "actual_union_exact": false,
+    "status": "failed",
+    "groups": [
+      {
+        "group": "current",
+        "source_sha": "0c1f4f6f4cda1d39952df1fe9eeda87d74f56eb9",
+        "requested": 636,
+        "started": 601,
+        "failure_events": 2,
+        "error_events": 64,
+        "skips": 1,
+        "expected_failures": null,
+        "missing": 35
+      },
+      {
+        "group": "frozen",
+        "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "requested": 4,
+        "started": 4,
+        "failure_events": 0,
+        "error_events": 0,
+        "skips": 0,
+        "expected_failures": null,
+        "missing": 0
+      }
+    ]
+  },
+  "final": {
+    "discovered": 644,
+    "dispatch_union_exact": true,
+    "dispatch_disjoint": true,
+    "actual_disjoint": true,
+    "actual_union_exact": false,
+    "status": "failed",
+    "groups": [
+      {
+        "group": "current",
+        "source_sha": "66eb5e819170d3508edb07db8ab1e0014555ff8c",
+        "requested": 640,
+        "started": 612,
+        "failure_events": 2,
+        "error_events": 40,
+        "skips": 1,
+        "expected_failures": 0,
+        "missing": 28
+      },
+      {
+        "group": "frozen-v1",
+        "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "requested": 4,
+        "started": 4,
+        "failure_events": 0,
+        "error_events": 0,
+        "skips": 0,
+        "expected_failures": 0,
+        "missing": 0
+      }
+    ]
+  }
+}

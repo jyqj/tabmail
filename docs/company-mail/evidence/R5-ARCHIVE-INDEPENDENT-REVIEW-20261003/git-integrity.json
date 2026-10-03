@@ -1,0 +1,15 @@
+{
+  "base": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+  "original_evidence_count": 528,
+  "production_and_original_helper_count": 765,
+  "heads": {
+    "0c1f4f6f4cda1d39952df1fe9eeda87d74f56eb9": {
+      "changed_or_missing_original_evidence": [],
+      "changed_or_missing_production_or_original_helper": []
+    },
+    "66eb5e819170d3508edb07db8ab1e0014555ff8c": {
+      "changed_or_missing_original_evidence": [],
+      "changed_or_missing_production_or_original_helper": []
+    }
+  }
+}

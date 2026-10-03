@@ -1,0 +1,236 @@
+{
+  "fixed-actual": {
+    "commands": 42,
+    "formal_repeats": [
+      {
+        "stage": "default-cold-capture",
+        "first_command": 2,
+        "repeated_command": 6,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-cold-capture",
+        "first_command": 3,
+        "repeated_command": 7,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-cold-capture",
+        "first_command": 4,
+        "repeated_command": 8,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-cold-capture",
+        "first_command": 5,
+        "repeated_command": 9,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 12,
+        "repeated_command": 16,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 13,
+        "repeated_command": 17,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 14,
+        "repeated_command": 18,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 15,
+        "repeated_command": 19,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 22,
+        "repeated_command": 26,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 23,
+        "repeated_command": 27,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 24,
+        "repeated_command": 28,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 25,
+        "repeated_command": 29,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 32,
+        "repeated_command": 36,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 33,
+        "repeated_command": 37,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 34,
+        "repeated_command": 38,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 35,
+        "repeated_command": 39,
+        "raw_stdout_equal": true
+      }
+    ],
+    "formal_repeats_all_equal": true,
+    "hydration_retained_in_independent_raw_logs": true,
+    "default_receipt_changed_top_level_fields": []
+  },
+  "final-actual": {
+    "commands": 50,
+    "formal_repeats": [
+      {
+        "stage": "default-cold-capture",
+        "first_command": 2,
+        "repeated_command": 7,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-cold-capture",
+        "first_command": 3,
+        "repeated_command": 8,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-cold-capture",
+        "first_command": 4,
+        "repeated_command": 9,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-cold-capture",
+        "first_command": 5,
+        "repeated_command": 10,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-cold-capture",
+        "first_command": 6,
+        "repeated_command": 11,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 14,
+        "repeated_command": 19,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 15,
+        "repeated_command": 20,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 16,
+        "repeated_command": 21,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 17,
+        "repeated_command": 22,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "default-warm-validate",
+        "first_command": 18,
+        "repeated_command": 23,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 26,
+        "repeated_command": 31,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 27,
+        "repeated_command": 32,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 28,
+        "repeated_command": 33,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 29,
+        "repeated_command": 34,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-cold-capture",
+        "first_command": 30,
+        "repeated_command": 35,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 38,
+        "repeated_command": 43,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 39,
+        "repeated_command": 44,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 40,
+        "repeated_command": 45,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 41,
+        "repeated_command": 46,
+        "raw_stdout_equal": true
+      },
+      {
+        "stage": "race-r5protocol-warm-validate",
+        "first_command": 42,
+        "repeated_command": 47,
+        "raw_stdout_equal": true
+      }
+    ],
+    "formal_repeats_all_equal": true,
+    "hydration_retained_in_independent_raw_logs": true,
+    "default_receipt_changed_top_level_fields": [
+      "hydration_diagnostics"
+    ]
+  }
+}

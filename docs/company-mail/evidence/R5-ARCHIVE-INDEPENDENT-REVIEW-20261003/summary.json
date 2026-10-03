@@ -1,0 +1,296 @@
+{
+  "fixed_head": "0c1f4f6f4cda1d39952df1fe9eeda87d74f56eb9",
+  "final_delta_head": "66eb5e819170d3508edb07db8ab1e0014555ff8c",
+  "base": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+  "design": "05b4bb886164d0d85353a542fbb2881f104089b4",
+  "fixed_independent_observations": 8,
+  "final_delta_independent_observations": 9,
+  "actual_fixed": {
+    "source_sha": "0c1f4f6f4cda1d39952df1fe9eeda87d74f56eb9",
+    "initial_status": "",
+    "module_cache_initially_empty": true,
+    "contexts": {
+      "default": {
+        "build_cache_initially_empty": true,
+        "status": "pass",
+        "cold_identity": "9d666fed75dddd751b3cfe0e7b459ad029f0a42dc0da36abd1d459fab8ecd216",
+        "warm_identity": "9d666fed75dddd751b3cfe0e7b459ad029f0a42dc0da36abd1d459fab8ecd216",
+        "full_receipt_equal": true,
+        "selected_local": 589,
+        "historical_files": 36,
+        "historical_selected_overlap": [],
+        "root_explicit_equal": true,
+        "raw_observations": 9,
+        "hydration": null,
+        "variant_directory_records": 0
+      },
+      "race-r5protocol": {
+        "build_cache_initially_empty": true,
+        "status": "pass",
+        "cold_identity": "dcdd9a2d5bf9ac6ebc4b658f1391915d00892696654f760b82e3a779edfc5b1c",
+        "warm_identity": "dcdd9a2d5bf9ac6ebc4b658f1391915d00892696654f760b82e3a779edfc5b1c",
+        "full_receipt_equal": true,
+        "selected_local": 592,
+        "historical_files": 36,
+        "historical_selected_overlap": [],
+        "root_explicit_equal": true,
+        "raw_observations": 9,
+        "hydration": null,
+        "variant_directory_records": 0
+      }
+    },
+    "build": {
+      "build": {
+        "argv": [
+          "build",
+          "-mod=readonly",
+          "./..."
+        ],
+        "exit": 0
+      },
+      "vet": {
+        "argv": [
+          "vet",
+          "-mod=readonly",
+          "./..."
+        ],
+        "exit": 0
+      }
+    },
+    "final_status": ""
+  },
+  "actual_final": {
+    "source_sha": "66eb5e819170d3508edb07db8ab1e0014555ff8c",
+    "initial_status": "",
+    "module_cache_initially_empty": true,
+    "contexts": {
+      "default": {
+        "build_cache_initially_empty": true,
+        "status": "pass",
+        "cold_identity": "19e900f6fa45c2e9b3d67f17891c5c3958c976aaaae90cfbd8810bcda3ba9174",
+        "warm_identity": "19e900f6fa45c2e9b3d67f17891c5c3958c976aaaae90cfbd8810bcda3ba9174",
+        "full_receipt_equal": false,
+        "selected_local": 589,
+        "historical_files": 36,
+        "historical_selected_overlap": [],
+        "root_explicit_equal": true,
+        "raw_observations": 11,
+        "hydration": {
+          "role": "unbound_dependency_hydration_not_attested",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-json",
+            "./...",
+            "github.com/jhillyerd/enmime/v2/...",
+            "github.com/emersion/go-smtp/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "608e54f01c7e54955819fb5c6bf6367735ad7d01270d694c789d2dd41b391655",
+          "stderr": "go: downloading github.com/go-chi/chi/v5 v5.2.5\ngo: downloading github.com/google/uuid v1.6.0\ngo: downloading github.com/redis/go-redis/v9 v9.18.0\ngo: downloading github.com/go-chi/cors v1.2.2\ngo: downloading github.com/rs/zerolog v1.34.0\ngo: downloading golang.org/x/crypto v0.54.0\ngo: downloading github.com/alicebob/miniredis/v2 v2.35.0\ngo: downloading github.com/jackc/pgx/v5 v5.10.0\ngo: downloading github.com/kelseyhightower/envconfig v1.4.0\ngo: downloading github.com/emersion/go-msgauth v0.7.0\ngo: downloading golang.org/x/sync v0.22.0\ngo: downloading github.com/gorilla/css v1.0.1\ngo: downloading github.com/microcosm-cc/bluemonday v1.0.27\ngo: downloading golang.org/x/net v0.57.0\ngo: downloading github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6\ngo: downloading github.com/pressly/goose/v3 v3.27.3\ngo: downloading github.com/minio/minio-go/v7 v7.0.85\ngo: downloading github.com/gogs/chardet v0.0.0-20211120154057-b7413eaefb8f\ngo: downloading github.com/inbucket/html2text v1.0.0\ngo: downloading github.com/pkg/errors v0.9.1\ngo: downloading github.com/go-test/deep v1.1.1\ngo: downloading github.com/stretchr/testify v1.11.1\ngo: downloading github.com/cention-sany/utf7 v0.0.0-20170124080048-26cad61bd60a\ngo: downloading golang.org/x/text v0.40.0\ngo: downloading github.com/mattn/go-colorable v0.1.14\ngo: downloading github.com/yuin/gopher-lua v1.1.1\ngo: downloading github.com/jackc/pgpassfile v1.0.0\ngo: downloading github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761\ngo: downloading github.com/jackc/puddle/v2 v2.2.2\ngo: downloading github.com/cespare/xxhash/v2 v2.3.0\ngo: downloading github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f\ngo: downloading github.com/aymerick/douceur v0.2.0\ngo: downloading github.com/sethvargo/go-retry v0.4.0\ngo: downloading go.uber.org/multierr v1.11.0\ngo: downloading github.com/goccy/go-json v0.10.4\ngo: downloading github.com/klauspost/compress v1.19.1\ngo: downloading github.com/minio/md5-simd v1.1.2\ngo: downloading github.com/go-ini/ini v1.67.0\ngo: downloading github.com/olekukonko/tablewriter v1.1.3\ngo: downloading github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf\ngo: downloading github.com/davecgh/go-spew v1.1.1\ngo: downloading github.com/pmezard/go-difflib v1.0.0\ngo: downloading github.com/mattn/go-isatty v0.0.23\ngo: downloading go.uber.org/atomic v1.11.0\ngo: downloading github.com/mfridman/interpolate v0.0.2\ngo: downloading github.com/dustin/go-humanize v1.0.1\ngo: downloading github.com/klauspost/cpuid/v2 v2.2.9\ngo: downloading github.com/rs/xid v1.6.0\ngo: downloading github.com/mattn/go-runewidth v0.0.19\ngo: downloading github.com/olekukonko/errors v1.2.0\ngo: downloading github.com/olekukonko/ll v0.1.6\ngo: downloading gopkg.in/yaml.v3 v3.0.1\ngo: downloading golang.org/x/sys v0.47.0\ngo: downloading github.com/clipperhouse/uax29/v2 v2.6.0\ngo: downloading github.com/clipperhouse/displaywidth v0.10.0\ngo: downloading github.com/fatih/color v1.18.0\ngo: downloading github.com/olekukonko/cat v0.0.0-20250911104152-50322a0618f6\n"
+        },
+        "variant_directory_records": 64
+      },
+      "race-r5protocol": {
+        "build_cache_initially_empty": true,
+        "status": "pass",
+        "cold_identity": "dccf1b19df55d9105f72544a3e218ac8297d25bfd38b1888ddf7701cfa2ffb3c",
+        "warm_identity": "dccf1b19df55d9105f72544a3e218ac8297d25bfd38b1888ddf7701cfa2ffb3c",
+        "full_receipt_equal": true,
+        "selected_local": 592,
+        "historical_files": 36,
+        "historical_selected_overlap": [],
+        "root_explicit_equal": true,
+        "raw_observations": 11,
+        "hydration": {
+          "role": "unbound_dependency_hydration_not_attested",
+          "argv": [
+            "/workspace/tabmail-cloud/tools/go/bin/go",
+            "list",
+            "-mod=readonly",
+            "-deps",
+            "-test",
+            "-race",
+            "-tags=r5protocol",
+            "-json",
+            "./...",
+            "github.com/jhillyerd/enmime/v2/...",
+            "github.com/emersion/go-smtp/..."
+          ],
+          "exit": 0,
+          "stdout_sha256": "8cc4aa48214f5336070e22d1e6c1c5720ead1f708c98200a29ab71602ed4607b",
+          "stderr": ""
+        },
+        "variant_directory_records": 64
+      }
+    },
+    "build": {
+      "build": {
+        "argv": [
+          "build",
+          "-mod=readonly",
+          "./..."
+        ],
+        "exit": 0
+      },
+      "vet": {
+        "argv": [
+          "vet",
+          "-mod=readonly",
+          "./..."
+        ],
+        "exit": 0
+      }
+    },
+    "final_status": ""
+  },
+  "live_fixtures": {
+    "source_sha": "66eb5e819170d3508edb07db8ab1e0014555ff8c",
+    "all_own_files_in_static": true,
+    "own_variant_records": [
+      {
+        "directory": "internal/r5reviewstandalone",
+        "import_path": "tabmail/internal/r5reviewstandalone",
+        "module": "tabmail",
+        "fields": {
+          "GoFiles": [
+            "internal/r5reviewstandalone/standalone.go"
+          ]
+        },
+        "selected_context": true,
+        "other_variants": "static_only"
+      },
+      {
+        "directory": "internal/r5reviewtagonly",
+        "import_path": "tabmail/internal/r5reviewtagonly",
+        "module": "tabmail",
+        "fields": {
+          "IgnoredGoFiles": [
+            "internal/r5reviewtagonly/tagged.go"
+          ]
+        },
+        "selected_context": false,
+        "other_variants": "static_only"
+      },
+      {
+        "directory": "internal/r5reviewtestonly",
+        "import_path": "tabmail/internal/r5reviewtestonly",
+        "module": "tabmail",
+        "fields": {
+          "TestGoFiles": [
+            "internal/r5reviewtestonly/own_test.go"
+          ]
+        },
+        "selected_context": true,
+        "other_variants": "static_only"
+      },
+      {
+        "directory": "internal/r5reviewwindowsonly",
+        "import_path": "tabmail/internal/r5reviewwindowsonly",
+        "module": "tabmail",
+        "fields": {
+          "IgnoredGoFiles": [
+            "internal/r5reviewwindowsonly/own_windows.go"
+          ]
+        },
+        "selected_context": false,
+        "other_variants": "static_only"
+      }
+    ],
+    "own_selected_files": [
+      "internal/r5reviewstandalone/standalone.go",
+      "internal/r5reviewtestonly/own_test.go"
+    ],
+    "standalone_build_exit": 0,
+    "undefined_build_exit": 1,
+    "marker_deleted_build_exit": 1,
+    "status": "pass"
+  },
+  "legacy_cold": {
+    "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+    "build_cache_initially_empty": true,
+    "module_cache_initially_empty": true,
+    "cold_capture": "pass",
+    "cold_receipt_warm_validate": "failed",
+    "cold_roundtrip_error": "Traceback (most recent call last):\n  File \"/workspace/review-r5/scripts/tests/review_archive_legacy_cold.py\", line 46, in <module>\n    binding.validate(receipt, a.root, a.go, cache=cache, modulecache=a.modules)\n  File \"/workspace/r5-review-sandbox/frozen/scripts/r5_selected_source_binding.py\", line 254, in validate\n    raise ValueError('selected attestation missing/extra/drifted/context mismatch')\nValueError: selected attestation missing/extra/drifted/context mismatch\n",
+    "warm_recapture_roundtrip": "pass"
+  },
+  "runner": {
+    "fixed": {
+      "discovered": 640,
+      "dispatch_union_exact": true,
+      "dispatch_disjoint": true,
+      "actual_disjoint": true,
+      "actual_union_exact": false,
+      "status": "failed",
+      "groups": [
+        {
+          "group": "current",
+          "source_sha": "0c1f4f6f4cda1d39952df1fe9eeda87d74f56eb9",
+          "requested": 636,
+          "started": 601,
+          "failure_events": 2,
+          "error_events": 64,
+          "skips": 1,
+          "expected_failures": null,
+          "missing": 35
+        },
+        {
+          "group": "frozen",
+          "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+          "requested": 4,
+          "started": 4,
+          "failure_events": 0,
+          "error_events": 0,
+          "skips": 0,
+          "expected_failures": null,
+          "missing": 0
+        }
+      ]
+    },
+    "final": {
+      "discovered": 644,
+      "dispatch_union_exact": true,
+      "dispatch_disjoint": true,
+      "actual_disjoint": true,
+      "actual_union_exact": false,
+      "status": "failed",
+      "groups": [
+        {
+          "group": "current",
+          "source_sha": "66eb5e819170d3508edb07db8ab1e0014555ff8c",
+          "requested": 640,
+          "started": 612,
+          "failure_events": 2,
+          "error_events": 40,
+          "skips": 1,
+          "expected_failures": 0,
+          "missing": 28
+        },
+        {
+          "group": "frozen-v1",
+          "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+          "requested": 4,
+          "started": 4,
+          "failure_events": 0,
+          "error_events": 0,
+          "skips": 0,
+          "expected_failures": 0,
+          "missing": 0
+        }
+      ]
+    }
+  },
+  "scope_status": "archive_static_selected_build_bounded_pass_at_final_head",
+  "wholeCI": "failed_or_unknown_not_admitted",
+  "atomicity": "not_proven",
+  "archive": {
+    "file": "observations.tar.gz",
+    "bytes": 11795833,
+    "sha256": "548337252f907d3215e6970582811faeeaedfc509ace897dedfed5c309d4ec05",
+    "payload_files": 286
+  }
+}
