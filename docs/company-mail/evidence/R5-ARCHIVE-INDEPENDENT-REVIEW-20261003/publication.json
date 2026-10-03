@@ -1,0 +1,13 @@
+{
+  "branch": "review/r5-archive-fixed-0c1f4f6",
+  "review_evidence_commit": "28c703b161970d9486b938dd8260c1a377abad6a",
+  "push": "succeeded",
+  "draft_pr": {
+    "status": "blocked",
+    "base": "feat/r5-archive-boundary-v1",
+    "command": "gh pr create --repo jyqj/tabmail --base feat/r5-archive-boundary-v1 --head review/r5-archive-fixed-0c1f4f6 --draft --body-file <prepared body>",
+    "exit": 1,
+    "error": "Post https://api.github.com/graphql: Forbidden",
+    "retry_via_other_credentials_or_connector": false
+  }
+}
