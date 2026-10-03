@@ -2074,3 +2074,12 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - 本地whole-PG180由另Goose owner验证，本批NOTSTARTED；不复跑全Web/Go/fork/browser/audit或真实benchmark。原PG180 mandatory未完及audit8high/0critical历史FAIL保，normalPG180及audit gate不skip/降级。详[本批附录](R5-INTEGRATION-BATCH5-20261003.md)、[actual IDs/分类](evidence/R5-INTEGRATION-BATCH5-20261003/receipt.json)、[剩余错误](evidence/R5-INTEGRATION-BATCH5-20261003/remaining-errors.json)。
 - 普通origin首次push成功且固定SHA de1b7d3经ls-remote确认；新三线组合唯一一次gh draftPR创建（base=batch4）exit1 `Post https://api.github.com/graphql: Forbidden`。PR未创建，随后停止PR/API动作，无旧拒PR重试、身份/connector/route切换；reviewable body保留。新CI NOTSTARTED-by-this-task/UNOBSERVED，不能借旧aeed CI冒认新head结果；workflow及PG180原门禁保持。
 - **父10/171保持，无新增勾，无merge/deploy/force。** 本附录/证据/TODO随后仅docs-only提交与普通push；固定交付remote SHA由终态ls-remote回执交父继续，不称其未观察CI全绿。
+
+### 2026-10-03｜batch5 后 source-only 两完整范围独立整合
+
+- 独立 `integration/r5-source-combined-20261003` 从 batch5 `4aec142` 派生；完整 no-ff 保留 compat `006ff693→ee3308fd`、runnerprep `753e8f94→054492fd→92c04049`，实际测试源 `a9012118b4fdab630bc0afea349df3759e9efc66`。author rawlogs、初次 binary-binding 限制与 corrected evidence、历史 FAIL 均保留。
+- 原默认 versioned runner 首轮 preparation 因首次 Go hydration 后命令输出哈希不同严格 FAIL，0 dispatch；保留报告后重跑原 runner，**675/675 actual started（current671+原frozen4），0F/0E/0skip、无漏无重，exit0**。default 与 race-r5protocol selection identity 前后相同；锁 TypeScript5.9.3 最小132 regular files，official test2json 执行同 source 固定二进制，21 typed fixtures 实际生成并被 Python receipt body 验证。缺 fixture 另跑反例真实 FAIL，不改 skip 或断言。
+- 两 compatibility ERROR 用 schema2 current source/history separation 解决；新增6回归均入默认 partition。相关223/223、contract CLI、client AST13/13、七个改变Python static/compile与source whitespace检查通过。source map仍 `task_complete=false/product_green=false/current_wire_required`，历史 safejoin不冒当前 wire 成功。
+- 36 old-history及产品/runtime/config1,012文件全字节不变；1,051非docs/test基线路径的三个获准工具改动明确列出，不虚称整1,051全不变。旧evidence仅获准compat schema2 map变化；锁、两replace、workflow/backendPG180/audit gate不变。新证据仅安全metadata/hash/raw testlogs，不pubbinary/npm/sourceclone/typedfixture body/secret。
+- 新HTTP/sharedDB `ac5db2ee` 另分支旁证未合入、不admit current wire；current actual-wire failure含stale subject oracle仍待修，不将私密subject恢复进普通receipt。RC02/BC03/components external dependency仍由其他owner处理。本地wholePG/fullWeb/type/lint/build/browser均NOTRUN，不套旧PASS。
+- **10/171保持，无父项关闭，无merge/deploy/force。** 详细[组合附录](R5-SOURCE-COMBINED-20261003.md)、[实际分区/限定回执](evidence/R5-SOURCE-COMBINED-20261003/summary.json)；交付HEAD随后仅evidence/TODO docs维护，普通push与唯一新draftPR及exact-head CI另记终态，拒绝即停止该动作。

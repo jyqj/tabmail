@@ -1,0 +1,210 @@
+{
+  "source_sha": "a9012118b4fdab630bc0afea349df3759e9efc66",
+  "base_sha": "4aec142bcffd53c6ab91f2263436aaf980833fab",
+  "product_sha": "aeed47f0e1998d9925acb680992b051463821d69",
+  "protected_files": 995,
+  "protected_changed": [],
+  "historical_files": [
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-CAPSULE.json",
+      "sha256": "f670a5c4a85c8aeb8d4e4a07f2fc0d3954172a7e8ceba199903bf1d8463718ea",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-CAPSULE.tar.gz",
+      "sha256": "968607700067c24182250e75516cb7024fe35732ed0f9273154bc366f8faf597",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2-CAPSULE.json",
+      "sha256": "53f42d3258b3bca97d6539faeb39ae54ce3d9aa88acbe06087289ac3a26c60a2",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2-CAPSULE.tar.gz",
+      "sha256": "4728c65a4300c052f7bdf96963ba884530d6be086933c26cf634b3baaace5957",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/app/messages/mime_budget_boundary_test.go",
+      "sha256": "b405791a97dca02eb6fddf24fa122703909dfb8fdaf96d7bffe287cd82e06a1a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/app/messages/service.go",
+      "sha256": "a852c17b5051989cc91990f78d95f721e441346f11101e66460360c5ac708460",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/mailcontent/mime_budget.go",
+      "sha256": "b2d93567f4556971b9967ad80157cc9d70ace8dd31a6393075c4eba6e2521364",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/mailcontent/mime_budget_test.go",
+      "sha256": "36858895bd2b84b84b7be6316c9e4bbd950a21fc797e137e46ef5553dc6c6758",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/after/internal/mailcontent/parser.go",
+      "sha256": "cab8753b99dd2af3192ad15b5b2c3a99adea830d9665bad2087cea1d96fa31f3",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before.json",
+      "sha256": "ae5bafa5b6099b345536cc052d69bf62402d3a9710e4cbce4513251a16695bb2",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/app/messages/mime_budget_boundary_test.go",
+      "sha256": "b405791a97dca02eb6fddf24fa122703909dfb8fdaf96d7bffe287cd82e06a1a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/app/messages/service.go",
+      "sha256": "a852c17b5051989cc91990f78d95f721e441346f11101e66460360c5ac708460",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/mailcontent/mime_budget.go",
+      "sha256": "342ffd1ce567a943bb8b9ddde7b0812f170f143b564a9e4f7a919aca9c150391",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/mailcontent/mime_budget_test.go",
+      "sha256": "cd003b9f058e2d81cc2df3fb298a3b8eddf2fb7ff909b166697d705be4ab9390",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/before/internal/mailcontent/parser.go",
+      "sha256": "cab8753b99dd2af3192ad15b5b2c3a99adea830d9665bad2087cea1d96fa31f3",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/capsule.json",
+      "sha256": "2d2cce07be8d138fb2361fb2cffb81103b8f7dc729c9e4d3920b4f5084e59d71",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/change.patch",
+      "sha256": "a3b44754edd03dd8538630ffc1c7e0f2986499cbf7cc6244975986c42211e248",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3-CAPSULE.json",
+      "sha256": "baff1332e6de4c8266d999bc1b0e7a9358704235743ddf50667b6c60e7491055",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3-CAPSULE.tar.gz",
+      "sha256": "299ed045f0b18f406dd3f2865f474f7dc245501db1b2765f4e45ba955c10ce0d",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/after/internal/mailcontent/mime_budget.go",
+      "sha256": "b92072b2f5fb89a9eea2956e40746a22bbfea22a530fca197da3f65a00288003",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/after/internal/mailcontent/mime_budget_test.go",
+      "sha256": "8aeb043be4a841a4619e2afec8137e3397f7983c5db3021d833523295faf4b22",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/before.json",
+      "sha256": "14c4317b252c03a237ad4e1fd880355c9b7d56eb6c4fa144168739abe92b25a5",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/before/internal/mailcontent/mime_budget.go",
+      "sha256": "b2d93567f4556971b9967ad80157cc9d70ace8dd31a6393075c4eba6e2521364",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/before/internal/mailcontent/mime_budget_test.go",
+      "sha256": "36858895bd2b84b84b7be6316c9e4bbd950a21fc797e137e46ef5553dc6c6758",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/capsule.json",
+      "sha256": "4165d588422f9c39aa01974f15c3696c35865fbb9350f3a21d37e7bf3a0dc9b3",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/change.patch",
+      "sha256": "632d1fea6f44608a15f8426a2c33e0bbdd65268978d131fbec854bed783d6d51",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/app/messages/mime_budget_boundary_test.go",
+      "sha256": "b405791a97dca02eb6fddf24fa122703909dfb8fdaf96d7bffe287cd82e06a1a",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/app/messages/service.go",
+      "sha256": "a852c17b5051989cc91990f78d95f721e441346f11101e66460360c5ac708460",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/mailcontent/mime_budget.go",
+      "sha256": "342ffd1ce567a943bb8b9ddde7b0812f170f143b564a9e4f7a919aca9c150391",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/mailcontent/mime_budget_test.go",
+      "sha256": "cd003b9f058e2d81cc2df3fb298a3b8eddf2fb7ff909b166697d705be4ab9390",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/after/internal/mailcontent/parser.go",
+      "sha256": "cab8753b99dd2af3192ad15b5b2c3a99adea830d9665bad2087cea1d96fa31f3",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/before.json",
+      "sha256": "59fc611c0e315b7a2330b4e4fd97d7f71118347643c30d3dd0e3122ded6f9a4b",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/before/internal/app/messages/service.go",
+      "sha256": "3d27af40e991de1f2636672e3bbd3a00f24520f821a308012b11e02802161867",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/before/internal/mailcontent/parser.go",
+      "sha256": "b4b7b3c4cd594d6762716cb0ce868da52b696f307311dd6de4cefea756769cf1",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/capsule.json",
+      "sha256": "ed383aa4da0b74a9d3aabdb65a3c2c54f7e22ca1b459e1ea2c2b8fe7e18ef48e",
+      "unchanged": true
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/change.patch",
+      "sha256": "da1ed2f696fb6b7e158f5f2297640e17e2c219f4872124dd0d3e22dc905f37e4",
+      "unchanged": true
+    }
+  ],
+  "baseline_evidence_count": 628,
+  "baseline_evidence_changed": [
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json"
+  ],
+  "complete_ranges": {
+    "92c040492d5a7ac94d5b72e63ca1be92c2fe5418": true,
+    "054492fd2ea8cc24699161a0ad91c17547c4ecb3": true,
+    "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6": true,
+    "006ff6939edbe5f9fa5732cd1ab1a2efb8ece4cf": true,
+    "753e8f94897b92008274d42861f26bcebe3c98b8": true
+  },
+  "workflow_changes": [],
+  "baseline_nondocs_nontests_files": 1051,
+  "authorized_source_tooling_changes": [
+    "scripts/check_r5_compatibility.py",
+    "scripts/run_r5_source_version_tests.py",
+    "scripts/testenv/README.md"
+  ],
+  "product_runtime_config_files": 1012,
+  "product_runtime_config_changes": [],
+  "baseline_evidence_changed_authorized_schema2_source_map_only": true
+}

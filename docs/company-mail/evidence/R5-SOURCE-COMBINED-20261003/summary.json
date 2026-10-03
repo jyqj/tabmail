@@ -1,0 +1,116 @@
+{
+  "runtime_source_sha": "a9012118b4fdab630bc0afea349df3759e9efc66",
+  "runs": {
+    "initial": {
+      "status": "failed",
+      "discovered": 675,
+      "no_missing": false,
+      "no_overlap": true,
+      "preparation_error": "TypeScript preparation changed Go selection",
+      "groups": []
+    },
+    "hydrated": {
+      "status": "pass",
+      "discovered": 675,
+      "no_missing": true,
+      "no_overlap": true,
+      "preparation_error": null,
+      "groups": [
+        {
+          "group": "current",
+          "source_sha": "a9012118b4fdab630bc0afea349df3759e9efc66",
+          "exit": 0,
+          "requested": 671,
+          "started": 671,
+          "tests_run": 671,
+          "missing": [],
+          "failures": [],
+          "errors": [],
+          "skips": []
+        },
+        {
+          "group": "frozen-v1",
+          "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+          "exit": 0,
+          "requested": 4,
+          "started": 4,
+          "tests_run": 4,
+          "missing": [],
+          "failures": [],
+          "errors": [],
+          "skips": []
+        }
+      ],
+      "execution": {
+        "source_sha": "a9012118b4fdab630bc0afea349df3759e9efc66",
+        "go_selection_unchanged": true,
+        "build_sha256": "99bdf08aa4c61fe7e43d94226d5a67465cbb383932f8f547e4b9ce530262a97f",
+        "executed_binary_sha256": "99bdf08aa4c61fe7e43d94226d5a67465cbb383932f8f547e4b9ce530262a97f",
+        "fixture_sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+        "run_sha256": "40a16ea926467f2cfa94b575ced86d51e833e5b64cec06a4d28bf718ca1b6a21",
+        "actual_started_test_ids": [
+          "TestOrdinaryReceiptOpenAPIWireFixtures"
+        ],
+        "actual_passed_test_ids": [
+          "TestOrdinaryReceiptOpenAPIWireFixtures"
+        ],
+        "exit": 0,
+        "fixture_count": 21
+      }
+    }
+  },
+  "related_tests": 223,
+  "related_exit": 0,
+  "contract_exit": 0,
+  "compatibility_source": {
+    "wire_validation_scope": "not_checked_current_wire_required",
+    "historical_wire_reference": {
+      "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+      "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+      "qualification": "historical_metadata_only_not_current_wire"
+    },
+    "status": "source_inventory_and_upgrade_plan_checked",
+    "task_complete": false,
+    "product_green": false,
+    "routes": 132,
+    "client_branches": 134,
+    "source_files": 94,
+    "openapi_missing": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/suppression",
+      "GET /docs-assets/*"
+    ],
+    "no_shipped_client": [
+      "DELETE /api/v1/suppression/{id}",
+      "GET /api/v1/admin/status",
+      "GET /api/v1/auth/me",
+      "GET /api/v1/company/outbound/{id}/recipients",
+      "GET /api/v1/suppression",
+      "GET /docs",
+      "GET /docs-assets/*",
+      "GET /metrics",
+      "GET /openapi.yaml",
+      "GET /ready",
+      "GET /redoc"
+    ],
+    "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+  },
+  "missing_wire_negative_exit": 1,
+  "whole_pg180": "NOTRUN; original gate unchanged",
+  "full_web": "NOTRUN",
+  "browser": "NOTRUN",
+  "current_wire": "NOTQUALIFIED; separate actual-wire failure including stale subject oracle remains; no private subject admitted to ordinary receipts",
+  "task_complete": false,
+  "completed_tasks": "10/171",
+  "omitted_artifacts": [
+    "binary",
+    "npm tree",
+    "source clones",
+    "typed fixture body",
+    "secrets"
+  ],
+  "client_ast_tests": 13,
+  "client_ast_exit": 0,
+  "related_command": "PYTHONPATH=scripts/tests python -B -m unittest scripts.tests.test_r5_compatibility scripts.tests.test_contract_drift scripts.tests.test_http_contract scripts.tests.test_http_response_bindings scripts.tests.test_openapi_contract scripts.tests.test_permission_editor_contract scripts.tests.test_company_admin_events_contract scripts.tests.test_r5_protocol scripts.tests.test_r5_protocol_component_evidence",
+  "formal_command": "python -B scripts/run_r5_source_version_tests.py --root /workspace/tabmail --output /workspace/r5-source-combined/versioned-hydrated.json"
+}

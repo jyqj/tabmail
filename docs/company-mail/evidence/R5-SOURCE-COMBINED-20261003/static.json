@@ -1,0 +1,25 @@
+{
+  "python_ast_checked": [
+    "scripts/check_r5_compatibility.py",
+    "scripts/r5_source_runner_prepare.py",
+    "scripts/run_r5_source_version_tests.py",
+    "scripts/tests/test_ordinary_receipt_contract.py",
+    "scripts/tests/test_r5_cold_web.py",
+    "scripts/tests/test_r5_compatibility.py",
+    "scripts/tests/test_r5_source_version_runner.py"
+  ],
+  "go_changed": [],
+  "diff_check": "author push.raw.txt trailing whitespace retained verbatim",
+  "python_compile_in_memory_checked": [
+    "scripts/check_r5_compatibility.py",
+    "scripts/r5_source_runner_prepare.py",
+    "scripts/run_r5_source_version_tests.py",
+    "scripts/tests/test_ordinary_receipt_contract.py",
+    "scripts/tests/test_r5_cold_web.py",
+    "scripts/tests/test_r5_compatibility.py",
+    "scripts/tests/test_r5_source_version_runner.py"
+  ],
+  "source_format_diff_check_exit": 0,
+  "whole_diff_check_exit": 2,
+  "go_fmt_scope": "No Go source changes relative to batch5; no Go rewrites"
+}
