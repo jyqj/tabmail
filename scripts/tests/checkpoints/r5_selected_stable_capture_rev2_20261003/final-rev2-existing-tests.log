@@ -1,0 +1,17 @@
+test_actual_full_scope_fresh_hashes (test_r5_selected_source_binding.ActualRootBindingTests.test_actual_full_scope_fresh_hashes) ... ok
+test_capture_midflight_drift_refused (test_r5_selected_source_binding.ActualRootBindingTests.test_capture_midflight_drift_refused) ... ok
+test_omission_extra_hash_flags_abi_and_historical_rejected (test_r5_selected_source_binding.ActualRootBindingTests.test_omission_extra_hash_flags_abi_and_historical_rejected) ... ok
+test_real_receipt_roundtrip (test_r5_selected_source_binding.ActualRootBindingTests.test_real_receipt_roundtrip) ... ok
+test_duplicate_metadata_and_unknown_compiled (test_r5_selected_source_binding.SelectedNegativeTests.test_duplicate_metadata_and_unknown_compiled) ... ok
+test_forged_metadata_does_not_authorize_secret_or_evidence (test_r5_selected_source_binding.SelectedNegativeTests.test_forged_metadata_does_not_authorize_secret_or_evidence) ... ok
+test_generated_and_external_are_not_local_read_capabilities (test_r5_selected_source_binding.SelectedNegativeTests.test_generated_and_external_are_not_local_read_capabilities) ... ok
+test_missing_and_symlink_static_source (test_r5_selected_source_binding.SelectedNegativeTests.test_missing_and_symlink_static_source) ... ok
+test_nested_module_in_excluded_static_output_is_rejected (test_r5_selected_source_binding.SelectedNegativeTests.test_nested_module_in_excluded_static_output_is_rejected) ... ok
+test_source_hash_drift_detected (test_r5_selected_source_binding.SelectedNegativeTests.test_source_hash_drift_detected) ... ok
+test_unknown_nested_module_and_extra_go (test_r5_selected_source_binding.SelectedNegativeTests.test_unknown_nested_module_and_extra_go) ... ok
+test_wrongfork_and_third_replace (test_r5_selected_source_binding.SelectedNegativeTests.test_wrongfork_and_third_replace) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 12.198s
+
+OK
