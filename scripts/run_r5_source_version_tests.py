@@ -87,8 +87,13 @@ def child(root,ids,output):
     actual = [t.id() for t in flatten(suite)]
     if actual != ids:
         raise ValueError('child actual test IDs differ')
-    result = unittest.TextTestRunner(verbosity=2).run(suite)
-    report = dict(source_sha=git(root,'rev-parse','HEAD'),actual_test_ids=actual,tests_run=result.testsRun,
+    class ObservedResult(unittest.TextTestResult):
+        def __init__(self,*args,**kwargs):
+            super().__init__(*args,**kwargs); self.actual_ids=[]
+        def startTest(self,test):
+            self.actual_ids.append(test.id());super().startTest(test)
+    result = unittest.TextTestRunner(verbosity=2,resultclass=ObservedResult).run(suite)
+    report = dict(source_sha=git(root,'rev-parse','HEAD'),loaded_test_ids=actual,actual_test_ids=result.actual_ids,missing_test_ids=sorted(set(ids)-set(result.actual_ids)),tests_run=result.testsRun,
         failures=[t.id() for t,_ in result.failures],errors=[t.id() for t,_ in result.errors],
         execution_paths=dict(go=str(legacy.GO),cache=str(legacy.CACHE),modulecache=str(legacy.MODULECACHE)), skips=[t.id() for t,_ in result.skipped],unexpected_successes=[t.id() for t in result.unexpectedSuccesses])
     Path(output).write_text(json.dumps(report,indent=2)+'\n')
@@ -115,7 +120,11 @@ def run(root,output):
             report = json.loads(reportfile.read_text()) if reportfile.exists() else dict(error='child report missing')
             groups.append(dict(group=name,source_sha=git(source,'rev-parse','HEAD'),requested_test_ids=selection,argv=argv,exit=result.returncode,report=report))
     good = all(g['exit']==0 and g['report'].get('actual_test_ids')==g['requested_test_ids'] and g['report'].get('source_sha')==g['source_sha'] for g in groups)
-    report = dict(schema_version=1,discovered_test_ids=ids,groups=groups,no_missing=True,no_overlap=True,status='pass' if good else 'failed')
+    executed = [i for g in groups for i in g['report'].get('actual_test_ids',[])]
+    report = dict(schema_version=1,discovered_test_ids=ids,groups=groups,
+        dispatch_no_missing=True,dispatch_no_overlap=True,
+        no_missing=set(executed)==set(ids),no_overlap=len(executed)==len(set(executed)),
+        missing_test_ids=sorted(set(ids)-set(executed)),status='pass' if good else 'failed')
     output.write_text(json.dumps(report,indent=2)+'\n')
     return 0 if good else 1
 

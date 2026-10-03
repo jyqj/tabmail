@@ -14,6 +14,7 @@ import r5_source_inventory as inventory
 
 REGISTRY = 'scripts/contracts/r5-archive-boundary-v1.json'
 REGISTRY_SHA256 = '8e04081e1f2b9d9b82b854954b56a1ac71047646f8768d1b7a7ff89af223bb15'
+_IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 BASELINE = '41b015c30c66b3ba58a3c1395e8559ebcd27a65f'
 MAX_ENTRIES = 100000
 MAX_DEPTH = 64
@@ -149,6 +150,12 @@ def check(root):
     modules = {'go.mod', *(r['path']+'/go.mod' for r in inventory.CURRENT_REPLACEMENTS), *markers}
     if {p for p in files if Path(p).name == 'go.mod'} != modules:
         raise ValueError('unknown/missing nested module topology')
+    archive_family = 'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE'
+    if {p for p in files if p.startswith(archive_family)} != set(historical)|set(markers):
+        raise ValueError('archive family added/missing file')
+    sums = {'go.sum', *(r['path']+'/go.sum' for r in inventory.CURRENT_REPLACEMENTS)}
+    if {p for p in files if Path(p).name=='go.sum'} != sums:
+        raise ValueError('unknown/missing module sums')
     for p in files | dirs:
         if Path(p).name in {'vendor','go.work','go.work.sum'} or (Path(p).name.startswith('go.work') and Path(p).name != 'go.work.example'):
             raise ValueError('workspace/vendor boundary rejected')
@@ -178,7 +185,7 @@ def check(root):
     if any(not owned(p) or any(part in inventory.EXCLUDED_DIRS for part in Path(p).parts) for p in production):
         raise ValueError('unclassified production Go source')
     for p in files:
-        if p.endswith(BUILD_SUFFIXES) and p not in protected and not owned(p):
+        if p.endswith(BUILD_SUFFIXES) and p not in protected and (not owned(p) or any(part in inventory.EXCLUDED_DIRS for part in Path(p).parts)):
             raise ValueError('unclassified native/build input: '+p)
     hashes = {}
     for p in sorted(production):
@@ -189,7 +196,7 @@ def check(root):
         for directive in re.findall(r'^\s*//go:(?:embed|generate)\s+(.+)$', text, re.M):
             if any(a in directive or Path(a).name in directive for a in archives) or 'tabmail/archive' in directive:
                 raise ValueError('production directive points to archive')
-    if read(root, REGISTRY) != inventory.canonical(contract) and hashlib.sha256(read(root, REGISTRY)).hexdigest() != REGISTRY_SHA256:
+    if hashlib.sha256(read(root, REGISTRY)).hexdigest() != REGISTRY_SHA256:
         raise ValueError('registry changed during check')
     if (files, dirs) != topology(root):
         raise ValueError('boundary topology changed during check')

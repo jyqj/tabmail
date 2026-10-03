@@ -127,6 +127,13 @@ class ArchiveBoundaryTests(unittest.TestCase):
         with mock.patch.object(boundary,'MAX_DEPTH',1),self.assertRaisesRegex(ValueError,'budget'):boundary.check(self.root)
         with mock.patch.object(boundary.os,'scandir',side_effect=PermissionError('denied')),self.assertRaisesRegex(ValueError,'unavailable'):boundary.check(self.root)
 
+    def test_archive_family_extra_capsule_and_ancestor_symlink(self):
+        p=self.root/'docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V4-CAPSULE.json';p.write_text('{}')
+        with self.assertRaises(ValueError):boundary.check(self.root)
+        p.unlink()
+        docs=self.root/'docs';moved=self.root/'saved-docs';docs.rename(moved);docs.symlink_to(moved,target_is_directory=True)
+        with self.assertRaises(ValueError):boundary.check(self.root)
+
     def test_third_replace(self):
         p=self.root/'go.mod';p.write_text(p.read_text()+'\nreplace example.invalid/x v1.0.0 => ./third_party/go-smtp\n')
         with self.assertRaises(ValueError):boundary.check(self.root)

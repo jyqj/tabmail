@@ -581,6 +581,8 @@ def _capture_archive_v4(root, *, purpose, policy, build_context):
         'scripts/tests/test_r5_archive_boundary.py', 'scripts/tests/test_r5_selected_source_binding_v2.py',
         'scripts/tests/test_r5_source_version_runner.py'} | set(before['archive_markers'])
     files = {p:hashlib.sha256(boundary.read(root,p)).hexdigest() for p in sorted(names)}
+    if files['scripts/r5_archive_boundary.py'] != boundary._IMPLEMENTATION_SHA256:
+        raise ValueError('archive guard implementation differs from snapshot')
     if before != boundary.check(root):
         raise ValueError('archive/production changed during v4 capture')
     if any(hashlib.sha256(boundary.read(root,p)).hexdigest() != h for p,h in files.items()):
