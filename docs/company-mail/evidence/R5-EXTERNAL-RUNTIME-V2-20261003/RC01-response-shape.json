@@ -1,0 +1,32 @@
+{
+  "case": "RC01/default",
+  "http_status": 200,
+  "shape": {
+    "data": {
+      "attempt_count": "number",
+      "capabilities": {
+        "retry": "boolean",
+        "retry_block_reason": "string",
+        "view_content": "boolean"
+      },
+      "created_at": "string",
+      "delivery_uncertain": "boolean",
+      "id": "string",
+      "progress": {
+        "completeness": "string",
+        "counts": {
+          "accepted": "number",
+          "pending": "number",
+          "permanent": "number",
+          "temporary": "number",
+          "total": "number",
+          "uncertain": "number"
+        }
+      },
+      "state": "string",
+      "status": "string",
+      "tenant_id": "string",
+      "updated_at": "string"
+    }
+  }
+}
