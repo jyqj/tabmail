@@ -1330,14 +1330,17 @@ func TestR5ProtocolLegacyReplaySharedCases(t *testing.T) {
 				default:
 					t.Fatal("unknown legacy compatibility operation")
 				}
-				for _, private := range []string{payload.TextBody, "PRIVATE_PROTOCOL_HEADER", payload.BCC[0]} {
+				for _, private := range []string{payload.Subject, payload.TextBody, "PRIVATE_PROTOCOL_HEADER", payload.BCC[0]} {
 					if strings.Contains(w.Body.String(), private) {
 						t.Fatal("legacy compatibility entrypoint returned expired private content")
 					}
 				}
-				if !strings.Contains(w.Body.String(), payload.Subject) {
-					t.Fatal("legitimate safe receipt erased")
+				job, e := f.st.GetOutboundJob(ctx, id)
+				must(t, e)
+				if job.DraftID == nil || *job.DraftID != draft.ID || job.SenderMailboxID == nil || *job.SenderMailboxID != f.personal.ID || job.UserID == nil || *job.UserID != f.employee.ID {
+					t.Fatal("receipt lost original submission identity")
 				}
+				r5AssertExpiredReplayReceiptV2(t, w, operation == "legacy_outbound_list", job)
 				var jobs int
 				must(t, f.pool.QueryRow(ctx, `SELECT count(*) FROM outbound_jobs WHERE draft_id=$1`, draft.ID).Scan(&jobs))
 				if jobs != 1 {
@@ -1513,10 +1516,11 @@ func TestR5ProtocolLegacyBCCObservationSharedCases(t *testing.T) {
 				f := seedCompany(t)
 				ctx := context.Background()
 				h := r5SharedRouter(t, f)
-				j := r5LegacyJob(t, f)
-				if variant != "reliable_source" {
-					_, e := f.pool.Exec(ctx, `DELETE FROM outbound_jobs WHERE id=$1`, j.ID)
-					must(t, e)
+				var j *models.OutboundJob
+				if variant == "reliable_source" {
+					j = r5LegacyJob(t, f)
+				} else {
+					j = r5UnprovableLegacyAssetV2(t, f)
 				}
 				if variant == "foreign_job" {
 					tenant := &models.Tenant{Name: "Unprovable legacy source", PlanID: f.tenant.PlanID}
@@ -1570,8 +1574,8 @@ func TestR5ProtocolLegacyBCCObservationSharedCases(t *testing.T) {
 							t.Errorf("%s: exact current job has BCC but durable legacy asset lacks recoverable recipient snapshot", marker)
 						}
 					}
-				} else if !strings.Contains(last.Body.String(), "legacy_unknown") {
-					t.Errorf("%s: unavailable/unprovable legacy source has no unknown completeness marker in actual response", marker)
+				} else {
+					r5AssertUnknownBCCV2(t, last, marker)
 				}
 			})
 		}

@@ -180,3 +180,14 @@ RC02的legacy list/detail/submit-replay仍保留required components欠缺：现�
 RC02不免原components要求：当前正式ReceiptFolder/workspace兼容入口连接独立LegacyReceiptFolder，真实GET legacy list/detail，Compose断连后同key重放使用其原公开submission入口；实际三variant消费者注册后须同新CASE SHA／源码fresh运行。旧DB scalar与新UI／能力exact路径marker分开，不覆盖旧失败。
 
 BC02/03原目标（可靠来源回填、重复不覆盖、无可信源legacy_unknown）完整保留；新当前能力consumer只证实际最终schema／精确same-tenant job来源／HTTP缺口及两次当前Migrate no-op。它既不是未来正式write执行，也不是其幂等证明。P0-080/120基线允许绑定AC/后续任务的精确能力红；真正版本化snapshot/unknown迁移、qualified backfill、empty/upgrade及重复同formal writes验收仍必须P2-070/080/110实现，不能以基线层集合或controller0提前标产品完成。
+
+## AB：2026-10-03 receipt / legacy adapter-fixture revision 2
+
+本附录显式修订 RC02/BC03 的执行 oracle / fixture（revision 2），不改变 `R5-PROTOCOL-CASES.json` schema v1、任何原 input、正式 runtime path、target marker 或 required layer。旧版映射是 `ac5db2ee72b97b027a14d6e885d3870276bfaf82`（其产品与授权 base `ee3308fd3217246c9bdd43b07ae0609ebae6aeb6` 相同）。原 `R5-CURRENT-WIRE-20261003` 失败证据与报告保持原样；修正后必须另收 fresh runtime，不提升旧失败。
+
+- RC02 revision 1 将 subject 留在 ordinary receipt 当作“合法回执未丢”的判据，与当前 privacy DTO 相反。revision 2 的三条正式 list/detail/same-key replay 都经过真实 shipping router/JWT/PG，严格关闭顶层与嵌套 DTO 字段，精确核对原 job ID、tenant、pending/submitted、known progress 的 total=2/pending=2、时间、attempt_count=0、delivery_uncertain=false、过期后的 view_content=false/retry=false。list 的 retry_block_reason 为当前保守 `unknown`；detail/replay 为 `state_not_retryable`。DB 原 draft/mailbox/user 身份对应、replay 同 ID、draft 对应 DB job=1 仍必须成立；subject/body/BCC/headers 不得泄露，不以 contains 代替 DTO 断言。
+- BC03 revision 1 的 `r5LegacyJob` 实际走当前 `CreateOutboundJob`。migration 17 的 capture trigger 已将其写成 version=1/complete/non-null BCC；source job 消失不应将可信持久 snapshot 降级。revision 2 的原 missing/foreign 负例改用 `r5UnprovableLegacyAssetV2`：直接构造已失去 structured source 的历史 persisted asset/item，所有当前 trigger/constraint 保持开启，初态必须为 version=0/legacy_unknown/NULL BCC 且无 job。它是历史存量形状 fixture，不宣称实际运行了 schema-16 upgrade。真实 schema-16 write → migration17 → bounded backfill 由原 `TestR5SentRecipientSnapshotUpgradeV16BoundedTrustedBackfill` 另行回归。
+- 原 BC03 capability/observation paths 与 marker 不删；响应必须同时存在精确 `recipient_completeness="legacy_unknown"` 与 JSON `bcc:null`，不能用字符串 contains 或 known-empty 替代。重复 GET / 两次当前 Migrate no-op 原不变值约束保留；BC02 仍按原 scope 观察当前可靠源，不冒称旧 adapter 执行了正式 backfill。
+- 新 `TestR5ProtocolDurableBCCSnapshotV2` 分别证明当前完整 snapshot 在 missing source / same-ID foreign source 后，重复真实 HTTP 与显式 bounded backfill 均保持原 BCC、正文、To/CC 及完整 immutable asset。新 `TestR5ProtocolLegacyBCCIdentityV2` 单独构造所有 immutable payload 相同、只 tenant / zone / mailbox 一轴不符的 same-ID source；真实 selector 必须拒绝，重复真实 HTTP 与 bounded backfill 不改历史 NULL/unknown asset。这些新增反例是独立补充回归，不偷偷扩充原 formal adapter paths 或完成层声明。
+
+这是测试/fixture 最小修复；不改生产 selector/backfill、migration、DTO、数据模型、runnerprep/source policy、兼容映射、锁或预算。原缺层与 P0-080/120 等验收仍按各 owner 的 fresh 证据裁决。

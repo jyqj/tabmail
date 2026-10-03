@@ -5,7 +5,6 @@ package postgres_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -32,12 +31,13 @@ func TestR5LegacyBCCContractCapabilities(t *testing.T) {
 			t.Run(c.ID+"/"+variant, func(t *testing.T) {
 				f := seedCompany(t)
 				ctx := context.Background()
-				j := r5LegacyJob(t, f)
-				h := r5SharedRouter(t, f)
-				if variant != "trusted_structured_source" {
-					_, e := f.pool.Exec(ctx, `DELETE FROM outbound_jobs WHERE id=$1`, j.ID)
-					must(t, e)
+				var j *models.OutboundJob
+				if variant == "trusted_structured_source" {
+					j = r5LegacyJob(t, f)
+				} else {
+					j = r5UnprovableLegacyAssetV2(t, f)
 				}
+				h := r5SharedRouter(t, f)
 				if variant == "same_id_foreign_source" {
 					foreign := &models.Tenant{Name: "BCC capability foreign source", PlanID: f.tenant.PlanID}
 					must(t, f.st.CreateTenant(ctx, foreign))
@@ -88,11 +88,7 @@ func TestR5LegacyBCCContractCapabilities(t *testing.T) {
 						}
 					}
 				} else {
-					var wire map[string]any
-					must(t, json.Unmarshal(response.Body.Bytes(), &wire))
-					if !bytes.Contains(response.Body.Bytes(), []byte("legacy_unknown")) {
-						t.Errorf("R5_PROTOCOL_CAPABILITY_TARGET_BC03: actual missing/unprovable source read response lacks explicit legacy_unknown completeness; current_version=%d asset_columns=%s exact_source_count=%d", version, columns, exactSources)
-					}
+					r5AssertUnknownBCCV2(t, response, "R5_PROTOCOL_CAPABILITY_TARGET_BC03")
 				}
 				// Only schema names/version and source cardinality are reported, never
 				// bodies, BCC values, tokens, production data, or private fixture headers.
