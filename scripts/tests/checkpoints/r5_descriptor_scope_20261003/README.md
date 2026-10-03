@@ -87,8 +87,26 @@ Artifact contents remain outside SOURCE. Existing byte/directory budgets, defaul
 4MiB controls, benchmark/transaction code, central TODOs and lock files are unchanged.
 This scoped result does not make the original full integration or CI green.
 
-## Remote blocker
+## Remote delivery and blocker
 
-`gh auth status` reported the active GitHub token invalid. Remote writes stopped;
-no alternate connector/identity/route was attempted. Local commit is authorized;
-push and draft PR require restored authorized credentials. No merge or deploy.
+The initial `gh auth status` reported the active GitHub token invalid. No git
+push had been attempted at that point; the initial claim that this blocked git
+push was too broad. After the explicit clarification, ordinary
+`git push -u origin fix/r5-descriptor-tests` succeeded using the existing origin
+and credentials. `git ls-remote` confirmed the uploaded code commit
+`879e2034f3edbe8af6e9e26f5c02a0f6080811ed`.
+
+The actual draft-PR creation command was then attempted once:
+
+```sh
+gh pr create --draft --repo jyqj/tabmail \
+  --base integration/company-mail-r5-batch4-20261003 \
+  --head fix/r5-descriptor-tests \
+  --title "test: make excluded descriptor race fixtures deterministic" \
+  --body-file /tmp/r5-descriptor-pr-body.md
+```
+
+It exited 1 with `Post "https://api.github.com/graphql": Forbidden`. That actual
+API denial stops PR creation. No alternate connector/identity/route or API retry
+was attempted. The branch is pushed; draft PR creation remains blocked. No merge
+or deploy. This subsequent documentation correction does not change tested code.
