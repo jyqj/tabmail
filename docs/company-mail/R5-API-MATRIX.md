@@ -341,3 +341,5 @@ P2已有 POST `/company/outbound/{id}/inspect`不在缺5之列；其freshselecte
 
 
 第四批组合调用清单（2026-10-03）：保原严格收集器，legacy recipients 使用 existing detail 后为134分支、7转发、127映射。`R5-CLIENT-CALLS.json` 从实际组合重新生成，完整 `--check` PASS；历史专项附录的未注册失败保持。其余组合资格见中央 TODO 和 batch4 evidence。
+
+组合后端 Go AST producer 真导出132路由，原矩阵只有源码位置/handler/middleware等漂移；刷新后 route inventory 正/负例 PASS，client strict check 同时PASS。完整当前 source-only API/client map见 evidence/R5-INTEGRATION-BATCH4-20261003/current-api-client-source-map.json。旧wire摘要和它的source/spec/case资格保持历史范围，未重新认证。

@@ -2052,3 +2052,5 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 - workspace 私有 venv 成功安装原官方 pinned requirements；未写 /home/agent/.local，不修改权限。源码 freeze 后组合 test/type/lint/build、archive/version/fresh cold-warm 与真实 CI 结果继续本批记录；本 checkpoint 不转授单支 PASS。
 - audit 已知 8 high / 0 critical（omit-dev 6）仍是 gate FAIL；PG 整包累计180s timeout、usage_held_allows_retry 与 SMTP ownerTailLogger.Printf 重复 close(entered) 由父另修，本批不修改这些文件。原 archive 全量2fail/64error/1skip/16未执行仅历史结果，正常依赖后按本组合实际重新分类。
 - 两 fork replace/schema19/root ./...、36 history bytes/528旧 evidence、current v4/v2 与旧四 actual-root 语义保留；10/171 不变。无 merge/deploy/force、Method19/SML/perf/真实邮件服务资格。
+
+- 组合实际发现 Go AST route matrix 漂移；按中央 API owner 范围重新导出132路由，完整 route inventory/negative drift tests 与 strict client check PASS。新 `current-api-client-source-map.json` 逐路由绑定 handler/middleware/OpenAPI/client/test/源码closure；不替历史 wire runtime 盖章。528个基线 evidence 中526路径字节原封不动，只有获授权的两个 generated 当前清单（API-MATRIX/CLIENT-CALLS）刷新；这两份 PR21 原始 bytes 已另外原样保存本批 historical-*，36受保护历史文件完全不变。历史 R5-COMPATIBILITY-GATES/schema/registry/tars 保持，不更改旧资格。
