@@ -38,6 +38,75 @@ FORBIDDEN = {
     "smtp_password", "api_key", "api_key_secret", "jwt_secret", "password",
     "content_digest", "submit_actor", "idempotency_key", "request_hash",
 }
+ORDINARY_FORBIDDEN = FORBIDDEN | {
+    "subject", "mail_from", "from", "to", "cc", "bcc", "rcpt_to", "recipients",
+    "mailbox_id", "attachment_count", "text_body", "html_body", "headers",
+    "smtp_code", "user_id", "api_key_id", "sender_user_id", "content_redacted",
+    "delivered_domains", "message_id_header", "max_attempts", "address", "kind",
+    "enhanced_code",
+}
+RECEIPT_KEYS = {
+    "id", "tenant_id", "state", "status", "progress", "created_at", "updated_at",
+    "attempt_count", "next_retry", "delivery_uncertain", "capabilities",
+}
+ORDINARY_COMPONENTS = {
+    "OutboundReceipt", "OutboundReceiptProgress", "OutboundReceiptCounts",
+    "SubmissionCapabilities",
+}
+
+
+def ordinary_closure(schema, schemas, trail=()):
+    """Expand only this receipt's local refs; reject unsupported schema shapes.
+
+    This is a boundary assertion, not a permissive JSON Schema interpreter.
+    Walk schema-bearing keywords only (never descriptions or enum values).
+    """
+    if not isinstance(schema, dict):
+        raise AssertionError("ordinary schema must be an object")
+    if "$ref" in schema:
+        ref = schema["$ref"]
+        if set(schema) != {"$ref"}:
+            raise AssertionError("ordinary $ref siblings unsupported")
+        if not isinstance(ref, str) or not re.fullmatch(r"#/components/schemas/[A-Za-z0-9_]+", ref):
+            raise AssertionError(f"unsupported ordinary local ref: {ref!r}")
+        name = ref.rsplit("/", 1)[1]
+        if name not in schemas:
+            raise AssertionError(f"unknown ordinary ref: {ref}")
+        if name in trail:
+            raise AssertionError(f"cyclic ordinary ref: {' -> '.join((*trail, name))}")
+        if name not in ORDINARY_COMPONENTS | {"OutboundJob", "Submission"}:
+            raise AssertionError(f"non-ordinary component in receipt closure: {name}")
+        return ordinary_closure(schemas[name], schemas, (*trail, name))
+    supported = {"type", "format", "description", "additionalProperties", "required",
+                 "properties", "enum", "minimum", "oneOf", "not"}
+    unknown = set(schema) - supported
+    if unknown:
+        raise AssertionError(f"unsupported ordinary keywords: {sorted(unknown)}")
+    if schema.get("type") == "object" and schema.get("additionalProperties") is not False:
+        raise AssertionError("ordinary object must be closed")
+    props = schema.get("properties", {})
+    forbidden = set(props) & ORDINARY_FORBIDDEN
+    if forbidden:
+        raise AssertionError(f"forbidden ordinary fields: {sorted(forbidden)}")
+    out = copy.deepcopy(schema)
+    if "properties" in schema:
+        out["properties"] = {k: ordinary_closure(v, schemas, trail) for k, v in props.items()}
+    if "oneOf" in schema:
+        out["oneOf"] = [ordinary_closure(v, schemas, trail) for v in schema["oneOf"]]
+    if "not" in schema:
+        out["not"] = ordinary_closure(schema["not"], schemas, trail)
+    return out
+
+
+def assert_ordinary_boundary(schemas):
+    canonical = ordinary_closure({"$ref": "#/components/schemas/OutboundReceipt"}, schemas)
+    if set(canonical["properties"]) != RECEIPT_KEYS:
+        raise AssertionError("ordinary receipt field set changed")
+    for alias in ("OutboundJob", "Submission"):
+        expanded = ordinary_closure({"$ref": "#/components/schemas/" + alias}, schemas)
+        if expanded != canonical:
+            raise AssertionError(f"ordinary alias differs from receipt: {alias}")
+    return canonical
 
 
 def body(source, name):
@@ -269,18 +338,97 @@ class OutboundInspectionContractTests(unittest.TestCase):
         self.assertEqual(SCHEMAS["CompanyOutboundInspection"]["properties"]["recipients"]["maxItems"], 50)
 
     def test_ordinary_receipt_schemas_not_expanded(self):
-        ordinary = SCHEMAS["OutboundJob"]
-        self.assertEqual(set(ordinary["properties"]), {
-            "content_redacted", "id", "tenant_id", "mail_from", "rcpt_to", "subject",
-            "delivered_domains", "in_flight_domain", "state", "attempts", "max_attempts",
-            "last_error", "smtp_code", "smtp_response", "message_id_header", "created_at", "updated_at",
-        })
+        # The former direct ["properties"] access raised KeyError on the R5
+        # alias. Preserve its boundary intent, not its pre-R5 raw-model fields.
+        ordinary = assert_ordinary_boundary(SCHEMAS)
+        self.assertEqual(set(ordinary["properties"]), RECEIPT_KEYS)
+        for filename, names in (
+            ("outbound_receipt.go", ("OutboundReceipt", "OutboundReceiptProgress", "OutboundReceiptCounts")),
+            ("submissions.go", ("SubmissionCapabilities",)),
+        ):
+            source = (ROOT / "internal/company" / filename).read_text()
+            go, errors = gate.parse_go_source(source)
+            self.assertEqual(errors, [])
+            for name in names:
+                schema = ordinary_closure(SCHEMAS[name], SCHEMAS)
+                self.assertEqual(set(schema["properties"]), set(go.structs[name]), name)
+                self.assertEqual(set(schema["required"]), {
+                    key for key, field in go.structs[name].items() if not field.omitempty
+                }, name)
+        self.assertNotIn("Inspection", repr(ordinary))
+        # CompanyRecipient is a separate legacy/recovery shape, not an ordinary
+        # receipt dependency. Keep its old baseline without blessing exposure.
         self.assertEqual(set(SCHEMAS["CompanyRecipient"]["properties"]), {
             "address", "state", "smtp_code", "diagnostic", "attempts", "updated_at",
         })
         self.assertEqual(set(SCHEMAS["CompanyRecipient"]["properties"]["state"]["enum"]), STATES - {"unknown"})
-        for schema in (ordinary, SCHEMAS["CompanyRecipient"]):
-            self.assertNotIn("CompanyOutboundInspection", repr(schema))
+
+    def test_ordinary_schema_pollution_fails_at_every_closure_object(self):
+        assert_ordinary_boundary(SCHEMAS)  # unmodified positive control
+        for name in ORDINARY_COMPONENTS:
+            for key in ORDINARY_FORBIDDEN:
+                with self.subTest(component=name, forbidden=key):
+                    mutant = copy.deepcopy(SCHEMAS)
+                    mutant[name]["properties"][key] = {"type": "string"}
+                    with self.assertRaisesRegex(AssertionError, "forbidden ordinary fields"):
+                        assert_ordinary_boundary(mutant)
+            mutant = copy.deepcopy(SCHEMAS)
+            mutant[name]["additionalProperties"] = True
+            with self.subTest(component=name, reopened=True):
+                with self.assertRaisesRegex(AssertionError, "ordinary object must be closed"):
+                    assert_ordinary_boundary(mutant)
+
+    def test_ordinary_alias_and_nested_inspection_refs_fail(self):
+        for alias in ("OutboundJob", "Submission"):
+            for target in ("CompanyOutboundInspection", JOB, RECIPIENT, HEADERS, "CompanyRecipient"):
+                mutant = copy.deepcopy(SCHEMAS)
+                mutant[alias] = {"$ref": "#/components/schemas/" + target}
+                with self.subTest(alias=alias, target=target):
+                    with self.assertRaisesRegex(AssertionError, "non-ordinary component"):
+                        assert_ordinary_boundary(mutant)
+        mutant = copy.deepcopy(SCHEMAS)
+        mutant["OutboundReceipt"]["properties"]["progress"] = {"$ref": "#/components/schemas/" + JOB}
+        with self.assertRaisesRegex(AssertionError, "non-ordinary component"):
+            assert_ordinary_boundary(mutant)
+        mutant = copy.deepcopy(SCHEMAS)
+        mutant["OutboundJob"] = copy.deepcopy(SCHEMAS["OutboundReceipt"])
+        mutant["OutboundJob"]["properties"]["private_future_field"] = {"type": "string"}
+        with self.assertRaisesRegex(AssertionError, "ordinary alias differs"):
+            assert_ordinary_boundary(mutant)
+
+    def test_ordinary_local_refs_fail_explicitly_on_unknown_cycles_and_unsupported(self):
+        for ref, message in (
+            ("#/components/schemas/MissingReceipt", "unknown ordinary ref"),
+            ("https://fixture.test/receipt.json", "unsupported ordinary local ref"),
+            ("#/components/responses/OutboundReceipt", "unsupported ordinary local ref"),
+            ("#/components/schemas/OutboundReceipt/properties/id", "unsupported ordinary local ref"),
+        ):
+            mutant = copy.deepcopy(SCHEMAS)
+            mutant["OutboundJob"] = {"$ref": ref}
+            with self.subTest(ref=ref):
+                with self.assertRaisesRegex(AssertionError, message):
+                    assert_ordinary_boundary(mutant)
+        for target in ("OutboundJob", "Submission"):
+            mutant = copy.deepcopy(SCHEMAS)
+            mutant["OutboundJob"] = {"$ref": "#/components/schemas/" + target}
+            mutant[target] = {"$ref": "#/components/schemas/OutboundJob"}
+            with self.subTest(cycle=target):
+                with self.assertRaisesRegex(AssertionError, "cyclic ordinary ref"):
+                    assert_ordinary_boundary(mutant)
+        mutant = copy.deepcopy(SCHEMAS)
+        mutant["OutboundReceiptCounts"]["properties"]["total"] = {"$ref": "#/components/schemas/OutboundReceipt"}
+        with self.assertRaisesRegex(AssertionError, "cyclic ordinary ref"):
+            assert_ordinary_boundary(mutant)
+        for extra, message in (({"allOf": []}, "unsupported ordinary keywords"),
+                               ({"patternProperties": {}}, "unsupported ordinary keywords")):
+            mutant = copy.deepcopy(SCHEMAS)
+            mutant["OutboundReceipt"].update(extra)
+            with self.assertRaisesRegex(AssertionError, message):
+                assert_ordinary_boundary(mutant)
+        mutant = copy.deepcopy(SCHEMAS)
+        mutant["OutboundJob"]["properties"] = {"diagnostic": {"type": "string"}}
+        with self.assertRaisesRegex(AssertionError, r"ordinary \$ref siblings unsupported"):
+            assert_ordinary_boundary(mutant)
 
 
 if __name__ == "__main__":
