@@ -15,12 +15,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 247,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT互动admin/super_admin；outer RequireAdmin仅粗门禁，editorActor拒Key并要求selectedtenant；下游fresh currentMemberActor/成员层级与tenant重新核定；global profile当前super-only/system拒",
+    "resource": "selectedtenant+UUID profile；完整当前affected member compoundrevision集合",
+    "version": "64KiB strict JSON expected_revision(decimal)+confirmed_members(完整PermissionRevision[])必填；exact集合/CAS确认后删除，成功204，不empty旧写",
+    "audit": "permission.profile.delete必要audit/outbox同Tx；global真实affectedtenants sortedunique各event，零受众仅主audit，无platform事件",
+    "content": "204无body；失败无部分effects，不用户内容",
+    "evidence": "internal/api/handlers/permissions.go → internal/app/permissions/editor.go → internal/store/postgres/permission_profile_cas.go:DeletePermissionProfileCAS/permissionProfileAudit"
   },
   {
     "method": "DELETE",
@@ -38,12 +38,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 290,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "DELETE",
@@ -61,12 +61,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 270,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "DELETE",
@@ -84,12 +84,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 275,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "DELETE",
@@ -107,12 +107,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 260,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "当前tenant中的员工ID，admin只可管理user，super可管理更高层级",
+    "version": "无请求CAS；事务重读当前身份/角色，最后管理员保护",
+    "audit": "guarded成员写入与user.update/user.delete同事务",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/users_admin.go + internal/store/postgres/member_guard.go"
   },
   {
     "method": "DELETE",
@@ -130,12 +130,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 255,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "个人覆盖限定目标user同tenant；profile区分system/global/tenant",
+    "version": "旧clear覆盖入口保注册，handler直接409；改versioned editor字段null继承，不允许旧clear旁路",
+    "audit": "拒绝路径无持久写/版本/audit/outbox",
+    "content": "409 API error；不返回已成功清空或读取结果",
+    "evidence": "internal/api/handlers/permissions.go:DeleteUserPermissionOverride"
   },
   {
     "method": "DELETE",
@@ -157,12 +157,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 102,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT当前tenant-admin；路由RequireAdmin与handler requireCompanyAdmin双重检查",
+    "resource": "当前tenant+domain zone ID；删除检查company primary/mailbox/receipt等资产引用",
+    "version": "创建/验证无请求CAS；删除持有资产保护锁",
+    "audit": "删除使用受保护事务与必要审计；创建/验证沿既有domain service审计，不冒称全部companyTx",
+    "content": "公司域名与DNS验证元数据，不授予员工邮箱内容权限",
+    "evidence": "internal/api/handlers/company_domains.go + internal/app/domains/service.go + internal/store/postgres/domain_delete.go"
   },
   {
     "method": "DELETE",
@@ -182,12 +182,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 81,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前draft owner与邮箱send资格（管理权不替代）",
+    "resource": "tenant+user+draftID+mailbox+附件归属",
+    "version": "create稳定UUID/墓碑；update/delete revision；submit expected_revision+Idempotency-Key",
+    "audit": "保存按既有workspace事务；submit消费/归档/账本/必要审计原子",
+    "content": "私人草稿/保存结果；submit为发送回执",
+    "evidence": "internal/api/handlers/company_drafts.go + internal/store/postgres/company_mail.go + internal/app/submissions/service.go"
   },
   {
     "method": "DELETE",
@@ -207,12 +207,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 37,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin",
+    "resource": "tenant+邀请ID/开通地址",
+    "version": "创建/撤销邀请，token单次使用",
+    "audit": "employee invitation与companyAudit同事务",
+    "content": "邀请元数据；创建返回activation_token且no-store",
+    "evidence": "internal/api/handlers/company_setup.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "DELETE",
@@ -230,12 +230,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 233,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT员工（user/admin/super_admin）；Key拒绝；创建还检查can_create_api_keys和scope/zone",
+    "resource": "当前tenant+当前user owner；admin可管理tenant范围",
+    "version": "无请求CAS；按key ID核对归属",
+    "audit": "旧平台路径；非统一companyTx，不能当作原子required audit",
+    "content": "Key元数据；创建返回一次性原始Key",
+    "evidence": "internal/api/handlers/admin.go:UserCreateAPIKey/UserListAPIKeys/UserDeleteAPIKey"
   },
   {
     "method": "DELETE",
@@ -256,12 +256,12 @@
     ],
     "source": "internal/api/router.go",
     "line": 223,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT需tenant-admin；API Key需suppression read/manage scope",
+    "resource": "当前tenant抑制地址/显式suppression ID",
+    "version": "无revision，必填reason",
+    "audit": "DeleteSuppressionAudited：删除与必要审计同事务",
+    "content": "抑制收件人地址及原因",
+    "evidence": "internal/api/handlers/outbound.go:requireSuppressionAdmin/DeleteSuppression"
   },
   {
     "method": "GET",
@@ -279,12 +279,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 281,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "当前选定tenant；路径ID仍需handler/store作用域校验",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -302,12 +302,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 240,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "员工/Key按scope与域名可见范围，admin列表为管理可见",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "域名管理元数据，不授予邮箱read/send",
+    "evidence": "internal/api/handlers/domains.go + internal/app/domains/service.go"
   },
   {
     "method": "GET",
@@ -325,12 +325,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 282,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "当前选定tenant；路径ID仍需handler/store作用域校验",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "平台队列/投递诊断元数据，不能按普通正文授权理解",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -348,12 +348,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 279,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "当前选定tenant；路径ID仍需handler/store作用域校验",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "平台监控事件/历史（可能含发收件元数据），不是普通员工入口",
+    "evidence": "internal/api/handlers/monitor.go"
   },
   {
     "method": "GET",
@@ -371,12 +371,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 280,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "当前选定tenant；路径ID仍需handler/store作用域校验",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "平台监控事件/历史（可能含发收件元数据），不是普通员工入口",
+    "evidence": "internal/api/handlers/monitor.go"
   },
   {
     "method": "GET",
@@ -394,12 +394,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 243,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "互动JWT admin/super；ProfileVisibilityStore/companyReadTx fresh active/role/session；Key拒，选公司不授予normaladmin全部global权限",
+    "resource": "current super沿既有allprofiles范围；tenant admin仅global/system+own tenant，不因profile引用/event受众扩张；selectedcompany存在核验",
+    "version": "只读unpaginated PermissionProfile[]，真实decimal revision；name,id稳定排序；不是editor rawsnapshot",
+    "audit": "无mutation audit/outbox，身份/范围失败不读profile字段",
+    "content": "APIResponse<PermissionProfile[]>权限配置元数据，不邮箱read",
+    "evidence": "internal/api/handlers/permissions.go:ListProfiles → internal/app/permissions/service.go:ListProfiles → internal/store/postgres/permission_profile_visibility.go:ListVisiblePermissionProfiles"
   },
   {
     "method": "GET",
@@ -417,12 +417,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 244,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT互动admin/super_admin；outer RequireAdmin仅粗门禁，editorActor拒Key并要求selectedtenant；下游fresh currentMemberActor/成员层级与tenant重新核定；global profile只当前super可管理，system拒修改",
+    "resource": "selectedtenant+UUID profile_id及当前受影响成员revision集合；global audience不授予跨tenant list/read",
+    "version": "只读preview返回profile_revision及完整members复合revision/before-after；锁快照，无版本消费",
+    "audit": "纯snapshot/锁读取，无mutation audit/outbox；真正DELETE另需expected_revision+exactconfirmed_members",
+    "content": "APIResponse<PermissionProfileDeletionPreview>：profile_id/profile_revision/members/changes[{revision,before,after}]；不含邮件内容",
+    "evidence": "internal/api/handlers/permissions.go → internal/app/permissions/editor.go → internal/store/postgres/permission_profile_cas.go:GetPermissionProfileDeletionPreview + internal/company/permission_editor.go"
   },
   {
     "method": "GET",
@@ -440,12 +440,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 287,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -463,12 +463,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 292,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -486,12 +486,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 296,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -509,12 +509,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 300,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -532,12 +532,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 277,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "SystemStats管理元数据；recent_audit投影为完整AuditEntry值数组（空集合[]），nil存储entry failclosed无成功payload；值复制不宣称嵌套深拷贝",
+    "evidence": "internal/app/admin/service.go:Stats + internal/api/handlers/admin.go:Stats；fc7c7c Stats5 app/handler bounded race5top11leaf13PASS，不全router鉴权矩阵"
   },
   {
     "method": "GET",
@@ -555,12 +555,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 278,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -578,12 +578,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 267,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -601,12 +601,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 271,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -624,12 +624,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 274,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -647,12 +647,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 258,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "当前tenant中的员工ID，admin只可管理user，super可管理更高层级",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/users_admin.go + internal/store/postgres/member_guard.go"
   },
   {
     "method": "GET",
@@ -670,12 +670,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 251,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT互动admin/super_admin；outer RequireAdmin仅粗门禁，editorActor拒Key并要求selectedtenant；下游fresh currentMemberActor/成员层级与tenant重新核定",
+    "resource": "selectedtenant+UUID targetuser；原assignedprofile/nullable个人overrides与effective同Tx读取",
+    "version": "返回完整5required复合revision、rawprofile/override/effective/field_sources/capabilities；不等旧effective-only GET",
+    "audit": "raw编辑快照只读，无mutation audit/outbox",
+    "content": "APIResponse<PermissionEditorSnapshot>；profile/overrides/effective可null；capabilities仅提示不替实际命令授权",
+    "evidence": "internal/api/handlers/permissions.go → internal/app/permissions/editor.go → internal/store/postgres/permission_editor_snapshot.go + internal/company/permission_editor.go"
   },
   {
     "method": "GET",
@@ -693,12 +693,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 250,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "个人覆盖限定目标user同tenant；profile区分system/global/tenant",
+    "version": "只读effective或profile列表；非原始覆盖编辑快照",
+    "audit": "无逐次读取审计",
+    "content": "原始配置/覆盖或effective权限，不含邮件正文",
+    "evidence": "internal/api/handlers/permissions.go + internal/store/postgres/permissions.go"
   },
   {
     "method": "GET",
@@ -716,12 +716,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 283,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "当前选定tenant；路径ID仍需handler/store作用域校验",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "平台队列/投递诊断元数据，不能按普通正文授权理解",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "GET",
@@ -739,12 +739,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 204,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT员工（user/admin/super_admin）；Key拒绝",
+    "resource": "当前账号或请求中受验证凭据绑定的账号",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "身份/会话凭据或当前用户信息",
+    "evidence": "internal/api/handlers/auth.go + internal/store/postgres/refresh_rotation.go"
   },
   {
     "method": "GET",
@@ -762,12 +762,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 206,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT员工（user/admin/super_admin）；Key拒绝",
+    "resource": "当前账号或请求中受验证凭据绑定的账号",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "当前有效权限",
+    "evidence": "internal/api/handlers/permissions.go:MyPermissions"
   },
   {
     "method": "GET",
@@ -787,12 +787,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 75,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；上传需send，已提交附件需当前read，未提交按上传者规则",
+    "resource": "tenant+upload ID+mailbox+当前user；sent pin按存活内容条目",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "附件上传结果或附件字节",
+    "evidence": "internal/store/postgres/company_mail.go + internal/app/companymail/service.go"
   },
   {
     "method": "GET",
@@ -812,12 +812,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 31,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；数据库当前tenant-admin",
+    "resource": "tenant范围统计/审计；access还需mailbox/user同tenant",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "管理统计/审计/权利解释；不授予正文权",
+    "evidence": "internal/store/postgres/company_console.go + internal/store/postgres/company_access_explanation.go"
   },
   {
     "method": "GET",
@@ -839,12 +839,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 99,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT当前tenant-admin；路由RequireAdmin与handler requireCompanyAdmin双重检查",
+    "resource": "当前tenant+domain zone ID；删除检查company primary/mailbox/receipt等资产引用",
+    "version": "只读域名及验证状态",
+    "audit": "无逐次读取审计",
+    "content": "公司域名与DNS验证元数据，不授予员工邮箱内容权限",
+    "evidence": "internal/api/handlers/company_domains.go + internal/app/domains/service.go + internal/store/postgres/domain_delete.go"
   },
   {
     "method": "GET",
@@ -866,12 +866,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 101,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT当前tenant-admin；路由RequireAdmin与handler requireCompanyAdmin双重检查",
+    "resource": "当前tenant+domain zone ID；删除检查company primary/mailbox/receipt等资产引用",
+    "version": "只读域名及验证状态",
+    "audit": "无逐次读取审计",
+    "content": "公司域名与DNS验证元数据，不授予员工邮箱内容权限",
+    "evidence": "internal/api/handlers/company_domains.go + internal/app/domains/service.go + internal/store/postgres/domain_delete.go"
   },
   {
     "method": "GET",
@@ -891,12 +891,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 76,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前draft owner与邮箱send资格（管理权不替代）",
+    "resource": "tenant+user+draftID+mailbox+附件归属",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "私人草稿/保存结果；submit为发送回执",
+    "evidence": "internal/api/handlers/company_drafts.go + internal/store/postgres/company_mail.go + internal/app/submissions/service.go"
   },
   {
     "method": "GET",
@@ -916,12 +916,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 77,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前draft owner与邮箱send资格（管理权不替代）",
+    "resource": "tenant+user+draftID+mailbox+附件归属",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "私人草稿/保存结果；submit为发送回执",
+    "evidence": "internal/api/handlers/company_drafts.go + internal/store/postgres/company_mail.go + internal/app/submissions/service.go"
   },
   {
     "method": "GET",
@@ -943,12 +943,12 @@
     ],
     "source": "internal/api/router.go",
     "line": 180,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "RequireAuth+RequireAdmin的JWT互动主体；selectedtenant，store companyReadTx/current actor重核active/admin/session；每batch及每frame同user/tenant/session fenced actualwrite+flush，角色/会话/tenant变化终止",
+    "resource": "当前selectedtenant的durable company.admin.changed管理invalidation；不平台全播、不个人message/sent状态广播",
+    "version": "无body；Last-Event-ID仅advisory dedup非提交顺序cursor。recent≤200原outbox只读，无claim/ack；2s poll/25s resync、frame2s预算；ready/resync严格tenant_id",
+    "audit": "读取原required outbox，不新增写/audit/ack；无平台global-emptyaudience自动事件，通知不取代权威重读",
+    "content": "200 text/event-stream：ready/resync data={tenant_id}；company.admin.changed id=UUID，data仅type/tenant_id/occurred_at/metadata(action/resource_type/resource_id allowlist)。禁正文/BCC/令牌/objectkey/SQL原payload",
+    "evidence": "internal/api/router.go:NewRouter → internal/api/handlers/company_admin_stream.go:Events → internal/store/postgres/company_admin_events.go + web/lib/api/company-events.ts + web/features/company/company-event-consumer.tsx"
   },
   {
     "method": "GET",
@@ -968,12 +968,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 35,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin",
+    "resource": "tenant+邀请ID/开通地址",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "邀请元数据；创建返回activation_token且no-store",
+    "evidence": "internal/api/handlers/company_setup.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "GET",
@@ -993,12 +993,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 40,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口",
+    "resource": "tenant+当前actor；普通权利与管理可见分别投影",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "邮箱元数据及CanRead/CanOrganize/CanSend，管理可见不是正文资格",
+    "evidence": "internal/store/postgres/company_members.go:ListWorkMailboxes"
   },
   {
     "method": "GET",
@@ -1018,12 +1018,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 32,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；数据库当前tenant-admin",
+    "resource": "tenant范围统计/审计；access还需mailbox/user同tenant",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "管理统计/审计/权利解释；不授予正文权",
+    "evidence": "internal/store/postgres/company_console.go + internal/store/postgres/company_access_explanation.go"
   },
   {
     "method": "GET",
@@ -1043,12 +1043,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 61,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read，定期重新鉴权",
+    "resource": "tenant+mailbox+event cursor",
+    "version": "sequence cursor，resync语义仍需P7验证",
+    "audit": "普通读取不要求独立审计",
+    "content": "邮箱变更通知，不含正文/BCC",
+    "evidence": "internal/api/handlers/company_stream.go"
   },
   {
     "method": "GET",
@@ -1068,12 +1068,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 44,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及目标属主成员层级保护",
+    "resource": "tenant+mailboxID及目标owner/grant user",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "邮箱管理结果/授权快照",
+    "evidence": "internal/api/handlers/company_mailboxes.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "GET",
@@ -1093,12 +1093,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 64,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1118,12 +1118,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 66,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1143,12 +1143,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 67,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1168,12 +1168,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 71,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1193,12 +1193,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 72,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1218,12 +1218,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 65,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1243,12 +1243,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 73,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1268,12 +1268,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 70,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "GET",
@@ -1293,12 +1293,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 62,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read+zone+存活sent item",
+    "resource": "tenant+mailboxID+assetID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "已发送资产列表或文件夹状态",
+    "evidence": "internal/store/postgres/sent_archive.go"
   },
   {
     "method": "GET",
@@ -1318,12 +1318,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 60,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；精确mailbox send+可用模板usage",
+    "resource": "tenant+mailboxID+user",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "可用已发布模板，不因管理身份放行",
+    "evidence": "internal/store/postgres/company_templates.go:ListUsableTemplates"
   },
   {
     "method": "GET",
@@ -1343,12 +1343,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 92,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口",
+    "resource": "tenant+job ID+receipt可见资格",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "APIResponse<OutboundReceipt>单聚合metadata对象，完整ledger聚合outcomes；progress unknown时counts省略非伪零。即使有当前content-read也不在此路由透出逐地址/BCC/正文/SMTP诊断；内容与inspection走独立资格面",
+    "evidence": "internal/api/handlers/company_recovery.go:Recipients + internal/app/submissions/service.go；source33307实际wire聚合DTO，9afe新OAS精确对象契约/旧81capture只读复验，非freshformalCLI0"
   },
   {
     "method": "GET",
@@ -1368,12 +1368,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 29,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；数据库当前tenant-admin",
+    "resource": "tenant范围统计/审计；access还需mailbox/user同tenant",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "管理统计/审计/权利解释；不授予正文权",
+    "evidence": "internal/store/postgres/company_console.go + internal/store/postgres/company_access_explanation.go"
   },
   {
     "method": "GET",
@@ -1393,12 +1393,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 89,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；数据库recoveryActor当前super_admin",
+    "resource": "当前tenant下receipt固定目标或outbound job ID",
+    "version": "inspect理由；retry/reconcile观察updated_at+原件hash/收件人证据",
+    "audit": "inspect/retry/reconcile必需审计，失败回滚",
+    "content": "恢复元数据/核对结果；原件校验并非普通正文读取",
+    "evidence": "internal/api/handlers/company_recovery.go + internal/store/postgres/company_ops.go"
   },
   {
     "method": "GET",
@@ -1418,12 +1418,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 33,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口",
+    "resource": "当前tenant公司配置与verified主域名",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "公司元数据",
+    "evidence": "internal/api/handlers/company_setup.go + internal/store/postgres/company_members.go:ConfigureCompany"
   },
   {
     "method": "GET",
@@ -1443,12 +1443,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 82,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口",
+    "resource": "tenant+原提交ID+原发送mailboxID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "最小回执/状态，历史submitter不授予内容",
+    "evidence": "internal/store/postgres/submissions.go + internal/store/postgres/sent_archive.go"
   },
   {
     "method": "GET",
@@ -1468,12 +1468,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 83,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口",
+    "resource": "tenant+原提交ID+原发送mailboxID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "最小回执/状态，历史submitter不授予内容",
+    "evidence": "internal/store/postgres/submissions.go + internal/store/postgres/sent_archive.go"
   },
   {
     "method": "GET",
@@ -1493,12 +1493,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 87,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前原邮箱read+zone+存活sent item，失败404",
+    "resource": "tenant+原提交ID+原发送mailboxID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "正文或附件元数据/字节；不依赖job存活",
+    "evidence": "internal/store/postgres/submissions.go + internal/store/postgres/sent_archive.go"
   },
   {
     "method": "GET",
@@ -1518,12 +1518,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 88,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前原邮箱read+zone+存活sent item，失败404",
+    "resource": "tenant+原提交ID+原发送mailboxID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "正文或附件元数据/字节；不依赖job存活",
+    "evidence": "internal/store/postgres/submissions.go + internal/store/postgres/sent_archive.go"
   },
   {
     "method": "GET",
@@ -1543,12 +1543,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 86,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前原邮箱read+zone+存活sent item，失败404",
+    "resource": "tenant+原提交ID+原发送mailboxID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "正文或附件元数据/字节；不依赖job存活",
+    "evidence": "internal/store/postgres/submissions.go + internal/store/postgres/sent_archive.go"
   },
   {
     "method": "GET",
@@ -1568,12 +1568,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 50,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "GET",
@@ -1593,12 +1593,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 58,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "GET",
@@ -1618,12 +1618,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 56,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "只读",
+    "audit": "普通读取不要求独立审计",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "GET",
@@ -1642,12 +1642,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 214,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT用户或有效API Key；Key还需记录中的scope；JWT不按Key scope限制",
+    "resource": "员工/Key按scope与域名可见范围，admin列表为管理可见",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "域名管理元数据，不授予邮箱read/send",
+    "evidence": "internal/api/handlers/domains.go + internal/app/domains/service.go"
   },
   {
     "method": "GET",
@@ -1665,12 +1665,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 232,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT员工（user/admin/super_admin）；Key拒绝；创建还检查can_create_api_keys和scope/zone",
+    "resource": "当前tenant+当前user owner；admin可管理tenant范围",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "Key元数据；创建返回一次性原始Key",
+    "evidence": "internal/api/handlers/admin.go:UserCreateAPIKey/UserListAPIKeys/UserDeleteAPIKey"
   },
   {
     "method": "GET",
@@ -1691,12 +1691,12 @@
     ],
     "source": "internal/api/router.go",
     "line": 218,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT用户或有效API Key；Key还需记录中的scope；JWT不按Key scope限制",
+    "resource": "当前tenant+原job ID；receipt按submitter/key归属，content需当前原邮箱read和zone",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "投递回执；旧接口ContentAllowed仍缺sent-item期限(A03)，body/BCC/诊断可能保留",
+    "evidence": "internal/api/handlers/outbound.go + internal/app/submissions/service.go"
   },
   {
     "method": "GET",
@@ -1717,12 +1717,12 @@
     ],
     "source": "internal/api/router.go",
     "line": 219,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT用户或有效API Key；Key还需记录中的scope；JWT不按Key scope限制",
+    "resource": "当前tenant+原job ID；receipt按submitter/key归属，content需当前原邮箱read和zone",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "投递回执；旧接口ContentAllowed仍缺sent-item期限(A03)，body/BCC/诊断可能保留",
+    "evidence": "internal/api/handlers/outbound.go + internal/app/submissions/service.go"
   },
   {
     "method": "GET",
@@ -1743,12 +1743,12 @@
     ],
     "source": "internal/api/router.go",
     "line": 220,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT用户或有效API Key；Key还需记录中的scope；JWT不按Key scope限制",
+    "resource": "当前tenant+原job ID；receipt按submitter/key归属，content需当前原邮箱read和zone",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "投递回执；旧接口ContentAllowed仍缺sent-item期限(A03)，body/BCC/诊断可能保留",
+    "evidence": "internal/api/handlers/outbound.go + internal/app/submissions/service.go"
   },
   {
     "method": "GET",
@@ -1769,12 +1769,12 @@
     ],
     "source": "internal/api/router.go",
     "line": 222,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT需tenant-admin；API Key需suppression read/manage scope",
+    "resource": "当前tenant抑制地址/显式suppression ID",
+    "version": "只读",
+    "audit": "该读取不消费业务审计版本",
+    "content": "抑制收件人地址及原因",
+    "evidence": "internal/api/handlers/outbound.go:requireSuppressionAdmin/DeleteSuppression"
   },
   {
     "method": "GET",
@@ -1791,12 +1791,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 315,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "匿名可到达；认证失败仍受统一middleware影响",
+    "resource": "无业务资源",
+    "version": "只读",
+    "audit": "无强制逐次读取审计",
+    "content": "公开文档/健康状态",
+    "evidence": "internal/api/router.go"
   },
   {
     "method": "GET",
@@ -1813,12 +1813,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 319,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "匿名可到达；认证失败仍受统一middleware影响",
+    "resource": "无业务资源",
+    "version": "只读",
+    "audit": "无强制逐次读取审计",
+    "content": "公开文档/健康状态",
+    "evidence": "internal/api/router.go"
   },
   {
     "method": "GET",
@@ -1828,17 +1828,17 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 324,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "匿名GET，外层wrapper先于身份lookup",
+    "resource": "进程存活/依赖ready",
+    "version": "只读；ready5秒超时",
+    "audit": "无强制逐次读取审计",
+    "content": "最小health/ready状态",
+    "evidence": "internal/api/router.go:360-381"
   },
   {
     "method": "GET",
     "path": "/metrics",
-    "handler": "func(w http.ResponseWriter, r *http.Request) {\n\n\tif !metricsAuthorized(r, metricsToken) {\n\t\tw.Header().Set(\"WWW-Authenticate\", \"Bearer\")\n\t\thttp.Error(w, \"unauthorized\", http.StatusUnauthorized)\n\t\treturn\n\t}\n\tcounts := metricsCounts.Get(time.Now(), func() metricsDBCounts {\n\t\twebhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), \"dead\")\n\t\twebhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), \"pending\", \"retry\", \"processing\")\n\t\tingestReady, _ := st.CountIngestJobsByState(r.Context(), \"pending\", \"retry\")\n\t\tingestProcessing, _ := st.CountIngestJobsByState(r.Context(), \"processing\")\n\t\treturn metricsDBCounts{\n\t\t\twebhookDead:      webhookDead,\n\t\t\twebhookPending:   webhookPending,\n\t\t\tingestReady:      ingestReady,\n\t\t\tingestProcessing: ingestProcessing,\n\t\t}\n\t})\n\tsnapshot := metrics.Snapshot(cfg.Dispatcher != nil \u0026\u0026 cfg.Dispatcher.Enabled(), counts.webhookDead)\n\tvalues := map[string]float64{\n\t\t\"tabmail_webhooks_backlog\":         float64(counts.webhookPending),\n\t\t\"tabmail_ingest_backlog\":           float64(counts.ingestReady + counts.ingestProcessing),\n\t\t\"tabmail_ingest_queue_depth\":       float64(counts.ingestReady + counts.ingestProcessing),\n\t\t\"tabmail_ingest_queue_ready_depth\": float64(counts.ingestReady),\n\t\t\"tabmail_ingest_queue_inflight\":    float64(counts.ingestProcessing),\n\t}\n\tif health, ok := st.(interface {\n\t\tCompanyMetrics(context.Context) (map[string]float64, error)\n\t}); ok {\n\t\textra, err := health.CompanyMetrics(r.Context())\n\t\tif err != nil {\n\t\t\tvalues[\"tabmail_operational_metrics_error\"] = 1\n\t\t} else {\n\t\t\tvalues[\"tabmail_operational_metrics_error\"] = 0\n\t\t\tfor k, v := range extra {\n\t\t\t\tvalues[k] = v\n\t\t\t}\n\t\t}\n\t}\n\tbody := metrics.RenderPrometheus(snapshot, values)\n\tw.Header().Set(\"Content-Type\", \"text/plain; version=0.0.4; charset=utf-8\")\n\t_, _ = w.Write([]byte(body))\n}",
+    "handler": "func(w http.ResponseWriter, r *http.Request) {\n\n\tif !metricsAuthorized(r, metricsToken) {\n\t\tw.Header().Set(\"WWW-Authenticate\", \"Bearer\")\n\t\thttp.Error(w, \"unauthorized\", http.StatusUnauthorized)\n\t\treturn\n\t}\n\tcounts := metricsCounts.Get(time.Now(), func() metricsDBCounts {\n\t\twebhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), \"dead\")\n\t\twebhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), \"pending\", \"retry\", \"processing\")\n\t\tingestReady, _ := st.CountIngestJobsByState(r.Context(), \"pending\", \"retry\")\n\t\tingestProcessing, _ := st.CountIngestJobsByState(r.Context(), \"processing\")\n\t\treturn metricsDBCounts{\n\t\t\twebhookDead:      webhookDead,\n\t\t\twebhookPending:   webhookPending,\n\t\t\tingestReady:      ingestReady,\n\t\t\tingestProcessing: ingestProcessing,\n\t\t}\n\t})\n\tsnapshot := metrics.Snapshot(cfg.Dispatcher != nil && cfg.Dispatcher.Enabled(), counts.webhookDead)\n\tvalues := map[string]float64{\n\t\t\"tabmail_webhooks_backlog\":         float64(counts.webhookPending),\n\t\t\"tabmail_ingest_backlog\":           float64(counts.ingestReady + counts.ingestProcessing),\n\t\t\"tabmail_ingest_queue_depth\":       float64(counts.ingestReady + counts.ingestProcessing),\n\t\t\"tabmail_ingest_queue_ready_depth\": float64(counts.ingestReady),\n\t\t\"tabmail_ingest_queue_inflight\":    float64(counts.ingestProcessing),\n\t}\n\tif health, ok := st.(interface {\n\t\tCompanyMetrics(context.Context) (map[string]float64, error)\n\t}); ok {\n\t\textra, err := health.CompanyMetrics(r.Context())\n\t\tif err != nil {\n\t\t\tvalues[\"tabmail_operational_metrics_error\"] = 1\n\t\t} else {\n\t\t\tvalues[\"tabmail_operational_metrics_error\"] = 0\n\t\t\tfor k, v := range extra {\n\t\t\t\tvalues[k] = v\n\t\t\t}\n\t\t}\n\t}\n\tbody := metrics.RenderPrometheus(snapshot, values)\n\tw.Header().Set(\"Content-Type\", \"text/plain; version=0.0.4; charset=utf-8\")\n\t_, _ = w.Write([]byte(body))\n}",
     "middleware": [
       "chimw.RequestID",
       "chimw.Recoverer",
@@ -1850,12 +1850,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 329,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "配置metrics bearer token或已认证super_admin，非公开",
+    "resource": "平台低基数运行指标",
+    "version": "只读",
+    "audit": "无强制逐次读取审计",
+    "content": "运行指标，不是员工正文",
+    "evidence": "internal/api/router.go:metricsAuthorized"
   },
   {
     "method": "GET",
@@ -1872,12 +1872,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 306,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "匿名可到达；认证失败仍受统一middleware影响",
+    "resource": "无业务资源",
+    "version": "只读",
+    "audit": "无强制逐次读取审计",
+    "content": "公开文档/健康状态",
+    "evidence": "internal/api/router.go"
   },
   {
     "method": "GET",
@@ -1887,12 +1887,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 363,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "匿名GET，外层wrapper先于身份lookup",
+    "resource": "进程存活/依赖ready",
+    "version": "只读；ready5秒超时",
+    "audit": "无强制逐次读取审计",
+    "content": "最小health/ready状态",
+    "evidence": "internal/api/router.go:360-381"
   },
   {
     "method": "GET",
@@ -1909,12 +1909,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 316,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "匿名可到达；认证失败仍受统一middleware影响",
+    "resource": "无业务资源",
+    "version": "只读",
+    "audit": "无强制逐次读取审计",
+    "content": "公开文档/健康状态",
+    "evidence": "internal/api/router.go"
   },
   {
     "method": "PATCH",
@@ -1932,12 +1932,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 246,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT互动admin/super_admin；outer RequireAdmin仅粗门禁，editorActor拒Key并要求selectedtenant；下游fresh currentMemberActor/成员层级与tenant重新核定；global profile当前super-only/system拒",
+    "resource": "selectedtenant+UUID profile及当前affected成员；原domain/角色层级限制保",
+    "version": "64KiB strict expected_revision(decimal) CAS+字段patch，omit保持；actual no-op不写/不bump；成功返回真实SQL revision",
+    "audit": "permission.profile.update必要audit/outbox同Tx；global受众sortedunique，required任何event失败完整rollback",
+    "content": "APIResponse<PermissionProfile>真实revision，不将更新许可等同邮件read",
+    "evidence": "internal/api/handlers/permissions.go → internal/app/permissions/editor.go → internal/store/postgres/permission_profile_cas.go:UpdatePermissionProfileCAS/permissionProfileAudit"
   },
   {
     "method": "PATCH",
@@ -1955,12 +1955,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 289,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "PATCH",
@@ -1978,12 +1978,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 293,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "PATCH",
@@ -2001,12 +2001,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 301,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "PATCH",
@@ -2024,12 +2024,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 269,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "PATCH",
@@ -2047,12 +2047,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 259,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "当前tenant中的员工ID，admin只可管理user，super可管理更高层级",
+    "version": "无请求CAS；事务重读当前身份/角色，最后管理员保护",
+    "audit": "guarded成员写入与user.update/user.delete同事务",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/users_admin.go + internal/store/postgres/member_guard.go"
   },
   {
     "method": "PATCH",
@@ -2070,12 +2070,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 252,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT互动admin/super_admin；outer RequireAdmin仅粗门禁，editorActor拒Key并要求selectedtenant；下游fresh currentMemberActor/成员层级与tenant重新核定",
+    "resource": "selectedtenant+UUID targetuser+observed assignedprofile；tenant/scope/角色层级不因patch为空豁免",
+    "version": "64KiB strict body：expected_revision完整5required compoundCAS；patch字段omit保持/null继承/false与0为值/domain_access显式mode。授权CAS后empty不消耗版本；实际变化返回fresh snapshot",
+    "audit": "permission.override.patch与company.admin.changed required audit/outbox同Tx；失败整体回滚；raw noop无写/版本/audit/event",
+    "content": "APIResponse<PermissionEditorSnapshot>；仅权限配置/覆盖/effective，不邮件正文或旁路授权",
+    "evidence": "internal/api/handlers/permissions.go → internal/app/permissions/editor.go → internal/store/postgres/permission_editor_patch.go:PatchPermissionEditor/applyPermissionPatchTx + internal/company/permission_editor_decode.go"
   },
   {
     "method": "POST",
@@ -2093,12 +2093,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 285,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台admin invitation；不是公司员工入职",
+    "version": "创建邀请，不含CAS",
+    "audit": "旧邀请创建无companyAudit；公司模式注册入口拒绝此激活链路",
+    "content": "invite_code凭据及邀请元数据",
+    "evidence": "internal/api/handlers/users_admin.go:InviteAdmin"
   },
   {
     "method": "POST",
@@ -2116,12 +2116,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 245,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT互动admin/super；formal ProfileCreationStore当前actor重载，role/active/session与selected/requested作用域事务核定；cachedsuper/reader hint不自授权，Key拒",
+    "resource": "tenant-scoped创建按fresh actor/selected/requested公司及zone归属核定；global只freshsuper，可无selected但需持久合法actor TenantID作主audit anchor，system/非法anchor拒",
+    "version": "64KiB strict create输入；quota/count 0..2147483647；guarded INSERT RETURNING真实noncycling sequence decimalrevision，不timestamp；nilport/nilsuccess禁止legacyfallback/201null",
+    "audit": "tenantScoped requiredcompanyAudit+outbox同Tx；global空audience required主audit用selectedfreshT或同Txfreshsuper持久TenantID anchor，无合法anchor拒，不捏tenant事件/不宣outbox成功；失败rollback",
+    "content": "201 APIResponse<PermissionProfile>非null且真实revision；配置元数据不授正文read；平台global无受众通知仍未closed",
+    "evidence": "source7ffe实际new7pure+8PG/5HTTP：internal/api/handlers/permissions.go:CreateProfile → internal/app/permissions/service.go:CreateProfile/ProfileCreationStore → internal/store/postgres/permission_profile_create.go:CreatePermissionProfileGuarded；旧store.CreatePermissionProfile留legacy非formalfallback"
   },
   {
     "method": "POST",
@@ -2139,12 +2139,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 288,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台全局设置/套餐/统计；不是邮箱内容权",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "POST",
@@ -2162,12 +2162,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 268,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "POST",
@@ -2185,12 +2185,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 273,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT super_admin；匿名401，其他主体403",
+    "resource": "平台范围；显式tenant ID，不要求等于当前选择tenant",
+    "version": "无客户端revision",
+    "audit": "app.InsertAudit后置尽力记录；不等价同事务required audit",
+    "content": "管理元数据",
+    "evidence": "internal/api/handlers/admin.go + internal/app/admin/service.go"
   },
   {
     "method": "POST",
@@ -2208,12 +2208,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 253,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT互动admin/super_admin；outer RequireAdmin仅粗门禁，editorActor拒Key并要求selectedtenant；下游fresh currentMemberActor/成员层级与tenant重新核定",
+    "resource": "selectedtenant+UUID targetuser；旧assignedprofile复合revision与目标新profile当前revision/作用域同Tx核定",
+    "version": "64KiB strict四required：expected_revision/profile_id/profile_revision/patch；profile pair为UUID+decimal或null/null。assignment+override一次原子CAS；同profile+empty授权后noop",
+    "audit": "permission.profile.assign与company.admin.changed required audit/outbox同Tx；source locks/CAS/审计/提交失败整体rollback",
+    "content": "APIResponse<PermissionEditorSnapshot>；目标profile切换结果与fresh raw/effective快照，不把profile可见性当应用/任意成员管理权限",
+    "evidence": "internal/api/handlers/permissions.go → internal/app/permissions/editor.go → internal/store/postgres/permission_assignment.go:AssignPermissionEditor + internal/company/permission_editor_decode.go"
   },
   {
     "method": "POST",
@@ -2231,12 +2231,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 205,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT员工（user/admin/super_admin）；Key拒绝",
+    "resource": "当前账号或请求中受验证凭据绑定的账号",
+    "version": "无客户端revision",
+    "audit": "旧平台路径；非统一companyTx，不能当作原子required audit",
+    "content": "身份/会话凭据或当前用户信息",
+    "evidence": "internal/api/handlers/auth.go + internal/store/postgres/refresh_rotation.go"
   },
   {
     "method": "POST",
@@ -2253,12 +2253,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 196,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "有效账号密码和active状态；无需既有JWT",
+    "resource": "当前账号或请求中受验证凭据绑定的账号",
+    "version": "新登录会话",
+    "audit": "登录会话状态，非required管理审计",
+    "content": "身份/会话凭据或当前用户信息",
+    "evidence": "internal/api/handlers/auth.go + internal/store/postgres/refresh_rotation.go"
   },
   {
     "method": "POST",
@@ -2276,12 +2276,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 203,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT员工（user/admin/super_admin）；Key拒绝",
+    "resource": "当前账号或请求中受验证凭据绑定的账号",
+    "version": "无客户端revision",
+    "audit": "旧平台路径；非统一companyTx，不能当作原子required audit",
+    "content": "身份/会话凭据或当前用户信息",
+    "evidence": "internal/api/handlers/auth.go + internal/store/postgres/refresh_rotation.go"
   },
   {
     "method": "POST",
@@ -2298,12 +2298,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 198,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "有效refresh cookie/token family；无需既有JWT",
+    "resource": "当前账号或请求中受验证凭据绑定的账号",
+    "version": "单次旋转/重放家族撤销",
+    "audit": "刷新事务，不是companyAudit管理事件",
+    "content": "身份/会话凭据或当前用户信息",
+    "evidence": "internal/api/handlers/auth.go + internal/store/postgres/refresh_rotation.go"
   },
   {
     "method": "POST",
@@ -2320,12 +2320,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 197,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "入口注册仍存在，但CompanyOnly在handler返回403；兼容模式按注册配置处理",
+    "resource": "当前账号或请求中受验证凭据绑定的账号",
+    "version": "公司模式不写入",
+    "audit": "公司模式拒绝，无激活写入",
+    "content": "身份/会话凭据或当前用户信息",
+    "evidence": "internal/api/handlers/auth.go + internal/store/postgres/refresh_rotation.go"
   },
   {
     "method": "POST",
@@ -2344,12 +2344,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 26,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "匿名+有效未消费邀请token，tenant由邀请绑定",
+    "resource": "邀请ID/哈希及其tenant/employee/mailbox",
+    "version": "单次消费+过期检查",
+    "audit": "激活事务记录与身份/邮箱创建",
+    "content": "激活结果，不返回邮件",
+    "evidence": "internal/api/handlers/company_setup.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "POST",
@@ -2371,12 +2371,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 98,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT当前tenant-admin；路由RequireAdmin与handler requireCompanyAdmin双重检查",
+    "resource": "当前tenant+domain zone ID；删除检查company primary/mailbox/receipt等资产引用",
+    "version": "创建/验证无请求CAS；删除持有资产保护锁",
+    "audit": "删除使用受保护事务与必要审计；创建/验证沿既有domain service审计，不冒称全部companyTx",
+    "content": "公司域名与DNS验证元数据，不授予员工邮箱内容权限",
+    "evidence": "internal/api/handlers/company_domains.go + internal/app/domains/service.go + internal/store/postgres/domain_delete.go"
   },
   {
     "method": "POST",
@@ -2398,12 +2398,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 100,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT当前tenant-admin；路由RequireAdmin与handler requireCompanyAdmin双重检查",
+    "resource": "当前tenant+domain zone ID；删除检查company primary/mailbox/receipt等资产引用",
+    "version": "创建/验证无请求CAS；删除持有资产保护锁",
+    "audit": "删除使用受保护事务与必要审计；创建/验证沿既有domain service审计，不冒称全部companyTx",
+    "content": "公司域名与DNS验证元数据，不授予员工邮箱内容权限",
+    "evidence": "internal/api/handlers/company_domains.go + internal/app/domains/service.go + internal/store/postgres/domain_delete.go"
   },
   {
     "method": "POST",
@@ -2423,12 +2423,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 78,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前draft owner与邮箱send资格（管理权不替代）",
+    "resource": "tenant+user+draftID+mailbox+附件归属",
+    "version": "create稳定UUID/墓碑；update/delete revision；submit expected_revision+Idempotency-Key",
+    "audit": "保存按既有workspace事务；submit消费/归档/账本/必要审计原子",
+    "content": "私人草稿/保存结果；submit为发送回执",
+    "evidence": "internal/api/handlers/company_drafts.go + internal/store/postgres/company_mail.go + internal/app/submissions/service.go"
   },
   {
     "method": "POST",
@@ -2448,12 +2448,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 80,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前draft owner与邮箱send资格（管理权不替代）",
+    "resource": "tenant+user+draftID+mailbox+附件归属",
+    "version": "create稳定UUID/墓碑；update/delete revision；submit expected_revision+Idempotency-Key",
+    "audit": "保存按既有workspace事务；submit消费/归档/账本/必要审计原子",
+    "content": "私人草稿/保存结果；submit为发送回执",
+    "evidence": "internal/api/handlers/company_drafts.go + internal/store/postgres/company_mail.go + internal/app/submissions/service.go"
   },
   {
     "method": "POST",
@@ -2473,12 +2473,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 39,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及成员层级、最后管理员约束",
+    "resource": "tenant+目标员工+有效接收人+actor-owned plan",
+    "version": "preview生成15分钟指纹计划；execute必须plan_id，重复返回receipt",
+    "audit": "preview/执行及转移/撤权同事务",
+    "content": "资产影响数量/处置回执，不含私人草稿正文",
+    "evidence": "internal/api/handlers/company_lifecycle.go + internal/store/postgres/employee_disposition.go；A04当前inactive目标拒绝"
   },
   {
     "method": "POST",
@@ -2498,12 +2498,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 38,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及成员层级、最后管理员约束",
+    "resource": "tenant+目标员工+有效接收人+actor-owned plan",
+    "version": "preview生成15分钟指纹计划；execute必须plan_id，重复返回receipt",
+    "audit": "preview/执行及转移/撤权同事务",
+    "content": "资产影响数量/处置回执，不含私人草稿正文",
+    "evidence": "internal/api/handlers/company_lifecycle.go + internal/store/postgres/employee_disposition.go；A04当前inactive目标拒绝"
   },
   {
     "method": "POST",
@@ -2524,12 +2524,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 30,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin",
+    "resource": "选定tenant+不可变资源ID；companyTx/companyReadTx重载主体",
+    "version": "有理由、最多100条当前failed工作",
+    "audit": "索引重排与审计/outbox同事务",
+    "content": "公司元数据",
+    "evidence": "internal/store/postgres/mail_content.go + internal/store/postgres/company_index_recovery_test.go"
   },
   {
     "method": "POST",
@@ -2549,12 +2549,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 36,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin",
+    "resource": "tenant+邀请ID/开通地址",
+    "version": "创建/撤销邀请，token单次使用",
+    "audit": "employee invitation与companyAudit同事务",
+    "content": "邀请元数据；创建返回activation_token且no-store",
+    "evidence": "internal/api/handlers/company_setup.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "POST",
@@ -2574,12 +2574,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 41,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及目标属主成员层级保护",
+    "resource": "tenant+mailboxID及目标owner/grant user",
+    "version": "创建无旧revision；handover/convert-shared/grant/send-policy均要求mailbox revision",
+    "audit": "邮箱管理写入与companyAudit同事务",
+    "content": "邮箱管理结果/授权快照",
+    "evidence": "internal/api/handlers/company_mailboxes.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "POST",
@@ -2599,12 +2599,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 74,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；上传需send，已提交附件需当前read，未提交按上传者规则",
+    "resource": "tenant+upload ID+mailbox+当前user；sent pin按存活内容条目",
+    "version": "reserve/put/finish，预算/大小/摘要；非客户端CAS",
+    "audit": "对象与DB非单事务，失败对象走恢复/回收",
+    "content": "附件上传结果或附件字节",
+    "evidence": "internal/store/postgres/company_mail.go + internal/app/companymail/service.go"
   },
   {
     "method": "POST",
@@ -2624,12 +2624,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 43,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及目标属主成员层级保护",
+    "resource": "tenant+mailboxID及目标owner/grant user",
+    "version": "创建无旧revision；handover/convert-shared/grant/send-policy均要求mailbox revision",
+    "audit": "邮箱管理写入与companyAudit同事务",
+    "content": "邮箱管理结果/授权快照",
+    "evidence": "internal/api/handlers/company_mailboxes.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "POST",
@@ -2649,12 +2649,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 42,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及目标属主成员层级保护",
+    "resource": "tenant+mailboxID及目标owner/grant user",
+    "version": "创建无旧revision；handover/convert-shared/grant/send-policy均要求mailbox revision",
+    "audit": "邮箱管理写入与companyAudit同事务",
+    "content": "邮箱管理结果/授权快照",
+    "evidence": "internal/api/handlers/company_mailboxes.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "POST",
@@ -2674,12 +2674,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 68,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone；seen/star只read，trash/archive/restore需read+organize",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "收件动作没有请求revision；restore仍清expires_at(A05)",
+    "audit": "message state、companyAudit与outbox同事务",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "POST",
@@ -2699,12 +2699,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 69,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read及zone；原信read+目标From可发送，模板限制仍生效",
+    "resource": "tenant+mailboxID+messageID/partID；内容缓存不能代替当前授权",
+    "version": "回复/转发预填，不直接发送",
+    "audit": "没有投递事务",
+    "content": "收件列表/正文/EML/附件/会话/索引元数据",
+    "evidence": "internal/store/postgres/company_mail.go + internal/store/postgres/company_message_read.go + internal/store/postgres/mail_content.go + internal/app/companymail"
   },
   {
     "method": "POST",
@@ -2724,12 +2724,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 63,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前mailbox read+zone+存活sent item；organize",
+    "resource": "tenant+mailboxID+assetID",
+    "version": "sent item revision CAS+期限条件",
+    "audit": "sent操作、审计、mailbox event同事务",
+    "content": "已发送资产列表或文件夹状态",
+    "evidence": "internal/store/postgres/sent_archive.go"
   },
   {
     "method": "POST",
@@ -2750,12 +2750,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 94,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效互动员工主体；选定tenant，Key不能走互动公司接口；路由super_admin且事务内fresh actor当前active/super_admin，普通回执可见不能授予例外能力",
+    "resource": "选定tenant+job ID",
+    "version": "reason裁剪后8–1000 UTF-8 bytes；job与完整ledger单事务锁定快照，busy/超50条返回409，不截断",
+    "audit": "InspectOutboundRecovery同事务required audit+outbox提交后才返回；授权/快照/审计/提交失败无inspection payload",
+    "content": "显式InspectionJob/Recipient安全投影；例外正文与结构化BCC、完整ledger派生status及精确headers allowlist；accepted仅next-hop，禁raw诊断/lease/claim/object key/SMTP-DKIM-API-JWT凭据",
+    "evidence": "internal/api/handlers/company_recovery.go:InspectOutbound → internal/app/recovery/outbound_inspection.go:InspectOutboundRecovery → internal/store/postgres/outbound_inspection.go + internal/company/outbound_inspection.go"
   },
   {
     "method": "POST",
@@ -2775,12 +2775,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 93,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；数据库recoveryActor当前super_admin",
+    "resource": "当前tenant下receipt固定目标或outbound job ID",
+    "version": "inspect理由；retry/reconcile观察updated_at+原件hash/收件人证据",
+    "audit": "inspect/retry/reconcile必需审计，失败回滚",
+    "content": "恢复元数据/核对结果；原件校验并非普通正文读取",
+    "evidence": "internal/api/handlers/company_recovery.go + internal/store/postgres/company_ops.go"
   },
   {
     "method": "POST",
@@ -2800,12 +2800,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 90,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；数据库recoveryActor当前super_admin",
+    "resource": "当前tenant下receipt固定目标或outbound job ID",
+    "version": "inspect理由；retry/reconcile观察updated_at+原件hash/收件人证据",
+    "audit": "inspect/retry/reconcile必需审计，失败回滚",
+    "content": "恢复元数据/核对结果；原件校验并非普通正文读取",
+    "evidence": "internal/api/handlers/company_recovery.go + internal/store/postgres/company_ops.go"
   },
   {
     "method": "POST",
@@ -2825,12 +2825,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 91,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；数据库recoveryActor当前super_admin",
+    "resource": "当前tenant下receipt固定目标或outbound job ID",
+    "version": "inspect理由；retry/reconcile观察updated_at+原件hash/收件人证据",
+    "audit": "inspect/retry/reconcile必需审计，失败回滚",
+    "content": "恢复元数据/核对结果；原件校验并非普通正文读取",
+    "evidence": "internal/api/handlers/company_recovery.go + internal/store/postgres/company_ops.go"
   },
   {
     "method": "POST",
@@ -2850,12 +2850,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 51,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "保存/发布/停用/撤销使用template revision；usage grant当前无请求revision",
+    "audit": "template变更与companyAudit同事务",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "POST",
@@ -2875,12 +2875,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 53,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；精确发送邮箱权+当前template usage及版本状态，非管理豁免",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "固定template_version_id+变量校验",
+    "audit": "预览无实际发送/入队",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "POST",
@@ -2900,12 +2900,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 54,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "保存/发布/停用/撤销使用template revision；usage grant当前无请求revision",
+    "audit": "template变更与companyAudit同事务",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "POST",
@@ -2925,12 +2925,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 55,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "保存/发布/停用/撤销使用template revision；usage grant当前无请求revision",
+    "audit": "template变更与companyAudit同事务",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "POST",
@@ -2950,12 +2950,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 57,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "保存/发布/停用/撤销使用template revision；usage grant当前无请求revision",
+    "audit": "template变更与companyAudit同事务",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "POST",
@@ -2973,12 +2973,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 231,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT员工（user/admin/super_admin）；Key拒绝；创建还检查can_create_api_keys和scope/zone",
+    "resource": "当前tenant+当前user owner；admin可管理tenant范围",
+    "version": "无请求CAS；按key ID核对归属",
+    "audit": "旧平台路径；非统一companyTx，不能当作原子required audit",
+    "content": "Key元数据；创建返回一次性原始Key",
+    "evidence": "internal/api/handlers/admin.go:UserCreateAPIKey/UserListAPIKeys/UserDeleteAPIKey"
   },
   {
     "method": "POST",
@@ -2999,12 +2999,12 @@
     ],
     "source": "internal/api/router.go",
     "line": 221,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT用户或有效API Key；Key还需记录中的scope；JWT不按Key scope限制；当前发送身份资格+可重试state，uncertain禁止",
+    "resource": "当前tenant+原job ID；receipt按submitter/key归属，content需当前原邮箱read和zone",
+    "version": "状态/token条件写入；无客户端revision",
+    "audit": "重试状态与授权由outbound命令控制，不能把capability当授权",
+    "content": "投递回执；旧接口ContentAllowed仍缺sent-item期限(A03)，body/BCC/诊断可能保留",
+    "evidence": "internal/api/handlers/outbound.go + internal/app/submissions/service.go"
   },
   {
     "method": "PUT",
@@ -3022,12 +3022,12 @@
     "conditions": [],
     "source": "internal/api/router.go",
     "line": 254,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT admin/super_admin；匿名401，员工/Key403",
+    "resource": "个人覆盖限定目标user同tenant；profile区分system/global/tenant",
+    "version": "旧全量覆盖写入口保注册，handler直接409协议升级；应改GET/PATCH permission-editor + expected_revision，不接受旧body写入",
+    "audit": "拒绝路径无持久写/版本/audit/outbox；不冒旧A01原缺陷仍在此handler执行",
+    "content": "409 API error；无权限写结果/用户内容",
+    "evidence": "internal/api/handlers/permissions.go:SetUserPermissionOverride"
   },
   {
     "method": "PUT",
@@ -3047,12 +3047,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 79,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前draft owner与邮箱send资格（管理权不替代）",
+    "resource": "tenant+user+draftID+mailbox+附件归属",
+    "version": "create稳定UUID/墓碑；update/delete revision；submit expected_revision+Idempotency-Key",
+    "audit": "保存按既有workspace事务；submit消费/归档/账本/必要审计原子",
+    "content": "私人草稿/保存结果；submit为发送回执",
+    "evidence": "internal/api/handlers/company_drafts.go + internal/store/postgres/company_mail.go + internal/app/submissions/service.go"
   },
   {
     "method": "PUT",
@@ -3072,12 +3072,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 45,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及目标属主成员层级保护",
+    "resource": "tenant+mailboxID及目标owner/grant user",
+    "version": "创建无旧revision；handover/convert-shared/grant/send-policy均要求mailbox revision",
+    "audit": "邮箱管理写入与companyAudit同事务",
+    "content": "邮箱管理结果/授权快照",
+    "evidence": "internal/api/handlers/company_mailboxes.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "PUT",
@@ -3098,12 +3098,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 49,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin及目标属主成员层级保护",
+    "resource": "tenant+mailboxID及目标owner/grant user",
+    "version": "创建无旧revision；handover/convert-shared/grant/send-policy均要求mailbox revision",
+    "audit": "邮箱管理写入与companyAudit同事务",
+    "content": "邮箱管理结果/授权快照",
+    "evidence": "internal/api/handlers/company_mailboxes.go + internal/store/postgres/company_members.go"
   },
   {
     "method": "PUT",
@@ -3123,12 +3123,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 34,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin",
+    "resource": "当前tenant公司配置与verified主域名",
+    "version": "company settings revision CAS",
+    "audit": "company.configure与配置同事务",
+    "content": "公司元数据",
+    "evidence": "internal/api/handlers/company_setup.go + internal/store/postgres/company_members.go:ConfigureCompany"
   },
   {
     "method": "PUT",
@@ -3148,12 +3148,12 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 52,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "保存/发布/停用/撤销使用template revision；usage grant当前无请求revision",
+    "audit": "template变更与companyAudit同事务",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   },
   {
     "method": "PUT",
@@ -3173,11 +3173,11 @@
     ],
     "source": "internal/api/handlers/company_routes.go",
     "line": 59,
-    "authority": "",
-    "resource": "",
-    "version": "",
-    "audit": "",
-    "content": "",
-    "evidence": ""
+    "authority": "JWT有效员工主体；选定tenant，Key不能走互动公司接口；当前tenant-admin管理权",
+    "resource": "tenant+template/version/mailbox/user ID",
+    "version": "usage grant当前无请求revision（P5治理收口）",
+    "audit": "template变更与companyAudit同事务",
+    "content": "模板草稿/已发布快照/授权元数据",
+    "evidence": "internal/api/handlers/company_templates.go + internal/store/postgres/company_templates.go"
   }
 ]

@@ -9716,7 +9716,7 @@
     }
   ],
   "source_closure": {
-    "docs/company-mail/evidence/R5-API-MATRIX.json": "99a9d7277cdd7bc8f6ac56668410dd6d25c67897b56939c89ccc90daec245404",
+    "docs/company-mail/evidence/R5-API-MATRIX.json": "56cc04e6c7727346345853c7fb079eaac408e75164ea630372ad2c0f61d5fbdc",
     "internal/api/handlers/company_routes.go": "11df2fde1266f1ea46e4de3789fd4f7b2985939173644ff1c60b4aeb932ca6a8",
     "internal/api/handlers/r5_protocol_component_observations_test.go": "b47248460d33055d70867d568f960b6880adff22b4ff4a4e4df273a7ae344770",
     "internal/api/http_contract_test.go": "a5127099c5d4c25ee72232e7446f40cd7a93fd1be772935164af5963c471950c",
@@ -9775,5 +9775,6 @@
     "web/lib/legacy-outbound.ts": "4238af8ff874dd7dbd8a5104f161ceedb0d2d6275656ede4b0b80f3b72e7a934",
     "web/lib/types.ts": "09e7a9c57cc2bc27197e37f7fba57c3fbdb3424afb3cf5e606b6355802ea2c34"
   },
-  "historical_wire": "R5-COMPATIBILITY-GATES.json retained unchanged; historical wire spec/case mismatch is not reattested"
+  "historical_wire": "R5-COMPATIBILITY-GATES.json retained unchanged; historical wire spec/case mismatch is not reattested",
+  "boundary_annotations": "Preserve exact existing six manual boundary fields by method/path; fresh AST facts are source-only and do not renew runtime review."
 }
