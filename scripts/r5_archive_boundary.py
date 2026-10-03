@@ -175,7 +175,7 @@ def check(root):
         raw = read(root, p)
         if raw != ('module '+item['module']+'\n\ngo 1.25.7\n').encode() or hashlib.sha256(raw).hexdigest() != item['sha256']:
             raise ValueError('archive marker bytes differ')
-    replacements = inventory._module_binding(root)
+    replacements = inventory._module_binding(root, _reader=read)
     roots = contract['production_roots'] + [r['path'] for r in replacements]
     def owned(p):
         return any(p.startswith(prefix+'/') for prefix in roots)

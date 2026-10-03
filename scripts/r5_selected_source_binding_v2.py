@@ -82,7 +82,7 @@ def variant_patterns(static):
 
 def variant_argv(context,static):
     argv=selection_argv(context,variant_patterns(static))
-    return [a for a in argv if a not in ('-deps','-test')] + ['-e']
+    return [argv[0], '-e', *[a for a in argv[1:] if a not in ('-deps','-test')]]
 
 
 def compare_variants(rows,root,static):

@@ -288,7 +288,7 @@ def _local_imports(text):
     return imports
 
 
-def _check_go_inputs(root, names, *, replacements=None):
+def _check_go_inputs(root, names, *, replacements=None, _reader=None):
     embeds = {}
     admitted = (REPLACEMENT,) if replacements is None else replacements
     module_files = {item['path'] + '/go.mod' for item in admitted}
@@ -297,7 +297,7 @@ def _check_go_inputs(root, names, *, replacements=None):
             raise ValueError('unknown nested module: ' + name)
         if not name.endswith('.go'):
             continue
-        text = (root / name).read_text()
+        text = (root / name).read_text() if _reader is None else _reader(root,name).decode()
         if re.search(r'(?m)^\s*//go:(?:linkname|cgo_)|^\s*#cgo', text):
             raise ValueError('unbound native/linker input: ' + name)
         # Only local module imports affect this local-source closure. External
@@ -387,9 +387,9 @@ def _capture_legacy_v2(root, *, purpose, policy, build_context):
             **payload}
 
 
-def _module_document(root, name):
+def _module_document(root, name, *, _reader=None):
     """Bounded static Go-module grammar, not an effective MVS resolver."""
-    text = checked_path(root, name).read_text()
+    text = checked_path(root, name).read_text() if _reader is None else _reader(root,name).decode()
     if '/*' in text or '*/' in text:
         raise ValueError('unsupported module comment grammar: ' + name)
     result = {'module': None, 'go': None, 'toolchain': None, 'requires': {}, 'replace_lines': []}
@@ -435,19 +435,19 @@ def _module_document(root, name):
     return result
 
 
-def _module_binding(root, *, policy=CURRENT_POLICY):
+def _module_binding(root, *, policy=CURRENT_POLICY, _reader=None):
     if policy == POLICY:
         return _legacy_module_binding_v2(root)
     if policy != CURRENT_POLICY:
         raise ValueError('unknown module binding policy; no inferred upgrade')
-    main = _module_document(root, 'go.mod')
+    main = _module_document(root, 'go.mod', _reader=_reader)
     expected = {'replace '+item['module']+' '+item['version']+' => ./'+item['path'] for item in CURRENT_REPLACEMENTS}
     if main['module'] != 'tabmail' or len(main['replace_lines']) != 2 or set(main['replace_lines']) != expected:
         raise ValueError('v3 requires exactly the two pinned version/path replacements; no third or dynamic replace')
     for item in CURRENT_REPLACEMENTS:
         if main['requires'].get(item['module']) != item['version']:
             raise ValueError('root required local module version differs from exact replacement')
-        nested = _module_document(root, item['path']+'/go.mod')
+        nested = _module_document(root, item['path']+'/go.mod', _reader=_reader)
         if nested['module'] != item['module'] or nested['replace_lines']:
             raise ValueError('local module identity or nested replacement differs')
         for known in CURRENT_REPLACEMENTS:
@@ -477,9 +477,9 @@ def _current_source_paths(root, purpose, replacements):
     return names
 
 
-def _upstream_file_inventory(root, replacement, names):
+def _upstream_file_inventory(root, replacement, names, *, _reader=None):
     path = replacement['path']+'/UPSTREAM-MANIFEST.json'
-    manifest = strict_json(checked_path(root, path).read_bytes())
+    manifest = strict_json(checked_path(root, path).read_bytes() if _reader is None else _reader(root,path))
     if type(manifest) is not dict or manifest.get('module') != replacement['module'] or manifest.get('version') != replacement['version']:
         raise ValueError('local upstream manifest module/version differs')
     field = 'files' if replacement['module'] == REPLACEMENT['module'] else 'files_sha256'
@@ -504,7 +504,7 @@ def _upstream_file_inventory(root, replacement, names):
     return sorted(entries)
 
 
-def _capture_smtp_owner_v3(root, *, purpose, policy, build_context, _context_purpose=None):
+def _capture_smtp_owner_v3(root, *, purpose, policy, build_context, _context_purpose=None, _reader=None):
     if policy != CURRENT_POLICY or purpose not in FIXED:
         raise ValueError('explicit v3 policy/purpose required; no legacy fallback')
     root = Path(root).absolute()
@@ -514,35 +514,35 @@ def _capture_smtp_owner_v3(root, *, purpose, policy, build_context, _context_pur
     validate_context(build_context, purpose if _context_purpose is None else _context_purpose)
     if any(root.glob('go.work*')) or (root/'vendor').exists() or (root/'vendor').is_symlink():
         raise ValueError('workspace/vendor replacement selection is not admitted')
-    replacements = _module_binding(root, policy=policy)
+    replacements = _module_binding(root, policy=policy, _reader=_reader)
     names = _current_source_paths(root, purpose, replacements)
-    upstream = {item['module']:_upstream_file_inventory(root, item, names) for item in replacements}
+    upstream = {item['module']:_upstream_file_inventory(root, item, names, _reader=_reader) for item in replacements}
     if purpose == 'protocol':
-        cases = strict_json(checked_path(root, 'docs/company-mail/evidence/R5-PROTOCOL-CASES.json').read_bytes())
+        cases = strict_json(checked_path(root, 'docs/company-mail/evidence/R5-PROTOCOL-CASES.json').read_bytes() if _reader is None else _reader(root,'docs/company-mail/evidence/R5-PROTOCOL-CASES.json'))
         for row in cases.get('cases', []):
             for adapter in row.get('reference_adapters', []) + row.get('shared_adapters', []):
                 for field in ('source', 'component_source'):
                     if adapter.get(field) and adapter[field] not in names:
                         raise ValueError('protocol adapter outside declared local inventory')
-    files = {name:hashlib.sha256(checked_path(root, name).read_bytes()).hexdigest() for name in sorted(names)}
+    files = {name:hashlib.sha256(checked_path(root, name).read_bytes() if _reader is None else _reader(root,name)).hexdigest() for name in sorted(names)}
     if files['scripts/r5_source_inventory.py'] != _IMPLEMENTATION_SHA256:
         raise ValueError('v3 inventory implementation differs from snapshot helper bytes')
-    documents = {'go.mod':_module_document(root, 'go.mod')}
+    documents = {'go.mod':_module_document(root, 'go.mod', _reader=_reader)}
     local_modules = []
     for item in replacements:
-        name = item['path']+'/go.mod';documents[name] = _module_document(root, name)
+        name = item['path']+'/go.mod';documents[name] = _module_document(root, name, _reader=_reader)
         local_modules.append({**item, 'declared_go':documents[name]['go'], 'declared_toolchain':documents[name]['toolchain'],
                               'declared_requires':documents[name]['requires'], 'go_mod_sha256':files[name],
                               'go_sum_sha256':files[item['path']+'/go.sum'],
                               'metadata_sha256':{member:files[item['path']+'/'+member] for member in MODULE_METADATA[item['module']]},
                               'upstream_file_inventory':upstream[item['module']]})
     # Detect changed topology or module declarations while taking the snapshot.
-    if replacements != _module_binding(root, policy=policy) or names != _current_source_paths(root, purpose, replacements):
+    if replacements != _module_binding(root, policy=policy, _reader=_reader) or names != _current_source_paths(root, purpose, replacements):
         raise ValueError('local module/source inventory changed during capture')
     metadata_names = {'go.mod','go.sum','scripts/r5_source_inventory.py'}
     for item in replacements:
         metadata_names.update(item['path']+'/'+name for name in ('go.mod','go.sum',*MODULE_METADATA[item['module']]))
-    if any(hashlib.sha256(checked_path(root, name).read_bytes()).hexdigest() != files[name] for name in metadata_names):
+    if any(hashlib.sha256(checked_path(root, name).read_bytes() if _reader is None else _reader(root,name)).hexdigest() != files[name] for name in metadata_names):
         raise ValueError('module or provenance bytes changed during capture')
     resolution = {'main_module':'tabmail', 'root_go_mod_sha256':files['go.mod'], 'root_go_sum_sha256':files['go.sum'],
                   'declared_go':documents['go.mod']['go'], 'declared_toolchain':documents['go.mod']['toolchain'],
@@ -558,7 +558,7 @@ def _capture_smtp_owner_v3(root, *, purpose, policy, build_context, _context_pur
                   'boundary':'Declared root/local module metadata and complete local input superset only; actual root MVS/go-list/build/external-cache qualification is separate'}
     payload = {'policy':policy, 'purpose':purpose, 'build_context':build_context, 'replacements':replacements,
                'module_resolution':resolution, 'inventory_implementation_sha256':_IMPLEMENTATION_SHA256, 'boundary':CURRENT_BOUNDARY, 'excluded_directories':sorted(EXCLUDED_DIRS),
-               'embed_inputs':_check_go_inputs(root, names, replacements=replacements), 'files':files}
+               'embed_inputs':_check_go_inputs(root, names, replacements=replacements, _reader=_reader), 'files':files}
     wire = canonical(payload)
     return {'schema_version':CURRENT_SCHEMA_VERSION, 'snapshot_root':str(root), 'source_identity_kind':CURRENT_KIND,
             'source_sha':hashlib.sha1(wire).hexdigest(), 'source_closure_sha256':hashlib.sha256(wire).hexdigest(), **payload}
@@ -573,7 +573,7 @@ def _capture_archive_v4(root, *, purpose, policy, build_context):
     # Retain v3's exact two-fork grammar/full-tree inputs; do not relax its
     # historical module admission. Archive static inputs are a separate domain.
     validate_context(build_context, purpose)
-    base = _capture_smtp_owner_v3(root, purpose='protocol' if purpose == 'selected' else purpose, policy=CURRENT_POLICY, build_context=build_context, _context_purpose=purpose)
+    base = _capture_smtp_owner_v3(root, purpose='protocol' if purpose == 'selected' else purpose, policy=CURRENT_POLICY, build_context=build_context, _context_purpose=purpose, _reader=boundary.read)
     base['build_context'] = build_context
     base['purpose'] = purpose
     names = set(base['files']) | {boundary.REGISTRY, 'scripts/r5_archive_boundary.py',
