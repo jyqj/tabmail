@@ -1,5 +1,6 @@
 """Independent negative fixtures plus fresh actual root metadata; never Go tests."""
 import copy
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -57,7 +58,7 @@ class SelectedNegativeTests(unittest.TestCase):
 
     def test_generated_and_external_are_not_local_read_capabilities(self):
         row=dict(Dir=str(self.root/'cmd'),Name='main',ImportPath='tabmail/cmd.test',Module=self.module,GoFiles=['/tmp/cache/aa/hash-d'])
-        local,generated,external,native=self.classify(row)
+        local,generated,external,native,toolchain=self.classify(row)
         self.assertEqual(local,{})
         self.assertEqual(generated[0]['qualification'],'unknown')
         row['GoFiles']=['/etc/passwd']
@@ -69,6 +70,10 @@ class SelectedNegativeTests(unittest.TestCase):
         with self.assertRaises(ValueError):binding.stream(b'{"Path":"a","Path":"b"}')
         row=copy.deepcopy(self.row);row['CompiledGoFiles']=['arbitrary.go']
         with self.assertRaises(ValueError):self.classify(row)
+
+    def test_nested_module_in_excluded_static_output_is_rejected(self):
+        path=self.root/'cmd/build';path.mkdir();(path/'go.mod').write_text('module hidden\ngo 1.25.7\n')
+        with self.assertRaisesRegex(ValueError,'nested'):binding.topology(self.root)
 
     def test_source_hash_drift_detected(self):
         first=binding.digest(self.root,{'cmd/main.go'})
@@ -90,7 +95,7 @@ class ActualRootBindingTests(unittest.TestCase):
         self.assertEqual({p:info['sha256'] for p,info in local.items()},binding.digest(ROOT,local))
         self.assertTrue(any(p.startswith('third_party/go-smtp/') for p in local))
         self.assertTrue(any(p.startswith('third_party/enmime-v2.3.0/') for p in local))
-        self.assertTrue(receipt['generated_testmain']);self.assertTrue(receipt['external_inputs'])
+        self.assertTrue(receipt['generated_testmain']);self.assertTrue(receipt['external_modulecache_inputs'])
 
     def test_real_receipt_roundtrip(self):
         self.assertEqual(binding.validate(self.receipt,ROOT,GO,cache=CACHE,modulecache=MODULECACHE),self.receipt)
@@ -108,6 +113,8 @@ class ActualRootBindingTests(unittest.TestCase):
             if change=='flags':value['environment']['GOFLAGS']='-buildvcs=false'
             if change=='abi':value['go_env']['GOAMD64']='v3'
             if change=='legacy':value['policy']=binding.inventory.CURRENT_POLICY
+            payload={k:v for k,v in value.items() if k!='attestation_sha256'}
+            value['attestation_sha256']=hashlib.sha256(json.dumps(payload,sort_keys=True,separators=(',',':')).encode()).hexdigest()
             cases.append((change,value))
         with mock.patch.object(binding,'capture',return_value=observed):
             for change,value in cases:

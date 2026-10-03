@@ -54,7 +54,14 @@ def digest(root, names):
     for name in sorted(names):
         path = inventory.checked_path(root, name)
         # O_NOFOLLOW also rejects a leaf switched after the path check.
-        fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        parent = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            for component in Path(name).parts[:-1]:
+                child = os.open(component, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=parent)
+                os.close(parent); parent = child
+            fd = os.open(Path(name).name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=parent)
+        finally:
+            os.close(parent)
         try:
             before = os.fstat(fd)
             if not stat.S_ISREG(before.st_mode):
@@ -74,6 +81,10 @@ def topology(root):
     allowed_modules = {'go.mod', *(r['path']+'/go.mod' for r in inventory.CURRENT_REPLACEMENTS)}
     go = set()
     for current, dirs, files in os.walk(root, followlinks=False):
+        relative = Path(current).relative_to(root).parts
+        for item in dirs:
+            if item in inventory.EXCLUDED_DIRS and relative and relative[0] in {'cmd','internal','scripts','docs'}:
+                inventory._check_excluded_metadata(root, Path(current)/item, [0])
         dirs[:] = sorted(d for d in dirs if d not in inventory.EXCLUDED_DIRS)
         for item in dirs + files:
             path = Path(current)/item
@@ -111,7 +122,7 @@ def normalize_mvs(rows, root):
 
 
 def classify(rows, root, authorized, envinfo, mvs):
-    local = {}; generated = []; external = []; native = []
+    local = {}; generated = []; external = []; native = []; toolchain = []
     modules = {r['Path']:r for r in mvs}
     for row in rows:
         if row.get('Error') or row.get('DepsErrors'):
@@ -152,19 +163,24 @@ def classify(rows, root, authorized, envinfo, mvs):
                 elif generated_main:
                     if field!='GoFiles' or not Path(name).is_absolute() or not path.is_relative_to(Path(envinfo['GOCACHE'])) or not path.name.endswith('-d'):
                         raise ValueError('invalid generated testmain path')
-                    generated.append(dict(package=row['ImportPath'],field=field,classification='generated_testmain',qualification='unknown'))
+                    generated.append(dict(package=row['ImportPath'],field=field,path=path.relative_to(Path(envinfo['GOCACHE'])).as_posix(),classification='generated_testmain',qualification='unknown'))
                 elif row.get('Standard'):
                     if not path.is_relative_to(Path(envinfo['GOROOT'])/'src'):
                         raise ValueError('false standard path')
-                    external.append(dict(package=row['ImportPath'],field=field,path=path.relative_to(Path(envinfo['GOROOT'])).as_posix(),classification='toolchain_source',qualification='unknown'))
+                    entry = dict(package=row['ImportPath'],field=field,path=path.relative_to(Path(envinfo['GOROOT'])).as_posix(),classification='toolchain_source',qualification='unknown')
+                    (native if field in NATIVE_FIELDS else toolchain).append(entry)
                 else:
                     module = row.get('Module',{}); bound = modules.get(module.get('Path'))
                     if not bound or 'Replace' in bound or module.get('Version')!=bound.get('Version') or not path.is_relative_to(Path(envinfo['GOMODCACHE'])):
                         raise ValueError('unclassified external input')
-                    external.append(dict(package=row['ImportPath'],field=field,module=module['Path'],version=module['Version'],path=path.relative_to(Path(envinfo['GOMODCACHE'])).as_posix(),classification='external_modulecache',qualification='unknown'))
+                    module_dir = Path(module.get('Dir',''))
+                    if not module_dir.is_absolute() or not module_dir.is_relative_to(Path(envinfo['GOMODCACHE'])) or not path.is_relative_to(module_dir):
+                        raise ValueError('false external module directory')
+                    entry = dict(package=row['ImportPath'],field=field,module=module['Path'],version=module['Version'],path=path.relative_to(Path(envinfo['GOMODCACHE'])).as_posix(),classification='external_modulecache',qualification='unknown')
+                    (native if field in NATIVE_FIELDS else external).append(entry)
         if row.get('CompiledGoFiles'):
             raise ValueError('unexpected compiled input metadata')
-    return {p:sorted(fields) for p,fields in sorted(local.items())}, generated, external, native
+    return {p:sorted(fields) for p,fields in sorted(local.items())}, generated, external, native, toolchain
 
 
 def capture(root, go, *, cache, modulecache):
@@ -198,12 +214,15 @@ def capture(root, go, *, cache, modulecache):
     envinfo['GOGCCFLAGS'] = re.sub(r'/tmp/go-build[0-9]+=', '/tmp/go-build<TEMP>=', envinfo['GOGCCFLAGS'])
     commands[-1]['stdout_sha256'] = hashlib.sha256(inventory.canonical(envinfo)).hexdigest()
     commands[-1]['stdout_hash_domain'] = 'canonical_go_env_with_only_GOGCCFLAGS_temp_prefix_normalized'
-    required = dict(GOVERSION='go1.25.7', GOOS='linux',GOARCH='amd64',CGO_ENABLED='1',GOWORK='off',GOENV='',GOFLAGS='',GOEXPERIMENT='',GOAMD64='v1',GOTOOLCHAIN='local')
+    required = dict(GOVERSION='go1.25.7', GOOS='linux',GOARCH='amd64',GOHOSTOS='linux',GOHOSTARCH='amd64',CGO_ENABLED='1',GOWORK='off',GOENV='',GOFLAGS='',GOEXPERIMENT='',GOAMD64='v1',GOTOOLCHAIN='local')
     if any(envinfo.get(k)!=v for k,v in required.items()):
         raise ValueError('wrong Go version/flags/ABI')
     mvs = normalize_mvs(stream(run(MVS_ARGV)),root)
     rows = stream(run(ARGV))
-    local, generated, external, native = classify(rows,root,authorized,envinfo,mvs)
+    local, generated, external, native, toolchain = classify(rows,root,authorized,envinfo,mvs)
+    admitted_embeds = {path for paths in base['embed_inputs'].values() for path in paths}
+    if any(set(fields) & set(FIELDS[4:7]) and path not in admitted_embeds for path,fields in local.items()):
+        raise ValueError('selected embed outside declared static directives')
     fresh = digest(root,local)
     after = inventory.capture_current_source(root,purpose='protocol',policy=inventory.CURRENT_POLICY,build_context=CONTEXT)
     if base!=after or before_go!=topology(root) or before!=digest(root,authorized) or any(before[p]!=h for p,h in fresh.items()):
@@ -215,14 +234,14 @@ def capture(root, go, *, cache, modulecache):
     payload = dict(schema_version=1,policy=POLICY,incompatible_with='Historical v2/v3 receipts are not selected-input attestations',
                    base_source=base, environment=env,go_env=envinfo,commands=commands,root_mvs=mvs,
                    selected_local={p:dict(sha256=fresh[p],fields=fields) for p,fields in local.items()},
-                   generated_testmain=generated,external_inputs=external,native_inputs=native,
-                   package_records=len(rows), qualification=dict(local_static_binding='captured',generated='unknown',external_modulecache='unknown',compiler_native='unknown',Method19='unknown',SML='unknown',wholeCI='unknown'),
+                   generated_testmain=generated,external_modulecache_inputs=external,native_inputs=native,toolchain_source_inputs=toolchain,
+                   package_records=len(rows), qualification=dict(overall='blocked',excluded_metadata_boundary='blocked_pending_separate_helper_race_fix',local_static_binding='captured',generated='unknown',external_modulecache='unknown',compiler_native='unknown',Method19='unknown',SML='unknown',wholeCI='unknown'),
                    boundary='Metadata/static local bytes only; no product tests, cold build or runtime qualification')
     return dict(payload,attestation_sha256=hashlib.sha256(inventory.canonical(payload)).hexdigest())
 
 
 def validate(receipt, root, go, *, cache, modulecache):
-    if type(receipt) is not dict or receipt.get('policy')!=POLICY or receipt.get('schema_version')!=1:
+    if type(receipt) is not dict or receipt.get('policy')!=POLICY or type(receipt.get('schema_version')) is not int or receipt.get('schema_version')!=1:
         raise ValueError('explicit incompatible selected attestation required')
     observed = capture(root,go,cache=cache,modulecache=modulecache)
     def identity(value):
