@@ -1,0 +1,299 @@
+package api_test
+
+// Shipping Router.ServeHTTP with synthetic stores and explicit barriers. These
+// tests do not attest TCP, Postgres, main's shutdown ordering, or SMTP delivery.
+import (
+	"context"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"sync"
+	"sync/atomic"
+	"testing"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/rs/zerolog"
+	"golang.org/x/crypto/bcrypt"
+	"tabmail/internal/api"
+	"tabmail/internal/api/middleware"
+	"tabmail/internal/authn"
+	"tabmail/internal/models"
+	"tabmail/internal/testutil"
+)
+
+type r5CloudBackgroundStore struct {
+	*testutil.FakeStore
+	tenant                *models.Tenant
+	key                   uuid.UUID
+	mode                  string
+	entered               chan context.Context
+	requestGate, taskGate chan struct{}
+	touched               chan context.Context
+	resolves              atomic.Int32
+	users                 atomic.Int32
+	loginReads            atomic.Int32
+	identityGate          chan struct{}
+	identityOnce          sync.Once
+}
+
+func (s *r5CloudBackgroundStore) ResolveAPIKey(ctx context.Context, _ string) (*models.Tenant, *uuid.UUID, []string, []uuid.UUID, *uuid.UUID, error) {
+	s.resolves.Add(1)
+	if s.mode == "key" {
+		s.entered <- ctx
+		<-s.requestGate
+	}
+	return s.tenant, &s.key, []string{"*"}, nil, nil, nil
+}
+func (s *r5CloudBackgroundStore) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+	s.loginReads.Add(1)
+	if s.mode == "login" {
+		s.entered <- ctx
+		<-s.requestGate
+	}
+	return s.FakeStore.GetUserByEmail(ctx, email)
+}
+func (s *r5CloudBackgroundStore) GetUser(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	if s.users.Add(1) == 1 && s.mode == "sse" {
+		s.entered <- ctx
+		<-s.identityGate
+	}
+	return s.FakeStore.GetUser(ctx, id)
+}
+func (s *r5CloudBackgroundStore) releaseIdentity() {
+	s.identityOnce.Do(func() { close(s.identityGate) })
+}
+func (s *r5CloudBackgroundStore) TouchAPIKey(ctx context.Context, _ uuid.UUID, _ string) error {
+	s.touched <- ctx
+	<-s.taskGate
+	return nil
+}
+func (s *r5CloudBackgroundStore) TouchUserLogin(ctx context.Context, _ uuid.UUID) error {
+	s.touched <- ctx
+	<-s.taskGate
+	return nil
+}
+func (s *r5CloudBackgroundStore) ListMonitorEvents(ctx context.Context, _ models.Page, _, _, _ string) ([]*models.MonitorEvent, int, error) {
+	s.entered <- ctx
+	<-s.requestGate
+	return nil, 0, nil
+}
+
+func r5CloudBackgroundFixture(t *testing.T, mode string) (*api.Router, *r5CloudBackgroundStore, func(), func()) {
+	t.Helper()
+	s := &r5CloudBackgroundStore{FakeStore: testutil.NewFakeStore(), tenant: &models.Tenant{ID: uuid.New(), Name: "synthetic"}, key: uuid.New(), mode: mode, entered: make(chan context.Context, 4), touched: make(chan context.Context, 4), requestGate: make(chan struct{}), taskGate: make(chan struct{}), identityGate: make(chan struct{})}
+	s.SeedTenant(s.tenant)
+	var requestOnce, taskOnce sync.Once
+	releaseRequest := func() { requestOnce.Do(func() { close(s.requestGate) }) }
+	releaseTask := func() { taskOnce.Do(func() { close(s.taskGate) }) }
+	t.Cleanup(releaseRequest)
+	t.Cleanup(releaseTask)
+	r := api.NewRouter(api.RouterConfig{Store: s, PublicTenantID: s.tenant.ID.String(), JWTSecret: "r5-cloud-synthetic", RateLimiter: middleware.NewRateLimiter(nil, s, 0, nil), Logger: zerolog.Nop()})
+	t.Cleanup(func() {
+		s.releaseIdentity()
+		releaseRequest()
+		releaseTask()
+		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+		defer cancel()
+		if err := r.StopContext(ctx); err != nil {
+			t.Errorf("fixture join: %v", err)
+		}
+	})
+	return r, s, releaseRequest, releaseTask
+}
+func r5CloudBackgroundContext(t *testing.T, ch <-chan context.Context) context.Context {
+	t.Helper()
+	select {
+	case ctx := <-ch:
+		return ctx
+	case <-time.After(3 * time.Second):
+		t.Fatal("missing context barrier")
+		return nil
+	}
+}
+func r5CloudBackgroundWait(t *testing.T, ch <-chan struct{}) {
+	t.Helper()
+	select {
+	case <-ch:
+	case <-time.After(3 * time.Second):
+		t.Fatal("missing completion barrier")
+	}
+}
+func r5CloudBackgroundNotDone(t *testing.T, r *api.Router) {
+	t.Helper()
+	select {
+	case <-r.Done():
+		t.Fatal("live request/task falsely drained")
+	default:
+	}
+}
+func r5CloudBackgroundExpired(t *testing.T, r *api.Router) context.Context {
+	t.Helper()
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-time.Second))
+	t.Cleanup(cancel)
+	if err := r.StopContext(ctx); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("expired stop: %v", err)
+	}
+	r5CloudBackgroundNotDone(t, r)
+	return ctx
+}
+
+func TestR5CloudBackgroundHTTPAdmittedLateChild(t *testing.T) {
+	for _, mode := range []string{"key", "login"} {
+		t.Run(mode, func(t *testing.T) {
+			r, st, releaseRequest, releaseTask := r5CloudBackgroundFixture(t, mode)
+			requestCtx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			req := httptest.NewRequest("GET", "/api/v1/auth/me", nil).WithContext(requestCtx)
+			want := http.StatusForbidden
+			if mode == "key" {
+				req.Header.Set("X-API-Key", "synthetic")
+			} else {
+				hash, err := bcrypt.GenerateFromPassword([]byte("synthetic-password"), bcrypt.MinCost)
+				if err != nil {
+					t.Fatal(err)
+				}
+				user := &models.User{ID: uuid.New(), TenantID: st.tenant.ID, Email: "cloud@example.test", PasswordHash: string(hash), Role: models.RoleUser, IsActive: true}
+				if err := st.CreateUser(context.Background(), user); err != nil {
+					t.Fatal(err)
+				}
+				req = httptest.NewRequest("POST", "/api/v1/auth/login", strings.NewReader(`{"email":"cloud@example.test","password":"synthetic-password"}`)).WithContext(requestCtx)
+				want = http.StatusOK
+			}
+			w := httptest.NewRecorder()
+			returned := make(chan struct{})
+			go func() { defer close(returned); r.ServeHTTP(w, req) }()
+			oldLease := r5CloudBackgroundContext(t, st.entered)
+			stop := r5CloudBackgroundExpired(t, r)
+			// The admitted handler has not reached Go yet. Closing admission must
+			// reject new HTTP requests without revoking this request's late child.
+			for _, path := range []string{"/health", "/ready", "/api/v1/auth/me", "/api/v1/auth/login", "/api/v1/admin/monitor/events"} {
+				denied := httptest.NewRecorder()
+				fresh := httptest.NewRequest("GET", path, nil)
+				fresh.Header.Set("X-API-Key", "synthetic")
+				r.ServeHTTP(denied, fresh)
+				if denied.Code != http.StatusServiceUnavailable || !strings.Contains(denied.Body.String(), `"UNAVAILABLE"`) {
+					t.Fatalf("closed %s: %d %s", path, denied.Code, denied.Body.String())
+				}
+			}
+			if mode == "key" && st.resolves.Load() != 1 || mode == "login" && (st.resolves.Load() != 0 || st.loginReads.Load() != 1) {
+				t.Fatal("closed admission reached identity store")
+			}
+			releaseRequest()
+			taskCtx := r5CloudBackgroundContext(t, st.touched)
+			r5CloudBackgroundWait(t, returned)
+			if w.Code != want {
+				t.Fatalf("admitted %s: %d %s", mode, w.Code, w.Body.String())
+			}
+			cancel()
+			if taskCtx.Err() != nil {
+				t.Fatalf("detached task inherited request cancellation: %v", taskCtx.Err())
+			}
+			r5CloudBackgroundNotDone(t, r)
+			// This exact same router rejects its own released nested request lease.
+			stale := httptest.NewRecorder()
+			r.ServeHTTP(stale, httptest.NewRequest("GET", "/health", nil).WithContext(oldLease))
+			if stale.Code != http.StatusServiceUnavailable {
+				t.Fatalf("released lease accepted: %d", stale.Code)
+			}
+			releaseTask()
+			r5CloudBackgroundWait(t, r.Done())
+			if err := r.StopContext(stop); !errors.Is(err, context.DeadlineExceeded) {
+				t.Fatalf("late drain erased expired deadline: %v", err)
+			}
+		})
+	}
+}
+
+// The real monitor handler exposes the request returned by its configured
+// RevalidateRequest at the journal read. Blocking Flush holds the enclosing SSE
+// lease after that read, without waiting for the five-second polling interval.
+type r5CloudBackgroundWriter struct {
+	*httptest.ResponseRecorder
+	flushed, gate chan struct{}
+	once          sync.Once
+}
+
+func (w *r5CloudBackgroundWriter) Flush() {
+	w.ResponseRecorder.Flush()
+	w.once.Do(func() { close(w.flushed); <-w.gate })
+}
+
+func TestR5CloudBackgroundHTTPSSERevalidationLease(t *testing.T) {
+	r, st, releaseRead, _ := r5CloudBackgroundFixture(t, "sse")
+	user := &models.User{ID: uuid.New(), TenantID: st.tenant.ID, Email: "stream@example.test", Role: models.RoleSuperAdmin, IsActive: true}
+	if err := st.CreateUser(context.Background(), user); err != nil {
+		t.Fatal(err)
+	}
+	token, err := authn.IssueAccessToken("r5-cloud-synthetic", user)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	req := httptest.NewRequest("GET", "/api/v1/admin/monitor/events", nil).WithContext(ctx)
+	req.Header.Set("Authorization", "Bearer "+token)
+	gate := make(chan struct{})
+	var once sync.Once
+	releaseFlush := func() { once.Do(func() { close(gate) }) }
+	defer releaseFlush()
+	w := &r5CloudBackgroundWriter{ResponseRecorder: httptest.NewRecorder(), flushed: make(chan struct{}), gate: gate}
+	returned := make(chan struct{})
+	go func() { defer close(returned); r.ServeHTTP(w, req) }()
+	// Close admission while the real router's handshake is still in GetUser.
+	// The handler's first actual SSE revalidation therefore runs after closure.
+	handshakeCtx := r5CloudBackgroundContext(t, st.entered)
+	stop := r5CloudBackgroundExpired(t, r)
+	st.releaseIdentity()
+	journalCtx := r5CloudBackgroundContext(t, st.entered)
+	if st.users.Load() != 2 {
+		t.Fatal("shipping SSE did not revalidate after admission closed")
+	}
+	stale := httptest.NewRecorder()
+	r.ServeHTTP(stale, httptest.NewRequest("GET", "/health", nil).WithContext(handshakeCtx))
+	if stale.Code != http.StatusServiceUnavailable {
+		t.Fatalf("released handshake lease accepted while stream live: %d", stale.Code)
+	}
+	fresh := req.WithContext(journalCtx)
+	reads := st.users.Load()
+	for i := 0; i < 2; i++ {
+		fresh, err = middleware.RevalidateRequest(fresh, st, "r5-cloud-synthetic", st.tenant.ID.String())
+		if err != nil {
+			t.Fatalf("live restored SSE lease revalidation %d: %v", i, err)
+		}
+		if middleware.UserFromCtx(fresh.Context()).ID != user.ID {
+			t.Fatal("fresh identity lost")
+		}
+	}
+	if st.users.Load() != reads+2 {
+		t.Fatal("revalidation reused cached identity")
+	}
+	// A different live router must reject this foreign lease before /health.
+	other, _, _, _ := r5CloudBackgroundFixture(t, "foreign")
+	foreign := httptest.NewRecorder()
+	other.ServeHTTP(foreign, httptest.NewRequest("GET", "/health", nil).WithContext(fresh.Context()))
+	if foreign.Code != http.StatusServiceUnavailable {
+		t.Fatalf("foreign lease accepted: %d", foreign.Code)
+	}
+	releaseRead()
+	r5CloudBackgroundWait(t, w.flushed)
+	r5CloudBackgroundNotDone(t, r)
+	cancel()
+	releaseFlush()
+	r5CloudBackgroundWait(t, returned)
+	r5CloudBackgroundWait(t, r.Done())
+	if w.Code != http.StatusOK || !strings.Contains(w.Body.String(), "resync") {
+		t.Fatalf("SSE: %d %s", w.Code, w.Body.String())
+	}
+	reads = st.users.Load()
+	if _, err := middleware.RevalidateRequest(fresh, st, "r5-cloud-synthetic", st.tenant.ID.String()); err == nil {
+		t.Fatal("released enclosing SSE lease revalidated")
+	}
+	if st.users.Load() != reads {
+		t.Fatal("released lease reached identity store")
+	}
+	if err := r.StopContext(stop); !errors.Is(err, context.DeadlineExceeded) {
+		t.Fatalf("late SSE drain erased timeout: %v", err)
+	}
+}
