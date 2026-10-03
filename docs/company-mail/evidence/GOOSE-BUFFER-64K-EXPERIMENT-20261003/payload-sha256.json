@@ -20,6 +20,7 @@
   "candidate-source-binding.json": "ab376cbde05ace9f036974e97f15e3284a53383702b556904b1c138e94f6cd11",
   "candidate-wholepg.jsonl": "34f057f526cc021f2674e5c5591fd648bedd16930182dcb02b203c58cec95434",
   "candidate-wholepg.stderr": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "delivery.json": "b54f40e174a01ca252951752fc84e4e9068c9ad6ff116ced2ef631e722fe4eeb",
   "experiment-receipt.json": "9251a11ec071a72605aa3309dea03e0b3675638bb446a60b968a03476caffc0e",
   "goose-buffer.patch": "c161d9ec608a621424ae15a3f841159ba8e312c9feb2734499eec2b91ac7a4ab",
   "inventory.json": "4064585ccd5ea1ccdfe1a767e86a61ddc6d2e0c8dc9a7a5ebe4905bb7eaa42e3",
