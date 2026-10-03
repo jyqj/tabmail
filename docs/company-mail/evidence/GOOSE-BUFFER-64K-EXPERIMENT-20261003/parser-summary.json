@@ -1,0 +1,30 @@
+{
+  "comparison": "full raw JSONL bytewise equality before hashing",
+  "equal": true,
+  "raw_bytes": 173812438,
+  "sha256": "9e9e85894a5b84a95090881618899778bfcb4040603004487e7546f969016593",
+  "result_rows": 600,
+  "migration_files": 19,
+  "migration_direction_rows": 38,
+  "error_rows": 167,
+  "frozen_parser_environment": {
+    "GODEBUG": "asynctimerchan=0",
+    "GOOSE_EXPERIMENT_VALUE": "FROZEN_NON_SECRET",
+    "all_other_variables": "absent"
+  },
+  "baseline": {
+    "diagnostic_allocated_bytes": 961345000,
+    "diagnostic_mallocs": 11746,
+    "migration_files": 19,
+    "output_sha256": "9e9e85894a5b84a95090881618899778bfcb4040603004487e7546f969016593",
+    "scope": "one serial Up/Down parse of 19 migrations; not wholePG"
+  },
+  "candidate": {
+    "diagnostic_allocated_bytes": 14829352,
+    "diagnostic_mallocs": 11529,
+    "migration_files": 19,
+    "output_sha256": "9e9e85894a5b84a95090881618899778bfcb4040603004487e7546f969016593",
+    "scope": "one serial Up/Down parse of 19 migrations; not wholePG"
+  },
+  "allocation_scope": "one serial parse of 19 migrations in both directions under race; not wholePG improvement"
+}

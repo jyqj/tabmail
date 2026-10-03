@@ -1,0 +1,83 @@
+// Self-authored isolated diagnostic, installed only in temporary official Goose trees.
+package main
+
+import (
+ "crypto/sha256"
+ "encoding/hex"
+ "encoding/json"
+ "fmt"
+ "io"
+ "os"
+ "path/filepath"
+ "runtime"
+ "strings"
+
+ "github.com/pressly/goose/v3/internal/sqlparser"
+)
+
+type row struct {
+ ID string
+ Direction string
+ Statements []string
+ UseTx bool
+ Error string
+ EndSemicolon *bool `json:",omitempty"`
+}
+// Include EOF delivered with data, as well as ordinary EOF on a later Read.
+type eofReader struct { s string; chunk int }
+func (r *eofReader) Read(p []byte) (int,error) {
+ if len(r.s)==0 { return 0,io.EOF }
+ n:=len(p); if r.chunk>0 && n>r.chunk {n=r.chunk}; if n>len(r.s) {n=len(r.s)}
+ copy(p,r.s[:n]);r.s=r.s[n:];if len(r.s)==0{return n,io.EOF};return n,nil
+}
+func main() {
+ if len(os.Args)!=3 {panic("migration directory and output file required")}
+ out,err:=os.Create(os.Args[2]);if err!=nil{panic(err)};defer out.Close()
+ enc:=json.NewEncoder(out)
+ emit:=func(id,sql,readerKind string) {
+  for _,d:=range []sqlparser.Direction{sqlparser.DirectionUp,sqlparser.DirectionDown} {
+   var r io.Reader=strings.NewReader(sql)
+   if readerKind=="eof" {r=&eofReader{s:sql}};if readerKind=="chunked-eof" {r=&eofReader{s:sql,chunk:997}}
+   stmts,tx,e:=sqlparser.ParseSQLMigration(r,d,false)
+   msg:="";if e!=nil{msg=e.Error()}
+   if err:=enc.Encode(row{ID:id+"/"+readerKind,Direction:string(d),Statements:stmts,UseTx:tx,Error:msg});err!=nil{panic(err)}
+  }
+ }
+ files,err:=filepath.Glob(filepath.Join(os.Args[1],"*.sql"));if err!=nil{panic(err)}
+ if len(files)!=19 {panic(fmt.Sprintf("expected 19 migrations, got %d",len(files)))}
+ for _,f:=range files {b,e:=os.ReadFile(f);if e!=nil{panic(e)};emit(filepath.Base(f),string(b),"normal")}
+ cases:=map[string]string{
+  "annotations":"-- +goose NO TRANSACTION\n-- +goose Up\n-- leading ignored\nSELECT 1; -- tail\n-- +goose StatementBegin\nDO $$ BEGIN\n-- inner comment\nPERFORM 2;\nEND $$;\n-- +goose StatementEnd\n-- +goose ENVSUB ON\nSELECT '${GOOSE_EXPERIMENT_VALUE}';\n-- +goose ENVSUB OFF\nSELECT '${GOOSE_EXPERIMENT_VALUE}';\n-- +goose Down\nSELECT 3;",
+  "env-missing":"-- +goose Up\n-- +goose ENVSUB ON\nSELECT '${GOOSE_EXPERIMENT_UNSET:?missing}';",
+  "unfinished":"-- +goose Up\nSELECT 1\n-- +goose Down\nSELECT 2;",
+  "missing-end":"-- +goose Up\n-- +goose StatementBegin\nSELECT 1;",
+  "invalid":"-- +goose Up\n-- +goose Invalid\nSELECT 1;",
+  "statement-end-without-begin":"-- +goose Up\n-- +goose StatementEnd\n",
+  "duplicate-up":"-- +goose Up\n-- +goose Up\n",
+ }
+ // Stable ordering matters for a bytewise comparison of the complete output.
+ names:=[]string{"annotations","env-missing","unfinished","missing-end","invalid","statement-end-without-begin","duplicate-up"}
+ for _,id:=range names {for _,reader:=range []string{"normal","eof","chunked-eof"}{emit(id,cases[id],reader)}}
+ for _,size:=range []int{65534,65535,65536,65537,65538,4194302,4194303,4194304,4194305,4194306} {
+  // Exact line length includes semicolon. Exercise ScanLines and ScanWords,
+  // whitespace and trailing comment, and explicit statement blocks.
+  for _,shape:=range []string{"word","spaces","comment","block"} {
+   line:=strings.Repeat("x",size-1)+";"
+   if shape=="spaces" {line=strings.Repeat(" ",size-2)+"x;"}
+   if shape=="comment" {line="x; --"+strings.Repeat("x",size-5)}
+   for _,nl:=range []bool{false,true} {
+    sql:="-- +goose Up\n";if shape=="block" {sql+="-- +goose StatementBegin\n"};sql+=line;if nl{sql+="\n"};if shape=="block" {sql+="\n-- +goose StatementEnd\n"}
+    id:=fmt.Sprintf("boundary/%d/%s/newline=%v",size,shape,nl)
+    for _,reader:=range []string{"normal","eof","chunked-eof"}{emit(id,sql,reader)}
+   }
+   result:=sqlparser.ExperimentEndsWithSemicolon(line)
+   if err:=enc.Encode(row{ID:fmt.Sprintf("scanwords/%d/%s",size,shape),EndSemicolon:&result});err!=nil{panic(err)}
+  }
+ }
+ // Diagnostic allocation only; deliberately no performance qualification.
+ runtime.GC();var before,after runtime.MemStats;runtime.ReadMemStats(&before)
+ for _,f:=range files {b,e:=os.ReadFile(f);if e!=nil{panic(e)};for _,d:=range []sqlparser.Direction{sqlparser.DirectionUp,sqlparser.DirectionDown}{_,_,e=sqlparser.ParseSQLMigration(strings.NewReader(string(b)),d,false);if e!=nil{panic(e)}}}
+ runtime.ReadMemStats(&after)
+ out.Close();b,e:=os.ReadFile(os.Args[2]);if e!=nil{panic(e)};sum:=sha256.Sum256(b)
+ json.NewEncoder(os.Stdout).Encode(map[string]any{"migration_files":len(files),"output_sha256":hex.EncodeToString(sum[:]),"diagnostic_allocated_bytes":after.TotalAlloc-before.TotalAlloc,"diagnostic_mallocs":after.Mallocs-before.Mallocs,"scope":"one serial Up/Down parse of 19 migrations; not wholePG"})
+}

@@ -1,0 +1,5 @@
+{
+  "original_sha256": "bcc446286dd5aca12cbb66fcdd94153b4ac9a8978b92c2c6f84a376d81b32e7b",
+  "public_sha256": "bcc446286dd5aca12cbb66fcdd94153b4ac9a8978b92c2c6f84a376d81b32e7b",
+  "rule": "replace postgres/postgresql URI literals with OWNED_LOOPBACK_DSN; all fixture data synthetic; no other content changes"
+}

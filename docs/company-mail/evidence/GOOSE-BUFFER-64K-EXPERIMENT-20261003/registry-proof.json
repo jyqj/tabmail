@@ -1,0 +1,15 @@
+{
+  "official_registry_url": "https://proxy.golang.org/github.com/pressly/goose/v3/@v/v3.27.3.zip",
+  "official_origin_commit": "520411a16119bd3b332613d1ff8312c4cc249673",
+  "official_version": "v3.27.3",
+  "module_sum": "h1:pIglVHjw99r4e/hDHHwbl9vfOsDMqUokfkXo6+n/RxA=",
+  "go_mod_sum": "h1:Dag+xpV6o20HR2LFY1j0q6MDwc3f7vPUFDA77R+0yGY=",
+  "zip_sha256": "5707e627c3c16cac20df24fd008aeea47e5d23d3befb0e024624e33691358bbf",
+  "registry_zip_equal_to_original_sum_verified_cache": true,
+  "zip_Hash1_independently_recomputed_matches_original_go_sum": true,
+  "actual_wholepg_source_difference": [
+    "internal/sqlparser/parser.go initial make capacity only"
+  ],
+  "baseline_wholepg_tree_has_no_diagnostic_bridge": true,
+  "candidate_wholepg_tree_has_no_diagnostic_bridge": true
+}

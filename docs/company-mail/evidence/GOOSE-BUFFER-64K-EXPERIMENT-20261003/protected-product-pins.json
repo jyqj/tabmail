@@ -1,0 +1,1086 @@
+{
+  "source_freeze": "aeed47f0e1998d9925acb680992b051463821d69",
+  "all_equal": true,
+  "files": [
+    {
+      "path": "go.mod",
+      "sha256": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377"
+    },
+    {
+      "path": "go.sum",
+      "sha256": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00001_baseline.sql",
+      "sha256": "233a6e0a5dea5e08de370aa3d8cd7e69a61f9cfaf2421846e23494de0e4e0549"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00002_mailbox_grants.sql",
+      "sha256": "51615b38624aaa3010c5b8e7ff84ddafbd22046fe5f8992bfc2c31b5592a6ba5"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00003_refresh_token_family.sql",
+      "sha256": "11a168f78cf5b3b11e369f3c089e6252258bfa0a5cdbfc192b1581284d3c541b"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00004_owned_mailbox_private.sql",
+      "sha256": "e8abcdd3026d6586afd20d0a7375c9b9a10bcfab94b9a5ddcace0efa3899add1"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00005_company_workflows.sql",
+      "sha256": "f6a66202fd0f2bdc9d3b6ceecb05cee5f6bd96f620d665e873222938b0e5ba50"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00006_draft_submission.sql",
+      "sha256": "8c02d23d9b06da8524e4ce67ade38cb72aa289f675b8856a831a62915907610a"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00007_message_user_state.sql",
+      "sha256": "8a0806eb2367d797a5af2f3f030d4767db9202b4cf7af472e360e8dcaa873caf"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00008_send_policy.sql",
+      "sha256": "f97a25c5fd3911bded2d1e63a094027780c34b58a503c27561c7423dc4cbc891"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00009_domain_asset_guard.sql",
+      "sha256": "54348b595d017a36edb77930f666aa6a26fadf7e848bf1cf5d1e4190c57fcc2a"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00010_sent_mail_archive.sql",
+      "sha256": "57156b73a3f5f4ba4aab55ce0a6e3a670a74b52544e7df13ea38e7dd61fb259f"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00011_mail_content_index.sql",
+      "sha256": "6232a3c74b75980d48bcc2f8e2e5f79854c366a89f09743deb5a8ebbfe747042"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00012_employee_disposition.sql",
+      "sha256": "2f7d448d04c185a1642399a0f6559d2df7ed9a1e59ac2523167e259e24e3d9b0"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00013_draft_creation_receipts.sql",
+      "sha256": "69c605b794be3b3884659c6315d518b94c69ffb8259d00199a45ee4d1e1160c3"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00014_recipient_ledger_required.sql",
+      "sha256": "2180a04b8f26066593a80dc02b90327626c03f9ef563ea02d79047479a0714fc"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00015_suppression_key_scopes.sql",
+      "sha256": "7068bf50880ee94bff29dc86fa11383cd1b799d6645ba8b4bfb2d07d362c5db8"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00016_permission_editor_versions.sql",
+      "sha256": "4b878baca5ec6eb44fd9cad29fa11a944cd815b5cb43a18cfd865da04ad46c05"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00017_sent_recipient_snapshot.sql",
+      "sha256": "7cc2cbffc10a35b1e3b337f34171100f2260b02066abed27d91dece37c30ccfb"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00018_attachment_gc_cursor.sql",
+      "sha256": "29ed9b37bcd17681025e50bc80a8d08447e498bd1a5fe57dec2c5a1eab9c6cc7"
+    },
+    {
+      "path": "internal/store/postgres/migrations/00019_api_key_usage.sql",
+      "sha256": "a7d8325f90d93964ccbc7cc727c1ead23be9f0ddcc4c61f8ee8d5ffffb8337f1"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.envrc",
+      "sha256": "1d26c74fd25a4c3dbb09e029fc609588da499fd4af2a41c88f6316c7f8c54cf1"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.gitattributes",
+      "sha256": "23e7130958628ffac6b4c3e9f893c31f6accc71ec656b8762671f5c049b0501a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.github/ISSUE_TEMPLATE.md",
+      "sha256": "8ec8dc73481d3232a20ec70c2627f9a2aed3372bb43188a8402fa7f689c58d88"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.github/dependabot.yml",
+      "sha256": "99c78d4ac39e5e4e777e5c5e74578a3ce09d24975403c532ce2b7730220d2f07"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.github/workflows/build-and-test.yml",
+      "sha256": "0288feb8cfd24e6c4124e026b794e9d1dc0315f6960aac797827de5f197e47c7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.github/workflows/lint.yml",
+      "sha256": "441b89e23c90b47016098a15e397045d041ae7fb42f57caeb9f9ef74617ba96f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.gitignore",
+      "sha256": "d63773134deaa6381ae280fa109439f14a97ad53010eaa81b816824f1e05ce72"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/.golangci.yml",
+      "sha256": "7dacd46916365cd6fa9a90ce2ce69f0bab858fc1cc7068f343dad07a37c934bb"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/CONTRIBUTING.md",
+      "sha256": "449f160487bb4046e53bf643f246f050b31e7e10da38a08b29b125d5cbccbfdb"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/LICENSE",
+      "sha256": "997664bf5bbb7264dcb4d7f024745a78eac022fe29a2b1294ac019677744243d"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/Makefile",
+      "sha256": "a2328d38b85c14ca582b6f271130131012d18bbdb4d37508b3660477424660ef"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/PROVENANCE.json",
+      "sha256": "7868d5805fe2eae8c0904e0cb1fff716c508e059cb01f4aba2f481c9efba4096"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/README.md",
+      "sha256": "2e4f316a525ee903f7e877faa6878fb66e0b0b71887f332d712ff1423a313ab4"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/TABMAIL-FORK.md",
+      "sha256": "abf92d360ab798aa980ac278e62213f7ea1ec32ee52d49fc1939eb9d35ebd85b"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/UPSTREAM-DELTA.patch",
+      "sha256": "559f55d5ea88e0721be4b95f608c591423bd983a917c5f874691fea2a9bda6ab"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/UPSTREAM-MANIFEST.json",
+      "sha256": "897f8da078bb175bf4ba739306029dd95de2689a7a233990e41624d5f28ae772"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/boundary.go",
+      "sha256": "10efd3dd1e72b3dabf16f2988eaf32767fb8397fab6985ee1679bb391ba908f7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/boundary_test.go",
+      "sha256": "e5bb4da612960cf8596f48429a260c33442c8e8cc5a10a89d541dcf5fab2a7a6"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/builder.go",
+      "sha256": "6ee5628eb805915eadf7f63dddee45c2d2167601c04ffe7d5c2028f14184a448"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/builder_test.go",
+      "sha256": "dae9c01c1bb9c4ce82eba07dbf480b2388bb92bb1be58b86acef55aff27269ac"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/example_test.go",
+      "sha256": "0c4e594de427b84c02cd3b7db41c4923579aeaaef8ed1b999a658123bed73a81"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/mime-dump/README.md",
+      "sha256": "4340f90637f557f3b4837267511b68549b232a9c60809ddb4462572dd9c85b80"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/mime-dump/mime-dump.go",
+      "sha256": "0f83dc02c645e655563c55b2612658f02adbc9efdf15ee27b53064ec26289c0a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/mime-dump/mime-dump_test.go",
+      "sha256": "dd0f77fbc259466a541b166316dae5405d8d4d47b407c43c7746ae294975f9c9"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/mime-extractor/mime-extractor.go",
+      "sha256": "07ddd52007eaeff80676cf5bd3928e5b1006d531cb49ddd0b4c38a1bba3d062b"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/mime-extractor/mime-extractor_test.go",
+      "sha256": "4d6d3d4aae1fb8b16d3df10c4e973747651aae3f80fd2fc0cc5b55a8ca98ed1f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/utils.go",
+      "sha256": "cbccd6ba54b8287e222b5b755ea17e1cf2614c0529d2c5e4e5fd0f5026792415"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/cmd/utils_test.go",
+      "sha256": "093dbb66e7d4e2f49075e9e325aad4c015697d395f99649fc8f8fbccffba3cd1"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/detect.go",
+      "sha256": "e35abd5248f71afd45029ccbd9dcc4b5c3caffc5ce234aaf4a2c33641dfd04f3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/detect_test.go",
+      "sha256": "2ee49353b0fc2aab9a043de03e84fbe958c086527c763476bd2030d2ff5c2a48"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/dsn.go",
+      "sha256": "96dc4d0a510bba71f571d6e44525509893dacb59b701bce94a78d94e7b7b69ac"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/example_test.go",
+      "sha256": "a83903263fefeff9eacf14120fcb5bc100e80500ec9e840db4e58a7b64f53daa"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/parse.go",
+      "sha256": "38a5daab2316139c522d86a1fb763df46cb8893a698648de7cc185f189384d5f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/parse_internal_test.go",
+      "sha256": "8d0d1eec8d02a13da76b4aeed41b65e10995f81f0285b3683a4eb41e930e21e0"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/parse_test.go",
+      "sha256": "dea681587970f11a7bfb27d6cdf9dd34790394e682e1202c22257085c392a388"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/testdata/delayed_dsn.raw",
+      "sha256": "d2ad9ee778833d2fe6f5adce23b0a90423ee371805b9d35b78f4872b90957a96"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/testdata/dsn_with_multipart_alternative.raw",
+      "sha256": "16f628e29baeb241880e872a4cf5187c378f5572d0b345f56c4b2e9b94003492"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/testdata/multi_recipient_dsn.raw",
+      "sha256": "d1194874551baeb63beb2d60a6618752a86b160fde5c25eb0d37c9dfcab2ecbc"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/testdata/simple_dsn.raw",
+      "sha256": "932ece2bcefeb7324e2502799c8292bf8fc0d0bcfacd18cb97c83ebfd7d2b6d9"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/dsn/testdata/simple_dsn_with_html.raw",
+      "sha256": "adf9d9fa0ccbd6dd9065b082e3cd29154cd3833d5bfa2fdd708821b2df190351"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/encode.go",
+      "sha256": "deab68c5f6f0502f91a46936d84b03919d41a239d72e3b495ab53a084a0fbad7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/encode_test.go",
+      "sha256": "bd5d2bfbc3e4aebd1dfed0bc8db77687ec237d629f8099f1bc7b29625a5e9497"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/encoder_options.go",
+      "sha256": "d37d967e89412ef596de8e373564fa97f82a9334ae3f57ee968469d4a2ef373a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/enmime.go",
+      "sha256": "04af762de39908ec00f3fc0a8338d9f222cf33da0735f9d12f189b6bf922c6a5"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/envelope.go",
+      "sha256": "d5414f23105d7e0b5f95583f84d92ee614c0b13867b8375ec0e97b3412f5ea7e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/envelope_fuzz_test.go",
+      "sha256": "1f57e4e13f406562b29379d2e86fe53d2c91443568c985dd8479dc35d6fc07a3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/envelope_test.go",
+      "sha256": "544916e163f1c01e7e5c63b06ec02e012ef0299ac93b368d5515d86e6c78f49c"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/error.go",
+      "sha256": "1c1c063d587af549bb290ba7e0bfd566c96a84f9d65e0276d5d377a1ca572347"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/error_test.go",
+      "sha256": "7264360673f01e1bd8acdce20970277098265ae7f1ebc048b1e87fb89a141407"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/example_test.go",
+      "sha256": "625e4ba9c5312bc67e2c8c3e9f35cdef0fe8c8066807fcb6a0e1690e355b6e22"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/flake.lock",
+      "sha256": "b869482caf437c77f8fc58ba44b18223478bc5be67c51a5b001ea4af8cb969e3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/flake.nix",
+      "sha256": "f287d997561f7473ba77d0ae9f0c4dc8873698eb6f29feb9a0837788e27972d2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/go.mod",
+      "sha256": "976135226793cb303993bce4659b3883783db3225d9e5617d1e3a1540e5c5862"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/go.sum",
+      "sha256": "0c19f867af32840597157de144e8ff9bd39dc3178522df145fd288cc4422aac4"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/header.go",
+      "sha256": "0defdbc47161927a69cedb5a1809a18bbbf27b3925953dda212033707022d2e8"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/header_test.go",
+      "sha256": "809806b8e152110843d8dfe7a287d73e0cc077a9498202fa50771d6584740ba4"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/inspect.go",
+      "sha256": "53da56bde221a0fd031cfe3d3bd1f4f7a7ae50490877dd0488cc54d3a87d3466"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/inspect_test.go",
+      "sha256": "848a6ac79a2a5f629be66f3f08489ba5cbb4725d1966c0400501a800025c6d9b"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/base64.go",
+      "sha256": "9fcb5bac0f115093b38a4a15d76268f01a1c7f145b03675e5f7a47d0bdfc68d8"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/base64_test.go",
+      "sha256": "24b1a586736a5af7e23d594bb068c6f81a7f32168a490948d7e7e305a33282a3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/charsets.go",
+      "sha256": "fe9ce62cbc309fbbf2e042f88c5874694674292adc0d4242fa545f6fd11edc67"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/charsets_test.go",
+      "sha256": "fdb782f4d869fac0238446d5d154cb7a113cf8e78673dbfcc3c9cb3cf394be04"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/headerext.go",
+      "sha256": "393c5f7bf2bb6b03d7a54cf99546e37f1131873e0aef2cf4702cd88725dbcb7c"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/headerext_test.go",
+      "sha256": "7c3c7904ae9850b38d057ba4cfbd6a8cd61a0cdc6908e4390004fa64991c74b9"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/idheader.go",
+      "sha256": "115f4975b6bed8672f996a05fa5fc59579430b29f85bf51637c69d5f307dd070"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/idheader_test.go",
+      "sha256": "a4cf5d144496b9d194f552f682b78ae07e3599f0f130c0e0a835c035666913b3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/quotedprint.go",
+      "sha256": "325f4285c8771ee6fecf0dca3858c4e5ccb5cf7055cd60a9fb85379cf46442c7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/coding/quotedprint_test.go",
+      "sha256": "0fbbb598b2fd46cd67ecdaf06f266787b2eebd5dd69dee98f3c64915e782b747"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/addr.go",
+      "sha256": "7385f3fde2483523b76a0c7207a92cf4f744b902c139dcc7eb98b214b3c8dd0e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/addr_test.go",
+      "sha256": "442cb4e695ba7e4130073d22be846c15df6b0ff1dd422291ef56ff333b8097d6"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/find.go",
+      "sha256": "faaeac9e175d3576daccb17ed2300b49a0924cc8e96056bbc3a2183158225ddf"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/find_test.go",
+      "sha256": "effef49370f8c09f7b9a9e6bdd45a40df9aa44cfa345c9d79bc6c4b859650ced"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/rand_source.go",
+      "sha256": "36af8c3f00a1b03f2ac493128df7af5f16c136d04698011e008c18aa195b52ac"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/split.go",
+      "sha256": "c278f3b1c2cdf30ea4bc679c1c03c53128a1097122048038dcfc7b127e0af083"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/split_test.go",
+      "sha256": "e1fdffa9165d1751b0b4d5023f056838a8a9084cf0f883c731a12272d02ef154"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/uuid.go",
+      "sha256": "38855e27385ec321c9286573902e51763942c9cd590520dc93b9bf02a3a7fc4f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/uuid_test.go",
+      "sha256": "d0dd06f7c0dd184a5dbb2afa917668d52588e17c591f93854d99e9be22e97a70"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/wrap.go",
+      "sha256": "b1abc81f8dcd8b38a2daa823cb63732a971fab084c77a224f879f8d05ff46bbf"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/stringutil/wrap_test.go",
+      "sha256": "03e08551658700d430a5c94ccddd5e80adfdad27960785c1b46bb577eed885a8"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/test/golden.go",
+      "sha256": "77297774640dc0d965e6d9c914ccfffe31070d75f8e55fbd7a43273f2b27b702"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/test/golden_test.go",
+      "sha256": "2a26e8e60b50c7ee3001fc820ed408a3b5104508e9a099fc1a5920dd4114809f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/test/testdata/test.golden",
+      "sha256": "b6285c57e8797db5d4c51c80d6f11938afda9b11c6a003549709189e9b4b92a2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/test/testing.go",
+      "sha256": "6550c071841a17ee6beff3f6d47735814389641610d0fe6e15e669ccd7561bb6"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/test/testing_test.go",
+      "sha256": "b641403be458b8ad1631e624d94dc39efb441b8956069ab8c1c67e3a07961f87"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/header.go",
+      "sha256": "8810549fcfbb5f7218062b8f120cbf574b24295686227d8c4a2ebc68f483f008"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/header_test.go",
+      "sha256": "7f5eea639214c106ebe5a481a6a28591c8690dd8d261a114ce3b50b6465e58bd"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/pipeline.go",
+      "sha256": "d8b78ffe222aeae796fd97b6feb8eec481fb5325bfcda1448e1f6b1866557e83"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/reader.go",
+      "sha256": "badb31d2eff30a66275bf8143594061feb075ede906b1015df96b51c85bb6c10"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/reader_email.go",
+      "sha256": "11527202f0ca36b3b59695a6f369dc6a48698a91eb394f99e2720edaa06b1cc1"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/reader_test.go",
+      "sha256": "fd767162ba482c553c8ecd3294374d89fb44b13ed83114f831dc2cda57e5a3b2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/textproto.go",
+      "sha256": "163fe0f76f1a26e9c2b9fe0f452ec42ce293466b406f8e38b436e931dc059f29"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/writer.go",
+      "sha256": "ddea347b71c84fc796f9870eff6af8797d022d110c2588d53ff9f0de3611f38d"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/internal/textproto/writer_test.go",
+      "sha256": "048d135fcabb79e9caf037e8a004a9a1048d60b5900c013ffbe9a6cccb5583d3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/match.go",
+      "sha256": "6dd6798c54aea1a5c5ff685de71447eada6c6144f97181c9a4c21dc51afda1cb"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/match_test.go",
+      "sha256": "42ddf9fa3e5731091673a53e4d66c6b8146c364a5721aa30720c9fd038c921b1"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/mediatype/mediatype.go",
+      "sha256": "d99d6fe03b70ffb7bc27aa792993ea868c720d0f29bb4e2e9a225badce9b8431"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/mediatype/mediatype_test.go",
+      "sha256": "1669a4a8e5256d60c52f54a99c477a44e5c9aec477aae0393fca34b0e8036960"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/options.go",
+      "sha256": "278679a54fa079ae6783976d5cefddf0da9473e501adfbc4f04ec65b8967d0dc"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/options_test.go",
+      "sha256": "633834d694834529ef1455acca31d612f609f59971d580978c0302121f0c86d8"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/parse_budget.go",
+      "sha256": "c984752f48c564e1d44d4c5492f19c7efaeec5b7d81e31dae6c325eee2f8e5fe"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/parse_budget_test.go",
+      "sha256": "e121404fea2c0872ab4fdeef446e815e28b6c11a44c8053f20c19e3dd1603433"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/parser.go",
+      "sha256": "d8bca25d45989151a6607b9ad605b605cf75d35d30364c10ef3cf4da0dc6927b"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/part.go",
+      "sha256": "7486e3704eb6962c68a8ee894841bc84b1b305bec1b225ed2bc552c87e2eb8ca"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/part_test.go",
+      "sha256": "3da54cabb084ad9ead940a2f1fc09d60fce1758352a0adedb9eaddcfba3e0cba"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/randoption_test.go",
+      "sha256": "639c5dd72477fb25d8f09d5ec5744e6059b82a80c40168fbec39d088b6320787"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/sender.go",
+      "sha256": "99f9482ae14374456a68506ba3c53838029d4e6954b36b10b82ed55e023de9bb"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/sender_test.go",
+      "sha256": "c889adb7508ecd24b736b8226cd6824815e76ca8e7ab032f370e362f72db3a90"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/shell.nix",
+      "sha256": "0ee1026be2a921f3aa09ad2bd96fd146e7f8705e5d14d6128067467d6715733d"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/attach/fake.png",
+      "sha256": "5c59bced91c19476af7237e4d1ed7477c56bcafd51e6efc92f8e2dc477da1b6e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/build-qp-addr-headers.golden",
+      "sha256": "c962c7af1656fc037ecc35cdce8449ff522136568ec8f8502266ead423fb59bf"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/nocontent-with-children.golden",
+      "sha256": "516b7f2883657c3fa4b83c1eca6b7d5bc11c3d2cd99936c0759caea2343c86e5"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/parser-raw-content-html-option-false.raw.golden",
+      "sha256": "d9f270c2f678d451b89da2353ddd3b1e07f5de2ad6f9274812493826ea52a02c"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/parser-raw-content-html-option-true.raw.golden",
+      "sha256": "5d02096a088d34ad13a11393bfe43a032ce53302dd5cb251085bfeeda986e500"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/parser-raw-content-html-option.raw",
+      "sha256": "ae759a38f1339aafb8f3e6aaa1d0af7e20a592b374132dd96df536b3d6bc9b32"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/parser-raw-content-text-option-false.raw.golden",
+      "sha256": "f4f044d00231da811bc9e357779bc17d51581ee406c0cc5b4acff0dce407d2a0"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/parser-raw-content-text-option-true.raw.golden",
+      "sha256": "28e386bc0a17b823d01206e7fbfebf27bb7d6f58d53c319924685e052d269749"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/parser-raw-content-text-option.raw",
+      "sha256": "28e386bc0a17b823d01206e7fbfebf27bb7d6f58d53c319924685e052d269749"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-bin-content.golden",
+      "sha256": "afee6cc13f9f2f45e844fc4298eaaa73ab04708b96a69250eb0c8567c6604099"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-bin-header.golden",
+      "sha256": "72e629891734d5347b7fa5f1ba880212fa9a5a87e842df8498c035400ebf7ed0"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-content-only-qp.golden",
+      "sha256": "554b614eb492bc9e58135ff50953b23636f20fdc66a903d0d4bb39123039da7a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-content-only.golden",
+      "sha256": "f6701cd784fe91fd94d97353b9f969c8495505df6354d3b23be367ddd99c28b7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-default-headers.golden",
+      "sha256": "5cf6583f08cbaca2190d5be6e0f80fa098ae8daaab25f724851bcea90ac6ab66"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-empty.golden",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-file-mod-date.golden",
+      "sha256": "b7fead1c829ce33719fe828e8c2cab9a14d3021153f4b035bc3314c23d061ffa"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-header-only-default-encoding.golden",
+      "sha256": "7e428349c016e687ff5114f90d1c7e72c36456a2871a72960b6e1ab81cdb21f8"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-header-only.golden",
+      "sha256": "a5315535daa5b58d6ceea4c6517da716805998e3cb1e2c13869211c1b4bdb5c2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-message-rfc822.golden",
+      "sha256": "6cc1515d9d053fe413ae3d6f987e234ea277895bfb5b919c951ffa63310b04c9"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-plain.golden",
+      "sha256": "b1a5addfe047d8db636ea051ba9eacb2add7f5fae0b01ecdaf2cfb82f2369971"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-quotable-content.golden",
+      "sha256": "06b56d83f54d34fb289d2346e1580e063fa5549011dd22fe27907307773f6445"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-quoted-content.golden",
+      "sha256": "3eadde2a8cdbefdf24cb5e11fc219e2c99fbc92e96d7422af7afb1adbab105a3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-quoted-headers.golden",
+      "sha256": "fce87290d854ee6a1272f7ed2971dd4922a4db9f2a88bd8f86fe111c725050d9"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-quoted-printable-headers.golden",
+      "sha256": "0ed53832702a17335b0ce4dc13d201f0b6074a8233fcdc15465c94589282090e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/part-with-children.golden",
+      "sha256": "bb09f633d2a01a895fdd45ce5fda49c7576bd155e38bf249d6d3dc44e7de0c69"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/encode/utf8-to.raw.golden",
+      "sha256": "09d4a534de2645b509f72f5e2f8bdc6cb4c5cc2560e804378b1d93e028508b2e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/bad-final-boundary.raw",
+      "sha256": "d0713b26fac04f0675b70b9b40825a9dc7f8a3737ec969e8062a551efeb8043a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/bad-header-start.raw",
+      "sha256": "baf45abd4f891d97552bf8666c5ad1a3e13a201ced2c73c8262a2fe0c15a0d7d"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/bad-header-wrap.raw",
+      "sha256": "a18560bd431d806d542b72563a39646dc29cd9cb3274759c1a18056de3606c33"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/empty-header.raw",
+      "sha256": "093e70ef7e436d45a248e3c44b15707b44521d137cc687d4f67a484c276574ef"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/html-only-inline.raw",
+      "sha256": "c2926f519fb087d06af01bd9191433fdbdd6829271b326a32082bc952e2b238b"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/incorrect-charset.raw",
+      "sha256": "e6f43736cfa1580d7e8d8aa46e35f7e0ed7b39129933175d59f9cde3c7101cc5"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/malformed-base64-attach.raw",
+      "sha256": "91a12e8c290a1bb0155be648dc447be5442469451c06518c9a20f520a17c6827"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/missing-content-type.raw",
+      "sha256": "ff3de2f2bd3fadaf8d11431ae87fae2053fbfb89a4989952f2883aefcad086a7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/missing-content-type2.raw",
+      "sha256": "9e0c27a8aa925133e91fe33d45749edefa3eeceba6e461d1d89cd2a4d5f9537f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/unk-charset-html-only.raw",
+      "sha256": "aa67346fa424611c1f46d69ec62f6c2418c59b39180ab8b63f7bf89388de785a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/unk-charset-part.raw",
+      "sha256": "a21fb4cfbbac07dbea865973ff6dfab8e99357df716866f1114452118a83e011"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/low-quality/unk-encoding-part.raw",
+      "sha256": "40c613565f74fe36b9c4cb73a2eb5600ead3289cd9463d5f60f950d00a24af0d"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment-application.raw",
+      "sha256": "74f800fc209f0f24d7ddf46455afac62d087cbea6929dcc0cab1c339f4b4cffd"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment-octet.raw",
+      "sha256": "55b693c6aba981331db88ba6ebf47025a359982573e2f76fd1febd2e25e3d07c"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment-only-inline-quoted-printable.raw",
+      "sha256": "c3cfb5da25f54d2f33c20fce0720713bad9d3b17da513851be3faec49b536bd2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment-only-inline.raw",
+      "sha256": "410b0cc017ca7a408bc5d87e49aa4a71081e8deaa3a4314ebca21907dd5a3021"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment-only-no-disposition.raw",
+      "sha256": "b51d5147c9a3e17cb93be5b6cfa70a69863376e55460378960a470783051c4e6"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment-only-text-attachment.raw",
+      "sha256": "1834507e73bc910efc09eed942e398e74995962da3726089dfc720ebc6d18d23"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment-only.raw",
+      "sha256": "6f5ca2dbe2eb6f520d88e24a10a09b651775e382a56a4113147f14f622b1b5fd"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/attachment.raw",
+      "sha256": "470f8bd61eac12abd4138c853a711af927cd6f5c2378fb3d6a4896abc20d42e3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/ctype-bug.raw",
+      "sha256": "754a6feb8756641222dab898f9e1cce477894454d7e09b5182b831fdc9c52034"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/epilogue-sample.raw",
+      "sha256": "4035b88a402b8d2c0ef2a77ca621870c502fe5874ec785be7e215bbe9e4fb6ed"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/erroneous.raw",
+      "sha256": "659321554ff23b77f780e0813982c5a1e244c10fd1bf26add238168730374cc7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/header-only.raw",
+      "sha256": "b283aa016a21e4d48d6c8b408aa2edbfd02602d75f64bee4b7d440f6d1a1f05a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/html-mime-bad-charset-inline.raw",
+      "sha256": "712591580f07efcebceb06cff0f88caee65b068f238991a6e00df43cab796137"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/html-mime-bad-unknown-charset-inline.raw",
+      "sha256": "9a603d3d010a41b61066dc85f819bba2dea0c9a79b429b20f923636b00383dbe"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/html-mime-inline.raw",
+      "sha256": "c1de9ff47c2db534a8fbceaf32dc29bbc9ef85455a64158c29ed33dd1e6c51c4"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/html-only-inline.raw",
+      "sha256": "51d060c91819521caef6bf3ed326a1d7e919ef20fea6304f7f78c685896003c2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/inlinemultipart.raw",
+      "sha256": "5ac336007ec8edb7b075785ddad8147191ad74d46957d81ddfab42f44c56eb02"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/malformed-multiple-address-header-values.raw",
+      "sha256": "f44033ef4fc99233267a06aa8427a1ac8706993bb1b822a569245d09edc2f760"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-alternative.raw",
+      "sha256": "1ed664ef15cdaa45e06cde1d6c2d2791160ac7120b192a749dff468de81ec2cb"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-bad-8bit-filename.raw",
+      "sha256": "08b9fcde05f0539bec5ec674239dc1666898dd38faed56c02fd15b3d337f17cc"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-bad-content-transfer-encoding.raw",
+      "sha256": "91d3022079904e2777ae9018edddedba41b1ee5819bb358241a9b53d81b5825d"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-bad-content-type.raw",
+      "sha256": "3cb442b7618ff8f1b877c78360f2f256af121b61a8e91579bb0b51b52722049a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-blank-media-name.raw",
+      "sha256": "ffa397204e2d144d9ab3c3229789278f86fef8c5363a0461195da79035c4b051"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-duplicate-param.raw",
+      "sha256": "d0ad1ef367e368aeb0afd3638803e12bfe02ab1e98af147edfdf3d1f58795e93"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-mixed-related.raw",
+      "sha256": "ceeaa825bd280da224a67fbeb7659724cae5079e87f515ce07c8a7774c67bc0e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-mixed.raw",
+      "sha256": "ccd07b8762121a941b5ca29be3da6c02fc2f9a8fc9166a300df4aea27d940f83"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-signed.raw",
+      "sha256": "09ee90bf37554e15339c9467741498f81ac7fea3711db071213d396669d8ea24"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/mime-unquoted-tspecials-param.raw",
+      "sha256": "9d08585f90ecf95b0e54a69fabcecbd64943d06c4c026b2d66421e9430ec94ab"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/multipart-wo-boundary.raw",
+      "sha256": "3cb89b9d766fd7c269281fb0f020fe68900fc990a5b98ba5ba60ead58d2bf433"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/non-mime-html-charset-header-only.raw",
+      "sha256": "dc6c0aef5232589b823c383048fe9a96305b6b31591d99452fdab3fb3a3d9ba4"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/non-mime-html.raw",
+      "sha256": "04eb4a1372c2d0d38d9c4cb5cfb92b77ccdff2b02412350ef439ea17d630beff"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/non-mime-missing-charset.raw",
+      "sha256": "56778359855591940b1f41b64e764599b5e0eade6d6378ad5ab3c6105a2eb64f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/non-mime.raw",
+      "sha256": "b08b189574d09f028b459da9a6c30950dba6816da1b2b6dad050c35697d08177"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/other-multi-related.raw",
+      "sha256": "cbae822596069c6047aa0326aa20aad3bc190a9c2ac930ce34f4f1360372ac4e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/other-parts.raw",
+      "sha256": "8ba12941b0927d80f75cd9b095f7db0ab58af58d77db82faf1cae4519b4ff092"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/qp-ascii-header.raw",
+      "sha256": "64d5aba59f3fb749740dacc05aeb415006630d026dd6fc55ed87ab2426a13d27"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/qp-utf8-header-no-break.raw",
+      "sha256": "20bf9c58fd3adf3aa4a116507ee3e5662549110533beb73de33e07c2334dd090"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/qp-utf8-header-recursed.raw",
+      "sha256": "6ceb4b7ed4aa4b519c5e22e81a68c8eecf6b660323b64e31913c649052d880d7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/qp-utf8-header.raw",
+      "sha256": "8b99a1fd834a4ef48c51ddae86dd68bc4861fac9d5763205dbd6557f9235d60c"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/quoted-printable-mime.raw",
+      "sha256": "169033d5c688c5e61c9581b31cb450beb8809ae2b53ccf22865a5f89ef4db1ab"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/quoted-printable.raw",
+      "sha256": "52747e740b3362c2119e5217dced2d6f9065323fd86af311c59fe1d8621daf96"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/mail/unknown-part-type.raw",
+      "sha256": "e011b078d0d9b5e1617c2feb55604f89df0995ebf2bca62399249277f9f5c201"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/badboundary.raw",
+      "sha256": "e62b8e40adf378acc4cbb99837d34c8ed993266a519b02cdbfeba06b868c051d"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/barren-content-type.raw",
+      "sha256": "5632f6b7925d54f47e4b6559834fb7725788f33aac6c3fb7e73dbb6fa752f21e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/bin-attach.raw",
+      "sha256": "49342911a87bd497384db604d84b8eacaf579250d51c89f0e05ec2ad86a69b36"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/chardet-detection.raw",
+      "sha256": "830c3adf0c7236af915db52eed1c80196b675d4e5c1d56df0ab505ff126666e7"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/chardet-fail-non-txt.raw",
+      "sha256": "17fab5aec0bd355cea6e9c5dc3da0a49401def0f54339f4e2b16f353a0bf03fc"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/chardet-fail-not-long-enough.raw",
+      "sha256": "077fbd3a96aa17279fad4fdda0248a05e3a2f2dcbdf05a3ab6b7f8a022cd5a40"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/chardet-fail.raw",
+      "sha256": "f44ad57eb8e0c1c5dfbb79da3d873395053393910d8cb4c89cb2ce3a0fb8e25b"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/chardet-success-big-5.raw",
+      "sha256": "443ac7d5b2d3da3ff9b1991a0a101d089c1e6c40650608219c3932541139dbf2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/chardet-success-iso-8859-1.raw",
+      "sha256": "556d25db40e755151cb98609a7d89a9a9cc905136963773318bc7029750eb22a"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/ctype-invalid-characters.raw",
+      "sha256": "43b5179b269d0fdd16ba5ffe0e58645391da1b0c9880496677d2343ae5b62355"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/empty-ctype-bad-content.raw",
+      "sha256": "e5f4258464ce23a13bd3f31626281bb4a8a9019c6a4188832b1546ba9a33cea2"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/empty-header.raw",
+      "sha256": "d3f6e57e401fd31275a34072e826787bda44a2d4e34db009534db53b9f188fe6"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/extra-base64-character.raw",
+      "sha256": "8e4d0bfe96f2bcd5da36e7b7d7f1eb0c26ecc807b034e7978e0902e95b6b9043"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/header-only.raw",
+      "sha256": "9dcec7fe09e12943b717fd8b6f8d8d934015ce5d3422c3cd462af8282ea55d35"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/html-with-boundary.raw",
+      "sha256": "843e41dd5f01d18be77ec2afc230afaa583a73d1bc451fab037eb1a0d606b89f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/malformed-content-type-params.raw",
+      "sha256": "4adb52ae876759ca4d21d3a40db7eeea77363e884626489c02b05e3663306080"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/missing-closing-param-quote.raw",
+      "sha256": "d74bf480b80ac54e6947610d6b7328d3309b4a400acf41f42a2a47a8fb7895ce"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/missing-ctype-root.raw",
+      "sha256": "5d70570a03f08368dd084a788f8bb191f329cde28e616537e0a48cb1ed5015d0"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/missing-ctype.raw",
+      "sha256": "268ac01a381b8876a47e124149c25544758c9ca77353489bc40f15a03d954a4f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/multi-malformed.raw",
+      "sha256": "2f1eddc8ca44d06073415fffb8516625939fcc2886c7f0a9a040b808133a36b3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/multialtern.raw",
+      "sha256": "656c28b8f173207bebc083a533ece2de308a4bb69307c2d8acc2179fdf3bb67e"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/multibase64.raw",
+      "sha256": "81ccabaaa240c5e3417324222e9ca860d551288b4259701f5c8956f438a7f74f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/multimixed-no-closing-boundary.raw",
+      "sha256": "6bb89b0bfbc74a8ef11db8bab0c780bf42967d898e49049fa1ad068dc1c1724b"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/multimixed.raw",
+      "sha256": "74961db7e129a46a3a1be0d5e27e2875c15e325435c2770da3df1e5af8e6c097"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/multiother.raw",
+      "sha256": "8f2886fb79b58d89970fa89b605a350e006d5a55e093eabebab258c444cb4be3"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/nestedmulti.raw",
+      "sha256": "bbf90e1d8ba44074dcf8c65b45989ab32718d22cbf84bd5dbbda62ccd81921aa"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/quoted-printable-invalid.raw",
+      "sha256": "e696e481a18168e3d72f50a48a039d5f31617c0923f7d42e132f9b3977f4b931"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/quoted-printable.raw",
+      "sha256": "34cffcd0f8963da4e76b063dac9b13a86c2763eac1f02b526be996ce1fa408e9"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/similar-boundary.raw",
+      "sha256": "59475ecdfeab839c0a41a2691999c39476d01c21acb25d97e739585612ddcdaf"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/textplain.raw",
+      "sha256": "11b00b5dd52a082dc078dffac5293dfe7b3a75ebad00e87307c544ef3fa39d6f"
+    },
+    {
+      "path": "third_party/enmime-v2.3.0/testdata/parts/unquoted-ctype-param-special.raw",
+      "sha256": "ffddf01503b4696079d03f7b3a04c4760499792ce475686b3d7aea340028f99a"
+    },
+    {
+      "path": "third_party/go-smtp/.build.yml",
+      "sha256": "d1ae2fea7401b061ed9d0b2969434cd77373b43dd15f5e7f682b5a52f77e441e"
+    },
+    {
+      "path": "third_party/go-smtp/.github/ISSUE_TEMPLATE/config.yml",
+      "sha256": "1862a3a03d992ba1d95d2b3b253d027082d50c00647eacbc4211d172a4f8d708"
+    },
+    {
+      "path": "third_party/go-smtp/.github/ISSUE_TEMPLATE/issue_template.md",
+      "sha256": "a0253867be44b5480f97bd5344552da896a67a588edc48dc1cf6954aa1403682"
+    },
+    {
+      "path": "third_party/go-smtp/.gitignore",
+      "sha256": "c1e244c0520af51e2c4762a68defbda93ed24d4dbbbec2d60c4ea4d8c075a897"
+    },
+    {
+      "path": "third_party/go-smtp/LICENSE",
+      "sha256": "ed667a24be2a9c3f2fbcd275c70aa9cf19f61345836d08dd5669f4b5737ab036"
+    },
+    {
+      "path": "third_party/go-smtp/LOCAL-PATCH.diff",
+      "sha256": "e7ca4ab4de6348bebe375a81c37370d67474c932f67bd92ff2971657892a5824"
+    },
+    {
+      "path": "third_party/go-smtp/LOCAL-PROVENANCE.md",
+      "sha256": "bb8d225f6159fbdd5571e3ba286b7e923d20446ef8e1917ead142a6556e274c5"
+    },
+    {
+      "path": "third_party/go-smtp/LOCAL-REVIEW-FIX.diff",
+      "sha256": "585ea4c26970cac46b3441e4502e86bd99197b8a1727be807ef0422a7ef70d35"
+    },
+    {
+      "path": "third_party/go-smtp/LOCAL-SOURCE-MANIFEST.json",
+      "sha256": "38bc4934843c8d8ce98eab33358f64c4007138a53c0b4f0bc4efb246ebe8bd1e"
+    },
+    {
+      "path": "third_party/go-smtp/README.md",
+      "sha256": "3847e839321356cf5ececaf6fd4f74a1ca7f57969253322bfbe00ce897d4c421"
+    },
+    {
+      "path": "third_party/go-smtp/UPSTREAM-MANIFEST.json",
+      "sha256": "697694fbef2690dc111c2524ae9029aa070d301466d062d8ff53e5e73d168756"
+    },
+    {
+      "path": "third_party/go-smtp/backend.go",
+      "sha256": "7792120dd25e43fbb79656fb31ff3290e7884a3c4ea3c8266a0ff9c6d89b2438"
+    },
+    {
+      "path": "third_party/go-smtp/client.go",
+      "sha256": "7adcc4610ff4810ab903d0a811e8a32382a2490e06d340631ef425e9cb6597de"
+    },
+    {
+      "path": "third_party/go-smtp/client_test.go",
+      "sha256": "39f4eeac6088d41c3502534bd2fa8d5b6a88df0e7f28a0ca41473993b66cfd93"
+    },
+    {
+      "path": "third_party/go-smtp/cmd/smtp-debug-server/main.go",
+      "sha256": "ba8d5652ecc64121fbb84314ce43036a8ffd93503935a5e71b947f8d7edb820f"
+    },
+    {
+      "path": "third_party/go-smtp/conn.go",
+      "sha256": "7fffcf21ae9e17c408ce857d766dc576d27ccd873f9509abf14d5043e5998eb5"
+    },
+    {
+      "path": "third_party/go-smtp/data.go",
+      "sha256": "9dd19f115369da72cb36668f953bcc19f73fd1994e8063db5c3a75ca7481d0c8"
+    },
+    {
+      "path": "third_party/go-smtp/example_server_test.go",
+      "sha256": "3b25705ecbe3679140e7f7deaceeb5f8357513d10b3c2b83d733629118afc958"
+    },
+    {
+      "path": "third_party/go-smtp/example_test.go",
+      "sha256": "1ea3e758d34c28ad3eed4b70a27ce0eb6c54d669475b6eef3ec7e0dda81f4ac2"
+    },
+    {
+      "path": "third_party/go-smtp/go.mod",
+      "sha256": "c90914c039d7a1eba0c1c07c00435f0561607cb0e56bf43664c63a45c6e17900"
+    },
+    {
+      "path": "third_party/go-smtp/go.sum",
+      "sha256": "91f0cc69b3e71d54c3de263a771da33435278b78aad1b4be6608d0f149da8a1f"
+    },
+    {
+      "path": "third_party/go-smtp/lengthlimit_reader.go",
+      "sha256": "ce4040c9285a3620285dcce853ef2359872a375577a6f3d2034da3b049b024f6"
+    },
+    {
+      "path": "third_party/go-smtp/lmtp_server_test.go",
+      "sha256": "d0f53be6fdc352d1b0549bddf5fd3b06d78cf575a6dfc180a0166dbd3d98ecdc"
+    },
+    {
+      "path": "third_party/go-smtp/owner_lifecycle_logger_evidence.md",
+      "sha256": "4f690395be70ed9c830883a56247fa9e909bcbf1d5dcd0c85d922850b0540c4d"
+    },
+    {
+      "path": "third_party/go-smtp/owner_lifecycle_test.go",
+      "sha256": "4ee581d66080cc2de1d511d02d8e051495546220726cf1f6340751e48160e19a"
+    },
+    {
+      "path": "third_party/go-smtp/parse.go",
+      "sha256": "47346dc8ef668dc34132b7d143016b1e186da22ecd389c51ba820e16a8d6e722"
+    },
+    {
+      "path": "third_party/go-smtp/parse_test.go",
+      "sha256": "c6ef7e37e399a7b8a041e29a445fe0ef3f1256b701b4b74ce57638be653e9cd7"
+    },
+    {
+      "path": "third_party/go-smtp/server.go",
+      "sha256": "75be3110a5b04e7aa48acbe6c35509c52d878ef6c32289e9511d35f637e327c2"
+    },
+    {
+      "path": "third_party/go-smtp/server_test.go",
+      "sha256": "14e20d0dd3db489d9158eb00a26aa648c8dec08a9f57c4015dacc1d809c6428b"
+    },
+    {
+      "path": "third_party/go-smtp/smtp.go",
+      "sha256": "fd93bf53ff98cc529960272d1ff46acee127f37114ee724bf7fd9ff96dcbda43"
+    }
+  ]
+}
