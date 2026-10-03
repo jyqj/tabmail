@@ -369,6 +369,8 @@ def run_references(data, layer, output):
         report = classify_events(result.stdout,'tabmail/' + package.removeprefix('./'),tests,result.returncode)
         report.update(command=cmd,package=package)
         reports.append(report)
+    if external_runtime is not None:
+        r5_external_runtime.validate(external_runtime)
     final_closure = source_closure()
     if tested_closure != final_closure:
         reports.append({'errors':['source changed during reference execution; rerun after integration'],'task_complete':False})
@@ -539,6 +541,12 @@ def run_shared(data, layer, output):
     identity = protocol_source_metadata()
     source = identity['source_sha']
     env = current_protocol_environment(sorted({(tag,) if tag else () for _, tag in selected}))
+    external_runtime = None
+    if layer == 'components':
+        sys.path.insert(0, str(ROOT/'scripts/preparation'))
+        import r5_external_runtime
+        external_runtime = r5_external_runtime.from_environment(ROOT)
+        r5_external_runtime.validate(external_runtime)
     env['TABMAIL_R5_PROTOCOL_OBSERVATIONS'] = str((output/'observations.json').resolve())
     env['TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE'] = str((output/'http-pg-components').resolve())
     reports = []
@@ -558,9 +566,9 @@ def run_shared(data, layer, output):
     component_pass = False
     if layer == 'components' and go_pass:
         component_file = output/'vitest.json'
-        cmd = ['node','node_modules/vitest/vitest.mjs','run','components/company/r5-protocol.test.tsx',
+        cmd = [external_runtime['node']['path'],external_runtime['cli']['path'],'run','components/company/r5-protocol.test.tsx',
                '--reporter=json','--outputFile='+str(component_file.resolve())]
-        result = subprocess.run(cmd,cwd=ROOT/'web',env=env,capture_output=True,text=True,timeout=180)
+        result = r5_external_runtime.launch(external_runtime,cmd,env)
         (output/'vitest.stdout').write_text(result.stdout)
         (output/'vitest.stderr').write_text(result.stderr)
         names = {'R5 shared receipt '+row['id'] for row in data['cases']
@@ -569,6 +577,8 @@ def run_shared(data, layer, output):
         component.update(command=cmd)
         reports.append(component)
         component_pass = not component['errors']
+    if external_runtime is not None:
+        r5_external_runtime.validate(external_runtime)
     final_closure = source_closure()
     if tested_closure != final_closure or hashlib.sha256(CASES.read_bytes()).hexdigest()!=cases_hash:
         reports.append({'errors':['source/shared input changed during execution; rerun after integration'],'task_complete':False})

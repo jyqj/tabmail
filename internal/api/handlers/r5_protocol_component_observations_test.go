@@ -468,15 +468,68 @@ func r5UIState(t *testing.T, f *r5UIFixture) map[string]any {
 	r5UIMust(t, e)
 	return map[string]any{"employee_active": active, "employee_session_version": version, "disposition_audits": audits, "effective_can_send": perm.CanSend, "effective_zone_count": len(perm.AllowedZoneIDs)}
 }
+
+// Both producers resolve the same externally pinned CLI. The helper performs
+// full descriptor-bound inventory checks before launch and after termination.
+// This workspace contract does not prevent hostile transient concurrent writes.
+func r5UIExternalRuntime(t *testing.T, root string) (string, string, string) {
+	t.Helper()
+	path, pin := os.Getenv("TABMAIL_R5_EXTERNAL_MANIFEST"), os.Getenv("TABMAIL_R5_EXTERNAL_MANIFEST_SHA256")
+	if path == "" || pin == "" || !filepath.IsAbs(path) {
+		t.Fatal("explicit external runtime manifest and independent SHA256 required")
+	}
+	raw, err := os.ReadFile(path)
+	r5UIMust(t, err)
+	hash := sha256.Sum256(raw)
+	if hex.EncodeToString(hash[:]) != pin {
+		t.Fatal("external runtime manifest pin differs")
+	}
+	type tool struct {
+		Path   string
+		SHA256 string
+	}
+	var manifest struct {
+		Policy, Status    string
+		Source            struct{ Path string }
+		Node, CLI, Python tool
+		HelperSHA256      string `json:"helper_sha256"`
+	}
+	r5UIMust(t, json.Unmarshal(raw, &manifest))
+	if manifest.Policy != "r5_external_dependency_runtime_v1" || manifest.Status != "UNADOPTED" || manifest.Source.Path != root {
+		t.Fatal("external runtime policy, status or source differs")
+	}
+	helper := filepath.Join(root, "scripts/preparation/r5_external_runtime.py")
+	for _, file := range []tool{manifest.Node, manifest.CLI, manifest.Python, {Path: helper, SHA256: manifest.HelperSHA256}} {
+		if !filepath.IsAbs(file.Path) {
+			t.Fatal("absolute pinned executable required")
+		}
+		info, e := os.Lstat(file.Path)
+		r5UIMust(t, e)
+		if !info.Mode().IsRegular() {
+			t.Fatal("regular pinned executable required")
+		}
+		bytes, e := os.ReadFile(file.Path)
+		r5UIMust(t, e)
+		digest := sha256.Sum256(bytes)
+		if hex.EncodeToString(digest[:]) != file.SHA256 {
+			t.Fatal("external runtime executable drift")
+		}
+	}
+	cmd := exec.Command(manifest.Python.Path, helper, "validate", "--source", root)
+	cmd.Dir = filepath.Join(root, "web")
+	if output, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("external runtime validation rejected: %v: %s", err, output)
+	}
+	return manifest.Python.Path, manifest.Node.Path, manifest.CLI.Path
+}
+
 func TestR5ProtocolComponentObservations(t *testing.T) {
 	if os.Getenv("TABMAIL_TEST_DB_DSN") == "" || os.Getenv("TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE") == "" {
 		t.Fatal("Explicit disposable DSN and fresh component evidence root required; no skip")
 	}
-	if _, e := exec.LookPath("node"); e != nil {
-		t.Fatal("Actual installed Node frontend toolchain required")
-	}
 	_, file, _, _ := runtime.Caller(0)
 	root := filepath.Clean(filepath.Join(filepath.Dir(file), "../../.."))
+	launcher, node, cli := r5UIExternalRuntime(t, root)
 	raw, e := os.ReadFile(filepath.Join(root, "docs/company-mail/evidence/R5-PROTOCOL-CASES.json"))
 	r5UIMust(t, e)
 	hash := sha256.Sum256(raw)
@@ -516,7 +569,7 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 				r5UIMust(t, os.WriteFile(private, b, 0600))
 				ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
 				defer cancel()
-				cmd := exec.CommandContext(ctx, "node", filepath.Join(root, "web/node_modules/vitest/vitest.mjs"), "run", "--config", "vitest.r5protocol.config.ts", "--reporter=json", "--outputFile", reportPath)
+				cmd := exec.CommandContext(ctx, launcher, filepath.Join(root, "scripts/preparation/r5_external_runtime.py"), "launch", "--source", root, "--", node, cli, "run", "--config", "vitest.r5protocol.config.ts", "--reporter=json", "--outputFile", reportPath)
 				cmd.Dir = filepath.Join(root, "web")
 				cmd.Env = append(os.Environ(), "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE="+private)
 				f.mu.Lock()
