@@ -1,0 +1,390 @@
+test_current_inventory_is_only_structure_evidence (original_test.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence) ... ERROR
+
+======================================================================
+ERROR: test_current_inventory_is_only_structure_evidence (original_test.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_transactions.py", line 24, in test_current_inventory_is_only_structure_evidence
+    result = tx.validate(self.data, self.ast, self.migrations)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/check_r5_transactions.py", line 122, in validate
+    if errors: raise ValueError('\n'.join(errors))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: postgres function set drift: missing=['internal/store/postgres/apikeys.go:*PgStore:touchAPIKeyObservation', 'internal/store/postgres/company_admin_events.go:*PgStore:ListCompanyAdminEvents', 'internal/store/postgres/company_admin_events.go:*PgStore:WithCompanyAdminEventAccess', 'internal/store/postgres/company_attachment_gc_scheduler.go:*PgStore:sweepCompanyAttachmentTenants', 'internal/store/postgres/company_mail.go:*capturedRestoreDeadline:check', 'internal/store/postgres/company_mail.go::restoreMessageMutation', 'internal/store/postgres/company_ops.go::sweepCompanyAttachmentsWith', 'internal/store/postgres/content_eligibility.go:*PgStore:authorizeReceivedMailboxTx', 'internal/store/postgres/content_eligibility.go::readReceivedPageTx', 'internal/store/postgres/content_eligibility.go::requireReceivedContentTx', 'internal/store/postgres/content_eligibility.go::requireReceivedMailboxLiveTx', 'internal/store/postgres/employee_disposition.go:*PgStore:offboardingPlanTarget', 'internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget', 'internal/store/postgres/employee_disposition.go::offboardingAuthorityEpochTx', 'internal/store/postgres/employee_disposition.go::offboardingEpochsTx', 'internal/store/postgres/employee_disposition.go::offboardingPreviewDeadlineTx', 'internal/store/postgres/employee_disposition.go::offboardingSubjectsTx', 'internal/store/postgres/member_guard.go::guardMemberHistoricalIdentity', 'internal/store/postgres/member_guard.go::memberIdentityDeleteError', 'internal/store/postgres/outbound.go::outboundJobsScopeSQL', 'internal/store/postgres/outbound_inspection.go:*PgStore:InspectOutboundRecovery', 'internal/store/postgres/permission_assignment.go:*PgStore:AssignPermissionEditor', 'internal/store/postgres/permission_assignment.go::permissionAssignmentChangedFields', 'internal/store/postgres/permission_editor_patch.go:*PgStore:PatchPermissionEditor', 'internal/store/postgres/permission_editor_patch.go::applyPermissionPatchTx', 'internal/store/postgres/permission_editor_patch.go::permissionDomainPatchParams', 'internal/store/postgres/permission_editor_patch.go::permissionFieldParam', 'internal/store/postgres/permission_editor_patch.go::permissionPatchFields', 'internal/store/postgres/permission_editor_snapshot.go:*PgStore:GetPermissionEditorSnapshot', 'internal/store/postgres/permission_editor_snapshot.go::permissionEditorSnapshotTx', 'internal/store/postgres/permission_profile_cas.go:*PgStore:DeletePermissionProfileCAS', 'internal/store/postgres/permission_profile_cas.go:*PgStore:GetPermissionProfileDeletionPreview', 'internal/store/postgres/permission_profile_cas.go:*PgStore:UpdatePermissionProfileCAS', 'internal/store/postgres/permission_profile_cas.go::permissionPositiveRevision', 'internal/store/postgres/permission_profile_cas.go::permissionProfileAudit', 'internal/store/postgres/permission_profile_cas.go::permissionProfileChangedFields', 'internal/store/postgres/permission_profile_cas.go::permissionProfileMembersTx', 'internal/store/postgres/permission_profile_cas.go::permissionProfileMutationTx', 'internal/store/postgres/permission_profile_create.go:*PgStore:CreatePermissionProfileGuarded', 'internal/store/postgres/permission_profile_visibility.go:*PgStore:ListVisiblePermissionProfiles', 'internal/store/postgres/permissions.go::effectivePermissionAfterProfileRemoval', 'internal/store/postgres/permissions.go::effectivePermissionPolicy', 'internal/store/postgres/sent_content_selector.go::readSentContentTx', 'internal/store/postgres/sent_recipient_snapshot.go:*PgStore:BackfillSentRecipientSnapshotsV1', 'internal/store/postgres/submission_receipt_privacy.go::loadSubmissionReceiptRecipients'] obsolete=['internal/store/postgres/submissions.go::applySubmissionOutcome', 'internal/store/postgres/submissions.go::loadSubmissionRecipients']
+function syntax drift: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey
+classification drift: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey
+precise assertion drift direct_sql_effects: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey
+precise assertion drift transaction_helper_calls: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey
+precise assertion drift sql_execution_expressions: internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey
+function syntax drift: internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey
+precise assertion drift direct_sql_effects: internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey
+precise assertion drift sql_execution_expressions: internal/store/postgres/apikeys.go:*PgStore:DeleteAPIKey
+function syntax drift: internal/store/postgres/apikeys.go:*PgStore:GetAPIKey
+precise assertion drift sql_execution_expressions: internal/store/postgres/apikeys.go:*PgStore:GetAPIKey
+caller drift: internal/store/postgres/apikeys.go:*PgStore:GetAPIKey
+function syntax drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys
+precise assertion drift sql_execution_expressions: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys
+function syntax drift: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner
+precise assertion drift sql_execution_expressions: internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner
+function syntax drift: internal/store/postgres/apikeys.go:*PgStore:ResolveAPIKey
+precise assertion drift sql_execution_expressions: internal/store/postgres/apikeys.go:*PgStore:ResolveAPIKey
+caller drift: internal/store/postgres/apikeys.go:*PgStore:ResolveAPIKey
+function syntax drift: internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey
+classification drift: internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey
+precise assertion drift direct_sql_effects: internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey
+precise assertion drift sql_execution_expressions: internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey
+caller drift: internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey
+function syntax drift: internal/store/postgres/apikeys.go::scanAPIKeys
+caller drift: internal/store/postgres/apikeys.go::scanAPIKeys
+caller drift: internal/store/postgres/audit.go:*PgStore:InsertAudit
+caller drift: internal/store/postgres/audit.go:*PgStore:ListAuditEntriesPaged
+function syntax drift: internal/store/postgres/company_access_explanation.go:*PgStore:ExplainMailboxAccess
+caller drift: internal/store/postgres/company_bootstrap.go:*PgStore:BootstrapCompanyAdmin
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:DeleteMailDraft
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go:*PgStore:DeleteMailDraft
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:DeleteMailDraft
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:DeleteMailDraft
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment
+precise assertion drift direct_lock_fragments: internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:GetMailDraft
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:GetMailDraft
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:GetMailDraft
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:ListMailDrafts
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:ListMailboxEvents
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:ListMailboxEvents
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:ListWorkMessages
+classification drift: internal/store/postgres/company_mail.go:*PgStore:ListWorkMessages
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:ListWorkMessages
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:MutateWorkMessage
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:MutateWorkMessage
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:OutboundAttachments
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:OutboundAttachments
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment
+precise assertion drift direct_lock_fragments: internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:SaveMailDraft
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go:*PgStore:SaveMailDraft
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:SaveMailDraft
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:SaveMailDraft
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages
+precise assertion drift direct_lock_fragments: internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages
+caller drift: internal/store/postgres/company_mail.go:*PgStore:TrashCompanyMessages
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:fillDraftTemplateVersions
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:fillDraftTemplateVersions
+function syntax drift: internal/store/postgres/company_mail.go:*PgStore:writePersonalMessageState
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go:*PgStore:writePersonalMessageState
+precise assertion drift direct_lock_fragments: internal/store/postgres/company_mail.go:*PgStore:writePersonalMessageState
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go:*PgStore:writePersonalMessageState
+caller drift: internal/store/postgres/company_mail.go:*PgStore:writePersonalMessageState
+function syntax drift: internal/store/postgres/company_mail.go::fillDraftTemplateVersion
+caller drift: internal/store/postgres/company_mail.go::fillDraftTemplateVersion
+function syntax drift: internal/store/postgres/company_mail.go::messageMutation
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go::messageMutation
+precise assertion drift direct_lock_fragments: internal/store/postgres/company_mail.go::messageMutation
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go::messageMutation
+caller drift: internal/store/postgres/company_mail.go::messageMutation
+function syntax drift: internal/store/postgres/company_mail.go::messageOutbox
+precise assertion drift direct_sql_effects: internal/store/postgres/company_mail.go::messageOutbox
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go::messageOutbox
+caller drift: internal/store/postgres/company_mail.go::messageOutbox
+caller drift: internal/store/postgres/company_mail.go::scanWorkMessage
+function syntax drift: internal/store/postgres/company_mail.go::validateAttachmentIDs
+precise assertion drift direct_lock_fragments: internal/store/postgres/company_mail.go::validateAttachmentIDs
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_mail.go::validateAttachmentIDs
+caller drift: internal/store/postgres/company_mail.go::validateAttachmentIDs
+caller drift: internal/store/postgres/company_mail.go::workMessageSelect
+caller drift: internal/store/postgres/company_members.go:*PgStore:companyReadTx
+caller drift: internal/store/postgres/company_members.go:*PgStore:companyReferencedTx
+caller drift: internal/store/postgres/company_members.go:*PgStore:companyTx
+caller drift: internal/store/postgres/company_members.go:*PgStore:mailboxAccessTx
+caller drift: internal/store/postgres/company_members.go::companyAudit
+function syntax drift: internal/store/postgres/company_message_read.go:*PgStore:GetWorkMessage
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_message_read.go:*PgStore:GetWorkMessage
+caller drift: internal/store/postgres/company_metrics.go:*PgStore:CompanyMetrics
+caller drift: internal/store/postgres/company_ops.go:*PgStore:CheckWorkers
+caller drift: internal/store/postgres/company_ops.go:*PgStore:Heartbeat
+caller drift: internal/store/postgres/company_ops.go:*PgStore:InspectRecoveryReceipt
+caller drift: internal/store/postgres/company_ops.go:*PgStore:ListOutboundRecipients
+caller drift: internal/store/postgres/company_ops.go:*PgStore:ListRecoveryReceipts
+caller drift: internal/store/postgres/company_ops.go:*PgStore:Readiness
+caller drift: internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound
+caller drift: internal/store/postgres/company_ops.go:*PgStore:RetryRecoveryReceipt
+function syntax drift: internal/store/postgres/company_ops.go:*PgStore:SweepCompanyMetadata
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_ops.go:*PgStore:SweepCompanyMetadata
+function syntax drift: internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments
+classification drift: internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments
+precise assertion drift direct_sql_effects: internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments
+precise assertion drift direct_lock_fragments: internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments
+precise assertion drift transaction_helper_calls: internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments
+precise assertion drift sql_execution_expressions: internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments
+caller drift: internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments
+caller drift: internal/store/postgres/company_ops.go::recoveryReferencedActor
+caller drift: internal/store/postgres/company_templates.go:*PgStore:TemplateForSend
+caller drift: internal/store/postgres/company_templates.go::classifyTemplateVersion
+caller drift: internal/store/postgres/company_templates.go::newDraftTemplateVersion
+caller drift: internal/store/postgres/company_templates.go::templateVersionStatusTx
+caller drift: internal/store/postgres/draft_query.go:*PgStore:ListMailDraftPage
+function syntax drift: internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding
+precise assertion drift direct_sql_effects: internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding
+precise assertion drift direct_lock_fragments: internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding
+precise assertion drift transaction_helper_calls: internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding
+precise assertion drift sql_execution_expressions: internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding
+function syntax drift: internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding
+precise assertion drift direct_sql_effects: internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding
+precise assertion drift transaction_helper_calls: internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding
+precise assertion drift sql_execution_expressions: internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding
+function syntax drift: internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding
+precise assertion drift direct_sql_effects: internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding
+precise assertion drift sql_execution_expressions: internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding
+caller drift: internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding
+function syntax drift: internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget
+classification drift: internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget
+precise assertion drift direct_lock_fragments: internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget
+precise assertion drift sql_execution_expressions: internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget
+caller drift: internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget
+function syntax drift: internal/store/postgres/employee_disposition.go::offboardingSnapshot
+precise assertion drift sql_execution_expressions: internal/store/postgres/employee_disposition.go::offboardingSnapshot
+caller drift: internal/store/postgres/employee_disposition.go::offboardingSnapshot
+caller drift: internal/store/postgres/ingress.go:*PgStore:CreateIngress
+caller drift: internal/store/postgres/ingress.go:*PgStore:DeliverIngress
+caller drift: internal/store/postgres/ingress.go:*PgStore:FailIngressTarget
+caller drift: internal/store/postgres/ingress.go:*PgStore:HoldIngressTarget
+caller drift: internal/store/postgres/ingress.go:*PgStore:ListIngressTargets
+function syntax drift: internal/store/postgres/mail_content.go:*PgStore:ClaimMailIndexJobs
+precise assertion drift direct_sql_effects: internal/store/postgres/mail_content.go:*PgStore:ClaimMailIndexJobs
+precise assertion drift direct_lock_fragments: internal/store/postgres/mail_content.go:*PgStore:ClaimMailIndexJobs
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go:*PgStore:ClaimMailIndexJobs
+function syntax drift: internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob
+precise assertion drift direct_sql_effects: internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob
+precise assertion drift direct_lock_fragments: internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob
+precise assertion drift transaction_helper_calls: internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob
+function syntax drift: internal/store/postgres/mail_content.go:*PgStore:ContentIndexStatus
+classification drift: internal/store/postgres/mail_content.go:*PgStore:ContentIndexStatus
+precise assertion drift transaction_helper_calls: internal/store/postgres/mail_content.go:*PgStore:ContentIndexStatus
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go:*PgStore:ContentIndexStatus
+function syntax drift: internal/store/postgres/mail_content.go:*PgStore:FailMailIndexJob
+precise assertion drift direct_sql_effects: internal/store/postgres/mail_content.go:*PgStore:FailMailIndexJob
+precise assertion drift transaction_helper_calls: internal/store/postgres/mail_content.go:*PgStore:FailMailIndexJob
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go:*PgStore:FailMailIndexJob
+function syntax drift: internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage
+classification drift: internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage
+function syntax drift: internal/store/postgres/mail_content.go:*PgStore:RetryFailedMailIndex
+precise assertion drift direct_sql_effects: internal/store/postgres/mail_content.go:*PgStore:RetryFailedMailIndex
+precise assertion drift direct_lock_fragments: internal/store/postgres/mail_content.go:*PgStore:RetryFailedMailIndex
+precise assertion drift transaction_helper_calls: internal/store/postgres/mail_content.go:*PgStore:RetryFailedMailIndex
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go:*PgStore:RetryFailedMailIndex
+function syntax drift: internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage
+precise assertion drift direct_lock_fragments: internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage
+precise assertion drift transaction_helper_calls: internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage
+function syntax drift: internal/store/postgres/mail_content.go::lockMailIndexLease
+precise assertion drift direct_lock_fragments: internal/store/postgres/mail_content.go::lockMailIndexLease
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go::lockMailIndexLease
+caller drift: internal/store/postgres/mail_content.go::lockMailIndexLease
+function syntax drift: internal/store/postgres/mail_content.go::saveParsed
+precise assertion drift direct_sql_effects: internal/store/postgres/mail_content.go::saveParsed
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_content.go::saveParsed
+caller drift: internal/store/postgres/mail_content.go::saveParsed
+function syntax drift: internal/store/postgres/mail_conversation.go:*PgStore:ListMessageConversation
+precise assertion drift sql_execution_expressions: internal/store/postgres/mail_conversation.go:*PgStore:ListMessageConversation
+caller drift: internal/store/postgres/mailbox_predicate.go::readableMailboxPredicate
+caller drift: internal/store/postgres/mailbox_revision.go::lockMailboxAuthorization
+caller drift: internal/store/postgres/mailbox_revision.go::transferOwnedMailboxes
+caller drift: internal/store/postgres/mailboxes.go:*PgStore:ForTenant
+caller drift: internal/store/postgres/mailboxes.go:*PgStore:GetMailbox
+caller drift: internal/store/postgres/mailboxes.go:*PgStore:ListMailboxObjectKeys
+caller drift: internal/store/postgres/mailboxes.go:*pgTenantView:GetMailbox
+function syntax drift: internal/store/postgres/member_guard.go:*PgStore:DeleteUserGuarded
+precise assertion drift direct_sql_effects: internal/store/postgres/member_guard.go:*PgStore:DeleteUserGuarded
+precise assertion drift sql_execution_expressions: internal/store/postgres/member_guard.go:*PgStore:DeleteUserGuarded
+caller drift: internal/store/postgres/member_guard.go:*PgStore:DeleteUserGuarded
+caller drift: internal/store/postgres/member_guard.go:*PgStore:UpdateUserGuarded
+caller drift: internal/store/postgres/member_guard.go::currentMemberActor
+caller drift: internal/store/postgres/member_guard.go::guardMemberRemoval
+caller drift: internal/store/postgres/member_guard.go::insertMemberAudit
+caller drift: internal/store/postgres/member_guard.go::lockMemberTenant
+caller drift: internal/store/postgres/messages.go:*PgStore:DeleteMessage
+caller drift: internal/store/postgres/messages.go:*PgStore:GetMessage
+caller drift: internal/store/postgres/messages.go:*PgStore:ListMessages
+caller drift: internal/store/postgres/messages.go:*PgStore:MarkSeen
+caller drift: internal/store/postgres/messages.go:*PgStore:PurgeMailbox
+caller drift: internal/store/postgres/messages.go:*pgTenantView:GetMessage
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:AddSuppression
+precise assertion drift direct_sql_effects: internal/store/postgres/outbound.go:*PgStore:AddSuppression
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:AddSuppression
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:ClaimOutboundJobs
+precise assertion drift direct_sql_effects: internal/store/postgres/outbound.go:*PgStore:ClaimOutboundJobs
+precise assertion drift direct_lock_fragments: internal/store/postgres/outbound.go:*PgStore:ClaimOutboundJobs
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:ClaimOutboundJobs
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:CountOutboundByIdentitySince
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:CountOutboundSince
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:CreateOutboundAttempt
+precise assertion drift direct_sql_effects: internal/store/postgres/outbound.go:*PgStore:CreateOutboundAttempt
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:CreateOutboundAttempt
+caller drift: internal/store/postgres/outbound.go:*PgStore:CreateOutboundAttempt
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:DeleteSuppression
+precise assertion drift direct_sql_effects: internal/store/postgres/outbound.go:*PgStore:DeleteSuppression
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:DeleteSuppression
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited
+precise assertion drift direct_lock_fragments: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited
+precise assertion drift transaction_helper_calls: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAudited
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized
+precise assertion drift direct_lock_fragments: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized
+precise assertion drift transaction_helper_calls: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized
+caller drift: internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:IsSuppressed
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:IsSuppressed
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:ListOutboundAttempts
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:ListOutboundAttempts
+caller drift: internal/store/postgres/outbound.go:*PgStore:ListOutboundAttempts
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:ListOutboundJobsScoped
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:ListOutboundJobsScoped
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:ListSuppressions
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go:*PgStore:ListSuppressions
+caller drift: internal/store/postgres/outbound.go:*PgStore:ListSuppressions
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobFailed
+caller drift: internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobFailed
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobRetry
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobSent
+caller drift: internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobSent
+function syntax drift: internal/store/postgres/outbound.go:*PgStore:RequeueOutboundJob
+function syntax drift: internal/store/postgres/outbound.go::countOutboundByIdentitySinceQuery
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go::countOutboundByIdentitySinceQuery
+caller drift: internal/store/postgres/outbound.go::countOutboundByIdentitySinceQuery
+function syntax drift: internal/store/postgres/outbound.go::countOutboundSinceQuery
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go::countOutboundSinceQuery
+caller drift: internal/store/postgres/outbound.go::countOutboundSinceQuery
+function syntax drift: internal/store/postgres/outbound.go::deleteSuppressionAuditedTx
+precise assertion drift direct_sql_effects: internal/store/postgres/outbound.go::deleteSuppressionAuditedTx
+precise assertion drift direct_lock_fragments: internal/store/postgres/outbound.go::deleteSuppressionAuditedTx
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go::deleteSuppressionAuditedTx
+caller drift: internal/store/postgres/outbound.go::deleteSuppressionAuditedTx
+function syntax drift: internal/store/postgres/outbound.go::mergeAuditDetail
+caller drift: internal/store/postgres/outbound.go::mergeAuditDetail
+function syntax drift: internal/store/postgres/outbound.go::requeueOutboundJob
+precise assertion drift direct_sql_effects: internal/store/postgres/outbound.go::requeueOutboundJob
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound.go::requeueOutboundJob
+caller drift: internal/store/postgres/outbound.go::requeueOutboundJob
+function syntax drift: internal/store/postgres/outbound.go::requireDeliveryUpdate
+caller drift: internal/store/postgres/outbound.go::scanOutboundJob
+caller drift: internal/store/postgres/outbound_receipts.go:*PgStore:GetOutboundReceipt
+caller drift: internal/store/postgres/outbound_receipts.go:*PgStore:ListOutboundReceipts
+function syntax drift: internal/store/postgres/outbound_receipts.go::readOutboundReceipts
+precise assertion drift sql_execution_expressions: internal/store/postgres/outbound_receipts.go::readOutboundReceipts
+function syntax drift: internal/store/postgres/outbound_receipts.go:outboundReceiptRow:Scan
+caller drift: internal/store/postgres/outbound_receipts.go:outboundReceiptRow:Scan
+caller drift: internal/store/postgres/outbound_recipients.go:*PgStore:CompleteOutboundRecipient
+caller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:EffectivePermission
+caller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:FindSendIdentityForAddress
+caller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:ForTenant
+caller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetAPIKey
+caller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetUser
+caller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone
+caller drift: internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:TemplateForSend
+caller drift: internal/store/postgres/outbound_retry_reader.go:retryTenantView:GetMailbox
+caller drift: internal/store/postgres/outbound_retry_reader.go:retryTenantView:GetMessage
+caller drift: internal/store/postgres/outbound_transition.go:*PgStore:finalizeOutbound
+caller drift: internal/store/postgres/permission_snapshot.go:*PgStore:permissionOverrideTx
+function syntax drift: internal/store/postgres/permissions.go:*PgStore:CreatePermissionProfile
+precise assertion drift direct_sql_effects: internal/store/postgres/permissions.go:*PgStore:CreatePermissionProfile
+precise assertion drift sql_execution_expressions: internal/store/postgres/permissions.go:*PgStore:CreatePermissionProfile
+caller drift: internal/store/postgres/permissions.go:*PgStore:CreatePermissionProfile
+caller drift: internal/store/postgres/permissions.go:*PgStore:DeletePermissionProfile
+function syntax drift: internal/store/postgres/permissions.go:*PgStore:DeleteUserPermissionOverride
+precise assertion drift direct_sql_effects: internal/store/postgres/permissions.go:*PgStore:DeleteUserPermissionOverride
+precise assertion drift transaction_helper_calls: internal/store/postgres/permissions.go:*PgStore:DeleteUserPermissionOverride
+precise assertion drift sql_execution_expressions: internal/store/postgres/permissions.go:*PgStore:DeleteUserPermissionOverride
+caller drift: internal/store/postgres/permissions.go:*PgStore:DeleteUserPermissionOverride
+function syntax drift: internal/store/postgres/permissions.go:*PgStore:EffectivePermission
+caller drift: internal/store/postgres/permissions.go:*PgStore:EffectivePermission
+caller drift: internal/store/postgres/permissions.go:*PgStore:GetPermissionProfile
+caller drift: internal/store/postgres/permissions.go:*PgStore:ListPermissionProfiles
+caller drift: internal/store/postgres/permissions.go:*PgStore:UpdatePermissionProfile
+function syntax drift: internal/store/postgres/permissions.go:*PgStore:UpsertUserPermissionOverride
+precise assertion drift direct_sql_effects: internal/store/postgres/permissions.go:*PgStore:UpsertUserPermissionOverride
+precise assertion drift sql_execution_expressions: internal/store/postgres/permissions.go:*PgStore:UpsertUserPermissionOverride
+caller drift: internal/store/postgres/permissions.go:*PgStore:UpsertUserPermissionOverride
+function syntax drift: internal/store/postgres/permissions.go::effectivePermission
+precise assertion drift sql_execution_expressions: internal/store/postgres/permissions.go::effectivePermission
+caller drift: internal/store/postgres/permissions.go::effectivePermission
+function syntax drift: internal/store/postgres/permissions.go::scanPermProfile
+caller drift: internal/store/postgres/permissions.go::scanPermProfile
+function syntax drift: internal/store/postgres/permissions.go::uuidSliceParam
+caller drift: internal/store/postgres/permissions.go::uuidSliceParam
+caller drift: internal/store/postgres/postgres.go:*PgStore:Close
+caller drift: internal/store/postgres/postgres.go::New
+caller drift: internal/store/postgres/postgres.go::hashKey
+caller drift: internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries
+caller drift: internal/store/postgres/queue.go:*PgStore:CountIngestJobsByState
+caller drift: internal/store/postgres/queue.go:*PgStore:CountWebhookDeliveriesByState
+caller drift: internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent
+caller drift: internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries
+caller drift: internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries
+caller drift: internal/store/postgres/queue.go:*PgStore:ListIngestJobs
+caller drift: internal/store/postgres/queue.go:*PgStore:ListWebhookDeliveries
+caller drift: internal/store/postgres/refresh_rotation.go:*PgStore:RevokeRefreshTokenByHash
+caller drift: internal/store/postgres/refresh_rotation.go:*PgStore:RotateRefreshToken
+caller drift: internal/store/postgres/send_identities.go:*PgStore:FindSendIdentityForAddress
+caller drift: internal/store/postgres/smtp_policy.go:*PgStore:GetSMTPPolicy
+caller drift: internal/store/postgres/smtp_policy.go:*PgStore:UpsertSMTPPolicy
+function syntax drift: internal/store/postgres/submissions.go:*PgStore:GetSubmission
+precise assertion drift transaction_helper_calls: internal/store/postgres/submissions.go:*PgStore:GetSubmission
+precise assertion drift sql_execution_expressions: internal/store/postgres/submissions.go:*PgStore:GetSubmission
+function syntax drift: internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment
+precise assertion drift transaction_helper_calls: internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment
+precise assertion drift sql_execution_expressions: internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment
+function syntax drift: internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent
+classification drift: internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent
+precise assertion drift transaction_helper_calls: internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent
+precise assertion drift sql_execution_expressions: internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent
+function syntax drift: internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments
+precise assertion drift transaction_helper_calls: internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments
+precise assertion drift sql_execution_expressions: internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments
+function syntax drift: internal/store/postgres/submissions.go:*PgStore:ListSubmissions
+precise assertion drift transaction_helper_calls: internal/store/postgres/submissions.go:*PgStore:ListSubmissions
+precise assertion drift sql_execution_expressions: internal/store/postgres/submissions.go:*PgStore:ListSubmissions
+function syntax drift: internal/store/postgres/submissions.go::scanSubmission
+caller drift: internal/store/postgres/submissions.go::scanSubmission
+function syntax drift: internal/store/postgres/submissions.go::submissionContentScope
+caller drift: internal/store/postgres/submissions.go::submissionContentScope
+function syntax drift: internal/store/postgres/submissions.go::submissionScope
+caller drift: internal/store/postgres/submissions.go::submissionScope
+function syntax drift: internal/store/postgres/submissions.go::submissionScopeFor
+caller drift: internal/store/postgres/submissions.go::submissionScopeFor
+caller drift: internal/store/postgres/tenants.go:*PgStore:CreateTenant
+caller drift: internal/store/postgres/tenants.go:*PgStore:GetTenant
+caller drift: internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic
+caller drift: internal/store/postgres/users.go:*PgStore:CreateRefreshToken
+caller drift: internal/store/postgres/users.go:*PgStore:CreateUser
+caller drift: internal/store/postgres/users.go:*PgStore:GetUser
+caller drift: internal/store/postgres/users.go:*PgStore:GetUserByEmail
+caller drift: internal/store/postgres/users.go:*PgStore:RevokeUserRefreshTokens
+caller drift: internal/store/postgres/users.go:*PgStore:TouchUserLogin
+caller drift: internal/store/postgres/users.go:*PgStore:UpdateUserPassword
+caller drift: internal/store/postgres/users.go::scanUser
+caller drift: internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints
+caller drift: internal/store/postgres/zones.go:*PgStore:GetRoute
+caller drift: internal/store/postgres/zones.go:*PgStore:GetZone
+postgres file set/content drift including package SQL constants
+migration/FK/trigger definition drift
+file-type review coverage drift
+
+----------------------------------------------------------------------
+Ran 1 test in 0.384s
+
+FAILED (errors=1)

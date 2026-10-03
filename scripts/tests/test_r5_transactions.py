@@ -22,8 +22,9 @@ class TransactionInventoryTests(unittest.TestCase):
 
     def test_current_inventory_is_only_structure_evidence(self):
         result = tx.validate(self.data, self.ast, self.migrations)
-        self.assertEqual(result['functions'], 352)
-        self.assertEqual(result['postgres_files'], 49)
+        self.assertEqual(result['functions'], 395)
+        self.assertEqual(result['postgres_files'], 62)
+        self.assertEqual(result['migration_files'], 19)
         self.assertFalse(result['runtime_verified'])
         self.assertFalse(result['task_complete'])
 
@@ -109,9 +110,112 @@ class TransactionInventoryTests(unittest.TestCase):
 
     def test_cache_has_specific_message_fence_not_ancestor_lock(self):
         e=next(e for e in self.data['entries'] if e['entry']=='SaveParsedMessage')
-        self.assertIn('message SHARE NOWAIT',e['lock_fk_wait_fence'])
-        self.assertEqual(e['evidence_level'],'actual-batch-linked-relationship')
-        self.assertIn('不新增T锁',e['lock_fk_wait_fence'])
+        self.assertIn('message SHARE NOWAIT',e['lock_fk_wait_fence']['boundary'])
+        self.assertEqual(e['evidence_level'],'source-only')
+        self.assertIn('no new ancestor tenant lock',e['lock_fk_wait_fence']['boundary'])
+        self.assertIn('not executed against PG',e['source_review']['unverified'])
+
+
+    def entry(self, name):
+        return next(e for e in self.data['entries'] if e['entry'] == name)
+
+    def test_pr23_each_added_and_changed_body_has_independent_source_review(self):
+        evidence = tx.CATALOG.parent / 'PR23-TRANSACTION-INVENTORY-20261003/function-review.json'
+        review = json.loads(evidence.read_text())
+        self.assertEqual((review['added'], review['removed'], review['body_changed']), (45, 2, 33))
+        entries = {e['id']: e for e in self.data['entries']}
+        self.assertEqual(len(review['functions']), 78)
+        self.assertEqual(len({r['id'] for r in review['functions']}), 78)
+        for row in review['functions']:
+            with self.subTest(function=row['id']):
+                e = entries[row['id']]
+                self.assertEqual(e['source_review'], {k: row[k] for k in
+                    ('role', 'trace', 'unverified', 'source_sha256', 'base_commit')})
+                self.assertEqual(e['syntax']['sha256'], row['source_sha256'])
+                self.assertEqual(e['classification'], row['classification'])
+                self.assertEqual(e['evidence_level'], 'source-only')
+        for row in review['removed_functions']:
+            self.assertNotIn(row['id'], entries)
+        self.assertFalse(review['runtime_verified'])
+
+    def test_obsolete_function_and_wrong_receiver_rejected(self):
+        for identity in [tx.PG+'submissions.go::loadSubmissionRecipients',
+                         tx.PG+'company_mail.go:*PgStore:check']:
+            data = copy.deepcopy(self.data)
+            e = copy.deepcopy(self.entry('check')); e['id'] = identity
+            data['entries'].append(e)
+            with self.assertRaisesRegex(ValueError, 'postgres function set drift:.*obsolete='):
+                tx.validate(data, self.ast, self.migrations)
+
+    def test_constant_backed_observation_is_write_despite_ast_heuristic(self):
+        e = self.entry('touchAPIKeyObservation')
+        # The unchanged producer does not resolve package SQL constants. Its
+        # read/dynamic heuristic must never be used as a transaction allowlist.
+        self.assertFalse(e['classification']['direct_write'])
+        self.assertEqual(e['classification']['kind'], 'dynamic-sql-review')
+        self.assertEqual(e['source_review']['role'], 'autocommit-observation-write')
+        self.assertEqual(e['assertions']['sql_execution_expressions'][0]['sql_expr'], 'apiKeyUsageUpdateSQL')
+        pgfile = next(f for f in self.ast['files'] if f['path'] == e['syntax']['file'])
+        self.assertTrue(any(tx.MUTATION.search(s['value']) and 'tenant_api_key_usage' in s['value']
+                            for s in pgfile['strings']))
+        ast = copy.deepcopy(self.ast)
+        next(f for f in ast['files'] if f['path'] == pgfile['path'])['sha256'] = 'a'*64
+        with self.assertRaisesRegex(ValueError, 'postgres file set/content drift'):
+            tx.validate(self.data, ast, self.migrations)
+
+    def test_read_preview_and_sse_have_real_lock_and_callback_boundaries(self):
+        preview = self.entry('GetPermissionProfileDeletionPreview')
+        self.assertTrue(preview['classification']['explicit_lock'])
+        self.assertFalse(preview['classification']['direct_write'])
+        self.assertEqual(preview['source_review']['role'], 'authorized-transaction-locking-reader')
+        self.assertIn('UPDATE NOWAIT', preview['source_review']['trace'])
+        members = self.entry('permissionProfileMembersTx')
+        self.assertIn('NO KEY UPDATE NOWAIT', members['source_review']['trace'])
+        self.assertIn('tenant KEY SHARE NOWAIT', members['source_review']['trace'])
+        callback = self.entry('WithCompanyAdminEventAccess')
+        self.assertTrue(callback['classification']['callback_parameter'])
+        self.assertEqual(callback['source_review']['role'], 'transaction-external-callback')
+        self.assertIn('cannot be rolled back', callback['assertions']['callback_effect'])
+        data = copy.deepcopy(self.data)
+        next(e for e in data['entries'] if e['entry'] == callback['entry'])['assertions']['callback_effect'] = ''
+        self.rejected(data=data)
+
+    def test_gc_round_and_receipt_projection_are_not_transaction_acceptance(self):
+        scheduler = self.entry('sweepCompanyAttachmentTenants')
+        self.assertEqual(scheduler['source_review']['role'], 'session-lock-scheduler')
+        self.assertIn('autocommits', scheduler['source_review']['trace'])
+        sweep = self.entry('sweepCompanyAttachmentsWith')
+        self.assertEqual(sweep['source_review']['role'], 'transaction-owner-gc')
+        states = self.entry('loadSubmissionReceiptRecipients')
+        sql = states['assertions']['sql_execution_expressions'][0]['sql_expr']
+        self.assertIn('SELECT job_id,state', sql)
+        self.assertNotIn('SELECT job_id,address', sql)
+        self.assertEqual(self.entry('permissionFieldParam')['source_review']['role'], 'pure-parameter-builder')
+        # Interface QueryRow is a querier, even though the old callback syntax
+        # heuristic over-approximates the embedded func signature.
+        self.assertIn('not a function callback', self.entry('effectivePermissionPolicy')['assertions']['callback_effect'])
+
+    def test_new_pure_function_is_also_rejected_and_no_inventory_allowlist(self):
+        ast = copy.deepcopy(self.ast)
+        f = copy.deepcopy(self.entry('permissionPositiveRevision')['syntax'])
+        f.update(id=tx.PG+'future.go::FuturePure', file=tx.PG+'future.go', name='FuturePure', calls=[], strings=[])
+        ast['functions'].append(f)
+        with self.assertRaisesRegex(ValueError, 'postgres function set drift: missing='):
+            tx.validate(self.data, ast, self.migrations)
+
+    def test_current_trigger_and_package_constant_changes_remain_fenced(self):
+        self.assertTrue(any('CREATE TRIGGER permission_override_revision' in d['source']
+                            for m in self.migrations for d in m['definitions']))
+        migrations = copy.deepcopy(self.migrations)
+        trigger = next(m for m in migrations if any('permission_override_revision' in d['source']
+                                                   for d in m['definitions']))
+        trigger['definitions'] = []
+        with self.assertRaisesRegex(ValueError, 'migration/FK/trigger definition drift'):
+            tx.validate(self.data, self.ast, migrations)
+        data = copy.deepcopy(self.data)
+        next(e for e in data['entries'] if e['entry'] == 'applyPermissionPatchTx')['classification']['direct_write'] = False
+        with self.assertRaisesRegex(ValueError, 'classification drift'):
+            tx.validate(data, self.ast, self.migrations)
 
 if __name__=='__main__':
     unittest.main()

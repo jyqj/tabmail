@@ -1,5 +1,7 @@
 # R5 全入口事务／FK／trigger／等待覆盖目录
 
+> **PR23 当前结构复核（2026-10-03）：** 固定源码 `aeed47f0e1998d9925acb680992b051463821d69` 的清单已更新为62文件／395函数／19迁移，26项transaction tests通过。45新增与2删除逐项核对，33变更体source-only；历史运行/acceptance metadata归档，未运行PG，不构成事务动态验收。见[独立证据与角色清单](R5-TRANSACTION-INVENTORY-PR23-20261003.md)。下方49文件、350/352函数、旧restore和早期Go期限等描述保留为历史批次记录，以当前manifest和本次逐函数分析为当前结构事实。
+
 > **当前19不继承18（2026-10-03）：** 新physical usageSOURCE合格不完整runtime，A失败/D1P/D2F/D3BSC未run；catalog15 170pureP无owned/fullref，旧18 partialcatalog/完整源码checkpoint不当19catalog或全caller事务覆盖。Stopdeadline/asyncTouchjoin/原retry拒409边界与新族freshAST/coverage具名待验。[当前层级](R5-CURRENT19-USAGE-DIAGNOSTIC-C18-STATUS-20261003.md)，未知不统一归零。
 
 > **2026-10-03 边界补充：** 新旧actualcatalog结构观察不等完整reference或函数coverage。现schema18七集合缺typmod/triggerenabled/indexvalid-ready/seqcacheownership/普通functions，11是trigger_functions；C18-07 fullreference尚待actual采集签准，原02a585 bytes不改。[分类](evidence/R5-CATALOG18-HISTORICAL-PARTIAL-C18-BOUNDARY-20261003.json)另文件，不静态填默认或统一清unknown。
