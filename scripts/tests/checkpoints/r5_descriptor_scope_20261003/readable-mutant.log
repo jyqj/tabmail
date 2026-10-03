@@ -1,0 +1,40 @@
+F
+======================================================================
+FAIL: test_only_metadata_handles_for_artifacts_and_no_body_reads (test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_only_metadata_handles_for_artifacts_and_no_body_reads)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/workspace/tabmail/scripts/tests/test_r5_excluded_descriptor_metadata.py", line 179, in test_only_metadata_handles_for_artifacts_and_no_body_reads
+    self.assertEqual(self.capture(), baseline)
+                     ^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/tests/checkpoints/r5_excluded_descriptor_20261003/oracle.py", line 75, in capture
+    return inventory.capture_current_source(self.root, purpose='protocol', policy=POLICY, build_context=CONTEXT)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/r5-descriptor-readable-mutant.py", line 606, in capture_current_source
+    return _capture_smtp_owner_v3(root, purpose=purpose, policy=policy, build_context=build_context)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/r5-descriptor-readable-mutant.py", line 518, in _capture_smtp_owner_v3
+    names = _current_source_paths(root, purpose, replacements)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/r5-descriptor-readable-mutant.py", line 471, in _current_source_paths
+    names.update(_walk(root, item['path'], complete_local_module=True))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/r5-descriptor-readable-mutant.py", line 225, in _walk
+    _check_excluded_metadata(root, Path(current) / entry, metadata_budget)
+  File "/tmp/r5-descriptor-readable-mutant.py", line 204, in _check_excluded_metadata
+    visit(fd, path.name, 1)
+  File "/tmp/r5-descriptor-readable-mutant.py", line 176, in visit
+    visit(fd, entry.name, depth + 1)
+  File "/tmp/r5-descriptor-readable-mutant.py", line 167, in visit
+    handle = bound_metadata(parent_fd, name, before)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/tmp/r5-descriptor-readable-mutant.py", line 143, in bound_metadata
+    handle = os.open(name, metadata_flags, dir_fd=parent_fd)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail/scripts/tests/test_r5_excluded_descriptor_metadata.py", line 164, in guarded_open
+    self.assertEqual(flags, os.O_PATH | os.O_NOFOLLOW)
+AssertionError: 131072 != 2228224
+
+----------------------------------------------------------------------
+Ran 1 test in 0.021s
+
+FAILED (failures=1)
