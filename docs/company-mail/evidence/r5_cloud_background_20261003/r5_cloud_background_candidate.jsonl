@@ -1,0 +1,10 @@
+{"Time": "2026-10-03T16:55:54.797634223Z", "Action": "start", "Package": "tabmail/internal/api"}
+{"Time": "2026-10-03T16:55:54.828018423Z", "Action": "run", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPAdmittedLateChild"}
+{"Time": "2026-10-03T16:55:54.82809167Z", "Action": "run", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPAdmittedLateChild/key"}
+{"Time": "2026-10-03T16:55:54.829239734Z", "Action": "pass", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPAdmittedLateChild/key", "Elapsed": 0}
+{"Time": "2026-10-03T16:55:54.82926782Z", "Action": "run", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPAdmittedLateChild/login"}
+{"Time": "2026-10-03T16:55:54.872110398Z", "Action": "pass", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPAdmittedLateChild/login", "Elapsed": 0.04}
+{"Time": "2026-10-03T16:55:54.872169048Z", "Action": "pass", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPAdmittedLateChild", "Elapsed": 0.04}
+{"Time": "2026-10-03T16:55:54.872172148Z", "Action": "run", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPSSERevalidationLease"}
+{"Time": "2026-10-03T16:55:54.874363876Z", "Action": "pass", "Package": "tabmail/internal/api", "Test": "TestR5CloudBackgroundHTTPSSERevalidationLease", "Elapsed": 0}
+{"Time": "2026-10-03T16:55:55.876672855Z", "Action": "pass", "Package": "tabmail/internal/api", "Elapsed": 1.079}

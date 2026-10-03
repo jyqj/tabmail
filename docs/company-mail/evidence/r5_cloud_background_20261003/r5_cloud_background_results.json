@@ -1,0 +1,61 @@
+{
+  "base": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+  "final_test_source_commit": "ca77a8a1936dbc1ae3a3f28c12d5a1812119fd1b",
+  "final_test_source_tree": "a5a4f7f185a706fdba2a03b840644feebda36950",
+  "toolchain": "go1.25.7 linux/amd64",
+  "cwd": "/workspace/tabmail",
+  "scope": "synthetic shipping Router.ServeHTTP plus selected lifecycle/auth/login component regression; no TCP/PG/SMTP/process-main proof",
+  "runs": [
+    {
+      "name": "candidate",
+      "exit_code": 0,
+      "command": "env PATH=/workspace/tabmail-cloud/tools/go/bin:$PATH GOMODCACHE=/workspace/tabmail-cloud/gomod GOCACHE=/workspace/tabmail-cloud/gocache GOPATH=/workspace/tabmail-cloud/gopath GOFLAGS=-mod=readonly GOMAXPROCS=2 go test -race -p 1 -count=1 -json ./internal/api -run '^TestR5CloudBackgroundHTTP'",
+      "top_level": 2,
+      "test_nodes_started": 4,
+      "pass": 4,
+      "fail": 0,
+      "skip": 0,
+      "unfinished": 0,
+      "events": "r5_cloud_background_candidate.jsonl",
+      "source": "base plus first candidate test; gofmt was invoked during compilation, exact byte capture unavailable",
+      "qualification": false,
+      "note": "initial bare gofmt command not found; explicit official gofmt used afterward. Candidate pass is exploratory only and superseded by final source-pinned run."
+    },
+    {
+      "name": "fixture-fail",
+      "exit_code": 1,
+      "command": "env PATH=/workspace/tabmail-cloud/tools/go/bin:$PATH GOMODCACHE=/workspace/tabmail-cloud/gomod GOCACHE=/workspace/tabmail-cloud/gocache GOPATH=/workspace/tabmail-cloud/gopath GOFLAGS=-mod=readonly GOMAXPROCS=2 go test -race -p 1 -count=1 -json ./internal/api ./internal/api/lifecycle ./internal/api/middleware ./internal/api/handlers -run '^TestR5(CloudBackgroundHTTP|APIBackgroundShutdown)'",
+      "top_level": 27,
+      "test_nodes_started": 31,
+      "pass": 30,
+      "fail": 1,
+      "skip": 0,
+      "unfinished": 0,
+      "events": "r5_cloud_background_fixture-fail.jsonl",
+      "source": {
+        "base": "93005b644c1f39fa85072fe913156cf3d6c798e1",
+        "test_blob": "9174ff191b61ab7372bafd8a7fb4b410e6d4373a",
+        "snapshot": "r5_cloud_background_failed_fixture.go.txt"
+      },
+      "qualification": false,
+      "note": "test expectation defect: Auth wraps complete SSE handler, so handshake lease remains live until stream returns; HTTP 200 was correct. No production defect or fix."
+    },
+    {
+      "name": "final",
+      "exit_code": 0,
+      "command": "env PATH=/workspace/tabmail-cloud/tools/go/bin:$PATH GOMODCACHE=/workspace/tabmail-cloud/gomod GOCACHE=/workspace/tabmail-cloud/gocache GOPATH=/workspace/tabmail-cloud/gopath GOFLAGS=-mod=readonly GOMAXPROCS=2 go test -race -p 1 -count=1 -json ./internal/api ./internal/api/lifecycle ./internal/api/middleware ./internal/api/handlers -run '^TestR5(CloudBackgroundHTTP|APIBackgroundShutdown)'",
+      "top_level": 27,
+      "test_nodes_started": 31,
+      "pass": 31,
+      "fail": 0,
+      "skip": 0,
+      "unfinished": 0,
+      "events": "r5_cloud_background_final.jsonl",
+      "source": {
+        "commit": "ca77a8a1936dbc1ae3a3f28c12d5a1812119fd1b",
+        "tree": "a5a4f7f185a706fdba2a03b840644feebda36950"
+      },
+      "qualification": true
+    }
+  ]
+}
