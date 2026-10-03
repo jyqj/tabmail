@@ -1,0 +1,627 @@
+[
+  {
+    "suite": "web/features/company/company-event-consumer.test.tsx",
+    "assertions": [
+      {
+        "name": "mounted company event consumers mounted EOF reconnect re-reads overview then authoritative resource without rebasing draft",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers refresh endpoint final failure stops the original scope and clears its private draft",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers refresh endpoint success preserves stable identity and dirty draft through actual stream retry",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers re-reads authoritative profiles on duplicate events without rebasing a dirty CAS form",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers strictly ignores wrong-tenant, unknown and permission-bearing payloads",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers periodic tenant-bound resync invalidates deletion confirmation without automatic DELETE",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers same-principal token rotation keeps the stream and dirty draft",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers a late same-scope preview GET cannot restore confirmation after resync",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers a current role downgrade aborts the prior stream and clears the old private draft",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers terminal 401 evicts only the current management scope and stops retrying",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers terminal 403 evicts only the current management scope and stops retrying",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers authoritative read revocation aborts the live stream and closes private draft UI",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers old-session late 403 cannot evict a new tenant or its draft",
+        "status": "passed"
+      },
+      {
+        "name": "mounted company event consumers real permission editor preserves dirty intent but requires explicit reload after an event",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "suite": "web/features/company/permission-editor-session.consumer.test.tsx",
+    "assertions": [
+      {
+        "name": "permission editor real session ownership consumer tenant change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer tenant change clears get ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer tenant change clears patch ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer tenant change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer session change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer session change clears get ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer session change clears patch ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer session change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer logout change clears loaded ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer logout change clears get ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer logout change clears patch ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer logout change clears assignment ownership without a manual dialog close and cannot rebase old intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer rejects a self-consistent old-tenant user row and snapshot delivered under a new tenant transport",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer rejects a same-target wrong-tenant PATCH response rather than importing its capabilities or version",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer rejects a same-target wrong-tenant POST response rather than importing its capabilities or version",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer new-session read does not reuse the old session's write capabilities",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real session ownership consumer a new-tenant read rejects another target's self-consistent snapshot",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "suite": "web/features/company/permission-editor.consumer.test.tsx",
+    "assertions": [
+      {
+        "name": "permission editor real consumer formal assignment capability enables a versioned profile selector without immediately mutating permissions",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer assignment submits the observed target profile revision and dirty overrides in one atomic POST",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer unassignment sends an explicit NULL profile identity/version pair with an empty override patch",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer assignment conflict preserves the staged profile and dirty quota but prohibits automatic replays",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer an old assignment response cannot overwrite a newly opened user's profile or overrides",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer loads the real Go inherited raw NULL slice instead of staying disabled behind a validation error",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer accepts a clear/reset response containing Go inherited zone_ids NULL and can continue editing",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer incomplete effective {} never enables a consumer write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer incomplete effective {\"can_send\":false} never enables a consumer write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer loads raw false/zero/null separately from effective and patches only the dirty quota",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer clearing an existing numeric override sends explicit null rather than omission",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer setting an inherited quota to zero sends explicit zero, even when unlimited is the effective value",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer preserves dirty edits on conflict and never automatically replays or falls back to PUT",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer reload after conflict explicitly discards draft and uses the fresh observed revision",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer domain All preserves empty-zone mode instead of treating all empty arrays alike",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer domain No domains allowed preserves empty-zone mode instead of treating all empty arrays alike",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer domain Inherit preserves empty-zone mode instead of treating all empty arrays alike",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer unchecking the last allowed zone sends none, never the legacy empty-array allow-all",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer disables mutations for capability false without pretending the edit succeeded",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer reset is one revision-bound explicit inherit patch, not legacy DELETE",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer a failed snapshot never uses effective-only legacy data to enable an unsafe save",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor real consumer discards an older target snapshot that resolves after switching users",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "suite": "web/features/company/profile-management.consumer.test.tsx",
+    "assertions": [
+      {
+        "name": "formal profile management CAS consumer sends observed decimal revision, explicit false and zero in fields",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer keeps draft on conflict, blocks blind retry and requires manual revision refresh",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer opening and saving without field changes preserves raw NULL and sends no command",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer preserves NULL zone storage when changing only description",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer an incomplete observed profile cannot enable a write using default UI values",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer denied profile loading disables creation and reports the server's reason",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer does not restore untouched revoked fields after conflict refresh",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer blocks saves after a failed revision refresh even with a formerly valid revision",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer reports 401 denial and blocks later submissions in this session",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer reports 403 denial and blocks later submissions in this session",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer does not manufacture a missing legacy revision or permit unsafe quotas",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer shows effective before/after and requires explicit revision-bound deletion confirmation",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer invalidates stale deletion preview and never automatically replays DELETE",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer ignores old-session edit resolve without clearing a new write lock",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer ignores old-session edit reject without clearing a new write lock",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer ignores old-session DELETE resolve without clearing new preview/confirmation",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer ignores old-session DELETE reject without clearing new preview/confirmation",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer ignores old-session create resolve without clearing new draft/busy state",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer ignores old-session create reject without clearing new draft/busy state",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer ignores an old-session revision refresh rejection without unlocking a newer refresh",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer platform admin edits a global profile using its observed revision without changing scope",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer rejects malformed or non-string observed profile revision \"0\"",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer rejects malformed or non-string observed profile revision \"01\"",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer rejects malformed or non-string observed profile revision \"9223372036854775808\"",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer rejects malformed or non-string observed profile revision 9",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer tenant admin cannot mutate protected scope {\"is_system\":true}",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer tenant admin cannot mutate protected scope {\"tenant_id\":null}",
+        "status": "passed"
+      },
+      {
+        "name": "formal profile management CAS consumer tenant admin cannot mutate protected scope {\"tenant_id\":\"10000000-0000-4000-8000-000000000002\"}",
+        "status": "passed"
+      }
+    ]
+  },
+  {
+    "suite": "web/lib/api/permission-editor.serializer.test.ts",
+    "assertions": [
+      {
+        "name": "permission editor API wire serializer serializes assignment and dirty overrides as one POST with both observed revisions",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer an explicit null assignment pair remains null, not omitted or legacy updateUser",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment omission of expected_revision is rejected before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment omission of profile_id is rejected before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment omission of profile_revision is rejected before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment omission of patch is rejected before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":null}",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment rejects an invalid selected profile observation {\"profile_id\":null,\"profile_revision\":\"5\"}",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":\"01\"}",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":5}",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment rejects an invalid selected profile observation {\"profile_id\":\"40000000-0000-4000-8000-000000000002\",\"profile_revision\":\"9223372036854775808\"}",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer assignment conflicts never retry as legacy user update, override PUT or second POST",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer GET accepts Go 'inherit' raw zone_ids 'null' without changing raw NULL or field sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer GET accepts Go 'inherit' raw zone_ids 'omitted' without changing raw NULL or field sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer GET accepts Go 'all' raw zone_ids 'null' without changing raw NULL or field sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer GET accepts Go 'all' raw zone_ids 'omitted' without changing raw NULL or field sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer GET accepts Go 'none' raw zone_ids 'null' without changing raw NULL or field sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer GET accepts Go 'none' raw zone_ids 'omitted' without changing raw NULL or field sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer PATCH response accepts Go 'inherit' raw zone_ids 'null' while preserving NULL and sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer PATCH response accepts Go 'inherit' raw zone_ids 'omitted' while preserving NULL and sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer PATCH response accepts Go 'all' raw zone_ids 'null' while preserving NULL and sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer PATCH response accepts Go 'all' raw zone_ids 'omitted' while preserving NULL and sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer PATCH response accepts Go 'none' raw zone_ids 'null' while preserving NULL and sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer PATCH response accepts Go 'none' raw zone_ids 'omitted' while preserving NULL and sources",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer list zone_ids null remains invalid on GET and PATCH responses",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer list zone_ids omitted remains invalid on GET and PATCH responses",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source can_send before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source daily_send_quota before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source daily_receive_quota before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source max_mailboxes before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source max_domains before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source can_create_domains before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source can_create_routes before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source can_create_api_keys before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects absent source domain_access before the form can write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects incomplete effective {} instead of producing undefined quotas or allow-all",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects incomplete effective {\"can_send\":false} instead of producing undefined quotas or allow-all",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects a profile object missing identity even when sources pretend it is a valid profile",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects 'target ID mismatch' at GET without reaching any PATCH",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects 'tenant revision mismatch' at GET without reaching any PATCH",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects 'numeric revision' at GET without reaching any PATCH",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects 'half-present profile version' at GET without reaching any PATCH",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects 'override source without raw value' at GET without reaching any PATCH",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects 'missing raw presence' at GET without reaching any PATCH",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer creates a same-effective false/zero override instead of mistaking it for inherited intent",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer unchanged raw absence produces no dirty fields; never synthesizes defaults from effective",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer keeps all separate from the other empty-zone intents",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer keeps none separate from the other empty-zone intents",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer keeps inherit separate from the other empty-zone intents",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects unsafe quota -1 before any write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects unsafe quota 1.5 before any write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects unsafe quota NaN before any write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects unsafe quota Infinity before any write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects unsafe quota 9007199254740992 before any write",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects missing raw field source rather than filling it with permissive defaults",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer keeps auth/current and legacy effective consumers on their effective response contract",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer reads a separate raw editor snapshot endpoint",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer preserves omitted/null/false/zero and large decimal revisions in PATCH JSON",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer does not retry a rejected editor PATCH using legacy PUT/DELETE or updateUser",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects malformed revision 0 before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects malformed revision 01 before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects malformed revision -1 before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects malformed revision 1.5 before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects malformed revision 9223372036854775808 before contacting the server",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects a target mismatch and a half-present profile observation before writing",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects invalid domain intent {\"mode\":\"list\",\"zone_ids\":[]} before writing",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects invalid domain intent {\"mode\":\"none\",\"zone_ids\":[\"10000000-0000-4000-8000-000000000001\"]} before writing",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer rejects invalid domain intent {\"mode\":\"list\",\"zone_ids\":[\"10000000-0000-4000-8000-000000000001\",\"10000000-0000-4000-8000-000000000001\"]} before writing",
+        "status": "passed"
+      },
+      {
+        "name": "permission editor API wire serializer ignores a late editor snapshot from an earlier authenticated identity",
+        "status": "passed"
+      }
+    ]
+  }
+]
