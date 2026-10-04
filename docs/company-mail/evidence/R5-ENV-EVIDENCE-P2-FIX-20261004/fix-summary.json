@@ -1,0 +1,125 @@
+{
+  "tested_implementation_sha": "4b75d4067aae2626cbf22cf15fe6e8ac1dc1d67e",
+  "repair_base_sha": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+  "independent_review_sha": "5b7368286b292ed540293bcb04d1d4c1bdc2e1c4",
+  "original_red_files_preserved_sha256": {
+    "README.md": "ba1c9c64ea13e06522613098cddb1b4f67534f26385be5a82aa965858be8829d",
+    "collector_comparison.py": "f4edeb9d62682290353f56ae946a4e5f4b433698d0fb0a18929bf2c603342b3f",
+    "private-evidence-hashes.json": "e8e8cc588b8cc6624a1228d3dced178ae6787b421c1aa51b2022c9fff2f6bfb7",
+    "review_checks.py": "be06635e2583374e4415b2059071fed97feeaab026b75c7d7d53e716de870ffd",
+    "summary.json": "183150a5915b495ae58efdb4460691f9255720108255c0729aee635d78f343b3"
+  },
+  "unchanged_independent_program_sha256": "be06635e2583374e4415b2059071fed97feeaab026b75c7d7d53e716de870ffd",
+  "independent_program_declared_candidate": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+  "independent_program_note": "Unmodified program prints its original candidate constant; actual imports use tested_implementation_sha. Its static AST comparison remains the original base/df6 comparison.",
+  "tests": {
+    "inherited": {
+      "tests_run": 67,
+      "error_ids": [
+        "test_current_inventory_is_only_structure_evidence (test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence)",
+        "setUpClass (test_r5_compatibility.CompatibilityGateTests)",
+        "setUpClass (test_r5_compatibility.CurrentHistoricalBoundaryTests)"
+      ],
+      "errors": 3,
+      "outer_failures": [],
+      "passed": 64
+    },
+    "inherited-final": {
+      "tests_run": 82,
+      "error_ids": [
+        "test_current_inventory_is_only_structure_evidence (test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence)",
+        "test_current_source_map_is_not_product_or_dependency_completion (test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion)"
+      ],
+      "errors": 2,
+      "outer_failures": [],
+      "passed": 80
+    },
+    "own-fix": {
+      "tests_run": 8,
+      "error_ids": [],
+      "errors": 0,
+      "outer_failures": [],
+      "passed": 8
+    },
+    "independent": {
+      "tests_run": 23,
+      "error_ids": [],
+      "errors": 0,
+      "outer_failures": [],
+      "passed": 23
+    }
+  },
+  "original37_passed": true,
+  "additional_own_fix_checks_passed": 8,
+  "independent_method_requirements_passed": 23,
+  "focused_distinct_passes": 68,
+  "combined_final_outer_tests": 113,
+  "combined_final_outer_passes": 111,
+  "remaining_baseline_errors": 2,
+  "attempt_history": [
+    {
+      "attempt": "inherited",
+      "cause": "missing locked TypeScript preparation; transaction baseline inventory error and two compatibility class setup errors",
+      "tests_run": 67,
+      "errors": 3
+    },
+    {
+      "attempt": "inherited-final",
+      "cause": "only independently documented transaction/compatibility baseline inventory drift",
+      "tests_run": 82,
+      "errors": 2
+    }
+  ],
+  "preparation": {
+    "source": "existing npm archive cache; no download or version change",
+    "typescript_archive_sha256": "10e108c9cf7d5f2879053dff18515fb405abf2ccef63eaaf017d9c571687a1d3",
+    "files": 132
+  },
+  "formal_runs": 0,
+  "metadata_controls": 0,
+  "catalogs_changed": false,
+  "identity_policy_changed": false,
+  "negative_runner_children": "One intentionally failed/skipped/expected-failed inner child remains an asserted non-green control; no outer skips.",
+  "private_log_hashes": {
+    "independent.stderr": {
+      "bytes": 3482,
+      "sha256": "fcbb8b090877acf320d3d3b88d8058b844f9f50bd0fde8365d41b45547dcb4d3"
+    },
+    "independent.stdout": {
+      "bytes": 218,
+      "sha256": "21988d930eb8d0c0046a2282b1e3a9a1ee012eabe531544e6547a5077d494f69"
+    },
+    "inherited-final.stderr": {
+      "bytes": 20581,
+      "sha256": "06f7f42c5411c21e13b0850118d629a45e217f59c269254db2f6e1a71b4be12b"
+    },
+    "inherited-final.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "inherited.stderr": {
+      "bytes": 19810,
+      "sha256": "9a266763aad30ac463d228dc91a8c03b75d862df7a9fa4f12af395c2853ea007"
+    },
+    "inherited.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "node-probe.stderr": {
+      "bytes": 1015,
+      "sha256": "faee76e581beb9ebf35cbc9aa07e65170ce3b8f94b47a790d1adbf285b3b502e"
+    },
+    "node-probe.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "own-fix.stderr": {
+      "bytes": 1600,
+      "sha256": "e75a468c9e2b01a31aaabe0c4ef0f0eeb0f85cb97ebf0143c05a904c46cbbb80"
+    },
+    "own-fix.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  }
+}

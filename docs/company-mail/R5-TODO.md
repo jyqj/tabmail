@@ -2114,3 +2114,7 @@ Root批准新独占batch合同和PE05 finite-owner精确delta8a5200；已实现p
 ### 2026-10-04 bounded validation tooling review freeze
 
 From `f52f8cbbf31dcbfb72ba062af6623248334a2e99`, isolated `codex/r5-env-evidence-20261004` repairs selected Go/cache propagation and adds opt-in private bounded diagnostics. [Review handoff](R5-VALIDATION-ENV-EVIDENCE-20261004.md): 37 focused Python checks pass. New exact-source default metadata/handlers compile-only control retains a strict post-binding rejection; raw differences prove Stale/StaleReason only for this new control. No warmup was added; root decision and independent review remain required. No formal default/sharedDB/HTTP/components/wholePG180 run, historical failure waiver, product/dependency/expectation change, merge, deployment or email occurred; 10/171 and all prior qualification blockers remain unchanged.
+
+### 2026-10-04 bounded retention P2 completion, pending independent review
+
+Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exception masking and fdopen double-close. [Bounded completion](evidence/R5-ENV-EVIDENCE-P2-FIX-20261004/README.md) fixes only those two P2s at tested implementation `4b75d4067aae2626cbf22cf15fe6e8ac1dc1d67e`: original37 + own8 + unchanged independent23 pass. Transaction/compatibility source-inventory errors remain explicit (2 errors/113 final outer tests); catalogs and original red review unchanged. No formal rerun or metadata/warmup experiment; 10/171 and all qualification blockers remain unchanged. Root independent review required.

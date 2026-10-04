@@ -1,0 +1,92 @@
+{
+  "diagnostic_only": true,
+  "files": {
+    "base-ast.json": {
+      "bytes": 2057266,
+      "mode": "0o600",
+      "sha256": "0384d48441d0791e70904af7782cd6dbedd475f46a2964517083afcdcb7ec56b"
+    },
+    "base-transactions.stderr": {
+      "bytes": 9347,
+      "mode": "0o600",
+      "sha256": "843907e8d6ed63761abe1436eabae31446f1d238630083f54e4317309e72fe17"
+    },
+    "base-transactions.stdout": {
+      "bytes": 0,
+      "mode": "0o600",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "collector-comparison.json": {
+      "bytes": 10662,
+      "mode": "0o600",
+      "sha256": "d0d441c11e2899aa149f6f92c164b2915cb0079b3f8ec9e183eab98aa9041a13"
+    },
+    "collector.stderr": {
+      "bytes": 0,
+      "mode": "0o600",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "collector.stdout": {
+      "bytes": 10807,
+      "mode": "0o600",
+      "sha256": "3d019b302e4dc172aa1b4c9842076ecf0e7cd831599159bf642687c7df9996aa"
+    },
+    "current-ast.json": {
+      "bytes": 2057266,
+      "mode": "0o600",
+      "sha256": "0384d48441d0791e70904af7782cd6dbedd475f46a2964517083afcdcb7ec56b"
+    },
+    "existing-final.stderr": {
+      "bytes": 20546,
+      "mode": "0o600",
+      "sha256": "6fb3bb820f6acbc5f80003c7f621ec9089ef4f81b93b196bb900d73348af546d"
+    },
+    "existing-final.stdout": {
+      "bytes": 0,
+      "mode": "0o600",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "existing.stderr": {
+      "bytes": 20897,
+      "mode": "0o600",
+      "sha256": "66392f9b2f46f0c3f5d72f2bd55dd9411ae50b7a5169558e4ffe1ba355dee30d"
+    },
+    "existing.stdout": {
+      "bytes": 0,
+      "mode": "0o600",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "review-final.stderr": {
+      "bytes": 18344,
+      "mode": "0o600",
+      "sha256": "6dd5fe165455796b4858978b9142e83c5660026e8b0ab4405defe9361f7adf2d"
+    },
+    "review-final.stdout": {
+      "bytes": 912,
+      "mode": "0o600",
+      "sha256": "6a6dc101a41d2919ab210eea0604d1b783b36509b2916db2c46a3879363fe8aa"
+    },
+    "review-production.stderr": {
+      "bytes": 21202,
+      "mode": "0o600",
+      "sha256": "f37cb1a04fd056609beb0186c80231c296f36a7889f72f2d9c6696da1872acda"
+    },
+    "review-production.stdout": {
+      "bytes": 1018,
+      "mode": "0o600",
+      "sha256": "63750733c0cda613f40acbb9ef85e77f6ca26c7c2a43d3757699b385ac8c77b7"
+    },
+    "review.stderr": {
+      "bytes": 19024,
+      "mode": "0o600",
+      "sha256": "1854120a22f384ca028352a5d090696a9ffcabc7e2a237e053b0e35f43c73a44"
+    },
+    "review.stdout": {
+      "bytes": 1009,
+      "mode": "0o600",
+      "sha256": "71e6c579c55340224c0935aaba18d927fec110a2d4719d29ab7684407559c3b8"
+    }
+  },
+  "root": "/tmp/R5-ENV-EVIDENCE-INDEPENDENT-20261004",
+  "root_mode": "0o700"
+}
