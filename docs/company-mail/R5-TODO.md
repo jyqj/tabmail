@@ -2087,3 +2087,8 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 ### 2026-10-03 external batch lifecycle design handoff
 
 Base9fc345；catalog46/handler17IDs26variants。发现PE05 barrier/revoker未完整join与Go取消Python后Node子进程归属缺口，按用户条件先交root设计审查，未开启并行、未实施新batch资格、未重跑formal46。独立jsdom self-probe合法最小类型修复：full tsc P、v2 controls21P、local TSX probe1P（非external资格）。详见[R5-EXTERNAL-BATCH-DESIGN-20261003](R5-EXTERNAL-BATCH-DESIGN-20261003.md)。10/171、wholePG180/audit8high保open，default675/sharedDB89e7不整合。
+
+
+### 2026-10-04 explicit external batch v1 scoped implementation
+
+Root批准新独占batch合同和PE05 finite-owner精确delta8a5200；已实现pinned supervisor/private capability/Go bridge，bounded4独立DATABASE/HTTP/Vitest owners，derivedcomponent终态40Go+3Python=43（非全46层资格）。批量full pre/post content/descriptor校验；cleanup ack、missing/duplicate/nonterminal/falsepass、child/descendant tail、deadline或postmutation均全组拒，lease收尾失败撤资格，旧v2不promote。30controls P、oldv2 21P、protocol70P、fulltsc P，少量真实8realm+Python探针10/10、peak4、cleanup ack/完整prepost P，限定infra；latecancel拒全组，首setup失败receipt保留。实现/固定source与safe hashes见[R5-EXTERNAL-BATCH-RUNTIME-V1](R5-EXTERNAL-BATCH-RUNTIME-V1.md)。正式26/46producer待root固定实现审阅后另授权，不default675/sharedDB89e7、不merge/deploy、不retry draft Forbidden；10/171及wholePG180/audit8high保open。

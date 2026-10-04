@@ -1,0 +1,419 @@
+{
+  "policy": "r5_external_batch_validation_v1",
+  "fixed_source": "f80b37fe14d856d2f2a048a06fe848fc4420448d",
+  "base": "9fc345308153fb664f115c7ac9ddd5abc3e46929",
+  "adopted_owner_delta": "8a5200bfd9496b02c2182cc0a04151103973a6e7",
+  "scope": "infrastructure_probe_only",
+  "catalog_cases": 46,
+  "handler_ids": 17,
+  "handler_variants": 26,
+  "component_required_go_paths": 40,
+  "component_required_python_assertions": 3,
+  "formal_producer": "NOTRUN_PENDING_ROOT_FIXED_IMPLEMENTATION_REVIEW",
+  "product_green": false,
+  "task_complete": false,
+  "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+  "original_budgets": {
+    "case": 75,
+    "go": 120,
+    "process": 180
+  },
+  "contract_sha256": "592a533cb6c10cf8d0a40f140b4191eadaa26de8bf633cabf3cdf42f56ea604a",
+  "runtime_manifest_sha256": "4ff8193bdd68346d5dd6505b4dcb0ccda6196ed7afae7f30a864c55914fdc243",
+  "receipt_hashes": {
+    "archive": "b549d58418374266a244498679713ea6e12b8b0f54ab4f2320fb1b5309cd4e0e",
+    "default": "a40f34f10121b377e336f1ccdb477e85bf9b33b43acce774cf9fd30ec015efcd",
+    "race": "8c3437e9243676a2f9e8c5a2a866dfcbb1b11cac55ec9b2dfaa67ab0b65428a1"
+  },
+  "installed_content_root": "f0fe539d898c4f533fca618e90997262b883e3c22c4fc22c9f37d7125272a28f",
+  "code_hashes": {
+    "scripts/preparation/r5_external_batch.py": "6e80b9ded4b01da727bd04f2a9be8e33c2dc4bf8b38e4c0e0ad1c4f556b341db",
+    "scripts/preparation/r5_external_runtime.py": "c793eab91eef55c5c48ebf0f37606402b7199700d346828180597a6ae70a0cf1",
+    "scripts/preparation/test_r5_external_batch.py": "beb6f190462684a2ce15b1157bab0d99a2d35614dab89105d4dc9da9776d467b",
+    "internal/api/handlers/r5_external_batch_test.go": "c590fc85d78095c9231c00e8671930dd06c226f89b959e885ac502533ca96e45",
+    "internal/api/handlers/r5_protocol_component_observations_test.go": "d0c4ce103fa231d43972af4a82b90fbdda99afb032c94b41b6c4951d95fbe9fe",
+    "internal/api/handlers/r5_protocol_grant_owner_test.go": "14691cd4d02d840d8f8a8a6abd2ad3b60ce6731450b3dd249a4001f6655eda1f",
+    "internal/api/handlers/r5_protocol_grant_owner_pg_test.go": "8c88adea9d54c4e26a8f04e03caef37af139b2c0323d214a06b2243b90ea50d7",
+    "web/r5-external-batch-probe.test.tsx": "69283e7944d503b24aaf0f643b37dbd584d3a3454d80e09aa1c1fe933799c3e0",
+    "web/vitest.r5batch-probe.config.ts": "9b565f6436465eb26bf2da1dd54053e38a2ef0ec3f46f5368a7118b1c54b24a7",
+    "web/r5-external-runtime-probe-jsdom.d.ts": "857f3f7365c683846681f6f9d72a65bb52a6c6be02992c741b947c7ee3c32e38"
+  },
+  "tests": {
+    "batch_controls": 30,
+    "old_v2_controls": 21,
+    "protocol_regressions": 70,
+    "typescript": "PASS full project; official locked external toolroot",
+    "go_bridge": "PASS race; exact supervised exit retained",
+    "go_owner": "PASS focused race/loopback PostgreSQL; finite owner delta",
+    "probe_release": "PASS 10/10 required terminals; 8 Go realms + Python self-probe; peak4; equal full pre/post; cleanup ack; physical process joins"
+  },
+  "inventory_statistics": {
+    "source": {
+      "regular_files": 1924,
+      "regular_file_bytes": 59909388
+    },
+    "dependencies": {
+      "regular_files": 45584,
+      "regular_file_bytes": 775103182
+    }
+  },
+  "probe_release_wall_seconds": 24.60088413700032,
+  "probe_release_go_owner_elapsed_seconds": 7.65,
+  "exact_stage_breakdown": "unknown",
+  "physical_io": "unknown",
+  "reports": {
+    "probe": {
+      "receipt": {
+        "children": {
+          "probe/0": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "6a99eb3e31d0a496f48e66c78363f5fdb1e4e556a92ce477c98c53102905111e",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/1": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "d58d60deed601b93d1fc3f4d4d7af744cbbcd4a004806b9cf8656283d3c68f00",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/2": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "a8e99130e6da997e5a463039d17f0ce53a5de5fc439588de57fae3072d9afdbc",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/3": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "907be74a858bee4254e3fdd910aeb81c7da87c022047a1c8cf226b89381330ab",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/4": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "4bf5c87a14d31c897b901c1332f997fad4fb29caf8b05256c6fff6ea8a4805a4",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/5": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "1855d54b94e730d4c5de5a574d7910ca0c811a0e5d985138e6714c3bad4b7680",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/6": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "706068d41d360888701e207661a56536ccfaa2fe953be29bb20b488def049f92",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/7": {
+            "exit_code": 1,
+            "qualified": false,
+            "report_sha256": "c314db4701a13c9c43d28a14463c60a44140a7a109a993ef142bb5121d2f1be7",
+            "tail": false,
+            "timeout": false
+          }
+        },
+        "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+        "contract_sha256": "9906a1a72911ee1afd830bde826fd1a77cd70ecf59555cef7d821bc072054125",
+        "eligibility_scope": "infrastructure_probe_only",
+        "errors": [
+          "Go required terminal/assertion failure",
+          "staged child assertion/lifecycle failure",
+          "missing/duplicate/nonpassing required terminal"
+        ],
+        "max_live_children": 4,
+        "owners_joined": true,
+        "policy": "r5_external_batch_validation_v1",
+        "preflight": true,
+        "product_green": false,
+        "required_terminal_count": 10,
+        "schema_version": 1,
+        "status": "BATCH_REJECTED",
+        "task_complete": false,
+        "terminal_count": 1,
+        "terminal_postcheck": true
+      },
+      "receipt_sha256": "df13e33933636b49fcd9b91bd7d2817a542eba1e6b277e7bc3ff06d956367af7",
+      "go_jsonl_sha256": "6f10ac1de3ca381a60f13d068a5585768cb63923930a017527686a73c34a6baa",
+      "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python_report_sha256": "f880179332343d4e069b7891fbbe22d77192c63aec153b06e35775a66d8ab4a9",
+      "fixed_source": "1337ae8f9cd0395d4a2d36e078109190ca92ddf5"
+    },
+    "probe-fixed": {
+      "receipt": {
+        "children": {
+          "probe/0": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "0ec3e84d48b642ca0e9ca8c6b54065f2369279d8de19d174a8d7f5f54c2444fa",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/1": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "2af66f54d799ece350a12e723076e339b521d5f94e28c64cae6355cdc9e9666e",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/2": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "e87861493965d31d3953c8e0592a6f8f179c5fff5e75878dcbb18555b097a235",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/3": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "7273d9d16dc108e110e0929c70d76bbaace895d0c8fd241a4ab672524c6cda84",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/4": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "0d19c13a8ad11c6a5e8673edf0c93886007a98029f71772a57072641e9f16eb8",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/5": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "47d485533b3fd081c7cf1cbbd2942d86ffae3904c0e24a0bbcc1738251896e09",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/6": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "7db1cb6943c948a8ca51e3a362407f3a2fe443978e2d8a34c7672aab02de1cb0",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/7": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "13a85497c61d6f0d4d06539ab497de3f497d0190fdea59ec2a6b10fc72076fa8",
+            "tail": false,
+            "timeout": false
+          }
+        },
+        "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+        "contract_sha256": "b92167dce09fbea20cc14346e417cbb8cf3e0d30d25226e0aa0450170633ce19",
+        "eligibility_scope": "infrastructure_probe_only",
+        "errors": [],
+        "max_live_children": 4,
+        "owners_joined": true,
+        "policy": "r5_external_batch_validation_v1",
+        "preflight": true,
+        "product_green": false,
+        "required_terminal_count": 10,
+        "schema_version": 1,
+        "status": "BATCH_QUALIFIED",
+        "task_complete": false,
+        "terminal_count": 10,
+        "terminal_postcheck": true
+      },
+      "receipt_sha256": "61b4e9ccd2cfd28662081fe1f3f680e6dc411c5d6fd64c13dc377819cd3106cb",
+      "go_jsonl_sha256": "045f325af4deebfbbca1194941ae6b517cbfec703511482b5c3b8d9dcc2bafb9",
+      "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python_report_sha256": "34b063fef568c08b6938fa83abd3347be1f777c6dd454b1ce69db5ab087914da",
+      "fixed_source": "c77df12f77c950a30320b4a4fab22d77ff0f6632"
+    },
+    "probe-final": {
+      "receipt": {
+        "children": {
+          "probe/0": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "b92c9978ffa6fb7bf6051bedc007b444e362ca95e3b1ce54015007a6f4cbde83",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/1": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "5d01775f7abbea57b67d50611f4eb51f8aedb26eefb064f0cd8dd230ca7c910e",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/2": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "b0aff540bbb0605ae20a7308ef4cf6706221bbf392288032f74cff27c067bd29",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/3": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "82a6748e0ee589236f70838b8e525d58d8c98001627c72944b89d0e656683e33",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/4": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "85374d932ae2702d424a973db51a8d8bfc91a4ee5f54378365c234d125c8b3a3",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/5": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "a1d5832c62fc9543fa76a2b998337097fd68629de394ea6b379c3a26a6b78c26",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/6": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "8fe443fe840d350c0282b551d5034f3fa74f03aca709e5cf3e3f464bc3b572c2",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/7": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "dda1d624c5cf1739b395716ae01c0dac93a32d3160217a1b8ed1598f629d7a2d",
+            "tail": false,
+            "timeout": false
+          }
+        },
+        "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+        "contract_sha256": "c707ad7436b67a41b9eed9d96a30d0cab6a087d54e8f3c776fbfc05ee843aed7",
+        "eligibility_scope": "infrastructure_probe_only",
+        "errors": [],
+        "max_live_children": 4,
+        "owners_joined": true,
+        "policy": "r5_external_batch_validation_v1",
+        "preflight": true,
+        "product_green": false,
+        "required_terminal_count": 10,
+        "schema_version": 1,
+        "status": "BATCH_QUALIFIED",
+        "task_complete": false,
+        "terminal_count": 10,
+        "terminal_postcheck": true
+      },
+      "receipt_sha256": "42047783d5014850cd8a31ee0919ba349219bdac2f1327ec2a252a4e54371c19",
+      "go_jsonl_sha256": "d5ed531fa4f54df3ffc49fb1cea7abe9df25475c6cacc95fa32a051ed64461f8",
+      "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python_report_sha256": "b214f9695000256933081e5c626e92b7f1bbf231103afd8184e81ab7abc6d96c",
+      "fixed_source": "4f0d7d71e9601701104a3d890c9a683b9d0d2185"
+    },
+    "probe-release": {
+      "receipt": {
+        "children": {
+          "probe/0": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "9c6270390cafb9af6d202d31c446b5f948dd50b7c9b13737303d0ed5af8e4f87",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/1": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "db7b041138b550c5e18edc57163c400d6ae1b3c40ad0fe5553ed7d031b2f2945",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/2": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "b32208eb50d26f04a27619bd1c8e5fabf4b6c4fe526901756005a86678bf646f",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/3": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "ac3d8b904d83695956d2f837da661efb56f8bf055153cda4b8269e44bcffa60b",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/4": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "6e22937368835dee731dcc9a63f85544d64487106df09dee16cb98c4092eb715",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/5": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "1af87446e6e81acbd3d51095518fbb6d8c023e3481ffedaf5a742768f02bfa67",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/6": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "1199cee503ea43d1f53b93dfbd5b984c5f601fd78f65eb2d25a59bd08f3bcbf9",
+            "tail": false,
+            "timeout": false
+          },
+          "probe/7": {
+            "exit_code": 0,
+            "qualified": true,
+            "report_sha256": "998f4d74dfe22ca0d39b7720abe583de442d7ee25fefe435e9bd923d31b97ee9",
+            "tail": false,
+            "timeout": false
+          }
+        },
+        "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+        "contract_sha256": "592a533cb6c10cf8d0a40f140b4191eadaa26de8bf633cabf3cdf42f56ea604a",
+        "eligibility_scope": "infrastructure_probe_only",
+        "errors": [],
+        "max_live_children": 4,
+        "owners_joined": true,
+        "policy": "r5_external_batch_validation_v1",
+        "preflight": true,
+        "product_green": false,
+        "required_terminal_count": 10,
+        "schema_version": 1,
+        "status": "BATCH_QUALIFIED",
+        "task_complete": false,
+        "terminal_count": 10,
+        "terminal_postcheck": true
+      },
+      "receipt_sha256": "5528d305a75a18e3c57e8591dce6c5c1ec1f83a2be8a5659e95af1cf2a556bf5",
+      "go_jsonl_sha256": "2f54cd60510eb389306972331840b08957b2cc184823118b9b47fcd10e2f1d8b",
+      "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "python_report_sha256": "e0ed428e76877e743c53136704511bfb581a88cd01088fe35a978161778e2b35",
+      "fixed_source": "f80b37fe14d856d2f2a048a06fe848fc4420448d"
+    }
+  },
+  "preparation_failures_retained": [
+    "unbound inherited NODE_PATH/npm environment rejected",
+    "copied development dependency tree rejected for installed lock version mismatch; replaced by normal lifecycle official-lock npm ci"
+  ],
+  "scope_exclusions": [
+    "default675",
+    "sharedDB89e7"
+  ],
+  "central_progress": "10/171 unchanged",
+  "remaining_open": [
+    "formal26/46 runtime",
+    "wholePG180",
+    "audit8high",
+    "exhaustive dynamic loader/native/generated/Method19/SML/wholeCI"
+  ],
+  "draft": "one earlier Forbidden; no retry",
+  "publication": "safe hashes/counters only; private manifests/packets/logs/fixture values excluded",
+  "unit_log_sha256": "f43f5cb79e2b27c31d608e46c3cc163f2be6281b60859a8880235a25d35bed64",
+  "postgres_normal_fixture_databases_remaining": 0,
+  "unit_log_source": "f80b37fe14d856d2f2a048a06fe848fc4420448d",
+  "owned_probe_postgresql_shutdown": true
+}

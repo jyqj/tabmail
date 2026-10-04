@@ -1,4 +1,8 @@
-# External runtime batch design: lifecycle review required
+# External runtime batch design: historical lifecycle review
+
+Implementation after root review is described in
+[R5-EXTERNAL-BATCH-RUNTIME-V1](R5-EXTERNAL-BATCH-RUNTIME-V1.md).
+The status below records the original design handoff at `6e04545`.
 
 Base: `9fc345308153fb664f115c7ac9ddd5abc3e46929`. Status: design only;
 new batch executor NOT IMPLEMENTED, no batch-qualified receipt, no formal run.
