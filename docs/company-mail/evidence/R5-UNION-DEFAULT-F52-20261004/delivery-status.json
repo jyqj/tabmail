@@ -5,6 +5,13 @@
   "draft_creation_attempts": 0,
   "denied_action_retries": 0,
   "denied_action_reroutes": 0,
-  "normal_git_push": "pending_delivery",
-  "diagnostic_sha256": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725"
+  "normal_git_push": "pass",
+  "diagnostic_sha256": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725",
+  "normal_git_push_exit": 0,
+  "first_delivery_sha": "03d207ac65b0d927e91774f32627ed85e52b6a76",
+  "independent_remote_verification": "pass",
+  "verified_remote_sha": "03d207ac65b0d927e91774f32627ed85e52b6a76",
+  "push_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "push_stderr_sha256": "5913e0198f7bc3d08a0d618457023d1d65e48a825292ca0862aa3032ca0eb653",
+  "remote_verification_sha256": "258732a39b61b545a4567323dbcaf1144b90cfc3c46ced22423d4ef422ebef8d"
 }

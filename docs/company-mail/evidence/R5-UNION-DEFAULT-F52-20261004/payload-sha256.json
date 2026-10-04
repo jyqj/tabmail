@@ -1,6 +1,6 @@
 {
   "cleanup.json": "c17ddec60d0ecff8716e24950da3a9fdbe35e5f4f7550f216e02d11b9187aa42",
-  "delivery-status.json": "c56d3f0f2beb50805000b648771ac67915ec0b90373e3d11055d57cd36b2bb78",
+  "delivery-status.json": "f3fe7b3241b64b805b03fce1cb52f1e3af902f1d999896fc320956bb38f0d81a",
   "formal-cause-categories.json": "2dfd0615037e9d3cf07ab58f8bb9453021d7b96bfd689c954260dd0b66740c68",
   "formal-error-statuses.json": "e1f54d0c3a6c03d6b4f4281723b6b3b518b2884ec98102e5d6e87bbdd0f047f5",
   "initial-input-statuses.json": "22045b3dff3a10c7a8c898828cbb697ac41ba773f7a3a3e5ceb9f17a3743ffe2",
@@ -9,7 +9,7 @@
   "post-controls.json": "c4ac3139edbe3de1ef509b4fe4a406fc7bd2a6df72e513d74c4add38d437f9dc",
   "pre-controls.json": "85abb643d4d27d0d7cd90869365d7f2e002f9c739d05f620d070f5346772a3ee",
   "preparation-history.json": "c0b9a7f8b46b44d0f0bf4cac4cc38b6ddb92fda1bee9948b24cdc9c9fe8ec00a",
-  "private-artifact-sha256.json": "e70389646298287c0d46900393b7e2e10729e8419b95b47f35bdc72e2e4bb589",
+  "private-artifact-sha256.json": "0d9d016575d12e347267e94192876c70afeb48500461561d3fd7b7a26b581c20",
   "proposed-TODO.md": "b10bdc02696d447a974390f5260f6ace74cf2824a973ed549bc6e1964c96c1d9",
   "python-pins.json": "8f097d49af1ca429cb462345cb78beb6c57d7d41c31d7e1084a28124e3ee2e55",
   "summary.json": "7e1a0d80ee379c4a61b13961dffe9a01dbe367dc3d99412c35975136aff8adf8",
