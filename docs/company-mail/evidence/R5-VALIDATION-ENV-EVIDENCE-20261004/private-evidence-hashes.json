@@ -360,6 +360,18 @@
     "raw/selection-9286816899634570a14e5eac9836f22c/0.stdout": {
       "bytes": 1338,
       "sha256": "492292865c6b5cdba826686f6fca7fec1351dcfb81bb607adcd8f492253b04bd"
+    },
+    "focused-flag-final.stdout": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "focused-flag-final.stderr": {
+      "bytes": 2607,
+      "sha256": "d4b2fe38a1c8dcbd7c43734309536235f69586f695a2b43c7a18809f2b708169"
+    },
+    "draft-pr.md": {
+      "bytes": 1170,
+      "sha256": "a45e8f04f5f44fcc30c843b3b1a71e9830ac53ccde1bd22cac4c198bffa316c6"
     }
   }
 }

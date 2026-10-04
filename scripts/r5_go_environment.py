@@ -18,8 +18,12 @@ def selected(environment=None, *, fallback='go'):
         # Do not inherit caller compiler/ABI switches into the selected tool.
         for key in ('GOEXPERIMENT', 'GOOS', 'GOARCH', 'GOAMD64', 'CGO_ENABLED',
                     'CC', 'CXX', 'CGO_CFLAGS', 'CGO_CPPFLAGS', 'CGO_CXXFLAGS',
-                    'CGO_LDFLAGS', 'GODEBUG'):
+                    'CGO_LDFLAGS', 'GODEBUG', 'GOROOT', 'GOTMPDIR', 'GOCACHEPROG',
+                    'GOFIPS140', 'GOCOVERDIR'):
             env.pop(key, None)
+        for key in list(env):
+            if key.startswith('CGO_'):
+                env.pop(key)
         env.update(GOENV='off', GOWORK='off', GOFLAGS='', GOTOOLCHAIN='local')
         env.update(R5_TEST_GO=go, R5_GO=go)
         env['PATH'] = str(Path(go).parent) + os.pathsep + original.get('PATH', '/usr/bin:/bin')

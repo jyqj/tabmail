@@ -22,7 +22,8 @@ class EnvironmentTests(unittest.TestCase):
     def test_explicit_tool_caches_and_no_inherited_flags(self):
         original = dict(R5_TEST_GO='/owned/go', R5_GO='/wrong/go', R5_TEST_CACHE='/owned/cache',
                         R5_TEST_MODULECACHE='/owned/mod', GOCACHE='/wrong/cache', GOFLAGS='-tags=wrong',
-                        CGO_CFLAGS='-wrong', GOEXPERIMENT='wrong', PATH='/usr/bin', DATABASE_URL='preserved')
+                        CGO_CFLAGS='-wrong', CGO_CFLAGS_ALLOW='.*', GOROOT='/wrong/root',
+                        GOCACHEPROG='/wrong/cache-program', GOFIPS140='wrong', GOEXPERIMENT='wrong', PATH='/usr/bin', DATABASE_URL='preserved')
         go, env = goenv.selected(original)
         self.assertEqual(go, '/owned/go')
         self.assertEqual(env['R5_GO'], go)
@@ -34,6 +35,8 @@ class EnvironmentTests(unittest.TestCase):
         self.assertEqual(env['DATABASE_URL'], 'preserved')
         self.assertNotIn('CGO_CFLAGS', env)
         self.assertNotIn('GOEXPERIMENT', env)
+        for key in ('CGO_CFLAGS_ALLOW','GOROOT','GOCACHEPROG','GOFIPS140'):
+            self.assertNotIn(key,env)
         self.assertEqual(original['GOFLAGS'], '-tags=wrong')
 
     def test_legacy_selector_and_default_cache_preserved(self):
