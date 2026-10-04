@@ -125,8 +125,10 @@ class BatchFinalizationControls(unittest.TestCase):
         self.contract=dict(runtime=self.manifest,mode='probe',required={},catalog_sha256='0'*64,go=dict(path=sys.executable),argv=dict(go_commands=[[sys.executable,'synthetic-control']],python=[sys.executable,'synthetic-python-probe']))
         with batch.runtime.descriptors() as files:self.before=files.tree(self.source,source=True)
         self.events=[]
+        self.cancel_during_post=False
     def validate(self,contract):
         self.events.append('validate')
+        if self.cancel_during_post and len(self.events)==2:self.last_owner.request_cancel()
         self.assertTrue((self.root/'.r5-runtime-owner').exists())
         with batch.runtime.descriptors() as files:
             if files.tree(self.source,source=True)!=self.before:raise ValueError('real source content drift')
@@ -195,6 +197,13 @@ class BatchFinalizationControls(unittest.TestCase):
         path=self.root/'out/receipt.json';before=path.read_bytes()
         with self.assertRaisesRegex(ValueError,'single-use'):self.last_owner.run()
         self.assertEqual(path.read_bytes(),before)
+
+    def test_late_batch_cancellation_rejects_complete_staged_passes(self):
+        self.cancel_during_post=True
+        receipt=self.run_synthetic_owner()
+        self.assertEqual(receipt['status'],'BATCH_REJECTED')
+        self.assertIn('batch cancellation requested',receipt['errors'])
+        self.assertTrue(all(not child['qualified'] for child in receipt['children'].values()))
 
     def test_exclusive_second_consumer_cannot_interleave(self):
         with batch.runtime.owner(self.manifest):

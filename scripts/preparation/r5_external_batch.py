@@ -266,6 +266,7 @@ class Batch:
         self.published = False
         self.started = False
         self.leased = False
+        self.abort_requested = False
         self.socket = self.output/'channel.sock'
         self.cancelled_keys = set()
         self.deadline = None
@@ -373,12 +374,19 @@ class Batch:
         owned = OwnedProcess(argv,cwd=cwd,env=env)
         return owned.finish(self.cancelled,min(self.deadline,time.monotonic()+seconds))
 
+    def request_cancel(self):
+        self.abort_requested=True
+        self.cancelled.set()
+
     def run(self):
         if self.started:
             raise ValueError('batch instance is single-use; previous receipts are immutable')
         self.started=True
         try:
-            return self._run()
+            receipt=self._run()
+            if receipt['status']=='BATCH_QUALIFIED' and (self.abort_requested or time.monotonic()>=self.deadline):
+                raise ValueError('cancellation/deadline observed before return')
+            return receipt
         except Exception as error:
             # An observed lease-finalization failure must invalidate a receipt
             # already staged before context-manager release. Never touch a
@@ -525,6 +533,8 @@ class Batch:
                         raise ValueError('lease token capability drift')
             except Exception as error:
                 errors.append('lease token validation rejected: '+type(error).__name__)
+            if self.abort_requested:
+                errors.append('batch cancellation requested')
             if time.monotonic()>=self.deadline:
                 errors.append('batch process180 deadline exceeded')
             receipt=dict(schema_version=1,policy=POLICY,status='BATCH_QUALIFIED' if not errors else 'BATCH_REJECTED',
@@ -561,7 +571,7 @@ def main():
     else:
         contract=load(args.contract,args.pin)
         batch=Batch(contract,args.output)
-        def cancel(signum,frame):batch.cancelled.set()
+        def cancel(signum,frame):batch.request_cancel()
         for sig in (signal.SIGINT,signal.SIGTERM):signal.signal(sig,cancel)
         receipt=batch.run()
         print(runtime.canonical(receipt).decode())
