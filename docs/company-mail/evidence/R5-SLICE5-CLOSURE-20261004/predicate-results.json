@@ -1,0 +1,142 @@
+{
+  "tests_run": 5,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "os_process_events": [],
+  "executed_negatives": [
+    {
+      "label": "archive byte budget reduced synthetic boundary",
+      "error": "boundary byte budget exceeded"
+    },
+    {
+      "label": "v3 missing scripts/r5_selected_source_binding_v3.py",
+      "error": "missing/extra/malformed v3 source fields"
+    },
+    {
+      "label": "v3 rename scripts/r5_selected_source_binding_v3.py",
+      "error": "missing/extra/malformed v3 source fields"
+    },
+    {
+      "label": "v3 missing scripts/contracts/r5-selected-binding-v3-producer.json",
+      "error": "missing/extra/malformed v3 source fields"
+    },
+    {
+      "label": "v3 rename scripts/contracts/r5-selected-binding-v3-producer.json",
+      "error": "missing/extra/malformed v3 source fields"
+    },
+    {
+      "label": "v3 missing scripts/tests/r5_selected_source_binding_v3_checks.py",
+      "error": "missing/extra/malformed v3 source fields"
+    },
+    {
+      "label": "v3 rename scripts/tests/r5_selected_source_binding_v3_checks.py",
+      "error": "missing/extra/malformed v3 source fields"
+    },
+    {
+      "label": "v3 extra",
+      "error": "missing/extra/malformed v3 source fields"
+    },
+    {
+      "label": "unclassified build newroot/input.c",
+      "error": "unclassified native/build input: newroot/input.c"
+    },
+    {
+      "label": "unclassified build internal/build/input.h",
+      "error": "unclassified native/build input: internal/build/input.h"
+    },
+    {
+      "label": "unclassified build newroot/input.syso",
+      "error": "unclassified native/build input: newroot/input.syso"
+    },
+    {
+      "label": "native directive 'package main\\nimport \"C\"\\n'",
+      "error": "unbound native compiler input"
+    },
+    {
+      "label": "native directive 'package main\\n//go:linkname local remote\\n'",
+      "error": "unbound native/linker input: cmd/native.go"
+    },
+    {
+      "label": "root explicit omission",
+      "error": "root/explicit production package coverage differs"
+    },
+    {
+      "label": "selected file outside static",
+      "error": "selected Go outside production variant superset"
+    },
+    {
+      "label": "missing variant",
+      "error": "static production variant directory/file coverage missing or extra"
+    },
+    {
+      "label": "extra variant",
+      "error": "variant outside static source authority"
+    },
+    {
+      "label": "invalid variant",
+      "error": "invalid explicit production variant directory"
+    },
+    {
+      "label": "unknown directory",
+      "error": "unknown explicit production variant directory"
+    },
+    {
+      "label": "wrong module",
+      "error": "wrong variant main module"
+    },
+    {
+      "label": "variant fork identity",
+      "error": "wrong variant fork module"
+    },
+    {
+      "label": "selector True",
+      "error": "selected binding version must be integer 2 or 3"
+    },
+    {
+      "label": "selector False",
+      "error": "selected binding version must be integer 2 or 3"
+    },
+    {
+      "label": "selector 1",
+      "error": "selected binding version must be integer 2 or 3"
+    },
+    {
+      "label": "selector 4",
+      "error": "selected binding version must be integer 2 or 3"
+    },
+    {
+      "label": "selector '3'",
+      "error": "selected binding version must be integer 2 or 3"
+    },
+    {
+      "label": "selector 3.0",
+      "error": "selected binding version must be integer 2 or 3"
+    },
+    {
+      "label": "selector None",
+      "error": "selected binding version must be integer 2 or 3"
+    },
+    {
+      "label": "runtime missing independent serialized pin",
+      "error": "independent runtime manifest reference required"
+    },
+    {
+      "label": "runtime mixed version True",
+      "error": "batch runtime/version pairing differs"
+    },
+    {
+      "label": "runtime mixed version 2",
+      "error": "batch runtime/version pairing differs"
+    },
+    {
+      "label": "runtime mixed version 4",
+      "error": "batch runtime/version pairing differs"
+    },
+    {
+      "label": "batch v1 schema mixed with selected3",
+      "error": "batch contract/status/version pairing differs"
+    }
+  ],
+  "scope": "actual predicates on synthetic data; no producer/capture/process"
+}

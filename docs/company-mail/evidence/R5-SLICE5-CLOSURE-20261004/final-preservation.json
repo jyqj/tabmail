@@ -1,0 +1,21 @@
+{
+  "frozen_delivery": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+  "verified_tracked_files": 2331,
+  "sha256_and_mode_unchanged": true,
+  "test_methods": 36,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "guarded_os_process_events": 0,
+  "proposed_controller": "AST syntax inspected only; never imported or executed",
+  "new_artifacts": {
+    "docs/company-mail/R5-SLICE5-CLOSURE-20261004.md": "9d71bb792cbb982204cce6ae63ccb02bad64506aa0e2787bc29e770b0b750665",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/checks.txt": "8eb5e0f06fa7d106c3e3fca8ea1718e3c612dd50bcb7e36cc119fa96acc14743",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/predicate-checks.txt": "14a533c2c10575c0b4938ed6257b7d8cdcdccb85b9464e6c7e970ca0282e8f39",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/predicate-results.json": "f052a549d281e0a8fd8e6b0a90f68cf78534432caae9865bb84039e00b9c68cb",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/proposed_physical_controller.py": "94c6294eb1057f9fa0c64e08dd73b29d35a04c24ecbf0a23bb49c332c48bbbe2",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/results.json": "33049106f4dde0cb7ec9363e464f43763465e7ccd452327a4518cf7436696536",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/verify_closure.py": "773e1a597ccf0c485030ce00a5f3618378b68c421ff0b4b4a3940a2783ce472d",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/verify_predicates.py": "ddd1c5a570c886215bff5f1aa31c2a155c85c471c8a5627b8830e91ed4516537"
+  }
+}
