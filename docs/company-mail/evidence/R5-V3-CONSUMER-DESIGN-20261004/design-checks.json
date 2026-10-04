@@ -1,0 +1,21 @@
+{
+  "kind": "synthetic_design_checks_only",
+  "source_reviewed": "412f875985854527f5e7d74040f18954c3a352bf",
+  "inherited_tested_source": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+  "project_imports": 0,
+  "producer_executions": 0,
+  "formal_qualification": false,
+  "controls": {
+    "correct_external_pin": true,
+    "missing_pin_rejected": true,
+    "forged_self_resigned_rejected": true,
+    "diagnostic_change_requires_own_pin": true,
+    "owned_new_observation_own_pin": true,
+    "same_binding_distinct_observation": true,
+    "v2_option_rejects_v3": true,
+    "v1_option_rejects_v3": true,
+    "bool_option_rejected": true,
+    "unknown_option_rejected": true,
+    "file_byte_pin_domain_distinct": true
+  }
+}

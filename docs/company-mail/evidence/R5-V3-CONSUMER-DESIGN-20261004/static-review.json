@@ -1,0 +1,175 @@
+{
+  "kind": "static_inspection_preservation_only",
+  "reviewed": "412f875985854527f5e7d74040f18954c3a352bf",
+  "inherited_tested": "58a50ee7ff8cde0b434f8492426d2263cedf280d",
+  "checked_paths": [
+    {
+      "path": "web/AGENTS.md",
+      "sha256": "e3447d84251880fb34cfae09131cb4c57471529bbfe60976a3245793cf621627",
+      "bytes": 327,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "docs/company-mail/R5-CATALOG-V3-INTEGRATION-20261004.md",
+      "sha256": "3d05a34dca64ad0c2ec9786182840abe24a57bd317f1c6be0e2b7e6565c235b5",
+      "bytes": 10962,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/r5_selected_source_binding_v2.py",
+      "sha256": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67",
+      "bytes": 26192,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/r5_selected_source_binding_v3.py",
+      "sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+      "bytes": 18917,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/r5_source_runner_prepare.py",
+      "sha256": "a8a7396ca8aca931a4babde47afa6c53e49f6c538c3a119c7fa13e4c6eaa9b83",
+      "bytes": 14303,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/run_r5_source_version_tests.py",
+      "sha256": "2ef49fe8f085d965eeeee9ae4f0cb5d2a2c373db0a4526b7226f41a7adcace5d",
+      "bytes": 8873,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/r5_go_environment.py",
+      "sha256": "04999b9238c748a0abdd33d6e357b3f29b0e412472140c85d74ee9234940e2f5",
+      "bytes": 1672,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/r5_source_inventory.py",
+      "sha256": "306cfcae043925d656d13b08bd439015e23348df255b363ceb8c10b6890488b2",
+      "bytes": 40174,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/r5_archive_boundary.py",
+      "sha256": "c02acc09dd0f49b28113f99b05ffc6ff996287fb015d60fa08d7de56d92b7f15",
+      "bytes": 12437,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/contracts/r5-selected-binding-v3-producer.json",
+      "sha256": "cc80c215f1bf51f2a014ff5e6a37084f29f54a904c69ee58ba52febbd125df66",
+      "bytes": 3786,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/contracts/r5-archive-boundary-v1.json",
+      "sha256": "8e04081e1f2b9d9b82b854954b56a1ac71047646f8768d1b7a7ff89af223bb15",
+      "bytes": 11582,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/r5_external_runtime.py",
+      "sha256": "c793eab91eef55c5c48ebf0f37606402b7199700d346828180597a6ae70a0cf1",
+      "bytes": 19699,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/r5_external_batch.py",
+      "sha256": "bf839d0542d52c196f27bae40a9e9fb7cc7509a38664d14e209a7e1642a7b1ec",
+      "bytes": 45257,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/r5_external_dependencies.py",
+      "sha256": "1320eae1eb90729cfb4f81cd358d596f9bc6a21f35f8626d1f7ff7f8d07bc873",
+      "bytes": 9045,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/run_r5_external_scoped.py",
+      "sha256": "ae238c523fc12ae9a89f6ec30be86216fe13eac0ec10da1c930630a09392c24c",
+      "bytes": 3482,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/probe_r5_external_runtime.py",
+      "sha256": "d63221637ed1728fafa5424ea9e50cf804af1ec15325d2f1b3f444ab4eb92713",
+      "bytes": 1119,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/check_r5_protocol.py",
+      "sha256": "8673f071517ee1d59526f89a38a7df8f29a7da2d63e7cc10789d2df0e7e94dba",
+      "bytes": 39074,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/contracts/r5-external-batch-v1.schema.json",
+      "sha256": "88137363c74f35f979acd035a7774ddb3fafbcc631da55e1ffbb6c90766b1ab9",
+      "bytes": 2616,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "internal/api/handlers/r5_protocol_component_observations_test.go",
+      "sha256": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+      "bytes": 34194,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/tests/r5_selected_source_binding_v3_checks.py",
+      "sha256": "632c5968163725d91c66b489dacd6284b74ac1e9a306c2cc1b817b77c895511f",
+      "bytes": 19608,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/tests/r5_selected_binding_v3_producer_path_checks.py",
+      "sha256": "363a14ed36c917753fb81038fcca2cc00b23ce80b1a5a72227c8d66cc6c08b7a",
+      "bytes": 4194,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/tests/r5_selected_binding_v3_rejection_checks.py",
+      "sha256": "f19401c2d6c955d0b55660036c72143fd8a45c3d417fe3d96719a6a63074bbc2",
+      "bytes": 4338,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/test_r5_external_runtime.py",
+      "sha256": "29e5c9a9ef9df4b7c3c37bb77742c71313b467cb489475862b5a8fd79ed3ab4d",
+      "bytes": 7031,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/test_r5_external_batch.py",
+      "sha256": "4e71bb4a16523387c5e6a10aad3239fe66c28f84ddc86514771b49d906439f73",
+      "bytes": 20050,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/test_r5_batch_cleanup.py",
+      "sha256": "b58e3d6ca1b3f2cc29812d73e478afff4dee7fcc233ec36d3c726ca3319c4c30",
+      "bytes": 9809,
+      "unchanged_from_frozen": true
+    },
+    {
+      "path": "scripts/preparation/test_r5_batch_lifecycle.py",
+      "sha256": "dc27989cad982394e57acf261dc0685f0fc8b90e375e5576740fef03755482ad",
+      "bytes": 8200,
+      "unchanged_from_frozen": true
+    }
+  ],
+  "all_existing_tracked_paths_unchanged": true,
+  "applicable_instructions": [
+    "web/AGENTS.md"
+  ],
+  "repository_agents_skills_present": false,
+  "central": "10/171 unchanged",
+  "historical_F52": "failed unchanged",
+  "formal_runs": 0,
+  "source_captures": 0,
+  "project_imports": 0,
+  "services_database_mail_actions": 0,
+  "ci_reads": 0
+}
