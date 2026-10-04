@@ -1,0 +1,948 @@
+{
+  "F52": "historical failures unchanged",
+  "Go": "static full-text reconstruction and lexical model only; no Go execution or syntax/type/compile proof",
+  "actual_producer_runtime_Go_Node_PG_mail_formal_lifecycle": false,
+  "bridge_static_assertions": 2280,
+  "central": "10/171 unchanged",
+  "counting": "named controls/test methods; receipt mutation subtests and lexical Go model rows are separate",
+  "guard_events": [],
+  "orchestration": "Python check interpreter starts and read-only Git metadata are outside guarded child counts",
+  "source": "73777de3f51ff185d02ab2e1193421fa91cde9d4",
+  "suites": [
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "scripts/tests/r5_external_batch_v2_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "batch-author",
+      "result": {
+        "errors": 0,
+        "failures": 0,
+        "os_process_events": [],
+        "tests": 14
+      },
+      "source_sha256": "dca70ff40eeccd11bdcd8f28e4e4d83d7f7bfdf7dcbd9f95b3481fdd12cd2ede",
+      "stderr_sha256": "52a1275903d4123c21d9a4fe8d8253ec11639dd693314f72cfd611605d3b47df",
+      "stdout_sha256": "ef8dca9c70c879258c771b13293a1b16b034556480eddb3e3064aed29a76b613"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "docs/company-mail/evidence/R5-BATCH-V2-SLICE4-INDEPENDENT-20261004/independent_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "batch-independent",
+      "result": {
+        "errors": 0,
+        "failures": 0,
+        "os_process_events": [],
+        "resealed_envelope_bundle_mutations": 168,
+        "tests": 11
+      },
+      "source_sha256": "f97d923e3334ead52dd7a34fe747f56857e4976e7a6b781932610a678a5c0283",
+      "stderr_sha256": "1c3eddc1677da18301b721ec60f44e73527d372114cfda0019877a41359e0d12",
+      "stdout_sha256": "ea4d1f25a9983304d9a975f798206aca19a7e5961512d04fd15f2e350204f750"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "scripts/tests/r5_slice4_bridge_caller_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "bridge-author",
+      "result": {
+        "controls": [
+          "caller-selector-None",
+          "stable-negotiation-after-environment-drift-None",
+          "go-failure-no-launch-None",
+          "load-None",
+          "validate-None",
+          "launch-None",
+          "postcheck-None",
+          "caller-selector-'2'",
+          "stable-negotiation-after-environment-drift-'2'",
+          "go-failure-no-launch-'2'",
+          "load-'2'",
+          "validate-'2'",
+          "launch-'2'",
+          "postcheck-'2'",
+          "caller-selector-'3'",
+          "stable-negotiation-after-environment-drift-'3'",
+          "go-failure-no-launch-'3'",
+          "load-'3'",
+          "validate-'3'",
+          "launch-'3'",
+          "postcheck-'3'",
+          "invalid-environment-zero-dispatch-''",
+          "invalid-environment-zero-dispatch-'1'",
+          "invalid-environment-zero-dispatch-'4'",
+          "invalid-environment-zero-dispatch-'true'",
+          "invalid-environment-zero-dispatch-'false'",
+          "invalid-environment-zero-dispatch-'3.0'",
+          "invalid-environment-zero-dispatch-'03'",
+          "invalid-environment-zero-dispatch-' 3'",
+          "invalid-environment-zero-dispatch-'3 '",
+          "invalid-environment-zero-dispatch-'null'",
+          "unit-does-not-load-runtime",
+          "data-only-Go-lexical-version-pairing-matrix"
+        ],
+        "count": 33,
+        "go_data_matrix": {
+          "accepted_rows": 4,
+          "rows": 7290
+        },
+        "os_process_events": [],
+        "scope": "Synthetic actual Python caller and data-only Go model; no runtime qualification"
+      },
+      "source_sha256": "02c27ec7f165056e8fb1134fb57c6ee3deae96f9aee166c17a9c103db706b724",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "775377bb94c4f0331625a9b2614ec41b80cd73e2ef2208605e98d0f7380b923d"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "docs/company-mail/evidence/R5-SLICE4-BRIDGE-INDEPENDENT-20261004/independent_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "bridge-independent",
+      "result": {
+        "actual_runtime_header_matrix": {
+          "accepted_minimal_v2_rows": 1,
+          "rows": 66
+        },
+        "controls": [
+          "actual-runtime-header-matrix-66",
+          "actual-runtime-API-selector-reject-None",
+          "actual-runtime-API-selector-reject-True",
+          "actual-runtime-API-selector-reject-False",
+          "actual-runtime-API-selector-reject-2.0",
+          "actual-runtime-API-selector-reject-3.0",
+          "actual-runtime-API-selector-reject-'2'",
+          "actual-runtime-API-selector-reject-'3'",
+          "actual-runtime-API-selector-reject-1",
+          "actual-runtime-API-selector-reject-4",
+          "actual-runtime-API-selector-reject-[]",
+          "actual-runtime-API-selector-reject-{}",
+          "v2-reject-field-presence-selected_binding_version-None",
+          "v2-reject-field-presence-selected_binding_version-False",
+          "v2-reject-field-presence-selected_binding_version-2",
+          "v2-reject-field-presence-selected_binding_version-3",
+          "v2-reject-field-presence-selected_binding_version-{}",
+          "v2-reject-field-presence-selected_binding_version-[]",
+          "v2-reject-field-presence-admitted_selection-None",
+          "v2-reject-field-presence-admitted_selection-False",
+          "v2-reject-field-presence-admitted_selection-2",
+          "v2-reject-field-presence-admitted_selection-3",
+          "v2-reject-field-presence-admitted_selection-{}",
+          "v2-reject-field-presence-admitted_selection-[]",
+          "actual-v3-boundary-strict-selector-before-mocked-envelope",
+          "real-pinned-load-canonical-v2-and-bad-pin",
+          "real-pinned-load-whitespace-integer-v2",
+          "real-load-schema-token-true",
+          "real-load-schema-token-false",
+          "real-load-schema-token-\"2\"",
+          "real-load-schema-token-2.0",
+          "real-load-schema-token-2e0",
+          "real-load-schema-token-null",
+          "real-load-schema-token-NaN",
+          "real-load-schema-token-Infinity",
+          "real-load-schema-token-1",
+          "real-load-schema-token-3",
+          "real-load-schema-token-[]",
+          "real-load-schema-token-{}",
+          "malformed-duplicate-case-or-presence-021fb596db81",
+          "malformed-duplicate-case-or-presence-4f53cda18c2b",
+          "malformed-duplicate-case-or-presence-74234e98afe7",
+          "malformed-duplicate-case-or-presence-a8100ae6aa19",
+          "malformed-duplicate-case-or-presence-88b4f9906259",
+          "malformed-duplicate-case-or-presence-c82f14bf4a02",
+          "malformed-duplicate-case-or-presence-03d830fb5b05",
+          "malformed-duplicate-case-or-presence-20ab5a194e8e",
+          "malformed-duplicate-case-or-presence-a1dc4184b2cb",
+          "malformed-duplicate-case-or-presence-ca16f75afaf8",
+          "malformed-duplicate-case-or-presence-e599f3c0d726",
+          "actual-env-selector-None",
+          "actual-env-selector-'2'",
+          "actual-env-selector-'3'",
+          "actual-env-selector-''",
+          "actual-env-selector-'03'",
+          "actual-env-selector-'+3'",
+          "actual-env-selector-'3.0'",
+          "actual-env-selector-'3e0'",
+          "actual-env-selector-' 3'",
+          "actual-env-selector-'3 '",
+          "actual-env-selector-'true'",
+          "actual-env-selector-'null'",
+          "actual-env-selector-'1'",
+          "actual-env-selector-'4'",
+          "actual-from-environment-explicit-beats-contamination",
+          "actual-caller-bound-env-(None, False, False)",
+          "actual-caller-bound-env-(None, True, False)",
+          "actual-caller-bound-env-(None, False, True)",
+          "actual-caller-bound-env-('2', False, False)",
+          "actual-caller-bound-env-('2', True, False)",
+          "actual-caller-bound-env-('2', False, True)",
+          "actual-caller-bound-env-('3', False, False)",
+          "actual-caller-bound-env-('3', True, False)",
+          "actual-caller-bound-env-('3', False, True)",
+          "invalid-caller-no-dispatch-''",
+          "invalid-caller-no-dispatch-'garbage'",
+          "invalid-caller-no-dispatch-'03'",
+          "invalid-caller-no-dispatch-'3.0'",
+          "noncomponent-selector-isolation"
+        ],
+        "count": 79,
+        "limits": [
+          "Go is read as text, never parsed/compiled/executed",
+          "Runtime load tests validate header and byte-pin only; full v3 selection is mocked",
+          "Caller process/runtime boundaries mocked; no physical or lifecycle qualification"
+        ],
+        "os_process_events": []
+      },
+      "source_sha256": "b39b768fedf7093bbd59172bc21557692ba61d68293039531185e25a278d6d24",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "a970fbdb6144cf00afb80bfcdf348930ffcde7e666bcef9a60f575d889637d54"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "scripts/tests/r5_source_preparation_v3_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "preparation-author",
+      "result": {
+        "controls": [
+          {
+            "name": "four-owned-returns-distinct-persisted-pins-complete-equality",
+            "passed": true
+          },
+          {
+            "name": "invalid-selector-None",
+            "passed": true
+          },
+          {
+            "name": "invalid-selector-True",
+            "passed": true
+          },
+          {
+            "name": "invalid-selector-False",
+            "passed": true
+          },
+          {
+            "name": "invalid-selector-1",
+            "passed": true
+          },
+          {
+            "name": "invalid-selector-4",
+            "passed": true
+          },
+          {
+            "name": "invalid-selector-'3'",
+            "passed": true
+          },
+          {
+            "name": "invalid-selector-3.0",
+            "passed": true
+          },
+          {
+            "name": "bare-producer-before-environment-go",
+            "passed": true
+          },
+          {
+            "name": "bare-producer-before-environment-./go",
+            "passed": true
+          },
+          {
+            "name": "v2-consumer-rejects-v3",
+            "passed": true
+          },
+          {
+            "name": "wrong-run-id",
+            "passed": true
+          },
+          {
+            "name": "wrong-preparation-byte-pin",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-binding",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-root",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-context",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-role",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-argv",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-exit",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-order",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-persisted",
+            "passed": true
+          },
+          {
+            "name": "reject-before-build-pin",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-hydration",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-stdout-length",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-stdout-hash",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-stderr",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-role",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-argv",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-exit",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-order",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-bundle",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-pin",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-fixture",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-binary",
+            "passed": true
+          },
+          {
+            "name": "pinned-retained-reject-run-log",
+            "passed": true
+          },
+          {
+            "name": "forged-resealed-receipt-replaced-bundle-colocated-hash-rejected",
+            "passed": true
+          },
+          {
+            "name": "bundle-contract-zero-producer-missing",
+            "passed": true
+          },
+          {
+            "name": "bundle-contract-zero-producer-extra",
+            "passed": true
+          },
+          {
+            "name": "bundle-contract-zero-producer-swapped",
+            "passed": true
+          },
+          {
+            "name": "bundle-contract-zero-producer-producer",
+            "passed": true
+          },
+          {
+            "name": "bundle-contract-zero-producer-source",
+            "passed": true
+          },
+          {
+            "name": "bundle-contract-zero-producer-run-id",
+            "passed": true
+          },
+          {
+            "name": "retained-postrun-mutation-no-publication",
+            "passed": true
+          },
+          {
+            "name": "default-v2-shape-no-v3-capture-and-v3-rejects-v2",
+            "passed": true
+          },
+          {
+            "name": "v3-strict-preparation-schema-extra",
+            "passed": true
+          },
+          {
+            "name": "v3-strict-preparation-schema-missing",
+            "passed": true
+          },
+          {
+            "name": "v3-strict-preparation-schema-wrong-policy",
+            "passed": true
+          },
+          {
+            "name": "v3-strict-preparation-schema-bool-schema",
+            "passed": true
+          },
+          {
+            "name": "v3-strict-preparation-schema-bool-version",
+            "passed": true
+          },
+          {
+            "name": "exact-wire-test-publication-reject-missing-run",
+            "passed": true
+          },
+          {
+            "name": "exact-wire-test-publication-reject-missing-pass",
+            "passed": true
+          },
+          {
+            "name": "exact-wire-test-publication-reject-wrong-test",
+            "passed": true
+          },
+          {
+            "name": "exact-wire-test-publication-reject-nonzero",
+            "passed": true
+          },
+          {
+            "name": "preserved-typescript-boundary-extra",
+            "passed": true
+          },
+          {
+            "name": "preserved-typescript-boundary-symlink",
+            "passed": true
+          },
+          {
+            "name": "preserved-typescript-boundary-tampered",
+            "passed": true
+          },
+          {
+            "name": "preserved-typescript-boundary-extra-directory",
+            "passed": true
+          },
+          {
+            "name": "preserved-linux-fd-boundary-wrong-source",
+            "passed": true
+          },
+          {
+            "name": "preserved-linux-fd-boundary-stale-fixture",
+            "passed": true
+          },
+          {
+            "name": "preserved-linux-fd-boundary-binary-tamper",
+            "passed": true
+          },
+          {
+            "name": "preserved-linux-fd-boundary-midflight-inode",
+            "passed": true
+          },
+          {
+            "name": "current-only-dispatch-v2",
+            "passed": true
+          },
+          {
+            "name": "current-only-dispatch-v3",
+            "passed": true
+          },
+          {
+            "name": "failed-selection-zero-child-dispatch",
+            "passed": true
+          }
+        ],
+        "count": 64,
+        "os_process_events": [],
+        "scope": "synthetic preparation only; no runtime qualification",
+        "source_sha256": {
+          "scripts/r5_selected_binding_consumer.py": "46a43df58a17ea03966b88fe07275e60344a055960aaabfcf405a7d5eb6caa21",
+          "scripts/r5_source_runner_prepare.py": "193c830550d88546b4669bdbbfd1a5f94b652f61877e426a533eeb387589ed15",
+          "scripts/run_r5_source_version_tests.py": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+          "scripts/tests/r5_source_preparation_v3_checks.py": "32297a9180ca28b2ebf370ad4e233d6a2a505e0e15570248d19dcaba426ac6e5"
+        }
+      },
+      "source_sha256": "32297a9180ca28b2ebf370ad4e233d6a2a505e0e15570248d19dcaba426ac6e5",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "747c95cec09aa58a8b4b285a57b0764197b5938e0031e44fc091474c2ad8601c"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "docs/company-mail/evidence/R5-V3-PREPARATION-SLICE2-INDEPENDENT-20261004/independent_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "preparation-independent",
+      "result": {
+        "controls": [
+          {
+            "name": "owned-returns-independent-complete-canonical-digests-byte-pins-and-environment",
+            "passed": true
+          },
+          {
+            "name": "producer-before-boundary-'go'",
+            "passed": true
+          },
+          {
+            "name": "producer-before-boundary-'./go'",
+            "passed": true
+          },
+          {
+            "name": "producer-before-boundary-'bin/go'",
+            "passed": true
+          },
+          {
+            "name": "producer-before-boundary-'../go'",
+            "passed": true
+          },
+          {
+            "name": "producer-before-boundary-''",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-None",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-True",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-False",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-1",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-0",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-4",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-'3'",
+            "passed": true
+          },
+          {
+            "name": "strict-selector-3.0",
+            "passed": true
+          },
+          {
+            "name": "failed-owned-capture-0",
+            "passed": true
+          },
+          {
+            "name": "failed-owned-capture-1",
+            "passed": true
+          },
+          {
+            "name": "failed-owned-capture-2",
+            "passed": true
+          },
+          {
+            "name": "failed-owned-capture-3",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-before-default-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-before-default-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-before-default-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-before-default-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-before-race-r5protocol-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-before-race-r5protocol-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-before-race-r5protocol-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-before-race-r5protocol-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-after-default-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-after-default-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-after-default-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-after-default-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-after-race-r5protocol-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-after-race-r5protocol-selection.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-after-race-r5protocol-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-after-race-r5protocol-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-selected-observation-pins.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-selected-observation-pins.json",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-build.stdout",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-build.stdout",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-build.stderr",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-build.stderr",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-run.stdout",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-run.stdout",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-run.stderr",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-run.stderr",
+            "passed": true
+          },
+          {
+            "name": "publication-collision-preparation.json",
+            "passed": true
+          },
+          {
+            "name": "publication-ENOSPC-preparation.json",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-default-reseal",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-default-replace-bundle",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-default-swap-context",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-default-symlink",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-race-r5protocol-reseal",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-race-r5protocol-replace-bundle",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-race-r5protocol-swap-context",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-before-race-r5protocol-symlink",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-default-reseal",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-default-replace-bundle",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-default-swap-context",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-default-symlink",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-race-r5protocol-reseal",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-race-r5protocol-replace-bundle",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-race-r5protocol-swap-context",
+            "passed": true
+          },
+          {
+            "name": "fixed-controller-pin-after-race-r5protocol-symlink",
+            "passed": true
+          },
+          {
+            "name": "full-binding-prebuild-package_records",
+            "passed": true
+          },
+          {
+            "name": "full-binding-prebuild-qualification",
+            "passed": true
+          },
+          {
+            "name": "full-binding-prebuild-root_mvs",
+            "passed": true
+          },
+          {
+            "name": "full-binding-prebuild-selected_local_packages",
+            "passed": true
+          },
+          {
+            "name": "full-binding-prebuild-environment",
+            "passed": true
+          },
+          {
+            "name": "full-binding-prebuild-go_env",
+            "passed": true
+          },
+          {
+            "name": "authenticated-wrong-identity-source_root",
+            "passed": true
+          },
+          {
+            "name": "authenticated-wrong-identity-source_commit",
+            "passed": true
+          },
+          {
+            "name": "authenticated-wrong-identity-run_id",
+            "passed": true
+          },
+          {
+            "name": "authenticated-wrong-identity-producer",
+            "passed": true
+          },
+          {
+            "name": "authenticated-wrong-identity-phase",
+            "passed": true
+          },
+          {
+            "name": "pin-publication-outside-source",
+            "passed": true
+          },
+          {
+            "name": "pin-publication-outside-build-cache",
+            "passed": true
+          },
+          {
+            "name": "pin-publication-outside-module-cache",
+            "passed": true
+          },
+          {
+            "name": "persisted-substitution-before-build-before-default-selection.json",
+            "passed": true
+          },
+          {
+            "name": "persisted-substitution-before-build-before-default-observation-pin.json",
+            "passed": true
+          },
+          {
+            "name": "persisted-substitution-before-build-selected-observation-pins.json",
+            "passed": true
+          },
+          {
+            "name": "schema-valid-complete-binding-drift-HOME",
+            "passed": true
+          },
+          {
+            "name": "schema-valid-complete-binding-drift-PATH",
+            "passed": true
+          },
+          {
+            "name": "schema-valid-complete-binding-drift-GOGCCFLAGS",
+            "passed": true
+          },
+          {
+            "name": "omitted-preparation-selector-v2-retains-legacy-shape-and-domain",
+            "passed": true
+          },
+          {
+            "name": "environment-selector-reject-'1'",
+            "passed": true
+          },
+          {
+            "name": "environment-selector-reject-'4'",
+            "passed": true
+          },
+          {
+            "name": "environment-selector-reject-'true'",
+            "passed": true
+          },
+          {
+            "name": "environment-selector-reject-''",
+            "passed": true
+          },
+          {
+            "name": "environment-selector-reject-'03'",
+            "passed": true
+          },
+          {
+            "name": "current-only-frozen-child-contamination-v2",
+            "passed": true
+          },
+          {
+            "name": "current-only-frozen-child-contamination-v3",
+            "passed": true
+          }
+        ],
+        "count": 90,
+        "os_process_events": [],
+        "scope": "independent pure synthetic preparation boundaries; no runtime qualification"
+      },
+      "source_sha256": "5a9e831246f62d637492a44e46106cce436a542f3a2e81f58913897128a4d8fc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "bf83d51dd008fe1b703f4de2dcb2bbb4240c640cee42b5f732f8ba195094ac75"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "docs/company-mail/evidence/R5-V3-PREPARATION-SLICE2-INDEPENDENT-20261004/preserved_pure_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "preparation-preserved",
+      "result": {
+        "count": 15,
+        "errors": 0,
+        "failures": 0,
+        "os_process_events": [],
+        "scope": "preserved pure mocked unit boundaries only; no actual-root or formal suites",
+        "test_ids": [
+          "test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green",
+          "test_r5_source_version_runner.SourceVersionRunnerTests.test_exact_partition",
+          "test_r5_source_version_runner.SourceVersionRunnerTests.test_missing_overlap_duplicate_wrong_baseline",
+          "test_r5_source_version_runner.SourceVersionRunnerTests.test_no_fresh_actual_root_class",
+          "test_r5_source_version_runner.SourceVersionRunnerTests.test_preparation_failure_reports_all_ids_missing_and_dispatches_none",
+          "test_r5_source_version_runner.PreparationBoundaryTests.test_authenticated_archive_still_checks_member_and_dependency_boundary",
+          "test_r5_source_version_runner.PreparationBoundaryTests.test_extra_tampered_link_and_native_prepared_files_rejected",
+          "test_r5_source_version_runner.PreparationBoundaryTests.test_stale_source_fixture_and_receipt_tamper_rejected",
+          "test_r5_source_version_runner.PreparationBoundaryTests.test_unknown_lock_and_existing_dependency_tree_refused_before_write",
+          "test_r5_source_version_runner.PreparationBoundaryTests.test_wrong_archive_hash_refused_before_any_mkdir",
+          "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_midflight_path_replacement_cannot_change_executed_inode_and_is_rejected",
+          "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_old_fixture_refused_before_execution",
+          "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_receipt_validation_rejects_replaced_executed_binary",
+          "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_replaced_binary_refused_before_execution",
+          "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_wrong_source_refused_before_execution"
+        ]
+      },
+      "source_sha256": "fe25f36fbacb04977b34d425890a4f95c085058c68c01785fce6933d1c7d837a",
+      "stderr_sha256": "c82665c959d63d713d409a007e655e651350ed0ec6cb56d43b2f7205329a6bbe",
+      "stdout_sha256": "5442098dd9652cc8a894c04c6caf2a8b15eb9fa9293873c779682733aa1d1460"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "scripts/tests/r5_external_runtime_v3_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "runtime-author",
+      "result": {
+        "errors": 0,
+        "failures": 0,
+        "os_process_events": [],
+        "synthetic_only": true,
+        "tests": 30
+      },
+      "source_sha256": "3063feb5577133e4d31818f4b2b8edeecbf327b498a9b30de909bbdcf12a7848",
+      "stderr_sha256": "bb5660eb88e92a0aee6a763220970e1fadc7dd45dfddf0cfaaeeff713dc4707b",
+      "stdout_sha256": "dd4c6bf0ba128d290dbac417ebb0f3504e5321846a5dcb66e775bd573b371c03"
+    },
+    {
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "docs/company-mail/evidence/R5-RUNTIME-V3-INDEPENDENT-20261004/independent_checks.py"
+      ],
+      "exit_code": 0,
+      "name": "runtime-independent",
+      "result": {
+        "errors": 0,
+        "failures": 0,
+        "os_process_events": [],
+        "synthetic_only": true,
+        "tests": 13
+      },
+      "source_sha256": "d9e57a27ba6677fbfb27f14f0cca0c8651e0fd8416da60cdc0a9ed5c546ef271",
+      "stderr_sha256": "302885f31e59d458356a1f8a19d2a285e41b9c055541e252e6c61dd5f4af5dc9",
+      "stdout_sha256": "ae27c2617776432ae96856213aed9533edf256a76f4b818605cfd9a24f84dc99"
+    }
+  ],
+  "synthetic_only": true,
+  "total": 349
+}
