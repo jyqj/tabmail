@@ -1,0 +1,32 @@
+{
+  "boundary": "All owned servers stopped, databases/data removed, sockets released. Two exited postmasters are unreaped PID1 zombies; no kill or unrelated cleanup attempted.",
+  "postmaster_states": {
+    "shared-db": {
+      "parent_pid": 1,
+      "postmaster_pid": 6610,
+      "postmaster_state": "Z",
+      "running": false
+    },
+    "shared-http": {
+      "parent_pid": 1,
+      "postmaster_pid": 8779,
+      "postmaster_state": "Z",
+      "running": false
+    }
+  },
+  "shared-db": {
+    "fixture_database_count_after": "NOTMEASURED; post-run receipt rejection stopped collection before catalog check",
+    "owned_data_removed": true,
+    "port_accepts_connections": false,
+    "postmaster_pid_file_absent": true,
+    "preparation_cleanup_bind_failure": "EADDRINUSE after stop; no listening PG endpoint",
+    "stop_exit": 0
+  },
+  "shared-http": {
+    "fixture_databases_remaining": 0,
+    "owned_data_removed": true,
+    "pid_gone": false,
+    "port_free_after": true,
+    "stop_exit": 0
+  }
+}

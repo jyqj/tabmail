@@ -1,0 +1,11 @@
+{
+  "changed_top_keys": [
+    "attestation_sha256",
+    "commands",
+    "hydration_diagnostics"
+  ],
+  "command_stdout_hashes_changed": true,
+  "formal_post_validation": "REJECTED",
+  "interpretation": "No source/fixture integrity drift; command output hash changes remain unresolved and are not waived.",
+  "source_package_native_toolchain_module_inputs_equal": true
+}

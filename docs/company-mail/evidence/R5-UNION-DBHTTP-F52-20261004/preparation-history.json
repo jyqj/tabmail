@@ -1,0 +1,38 @@
+[
+  {
+    "reason": "missing exact pinned rfc3339-validator; requirements later hydrated exactly",
+    "stage": "initial_python_check",
+    "status": "REJECTED"
+  },
+  {
+    "reason": "Go VCS discovery reached workspace repository; no flags/source changes; independent real clone used",
+    "stage": "worktree_selection",
+    "status": "REJECTED"
+  },
+  {
+    "exit": 254,
+    "reason": "default cache path ENOENT; later owned-cache official-lock hydration passed",
+    "stage": "npm_default_cache_hydration",
+    "status": "FAILED"
+  },
+  {
+    "reason": "requested cwd did not yet exist; clone subsequently created from existing workspace",
+    "stage": "real_clone_process_creation",
+    "status": "FAILED_BEFORE_EXECUTION"
+  },
+  {
+    "reason": "Go --version is unsupported; go version subsequently captured",
+    "stage": "runtime_tools_version_observation",
+    "status": "FAILED"
+  },
+  {
+    "reason": "unchanged substantive inputs; command stdout hashes changed; mismatch not waived, no producer rerun",
+    "stage": "shared_db_post_selection_validation",
+    "status": "REJECTED"
+  },
+  {
+    "reason": "EADDRINUSE after PG stop; no listening endpoint; stopped server and owned data cleanup independently verified",
+    "stage": "shared_db_cleanup_bind_probe",
+    "status": "FAILED"
+  }
+]

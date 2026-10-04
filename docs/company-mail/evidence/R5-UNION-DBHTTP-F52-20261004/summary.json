@@ -1,0 +1,33 @@
+{
+  "archive_after_db_sha256": "f61d76e97869959aa9a8cc0f1a170a783cac6a80de67009290a3efa7b6d63a2f",
+  "archive_after_http_sha256": "f61d76e97869959aa9a8cc0f1a170a783cac6a80de67009290a3efa7b6d63a2f",
+  "archive_before_http_sha256": "f61d76e97869959aa9a8cc0f1a170a783cac6a80de67009290a3efa7b6d63a2f",
+  "archive_before_sha256": "f61d76e97869959aa9a8cc0f1a170a783cac6a80de67009290a3efa7b6d63a2f",
+  "bc02_boundary": "current_contract_capability; not formal historical backfill/migration-write certification",
+  "budgets": {
+    "go_seconds": 120,
+    "process_seconds": 180
+  },
+  "cleanup_running_owned_resources": 0,
+  "go": "1.25.7",
+  "local_replacements": 2,
+  "no_historical_qualification_inherited": true,
+  "official_npm_lock_sha256": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3",
+  "private_root": "/workspace/r5-union-f52-private",
+  "private_root_mode": "0700",
+  "producer_scope_results": {
+    "db_cases": 46,
+    "http_cases": 43,
+    "unique_db_http_layer_slots": 89
+  },
+  "product_green_scope": "Both original scoped producers report true; whole product/union qualification not asserted",
+  "remaining_blocker": "shared-db post-runtime selected attestation rejection",
+  "schema": 19,
+  "schema19_observation": "Original fixtures migrate current schema; no supplementary schema test run",
+  "source_clean_after": true,
+  "source_closure_sha256": "d850573cc6dc38ca022c7911f89bd11071a036d53f4f1452eb7209861194e18c",
+  "source_commit": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+  "source_identity_sha1": "880c5e23fb57855760fbdc5ebc960421cf1bea92",
+  "task_complete": false,
+  "union_complete_qualification": false
+}

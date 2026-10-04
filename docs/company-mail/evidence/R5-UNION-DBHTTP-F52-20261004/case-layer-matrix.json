@@ -1,0 +1,1052 @@
+[
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT03",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT04",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT05",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT06",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT07",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT08",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT09",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "CT10",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RC01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RC02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RC03",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RC04",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RC05",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "OP01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "OP02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "OP03",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "OP04",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RT01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RT02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RT03",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RT04",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RT05",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RT06",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "RT07",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "NOTAPPLICABLE",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db"
+    ],
+    "shared_http_declared_verified_layers": []
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "BC01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "current_contract_capability",
+      "shared_input_runtime"
+    ],
+    "case_id": "BC02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "current_contract_capability",
+      "shared_input_runtime"
+    ],
+    "case_id": "BC03",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "BC04",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "BC05",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "BC06",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db",
+      "http"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "GC01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "NOTAPPLICABLE",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db"
+    ],
+    "shared_http_declared_verified_layers": []
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "GC02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "NOTAPPLICABLE",
+    "missing_required_layers": [],
+    "required_layers": [
+      "db"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db"
+    ],
+    "shared_http_declared_verified_layers": []
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "LF01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "LF02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "LF03",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "LF04",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "LF05",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "LF06",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "LF07",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "PE01",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "PE02",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "PE03",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "PE04",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  },
+  {
+    "adapter_evidence_scopes": [
+      "shared_input_runtime"
+    ],
+    "case_id": "PE05",
+    "components": "NOTRUN",
+    "db_producer_db_slot": "PASS",
+    "http_producer_http_slot": "PASS",
+    "missing_required_layers": [
+      "components"
+    ],
+    "required_layers": [
+      "db",
+      "http",
+      "components"
+    ],
+    "shared_db_declared_verified_layers": [
+      "db",
+      "http"
+    ],
+    "shared_http_declared_verified_layers": [
+      "db",
+      "http"
+    ]
+  }
+]

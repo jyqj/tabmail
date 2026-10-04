@@ -1,0 +1,295 @@
+{
+  "archive_post_validation": "PASS",
+  "errors_count": 0,
+  "exit": 0,
+  "missing_required_layers": {
+    "BC01": [],
+    "BC02": [],
+    "BC03": [],
+    "BC04": [],
+    "BC05": [],
+    "BC06": [],
+    "CT01": [],
+    "CT02": [],
+    "CT03": [],
+    "CT04": [],
+    "CT05": [],
+    "CT06": [],
+    "CT07": [],
+    "CT08": [],
+    "CT09": [],
+    "CT10": [],
+    "GC01": [
+      "db"
+    ],
+    "GC02": [
+      "db"
+    ],
+    "LF01": [
+      "components"
+    ],
+    "LF02": [
+      "components"
+    ],
+    "LF03": [
+      "components"
+    ],
+    "LF04": [
+      "components"
+    ],
+    "LF05": [
+      "components"
+    ],
+    "LF06": [
+      "components"
+    ],
+    "LF07": [
+      "components"
+    ],
+    "OP01": [],
+    "OP02": [],
+    "OP03": [],
+    "OP04": [],
+    "PE01": [
+      "components"
+    ],
+    "PE02": [
+      "components"
+    ],
+    "PE03": [
+      "components"
+    ],
+    "PE04": [
+      "components"
+    ],
+    "PE05": [
+      "components"
+    ],
+    "RC01": [
+      "components"
+    ],
+    "RC02": [
+      "components"
+    ],
+    "RC03": [
+      "components"
+    ],
+    "RC04": [
+      "components"
+    ],
+    "RC05": [
+      "components"
+    ],
+    "RT01": [],
+    "RT02": [],
+    "RT03": [],
+    "RT04": [],
+    "RT05": [],
+    "RT06": [],
+    "RT07": [
+      "db"
+    ]
+  },
+  "producer_invocations": 1,
+  "product_green": true,
+  "raw_report_sha256": "5e4be924c5de1b766ee7a7c92bc51e540f42f5e14d9a03888485131db64a5586",
+  "runtime_test_names": [
+    "TestR5LegacyBCCContractCapabilities",
+    "TestR5ProtocolBCCAssetSharedCases",
+    "TestR5ProtocolBCCSurfacesSharedCases",
+    "TestR5ProtocolContentSharedCases",
+    "TestR5ProtocolCredentialSharedCases",
+    "TestR5ProtocolDomainSharedCases",
+    "TestR5ProtocolDraftGrantOrderingSharedCases",
+    "TestR5ProtocolLegacyBCCObservationSharedCases",
+    "TestR5ProtocolLegacyReplaySharedCases",
+    "TestR5ProtocolOffboardingEligibilitySharedCases",
+    "TestR5ProtocolOffboardingSharedCases",
+    "TestR5ProtocolPermissionIntentSharedCases",
+    "TestR5ProtocolPermissionStaleSharedCases",
+    "TestR5ProtocolReceiptSharedCases",
+    "TestR5ProtocolRecoverySharedCases",
+    "TestR5ProtocolRetentionSharedCases"
+  ],
+  "selected_post_validation": "PASS",
+  "shared_input_verified_cases": 43,
+  "shared_input_verified_layers": {
+    "BC01": [
+      "db",
+      "http"
+    ],
+    "BC02": [
+      "db",
+      "http"
+    ],
+    "BC03": [
+      "db",
+      "http"
+    ],
+    "BC04": [
+      "db",
+      "http"
+    ],
+    "BC05": [
+      "db",
+      "http"
+    ],
+    "BC06": [
+      "db",
+      "http"
+    ],
+    "CT01": [
+      "db",
+      "http"
+    ],
+    "CT02": [
+      "db",
+      "http"
+    ],
+    "CT03": [
+      "db",
+      "http"
+    ],
+    "CT04": [
+      "db",
+      "http"
+    ],
+    "CT05": [
+      "db",
+      "http"
+    ],
+    "CT06": [
+      "db",
+      "http"
+    ],
+    "CT07": [
+      "db",
+      "http"
+    ],
+    "CT08": [
+      "db",
+      "http"
+    ],
+    "CT09": [
+      "db",
+      "http"
+    ],
+    "CT10": [
+      "db",
+      "http"
+    ],
+    "LF01": [
+      "db",
+      "http"
+    ],
+    "LF02": [
+      "db",
+      "http"
+    ],
+    "LF03": [
+      "db",
+      "http"
+    ],
+    "LF04": [
+      "db",
+      "http"
+    ],
+    "LF05": [
+      "db",
+      "http"
+    ],
+    "LF06": [
+      "db",
+      "http"
+    ],
+    "LF07": [
+      "db",
+      "http"
+    ],
+    "OP01": [
+      "db",
+      "http"
+    ],
+    "OP02": [
+      "db",
+      "http"
+    ],
+    "OP03": [
+      "db",
+      "http"
+    ],
+    "OP04": [
+      "db",
+      "http"
+    ],
+    "PE01": [
+      "db",
+      "http"
+    ],
+    "PE02": [
+      "db",
+      "http"
+    ],
+    "PE03": [
+      "db",
+      "http"
+    ],
+    "PE04": [
+      "db",
+      "http"
+    ],
+    "PE05": [
+      "db",
+      "http"
+    ],
+    "RC01": [
+      "db",
+      "http"
+    ],
+    "RC02": [
+      "db",
+      "http"
+    ],
+    "RC03": [
+      "db",
+      "http"
+    ],
+    "RC04": [
+      "db",
+      "http"
+    ],
+    "RC05": [
+      "db",
+      "http"
+    ],
+    "RT01": [
+      "db",
+      "http"
+    ],
+    "RT02": [
+      "db",
+      "http"
+    ],
+    "RT03": [
+      "db",
+      "http"
+    ],
+    "RT04": [
+      "db",
+      "http"
+    ],
+    "RT05": [
+      "db",
+      "http"
+    ],
+    "RT06": [
+      "db",
+      "http"
+    ]
+  },
+  "source_closure_sha256": "d850573cc6dc38ca022c7911f89bd11071a036d53f4f1452eb7209861194e18c",
+  "source_sha": "880c5e23fb57855760fbdc5ebc960421cf1bea92",
+  "status": "shared_scoped_evidence_passed",
+  "target_red_count": 0,
+  "task_complete": false
+}
