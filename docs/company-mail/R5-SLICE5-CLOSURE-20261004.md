@@ -33,8 +33,8 @@ The first harness requires HEAD equal to the frozen delivery and authenticates i
 
 | Executed evidence | Test methods | Failures/errors/skips | Guarded OS process events |
 |---|---:|---:|---:|
-| [Closure checks log](evidence/R5-SLICE5-CLOSURE-20261004/checks.log) | 31 | 0 / 0 / 0 | 0 |
-| [Supplemental predicate log](evidence/R5-SLICE5-CLOSURE-20261004/predicate-checks.log) and [results](evidence/R5-SLICE5-CLOSURE-20261004/predicate-results.json) | 5 | 0 / 0 / 0 | 0 |
+| [Closure checks log](evidence/R5-SLICE5-CLOSURE-20261004/checks.txt) | 31 | 0 / 0 / 0 | 0 |
+| [Supplemental predicate log](evidence/R5-SLICE5-CLOSURE-20261004/predicate-checks.txt) and [results](evidence/R5-SLICE5-CLOSURE-20261004/predicate-results.json) | 5 | 0 / 0 / 0 | 0 |
 
 **36 test methods pass.** Subtests are not added to that method count. The first harness records **66 custom negatives**, including **56** actual v4 per-input negatives (14 paths × bytes/missing/extra/rename), eight receipt membership/version changes and two mocked midflight observations. The supplemental harness records **33** predicate negatives. Reused explicit pure methods additionally execute every historical file byte/delete/rename check, registry forgery/duplicate/traversal checks, marker mutations, unknown nested modules, exact two-fork grammar/version/path negatives, root versus explicit/variant/file coverage, archive imports/embed/generate, native/build/ignored Go rejection, workspace/vendor, symlink/FIFO, descriptor replacement, source drift and externally pinned/resealed envelope rejection. These reused subtests remain individually visible in source and named logs; no inflated aggregate mutation count is claimed.
 

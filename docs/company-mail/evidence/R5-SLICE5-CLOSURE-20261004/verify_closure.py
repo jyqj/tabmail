@@ -130,6 +130,6 @@ report=dict(delivery=DELIVERY,tested_implementation=IMPLEMENTATION,
     skips=len(result.skipped),os_process_events=process_events,executed_custom_negatives=negative_rows,
     preserved_tracked_files=records,scope='actual pure v4 validators on owned frozen copies; selected producer boundaries mocked; no physical qualification')
 (OUT/'results.json').write_text(json.dumps(report,indent=2,sort_keys=True)+'\n')
-(OUT/'checks.log').write_text(stream.getvalue())
+(OUT/'checks.txt').write_text(stream.getvalue())
 print(json.dumps({k:report[k] for k in ('authenticated_frozen_files','tests_run','failures','errors','skips','os_process_events')}))
 if not result.wasSuccessful() or process_events: sys.exit(1)

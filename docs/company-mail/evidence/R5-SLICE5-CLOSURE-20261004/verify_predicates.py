@@ -73,6 +73,6 @@ class Predicates(unittest.TestCase):
                 self.reject('archive byte budget reduced synthetic boundary',lambda:boundary.read(root,'input'))
 stream=io.StringIO();result=unittest.TextTestRunner(stream=stream,verbosity=2).run(unittest.defaultTestLoader.loadTestsFromTestCase(Predicates))
 report=dict(tests_run=result.testsRun,failures=len(result.failures),errors=len(result.errors),skips=len(result.skipped),os_process_events=events,executed_negatives=rows,scope='actual predicates on synthetic data; no producer/capture/process')
-(OUT/'predicate-results.json').write_text(json.dumps(report,indent=2)+'\n');(OUT/'predicate-checks.log').write_text(stream.getvalue())
+(OUT/'predicate-results.json').write_text(json.dumps(report,indent=2)+'\n');(OUT/'predicate-checks.txt').write_text(stream.getvalue())
 print(json.dumps({k:report[k] for k in ('tests_run','failures','errors','skips','os_process_events')}))
 if not result.wasSuccessful() or events:sys.exit(1)
