@@ -10144,7 +10144,7 @@
     "internal/api/handlers/outbound.go": "535a602f0d2b0566c09a8131040ee25471f0266b5c15395ee9b312ffe83fa5a8",
     "internal/api/handlers/outbound_view.go": "0c649053f1c44eaa8f6e8468a57cbaac8618f158fe562e748a0131f47c197808",
     "internal/api/handlers/permissions.go": "112403579c8fe55428a9dcc10b59196bd19beeef3fe69fed514880e350f386d6",
-    "internal/api/handlers/r5_protocol_component_observations_test.go": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+    "internal/api/handlers/r5_protocol_component_observations_test.go": "b47248460d33055d70867d568f960b6880adff22b4ff4a4e4df273a7ae344770",
     "internal/api/handlers/respond.go": "cad0a2150d3bfa2f30e5cd8b75fb6d2bca4b5437ef586bbf3a93c2a514265bf9",
     "internal/api/handlers/users_admin.go": "754195f3cea07c2a8805d29426e30d2e311f5886372e096b2ee13f313af81e19",
     "internal/api/http_contract_test.go": "a5127099c5d4c25ee72232e7446f40cd7a93fd1be772935164af5963c471950c",
@@ -10172,7 +10172,7 @@
     "internal/company/types.go": "7c67ba6d42001bfd704865cb6887146e35541aa8c8808ee8b11eaf647107f305",
     "internal/models/mailbox_grants.go": "ce208909d625521c000934f18240ca0d8a1e7f805161d939096c94d890ae6e83",
     "internal/models/models.go": "497558bbcdb3579034db3744e544c5f09ae5f28d101ea966a6d9e9e6e7ab002d",
-    "internal/store/postgres/r5_protocol_shared_test.go": "c3a961063e532cdf41957edbc85455dc2a142ad1d664741da43b07afab83e6b8",
+    "internal/store/postgres/r5_protocol_shared_test.go": "7974a065199361e7e01f0d4ba7e2b3ec08ab6bf37c40cd86f6a88901cfbd6db9",
     "scripts/check_contract_drift.py": "a1199a4766ebbd30270df438b5cceaa6507bcf239a6d172dde937612d93ab107",
     "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
     "web/app/(dashboard)/company/recovery/page.tsx": "f7d291f3ee65fb3b106485fc56f7214eb343285d1dc5012449c426890cf39fe9",
@@ -10217,13 +10217,5 @@
   "acquisition": {
     "base_commit": "4aec142bcffd53c6ab91f2263436aaf980833fab",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
-  },
-  "inventory_revision": {
-    "revision": 2,
-    "source_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3",
-    "previous_snapshot": "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-compatibility-inventory-revision1.json",
-    "previous_sha256": "cfd20e67cdec8b1c03b4e2f882c5f791f53e28d910af13411e81d777fd621820",
-    "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/README.md"
   }
 }
