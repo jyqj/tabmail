@@ -6,6 +6,7 @@ import {
   sessionScope,
 } from "../session";
 import type { APIError, LoginResponse, APIResponse } from "../types";
+import { createEventStreamParser } from "./event-stream";
 
 export interface RequestOptions {
   signal?: AbortSignal;
@@ -394,43 +395,29 @@ export async function streamEvents(
         onEvent({ type: "resync", data: null });
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
-        let buffer = "";
+        const parser = createEventStreamParser(frame => {
+          assertSession(lease.scope);
+          if (lease.signal.aborted) throw new DOMException("Aborted", "AbortError");
+          if (frame.id !== undefined) cursor = frame.id;
+          if (frame.data === undefined) return;
+          let data: unknown = frame.data;
+          try {
+            data = JSON.parse(frame.data);
+          } catch {
+            /* raw event data */
+          }
+          onEvent({
+            type: frame.type,
+            data: transform ? transform(data) : data,
+          });
+          failures = 0;
+        });
         try {
           while (!lease.signal.aborted) {
             const { value, done } = await reader.read();
             assertSession(lease.scope);
             if (done) break;
-            buffer += decoder
-              .decode(value, { stream: true })
-              .replace(/\r\n/g, "\n");
-            if (buffer.length > 1024 * 1024)
-              throw new Error("Oversized event stream frame");
-            let boundary: number;
-            while ((boundary = buffer.indexOf("\n\n")) >= 0) {
-              const chunk = buffer.slice(0, boundary);
-              buffer = buffer.slice(boundary + 2);
-              let event = "message";
-              const lines: string[] = [];
-              for (const line of chunk.split("\n")) {
-                if (line.startsWith("id:")) cursor = line.slice(3).trim();
-                if (line.startsWith("event:")) event = line.slice(6).trim();
-                if (line.startsWith("data:"))
-                  lines.push(line.slice(5).trimStart());
-              }
-              if (!lines.length) continue;
-              let data: unknown = lines.join("\n");
-              try {
-                data = JSON.parse(data as string);
-              } catch {
-                /* raw event data */
-              }
-              assertSession(lease.scope);
-              onEvent({
-                type: event,
-                data: transform ? transform(data) : data,
-              });
-              failures = 0;
-            }
+            parser.push(decoder.decode(value, { stream: true }));
           }
         } finally {
           await reader.cancel().catch(() => undefined);
