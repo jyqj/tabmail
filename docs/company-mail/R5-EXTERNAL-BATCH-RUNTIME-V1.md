@@ -1,5 +1,10 @@
 # Explicit external batch runtime v1
 
+The lifecycle at this historical frozen source is superseded by the
+[F1/F2/F3 correction](R5-EXTERNAL-BATCH-LIFECYCLE-FIX-20261004.md). Its receipts
+retain their original identities. The historical bounded-return claims do not
+qualify the independently reproduced fault paths.
+
 Implementation frozen for the final infrastructure probe:
 `f80b37fe14d856d2f2a048a06fe848fc4420448d`, based on
 `9fc345308153fb664f115c7ac9ddd5abc3e46929` plus the independently approved

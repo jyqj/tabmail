@@ -91,5 +91,5 @@
     "bridge_sha256",
     "probe_config_sha256"
   ],
-  "$comment": "Semantic validation recaptures the exact required adapter set, command templates, helper hashes and complete descriptor/content inventories. Schema alone never authorizes launch."
+  "$comment": "Semantic validation recaptures the exact required adapter set, command templates, helper hashes and complete descriptor/content inventories. Schema alone never authorizes launch. The process180 budget is the execution deadline, including full pre/post validation and RPC reads. Physical kill/reap/socket/owner cleanup is mandatory before qualification and can require a cleanup tail; OS uninterruptible waits have no hard physical-return bound. Accepted per-case cancellation before finalization invalidates the entire staged batch. A lease-held outer barrier covers initial preflight, setup, execution and postflight. Physical cleanup uses independent kill/wait reaping, never a retry of the pipe-drain routine. Unknown cleanup retains blocking ownership and cannot release the lease or publish qualification."
 }

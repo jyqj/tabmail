@@ -161,7 +161,7 @@ class BatchFinalizationControls(unittest.TestCase):
                 yield nonce
                 raise ValueError('synthetic observed lease release failure')
         lease_patch=patch.object(batch.runtime,'owner',failing_release) if lease_failure else batch.contextlib.nullcontext()
-        with lease_patch,patch.object(batch,'validate_contract',side_effect=self.validate),patch.object(owner,'run_process',side_effect=synthetic):
+        with lease_patch,patch.object(owner,'validate_inventory',side_effect=lambda: self.validate(owner.contract)),patch.object(owner,'run_process',side_effect=synthetic):
             receipt=owner.run()
         self.assertEqual(self.events,['validate'] if noack else ['validate','validate'])
         self.assertFalse((self.root/'.r5-runtime-owner').exists())
