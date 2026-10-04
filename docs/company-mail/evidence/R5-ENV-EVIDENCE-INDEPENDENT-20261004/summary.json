@@ -1,0 +1,154 @@
+{
+  "attempt_history": [
+    {
+      "cause": "transaction pre-existing drift plus two compatibility class setup errors from omitted existing Node PATH",
+      "errors": 3,
+      "failures": 0,
+      "log": "existing.stderr",
+      "tests_run": 67
+    },
+    {
+      "cause": "four candidate requirement failures plus umask-sensitive same-uid harness expectation",
+      "failed_methods": 5,
+      "failure_records": 7,
+      "log": "review.stderr",
+      "tests_run": 21
+    },
+    {
+      "cause": "two confirmed pre-existing inventory drifts",
+      "errors": 2,
+      "failures": 0,
+      "log": "existing-final.stderr",
+      "tests_run": 82
+    },
+    {
+      "cause": "candidate requirement failures",
+      "failed_methods": 4,
+      "failure_records": 6,
+      "log": "review-final.stderr",
+      "tests_run": 21
+    },
+    {
+      "cause": "candidate failures including real production file bound",
+      "failed_methods": 5,
+      "failure_records": 7,
+      "log": "review-production.stderr",
+      "tests_run": 23
+    }
+  ],
+  "base_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+  "base_transaction_test": {
+    "errors": 1,
+    "failures": 0,
+    "passed": 25,
+    "tests_run": 26
+  },
+  "candidate_source_modified": false,
+  "collector_comparison": {
+    "ast_equal": true,
+    "base_ast_sha256": "0384d48441d0791e70904af7782cd6dbedd475f46a2964517083afcdcb7ec56b",
+    "base_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+    "clients": 134,
+    "compat_base": {
+      "error": "source hash drift",
+      "error_sha256": "7a8a2020c49d320f2c88a155999b4c96ef3542f8e7668166de9e4ca1f918c468",
+      "status": "rejected"
+    },
+    "compat_current": {
+      "error": "source hash drift",
+      "error_sha256": "7a8a2020c49d320f2c88a155999b4c96ef3542f8e7668166de9e4ca1f918c468",
+      "status": "rejected"
+    },
+    "compatibility_closure_drift": {
+      "internal/api/handlers/r5_protocol_component_observations_test.go": {
+        "observed": "42deed5c10a1bcc510ea144e36ecac6af377a8fe8a08cea57bf3190eecb73757",
+        "stored": "b47248460d33055d70867d568f960b6880adff22b4ff4a4e4df273a7ae344770"
+      },
+      "internal/store/postgres/r5_protocol_shared_test.go": {
+        "observed": "c3a961063e532cdf41957edbc85455dc2a142ad1d664741da43b07afab83e6b8",
+        "stored": "7974a065199361e7e01f0d4ba7e2b3ec08ab6bf37c40cd86f6a88901cfbd6db9"
+      }
+    },
+    "compatibility_closure_equal": true,
+    "compatibility_source_facts_equal": true,
+    "current_ast_sha256": "0384d48441d0791e70904af7782cd6dbedd475f46a2964517083afcdcb7ec56b",
+    "migration_equal": true,
+    "routes": 132,
+    "source_sha": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+    "tx_base": {
+      "error_lines": 45,
+      "error_sha256": "0bff52904998adbd0d54f03d14e5d5987a19d676de2a5176beebc93296845706",
+      "status": "rejected"
+    },
+    "tx_current": {
+      "error_lines": 45,
+      "error_sha256": "0bff52904998adbd0d54f03d14e5d5987a19d676de2a5176beebc93296845706",
+      "status": "rejected"
+    }
+  },
+  "decision": "reject_pending_root_fixes",
+  "dependencies_changed": false,
+  "final_existing": {
+    "author_controls": 17,
+    "compatibility_tests": 19,
+    "error_ids": [
+      "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence",
+      "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion"
+    ],
+    "errors": 2,
+    "failures": 0,
+    "outer_skips": 0,
+    "passed_methods": 80,
+    "runner_preparation_binary_controls": 15,
+    "selected_v2_negatives": 5,
+    "tests_run": 82,
+    "transaction_tests": 26
+  },
+  "final_independent": {
+    "base_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+    "errors": [],
+    "expected_failures": [],
+    "failed_methods": 5,
+    "failure_records_including_subtests": 7,
+    "failures": [
+      "__main__.RequirementRegressions.test_compatibility_bound_must_preserve_original_exception (kind='CalledProcessError')",
+      "__main__.RequirementRegressions.test_compatibility_bound_must_preserve_original_exception (kind='TimeoutExpired')",
+      "__main__.RequirementRegressions.test_compatibility_write_error_must_preserve_original_timeout",
+      "__main__.RequirementRegressions.test_compatibility_production_bound_must_preserve_original_failure",
+      "__main__.RequirementRegressions.test_selected_bound_must_preserve_metadata_failure_and_timeout (kind='CompletedProcess')",
+      "__main__.RequirementRegressions.test_selected_bound_must_preserve_metadata_failure_and_timeout (kind='TimeoutExpired')",
+      "__main__.RequirementRegressions.test_write_failure_must_not_close_reused_descriptor"
+    ],
+    "passed_methods": 18,
+    "skipped": [],
+    "source_sha": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+    "tests_run": 23
+  },
+  "findings": [
+    {
+      "id": "R5-ENV-IND-1",
+      "priority": "P2",
+      "sources": [
+        "scripts/check_r5_compatibility.py:45",
+        "scripts/r5_selected_source_binding_v2.py:294",
+        "scripts/r5_selected_source_binding_v2.py:296"
+      ],
+      "title": "Retention failure masks producer failure/timeout"
+    },
+    {
+      "id": "R5-ENV-IND-2",
+      "priority": "P2",
+      "sources": [
+        "scripts/r5_private_diagnostics.py:77",
+        "scripts/r5_private_diagnostics.py:81"
+      ],
+      "title": "Double close can close reused descriptor"
+    }
+  ],
+  "formal_runs": 0,
+  "go_executable_sha256": "76ac600b41ad2eceee5d39d02af78009516f8b2a29f30bcc80f765c3e4b4f5a8",
+  "go_version": "go1.25.7",
+  "merge_or_deploy": false,
+  "original_author_private_root_available": false,
+  "source_sha": "df6ffe046611f5b2121f4d48d5114a2ececd2c24"
+}
