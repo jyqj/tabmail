@@ -123,7 +123,9 @@ class TransactionInventoryTests(unittest.TestCase):
         evidence = tx.CATALOG.parent / 'PR23-TRANSACTION-INVENTORY-20261003/function-review.json'
         review = json.loads(evidence.read_text())
         self.assertEqual((review['added'], review['removed'], review['body_changed']), (45, 2, 33))
-        entries = {e['id']: e for e in self.data['entries']}
+        historical = json.loads((tx.CATALOG.parent / 'R5-CATALOG-RECONCILIATION-20261004/historical-transaction-inventory-revision1.json').read_text())
+        entries = {e['id']: e for e in historical['entries']}
+        current = {e['id']: e for e in self.data['entries']}
         self.assertEqual(len(review['functions']), 78)
         self.assertEqual(len({r['id'] for r in review['functions']}), 78)
         for row in review['functions']:
@@ -134,6 +136,18 @@ class TransactionInventoryTests(unittest.TestCase):
                 self.assertEqual(e['syntax']['sha256'], row['source_sha256'])
                 self.assertEqual(e['classification'], row['classification'])
                 self.assertEqual(e['evidence_level'], 'source-only')
+                now = current[row['id']]
+                if row['id'] == tx.PG + 'employee_disposition.go::offboardingSubjectsTx':
+                    self.assertEqual(now['source_review']['source_sha256'], now['syntax']['sha256'])
+                    self.assertEqual(now['source_review']['base_commit'], '3f34c31ed51a721b318a76512805e4a14dc292c3')
+                    self.assertIn('authz.CanManageTenantMember', now['source_review']['trace'])
+                    self.assertIn('current caller', now['source_review']['trace'])
+                    self.assertNotEqual(now['syntax']['sha256'], row['source_sha256'])
+                else:
+                    self.assertEqual(now['source_review'], e['source_review'])
+                    self.assertEqual(now['syntax']['sha256'], row['source_sha256'])
+                self.assertEqual(now['classification'], row['classification'])
+                self.assertEqual(now['evidence_level'], 'source-only')
         for row in review['removed_functions']:
             self.assertNotIn(row['id'], entries)
         self.assertFalse(review['runtime_verified'])

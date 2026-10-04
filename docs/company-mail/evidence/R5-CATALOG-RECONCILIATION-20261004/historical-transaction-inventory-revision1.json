@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "baseline_commit": "aeed47f0e1998d9925acb680992b051463821d69",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -79,7 +79,7 @@
     },
     {
       "path": "internal/store/postgres/employee_disposition.go",
-      "sha256": "ac722af5f6cc24b25662bdc9098d466417fb701ceddf29373ac26e1b17aca42e"
+      "sha256": "8e85190234b215c2110b58bca9dc0972e6fe73451275e048d1a73a06867398fc"
     },
     {
       "path": "internal/store/postgres/ingress.go",
@@ -11549,7 +11549,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 252,
+          "line": 244,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -11557,7 +11557,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 222,
+          "line": 214,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12936,7 +12936,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 240,
+          "line": 232,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12944,7 +12944,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "applyOffboarding",
-          "line": 352,
+          "line": 344,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -19811,108 +19811,108 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "ExecuteOffboarding",
         "receiver": "*PgStore",
-        "line": 250,
-        "end": 317,
+        "line": 242,
+        "end": 309,
         "sha256": "615a8dfc3350368188853a9be4f0a0bcd630ae098089113bc276e51902f9ea4f",
         "calls": [
           {
-            "line": 252,
+            "line": 244,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 255,
+            "line": 247,
             "expr": "tx.QueryRow(ctx, `SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE`, a.TenantID, a.ID, planID, target).Scan",
             "name": "Scan"
           },
           {
-            "line": 255,
+            "line": 247,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE`"
           },
           {
-            "line": 256,
+            "line": 248,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 257,
+            "line": 249,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 262,
+            "line": 254,
             "expr": "json.Unmarshal",
             "name": "Unmarshal"
           },
           {
-            "line": 265,
+            "line": 257,
             "expr": "json.Unmarshal",
             "name": "Unmarshal"
           },
           {
-            "line": 271,
+            "line": 263,
             "expr": "offboardingSubjectsTx",
             "name": "offboardingSubjectsTx"
           },
           {
-            "line": 274,
+            "line": 266,
             "expr": "offboardingEpochsTx",
             "name": "offboardingEpochsTx"
           },
           {
-            "line": 278,
+            "line": 270,
             "expr": "strings.HasPrefix",
             "name": "HasPrefix"
           },
           {
-            "line": 279,
+            "line": 271,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 285,
+            "line": 277,
             "expr": "offboardingPreviewDeadlineTx",
             "name": "offboardingPreviewDeadlineTx"
           },
           {
-            "line": 288,
+            "line": 280,
             "expr": "s.offboardingPlanTarget",
             "name": "offboardingPlanTarget"
           },
           {
-            "line": 291,
+            "line": 283,
             "expr": "offboardingSnapshot",
             "name": "offboardingSnapshot"
           },
           {
-            "line": 296,
+            "line": 288,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 298,
+            "line": 290,
             "expr": "s.applyOffboarding",
             "name": "applyOffboarding"
           },
           {
-            "line": 303,
+            "line": 295,
             "expr": "offboardingPreviewDeadlineTx",
             "name": "offboardingPreviewDeadlineTx"
           },
           {
-            "line": 306,
+            "line": 298,
             "expr": "offboardingEpochsTx",
             "name": "offboardingEpochsTx"
           },
           {
-            "line": 311,
+            "line": 303,
             "expr": "tx.QueryRow(ctx, `UPDATE employee_offboarding_plans SET state='executed',executed_at=clock_timestamp(),fingerprint=$2 WHERE id=$1 RETURNING executed_at`, planID, offboardingExecutedPrefix+targetEpoch+\":\"+successorEpoch).Scan",
             "name": "Scan"
           },
           {
-            "line": 311,
+            "line": 303,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`UPDATE employee_offboarding_plans SET state='executed',executed_at=clock_timestamp(),fingerprint=$2 WHERE id=$1 RETURNING executed_at`"
@@ -19920,39 +19920,39 @@
         ],
         "strings": [
           {
-            "line": 255,
+            "line": 247,
             "value": "SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE"
           },
           {
-            "line": 257,
+            "line": 249,
             "value": "offboarding plan not found"
           },
           {
-            "line": 270,
+            "line": 262,
             "value": "executed"
           },
           {
-            "line": 278,
+            "line": 270,
             "value": ":"
           },
           {
-            "line": 279,
+            "line": 271,
             "value": "offboarding completion identity changed or is unverified; do not replay the old plan"
           },
           {
-            "line": 296,
+            "line": 288,
             "value": "employee assets changed; preview again"
           },
           {
-            "line": 310,
+            "line": 302,
             "value": "executed"
           },
           {
-            "line": 311,
+            "line": 303,
             "value": "UPDATE employee_offboarding_plans SET state='executed',executed_at=clock_timestamp(),fingerprint=$2 WHERE id=$1 RETURNING executed_at"
           },
           {
-            "line": 311,
+            "line": 303,
             "value": ":"
           }
         ],
@@ -19972,19 +19972,25 @@
         "boundary": "companyTx; exact plan UPDATE lock; executed replay qualifies subject and epoch only; pending path deadline/qualified target/fingerprint; applyOffboarding; final deadline then post-effects epoch and executed fingerprint UPDATE.",
         "direct_lock_fragments": [
           {
-            "line": 255,
+            "line": 247,
             "sql_fragment": "SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE"
           }
         ],
         "local_operations": [
           {
-            "line": 255,
+            "line": 244,
+            "operation": "s.companyTx",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 247,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 311,
+            "line": 303,
             "operation": "tx.QueryRow",
             "sql_expression": "`UPDATE employee_offboarding_plans SET state='executed',executed_at=clock_timestamp(),fingerprint=$2 WHERE id=$1 RETURNING executed_at`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
@@ -19993,7 +19999,7 @@
         "implicit_fk": "See exact migration Up hashes; FK/trigger indirect effects are not evaluated by this AST."
       },
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:250-317 sha256=615a8dfc3350368188853a9be4f0a0bcd630ae098089113bc276e51902f9ea4f",
+        "internal/store/postgres/employee_disposition.go:242-309 sha256=615a8dfc3350368188853a9be4f0a0bcd630ae098089113bc276e51902f9ea4f",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "unverified_risks": [
@@ -20007,32 +20013,32 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 311,
+            "line": 303,
             "sql_fragment": "UPDATE employee_offboarding_plans SET state='executed',executed_at=clock_timestamp(),fingerprint=$2 WHERE id=$1 RETURNING executed_at"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 255,
+            "line": 247,
             "sql_fragment": "SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 252,
+            "line": 244,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 255,
+            "line": 247,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE`"
           },
           {
-            "line": 311,
+            "line": 303,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`UPDATE employee_offboarding_plans SET state='executed',executed_at=clock_timestamp(),fingerprint=$2 WHERE id=$1 RETURNING executed_at`"
@@ -20071,143 +20077,143 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "PreviewOffboarding",
         "receiver": "*PgStore",
-        "line": 211,
-        "end": 249,
+        "line": 203,
+        "end": 241,
         "sha256": "d10a4b3f15e33dcfec344d47ca9596c8ef81e174b46b400a5a93dec570a1a7ec",
         "calls": [
           {
-            "line": 212,
+            "line": 204,
             "expr": "credentials.AuditReason",
             "name": "AuditReason"
           },
           {
-            "line": 214,
+            "line": 206,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 219,
+            "line": 211,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 221,
+            "line": 213,
             "expr": "uuid.New",
             "name": "New"
           },
           {
-            "line": 222,
+            "line": 214,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 223,
+            "line": 215,
             "expr": "s.offboardingPlanTarget",
             "name": "offboardingPlanTarget"
           },
           {
-            "line": 226,
+            "line": 218,
             "expr": "offboardingSnapshot",
             "name": "offboardingSnapshot"
           },
           {
-            "line": 232,
+            "line": 224,
             "expr": "tx.QueryRow(ctx, `SELECT clock_timestamp()+interval '15 minutes'`).Scan",
             "name": "Scan"
           },
           {
-            "line": 232,
+            "line": 224,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT clock_timestamp()+interval '15 minutes'`"
           },
           {
-            "line": 235,
+            "line": 227,
             "expr": "json.Marshal",
             "name": "Marshal"
           },
           {
-            "line": 236,
+            "line": 228,
             "expr": "json.Marshal",
             "name": "Marshal"
           },
           {
-            "line": 237,
+            "line": 229,
             "expr": "tx.QueryRow(ctx, `INSERT INTO employee_offboarding_plans(id,tenant_id,created_by,target_id,successor_id,options,impact,fingerprint,reason,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING expires_at`, p.ID, a.TenantID, a.ID, target, successor, opts, counts, fingerprint, reason, p.ExpiresAt).Scan",
             "name": "Scan"
           },
           {
-            "line": 237,
+            "line": 229,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`INSERT INTO employee_offboarding_plans(id,tenant_id,created_by,target_id,successor_id,options,impact,fingerprint,reason,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING expires_at`"
           },
           {
-            "line": 240,
+            "line": 232,
             "expr": "companyAudit",
             "name": "companyAudit"
           },
           {
-            "line": 243,
+            "line": 235,
             "expr": "offboardingPreviewDeadlineTx",
             "name": "offboardingPreviewDeadlineTx"
           }
         ],
         "strings": [
           {
-            "line": 214,
+            "line": 206,
             "value": "documented offboarding reason required"
           },
           {
-            "line": 217,
+            "line": 209,
             "value": "seal"
           },
           {
-            "line": 217,
+            "line": 209,
             "value": "transfer_owned"
           },
           {
-            "line": 217,
+            "line": 209,
             "value": "discard"
           },
           {
-            "line": 219,
+            "line": 211,
             "value": "invalid draft disposition"
           },
           {
-            "line": 221,
+            "line": 213,
             "value": "preview"
           },
           {
-            "line": 232,
+            "line": 224,
             "value": "SELECT clock_timestamp()+interval '15 minutes'"
           },
           {
-            "line": 237,
+            "line": 229,
             "value": "INSERT INTO employee_offboarding_plans(id,tenant_id,created_by,target_id,successor_id,options,impact,fingerprint,reason,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING expires_at"
           },
           {
-            "line": 240,
+            "line": 232,
             "value": "employee.offboard.preview"
           },
           {
-            "line": 240,
+            "line": 232,
             "value": "user"
           },
           {
-            "line": 240,
+            "line": 232,
             "value": "plan_id"
           },
           {
-            "line": 240,
+            "line": 232,
             "value": "successor"
           },
           {
-            "line": 240,
+            "line": 232,
             "value": "options"
           },
           {
-            "line": 240,
+            "line": 232,
             "value": "impact"
           }
         ],
@@ -20228,13 +20234,19 @@
         "direct_lock_fragments": [],
         "local_operations": [
           {
-            "line": 232,
+            "line": 214,
+            "operation": "s.companyTx",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 224,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT clock_timestamp()+interval '15 minutes'`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 237,
+            "line": 229,
             "operation": "tx.QueryRow",
             "sql_expression": "`INSERT INTO employee_offboarding_plans(id,tenant_id,created_by,target_id,successor_id,options,impact,fingerprint,reason,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING expires_at`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
@@ -20243,7 +20255,7 @@
         "implicit_fk": "See exact migration Up hashes; FK/trigger indirect effects are not evaluated by this AST."
       },
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:211-249 sha256=d10a4b3f15e33dcfec344d47ca9596c8ef81e174b46b400a5a93dec570a1a7ec",
+        "internal/store/postgres/employee_disposition.go:203-241 sha256=d10a4b3f15e33dcfec344d47ca9596c8ef81e174b46b400a5a93dec570a1a7ec",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "unverified_risks": [
@@ -20257,27 +20269,27 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 237,
+            "line": 229,
             "sql_fragment": "INSERT INTO employee_offboarding_plans(id,tenant_id,created_by,target_id,successor_id,options,impact,fingerprint,reason,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING expires_at"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 222,
+            "line": 214,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 232,
+            "line": 224,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT clock_timestamp()+interval '15 minutes'`"
           },
           {
-            "line": 237,
+            "line": 229,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`INSERT INTO employee_offboarding_plans(id,tenant_id,created_by,target_id,successor_id,options,impact,fingerprint,reason,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING expires_at`"
@@ -20316,118 +20328,118 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "applyOffboarding",
         "receiver": "*PgStore",
-        "line": 318,
-        "end": 353,
+        "line": 310,
+        "end": 345,
         "sha256": "ee57dd8aa36ef331f04979e42925f2d9f2ba034385b745ff219db062def6d1f2",
         "calls": [
           {
-            "line": 322,
+            "line": 314,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mail_attachments f SET user_id=$3 WHERE f.tenant_id=$1 AND f.user_id=$2 AND EXISTS(SELECT 1 FROM mail_drafts d JOIN mailboxes m ON m.id=d.mailbox_id AND m.tenant_id=d.tenant_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2 AND d.payload->'attachment_ids' ? f.id::text)`"
           },
           {
-            "line": 326,
+            "line": 318,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mail_drafts SET user_id=$3,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL AND mailbox_id IN(SELECT id FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2)`"
           },
           {
-            "line": 345,
+            "line": 337,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "stmt"
           },
           {
-            "line": 349,
+            "line": 341,
             "expr": "transferOwnedMailboxes",
             "name": "transferOwnedMailboxes"
           },
           {
-            "line": 352,
+            "line": 344,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 319,
+            "line": 311,
             "value": "transfer_owned"
           },
           {
-            "line": 322,
+            "line": 314,
             "value": "UPDATE mail_attachments f SET user_id=$3 WHERE f.tenant_id=$1 AND f.user_id=$2 AND EXISTS(SELECT 1 FROM mail_drafts d JOIN mailboxes m ON m.id=d.mailbox_id AND m.tenant_id=d.tenant_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2 AND d.payload->'attachment_ids' ? f.id::text)"
           },
           {
-            "line": 326,
+            "line": 318,
             "value": "UPDATE mail_drafts SET user_id=$3,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL AND mailbox_id IN(SELECT id FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2)"
           },
           {
-            "line": 331,
+            "line": 323,
             "value": "UPDATE mail_drafts SET sealed_at=now(),revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL"
           },
           {
-            "line": 332,
+            "line": 324,
             "value": "discard"
           },
           {
-            "line": 333,
+            "line": 325,
             "value": "DELETE FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL"
           },
           {
-            "line": 337,
+            "line": 329,
             "value": "UPDATE outbound_jobs j SET state='cancelled',last_error='Cancelled by employee offboarding',claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=now() WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')"
           },
           {
-            "line": 338,
+            "line": 330,
             "value": "UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$2 AND revoked_at IS NULL AND EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)"
           },
           {
-            "line": 339,
+            "line": 331,
             "value": "DELETE FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2"
           },
           {
-            "line": 340,
+            "line": 332,
             "value": "DELETE FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2"
           },
           {
-            "line": 341,
+            "line": 333,
             "value": "DELETE FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2"
           },
           {
-            "line": 342,
+            "line": 334,
             "value": "UPDATE users SET is_active=false,session_version=session_version+1,updated_at=now() WHERE tenant_id=$1 AND id=$2"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "employee.offboard"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "user"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "plan_id"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "successor"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "reason"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "drafts"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "queued_sends"
           },
           {
-            "line": 352,
+            "line": 344,
             "value": "cancelled; active and uncertain delivery evidence preserved"
           }
         ],
@@ -20446,14 +20458,14 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 298,
+          "line": 290,
           "expression": "s.applyOffboarding",
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
       "lock_fk_wait_fence": "调用者tx：transfer_owned先A owner W→D owner/revision W，seal/discard另分支；cancel已知非在途J→R撤销→owned Key/grants/template grants DELETE→target U inactive/session W→按id M转交/CAS→audit/outbox；依赖调用方预持T/target/successor/J。",
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:318-353 sha256=ee57dd8aa36ef331f04979e42925f2d9f2ba034385b745ff219db062def6d1f2",
+        "internal/store/postgres/employee_disposition.go:310-345 sha256=ee57dd8aa36ef331f04979e42925f2d9f2ba034385b745ff219db062def6d1f2",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -20467,43 +20479,43 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 322,
+            "line": 314,
             "sql_fragment": "UPDATE mail_attachments f SET user_id=$3 WHERE f.tenant_id=$1 AND f.user_id=$2 AND EXISTS(SELECT 1 FROM mail_drafts d JOIN mailboxes m ON m.id=d.mailbox_id AND m.tenant_id=d.tenant_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2 AND d.payload->'attachment_ids' ? f.id::text)"
           },
           {
-            "line": 326,
+            "line": 318,
             "sql_fragment": "UPDATE mail_drafts SET user_id=$3,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL AND mailbox_id IN(SELECT id FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2)"
           },
           {
-            "line": 331,
+            "line": 323,
             "sql_fragment": "UPDATE mail_drafts SET sealed_at=now(),revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL"
           },
           {
-            "line": 333,
+            "line": 325,
             "sql_fragment": "DELETE FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL"
           },
           {
-            "line": 337,
+            "line": 329,
             "sql_fragment": "UPDATE outbound_jobs j SET state='cancelled',last_error='Cancelled by employee offboarding',claimed_at=NULL,lease_until=NULL,delivery_token=NULL,updated_at=now() WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')"
           },
           {
-            "line": 338,
+            "line": 330,
             "sql_fragment": "UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$2 AND revoked_at IS NULL AND EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)"
           },
           {
-            "line": 339,
+            "line": 331,
             "sql_fragment": "DELETE FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2"
           },
           {
-            "line": 340,
+            "line": 332,
             "sql_fragment": "DELETE FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2"
           },
           {
-            "line": 341,
+            "line": 333,
             "sql_fragment": "DELETE FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2"
           },
           {
-            "line": 342,
+            "line": 334,
             "sql_fragment": "UPDATE users SET is_active=false,session_version=session_version+1,updated_at=now() WHERE tenant_id=$1 AND id=$2"
           }
         ],
@@ -20511,19 +20523,19 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 322,
+            "line": 314,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mail_attachments f SET user_id=$3 WHERE f.tenant_id=$1 AND f.user_id=$2 AND EXISTS(SELECT 1 FROM mail_drafts d JOIN mailboxes m ON m.id=d.mailbox_id AND m.tenant_id=d.tenant_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2 AND d.payload->'attachment_ids' ? f.id::text)`"
           },
           {
-            "line": 326,
+            "line": 318,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mail_drafts SET user_id=$3,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL AND mailbox_id IN(SELECT id FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2)`"
           },
           {
-            "line": 345,
+            "line": 337,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "stmt"
@@ -20549,12 +20561,12 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingPlanTarget",
         "receiver": "*PgStore",
-        "line": 70,
-        "end": 72,
+        "line": 62,
+        "end": 64,
         "sha256": "c194a1376753bc7d5db6a0f157a0097c05d2d3e1af76fc1a3989bd0ddebe6bec",
         "calls": [
           {
-            "line": 71,
+            "line": 63,
             "expr": "s.offboardingQualifiedTarget",
             "name": "offboardingQualifiedTarget"
           }
@@ -20576,7 +20588,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 288,
+          "line": 280,
           "expression": "s.offboardingPlanTarget",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -20584,7 +20596,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 223,
+          "line": 215,
           "expression": "s.offboardingPlanTarget",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -20608,7 +20620,7 @@
       ],
       "file_family_context": "Delegates offboardingQualifiedTarget(...,allowInactiveTarget=true); formal planner admits frozen target under identity/epoch qualification.",
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:70-72 sha256=c194a1376753bc7d5db6a0f157a0097c05d2d3e1af76fc1a3989bd0ddebe6bec",
+        "internal/store/postgres/employee_disposition.go:62-64 sha256=c194a1376753bc7d5db6a0f157a0097c05d2d3e1af76fc1a3989bd0ddebe6bec",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "review_status": "static-type-review",
@@ -20635,78 +20647,78 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingQualifiedTarget",
         "receiver": "*PgStore",
-        "line": 74,
-        "end": 106,
+        "line": 66,
+        "end": 98,
         "sha256": "417153c4ad89ee6a1b990e9f70db18caaa92da419a97891577933b214676043c",
         "calls": [
           {
-            "line": 75,
+            "line": 67,
             "expr": "offboardingSubjectsTx",
             "name": "offboardingSubjectsTx"
           },
           {
-            "line": 79,
+            "line": 71,
             "expr": "offboardingEpochsTx",
             "name": "offboardingEpochsTx"
           },
           {
-            "line": 84,
+            "line": 76,
             "expr": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM employee_offboarding_plans WHERE tenant_id=$1 AND target_id=$2 AND state='executed' AND fingerprint LIKE $3)`, a.TenantID, target, offboardingExecutedPrefix+targetEpoch+\":%\").Scan",
             "name": "Scan"
           },
           {
-            "line": 84,
+            "line": 76,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM employee_offboarding_plans WHERE tenant_id=$1 AND target_id=$2 AND state='executed' AND fingerprint LIKE $3)`"
           },
           {
-            "line": 88,
+            "line": 80,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 92,
+            "line": 84,
             "expr": "guardMemberRemoval",
             "name": "guardMemberRemoval"
           },
           {
-            "line": 97,
+            "line": 89,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT id FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain')) ORDER BY id FOR UPDATE`"
           },
           {
-            "line": 101,
+            "line": 93,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 103,
+            "line": 95,
             "expr": "rows.Err",
             "name": "Err"
           },
           {
-            "line": 104,
+            "line": 96,
             "expr": "rows.Close",
             "name": "Close"
           }
         ],
         "strings": [
           {
-            "line": 84,
+            "line": 76,
             "value": "SELECT EXISTS(SELECT 1 FROM employee_offboarding_plans WHERE tenant_id=$1 AND target_id=$2 AND state='executed' AND fingerprint LIKE $3)"
           },
           {
-            "line": 84,
+            "line": 76,
             "value": ":%"
           },
           {
-            "line": 88,
+            "line": 80,
             "value": "employee disposition already completed for the current identity; do not repeat it"
           },
           {
-            "line": 97,
+            "line": 89,
             "value": "SELECT id FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain')) ORDER BY id FOR UPDATE"
           }
         ],
@@ -20726,7 +20738,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingPlanTarget",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingPlanTarget",
-          "line": 71,
+          "line": 63,
           "expression": "s.offboardingQualifiedTarget",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -20734,7 +20746,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingTarget",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingTarget",
-          "line": 67,
+          "line": 59,
           "expression": "s.offboardingQualifiedTarget",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -20751,19 +20763,19 @@
         "boundary": "offboardingSubjectsTx; target/successor epochs; reject executed target epoch; guardMemberRemoval; lock relevant outbound jobs ORDER BY id FOR UPDATE including uncertain ledger.",
         "direct_lock_fragments": [
           {
-            "line": 97,
+            "line": 89,
             "sql_fragment": "SELECT id FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain')) ORDER BY id FOR UPDATE"
           }
         ],
         "local_operations": [
           {
-            "line": 84,
+            "line": 76,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT EXISTS(SELECT 1 FROM employee_offboarding_plans WHERE tenant_id=$1 AND target_id=$2 AND state='executed' AND fingerprint LIKE $3)`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 97,
+            "line": 89,
             "operation": "tx.Query",
             "sql_expression": "`SELECT id FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain')) ORDER BY id FOR UPDATE`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
@@ -20776,7 +20788,7 @@
       ],
       "file_family_context": "offboardingSubjectsTx; target/successor epochs; reject executed target epoch; guardMemberRemoval; lock relevant outbound jobs ORDER BY id FOR UPDATE including uncertain ledger.",
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:74-106 sha256=417153c4ad89ee6a1b990e9f70db18caaa92da419a97891577933b214676043c",
+        "internal/store/postgres/employee_disposition.go:66-98 sha256=417153c4ad89ee6a1b990e9f70db18caaa92da419a97891577933b214676043c",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "review_status": "static-type-review",
@@ -20784,20 +20796,20 @@
         "direct_sql_effects": [],
         "direct_lock_fragments": [
           {
-            "line": 97,
+            "line": 89,
             "sql_fragment": "SELECT id FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain')) ORDER BY id FOR UPDATE"
           }
         ],
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 84,
+            "line": 76,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM employee_offboarding_plans WHERE tenant_id=$1 AND target_id=$2 AND state='executed' AND fingerprint LIKE $3)`"
           },
           {
-            "line": 97,
+            "line": 89,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT id FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain')) ORDER BY id FOR UPDATE`"
@@ -20827,12 +20839,12 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingTarget",
         "receiver": "*PgStore",
-        "line": 64,
-        "end": 68,
+        "line": 56,
+        "end": 60,
         "sha256": "db3cdf03ca615ab8a9c8f7c6a6027520e630cd7e0805690b9f0afc201b2d9876",
         "calls": [
           {
-            "line": 67,
+            "line": 59,
             "expr": "s.offboardingQualifiedTarget",
             "name": "offboardingQualifiedTarget"
           }
@@ -20857,7 +20869,7 @@
         "implicit_fk": "See exact migration Up hashes; FK/trigger indirect effects are not evaluated by this AST."
       },
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:64-68 sha256=db3cdf03ca615ab8a9c8f7c6a6027520e630cd7e0805690b9f0afc201b2d9876",
+        "internal/store/postgres/employee_disposition.go:56-60 sha256=db3cdf03ca615ab8a9c8f7c6a6027520e630cd7e0805690b9f0afc201b2d9876",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "unverified_risks": [
@@ -20900,119 +20912,119 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingAuthorityEpochTx",
         "receiver": "",
-        "line": 132,
-        "end": 161,
+        "line": 124,
+        "end": 153,
         "sha256": "c585fdc2bfe92c58da85fe9ec9d1f798bfca3f958682116779a2d2ade1cec8be",
         "calls": [
           {
-            "line": 138,
+            "line": 130,
             "expr": "tx.QueryRow(ctx, `SELECT jsonb_build_array(tenant_id,id,role,is_active,session_version,permission_revision),permission_profile_id FROM users WHERE tenant_id=$1 AND id=$2`, tenant, user).Scan",
             "name": "Scan"
           },
           {
-            "line": 138,
+            "line": 130,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT jsonb_build_array(tenant_id,id,role,is_active,session_version,permission_revision),permission_profile_id FROM users WHERE tenant_id=$1 AND id=$2`"
           },
           {
-            "line": 143,
+            "line": 135,
             "expr": "tx.QueryRow(ctx, `SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT`, *binding.ProfileID, tenant).Scan",
             "name": "Scan"
           },
           {
-            "line": 143,
+            "line": 135,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT`"
           },
           {
-            "line": 144,
+            "line": 136,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 145,
+            "line": 137,
+            "expr": "app.Conflict",
+            "name": "Conflict"
+          },
+          {
+            "line": 140,
+            "expr": "errors.As",
+            "name": "As"
+          },
+          {
+            "line": 141,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
             "line": 148,
-            "expr": "errors.As",
-            "name": "As"
-          },
-          {
-            "line": 149,
-            "expr": "app.Conflict",
-            "name": "Conflict"
-          },
-          {
-            "line": 156,
             "expr": "json.Marshal",
             "name": "Marshal"
           },
           {
-            "line": 160,
+            "line": 152,
             "expr": "company.Hash",
             "name": "Hash"
           },
           {
-            "line": 160,
+            "line": 152,
             "expr": "string",
             "name": "string"
           }
         ],
         "strings": [
           {
-            "line": 134,
+            "line": 126,
             "value": "json:\"identity\""
           },
           {
-            "line": 135,
+            "line": 127,
             "value": "json:\"profile_id\""
           },
           {
-            "line": 136,
+            "line": 128,
             "value": "json:\"profile_revision\""
           },
           {
-            "line": 138,
+            "line": 130,
             "value": "SELECT jsonb_build_array(tenant_id,id,role,is_active,session_version,permission_revision),permission_profile_id FROM users WHERE tenant_id=$1 AND id=$2"
           },
           {
-            "line": 139,
+            "line": 131,
             "value": ""
           },
           {
-            "line": 143,
+            "line": 135,
             "value": "SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT"
           },
           {
-            "line": 145,
+            "line": 137,
             "value": ""
           },
           {
-            "line": 145,
+            "line": 137,
             "value": "assigned permission profile is unavailable; observe the current lifecycle again"
           },
           {
-            "line": 148,
+            "line": 140,
             "value": "55P03"
           },
           {
-            "line": 149,
+            "line": 141,
             "value": ""
           },
           {
-            "line": 149,
+            "line": 141,
             "value": "assigned permission profile is changing; observe the current lifecycle again"
           },
           {
-            "line": 152,
+            "line": 144,
             "value": ""
           },
           {
-            "line": 158,
+            "line": 150,
             "value": ""
           }
         ],
@@ -21032,7 +21044,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingEpochsTx",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingEpochsTx",
-          "line": 117,
+          "line": 109,
           "expression": "offboardingAuthorityEpochTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21040,7 +21052,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingEpochsTx",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingEpochsTx",
-          "line": 121,
+          "line": 113,
           "expression": "offboardingAuthorityEpochTx",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -21057,19 +21069,19 @@
         "boundary": "Read tenant/user identity tuple plus profile ID; assigned profile revision FOR SHARE NOWAIT; reject unavailable/busy profile; hash binding.",
         "direct_lock_fragments": [
           {
-            "line": 143,
+            "line": 135,
             "sql_fragment": "SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT"
           }
         ],
         "local_operations": [
           {
-            "line": 138,
+            "line": 130,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT jsonb_build_array(tenant_id,id,role,is_active,session_version,permission_revision),permission_profile_id FROM users WHERE tenant_id=$1 AND id=$2`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 143,
+            "line": 135,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
@@ -21082,7 +21094,7 @@
       ],
       "file_family_context": "Read tenant/user identity tuple plus profile ID; assigned profile revision FOR SHARE NOWAIT; reject unavailable/busy profile; hash binding.",
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:132-161 sha256=c585fdc2bfe92c58da85fe9ec9d1f798bfca3f958682116779a2d2ade1cec8be",
+        "internal/store/postgres/employee_disposition.go:124-153 sha256=c585fdc2bfe92c58da85fe9ec9d1f798bfca3f958682116779a2d2ade1cec8be",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "review_status": "static-type-review",
@@ -21090,20 +21102,20 @@
         "direct_sql_effects": [],
         "direct_lock_fragments": [
           {
-            "line": 143,
+            "line": 135,
             "sql_fragment": "SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT"
           }
         ],
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 138,
+            "line": 130,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT jsonb_build_array(tenant_id,id,role,is_active,session_version,permission_revision),permission_profile_id FROM users WHERE tenant_id=$1 AND id=$2`"
           },
           {
-            "line": 143,
+            "line": 135,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT`"
@@ -21127,36 +21139,36 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingEpochsTx",
         "receiver": "",
-        "line": 116,
-        "end": 126,
+        "line": 108,
+        "end": 118,
         "sha256": "a991498d83f6136d94e4861d27b7b5999e523bba9de6f58062064e3a11620ce8",
         "calls": [
           {
-            "line": 117,
+            "line": 109,
             "expr": "offboardingAuthorityEpochTx",
             "name": "offboardingAuthorityEpochTx"
           },
           {
-            "line": 121,
+            "line": 113,
             "expr": "offboardingAuthorityEpochTx",
             "name": "offboardingAuthorityEpochTx"
           }
         ],
         "strings": [
           {
-            "line": 119,
+            "line": 111,
             "value": ""
           },
           {
-            "line": 119,
+            "line": 111,
             "value": ""
           },
           {
-            "line": 123,
+            "line": 115,
             "value": ""
           },
           {
-            "line": 123,
+            "line": 115,
             "value": ""
           }
         ],
@@ -21176,7 +21188,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 274,
+          "line": 266,
           "expression": "offboardingEpochsTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21184,7 +21196,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 306,
+          "line": 298,
           "expression": "offboardingEpochsTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21192,7 +21204,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingQualifiedTarget",
-          "line": 79,
+          "line": 71,
           "expression": "offboardingEpochsTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21200,7 +21212,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingSnapshot",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingSnapshot",
-          "line": 176,
+          "line": 168,
           "expression": "offboardingEpochsTx",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -21224,7 +21236,7 @@
       ],
       "file_family_context": "Read target epoch then successor epoch via offboardingAuthorityEpochTx in same borrowed transaction.",
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:116-126 sha256=a991498d83f6136d94e4861d27b7b5999e523bba9de6f58062064e3a11620ce8",
+        "internal/store/postgres/employee_disposition.go:108-118 sha256=a991498d83f6136d94e4861d27b7b5999e523bba9de6f58062064e3a11620ce8",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "review_status": "static-type-review",
@@ -21251,34 +21263,34 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingPreviewDeadlineTx",
         "receiver": "",
-        "line": 163,
-        "end": 172,
+        "line": 155,
+        "end": 164,
         "sha256": "6870bfd4bd5f12382f97fc7deee6fad324738915e3a2341e2dae976d9b7a6199",
         "calls": [
           {
-            "line": 165,
+            "line": 157,
             "expr": "tx.QueryRow(ctx, `SELECT clock_timestamp()>=$1::timestamptz`, expiresAt).Scan",
             "name": "Scan"
           },
           {
-            "line": 165,
+            "line": 157,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT clock_timestamp()>=$1::timestamptz`"
           },
           {
-            "line": 169,
+            "line": 161,
             "expr": "app.Conflict",
             "name": "Conflict"
           }
         ],
         "strings": [
           {
-            "line": 165,
+            "line": 157,
             "value": "SELECT clock_timestamp()>=$1::timestamptz"
           },
           {
-            "line": 169,
+            "line": 161,
             "value": "offboarding preview expired; preview again"
           }
         ],
@@ -21298,7 +21310,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 285,
+          "line": 277,
           "expression": "offboardingPreviewDeadlineTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21306,7 +21318,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 303,
+          "line": 295,
           "expression": "offboardingPreviewDeadlineTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21314,7 +21326,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 243,
+          "line": 235,
           "expression": "offboardingPreviewDeadlineTx",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -21332,7 +21344,7 @@
         "direct_lock_fragments": [],
         "local_operations": [
           {
-            "line": 165,
+            "line": 157,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT clock_timestamp()>=$1::timestamptz`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
@@ -21345,7 +21357,7 @@
       ],
       "file_family_context": "SELECT clock_timestamp() >= preview expiresAt; Conflict when elapsed; invoked after potential waits by planner/executor.",
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:163-172 sha256=6870bfd4bd5f12382f97fc7deee6fad324738915e3a2341e2dae976d9b7a6199",
+        "internal/store/postgres/employee_disposition.go:155-164 sha256=6870bfd4bd5f12382f97fc7deee6fad324738915e3a2341e2dae976d9b7a6199",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "review_status": "static-type-review",
@@ -21355,7 +21367,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 165,
+            "line": 157,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT clock_timestamp()>=$1::timestamptz`"
@@ -21385,71 +21397,71 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingSnapshot",
         "receiver": "",
-        "line": 174,
-        "end": 210,
+        "line": 166,
+        "end": 202,
         "sha256": "15bb18f120372cd4e20c17ff30ee742f1f965946310b73aafe3a0e1d7e1548df",
         "calls": [
           {
-            "line": 176,
+            "line": 168,
             "expr": "offboardingEpochsTx",
             "name": "offboardingEpochsTx"
           },
           {
-            "line": 184,
+            "line": 176,
             "expr": "tx.QueryRow(ctx, `SELECT jsonb_build_object(\n 'user',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$2),\n 'successor',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$3),\n 'mailboxes',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,lifecycle_revision) ORDER BY id) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'drafts',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,revision,mailbox_id) ORDER BY id) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),'[]'),\n 'uploads',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state) ORDER BY id) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'keys',COALESCE((SELECT jsonb_agg(id ORDER BY id) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(mailbox_id,can_read,can_organize,can_send,template_only) ORDER BY mailbox_id) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'template_grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(template_id,mailbox_id) ORDER BY template_id,mailbox_id) FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'jobs',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state,updated_at,in_flight_domain,(SELECT COALESCE(jsonb_agg(jsonb_build_array(r.address,r.state,r.attempts,r.updated_at) ORDER BY r.address),'[]') FROM outbound_recipients r WHERE r.tenant_id=$1 AND r.job_id=outbound_jobs.id)) ORDER BY id) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain'))),'[]'))`, tenant, target, successor).Scan",
             "name": "Scan"
           },
           {
-            "line": 184,
+            "line": 176,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT jsonb_build_object(\n 'user',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$2),\n 'successor',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$3),\n 'mailboxes',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,lifecycle_revision) ORDER BY id) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'drafts',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,revision,mailbox_id) ORDER BY id) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),'[]'),\n 'uploads',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state) ORDER BY id) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'keys',COALESCE((SELECT jsonb_agg(id ORDER BY id) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(mailbox_id,can_read,can_organize,can_send,template_only) ORDER BY mailbox_id) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'template_grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(template_id,mailbox_id) ORDER BY template_id,mailbox_id) FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'jobs',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state,updated_at,in_flight_domain,(SELECT COALESCE(jsonb_agg(jsonb_build_array(r.address,r.state,r.attempts,r.updated_at) ORDER BY r.address),'[]') FROM outbound_recipients r WHERE r.tenant_id=$1 AND r.job_id=outbound_jobs.id)) ORDER BY id) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain'))),'[]'))`"
           },
           {
-            "line": 197,
+            "line": 189,
             "expr": "tx.QueryRow(ctx, `SELECT\n (SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),\n (SELECT count(*) FROM mail_drafts d JOIN mailboxes m ON m.tenant_id=d.tenant_id AND m.id=d.mailbox_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2),\n (SELECT count(*) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')),\n (SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state='processing'),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')))`, tenant, target).Scan",
             "name": "Scan"
           },
           {
-            "line": 197,
+            "line": 189,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT\n (SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),\n (SELECT count(*) FROM mail_drafts d JOIN mailboxes m ON m.tenant_id=d.tenant_id AND m.id=d.mailbox_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2),\n (SELECT count(*) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')),\n (SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state='processing'),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')))`"
           },
           {
-            "line": 209,
+            "line": 201,
             "expr": "company.Hash",
             "name": "Hash"
           },
           {
-            "line": 209,
+            "line": 201,
             "expr": "string",
             "name": "string"
           }
         ],
         "strings": [
           {
-            "line": 178,
+            "line": 170,
             "value": ""
           },
           {
-            "line": 184,
+            "line": 176,
             "value": "SELECT jsonb_build_object(\n 'user',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$2),\n 'successor',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$3),\n 'mailboxes',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,lifecycle_revision) ORDER BY id) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'drafts',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,revision,mailbox_id) ORDER BY id) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),'[]'),\n 'uploads',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state) ORDER BY id) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'keys',COALESCE((SELECT jsonb_agg(id ORDER BY id) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(mailbox_id,can_read,can_organize,can_send,template_only) ORDER BY mailbox_id) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'template_grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(template_id,mailbox_id) ORDER BY template_id,mailbox_id) FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'jobs',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state,updated_at,in_flight_domain,(SELECT COALESCE(jsonb_agg(jsonb_build_array(r.address,r.state,r.attempts,r.updated_at) ORDER BY r.address),'[]') FROM outbound_recipients r WHERE r.tenant_id=$1 AND r.job_id=outbound_jobs.id)) ORDER BY id) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain'))),'[]'))"
           },
           {
-            "line": 195,
+            "line": 187,
             "value": ""
           },
           {
-            "line": 197,
+            "line": 189,
             "value": "SELECT\n (SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),\n (SELECT count(*) FROM mail_drafts d JOIN mailboxes m ON m.tenant_id=d.tenant_id AND m.id=d.mailbox_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2),\n (SELECT count(*) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')),\n (SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state='processing'),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')))"
           },
           {
-            "line": 209,
+            "line": 201,
             "value": ":"
           },
           {
-            "line": 209,
+            "line": 201,
             "value": ":"
           }
         ],
@@ -21460,7 +21472,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 291,
+          "line": 283,
           "expression": "offboardingSnapshot",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21468,7 +21480,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 226,
+          "line": 218,
           "expression": "offboardingSnapshot",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -21478,13 +21490,13 @@
         "direct_lock_fragments": [],
         "local_operations": [
           {
-            "line": 184,
+            "line": 176,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT jsonb_build_object(\n 'user',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$2),\n 'successor',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$3),\n 'mailboxes',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,lifecycle_revision) ORDER BY id) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'drafts',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,revision,mailbox_id) ORDER BY id) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),'[]'),\n 'uploads',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state) ORDER BY id) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'keys',COALESCE((SELECT jsonb_agg(id ORDER BY id) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(mailbox_id,can_read,can_organize,can_send,template_only) ORDER BY mailbox_id) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'template_grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(template_id,mailbox_id) ORDER BY template_id,mailbox_id) FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'jobs',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state,updated_at,in_flight_domain,(SELECT COALESCE(jsonb_agg(jsonb_build_array(r.address,r.state,r.attempts,r.updated_at) ORDER BY r.address),'[]') FROM outbound_recipients r WHERE r.tenant_id=$1 AND r.job_id=outbound_jobs.id)) ORDER BY id) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain'))),'[]'))`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 197,
+            "line": 189,
             "operation": "tx.QueryRow",
             "sql_expression": "`SELECT\n (SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),\n (SELECT count(*) FROM mail_drafts d JOIN mailboxes m ON m.tenant_id=d.tenant_id AND m.id=d.mailbox_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2),\n (SELECT count(*) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')),\n (SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state='processing'),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')))`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
@@ -21493,7 +21505,7 @@
         "implicit_fk": "See exact migration Up hashes; FK/trigger indirect effects are not evaluated by this AST."
       },
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:174-210 sha256=15bb18f120372cd4e20c17ff30ee742f1f965946310b73aafe3a0e1d7e1548df",
+        "internal/store/postgres/employee_disposition.go:166-202 sha256=15bb18f120372cd4e20c17ff30ee742f1f965946310b73aafe3a0e1d7e1548df",
         "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "unverified_risks": [
@@ -21510,13 +21522,13 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 184,
+            "line": 176,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT jsonb_build_object(\n 'user',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$2),\n 'successor',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$3),\n 'mailboxes',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,lifecycle_revision) ORDER BY id) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'drafts',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,revision,mailbox_id) ORDER BY id) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),'[]'),\n 'uploads',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state) ORDER BY id) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'keys',COALESCE((SELECT jsonb_agg(id ORDER BY id) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(mailbox_id,can_read,can_organize,can_send,template_only) ORDER BY mailbox_id) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'template_grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(template_id,mailbox_id) ORDER BY template_id,mailbox_id) FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'jobs',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state,updated_at,in_flight_domain,(SELECT COALESCE(jsonb_agg(jsonb_build_array(r.address,r.state,r.attempts,r.updated_at) ORDER BY r.address),'[]') FROM outbound_recipients r WHERE r.tenant_id=$1 AND r.job_id=outbound_jobs.id)) ORDER BY id) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain'))),'[]'))`"
           },
           {
-            "line": 197,
+            "line": 189,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT\n (SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),\n (SELECT count(*) FROM mail_drafts d JOIN mailboxes m ON m.tenant_id=d.tenant_id AND m.id=d.mailbox_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2),\n (SELECT count(*) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')),\n (SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state='processing'),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')))`"
@@ -21549,119 +21561,105 @@
         "file": "internal/store/postgres/employee_disposition.go",
         "name": "offboardingSubjectsTx",
         "receiver": "",
-        "line": 24,
-        "end": 62,
-        "sha256": "d39292c8e26bc87600aeafb5d59a7dca5790228cf02c6cce973534fcce39fd1f",
+        "line": 23,
+        "end": 54,
+        "sha256": "92bd5d77aeb26607c35c9e8e4efc9116c08b848887160f66b9766cda7c5792f2",
         "calls": [
           {
-            "line": 26,
+            "line": 25,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 28,
+            "line": 27,
             "expr": "scanUser",
             "name": "scanUser"
           },
           {
-            "line": 28,
+            "line": 27,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "userSelect + ` WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 33,
+            "line": 32,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 39,
+            "line": 38,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 41,
+            "line": 40,
             "expr": "authz.CanManageTenantMember",
             "name": "CanManageTenantMember"
           },
           {
-            "line": 42,
+            "line": 41,
             "expr": "app.Forbidden",
             "name": "Forbidden"
           },
           {
-            "line": 49,
-            "expr": "tx.QueryRow(ctx, `SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan",
+            "line": 44,
+            "expr": "tx.QueryRow(ctx, `SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan",
             "name": "Scan"
           },
           {
-            "line": 49,
+            "line": 44,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
-            "sql_expr": "`SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`"
+            "sql_expr": "`SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`"
           },
           {
-            "line": 49,
+            "line": 44,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 50,
+            "line": 45,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 56,
+            "line": 51,
             "expr": "app.BadRequest",
             "name": "BadRequest"
-          },
-          {
-            "expr": "authz.CanManageTenantMember",
-            "line": 58,
-            "name": "CanManageTenantMember"
-          },
-          {
-            "expr": "app.Forbidden",
-            "line": 59,
-            "name": "Forbidden"
           }
         ],
         "strings": [
           {
-            "line": 26,
+            "line": 25,
             "value": "distinct employee and successor required"
           },
           {
-            "line": 28,
+            "line": 27,
             "value": " WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 33,
+            "line": 32,
             "value": "employee not found"
           },
           {
-            "line": 39,
+            "line": 38,
             "value": "employee is already inactive"
           },
           {
-            "line": 42,
+            "line": 41,
             "value": "cannot manage this employee"
           },
           {
-            "line": 49,
-            "value": "SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE"
+            "line": 44,
+            "value": "SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE"
           },
           {
-            "line": 50,
+            "line": 45,
             "value": "successor must be an active company employee"
           },
           {
-            "line": 56,
+            "line": 51,
             "value": "successor is inactive"
-          },
-          {
-            "line": 59,
-            "value": "cannot manage this successor"
           }
         ],
         "params": "func(ctx context.Context, tx pgx.Tx, a authz.Actor, target, successor uuid.UUID, allowInactiveTarget bool) (*models.User, error)"
@@ -21680,7 +21678,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 271,
+          "line": 263,
           "expression": "offboardingSubjectsTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -21688,42 +21686,42 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingQualifiedTarget",
-          "line": 75,
+          "line": 67,
           "expression": "offboardingSubjectsTx",
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
       "source_review": {
         "role": "borrowed-transaction-locking-qualifier",
-        "trace": "Validate target/successor distinct from each other and current caller; target users FOR UPDATE; existing target activity/current actor policy; successor current role/activity under existing FOR SHARE; require active and authz.CanManageTenantMember before returning. Caller tenant/current actor and execute plan fences precede target; no new lock.",
+        "trace": "Validate distinct IDs; target users FOR UPDATE; active policy branch and current actor role check; successor users FOR SHARE must be active.",
         "unverified": "Caller must fence tenant/actor; target-before-successor lock order not a universal global order; contention not executed.",
-        "source_sha256": "d39292c8e26bc87600aeafb5d59a7dca5790228cf02c6cce973534fcce39fd1f",
-        "base_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3"
+        "source_sha256": "92bd5d77aeb26607c35c9e8e4efc9116c08b848887160f66b9766cda7c5792f2",
+        "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
       },
       "evidence_level": "source-only",
       "lock_fk_wait_fence": {
-        "boundary": "Validate target/successor distinct from each other and current caller; target users FOR UPDATE; existing target activity/current actor policy; successor current role/activity under existing FOR SHARE; require active and authz.CanManageTenantMember before returning. Caller tenant/current actor and execute plan fences precede target; no new lock.",
+        "boundary": "Validate distinct IDs; target users FOR UPDATE; active policy branch and current actor role check; successor users FOR SHARE must be active.",
         "direct_lock_fragments": [
           {
-            "line": 28,
+            "line": 27,
             "sql_fragment": " WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 49,
-            "sql_fragment": "SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE"
+            "line": 44,
+            "sql_fragment": "SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE"
           }
         ],
         "local_operations": [
           {
-            "line": 28,
+            "line": 27,
             "operation": "tx.QueryRow",
             "sql_expression": "userSelect + ` WHERE tenant_id=$1 AND id=$2 FOR UPDATE`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 49,
+            "line": 44,
             "operation": "tx.QueryRow",
-            "sql_expression": "`SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`",
+            "sql_expression": "`SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           }
         ],
@@ -21732,37 +21730,37 @@
       "unverified_risks": [
         "Caller must fence tenant/actor; target-before-successor lock order not a universal global order; contention not executed."
       ],
-      "file_family_context": "Validate target/successor distinct from each other and current caller; target users FOR UPDATE; existing target activity/current actor policy; successor current role/activity under existing FOR SHARE; require active and authz.CanManageTenantMember before returning. Caller tenant/current actor and execute plan fences precede target; no new lock.",
+      "file_family_context": "Validate distinct IDs; target users FOR UPDATE; active policy branch and current actor role check; successor users FOR SHARE must be active.",
       "evidence": [
-        "internal/store/postgres/employee_disposition.go:24-62 sha256=d39292c8e26bc87600aeafb5d59a7dca5790228cf02c6cce973534fcce39fd1f",
-        "Reviewed LF successor delta 23228449254bc0312171640a637e359187169192; docs/company-mail/OFFBOARDING-SUCCESSOR-AUTHZ-20261004.md; static reconciliation only, no new runtime qualification"
+        "internal/store/postgres/employee_disposition.go:23-54 sha256=92bd5d77aeb26607c35c9e8e4efc9116c08b848887160f66b9766cda7c5792f2",
+        "PR23 source-only review; no PostgreSQL execution in this task"
       ],
       "review_status": "static-type-review",
       "assertions": {
         "direct_sql_effects": [],
         "direct_lock_fragments": [
           {
-            "line": 28,
+            "line": 27,
             "sql_fragment": " WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 49,
-            "sql_fragment": "SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE"
+            "line": 44,
+            "sql_fragment": "SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE"
           }
         ],
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 28,
+            "line": 27,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "userSelect + ` WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 49,
+            "line": 44,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
-            "sql_expr": "`SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`"
+            "sql_expr": "`SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`"
           }
         ],
         "effect_status": "source-fragments-not-evaluated-SQL",
@@ -25891,7 +25889,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:applyOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "applyOffboarding",
-          "line": 349,
+          "line": 341,
           "expression": "transferOwnedMailboxes",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -28769,7 +28767,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingQualifiedTarget",
-          "line": 92,
+          "line": 84,
           "expression": "guardMemberRemoval",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38686,7 +38684,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 255,
+          "line": 247,
           "expression": "tx.QueryRow(ctx, `SELECT target_id,successor_id,options,impact,fingerprint,reason,state,expires_at,executed_at FROM employee_offboarding_plans WHERE tenant_id=$1 AND created_by=$2 AND id=$3 AND target_id=$4 FOR UPDATE`, a.TenantID, a.ID, planID, target).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38694,7 +38692,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:ExecuteOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "ExecuteOffboarding",
-          "line": 311,
+          "line": 303,
           "expression": "tx.QueryRow(ctx, `UPDATE employee_offboarding_plans SET state='executed',executed_at=clock_timestamp(),fingerprint=$2 WHERE id=$1 RETURNING executed_at`, planID, offboardingExecutedPrefix+targetEpoch+\":\"+successorEpoch).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38702,7 +38700,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 232,
+          "line": 224,
           "expression": "tx.QueryRow(ctx, `SELECT clock_timestamp()+interval '15 minutes'`).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38710,7 +38708,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 237,
+          "line": 229,
           "expression": "tx.QueryRow(ctx, `INSERT INTO employee_offboarding_plans(id,tenant_id,created_by,target_id,successor_id,options,impact,fingerprint,reason,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING expires_at`, p.ID, a.TenantID, a.ID, target, successor, opts, counts, fingerprint, reason, p.ExpiresAt).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38718,7 +38716,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingQualifiedTarget",
-          "line": 84,
+          "line": 76,
           "expression": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM employee_offboarding_plans WHERE tenant_id=$1 AND target_id=$2 AND state='executed' AND fingerprint LIKE $3)`, a.TenantID, target, offboardingExecutedPrefix+targetEpoch+\":%\").Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38726,7 +38724,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingAuthorityEpochTx",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingAuthorityEpochTx",
-          "line": 138,
+          "line": 130,
           "expression": "tx.QueryRow(ctx, `SELECT jsonb_build_array(tenant_id,id,role,is_active,session_version,permission_revision),permission_profile_id FROM users WHERE tenant_id=$1 AND id=$2`, tenant, user).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38734,7 +38732,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingAuthorityEpochTx",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingAuthorityEpochTx",
-          "line": 143,
+          "line": 135,
           "expression": "tx.QueryRow(ctx, `SELECT permission_revision::text FROM permission_profiles WHERE id=$1 AND (tenant_id IS NULL OR tenant_id=$2) FOR SHARE NOWAIT`, *binding.ProfileID, tenant).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38742,7 +38740,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingPreviewDeadlineTx",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingPreviewDeadlineTx",
-          "line": 165,
+          "line": 157,
           "expression": "tx.QueryRow(ctx, `SELECT clock_timestamp()>=$1::timestamptz`, expiresAt).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38750,7 +38748,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingSnapshot",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingSnapshot",
-          "line": 184,
+          "line": 176,
           "expression": "tx.QueryRow(ctx, `SELECT jsonb_build_object(\n 'user',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$2),\n 'successor',(SELECT jsonb_build_array(tenant_id,id,is_active,session_version,role,permission_revision) FROM users WHERE tenant_id=$1 AND id=$3),\n 'mailboxes',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,lifecycle_revision) ORDER BY id) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'drafts',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,revision,mailbox_id) ORDER BY id) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),'[]'),\n 'uploads',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state) ORDER BY id) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'keys',COALESCE((SELECT jsonb_agg(id ORDER BY id) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),'[]'),\n 'grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(mailbox_id,can_read,can_organize,can_send,template_only) ORDER BY mailbox_id) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'template_grants',COALESCE((SELECT jsonb_agg(jsonb_build_array(template_id,mailbox_id) ORDER BY template_id,mailbox_id) FROM mail_template_grants WHERE tenant_id=$1 AND user_id=$2),'[]'),\n 'jobs',COALESCE((SELECT jsonb_agg(jsonb_build_array(id,state,updated_at,in_flight_domain,(SELECT COALESCE(jsonb_agg(jsonb_build_array(r.address,r.state,r.attempts,r.updated_at) ORDER BY r.address),'[]') FROM outbound_recipients r WHERE r.tenant_id=$1 AND r.job_id=outbound_jobs.id)) ORDER BY id) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (state IN ('pending','retry','processing') OR in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=outbound_jobs.id AND r.state='uncertain'))),'[]'))`, tenant, target, successor).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38758,7 +38756,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingSnapshot",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingSnapshot",
-          "line": 197,
+          "line": 189,
           "expression": "tx.QueryRow(ctx, `SELECT\n (SELECT count(*) FROM mailboxes WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mail_drafts WHERE tenant_id=$1 AND user_id=$2 AND sealed_at IS NULL),\n (SELECT count(*) FROM mail_drafts d JOIN mailboxes m ON m.tenant_id=d.tenant_id AND m.id=d.mailbox_id WHERE d.tenant_id=$1 AND d.user_id=$2 AND d.sealed_at IS NULL AND m.owner_user_id=$2),\n (SELECT count(*) FROM mail_attachments WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM tenant_api_keys WHERE tenant_id=$1 AND owner_user_id=$2),\n (SELECT count(*) FROM mailbox_grants WHERE tenant_id=$1 AND user_id=$2),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state IN ('pending','retry') AND in_flight_domain='' AND NOT EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')),\n (SELECT count(*) FROM outbound_jobs WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND state='processing'),\n (SELECT count(*) FROM outbound_jobs j WHERE tenant_id=$1 AND (sender_user_id=$2 OR user_id=$2) AND (in_flight_domain<>'' OR EXISTS(SELECT 1 FROM outbound_recipients r WHERE r.job_id=j.id AND r.state='uncertain')))`, tenant, target).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38766,8 +38764,8 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingSubjectsTx",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingSubjectsTx",
-          "line": 49,
-          "expression": "tx.QueryRow(ctx, `SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan",
+          "line": 44,
+          "expression": "tx.QueryRow(ctx, `SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -50367,7 +50365,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:offboardingQualifiedTarget",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingQualifiedTarget",
-          "line": 104,
+          "line": 96,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51669,7 +51667,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go:*PgStore:PreviewOffboarding",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "PreviewOffboarding",
-          "line": 221,
+          "line": 213,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63380,7 +63378,7 @@
           "caller_id": "internal/store/postgres/employee_disposition.go::offboardingSubjectsTx",
           "file": "internal/store/postgres/employee_disposition.go",
           "function": "offboardingSubjectsTx",
-          "line": 28,
+          "line": 27,
           "expression": "scanUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -66973,14 +66971,6 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3",
-  "current_review_boundary": "Revision 2 current AST/file/migration inventory only; reviewed LF successor delta and source locations reconciled at the declared source commit. Historical runtime links and manual acceptance are preserved, not recertified. No PostgreSQL tests executed in this reconciliation.",
-  "inventory_revision": {
-    "revision": 2,
-    "source_commit": "3f34c31ed51a721b318a76512805e4a14dc292c3",
-    "previous_snapshot": "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-transaction-inventory-revision1.json",
-    "previous_sha256": "3ebb5fe8499f663cfe6af906e550787011d17c439db238c22cbe4256c9e59988",
-    "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/README.md"
-  }
+  "last_review_base_commit": "aeed47f0e1998d9925acb680992b051463821d69",
+  "current_review_boundary": "Current AST/file/migration inventory only. Historical runtime links and manual acceptance are archived, not recertified on PR23. No PostgreSQL tests executed."
 }
