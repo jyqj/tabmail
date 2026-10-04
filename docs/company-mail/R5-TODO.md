@@ -2087,3 +2087,10 @@ M后rolling SOURCE/prepared source群已保存[queuehandoff](evidence/R5-POST-M-
 ### 2026-10-03 external batch lifecycle design handoff
 
 Base9fc345；catalog46/handler17IDs26variants。发现PE05 barrier/revoker未完整join与Go取消Python后Node子进程归属缺口，按用户条件先交root设计审查，未开启并行、未实施新batch资格、未重跑formal46。独立jsdom self-probe合法最小类型修复：full tsc P、v2 controls21P、local TSX probe1P（非external资格）。详见[R5-EXTERNAL-BATCH-DESIGN-20261003](R5-EXTERNAL-BATCH-DESIGN-20261003.md)。10/171、wholePG180/audit8high保open，default675/sharedDB89e7不整合。
+
+
+### 2026-10-04 PE05 fixture owner join narrow repair
+
+- Base6e045457；仅测试基础设施。幂等 ownerClose 取消/释放 held transaction 后同步 join coordinator/revoker，全部 owned work 结束后才发布 done/result；真实 query/rollback/revoker 错误保留，LIFO 先于 fixture server/pool 清理，去掉静默一秒 join 退出。共享 batch owner interface 与交接见 [owner join report](R5-FIXTURE-OWNER-JOIN-20261004.md)。
+- 自编 synctest 与两独立 loopback PG/HTTP owners 的 focused race PASS；真实首次保存200、撤权后403及锁释放。初轮 synctest timeout、PG probe泄漏timeout与后续55P03失败保留；最终取消PG seam明确使用不响应context取消的child证明 release/join，不将pgx异步backend取消改写为通过。安全hash见 [receipt](evidence/R5-FIXTURE-OWNER-JOIN-20261004.json)。
+- 固定JSON/markers/RC业务断言、生产API/store/授权条件、helper/launcher/cache及20/120/180/75预算不改。正式46case producer与wholePG180未跑；中央10/171不关，旧问题/失败及audit gate保留，无merge/deploy。
