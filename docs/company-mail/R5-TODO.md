@@ -746,6 +746,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
   - 实施：不把自增sequence等同提交顺序；断线/裁剪/缺口/跨实例切换使用resync和权威快照，不许只凭last-ID保证不漏。
   - 交付：company_stream、ListMailboxEvents与客户端streamEvents协议。
   - 验收/测试：人为制造提交顺序倒置、过期cursor、正常EOF重连后UI最终一致；无无限补发循环。
+  - 2026-10-04限定进展：客户端增量SSE分帧修复跨chunk CRLF、合并小帧误超限及callback abort后晚事件；等价源码`ba93e24`／完整树`81be69d`，独立冻结15/15、实际Vitest66/66、typecheck/定向lint/build通过。全web620pass/1fail/3skip，原基线同样缺Go1.25.7与private PG fixture；DB提交顺序/多实例/真实browser未验。本项及依赖仍未完成，10/171与历史F52failed不变。见[限定报告](SSE-FRAMING-20261004.md)。
 
 - [ ] **R5-P7-100｜持续连接与缓存撤权**
   - 依赖：`R5-P7-090`、`R5-P4-090`、`R5-P2-130`；优先级：阻塞。
