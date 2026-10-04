@@ -106,10 +106,10 @@ func TestLF01OwnedHTTPNegativeBoundaries(t *testing.T) {
 	peer := &models.User{TenantID: f.tenant.ID, Email: "peer@fixture.test", DisplayName: "Peer", Role: models.RoleAdmin, IsActive: true, PasswordHash: "synthetic"}
 	must(t, f.st.CreateUser(context.Background(), peer))
 	r3HTTP(t, h, token, "POST", path(peer.ID), body(f.other.ID), 403)
-	// Record the existing backend gap independently: same-tenant higher-role
-	// successors are accepted by HTTP even though the panel excludes them.
-	r3HTTP(t, h, token, "POST", path(f.employee.ID), body(peer.ID), 200)
-	t.Log("BACKEND_GAP: admin caller can preview a higher-role successor; no backend widening in this change")
+	// The original UI-only probe recorded peer-successor HTTP200 as a gap.
+	// Combined accepted backend policy now denies it; old evidence is retained.
+	r3HTTP(t, h, token, "POST", path(f.employee.ID), body(peer.ID), 403)
+	t.Log("COMBINED_POLICY: peer-admin successor denied with HTTP403")
 	_, err := f.pool.Exec(context.Background(), `UPDATE users SET is_active=false WHERE id=$1`, f.other.ID)
 	must(t, err)
 	r3HTTP(t, h, token, "POST", path(f.employee.ID), body(f.other.ID), 400)
