@@ -11,7 +11,7 @@ export function OffboardingPanel({ employees, refresh }: {
     refresh: () => Promise<unknown>;
 }) {
     const t = useText();
-    const { user } = useAuth();
+    const { user, tenantId } = useAuth();
     const { busy, run } = useAction();
     const [target, setTarget] = useState("");
     const [successor, setSuccessor] = useState("");
@@ -19,15 +19,22 @@ export function OffboardingPanel({ employees, refresh }: {
     const [disposition, setDisposition] = useState<OffboardingOptions["drafts"]>("seal");
     const [plan, setPlan] = useState<OffboardingPlan | null>(null);
     const [conflict, setConflict] = useState(false);
-    const active = employees.filter(u => u.is_active);
+    // Suspension and completed disposition are separate server-side states.
+    // Frozen targets remain selectable; successors must still be active.
+    const selectedTenant = tenantId ?? user?.tenant_id;
+    const manageable = employees.filter(u => user && u.tenant_id === selectedTenant &&
+        (user.role === "super_admin" || selectedTenant === user.tenant_id) &&
+        u.id !== user.id && (user.role === "super_admin" || (user.role === "admin" && u.role === "user")));
+    const successors = manageable.filter(u => u.is_active && u.id !== target);
+    const validSelection = manageable.some(u => u.id === target) && successors.some(u => u.id === successor);
     return <Section title={t("离职预览与交接", "Offboarding preview and handover")}>
   <p className="text-sm text-muted-foreground">{t("先核对资产与处置，再停用账号。预览不读取私人草稿正文，默认封存而不是转交。", "Review assets and disposition before disabling the account. Preview never reads private draft bodies; the default is sealing, not transfer.")}</p>
   {!plan ? <>
-   <div className="grid gap-3 md:grid-cols-2"><EmployeeField label={t("停用成员", "Employee to offboard")} value={target} onChange={setTarget} employees={active.filter(u => u.id !== user?.id && (user?.role === "super_admin" || u.role === "user"))}/><EmployeeField label={t("邮箱接管人", "Mailbox successor")} value={successor} onChange={setSuccessor} employees={active.filter(u => u.id !== target)}/></div>
+   <div className="grid gap-3 md:grid-cols-2"><EmployeeField label={t("停用成员", "Employee to offboard")} value={target} onChange={setTarget} employees={manageable}/><EmployeeField label={t("邮箱接管人", "Mailbox successor")} value={successor} onChange={setSuccessor} employees={successors}/></div>
    <Field label={t("草稿处置", "Draft disposition")}>{id => <select id={id} className={inputClass} value={disposition} onChange={e => setDisposition(e.target.value as OffboardingOptions["drafts"])}><option value="seal">{t("封存全部私人草稿（默认）", "Seal all private drafts (default)")}</option><option value="transfer_owned">{t("交接本人名下邮箱草稿，其余封存", "Transfer drafts in owned mailboxes; seal the rest")}</option><option value="discard">{t("明确删除未发送草稿", "Explicitly discard unsent drafts")}</option></select>}</Field>
    <Field label={t("交接原因 / 工单号（至少 8 个字符）", "Reason / ticket (at least 8 characters)")}>{id => <input id={id} className={inputClass} value={reason} minLength={8} maxLength={1000} onChange={e => setReason(e.target.value)}/>}</Field>
    {conflict && <p role="alert" className="text-sm text-destructive">{t("资产或权限已变化，请重新预览；没有执行旧计划。", "Assets or authority changed. Preview again; the stale plan was not applied.")}</p>}
-   <ActionButton disabled={busy || !target || !successor || target === successor || reason.trim().length < 8} onClick={() => run(async () => { const value = await previewOffboarding(target, successor, { drafts: disposition }, reason); setPlan(value); setConflict(false); })}>{t("预览交接影响", "Preview handover impact")}</ActionButton>
+   <ActionButton disabled={busy || !validSelection || reason.trim().length < 8} onClick={() => run(async () => { const value = await previewOffboarding(target, successor, { drafts: disposition }, reason); setPlan(value); setConflict(false); })}>{t("预览交接影响", "Preview handover impact")}</ActionButton>
   </> : <>
    <p className="text-sm break-all">{t("计划", "Plan")}: {plan.id} · {plan.reason}</p>
    <dl className="grid grid-cols-2 gap-3 md:grid-cols-3">{(Object.keys(plan.impact) as (keyof typeof plan.impact)[]).map(k => <div key={k} className="rounded border p-3"><dt className="text-xs text-muted-foreground">{({ mailboxes: t("移交邮箱", "Mailboxes"), drafts: t("私人草稿", "Private drafts"), transferable_drafts: t("本人邮箱可移交草稿", "Drafts eligible for transfer"), attachments: t("上传附件", "Uploaded attachments"), api_keys: t("撤销个人密钥", "Keys revoked"), grants: t("移除共享授权", "Shared grants removed"), queued: t("取消未开始投递", "Queued deliveries cancelled"), in_flight: t("正在投递", "In-flight deliveries"), uncertain: t("结果不确定", "Uncertain results") })[k]}</dt><dd className="text-xl font-semibold">{plan.impact[k]}</dd></div>)}</dl>
