@@ -417,6 +417,11 @@ class Batch:
                     if checked['errors'] or result['exit_code']!=0:
                         errors.append('Go required terminal/assertion failure')
                     terminals.extend(event['Test'] for event in events if event.get('Action')=='pass' and event.get('Test'))
+                    if (PROBE in tests or GO_NEW in tests) and self.ack is None:
+                        self.cancelled.set()
+                        with self.guard:
+                            for child in self.active.values():child.kill()
+                        raise ValueError('Go owner exited without physical fixture acknowledgement')
                 if self.contract['mode']=='components':
                     selected={(g['package'],g['tag']):set(g['tests']) for g in groups}
                     packets,_=protocol.classify_go_component_packets(data,selected,self.output,self.contract['catalog_sha256'])

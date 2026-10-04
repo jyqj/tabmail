@@ -225,3 +225,29 @@ class DetachedTailControls(unittest.TestCase):
             self.assertTrue(owner.joined)
             self.assertTrue(batch.join_adopted_tails())
             self.assertFalse(batch.join_adopted_tails())
+
+class ConsumerIdentityControls(unittest.TestCase):
+    def test_both_builders_share_pinned_cli_and_cache_policy(self):
+        source=Path(batch.protocol.ROOT)
+        manifest=dict(source=dict(path=str(source)),node=dict(path='/fixed/node'),cli=dict(path='/fixed/cli'))
+        with patch.object(batch,'file_digest',return_value='0'*64),patch.object(batch.subprocess,'check_output',return_value='go version go1.25.7 linux/amd64'):
+            contract=batch.capture(manifest,Path('/fixed/go'),'components')
+        prefix=['/fixed/node','/fixed/cli','run','--cache=false','--experimental.fsModuleCache=false']
+        self.assertEqual(contract['argv']['child'][:5],prefix)
+        self.assertEqual(contract['argv']['python'][:5],prefix)
+        self.assertEqual(len(contract['required']['go_paths'])+len(contract['required']['python_assertions']),43)
+        self.assertEqual(contract['budgets'],dict(go=120,process=180,case=75))
+    def test_two_dependency_observers_do_not_share_mutable_root_identity(self):
+        with tempfile.TemporaryDirectory() as root:
+            root=Path(root)
+            for name,version in [('a','1'),('b','2')]:
+                folder=root/name/'node_modules/tool';folder.mkdir(parents=True)
+                (folder/'package.json').write_text(json.dumps(dict(name='tool',version=version)))
+            def observe(pair):
+                name,version=pair
+                tree={'tool/package.json':dict(type='file')}
+                lock=dict(packages={'':{},'node_modules/tool':dict(version=version)})
+                result=batch.runtime.dependency_records(tree,lock,dependency_root=root/name)
+                self.assertEqual(result['locked']['node_modules/tool']['version'],version)
+            with batch.concurrent.futures.ThreadPoolExecutor(max_workers=4) as workers:
+                list(workers.map(observe,[('a','1'),('b','2')]*20))

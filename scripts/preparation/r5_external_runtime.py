@@ -149,7 +149,7 @@ def descriptors():
     finally:
         value.close()
 
-def dependency_records(tree, lock):
+def dependency_records(tree, lock, *, dependency_root=None):
     declared = {}
     packages = lock['packages']
     missing = []
@@ -163,7 +163,9 @@ def dependency_records(tree, lock):
             missing.append(name)
             continue
         # All installed package metadata must be a regular bound file.
-        root = Path(_DEPENDENCY_ROOT) / name
+        if dependency_root is None:
+            raise ValueError("explicit dependency root required")
+        root = Path(dependency_root) / name
         with descriptors() as files:
             package = source_inventory.strict_json(files.file(root / 'package.json'))
         if package.get('version') != row.get('version'):
@@ -176,10 +178,10 @@ def dependency_records(tree, lock):
             modules = modules.parent
         for command, target in bins.items():
             resolved = os.path.normpath(str(root / target))
-            relative = os.path.relpath(resolved, Path(_DEPENDENCY_ROOT) / 'node_modules')
+            relative = os.path.relpath(resolved, Path(dependency_root) / 'node_modules')
             if relative.startswith('../') or tree.get(relative, {}).get('type') != 'file':
                 raise ValueError('unknown bin executable')
-            key = (modules / '.bin' / command).relative_to(Path(_DEPENDENCY_ROOT) / 'node_modules').as_posix()
+            key = (modules / '.bin' / command).relative_to(Path(dependency_root) / 'node_modules').as_posix()
             declared.setdefault(key, set()).add(relative)
     for name, row in tree.items():
         if row['type'] == 'link':
@@ -194,13 +196,10 @@ def dependency_records(tree, lock):
                 sri='official lock SRI verified by lifecycle-enabled npm ci; installed outputs are observed bytes',
                 lifecycle_outputs='not independently attributed to registry tarball members')
 
-_DEPENDENCY_ROOT = ''
 
 def observe(source, root, archive, default, race, node):
-    global _DEPENDENCY_ROOT
     clean_environment()
     source, root, node = Path(source), Path(root), Path(node)
-    _DEPENDENCY_ROOT = str(root)
     if source != root / 'source':
         raise ValueError('exact ownedroot/source layout required')
     for ancestor in root.parents:
@@ -233,7 +232,7 @@ def observe(source, root, archive, default, race, node):
                 raise ValueError('package lock/source differs')
             package_hashes[name] = digest(raw)
         lock = preparation.check_lock(files.file(root / 'package-lock.json'))
-        records = dependency_records(installed, lock)
+        records = dependency_records(installed, lock, dependency_root=root)
         cli = root / 'node_modules/vitest/vitest.mjs'
         return dict(schema_version=2, policy=POLICY, status='UNADOPTED',
             source=files.binding(source), dependency_root=files.binding(root), git_commit=commit,
