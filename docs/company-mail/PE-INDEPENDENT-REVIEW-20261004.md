@@ -1,0 +1,31 @@
+# Independent combined PE adapter and SSE review
+
+Verdict: **PASS, source-bounded focused review** of `9510bfd85264e92191cad277ef7187cd4fad8abf` on `codex/pe-shared-adapter`. Production permissions and offboarding remain byte-identical to `f875672dea2b68fdec9e0b986f4863724da5d7ba`. The PE side is ready for root integration alongside a separately independently accepted LF pair. This delegation neither received nor reviewed that LF pair, so combined PE+LF qualification is not asserted. No merge or deployment occurred.
+
+Read the web AGENTS instructions, shared migration, seed repair, PE03 diagnosis at `4b0bc7da980663069eb653e88f29e66dcb4e456a`, original catalog and formal evidence, observer, adapter oracle, shipping consumers, API clients and live fixture. Reviewed seed `d9a56effa08489f65ebc169ed161d18f8326ee25`, earlier adapter `78cd8f9`, and transport `f027fcd9f2720407d06a2459406b8af24ab38b90`; transport/fixture source matches imported `833cbf1`. Available skills were considered; this repository test review required no artifact, architecture or external-app workflow.
+
+## Independent execution
+
+A new owned PG17 cluster on loopback port 55439 used freshly initialized storage under `/tmp/pe-independent-review`; the workspace/shared database was never accessed. Go 1.25.7, readonly modules, original replaces, lockfile and formal budgets were retained. Local Node24.19.0/Vitest4.1.11 was reused; no fresh official-lock runtime receipt is claimed.
+
+```
+go test -mod=readonly -count=1 -tags=r5protocol -timeout=180s ./internal/api/handlers -run '^(TestPESharedAdapterFocused|TestR5TransportRealRouter|TestR5TransportFetchObserver|TestR5PermissionSeedSetup|TestR5PermissionSeedLegacy409AndCAS)$' -v
+```
+
+PASS, package 49.129s: all eight real owned PG/router/shipping UI PE variants, seven seed cases, legacy/CAS guard, actual router ready/event/EOF/reconnect/JSON digest probe, and real fetch observer probe. Each focused fixture asserts zero databases/backends and closed HTTP listener. All eight report actual scoped ready and error-free released streams. PE03 observes targeted profile update after its cursor; PE04 observes targeted override patch after each reset and restore cursor.
+
+Independent shipping `useCompanyEventConsumer` unmount probe PASS (1.717s): unmount cancels the actual router stream **before** observer close, and emits only GETs. Independent loopback socket/oracle suite: 18 PASS; existing author oracle suite: 8 PASS. These cover byte-fragmented UTF8 and CRLF, complete and incomplete EOF, empty body, malformed scope/action/event ID, JSON text fidelity with null/false/0/empty array and large decimal revision, reconnect, caller cancellation, unread tee owner closure, idempotent close and rejection of fetch after close. Synthetic loopback bytes and oracle snapshots are negative controls, never business qualification or response-mock evidence.
+
+`scripts/reviews/pe_independent_mutations_20261004.py` ran three temporary test-only mutations through the real focused harness. All returned exit 1 at the expected assertion: PE01 raw override loss with coherent field source and unchanged effective permissions; PE03 direct control carrying current revision so the server accepts/restores instead of returning conflict; and PE03 observed action replaced with a different valid action. Thus accepted CAS or wrong event cannot satisfy the focused assertions. Each mutation restores exact original bytes in `finally`; no reviewed source modifications remain. The independent pure controls additionally reject corrupt raw omitted/null/false/0/[] intent and each of the five compound revision fields. TypeScript noEmit, focused ESLint and diff check PASS.
+
+Final owned-cluster query returned `0|0` fixture databases/backends, followed by successful fast shutdown. Private fixture/token/component logs stay outside the repository. The safe [report](evidence/PE-INDEPENDENT-REVIEW-20261004/report.json) records aggregate outcomes and evidence hashes.
+
+## Source assessment and bounds
+
+Actual UI invalidation blocks stale Save, preserves dirty description/security intent, and emits no UI PATCH. The separately labelled direct old-revision plus old-security command must return actual HTTP409/CONFLICT and preserve revoked/restored raw values and revision; it is never attributed to Save. PE04 completes successful current reset and restoration with advancing revisions before stale refusal. PE02 false preparation is explicit successful current CAS before opening the UI; it is not counted as the UI intent being qualified.
+
+Reads validate raw snapshots and compound observations rather than reconstructing overrides from effective permissions. Exact changed-only wire patches preserve omitted values and distinguish explicit null, false, numeric zero and all/empty domain intent. Additional profile/overview/list reads are authoritative revalidation or labelled independent observations. Mutation commands are limited to seed, false preparation, intended UI command, profile revocation, reset/restoration and explicit CAS controls. The fixture hashes and forwards real written response bytes; the lost-submit buffer is confined to its pre-existing labelled fault route and is not used for PE.
+
+Catalog bytes, inputs, expected properties, acceptance and target markers are retained. PE marker checks moved into the shared oracle where appropriate. Production files, Go modules/replaces, web lock and formal config/checker have no delta. Ready and post-cursor targeted events are mandatory; empty stream, connection-only resync, wrong observed action and EOF cannot substitute. No weakening or unintended additional business command was found within the reviewed PE branches. The transport change affects the shared fixture, so this PE review does not qualify other catalog branches.
+
+**Whole formal 43/26/46: NOTRUN.** Original rejected history remains 17 pass / 9 fail / 17 missing / zero qualified, with report hash `7dbcc94223f82606af4a646d79fb8231e677102ff71a33c7b96402c893d3c896`. No wholePG/audit/default675/sharedDB imports, actual email/user data or central closure was run. Eight focused passing variants do not replace the original formal run, browser journeys, independent LF evidence or final combined integration verification.
