@@ -1,0 +1,35 @@
+test_absolute_producer_and_selected_receipt_pairings (__main__.RuntimeV3Checks.test_absolute_producer_and_selected_receipt_pairings) ... ok
+test_authenticated_wrong_context_slot_and_producer (__main__.RuntimeV3Checks.test_authenticated_wrong_context_slot_and_producer) ... ok
+test_binding_mismatch_primary_with_retention_failure (__main__.RuntimeV3Checks.test_binding_mismatch_primary_with_retention_failure) ... ok
+test_clean_environment_and_dependency_boundaries (__main__.RuntimeV3Checks.test_clean_environment_and_dependency_boundaries) ... ok
+test_cli_controls_are_explicit_and_disjoint (__main__.RuntimeV3Checks.test_cli_controls_are_explicit_and_disjoint) ... ok
+test_complete_envelope_mutations_original_pin (__main__.RuntimeV3Checks.test_complete_envelope_mutations_original_pin) ... ok
+test_corrupt_fresh_return_seal_never_published (__main__.RuntimeV3Checks.test_corrupt_fresh_return_seal_never_published) ... ok
+test_directory_construction_fails_before_producer (__main__.RuntimeV3Checks.test_directory_construction_fails_before_producer) ... ok
+test_environment_pins_and_explicit_selector (__main__.RuntimeV3Checks.test_environment_pins_and_explicit_selector) ... ok
+test_environment_selector_strict_default (__main__.RuntimeV3Checks.test_environment_selector_strict_default) ... ok
+test_exclusive_publication_descriptor_flags_and_readback (__main__.RuntimeV3Checks.test_exclusive_publication_descriptor_flags_and_readback) ... ok
+test_filesystem_and_actual_commit_drift (__main__.RuntimeV3Checks.test_filesystem_and_actual_commit_drift) ... ok
+test_forged_receipts_and_colocated_resealed_bundle (__main__.RuntimeV3Checks.test_forged_receipts_and_colocated_resealed_bundle) ... ok
+test_fresh_equal_digests_allowed (__main__.RuntimeV3Checks.test_fresh_equal_digests_allowed) ... ok
+test_fresh_origin_and_immutable_inputs (__main__.RuntimeV3Checks.test_fresh_origin_and_immutable_inputs) ... ok
+test_input_bundle_replacement_fails_before_producer (__main__.RuntimeV3Checks.test_input_bundle_replacement_fails_before_producer) ... ok
+test_invalid_versions_zero_producer (__main__.RuntimeV3Checks.test_invalid_versions_zero_producer) ... ok
+test_later_bundle_replacement_rejects_manifest_delegation (__main__.RuntimeV3Checks.test_later_bundle_replacement_rejects_manifest_delegation) ... ok
+test_later_metadata_tamper_stops_before_filesystem_process (__main__.RuntimeV3Checks.test_later_metadata_tamper_stops_before_filesystem_process) ... ok
+test_launch_prepost_success_and_errors (__main__.RuntimeV3Checks.test_launch_prepost_success_and_errors) ... ok
+test_manifest_independent_byte_pin_and_opt_in (__main__.RuntimeV3Checks.test_manifest_independent_byte_pin_and_opt_in) ... ok
+test_manifest_strict_fields_and_promotion (__main__.RuntimeV3Checks.test_manifest_strict_fields_and_promotion) ... ok
+test_no_follow_descriptor_file_and_directory_invariants (__main__.RuntimeV3Checks.test_no_follow_descriptor_file_and_directory_invariants) ... ok
+test_no_relative_or_in_tree_evidence (__main__.RuntimeV3Checks.test_no_relative_or_in_tree_evidence) ... ok
+test_policy_schema_selector_pairings (__main__.RuntimeV3Checks.test_policy_schema_selector_pairings) ... ok
+test_retention_and_publication_fail_closed (__main__.RuntimeV3Checks.test_retention_and_publication_fail_closed) ... ok
+test_second_producer_failure_retains_first_and_preserves_exception (__main__.RuntimeV3Checks.test_second_producer_failure_retains_first_and_preserves_exception) ... ok
+test_slot_omission_extra_and_duplicate_json (__main__.RuntimeV3Checks.test_slot_omission_extra_and_duplicate_json) ... ok
+test_v2_default_and_legacy_selected_export (__main__.RuntimeV3Checks.test_v2_default_and_legacy_selected_export) ... ok
+test_wrong_controller_identity (__main__.RuntimeV3Checks.test_wrong_controller_identity) ... ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 0.444s
+
+OK
