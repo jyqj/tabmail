@@ -23,5 +23,17 @@
   "remaining_limits": [
     "No TSX, external batch, formal producer, whole-package PG or CI qualification",
     "The controlled canceled PG child is intentionally not context-canceled; original pgx asynchronous backend cancellation observation remains recorded"
-  ]
+  ],
+  "delivery": {
+    "tested_source_commit": "dc4eac723e8bbb8fbc1015e6dc731775c72b6cf5",
+    "branch": "fix/r5-fixture-owner-join",
+    "normal_origin_push": "success",
+    "draft_pr_attempts": 1,
+    "draft_pr": "not_created",
+    "draft_pr_failure": "Post https://api.github.com/graphql: Forbidden",
+    "pr_api_actions_stopped": true,
+    "ci": "unobserved",
+    "merge": false,
+    "deploy": false
+  }
 }

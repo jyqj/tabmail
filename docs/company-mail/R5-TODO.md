@@ -2094,3 +2094,5 @@ Base9fc345；catalog46/handler17IDs26variants。发现PE05 barrier/revoker未完
 - Base6e045457；仅测试基础设施。幂等 ownerClose 取消/释放 held transaction 后同步 join coordinator/revoker，全部 owned work 结束后才发布 done/result；真实 query/rollback/revoker 错误保留，LIFO 先于 fixture server/pool 清理，去掉静默一秒 join 退出。共享 batch owner interface 与交接见 [owner join report](R5-FIXTURE-OWNER-JOIN-20261004.md)。
 - 自编 synctest 与两独立 loopback PG/HTTP owners 的 focused race PASS；真实首次保存200、撤权后403及锁释放。初轮 synctest timeout、PG probe泄漏timeout与后续55P03失败保留；最终取消PG seam明确使用不响应context取消的child证明 release/join，不将pgx异步backend取消改写为通过。安全hash见 [receipt](evidence/R5-FIXTURE-OWNER-JOIN-20261004.json)。
 - 固定JSON/markers/RC业务断言、生产API/store/授权条件、helper/launcher/cache及20/120/180/75预算不改。正式46case producer与wholePG180未跑；中央10/171不关，旧问题/失败及audit gate保留，无merge/deploy。
+
+- 本修复实际交付：tested source `dc4eac7` 普通origin push成功；唯一一次gh draft请求 `Forbidden`，未创建PR并停止全部PR/API动作，不切换身份/connector/route。CI unobserved，无merge/deploy；随后仅docs交付状态提交。

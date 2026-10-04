@@ -42,3 +42,12 @@ launcher/helper/cache, two fork replaces and existing 20/120/180/75 budgets rema
 unchanged. No formal 46-case producer, TSX run or wholePG180 run. Central 10/171,
 wholePG180, audit and prior failures stay open. No merge/deploy. Draft delivery
 status is reported separately after the authorized single attempt.
+
+## Delivery
+
+Tested source commit `dc4eac7` pushed normally to
+`origin/fix/r5-fixture-owner-join`. The single draft PR request against
+`feat/runtime-batch-validation` returned
+`Post https://api.github.com/graphql: Forbidden`; no PR was created. PR/API
+actions stopped without identity/connector/route fallback. CI is unobserved.
+This delivery appendix is docs-only; no extra tests or product qualification.
