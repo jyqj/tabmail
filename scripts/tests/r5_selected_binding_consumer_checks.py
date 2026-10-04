@@ -204,7 +204,8 @@ def fixture_receipt(context):
             GOPATH='/controller/cache', GOMODCACHE='/controller/cache/mod', GOCACHE='/controller/cache/build'),
         go_env=dict(GOVERSION='go1.25.7', GOOS='linux', GOARCH='amd64', GOHOSTOS='linux',
             GOHOSTARCH='amd64', CGO_ENABLED='1', GOWORK='off', GOENV='', GOFLAGS='', GOEXPERIMENT='',
-            GOAMD64='v1', GOTOOLCHAIN='local', GOROOT='/controller/toolchain', GOGCCFLAGS='-fdebug-prefix-map=/tmp/go-build<TEMP>='),
+            GOAMD64='v1', GOTOOLCHAIN='local', GOROOT='/controller/toolchain', GOCACHE='/controller/cache/build',
+            GOMODCACHE='/controller/cache/mod', GOGCCFLAGS='-fdebug-prefix-map=/tmp/go-build<TEMP>='),
         observation_envelope=envelope, v3_source={v3._V3_FILES[0]: v3._IMPLEMENTATION_SHA256,
         v3.SCHEMA_PATH: sha(v3._REGISTRY_BYTES), v3._V3_FILES[2]: 'd' * 64},
         metadata_producer=dict(version=PRODUCER['version'], executable_sha256=PRODUCER['sha256'],
@@ -777,6 +778,17 @@ class ClassifierContractChecks(unittest.TestCase):
         r['package_records'] = 2
         rebind(b, receipts)
         verify(b, receipts)
+        for key in ('GOCACHE', 'GOMODCACHE'):
+            for value in ('/different/cache', None):
+                changed = copy.deepcopy(receipts)
+                if value is None: changed['before-default']['go_env'].pop(key)
+                else: changed['before-default']['go_env'][key] = value
+                rebind(b, changed)
+                # With no record in the relevant domain, absence is allowed;
+                # present contradictory observations are always rejected.
+                if value is not None:
+                    with self.subTest(cache=key), self.assertRaises(ValueError): verify(b, changed)
+                else: verify(b, changed)
 
 
 if __name__ == '__main__':

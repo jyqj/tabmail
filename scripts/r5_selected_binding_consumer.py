@@ -298,8 +298,16 @@ def _classifier_contract(receipt, source_root, v3):
             Replace=dict(Path='./' + replacement['path'], Dir=source_root + '/' + replacement['path']))
         rows.append(dict(Dir=source_root + '/' + package['directory'], ImportPath=package['import_path'],
             Name='main' if generated else 'package', Module=module, **fields))
-    env = dict(receipt['go_env'], GOCACHE=receipt['environment']['GOCACHE'],
-               GOMODCACHE=receipt['environment']['GOMODCACHE'])
+    env = dict(receipt['go_env'])
+    for key, needed in (('GOCACHE', bool(receipt['generated_testmain'])),
+            ('GOMODCACHE', bool(receipt['external_modulecache_inputs']) or
+             any(r.get('classification') == 'external_modulecache' for r in receipt['native_inputs']))):
+        if key in env or needed:
+            _equal(env.get(key), receipt['environment'][key], 'classifier observed/requested ' + key)
+        else:
+            # Partial pure fixtures without any cache-domain records need no
+            # cache observation. No path or authority is inferred for that domain.
+            env[key] = receipt['environment'][key]
     local, generated, external, native, toolchain = classifier(
         rows, root, set(base['files']), env, receipt['root_mvs'])
     _equal(local, {p: row['fields'] for p, row in receipt['selected_local'].items()}, 'classifier local inputs')
