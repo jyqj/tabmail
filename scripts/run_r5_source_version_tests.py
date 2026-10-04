@@ -14,6 +14,7 @@ import sys
 import tempfile
 import unittest
 import r5_source_runner_prepare as preparation
+import r5_go_environment
 
 BASELINE = '41b015c30c66b3ba58a3c1395e8559ebcd27a65f'
 HISTORICAL_IDS = frozenset('test_r5_selected_source_binding.ActualRootBindingTests.'+name for name in (
@@ -80,7 +81,7 @@ def child(root,ids,output):
     # explicitly in memory; source/helper bytes and policy stay frozen.
     import importlib
     legacy = importlib.import_module('test_r5_selected_source_binding')
-    go = os.environ.get('R5_TEST_GO','go')
+    go = (os.environ.get('R5_TEST_GO') or os.environ.get('R5_GO') or 'go')
     import shutil
     legacy.GO = Path(shutil.which(go) or go).resolve()
     legacy.CACHE = Path(os.environ.get('R5_TEST_CACHE') or git_go_env(go,'GOCACHE'))
@@ -116,7 +117,7 @@ def run(root,output):
         # Preserve build/run artifacts outside the disposable source clones.
         evidence = Path(tempfile.mkdtemp(prefix='r5-source-preparation-',dir=output.parent))
         try:
-            prepared, prepared_env = preparation.prepare(current,evidence/'current',os.environ.get('R5_TEST_GO','go'))
+            prepared, prepared_env = preparation.prepare(current,evidence/'current',(os.environ.get('R5_TEST_GO') or os.environ.get('R5_GO') or 'go'))
         except Exception as error:
             output.write_text(json.dumps(dict(schema_version=1,status='failed',source_sha=sha,
                 preparation_error=str(error),preparation_output=str(evidence),discovered_test_ids=ids,
@@ -132,10 +133,11 @@ def run(root,output):
             # from the exact clone. The frozen helper itself is never replaced.
             argv = [sys.executable,'-B',str(Path(__file__).resolve()),'--child-root',str(source),
                     '--ids',str(request),'--output',str(reportfile)]
-            env = {key:value for key,value in os.environ.items() if key not in
+            _, dispatch_env = r5_go_environment.selected({**os.environ, 'R5_TEST_GO': (os.environ.get('R5_TEST_GO') or os.environ.get('R5_GO') or 'go')})
+            env = {key:value for key,value in dispatch_env.items() if key not in
                    ('ORDINARY_RECEIPT_WIRE_FIXTURE','R5_SOURCE_PREPARATION','R5_SOURCE_PREPARATION_SHA256','R5_SOURCE_RUN_ID')}
             if pin is None:env.update(prepared_env)
-            result = subprocess.run(argv,cwd=source,env={**env,'R5_TEST_GO':os.environ.get('R5_TEST_GO','go')})
+            result = subprocess.run(argv,cwd=source,env=env)
             report = json.loads(reportfile.read_text()) if reportfile.exists() else dict(error='child report missing')
             groups.append(dict(group=name,source_sha=git(source,'rev-parse','HEAD'),requested_test_ids=selection,argv=argv,exit=result.returncode,report=report))
     good = all(g['exit']==0 and g['report'].get('actual_test_ids')==g['requested_test_ids'] and g['report'].get('source_sha')==g['source_sha'] for g in groups)

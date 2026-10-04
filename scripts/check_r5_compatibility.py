@@ -10,6 +10,8 @@ import re
 import subprocess
 import sys
 import tempfile
+import r5_go_environment
+from r5_private_diagnostics import Retention
 
 ROOT=Path(__file__).resolve().parents[1]
 MAP=ROOT/'docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json'
@@ -35,14 +37,27 @@ def strict_json(text):
     def constant(value):raise ValueError('non-finite JSON number: '+value)
     return json.loads(text,object_pairs_hook=pairs,parse_constant=constant)
 
+def diagnostic_run(argv, **kwargs):
+    with Retention('compatibility') as diagnostics:
+        try:
+            result = subprocess.run(argv, **kwargs)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
+            diagnostics.command(0, error.stdout, error.stderr, getattr(error, 'returncode', None))
+            raise
+        diagnostics.command(0, result.stdout, result.stderr, result.returncode)
+        return result
+
+
 def collect():
     # Fresh producers read syntax only; neither starts a server nor touches PostgreSQL.
     with tempfile.TemporaryDirectory(prefix='tabmail-r5-compat-') as tmp:
         import os
-        out=Path(tmp)/'routes.json';env=dict(os.environ,TABMAIL_ROUTE_INVENTORY_OUTPUT=str(out))
-        subprocess.run(['go','test','-mod=readonly','-count=1','./internal/architecture','-run','^TestR5RouteInventory$'],cwd=ROOT,env=env,check=True,capture_output=True,text=True,timeout=60)
+        out=Path(tmp)/'routes.json'
+        go, env = r5_go_environment.selected()
+        env['TABMAIL_ROUTE_INVENTORY_OUTPUT'] = str(out)
+        diagnostic_run([go,'test','-mod=readonly','-count=1','./internal/architecture','-run','^TestR5RouteInventory$'],cwd=ROOT,env=env,check=True,capture_output=True,text=True,timeout=60)
         routes=strict_json(out.read_text())
-    clients=strict_json(subprocess.run(['node','scripts/collect_api_calls.cjs'],cwd=ROOT,check=True,capture_output=True,text=True,timeout=60).stdout)
+    clients=strict_json(diagnostic_run(['node','scripts/collect_api_calls.cjs'],cwd=ROOT,check=True,capture_output=True,text=True,timeout=60).stdout)
     return routes,clients
 
 def norm(path):return re.sub(r'\{[^{}]*\}','{}',path.split('?')[0])

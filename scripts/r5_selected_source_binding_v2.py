@@ -12,6 +12,7 @@ from pathlib import Path
 import subprocess
 import r5_source_inventory as inventory
 import r5_archive_boundary as boundary
+from r5_private_diagnostics import Retention
 
 _IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 POLICY = 'r5_root_selected_local_archive_attestation_v2'
@@ -256,6 +257,11 @@ class MetadataCommandFailure(ValueError):
         super().__init__('metadata command failed: '+inventory.canonical(command).decode())
 
 def capture(root, go, *, cache, modulecache, context=None):
+    with Retention('selection') as diagnostics:
+        return _capture(root, go, cache=cache, modulecache=modulecache, context=context, diagnostics=diagnostics)
+
+
+def _capture(root, go, *, cache, modulecache, context, diagnostics):
     context = CONTEXT if context is None else context
     inventory.validate_context(context, "selected")
     if context not in (CONTEXT, DEFAULT_CONTEXT):
@@ -282,7 +288,12 @@ def capture(root, go, *, cache, modulecache, context=None):
                GOMODCACHE=str(Path(modulecache).resolve()), GOCACHE=str(Path(cache).resolve()))
     commands = []
     def run(argv, *, role="attested_observation"):
-        result = subprocess.run([str(go),*argv],cwd=root,env={**env,**{k:os.environ[k] for k in ('HTTPS_PROXY','HTTP_PROXY','ALL_PROXY','NO_PROXY') if k in os.environ}},capture_output=True,timeout=180)
+        try:
+            result = subprocess.run([str(go),*argv],cwd=root,env={**env,**{k:os.environ[k] for k in ('HTTPS_PROXY','HTTP_PROXY','ALL_PROXY','NO_PROXY') if k in os.environ}},capture_output=True,timeout=180)
+        except subprocess.TimeoutExpired as error:
+            diagnostics.command(diagnostics.count, error.stdout, error.stderr, None)
+            raise
+        diagnostics.command(diagnostics.count, result.stdout, result.stderr, result.returncode)
         commands.append(dict(role=role,argv=[str(go),*argv],exit=result.returncode,stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),stderr=result.stderr.decode()))
         if result.returncode:
             raise MetadataCommandFailure(commands[-1],result.stdout,result.stderr)
@@ -344,6 +355,8 @@ def validate(receipt, root, go, *, cache, modulecache):
         return inventory.canonical(value)
     payload = {k:v for k,v in receipt.items() if k not in ('attestation_sha256','hydration_diagnostics')}
     if receipt.get('attestation_sha256')!=hashlib.sha256(inventory.canonical(payload)).hexdigest() or identity(receipt)!=identity(observed):
+        with Retention('rejected-selection') as diagnostics:
+            diagnostics.json('observed.json', observed)
         raise ValueError('selected attestation missing/extra/drifted/context mismatch')
     return observed
 

@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import r5_go_environment
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / 'docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json'
@@ -23,11 +24,12 @@ def sha(path):
 def extract(root=ROOT):
     go = os.environ.get('R5_GO') or shutil.which('go')
     cached = Path('/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go')
-    if 'R5_GO' not in os.environ and cached.exists():
+    if not (os.environ.get('R5_GO') or os.environ.get('R5_TEST_GO')) and cached.exists():
         go = str(cached)
     if not go:
         raise ValueError('Go required for AST extraction; set R5_GO')
-    env = dict(os.environ, GOTOOLCHAIN='local', GOPROXY='off')
+    go, env = r5_go_environment.selected(fallback=go)
+    env.update(GOTOOLCHAIN='local', GOPROXY='off')
     run = subprocess.run([go, 'run', './cmd/r5txinventory', str(root)], cwd=ROOT, env=env, capture_output=True, text=True, timeout=90)
     if run.returncode:
         raise ValueError('AST extraction failed: ' + run.stderr.strip())

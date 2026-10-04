@@ -16,6 +16,7 @@ import stat
 import tarfile
 import urllib.request
 import uuid
+import r5_go_environment
 
 LOCK_SHA256 = 'b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3'
 TS_URL = 'https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz'
@@ -169,10 +170,7 @@ def prepare(root, output, go):
     root, output = Path(root).resolve(), Path(output).resolve()
     output.mkdir(mode=0o700)  # New unique runner-owned directory only.
     sha = source_identity(root)
-    env = {**os.environ, 'GOWORK': 'off', 'GOENV': 'off', 'GOFLAGS': '', 'GOTOOLCHAIN': 'local'}
-    for variable, key in (('R5_TEST_CACHE', 'GOCACHE'), ('R5_TEST_MODULECACHE', 'GOMODCACHE')):
-        if os.environ.get(variable):
-            env[key] = os.environ[variable]
+    go, env = r5_go_environment.selected({**os.environ, 'R5_TEST_GO': str(go)})
     version = subprocess.check_output([go, 'env', 'GOVERSION'], env=env, text=True).strip()
     if version != 'go1.25.7':
         raise ValueError('Go1.25.7 required for source-runner preparation')
