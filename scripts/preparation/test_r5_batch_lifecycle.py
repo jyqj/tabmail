@@ -88,6 +88,7 @@ with b.runtime.descriptors() as files: files.tree(Path({str(inventory)!r}),sourc
         spawned=[]
         def worker(argv,**kwargs):
             self.assertEqual(argv[2],'validate')
+            self.assertEqual(kwargs['env']['PYTHONDONTWRITEBYTECODE'],'1')
             child=constructor([sys.executable,'-c',code],**kwargs);spawned.append(child);return child
         if phase=='post':owner.cancelled.set() # ordinary execution shutdown is not user abort
         timer=threading.Timer(.15,owner.request_cancel) if cancel else None

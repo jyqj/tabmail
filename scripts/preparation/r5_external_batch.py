@@ -441,7 +441,7 @@ class Batch:
             os.chmod(path, 0o600)
         owned = OwnedProcess([sys.executable, str(self.source/HELPER), 'validate',
                               '--contract', str(path), '--pin', self.pin],
-                             cwd=self.source, env=self.env)
+                             cwd=self.source, env=dict(self.env, PYTHONDONTWRITEBYTECODE='1'))
         try:
             result = owned.finish(self.abort, self.deadline)
         finally:
