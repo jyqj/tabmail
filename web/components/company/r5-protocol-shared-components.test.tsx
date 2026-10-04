@@ -1,6 +1,7 @@
 import React from "react";
+import { createR5FetchObserver, type R5ObservedCall } from "./r5-streaming-fetch-observer";
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -48,7 +49,9 @@ const origin = new URL(fixture.api_url);
 if (fixture.schema_version !== 1 || !shared || fixture.case_sha256 !== createHash("sha256").update(raw).digest("hex") || JSON.stringify(shared.input) !== JSON.stringify(fixture.input) || origin.protocol !== "http:" || origin.hostname !== "127.0.0.1") {
   throw new Error("Invalid source hash, shared input, or non-loopback Go-owned fixture");
 }
-const calls: { method: string; path: string; body?: Record<string, unknown>; status: number; data?: unknown }[] = [];
+const calls: R5ObservedCall[] = [];
+let fetchObserver: ReturnType<typeof createR5FetchObserver>;
+const permissionEvidence = { ui_blocked: false, direct_cas409: false };
 beforeEach(() => {
   process.env.NEXT_PUBLIC_API_URL = origin.origin;
   host.user = fixture.auth.user; installSession(fixture.auth.token, fixture.auth.user);
@@ -56,16 +59,35 @@ beforeEach(() => {
   Object.defineProperty(window, "matchMedia", { configurable: true, value: (query: string) => ({ matches: false, media: query, onchange: null, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, dispatchEvent() { return false; } }) });
   vi.spyOn(window, "confirm").mockReturnValue(true);
   const fetchReal = globalThis.fetch.bind(globalThis);
-  vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
-    const target = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
-    if (target.origin !== origin.origin) throw new Error("Component attempted non-fixture network I/O");
-    const response = await fetchReal(input, init);
-    let data: unknown; try { data = await response.clone().json(); } catch { /* real 204/non-JSON */ }
-    calls.push({ method: init?.method ?? "GET", path: target.pathname, body: typeof init?.body === "string" ? JSON.parse(init.body) : undefined, status: response.status, data });
-    return response;
-  });
+  fetchObserver = createR5FetchObserver(fetchReal, origin.origin, calls);
+  vi.stubGlobal("fetch", fetchObserver.fetch);
 });
-afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks(); delete process.env.NEXT_PUBLIC_API_URL; });
+afterEach(async () => {
+  cleanup();
+  try {
+    await fetchObserver.close();
+    expect(fetchObserver.streams.every(stream => stream.ended || stream.aborted)).toBe(true);
+    const evidence = process.env.TABMAIL_PE_FOCUSED_STREAM_REPORT;
+    if (evidence) writeFileSync(evidence, JSON.stringify({ case_id: fixture.case_id, variant: fixture.variant,
+      ready_frames: fetchObserver.streams.flatMap(stream => stream.frames).filter(frame => frame.event === "ready" && frame.tenant_id === fixture.auth.user.tenant_id).length,
+      profile_update_frames: fetchObserver.streams.flatMap(stream => stream.frames).filter(frame => frame.event === "company.admin.changed" && frame.tenant_id === fixture.auth.user.tenant_id && frame.action === "permission.profile.update" && frame.resource_type === "permission_profile" && frame.resource_id === fixture.profile_id).length,
+      override_patch_frames: fetchObserver.streams.flatMap(stream => stream.frames).filter(frame => frame.event === "company.admin.changed" && frame.tenant_id === fixture.auth.user.tenant_id && frame.action === "permission.override.patch" && frame.resource_type === "user" && frame.resource_id === fixture.employee_id).length,
+      stream_count: fetchObserver.streams.length, stream_errors: fetchObserver.streams.filter(stream => stream.error).length,
+      all_streams_released: fetchObserver.streams.every(stream => stream.ended || stream.aborted), ...permissionEvidence }, null, 2));
+  } finally { vi.unstubAllGlobals(); vi.restoreAllMocks(); delete process.env.NEXT_PUBLIC_API_URL; }
+});
+async function waitReady() {
+  await waitFor(() => expect(fetchObserver.streams.some(stream => stream.frames.some(frame =>
+    frame.event === "ready" && frame.tenant_id === fixture.auth.user.tenant_id))).toBe(true), { timeout: 5000 });
+  await waitFor(() => expect(calls.some(call => call.method === "GET" && call.path === "/api/v1/company/overview" && call.status === 200)).toBe(true));
+}
+function streamCursor() { return fetchObserver.streams.map(stream => stream.frames.length); }
+async function waitChanged(cursor: number[], action: string, resourceType: string, resourceId: string) {
+  await waitFor(() => expect(fetchObserver.streams.some((stream, index) => stream.frames.slice(cursor[index] ?? 0).some(frame =>
+    frame.event === "company.admin.changed" && frame.tenant_id === fixture.auth.user.tenant_id &&
+    frame.action === action && frame.resource_type === resourceType && frame.resource_id === resourceId))).toBe(true), { timeout: 5000 });
+  expect(fetchObserver.streams.every(stream => !stream.error)).toBe(true);
+}
 function target(marker: string, detail: string): never { throw new Error(`${marker}: ${detail}`); }
 // Inspect the captured REAL response, including fields the UI parser could reject.
 // Boolean assertions avoid publishing response bodies or private canaries on failure.
@@ -256,6 +278,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     if (fixture.input.stale_revision !== true || fixture.input.patch_contains_old_security_fields !== true) throw new Error("Shared old-revision/security control input missing");
     if (!fixture.profile_id || !fixture.profile_name) throw new Error("Actual profile fixture missing");
     render(<SidebarProvider><PermissionsPage /></SidebarProvider>);
+    await waitReady();
     const dialog = await rowDialog(fixture.profile_name, "Edit");
     // Observe the current persistent version through the real authorized GET;
     // the shipping editor retains the older snapshot opened above.
@@ -268,9 +291,11 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     const initialSave = within(dialog).getByRole("button", { name: /^Save$/ });
     expect(initialSave).toBeEnabled();
     expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
+    const profileCursor = streamCursor();
     const revoked = (await updatePermissionProfile(fixture.profile_id, { expected_revision: observed.revision, fields: { can_send: false } })).data;
     expect(revoked.can_send).toBe(false);
     expect(BigInt(revoked.revision)).toBeGreaterThan(BigInt(observed.revision));
+    await waitChanged(profileCursor, "permission.profile.update", "permission_profile", fixture.profile_id);
     // UI control: an invalidated dirty shipping editor must block Save.
     // HTTP CAS is an independent real request below, not a UI request.
     const save = within(dialog).getByRole("button", { name: /^Save$/ });
@@ -284,6 +309,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     if (afterUI?.can_send) target("R5_PROTOCOL_UI_TARGET_PE03_STALE", "actual stale shipping editor restored revoked sending");
     expect(afterUI?.revision).toBe(revoked.revision);
     expect(afterUI?.description).toBe(observed.description);
+    permissionEvidence.ui_blocked = true;
     // Catalog HTTP control: explicit old revision and old security fields.
     // This second PATCH is issued by the test API client, never by Save.
     await expect(updatePermissionProfile(fixture.profile_id, {
@@ -300,6 +326,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     expect(calls.filter(c => c.method === "PATCH" && c.path.endsWith(fixture.profile_id!)).at(-1)?.status).toBe(409);
     expect(after?.revision).toBe(revoked.revision);
     expect(after?.description).toBe(observed.description);
+    permissionEvidence.direct_cas409 = true;
     return;
   }
   if (id === "PE05") {
@@ -332,6 +359,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
       expect(before.overrides?.can_send).toBe(true);
     }
     render(<SidebarProvider><UsersPage /></SidebarProvider>);
+    await waitReady();
     const dialog = await rowDialog(fixture.employee_email, "Permissions");
     await waitFor(() => expect(dialog.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(0));
     const quota = within(dialog).getAllByRole("spinbutton")[0];
@@ -346,11 +374,14 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
       const save = within(dialog).getByRole("button", { name: /^Save Overrides$/ });
       expect(save).toBeEnabled();
       expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
+      const resetCursor = streamCursor();
       const reset = (await patchUserPermissionEditor(fixture.employee_id, {
         expected_revision: before.revision, patch: resetPermissionPatch,
       })).data;
       expect(BigInt(reset.revision.user_revision)).toBeGreaterThan(BigInt(before.revision.user_revision));
       expect(reset.overrides === null || reset.overrides.can_send === null).toBe(true);
+      await waitChanged(resetCursor, "permission.override.patch", "user", fixture.employee_id);
+      const restoreCursor = streamCursor();
       const restored = (await patchUserPermissionEditor(fixture.employee_id, {
         expected_revision: reset.revision,
         patch: { can_send: false, daily_send_quota: 19, domain_access: { mode: "list", zone_ids: [fixture.zone_id] } },
@@ -358,6 +389,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
       expect(BigInt(restored.revision.user_revision)).toBeGreaterThan(BigInt(reset.revision.user_revision));
       expect(restored.overrides?.can_send).toBe(false);
       expect(restored.effective.can_send).toBe(false);
+      await waitChanged(restoreCursor, "permission.override.patch", "user", fixture.employee_id);
       await within(dialog).findByRole("alert");
       expect(save).toBeDisabled();
       expect(switchControl).toHaveAttribute("aria-checked", "true");
@@ -368,6 +400,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
       if (afterUI.effective.can_send || afterUI.overrides?.can_send !== false) target("R5_PROTOCOL_UI_TARGET_PE04_ABA", "actual stale shipping editor restored sending after reset/recreation");
       expect(afterUI.revision).toEqual(restored.revision);
       expect(afterUI.overrides).toEqual(restored.overrides);
+      permissionEvidence.ui_blocked = true;
       // Separately labelled direct old compound-revision CAS, not a UI Save.
       await expect(patchUserPermissionEditor(fixture.employee_id, {
         expected_revision: before.revision, patch: { can_send: true },
@@ -378,6 +411,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
       if (after.effective.can_send || after.overrides?.can_send !== false) target("R5_PROTOCOL_UI_TARGET_PE04_ABA", "old editor/control restored sending after versioned reset and recreation");
       expect(after.revision).toEqual(restored.revision);
       expect(after.overrides).toEqual(restored.overrides);
+      permissionEvidence.direct_cas409 = true;
       return;
     }
     if (id === "PE01" || fixture.variant === "omitted") {
