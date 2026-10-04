@@ -1,0 +1,22 @@
+[
+  {
+    "bytes": 4546,
+    "path": "REPORT.md",
+    "sha256": "c5cf184d42cd21fa669765bfad07a763acd8b58b532a85b5f6e33c0645b1a20d"
+  },
+  {
+    "bytes": 79491,
+    "path": "all-lock-directory-inventory.json",
+    "sha256": "f74c7536ecf05dc1c2a322ed4d86b0eacdc76b3e62b82ea3935e0922b9335c11"
+  },
+  {
+    "bytes": 74211,
+    "path": "directory-inventory.json",
+    "sha256": "36c45aaa8b7df2ccb24a7dbd6cb59d8dbb65408384e053f254a4f132f02b966a"
+  },
+  {
+    "bytes": 19632,
+    "path": "offline-provisioning-result.json",
+    "sha256": "ea0f0c8ae3d87e714e68a8400893330e48740bc83dc6bd76c8c62cb5ec3bf143"
+  }
+]

@@ -1,0 +1,2682 @@
+{
+  "cache_roots": [
+    "/workspace/tabmail-cloud/gomod",
+    "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod"
+  ],
+  "missing_declared_pairs": [
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "github.com/davecgh/go-spew",
+      "version": "v1.1.1"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "github.com/go-test/deep",
+      "version": "v1.1.1"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "github.com/mattn/go-isatty",
+      "version": "v0.0.20"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "github.com/pmezard/go-difflib",
+      "version": "v1.0.0"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "github.com/stretchr/testify",
+      "version": "v1.11.1"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "golang.org/x/net",
+      "version": "v0.50.0"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "golang.org/x/sys",
+      "version": "v0.41.0"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "golang.org/x/text",
+      "version": "v0.34.0"
+    },
+    {
+      "declared_by": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "module": "gopkg.in/yaml.v3",
+      "version": "v3.0.1"
+    }
+  ],
+  "rows": [
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/alicebob/miniredis/v2",
+      "sums": {
+        "go_mod_sum": "h1:TcL7YfarKPGDAthEtl5NBeHZfeUQj6OXMm/+iu5cLMM=",
+        "zip_sum": "h1:QwLphYqCEAo1eu1TqPRN2jgVMPBweeQcR21jeqDCONI="
+      },
+      "version": "v2.35.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/aymerick/douceur",
+      "sums": {
+        "go_mod_sum": "h1:wlT5vV2O3h55X9m7iVYN0TBM0NH/MmbLnd30/FjWUq4=",
+        "zip_sum": "h1:Mv+mAeH1Q+n9Fr+oyamOlAkUNPWPlA8PPGR0QAaYuPk="
+      },
+      "version": "v0.2.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/bsm/ginkgo/v2",
+      "sums": {
+        "go_mod_sum": "h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=",
+        "zip_sum": "h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs="
+      },
+      "version": "v2.12.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/bsm/gomega",
+      "sums": {
+        "go_mod_sum": "h1:JyEr/xRbxbtgWNi8tIEVPUYZ5Dzef52k01W3YH0H+O0=",
+        "zip_sum": "h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA="
+      },
+      "version": "v1.27.10"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/cention-sany/utf7",
+      "sums": {
+        "go_mod_sum": "h1:2GxOXOlEPAMFPfp014mK1SWq8G8BN8o7/dfYqJrVGn8=",
+        "zip_sum": "h1:MISbI8sU/PSK/ztvmWKFcI7UGb5/HQT7B+i3a2myKgI="
+      },
+      "version": "v0.0.0-20170124080048-26cad61bd60a"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/cespare/xxhash/v2",
+      "sums": {
+        "go_mod_sum": "h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=",
+        "zip_sum": "h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs="
+      },
+      "version": "v2.3.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/clipperhouse/displaywidth",
+      "sums": {
+        "go_mod_sum": "h1:XqJajYsaiEwkxOj4bowCTMcT1SgvHo9flfF3jQasdbs=",
+        "zip_sum": "h1:GhBG8WuerxjFQQYeuZAeVTuyxuX+UraiZGD4HJQ3Y8g="
+      },
+      "version": "v0.10.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/clipperhouse/uax29/v2",
+      "sums": {
+        "go_mod_sum": "h1:Wn1g7MK6OoeDT0vL+Q0SQLDz/KpfsVRgg6W7ihQeh4g=",
+        "zip_sum": "h1:z0cDbUV+aPASdFb2/ndFnS9ts/WNXgTNNGFoKXuhpos="
+      },
+      "version": "v2.6.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/coreos/go-systemd/v22",
+      "sums": {
+        "go_mod_sum": "h1:Y58oyj3AT4RCenI/lSvhwexgC+NSVTIJ3seZv2GcEnc="
+      },
+      "version": "v22.5.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/davecgh/go-spew",
+      "sums": {
+        "go_mod_sum": "h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38="
+      },
+      "version": "v1.1.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/davecgh/go-spew",
+      "sums": {
+        "go_mod_sum": "h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=",
+        "zip_sum": "h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c="
+      },
+      "version": "v1.1.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/dgryski/go-rendezvous",
+      "sums": {
+        "go_mod_sum": "h1:cuUVRXasLTGF7a8hSLbxyZXjz+1KgoB3wDUb6vlszIc=",
+        "zip_sum": "h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78="
+      },
+      "version": "v0.0.0-20200823014737-9f7001d12a5f"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/dustin/go-humanize",
+      "sums": {
+        "go_mod_sum": "h1:Mu1zIs6XwVuF/gI1OepvI0qD18qycQx+mFykh5fBlto=",
+        "zip_sum": "h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY="
+      },
+      "version": "v1.0.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/emersion/go-msgauth",
+      "sums": {
+        "go_mod_sum": "h1:mmS9I6HkSovrNgq0HNXTeu8l3sRAAuQ9RMvbM4KU7Ck=",
+        "zip_sum": "h1:vj2hMn6KhFtW41kshIBTXvp6KgYSqpA/ZN9Pv4g1INc="
+      },
+      "version": "v0.7.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/emersion/go-sasl",
+      "sums": {
+        "go_mod_sum": "h1:iL2twTeMvZnrg54ZoPDNfJaJaqy0xIQFuBdrLsmspwQ=",
+        "zip_sum": "h1:oP4q0fw+fOSWn3DfFi4EXdT+B+gTtzx8GC9xsc26Znk="
+      },
+      "version": "v0.0.0-20241020182733-b788ff22d5a6"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": true,
+      "module": "github.com/emersion/go-smtp",
+      "sums": {
+        "go_mod_sum": "h1:ZtRRkbTyp2XTHCA+BmyTFTrj8xY4I+b4McvHxCU2gsQ=",
+        "zip_sum": "h1:g6AfoF140mvW0vLNPD/LuCBLEAdlxOjIXqbIkJIS6Wk="
+      },
+      "version": "v0.24.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/fatih/color",
+      "sums": {
+        "go_mod_sum": "h1:4FelSpRwEGDpQ12mAdzqdOukCy4u8WUtOY6lkT/6HfU=",
+        "zip_sum": "h1:S8gINlzdQ840/4pfAwic/ZE0djQEH3wM94VfqLTZcOM="
+      },
+      "version": "v1.18.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/go-chi/chi/v5",
+      "sums": {
+        "go_mod_sum": "h1:X7Gx4mteadT3eDOMTsXzmI4/rwUpOwBHLpAfupzFJP0=",
+        "zip_sum": "h1:Eg4myHZBjyvJmAFjFvWgrqDTXFyOzjj7YIm3L3mu6Ug="
+      },
+      "version": "v5.2.5"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/go-chi/cors",
+      "sums": {
+        "go_mod_sum": "h1:sSbTewc+6wYHBBCW7ytsFSn836hqM7JxpglAy2Vzc58=",
+        "zip_sum": "h1:Jmey33TE+b+rB7fT8MUy1u0I4L+NARQlK6LhzKPSyQE="
+      },
+      "version": "v1.2.2"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/go-ini/ini",
+      "sums": {
+        "go_mod_sum": "h1:ByCAeIL28uOIIG0E3PJtZPDL8WnHpFKFOtgjp+3Ies8=",
+        "zip_sum": "h1:z6ZrTEZqSWOTyH2FlglNbNgARyHG8oLW9gMELqKr06A="
+      },
+      "version": "v1.67.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/go-test/deep",
+      "sums": {
+        "go_mod_sum": "h1:5C2ZWiW0ErCdrYzpqxLbTX7MG14M9iiw8DgHncVwcsE=",
+        "zip_sum": "h1:0r/53hagsehfO4bzD2Pgr/+RgHqhmf+k1Bpse2cTu1U="
+      },
+      "version": "v1.1.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/goccy/go-json",
+      "sums": {
+        "go_mod_sum": "h1:oq7eo15ShAhp70Anwd5lgX2pLfOS3QCiwU/PULtXL6M=",
+        "zip_sum": "h1:JSwxQzIqKfmFX1swYPpUThQZp/Ka4wzJdK0LWVytLPM="
+      },
+      "version": "v0.10.4"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/godbus/dbus/v5",
+      "sums": {
+        "go_mod_sum": "h1:xhWf0FNVPg57R7Z0UbKHbJfkEywrmjJnf7w5xrFpKfA="
+      },
+      "version": "v5.0.4"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/gogs/chardet",
+      "sums": {
+        "go_mod_sum": "h1:Pcatq5tYkCW2Q6yrR2VRHlbHpZ/R4/7qyL1TCF7vl14=",
+        "zip_sum": "h1:3BSP1Tbs2djlpprl7wCLuiqMaUh5SJkkzI2gDs+FgLs="
+      },
+      "version": "v0.0.0-20211120154057-b7413eaefb8f"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/google/uuid",
+      "sums": {
+        "go_mod_sum": "h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=",
+        "zip_sum": "h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0="
+      },
+      "version": "v1.6.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/gorilla/css",
+      "sums": {
+        "go_mod_sum": "h1:BvnYkspnSzMmwRK+b8/xgNPLiIuNZr6vbZBTPQ2A3b0=",
+        "zip_sum": "h1:ntNaBIghp6JmvWnxbZKANoLyuXTPZ4cAMlo6RyhlbO8="
+      },
+      "version": "v1.0.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/inbucket/html2text",
+      "sums": {
+        "go_mod_sum": "h1:5TrhXQKGU+LXurODaSm55Y9eXoPBRnYiOz4x2XfUoJU=",
+        "zip_sum": "h1:N5kza++4uBBDJ2Z3KUnTRyPNoBcW+YfOgNiNmNB+sgs="
+      },
+      "version": "v1.0.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/jackc/pgpassfile",
+      "sums": {
+        "go_mod_sum": "h1:CEx0iS5ambNFdcRtxPj5JhEz+xB6uRky5eyVu/W2HEg=",
+        "zip_sum": "h1:/6Hmqy13Ss2zCq62VdNG8tM1wchn8zjSGOBJ6icpsIM="
+      },
+      "version": "v1.0.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/jackc/pgservicefile",
+      "sums": {
+        "go_mod_sum": "h1:5TJZWKEWniPve33vlWYSoGYefn3gLQRzjfDlhSJ9ZKM=",
+        "zip_sum": "h1:iCEnooe7UlwOQYpKFhBabPMi4aNAfoODPEFNiAnClxo="
+      },
+      "version": "v0.0.0-20240606120523-5a60cdf6a761"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/jackc/pgx/v5",
+      "sums": {
+        "go_mod_sum": "h1:mal1tBGAFfLHvZzaYh77YS/eC6IX9OWbRV1QIIM0Jn4=",
+        "zip_sum": "h1:VhSvgU2jSli8o3AqIEOTJr7rZwAEUVo4E4XhR94Zfr0="
+      },
+      "version": "v5.10.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/jackc/puddle/v2",
+      "sums": {
+        "go_mod_sum": "h1:vriiEXHvEE654aYKXXjOvZM39qJ0q+azkZFrfEOc3H4=",
+        "zip_sum": "h1:PR8nw+E/1w0GLuRFSmiioY6UooMp6KJv0/61nB7icHo="
+      },
+      "version": "v2.2.2"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": true,
+      "module": "github.com/jhillyerd/enmime/v2",
+      "sums": {
+        "go_mod_sum": "h1:mGKXAP45l6pF6HZiaLhgSYsgteJskaSIYmEZXpw6ZpI=",
+        "zip_sum": "h1:Y/pzQanyU8nkSgB2npXX8Dha5OItJE/QwbDJM4sf/kU="
+      },
+      "version": "v2.3.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/kelseyhightower/envconfig",
+      "sums": {
+        "go_mod_sum": "h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=",
+        "zip_sum": "h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8="
+      },
+      "version": "v1.4.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/klauspost/compress",
+      "sums": {
+        "go_mod_sum": "h1:cwPg85FWrGar70rWktvGQj8/hthj3wpl0PGDogxkrSQ=",
+        "zip_sum": "h1:VsB4HPswih7mmZ8WleSFQ75c/Ui1M4trX5oAsJnhSlk="
+      },
+      "version": "v1.19.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/klauspost/cpuid/v2",
+      "sums": {
+        "go_mod_sum": "h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg="
+      },
+      "version": "v2.0.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/klauspost/cpuid/v2",
+      "sums": {
+        "go_mod_sum": "h1:rqkxqrZ1EhYM9G+hXH7YdowN5R5RGN6NK4QwQ3WMXF8=",
+        "zip_sum": "h1:66ze0taIn2H33fBvCkXuv9BmCwDfafmiIVpKV9kKGuY="
+      },
+      "version": "v2.2.9"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/mattn/go-colorable",
+      "sums": {
+        "go_mod_sum": "h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovkB8vQcUbaXHg="
+      },
+      "version": "v0.1.13"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/mattn/go-colorable",
+      "sums": {
+        "go_mod_sum": "h1:6LmQG8QLFO4G5z1gPvYEzlUgJ2wF+stgPZH1UqBm1s8=",
+        "zip_sum": "h1:9A9LHSqF/7dyVVX6g0U9cwm9pG3kP9gSzcuIPHPsaIE="
+      },
+      "version": "v0.1.14"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/mattn/go-isatty",
+      "sums": {
+        "go_mod_sum": "h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM="
+      },
+      "version": "v0.0.16"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/mattn/go-isatty",
+      "sums": {
+        "go_mod_sum": "h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y="
+      },
+      "version": "v0.0.19"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/mattn/go-isatty",
+      "sums": {
+        "go_mod_sum": "h1:nMCL3Zebbrt45jsMDgnfIwz6ydEQApk5oEI3HqDio6A=",
+        "zip_sum": "h1:cYwCQTQf3HB6xUC+BtyCLZNr7IzbOmoZbmssVNzSyiQ="
+      },
+      "version": "v0.0.23"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/mattn/go-runewidth",
+      "sums": {
+        "go_mod_sum": "h1:XBkDxAl56ILZc9knddidhrOlY5R/pDhgLpndooCuJAs=",
+        "zip_sum": "h1:v++JhqYnZuu5jSKrk9RbgF5v4CGUjqRfBm05byFGLdw="
+      },
+      "version": "v0.0.19"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/mfridman/interpolate",
+      "sums": {
+        "go_mod_sum": "h1:p+7uk6oE07mpE/Ik1b8EckO0O4ZXiGAfshKBWLUM9Xg=",
+        "zip_sum": "h1:pnuTK7MQIxxFz1Gr+rjSIx9u7qVjf5VOoM/u6BbAxPY="
+      },
+      "version": "v0.0.2"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/microcosm-cc/bluemonday",
+      "sums": {
+        "go_mod_sum": "h1:jFi9vgW+H7c3V0lb6nR74Ib/DIB5OBs92Dimizgw2cA=",
+        "zip_sum": "h1:MpEUotklkwCSLeH+Qdx1VJgNqLlpY2KXwXFM08ygZfk="
+      },
+      "version": "v1.0.27"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/minio/md5-simd",
+      "sums": {
+        "go_mod_sum": "h1:MzdKDxYpY2BT9XQFocsiZf/NKVtR7nkE4RoEpN+20RM=",
+        "zip_sum": "h1:Gdi1DZK69+ZVMoNHRXJyNcxrMA4dSxoYHZSQbirFg34="
+      },
+      "version": "v1.1.2"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/minio/minio-go/v7",
+      "sums": {
+        "go_mod_sum": "h1:57YXpvc5l3rjPdhqNrDsvVlY0qPI6UTk1bflAe+9doY=",
+        "zip_sum": "h1:9psTLS/NTvC3MWoyjhjXpwcKoNbkongaCSF3PNpSuXo="
+      },
+      "version": "v7.0.85"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/ncruces/go-strftime",
+      "sums": {
+        "go_mod_sum": "h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=",
+        "zip_sum": "h1:HMFp8mLCTPp341M/ZnA4qaf7ZlsbTc+miZjCLOFAw7w="
+      },
+      "version": "v1.0.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/olekukonko/cat",
+      "sums": {
+        "go_mod_sum": "h1:rEKTHC9roVVicUIfZK7DYrdIoM0EOr8mK1Hj5s3JjH0=",
+        "zip_sum": "h1:zrbMGy9YXpIeTnGj4EljqMiZsIcE09mmF8XsD5AYOJc="
+      },
+      "version": "v0.0.0-20250911104152-50322a0618f6"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/olekukonko/errors",
+      "sums": {
+        "go_mod_sum": "h1:ppzxA5jBKcO1vIpCXQ9ZqgDh8iwODz6OXIGKU8r5m4Y=",
+        "zip_sum": "h1:10Zcn4GeV59t/EGqJc8fUjtFT/FuUh5bTMzZ1XwmCRo="
+      },
+      "version": "v1.2.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/olekukonko/ll",
+      "sums": {
+        "go_mod_sum": "h1:NVUmjBb/aCtUpjKk75BhWrOlARz3dqsM+OtszpY4o88=",
+        "zip_sum": "h1:lGVTHO+Qc4Qm+fce/2h2m5y9LvqaW+DCN7xW9hsU3uA="
+      },
+      "version": "v0.1.6"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/olekukonko/tablewriter",
+      "sums": {
+        "go_mod_sum": "h1:9VU0knjhmMkXjnMKrZ3+L2JhhtsQ/L38BbL3CRNE8tM=",
+        "zip_sum": "h1:VSHhghXxrP0JHl+0NnKid7WoEmd9/urKRJLysb70nnA="
+      },
+      "version": "v1.1.3"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/pkg/errors",
+      "sums": {
+        "go_mod_sum": "h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=",
+        "zip_sum": "h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4="
+      },
+      "version": "v0.9.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/pmezard/go-difflib",
+      "sums": {
+        "go_mod_sum": "h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=",
+        "zip_sum": "h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM="
+      },
+      "version": "v1.0.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/pressly/goose/v3",
+      "sums": {
+        "go_mod_sum": "h1:Dag+xpV6o20HR2LFY1j0q6MDwc3f7vPUFDA77R+0yGY=",
+        "zip_sum": "h1:pIglVHjw99r4e/hDHHwbl9vfOsDMqUokfkXo6+n/RxA="
+      },
+      "version": "v3.27.3"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/redis/go-redis/v9",
+      "sums": {
+        "go_mod_sum": "h1:k3ufPphLU5YXwNTUcCRXGxUoF1fqxnhFQmscfkCoDA0=",
+        "zip_sum": "h1:pMkxYPkEbMPwRdenAzUNyFNrDgHx9U+DrBabWNfSRQs="
+      },
+      "version": "v9.18.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/remyoudompheng/bigfft",
+      "sums": {
+        "go_mod_sum": "h1:qqbHyh8v60DhA7CoWK5oRCqLrMHRGoxYCSS9EjAz6Eo=",
+        "zip_sum": "h1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE="
+      },
+      "version": "v0.0.0-20230129092748-24d4a6f8daec"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/rs/xid",
+      "sums": {
+        "go_mod_sum": "h1:7XoLgs4eV+QndskICGsho+ADou8ySMSjJKDIan90Nz0=",
+        "zip_sum": "h1:fV591PaemRlL6JfRxGDEPl69wICngIQ3shQtzfy2gxU="
+      },
+      "version": "v1.6.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/rs/zerolog",
+      "sums": {
+        "go_mod_sum": "h1:bJsvje4Z08ROH4Nhs5iH600c3IkWhwp44iRc54W6wYQ=",
+        "zip_sum": "h1:k43nTLIwcTVQAncfCw4KZ2VY6ukYoZaBPNOE8txlOeY="
+      },
+      "version": "v1.34.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/sethvargo/go-retry",
+      "sums": {
+        "go_mod_sum": "h1:tvsjdKG6xfiCx4LSiUZ06kcv38xvdVQwv8R6/VnnVWg=",
+        "zip_sum": "h1:9qy1OoIAxBL+gBYnkTnTnWle5wlfsXQlwRzIbbpdqPw="
+      },
+      "version": "v0.4.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod",
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/ssor/bom",
+      "sums": {
+        "go_mod_sum": "h1:RJID2RhlZKId02nZ62WenDCkgHFerpIOmW0iT7GKmXM=",
+        "zip_sum": "h1:pvbZ0lM0XWPBqUKqFU8cmavspvIl9nulOYwdy6IFRRo="
+      },
+      "version": "v0.0.0-20170718123548-6386211fdfcf"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/stretchr/objx",
+      "sums": {
+        "go_mod_sum": "h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME="
+      },
+      "version": "v0.1.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/stretchr/testify",
+      "sums": {
+        "go_mod_sum": "h1:wZwfW3scLgRK+23gO65QZefKpKQRnfz6sD981Nm4B6U=",
+        "zip_sum": "h1:7s2iGBzp5EwR7/aIZr8ao5+dra3wiQyKjjFuvgVKu7U="
+      },
+      "version": "v1.11.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/stretchr/testify",
+      "sums": {
+        "go_mod_sum": "h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI="
+      },
+      "version": "v1.3.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/stretchr/testify",
+      "sums": {
+        "go_mod_sum": "h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg="
+      },
+      "version": "v1.7.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "github.com/yuin/gopher-lua",
+      "sums": {
+        "go_mod_sum": "h1:GBR0iDaNXjAgGg9zfCvksxSRnQx76gclCIb7kdAd1Pw=",
+        "zip_sum": "h1:kYKnWBjvbNP4XLT3+bPEwAXJx262OhaHDWDVOPjL46M="
+      },
+      "version": "v1.1.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "github.com/zeebo/xxh3",
+      "sums": {
+        "go_mod_sum": "h1:5NWz9Sef7zIDm2JHfFlcQvNekmcEl9ekUZQQKCYaDcA=",
+        "zip_sum": "h1:xZmwmqxHZA8AI603jOQ0tMqmBr9lPeFwGg6d+xy9DC0="
+      },
+      "version": "v1.0.2"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "go.uber.org/atomic",
+      "sums": {
+        "go_mod_sum": "h1:LUxbIzbOniOlMKjJjyPfpl4v+PKK2cNJn91OQbhoJI0=",
+        "zip_sum": "h1:ZvwS0R+56ePWxUNi+Atn9dWONBPp/AUETXlHW0DxSjE="
+      },
+      "version": "v1.11.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "go.uber.org/multierr",
+      "sums": {
+        "go_mod_sum": "h1:20+QtiLqy0Nd6FdQB9TLXag12DsQkrbs3htMFfDN80Y=",
+        "zip_sum": "h1:blXXJkSxSSfBVBlC76pxqeO+LN3aDfLQo+309xJstO0="
+      },
+      "version": "v1.11.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "golang.org/x/crypto",
+      "sums": {
+        "go_mod_sum": "h1:KWL8ny2AZdGR2cWmzeHrp2azQPGogOv+HeQaVEXC2dk=",
+        "zip_sum": "h1:YLIA59K4fiNzHzjnZt2tUJQjQtUWfWbeHBqKtk3eScw="
+      },
+      "version": "v0.54.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "golang.org/x/net",
+      "sums": {
+        "go_mod_sum": "h1:KpXc8iv+r3XplLAG/f7Jsf9RPszJzdR0f58q9vGOuEU=",
+        "zip_sum": "h1:K5+3DljvIuDG9/Jv9rvyMywYNFCQ9RSUY6OOTTkT+tE="
+      },
+      "version": "v0.57.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "golang.org/x/sync",
+      "sums": {
+        "go_mod_sum": "h1:9xrNwdLfx4jkKbNva9FpL6vEN7evnE43NNNJQ2LF3+0=",
+        "zip_sum": "h1:SZjpbeLmrCk4xhRSZFNZW5gFUeCeFgjekvI/+gfScek="
+      },
+      "version": "v0.22.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "golang.org/x/sys",
+      "sums": {
+        "go_mod_sum": "h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg="
+      },
+      "version": "v0.0.0-20220811171246-fbc7d0a398ab"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "golang.org/x/sys",
+      "sums": {
+        "go_mod_sum": "h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg="
+      },
+      "version": "v0.12.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "golang.org/x/sys",
+      "sums": {
+        "go_mod_sum": "h1:4GL1E5IUh+htKOUEOaiffhrAeqysfVGipDYzABqnCmw=",
+        "zip_sum": "h1:o7XGOvZQCADBQQ4Y7VNq2dRWQR7JmOUW8Kxx4ZsNgWs="
+      },
+      "version": "v0.47.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "golang.org/x/sys",
+      "sums": {
+        "go_mod_sum": "h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg="
+      },
+      "version": "v0.6.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": true,
+            ".mod": true,
+            ".zip": true,
+            ".ziphash": true
+          },
+          "extracted_directory": true
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "go.mod"
+      ],
+      "local_replacement": false,
+      "module": "golang.org/x/text",
+      "sums": {
+        "go_mod_sum": "h1:hpnzDAfGV753zIKo+wk3u1bVKCGPbrnF7+7LBF/UHVY=",
+        "zip_sum": "h1:Ub2Z6/xjgF1WrYQz2nuITOEegKFtiIy+rieRJ5lHZKs="
+      },
+      "version": "v0.40.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "gopkg.in/check.v1",
+      "sums": {
+        "go_mod_sum": "h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0="
+      },
+      "version": "v0.0.0-20161208181325-20d25e280405"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": true,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "gopkg.in/yaml.v3",
+      "sums": {
+        "go_mod_sum": "h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM="
+      },
+      "version": "v3.0.0-20200313102051-9f266ea9e77c"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [
+        "third_party/enmime-v2.3.0/go.mod"
+      ],
+      "local_replacement": false,
+      "module": "gopkg.in/yaml.v3",
+      "sums": {
+        "go_mod_sum": "h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=",
+        "zip_sum": "h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA="
+      },
+      "version": "v3.0.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "modernc.org/libc",
+      "sums": {
+        "go_mod_sum": "h1:4H7h/MJ8wnjL8RAbp9v3OXgnk22X7MouHIhDbvP3gj4=",
+        "zip_sum": "h1:a4J+Z8aVaxPyjyxRAdJzw246PqpcFGvVPnfT/AuM5Ws="
+      },
+      "version": "v1.74.3"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "modernc.org/mathutil",
+      "sums": {
+        "go_mod_sum": "h1:4p5IwJITfppl0G4sUEDtCr4DthTaT47/N3aT6MhfgJg=",
+        "zip_sum": "h1:GCZVGXdaN8gTqB1Mf/usp1Y/hSqgI2vAGGP4jZMCxOU="
+      },
+      "version": "v1.7.1"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "modernc.org/memory",
+      "sums": {
+        "go_mod_sum": "h1:/JP4VbVC+K5sU2wZi9bHoq2MAkCnrt2r98UGeSK7Mjw=",
+        "zip_sum": "h1:o4QC8aMQzmcwCK3t3Ux/ZHmwFPzE6hf2Y5LbkRs+hbI="
+      },
+      "version": "v1.11.0"
+    },
+    {
+      "cache_inventory": {
+        "/workspace/tabmail-cloud/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        },
+        "/workspace/tabmail-metadata-gate-pnkZA9ce/gomod": {
+          "artifacts": {
+            ".info": false,
+            ".mod": false,
+            ".zip": false,
+            ".ziphash": false
+          },
+          "extracted_directory": false
+        }
+      },
+      "declared_requirements": [],
+      "local_replacement": false,
+      "module": "modernc.org/sqlite",
+      "sums": {
+        "go_mod_sum": "h1:4ntCLuNmnH8+GNqjka1wNg7KJd5/Hi5FYp8K+XQ7GZw=",
+        "zip_sum": "h1:JCxR4qwkJvOaqAoYcgDoO25Nc+ROg6EJ2LfBVzdrgog="
+      },
+      "version": "v1.54.0"
+    }
+  ],
+  "source": "593bbc6a3ac91b5dbf8917602e45900bff094e27"
+}
