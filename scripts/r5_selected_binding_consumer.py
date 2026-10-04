@@ -33,6 +33,12 @@ _COMMAND_FIELDS = frozenset('role argv exit raw_stdout_sha256 raw_stdout_bytes '
     'stderr_sha256 stderr_bytes binding_stdout_sha256 binding_stdout_domain'.split())
 _PACKAGE_DOMAIN = 'complete_PackagePublic_stream_except_top_level_Stale_StaleReason'
 _ENV_DOMAIN = 'canonical_go_env_with_only_GOGCCFLAGS_temp_prefix_normalized'
+_QUALIFICATION = dict(overall='blocked', excluded_metadata_boundary='descriptor_checked',
+    local_static_binding='captured', generated='unknown', external_modulecache='unknown',
+    compiler_native='unknown', Method19='unknown', SML='unknown', wholeCI='unknown')
+_FROZEN_IDS = sorted('test_r5_selected_source_binding.ActualRootBindingTests.' + name for name in
+    ('test_actual_full_scope_fresh_hashes', 'test_real_receipt_roundtrip',
+     'test_omission_extra_hash_flags_abi_and_historical_rejected', 'test_capture_midflight_drift_refused'))
 
 
 def selected_version(selected_binding_version=2):
@@ -124,12 +130,307 @@ def _hash_map(value):
         _digest(digest)
 
 
+def _record(value, required, optional=()):
+    if type(value) is not dict or not set(required).issubset(value) or set(value) - set(required) - set(optional):
+        raise ValueError('missing/extra/malformed nested record fields')
+
+
+def _strings(value, *, sorted_unique=False):
+    if type(value) is not list or any(type(s) is not str or not s or '\x00' in s for s in value):
+        raise ValueError('malformed string array')
+    if len(set(value)) != len(value) or (sorted_unique and value != sorted(value)):
+        raise ValueError('duplicate/unordered string array')
+
+
+def _requires(value):
+    if type(value) is not dict:
+        raise ValueError('module requirement map required')
+    for module, version in value.items():
+        _relative(module)
+        if type(version) is not str or not re.fullmatch(r'v[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9._-]+)?(?:\+incompatible)?', version):
+            raise ValueError('malformed module requirement version')
+
+
+def _go_declaration(go, toolchain):
+    if type(go) is not str or not re.fullmatch(r'[0-9]+\.[0-9]+(?:\.[0-9]+)?', go):
+        raise ValueError('malformed declared Go version')
+    if toolchain is not None and (type(toolchain) is not str or not re.fullmatch(r'go[0-9]+\.[0-9]+(?:\.[0-9]+)?', toolchain)):
+        raise ValueError('malformed declared toolchain')
+
+
+def _source_records(base, v3):
+    inventory = v3.inventory
+    _equal(base['replacements'], list(inventory.CURRENT_REPLACEMENTS), 'exact local replacements')
+    _equal(base['inventory_implementation_sha256'], inventory._IMPLEMENTATION_SHA256, 'inventory helper')
+    _equal(base['excluded_directories'], sorted(inventory.EXCLUDED_DIRS), 'excluded directories')
+    _equal(base['boundary'], 'Versioned archive static bytes and production variant superset; '
+        'selected metadata/runtime are separate', 'source boundary')
+    _equal(base['version_test_contract'], dict(frozen_v1=v3.boundary.BASELINE,
+        frozen_test_ids=_FROZEN_IDS, current_actual_class='test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.',
+        expected_failures_are_green=False), 'version test contract')
+    resolution = base['module_resolution']
+    _shape(resolution, 'main_module root_go_mod_sha256 root_go_sum_sha256 declared_go declared_toolchain '
+           'declared_requires local_modules local_module_file_selection excluded_local_module_metadata '
+           'effective_root_MVS_observed go_selected_inputs_observed external_module_cache_verified boundary'.split(), 'module resolution')
+    _equal(resolution['main_module'], 'tabmail', 'main module')
+    for key, path in (('root_go_mod_sha256', 'go.mod'), ('root_go_sum_sha256', 'go.sum')):
+        _digest(resolution[key])
+        _equal(resolution[key], base['files'].get(path), 'root module file')
+    _go_declaration(resolution['declared_go'], resolution['declared_toolchain'])
+    _requires(resolution['declared_requires'])
+    _equal(resolution['local_module_file_selection'],
+        'all_regular_files_not_suffix_filtered_except_explicit_artifact_directories_and_DS_Store', 'local file selection')
+    _equal(resolution['excluded_local_module_metadata'], dict(
+        inspection='names_and_lstat_types_only_no_regular_file_reads_no_symlink_following',
+        reject=['symlinks', 'nested_go.mod', 'special_or_unknown_types', 'unavailable_metadata', 'budget_exceeded'],
+        max_entries_per_local_module_per_pass=inventory.EXCLUDED_METADATA_MAX_ENTRIES,
+        max_depth_including_excluded_root=inventory.EXCLUDED_METADATA_MAX_DEPTH), 'excluded metadata contract')
+    for key in ('effective_root_MVS_observed', 'go_selected_inputs_observed', 'external_module_cache_verified'):
+        _equal(resolution[key], False, 'static qualification ' + key)
+    _equal(resolution['boundary'], 'Declared root/local module metadata and complete local input superset only; '
+        'actual root MVS/go-list/build/external-cache qualification is separate', 'module boundary')
+    modules = resolution['local_modules']
+    if type(modules) is not list or len(modules) != 2:
+        raise ValueError('exact two local module records required')
+    for row, replacement in zip(modules, inventory.CURRENT_REPLACEMENTS):
+        _shape(row, 'module version path declared_go declared_toolchain declared_requires go_mod_sha256 '
+               'go_sum_sha256 metadata_sha256 upstream_file_inventory'.split(), 'local module')
+        for key in ('module', 'version', 'path'):
+            _equal(row[key], replacement[key], 'local module ' + key)
+        _equal(resolution['declared_requires'].get(row['module']), row['version'], 'declared replacement requirement')
+        _go_declaration(row['declared_go'], row['declared_toolchain'])
+        _requires(row['declared_requires'])
+        for key, name in (('go_mod_sha256', 'go.mod'), ('go_sum_sha256', 'go.sum')):
+            _digest(row[key])
+            _equal(row[key], base['files'].get(row['path'] + '/' + name), 'local module file')
+        _shape(row['metadata_sha256'], inventory.MODULE_METADATA[row['module']], 'local module metadata')
+        for name, digest in row['metadata_sha256'].items():
+            _digest(digest)
+            _equal(digest, base['files'].get(row['path'] + '/' + name), 'local metadata file')
+        _strings(row['upstream_file_inventory'], sorted_unique=True)
+        if not row['upstream_file_inventory']:
+            raise ValueError('empty upstream inventory')
+        for name in row['upstream_file_inventory']:
+            _relative(name)
+            if row['path'] + '/' + name not in base['files']:
+                raise ValueError('upstream inventory outside source files')
+    for declaration, paths in base['embed_inputs'].items():
+        _text(declaration)
+        parts = declaration.rsplit(':', 1)
+        if len(parts) != 2 or not parts[1]:
+            raise ValueError('malformed embed declaration')
+        source, pattern = parts
+        _relative(source)
+        _relative(pattern)
+        if not source.endswith('.go') or source not in base['files']:
+            raise ValueError('embed declaration outside source files')
+        if ':' in pattern or any(c in pattern for c in '[]?`') or '**' in pattern:
+            raise ValueError('unsupported embed pattern')
+        _strings(paths, sorted_unique=True)
+        if not paths:
+            raise ValueError('empty embed input declaration')
+        for path in paths:
+            _relative(path)
+            if path not in base['files']:
+                raise ValueError('embed input outside source files')
+
+
+def _field_map(fields, allowed):
+    _record(fields, (), allowed)
+    for values in fields.values():
+        _strings(values)
+        for value in values:
+            _absolute(value) if value.startswith('/') else _relative(value)
+
+
+def _local_module(directory, v3):
+    for replacement in v3.inventory.CURRENT_REPLACEMENTS:
+        if directory == replacement['path'] or directory.startswith(replacement['path'] + '/'):
+            return replacement['module']
+    if directory in ('cmd', 'internal') or directory.startswith(('cmd/', 'internal/')):
+        return 'tabmail'
+    raise ValueError('package outside local production roots')
+
+
+def _packages(rows, v3, *, main_only=False):
+    if type(rows) is not list:
+        raise ValueError('package record array required')
+    for row in rows:
+        _shape(row, 'directory import_path for_test module fields'.split(), 'local package')
+        _relative(row['directory'])
+        _text(row['import_path'])
+        if row['for_test'] is not None:
+            _text(row['for_test'])
+        _equal(row['module'], 'tabmail' if main_only else _local_module(row['directory'], v3), 'package module')
+        if main_only and _local_module(row['directory'], v3) != 'tabmail':
+            raise ValueError('fork in root coverage')
+        _field_map(row['fields'], v3.FIELDS)
+
+
+def _selected_records(receipt, source_root, v3):
+    base = receipt['base_source']
+    mvs = receipt['root_mvs']
+    seen = set()
+    replacements = []
+    main = 0
+    for row in mvs:
+        _record(row, ('Path',), ('Version', 'Main', 'GoVersion', 'Sum', 'GoModSum', 'Replace'))
+        _relative(row['Path'])
+        if row['Path'] in seen:
+            raise ValueError('duplicate MVS module')
+        seen.add(row['Path'])
+        for key in ('Version', 'GoVersion', 'Sum', 'GoModSum'):
+            if key in row:
+                _text(row[key])
+        if 'Main' in row and type(row['Main']) is not bool:
+            raise ValueError('malformed MVS Main')
+        if row.get('Main', False):
+            main += 1
+            _equal(row['Path'], 'tabmail', 'main MVS identity')
+            if 'Replace' in row or 'Version' in row:
+                raise ValueError('unexpected main MVS version/replacement')
+        elif 'Version' not in row:
+            raise ValueError('missing MVS version')
+        if 'Replace' in row:
+            matches = [r for r in v3.inventory.CURRENT_REPLACEMENTS if
+                       r['module'] == row['Path'] and r['version'] == row.get('Version')]
+            if len(matches) != 1:
+                raise ValueError('unapproved MVS replacement')
+            _equal(row['Replace'], matches[0], 'normalized MVS replacement')
+            replacements.append(row['Replace'])
+    if main != 1 or sorted(replacements, key=lambda r: r['module']) != sorted(v3.inventory.CURRENT_REPLACEMENTS, key=lambda r: r['module']):
+        raise ValueError('missing root or exact two MVS replacements')
+    _equal(mvs, sorted(mvs, key=lambda r: r['Path']), 'MVS order')
+    _equal(receipt['qualification'], _QUALIFICATION, 'selected qualification')
+    packages = receipt['selected_local_packages']
+    _packages(packages, v3)
+    if receipt['package_records'] < len(packages):
+        raise ValueError('local package count exceeds total')
+    selected = receipt['selected_local']
+    observed = {}
+    for row in packages:
+        for field, names in row['fields'].items():
+            for name in names:
+                if name.startswith('/'):
+                    _absolute(name)
+                    if not name.startswith(source_root + '/'):
+                        # Generated testmain inputs may have a local package Dir
+                        # but cache-based absolute GoFiles. Require their separate
+                        # classification record rather than invent local authority.
+                        matches = [r for r in receipt['generated_testmain'] if
+                            r.get('package') == row['import_path'] and r.get('field') == field and
+                            type(r.get('path')) is str and
+                            name == receipt['environment']['GOCACHE'] + '/' + r.get('path', '')]
+                        if len(matches) != 1:
+                            raise ValueError('unclassified absolute local-package input')
+                        continue
+                    path = name[len(source_root) + 1:]
+                else:
+                    _relative(name)
+                    path = row['directory'] + '/' + name
+                observed.setdefault(path, set()).add(field)
+    for path, row in selected.items():
+        _relative(path)
+        _shape(row, ('sha256', 'fields'), 'selected local input')
+        _digest(row['sha256'])
+        _equal(row['sha256'], base['files'].get(path), 'selected input source hash')
+        _strings(row['fields'], sorted_unique=True)
+        if not row['fields'] or set(row['fields']) - set(v3.FIELDS):
+            raise ValueError('invalid selected input field names')
+        if set(row['fields']) & set(v3.FIELDS[4:7]) and path not in {p for paths in base['embed_inputs'].values() for p in paths}:
+            raise ValueError('selected embed outside declarations')
+    _equal({p: row['fields'] for p, row in selected.items()},
+           {p: sorted(fields) for p, fields in observed.items()}, 'selected package/input linkage')
+    coverage = receipt['production_coverage']
+    _shape(coverage, 'root_packages explicit_packages no_missing no_overlap all_variant_directories '
+           'other_contexts variant_directory_records'.split(), 'production coverage')
+    _equal(coverage['no_missing'], True, 'no missing coverage')
+    _equal(coverage['no_overlap'], True, 'no overlap coverage')
+    _equal(coverage['other_contexts'], 'static_only_not_executed', 'coverage qualification')
+    for key in ('root_packages', 'explicit_packages'):
+        _packages(coverage[key], v3, main_only=True)
+        _equal(coverage[key], sorted(coverage[key], key=_canonical), 'coverage package order')
+    _equal(coverage['root_packages'], coverage['explicit_packages'], 'root/explicit package coverage')
+    _equal(coverage['root_packages'], sorted([p for p in packages if p['module'] == 'tabmail'], key=_canonical),
+           'selected/root package linkage')
+    static = base['archive_boundary']
+    if not {p for p in selected if p.endswith('.go')}.issubset(static['production_go']):
+        raise ValueError('selected Go outside static production')
+    variants = coverage['variant_directory_records']
+    if type(variants) is not list:
+        raise ValueError('variant record array required')
+    observed = set()
+    directories = []
+    for row in variants:
+        _shape(row, 'directory import_path module fields selected_context other_variants'.split(), 'variant record')
+        _relative(row['directory'])
+        directories.append(row['directory'])
+        _text(row['import_path'])
+        _equal(row['module'], _local_module(row['directory'], v3), 'variant module')
+        if type(row['selected_context']) is not bool:
+            raise ValueError('malformed variant context')
+        _equal(row['other_variants'], 'static_only', 'variant qualification')
+        _field_map(row['fields'], ('GoFiles', 'CgoFiles', 'TestGoFiles', 'XTestGoFiles', 'IgnoredGoFiles'))
+        for paths in row['fields'].values():
+            if not paths:
+                raise ValueError('empty serialized variant field')
+            for path in paths:
+                _relative(path)
+                if not path.endswith('.go') or posixpath.dirname(path) != row['directory'] or path not in static['production_go']:
+                    raise ValueError('variant file outside static authority')
+                observed.add(path)
+    _equal(directories, static['production_variant_directories'], 'variant record directories')
+    _equal(sorted(observed), sorted(static['production_go']), 'variant file coverage')
+    bound_modules = {row['Path']: row for row in mvs}
+    for container, classification in (('generated_testmain', 'generated_testmain'),
+            ('external_modulecache_inputs', 'external_modulecache'), ('toolchain_source_inputs', 'toolchain_source'),
+            ('native_inputs', None)):
+        for row in receipt[container]:
+            actual = row.get('classification')
+            if classification is not None:
+                _equal(actual, classification, 'input classification')
+            if actual not in (None, 'generated_testmain', 'external_modulecache', 'toolchain_source') or (container == 'native_inputs' and actual == 'generated_testmain'):
+                raise ValueError('unknown input classification')
+            required = ['package', 'field', 'path', 'qualification']
+            if actual is not None:
+                required.append('classification')
+            if actual == 'external_modulecache':
+                required += ['module', 'version']
+            _shape(row, required, 'classified input')
+            _text(row['package'])
+            _relative(row['path'])
+            _equal(row['qualification'], 'unknown', 'input qualification')
+            if type(row['field']) is not str or row['field'] not in v3.FIELDS:
+                raise ValueError('unknown input field')
+            if container == 'native_inputs':
+                if row['field'] not in v3.v2.NATIVE_FIELDS:
+                    raise ValueError('non-native input in native records')
+            elif row['field'] in v3.v2.NATIVE_FIELDS:
+                raise ValueError('native input in non-native records')
+            if actual is None:
+                if container != 'native_inputs' or row['field'] not in selected.get(row['path'], {}).get('fields', []):
+                    raise ValueError('local native input outside selected inputs')
+            elif actual == 'generated_testmain':
+                if row['field'] != 'GoFiles' or not row['path'].endswith('-d') or not row['package'].endswith('.test'):
+                    raise ValueError('invalid generated testmain record')
+            elif actual == 'toolchain_source' and not row['path'].startswith('src/'):
+                raise ValueError('toolchain input outside src')
+            elif actual == 'external_modulecache':
+                bound = bound_modules.get(row['module']) if type(row['module']) is str else None
+                if not bound or 'Replace' in bound or row['version'] != bound.get('Version'):
+                    raise ValueError('external input outside MVS')
+
+
 def _receipt(receipt, context, source_root, producer, v3):
     _shape(receipt, _RECEIPT_FIELDS, 'receipt')
     if type(receipt['schema_version']) is not int or receipt['schema_version'] != 3 or receipt['policy'] != v3.POLICY:
         raise ValueError('mixed/incompatible selected receipt version')
     for key in ('incompatible_with', 'observation_order', 'boundary'):
         _text(receipt[key])
+    _equal(receipt['incompatible_with'], 'selected v1/v2 receipts never authorize v3; v3 never authorizes v2', 'receipt incompatibility')
+    _equal(receipt['observation_order'], 'env; unbound hydration; selected; MVS; coverage; selected; MVS; '
+        'repeated coverage (projected package equality; raw MVS equality)', 'receipt observation order')
+    _equal(receipt['boundary'], 'Metadata/static local bytes only; no product tests, cold build or runtime qualification', 'receipt boundary')
     for key in ('binding_sha256', 'observation_sha256'):
         _digest(receipt[key])
     for key in ('archive_static', 'production_coverage', 'environment', 'go_env',
@@ -196,17 +497,24 @@ def _receipt(receipt, context, source_root, producer, v3):
     static = base['archive_boundary']
     _shape(static, 'policy registry_sha256 modules archive_static archive_markers production_go '
            'production_variant_directories compile_roots explicit_production_roots budgets'.split(), 'archive boundary')
-    _text(static['policy'])
-    _digest(static['registry_sha256'])
+    _equal(static['policy'], 'r5_immutable_archive_boundary_v1', 'archive boundary policy')
+    _equal(static['registry_sha256'], v3.boundary.REGISTRY_SHA256, 'archive boundary registry')
     _hash_map(static['archive_static'])
     _hash_map(static['archive_markers'])
     _equal(static['archive_static'], base['archive_static'], 'boundary archive static')
     if type(static['modules']) is not list or any(type(m) is not str for m in static['modules']):
         raise ValueError('malformed archive module labels')
+    _equal(static['modules'], sorted(['go.mod', *[r['path'] + '/go.mod' for r in v3.inventory.CURRENT_REPLACEMENTS],
+                                     *static['archive_markers']]), 'archive module topology')
     _equal(static['compile_roots'], ['./...'], 'compile roots')
     _equal(static['explicit_production_roots'], ['./cmd/...', './internal/...'], 'explicit roots')
     _equal(static['budgets'], dict(entries=100000, depth=64, bytes=64 * 1024 * 1024), 'archive budgets')
     _hash_map(static['production_go'])
+    for path, digest in static['production_go'].items():
+        if not path.endswith('.go'):
+            raise ValueError('non-Go static production file')
+        _local_module(posixpath.dirname(path), v3)
+        _equal(digest, base['files'].get(path), 'static production/source hash')
     directories = static['production_variant_directories']
     if type(directories) is not list or not directories or any(type(d) is not str for d in directories):
         raise ValueError('invalid variant directories')
@@ -214,6 +522,8 @@ def _receipt(receipt, context, source_root, producer, v3):
         _relative(directory)
     _equal(directories, sorted({posixpath.dirname(p) for p in static['production_go']}), 'variant directories')
     _equal(receipt['production_coverage'].get('all_variant_directories'), directories, 'coverage directories')
+    _source_records(base, v3)
+    _selected_records(receipt, source_root, v3)
     selection = v3.selection_argv(context, ['./...', 'github.com/jhillyerd/enmime/v2/...', 'github.com/emersion/go-smtp/...'])
     root = v3.selection_argv(context, ['./...'])
     explicit = v3.selection_argv(context, ['./cmd/...', './internal/...'])
