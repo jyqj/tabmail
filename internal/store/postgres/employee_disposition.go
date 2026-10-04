@@ -16,12 +16,13 @@ import (
 	"time"
 )
 
-// Lock order: tenant -> departing user -> successor -> active jobs -> owned
-// mailboxes (ORDER BY id). Draft and upload writes take a user SHARE lock;
+// Lock order: tenant -> current caller -> plan (execute only) -> departing
+// user -> successor -> active jobs -> owned mailboxes (ORDER BY id).
+// Draft and upload writes take a user SHARE lock;
 // enqueue has the same database fence. A preview never reads or returns
 // private draft/message content.
 func offboardingSubjectsTx(ctx context.Context, tx pgx.Tx, a authz.Actor, target, successor uuid.UUID, allowInactiveTarget bool) (*models.User, error) {
-	if target == successor || target == a.ID || target == uuid.Nil || successor == uuid.Nil {
+	if target == successor || target == a.ID || successor == a.ID || target == uuid.Nil || successor == uuid.Nil {
 		return nil, app.BadRequest("distinct employee and successor required")
 	}
 	u, e := scanUser(tx.QueryRow(ctx, userSelect+` WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, target))
@@ -41,7 +42,11 @@ func offboardingSubjectsTx(ctx context.Context, tx pgx.Tx, a authz.Actor, target
 		return nil, app.Forbidden("cannot manage this employee")
 	}
 	var active bool
-	if e = tx.QueryRow(ctx, `SELECT is_active FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan(&active); errors.Is(e, pgx.ErrNoRows) {
+	var role models.UserRole
+	// Qualify custody recipients with the same member policy as departing
+	// employees. Read current role/activity under the existing successor fence;
+	// preview, execute and qualified receipt replay all use this validator.
+	if e = tx.QueryRow(ctx, `SELECT is_active,role FROM users WHERE tenant_id=$1 AND id=$2 FOR SHARE`, a.TenantID, successor).Scan(&active, &role); errors.Is(e, pgx.ErrNoRows) {
 		return nil, app.BadRequest("successor must be an active company employee")
 	}
 	if e != nil {
@@ -49,6 +54,9 @@ func offboardingSubjectsTx(ctx context.Context, tx pgx.Tx, a authz.Actor, target
 	}
 	if !active {
 		return nil, app.BadRequest("successor is inactive")
+	}
+	if !authz.CanManageTenantMember(a, a.TenantID, role) {
+		return nil, app.Forbidden("cannot manage this successor")
 	}
 	return u, nil
 }
