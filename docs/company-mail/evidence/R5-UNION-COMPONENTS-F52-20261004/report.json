@@ -599,6 +599,11 @@
       "correction": null,
       "retry_or_reroute": false,
       "draft_attempts": 0
+    },
+    {
+      "stage": "safe_publication_report_refresh",
+      "reason": "private report generator mkdir rejected already-existing owned evidence directory; no repository mutation and no new commit occurred",
+      "correction": "updated existing safe report directly; formal preparation unchanged"
     }
   ],
   "initial_capture_history": {
@@ -612,7 +617,7 @@
     },
     "selected-race": {
       "first_capture_sha256": "d07912441067ea65adec35d05782eb4ae7106ecc2667b33426e10b819e33b71b",
-      "retained_current_bytes_equal": false
+      "retained_current_bytes_equal": true
     }
   },
   "capture_context_decision": "The components runtime requires build_tag_sets=[[],[r5protocol]]; the handoff archive command only shows [r5protocol]. Used the unchanged runtime-required context; no policy/code edits.",
@@ -1176,8 +1181,8 @@
       "bytes": 159
     },
     "initial-capture-history.json": {
-      "sha256": "6f82fd90f6bfd62a38d34544133da2b2be19748b66684e9d8446c75a3e6a35a3",
-      "bytes": 490
+      "sha256": "516b648d749b750fe5580ca7a36038c074e9377f4b0fb6985353e587af2b0347",
+      "bytes": 489
     },
     "compile-postgres.log": {
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
@@ -1358,6 +1363,26 @@
     "rejected-runtime/runtime.json": {
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0
+    },
+    "publication-safe.json": {
+      "sha256": "be3ad6899378424541c1fa7dac29da3f495e70584f19239cb645f0aae10758d1",
+      "bytes": 203
+    },
+    "push.exit": {
+      "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+      "bytes": 2
+    },
+    "push.stdout": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "push.stderr": {
+      "sha256": "b042432e2a98936a85d328377507a0f63e49fc33ee800c978d94bf1ec7cde4e9",
+      "bytes": 374
+    },
+    "commit.log": {
+      "sha256": "18e9517d03a0b8116f4e8b074aec57166ff308097d189971203d2e0aaacc1078",
+      "bytes": 324
     }
   },
   "private_root": "/workspace/r5-components-f52-private",
@@ -1375,9 +1400,11 @@
     "deploy"
   ],
   "publication": {
+    "normal_git_push_exit": 0,
+    "published_commit": "73fe2e5dde1d9554b4960374515ffe74f2d64fd8",
+    "draft_created": false,
     "PR27_read": "Forbidden",
     "draft_attempts": 0,
-    "draft_created": false,
-    "no_retry_or_reroute": true
+    "retry_or_reroute": false
   }
 }
