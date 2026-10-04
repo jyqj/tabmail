@@ -1,7 +1,8 @@
 """Additive selected binding v3: full metadata binding and externally pinned observations.
 
-No formal consumer uses this API. The producer executable is pinned; compiler,
-native, generated and external module bytes remain unattested.
+No formal consumer uses this API. The metadata producer requires an absolute
+path and is byte-pinned; compiler, native, generated and external module bytes
+remain unattested.
 """
 from __future__ import annotations
 import datetime
@@ -142,11 +143,24 @@ def _verify_receipt(receipt, trusted_observation_sha256):
 
 
 def capture(root, go, *, cache, modulecache, context=None):
+    """Capture with an absolute metadata-producer path; no relative/PATH lookup.
+
+    Before/after hashes are not atomic against concurrent executable or symlink
+    changes. The producer path must remain trusted and quiescent during capture.
+    """
     with Retention('selection-v3') as diagnostics:
         return _capture(root, go, cache=cache, modulecache=modulecache, context=context, diagnostics=diagnostics)
 
 
+def _absolute_producer_path(go):
+    path = Path(go)
+    if not path.is_absolute():
+        raise ValueError('absolute path required for metadata producer executable')
+    return path
+
+
 def _capture(root, go, *, cache, modulecache, context, diagnostics):
+    go = _absolute_producer_path(go)
     context = CONTEXT if context is None else context
     inventory.validate_context(context, "selected")
     if context not in (CONTEXT, DEFAULT_CONTEXT):
@@ -264,6 +278,7 @@ def validate(receipt, root, go, *, cache, modulecache, trusted_observation_sha25
 
     trusted_observation_sha256 MUST come from an independent trusted complete
     capture/envelope channel, never from the receipt under validation.
+    go MUST be an absolute metadata-producer path, as required by capture.
     """
     _verify_receipt(receipt, trusted_observation_sha256)
     observed = capture(root,go,cache=cache,modulecache=modulecache,
@@ -287,7 +302,8 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root',type=Path,required=True)
-    parser.add_argument('--go',type=Path,required=True)
+    parser.add_argument('--go',type=Path,required=True,
+                        help='absolute path to the pinned metadata producer executable (no relative/PATH lookup)')
     parser.add_argument('--cache',type=Path,required=True)
     parser.add_argument('--modulecache',type=Path,required=True)
     parser.add_argument('--validate',type=Path)

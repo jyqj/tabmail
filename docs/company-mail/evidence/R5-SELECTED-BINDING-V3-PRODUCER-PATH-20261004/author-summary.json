@@ -1,0 +1,232 @@
+{
+  "base_commit": "52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73",
+  "repository": "jyqj/tabmail",
+  "verified_base_files": 56,
+  "partial_extract": true,
+  "changed_base_paths": [
+    "scripts/r5_selected_source_binding_v3.py"
+  ],
+  "new_deliverable_paths": [
+    "scripts/tests/r5_selected_binding_v3_producer_path_checks.py",
+    "docs/company-mail/R5-SELECTED-BINDING-V3-PRODUCER-PATH-20261004.md"
+  ],
+  "delivery_paths": [
+    {
+      "path": "scripts/r5_selected_source_binding_v3.py",
+      "sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+      "git_blob": "390f72d638a8cb3398492bab26c810802017115d",
+      "bytes": 18917
+    },
+    {
+      "path": "scripts/tests/r5_selected_binding_v3_producer_path_checks.py",
+      "sha256": "363a14ed36c917753fb81038fcca2cc00b23ce80b1a5a72227c8d66cc6c08b7a",
+      "git_blob": "46e701f8d3d5e56090640add3139c35cd5539ebc",
+      "bytes": 4194
+    },
+    {
+      "path": "docs/company-mail/R5-SELECTED-BINDING-V3-PRODUCER-PATH-20261004.md",
+      "sha256": "247c15ed0b6ef558dd7c709f60c2a51f9300fe8345685083dfb8d5af435babf4",
+      "git_blob": "c215356256d29096b21853b595b8bc010077ac3d",
+      "bytes": 7948
+    }
+  ],
+  "accepted_runs": [
+    {
+      "log": "fixed-pure-tests.log",
+      "passed": 56,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "external_subprocess_calls": 0,
+      "private_log": {
+        "bytes": 9190,
+        "sha256": "8bbafa7f8895cb36371abb93c249607347f5529d0cd480463c456316644e4233"
+      },
+      "check_ids": [
+        "test_absolute_capture_keeps_all_twelve_commands_and_pin (r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_absolute_capture_keeps_all_twelve_commands_and_pin)",
+        "test_bare_names_reject_before_source_or_command (r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_bare_names_reject_before_source_or_command)",
+        "test_cli_help_explains_absolute_path_requirement (r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_cli_help_explains_absolute_path_requirement)",
+        "test_cli_rejects_bare_and_relative_before_source_or_command (r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_cli_rejects_bare_and_relative_before_source_or_command)",
+        "test_production_sha256_pin_is_unchanged (r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_production_sha256_pin_is_unchanged)",
+        "test_relative_paths_reject_before_source_or_command (r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_relative_paths_reject_before_source_or_command)",
+        "test_validate_rejects_nonabsolute_after_valid_external_pin (r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_validate_rejects_nonabsolute_after_valid_external_pin)",
+        "test_context_and_unapproved_producer_reject_before_command (r5_selected_source_binding_v3_checks.AuthorityTests.test_context_and_unapproved_producer_reject_before_command)",
+        "test_v3_reuses_unchanged_v2_authority_predicates (r5_selected_source_binding_v3_checks.AuthorityTests.test_v3_reuses_unchanged_v2_authority_predicates)",
+        "test_v3_source_archive_package_coverage_and_replacement_rejections (r5_selected_source_binding_v3_checks.AuthorityTests.test_v3_source_archive_package_coverage_and_replacement_rejections)",
+        "test_all_package_roles_projected_including_hydration_and_repetitions (r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_all_package_roles_projected_including_hydration_and_repetitions)",
+        "test_producer_failure_interface_and_timeout_preserved (r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_producer_failure_interface_and_timeout_preserved)",
+        "test_retained_mutation_in_each_repeated_role_rejected (r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_retained_mutation_in_each_repeated_role_rejected)",
+        "test_source_before_after_drift_rejected (r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_source_before_after_drift_rejected)",
+        "test_unknown_or_diagnostic_type_in_every_package_role_rejected (r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_unknown_or_diagnostic_type_in_every_package_role_rejected)",
+        "test_external_pin_required_and_resigning_rejected (r5_selected_source_binding_v3_checks.EnvelopeTests.test_external_pin_required_and_resigning_rejected)",
+        "test_observation_change_can_preserve_binding_and_stays_separately_pinned (r5_selected_source_binding_v3_checks.EnvelopeTests.test_observation_change_can_preserve_binding_and_stays_separately_pinned)",
+        "test_validation_fresh_binding_mismatch_and_external_pin_precedes_execution (r5_selected_source_binding_v3_checks.EnvelopeTests.test_validation_fresh_binding_mismatch_and_external_pin_precedes_execution)",
+        "test_version_rejection_before_capture_no_fallback (r5_selected_source_binding_v3_checks.EnvelopeTests.test_version_rejection_before_capture_no_fallback)",
+        "test_diagnostic_values_and_presence_equal_binding_different_observation (r5_selected_source_binding_v3_checks.ProjectionTests.test_diagnostic_values_and_presence_equal_binding_different_observation)",
+        "test_duplicates_nonfinite_and_malformed_streams (r5_selected_source_binding_v3_checks.ProjectionTests.test_duplicates_nonfinite_and_malformed_streams)",
+        "test_error_serialization_requires_complete_records (r5_selected_source_binding_v3_checks.ProjectionTests.test_error_serialization_requires_complete_records)",
+        "test_every_retained_field_and_nested_leaf_is_bound (r5_selected_source_binding_v3_checks.ProjectionTests.test_every_retained_field_and_nested_leaf_is_bound)",
+        "test_invalid_types_for_every_registry_field (r5_selected_source_binding_v3_checks.ProjectionTests.test_invalid_types_for_every_registry_field)",
+        "test_order_arrays_multiplicity_and_presence_bound (r5_selected_source_binding_v3_checks.ProjectionTests.test_order_arrays_multiplicity_and_presence_bound)",
+        "test_recursive_module_field_presence_bound (r5_selected_source_binding_v3_checks.ProjectionTests.test_recursive_module_field_presence_bound)",
+        "test_registry_source_shape_and_time (r5_selected_source_binding_v3_checks.ProjectionTests.test_registry_source_shape_and_time)",
+        "test_unknown_fields_in_all_nested_domains_fail_closed (r5_selected_source_binding_v3_checks.ProjectionTests.test_unknown_fields_in_all_nested_domains_fail_closed)",
+        "test_altered_envelope_rejects_before_capture (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_altered_envelope_rejects_before_capture)",
+        "test_capture_failure_object_is_unchanged (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_capture_failure_object_is_unchanged)",
+        "test_constructor_failure_keeps_binding_mismatch (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_constructor_failure_keeps_binding_mismatch)",
+        "test_context_cleanup_failure_keeps_binding_mismatch (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_context_cleanup_failure_keeps_binding_mismatch)",
+        "test_disk_full_keeps_binding_mismatch (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_disk_full_keeps_binding_mismatch)",
+        "test_matching_binding_keeps_normal_success (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_matching_binding_keeps_normal_success)",
+        "test_retention_limit_keeps_binding_mismatch (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_retention_limit_keeps_binding_mismatch)",
+        "test_successful_retention_records_observed_then_rejects (r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_successful_retention_records_observed_then_rejects)",
+        "test_coverage_omission_fork_mismatch_unknown_root (test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_coverage_omission_fork_mismatch_unknown_root)",
+        "test_cross_identity_rejected_before_commands (test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_cross_identity_rejected_before_commands)",
+        "test_metadata_never_authorizes_private_archive_or_unknown_body (test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_metadata_never_authorizes_private_archive_or_unknown_body)",
+        "test_selected_archive_package_rejected (test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_selected_archive_package_rejected)",
+        "test_unsupported_context (test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_unsupported_context)",
+        "test_archive_extra_controls_and_files (test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_extra_controls_and_files)",
+        "test_archive_family_extra_capsule_and_ancestor_symlink (test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_family_extra_capsule_and_ancestor_symlink)",
+        "test_budget_and_unavailable_metadata_fail_closed (test_r5_archive_boundary.ArchiveBoundaryTests.test_budget_and_unavailable_metadata_fail_closed)",
+        "test_descriptor_second_stat_replacement (test_r5_archive_boundary.ArchiveBoundaryTests.test_descriptor_second_stat_replacement)",
+        "test_every_historical_file_byte_delete_rename (test_r5_archive_boundary.ArchiveBoundaryTests.test_every_historical_file_byte_delete_rename)",
+        "test_exact_baseline_hashes_and_six_modules (test_r5_archive_boundary.ArchiveBoundaryTests.test_exact_baseline_hashes_and_six_modules)",
+        "test_import_embed_generate_archive_rejected (test_r5_archive_boundary.ArchiveBoundaryTests.test_import_embed_generate_archive_rejected)",
+        "test_marker_bytes_value_case_directives (test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_bytes_value_case_directives)",
+        "test_marker_deletion_and_module_in_all_roots (test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_deletion_and_module_in_all_roots)",
+        "test_production_all_variants_change_static_domain (test_r5_archive_boundary.ArchiveBoundaryTests.test_production_all_variants_change_static_domain)",
+        "test_read_leaf_replacement_never_opens_fifo_body (test_r5_archive_boundary.ArchiveBoundaryTests.test_read_leaf_replacement_never_opens_fifo_body)",
+        "test_registry_duplicate_traversal_forgery (test_r5_archive_boundary.ArchiveBoundaryTests.test_registry_duplicate_traversal_forgery)",
+        "test_symlink_ancestors_fifo_and_metadata_only (test_r5_archive_boundary.ArchiveBoundaryTests.test_symlink_ancestors_fifo_and_metadata_only)",
+        "test_third_replace (test_r5_archive_boundary.ArchiveBoundaryTests.test_third_replace)",
+        "test_unknown_root_and_ignored_go_not_hidden (test_r5_archive_boundary.ArchiveBoundaryTests.test_unknown_root_and_ignored_go_not_hidden)"
+      ]
+    },
+    {
+      "log": "fixed-independent16.log",
+      "passed": 16,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "external_subprocess_calls": 0,
+      "private_log": {
+        "bytes": 2528,
+        "sha256": "a2c2b06af8f9d4f2c8b197624115fa64006f4619e62ccb1e5844fd15c14a974f"
+      },
+      "check_ids": [
+        "test_duplicate_aliases_and_bad_nested_types (independent.IndependentSchemaProjectionTests.test_duplicate_aliases_and_bad_nested_types)",
+        "test_every_official_field_presence_is_bound_or_rejected (independent.IndependentSchemaProjectionTests.test_every_official_field_presence_is_bound_or_rejected)",
+        "test_exact_official_fields_and_error_marshaler (independent.IndependentSchemaProjectionTests.test_exact_official_fields_and_error_marshaler)",
+        "test_seeded_projection_properties (independent.IndependentSchemaProjectionTests.test_seeded_projection_properties)",
+        "test_diagnostics_only_changes_preserve_binding_not_observation (independent.IndependentCaptureTests.test_diagnostics_only_changes_preserve_binding_not_observation)",
+        "test_each_repeated_package_omission_rejects (independent.IndependentCaptureTests.test_each_repeated_package_omission_rejects)",
+        "test_every_package_command_unknowns_and_types_reject (independent.IndependentCaptureTests.test_every_package_command_unknowns_and_types_reject)",
+        "test_exact_twelve_command_sequence_and_qualifications (independent.IndependentCaptureTests.test_exact_twelve_command_sequence_and_qualifications)",
+        "test_mvs_raw_whitespace_order_presence_and_types_reject (independent.IndependentCaptureTests.test_mvs_raw_whitespace_order_presence_and_types_reject)",
+        "test_producer_bytes_after_commands_reject (independent.IndependentCaptureTests.test_producer_bytes_after_commands_reject)",
+        "test_schema_helper_and_check_source_drift_reject (independent.IndependentCaptureTests.test_schema_helper_and_check_source_drift_reject)",
+        "test_every_envelope_leaf_resigned_cannot_pass_original_pin (independent.IndependentPinTests.test_every_envelope_leaf_resigned_cannot_pass_original_pin)",
+        "test_matching_binding_returns_fresh_sealed_observation (independent.IndependentPinTests.test_matching_binding_returns_fresh_sealed_observation)",
+        "test_pin_origin_cannot_be_inferred_by_api (independent.IndependentPinTests.test_pin_origin_cannot_be_inferred_by_api)",
+        "test_receipt_and_command_presence_tamper_rejects_pre_execution (independent.IndependentPinTests.test_receipt_and_command_presence_tamper_rejects_pre_execution)",
+        "test_rejection_retention_enter_failure_preserves_primary (independent.IndependentPinTests.test_rejection_retention_enter_failure_preserves_primary)"
+      ]
+    },
+    {
+      "log": "fixed-independent-absolute-contract.log",
+      "passed": 3,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "external_subprocess_calls": 0,
+      "private_log": {
+        "bytes": 716,
+        "sha256": "67a6c0eda1561a019c0c4b84e7eca4b78ffea34fb6324192b1ff45253d09edc4"
+      },
+      "check_ids": [
+        "test_absolute_string_and_path_keep_all_twelve_targets_identical (absolute_contract.AbsoluteOnlyProducerContract.test_absolute_string_and_path_keep_all_twelve_targets_identical)",
+        "test_nonabsolute_capture_rejects_before_source_or_command (absolute_contract.AbsoluteOnlyProducerContract.test_nonabsolute_capture_rejects_before_source_or_command)",
+        "test_nonabsolute_valid_pin_validate_rejects_before_source_or_command (absolute_contract.AbsoluteOnlyProducerContract.test_nonabsolute_valid_pin_validate_rejects_before_source_or_command)"
+      ]
+    }
+  ],
+  "total_accepted_outer_checks": 75,
+  "retained_nonpassing_evidence": [
+    {
+      "log": "producer-path-red-baseline.log",
+      "kind": "new_seven_test_suite_on_exact_base",
+      "outer_tests": 7,
+      "failures": 2,
+      "errors": 12,
+      "private_log": {
+        "bytes": 32946,
+        "sha256": "029707ded64f62a7915f08b474e078d1452e85c62556eabdc6f8c9c5812a4097"
+      }
+    },
+    {
+      "log": "R5-V3-INDEPENDENT-ROOT-20261004-independent-tests.log",
+      "kind": "frozen_original_review",
+      "outer_tests": 18,
+      "passed": 16,
+      "failed_methods": 2,
+      "private_log": {
+        "bytes": 4564,
+        "sha256": "f0a7ad34c9c8393e7663f18967df294a57fb2a21174a08276076fdf3df5de33b"
+      }
+    },
+    {
+      "log": "independent-absolute-contract-red.log",
+      "kind": "independent_absolute_only_policy_on_exact_base",
+      "outer_tests": 3,
+      "passed_methods": 1,
+      "failed_methods": 2,
+      "subtest_failure_events": 7,
+      "private_log": {
+        "bytes": 7172,
+        "sha256": "ba673a79cafa9417857cb9fca6ffacb49e609f55b7aae87d335bd4bd0f53fc50"
+      }
+    },
+    {
+      "log": "initial-import-attempt.log",
+      "kind": "unintended_module_import_command",
+      "command": [
+        "/usr/bin/go",
+        "env",
+        "GOCACHE"
+      ],
+      "exit": 1,
+      "stderr": "Go: Unknown option: env",
+      "tests_started": 0,
+      "private_log": {
+        "bytes": 2265,
+        "sha256": "29b6db092b66e320f909e3e5c9701f6589702e9787f23b31871ff953b6edc8b0"
+      }
+    },
+    {
+      "log": "extended-pure-partial-extract.log",
+      "kind": "missing_fixture_in_partial_extract",
+      "outer_tests": 72,
+      "passed": 71,
+      "failed": 1,
+      "missing": "docs/company-mail/evidence/R5-BENCHMARK-DATASETS.json",
+      "external_subprocess_calls": 0,
+      "private_log": {
+        "bytes": 13722,
+        "sha256": "0c0960e1dc5acf7bce44c0b2de77089e008af18c5e10701fdbe11cee4934144e"
+      }
+    }
+  ],
+  "limits": [
+    "Not atomic against concurrent executable/parent/symlink change and restore",
+    "No compiler/native/generated/external-module bytes attested",
+    "No valid Go capture, compilation, product test, service, database or formal runtime qualification",
+    "No v2/schema/catalog/discovery/formal consumer changes",
+    "No GitHub write, commit, push, merge or deploy"
+  ],
+  "publication": "new stacked branch authorized after bounded independent acceptance; not a merge/deploy/CI qualification",
+  "independent_acceptance": {
+    "report": "R5-V3-INDEPENDENT-ROOT-20261004-delta-review.md",
+    "tests": 82,
+    "os_subprocess_attempts": 0,
+    "test_summary": "R5-V3-INDEPENDENT-ROOT-20261004-delta-test-summary.json"
+  }
+}
