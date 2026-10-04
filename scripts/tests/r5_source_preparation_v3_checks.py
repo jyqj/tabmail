@@ -212,6 +212,48 @@ with tempfile.TemporaryDirectory(prefix='r5-v3-preparation-pure-') as temporary:
             e['R5_SOURCE_PREPARATION_SHA256']=p.digest(path.read_bytes())
             rejects(lambda:owner.validate(data,e))
         check('v3-strict-preparation-schema-'+kind,schema)
+    for kind in ('missing-run','missing-pass','wrong-test','nonzero'):
+        def wire_failure(kind=kind):
+            owner=fresh('wire-failure-'+kind);original=owner.execute
+            def execute(*args,**kwargs):
+                run,e=original(*args,**kwargs)
+                if kind=='missing-run':run.stdout=json.dumps(dict(Action='pass',Test=p.TEST_NAME)).encode()
+                elif kind=='missing-pass':run.stdout=json.dumps(dict(Action='run',Test=p.TEST_NAME)).encode()
+                elif kind=='wrong-test':run.stdout=run.stdout.replace(p.TEST_NAME.encode(),b'ForeignTest')
+                else:run.returncode=1
+                return run,e
+            owner.execute=execute
+            rejects(owner.prepare)
+            assert not (owner.output/'preparation.json').exists()
+        check('exact-wire-test-publication-reject-'+kind,wire_failure)
+    for kind in ('extra','symlink','tampered','extra-directory'):
+        def typescript(kind=kind):
+            directory=base/('typescript-'+kind);target=directory/'web/node_modules/typescript'
+            target.mkdir(parents=True);(target/'index.js').write_bytes(b'locked')
+            expected={'index.js':b'locked'};p.verify_typescript(directory,expected)
+            if kind=='extra':(target/'foreign.js').write_bytes(b'foreign')
+            elif kind=='symlink':(target/'index.js').unlink();(target/'index.js').symlink_to('/foreign')
+            elif kind=='tampered':(target/'index.js').write_bytes(b'foreign')
+            else:(target/'foreign').mkdir()
+            rejects(lambda:p.verify_typescript(directory,expected))
+        check('preserved-typescript-boundary-'+kind,typescript)
+    for kind in ('wrong-source','stale-fixture','binary-tamper','midflight-inode'):
+        def fd_boundary(kind=kind):
+            directory=base/('fd-'+kind);directory.mkdir()
+            binary=directory/'ordinary-receipt.test';binary.write_bytes(b'original')
+            fixture=directory/'wire.json';pin=p.digest(binary.read_bytes())
+            if kind=='stale-fixture':fixture.write_bytes(b'old')
+            elif kind=='binary-tamper':binary.write_bytes(b'foreign')
+            def process(argv,**kwargs):
+                assert Path(argv[6]).read_bytes()==b'original'
+                binary.unlink();binary.write_bytes(b'foreign')
+                assert Path(argv[6]).read_bytes()==b'original'
+                return p.subprocess.CompletedProcess(argv,0,b'',b'')
+            with mock.patch.object(p,'source_identity',return_value=('f'*40 if kind=='wrong-source' else fixtures.COMMIT)), \
+                 mock.patch.object(p.subprocess,'run',side_effect=process) as execution:
+                rejects(lambda:p.execute_binary(directory,'/controller/tools/go',binary,pin,fixtures.COMMIT,fixture,{}))
+                if kind!='midflight-inode':execution.assert_not_called()
+        check('preserved-linux-fd-boundary-'+kind,fd_boundary)
     def runner_dispatch(version):
         root=base/('runner-source-'+str(version));root.mkdir()
         out=base/('runner-'+str(version)+'.json')
