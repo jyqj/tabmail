@@ -1,0 +1,97 @@
+{
+  "review_source": "9510bfd85264e92191cad277ef7187cd4fad8abf",
+  "production_base": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "verdict": "PASS_SOURCE_BOUNDED_FOCUSED_PE_AND_REAL_SSE",
+  "formal_43_26_46": "NOTRUN",
+  "historical_formal": {
+    "pass": 17,
+    "fail": 9,
+    "missing": 17,
+    "qualified": 0,
+    "status": "REJECTED_PRESERVED"
+  },
+  "integration_readiness": "PE side ready to pair with a separately independently accepted LF change; combined PE+LF qualification not run or asserted",
+  "focused_real_PE_variants": 8,
+  "go_focused_package_seconds": 49.129,
+  "independent_unmount_seconds": 1.717,
+  "independent_socket_oracle_tests_pass": 18,
+  "author_oracle_tests_pass": 8,
+  "mutation_controls": [
+    {
+      "control": "raw_loss",
+      "case": "PE01",
+      "exit_code": 1,
+      "expected_assertion_rejected": true
+    },
+    {
+      "control": "accepted_cas",
+      "case": "PE03",
+      "exit_code": 1,
+      "expected_assertion_rejected": true
+    },
+    {
+      "control": "wrong_event",
+      "case": "PE03",
+      "exit_code": 1,
+      "expected_assertion_rejected": true
+    }
+  ],
+  "cleanup": {
+    "owned_fixture_databases": 0,
+    "owned_fixture_backends": 0,
+    "owned_HTTP_listeners": "asserted closed",
+    "owned_cluster": "fast stop succeeded"
+  },
+  "retained": [
+    {
+      "path": "docs/company-mail/evidence/R5-PROTOCOL-CASES.json",
+      "sha256": "f46d58c45dbf66e48eb1e379fd019aa5c02dc153f004548a69752f45dc52b1b7",
+      "identical_to": "f875672dea2b68fdec9e0b986f4863724da5d7ba"
+    },
+    {
+      "path": "docs/company-mail/evidence/R5-FORMAL-COMPONENTS-F875-20261004/report.json",
+      "sha256": "7dbcc94223f82606af4a646d79fb8231e677102ff71a33c7b96402c893d3c896",
+      "identical_to": "4b9b5d4"
+    },
+    {
+      "path": "go.mod",
+      "sha256": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+      "identical_to": "f875672dea2b68fdec9e0b986f4863724da5d7ba"
+    },
+    {
+      "path": "go.sum",
+      "sha256": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+      "identical_to": "f875672dea2b68fdec9e0b986f4863724da5d7ba"
+    },
+    {
+      "path": "web/package-lock.json",
+      "sha256": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3",
+      "identical_to": "f875672dea2b68fdec9e0b986f4863724da5d7ba"
+    },
+    {
+      "path": "web/vitest.r5protocol.config.ts",
+      "sha256": "0b2aa438a94a3c61e561a91abffed63f1a49e757768ff854943aa59cdbeb1e91",
+      "identical_to": "f875672dea2b68fdec9e0b986f4863724da5d7ba"
+    },
+    {
+      "path": "scripts/check_r5_protocol.py",
+      "sha256": "8673f071517ee1d59526f89a38a7df8f29a7da2d63e7cc10789d2df0e7e94dba",
+      "identical_to": "f875672dea2b68fdec9e0b986f4863724da5d7ba"
+    }
+  ],
+  "private_evidence_hashes": {
+    "focused.log": "2dc2c33dffe759a6dc96fca2f95233ada6559692734b4b083e23d60b10003537",
+    "negative-final.log": "31aa5f951c06cb4a143e23a622ce5ca4bd26236e414e289ed418cbd7a38b00f9",
+    "unmount.log": "2ec6ae05fe1d05d4d8f7c9b33b20208c2c090840e8038cda86d4546db7b236f2",
+    "mutations.log": "1ad6bdeae0190d103412935258964ff845cb778cde650746174c1dfe38b2460b",
+    "cleanup.log": "3c9b144ae3b21b819763f40e890343e569144d8fa857c6d42f9eafa65e69a767",
+    "types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "lint.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "qualification_limits": [
+    "local installed Node24.19.0/Vitest4.1.11 tree; no fresh official-lock runtime receipt",
+    "no formal whole catalog, wholePG, audit batch, default675, sharedDB imports, actual users/email, or central closure",
+    "LF independent pair not provided or reviewed in this delegation",
+    "synthetic loopback bytes and oracle mutants are negative controls only; business qualification uses real owned PG/router/shipping UI"
+  ]
+}
