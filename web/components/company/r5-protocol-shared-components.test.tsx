@@ -16,11 +16,13 @@ import { ReceiptFolder } from "@/features/mail/components/receipt-folder";
 import { Compose } from "@/components/company/compose";
 import { executeOffboarding } from "@/features/company/api";
 import { company, type MailDraft, type WorkMailbox } from "@/lib/company";
-import { listUsers, getUserPermission, updateUser, updatePermissionProfile, listPermissionProfiles, setUserPermissionOverride, deleteUserPermissionOverride } from "@/lib/api";
-import { validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
+import { listUsers, updateUser, updatePermissionProfile, listPermissionProfiles } from "@/lib/api";
+import { getUserPermissionEditor, patchUserPermissionEditor } from "@/lib/api/permissions";
+import { validatePermissionEditorCommand, validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
 import { parseReceiptListResponse, parseReceiptResponse, type OrdinaryReceipt, type ReceiptCounts, type RetryBlockReason } from "@/lib/receipt-types";
 import { installSession } from "@/lib/session";
 import type { AuthUser } from "@/lib/types";
+import { assertPermissionIntent, resetPermissionPatch } from "./r5-permission-contract-oracle";
 import { expectedReceiptCapabilities, receiptCapabilitiesMatch, receiptCountsMatch, type ReceiptSurface } from "./r5-receipt-contract-oracle";
 
 // Host identity is supplied; API functions, session, SWR, controls, fetch,
@@ -251,6 +253,7 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     return;
   }
   if (id === "PE03") {
+    if (fixture.input.stale_revision !== true || fixture.input.patch_contains_old_security_fields !== true) throw new Error("Shared old-revision/security control input missing");
     if (!fixture.profile_id || !fixture.profile_name) throw new Error("Actual profile fixture missing");
     render(<SidebarProvider><PermissionsPage /></SidebarProvider>);
     const dialog = await rowDialog(fixture.profile_name, "Edit");
@@ -259,16 +262,44 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     const observed = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
     if (!observed) throw new Error("Actual profile GET omitted the fixture profile");
     validateObservedPermissionProfile(observed);
-    const revoked = (await updatePermissionProfile(fixture.profile_id, { expected_revision: observed.revision, fields: { can_send: false } })).data;
-    expect(revoked.can_send).toBe(false);
-    expect(revoked.revision).not.toBe(observed.revision);
+    expect(observed.can_send).toBe(true);
     const input = within(dialog).getByPlaceholderText("Profile description (optional)");
     await userEvent.clear(input); await userEvent.type(input, "Shared stale description");
-    await userEvent.click(within(dialog).getByRole("button", { name: /^Save$/ }));
+    const initialSave = within(dialog).getByRole("button", { name: /^Save$/ });
+    expect(initialSave).toBeEnabled();
+    expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
+    const revoked = (await updatePermissionProfile(fixture.profile_id, { expected_revision: observed.revision, fields: { can_send: false } })).data;
+    expect(revoked.can_send).toBe(false);
+    expect(BigInt(revoked.revision)).toBeGreaterThan(BigInt(observed.revision));
+    // UI control: an invalidated dirty shipping editor must block Save.
+    // HTTP CAS is an independent real request below, not a UI request.
+    const save = within(dialog).getByRole("button", { name: /^Save$/ });
+    await within(dialog).findByRole("alert");
+    expect(save).toBeDisabled();
+    expect(input).toHaveValue("Shared stale description");
+    expect(within(dialog).getAllByRole("switch")[0]).toHaveAttribute("aria-checked", "true");
+    await userEvent.click(save);
+    expect(calls.filter(c => c.method === "PATCH" && c.path.endsWith(fixture.profile_id!))).toHaveLength(1);
+    const afterUI = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
+    if (afterUI?.can_send) target("R5_PROTOCOL_UI_TARGET_PE03_STALE", "actual stale shipping editor restored revoked sending");
+    expect(afterUI?.revision).toBe(revoked.revision);
+    expect(afterUI?.description).toBe(observed.description);
+    // Catalog HTTP control: explicit old revision and old security fields.
+    // This second PATCH is issued by the test API client, never by Save.
+    await expect(updatePermissionProfile(fixture.profile_id, {
+      expected_revision: observed.revision,
+      fields: { description: "Shared stale description", can_send: observed.can_send,
+        daily_send_quota: observed.daily_send_quota, daily_receive_quota: observed.daily_receive_quota,
+        max_mailboxes: observed.max_mailboxes, max_domains: observed.max_domains,
+        allowed_zone_ids: observed.allowed_zone_ids ?? [], can_create_domains: observed.can_create_domains,
+        can_create_routes: observed.can_create_routes, can_create_api_keys: observed.can_create_api_keys },
+    })).rejects.toMatchObject({ error: { code: "CONFLICT" } });
     await waitFor(() => expect(calls.filter(c => c.method === "PATCH" && c.path.endsWith(fixture.profile_id!)).length).toBe(2));
     const after = (await listPermissionProfiles()).data.find(p => p.id === fixture.profile_id);
     if (after?.can_send) target("R5_PROTOCOL_UI_TARGET_PE03_STALE", "actual stale shipping editor restored revoked sending");
     expect(calls.filter(c => c.method === "PATCH" && c.path.endsWith(fixture.profile_id!)).at(-1)?.status).toBe(409);
+    expect(after?.revision).toBe(revoked.revision);
+    expect(after?.description).toBe(observed.description);
     return;
   }
   if (id === "PE05") {
@@ -288,32 +319,87 @@ test(`R5 protocol component ${fixture.case_id} ${fixture.variant} secure behavio
     return;
   }
   if (["PE01", "PE02", "PE04"].includes(id)) {
-    const before = (await getUserPermission(fixture.employee_id)).data;
+    let before = (await getUserPermissionEditor(fixture.employee_id)).data;
+    // The Go seed deliberately stores false. To qualify an explicit changed
+    // false intent (rather than an unchanged false omission), prepare true
+    // through a successful current CAS before opening the shipping editor.
+    if (id === "PE02" && fixture.variant === "false") {
+      const prepared = (await patchUserPermissionEditor(fixture.employee_id, {
+        expected_revision: before.revision, patch: { can_send: true },
+      })).data;
+      expect(BigInt(prepared.revision.user_revision)).toBeGreaterThan(BigInt(before.revision.user_revision));
+      before = (await getUserPermissionEditor(fixture.employee_id)).data;
+      expect(before.overrides?.can_send).toBe(true);
+    }
     render(<SidebarProvider><UsersPage /></SidebarProvider>);
     const dialog = await rowDialog(fixture.employee_email, "Permissions");
     await waitFor(() => expect(dialog.querySelectorAll('[data-slot="skeleton"]')).toHaveLength(0));
     const quota = within(dialog).getAllByRole("spinbutton")[0];
     const switchControl = within(dialog).getAllByRole("switch")[0];
-    if (id === "PE01" || fixture.variant === "omitted") { await userEvent.clear(quota); await userEvent.type(quota, String((fixture.input.patch as { daily_send_quota?: number } | undefined)?.daily_send_quota ?? 25)); }
-    else if (id === "PE04") { await userEvent.click(switchControl); await deleteUserPermissionOverride(fixture.employee_id); await setUserPermissionOverride(fixture.employee_id, { can_send: false }); }
-    else if (fixture.variant === "false" || fixture.variant === "null") {
-      await userEvent.click(switchControl); await userEvent.click(switchControl);
-      if (fixture.variant === "null") { const group = switchControl.parentElement!; const reset = group.querySelector<HTMLButtonElement>('button[data-slot="button"]'); if (!reset) throw new Error("Actual inheritance reset control missing"); await userEvent.click(reset); }
+    const editorPath = `/api/v1/admin/users/${fixture.employee_id}/permission-editor`;
+    const writes = () => calls.filter(c => c.method === "PATCH" && c.path === editorPath);
+    if (id === "PE04") {
+      if (fixture.input.old_revision !== true || fixture.input.override_recreated_or_profile_reassigned !== true) throw new Error("Shared ABA old revision/recreation input missing");
+      // Dirty stale editor tries to grant sending. Independent HTTP controls
+      // reset/recreate raw restrictions using each successful returned version.
+      await userEvent.click(switchControl);
+      const save = within(dialog).getByRole("button", { name: /^Save Overrides$/ });
+      expect(save).toBeEnabled();
+      expect(within(dialog).queryByRole("alert")).not.toBeInTheDocument();
+      const reset = (await patchUserPermissionEditor(fixture.employee_id, {
+        expected_revision: before.revision, patch: resetPermissionPatch,
+      })).data;
+      expect(BigInt(reset.revision.user_revision)).toBeGreaterThan(BigInt(before.revision.user_revision));
+      expect(reset.overrides === null || reset.overrides.can_send === null).toBe(true);
+      const restored = (await patchUserPermissionEditor(fixture.employee_id, {
+        expected_revision: reset.revision,
+        patch: { can_send: false, daily_send_quota: 19, domain_access: { mode: "list", zone_ids: [fixture.zone_id] } },
+      })).data;
+      expect(BigInt(restored.revision.user_revision)).toBeGreaterThan(BigInt(reset.revision.user_revision));
+      expect(restored.overrides?.can_send).toBe(false);
+      expect(restored.effective.can_send).toBe(false);
+      await within(dialog).findByRole("alert");
+      expect(save).toBeDisabled();
+      expect(switchControl).toHaveAttribute("aria-checked", "true");
+      const prior = writes().length;
+      await userEvent.click(save);
+      expect(writes()).toHaveLength(prior);
+      const afterUI = (await getUserPermissionEditor(fixture.employee_id)).data;
+      if (afterUI.effective.can_send || afterUI.overrides?.can_send !== false) target("R5_PROTOCOL_UI_TARGET_PE04_ABA", "actual stale shipping editor restored sending after reset/recreation");
+      expect(afterUI.revision).toEqual(restored.revision);
+      expect(afterUI.overrides).toEqual(restored.overrides);
+      // Separately labelled direct old compound-revision CAS, not a UI Save.
+      await expect(patchUserPermissionEditor(fixture.employee_id, {
+        expected_revision: before.revision, patch: { can_send: true },
+      })).rejects.toMatchObject({ error: { code: "CONFLICT" } });
+      expect(writes()).toHaveLength(prior + 1);
+      expect(writes().at(-1)?.status).toBe(409);
+      const after = (await getUserPermissionEditor(fixture.employee_id)).data;
+      if (after.effective.can_send || after.overrides?.can_send !== false) target("R5_PROTOCOL_UI_TARGET_PE04_ABA", "old editor/control restored sending after versioned reset and recreation");
+      expect(after.revision).toEqual(restored.revision);
+      expect(after.overrides).toEqual(restored.overrides);
+      return;
+    }
+    if (id === "PE01" || fixture.variant === "omitted") {
+      await userEvent.clear(quota); await userEvent.type(quota, String((fixture.input.patch as { daily_send_quota?: number } | undefined)?.daily_send_quota ?? 25));
+    } else if (fixture.variant === "false") await userEvent.click(switchControl);
+    else if (fixture.variant === "null") {
+      const reset = switchControl.parentElement!.querySelector<HTMLButtonElement>('button[data-slot="button"]');
+      if (!reset) throw new Error("Actual inheritance reset control missing");
+      await userEvent.click(reset);
     } else if (fixture.variant === "0") { await userEvent.clear(quota); await userEvent.type(quota, "0"); }
     else if (fixture.variant === "[]") await userEvent.click(within(dialog).getByRole("button", { name: /^All$/ }));
     else throw new Error("Unknown permission intent variant");
+    const prior = writes().length;
     await userEvent.click(within(dialog).getByRole("button", { name: /^Save Overrides$/ }));
-    await waitFor(() => expect(calls.some(c => c.method === "PUT" && c.path.endsWith(`${fixture.employee_id}/permissions`))).toBe(true));
-    const mutation = calls.filter(c => c.method === "PUT" && c.path.endsWith(`${fixture.employee_id}/permissions`)).at(-1)!;
-    const after = (await getUserPermission(fixture.employee_id)).data;
-    if (id === "PE04") { if (mutation.status === 200 && after.can_send) target("R5_PROTOCOL_UI_TARGET_PE04_ABA", "actual old editor save restored sending after override recreation"); expect(mutation.status).toBe(409); return; }
-    if (fixture.variant === "null" && (!Object.hasOwn(mutation.body ?? {}, "can_send") || mutation.body?.can_send !== null)) target("R5_PROTOCOL_UI_TARGET_PE02_NULL", "shipping inheritance reset sent omission instead of explicit null");
-    if (!Object.hasOwn(mutation.body ?? {}, "can_send") && after.can_send !== before.can_send || !Object.hasOwn(mutation.body ?? {}, "allowed_zone_ids") && JSON.stringify(after.allowed_zone_ids) !== JSON.stringify(before.allowed_zone_ids)) {
-      target(id === "PE01" ? "R5_PROTOCOL_UI_TARGET_PE01_OMITTED" : "R5_PROTOCOL_UI_TARGET_PE02_OMITTED", "actual shipping editor omitted fields lost existing restrictions in PostgreSQL");
-    }
-    if (fixture.variant === "false") expect(mutation.body?.can_send).toBe(false);
-    if (fixture.variant === "0") expect(mutation.body?.daily_send_quota).toBe(0);
-    if (fixture.variant === "[]") expect(mutation.body?.allowed_zone_ids).toEqual([]);
+    await waitFor(() => expect(writes()).toHaveLength(prior + 1));
+    const mutation = writes().at(-1)!;
+    expect(mutation.status).toBe(200);
+    const command = mutation.body as unknown as import("@/lib/api/permission-editor-types").PermissionEditorCommand;
+    validatePermissionEditorCommand(command, fixture.employee_id);
+    expect(command.expected_revision).toEqual(before.revision);
+    const after = (await getUserPermissionEditor(fixture.employee_id)).data;
+    assertPermissionIntent(id, fixture.variant, before, command, after);
     return;
   }
   throw new Error("No genuine shipping component consumer for this fixture case");
