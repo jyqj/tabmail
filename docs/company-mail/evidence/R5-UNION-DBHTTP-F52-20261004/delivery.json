@@ -1,0 +1,18 @@
+{
+  "initial_commit": "aebfaed2f056ede3ae67050a8f7abd30e1dcfa66",
+  "branch": "cloud/r5-union-dbhttp-f52-20261004-0449",
+  "normal_push_exit": 0,
+  "remote_initial_commit_verified": true,
+  "draft_pr_attempts": 1,
+  "draft_pr_exit": 1,
+  "draft_pr_status": "FORBIDDEN",
+  "draft_pr_created": false,
+  "no_retry_or_alternate_api": true,
+  "private_delivery_hashes": {
+    "push.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "push.stderr": "d3e899127b3cbf6c195683743ee878d5539d4a86e3217f21fccf659ffde55b1b",
+    "draft-pr-once.stdout": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "draft-pr-once.stderr": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725",
+    "draft-pr-body.md": "54af9b87807050fb36010e9149de4dae76aeaaa1235b7cd058b1405725b6d6d2"
+  }
+}
