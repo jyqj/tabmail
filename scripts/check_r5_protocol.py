@@ -550,8 +550,9 @@ def run_shared(data, layer, output):
     if layer == 'components':
         sys.path.insert(0, str(ROOT/'scripts/preparation'))
         import r5_external_runtime
-        external_runtime = r5_external_runtime.from_environment(ROOT)
-        r5_external_runtime.validate(external_runtime)
+        selected_binding_version = r5_external_runtime.environment_version()
+        external_runtime = r5_external_runtime.from_environment(ROOT, selected_binding_version=selected_binding_version)
+        r5_external_runtime.validate(external_runtime, selected_binding_version=selected_binding_version)
     env['TABMAIL_R5_PROTOCOL_OBSERVATIONS'] = str((output/'observations.json').resolve())
     env['TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE'] = str((output/'http-pg-components').resolve())
     reports = []
@@ -572,7 +573,7 @@ def run_shared(data, layer, output):
     if layer == 'components' and go_pass:
         component_file = output/'vitest.json'
         cmd = external_component_command(external_runtime,component_file.resolve())
-        result = r5_external_runtime.launch(external_runtime,cmd,env)
+        result = r5_external_runtime.launch(external_runtime,cmd,env,selected_binding_version=selected_binding_version)
         (output/'vitest.stdout').write_text(result.stdout)
         (output/'vitest.stderr').write_text(result.stderr)
         names = {'R5 shared receipt '+row['id'] for row in data['cases']
@@ -582,7 +583,7 @@ def run_shared(data, layer, output):
         reports.append(component)
         component_pass = not component['errors']
     if external_runtime is not None:
-        r5_external_runtime.validate(external_runtime)
+        r5_external_runtime.validate(external_runtime, selected_binding_version=selected_binding_version)
     final_closure = source_closure()
     if tested_closure != final_closure or hashlib.sha256(CASES.read_bytes()).hexdigest()!=cases_hash:
         reports.append({'errors':['source/shared input changed during execution; rerun after integration'],'task_complete':False})
