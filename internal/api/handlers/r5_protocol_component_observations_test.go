@@ -25,6 +25,7 @@ import (
 
 	"github.com/alicebob/miniredis/v2"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
@@ -378,90 +379,97 @@ func r5UISetup(t *testing.T, f *r5UIFixture, c r5UICase, variant, caseHash strin
 
 // The component's real PUT must reach the real draft row wait. Only then does
 // the administrator command race it; pg_blocking_pids, not sleeps, orders them.
-func r5UIGrantBarrier(t *testing.T, f *r5UIFixture, d *company.Draft) {
+func r5UIGrantBarrier(t *testing.T, f *r5UIFixture, d *company.Draft) r5UIBarrierOwner {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	t.Cleanup(cancel)
 	hold, e := f.pool.Begin(ctx)
-	r5UIMust(t, e)
-	t.Cleanup(func() { _ = hold.Rollback(context.Background()) })
-	_, e = hold.Exec(ctx, `SELECT id FROM mail_drafts WHERE id=$1 FOR UPDATE`, d.ID)
-	r5UIMust(t, e)
-	mb, e := f.st.GetWorkMailbox(ctx, f.actor, f.shared.ID)
-	r5UIMust(t, e)
-	done := make(chan error, 1)
-	go func() {
-		defer close(done)
+	if e != nil {
+		cancel()
+		r5UIMust(t, e)
+	}
+	pid := int32(hold.Conn().PgConn().PID())
+	ready := make(chan error, 1)
+	var txMu sync.Mutex
+	owner := r5UINewGrantOwner(ctx, cancel, func() error {
+		txMu.Lock()
+		defer txMu.Unlock()
+		return hold.Rollback(context.Background())
+	}, func(o *r5UIGrantOwner) error {
+		txMu.Lock()
+		_, e := hold.Exec(ctx, `SELECT id FROM mail_drafts WHERE id=$1 FOR UPDATE`, d.ID)
+		txMu.Unlock()
+		if e != nil {
+			ready <- e
+			return e
+		}
+		mb, e := f.st.GetWorkMailbox(ctx, f.actor, f.shared.ID)
+		ready <- e
+		if e != nil {
+			return e
+		}
 		ticker := time.NewTicker(10 * time.Millisecond)
 		defer ticker.Stop()
 		var writer int32
 		for {
-			e := f.pool.QueryRow(ctx, `SELECT pid FROM pg_stat_activity WHERE datname=current_database() AND state='active' AND $1::int=ANY(pg_blocking_pids(pid)) AND query LIKE '%UPDATE mail_drafts%' LIMIT 1`, int32(hold.Conn().PgConn().PID())).Scan(&writer)
+			e := f.pool.QueryRow(ctx, `SELECT pid FROM pg_stat_activity WHERE datname=current_database() AND state='active' AND $1::int=ANY(pg_blocking_pids(pid)) AND query LIKE '%UPDATE mail_drafts%' LIMIT 1`, pid).Scan(&writer)
 			if e == nil {
 				break
 			}
+			if !errors.Is(e, pgx.ErrNoRows) {
+				return e
+			}
 			select {
 			case <-ctx.Done():
-				done <- fmt.Errorf("actual component draft lock wait not observed")
-				return
+				return fmt.Errorf("actual component draft lock wait not observed: %w", ctx.Err())
 			case <-ticker.C:
 			}
 		}
-		revoked := make(chan error, 1)
-		go func() {
-			revoked <- f.st.SetWorkGrant(ctx, f.actor, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}, mb.Revision)
-		}()
-		completed := false
-	observe:
+		o.startRevoker(func(ctx context.Context) error {
+			return f.st.SetWorkGrant(ctx, f.actor, models.MailboxGrant{MailboxID: f.shared.ID, UserID: f.employee.ID, CanRead: true}, mb.Revision)
+		})
+		// Peek completion without consuming it: the owner always joins and retains
+		// the child result. This also handles revocation completing before polling.
 		for {
 			select {
-			case e := <-revoked:
-				if e != nil {
-					done <- e
-					return
-				}
-				completed = true
-				break observe
+			case <-o.revoked:
+				goto released
 			default:
 			}
 			var blocked bool
 			if e := f.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE datname=current_database() AND $1::int=ANY(pg_blocking_pids(pid)))`, writer).Scan(&blocked); e != nil {
-				done <- e
-				return
+				return e
 			}
 			if blocked {
 				break
 			}
 			select {
 			case <-ctx.Done():
-				done <- fmt.Errorf("actual component authority order not observed")
-				return
+				return fmt.Errorf("actual component authority order not observed: %w", ctx.Err())
 			case <-ticker.C:
 			}
 		}
-		if e := hold.Rollback(ctx); e != nil {
-			done <- e
-			return
+	released:
+		if e := o.releaseHeld(); e != nil {
+			return e
 		}
-		if !completed {
-			select {
-			case e := <-revoked:
-				done <- e
-			case <-ctx.Done():
-				done <- fmt.Errorf("revocation did not finish after actual writer release")
-			}
-		} else {
-			done <- nil
-		}
-	}()
-	t.Cleanup(func() {
-		cancel()
+		// Successful ordering must allow the revoker to finish before cancellation.
+		// The owner retains its actual result after the final join.
 		select {
-		case <-done:
-		case <-time.After(time.Second):
+		case <-o.revoked:
+			return nil
+		case <-ctx.Done():
+			return fmt.Errorf("revocation did not finish after actual writer release: %w", ctx.Err())
 		}
 	})
+	t.Cleanup(func() {
+		if e := owner.ownerClose(); e != nil {
+			t.Errorf("PE05 barrier owner cleanup failed: %T", e)
+		}
+	})
+	r5UIMust(t, <-ready)
+	return owner
 }
+
 func r5UIState(t *testing.T, f *r5UIFixture) map[string]any {
 	t.Helper()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -567,118 +575,124 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 		}
 		for _, variant := range variants {
 			t.Run(c.ID+"/"+variant, func(t *testing.T) {
-				f := r5UISeed(t)
-				fixture := r5UISetup(t, f, c, variant, caseHash)
-				out := filepath.Join(os.Getenv("TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE"), c.ID, strings.ReplaceAll(variant, "[]", "empty_array"))
-				r5UIMust(t, os.MkdirAll(out, 0700))
-				reportPath := filepath.Join(out, "vitest.json")
-				if _, e := os.Stat(reportPath); !os.IsNotExist(e) {
-					t.Fatal("fresh component evidence required")
-				}
-				private := filepath.Join(t.TempDir(), "private-fixture.json")
-				b, e := json.Marshal(fixture)
-				r5UIMust(t, e)
-				r5UIMust(t, os.WriteFile(private, b, 0600))
-				ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
-				defer cancel()
-				cmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, "vitest.r5protocol.config.ts", reportPath)
-				cmd.Dir = filepath.Join(root, "web")
-				cmd.Env = append(os.Environ(), "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE="+private)
-				f.mu.Lock()
-				f.trace = nil
-				f.mu.Unlock()
-				logs, runErr := cmd.CombinedOutput()
-				r5UIMust(t, os.WriteFile(filepath.Join(out, "vitest.log"), logs, 0600))
-				if ctx.Err() != nil {
-					t.Fatal("component process timed out; never target red")
-				}
-				var result struct {
-					NumTotalTests, NumFailedTests, NumPendingTests, NumRuntimeErrorTestSuites int
-					TestResults                                                               []struct {
-						AssertionResults []struct {
-							FullName, Status string
-							FailureMessages  []string
-						}
-					}
-				}
-				b, e = os.ReadFile(reportPath)
-				r5UIMust(t, e)
-				r5UIMust(t, json.Unmarshal(b, &result))
-				expectedName := "R5 protocol component " + c.ID + " " + variant + " secure behavior"
-				if result.NumTotalTests != 1 || result.NumPendingTests != 0 || result.NumRuntimeErrorTestSuites != 0 || len(result.TestResults) != 1 || len(result.TestResults[0].AssertionResults) != 1 {
-					t.Fatal("missing/setup/skipped component execution")
-				}
-				assertion := result.TestResults[0].AssertionResults[0]
-				if assertion.FullName != expectedName {
-					t.Fatal("unexpected real component test identity")
-				}
-				f.mu.Lock()
-				trace := append([]r5UITrace(nil), f.trace...)
-				f.mu.Unlock()
-				childExit := 0
-				if runErr != nil {
-					var childError *exec.ExitError
-					if errors.As(runErr, &childError) {
-						childExit = childError.ExitCode()
-					} else {
-						childExit = -1
-					}
-				}
-				observations := map[string]any{"schema_version": 1, "case_id": c.ID, "variant": variant, "case_sha256": caseHash, "component_process_exit_code": childExit, "scope": "actual shipping component/API client/fetch/HTTP/PostgreSQL; host auth context only is supplied", "trace": trace, "state": r5UIState(t, f)}
-				b, e = json.MarshalIndent(observations, "", "  ")
-				r5UIMust(t, e)
-				r5UIMust(t, os.WriteFile(filepath.Join(out, "observations.json"), b, 0600))
-				if assertion.Status == "passed" && runErr == nil && result.NumFailedTests == 0 && len(trace) > 0 {
-					if c.ID == "RC02" && variant == "submit_replay" {
-						submits := []r5UITrace{}
-						for _, v := range trace {
-							if v.Method == "POST" && strings.HasSuffix(v.Path, "/submit") {
-								submits = append(submits, v)
-							}
-						}
-						var jobs, consumed int
-						r5UIMust(t, f.pool.QueryRow(context.Background(), `SELECT count(*),count(DISTINCT draft_id) FROM outbound_jobs WHERE tenant_id=$1`, f.tenant.ID).Scan(&jobs, &consumed))
-						if len(submits) != 2 || !submits[0].TransportAborted || submits[0].Status != 201 || submits[1].Status != 200 || submits[1].TransportAborted || submits[0].IdempotencySHA == "" || submits[0].IdempotencySHA != submits[1].IdempotencySHA || jobs != 1 || consumed != 1 {
-							t.Fatal("actual lost-response replay did not preserve command identity/once effect")
-						}
-					}
-					if c.ID == "LF02" {
-						executes := []r5UITrace{}
-						for _, v := range trace {
-							if v.Method == "POST" && strings.HasSuffix(v.Path, "/offboard") {
-								executes = append(executes, v)
-							}
-						}
-						state := observations["state"].(map[string]any)
-						if len(executes) != 2 || executes[0].Status != 200 || executes[1].Status != 200 || executes[0].ResponseSHA256 != executes[1].ResponseSHA256 || state["disposition_audits"] != int64(1) || state["employee_session_version"] != f.employee.SessionVersion+1 {
-							t.Fatal("actual same-plan replay changed receipt/effects")
-						}
-					}
-					return
-				}
-				allowed := map[string][]string{
-					"RC01": {"R5_PROTOCOL_UI_TARGET_RC01_BCC"}, "RC02": {"R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS"}, "RC03": {"R5_PROTOCOL_UI_TARGET_RC03_BCC"}, "LF01": {"R5_PROTOCOL_UI_TARGET_LF01_FROZEN"}, "LF06": {"R5_PROTOCOL_UI_TARGET_LF06_LIFECYCLE"},
-					"PE01": {"R5_PROTOCOL_UI_TARGET_PE01_OMITTED"}, "PE02": {"R5_PROTOCOL_UI_TARGET_PE02_NULL", "R5_PROTOCOL_UI_TARGET_PE02_OMITTED"}, "PE03": {"R5_PROTOCOL_UI_TARGET_PE03_STALE"}, "PE04": {"R5_PROTOCOL_UI_TARGET_PE04_ABA"},
-				}
-				failure := strings.Join(assertion.FailureMessages, "\n")
-				matches := regexp.MustCompile(`(?m)^Error: (R5_PROTOCOL_UI_TARGET_[A-Z0-9_]+): `).FindAllStringSubmatch(failure, -1)
-				marker := ""
-				if len(matches) == 1 {
-					for _, candidate := range allowed[c.ID] {
-						if matches[0][1] == candidate {
-							marker = candidate
-						}
-					}
-				}
-				var exit *exec.ExitError
-				if assertion.Status != "failed" || result.NumFailedTests != 1 || !errors.As(runErr, &exit) || exit.ExitCode() != 1 || marker == "" || len(trace) == 0 {
-					t.Fatalf("unexpected component failure (not target); inspect isolated %s", out)
-				}
-				t.Errorf("%s: actual component and Go-owned HTTP/PG evidence at %s", marker, out)
+				r5UIObserveCase(t, root, c, variant, caseHash, func(ctx context.Context, private, report string) ([]byte, error) {
+					cmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, "vitest.r5protocol.config.ts", report)
+					cmd.Env = append(os.Environ(), "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE="+private)
+					return cmd.CombinedOutput()
+				})
 			})
 		}
 	}
 	if executed != 17 {
 		t.Fatalf("shared component case coverage drift: %d", executed)
 	}
+}
+
+// Shared assertions remain unchanged; the new batch entry supplies only its owned executor.
+func r5UIObserveCase(t *testing.T, root string, c r5UICase, variant, caseHash string, execute func(context.Context, string, string) ([]byte, error)) {
+	f := r5UISeed(t)
+	fixture := r5UISetup(t, f, c, variant, caseHash)
+	out := filepath.Join(os.Getenv("TABMAIL_R5_PROTOCOL_COMPONENT_EVIDENCE"), c.ID, strings.ReplaceAll(variant, "[]", "empty_array"))
+	r5UIMust(t, os.MkdirAll(out, 0700))
+	reportPath := filepath.Join(out, "vitest.json")
+	if _, e := os.Stat(reportPath); !os.IsNotExist(e) {
+		t.Fatal("fresh component evidence required")
+	}
+	private := filepath.Join(t.TempDir(), "private-fixture.json")
+	b, e := json.Marshal(fixture)
+	r5UIMust(t, e)
+	r5UIMust(t, os.WriteFile(private, b, 0600))
+	ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
+	defer cancel()
+	f.mu.Lock()
+	f.trace = nil
+	f.mu.Unlock()
+	logs, runErr := execute(ctx, private, reportPath)
+	r5UIMust(t, os.WriteFile(filepath.Join(out, "vitest.log"), logs, 0600))
+	if ctx.Err() != nil {
+		t.Fatal("component process timed out; never target red")
+	}
+	var result struct {
+		NumTotalTests, NumFailedTests, NumPendingTests, NumRuntimeErrorTestSuites int
+		TestResults                                                               []struct {
+			AssertionResults []struct {
+				FullName, Status string
+				FailureMessages  []string
+			}
+		}
+	}
+	b, e = os.ReadFile(reportPath)
+	r5UIMust(t, e)
+	r5UIMust(t, json.Unmarshal(b, &result))
+	expectedName := "R5 protocol component " + c.ID + " " + variant + " secure behavior"
+	if result.NumTotalTests != 1 || result.NumPendingTests != 0 || result.NumRuntimeErrorTestSuites != 0 || len(result.TestResults) != 1 || len(result.TestResults[0].AssertionResults) != 1 {
+		t.Fatal("missing/setup/skipped component execution")
+	}
+	assertion := result.TestResults[0].AssertionResults[0]
+	if assertion.FullName != expectedName {
+		t.Fatal("unexpected real component test identity")
+	}
+	f.mu.Lock()
+	trace := append([]r5UITrace(nil), f.trace...)
+	f.mu.Unlock()
+	childExit := 0
+	if runErr != nil {
+		var childError interface{ ExitCode() int }
+		if errors.As(runErr, &childError) {
+			childExit = childError.ExitCode()
+		} else {
+			childExit = -1
+		}
+	}
+	observations := map[string]any{"schema_version": 1, "case_id": c.ID, "variant": variant, "case_sha256": caseHash, "component_process_exit_code": childExit, "scope": "actual shipping component/API client/fetch/HTTP/PostgreSQL; host auth context only is supplied", "trace": trace, "state": r5UIState(t, f)}
+	b, e = json.MarshalIndent(observations, "", "  ")
+	r5UIMust(t, e)
+	r5UIMust(t, os.WriteFile(filepath.Join(out, "observations.json"), b, 0600))
+	if assertion.Status == "passed" && runErr == nil && result.NumFailedTests == 0 && len(trace) > 0 {
+		if c.ID == "RC02" && variant == "submit_replay" {
+			submits := []r5UITrace{}
+			for _, v := range trace {
+				if v.Method == "POST" && strings.HasSuffix(v.Path, "/submit") {
+					submits = append(submits, v)
+				}
+			}
+			var jobs, consumed int
+			r5UIMust(t, f.pool.QueryRow(context.Background(), `SELECT count(*),count(DISTINCT draft_id) FROM outbound_jobs WHERE tenant_id=$1`, f.tenant.ID).Scan(&jobs, &consumed))
+			if len(submits) != 2 || !submits[0].TransportAborted || submits[0].Status != 201 || submits[1].Status != 200 || submits[1].TransportAborted || submits[0].IdempotencySHA == "" || submits[0].IdempotencySHA != submits[1].IdempotencySHA || jobs != 1 || consumed != 1 {
+				t.Fatal("actual lost-response replay did not preserve command identity/once effect")
+			}
+		}
+		if c.ID == "LF02" {
+			executes := []r5UITrace{}
+			for _, v := range trace {
+				if v.Method == "POST" && strings.HasSuffix(v.Path, "/offboard") {
+					executes = append(executes, v)
+				}
+			}
+			state := observations["state"].(map[string]any)
+			if len(executes) != 2 || executes[0].Status != 200 || executes[1].Status != 200 || executes[0].ResponseSHA256 != executes[1].ResponseSHA256 || state["disposition_audits"] != int64(1) || state["employee_session_version"] != f.employee.SessionVersion+1 {
+				t.Fatal("actual same-plan replay changed receipt/effects")
+			}
+		}
+		return
+	}
+	allowed := map[string][]string{
+		"RC01": {"R5_PROTOCOL_UI_TARGET_RC01_BCC"}, "RC02": {"R5_PROTOCOL_UI_TARGET_RC02_LEGACY_BYPASS"}, "RC03": {"R5_PROTOCOL_UI_TARGET_RC03_BCC"}, "LF01": {"R5_PROTOCOL_UI_TARGET_LF01_FROZEN"}, "LF06": {"R5_PROTOCOL_UI_TARGET_LF06_LIFECYCLE"},
+		"PE01": {"R5_PROTOCOL_UI_TARGET_PE01_OMITTED"}, "PE02": {"R5_PROTOCOL_UI_TARGET_PE02_NULL", "R5_PROTOCOL_UI_TARGET_PE02_OMITTED"}, "PE03": {"R5_PROTOCOL_UI_TARGET_PE03_STALE"}, "PE04": {"R5_PROTOCOL_UI_TARGET_PE04_ABA"},
+	}
+	failure := strings.Join(assertion.FailureMessages, "\n")
+	matches := regexp.MustCompile(`(?m)^Error: (R5_PROTOCOL_UI_TARGET_[A-Z0-9_]+): `).FindAllStringSubmatch(failure, -1)
+	marker := ""
+	if len(matches) == 1 {
+		for _, candidate := range allowed[c.ID] {
+			if matches[0][1] == candidate {
+				marker = candidate
+			}
+		}
+	}
+	var exit interface{ ExitCode() int }
+	if assertion.Status != "failed" || result.NumFailedTests != 1 || !errors.As(runErr, &exit) || exit.ExitCode() != 1 || marker == "" || len(trace) == 0 {
+		t.Fatalf("unexpected component failure (not target); inspect isolated %s", out)
+	}
+	t.Errorf("%s: actual component and Go-owned HTTP/PG evidence at %s", marker, out)
 }

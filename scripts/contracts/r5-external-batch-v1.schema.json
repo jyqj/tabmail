@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Explicit R5 external batch validation v1",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "runtime": {
+      "type": "object"
+    },
+    "required": {
+      "type": "object"
+    },
+    "budgets": {
+      "type": "object"
+    },
+    "go": {
+      "type": "object"
+    },
+    "build_context": {
+      "type": "object"
+    },
+    "argv": {
+      "type": "object"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "policy": {
+      "const": "r5_external_batch_validation_v1"
+    },
+    "status": {
+      "const": "UNADOPTED"
+    },
+    "mode": {
+      "enum": [
+        "components",
+        "probe"
+      ]
+    },
+    "workers": {
+      "const": 4
+    },
+    "concurrency_boundary": {
+      "const": "not_qualified_for_hostile_concurrent_mutation"
+    },
+    "product_green": {
+      "const": false
+    },
+    "task_complete": {
+      "const": false
+    },
+    "runtime_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "catalog_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "helper_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "bridge_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "probe_config_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "required": [
+    "runtime",
+    "required",
+    "budgets",
+    "go",
+    "build_context",
+    "argv",
+    "schema_version",
+    "policy",
+    "status",
+    "mode",
+    "workers",
+    "concurrency_boundary",
+    "product_green",
+    "task_complete",
+    "runtime_sha256",
+    "catalog_sha256",
+    "helper_sha256",
+    "bridge_sha256",
+    "probe_config_sha256"
+  ],
+  "$comment": "Semantic validation recaptures the exact required adapter set, command templates, helper hashes and complete descriptor/content inventories. Schema alone never authorizes launch."
+}
