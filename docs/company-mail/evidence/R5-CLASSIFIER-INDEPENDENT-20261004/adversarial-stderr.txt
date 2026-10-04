@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/workspace/tabmail-r5-classifier-review/docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/adversarial_checks.py", line 127, in <module>
+    assert all(x['expected']==x['actual'] for x in RESULTS)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

@@ -1,0 +1,26 @@
+{
+  "candidate": "0c9adb17559e347ed99b3661d789b80ba59762aa",
+  "base": "412f875985854527f5e7d74040f18954c3a352bf",
+  "prior_evidence": [
+    "054d47924e041117afb88f4d8e74217a89bd2464",
+    "d0811178bc68760280c44a68cfd7f7bc0790c9b9"
+  ],
+  "all_132_names_order_expectations_preserved": true,
+  "preexisting_paths": 2208,
+  "changed_preexisting_paths": [],
+  "sha256": {
+    "docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/adversarial-results.json": "ec8fc97fb97ca1321a8fe4028060e04211f3305f97800ae561e20ed978403a7e",
+    "docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/adversarial-stderr.txt": "f8108c064543af482fc84ac8090f5be0813699f44f63554bbeb4519bd57aab02",
+    "docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/adversarial_checks.py": "165355274becac87f3e741aa1e26e1f61d911c73462a5807643cfc08e4c34db8",
+    "docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/author-checks.txt": "0b5e817a947b3d980ae44f7de742bb50c31603d0454ff1cc8400f857ab86bda1",
+    "docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/candidate-replay.json": "3b33de32f7f7720e24c98b394c46e10dc401be79c95248367ef357d6dd4fd7fd",
+    "docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/original-rejection-replay.txt": "3f28e63a6c6fb1a29104eb922310f01be8f0aa4a8fdc9fb942093ab5e26606db",
+    "docs/company-mail/evidence/R5-CLASSIFIER-INDEPENDENT-20261004/previous-replay.json": "8134388a1d263ffae2388424bfcba97c9ae0067e66ddc7b376d3b9150b13ac6e",
+    "scripts/contracts/r5-selected-binding-v3-producer.json": "cc80c215f1bf51f2a014ff5e6a37084f29f54a904c69ee58ba52febbd125df66",
+    "scripts/r5_selected_binding_consumer.py": "6d87b0b172a25871fdc1c766cf4e135c1ebf075d7886514faf2259f9cde4c6e3",
+    "scripts/r5_selected_source_binding.py": "15f5cdf4b13ee09558cc368e367091d4802804a7c9724065faf5c50605b8a873",
+    "scripts/r5_selected_source_binding_v2.py": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67",
+    "scripts/r5_selected_source_binding_v3.py": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+    "scripts/tests/r5_selected_binding_consumer_checks.py": "71db298f70aded89e13eae597ce5dc9315f49bebc8b6978fa8228f9db515e6a6"
+  }
+}
