@@ -1,0 +1,36 @@
+{
+  "base": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "ui": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+  "backend": "062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b",
+  "exact_production_union_tree": "9fae5d8e219ddfa90e27b1fdb13704b00996554e",
+  "production_blobs": {
+    "web/features/company/offboarding-panel.tsx": "52554e543a3aef7c9d28cebb149d3411e286a515",
+    "internal/store/postgres/employee_disposition.go": "619feb36f23f6f3039cbd8c8230a4bcd7b809fd7"
+  },
+  "go": "go1.25.7 linux/amd64",
+  "top_level_tests": 9,
+  "leaf_cases": 58,
+  "shipping_ui_http_pg_cases": 4,
+  "race": true,
+  "package_seconds": 30.598,
+  "formal_unchanged": {
+    "pass": 17,
+    "fail": 9,
+    "missing": 17,
+    "qualified": 0
+  },
+  "sha256": {
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/baseline-http.log": "503b0a7c9e9d8462efbeec66ee4a9b9782206d6c9fb636307a7033dcd4f95b41",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/baseline-ui.log": "f45557a2fdcaceda0b6011d2e2226cb46d7fe65d077f2c658648f841d9ea3990",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/cleanup.log": "e63479697088a6dd7c0fff4600ec7d9067121c7a861429f0e0264ac8d8437a9d",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/eslint.log": "76162e465989f3f070a9de8db711fbf358e53b74d09ce1bbdb57c727e4c4a16d",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/exact-production-union.patch": "b63aa9f618f87f066d14fbd07a740b869484bcc3983dc313a4ae362e72e64144",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/final-fixed-race.log": "5cfec9ded0c52545236e8f502a269fe575f1026287c568b07fa07233a8ace63d",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/initial-fixed-race.log": "8b46a61427db681d1dd32ac11c66ae1d8e05ddc479db177575cb51dd3dda1361",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/typescript.log": "76162e465989f3f070a9de8db711fbf358e53b74d09ce1bbdb57c727e4c4a16d",
+    "docs/company-mail/evidence/PAIR-INDEPENDENT-20261004/vet.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "internal/store/postgres/pair_independent_review_test.go": "c27cf8ce30337aff31b8626a44acb50d616f44f18a0001141fe2ca848114b633",
+    "web/pair-review.probe.tsx": "82c973f59a4ccade3d20401d1ca71e6e5ac1c4dbfec30ca49522f874adb6cd05",
+    "web/vitest.pair-review.config.ts": "b37165ae1d0a5f71101fb4aedba2d353e49155ef4da7b9286de6b70a8733a0e8"
+  }
+}
