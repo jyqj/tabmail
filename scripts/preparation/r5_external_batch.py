@@ -1,4 +1,4 @@
-"""Explicit batch v1. Sole cooperating executor, never hostile-write protection.
+"""Explicit batch v1/v2. Sole cooperating executor, never hostile-write protection.
 
 Old runtime v2 entry points remain unchanged. Private RPC carries case identity,
 never executable/argv. Only this leased supervisor starts and reaps Vitest groups.
@@ -25,6 +25,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import check_r5_protocol as protocol
 
 POLICY = 'r5_external_batch_validation_v1'
+V2_POLICY = 'r5_external_batch_validation_v2'
+CONTRACT_FIELDS = frozenset(('runtime required budgets go build_context argv schema_version policy status mode workers '
+    'concurrency_boundary product_green task_complete runtime_sha256 catalog_sha256 helper_sha256 '
+    'bridge_sha256 probe_config_sha256').split())
 GO_OLD = 'TestR5ProtocolComponentObservations'
 GO_NEW = 'TestR5ProtocolBatchComponentObservations'
 PROBE = 'TestR5ExternalBatchIsolationProbe'
@@ -70,10 +74,64 @@ def file_digest(path):
         return runtime.digest(files.file(Path(path)))
 
 
-def capture(manifest, go, mode='components'):
+def runtime_gate(manifest, selected_binding_version=2, *, runtime_manifest_path=None,
+                 runtime_manifest_sha256=None):
+    """Authenticate v3 through controller-held manifest bytes, never recapture."""
+    version = runtime.consumer.selected_version(selected_binding_version)
+    if (type(manifest.get('schema_version')) is not int or manifest['schema_version'] != version
+            or manifest.get('policy') != (runtime.POLICY if version == 2 else runtime.V3_POLICY)
+            or manifest.get('status') != 'UNADOPTED'):
+        raise ValueError('batch runtime/version pairing differs')
+    if version == 2:
+        if ('selected_binding_version' in manifest or 'admitted_selection' in manifest
+                or runtime_manifest_path is not None or runtime_manifest_sha256 is not None):
+            raise ValueError('mixed batch runtime versions')
+    else:
+        if type(manifest.get('selected_binding_version')) is not int or manifest['selected_binding_version'] != 3:
+            raise ValueError('explicit runtime v3 selector required')
+        if not isinstance(runtime_manifest_path, str) or not isinstance(runtime_manifest_sha256, str):
+            raise ValueError('independent runtime manifest reference required')
+        runtime.consumer._digest(runtime_manifest_sha256)
+        if runtime.load_pinned(runtime_manifest_path, runtime_manifest_sha256,
+                               selected_binding_version=3) != manifest:
+            raise ValueError('authenticated runtime manifest differs')
+    return version
+
+
+def contract_gate(contract, selected_binding_version=2):
+    version = runtime.consumer.selected_version(selected_binding_version)
+    fields = CONTRACT_FIELDS if version == 2 else CONTRACT_FIELDS | {
+        'selected_binding_version', 'runtime_manifest_path', 'runtime_manifest_sha256'}
+    if (not isinstance(contract, dict) or set(contract) != fields
+            or type(contract.get('schema_version')) is not int
+            or contract['schema_version'] != (1 if version == 2 else 2)
+            or contract.get('policy') != (POLICY if version == 2 else V2_POLICY)
+            or contract.get('status') != 'UNADOPTED'):
+        raise ValueError('batch contract/status/version pairing differs')
+    if version == 3 and (type(contract['selected_binding_version']) is not int
+                         or contract['selected_binding_version'] != 3):
+        raise ValueError('explicit batch v2 selector required')
+    if (contract['mode'] not in ('components', 'probe') or type(contract['workers']) is not int
+            or contract['workers'] != MAX_WORKERS or contract['budgets'] != dict(go=120, process=180, case=75)
+            or any(type(v) is not int for v in contract['budgets'].values())
+            or contract['product_green'] is not False or contract['task_complete'] is not False
+            or contract['concurrency_boundary'] != runtime.BOUNDARY
+            or contract['runtime_sha256'] != runtime.digest(runtime.canonical(contract['runtime']))):
+        raise ValueError('batch fixed inputs/promotion differ')
+    return runtime_gate(contract['runtime'], version,
+        runtime_manifest_path=contract.get('runtime_manifest_path'),
+        runtime_manifest_sha256=contract.get('runtime_manifest_sha256'))
+
+
+def capture(manifest, go, mode='components', *, selected_binding_version=2,
+            runtime_manifest_path=None, runtime_manifest_sha256=None):
+    version = runtime_gate(manifest, selected_binding_version,
+        runtime_manifest_path=runtime_manifest_path, runtime_manifest_sha256=runtime_manifest_sha256)
+    if mode not in ('components', 'probe'):
+        raise ValueError('unknown batch mode')
     source = Path(manifest['source']['path'])
     data = protocol.load_cases(source / CATALOG, source)
-    contract = dict(schema_version=1, policy=POLICY, status='UNADOPTED', runtime=manifest,
+    contract = dict(schema_version=1 if version == 2 else 2, policy=POLICY if version == 2 else V2_POLICY, status='UNADOPTED', runtime=manifest,
                     runtime_sha256=runtime.digest(runtime.canonical(manifest)),
                     catalog_sha256=file_digest(source/CATALOG), required=derive(data),
                     mode=mode, workers=4, budgets=dict(go=120, process=180, case=75),
@@ -89,29 +147,33 @@ def capture(manifest, go, mode='components'):
         raise ValueError('fixed Go1.25.7 required')
     if mode not in ('components', 'probe'):
         raise ValueError('unknown batch mode')
+    if version == 3:
+        contract.update(selected_binding_version=3, runtime_manifest_path=runtime_manifest_path,
+                        runtime_manifest_sha256=runtime_manifest_sha256)
     return contract
 
 
-def validate_contract(contract):
-    if contract.get('policy') != POLICY or contract.get('status') != 'UNADOPTED':
-        raise ValueError('old policy/promotion cannot authorize batch')
+def validate_contract(contract, *, selected_binding_version=2):
+    version = contract_gate(contract, selected_binding_version)
     if Path(__file__).resolve()!=Path(contract['runtime']['source']['path'])/HELPER:
         raise ValueError('batch helper must execute from bound source')
     if Path(sys.executable).resolve()!=Path(contract['runtime']['python']['path']):
         raise ValueError('batch interpreter identity differs')
-    if capture(contract['runtime'], Path(contract['go']['path']), contract['mode']) != contract:
+    runtime.validate(contract['runtime'], selected_binding_version=version)
+    if capture(contract['runtime'], Path(contract['go']['path']), contract['mode'],
+               selected_binding_version=version, runtime_manifest_path=contract.get('runtime_manifest_path'),
+               runtime_manifest_sha256=contract.get('runtime_manifest_sha256')) != contract:
         raise ValueError('batch contract/required inputs drift')
-    runtime.validate(contract['runtime'])
 
 
-def load(path, pin):
+def load(path, pin, *, selected_binding_version=2):
+    runtime.consumer.selected_version(selected_binding_version)
     with runtime.descriptors() as files:
         raw = files.file(Path(path))
     if runtime.digest(raw) != pin:
         raise ValueError('independent batch pin differs')
     result = runtime.source_inventory.strict_json(raw)
-    if result.get('policy') != POLICY or result.get('status') != 'UNADOPTED':
-        raise ValueError('old policy/promotion cannot authorize batch')
+    contract_gate(result, selected_binding_version)
     return result
 
 
@@ -336,7 +398,8 @@ def exact_assertions(report, expected, exit_code):
 
 
 class Batch:
-    def __init__(self, contract, output, environment=None):
+    def __init__(self, contract, output, environment=None, *, selected_binding_version=2):
+        self.selected_binding_version = contract_gate(contract, selected_binding_version)
         self.contract = contract
         self.manifest = contract['runtime']
         self.source = Path(self.manifest['source']['path'])
@@ -350,6 +413,10 @@ class Batch:
         if contract.get('build_context'):
             self.env=runtime.source_inventory.bound_environment(contract['build_context'],self.env)
             self.env['GOTOOLCHAIN']='local'
+        self.env['TABMAIL_R5_SELECTED_BINDING_VERSION'] = str(self.selected_binding_version)
+        if self.selected_binding_version == 3:
+            self.env['TABMAIL_R5_EXTERNAL_MANIFEST'] = contract['runtime_manifest_path']
+            self.env['TABMAIL_R5_EXTERNAL_MANIFEST_SHA256'] = contract['runtime_manifest_sha256']
         self.nonce = secrets.token_hex(32)
         self.pin=runtime.digest(runtime.canonical(contract))
         self.cancelled = threading.Event()
@@ -499,7 +566,8 @@ class Batch:
             path.write_bytes(runtime.canonical(self.contract))
             os.chmod(path, 0o600)
         owned = OwnedProcess([sys.executable, str(self.source/HELPER), 'validate',
-                              '--contract', str(path), '--pin', self.pin],
+                              '--contract', str(path), '--pin', self.pin,
+                              '--selected-binding-version', str(self.selected_binding_version)],
                              cwd=self.source, env=dict(self.env, PYTHONDONTWRITEBYTECODE='1'))
         result = owned.finish(self.abort, self.deadline)
         if (result['exit_code'] != 0 or result['timeout'] or result['tail']
@@ -826,7 +894,7 @@ class Batch:
                 errors.append('batch cancellation requested')
             if time.monotonic()>=self.deadline:
                 errors.append('batch process180 deadline exceeded')
-            receipt=dict(schema_version=1,policy=POLICY,status='BATCH_QUALIFIED' if not errors else 'BATCH_REJECTED',
+            receipt=dict(schema_version=self.contract['schema_version'],policy=self.contract['policy'],status='BATCH_QUALIFIED' if not errors else 'BATCH_REJECTED',
                          contract_sha256=runtime.digest(runtime.canonical(self.contract)),preflight=before,terminal_postcheck=after,
                          owners_joined=self.ack==sorted(self.children),resources_joined=self.resources_joined,
                          max_live_children=self.max_active,
@@ -836,6 +904,8 @@ class Batch:
                          concurrency_boundary=runtime.BOUNDARY,
                          children={key:dict(report_sha256=value['report_sha256'],exit_code=value['exit_code'],
                                             timeout=value['timeout'],tail=value['tail'],qualified=not errors) for key,value in sorted(self.results.items())})
+            if self.selected_binding_version == 3:
+                receipt['selected_binding_version'] = 3
             pending=self.output/'receipt.pending'
             pending.write_bytes(runtime.canonical(receipt));os.chmod(pending,0o600)
             pending.replace(self.output/'receipt.json')
@@ -852,17 +922,22 @@ def main():
     parser.add_argument('--contract',type=Path)
     parser.add_argument('--pin')
     parser.add_argument('--output',type=Path)
+    parser.add_argument('--selected-binding-version',type=int,choices=(2,3),default=2)
     args=parser.parse_args()
     if args.action=='capture':
-        manifest=runtime.from_environment(args.source)
-        validate_contract_candidate= capture(manifest,args.go,args.mode)
-        validate_contract(validate_contract_candidate)
+        manifest=runtime.from_environment(args.source, selected_binding_version=args.selected_binding_version)
+        references = {} if args.selected_binding_version == 2 else dict(
+            runtime_manifest_path=os.environ.get('TABMAIL_R5_EXTERNAL_MANIFEST'),
+            runtime_manifest_sha256=os.environ.get('TABMAIL_R5_EXTERNAL_MANIFEST_SHA256'))
+        validate_contract_candidate= capture(manifest,args.go,args.mode, selected_binding_version=args.selected_binding_version, **references)
+        validate_contract(validate_contract_candidate, selected_binding_version=args.selected_binding_version)
         print(runtime.canonical(validate_contract_candidate).decode())
     elif args.action == 'validate':
-        validate_contract(load(args.contract, args.pin))
+        validate_contract(load(args.contract, args.pin, selected_binding_version=args.selected_binding_version),
+                          selected_binding_version=args.selected_binding_version)
     else:
-        contract=load(args.contract,args.pin)
-        batch=Batch(contract,args.output)
+        contract=load(args.contract,args.pin, selected_binding_version=args.selected_binding_version)
+        batch=Batch(contract,args.output, selected_binding_version=args.selected_binding_version)
         def cancel(signum,frame):batch.request_cancel()
         for sig in (signal.SIGINT,signal.SIGTERM):signal.signal(sig,cancel)
         receipt=batch.run()
