@@ -4,6 +4,9 @@ import hashlib
 import json
 from pathlib import Path
 import sys
+import subprocess
+import tempfile
+from contextlib import ExitStack
 import unittest
 from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -182,6 +185,78 @@ class EnvelopeTests(unittest.TestCase):
         changed=copy.deepcopy(r);changed['observation_envelope'][0]['exit']=7;changed=v3._seal(changed)
         with mock.patch.object(v3,'capture') as capture,self.assertRaises(ValueError):v3.validate(changed,'root','go',cache='c',modulecache='m',trusted_observation_sha256=pin)
         capture.assert_not_called()
+
+
+class CaptureOrderingTests(unittest.TestCase):
+    """Synthetic command executor; actual authority predicates are tested separately."""
+    def exercise(self, mutation=None, fail=None, source_drift=False):
+        with tempfile.TemporaryDirectory() as tmp, ExitStack() as stack:
+            root=Path(tmp);go=root/'go';go.write_bytes(b'fixture producer')
+            base=dict(files={'scripts/r5_selected_source_binding_v2.py':'v2'},archive_static={},
+                      archive_boundary={'production_variant_directories':[]},embed_inputs={})
+            env=dict(GOVERSION='go1.25.7',GOOS='linux',GOARCH='amd64',GOHOSTOS='linux',GOHOSTARCH='amd64',
+                     CGO_ENABLED='1',GOWORK='off',GOENV='',GOFLAGS='',GOEXPERIMENT='',GOAMD64='v1',GOTOOLCHAIN='local',
+                     GOGCCFLAGS='-fdebug-prefix-map=/tmp/go-build123=',GOCACHE='/tmp/cache',GOROOT='/tmp/go',GOMODCACHE='/tmp/mod')
+            calls=[];package_count=0
+            def run(argv,**kwargs):
+                nonlocal package_count
+                calls.append(argv)
+                if fail and len(calls)==2:
+                    if isinstance(fail,Exception):raise fail
+                    return subprocess.CompletedProcess(argv,7,b'partial',b'failure')
+                if argv[1]=='env':raw=json.dumps(env).encode()
+                elif '-m' in argv:raw=b'{"Path":"tabmail","Main":true}'
+                else:
+                    package_count+=1;row={'ImportPath':'fixture','Dir':'/outside','Stale':True,'StaleReason':'before'}
+                    if mutation:mutation(row,package_count)
+                    raw=wire([row])
+                return subprocess.CompletedProcess(argv,0,raw,b'')
+            def hashes(root,names):
+                return {n:(v3._IMPLEMENTATION_SHA256 if n==v3._V3_FILES[0] else
+                           v3._sha(v3._REGISTRY_BYTES) if n==v3.SCHEMA_PATH else
+                           v2._IMPLEMENTATION_SHA256 if n.endswith('v2.py') else 'f'*64) for n in names}
+            stack.enter_context(mock.patch.object(v3,'GO_SHA256',v3._sha(go.read_bytes())))
+            stack.enter_context(mock.patch.object(v3.subprocess,'run',side_effect=run))
+            stack.enter_context(mock.patch.object(v3.inventory,'capture_current_source',side_effect=[base,dict(base,drift=True)] if source_drift else [base,base]))
+            stack.enter_context(mock.patch.object(v3,'digest',side_effect=hashes))
+            stack.enter_context(mock.patch.object(v3,'topology',return_value=set()))
+            stack.enter_context(mock.patch.object(v3,'classify',return_value=({},[],[],[],[])))
+            stack.enter_context(mock.patch.object(v3,'normalize_mvs',return_value=[]))
+            stack.enter_context(mock.patch.object(v3,'compare_coverage',return_value={}))
+            stack.enter_context(mock.patch.object(v3,'compare_variants',return_value=[]))
+            return v3.capture(root,go,cache=root/'cache',modulecache=root/'mod'),calls
+
+    def test_all_package_roles_projected_including_hydration_and_repetitions(self):
+        receipt,calls=self.exercise(lambda row,n:row.update(Stale=bool(n%2),StaleReason=str(n)))
+        self.assertEqual(len(calls),12)
+        self.assertEqual(receipt['observation_envelope'][1]['role'],'unbound_dependency_hydration_not_attested')
+        package=[r for r in receipt['observation_envelope'] if '-m' not in r['argv'] and r['argv'][1]=='list']
+        self.assertEqual(len(package),9)
+        self.assertEqual(len({r['binding_stdout_sha256'] for r in package}),1)
+        self.assertEqual(len({r['raw_stdout_sha256'] for r in package}),9)
+
+    def test_retained_mutation_in_each_repeated_role_rejected(self):
+        for n in (6,7,8,9):
+            with self.subTest(role=n),self.assertRaisesRegex(ValueError,'outside diagnostic'):
+                self.exercise(lambda row,count:row.update(Imports=['changed']) if count==n else None)
+
+    def test_unknown_or_diagnostic_type_in_every_package_role_rejected(self):
+        for n in range(1,10):
+            for field,value in [('Unknown',True),('Stale','bad')]:
+                with self.subTest(role=n,field=field),self.assertRaises(ValueError):
+                    self.exercise(lambda row,count:row.update({field:value}) if count==n else None)
+
+    def test_source_before_after_drift_rejected(self):
+        with self.assertRaisesRegex(ValueError,'source/hash/topology'):self.exercise(source_drift=True)
+
+    def test_producer_failure_interface_and_timeout_preserved(self):
+        with self.assertRaises(v3.MetadataCommandFailure) as caught:self.exercise(fail=True)
+        self.assertEqual(caught.exception.stdout,b'partial');self.assertEqual(caught.exception.stderr,b'failure')
+        self.assertEqual(caught.exception.command['exit'],7)
+        self.assertEqual(caught.exception.command['role'],'unbound_dependency_hydration_not_attested')
+        error=subprocess.TimeoutExpired(['go'],180,output=b'partial',stderr=b'failure')
+        with self.assertRaises(subprocess.TimeoutExpired) as caught:self.exercise(fail=error)
+        self.assertIs(caught.exception,error)
 
 
 if __name__=='__main__':unittest.main()

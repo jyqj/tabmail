@@ -167,7 +167,7 @@ def _capture(root, go, *, cache, modulecache, context, diagnostics):
     if not before_go.issubset(authorized):
         raise ValueError('unclassified repository Go source')
     before = digest(root, authorized)
-    if before.get('scripts/r5_selected_source_binding_v2.py')!=_IMPLEMENTATION_SHA256:
+    if before.get('scripts/r5_selected_source_binding_v2.py')!=v2._IMPLEMENTATION_SHA256:
         raise ValueError('selected binding helper differs from source')
     # Clean environment: never inherit private service settings or ABI/flags.
     env = dict(PATH=os.environ.get('PATH','/usr/bin:/bin'), HOME=os.environ.get('HOME','/tmp'),
