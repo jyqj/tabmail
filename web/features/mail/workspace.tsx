@@ -16,7 +16,9 @@ import { DraftFolder } from "./components/draft-folder";
 import { ReceiptFolder } from "./components/receipt-folder";
 const folders = ["inbox", "sent", "drafts", "archive", "trash", "receipts"] as const;
 type Folder = typeof folders[number];
-const mailKeys = new Set(["work-messages", "sent-assets", "work-drafts", "work-submissions", "mail-index-status"]);
+// Reconnect resync and manual refresh must cover mounted readers as well as
+// folder lists. Attachment and conversation readers do not poll on their own.
+const mailKeys = new Set(["work-messages", "work-message", "inbound-attachments", "mail-conversation", "sent-assets", "work-drafts", "work-submissions", "mail-index-status"]);
 export function MailWorkspace() {
     const t = useText();
     const router = useRouter();
