@@ -1,0 +1,219 @@
+{
+  "review": "independent lifecycle delta",
+  "tested_source": "52dd8b9ef538b55812b35308cae8b469400e2705",
+  "delivery_evidence_head": "a97e91350b437a18472655ca76177622c1410603",
+  "verdict": "REQUEST_CHANGES_FOR_G1; F1/F2/F3 VERIFIED_CORRECTED",
+  "original_findings": {
+    "F1": "PASS real detached-open-pipe termination/reap/tail retention; observed .108971s",
+    "F2": "PASS real partial RPC deadline join; observed .104836s; four slowed descriptor-worker deadline/cancel scenarios",
+    "F3": "PASS actual private RPC accepted late cancel before ack; full real postcheck; all eight synthetic staged qualifications rejected"
+  },
+  "residual_findings": [
+    {
+      "id": "G1",
+      "priority": "medium",
+      "finding": "preflight finish and cleanup retry errors release lease before physical reap",
+      "fault": "injected persistent OSError, not spontaneous host failure",
+      "real_pinned_contract": true,
+      "qualification": false,
+      "receipt_published": false,
+      "worker_reaped_by_review": true,
+      "observations": [
+        {
+          "phase": "single-finish-error",
+          "qualification": false,
+          "joined": true,
+          "lease_released": true
+        },
+        {
+          "phase": "repeated-finish-error",
+          "qualification": false,
+          "joined_before_lease_release": false,
+          "review_had_to_reap": true,
+          "lease_released": true
+        }
+      ]
+    }
+  ],
+  "author_controls_independently_rerun": {
+    "batch": 40,
+    "runtime_v2": 21,
+    "protocol_regressions": 70
+  },
+  "review_controls": {
+    "lifecycle_methods": 5,
+    "slow_inventory_subscenarios": 4,
+    "real_contract_semantic_assertions": 22,
+    "actual_contract_preflight_error_observations": 2,
+    "semantics": "passing fault controls means reproduced behavior, not business qualification"
+  },
+  "typescript": {
+    "command": "tsc --noEmit --incremental false",
+    "status": "PASS"
+  },
+  "source_hashes": {
+    "scripts/preparation/r5_external_batch.py": "bc49bc0fc39b728edea9799f713c6fb6db95b381141f5068a3120390be9c9f28",
+    "scripts/preparation/r5_external_runtime.py": "c793eab91eef55c5c48ebf0f37606402b7199700d346828180597a6ae70a0cf1",
+    "scripts/contracts/r5-external-batch-v1.schema.json": "d79f974075d09c038d2bf489b6eb3378fe878118b2dd65fcc09ff9adf4d44357",
+    "internal/api/handlers/r5_external_batch_test.go": "c590fc85d78095c9231c00e8671930dd06c226f89b959e885ac502533ca96e45",
+    "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+    "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+    "web/package-lock.json": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3"
+  },
+  "review_hashes": {
+    "docs/company-mail/R5-EXTERNAL-BATCH-INDEPENDENT-DELTA-20261004.md": "9315184089c482f934ab2d9fe538cf824784a13a15f604eee7770d45d2faf088",
+    "scripts/reviews/test_external_batch_delta_20261004.py": "ce1a146fdecbcfb94e73f37da559c07093b35b49c2dcd5689039b18da20871b3",
+    "scripts/reviews/check_external_batch_delta_semantics_20261004.py": "b7d1f5870de41a14a50192f3163f1d07ce0da030cec33259093a0aac23d53d41",
+    "scripts/reviews/check_inventory_cleanup_delta_20261004.py": "d7fd735f24af823e609a17a6346ad9b9b9ce3d3e46f9b5723f7a26a568b21635"
+  },
+  "private_log_hashes": {
+    "batch-controls.log": "da2188649d4b056079eca9c40bc5556ae3f146dc148d9571c2b8492c279265a2",
+    "v2-controls.log": "758155e60865a5bd5f4133748e112875f0fbe0560c6cefaca71a7bb87f00763a",
+    "protocol-controls.log": "502d9fd06b044b082d4764433e632375e2e5b09d1e621295ec817538c9815635",
+    "delta-controls.log": "2c94726e3b428968a850b33f94edf0620a675da73cca412c09311a1effa4f94a",
+    "semantic-controls.json": "8b84fd6d6460567f0686df05e9f26a458dc05abd34c683281b5372a7abd858df",
+    "inventory-fault-controls.json": "a8909dba894d7e4debf5c625b2ad3f3a722ba25a85b6f5765aaadde7f5a80e5d",
+    "tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "npm.log": "7fdde5ce4bba45f0798eb34f91a87cd94f46319ccbf0f461a184804fa0ec382e"
+  },
+  "probe": {
+    "status": "BATCH_QUALIFIED",
+    "receipt": {
+      "children": {
+        "probe/0": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "5e06d2fa21360008accad7a2f5b8c6f952da1b3a85b42cba23e094c8521fc394",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/1": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "2de1517a1e2d38755dad6dc76900224f92bef6063a3f358744f750a1566c63c3",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/2": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "455be08afa0498d26e6eddc29ce9f27454b0ae8cb689f397bbc46edd200905fa",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/3": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "5b591597458d14f99965735e064e56e86bfbf6f009654d791940688d810ff186",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/4": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "93e0b13e793457f3abfaffea8fdccd31e0a4f45fbb528c2f02ada186e8b59a98",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/5": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "51403bb69749a4509e08d6ac1dff1e10a0c6a7dfa632b9dece41b4dad3296e11",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/6": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "d147c777989852d6645efa670174b3c92a490ce50b1286c666f95e4e4542d04a",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/7": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "2727f1b9221aecadb3332a48dfae957b56fa35a0fff70a8de3a71375d52c8507",
+          "tail": false,
+          "timeout": false
+        }
+      },
+      "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+      "contract_sha256": "17c6ccbb936bb06fabb427b0f2910628b609be9b838835b916507f253dc9e8d4",
+      "eligibility_scope": "infrastructure_probe_only",
+      "errors": [],
+      "max_live_children": 4,
+      "owners_joined": true,
+      "policy": "r5_external_batch_validation_v1",
+      "preflight": true,
+      "product_green": false,
+      "required_terminal_count": 10,
+      "schema_version": 1,
+      "status": "BATCH_QUALIFIED",
+      "task_complete": false,
+      "terminal_count": 10,
+      "terminal_postcheck": true
+    },
+    "receipt_sha256": "04f200db00c7e97f3e83e6cf0ccde307cc08ce98e0724629eba55d484524aded",
+    "contract_independent_byte_pin": "ec2ce60ea948d6e0836ee7e210399bd23bb3c2dff1e81ef964dac2a698321e91",
+    "contract_canonical_sha256": "17c6ccbb936bb06fabb427b0f2910628b609be9b838835b916507f253dc9e8d4",
+    "runtime_manifest_independent_byte_pin": "d52c3f4c2b98b909e9d2b06b785e1305fc6b519f4e356a618958716621966904",
+    "timing": {
+      "wall_seconds": 27.518244417000005,
+      "exit_code": 0
+    },
+    "raw_go_jsonl_sha256": "79dd98515e650609acad05af6fef75643b8d5405023aa1bcf0e54af8e79ff53a",
+    "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python_report_sha256": "8942a574148c01dbf0bbf662fa2975080b8e18dc52108fa0215d641e9ca9707f",
+    "infrastructure_only": true
+  },
+  "inventories": {
+    "source": {
+      "regular_files": 1933,
+      "regular_bytes": 59995464
+    },
+    "dependencies": {
+      "regular_files": 45584,
+      "regular_bytes": 775103182
+    }
+  },
+  "cleanup": {
+    "normal_probe_fixture_databases_remaining": 0,
+    "normal_probe_fixture_backend_connections_remaining": 0,
+    "normal_probe_ack": true,
+    "owned_postgresql_shutdown": true,
+    "review_error_control_children_reaped": true,
+    "pgx_backend_cancellation": "not newly qualified"
+  },
+  "historical_evidence_preserved": {
+    "previous_review": "0a2baf4a6ccd11dca7b9aa3c188e6ae2aab2a338",
+    "previous_defective_source": "f80b37fe14d856d2f2a048a06fe848fc4420448d",
+    "prior_safe_evidence_sha256": "c7b369c41581615d0bca0bb54acc14ca20f3b8e532e10b912ea5338172653a07"
+  },
+  "original_budgets": {
+    "go": 120,
+    "batch": 180,
+    "case": 75,
+    "max_workers": 4
+  },
+  "deadline_semantics": "execution deadline; physical cleanup tail may exceed expiry; no hard return bound for OS uninterruptible waits",
+  "scope": {
+    "catalog_ids": 46,
+    "handler_ids": 17,
+    "handler_variants": 26,
+    "required_go_paths": 40,
+    "required_python_assertions": 3,
+    "required_component_terminals": 43,
+    "probe_terminals": 10,
+    "formal43_26_46": "NOTRUN"
+  },
+  "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+  "implementation_changes": false,
+  "product_green": false,
+  "task_complete": false,
+  "central_progress": "10/171 unchanged",
+  "wholePG180": "NOTRUN",
+  "audit": "NOTRUN; audit8high open",
+  "actual_email": "NOTRUN",
+  "merge_deploy": "NOTRUN",
+  "delivery": "existing review branch commit/push only; previous denied draft API not retried"
+}
