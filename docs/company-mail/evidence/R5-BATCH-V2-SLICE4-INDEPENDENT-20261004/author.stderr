@@ -1,0 +1,19 @@
+test_all_policy_schema_runtime_pairings (__main__.BatchChecks.test_all_policy_schema_runtime_pairings) ... ok
+test_authenticated_incompatible_admission_before_dispatch (__main__.BatchChecks.test_authenticated_incompatible_admission_before_dispatch) ... ok
+test_cli_explicit_capture_validate_run_selection (__main__.BatchChecks.test_cli_explicit_capture_validate_run_selection) ... ok
+test_complete_receipt_envelope_and_bundle_transitive (__main__.BatchChecks.test_complete_receipt_envelope_and_bundle_transitive) ... ok
+test_contract_fields_and_promotion_reject (__main__.BatchChecks.test_contract_fields_and_promotion_reject) ... ok
+test_default_v1_exact_route (__main__.BatchChecks.test_default_v1_exact_route) ... ok
+test_explicit_v3_load_validate_and_no_producer (__main__.BatchChecks.test_explicit_v3_load_validate_and_no_producer) ... ok
+test_forged_manifest_self_hash_cannot_delegate (__main__.BatchChecks.test_forged_manifest_self_hash_cannot_delegate) ... ok
+test_manifest_outer_and_byte_pins (__main__.BatchChecks.test_manifest_outer_and_byte_pins) ... ok
+test_missing_bad_references_mode_and_strict_json_before_dispatch (__main__.BatchChecks.test_missing_bad_references_mode_and_strict_json_before_dispatch) ... ok
+test_owned_environment_and_killable_worker_selector_deadline (__main__.BatchChecks.test_owned_environment_and_killable_worker_selector_deadline) ... ok
+test_selector_matrix_zero_dispatch (__main__.BatchChecks.test_selector_matrix_zero_dispatch) ... ok
+test_v1_closed_to_explicit_v3_and_mixed_runtime (__main__.BatchChecks.test_v1_closed_to_explicit_v3_and_mixed_runtime) ... ok
+test_worker_rejection_cancellation_and_remaining_deadline (__main__.BatchChecks.test_worker_rejection_cancellation_and_remaining_deadline) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.576s
+
+OK
