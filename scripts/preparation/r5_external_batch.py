@@ -493,6 +493,8 @@ class Batch:
             if any(terminals.count(name)!=1 for name in required):
                 errors.append('missing/duplicate/nonpassing required terminal')
             try:
+                if self.ack!=sorted(self.children):
+                    raise ValueError('fixture owners did not acknowledge complete cleanup')
                 validate_contract(self.contract)
                 after=True
             except Exception as error:
