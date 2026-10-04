@@ -10,7 +10,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"hash"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -71,6 +73,8 @@ type r5UIFixture struct {
 	server                     *httptest.Server
 	mu                         sync.Mutex
 	trace                      []r5UITrace
+	cancelTransport            context.CancelFunc
+	activeRequests             sync.WaitGroup
 	afterCommitFault           func(*http.Request, *httptest.ResponseRecorder) (bool, error)
 }
 
@@ -136,17 +140,32 @@ func r5UISeed(t *testing.T) *r5UIFixture {
 	rdb := redis.NewClient(&redis.Options{Addr: mr.Addr()})
 	t.Cleanup(func() { rdb.Close() })
 	router := api.NewRouter(api.RouterConfig{Store: st, CompanyRepository: st, ObjectStore: obj, RawObjects: rawobject.NewStore(obj, st), JWTSecret: r5UIJWT, MailboxTokenSecret: "ui-fixture-only", PublicTenantID: "00000000-0000-0000-0000-000000000001", NamingMode: policy.NamingFull, CompanyOnly: true, HTTP: config.HTTP{}, RateLimiter: middleware.NewRateLimiter(rdb, st, 10000, nil), OutboundService: svc, Logger: zerolog.Nop(), Readiness: st.Readiness})
-	f.server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	transportContext, cancelTransport := context.WithCancel(context.Background())
+	f.cancelTransport = cancelTransport
+	f.server = httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		f.activeRequests.Add(1)
+		defer f.activeRequests.Done()
 		raw, e := io.ReadAll(io.LimitReader(r.Body, 2<<20))
 		if e != nil {
 			http.Error(w, "fixture transport failed", 500)
 			return
 		}
 		r.Body = io.NopCloser(bytes.NewReader(raw))
-		captured := httptest.NewRecorder()
-		router.ServeHTTP(captured, r)
-		sum := sha256.Sum256(captured.Body.Bytes())
-		trace := r5UITrace{Method: r.Method, Path: r.URL.Path, Status: captured.Code, ResponseSHA256: hex.EncodeToString(sum[:])}
+		// Only the authorized lost-submit-response fault buffers a finite JSON
+		// command. All other routes reach the real socket writer immediately.
+		faultRoute := f.afterCommitFault != nil && r.Method == "POST" && strings.HasSuffix(r.URL.Path, "/submit")
+		var captured *httptest.ResponseRecorder
+		destination := w
+		if faultRoute {
+			captured = httptest.NewRecorder()
+			destination = captured
+		}
+		observed := &r5UIResponseWriter{ResponseWriter: destination, digest: sha256.New()}
+		router.ServeHTTP(observed, r)
+		if observed.status == 0 {
+			observed.status = http.StatusOK
+		}
+		trace := r5UITrace{Method: r.Method, Path: r.URL.Path, Status: observed.status, ResponseSHA256: hex.EncodeToString(observed.digest.Sum(nil))}
 		var body map[string]json.RawMessage
 		if json.Unmarshal(raw, &body) == nil {
 			for k := range body {
@@ -154,14 +173,14 @@ func r5UISeed(t *testing.T) *r5UIFixture {
 			}
 		}
 		var envelope struct{ Error struct{ Code string } }
-		_ = json.Unmarshal(captured.Body.Bytes(), &envelope)
+		_ = json.Unmarshal(observed.jsonBody.Bytes(), &envelope)
 		trace.ErrorCode = envelope.Error.Code
 		if key := r.Header.Get("Idempotency-Key"); key != "" {
 			sum := sha256.Sum256([]byte(key))
 			trace.IdempotencySHA = hex.EncodeToString(sum[:])
 		}
 		aborted := false
-		if f.afterCommitFault != nil {
+		if faultRoute {
 			var faultError error
 			aborted, faultError = f.afterCommitFault(r, captured)
 			if faultError != nil {
@@ -175,6 +194,9 @@ func r5UISeed(t *testing.T) *r5UIFixture {
 		if aborted {
 			panic(http.ErrAbortHandler)
 		}
+		if !faultRoute {
+			return
+		}
 		for k, vs := range captured.Header() {
 			for _, v := range vs {
 				w.Header().Add(k, v)
@@ -183,8 +205,53 @@ func r5UISeed(t *testing.T) *r5UIFixture {
 		w.WriteHeader(captured.Code)
 		_, _ = w.Write(captured.Body.Bytes())
 	}))
-	t.Cleanup(f.server.Close)
+	f.server.Config.BaseContext = func(net.Listener) context.Context { return transportContext }
+	f.server.Start()
+	t.Cleanup(f.closeTransport)
 	return f
+}
+
+// Unwrap preserves ResponseController deadlines and flush on the real writer.
+// Evidence hashes only bytes successfully written; SSE payloads are never retained.
+type r5UIResponseWriter struct {
+	http.ResponseWriter
+	status   int
+	digest   hash.Hash
+	jsonBody bytes.Buffer
+}
+
+func (w *r5UIResponseWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
+func (w *r5UIResponseWriter) FlushError() error {
+	if w.status == 0 {
+		w.WriteHeader(http.StatusOK)
+	}
+	return http.NewResponseController(w.ResponseWriter).Flush()
+}
+func (w *r5UIResponseWriter) Flush() { _ = w.FlushError() }
+func (w *r5UIResponseWriter) WriteHeader(status int) {
+	if w.status != 0 {
+		return
+	}
+	w.status = status
+	w.ResponseWriter.WriteHeader(status)
+}
+func (w *r5UIResponseWriter) Write(p []byte) (int, error) {
+	if w.status == 0 {
+		w.WriteHeader(http.StatusOK)
+	}
+	n, err := w.ResponseWriter.Write(p)
+	_, _ = w.digest.Write(p[:n])
+	if strings.HasPrefix(w.Header().Get("Content-Type"), "application/json") && w.jsonBody.Len()+n <= 2<<20 {
+		_, _ = w.jsonBody.Write(p[:n])
+	}
+	return n, err
+}
+func (f *r5UIFixture) closeTransport() {
+	f.cancelTransport()
+	f.server.CloseClientConnections()
+	f.server.Close()
+	f.activeRequests.Wait()
+	f.server.Client().CloseIdleConnections()
 }
 
 // Seed raw intent through the shipping versioned command, then independently
