@@ -1,0 +1,24 @@
+{
+  "scope": "preserved pure mocked unit boundaries only; no actual-root or formal suites",
+  "count": 15,
+  "test_ids": [
+    "test_r5_source_version_runner.SourceVersionRunnerTests.test_child_failure_and_skip_not_green",
+    "test_r5_source_version_runner.SourceVersionRunnerTests.test_exact_partition",
+    "test_r5_source_version_runner.SourceVersionRunnerTests.test_missing_overlap_duplicate_wrong_baseline",
+    "test_r5_source_version_runner.SourceVersionRunnerTests.test_no_fresh_actual_root_class",
+    "test_r5_source_version_runner.SourceVersionRunnerTests.test_preparation_failure_reports_all_ids_missing_and_dispatches_none",
+    "test_r5_source_version_runner.PreparationBoundaryTests.test_authenticated_archive_still_checks_member_and_dependency_boundary",
+    "test_r5_source_version_runner.PreparationBoundaryTests.test_extra_tampered_link_and_native_prepared_files_rejected",
+    "test_r5_source_version_runner.PreparationBoundaryTests.test_stale_source_fixture_and_receipt_tamper_rejected",
+    "test_r5_source_version_runner.PreparationBoundaryTests.test_unknown_lock_and_existing_dependency_tree_refused_before_write",
+    "test_r5_source_version_runner.PreparationBoundaryTests.test_wrong_archive_hash_refused_before_any_mkdir",
+    "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_midflight_path_replacement_cannot_change_executed_inode_and_is_rejected",
+    "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_old_fixture_refused_before_execution",
+    "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_receipt_validation_rejects_replaced_executed_binary",
+    "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_replaced_binary_refused_before_execution",
+    "test_r5_source_version_runner.ExecutedBinaryBoundaryTests.test_wrong_source_refused_before_execution"
+  ],
+  "failures": 0,
+  "errors": 0,
+  "os_process_events": []
+}

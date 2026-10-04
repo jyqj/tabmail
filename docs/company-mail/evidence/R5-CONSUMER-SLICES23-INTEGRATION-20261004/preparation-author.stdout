@@ -1,0 +1,269 @@
+{
+  "scope": "synthetic preparation only; no runtime qualification",
+  "controls": [
+    {
+      "name": "four-owned-returns-distinct-persisted-pins-complete-equality",
+      "passed": true
+    },
+    {
+      "name": "invalid-selector-None",
+      "passed": true
+    },
+    {
+      "name": "invalid-selector-True",
+      "passed": true
+    },
+    {
+      "name": "invalid-selector-False",
+      "passed": true
+    },
+    {
+      "name": "invalid-selector-1",
+      "passed": true
+    },
+    {
+      "name": "invalid-selector-4",
+      "passed": true
+    },
+    {
+      "name": "invalid-selector-'3'",
+      "passed": true
+    },
+    {
+      "name": "invalid-selector-3.0",
+      "passed": true
+    },
+    {
+      "name": "bare-producer-before-environment-go",
+      "passed": true
+    },
+    {
+      "name": "bare-producer-before-environment-./go",
+      "passed": true
+    },
+    {
+      "name": "v2-consumer-rejects-v3",
+      "passed": true
+    },
+    {
+      "name": "wrong-run-id",
+      "passed": true
+    },
+    {
+      "name": "wrong-preparation-byte-pin",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-binding",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-root",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-context",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-role",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-argv",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-exit",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-order",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-persisted",
+      "passed": true
+    },
+    {
+      "name": "reject-before-build-pin",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-hydration",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-stdout-length",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-stdout-hash",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-stderr",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-role",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-argv",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-exit",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-order",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-bundle",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-pin",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-fixture",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-binary",
+      "passed": true
+    },
+    {
+      "name": "pinned-retained-reject-run-log",
+      "passed": true
+    },
+    {
+      "name": "forged-resealed-receipt-replaced-bundle-colocated-hash-rejected",
+      "passed": true
+    },
+    {
+      "name": "bundle-contract-zero-producer-missing",
+      "passed": true
+    },
+    {
+      "name": "bundle-contract-zero-producer-extra",
+      "passed": true
+    },
+    {
+      "name": "bundle-contract-zero-producer-swapped",
+      "passed": true
+    },
+    {
+      "name": "bundle-contract-zero-producer-producer",
+      "passed": true
+    },
+    {
+      "name": "bundle-contract-zero-producer-source",
+      "passed": true
+    },
+    {
+      "name": "bundle-contract-zero-producer-run-id",
+      "passed": true
+    },
+    {
+      "name": "retained-postrun-mutation-no-publication",
+      "passed": true
+    },
+    {
+      "name": "default-v2-shape-no-v3-capture-and-v3-rejects-v2",
+      "passed": true
+    },
+    {
+      "name": "v3-strict-preparation-schema-extra",
+      "passed": true
+    },
+    {
+      "name": "v3-strict-preparation-schema-missing",
+      "passed": true
+    },
+    {
+      "name": "v3-strict-preparation-schema-wrong-policy",
+      "passed": true
+    },
+    {
+      "name": "v3-strict-preparation-schema-bool-schema",
+      "passed": true
+    },
+    {
+      "name": "v3-strict-preparation-schema-bool-version",
+      "passed": true
+    },
+    {
+      "name": "exact-wire-test-publication-reject-missing-run",
+      "passed": true
+    },
+    {
+      "name": "exact-wire-test-publication-reject-missing-pass",
+      "passed": true
+    },
+    {
+      "name": "exact-wire-test-publication-reject-wrong-test",
+      "passed": true
+    },
+    {
+      "name": "exact-wire-test-publication-reject-nonzero",
+      "passed": true
+    },
+    {
+      "name": "preserved-typescript-boundary-extra",
+      "passed": true
+    },
+    {
+      "name": "preserved-typescript-boundary-symlink",
+      "passed": true
+    },
+    {
+      "name": "preserved-typescript-boundary-tampered",
+      "passed": true
+    },
+    {
+      "name": "preserved-typescript-boundary-extra-directory",
+      "passed": true
+    },
+    {
+      "name": "preserved-linux-fd-boundary-wrong-source",
+      "passed": true
+    },
+    {
+      "name": "preserved-linux-fd-boundary-stale-fixture",
+      "passed": true
+    },
+    {
+      "name": "preserved-linux-fd-boundary-binary-tamper",
+      "passed": true
+    },
+    {
+      "name": "preserved-linux-fd-boundary-midflight-inode",
+      "passed": true
+    },
+    {
+      "name": "current-only-dispatch-v2",
+      "passed": true
+    },
+    {
+      "name": "current-only-dispatch-v3",
+      "passed": true
+    },
+    {
+      "name": "failed-selection-zero-child-dispatch",
+      "passed": true
+    }
+  ],
+  "count": 64,
+  "os_process_events": [],
+  "source_sha256": {
+    "scripts/r5_source_runner_prepare.py": "193c830550d88546b4669bdbbfd1a5f94b652f61877e426a533eeb387589ed15",
+    "scripts/run_r5_source_version_tests.py": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+    "scripts/r5_selected_binding_consumer.py": "46a43df58a17ea03966b88fe07275e60344a055960aaabfcf405a7d5eb6caa21",
+    "scripts/tests/r5_source_preparation_v3_checks.py": "32297a9180ca28b2ebf370ad4e233d6a2a505e0e15570248d19dcaba426ac6e5"
+  }
+}

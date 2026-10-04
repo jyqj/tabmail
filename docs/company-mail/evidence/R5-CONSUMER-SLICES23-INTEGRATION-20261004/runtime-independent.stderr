@@ -1,0 +1,18 @@
+test_authenticated_malformed_policy_source_context_phase_producer (__main__.IndependentChecks.test_authenticated_malformed_policy_source_context_phase_producer) ... ok
+test_duplicate_and_malformed_json_even_with_matching_byte_pin (__main__.IndependentChecks.test_duplicate_and_malformed_json_even_with_matching_byte_pin) ... ok
+test_equal_observations_require_new_paths_without_inequality_rule (__main__.IndependentChecks.test_equal_observations_require_new_paths_without_inequality_rule) ... ok
+test_execution_timeout_exit_and_postcheck_preserve_primary (__main__.IndependentChecks.test_execution_timeout_exit_and_postcheck_preserve_primary) ... ok
+test_explicit_selector_matrix (__main__.IndependentChecks.test_explicit_selector_matrix) ... ok
+test_failure_at_every_publish_stops_admission (__main__.IndependentChecks.test_failure_at_every_publish_stops_admission) ... ok
+test_first_return_retained_before_second_producer_and_new_pins (__main__.IndependentChecks.test_first_return_retained_before_second_producer_and_new_pins) ... ok
+test_fixed_manifest_pin_blocks_forged_delegated_pin (__main__.IndependentChecks.test_fixed_manifest_pin_blocks_forged_delegated_pin) ... ok
+test_fixed_pin_against_resealed_all_envelopes_and_bundle (__main__.IndependentChecks.test_fixed_pin_against_resealed_all_envelopes_and_bundle) ... ok
+test_later_byte_reencoding_rejected_before_process (__main__.IndependentChecks.test_later_byte_reencoding_rejected_before_process) ... ok
+test_observe_rechecks_envelopes_after_filesystem_work (__main__.IndependentChecks.test_observe_rechecks_envelopes_after_filesystem_work) ... ok
+test_real_publisher_fsync_and_independent_readback_failure (__main__.IndependentChecks.test_real_publisher_fsync_and_independent_readback_failure) ... ok
+test_same_byte_inode_replacement_and_nofollow (__main__.IndependentChecks.test_same_byte_inode_replacement_and_nofollow) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.359s
+
+OK
