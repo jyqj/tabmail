@@ -23,7 +23,8 @@ facts recording primary error type, direct reaping, group join, pipe closure,
 channel join, attempts and any cleanup errors. Exception text/traceback is not
 replaced by a failing drain retry.
 
-The barrier runs before receipt publication and again on exceptional scope exit.
+The barrier completes before receipt publication; an exceptional scope exit also
+requires it to complete if cleanup has not already been established.
 A completed barrier is recorded as `resources_joined=true`, separately from the
 unchanged exact Go physical-fixture `owners_joined` acknowledgement. Successful
 process cleanup cannot fabricate fixture acknowledgement. Accepted case cancel,
@@ -60,3 +61,26 @@ closure, default675/sharedDB89e7 import or other gate closure is authorized.
 The source/test/documentation delta is delivered by normal push to existing PR26;
 no additional draft/API attempt is needed. Exact fixed-source validation evidence
 is recorded separately from the later evidence-documentation revision.
+
+## Fixed-source validation
+
+Fixed source `f875672dea2b68fdec9e0b986f4863724da5d7ba` passes all 48 batch
+controls (8 new G1 plus the 40 existing controls), 21 runtime and 70 protocol
+checks. The delta reviewer's four F1/F2/F3 regression methods also pass, including
+four controlled inventory deadline/cancellation scenarios. The actual pinned
+helper checker passes single/persistent drain failures and persistent wait failure
+with retained ownership through cancellation/expiry, then controlled recovery.
+All 22 real-contract semantic assertions pass with complete initial/restoration
+checks and source/dependency mutation rejection.
+
+A fresh infrastructure-only probe at that exact source passes 10/10 terminals in
+23.077 seconds, peak4, full equal pre/post inventories and exact owner ack. The
+cleanup record confirms all 12 registered roots directly reaped, groups joined
+and pipes closed before release, with no cleanup failures. Source/dependency
+inventories contain 1,937/45,584 regular files. Zero owned fixture databases or
+backend connections remain, and the separate owned PostgreSQL cluster is shut
+down. See [safe evidence](evidence/R5-EXTERNAL-BATCH-G1-CLEANUP-FIX-20261004.json)
+for exact pins, receipt/log hashes and reproduced historical failure observations.
+This later evidence/documentation revision has a separate source identity and
+inherits no fixed-source receipt qualification; its implementation helper is
+byte-identical to the tested fixed source.
