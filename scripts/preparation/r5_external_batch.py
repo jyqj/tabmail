@@ -135,6 +135,7 @@ def lease(manifest, cancelled, deadline):
 # for an arbitrary embedded caller's subprocesses.
 _PROCESS_GUARD = threading.RLock()
 _PROCESS_ROOTS = set()
+_OWNED_PROCESSES = {}
 _ADOPTED_TAIL = False
 
 
@@ -177,16 +178,55 @@ class OwnedProcess:
         with _PROCESS_GUARD:
             self.process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE, start_new_session=True)
+            self.group = self.process.pid
+            self.joined = False
+            self.tail = False
+            self.direct_reaped = False
+            self.pipes_closed = False
             _PROCESS_ROOTS.add(self.process.pid)
-        self.group = self.process.pid
-        self.joined = False
-        self.tail = False
+            _OWNED_PROCESSES[self.process.pid] = self
 
     def kill(self):
         try:
             os.killpg(self.group, signal.SIGKILL)
         except ProcessLookupError:
             pass
+
+    def cleanup_physical(self):
+        """Independent kill/wait/close path; never calls finish/communicate.
+
+        Only the sole-executor barrier calls this after RPC threads stop using
+        the processes. A blocking kernel wait is a lease-held cleanup tail.
+        """
+        if not self.joined:
+            self.kill()
+            try:
+                pid, status = os.waitpid(self.process.pid, 0)
+                if pid != self.process.pid:
+                    raise ValueError('owned direct child not reaped')
+                self.process.returncode = os.waitstatus_to_exitcode(status)
+            except ChildProcessError:
+                # A prior communicate/poll may already have reaped the root
+                # before its pipe error. ECHILD establishes it is not waitable.
+                pass
+            self.direct_reaped = True
+            while True:
+                try:
+                    os.waitpid(-self.group, 0)
+                except ChildProcessError:
+                    break
+            try:
+                os.killpg(self.group, 0)
+            except ProcessLookupError:
+                self.joined = True
+            if not self.joined:
+                raise ValueError('owned process group cleanup remains unknown')
+        for pipe in (self.process.stdout, self.process.stderr):
+            if pipe is not None:
+                pipe.close()
+        self.pipes_closed = True
+        with _PROCESS_GUARD:
+            _PROCESS_ROOTS.discard(self.process.pid)
 
     def finish(self, cancelled, deadline):
         timed_out = False
@@ -230,6 +270,8 @@ class OwnedProcess:
             self.joined = True
         if not self.joined:
             raise ValueError('owned process group not physically joined')
+        self.direct_reaped = True
+        self.pipes_closed = all(pipe is None or pipe.closed for pipe in (self.process.stdout, self.process.stderr))
         with _PROCESS_GUARD:
             _PROCESS_ROOTS.discard(self.process.pid)
         return dict(exit_code=self.process.returncode, timeout=timed_out, tail=self.tail,
@@ -251,6 +293,14 @@ def join_adopted_tails():
     """
     global _ADOPTED_TAIL
     found = _ADOPTED_TAIL
+    # Registered roots need an independent wait path even when pipe draining
+    # failed persistently. Never erase their ownership before physical join.
+    with _PROCESS_GUARD:
+        for owned in list(_OWNED_PROCESSES.values()):
+            if not owned.joined:
+                found = _ADOPTED_TAIL = True
+            owned.cleanup_physical()
+            del _OWNED_PROCESSES[owned.process.pid]
     while True:
         children=[]
         for entry in Path('/proc').glob('[0-9]*/stat'):
@@ -264,7 +314,7 @@ def join_adopted_tails():
                 _PROCESS_ROOTS.clear()
                 _ADOPTED_TAIL = False
             return found
-        found=True
+        found = _ADOPTED_TAIL = True
         for pid in children:
             try:os.kill(pid,signal.SIGKILL)
             except ProcessLookupError:pass
@@ -320,6 +370,14 @@ class Batch:
         self.socket = self.output/'channel.sock'
         self.cancelled_keys = set()
         self.deadline = None
+        self.server = None
+        self.serving = None
+        self.channel_joined = False
+        self.resources_joined = False
+        self.lease_held = False
+        self.primary_error = None
+        self.owned_processes = {}
+        self.cleanup_facts = dict(state='NOT_STARTED', attempts=0, failures=[])
         self.children = contract['required']['children'] if contract['mode'] == 'components' else {
             'probe/'+str(i):dict(case_id='probe',variant=str(i),assertion='R5 batch independent realm loopback PostgreSQL') for i in range(8)}
 
@@ -415,9 +473,8 @@ class Batch:
                     self.results[key] = packet
                 return packet
             finally:
-                if not owned.joined:
-                    owned.kill()
-                    owned.finish(self.cancelled,time.monotonic())
+                # The lease-held outer barrier owns physical cleanup even if
+                # finish itself failed. Never retry the failing drain routine.
                 with self.guard:
                     self.active.pop(key,None)
 
@@ -433,6 +490,8 @@ class Batch:
         The parent can terminate a blocked inventory worker. Reaping an OS
         uninterruptible worker is cleanup tail, never a hard return guarantee.
         """
+        if self.resources_joined:
+            raise ValueError('inventory already finalized')
         if self.abort.is_set() or time.monotonic() >= self.deadline:
             raise ValueError('inventory deadline/cancellation')
         path = self.output/'validation-contract.json'
@@ -442,15 +501,106 @@ class Batch:
         owned = OwnedProcess([sys.executable, str(self.source/HELPER), 'validate',
                               '--contract', str(path), '--pin', self.pin],
                              cwd=self.source, env=dict(self.env, PYTHONDONTWRITEBYTECODE='1'))
-        try:
-            result = owned.finish(self.abort, self.deadline)
-        finally:
-            if not owned.joined:
-                owned.kill()
-                owned.finish(self.abort, time.monotonic())
+        result = owned.finish(self.abort, self.deadline)
         if (result['exit_code'] != 0 or result['timeout'] or result['tail']
                 or self.abort.is_set() or time.monotonic() >= self.deadline):
             raise ValueError('full inventory worker rejected')
+
+    def record_cleanup(self):
+        """Private facts survive the original exception; diagnostics may not mask it."""
+        with _PROCESS_GUARD:
+            self.owned_processes.update(_OWNED_PROCESSES)
+            pending_roots = sorted(_OWNED_PROCESSES)
+            process_facts = {str(pid):dict(direct_reaped=owned.direct_reaped,
+                                          group_joined=owned.joined,
+                                          pipes_closed=owned.pipes_closed)
+                             for pid,owned in sorted(self.owned_processes.items())}
+        self.cleanup_facts.update(lease_held=self.lease_held,
+                                  primary_error=type(self.primary_error).__name__ if self.primary_error else None,
+                                  registered_pending=pending_roots, processes=process_facts,
+                                  channel_joined=self.channel_joined,
+                                  resources_joined=self.resources_joined)
+        try:
+            pending = self.output/'cleanup.pending'
+            pending.write_bytes(runtime.canonical(self.cleanup_facts))
+            os.chmod(pending, 0o600)
+            pending.replace(self.output/'cleanup.json')
+        except OSError as error:
+            self.cleanup_facts['diagnostic_error'] = type(error).__name__
+
+    def close_channel(self):
+        if not self.channel_joined:
+            if self.server is not None:
+                self.server.interrupt_reads()
+                if self.serving is not None and self.serving.is_alive():
+                    self.server.shutdown()
+                    self.serving.join()
+                self.server.server_close()
+            self.channel_joined = True
+        self.socket.unlink(missing_ok=True)
+
+    def cleanup_resources(self):
+        """Hold ownership until independent physical cleanup is established.
+
+        Cleanup failures retain a blocking state and the live token; they do
+        not unwind the lease or substitute a rejected receipt for actual join.
+        """
+        if self.resources_joined:
+            return False
+        self.cancelled.set()
+        with self.guard:
+            self.closed = True
+            self.leased = False
+        found = False
+        while True:
+            self.cleanup_facts['attempts'] += 1
+            self.cleanup_facts['state'] = 'PENDING'
+            self.record_cleanup()
+            failures = []
+            with _PROCESS_GUARD:
+                for owned in _OWNED_PROCESSES.values():
+                    if not owned.joined:
+                        try:
+                            owned.kill()
+                        except OSError as error:
+                            failures.append(dict(resource='process_kill', error=type(error).__name__))
+            try:
+                self.close_channel()
+            except Exception as error:
+                failures.append(dict(resource='rpc_channel', error=type(error).__name__))
+            # A handler may still be using Popen if channel joining failed.
+            # Kill was already requested, but never race its wait/pipe owner.
+            if self.channel_joined:
+                try:
+                    found = join_adopted_tails() or found
+                except Exception as error:
+                    failures.append(dict(resource='process_reap', error=type(error).__name__))
+            if not failures:
+                self.resources_joined = True
+                self.cleanup_facts['state'] = 'JOINED'
+                self.record_cleanup()
+                return found
+            self.cleanup_facts['state'] = 'BLOCKED'
+            for failure in failures:
+                if failure not in self.cleanup_facts['failures']:
+                    self.cleanup_facts['failures'].append(failure)
+            self.record_cleanup()
+            # Cancellation/expiry do not authorize dropping unknown ownership.
+            threading.Event().wait(.05)
+
+    @contextlib.contextmanager
+    def resource_scope(self):
+        self.lease_held = True
+        try:
+            yield
+        except BaseException as error:
+            if self.primary_error is None:
+                self.primary_error = error
+            raise
+        finally:
+            self.cleanup_resources()
+            if self.primary_error is not None:
+                self.primary_error.add_note('lease-held physical cleanup established; cleanup_facts records outcome')
 
     def request_cancel(self):
         self.abort_requested=True
@@ -483,6 +633,13 @@ class Batch:
             return receipt
         finally:
             self.leased=False
+            if self.lease_held:
+                token = Path(self.manifest['dependency_root']['path'])/'.r5-runtime-owner'
+                try:
+                    self.lease_held = token.exists()
+                except OSError:
+                    self.cleanup_facts['token_state'] = 'UNKNOWN'
+                self.record_cleanup()
 
     def _run(self):
         self.output.mkdir(mode=0o700,parents=True,exist_ok=False)
@@ -493,7 +650,7 @@ class Batch:
         self.deadline = time.monotonic()+180
         errors, terminals = [], []
         before = after = False
-        with lease(self.manifest,self.cancelled,self.deadline) as nonce, runtime.descriptors() as anchors:
+        with lease(self.manifest,self.cancelled,self.deadline) as nonce, self.resource_scope(), runtime.descriptors() as anchors:
             self.nonce=nonce
             token=Path(self.manifest['dependency_root']['path'])/'.r5-runtime-owner'
             token_identity=runtime.preparation.identity(token.lstat())
@@ -565,9 +722,9 @@ class Batch:
                                 connection.shutdown(socket.SHUT_RDWR)
                             except OSError:
                                 pass
-            server = Server(str(self.socket),Handler)
+            server = self.server = Server(str(self.socket),Handler)
             os.chmod(self.socket,0o600)
-            serving = threading.Thread(target=server.serve_forever, kwargs=dict(poll_interval=.05))
+            serving = self.serving = threading.Thread(target=server.serve_forever, kwargs=dict(poll_interval=.05))
             serving.start()
             try:
                 env = dict(self.env,TABMAIL_R5_BATCH_SOCKET=str(self.socket),TABMAIL_R5_BATCH_NONCE=self.nonce,
@@ -625,17 +782,15 @@ class Batch:
                 else:terminals.extend(expected_python)
 
             except Exception as error:
+                self.primary_error = self.primary_error or error
                 errors.append('execution rejected: '+type(error).__name__)
             finally:
                 self.cancelled.set()
                 with self.guard:
                     self.closed=True
                     for child in self.active.values():child.kill()
-                server.interrupt_reads()
-                server.shutdown()
-                serving.join()
-                server.server_close() # joins every RPC owner/child before postcheck
-                self.socket.unlink()
+                self.close_channel() # joins every RPC owner/child before postcheck
+                self.record_cleanup()
                 if join_adopted_tails():
                     errors.append('unregistered/detached owned descendant tail')
             if self.cancelled_keys:
@@ -653,9 +808,12 @@ class Batch:
                 self.validate_inventory()
                 after=True
             except Exception as error:
+                self.primary_error = self.primary_error or error
                 errors.append('terminal inventory rejected: '+type(error).__name__)
-            if join_adopted_tails():
+            if self.cleanup_resources():
                 errors.append('inventory owned descendant tail')
+            if self.cleanup_facts['failures']:
+                errors.append('resource cleanup recovered from errors')
             try:
                 if runtime.preparation.identity(token.lstat())!=token_identity:
                     raise ValueError('lease token identity drift')
@@ -670,7 +828,8 @@ class Batch:
                 errors.append('batch process180 deadline exceeded')
             receipt=dict(schema_version=1,policy=POLICY,status='BATCH_QUALIFIED' if not errors else 'BATCH_REJECTED',
                          contract_sha256=runtime.digest(runtime.canonical(self.contract)),preflight=before,terminal_postcheck=after,
-                         owners_joined=self.ack==sorted(self.children),max_live_children=self.max_active,
+                         owners_joined=self.ack==sorted(self.children),resources_joined=self.resources_joined,
+                         max_live_children=self.max_active,
                          eligibility_scope='component_adapter_terminals' if self.contract['mode']=='components' else 'infrastructure_probe_only',
                          required_terminal_count=len(required),terminal_count=sum(terminals.count(n)==1 for n in required),
                          errors=errors,product_green=False,task_complete=False,

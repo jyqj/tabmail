@@ -1,5 +1,10 @@
 # Batch supervisor lifecycle correction — 2026-10-04
 
+The later [G1 cleanup correction](R5-EXTERNAL-BATCH-G1-CLEANUP-FIX-20261004.md)
+extends lease-held reaping to persistent preflight drain errors and setup failures.
+The fixed-source results and exact receipt identities below remain historical
+evidence for F1/F2/F3 and are not relabeled by that correction.
+
 This correction addresses F1/F2/F3 from the independent review at tested source
 `f80b37fe14d856d2f2a048a06fe848fc4420448d`, retained in review commit
 `0a2baf4a6ccd11dca7b9aa3c188e6ae2aab2a338`. The historical review, fault
