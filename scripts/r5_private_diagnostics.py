@@ -74,13 +74,13 @@ class Retention:
             raise ValueError('diagnostic retention bound exceeded')
         fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=self.fd)
         try:
-            with os.fdopen(fd, 'wb') as output:
+            output = os.fdopen(fd, 'wb')
+            fd = None  # fdopen owns it; its context may close/reuse the number.
+            with output:
                 output.write(data)
         except BaseException:
-            try:
+            if fd is not None:  # fdopen failed before transferring ownership.
                 os.close(fd)
-            except OSError:
-                pass
             os.unlink(name, dir_fd=self.fd)
             raise
         self.total += len(data)
@@ -99,6 +99,16 @@ class Retention:
                   stdout_bytes=len(stdout), stderr_bytes=len(stderr),
                   stdout_sha256=hashlib.sha256(stdout).hexdigest(),
                   stderr_sha256=hashlib.sha256(stderr).hexdigest()))
+
+    def failed_command(self, index, stdout, stderr, returncode, producer_error):
+        """A secondary diagnostic failure must never replace producer evidence."""
+        try:
+            self.command(index, stdout, stderr, returncode)
+        except Exception as retention_error:
+            producer_error.retention_errors = (*getattr(producer_error, 'retention_errors', ()), retention_error)
+            # Surface safe secondary facts even if disk/limits prevent writing.
+            producer_error.add_note('diagnostic retention failed: ' + type(retention_error).__name__ +
+                                    '; errno=' + str(getattr(retention_error, 'errno', None)))
 
     def close(self):
         if self.fd is not None:

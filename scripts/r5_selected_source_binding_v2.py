@@ -291,12 +291,14 @@ def _capture(root, go, *, cache, modulecache, context, diagnostics):
         try:
             result = subprocess.run([str(go),*argv],cwd=root,env={**env,**{k:os.environ[k] for k in ('HTTPS_PROXY','HTTP_PROXY','ALL_PROXY','NO_PROXY') if k in os.environ}},capture_output=True,timeout=180)
         except subprocess.TimeoutExpired as error:
-            diagnostics.command(diagnostics.count, error.stdout, error.stderr, None)
+            diagnostics.failed_command(diagnostics.count, error.stdout, error.stderr, None, error)
             raise
-        diagnostics.command(diagnostics.count, result.stdout, result.stderr, result.returncode)
         commands.append(dict(role=role,argv=[str(go),*argv],exit=result.returncode,stdout_sha256=hashlib.sha256(result.stdout).hexdigest(),stderr=result.stderr.decode()))
         if result.returncode:
-            raise MetadataCommandFailure(commands[-1],result.stdout,result.stderr)
+            error = MetadataCommandFailure(commands[-1],result.stdout,result.stderr)
+            diagnostics.failed_command(diagnostics.count, result.stdout, result.stderr, result.returncode, error)
+            raise error
+        diagnostics.command(diagnostics.count, result.stdout, result.stderr, result.returncode)
         return result.stdout
     envinfo = json.loads(run(['env','-json']))
     # go env reports GOENV='' when disabled; GOGCCFLAGS has a per-query temp prefix.

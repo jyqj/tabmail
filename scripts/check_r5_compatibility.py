@@ -42,7 +42,7 @@ def diagnostic_run(argv, **kwargs):
         try:
             result = subprocess.run(argv, **kwargs)
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired) as error:
-            diagnostics.command(0, error.stdout, error.stderr, getattr(error, 'returncode', None))
+            diagnostics.failed_command(0, error.stdout, error.stderr, getattr(error, 'returncode', None), error)
             raise
         diagnostics.command(0, result.stdout, result.stderr, result.returncode)
         return result
