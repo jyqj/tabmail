@@ -1,0 +1,200 @@
+{
+  "actual_receipt_resigned_rejections": [
+    {
+      "context": "default",
+      "field": "raw_stdout_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "default",
+      "field": "raw_stdout_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "default",
+      "field": "stderr_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "default",
+      "field": "stderr_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "default",
+      "field": "argv",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "default",
+      "field": "exit",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "default",
+      "field": "role",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "default",
+      "field": "raw_stdout_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "default",
+      "field": "raw_stdout_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "default",
+      "field": "stderr_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "default",
+      "field": "stderr_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "default",
+      "field": "argv",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "default",
+      "field": "exit",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "default",
+      "field": "role",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "raw_stdout_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "raw_stdout_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "stderr_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "stderr_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "argv",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "exit",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "role",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "before"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "raw_stdout_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "raw_stdout_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "stderr_sha256",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "stderr_bytes",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "argv",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "exit",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    },
+    {
+      "context": "race-r5protocol",
+      "field": "role",
+      "result": "resigned_envelope_rejected_with_external_pin_fixed",
+      "stage": "after"
+    }
+  ],
+  "pins": [
+    {
+      "context": "default",
+      "pin_file": "/tmp/r5-selected-v3-reviewed-20261004/default-before.independent-trusted-pin",
+      "stage": "before",
+      "trusted_observation_sha256": "01517740d7a9e51a61cea346e1b1af9366ec74a3ecba0dd0a12b1e590fe7eba6"
+    },
+    {
+      "context": "default",
+      "pin_file": "/tmp/r5-selected-v3-reviewed-20261004/default-after.independent-trusted-pin",
+      "stage": "after",
+      "trusted_observation_sha256": "d1aeef6594bf6342fdf97bbea49cd435c4e04b4f9c02d2422365723ed0b953c4"
+    },
+    {
+      "context": "race-r5protocol",
+      "pin_file": "/tmp/r5-selected-v3-reviewed-20261004/race-r5protocol-before.independent-trusted-pin",
+      "stage": "before",
+      "trusted_observation_sha256": "a946ab92f3c9165eb6022c071fff445ad54188c07983a5ad3bd0d7e28375875b"
+    },
+    {
+      "context": "race-r5protocol",
+      "pin_file": "/tmp/r5-selected-v3-reviewed-20261004/race-r5protocol-after.independent-trusted-pin",
+      "stage": "after",
+      "trusted_observation_sha256": "52c10a0aa6f152a4805ba852c20ed753703b3a3eecaee0fc81fec5d4562b44ea"
+    }
+  ],
+  "rejections": 28,
+  "trusted_channel": "private direct local captures/validate returns; independent stdlib complete-envelope hashing"
+}

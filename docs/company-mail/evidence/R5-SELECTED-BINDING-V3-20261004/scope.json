@@ -1,0 +1,13 @@
+{
+  "base_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "code_diff_paths": [
+    "scripts/contracts/r5-selected-binding-v3-producer.json",
+    "scripts/r5_selected_source_binding_v3.py",
+    "scripts/tests/r5_selected_source_binding_v3_checks.py"
+  ],
+  "code_sha": "b25e383a5e4fa64f13e9e0a069b75bb263dd7d5b",
+  "existing_file_changes": [],
+  "formal_consumer_changes": [],
+  "formal_discovery_filename_changes": [],
+  "v2_contract_changes": []
+}
