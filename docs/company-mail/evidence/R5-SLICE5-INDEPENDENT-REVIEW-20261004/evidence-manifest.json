@@ -1,0 +1,54 @@
+{
+  "REVIEW.md": {
+    "bytes": 15664,
+    "sha256": "fa2c3537d90ff63972b65ec3fa7f1a3ff4f74f3da495e07d94e41f1350d9050e"
+  },
+  "checks.txt": {
+    "bytes": 5053,
+    "sha256": "79baa23a4945181c641f4055845c1886c9781a6bd08030708d7d98ecf3ab5ff1"
+  },
+  "controller-reviewed.py.txt": {
+    "bytes": 4577,
+    "sha256": "94c6294eb1057f9fa0c64e08dd73b29d35a04c24ecbf0a23bb49c332c48bbbe2"
+  },
+  "delivery-post-preservation.json": {
+    "bytes": 200,
+    "sha256": "e64c77b1b24845a50e101cd891f2834a1e7ff2cab578c4ca9afe613ae6d5d451"
+  },
+  "delivery-pre.json": {
+    "bytes": 607111,
+    "sha256": "d4eb72f52c9966c151ffed4b0082c5906964f3051355f615cc03f1d075c0845b"
+  },
+  "independent-static-review.json": {
+    "bytes": 1735,
+    "sha256": "83c2abe7ccf0e90c321e2590a548d8da96c12075974f123683da27094f5db965"
+  },
+  "predicate-checks.txt": {
+    "bytes": 619,
+    "sha256": "f78e0d374be2182aff2d5e8bc18ec8d109cd84bd2dd3372f423bb168cb307a64"
+  },
+  "predicate-results.json": {
+    "bytes": 4272,
+    "sha256": "f052a549d281e0a8fd8e6b0a90f68cf78534432caae9865bb84039e00b9c68cb"
+  },
+  "results.json": {
+    "bytes": 633392,
+    "sha256": "33049106f4dde0cb7ec9363e464f43763465e7ccd452327a4518cf7436696536"
+  },
+  "review-summary.json": {
+    "bytes": 698,
+    "sha256": "ea87053eeb2ae116f8f2b5dba6175f12bf6aa503482994aa5147a6c45af01d6e"
+  },
+  "source-post-preservation.json": {
+    "bytes": 152604,
+    "sha256": "4f1f8662676a9432eef4af39628a097bc585ed0c37790fb213391da934cbd084"
+  },
+  "verify_closure.py": {
+    "bytes": 9505,
+    "sha256": "5e3dfb3092a7cd38a25265d74d2ec0f127c0a3d40891dd45c5cfe66119979635"
+  },
+  "verify_predicates.py": {
+    "bytes": 6040,
+    "sha256": "bc2c2b0440ea32cfe8625ee642e9cddeaa60c47b6db77a842f1e8f0b278c83d7"
+  }
+}

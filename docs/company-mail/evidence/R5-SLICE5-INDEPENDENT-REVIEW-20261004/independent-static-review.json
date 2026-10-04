@@ -1,0 +1,32 @@
+{
+  "all14_inventory_list_flags_accurate": true,
+  "all_source_blobs_modes_retained_in_delivery": true,
+  "controller_ast_parsed_only": true,
+  "controller_executed": false,
+  "controller_sha256": "94c6294eb1057f9fa0c64e08dd73b29d35a04c24ecbf0a23bb49c332c48bbbe2",
+  "delivery": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+  "delivery_only_additions": [
+    "docs/company-mail/R5-SLICE5-CLOSURE-20261004.md",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/checks.txt",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/final-preservation.json",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/predicate-checks.txt",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/predicate-results.json",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/proposed_physical_controller.py",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/results.json",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/verify_closure.py",
+    "docs/company-mail/evidence/R5-SLICE5-CLOSURE-20261004/verify_predicates.py"
+  ],
+  "historical_receipts_F52_TODO_locks_forks_all_preserved_by_full_tree_equality": true,
+  "implementation": "73777de3f51ff185d02ab2e1193421fa91cde9d4",
+  "implementation_to_source_docs_paths": 31,
+  "implementation_tree": "f27e02ce4987488d783a22f7cc1620dfe3795cd4",
+  "independently_derived14_paths_match_inventory": true,
+  "physical_blocker": "batch probe requires disposable PostgreSQL DSN and creates eight owned databases",
+  "source": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+  "source_domain_static_lines": [
+    "r5_source_inventory.py:211,463,567",
+    "r5_archive_boundary.py:148-160",
+    "r5_selected_binding_consumer.py:560"
+  ],
+  "source_paths": 2331
+}

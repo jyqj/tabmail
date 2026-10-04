@@ -1,0 +1,21 @@
+{
+  "closure_verdict": "ACCEPTED_BOUNDED_MEMBERSHIP",
+  "physical_plan_verdict": "NOT_READY_AS_WRITTEN",
+  "methods": 36,
+  "closure_methods": 31,
+  "predicate_methods": 5,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "guarded_process_events": 0,
+  "per_input_negative_rows": 56,
+  "closure_custom_negative_rows": 66,
+  "supplemental_negative_rows": 33,
+  "source_preserved_paths_modes": 2331,
+  "delivery_preserved_paths_modes": 2340,
+  "policy_registry_refresh_needed": false,
+  "exact_v3_keys_retained": true,
+  "controller_executed": false,
+  "blocking_physical_prerequisite": "explicitly authorized isolated disposable PostgreSQL DSN/create/drop/cleanup",
+  "review_details": "REVIEW.md"
+}

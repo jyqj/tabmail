@@ -1,0 +1,10 @@
+test_byte_budget_actual_read (__main__.Predicates.test_byte_budget_actual_read) ... ok
+test_exact_v3_source_membership (__main__.Predicates.test_exact_v3_source_membership) ... ok
+test_native_and_unclassified_build_inputs (__main__.Predicates.test_native_and_unclassified_build_inputs) ... ok
+test_selected_coverage_and_variants (__main__.Predicates.test_selected_coverage_and_variants) ... ok
+test_selector_and_batch_versions_before_boundary (__main__.Predicates.test_selector_and_batch_versions_before_boundary) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.047s
+
+OK
