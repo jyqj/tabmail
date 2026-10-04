@@ -1,0 +1,15 @@
+{
+  "source_commit": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+  "source_tree": "b5248dfb96e9478c5720ea7d5734433d3ddc6941",
+  "old_evidence_delivery": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+  "review_commit": "f89104c6e163a3555a5242d32f48f2af65c07262",
+  "controller_sha256": "eb22987bf2c0a0349a9e27c646406414bf5ac1564a2b95c690283a576a502358",
+  "physical_tests_run": 0,
+  "files": {
+    "docs/company-mail/R5-SLICE5-PHYSICAL-PLAN-V2-20261004.md": "13941d07b24f280cd6a6c58a406c6a9611e7c0432b55f28bf609b36b05bb07fc",
+    "docs/company-mail/evidence/R5-SLICE5-PHYSICAL-PLAN-V2-20261004/approval-template.json": "854164d8bd84a5e6959702ca29b3cf5d9259041c30c70be8ef686d9f78cad8d9",
+    "docs/company-mail/evidence/R5-SLICE5-PHYSICAL-PLAN-V2-20261004/candidate-tool-pins.json": "ed7983094d70edd6e409dae56de6aeb6b4adbf4ab4d9a67970eff5f77234583a",
+    "docs/company-mail/evidence/R5-SLICE5-PHYSICAL-PLAN-V2-20261004/controller_v2.py": "eb22987bf2c0a0349a9e27c646406414bf5ac1564a2b95c690283a576a502358",
+    "docs/company-mail/evidence/R5-SLICE5-PHYSICAL-PLAN-V2-20261004/static-plan-review.json": "a69017ce6ac902d95677fe03f9fec88b48e96cef346f57215bc54d3ea89f6f47"
+  }
+}

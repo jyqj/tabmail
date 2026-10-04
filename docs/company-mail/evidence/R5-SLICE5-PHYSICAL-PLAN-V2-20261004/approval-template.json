@@ -1,0 +1,85 @@
+{
+  "schema_version": 2,
+  "authorized_single_probe": false,
+  "source_commit": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+  "source_tree": "b5248dfb96e9478c5720ea7d5734433d3ddc6941",
+  "controller_sha256": "eb22987bf2c0a0349a9e27c646406414bf5ac1564a2b95c690283a576a502358",
+  "tools": {
+    "python": {
+      "path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3.12",
+      "sha256": "fa67443527ed9647f760d807e2a38f26340757123e643c4639cf273ed15d5ea7"
+    },
+    "git": {
+      "path": "/usr/local/bin/git",
+      "sha256": "37d928337f8e6c6b4c875d79fd33ee2f440594a589f584c89146bbf0aeafd63e"
+    },
+    "node": {
+      "path": "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+      "sha256": "bc17c508ffeed0ec622934f9b7fa72f8e78da65350e63c3eceb56fa688aa5e12"
+    },
+    "go": {
+      "path": "/workspace/tabmail-cloud/tools/go/bin/go",
+      "sha256": "76ac600b41ad2eceee5d39d02af78009516f8b2a29f30bcc80f765c3e4b4f5a8"
+    },
+    "cc": {
+      "path": "/usr/bin/x86_64-linux-gnu-gcc-14",
+      "sha256": "a23ecab8ff08f09ad8c80602c2c5df7f49e09c25905cb8975902e101bf72635f"
+    },
+    "postgres": {
+      "path": "/workspace/tabmail-cloud/sysroot/usr/lib/postgresql/17/bin/postgres",
+      "sha256": "6468a969338215cb3912cf9c0b894bdbbd37b9a709926db078e9a5bf8bdc3e16"
+    },
+    "psql": {
+      "path": "/workspace/tabmail-cloud/sysroot/usr/lib/postgresql/17/bin/psql",
+      "sha256": "3c94c29652ea7ff8803ab1ca35e48c38a39c8a94a8c8eeadbb1d87c68494506c"
+    },
+    "initdb": {
+      "path": "/workspace/tabmail-cloud/sysroot/usr/lib/postgresql/17/bin/initdb",
+      "sha256": "a0363354125bc00f25075bb47fc32a2838fa7668c008326227f5bc04d628ca1d"
+    },
+    "pg_ctl": {
+      "path": "/workspace/tabmail-cloud/sysroot/usr/lib/postgresql/17/bin/pg_ctl",
+      "sha256": "c8a0fa6df90600186575e3f3c47a352bafac73547416cf67675b41991b5b5d74"
+    }
+  },
+  "root": "/task-owned/r5-slice5/toolroot",
+  "source": "/task-owned/r5-slice5/toolroot/source",
+  "evidence": "/task-owned/r5-slice5/evidence",
+  "environment": {
+    "PATH": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin:/usr/local/bin:/workspace/tabmail-cloud/tools/go/bin:/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin:/usr/bin:/bin",
+    "HOME": "/task-owned/r5-slice5/home",
+    "TMPDIR": "/task-owned/r5-slice5/tmp",
+    "LANG": "C",
+    "LC_ALL": "C",
+    "GOCACHE": "/task-owned/r5-slice5/go-cache",
+    "GOMODCACHE": "/task-owned/r5-slice5/go-mod/pkg/mod",
+    "GOPATH": "/task-owned/r5-slice5/go-mod",
+    "GOENV": "off",
+    "GOWORK": "off",
+    "GOFLAGS": "",
+    "GOTOOLCHAIN": "local",
+    "GOPROXY": "off",
+    "GOSUMDB": "off",
+    "R5_DIAGNOSTIC_ROOT": "/task-owned/r5-slice5/diagnostics"
+  },
+  "containment": {
+    "probe_cgroup": null,
+    "pg_cgroup": null,
+    "net_namespace": null,
+    "pid_namespace": null,
+    "supervisor_review_commit": null,
+    "supervisor_sha256": null,
+    "supervisor_path": null
+  },
+  "postgres": {
+    "host": "127.0.0.1",
+    "port": null,
+    "role": null,
+    "database": "postgres",
+    "data_directory": "/task-owned/r5-slice5/pgdata",
+    "pid": null,
+    "start_epoch": null,
+    "system_identifier": null,
+    "pg_hba_sha256": null
+  }
+}
