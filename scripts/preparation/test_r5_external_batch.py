@@ -40,7 +40,7 @@ class ContractControls(unittest.TestCase):
     def test_false_pass_and_duplicate_assertions_rejected(self):
         report=dict(success=True,numTotalTests=1,numPassedTests=1,numFailedTests=0,numPendingTests=0,testResults=[dict(assertionResults=[dict(fullName='expected',status='passed')])])
         self.assertTrue(batch.exact_assertions(report,['expected'],0))
-        for field,value in [('success',False),('numPendingTests',1),('numPassedTests',0),('numRuntimeErrorTestSuites',1)]:
+        for field,value in [('success',False),('numPendingTests',1),('numPassedTests',0),('numRuntimeErrorTestSuites',1),('numTotalTests',True)]:
             bad=copy.deepcopy(report);bad[field]=value
             self.assertFalse(batch.exact_assertions(bad,['expected'],0))
         self.assertFalse(batch.exact_assertions(report,['expected'],1))

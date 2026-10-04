@@ -227,7 +227,9 @@ def join_adopted_tails():
 def exact_assertions(report, expected, exit_code):
     assertions = [a for result in report.get('testResults', []) for a in result.get('assertionResults', [])]
     names = [a.get('fullName') for a in assertions]
-    return (exit_code == 0 and report.get('success') is True and len(names) == len(set(names))
+    counters=('numTotalTests','numPassedTests','numFailedTests','numPendingTests')
+    return (all(type(report.get(key)) is int for key in counters)
+            and exit_code == 0 and report.get('success') is True and len(names) == len(set(names))
             and set(names) == set(expected) and all(a.get('status') == 'passed' for a in assertions)
             and report.get('numTotalTests') == report.get('numPassedTests') == len(expected)
             and report.get('numFailedTests') == report.get('numPendingTests') == 0
