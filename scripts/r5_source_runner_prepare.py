@@ -17,6 +17,7 @@ import tarfile
 import urllib.request
 import uuid
 import r5_go_environment
+import r5_selected_binding_consumer as consumer
 
 LOCK_SHA256 = 'b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3'
 TS_URL = 'https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz'
@@ -128,6 +129,69 @@ def go_selection(root, go, env, output, phase):
     return result
 
 
+def read_regular(path):
+    """Read retained evidence through a held regular, non-following descriptor."""
+    fd = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+    try:
+        initial = os.fstat(fd)
+        if not stat.S_ISREG(initial.st_mode):
+            raise ValueError('regular preparation evidence required')
+        with os.fdopen(os.dup(fd), 'rb') as file:
+            raw = file.read()
+        final, current = os.fstat(fd), Path(path).lstat()
+        identity = lambda row: (row.st_dev, row.st_ino, row.st_size, row.st_mtime_ns, row.st_ctime_ns)
+        if identity(initial) != identity(final) or identity(initial) != identity(current):
+            raise ValueError('preparation evidence changed while reading')
+        return raw
+    finally:
+        os.close(fd)
+
+
+def capture_owned_v3(root, go, env, output, phase, observations):
+    """Pins originate only from these successful capture returns, never files."""
+    helper = consumer.selected_helper(3)
+    cache = env.get('GOCACHE') or subprocess.check_output([go, 'env', 'GOCACHE'], env=env, text=True).strip()
+    modulecache = env.get('GOMODCACHE') or subprocess.check_output([go, 'env', 'GOMODCACHE'], env=env, text=True).strip()
+    if any(output.is_relative_to(Path(tree).resolve()) for tree in (root, cache, modulecache)):
+        raise ValueError('v3 evidence must be outside source and dependency/cache trees')
+    for name, context in (('default', helper.DEFAULT_CONTEXT), ('race-r5protocol', helper.CONTEXT)):
+        receipt = helper.capture(root, Path(go), cache=Path(cache), modulecache=Path(modulecache), context=context)
+        observation_pin = helper.observation_digest(receipt)
+        helper._verify_receipt(receipt, observation_pin)
+        raw = (json.dumps(receipt, indent=2, allow_nan=False) + '\n').encode()
+        path = output / (phase + '-' + name + '-selection.json')
+        pin = dict(receipt_path=str(path), receipt_byte_sha256=digest(raw),
+                   observation_sha256=observation_pin, context=dict(context))
+        exclusive(path, raw)
+        if read_regular(path) != raw:
+            raise ValueError('owned capture return persistence mismatch')
+        exclusive(output / (phase + '-' + name + '-observation-pin.json'),
+                  (json.dumps(pin, indent=2) + '\n').encode())
+        observations[phase + '-' + name] = pin
+
+
+def verify_v3_selection(bundle_path, bundle_hash, *, root, sha, run_id, producer, observations):
+    bundle_raw = read_regular(bundle_path)
+    for slot, pin in observations.items():
+        pin_path = Path(bundle_path).parent / (slot + '-observation-pin.json')
+        if consumer._decode(read_regular(pin_path)) != pin:
+            raise ValueError('separately persisted observation pin mismatch')
+        if pin['receipt_path'] != str(Path(bundle_path).parent / (slot + '-selection.json')):
+            raise ValueError('observation slot path mismatch')
+    receipts = {slot: read_regular(pin['receipt_path']) for slot, pin in observations.items()}
+    verified = consumer.verify_bundle(bundle_raw, receipts, trusted_bundle_byte_sha256=bundle_hash,
+        run_id=run_id, source_commit=sha, source_root=str(root), producer=producer,
+        allowed_slots=consumer.PREPARATION_SLOTS, selected_binding_version=3)
+    bundle = consumer._decode(bundle_raw)
+    if bundle['observations'] != observations:
+        raise ValueError('preparation observation references mismatch')
+    payloads = consumer.binding_payloads(verified, selected_binding_version=3)
+    for name in ('default', 'race-r5protocol'):
+        if payloads['before-' + name] != payloads['after-' + name]:
+            raise ValueError('TypeScript preparation changed complete Go binding payload')
+    return verified, payloads
+
+
 def execute_binary(root, go, binary, expected_hash, source_sha, fixture, env):
     """Execute the pinned inode, even if its pathname is replaced midflight.
 
@@ -166,22 +230,48 @@ def execute_binary(root, go, binary, expected_hash, source_sha, fixture, env):
         os.close(fd)
 
 
-def prepare(root, output, go):
+def prepare(root, output, go, *, selected_binding_version=2):
+    selected_binding_version = consumer.selected_version(selected_binding_version)
+    if selected_binding_version == 3:
+        # Reject PATH selection before the legacy environment resolver runs.
+        consumer.selected_helper(3)._absolute_producer_path(go)
     root, output = Path(root).resolve(), Path(output).resolve()
+    if selected_binding_version == 3 and output.is_relative_to(root):
+        raise ValueError('v3 evidence must be outside source tree')
     output.mkdir(mode=0o700)  # New unique runner-owned directory only.
     sha = source_identity(root)
     go, env = r5_go_environment.selected({**os.environ, 'R5_TEST_GO': str(go)})
     version = subprocess.check_output([go, 'env', 'GOVERSION'], env=env, text=True).strip()
     if version != 'go1.25.7':
         raise ValueError('Go1.25.7 required for source-runner preparation')
-    before = go_selection(root, go, env, output, 'before')
-    typescript = prepare_typescript(root)
-    after = go_selection(root, go, env, output, 'after')
-    if before != after:
-        raise ValueError('TypeScript preparation changed Go selection')
+    if selected_binding_version == 2:
+        before = go_selection(root, go, env, output, 'before')
+        typescript = prepare_typescript(root)
+        after = go_selection(root, go, env, output, 'after')
+        if before != after:
+            raise ValueError('TypeScript preparation changed Go selection')
+    else:
+        run_id = uuid.uuid4().hex
+        observations = {}
+        capture_owned_v3(root, go, env, output, 'before', observations)
+        typescript = prepare_typescript(root)
+        capture_owned_v3(root, go, env, output, 'after', observations)
+        producer = dict(path=go, sha256=consumer.selected_helper(3).GO_SHA256, version=version)
+        bundle = dict(schema_version=1, policy=consumer.PIN_POLICY, run_id=run_id,
+            source_commit=sha, source_root=str(root), selected_binding_version=3,
+            producer=producer, observations=observations)
+        bundle_raw = (json.dumps(bundle, indent=2, allow_nan=False) + '\n').encode()
+        bundle_hash = digest(bundle_raw)  # Controller memory, computed before publication.
+        bundle_path = output / 'selected-observation-pins.json'
+        exclusive(bundle_path, bundle_raw)
+        verified, payloads = verify_v3_selection(bundle_path, bundle_hash, root=root, sha=sha,
+            run_id=run_id, producer=producer, observations=observations)
+        before = {name: payloads['before-' + name] for name in ('default', 'race-r5protocol')}
+        after = {name: payloads['after-' + name] for name in ('default', 'race-r5protocol')}
     # Compile/run under exactly the checked selection environment, preserving
     # only platform proxy transport settings in addition to that environment.
-    env = json.loads((output / 'after-default-selection.json').read_bytes())['environment']
+    env = (json.loads((output / 'after-default-selection.json').read_bytes())['environment']
+           if selected_binding_version == 2 else dict(verified['after-default']['environment']))
     env.update({k:os.environ[k] for k in ('HTTPS_PROXY','HTTP_PROXY','ALL_PROXY','NO_PROXY') if k in os.environ})
     binary = output / 'ordinary-receipt.test'
     build_argv = [go, 'test', '-c', '-o', str(binary), './internal/api/handlers']
@@ -199,26 +289,75 @@ def prepare(root, output, go):
         raise ValueError('fresh typed wire test did not actually run and pass')
     if source_identity(root) != sha or not fixture.is_file() or fixture.is_symlink():
         raise ValueError('fresh typed wire source/output mismatch')
-    run_id = uuid.uuid4().hex
+    if selected_binding_version == 2:
+        run_id = uuid.uuid4().hex
+    else:
+        # Recheck retained selection after build/run before publishing admission.
+        verify_v3_selection(bundle_path, bundle_hash, root=root, sha=sha, run_id=run_id,
+                            producer=producer, observations=observations)
     receipt = dict(source_sha=sha, run_id=run_id, go_version=version, typescript=typescript, go_selection_before=before, go_selection_after=after,
                    go_selection_unchanged=True, fixture=str(fixture), fixture_sha256=digest(fixture.read_bytes()),
                    build_argv=build_argv, build_sha256=build_hash,
                    build_stdout_sha256=digest(build.stdout), build_stderr_sha256=digest(build.stderr),
                    **execution, run_stdout_sha256=digest(run.stdout), run_stderr_sha256=digest(run.stderr),
                    actual_started_test_ids=[TEST_NAME], actual_passed_test_ids=[TEST_NAME], exit=run.returncode)
+    if selected_binding_version == 3:
+        receipt.update(schema_version=3, policy='r5_source_preparation_v3', selected_binding_version=3,
+            source_root=str(root), selected_observation_bundle=str(bundle_path),
+            selected_observation_bundle_sha256=bundle_hash, selected_producer=producer,
+            selected_observations=observations)
     receipt['run_sha256'] = digest(json.dumps(receipt, sort_keys=True).encode())
     path = output / 'preparation.json'
     exclusive(path, (json.dumps(receipt, indent=2) + '\n').encode())
-    return receipt, {'ORDINARY_RECEIPT_WIRE_FIXTURE': str(fixture), 'R5_SOURCE_PREPARATION': str(path),
+    return receipt, {**({'R5_SELECTED_BINDING_VERSION': '3',
+        'R5_SELECTED_OBSERVATION_BUNDLE': str(bundle_path),
+        'R5_SELECTED_OBSERVATION_BUNDLE_SHA256': bundle_hash} if selected_binding_version == 3 else {}), 'ORDINARY_RECEIPT_WIRE_FIXTURE': str(fixture), 'R5_SOURCE_PREPARATION': str(path),
                      'R5_SOURCE_PREPARATION_SHA256': digest(path.read_bytes()), 'R5_SOURCE_RUN_ID': run_id}
 
 
-def validate_wire(root, fixture, receipt_path, receipt_hash, run_id):
+_DEFAULT_VERSION = object()
+
+
+def validate_wire(root, fixture, receipt_path, receipt_hash, run_id, *, selected_binding_version=_DEFAULT_VERSION):
     """Bind complete wire bytes to the current source and fresh build/run evidence."""
+    if selected_binding_version is _DEFAULT_VERSION:
+        selector = os.environ.get('R5_SELECTED_BINDING_VERSION', '2')
+        if selector not in ('2', '3'):
+            raise ValueError('invalid selected binding environment selector')
+        selected_binding_version = int(selector)
+    selected_binding_version = consumer.selected_version(selected_binding_version)
     path = Path(receipt_path)
-    if path.is_symlink() or digest(path.read_bytes()) != receipt_hash:
+    raw = path.read_bytes() if selected_binding_version == 2 else read_regular(path)
+    if path.is_symlink() or digest(raw) != receipt_hash:
         raise ValueError('typed wire preparation receipt tampered')
-    receipt = json.loads(path.read_bytes())
+    receipt = json.loads(raw) if selected_binding_version == 2 else consumer._decode(raw)
+    if selected_binding_version == 3:
+        consumer._shape(receipt, 'source_sha run_id go_version typescript go_selection_before '
+            'go_selection_after go_selection_unchanged fixture fixture_sha256 build_argv build_sha256 '
+            'build_stdout_sha256 build_stderr_sha256 run_argv run_cwd executed_binary_source_path '
+            'executed_binary_sha256 execution_binding run_stdout_sha256 run_stderr_sha256 '
+            'actual_started_test_ids actual_passed_test_ids exit schema_version policy selected_binding_version '
+            'source_root selected_observation_bundle selected_observation_bundle_sha256 '
+            'selected_producer selected_observations run_sha256'.split(), 'v3 preparation')
+        if (type(receipt.get('schema_version')) is not int or receipt['schema_version'] != 3 or
+                receipt.get('policy') != 'r5_source_preparation_v3' or
+                type(receipt.get('selected_binding_version')) is not int or receipt['selected_binding_version'] != 3 or
+                receipt.get('source_root') != str(Path(root).resolve()) or
+                receipt.get('go_version') != 'go1.25.7' or
+                receipt.get('go_selection_unchanged') is not True or
+                type(receipt.get('exit')) is not int):
+            raise ValueError('explicit v3 preparation required')
+        _, payloads = verify_v3_selection(receipt['selected_observation_bundle'],
+            receipt['selected_observation_bundle_sha256'], root=Path(root).resolve(),
+            sha=receipt['source_sha'], run_id=run_id, producer=receipt['selected_producer'],
+            observations=receipt['selected_observations'])
+        for phase in ('before', 'after'):
+            expected = {name: payloads[phase + '-' + name] for name in ('default', 'race-r5protocol')}
+            if receipt['go_selection_' + phase] != expected:
+                raise ValueError('complete preparation binding payload mismatch')
+    elif any(key in receipt for key in ('schema_version', 'policy', 'selected_binding_version',
+            'selected_observation_bundle', 'selected_observations')):
+        raise ValueError('v2 preparation rejects mixed selected policy')
     fixture = Path(fixture)
     if (receipt['run_id'] != run_id or receipt['source_sha'] != source_identity(root) or str(fixture.resolve()) != receipt['fixture'] or
             fixture.is_symlink() or digest(fixture.read_bytes()) != receipt['fixture_sha256']):

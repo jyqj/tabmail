@@ -103,7 +103,8 @@ def child(root,ids,output):
     return 0 if result.wasSuccessful() and not result.skipped and not result.expectedFailures and result.testsRun == len(ids) else 1
 
 
-def run(root,output):
+def run(root,output, *, selected_binding_version=2):
+    selected_binding_version = preparation.consumer.selected_version(selected_binding_version)
     root = Path(root).resolve(); output = Path(output).resolve(); output.parent.mkdir(parents=True,exist_ok=True)
     sha = git(root,'rev-parse','HEAD'); groups=[]
     with tempfile.TemporaryDirectory(prefix='r5-version-') as temp:
@@ -117,7 +118,7 @@ def run(root,output):
         # Preserve build/run artifacts outside the disposable source clones.
         evidence = Path(tempfile.mkdtemp(prefix='r5-source-preparation-',dir=output.parent))
         try:
-            prepared, prepared_env = preparation.prepare(current,evidence/'current',(os.environ.get('R5_TEST_GO') or os.environ.get('R5_GO') or 'go'))
+            prepared, prepared_env = preparation.prepare(current,evidence/'current',(os.environ.get('R5_TEST_GO') or os.environ.get('R5_GO') or 'go'), **({'selected_binding_version': 3} if selected_binding_version == 3 else {}))
         except Exception as error:
             output.write_text(json.dumps(dict(schema_version=1,status='failed',source_sha=sha,
                 preparation_error=str(error),preparation_output=str(evidence),discovered_test_ids=ids,
@@ -135,7 +136,8 @@ def run(root,output):
                     '--ids',str(request),'--output',str(reportfile)]
             _, dispatch_env = r5_go_environment.selected({**os.environ, 'R5_TEST_GO': (os.environ.get('R5_TEST_GO') or os.environ.get('R5_GO') or 'go')})
             env = {key:value for key,value in dispatch_env.items() if key not in
-                   ('ORDINARY_RECEIPT_WIRE_FIXTURE','R5_SOURCE_PREPARATION','R5_SOURCE_PREPARATION_SHA256','R5_SOURCE_RUN_ID')}
+                   ('ORDINARY_RECEIPT_WIRE_FIXTURE','R5_SOURCE_PREPARATION','R5_SOURCE_PREPARATION_SHA256','R5_SOURCE_RUN_ID','R5_SELECTED_BINDING_VERSION','R5_SELECTED_OBSERVATION_BUNDLE',
+                    'R5_SELECTED_OBSERVATION_BUNDLE_SHA256')}
             if pin is None:env.update(prepared_env)
             result = subprocess.run(argv,cwd=source,env=env)
             report = json.loads(reportfile.read_text()) if reportfile.exists() else dict(error='child report missing')
@@ -153,8 +155,8 @@ def run(root,output):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--root',type=Path);p.add_argument('--output',type=Path,required=True)
-    p.add_argument('--child-root',type=Path);p.add_argument('--ids',type=Path);a=p.parse_args()
-    return child(a.child_root,json.loads(a.ids.read_text()),a.output) if a.child_root else run(a.root,a.output)
+    p.add_argument('--selected-binding-version',type=int,choices=(2,3),default=2);p.add_argument('--child-root',type=Path);p.add_argument('--ids',type=Path);a=p.parse_args()
+    return child(a.child_root,json.loads(a.ids.read_text()),a.output) if a.child_root else run(a.root,a.output,selected_binding_version=a.selected_binding_version)
 
 if __name__=='__main__':
     raise SystemExit(main())
