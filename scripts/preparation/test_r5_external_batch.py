@@ -254,3 +254,11 @@ class ConsumerIdentityControls(unittest.TestCase):
                 self.assertEqual(result['locked']['node_modules/tool']['version'],version)
             with batch.concurrent.futures.ThreadPoolExecutor(max_workers=4) as workers:
                 list(workers.map(observe,[('a','1'),('b','2')]*20))
+
+
+class OutputBoundaryControls(unittest.TestCase):
+    def test_source_dependency_relative_and_parent_outputs_rejected_before_write(self):
+        runtime=dict(source=dict(path='/owned/source'),dependency_root=dict(path='/owned'),execution=dict(cwd='/owned/source/web'))
+        contract=dict(runtime=runtime,mode='probe',required={})
+        for path in ['relative','/owned/source/output','/owned/node_modules/output','/owned/../output']:
+            with self.assertRaises(ValueError):batch.Batch(contract,Path(path),{})

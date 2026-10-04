@@ -93,6 +93,10 @@ def capture(manifest, go, mode='components'):
 def validate_contract(contract):
     if contract.get('policy') != POLICY or contract.get('status') != 'UNADOPTED':
         raise ValueError('old policy/promotion cannot authorize batch')
+    if Path(__file__).resolve()!=Path(contract['runtime']['source']['path'])/HELPER:
+        raise ValueError('batch helper must execute from bound source')
+    if Path(sys.executable).resolve()!=Path(contract['runtime']['python']['path']):
+        raise ValueError('batch interpreter identity differs')
     if capture(contract['runtime'], Path(contract['go']['path']), contract['mode']) != contract:
         raise ValueError('batch contract/required inputs drift')
     runtime.validate(contract['runtime'])
@@ -235,6 +239,10 @@ class Batch:
         self.manifest = contract['runtime']
         self.source = Path(self.manifest['source']['path'])
         self.output = Path(output)
+        if not self.output.is_absolute() or '..' in self.output.parts or str(self.output)!=os.path.abspath(self.output):
+            raise ValueError('canonical absolute private output required')
+        if self.output.is_relative_to(self.source) or self.output.is_relative_to(Path(self.manifest['dependency_root']['path'])/'node_modules'):
+            raise ValueError('private output outside runtime trees required')
         self.env = dict(os.environ if environment is None else environment)
         runtime.clean_environment(self.env)
         if contract.get('build_context'):
