@@ -1,0 +1,17 @@
+{
+  "name": "http",
+  "command": [
+    "python3",
+    "-B",
+    "scripts/check_http_contract.py",
+    "--output-dir",
+    "/workspace/r5-wire-private/http",
+    "--source-sha",
+    "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6"
+  ],
+  "invocation_started": true,
+  "started_at": "2026-10-03T21:45:37.680255+00:00",
+  "ended_at": "2026-10-03T21:45:38.280991+00:00",
+  "exit_code": 1,
+  "source_commit": "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6"
+}

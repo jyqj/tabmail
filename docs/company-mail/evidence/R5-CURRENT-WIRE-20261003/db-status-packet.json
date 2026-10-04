@@ -1,0 +1,1435 @@
+{
+  "producer": "check_r5_protocol.py --run shared-db",
+  "source_sha": "a2c7dd0c5728067126b5a5ea05218fda0167cda6",
+  "raw_private_log_sha256": "3dc85471ab0787df35fb8dfa6b0bd317212f3f695116436b9280cde6b2358214",
+  "events": [
+    {
+      "Time": "2026-10-03T21:46:24.211260507Z",
+      "Action": "start",
+      "Package": "tabmail/internal/store/postgres"
+    },
+    {
+      "Time": "2026-10-03T21:46:24.238263949Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities"
+    },
+    {
+      "Time": "2026-10-03T21:46:24.250971265Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source"
+    },
+    {
+      "Time": "2026-10-03T21:46:24.818731821Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities/BC02/trusted_structured_source",
+      "Elapsed": 0.57
+    },
+    {
+      "Time": "2026-10-03T21:46:24.818814345Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities/BC03/missing_source"
+    },
+    {
+      "Time": "2026-10-03T21:46:25.286993635Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities/BC03/missing_source",
+      "Elapsed": 0.47
+    },
+    {
+      "Time": "2026-10-03T21:46:25.287061893Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source"
+    },
+    {
+      "Time": "2026-10-03T21:46:25.720428514Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities/BC03/same_id_foreign_source",
+      "Elapsed": 0.43
+    },
+    {
+      "Time": "2026-10-03T21:46:25.720467537Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5LegacyBCCContractCapabilities",
+      "Elapsed": 1.48
+    },
+    {
+      "Time": "2026-10-03T21:46:25.720874266Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:25.733233472Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT01/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:26.212968919Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT01/default",
+      "Elapsed": 0.48
+    },
+    {
+      "Time": "2026-10-03T21:46:26.212974539Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT03/company_admin"
+    },
+    {
+      "Time": "2026-10-03T21:46:26.665745355Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT03/company_admin",
+      "Elapsed": 0.45
+    },
+    {
+      "Time": "2026-10-03T21:46:26.665767756Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT03/platform_super_admin"
+    },
+    {
+      "Time": "2026-10-03T21:46:27.155991395Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT03/platform_super_admin",
+      "Elapsed": 0.49
+    },
+    {
+      "Time": "2026-10-03T21:46:27.156006212Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT04/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:27.645237679Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT04/default",
+      "Elapsed": 0.49
+    },
+    {
+      "Time": "2026-10-03T21:46:27.645256003Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT05/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:28.137568344Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT05/default",
+      "Elapsed": 0.49
+    },
+    {
+      "Time": "2026-10-03T21:46:28.137574896Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT06/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:28.600760886Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT06/default",
+      "Elapsed": 0.46
+    },
+    {
+      "Time": "2026-10-03T21:46:28.600770223Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT08/before"
+    },
+    {
+      "Time": "2026-10-03T21:46:29.100335467Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT08/before",
+      "Elapsed": 0.5
+    },
+    {
+      "Time": "2026-10-03T21:46:29.100344124Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT08/equal"
+    },
+    {
+      "Time": "2026-10-03T21:46:29.583276219Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT08/equal",
+      "Elapsed": 0.48
+    },
+    {
+      "Time": "2026-10-03T21:46:29.583295675Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT09/before"
+    },
+    {
+      "Time": "2026-10-03T21:46:30.049324186Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT09/before",
+      "Elapsed": 0.46
+    },
+    {
+      "Time": "2026-10-03T21:46:30.049341949Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT09/equal"
+    },
+    {
+      "Time": "2026-10-03T21:46:30.549493082Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT09/equal",
+      "Elapsed": 0.5
+    },
+    {
+      "Time": "2026-10-03T21:46:30.549510354Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT10/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:31.058367975Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases/CT10/default",
+      "Elapsed": 0.51
+    },
+    {
+      "Time": "2026-10-03T21:46:31.058377122Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolContentSharedCases",
+      "Elapsed": 5.34
+    },
+    {
+      "Time": "2026-10-03T21:46:31.058380388Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:31.072529723Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases/CT02/anonymous"
+    },
+    {
+      "Time": "2026-10-03T21:46:31.531859449Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases/CT02/anonymous",
+      "Elapsed": 0.46
+    },
+    {
+      "Time": "2026-10-03T21:46:31.531923108Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases/CT02/revoked"
+    },
+    {
+      "Time": "2026-10-03T21:46:32.086152979Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases/CT02/revoked",
+      "Elapsed": 0.55
+    },
+    {
+      "Time": "2026-10-03T21:46:32.086160824Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases/CT02/frozen"
+    },
+    {
+      "Time": "2026-10-03T21:46:32.529493873Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases/CT02/frozen",
+      "Elapsed": 0.44
+    },
+    {
+      "Time": "2026-10-03T21:46:32.529897446Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolCredentialSharedCases",
+      "Elapsed": 1.47
+    },
+    {
+      "Time": "2026-10-03T21:46:32.529952058Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:32.543273358Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT01/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:33.005429875Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT01/default",
+      "Elapsed": 0.46
+    },
+    {
+      "Time": "2026-10-03T21:46:33.005443831Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT02/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:33.522094131Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT02/default",
+      "Elapsed": 0.52
+    },
+    {
+      "Time": "2026-10-03T21:46:33.522100001Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/expires_at/before"
+    },
+    {
+      "Time": "2026-10-03T21:46:34.003161061Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/expires_at/before",
+      "Elapsed": 0.48
+    },
+    {
+      "Time": "2026-10-03T21:46:34.003178384Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/purge_after/before"
+    },
+    {
+      "Time": "2026-10-03T21:46:34.542394889Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/purge_after/before",
+      "Elapsed": 0.54
+    },
+    {
+      "Time": "2026-10-03T21:46:34.542403095Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/expires_at/equal"
+    },
+    {
+      "Time": "2026-10-03T21:46:35.092108907Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/expires_at/equal",
+      "Elapsed": 0.55
+    },
+    {
+      "Time": "2026-10-03T21:46:35.092114878Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/purge_after/equal"
+    },
+    {
+      "Time": "2026-10-03T21:46:35.64645175Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT03/purge_after/equal",
+      "Elapsed": 0.55
+    },
+    {
+      "Time": "2026-10-03T21:46:35.646460366Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT04/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:36.37907955Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT04/default",
+      "Elapsed": 0.73
+    },
+    {
+      "Time": "2026-10-03T21:46:36.379097584Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT05/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:36.967649837Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT05/default",
+      "Elapsed": 0.59
+    },
+    {
+      "Time": "2026-10-03T21:46:36.967657582Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT06/default"
+    },
+    {
+      "Time": "2026-10-03T21:46:37.56988301Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases/RT06/default",
+      "Elapsed": 0.6
+    },
+    {
+      "Time": "2026-10-03T21:46:37.570050713Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRetentionSharedCases",
+      "Elapsed": 5.04
+    },
+    {
+      "Time": "2026-10-03T21:46:37.570088303Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:37.582674322Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01"
+    },
+    {
+      "Time": "2026-10-03T21:46:38.134498442Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01/reader"
+    },
+    {
+      "Time": "2026-10-03T21:46:38.139759677Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01/reader",
+      "Elapsed": 0.01
+    },
+    {
+      "Time": "2026-10-03T21:46:38.139850166Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01/company_admin"
+    },
+    {
+      "Time": "2026-10-03T21:46:38.141574262Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01/company_admin",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:38.141608095Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01/historical_author"
+    },
+    {
+      "Time": "2026-10-03T21:46:38.143504022Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01/historical_author",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:38.25843186Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP01",
+      "Elapsed": 0.68
+    },
+    {
+      "Time": "2026-10-03T21:46:38.25856009Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP02"
+    },
+    {
+      "Time": "2026-10-03T21:46:38.963355203Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP02",
+      "Elapsed": 0.7
+    },
+    {
+      "Time": "2026-10-03T21:46:38.963360593Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.476551733Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/empty"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.479571777Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/empty",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.479584771Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/whitespace"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.480604613Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/whitespace",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.480618139Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/seven"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.481924005Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/seven",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.481934995Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/trim_seven"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.482859841Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/trim_seven",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.482972561Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/eight"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.488108372Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/eight",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.488111969Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/utf8_six"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.489027467Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/utf8_six",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.489043346Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/utf8_nine"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.492459428Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/utf8_nine",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.492622844Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/utf8_twelve"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.495918762Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/utf8_twelve",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.495934892Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/maximum"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.499652477Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/maximum",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.499665652Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/trim_maximum"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.50324014Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/trim_maximum",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.503418092Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/over_maximum"
+    },
+    {
+      "Time": "2026-10-03T21:46:39.504701025Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03/over_maximum",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:39.517894718Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP03",
+      "Elapsed": 0.55
+    },
+    {
+      "Time": "2026-10-03T21:46:39.517937809Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP04"
+    },
+    {
+      "Time": "2026-10-03T21:46:40.387607807Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases/OP04",
+      "Elapsed": 0.87
+    },
+    {
+      "Time": "2026-10-03T21:46:40.387768727Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolRecoverySharedCases",
+      "Elapsed": 2.82
+    },
+    {
+      "Time": "2026-10-03T21:46:40.387805015Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDomainSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:40.400806919Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDomainSharedCases/CT07"
+    },
+    {
+      "Time": "2026-10-03T21:46:41.049841958Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDomainSharedCases/CT07",
+      "Elapsed": 0.65
+    },
+    {
+      "Time": "2026-10-03T21:46:41.050099268Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDomainSharedCases",
+      "Elapsed": 0.66
+    },
+    {
+      "Time": "2026-10-03T21:46:41.050155944Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:41.065626973Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC01"
+    },
+    {
+      "Time": "2026-10-03T21:46:41.813254235Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC01",
+      "Elapsed": 0.75
+    },
+    {
+      "Time": "2026-10-03T21:46:41.813259665Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC03"
+    },
+    {
+      "Time": "2026-10-03T21:46:42.348569816Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC03",
+      "Elapsed": 0.54
+    },
+    {
+      "Time": "2026-10-03T21:46:42.348585445Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC04"
+    },
+    {
+      "Time": "2026-10-03T21:46:42.922293143Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC04",
+      "Elapsed": 0.57
+    },
+    {
+      "Time": "2026-10-03T21:46:42.922364777Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC05"
+    },
+    {
+      "Time": "2026-10-03T21:46:43.443225344Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases/RC05",
+      "Elapsed": 0.52
+    },
+    {
+      "Time": "2026-10-03T21:46:43.443343023Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolReceiptSharedCases",
+      "Elapsed": 2.39
+    },
+    {
+      "Time": "2026-10-03T21:46:43.443376225Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:43.461025538Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF01"
+    },
+    {
+      "Time": "2026-10-03T21:46:44.051504408Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF01",
+      "Elapsed": 0.59
+    },
+    {
+      "Time": "2026-10-03T21:46:44.051533262Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF02"
+    },
+    {
+      "Time": "2026-10-03T21:46:44.56863965Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF02",
+      "Elapsed": 0.52
+    },
+    {
+      "Time": "2026-10-03T21:46:44.568679955Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF03"
+    },
+    {
+      "Time": "2026-10-03T21:46:45.154715758Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF03",
+      "Elapsed": 0.59
+    },
+    {
+      "Time": "2026-10-03T21:46:45.154721449Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF04"
+    },
+    {
+      "Time": "2026-10-03T21:46:45.800849479Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF04",
+      "Elapsed": 0.65
+    },
+    {
+      "Time": "2026-10-03T21:46:45.80087137Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF06"
+    },
+    {
+      "Time": "2026-10-03T21:46:46.366971199Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF06",
+      "Elapsed": 0.57
+    },
+    {
+      "Time": "2026-10-03T21:46:46.366988462Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF07"
+    },
+    {
+      "Time": "2026-10-03T21:46:46.913289896Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases/LF07",
+      "Elapsed": 0.54
+    },
+    {
+      "Time": "2026-10-03T21:46:46.913299214Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingSharedCases",
+      "Elapsed": 3.47
+    },
+    {
+      "Time": "2026-10-03T21:46:46.913301869Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:46.92145607Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE01/quota_patch"
+    },
+    {
+      "Time": "2026-10-03T21:46:47.554913458Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE01/quota_patch",
+      "Elapsed": 0.63
+    },
+    {
+      "Time": "2026-10-03T21:46:47.554994319Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/omitted"
+    },
+    {
+      "Time": "2026-10-03T21:46:48.187388631Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/omitted",
+      "Elapsed": 0.63
+    },
+    {
+      "Time": "2026-10-03T21:46:48.187400243Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/null"
+    },
+    {
+      "Time": "2026-10-03T21:46:48.70776582Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/null",
+      "Elapsed": 0.52
+    },
+    {
+      "Time": "2026-10-03T21:46:48.707817196Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/false"
+    },
+    {
+      "Time": "2026-10-03T21:46:49.274504123Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/false",
+      "Elapsed": 0.57
+    },
+    {
+      "Time": "2026-10-03T21:46:49.274512288Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/0"
+    },
+    {
+      "Time": "2026-10-03T21:46:49.837669212Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/0",
+      "Elapsed": 0.56
+    },
+    {
+      "Time": "2026-10-03T21:46:49.837677077Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/[]"
+    },
+    {
+      "Time": "2026-10-03T21:46:50.372313026Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases/PE02/[]",
+      "Elapsed": 0.53
+    },
+    {
+      "Time": "2026-10-03T21:46:50.372323495Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionIntentSharedCases",
+      "Elapsed": 3.46
+    },
+    {
+      "Time": "2026-10-03T21:46:50.372326Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:50.384057054Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases/BC01"
+    },
+    {
+      "Time": "2026-10-03T21:46:50.944307658Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases/BC01",
+      "Elapsed": 0.56
+    },
+    {
+      "Time": "2026-10-03T21:46:50.944317276Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases/BC04"
+    },
+    {
+      "Time": "2026-10-03T21:46:51.521339876Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases/BC04",
+      "Elapsed": 0.57
+    },
+    {
+      "Time": "2026-10-03T21:46:51.521474517Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases/BC06"
+    },
+    {
+      "Time": "2026-10-03T21:46:52.085472437Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases/BC06",
+      "Elapsed": 0.56
+    },
+    {
+      "Time": "2026-10-03T21:46:52.085617789Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCAssetSharedCases",
+      "Elapsed": 1.71
+    },
+    {
+      "Time": "2026-10-03T21:46:52.08567753Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolGCBoundedSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:52.098819556Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolGCBoundedSharedCases/GC01"
+    },
+    {
+      "Time": "2026-10-03T21:46:52.778889849Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolGCBoundedSharedCases/GC01",
+      "Elapsed": 0.68
+    },
+    {
+      "Time": "2026-10-03T21:46:52.778899146Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolGCBoundedSharedCases",
+      "Elapsed": 0.69
+    },
+    {
+      "Time": "2026-10-03T21:46:52.778902653Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:52.790877101Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/frozen"
+    },
+    {
+      "Time": "2026-10-03T21:46:53.329481492Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/frozen",
+      "Elapsed": 0.54
+    },
+    {
+      "Time": "2026-10-03T21:46:53.330128279Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/foreign_tenant"
+    },
+    {
+      "Time": "2026-10-03T21:46:53.942569054Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/foreign_tenant",
+      "Elapsed": 0.61
+    },
+    {
+      "Time": "2026-10-03T21:46:53.942587298Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/self"
+    },
+    {
+      "Time": "2026-10-03T21:46:54.444291457Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/self",
+      "Elapsed": 0.5
+    },
+    {
+      "Time": "2026-10-03T21:46:54.444299031Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/higher_role"
+    },
+    {
+      "Time": "2026-10-03T21:46:54.942457446Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases/LF05/higher_role",
+      "Elapsed": 0.5
+    },
+    {
+      "Time": "2026-10-03T21:46:54.942692385Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolOffboardingEligibilitySharedCases",
+      "Elapsed": 2.17
+    },
+    {
+      "Time": "2026-10-03T21:46:54.942812178Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionStaleSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:54.955564457Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionStaleSharedCases/PE03"
+    },
+    {
+      "Time": "2026-10-03T21:46:55.51094554Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionStaleSharedCases/PE03",
+      "Elapsed": 0.56
+    },
+    {
+      "Time": "2026-10-03T21:46:55.510952974Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionStaleSharedCases/PE04"
+    },
+    {
+      "Time": "2026-10-03T21:46:56.037801994Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionStaleSharedCases/PE04",
+      "Elapsed": 0.53
+    },
+    {
+      "Time": "2026-10-03T21:46:56.037811672Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolPermissionStaleSharedCases",
+      "Elapsed": 1.09
+    },
+    {
+      "Time": "2026-10-03T21:46:56.037814157Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:56.555188172Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list"
+    },
+    {
+      "Time": "2026-10-03T21:46:56.560040564Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_list",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:56.560066582Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail"
+    },
+    {
+      "Time": "2026-10-03T21:46:56.565126892Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/legacy_outbound_detail",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:46:56.565157739Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay"
+    },
+    {
+      "Time": "2026-10-03T21:46:56.570826945Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases/RC02/submit_replay",
+      "Elapsed": 0.01
+    },
+    {
+      "Time": "2026-10-03T21:46:56.585355146Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyReplaySharedCases",
+      "Elapsed": 0.55
+    },
+    {
+      "Time": "2026-10-03T21:46:56.585362229Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolProtectedGCSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:56.597822773Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolProtectedGCSharedCases/GC02/sealed_draft"
+    },
+    {
+      "Time": "2026-10-03T21:46:57.145035715Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolProtectedGCSharedCases/GC02/sealed_draft",
+      "Elapsed": 0.55
+    },
+    {
+      "Time": "2026-10-03T21:46:57.145069769Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolProtectedGCSharedCases/GC02/held_raw"
+    },
+    {
+      "Time": "2026-10-03T21:46:57.69353037Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolProtectedGCSharedCases/GC02/held_raw",
+      "Elapsed": 0.55
+    },
+    {
+      "Time": "2026-10-03T21:46:57.69385224Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolProtectedGCSharedCases",
+      "Elapsed": 1.11
+    },
+    {
+      "Time": "2026-10-03T21:46:57.694008662Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:46:57.707973011Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/draft"
+    },
+    {
+      "Time": "2026-10-03T21:46:58.29929836Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/draft",
+      "Elapsed": 0.59
+    },
+    {
+      "Time": "2026-10-03T21:46:58.299306084Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/sent_asset"
+    },
+    {
+      "Time": "2026-10-03T21:46:58.881367729Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/sent_asset",
+      "Elapsed": 0.58
+    },
+    {
+      "Time": "2026-10-03T21:46:58.881377187Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/queue"
+    },
+    {
+      "Time": "2026-10-03T21:46:59.443004664Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/queue",
+      "Elapsed": 0.56
+    },
+    {
+      "Time": "2026-10-03T21:46:59.443012248Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/held"
+    },
+    {
+      "Time": "2026-10-03T21:47:00.050828634Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases/RT07/held",
+      "Elapsed": 0.61
+    },
+    {
+      "Time": "2026-10-03T21:47:00.05091753Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLogicalExpiryReferenceSharedCases",
+      "Elapsed": 2.36
+    },
+    {
+      "Time": "2026-10-03T21:47:00.051011184Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:47:00.065363809Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source"
+    },
+    {
+      "Time": "2026-10-03T21:47:00.639436883Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC02/reliable_source",
+      "Elapsed": 0.57
+    },
+    {
+      "Time": "2026-10-03T21:47:00.639442673Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source"
+    },
+    {
+      "Time": "2026-10-03T21:47:01.198055728Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/missing_source",
+      "Elapsed": 0.56
+    },
+    {
+      "Time": "2026-10-03T21:47:01.198076957Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job"
+    },
+    {
+      "Time": "2026-10-03T21:47:01.764523107Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases/BC03/foreign_job",
+      "Elapsed": 0.57
+    },
+    {
+      "Time": "2026-10-03T21:47:01.764566729Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolLegacyBCCObservationSharedCases",
+      "Elapsed": 1.71
+    },
+    {
+      "Time": "2026-10-03T21:47:01.764628574Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.279456748Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/list"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.287939332Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/list",
+      "Elapsed": 0.01
+    },
+    {
+      "Time": "2026-10-03T21:47:02.288005706Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/receipt"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.29697586Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/receipt",
+      "Elapsed": 0.01
+    },
+    {
+      "Time": "2026-10-03T21:47:02.297015013Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/sse"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.304952901Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/sse",
+      "Elapsed": 0.01
+    },
+    {
+      "Time": "2026-10-03T21:47:02.304956658Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/webhook"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.354339399Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/webhook",
+      "Elapsed": 0.05
+    },
+    {
+      "Time": "2026-10-03T21:47:02.354444395Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/metrics"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.359587861Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/metrics",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:47:02.359609782Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/wire_mime"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.359626112Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases/BC05/wire_mime",
+      "Elapsed": 0
+    },
+    {
+      "Time": "2026-10-03T21:47:02.373716607Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolBCCSurfacesSharedCases",
+      "Elapsed": 0.61
+    },
+    {
+      "Time": "2026-10-03T21:47:02.373763024Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDraftGrantOrderingSharedCases"
+    },
+    {
+      "Time": "2026-10-03T21:47:02.386879452Z",
+      "Action": "run",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDraftGrantOrderingSharedCases/PE05"
+    },
+    {
+      "Time": "2026-10-03T21:47:03.084670798Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDraftGrantOrderingSharedCases/PE05",
+      "Elapsed": 0.7
+    },
+    {
+      "Time": "2026-10-03T21:47:03.084682169Z",
+      "Action": "pass",
+      "Package": "tabmail/internal/store/postgres",
+      "Test": "TestR5ProtocolDraftGrantOrderingSharedCases",
+      "Elapsed": 0.71
+    },
+    {
+      "Time": "2026-10-03T21:47:03.093719411Z",
+      "Action": "fail",
+      "Package": "tabmail/internal/store/postgres",
+      "Elapsed": 38.882
+    }
+  ]
+}
