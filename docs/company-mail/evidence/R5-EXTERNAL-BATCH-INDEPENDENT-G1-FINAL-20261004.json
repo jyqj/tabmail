@@ -1,0 +1,250 @@
+{
+  "review": "independent final bounded G1 lifecycle review",
+  "tested_source": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "delivery_head": "68ae9c566af48c378c9f1958ae3f2caeeb66936e",
+  "verdict": "PASS_G1_AND_F1_F2_F3_IN_REVIEWED_SCOPE",
+  "formal_readiness": "reasonable to proceed only after separate authorization with fresh fixed-source components-mode binding and original budgets; no business gates credited",
+  "g1_actual_pinned_helper": {
+    "status": "PASS",
+    "fixed_source": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+    "observations": [
+      {
+        "phase": "persistent-drain",
+        "physical_reap_and_pipe_close_before_release": true,
+        "original_error_preserved": true,
+        "no_receipt": true,
+        "independent_drain_calls": 1,
+        "cleanup_failures": []
+      },
+      {
+        "phase": "cleanup-blocked",
+        "blocked_lease_retained_through_cancel_and_expiry": true,
+        "no_receipt": true
+      },
+      {
+        "phase": "cleanup-blocked",
+        "physical_reap_and_pipe_close_before_release": true,
+        "original_error_preserved": true,
+        "no_receipt": true,
+        "independent_drain_calls": 1,
+        "cleanup_failures": [
+          {
+            "error": "OSError",
+            "resource": "process_reap"
+          }
+        ]
+      },
+      {
+        "phase": "server-start",
+        "physical_reap_and_pipe_close_before_release": true,
+        "original_error_preserved": true,
+        "no_receipt": true,
+        "independent_drain_calls": 0,
+        "cleanup_failures": []
+      },
+      {
+        "phase": "source-preflight",
+        "physical_reap_and_pipe_close_before_release": true,
+        "original_error_preserved": true,
+        "no_receipt": true,
+        "independent_drain_calls": 0,
+        "cleanup_failures": []
+      }
+    ],
+    "full_initial_and_restoration_validation": true
+  },
+  "source_setup_execution_post_coverage": {
+    "actual_source_preflight_rejection": true,
+    "actual_server_start_failure": true,
+    "independent_synthetic_execution_error": true,
+    "independent_synthetic_postcheck_error": true,
+    "roots_reaped_and_pipes_closed_before_release": true,
+    "original_errors_preserved": true,
+    "no_false_qualification": true
+  },
+  "controls": {
+    "author_batch_rerun": 48,
+    "runtime_v2_rerun": 21,
+    "protocol_regressions_rerun": 70,
+    "original_independent_regression_methods": 4,
+    "slow_inventory_subscenarios": 4,
+    "new_independent_scope_methods": 2,
+    "actual_pinned_helper_phases": 4,
+    "real_contract_semantic_assertions": 22
+  },
+  "typescript": {
+    "command": "tsc --noEmit --incremental false",
+    "status": "PASS"
+  },
+  "probe": {
+    "receipt": {
+      "children": {
+        "probe/0": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "be171e1d56300bf0a14509f3df2af1fe5bc5df562b2a25306e353533f5b0bd31",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/1": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "7b9124e155e4d3fa40e1fbe25147689675f7af8b124b2c0358f48b7badb3f266",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/2": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "bc5305069eec73e900154dcdf3ce71549ff88a291fcd08406b19311c9547c5ca",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/3": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "7d56e1997ecf784a164d49b39fad4bb3d8a130b2316cf4431007c9c8b41669a4",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/4": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "ce163164ee6a9802e726ccc51bdb436fc5261dc5c0c98be481fee4af48843b6f",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/5": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "db686e6822b986e5a7e997ce1f46812b992edd3479eae81c89b7fd845a47bd71",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/6": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "f09119bd4280ee35770d6a54fd9a5267d818878056c9e89ab09ed1d8af9fa739",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/7": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "2f01274c70c101bf8ca16fdbb56c9564a87ff45e839a356685f42e46e6f85458",
+          "tail": false,
+          "timeout": false
+        }
+      },
+      "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+      "contract_sha256": "00dd0e4ce034c6d023fe167853b5e5897845ec3a99d5044b32a898977ccae767",
+      "eligibility_scope": "infrastructure_probe_only",
+      "errors": [],
+      "max_live_children": 4,
+      "owners_joined": true,
+      "policy": "r5_external_batch_validation_v1",
+      "preflight": true,
+      "product_green": false,
+      "required_terminal_count": 10,
+      "resources_joined": true,
+      "schema_version": 1,
+      "status": "BATCH_QUALIFIED",
+      "task_complete": false,
+      "terminal_count": 10,
+      "terminal_postcheck": true
+    },
+    "receipt_sha256": "1e85e56c0b3a7d5993c4e83f3e2d8a37928d1bca753c4344d8e967438fd83002",
+    "contract_independent_byte_pin": "2ae8966e9c4110a7ba3d3725169b37543eb867908ded845a241257a85558a8fc",
+    "contract_canonical_sha256": "00dd0e4ce034c6d023fe167853b5e5897845ec3a99d5044b32a898977ccae767",
+    "runtime_manifest_independent_byte_pin": "1e9e7b57309db7ccc9a5efd1e6ba6c613f9322e4916085174e350e615204246a",
+    "timing": {
+      "wall_seconds": 27.50625617700007,
+      "exit_code": 0
+    },
+    "raw_go_jsonl_sha256": "c0711c57f21fa119b33f293c2b29b407fe0cf0887391daa7461e8e8920ac4b50",
+    "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python_report_sha256": "bd24bc38f6e324fe9a0b85acf50e2d0984de43a50c7962edff1658f14035aea3",
+    "infrastructure_only": true
+  },
+  "normal_cleanup": {
+    "state": "JOINED",
+    "root_count": 12,
+    "all_roots_directly_reaped_group_joined_and_pipes_closed": true,
+    "registered_pending": 0,
+    "channel_joined": true,
+    "resources_joined": true,
+    "lease_held_after_return": false,
+    "cleanup_failures": [],
+    "cleanup_record_sha256": "dcc1782afb2dbf045970e2d27154fbe332add1ef7bf8650f8f250355d04f3b39",
+    "owned_fixture_databases_remaining": 0,
+    "owned_fixture_backend_connections_remaining": 0,
+    "owned_postgresql_shutdown": true
+  },
+  "inventories": {
+    "source": {
+      "regular_files": 1937,
+      "regular_bytes": 60031401
+    },
+    "dependencies": {
+      "regular_files": 45584,
+      "regular_bytes": 775103182
+    }
+  },
+  "source_hashes": {
+    "scripts/preparation/r5_external_batch.py": "bf839d0542d52c196f27bae40a9e9fb7cc7509a38664d14e209a7e1642a7b1ec",
+    "scripts/preparation/r5_external_runtime.py": "c793eab91eef55c5c48ebf0f37606402b7199700d346828180597a6ae70a0cf1",
+    "scripts/contracts/r5-external-batch-v1.schema.json": "88137363c74f35f979acd035a7774ddb3fafbcc631da55e1ffbb6c90766b1ab9",
+    "internal/api/handlers/r5_external_batch_test.go": "c590fc85d78095c9231c00e8671930dd06c226f89b959e885ac502533ca96e45",
+    "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+    "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+    "web/package-lock.json": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3"
+  },
+  "review_hashes": {
+    "scripts/reviews/check_external_batch_g1_final_20261004.py": "c1ba16b6449e9f88f59afe82f66342ab829da7eb148ec587439cba2c703f1afe",
+    "scripts/reviews/test_external_batch_g1_scope_20261004.py": "30686a3cc1a79115eb76ff5e9fbeeb578b7ecc0406bfa6199200907761023e19",
+    "docs/company-mail/R5-EXTERNAL-BATCH-INDEPENDENT-G1-FINAL-20261004.md": "1670c9066840036b1132f26b6d0705120d1626caca4c3c445da4db86a799e72e"
+  },
+  "historical_review_evidence_hashes": {
+    "docs/company-mail/evidence/R5-EXTERNAL-BATCH-INDEPENDENT-20261004.json": "c7b369c41581615d0bca0bb54acc14ca20f3b8e532e10b912ea5338172653a07",
+    "docs/company-mail/evidence/R5-EXTERNAL-BATCH-INDEPENDENT-DELTA-20261004.json": "50923ded010743e0f5976dfbfabffd25197256cb4561bc43e7d571f4231a7f6c"
+  },
+  "private_log_hashes": {
+    "batch-controls.log": "9a945ca63afdd30b4687362b8e08d36be22fc6cbb4bf75b43ba8a1998675a95d",
+    "v2-controls.log": "758155e60865a5bd5f4133748e112875f0fbe0560c6cefaca71a7bb87f00763a",
+    "protocol-controls.log": "9571117412f25e9a21631f2c839adb60a98bbeed516ed929949bafcb5e0d3020",
+    "original-regressions.log": "bb5a4b8708a15f5830cab932b802dce79cb7824577206188c39077702cca0d17",
+    "g1-scope-controls.log": "9717ebf7a77ca405be4e0ef56cac78cea25edfe614a2e76f2d03df93c6133e16",
+    "g1-real-controls.json": "fee9b34c821713f612a73b1eb7630db9d0136d960e81042d277015f3d869bdd8",
+    "semantic-controls.json": "d3664b51f7cfc2ea17afb27c670501cf02e901d45a9a940f783deab312859d3d",
+    "tsc.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "npm.log": "2cd136064cf7632c1ff55b582436748303a5469ee71adbe33cc20c31a9044ce9"
+  },
+  "original_budgets": {
+    "go": 120,
+    "batch": 180,
+    "case": 75,
+    "max_workers": 4
+  },
+  "deadline_semantics": "execution deadline; unknown required cleanup retains blocking lease and no receipt; OS uninterruptible waits have no hard physical return bound",
+  "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+  "scope": {
+    "catalog_ids": 46,
+    "handler_ids": 17,
+    "handler_variants": 26,
+    "required_go_paths": 40,
+    "required_python_assertions": 3,
+    "required_component_terminals": 43,
+    "probe_terminals": 10,
+    "formal_execution": "NOTRUN"
+  },
+  "pgx_backend_cancellation": "not newly qualified; approved PE05 backend-tail limit retained",
+  "implementation_changes": false,
+  "product_green": false,
+  "task_complete": false,
+  "central_progress": "10/171 unchanged",
+  "wholePG180": "NOTRUN",
+  "audit": "NOTRUN; audit8high remains open",
+  "actual_email": "NOTRUN",
+  "merge_deploy": "NOTRUN",
+  "delivery": "normal commit/push to existing review branch only; denied PR API not retried"
+}
