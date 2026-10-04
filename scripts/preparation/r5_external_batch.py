@@ -260,6 +260,8 @@ class Batch:
         self.closed = False
         self.max_active = 0
         self.invalid = False
+        self.published = False
+        self.started = False
         self.socket = self.output/'channel.sock'
         self.cancelled_keys = set()
         self.deadline = None
@@ -357,6 +359,28 @@ class Batch:
         return owned.finish(self.cancelled,min(self.deadline,time.monotonic()+seconds))
 
     def run(self):
+        if self.started:
+            raise ValueError('batch instance is single-use; previous receipts are immutable')
+        self.started=True
+        try:
+            return self._run()
+        except Exception as error:
+            # An observed lease-finalization failure must invalidate a receipt
+            # already staged before context-manager release. Never touch a
+            # previous attempt's existing output or any historical receipt.
+            if not self.published:
+                raise
+            path=self.output/'receipt.json'
+            receipt=runtime.source_inventory.strict_json(path.read_bytes())
+            receipt['status']='BATCH_REJECTED'
+            receipt['errors'].append('lease finalization rejected: '+type(error).__name__)
+            for child in receipt['children'].values():child['qualified']=False
+            pending=self.output/'receipt.pending'
+            pending.write_bytes(runtime.canonical(receipt));os.chmod(pending,0o600)
+            pending.replace(path)
+            return receipt
+
+    def _run(self):
         self.output.mkdir(mode=0o700,parents=True,exist_ok=False)
         os.chmod(self.output,0o700)
         if self.output.is_relative_to(self.source) or self.output.is_relative_to(Path(self.manifest['dependency_root']['path'])/'node_modules'):
@@ -367,6 +391,8 @@ class Batch:
         before = after = False
         with lease(self.manifest,self.cancelled,self.deadline) as nonce, runtime.descriptors() as anchors:
             self.nonce=nonce
+            token=Path(self.manifest['dependency_root']['path'])/'.r5-runtime-owner'
+            token_identity=runtime.preparation.identity(token.lstat())
             for path in (self.source,Path(self.manifest['execution']['cwd']),Path(self.manifest['dependency_root']['path'])):
                 anchors.directory(path)
             validate_contract(self.contract)
@@ -471,6 +497,14 @@ class Batch:
                 after=True
             except Exception as error:
                 errors.append('terminal inventory rejected: '+type(error).__name__)
+            try:
+                if runtime.preparation.identity(token.lstat())!=token_identity:
+                    raise ValueError('lease token identity drift')
+                with runtime.descriptors() as token_files:
+                    if runtime.source_inventory.strict_json(token_files.file(token))!=dict(pid=os.getpid(),nonce=self.nonce):
+                        raise ValueError('lease token capability drift')
+            except Exception as error:
+                errors.append('lease token validation rejected: '+type(error).__name__)
             if time.monotonic()>=self.deadline:
                 errors.append('batch process180 deadline exceeded')
             receipt=dict(schema_version=1,policy=POLICY,status='BATCH_QUALIFIED' if not errors else 'BATCH_REJECTED',
@@ -485,6 +519,7 @@ class Batch:
             pending=self.output/'receipt.pending'
             pending.write_bytes(runtime.canonical(receipt));os.chmod(pending,0o600)
             pending.replace(self.output/'receipt.json')
+            self.published=True
         return receipt
 
 

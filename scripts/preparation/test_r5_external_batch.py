@@ -108,7 +108,6 @@ class PhysicalLifecycleControls(unittest.TestCase):
         result=self.run_child('import subprocess,sys;subprocess.Popen([sys.executable,"-c","import time;time.sleep(60)"],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)')
         self.assertTrue(result['tail'])
 
-if __name__=='__main__':unittest.main()
 
 class BatchFinalizationControls(unittest.TestCase):
     def setUp(self):
@@ -125,8 +124,9 @@ class BatchFinalizationControls(unittest.TestCase):
         self.assertTrue((self.root/'.r5-runtime-owner').exists())
         with batch.runtime.descriptors() as files:
             if files.tree(self.source,source=True)!=self.before:raise ValueError('real source content drift')
-    def run_synthetic_owner(self,mutate=False,missing=False,duplicate=False,noack=False,falsepass=False):
+    def run_synthetic_owner(self,mutate=False,missing=False,duplicate=False,noack=False,falsepass=False,lease_failure=False):
         owner=batch.Batch(self.contract,self.root/'out',{})
+        self.last_owner=owner
         case_keys=list(owner.children)
         test=self
         def synthetic(argv,cwd,env,seconds=180):
@@ -146,7 +146,14 @@ class BatchFinalizationControls(unittest.TestCase):
             events=[dict(Package='tabmail/internal/api/handlers',Test=name,Action=action) for name in names for action in ['run','pass']]
             events.append(dict(Package='tabmail/internal/api/handlers',Action='pass'))
             return dict(exit_code=0,timeout=False,tail=False,stdout='\n'.join(json.dumps(e) for e in events).encode(),stderr=b'')
-        with patch.object(batch,'validate_contract',side_effect=self.validate),patch.object(owner,'run_process',side_effect=synthetic):
+        original_owner=batch.runtime.owner
+        @batch.contextlib.contextmanager
+        def failing_release(manifest):
+            with original_owner(manifest) as nonce:
+                yield nonce
+                raise ValueError('synthetic observed lease release failure')
+        lease_patch=patch.object(batch.runtime,'owner',failing_release) if lease_failure else batch.contextlib.nullcontext()
+        with lease_patch,patch.object(batch,'validate_contract',side_effect=self.validate),patch.object(owner,'run_process',side_effect=synthetic):
             receipt=owner.run()
         self.assertEqual(self.events,['validate','validate'])
         self.assertFalse((self.root/'.r5-runtime-owner').exists())
@@ -170,6 +177,19 @@ class BatchFinalizationControls(unittest.TestCase):
         self.assertEqual(receipt['status'],'BATCH_QUALIFIED')
         self.assertEqual(receipt['eligibility_scope'],'infrastructure_probe_only')
         self.assertTrue((self.root/'out/receipt.json').is_file())
+    def test_observed_lease_finalization_failure_invalidates_published_qualification(self):
+        receipt=self.run_synthetic_owner(lease_failure=True)
+        self.assertEqual(receipt['status'],'BATCH_REJECTED')
+        self.assertTrue(all(not child['qualified'] for child in receipt['children'].values()))
+        stored=json.loads((self.root/'out/receipt.json').read_text())
+        self.assertEqual(stored['status'],'BATCH_REJECTED')
+
+    def test_reusing_instance_does_not_rewrite_a_previous_receipt(self):
+        self.run_synthetic_owner()
+        path=self.root/'out/receipt.json';before=path.read_bytes()
+        with self.assertRaisesRegex(ValueError,'single-use'):self.last_owner.run()
+        self.assertEqual(path.read_bytes(),before)
+
     def test_exclusive_second_consumer_cannot_interleave(self):
         with batch.runtime.owner(self.manifest):
             second=batch.Batch(self.contract,self.root/'second',{})
@@ -262,3 +282,7 @@ class OutputBoundaryControls(unittest.TestCase):
         contract=dict(runtime=runtime,mode='probe',required={})
         for path in ['relative','/owned/source/output','/owned/node_modules/output','/owned/../output']:
             with self.assertRaises(ValueError):batch.Batch(contract,Path(path),{})
+
+
+if __name__ == "__main__":
+    unittest.main()
