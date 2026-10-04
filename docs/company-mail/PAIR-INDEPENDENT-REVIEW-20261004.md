@@ -10,7 +10,7 @@ UI: `648938a5baad2f35ba120da2cf5ae1001f8f3b4a`; production file `web/features/co
 
 Backend: `062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b`; production file `internal/store/postgres/employee_disposition.go`, Git blob `619feb36f23f6f3039cbd8c8230a4bcd7b809fd7`.
 
-The isolated joint-test tree is exactly the base plus those two file substitutions: tree `9fae5d8e219ddfa90e27b1fdb13704b00996554e`. No author tests or reports were imported into the test tree. Both author reports and complete production diffs were read. The [exact union patch](evidence/PAIR-INDEPENDENT-20261004/exact-production-union.patch) records the 23 added / 8 removed production lines. Production files were restored to base after testing; this report branch contains independent tests and evidence only. A separate temporary Git index produced the union tree without committing combined production.
+The isolated joint-test tree is exactly the base plus those two file substitutions: tree `9fae5d8e219ddfa90e27b1fdb13704b00996554e`. No author tests or reports were imported into the test tree. Both author reports and complete production diffs were read. The [exact union patch](evidence/PAIR-INDEPENDENT-20261004/exact-production-union.patch) records the 23 added / 8 removed production lines. To reproduce, apply this context-free patch with `git apply --unidiff-zero` in another isolated base worktree, then add the review tests and use a fresh owned cluster. Production files were restored to base after testing; this report branch contains independent tests and evidence only. A separate temporary Git index produced the union tree without committing combined production.
 
 ## Actual observations
 
@@ -46,7 +46,7 @@ Denial and replay checks independently serialize every public table, ordered by 
 
 The initial fixed run had one test expectation error: caller relocation yielded 404 rather than expected 403, because authentication resolves the caller's current tenant and the old plan is absent there. The [initial log](evidence/PAIR-INDEPENDENT-20261004/initial-fixed-race.log) is retained. Only the test expectation was corrected; no implementation was edited. New allowed-role fingerprint and post-qualification lock tests were added before the final run.
 
-Focused `go vet ./internal/store/postgres ./internal/authz`, ESLint for the two new TS files, TypeScript `--noEmit`, and `git diff --check` passed. `go.mod`, `go.sum`, both existing replaces and npm lock stayed exactly at base. [Cleanup evidence](evidence/PAIR-INDEPENDENT-20261004/cleanup.log) reports zero owned fixture databases and connections, followed by shutdown of only the newly owned cluster. [Manifest](evidence/PAIR-INDEPENDENT-20261004/manifest.json) records evidence and test hashes.
+Focused `go vet ./internal/store/postgres ./internal/authz`, ESLint for the two new TS files, TypeScript `--noEmit`, and source/test/Markdown diff whitespace checks passed. Raw logs retain the original Vitest output whitespace verbatim. `go.mod`, `go.sum`, both existing replaces and npm lock stayed exactly at base. [Cleanup evidence](evidence/PAIR-INDEPENDENT-20261004/cleanup.log) reports zero owned fixture databases and connections, followed by shutdown of only the newly owned cluster. [Manifest](evidence/PAIR-INDEPENDENT-20261004/manifest.json) records evidence and test hashes.
 
 ## Policy review and remaining limits
 
