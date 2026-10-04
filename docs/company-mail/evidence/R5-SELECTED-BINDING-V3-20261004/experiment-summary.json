@@ -1,0 +1,72 @@
+{
+  "diffs": {
+    "default": {
+      "binding_equal": true,
+      "fields": {
+        "Stale": 2889,
+        "StaleReason": 4144
+      },
+      "full_diff_private_file": "/tmp/r5-selected-v3-reviewed-20261004/default.full-raw-json-diffs.json",
+      "locations": 7033,
+      "observations_equal": false,
+      "outside_allowlist": 0
+    },
+    "race-r5protocol": {
+      "binding_equal": true,
+      "fields": {
+        "Stale": 2910,
+        "StaleReason": 4165
+      },
+      "full_diff_private_file": "/tmp/r5-selected-v3-reviewed-20261004/race-r5protocol.full-raw-json-diffs.json",
+      "locations": 7075,
+      "observations_equal": false,
+      "outside_allowlist": 0
+    }
+  },
+  "frozen_sha": "b25e383a5e4fa64f13e9e0a069b75bb263dd7d5b",
+  "rejections": [],
+  "result": "bounded_compile_only_v3_postvalidation_passed",
+  "root": "/workspace/tabmail-v3-reviewed-experiment",
+  "stages": [
+    {
+      "binding_sha256": "8f33e46f78cf1723e05d83d789bb67027028f6c976a21f551021c5886864ee0c",
+      "commands": 12,
+      "observation_sha256": "01517740d7a9e51a61cea346e1b1af9366ec74a3ecba0dd0a12b1e590fe7eba6",
+      "package_records": 602,
+      "seconds": 16.209,
+      "stage": "default-before"
+    },
+    {
+      "binding_sha256": "52301c2832f92a06728458c735516b3f67f061f9b77c95c9180bffe79247cf93",
+      "commands": 12,
+      "observation_sha256": "a946ab92f3c9165eb6022c071fff445ad54188c07983a5ad3bd0d7e28375875b",
+      "package_records": 604,
+      "seconds": 13.271,
+      "stage": "race-r5protocol-before"
+    },
+    {
+      "exit": 0,
+      "stage": "default-compile",
+      "test_binaries_executed": 0
+    },
+    {
+      "exit": 0,
+      "stage": "race-r5protocol-compile",
+      "test_binaries_executed": 0
+    },
+    {
+      "binding_sha256": "8f33e46f78cf1723e05d83d789bb67027028f6c976a21f551021c5886864ee0c",
+      "observation_sha256": "d1aeef6594bf6342fdf97bbea49cd435c4e04b4f9c02d2422365723ed0b953c4",
+      "seconds": 13.189,
+      "stage": "default-after",
+      "strict_postvalidation": true
+    },
+    {
+      "binding_sha256": "52301c2832f92a06728458c735516b3f67f061f9b77c95c9180bffe79247cf93",
+      "observation_sha256": "52c10a0aa6f152a4805ba852c20ed753703b3a3eecaee0fc81fec5d4562b44ea",
+      "seconds": 13.292,
+      "stage": "race-r5protocol-after",
+      "strict_postvalidation": true
+    }
+  ]
+}

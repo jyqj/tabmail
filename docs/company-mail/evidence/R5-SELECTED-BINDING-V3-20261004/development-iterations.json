@@ -1,0 +1,16 @@
+[
+  {
+    "frozen_sha": "ea06e9fa7ea45727b3d5b3108b4b33dd5732c457",
+    "private_evidence_root": "/tmp/r5-selected-v3-20261004",
+    "private_summary_sha256": "9cf5c7f2cd386551d392f920ab327153bffb78ee978708f90d095b1a5354a296",
+    "result": "bounded_compile_only_v3_postvalidation_passed",
+    "root": "/workspace/tabmail-v3-experiment"
+  },
+  {
+    "frozen_sha": "3731189993fe02bc8af419b9cac1856b80086cb6",
+    "private_evidence_root": "/tmp/r5-selected-v3-final-20261004",
+    "private_summary_sha256": "1e61665a27784d4fa2ff0905bab72d0dcd5e856dc832219de9cea019b8297280",
+    "result": "bounded_compile_only_v3_postvalidation_passed",
+    "root": "/workspace/tabmail-v3-final-experiment"
+  }
+]

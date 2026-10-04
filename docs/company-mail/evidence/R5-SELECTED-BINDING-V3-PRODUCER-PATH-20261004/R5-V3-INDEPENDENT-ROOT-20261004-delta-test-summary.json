@@ -1,0 +1,348 @@
+{
+  "reviewed_helper_sha256": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+  "outer_tests": 82,
+  "passed": 82,
+  "failures": 0,
+  "errors": 0,
+  "skips": 0,
+  "expected_failures": 0,
+  "unexpected_successes": 0,
+  "os_subprocess_attempts": 0,
+  "go_executed": false,
+  "groups": {
+    "author_and_unchanged_pure": 56,
+    "unchanged_independent_nonpath": 16,
+    "unchanged_absolute_contract": 3,
+    "fresh_delta_boundaries": 7
+  },
+  "records": [
+    {
+      "id": "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_absolute_capture_keeps_all_twelve_commands_and_pin",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_bare_names_reject_before_source_or_command",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_cli_help_explains_absolute_path_requirement",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_cli_rejects_bare_and_relative_before_source_or_command",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_production_sha256_pin_is_unchanged",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_relative_paths_reject_before_source_or_command",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_producer_path_checks.ProducerPathTests.test_validate_rejects_nonabsolute_after_valid_external_pin",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.AuthorityTests.test_context_and_unapproved_producer_reject_before_command",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.AuthorityTests.test_v3_reuses_unchanged_v2_authority_predicates",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.AuthorityTests.test_v3_source_archive_package_coverage_and_replacement_rejections",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_all_package_roles_projected_including_hydration_and_repetitions",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_producer_failure_interface_and_timeout_preserved",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_retained_mutation_in_each_repeated_role_rejected",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_source_before_after_drift_rejected",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.CaptureOrderingTests.test_unknown_or_diagnostic_type_in_every_package_role_rejected",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_external_pin_required_and_resigning_rejected",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_observation_change_can_preserve_binding_and_stays_separately_pinned",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_validation_fresh_binding_mismatch_and_external_pin_precedes_execution",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.EnvelopeTests.test_version_rejection_before_capture_no_fallback",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_diagnostic_values_and_presence_equal_binding_different_observation",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_duplicates_nonfinite_and_malformed_streams",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_error_serialization_requires_complete_records",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_every_retained_field_and_nested_leaf_is_bound",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_invalid_types_for_every_registry_field",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_order_arrays_multiplicity_and_presence_bound",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_recursive_module_field_presence_bound",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_registry_source_shape_and_time",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_source_binding_v3_checks.ProjectionTests.test_unknown_fields_in_all_nested_domains_fail_closed",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_altered_envelope_rejects_before_capture",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_capture_failure_object_is_unchanged",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_constructor_failure_keeps_binding_mismatch",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_context_cleanup_failure_keeps_binding_mismatch",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_disk_full_keeps_binding_mismatch",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_matching_binding_keeps_normal_success",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_retention_limit_keeps_binding_mismatch",
+      "result": "pass"
+    },
+    {
+      "id": "r5_selected_binding_v3_rejection_checks.RejectionEvidenceTests.test_successful_retention_records_observed_then_rejects",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_coverage_omission_fork_mismatch_unknown_root",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_cross_identity_rejected_before_commands",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_metadata_never_authorizes_private_archive_or_unknown_body",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_selected_archive_package_rejected",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_selected_source_binding_v2.SelectedV2NegativeTests.test_unsupported_context",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_extra_controls_and_files",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_archive_family_extra_capsule_and_ancestor_symlink",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_budget_and_unavailable_metadata_fail_closed",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_descriptor_second_stat_replacement",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_every_historical_file_byte_delete_rename",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_exact_baseline_hashes_and_six_modules",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_import_embed_generate_archive_rejected",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_bytes_value_case_directives",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_marker_deletion_and_module_in_all_roots",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_production_all_variants_change_static_domain",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_read_leaf_replacement_never_opens_fifo_body",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_registry_duplicate_traversal_forgery",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_symlink_ancestors_fifo_and_metadata_only",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_third_replace",
+      "result": "pass"
+    },
+    {
+      "id": "test_r5_archive_boundary.ArchiveBoundaryTests.test_unknown_root_and_ignored_go_not_hidden",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentSchemaProjectionTests.test_duplicate_aliases_and_bad_nested_types",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentSchemaProjectionTests.test_every_official_field_presence_is_bound_or_rejected",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentSchemaProjectionTests.test_exact_official_fields_and_error_marshaler",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentSchemaProjectionTests.test_seeded_projection_properties",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentCaptureTests.test_diagnostics_only_changes_preserve_binding_not_observation",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentCaptureTests.test_each_repeated_package_omission_rejects",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentCaptureTests.test_every_package_command_unknowns_and_types_reject",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentCaptureTests.test_exact_twelve_command_sequence_and_qualifications",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentCaptureTests.test_mvs_raw_whitespace_order_presence_and_types_reject",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentCaptureTests.test_producer_bytes_after_commands_reject",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentCaptureTests.test_schema_helper_and_check_source_drift_reject",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentPinTests.test_every_envelope_leaf_resigned_cannot_pass_original_pin",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentPinTests.test_matching_binding_returns_fresh_sealed_observation",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentPinTests.test_pin_origin_cannot_be_inferred_by_api",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentPinTests.test_receipt_and_command_presence_tamper_rejects_pre_execution",
+      "result": "pass"
+    },
+    {
+      "id": "frozen_independent_delta.IndependentPinTests.test_rejection_retention_enter_failure_preserves_primary",
+      "result": "pass"
+    },
+    {
+      "id": "absolute_contract_delta.AbsoluteOnlyProducerContract.test_absolute_string_and_path_keep_all_twelve_targets_identical",
+      "result": "pass"
+    },
+    {
+      "id": "absolute_contract_delta.AbsoluteOnlyProducerContract.test_nonabsolute_capture_rejects_before_source_or_command",
+      "result": "pass"
+    },
+    {
+      "id": "absolute_contract_delta.AbsoluteOnlyProducerContract.test_nonabsolute_valid_pin_validate_rejects_before_source_or_command",
+      "result": "pass"
+    },
+    {
+      "id": "fresh_delta.FreshDeltaBoundaries.test_absolute_custom_pathlike_is_frozen_once",
+      "result": "pass"
+    },
+    {
+      "id": "fresh_delta.FreshDeltaBoundaries.test_absolute_lexical_parent_component_keeps_same_target",
+      "result": "pass"
+    },
+    {
+      "id": "fresh_delta.FreshDeltaBoundaries.test_absolute_wrong_pin_fails_before_any_command",
+      "result": "pass"
+    },
+    {
+      "id": "fresh_delta.FreshDeltaBoundaries.test_external_pin_rejection_still_precedes_capture_path_checks",
+      "result": "pass"
+    },
+    {
+      "id": "fresh_delta.FreshDeltaBoundaries.test_literal_path_forms_do_not_expand_or_search",
+      "result": "pass"
+    },
+    {
+      "id": "fresh_delta.FreshDeltaBoundaries.test_no_path_canonicalization_or_environment_fallback",
+      "result": "pass"
+    },
+    {
+      "id": "fresh_delta.FreshDeltaBoundaries.test_relative_custom_pathlike_rejects_early",
+      "result": "pass"
+    }
+  ]
+}
