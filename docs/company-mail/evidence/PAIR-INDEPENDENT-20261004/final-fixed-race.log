@@ -1,0 +1,307 @@
+=== RUN   TestPairIndependentOldPeerSelf
+=== RUN   TestPairIndependentOldPeerSelf/peer
+    pair_independent_review_test.go:159: real HTTP 403
+=== RUN   TestPairIndependentOldPeerSelf/self
+    pair_independent_review_test.go:159: real HTTP 400
+--- PASS: TestPairIndependentOldPeerSelf (0.77s)
+    --- PASS: TestPairIndependentOldPeerSelf/peer (0.38s)
+    --- PASS: TestPairIndependentOldPeerSelf/self (0.39s)
+=== RUN   TestPairIndependentPreviewPolicy
+=== RUN   TestPairIndependentPreviewPolicy/frozen
+    pair_independent_review_test.go:230: real HTTP 200
+    pair_independent_review_test.go:242: real HTTP 200
+    pair_independent_review_test.go:249: real HTTP 200
+=== RUN   TestPairIndependentPreviewPolicy/peer-target
+    pair_independent_review_test.go:230: real HTTP 403
+=== RUN   TestPairIndependentPreviewPolicy/super-target
+    pair_independent_review_test.go:230: real HTTP 403
+=== RUN   TestPairIndependentPreviewPolicy/caller-target
+    pair_independent_review_test.go:230: real HTTP 400
+=== RUN   TestPairIndependentPreviewPolicy/same-subject
+    pair_independent_review_test.go:230: real HTTP 400
+=== RUN   TestPairIndependentPreviewPolicy/inactive-successor
+    pair_independent_review_test.go:230: real HTTP 400
+=== RUN   TestPairIndependentPreviewPolicy/super-successor
+    pair_independent_review_test.go:230: real HTTP 403
+=== RUN   TestPairIndependentPreviewPolicy/foreign-target
+    pair_independent_review_test.go:230: real HTTP 404
+=== RUN   TestPairIndependentPreviewPolicy/foreign-successor
+    pair_independent_review_test.go:230: real HTTP 400
+=== RUN   TestPairIndependentPreviewPolicy/ordinary-caller
+    pair_independent_review_test.go:230: real HTTP 403
+=== RUN   TestPairIndependentPreviewPolicy/inactive-caller
+    pair_independent_review_test.go:230: real HTTP 401
+=== RUN   TestPairIndependentPreviewPolicy/ordinary-selected-foreign
+    pair_independent_review_test.go:230: real HTTP 400
+=== RUN   TestPairIndependentPreviewPolicy/super-selected-user
+    pair_independent_review_test.go:230: real HTTP 200
+    pair_independent_review_test.go:242: real HTTP 200
+    pair_independent_review_test.go:249: real HTTP 200
+=== RUN   TestPairIndependentPreviewPolicy/super-selected-admin
+    pair_independent_review_test.go:230: real HTTP 200
+    pair_independent_review_test.go:242: real HTTP 200
+    pair_independent_review_test.go:249: real HTTP 200
+=== RUN   TestPairIndependentPreviewPolicy/super-selected-super
+    pair_independent_review_test.go:230: real HTTP 200
+    pair_independent_review_test.go:242: real HTTP 200
+    pair_independent_review_test.go:249: real HTTP 200
+--- PASS: TestPairIndependentPreviewPolicy (5.86s)
+    --- PASS: TestPairIndependentPreviewPolicy/frozen (0.52s)
+    --- PASS: TestPairIndependentPreviewPolicy/peer-target (0.40s)
+    --- PASS: TestPairIndependentPreviewPolicy/super-target (0.40s)
+    --- PASS: TestPairIndependentPreviewPolicy/caller-target (0.37s)
+    --- PASS: TestPairIndependentPreviewPolicy/same-subject (0.36s)
+    --- PASS: TestPairIndependentPreviewPolicy/inactive-successor (0.37s)
+    --- PASS: TestPairIndependentPreviewPolicy/super-successor (0.39s)
+    --- PASS: TestPairIndependentPreviewPolicy/foreign-target (0.39s)
+    --- PASS: TestPairIndependentPreviewPolicy/foreign-successor (0.37s)
+    --- PASS: TestPairIndependentPreviewPolicy/ordinary-caller (0.37s)
+    --- PASS: TestPairIndependentPreviewPolicy/inactive-caller (0.35s)
+    --- PASS: TestPairIndependentPreviewPolicy/ordinary-selected-foreign (0.40s)
+    --- PASS: TestPairIndependentPreviewPolicy/super-selected-user (0.39s)
+    --- PASS: TestPairIndependentPreviewPolicy/super-selected-admin (0.39s)
+    --- PASS: TestPairIndependentPreviewPolicy/super-selected-super (0.40s)
+=== RUN   TestPairIndependentStaleExecute
+=== RUN   TestPairIndependentStaleExecute/successor-role
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 403
+=== RUN   TestPairIndependentStaleExecute/successor-freeze
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 400
+=== RUN   TestPairIndependentStaleExecute/target-role
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 403
+=== RUN   TestPairIndependentStaleExecute/target-freeze
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 409
+=== RUN   TestPairIndependentStaleExecute/caller-role
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 403
+=== RUN   TestPairIndependentStaleExecute/caller-freeze
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 401
+=== RUN   TestPairIndependentStaleExecute/caller-tenant
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 404
+=== RUN   TestPairIndependentStaleExecute/successor-tenant-fk
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 200
+=== RUN   TestPairIndependentStaleExecute/target-tenant-fk
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 200
+=== RUN   TestPairIndependentStaleExecute/asset
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 409
+=== RUN   TestPairIndependentStaleExecute/expiry
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 409
+=== RUN   TestPairIndependentStaleExecute/plan-creator
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 404
+=== RUN   TestPairIndependentStaleExecute/plan-target
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 404
+=== RUN   TestPairIndependentStaleExecute/synthetic-old-self-plan
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 400
+=== RUN   TestPairIndependentStaleExecute/super-successor-role
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 409
+=== RUN   TestPairIndependentStaleExecute/super-target-role
+    pair_independent_review_test.go:266: real HTTP 200
+    pair_independent_review_test.go:326: real HTTP 409
+--- PASS: TestPairIndependentStaleExecute (6.17s)
+    --- PASS: TestPairIndependentStaleExecute/successor-role (0.39s)
+    --- PASS: TestPairIndependentStaleExecute/successor-freeze (0.40s)
+    --- PASS: TestPairIndependentStaleExecute/target-role (0.36s)
+    --- PASS: TestPairIndependentStaleExecute/target-freeze (0.37s)
+    --- PASS: TestPairIndependentStaleExecute/caller-role (0.38s)
+    --- PASS: TestPairIndependentStaleExecute/caller-freeze (0.35s)
+    --- PASS: TestPairIndependentStaleExecute/caller-tenant (0.49s)
+    --- PASS: TestPairIndependentStaleExecute/successor-tenant-fk (0.36s)
+    --- PASS: TestPairIndependentStaleExecute/target-tenant-fk (0.38s)
+    --- PASS: TestPairIndependentStaleExecute/asset (0.37s)
+    --- PASS: TestPairIndependentStaleExecute/expiry (0.38s)
+    --- PASS: TestPairIndependentStaleExecute/plan-creator (0.41s)
+    --- PASS: TestPairIndependentStaleExecute/plan-target (0.37s)
+    --- PASS: TestPairIndependentStaleExecute/synthetic-old-self-plan (0.39s)
+    --- PASS: TestPairIndependentStaleExecute/super-successor-role (0.39s)
+    --- PASS: TestPairIndependentStaleExecute/super-target-role (0.37s)
+=== RUN   TestPairIndependentReplayCompletion
+=== RUN   TestPairIndependentReplayCompletion/same
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 200
+    pair_independent_review_test.go:374: real HTTP 409
+=== RUN   TestPairIndependentReplayCompletion/successor-role
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 403
+=== RUN   TestPairIndependentReplayCompletion/successor-freeze
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 400
+=== RUN   TestPairIndependentReplayCompletion/target-role
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 403
+=== RUN   TestPairIndependentReplayCompletion/target-session
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 409
+=== RUN   TestPairIndependentReplayCompletion/successor-session
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 409
+=== RUN   TestPairIndependentReplayCompletion/unverified-receipt
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 409
+=== RUN   TestPairIndependentReplayCompletion/second-plan
+    pair_independent_review_test.go:339: real HTTP 200
+    pair_independent_review_test.go:342: real HTTP 200
+    pair_independent_review_test.go:344: real HTTP 200
+    pair_independent_review_test.go:368: real HTTP 409
+--- PASS: TestPairIndependentReplayCompletion (3.33s)
+    --- PASS: TestPairIndependentReplayCompletion/same (0.39s)
+    --- PASS: TestPairIndependentReplayCompletion/successor-role (0.46s)
+    --- PASS: TestPairIndependentReplayCompletion/successor-freeze (0.40s)
+    --- PASS: TestPairIndependentReplayCompletion/target-role (0.43s)
+    --- PASS: TestPairIndependentReplayCompletion/target-session (0.40s)
+    --- PASS: TestPairIndependentReplayCompletion/successor-session (0.37s)
+    --- PASS: TestPairIndependentReplayCompletion/unverified-receipt (0.40s)
+    --- PASS: TestPairIndependentReplayCompletion/second-plan (0.47s)
+=== RUN   TestPairIndependentCompatibility
+=== RUN   TestPairIndependentCompatibility/peer
+=== RUN   TestPairIndependentCompatibility/self
+=== RUN   TestPairIndependentCompatibility/inactive
+=== RUN   TestPairIndependentCompatibility/foreign
+=== RUN   TestPairIndependentCompatibility/frozen-target
+--- PASS: TestPairIndependentCompatibility (1.68s)
+    --- PASS: TestPairIndependentCompatibility/peer (0.31s)
+    --- PASS: TestPairIndependentCompatibility/self (0.34s)
+    --- PASS: TestPairIndependentCompatibility/inactive (0.35s)
+    --- PASS: TestPairIndependentCompatibility/foreign (0.35s)
+    --- PASS: TestPairIndependentCompatibility/frozen-target (0.34s)
+=== RUN   TestPairIndependentLockWait
+=== RUN   TestPairIndependentLockWait/preview/successor
+    pair_independent_review_test.go:472: real HTTP 403
+=== RUN   TestPairIndependentLockWait/preview/cross-tenant-super-caller
+    pair_independent_review_test.go:472: real HTTP 403
+=== RUN   TestPairIndependentLockWait/execute/successor
+    pair_independent_review_test.go:442: real HTTP 200
+    pair_independent_review_test.go:472: real HTTP 403
+=== RUN   TestPairIndependentLockWait/execute/cross-tenant-super-caller
+    pair_independent_review_test.go:442: real HTTP 200
+    pair_independent_review_test.go:472: real HTTP 403
+=== RUN   TestPairIndependentLockWait/replay/successor
+    pair_independent_review_test.go:442: real HTTP 200
+    pair_independent_review_test.go:446: real HTTP 200
+    pair_independent_review_test.go:472: real HTTP 403
+=== RUN   TestPairIndependentLockWait/replay/cross-tenant-super-caller
+    pair_independent_review_test.go:442: real HTTP 200
+    pair_independent_review_test.go:446: real HTTP 200
+    pair_independent_review_test.go:472: real HTTP 403
+--- PASS: TestPairIndependentLockWait (2.39s)
+    --- PASS: TestPairIndependentLockWait/preview/successor (0.32s)
+    --- PASS: TestPairIndependentLockWait/preview/cross-tenant-super-caller (0.39s)
+    --- PASS: TestPairIndependentLockWait/execute/successor (0.48s)
+    --- PASS: TestPairIndependentLockWait/execute/cross-tenant-super-caller (0.38s)
+    --- PASS: TestPairIndependentLockWait/replay/successor (0.45s)
+    --- PASS: TestPairIndependentLockWait/replay/cross-tenant-super-caller (0.37s)
+=== RUN   TestPairIndependentConcurrentExecute
+    pair_independent_review_test.go:485: real HTTP 200
+    pair_independent_review_test.go:497: real HTTP 200
+    pair_independent_review_test.go:497: real HTTP 200
+    pair_independent_review_test.go:497: real HTTP 200
+    pair_independent_review_test.go:497: real HTTP 200
+--- PASS: TestPairIndependentConcurrentExecute (0.36s)
+=== RUN   TestPairIndependentLocksHeldThroughCommit
+    pair_independent_review_test.go:520: real HTTP 200
+    pair_independent_review_test.go:548: real HTTP 200
+    pair_independent_review_test.go:552: real HTTP 403
+--- PASS: TestPairIndependentLocksHeldThroughCommit (0.38s)
+=== RUN   TestPairIndependentShippingUI
+=== RUN   TestPairIndependentShippingUI/frozen
+    pair_independent_review_test.go:605: (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+          - ESM syntax in a file loaded as CommonJS (vitest.pair-review.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+        Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+        
+         RUN  v4.1.11 /workspace/offboarding-review/web
+        
+        
+         Test Files  1 passed (1)
+              Tests  1 passed (1)
+           Start at  03:34:34
+           Duration  1.29s (transform 183ms, setup 147ms, import 230ms, tests 238ms, environment 497ms)
+        
+        npm notice
+        npm notice New major version of npm available! 11.9.0 -> 12.2.0
+        npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+        npm notice To update run: npm install -g npm@12.2.0
+        npm notice
+        
+=== RUN   TestPairIndependentShippingUI/successor-role
+    pair_independent_review_test.go:605: (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+          - ESM syntax in a file loaded as CommonJS (vitest.pair-review.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+        Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+        
+         RUN  v4.1.11 /workspace/offboarding-review/web
+        
+        
+         Test Files  1 passed (1)
+              Tests  1 passed (1)
+           Start at  03:34:36
+           Duration  1.38s (transform 175ms, setup 143ms, import 231ms, tests 282ms, environment 514ms)
+        
+        npm notice
+        npm notice New major version of npm available! 11.9.0 -> 12.2.0
+        npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+        npm notice To update run: npm install -g npm@12.2.0
+        npm notice
+        
+=== RUN   TestPairIndependentShippingUI/target-freeze
+    pair_independent_review_test.go:605: (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+          - ESM syntax in a file loaded as CommonJS (vitest.pair-review.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+        Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+        
+         RUN  v4.1.11 /workspace/offboarding-review/web
+        
+        
+         Test Files  1 passed (1)
+              Tests  1 passed (1)
+           Start at  03:34:39
+           Duration  1.35s (transform 195ms, setup 148ms, import 241ms, tests 280ms, environment 502ms)
+        
+        npm notice
+        npm notice New major version of npm available! 11.9.0 -> 12.2.0
+        npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+        npm notice To update run: npm install -g npm@12.2.0
+        npm notice
+        
+=== RUN   TestPairIndependentShippingUI/selected-super
+    pair_independent_review_test.go:605: (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+          - ESM syntax in a file loaded as CommonJS (vitest.pair-review.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+        Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+        
+         RUN  v4.1.11 /workspace/offboarding-review/web
+        
+        
+         Test Files  1 passed (1)
+              Tests  1 passed (1)
+           Start at  03:34:41
+           Duration  1.27s (transform 172ms, setup 138ms, import 228ms, tests 237ms, environment 488ms)
+        
+        npm notice
+        npm notice New major version of npm available! 11.9.0 -> 12.2.0
+        npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+        npm notice To update run: npm install -g npm@12.2.0
+        npm notice
+        
+--- PASS: TestPairIndependentShippingUI (8.63s)
+    --- PASS: TestPairIndependentShippingUI/frozen (2.09s)
+    --- PASS: TestPairIndependentShippingUI/successor-role (2.22s)
+    --- PASS: TestPairIndependentShippingUI/target-freeze (2.22s)
+    --- PASS: TestPairIndependentShippingUI/selected-super (2.09s)
+PASS
+ok  	tabmail/internal/store/postgres	30.598s

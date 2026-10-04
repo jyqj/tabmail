@@ -1,0 +1,43 @@
+=== RUN   TestPairIndependentShippingUI
+=== RUN   TestPairIndependentShippingUI/frozen
+    pair_independent_review_test.go:550: (!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+          - ESM syntax in a file loaded as CommonJS (vitest.pair-review.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+        Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+        
+         RUN  v4.1.11 /workspace/offboarding-review/web
+        
+         ❯ pair-review.probe.tsx (1 test | 1 failed) 59ms
+           × independent shipping UI over real HTTP and owned PG: frozen 58ms
+        
+        ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+        
+         FAIL  pair-review.probe.tsx > independent shipping UI over real HTTP and owned PG: frozen
+        AssertionError: expected [ '', …(1) ] to include '6d5f38a1-52d6-45d2-8d79-0809acf5fb82'
+         ❯ pair-review.probe.tsx:31:42
+             29|  render(<OffboardingPanel employees={rows} refresh={refresh} />);
+             30|  const options = (label: string) => Array.from((screen.getByLabelText(…
+             31|  expect(options("Employee to offboard")).toContain(f.target);
+               |                                          ^
+             32|  expect(options("Employee to offboard")).not.toContain(f.user.id);
+             33|  expect(options("Mailbox successor")).not.toContain(f.user.id);
+        
+        ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+        
+        
+         Test Files  1 failed (1)
+              Tests  1 failed (1)
+           Start at  03:32:16
+           Duration  1.12s (transform 197ms, setup 160ms, import 248ms, tests 59ms, environment 544ms)
+        
+        npm notice
+        npm notice New major version of npm available! 11.9.0 -> 12.2.0
+        npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+        npm notice To update run: npm install -g npm@12.2.0
+        npm notice
+        
+    pair_independent_review_test.go:551: exit status 1
+--- FAIL: TestPairIndependentShippingUI (2.12s)
+    --- FAIL: TestPairIndependentShippingUI/frozen (2.12s)
+FAIL
+FAIL	tabmail/internal/store/postgres	2.130s
+FAIL
