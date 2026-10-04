@@ -186,6 +186,40 @@ func r5UISeed(t *testing.T) *r5UIFixture {
 	t.Cleanup(f.server.Close)
 	return f
 }
+
+// Seed raw intent through the shipping versioned command, then independently
+// reload it. Effective permissions alone cannot prove an override was persisted.
+func r5UIReadPermissionEditor(t *testing.T, f *r5UIFixture, token string) company.PermissionEditorSnapshot {
+	t.Helper()
+	raw := r5UICall(t, f, token, "GET", "/api/v1/admin/users/"+f.employee.ID.String()+"/permission-editor", nil, 200)
+	var env struct {
+		Data company.PermissionEditorSnapshot
+	}
+	r5UIMust(t, json.Unmarshal(raw, &env))
+	r5UIMust(t, env.Data.Revision.Validate())
+	if env.Data.UserID != f.employee.ID || env.Data.TenantID != f.tenant.ID || env.Data.Revision.UserID != f.employee.ID || env.Data.Revision.TenantID != f.tenant.ID {
+		t.Fatal("permission seed readback identity differs")
+	}
+	return env.Data
+}
+
+func r5UISeedPermissionOverrides(t *testing.T, f *r5UIFixture, token string) {
+	t.Helper()
+	before := r5UIReadPermissionEditor(t, f, token)
+	r5UICall(t, f, token, "PATCH", "/api/v1/admin/users/"+f.employee.ID.String()+"/permission-editor", map[string]any{
+		"expected_revision": before.Revision,
+		"patch":             map[string]any{"can_send": false, "domain_access": company.DomainAccess{Mode: "list", ZoneIDs: []uuid.UUID{f.zone.ID}}, "daily_send_quota": 19},
+	}, 200)
+	after := r5UIReadPermissionEditor(t, f, token)
+	raw := after.Overrides
+	if raw == nil || raw.CanSend == nil || *raw.CanSend || raw.DailySendQuota == nil || *raw.DailySendQuota != 19 || raw.DomainAccess.Mode != "list" || len(raw.DomainAccess.ZoneIDs) != 1 || raw.DomainAccess.ZoneIDs[0] != f.zone.ID || len(raw.AllowedZoneIDs) != 1 || raw.AllowedZoneIDs[0] != f.zone.ID {
+		t.Fatal("permission seed raw readback differs")
+	}
+	if before.Revision.Equal(after.Revision) || after.FieldSources["can_send"] != "override" || after.FieldSources["daily_send_quota"] != "override" || after.FieldSources["domain_access"] != "override" {
+		t.Fatal("permission seed revision/source readback differs")
+	}
+}
+
 func r5UICall(t *testing.T, f *r5UIFixture, token, method, path string, body any, status int) []byte {
 	t.Helper()
 	raw, e := json.Marshal(body)
@@ -372,7 +406,7 @@ func r5UISetup(t *testing.T, f *r5UIFixture, c r5UICase, variant, caseHash strin
 		data["auth"] = map[string]any{"token": r5UIToken(t, f.employee), "user": f.employee}
 		r5UIGrantBarrier(t, f, d)
 	default:
-		r5UICall(t, f, token, "PUT", "/api/v1/admin/users/"+f.employee.ID.String()+"/permissions", map[string]any{"can_send": false, "allowed_zone_ids": []uuid.UUID{f.zone.ID}, "daily_send_quota": 19}, 200)
+		r5UISeedPermissionOverrides(t, f, token)
 	}
 	return data
 }
