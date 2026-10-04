@@ -42,7 +42,7 @@ for field, value in [('workers', 5), ('budgets', dict(go=121, process=180, case=
     else: raise AssertionError('semantic recapture accepted '+field)
 b.validate_contract(contract)
 checks.append('actual full contract validation passes')
-owner = b.Batch(contract, args.output/'rpc', {})
+owner = b.Batch(contract, args.output/'rpc', dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
 request = dict(nonce=owner.nonce, contract_sha256=owner.pin, operation='case', key='probe/0', fixture='/private')
 for label, change in [('outside lease', {}), ('foreign nonce', dict(nonce='foreign')), ('foreign contract', dict(contract_sha256='0'*64)), ('argv injection', dict(argv=['/bin/sh']))]:
     owner.leased = label != 'outside lease'
@@ -52,7 +52,7 @@ for label, change in [('outside lease', {}), ('foreign nonce', dict(nonce='forei
 
 def mutated_group(label, target=None):
     old = target.read_bytes() if target else None
-    owner = b.Batch(contract, args.output/label, {})
+    owner = b.Batch(contract, args.output/label, dict(os.environ, PYTHONDONTWRITEBYTECODE='1'))
     def synthetic(argv, cwd, env, seconds=180):
         if argv[0] == contract['go']['path']:
             keys = list(owner.children)

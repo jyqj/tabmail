@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "policy": "r5_batch_lifecycle_fix_evidence_20261004",
+  "fixed_source": "52dd8b9ef538b55812b35308cae8b469400e2705",
+  "tested_defective_source": "f80b37fe14d856d2f2a048a06fe848fc4420448d",
+  "independent_review_commit": "0a2baf4a6ccd11dca7b9aa3c188e6ae2aab2a338",
+  "controls": {
+    "focused_lifecycle": 10,
+    "existing_batch": 30,
+    "runtime": 21,
+    "protocol_regressions": 70,
+    "real_contract_semantic_assertions": [
+      "independent byte pin rejects",
+      "semantic recapture rejects workers",
+      "semantic recapture rejects budgets",
+      "semantic recapture rejects required",
+      "actual full contract validation passes",
+      "RPC rejects outside lease",
+      "RPC rejects foreign nonce",
+      "RPC rejects foreign contract",
+      "RPC rejects argv injection",
+      "source-mutation actual preflight",
+      "source-mutation terminal full validation rejects",
+      "source-mutation invalidates every staged child",
+      "source-mutation restored full validation passes",
+      "dependency-mutation actual preflight",
+      "dependency-mutation terminal full validation rejects",
+      "dependency-mutation invalidates every staged child",
+      "dependency-mutation restored full validation passes",
+      "late-case-cancel-before-ack cancel socket accepted",
+      "late-case-cancel-before-ack ack socket accepted",
+      "late-case-cancel-before-ack actual preflight",
+      "late-case-cancel-before-ack accepted cancellation rejects all staged eligibility",
+      "late-case-cancel-before-ack restored full validation passes"
+    ],
+    "semantic_execution": "synthetic supervisor observations; no business case credit",
+    "semantic_harness": "delivery evidence revision; bound implementation remains fixed_source"
+  },
+  "probe": {
+    "receipt": {
+      "children": {
+        "probe/0": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "9e16564e551df5891140ddc9c908f3bbc64845a47635fd78c71836667a639cf3",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/1": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "4f780c20a03e6a8b0bad8be418725591d1de3d30cec0d4b89865bec8198a291a",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/2": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "ca8b288d820f14c9a25bb70ba8429993df77e058cb11c085dbd0e59d3271b022",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/3": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "1ff18d77c8ee1715e841c83ca0084c2d0abb99e3388a961681f7a2cb6982d45f",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/4": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "c4d51285a9365ed058b3c1b078db1d8651cf18abcd5ecf12425fc0dff0ce9cae",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/5": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "7f51130da3f4979894f11de64d1f18204fd36f5c3a875a9a3908d755ac2ea8c6",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/6": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "587d0483ca441efac5f4e24a44d84cc422cdfe966cae2bfb755176afad1fa0d9",
+          "tail": false,
+          "timeout": false
+        },
+        "probe/7": {
+          "exit_code": 0,
+          "qualified": true,
+          "report_sha256": "0b9213134772dff5ba1ba0c82cdb39fe8bb3214ecefc95dd3755163c266d0e6b",
+          "tail": false,
+          "timeout": false
+        }
+      },
+      "concurrency_boundary": "not_qualified_for_hostile_concurrent_mutation",
+      "contract_sha256": "2761e9914c7113e46dc4163bd7cff7ce70fff99d566e8b1e1a56363bc0b3a785",
+      "eligibility_scope": "infrastructure_probe_only",
+      "errors": [],
+      "max_live_children": 4,
+      "owners_joined": true,
+      "policy": "r5_external_batch_validation_v1",
+      "preflight": true,
+      "product_green": false,
+      "required_terminal_count": 10,
+      "schema_version": 1,
+      "status": "BATCH_QUALIFIED",
+      "task_complete": false,
+      "terminal_count": 10,
+      "terminal_postcheck": true
+    },
+    "receipt_sha256": "1dc4808f036c96d3a7e19a20e19527afab6130c5036de8fcb045d12154a3ed87",
+    "contract_independent_byte_pin": "2761e9914c7113e46dc4163bd7cff7ce70fff99d566e8b1e1a56363bc0b3a785",
+    "contract_canonical_sha256": "2761e9914c7113e46dc4163bd7cff7ce70fff99d566e8b1e1a56363bc0b3a785",
+    "runtime_manifest_independent_byte_pin": "fa5aa7d2562d6f6c66d184876980a02b003b67f41a59a0c479558c3246fc285d",
+    "timing": {
+      "wall_seconds": 21.437126262999982,
+      "exit_code": 0
+    },
+    "raw_go_jsonl_sha256": "1ad538ee2e876250030094905d2630f0269ec235b830677094efbea1757cb45e",
+    "go_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "python_report_sha256": "04fa564503897eefdd4b44e2f4b2046d50bdd66613942ec13e5fb13c76f6489b",
+    "infrastructure_only": true
+  },
+  "inventories": {
+    "source": {
+      "regular_files": 1933,
+      "regular_bytes": 59995464
+    },
+    "dependencies": {
+      "regular_files": 45584,
+      "regular_bytes": 775103182
+    },
+    "full_pre_post_equal": true
+  },
+  "cleanup": {
+    "owned_fixture_databases_remaining": 0,
+    "owned_fixture_backend_connections_remaining": 0,
+    "physical_fixture_ack": true,
+    "owned_postgresql_shutdown": true,
+    "required_process_and_rpc_owners_joined": true,
+    "pgx_backend_cancellation_guarantee": "not newly qualified"
+  },
+  "intermediate_probe": {
+    "fixed_source": "10e6c7390bdd1814545ac8bd1b61b6cc21d9c9ca",
+    "receipt_sha256": "b0b1ee97f9f268c934d6eddbebc9763ceb4fe44fafe75c2144db67a89d3a1a53",
+    "contract_pin": "75dab6ad18e89a0bb494a8cab6a068e4968f0e6bbe807e29056af8fdd80f6b18",
+    "runtime_pin": "fe98652d78989ce8dfc24d89bbd74506d752cff6544af145f1230b41421c7dbd",
+    "timing": {
+      "wall_seconds": 21.797942372999955,
+      "exit_code": 0
+    },
+    "status": "BATCH_QUALIFIED infrastructure only; original identities retained"
+  },
+  "retained_preparation_and_harness_rejections": [
+    "initial npm invocation used repository cwd lacking root lock; no install performed",
+    "inherited NODE_PATH rejected by clean preparation",
+    "empty synthetic caller environment generated source bytecode; source cleanliness rejected; generated files removed",
+    "empty synthetic caller PATH selected a different Python identity; full inventory rejected; harness now preserves cleaned pinned-tool PATH"
+  ],
+  "scope": {
+    "catalog_ids": 46,
+    "handler_ids": 17,
+    "handler_variants": 26,
+    "required_go_paths": 40,
+    "required_python_assertions": 3,
+    "required_component_terminals": 43,
+    "probe_terminals": 10,
+    "formal_component_execution": "NOTRUN"
+  },
+  "original_budgets": {
+    "go": 120,
+    "batch": 180,
+    "case": 75,
+    "max_workers": 4
+  },
+  "deadline_semantics": "execution deadline includes full pre/post validation and active RPC reads; mandatory cleanup tail may exceed it; OS uninterruptible waits have no hard physical-return bound",
+  "qualification_rule": "all-or-none; accepted case cancellation invalidates every child; no required unknown owner/child cleanup may qualify",
+  "unchanged": [
+    "authoritative catalog/markers/business expectations",
+    "go.mod/go.sum and two replaces",
+    "official package-lock and dependencies",
+    "Go1.25.7",
+    "all historical failure/receipt identities"
+  ],
+  "historical_evidence": [
+    "R5-EXTERNAL-BATCH-V1-20261004.json",
+    "R5-EXTERNAL-BATCH-INDEPENDENT-20261004.json"
+  ],
+  "legacy_failures": "retained; no receipt relabeled",
+  "central_progress": "10/171 unchanged",
+  "excluded": [
+    "default675",
+    "sharedDB89e7"
+  ],
+  "wholePG180": "NOTRUN",
+  "audit": "NOTRUN; audit8high remains open",
+  "actual_email": "NOTRUN",
+  "merge_deploy": "NOTRUN",
+  "product_green": false,
+  "task_complete": false,
+  "delivery": "normal branch push and exactly one draft attempt; outcome reported separately; this evidence revision does not inherit the fixed-source receipt"
+}

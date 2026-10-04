@@ -45,8 +45,21 @@ capability lease remains held through cleanup and staged all-or-none publication
 Validation passes 10 focused synthetic owned process/socket and controlled
 descriptor inventory tests, all 30 existing batch controls, 21 runtime controls
 and 70 protocol regressions. It also requires a fresh
-fixed-source infrastructure-only probe. See the follow-up evidence report for
-exact fixed source, pins, timings and cleanup observations. A full-supervisor
+fixed-source infrastructure-only probe. Fixed implementation source
+`52dd8b9ef538b55812b35308cae8b469400e2705` passes the fresh probe in
+21.437 seconds: 10/10 infrastructure terminals, peak4, complete equal pre/post
+inventories and exact physical fixture acknowledgement. Zero owned fixture
+databases/backend connections remain, and the separate owned PostgreSQL cluster
+is shut down. All 22 real-contract semantic assertions pass against that fixed
+source, including source/dependency mutation rejection and accepted late-case
+cancellation invalidating all eight staged children. See the
+[safe evidence](evidence/R5-EXTERNAL-BATCH-LIFECYCLE-FIX-20261004.json) for exact
+pins, receipt/log hashes and retained intermediate/rejected attempt identities.
+The semantic harness is corrected in this later delivery revision to preserve
+the cleaned pinned-tool PATH; its earlier empty-environment invocations rejected
+at full preflight and credit no execution. The implementation helper remains
+identical to the tested fixed source. This newer evidence/documentation revision
+has a separate identity and inherits no receipt qualification. A full-supervisor
 late-cancel counterexample is a supervisor-contract test; it does not establish
 a real Go business false-pass. The fixed semantic controls also retain real
 source/dependency mutation rejection and exact restoration checks.
