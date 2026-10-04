@@ -1,0 +1,808 @@
+{
+  "candidate": "adapter-sha256:eb444c6f0a2112ed473c7c89b71739cb0ba5ac62346efda8cbb20323dec49a89",
+  "base": "412f875985854527f5e7d74040f18954c3a352bf",
+  "os_process_events": [],
+  "selector_and_projection_assertions": "passed",
+  "controls": [
+    {
+      "name": "controlled-two-context-four-slot-positive",
+      "expected": "accept",
+      "actual": "accept",
+      "detail": "accepted",
+      "passed": true
+    },
+    {
+      "name": "descriptor-0-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-0-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-0-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-0-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-0-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-0",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-1-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-1-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-1-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-1-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-1-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-1",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-2-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-2-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-2-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-2-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-2-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-2",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-3-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-3-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-3-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-3-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-3-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-3",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-4-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-4-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-4-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-4-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-4-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-4",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-5-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-5-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-5-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-5-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-5-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-5",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-6-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-6-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-6-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-6-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-6-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-6",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-7-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-7-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-7-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-7-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-7-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-7",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-8-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-8-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-8-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-8-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-8-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-8",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-9-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-9-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-9-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-9-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-9-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-9",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-10-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-10-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-10-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-10-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-10-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-10",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-11-role",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command role mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-11-argv",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "command argv/order mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-11-exit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "successful integer command exit required",
+      "passed": true
+    },
+    {
+      "name": "descriptor-11-binding_stdout_domain",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "stdout domain mismatch",
+      "passed": true
+    },
+    {
+      "name": "descriptor-11-stderr_bytes",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonnegative integer command length required",
+      "passed": true
+    },
+    {
+      "name": "counterfeit-resealed-fixedpin-11",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "trusted bundle byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "expected-run_id",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "run_id mismatch",
+      "passed": true
+    },
+    {
+      "name": "expected-source_commit",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "source_commit mismatch",
+      "passed": true
+    },
+    {
+      "name": "expected-source_root",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "source_root mismatch",
+      "passed": true
+    },
+    {
+      "name": "expected-producer",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "producer mismatch",
+      "passed": true
+    },
+    {
+      "name": "expected-allowed_slots",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "missing/extra/malformed observation slots fields",
+      "passed": true
+    },
+    {
+      "name": "expected-selected_binding_version",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "explicit selected binding integer version 3 required",
+      "passed": true
+    },
+    {
+      "name": "expected-selected_binding_version",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "selected binding version must be integer 2 or 3",
+      "passed": true
+    },
+    {
+      "name": "bundle-schema_version",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "incompatible pin bundle",
+      "passed": true
+    },
+    {
+      "name": "bundle-policy",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "incompatible pin bundle",
+      "passed": true
+    },
+    {
+      "name": "bundle-selected_binding_version",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "mixed selected versions",
+      "passed": true
+    },
+    {
+      "name": "duplicate-bundle",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "duplicate JSON field",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-0",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-1",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-2",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-3",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-4",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-5",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-6",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-7",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-8",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-9",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-10",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "missing-descriptor-11",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "exactly twelve command descriptors required",
+      "passed": true
+    },
+    {
+      "name": "malformed-bundle-b'{'",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+      "passed": true
+    },
+    {
+      "name": "malformed-bundle-b'[]'",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "missing/extra/malformed bundle fields",
+      "passed": true
+    },
+    {
+      "name": "malformed-bundle-b'\\xff'",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "malformed JSON bytes",
+      "passed": true
+    },
+    {
+      "name": "malformed-bundle-b'{\"schema_version\":1.0}'",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "noninteger/nonfinite JSON number",
+      "passed": true
+    },
+    {
+      "name": "malformed-bundle-b'{\"schema_version\":NaN}'",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "noninteger/nonfinite JSON number",
+      "passed": true
+    },
+    {
+      "name": "receipt-context-slot-duplicate-key",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "duplicate JSON field",
+      "passed": true
+    },
+    {
+      "name": "receipt-context-slot-float",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "noninteger/nonfinite JSON number",
+      "passed": true
+    },
+    {
+      "name": "receipt-context-slot-wrong-context",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "slot phase/context mismatch",
+      "passed": true
+    },
+    {
+      "name": "receipt-context-slot-wrong-root",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "source root mismatch",
+      "passed": true
+    },
+    {
+      "name": "receipt-context-slot-missing-slot",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "missing/extra/malformed observation slots fields",
+      "passed": true
+    },
+    {
+      "name": "receipt-context-slot-duplicate-path",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "duplicate receipt path",
+      "passed": true
+    },
+    {
+      "name": "receipt-context-slot-swap-phases",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "receipt byte pin mismatch",
+      "passed": true
+    },
+    {
+      "name": "schema-edge-archive-policy",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "archive boundary policy mismatch",
+      "passed": true
+    },
+    {
+      "name": "schema-edge-archive-registry",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "archive boundary registry mismatch",
+      "passed": true
+    },
+    {
+      "name": "schema-edge-nested-root-mvs-bool",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "nonempty string required",
+      "passed": true
+    },
+    {
+      "name": "schema-edge-selected-local-schema",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "malformed digest",
+      "passed": true
+    },
+    {
+      "name": "schema-edge-qualification-false-claim",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "selected qualification mismatch",
+      "passed": true
+    },
+    {
+      "name": "schema-edge-production-coverage-types",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "no missing coverage mismatch",
+      "passed": true
+    }
+  ],
+  "unexpected_acceptances": []
+}
+Replay: 114 controls; unexpected acceptances=0; OS-process events=0

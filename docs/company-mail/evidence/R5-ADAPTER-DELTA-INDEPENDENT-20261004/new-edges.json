@@ -1,0 +1,144 @@
+{
+  "candidate": "116d44a2a9c0b5d7ac6a09187bf3fae22c1a1e50",
+  "controls": [
+    {
+      "name": "non-go-local-GoFiles",
+      "expected": "reject",
+      "actual": "accept",
+      "detail": "verified receipts returned"
+    },
+    {
+      "name": "missing-local-native-classification",
+      "expected": "reject",
+      "actual": "accept",
+      "detail": "verified receipts returned"
+    },
+    {
+      "name": "foreign-package-native-classification",
+      "expected": "reject",
+      "actual": "accept",
+      "detail": "verified receipts returned"
+    },
+    {
+      "name": "orphan-generated-testmain",
+      "expected": "reject",
+      "actual": "accept",
+      "detail": "verified receipts returned"
+    },
+    {
+      "name": "non-go-toolchain-GoFiles",
+      "expected": "reject",
+      "actual": "accept",
+      "detail": "verified receipts returned"
+    },
+    {
+      "name": "selected-path-../outside.go",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "canonical relative path required"
+    },
+    {
+      "name": "selected-path-/outside.go",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "canonical relative path required"
+    },
+    {
+      "name": "selected-path-internal/../outside.go",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "canonical relative path required"
+    },
+    {
+      "name": "selected-input-type-sha256",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "malformed digest"
+    },
+    {
+      "name": "selected-input-type-fields",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "invalid selected input field names"
+    },
+    {
+      "name": "extra-qualification-field",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "selected qualification mismatch"
+    },
+    {
+      "name": "missing-qualification-field",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "selected qualification mismatch"
+    },
+    {
+      "name": "main-MVS-boolean-type",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "malformed MVS Main"
+    },
+    {
+      "name": "third-MVS-replacement",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "unapproved MVS replacement"
+    },
+    {
+      "name": "variant-extra-field",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "missing/extra/malformed variant record fields"
+    },
+    {
+      "name": "variant-context-bool-type",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "malformed variant context"
+    },
+    {
+      "name": "variant-missing-input",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "variant file coverage mismatch"
+    },
+    {
+      "name": "resolution-boolean-type",
+      "expected": "reject",
+      "actual": "reject",
+      "detail": "static qualification effective_root_MVS_observed mismatch"
+    }
+  ],
+  "helper_parity": [
+    {
+      "path": "/independent/controller/source/internal/not-go.txt",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "path": "/pinned/goroot/src/runtime/not-go.txt",
+      "actual": "reject",
+      "detail": "false Go source path"
+    },
+    {
+      "name": "local-native-classification-required",
+      "actual": [
+        {
+          "package": "tabmail/internal",
+          "field": "CFiles",
+          "path": "internal/native.c",
+          "qualification": "unknown"
+        }
+      ]
+    }
+  ],
+  "unexpected_acceptances": [
+    "non-go-local-GoFiles",
+    "missing-local-native-classification",
+    "foreign-package-native-classification",
+    "orphan-generated-testmain",
+    "non-go-toolchain-GoFiles"
+  ],
+  "os_process_events": []
+}

@@ -1,0 +1,41 @@
+test_all_nested_leaf_type_errors (__main__.CompleteNestedSchemaChecks.test_all_nested_leaf_type_errors) ... ok
+test_classified_records_positive_and_every_field_type (__main__.CompleteNestedSchemaChecks.test_classified_records_positive_and_every_field_type) ... ok
+test_each_required_nested_field_and_extra_key (__main__.CompleteNestedSchemaChecks.test_each_required_nested_field_and_extra_key) ... ok
+test_nested_linkage_missing_or_extra_records (__main__.CompleteNestedSchemaChecks.test_nested_linkage_missing_or_extra_records) ... ok
+test_adapter_does_not_read_environment_or_candidate_paths (__main__.ProjectionAndIsolationChecks.test_adapter_does_not_read_environment_or_candidate_paths) ... ok
+test_only_existing_hydration_and_raw_stdout_exclusions (__main__.ProjectionAndIsolationChecks.test_only_existing_hydration_and_raw_stdout_exclusions) ... ok
+test_os_process_guard_has_observed_zero_events (__main__.ProjectionAndIsolationChecks.test_os_process_guard_has_observed_zero_events) ... ok
+test_retained_command_stderr_hash_and_length_remain_bound (__main__.ProjectionAndIsolationChecks.test_retained_command_stderr_hash_and_length_remain_bound) ... ok
+test_verification_never_calls_capture_validate_or_retention (__main__.ProjectionAndIsolationChecks.test_verification_never_calls_capture_validate_or_retention) ... ok
+test_bool_context_cannot_equal_integer (__main__.ShapeChecks.test_bool_context_cannot_equal_integer) ... ok
+test_bundle_and_pin_missing_extra_fields (__main__.ShapeChecks.test_bundle_and_pin_missing_extra_fields) ... ok
+test_command_shape_and_field_types (__main__.ShapeChecks.test_command_shape_and_field_types) ... ok
+test_duplicate_malformed_json_at_nested_boundaries (__main__.ShapeChecks.test_duplicate_malformed_json_at_nested_boundaries) ... ok
+test_environment_and_source_nested_type_mismatches (__main__.ShapeChecks.test_environment_and_source_nested_type_mismatches) ... ok
+test_missing_extra_descriptor_at_every_position (__main__.ShapeChecks.test_missing_extra_descriptor_at_every_position) ... ok
+test_order_role_argv_exit_and_domain_at_every_position (__main__.ShapeChecks.test_order_role_argv_exit_and_domain_at_every_position) ... ok
+test_receipt_top_level_shape (__main__.ShapeChecks.test_receipt_top_level_shape) ... ok
+test_swapped_context_root_source_and_producer (__main__.ShapeChecks.test_swapped_context_root_source_and_producer) ... ok
+test_variant_directory_inconsistency_and_repeat_mismatch (__main__.ShapeChecks.test_variant_directory_inconsistency_and_repeat_mismatch) ... ok
+test_duplicate_receipt_path_rejected (__main__.TrustChecks.test_duplicate_receipt_path_rejected) ... ok
+test_forged_resealed_replacement_against_original_controller_pin (__main__.TrustChecks.test_forged_resealed_replacement_against_original_controller_pin) ... ok
+test_identical_complete_observations_may_share_digests (__main__.TrustChecks.test_identical_complete_observations_may_share_digests) ... ok
+test_missing_and_malformed_trust_inputs (__main__.TrustChecks.test_missing_and_malformed_trust_inputs) ... ok
+test_missing_extra_duplicate_slots_and_wrong_phase (__main__.TrustChecks.test_missing_extra_duplicate_slots_and_wrong_phase) ... ok
+test_receipt_bytes_not_canonical_digest (__main__.TrustChecks.test_receipt_bytes_not_canonical_digest) ... ok
+test_swapped_phases_with_distinct_pinned_observations (__main__.TrustChecks.test_swapped_phases_with_distinct_pinned_observations) ... ok
+test_valid_two_and_four_slot_bundles (__main__.TrustChecks.test_valid_two_and_four_slot_bundles) ... ok
+test_wrong_expected_identifiers (__main__.TrustChecks.test_wrong_expected_identifiers) ... ok
+test_wrong_inner_observation_pin_or_binding_seal (__main__.TrustChecks.test_wrong_inner_observation_pin_or_binding_seal) ... ok
+test_all_selector_bundle_receipt_version_pairings (__main__.VersionChecks.test_all_selector_bundle_receipt_version_pairings) ... ok
+test_bundle_policy_schema_strict (__main__.VersionChecks.test_bundle_policy_schema_strict) ... ok
+test_explicit_three_imports_only_v3 (__main__.VersionChecks.test_explicit_three_imports_only_v3) ... ok
+test_invalid_versions_never_import (__main__.VersionChecks.test_invalid_versions_never_import) ... ok
+test_omission_is_v2_without_v3_import (__main__.VersionChecks.test_omission_is_v2_without_v3_import) ... ok
+test_v3_pure_operation_requires_explicit_opt_in (__main__.VersionChecks.test_v3_pure_operation_requires_explicit_opt_in) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 3.103s
+
+OK
+OS-process audit events: 0

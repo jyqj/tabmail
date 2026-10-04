@@ -1,0 +1,24 @@
+{
+  "candidate": "116d44a2a9c0b5d7ac6a09187bf3fae22c1a1e50",
+  "base": "412f875985854527f5e7d74040f18954c3a352bf",
+  "prior_review": "054d47924e041117afb88f4d8e74217a89bd2464",
+  "preexisting_paths": 2208,
+  "changed_preexisting_paths": [],
+  "all_114_names_order_expectations_preserved": true,
+  "sha256": {
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/author-checks.txt": "3d6ad8f50940b006a079a8968dbdbd7adca1667110eb9c96014336248fe4b20c",
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/independent-baseline.json": "a7434e2eef4ab80acd96b28412b41b2f96971a643d50314f5d51d02345d6a8ab",
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/independent-replay.json": "974e209b2bd72de07e480f8f589199d12585c65b4ecba58d0436462b22a56ebc",
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/independent_replay.py": "d8a2151eba65efe1d6cfcd302ae36c6f7102526338a6893b6103eaa781f7d869",
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/new-edges.json": "fe97ead04aa9cbed21e962e357944027c20b8896334753b49229519a83afabfe",
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/new_edge_checks.py": "9f284ec994c9a9e164aef0103ae546bae79b24a7ab6be70c34dea4b1ae3963d9",
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/replay-baseline.txt": "3f28e63a6c6fb1a29104eb922310f01be8f0aa4a8fdc9fb942093ab5e26606db",
+    "docs/company-mail/evidence/R5-ADAPTER-DELTA-INDEPENDENT-20261004/replay-corrected.txt": "16730dd1f5f325f700ebc14a3ae2789e1792445dbb0ab2e54ef92ba694312477",
+    "scripts/contracts/r5-selected-binding-v3-producer.json": "cc80c215f1bf51f2a014ff5e6a37084f29f54a904c69ee58ba52febbd125df66",
+    "scripts/r5_selected_binding_consumer.py": "eb444c6f0a2112ed473c7c89b71739cb0ba5ac62346efda8cbb20323dec49a89",
+    "scripts/r5_selected_source_binding.py": "15f5cdf4b13ee09558cc368e367091d4802804a7c9724065faf5c50605b8a873",
+    "scripts/r5_selected_source_binding_v2.py": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67",
+    "scripts/r5_selected_source_binding_v3.py": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+    "scripts/tests/r5_selected_binding_consumer_checks.py": "82372ed6d398a80dac1864b8af95b5a47586144226bed6ec5e26a462fe3a98c7"
+  }
+}
