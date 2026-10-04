@@ -55,6 +55,8 @@ def _object(value, producer):
     if type(value) is not dict:
         raise ValueError('metadata object required: '+producer)
     schema = REGISTRY['types'][producer]
+    if producer in ('PackageError', 'ModuleError') and set(value) != set(schema):
+        raise ValueError('complete serialized error record required: '+producer)
     if set(value) - set(schema):
         raise ValueError('unknown metadata field: '+producer)
     for key, item in value.items():

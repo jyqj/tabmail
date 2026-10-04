@@ -123,6 +123,10 @@ class ProjectionTests(unittest.TestCase):
         for raw in (b'',b'[]',b'{}junk',b'{',b'{}\nnull',b'{"Stale":true,"Stale":false}',b'{"Module":{"Path":"a","Path":"b"}}',b'{"ImportMap":{"a":"b","a":"c"}}',b'{"Doc":NaN}',b'{"Doc":Infinity}',b'{"Doc":-Infinity}',b'{"Doc":1e999}',b'\xff'):
             with self.subTest(raw=raw),self.assertRaises(ValueError): v3.project_package_stdout(raw)
 
+    def test_error_serialization_requires_complete_records(self):
+        for value,producer in [({},'PackageError'),({'Err':'error'},'PackageError'),({},'ModuleError')]:
+            with self.subTest(producer=producer,value=value),self.assertRaises(ValueError):v3._object(value,producer)
+
     def test_registry_source_shape_and_time(self):
         self.assertEqual(len(v3.REGISTRY['types']['PackagePublic']),58)
         self.assertEqual(len(v3.REGISTRY['types']['ModulePublic']),19)
@@ -257,6 +261,38 @@ class CaptureOrderingTests(unittest.TestCase):
         error=subprocess.TimeoutExpired(['go'],180,output=b'partial',stderr=b'failure')
         with self.assertRaises(subprocess.TimeoutExpired) as caught:self.exercise(fail=error)
         self.assertIs(caught.exception,error)
+
+
+class AuthorityTests(unittest.TestCase):
+    def test_v3_reuses_unchanged_v2_authority_predicates(self):
+        for name in ('classify','normalize_mvs','compare_coverage','compare_variants','digest','topology','selection_argv','variant_argv'):
+            self.assertIs(getattr(v3,name),getattr(v2,name))
+        self.assertEqual(v3.CONTEXT,v2.CONTEXT);self.assertEqual(v3.DEFAULT_CONTEXT,v2.DEFAULT_CONTEXT)
+
+    def test_v3_source_archive_package_coverage_and_replacement_rejections(self):
+        import test_r5_archive_boundary as fixtures
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);fixtures.fixture(root)
+            row=dict(Dir=str(root/'cmd'),Name='main',ImportPath='tabmail/cmd',Module=dict(Path='tabmail',Main=True,Dir=str(root)),GoFiles=['main.go'])
+            for name in ('private.env','../go.mod','/etc/passwd',str(root/next(iter(v3.STATIC_EVIDENCE)))):
+                changed=copy.deepcopy(row);changed['GoFiles']=[name]
+                with self.subTest(source=name),self.assertRaises(ValueError):v3.classify([changed],root,{'cmd/main.go'},{'GOCACHE':'/tmp/cache'},[])
+            changed=copy.deepcopy(row);changed['Dir']=str((root/next(iter(v3.STATIC_EVIDENCE))).parent)
+            with self.assertRaisesRegex(ValueError,'archive package'):v3.classify([changed],root,set(v3.STATIC_EVIDENCE),{},[])
+            with self.assertRaisesRegex(ValueError,'coverage differs'):v3.compare_coverage([row],[],root,{'production_go':{'cmd/main.go'}},{'cmd/main.go':['GoFiles']})
+            changed=copy.deepcopy(row);changed['Dir']=str(root/'third_party/go-smtp')
+            with self.assertRaisesRegex(ValueError,'fork identity'):v3.classify([changed],root,{'cmd/main.go'},{},[])
+            with self.assertRaises(ValueError):v3.normalize_mvs([{'Path':'tabmail','Main':True,'Dir':str(root)}],root)
+
+    def test_context_and_unapproved_producer_reject_before_command(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);go=root/'go';go.write_bytes(b'unapproved')
+            with mock.patch.object(v3.subprocess,'run') as run,self.assertRaises(ValueError):
+                v3.capture(root,go,cache=root/'cache',modulecache=root/'mod',context=dict(v3.CONTEXT,goos='darwin'))
+            run.assert_not_called()
+            with mock.patch.object(v3.inventory,'capture_current_source',return_value={}),mock.patch.object(v3,'digest',return_value={v3._V3_FILES[0]:v3._IMPLEMENTATION_SHA256,v3.SCHEMA_PATH:v3._sha(v3._REGISTRY_BYTES)}),mock.patch.object(v3.subprocess,'run') as run,self.assertRaisesRegex(ValueError,'unapproved metadata producer'):
+                v3.capture(root,go,cache=root/'cache',modulecache=root/'mod')
+            run.assert_not_called()
 
 
 if __name__=='__main__':unittest.main()
