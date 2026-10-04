@@ -1,0 +1,635 @@
+{
+  "evidence": "typed-projection-and-shipping-envelope-only; not HTTP admission or PG acceptance",
+  "fixtures": [
+    {
+      "name": "known",
+      "path": "/api/v1/outbound",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "tenant_id": "22222222-2222-4222-8222-222222222222",
+            "state": "retry",
+            "status": "partially_accepted",
+            "progress": {
+              "completeness": "known",
+              "counts": {
+                "total": 3,
+                "accepted": 1,
+                "pending": 0,
+                "temporary": 1,
+                "permanent": 1,
+                "uncertain": 0
+              }
+            },
+            "created_at": "2026-10-02T01:00:00Z",
+            "updated_at": "2026-10-02T01:00:00Z",
+            "attempt_count": 2,
+            "next_retry": "2026-10-02T01:01:00Z",
+            "delivery_uncertain": false,
+            "capabilities": {
+              "view_content": true,
+              "retry": false,
+              "retry_block_reason": "state_not_retryable"
+            }
+          }
+        ],
+        "meta": {
+          "total": 1,
+          "page": 1,
+          "per_page": 30
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/outbound",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "tenant_id": "22222222-2222-4222-8222-222222222222",
+            "state": "retry",
+            "status": "needs_attention",
+            "progress": {
+              "completeness": "unknown"
+            },
+            "created_at": "2026-10-02T01:00:00Z",
+            "updated_at": "2026-10-02T01:00:00Z",
+            "attempt_count": 2,
+            "next_retry": "2026-10-02T01:01:00Z",
+            "delivery_uncertain": false,
+            "capabilities": {
+              "view_content": false,
+              "retry": false,
+              "retry_block_reason": "unknown"
+            }
+          }
+        ],
+        "meta": {
+          "total": 1,
+          "page": 1,
+          "per_page": 30
+        }
+      }
+    },
+    {
+      "name": "known",
+      "path": "/api/v1/outbound/{id}",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "partially_accepted",
+          "progress": {
+            "completeness": "known",
+            "counts": {
+              "total": 3,
+              "accepted": 1,
+              "pending": 0,
+              "temporary": 1,
+              "permanent": 1,
+              "uncertain": 0
+            }
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": true,
+            "retry": false,
+            "retry_block_reason": "state_not_retryable"
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/outbound/{id}",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "known",
+      "path": "/api/v1/outbound/{id}/attempts",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "partially_accepted",
+          "progress": {
+            "completeness": "known",
+            "counts": {
+              "total": 3,
+              "accepted": 1,
+              "pending": 0,
+              "temporary": 1,
+              "permanent": 1,
+              "uncertain": 0
+            }
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": true,
+            "retry": false,
+            "retry_block_reason": "state_not_retryable"
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/outbound/{id}/attempts",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "known",
+      "path": "/api/v1/outbound/{id}/retry",
+      "method": "post",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "partially_accepted",
+          "progress": {
+            "completeness": "known",
+            "counts": {
+              "total": 3,
+              "accepted": 1,
+              "pending": 0,
+              "temporary": 1,
+              "permanent": 1,
+              "uncertain": 0
+            }
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": true,
+            "retry": false,
+            "retry_block_reason": "state_not_retryable"
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/outbound/{id}/retry",
+      "method": "post",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "committed-fallback",
+      "path": "/api/v1/outbound/{id}/retry",
+      "method": "post",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "known",
+      "path": "/api/v1/company/submissions",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "tenant_id": "22222222-2222-4222-8222-222222222222",
+            "state": "retry",
+            "status": "partially_accepted",
+            "progress": {
+              "completeness": "known",
+              "counts": {
+                "total": 3,
+                "accepted": 1,
+                "pending": 0,
+                "temporary": 1,
+                "permanent": 1,
+                "uncertain": 0
+              }
+            },
+            "created_at": "2026-10-02T01:00:00Z",
+            "updated_at": "2026-10-02T01:00:00Z",
+            "attempt_count": 2,
+            "next_retry": "2026-10-02T01:01:00Z",
+            "delivery_uncertain": false,
+            "capabilities": {
+              "view_content": true,
+              "retry": false,
+              "retry_block_reason": "state_not_retryable"
+            }
+          }
+        ],
+        "meta": {
+          "total": 1,
+          "page": 1,
+          "per_page": 30
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/company/submissions",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "tenant_id": "22222222-2222-4222-8222-222222222222",
+            "state": "retry",
+            "status": "needs_attention",
+            "progress": {
+              "completeness": "unknown"
+            },
+            "created_at": "2026-10-02T01:00:00Z",
+            "updated_at": "2026-10-02T01:00:00Z",
+            "attempt_count": 2,
+            "next_retry": "2026-10-02T01:01:00Z",
+            "delivery_uncertain": false,
+            "capabilities": {
+              "view_content": false,
+              "retry": false,
+              "retry_block_reason": "unknown"
+            }
+          }
+        ],
+        "meta": {
+          "total": 1,
+          "page": 1,
+          "per_page": 30
+        }
+      }
+    },
+    {
+      "name": "known",
+      "path": "/api/v1/company/submissions/{id}",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "partially_accepted",
+          "progress": {
+            "completeness": "known",
+            "counts": {
+              "total": 3,
+              "accepted": 1,
+              "pending": 0,
+              "temporary": 1,
+              "permanent": 1,
+              "uncertain": 0
+            }
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": true,
+            "retry": false,
+            "retry_block_reason": "state_not_retryable"
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/company/submissions/{id}",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "known",
+      "path": "/api/v1/company/drafts/{id}/submit",
+      "method": "post",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "partially_accepted",
+          "progress": {
+            "completeness": "known",
+            "counts": {
+              "total": 3,
+              "accepted": 1,
+              "pending": 0,
+              "temporary": 1,
+              "permanent": 1,
+              "uncertain": 0
+            }
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": true,
+            "retry": false,
+            "retry_block_reason": "state_not_retryable"
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/company/drafts/{id}/submit",
+      "method": "post",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "known",
+      "path": "/api/v1/company/drafts/{id}/submit",
+      "method": "post",
+      "status": 201,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "partially_accepted",
+          "progress": {
+            "completeness": "known",
+            "counts": {
+              "total": 3,
+              "accepted": 1,
+              "pending": 0,
+              "temporary": 1,
+              "permanent": 1,
+              "uncertain": 0
+            }
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": true,
+            "retry": false,
+            "retry_block_reason": "state_not_retryable"
+          }
+        }
+      }
+    },
+    {
+      "name": "unknown",
+      "path": "/api/v1/company/drafts/{id}/submit",
+      "method": "post",
+      "status": 201,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "tenant_id": "22222222-2222-4222-8222-222222222222",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "created_at": "2026-10-02T01:00:00Z",
+          "updated_at": "2026-10-02T01:00:00Z",
+          "attempt_count": 2,
+          "next_retry": "2026-10-02T01:01:00Z",
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "committed-fallback",
+      "path": "/api/v1/company/drafts/{id}/submit",
+      "method": "post",
+      "status": 201,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "state": "retry",
+          "status": "needs_attention",
+          "progress": {
+            "completeness": "unknown"
+          },
+          "delivery_uncertain": false,
+          "capabilities": {
+            "view_content": false,
+            "retry": false,
+            "retry_block_reason": "unknown"
+          }
+        }
+      }
+    },
+    {
+      "name": "known-empty-bcc",
+      "path": "/api/v1/company/submissions/{id}/content",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "subject": "content-only fixture",
+          "from": "sender@fixture.test",
+          "to": [
+            "to@fixture.test"
+          ],
+          "bcc": [],
+          "recipient_completeness": "complete",
+          "created_at": "2026-10-02T01:00:00Z",
+          "content_redacted": false
+        }
+      }
+    },
+    {
+      "name": "known-bcc",
+      "path": "/api/v1/company/submissions/{id}/content",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "subject": "content-only fixture",
+          "from": "sender@fixture.test",
+          "to": [
+            "to@fixture.test"
+          ],
+          "bcc": [
+            "bcc@fixture.test"
+          ],
+          "recipient_completeness": "complete",
+          "created_at": "2026-10-02T01:00:00Z",
+          "content_redacted": false
+        }
+      }
+    },
+    {
+      "name": "legacy-unknown-bcc",
+      "path": "/api/v1/company/submissions/{id}/content",
+      "method": "get",
+      "status": 200,
+      "body": {
+        "data": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "subject": "content-only fixture",
+          "from": "sender@fixture.test",
+          "to": [
+            "to@fixture.test"
+          ],
+          "bcc": null,
+          "recipient_completeness": "legacy_unknown",
+          "created_at": "2026-10-02T01:00:00Z",
+          "content_redacted": false
+        }
+      }
+    }
+  ]
+}
