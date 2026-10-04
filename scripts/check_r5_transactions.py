@@ -22,7 +22,7 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 def extract(root=ROOT):
-    go = os.environ.get('R5_GO') or shutil.which('go')
+    go = os.environ.get('R5_TEST_GO') or os.environ.get('R5_GO') or shutil.which('go')
     cached = Path('/Users/jin/.cache/go-mod/golang.org/toolchain@v0.0.1-go1.25.7.darwin-arm64/bin/go')
     if not (os.environ.get('R5_GO') or os.environ.get('R5_TEST_GO')) and cached.exists():
         go = str(cached)

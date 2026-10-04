@@ -42,7 +42,7 @@ class EnvironmentTests(unittest.TestCase):
         self.assertEqual(env['GOCACHE'], '/legacy/cache')
 
     def test_transaction_uses_selected_tool_and_offline_policy(self):
-        with mock.patch.dict(os.environ, {'R5_TEST_GO':'/owned/go','R5_TEST_CACHE':'/owned/cache'}, clear=True), mock.patch.object(transactions.subprocess, 'run', return_value=subprocess.CompletedProcess([],0,'{}','')) as run:
+        with mock.patch.dict(os.environ, {'R5_TEST_GO':'/owned/go','R5_TEST_CACHE':'/owned/cache'}, clear=True), mock.patch.object(transactions.shutil, 'which', return_value=None), mock.patch.object(transactions.subprocess, 'run', return_value=subprocess.CompletedProcess([],0,'{}','')) as run:
             self.assertEqual(transactions.extract(), {})
         args, kwargs = run.call_args
         self.assertEqual(args[0][0], '/owned/go')
