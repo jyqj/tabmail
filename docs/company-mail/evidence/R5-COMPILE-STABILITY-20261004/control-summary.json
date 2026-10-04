@@ -1,0 +1,852 @@
+{
+  "compile_commands": [
+    {
+      "argv": [
+        "/workspace/tabmail-cloud/tools/go/bin/go",
+        "build",
+        "-mod=readonly",
+        "./..."
+      ],
+      "execution": "compiler_or_metadata_only",
+      "exit": 0,
+      "label": "prewarm-root-build",
+      "seconds": 46.984,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspace/tabmail-cloud/tools/go/bin/go",
+        "test",
+        "-c",
+        "-o",
+        "/tmp/r5-compile-stability-20261004/prewarm-default-selected/",
+        "./internal/api/handlers",
+        "./internal/architecture"
+      ],
+      "execution": "compiler_or_metadata_only",
+      "exit": 0,
+      "label": "prewarm-default-selected",
+      "seconds": 6.854,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspace/tabmail-cloud/tools/go/bin/go",
+        "test",
+        "-c",
+        "-o",
+        "/tmp/r5-compile-stability-20261004/prewarm-race-root/",
+        "-race",
+        "./..."
+      ],
+      "execution": "compiler_or_metadata_only",
+      "exit": 0,
+      "label": "prewarm-race-root",
+      "seconds": 73.642,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "dc650ee3b8c87adfdd46cadb938b8e5477cb278f13f968792580e90cad1faf8c"
+    },
+    {
+      "argv": [
+        "/workspace/tabmail-cloud/tools/go/bin/go",
+        "test",
+        "-c",
+        "-o",
+        "/tmp/r5-compile-stability-20261004/prewarm-race-protocol/",
+        "-race",
+        "-tags=r5protocol",
+        "./internal/api/handlers",
+        "./internal/store/postgres"
+      ],
+      "execution": "compiler_or_metadata_only",
+      "exit": 0,
+      "label": "prewarm-race-protocol",
+      "seconds": 12.236,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "argv": [
+        "/workspace/tabmail-cloud/tools/go/bin/go",
+        "test",
+        "-c",
+        "-o",
+        "/tmp/r5-compile-stability-20261004/prewarm-race-audit/",
+        "-race",
+        "-tags=r5audit",
+        "./internal/store/postgres"
+      ],
+      "execution": "compiler_or_metadata_only",
+      "exit": 0,
+      "label": "prewarm-race-audit",
+      "seconds": 9.083,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "compiler_artifacts": 46,
+  "default_capture": {
+    "attestation_sha256": "ca507621d5a16356ca8556719c0b324ff864876b423f33fdf81ad30b56b9d80d",
+    "repeated_raw_comparisons": [
+      {
+        "after_sha256": "8bb1924178f931b247a7fda6fe4962f0aefa900d232be49f6269a8a79b1d6cbd",
+        "before_sha256": "8bb1924178f931b247a7fda6fe4962f0aefa900d232be49f6269a8a79b1d6cbd",
+        "changes": [],
+        "equal": true,
+        "role": "selected union"
+      },
+      {
+        "after_sha256": "51bdb57981abf7966ed51c5a783706dde6113c5e5a4294a9b98151bca1b1583a",
+        "before_sha256": "51bdb57981abf7966ed51c5a783706dde6113c5e5a4294a9b98151bca1b1583a",
+        "changes": [],
+        "equal": true,
+        "role": "MVS"
+      },
+      {
+        "after_sha256": "484bbdae0f138ce9252b164c68cd47a775f172e01da24f451e7ee88447759c1f",
+        "before_sha256": "484bbdae0f138ce9252b164c68cd47a775f172e01da24f451e7ee88447759c1f",
+        "changes": [],
+        "equal": true,
+        "role": "root"
+      },
+      {
+        "after_sha256": "6fee28c09a2bcdf0aabd4048fbef269908eb46ab7d3bfb66b3426a370bfae55e",
+        "before_sha256": "6fee28c09a2bcdf0aabd4048fbef269908eb46ab7d3bfb66b3426a370bfae55e",
+        "changes": [],
+        "equal": true,
+        "role": "explicit"
+      },
+      {
+        "after_sha256": "796e7bb1654a0a9ff798dceab29495626014bcf8959c2430a470c4d241a01bf4",
+        "before_sha256": "796e7bb1654a0a9ff798dceab29495626014bcf8959c2430a470c4d241a01bf4",
+        "changes": [],
+        "equal": true,
+        "role": "variant"
+      }
+    ],
+    "status": "captured_not_postvalidated"
+  },
+  "plan": {
+    "contexts": {
+      "default": {
+        "build_tag_sets": [
+          []
+        ],
+        "cgo_enabled": 1,
+        "go_flags": "",
+        "go_work": "off",
+        "goarch": "amd64",
+        "goos": "linux",
+        "race": false,
+        "selection": "all_local_variants_superset"
+      },
+      "race": {
+        "build_tag_sets": [
+          []
+        ],
+        "cgo_enabled": 1,
+        "go_flags": "",
+        "go_work": "off",
+        "goarch": "amd64",
+        "goos": "linux",
+        "race": true,
+        "selection": "all_local_variants_superset"
+      },
+      "race-r5audit": {
+        "build_tag_sets": [
+          [
+            "r5audit"
+          ]
+        ],
+        "cgo_enabled": 1,
+        "go_flags": "",
+        "go_work": "off",
+        "goarch": "amd64",
+        "goos": "linux",
+        "race": true,
+        "selection": "all_local_variants_superset"
+      },
+      "race-r5protocol": {
+        "build_tag_sets": [
+          [
+            "r5protocol"
+          ]
+        ],
+        "cgo_enabled": 1,
+        "go_flags": "",
+        "go_work": "off",
+        "goarch": "amd64",
+        "goos": "linux",
+        "race": true,
+        "selection": "all_local_variants_superset"
+      }
+    },
+    "go_sha256": "76ac600b41ad2eceee5d39d02af78009516f8b2a29f30bcc80f765c3e4b4f5a8",
+    "lock_hashes": {
+      "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+      "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+      "third_party/enmime-v2.3.0/go.mod": "976135226793cb303993bce4659b3883783db3225d9e5617d1e3a1540e5c5862",
+      "third_party/go-smtp/go.mod": "c90914c039d7a1eba0c1c07c00435f0561607cb0e56bf43664c63a45c6e17900",
+      "web/package-lock.json": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3"
+    },
+    "metadata_commands": {
+      "default": [
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-json",
+          "./...",
+          "github.com/jhillyerd/enmime/v2/...",
+          "github.com/emersion/go-smtp/..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-json",
+          "./..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-json",
+          "./cmd/...",
+          "./internal/..."
+        ],
+        [
+          "list",
+          "-e",
+          "-mod=readonly",
+          "-json",
+          "./cmd/r5txinventory",
+          "./cmd/tabmail",
+          "./internal/api",
+          "./internal/api/handlers",
+          "./internal/api/lifecycle",
+          "./internal/api/middleware",
+          "./internal/app",
+          "./internal/app/admin",
+          "./internal/app/companymail",
+          "./internal/app/credentials",
+          "./internal/app/domains",
+          "./internal/app/drafts",
+          "./internal/app/employees",
+          "./internal/app/mailarchive",
+          "./internal/app/mailboxes",
+          "./internal/app/mailindex",
+          "./internal/app/messages",
+          "./internal/app/permissions",
+          "./internal/app/recovery",
+          "./internal/app/submissions",
+          "./internal/app/templates",
+          "./internal/architecture",
+          "./internal/authn",
+          "./internal/authz",
+          "./internal/autocreate",
+          "./internal/classify",
+          "./internal/company",
+          "./internal/config",
+          "./internal/configcache",
+          "./internal/delivery",
+          "./internal/dkim",
+          "./internal/hooks",
+          "./internal/ingest",
+          "./internal/mailcontent",
+          "./internal/metrics",
+          "./internal/models",
+          "./internal/outbound",
+          "./internal/policy",
+          "./internal/rawobject",
+          "./internal/realtime",
+          "./internal/resolver",
+          "./internal/retention",
+          "./internal/sanitize",
+          "./internal/settings",
+          "./internal/smtp",
+          "./internal/store",
+          "./internal/store/fileobj",
+          "./internal/store/postgres",
+          "./internal/store/s3obj",
+          "./internal/testpg",
+          "./internal/testutil",
+          "./internal/workqueue",
+          "github.com/jhillyerd/enmime/v2",
+          "github.com/jhillyerd/enmime/v2/cmd",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+          "github.com/jhillyerd/enmime/v2/dsn",
+          "github.com/jhillyerd/enmime/v2/internal/coding",
+          "github.com/jhillyerd/enmime/v2/internal/stringutil",
+          "github.com/jhillyerd/enmime/v2/internal/test",
+          "github.com/jhillyerd/enmime/v2/internal/textproto",
+          "github.com/jhillyerd/enmime/v2/mediatype",
+          "github.com/emersion/go-smtp",
+          "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-m",
+          "-json",
+          "all"
+        ]
+      ],
+      "race": [
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-json",
+          "./...",
+          "github.com/jhillyerd/enmime/v2/...",
+          "github.com/emersion/go-smtp/..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-json",
+          "./..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-json",
+          "./cmd/...",
+          "./internal/..."
+        ],
+        [
+          "list",
+          "-e",
+          "-mod=readonly",
+          "-race",
+          "-json",
+          "./cmd/r5txinventory",
+          "./cmd/tabmail",
+          "./internal/api",
+          "./internal/api/handlers",
+          "./internal/api/lifecycle",
+          "./internal/api/middleware",
+          "./internal/app",
+          "./internal/app/admin",
+          "./internal/app/companymail",
+          "./internal/app/credentials",
+          "./internal/app/domains",
+          "./internal/app/drafts",
+          "./internal/app/employees",
+          "./internal/app/mailarchive",
+          "./internal/app/mailboxes",
+          "./internal/app/mailindex",
+          "./internal/app/messages",
+          "./internal/app/permissions",
+          "./internal/app/recovery",
+          "./internal/app/submissions",
+          "./internal/app/templates",
+          "./internal/architecture",
+          "./internal/authn",
+          "./internal/authz",
+          "./internal/autocreate",
+          "./internal/classify",
+          "./internal/company",
+          "./internal/config",
+          "./internal/configcache",
+          "./internal/delivery",
+          "./internal/dkim",
+          "./internal/hooks",
+          "./internal/ingest",
+          "./internal/mailcontent",
+          "./internal/metrics",
+          "./internal/models",
+          "./internal/outbound",
+          "./internal/policy",
+          "./internal/rawobject",
+          "./internal/realtime",
+          "./internal/resolver",
+          "./internal/retention",
+          "./internal/sanitize",
+          "./internal/settings",
+          "./internal/smtp",
+          "./internal/store",
+          "./internal/store/fileobj",
+          "./internal/store/postgres",
+          "./internal/store/s3obj",
+          "./internal/testpg",
+          "./internal/testutil",
+          "./internal/workqueue",
+          "github.com/jhillyerd/enmime/v2",
+          "github.com/jhillyerd/enmime/v2/cmd",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+          "github.com/jhillyerd/enmime/v2/dsn",
+          "github.com/jhillyerd/enmime/v2/internal/coding",
+          "github.com/jhillyerd/enmime/v2/internal/stringutil",
+          "github.com/jhillyerd/enmime/v2/internal/test",
+          "github.com/jhillyerd/enmime/v2/internal/textproto",
+          "github.com/jhillyerd/enmime/v2/mediatype",
+          "github.com/emersion/go-smtp",
+          "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-m",
+          "-json",
+          "all"
+        ]
+      ],
+      "race-r5audit": [
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-tags=r5audit",
+          "-json",
+          "./...",
+          "github.com/jhillyerd/enmime/v2/...",
+          "github.com/emersion/go-smtp/..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-tags=r5audit",
+          "-json",
+          "./..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-tags=r5audit",
+          "-json",
+          "./cmd/...",
+          "./internal/..."
+        ],
+        [
+          "list",
+          "-e",
+          "-mod=readonly",
+          "-race",
+          "-tags=r5audit",
+          "-json",
+          "./cmd/r5txinventory",
+          "./cmd/tabmail",
+          "./internal/api",
+          "./internal/api/handlers",
+          "./internal/api/lifecycle",
+          "./internal/api/middleware",
+          "./internal/app",
+          "./internal/app/admin",
+          "./internal/app/companymail",
+          "./internal/app/credentials",
+          "./internal/app/domains",
+          "./internal/app/drafts",
+          "./internal/app/employees",
+          "./internal/app/mailarchive",
+          "./internal/app/mailboxes",
+          "./internal/app/mailindex",
+          "./internal/app/messages",
+          "./internal/app/permissions",
+          "./internal/app/recovery",
+          "./internal/app/submissions",
+          "./internal/app/templates",
+          "./internal/architecture",
+          "./internal/authn",
+          "./internal/authz",
+          "./internal/autocreate",
+          "./internal/classify",
+          "./internal/company",
+          "./internal/config",
+          "./internal/configcache",
+          "./internal/delivery",
+          "./internal/dkim",
+          "./internal/hooks",
+          "./internal/ingest",
+          "./internal/mailcontent",
+          "./internal/metrics",
+          "./internal/models",
+          "./internal/outbound",
+          "./internal/policy",
+          "./internal/rawobject",
+          "./internal/realtime",
+          "./internal/resolver",
+          "./internal/retention",
+          "./internal/sanitize",
+          "./internal/settings",
+          "./internal/smtp",
+          "./internal/store",
+          "./internal/store/fileobj",
+          "./internal/store/postgres",
+          "./internal/store/s3obj",
+          "./internal/testpg",
+          "./internal/testutil",
+          "./internal/workqueue",
+          "github.com/jhillyerd/enmime/v2",
+          "github.com/jhillyerd/enmime/v2/cmd",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+          "github.com/jhillyerd/enmime/v2/dsn",
+          "github.com/jhillyerd/enmime/v2/internal/coding",
+          "github.com/jhillyerd/enmime/v2/internal/stringutil",
+          "github.com/jhillyerd/enmime/v2/internal/test",
+          "github.com/jhillyerd/enmime/v2/internal/textproto",
+          "github.com/jhillyerd/enmime/v2/mediatype",
+          "github.com/emersion/go-smtp",
+          "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-m",
+          "-json",
+          "all"
+        ]
+      ],
+      "race-r5protocol": [
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-tags=r5protocol",
+          "-json",
+          "./...",
+          "github.com/jhillyerd/enmime/v2/...",
+          "github.com/emersion/go-smtp/..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-tags=r5protocol",
+          "-json",
+          "./..."
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-deps",
+          "-test",
+          "-race",
+          "-tags=r5protocol",
+          "-json",
+          "./cmd/...",
+          "./internal/..."
+        ],
+        [
+          "list",
+          "-e",
+          "-mod=readonly",
+          "-race",
+          "-tags=r5protocol",
+          "-json",
+          "./cmd/r5txinventory",
+          "./cmd/tabmail",
+          "./internal/api",
+          "./internal/api/handlers",
+          "./internal/api/lifecycle",
+          "./internal/api/middleware",
+          "./internal/app",
+          "./internal/app/admin",
+          "./internal/app/companymail",
+          "./internal/app/credentials",
+          "./internal/app/domains",
+          "./internal/app/drafts",
+          "./internal/app/employees",
+          "./internal/app/mailarchive",
+          "./internal/app/mailboxes",
+          "./internal/app/mailindex",
+          "./internal/app/messages",
+          "./internal/app/permissions",
+          "./internal/app/recovery",
+          "./internal/app/submissions",
+          "./internal/app/templates",
+          "./internal/architecture",
+          "./internal/authn",
+          "./internal/authz",
+          "./internal/autocreate",
+          "./internal/classify",
+          "./internal/company",
+          "./internal/config",
+          "./internal/configcache",
+          "./internal/delivery",
+          "./internal/dkim",
+          "./internal/hooks",
+          "./internal/ingest",
+          "./internal/mailcontent",
+          "./internal/metrics",
+          "./internal/models",
+          "./internal/outbound",
+          "./internal/policy",
+          "./internal/rawobject",
+          "./internal/realtime",
+          "./internal/resolver",
+          "./internal/retention",
+          "./internal/sanitize",
+          "./internal/settings",
+          "./internal/smtp",
+          "./internal/store",
+          "./internal/store/fileobj",
+          "./internal/store/postgres",
+          "./internal/store/s3obj",
+          "./internal/testpg",
+          "./internal/testutil",
+          "./internal/workqueue",
+          "github.com/jhillyerd/enmime/v2",
+          "github.com/jhillyerd/enmime/v2/cmd",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-dump",
+          "github.com/jhillyerd/enmime/v2/cmd/mime-extractor",
+          "github.com/jhillyerd/enmime/v2/dsn",
+          "github.com/jhillyerd/enmime/v2/internal/coding",
+          "github.com/jhillyerd/enmime/v2/internal/stringutil",
+          "github.com/jhillyerd/enmime/v2/internal/test",
+          "github.com/jhillyerd/enmime/v2/internal/textproto",
+          "github.com/jhillyerd/enmime/v2/mediatype",
+          "github.com/emersion/go-smtp",
+          "github.com/emersion/go-smtp/cmd/smtp-debug-server"
+        ],
+        [
+          "list",
+          "-mod=readonly",
+          "-m",
+          "-json",
+          "all"
+        ]
+      ]
+    },
+    "replacements": [
+      {
+        "module": "github.com/jhillyerd/enmime/v2",
+        "path": "third_party/enmime-v2.3.0",
+        "version": "v2.3.0"
+      },
+      {
+        "module": "github.com/emersion/go-smtp",
+        "path": "third_party/go-smtp",
+        "version": "v0.24.0"
+      }
+    ],
+    "source": "df6ffe046611f5b2121f4d48d5114a2ececd2c24"
+  },
+  "post_binding_repeat": "not_run",
+  "prewarm_differences": [
+    {
+      "contexts": {
+        "default": {
+          "changed_command_count": 4,
+          "fields": {
+            "Stale": 1396,
+            "StaleReason": 1779
+          }
+        },
+        "race": {
+          "changed_command_count": 0,
+          "fields": {}
+        },
+        "race-r5audit": {
+          "changed_command_count": 0,
+          "fields": {}
+        },
+        "race-r5protocol": {
+          "changed_command_count": 0,
+          "fields": {}
+        }
+      },
+      "intervention": "root-build"
+    },
+    {
+      "contexts": {
+        "default": {
+          "changed_command_count": 3,
+          "fields": {
+            "Stale": 24,
+            "StaleReason": 158
+          }
+        },
+        "race": {
+          "changed_command_count": 0,
+          "fields": {}
+        },
+        "race-r5audit": {
+          "changed_command_count": 0,
+          "fields": {}
+        },
+        "race-r5protocol": {
+          "changed_command_count": 0,
+          "fields": {}
+        }
+      },
+      "intervention": "default-selected"
+    },
+    {
+      "contexts": {
+        "default": {
+          "changed_command_count": 0,
+          "fields": {}
+        },
+        "race": {
+          "changed_command_count": 4,
+          "fields": {
+            "Stale": 1427,
+            "StaleReason": 1785
+          }
+        },
+        "race-r5audit": {
+          "changed_command_count": 4,
+          "fields": {
+            "Stale": 1427,
+            "StaleReason": 1785
+          }
+        },
+        "race-r5protocol": {
+          "changed_command_count": 4,
+          "fields": {
+            "Stale": 1427,
+            "StaleReason": 1785
+          }
+        }
+      },
+      "intervention": "race-root"
+    },
+    {
+      "contexts": {
+        "default": {
+          "changed_command_count": 0,
+          "fields": {}
+        },
+        "race": {
+          "changed_command_count": 3,
+          "fields": {
+            "Stale": 21,
+            "StaleReason": 29
+          }
+        },
+        "race-r5audit": {
+          "changed_command_count": 3,
+          "fields": {
+            "Stale": 18,
+            "StaleReason": 29
+          }
+        },
+        "race-r5protocol": {
+          "changed_command_count": 3,
+          "fields": {
+            "Stale": 21,
+            "StaleReason": 28
+          }
+        }
+      },
+      "intervention": "race-protocol"
+    },
+    {
+      "contexts": {
+        "default": {
+          "changed_command_count": 0,
+          "fields": {}
+        },
+        "race": {
+          "changed_command_count": 3,
+          "fields": {
+            "StaleReason": 3
+          }
+        },
+        "race-r5audit": {
+          "changed_command_count": 3,
+          "fields": {
+            "Stale": 3,
+            "StaleReason": 6
+          }
+        },
+        "race-r5protocol": {
+          "changed_command_count": 0,
+          "fields": {}
+        }
+      },
+      "intervention": "race-audit"
+    }
+  ],
+  "proof_boundary": "All recorded Go compiler invocations were build or test -c; no subprocess invocation named an artifact, test2json, go run, formal producer or service; all retained binaries are mode600. This is command/artifact evidence, not a syscall tracing claim.",
+  "race_protocol_capture": {
+    "comparisons": [
+      {
+        "after_sha256": "b1ab900a9a5ea67dfd08b02c3e896b73dc23dfd085580a1da47cc817fdcfd548",
+        "before_sha256": "53f300dd9f64751212673e9a6239051d44a0e956d552f54a9d8f30d9151af6fb",
+        "changes": [
+          {
+            "after": "stale dependency: tabmail/cmd/tabmail",
+            "before": "build ID mismatch",
+            "field": "StaleReason",
+            "import_path": "tabmail/cmd/tabmail.test",
+            "location": "/462/StaleReason"
+          }
+        ],
+        "equal": false,
+        "role": "selected union"
+      },
+      {
+        "after_sha256": "51bdb57981abf7966ed51c5a783706dde6113c5e5a4294a9b98151bca1b1583a",
+        "before_sha256": "51bdb57981abf7966ed51c5a783706dde6113c5e5a4294a9b98151bca1b1583a",
+        "changes": [],
+        "equal": true,
+        "role": "MVS"
+      }
+    ],
+    "not_reached": [
+      "repeated root",
+      "repeated explicit",
+      "repeated variant",
+      "completed race receipt"
+    ],
+    "reason": "selected metadata changed during capture",
+    "status": "rejected_within_capture"
+  },
+  "raw_metadata_commands_completed": 140,
+  "rejection_count": 1,
+  "remaining_not_run": [
+    "formal default/source Python suite",
+    "default root test compile beyond handlers and architecture",
+    "local fork test binaries",
+    "benchmark-tag compilation",
+    "sharedDB execution",
+    "HTTP execution",
+    "components execution",
+    "PG",
+    "mail",
+    "business services",
+    "Method19",
+    "SML",
+    "wholeCI",
+    "source runner preparation",
+    "typed wire fixture execution",
+    "fresh clone stabilization"
+  ],
+  "source": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+  "source_tree": "90956a05c3276210d51a9b935f43ae92064b78ed",
+  "status": "stopped_capture_unstable",
+  "strict_post_identity": "not_run",
+  "test_binaries_executed": 0,
+  "tracked_source_clean_before_documentation": true
+}
