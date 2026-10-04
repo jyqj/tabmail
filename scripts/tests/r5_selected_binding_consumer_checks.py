@@ -27,6 +27,48 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+if len(sys.argv) > 1 and sys.argv[1] == '--replay-generated':
+    import argparse
+    import contextlib
+    import importlib.util
+    import io
+    import runpy
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--replay-generated', required=True)
+    parser.add_argument('--adapter')
+    parser.add_argument('--expected-gaps', type=int, choices=(0, 1), required=True)
+    args = parser.parse_args()
+    source_path = Path(args.replay_generated)
+    assert hashlib.sha256(source_path.read_bytes()).hexdigest() == '165355274becac87f3e741aa1e26e1f61d911c73462a5807643cfc08e4c34db8'
+    adapter_path = Path(args.adapter) if args.adapter else Path(__file__).resolve().parents[1] / 'r5_selected_binding_consumer.py'
+    adapter_sha = hashlib.sha256(adapter_path.read_bytes()).hexdigest()
+    if args.adapter:
+        spec = importlib.util.spec_from_file_location('r5_selected_binding_consumer', args.adapter)
+        baseline = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(baseline)
+        sys.modules['r5_selected_binding_consumer'] = baseline
+    output = io.StringIO()
+    rejected_baseline = False
+    with contextlib.redirect_stdout(output):
+        try:
+            runpy.run_path(str(source_path))
+        except AssertionError as error:
+            # Baseline's original final assertion correctly fails on its one
+            # unexpected acceptance. No independent assertion is rewritten.
+            last = error.__traceback__
+            while last.tb_next: last = last.tb_next
+            assert args.expected_gaps == 1 and Path(last.tb_frame.f_code.co_filename) == source_path
+            assert last.tb_lineno == 127
+            rejected_baseline = True
+    result = json.loads(output.getvalue())
+    assert len(result['controls']) == 43 and len(result['unexpected']) == args.expected_gaps
+    assert rejected_baseline == bool(args.expected_gaps)
+    assert result['fixed_pin_controls'] == 3
+    assert not result['os_process_events'] and not PROCESS_EVENTS
+    print(json.dumps(dict(adapter_sha256=adapter_sha, independent_result=result,
+        original_baseline_final_assertion_failed=rejected_baseline, os_process_events=PROCESS_EVENTS), indent=2))
+    sys.exit(0)
+
 if len(sys.argv) > 1 and sys.argv[1] == '--replay-delta':
     import argparse
     import contextlib
@@ -789,6 +831,56 @@ class ClassifierContractChecks(unittest.TestCase):
                 if value is not None:
                     with self.subTest(cache=key), self.assertRaises(ValueError): verify(b, changed)
                 else: verify(b, changed)
+
+    def test_source_owned_go_files_cannot_borrow_testmain_exception(self):
+        for package_name in ('tabmail/cmd', 'tabmail/cmd.test'):
+            for field in v3.FIELDS[:4]:
+                for absolute in (False, True):
+                    for filename in ('borrowed.txt', 'borrowed-d'):
+                        b, receipts = fixture()
+                        r = receipts['before-default']
+                        path = 'cmd/' + filename
+                        r['base_source']['files'][path] = 'e' * 64
+                        r['selected_local_packages'][0]['import_path'] = package_name
+                        r['selected_local_packages'][0]['fields'][field] = [ROOT + '/' + path if absolute else filename]
+                        if field == 'GoFiles': r['selected_local'].pop('cmd/main.go')
+                        r['selected_local'][path] = dict(sha256='e' * 64, fields=[field])
+                        self.sync(r)
+                        rebind(b, receipts)
+                        with self.subTest(package=package_name, field=field, absolute=absolute, filename=filename), \
+                                self.assertRaisesRegex(ValueError, 'false Go source path'):
+                            verify(b, receipts)
+
+    def test_test_suffix_ordinary_go_paths_and_generated_cache_are_distinct(self):
+        for absolute in (False, True):
+            b, receipts = fixture()
+            r = receipts['before-default']
+            r['selected_local_packages'][0]['import_path'] = 'tabmail/cmd.test'
+            r['selected_local_packages'][0]['fields']['GoFiles'] = [ROOT + '/cmd/main.go' if absolute else 'main.go']
+            self.sync(r)
+            rebind(b, receipts)
+            # The suffix is not a deny list or sufficient generated provenance.
+            verify(b, receipts)
+            self.assertEqual(r['generated_testmain'], [])
+        b, receipts = fixture()
+        r = receipts['before-default']
+        r['selected_local_packages'].append(dict(directory='cmd', import_path='tabmail/cmd.test',
+            for_test=None, module='tabmail', fields={'GoFiles': ['/controller/cache/build/aa/testmain-d']}))
+        r['generated_testmain'] = [dict(package='tabmail/cmd.test', field='GoFiles', path='aa/testmain-d',
+            classification='generated_testmain', qualification='unknown')]
+        r['package_records'] = 2
+        self.sync(r)
+        rebind(b, receipts)
+        verify(b, receipts)
+        # Even a matching generated label/cache/suffix cannot exempt a source
+        # owned input when the cache path itself sits under the source root.
+        r['environment']['GOCACHE'] = r['go_env']['GOCACHE'] = ROOT + '/cache'
+        r['selected_local_packages'][1]['fields']['GoFiles'] = [ROOT + '/cache/aa/testmain-d']
+        r['base_source']['files']['cache/aa/testmain-d'] = 'e' * 64
+        r['selected_local']['cache/aa/testmain-d'] = dict(sha256='e' * 64, fields=['GoFiles'])
+        self.sync(r)
+        rebind(b, receipts)
+        with self.assertRaisesRegex(ValueError, 'false Go source path'): verify(b, receipts)
 
 
 if __name__ == '__main__':

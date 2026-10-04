@@ -285,13 +285,23 @@ def _classifier_contract(receipt, source_root, v3):
     rows = []
     for package in receipt['selected_local_packages']:
         fields = package['fields']
-        generated = package['import_path'].endswith('.test')
+        generated = False
         for field in v3.FIELDS[:4]:
             for name in fields.get(field, []):
-                # The only represented non-.go Go input is an absolute cache
-                # testmain GoFiles path, separately checked by classify below.
-                if not name.endswith('.go') and not (generated and field == 'GoFiles' and name.startswith('/')):
+                path = v3.v2.Path(name)
+                cache = v3.v2.Path(receipt['environment']['GOCACHE'])
+                # Prove the exceptional occurrence's provenance before giving
+                # the reconstructed row a generated Name. A .test suffix alone
+                # never exempts source-owned files from the ordinary .go rule.
+                exceptional = (field == 'GoFiles' and package['import_path'].endswith('.test')
+                    and path.is_absolute() and not path.is_relative_to(root)
+                    and path.is_relative_to(cache) and path.name.endswith('-d')
+                    and any(r['package'] == package['import_path'] and r['field'] == field
+                        and r['path'] == path.relative_to(cache).as_posix()
+                        for r in receipt['generated_testmain']))
+                if not name.endswith('.go') and not exceptional:
                     raise ValueError('false Go source path')
+                generated = generated or exceptional
         replacement = next((r for r in v3.inventory.CURRENT_REPLACEMENTS if r['module'] == package['module']), None)
         module = dict(Path='tabmail', Main=True, Dir=source_root) if replacement is None else dict(
             Path=replacement['module'], Version=replacement['version'],
