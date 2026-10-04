@@ -79,7 +79,7 @@ def capture(manifest, go, mode='components'):
                     build_context=dict(runtime.selected.CONTEXT,build_tag_sets=[[],['r5protocol']]),
                     argv=dict(go_commands=[ [str(go)]+protocol.shared_command(g['package'],g['tag'],[GO_NEW if name==GO_OLD else name for name in g['tests']])[1:] for g in derive(data)['groups']] if mode=='components' else [[str(go)]+protocol.shared_command('./internal/api/handlers','r5protocol',[PROBE])[1:]],
                               child=[manifest['node']['path'],manifest['cli']['path'],'run','--cache=false','--experimental.fsModuleCache=false','--config','vitest.r5protocol.config.ts' if mode=='components' else PROBE_CONFIG,'--reporter=json','--outputFile','<fresh-report>'],
-                              python=protocol.external_component_command(manifest,'<fresh-report>',probe=mode=='probe')), 
+                              python=protocol.external_component_command(manifest,'<fresh-report>',probe=mode=='probe')),
                     helper_sha256=file_digest(source/HELPER), bridge_sha256=file_digest(source/BRIDGE),
                     probe_config_sha256=file_digest(source/'web'/PROBE_CONFIG),
                     concurrency_boundary=runtime.BOUNDARY, product_green=False, task_complete=False)
