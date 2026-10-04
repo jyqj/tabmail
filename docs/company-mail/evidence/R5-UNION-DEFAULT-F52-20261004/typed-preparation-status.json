@@ -1,0 +1,22 @@
+{
+  "actual_passed": 1,
+  "actual_started": 1,
+  "build_sha256": "07f1b5a42402015c8bf9dd7519e20f2a65402649343d43446ce620399618c3f1",
+  "build_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "build_stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "executed_binary_sha256": "07f1b5a42402015c8bf9dd7519e20f2a65402649343d43446ce620399618c3f1",
+  "execution_binding": "linux_parent_proc_fd_pinned_inode",
+  "exit": 0,
+  "fixture_count": 21,
+  "fixture_sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+  "go_selection_unchanged": true,
+  "go_version": "go1.25.7",
+  "lock_sha256": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3",
+  "preparation_receipt_sha256": "6662678617ac8dd6ac7f5a01922db7dae5b3eb0f919f7742bce96d3012d77382",
+  "run_sha256": "87f8e06560b97b368cdb148f324b41afebe328b9abdc02b0775d4540b86aa666",
+  "run_stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "run_stdout_sha256": "4ed08a3d17ef57cae23e93765ab179f6d0ae0389fb2c0b2d6bb11938134880bc",
+  "source_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+  "status": "pass",
+  "typescript_archive_sha256": "10e108c9cf7d5f2879053dff18515fb405abf2ccef63eaaf017d9c571687a1d3"
+}

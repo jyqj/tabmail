@@ -1,0 +1,47 @@
+{
+  "PyYAML": {
+    "matches": true,
+    "observed": "6.0.3",
+    "required": "6.0.3"
+  },
+  "attrs": {
+    "matches": true,
+    "observed": "26.1.0",
+    "required": "26.1.0"
+  },
+  "jsonschema": {
+    "matches": true,
+    "observed": "4.26.0",
+    "required": "4.26.0"
+  },
+  "jsonschema-specifications": {
+    "matches": true,
+    "observed": "2025.9.1",
+    "required": "2025.9.1"
+  },
+  "referencing": {
+    "matches": true,
+    "observed": "0.37.0",
+    "required": "0.37.0"
+  },
+  "rfc3339-validator": {
+    "matches": true,
+    "observed": "0.1.4",
+    "required": "0.1.4"
+  },
+  "rpds-py": {
+    "matches": true,
+    "observed": "2026.6.3",
+    "required": "2026.6.3"
+  },
+  "six": {
+    "matches": true,
+    "observed": "1.17.0",
+    "required": "1.17.0"
+  },
+  "typing_extensions": {
+    "matches": true,
+    "observed": "4.16.0",
+    "required": "4.16.0"
+  }
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "correction": "Owned venv with original requirements-contract.txt only",
+    "formal_started": false,
+    "phase": "initial-python-verification",
+    "reason": "Missing rfc3339-validator; existing environment did not satisfy pinned closure",
+    "status": "rejected"
+  },
+  {
+    "correction": "New owned real clone outside workspace parent .git; source unchanged; no buildvcs or compiler override",
+    "formal_started": false,
+    "phase": "worktree-metadata-hydration",
+    "reason": "Go VCS discovery ignores worktree .git file and discovers invalid workspace .git directory",
+    "status": "rejected",
+    "stderr_sha256": "01b410623d2286b69d3fd253588b964a534fa32693574fe5806fe364e0950477"
+  }
+]

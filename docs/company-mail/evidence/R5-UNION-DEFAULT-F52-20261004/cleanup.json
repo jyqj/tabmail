@@ -1,0 +1,16 @@
+{
+  "automatic_approval_denials": 0,
+  "evidence_worktree_retained": true,
+  "execution_owner_real_checkout_removed": true,
+  "existing_resources_cleaned": false,
+  "formal_reruns": 0,
+  "owned_service_cleanup_required": false,
+  "pg_created": false,
+  "private_evidence_retained": true,
+  "private_root_mode": "0700",
+  "rejected_worktree_removed": true,
+  "runner_exit_observed": 1,
+  "runner_owned_source_clones_absent": true,
+  "service_or_listener_created": false,
+  "status": "completed"
+}

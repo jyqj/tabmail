@@ -1,0 +1,25 @@
+{
+  "default": {
+    "diagnostic_sha256": "b8b3132ad08ac6becabb0323a69085aa658ee4f4e3cbccb852339994804343a9",
+    "exception_type": "ValueError",
+    "formal_retry": false,
+    "metadata_identity_mismatch": true,
+    "revalidation_retry": false,
+    "status": "failed"
+  },
+  "race": {
+    "attestation_sha256": "f1c3ec8533bd75ef35bffdfa31651a23dd817e119097c93fd4eaa87a81beaef1",
+    "post_receipt_sha256": "a2ae9d2ef24ce2ff32213dab4ee8d839d9af129327fd3ef19e8cde4381dfde0c",
+    "replacement_count": 2,
+    "selected_local_files": 604,
+    "source_closure_sha256": "d88de168e71361f938f4501af87a3c56ecda09c0973cf0a9e953d4b548d1a396",
+    "status": "pass"
+  },
+  "source": {
+    "clean": true,
+    "source_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+    "tracked_bytes_unchanged": true,
+    "tracked_files": 2148,
+    "tracked_manifest_sha256": "adf17855c875f5828933fe8911c50696f870fa3d04279e06a17202f5b6fcccf0"
+  }
+}

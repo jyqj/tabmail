@@ -1,0 +1,10 @@
+{
+  "formal_started": false,
+  "lock_sha256": "b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3",
+  "pg_required": false,
+  "source_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+  "status": "validated",
+  "tls_verified": true,
+  "typescript_files": 132,
+  "typescript_sha256": "10e108c9cf7d5f2879053dff18515fb405abf2ccef63eaaf017d9c571687a1d3"
+}

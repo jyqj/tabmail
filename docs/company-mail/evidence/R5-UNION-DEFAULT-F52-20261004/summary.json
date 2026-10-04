@@ -1,0 +1,65 @@
+{
+  "assertion_failures": 0,
+  "class_setup_errors": 3,
+  "discovered": 675,
+  "dispatch_no_missing": true,
+  "dispatch_no_overlap": true,
+  "executed": 634,
+  "exit": 1,
+  "formal_report_sha256": "fc75afe564e099dea47acce8b8ac43eecc208fc928b51d8858a1c94b4f8c06ab",
+  "formal_reruns": 0,
+  "groups": [
+    {
+      "assertion_failures": 0,
+      "error_statuses": [
+        "setUpClass (test_r5_compatibility.CompatibilityGateTests)",
+        "setUpClass (test_r5_compatibility.CurrentHistoricalBoundaryTests)",
+        "setUpClass (test_r5_transactions.TransactionInventoryTests)"
+      ],
+      "errors": 3,
+      "executed": 630,
+      "exit": 1,
+      "expected_failures": 0,
+      "group": "current",
+      "missing": 41,
+      "passed": 630,
+      "requested": 671,
+      "skips": 0,
+      "source_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+      "status": "failed",
+      "unexpected_successes": 0
+    },
+    {
+      "assertion_failures": 0,
+      "error_statuses": [],
+      "errors": 0,
+      "executed": 4,
+      "exit": 0,
+      "expected_failures": 0,
+      "group": "frozen-v1",
+      "missing": 0,
+      "passed": 4,
+      "requested": 4,
+      "skips": 0,
+      "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+      "status": "pass",
+      "unexpected_successes": 0
+    }
+  ],
+  "historical_675_comparison_only": true,
+  "missing": 41,
+  "missing_by_module": {
+    "test_r5_compatibility": 15,
+    "test_r5_transactions": 26
+  },
+  "no_missing": false,
+  "no_overlap": true,
+  "passed": 634,
+  "raw_runtime_evidence": "private_only",
+  "runner_invocations": 1,
+  "sharedDB_HTTP_components_wholePG180_started": false,
+  "skips": 0,
+  "source_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+  "status": "failed",
+  "whole_product_qualification": "UNQUALIFIED"
+}

@@ -1,0 +1,32 @@
+{
+  "setUpClass (test_r5_compatibility.CompatibilityGateTests)": {
+    "diagnostic_sha256": "b897f0b6eebc518221354f1b84c5f1ea49aa11565e9456854c2db3bf3d702f75",
+    "exception_types": [
+      "subprocess.CalledProcessError"
+    ],
+    "go_route_inventory_failed": true,
+    "nonzero_subprocess": true,
+    "timeout": false,
+    "transaction_inventory_failed": false
+  },
+  "setUpClass (test_r5_compatibility.CurrentHistoricalBoundaryTests)": {
+    "diagnostic_sha256": "b897f0b6eebc518221354f1b84c5f1ea49aa11565e9456854c2db3bf3d702f75",
+    "exception_types": [
+      "subprocess.CalledProcessError"
+    ],
+    "go_route_inventory_failed": true,
+    "nonzero_subprocess": true,
+    "timeout": false,
+    "transaction_inventory_failed": false
+  },
+  "setUpClass (test_r5_transactions.TransactionInventoryTests)": {
+    "diagnostic_sha256": "36fd854b1385ba297ec2168f15caaa3f4226aa296e90b2b7c68a6434fb3a3fe9",
+    "exception_types": [
+      "ValueError"
+    ],
+    "go_route_inventory_failed": false,
+    "nonzero_subprocess": false,
+    "timeout": false,
+    "transaction_inventory_failed": false
+  }
+}

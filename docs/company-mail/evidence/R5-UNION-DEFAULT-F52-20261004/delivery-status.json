@@ -1,0 +1,10 @@
+{
+  "pr27_api_read": "Forbidden",
+  "pr27_read_exit": 1,
+  "draft_creation": "BLOCKED",
+  "draft_creation_attempts": 0,
+  "denied_action_retries": 0,
+  "denied_action_reroutes": 0,
+  "normal_git_push": "pending_delivery",
+  "diagnostic_sha256": "682deed6ccd21e66582c7f0e0efdffb3363feeac4c8b58f35a46d43dc240c725"
+}

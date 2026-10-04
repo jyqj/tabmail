@@ -1,0 +1,26 @@
+[
+  {
+    "exit": 0,
+    "phase": "module-download",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "exit": 0,
+    "phase": "module-verify",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "b4537ed75f533f993f371954de47e42a793b8e5b0587577de7e27fb3e50696bd"
+  },
+  {
+    "exit": 0,
+    "phase": "hydrate-default",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "ffd09660b027615b99fb01cdeff8ed6e15db6f2be15d81392fcad698ed6eeeb7"
+  },
+  {
+    "exit": 0,
+    "phase": "hydrate-race",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "7e25b799055a83c6376824e587424dfad4055f676a7127df98616411aaa47594"
+  }
+]

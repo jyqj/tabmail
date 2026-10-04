@@ -1,0 +1,20 @@
+[
+  {
+    "exit": 0,
+    "phase": "module-download",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  {
+    "exit": 0,
+    "phase": "module-verify",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "b4537ed75f533f993f371954de47e42a793b8e5b0587577de7e27fb3e50696bd"
+  },
+  {
+    "exit": 1,
+    "phase": "hydrate-default",
+    "stderr_sha256": "01b410623d2286b69d3fd253588b964a534fa32693574fe5806fe364e0950477",
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+]
