@@ -56,7 +56,8 @@ def derive(data):
                         raise ValueError('unknown component path')
                     key = path.removeprefix(GO_OLD + '/')
                     children[key] = dict(case_id=row['id'], variant=path[len(prefix):],
-                                         assertion='R5 protocol component ' + row['id'] + ' ' + path[len(prefix):] + ' secure behavior')
+                                         assertion='R5 protocol component ' + row['id'] + ' ' + path[len(prefix):] + ' secure behavior',
+                                         input_sha256=runtime.digest(runtime.canonical(row['input'])))
     if len(python) != len(set(python)) or not paths or not children:
         raise ValueError('duplicate/missing required terminals')
     return dict(groups=[dict(package=p, tag=t, tests=sorted(v)) for (p,t),v in sorted(groups.items())],
@@ -262,6 +263,7 @@ class Batch:
         self.invalid = False
         self.published = False
         self.started = False
+        self.leased = False
         self.socket = self.output/'channel.sock'
         self.cancelled_keys = set()
         self.deadline = None
@@ -269,6 +271,8 @@ class Batch:
             'probe/'+str(i):dict(case_id='probe',variant=str(i),assertion='R5 batch independent realm loopback PostgreSQL') for i in range(8)}
 
     def authenticate(self, request):
+        if not self.leased:
+            raise ValueError('batch capability is outside a validated owned lease')
         if (not isinstance(request, dict) or not isinstance(request.get('nonce'), str)
                 or not hmac.compare_digest(request['nonce'], self.nonce)
                 or request.get('contract_sha256')!=self.pin):
@@ -313,12 +317,18 @@ class Batch:
             if (not fixture.is_absolute() or fixture.is_relative_to(self.source)
                     or fixture.is_relative_to(Path(self.manifest['dependency_root']['path'])/'node_modules')):
                 raise ValueError('private fixture required')
+            info=fixture.lstat()
+            if info.st_uid!=os.getuid() or info.st_mode&0o077:
+                raise ValueError('owned private fixture mode required')
             with runtime.descriptors() as files:
-                content = runtime.source_inventory.strict_json(files.file(fixture))
+                fixture_bytes=files.file(fixture)
+                content = runtime.source_inventory.strict_json(fixture_bytes)
+            fixture_hash=runtime.digest(fixture_bytes)
             row = self.children[key]
             if self.contract['mode']=='components':
                 if (content.get('case_id') != row['case_id'] or content.get('variant') != row['variant']
-                        or content.get('case_sha256') != self.contract['catalog_sha256']):
+                        or content.get('case_sha256') != self.contract['catalog_sha256']
+                        or runtime.digest(runtime.canonical(content.get('input')))!=row['input_sha256']):
                     raise ValueError('fixture/case/catalog binding differs')
             elif content.get('case_id') != key:
                 raise ValueError('probe fixture identity differs')
@@ -339,6 +349,9 @@ class Batch:
                 # Keep child stdout and error bodies private; RPC returns only exit/lifecycle.
                 (report.parent/'stdout').write_bytes(result.pop('stdout'))
                 (report.parent/'stderr').write_bytes(result.pop('stderr'))
+                with runtime.descriptors() as fixture_files:
+                    if runtime.digest(fixture_files.file(fixture))!=fixture_hash or runtime.preparation.identity(fixture.lstat())!=runtime.preparation.identity(info):
+                        raise ValueError('private fixture content/descriptor drift')
                 raw = report.read_bytes()
                 passed = exact_assertions(json.loads(raw),[row['assertion']],result['exit_code'])
                 packet = dict(result,passed=passed,report_sha256=runtime.digest(raw),report=str(report))
@@ -379,6 +392,8 @@ class Batch:
             pending.write_bytes(runtime.canonical(receipt));os.chmod(pending,0o600)
             pending.replace(path)
             return receipt
+        finally:
+            self.leased=False
 
     def _run(self):
         self.output.mkdir(mode=0o700,parents=True,exist_ok=False)
@@ -397,6 +412,7 @@ class Batch:
                 anchors.directory(path)
             validate_contract(self.contract)
             before = True
+            self.leased=True
             batch = self
             class Handler(socketserver.StreamRequestHandler):
                 def handle(self):

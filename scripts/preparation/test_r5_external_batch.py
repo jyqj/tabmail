@@ -55,6 +55,8 @@ class RPCControls(unittest.TestCase):
         runtime=dict(source=dict(path=str(root/'source')),dependency_root=dict(path=str(root)),node=dict(path='/fixed/node'),cli=dict(path='/fixed/cli'),execution=dict(cwd=str(root/'source/web')))
         contract=dict(runtime=runtime,mode='probe',required={},catalog_sha256='0'*64)
         self.batch=batch.Batch(contract,root/'out',{})
+        self.lease_patch=patch.object(self.batch,'leased',True)
+        self.lease_patch.start();self.addCleanup(self.lease_patch.stop)
     def rpc(self,operation,**kwargs):return self.batch.rpc(dict(nonce=self.batch.nonce,contract_sha256=self.batch.pin,operation=operation,**kwargs))
     def test_capability_required_and_no_argv_escape(self):
         with self.assertRaisesRegex(ValueError,'capability'):self.batch.rpc(dict(nonce='foreign',operation='ack',completed=[]))
@@ -75,6 +77,10 @@ class RPCControls(unittest.TestCase):
             with self.assertRaisesRegex(ValueError,'case'):self.rpc('case',key=key,fixture='/private')
         self.batch.closed=True
         with self.assertRaises(ValueError):self.rpc('case',key='probe/1',fixture='/private')
+    def test_capability_cannot_launch_outside_a_validated_owned_lease(self):
+        with patch.object(self.batch,'leased',False),self.assertRaisesRegex(ValueError,'owned lease'):
+            self.rpc('case',key='probe/0',fixture='/private')
+
     def test_cancel_before_child_start_is_retained(self):
         self.rpc('cancel',key='probe/0')
         self.assertEqual(self.batch.cancelled_keys,{'probe/0'})
@@ -225,14 +231,15 @@ class BoundedRealChildrenControls(unittest.TestCase):
             owner=batch.Batch(contract,root/'out',{});owner.output.mkdir();owner.deadline=time.monotonic()+10
             fixtures={}
             for key in owner.children:
-                fixture=root/(key.replace('/','-')+'.json');fixture.write_text(json.dumps(dict(case_id=key)));fixtures[key]=str(fixture)
+                fixture=root/(key.replace('/','-')+'.json');fixture.write_text(json.dumps(dict(case_id=key)));fixture.chmod(0o600);fixtures[key]=str(fixture)
             batch.become_subreaper()
-            with batch.concurrent.futures.ThreadPoolExecutor(max_workers=8) as workers:
+            with patch.object(owner,'leased',True),batch.concurrent.futures.ThreadPoolExecutor(max_workers=8) as workers:
                 results=list(workers.map(lambda key:owner.rpc(dict(nonce=owner.nonce,contract_sha256=owner.pin,operation='case',key=key,fixture=fixtures[key])),owner.children))
             self.assertEqual(owner.max_active,4)
             self.assertEqual(owner.seen,set(owner.children));self.assertFalse(owner.active)
             self.assertTrue(all(r['passed'] and not r['tail'] and not r['timeout'] for r in results))
-            ack=owner.rpc(dict(nonce=owner.nonce,contract_sha256=owner.pin,operation='ack',completed=list(owner.children)))
+            with patch.object(owner,'leased',True):
+                ack=owner.rpc(dict(nonce=owner.nonce,contract_sha256=owner.pin,operation='ack',completed=list(owner.children)))
             self.assertTrue(ack['acknowledged'])
 
 
