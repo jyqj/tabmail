@@ -1,0 +1,18 @@
+{
+  "base": "412f875985854527f5e7d74040f18954c3a352bf",
+  "candidate": "3ff6db72b579419a7145d2bc2a3b888c111c9b62",
+  "design": "42f49538f7bceb6eb8e698d716c1418f85343413",
+  "preexisting_paths": 2208,
+  "changed_preexisting_paths": [],
+  "sha256": {
+    "docs/company-mail/evidence/R5-ADAPTER-INDEPENDENT-20261004/author-checks.log": "60e8ca8ad64530d78c1e3405f03ee20a192e09f7abc8c53adfbefd91b984fe15",
+    "docs/company-mail/evidence/R5-ADAPTER-INDEPENDENT-20261004/independent_checks.py": "9c4743698351ea2f6f1f51381a680e49011d750e857dfec3882dfa91d4d86b53",
+    "docs/company-mail/evidence/R5-ADAPTER-INDEPENDENT-20261004/results.json": "a7434e2eef4ab80acd96b28412b41b2f96971a643d50314f5d51d02345d6a8ab",
+    "scripts/contracts/r5-selected-binding-v3-producer.json": "cc80c215f1bf51f2a014ff5e6a37084f29f54a904c69ee58ba52febbd125df66",
+    "scripts/r5_selected_binding_consumer.py": "4326d0e211cfddd1f29f2813c0924f79d40e2a9b463672f08d2e9bb9343b904d",
+    "scripts/r5_selected_source_binding.py": "15f5cdf4b13ee09558cc368e367091d4802804a7c9724065faf5c50605b8a873",
+    "scripts/r5_selected_source_binding_v2.py": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67",
+    "scripts/r5_selected_source_binding_v3.py": "12799a213c93510bdb449b5f610a493f517395878dd83c4b48a06e574bbf6acb",
+    "scripts/tests/r5_selected_binding_consumer_checks.py": "27fd6df5d4bdb9162d78a60f325087793be002fea3dd89054df9ad84c0942573"
+  }
+}
