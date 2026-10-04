@@ -15,6 +15,7 @@ import importlib
 import json
 import posixpath
 import re
+import types
 
 PIN_POLICY = 'r5_selected_observation_pins_v1'
 ADMISSION_SLOTS = ('default', 'race-r5protocol')
@@ -265,6 +266,82 @@ def _packages(rows, v3, *, main_only=False):
         if main_only and _local_module(row['directory'], v3) != 'tabmail':
             raise ValueError('fork in root coverage')
         _field_map(row['fields'], v3.FIELDS)
+
+
+def _classifier_contract(receipt, source_root, v3):
+    """Replay preserved pure classification on representable normalized metadata.
+
+    Only classify's archive-marker reader is replaced, in a private globals copy,
+    by this already authenticated in-memory boundary's labels. Helper globals and
+    code are never modified. classify itself performs only lexical Path operations;
+    the replaced base_markers function was its sole filesystem-reading dependency.
+    This is validation, not reconstruction/attestation of original stdout bytes.
+    """
+    base = receipt['base_source']
+    root = v3.v2.Path(source_root)
+    classifier = types.FunctionType(v3.classify.__code__,
+        {**v3.classify.__globals__, 'base_markers': lambda unused: tuple(base['archive_boundary']['archive_markers'])},
+        'consumer_pure_classify', v3.classify.__defaults__, v3.classify.__closure__)
+    rows = []
+    for package in receipt['selected_local_packages']:
+        fields = package['fields']
+        generated = package['import_path'].endswith('.test')
+        for field in v3.FIELDS[:4]:
+            for name in fields.get(field, []):
+                # The only represented non-.go Go input is an absolute cache
+                # testmain GoFiles path, separately checked by classify below.
+                if not name.endswith('.go') and not (generated and field == 'GoFiles' and name.startswith('/')):
+                    raise ValueError('false Go source path')
+        replacement = next((r for r in v3.inventory.CURRENT_REPLACEMENTS if r['module'] == package['module']), None)
+        module = dict(Path='tabmail', Main=True, Dir=source_root) if replacement is None else dict(
+            Path=replacement['module'], Version=replacement['version'],
+            Replace=dict(Path='./' + replacement['path'], Dir=source_root + '/' + replacement['path']))
+        rows.append(dict(Dir=source_root + '/' + package['directory'], ImportPath=package['import_path'],
+            Name='main' if generated else 'package', Module=module, **fields))
+    env = dict(receipt['go_env'], GOCACHE=receipt['environment']['GOCACHE'],
+               GOMODCACHE=receipt['environment']['GOMODCACHE'])
+    local, generated, external, native, toolchain = classifier(
+        rows, root, set(base['files']), env, receipt['root_mvs'])
+    _equal(local, {p: row['fields'] for p, row in receipt['selected_local'].items()}, 'classifier local inputs')
+    _equal(generated, receipt['generated_testmain'], 'classifier generated occurrence records')
+    _equal(native, [r for r in receipt['native_inputs'] if 'classification' not in r],
+           'classifier local native occurrence records')
+    # Every represented local row must classify locally or as a generated testmain.
+    _equal((external, toolchain), ([], []), 'local package classification domains')
+    unseen_packages = set()
+    local_packages = {p['import_path'] for p in receipt['selected_local_packages']}
+    for container in ('external_modulecache_inputs', 'toolchain_source_inputs', 'native_inputs'):
+        for record in receipt[container]:
+            domain = record.get('classification')
+            if domain is None:
+                continue  # Complete ordered local occurrences checked above.
+            if record['package'] in local_packages:
+                raise ValueError('nonlocal classification attributed to local package')
+            unseen_packages.add(record['package'])
+            if record['field'] in v3.FIELDS[:4] and not record['path'].endswith('.go'):
+                raise ValueError('false Go source path')
+            if domain == 'toolchain_source':
+                goroot = env.get('GOROOT')
+                _absolute(goroot)
+                path = goroot + '/' + record['path']
+                raw = dict(Dir=posixpath.dirname(path), ImportPath=record['package'], Standard=True,
+                           **{record['field']: [path]})
+                expected_index = 3 if container == 'native_inputs' else 4
+            else:
+                path = env['GOMODCACHE'] + '/' + record['path']
+                raw = dict(Dir=posixpath.dirname(path), ImportPath=record['package'],
+                    Module=dict(Path=record['module'], Version=record['version'], Dir=posixpath.dirname(path)),
+                    **{record['field']: [path]})
+                expected_index = 3 if container == 'native_inputs' else 2
+            result = classifier([raw], root, set(base['files']), env, receipt['root_mvs'])
+            _equal(result[expected_index], [record], 'classifier nonlocal input record')
+            for index, values in enumerate(result):
+                if index != expected_index and values:
+                    raise ValueError('unexpected classifier domain')
+    # A row may emit many records, and rows without selected fields emit none.
+    # Only the lower bound supported by represented package identities is checked.
+    if receipt['package_records'] < len(rows) + len(unseen_packages):
+        raise ValueError('represented classification packages exceed total record count')
 
 
 def _selected_records(receipt, source_root, v3):
@@ -524,6 +601,7 @@ def _receipt(receipt, context, source_root, producer, v3):
     _equal(receipt['production_coverage'].get('all_variant_directories'), directories, 'coverage directories')
     _source_records(base, v3)
     _selected_records(receipt, source_root, v3)
+    _classifier_contract(receipt, source_root, v3)
     selection = v3.selection_argv(context, ['./...', 'github.com/jhillyerd/enmime/v2/...', 'github.com/emersion/go-smtp/...'])
     root = v3.selection_argv(context, ['./...'])
     explicit = v3.selection_argv(context, ['./cmd/...', './internal/...'])

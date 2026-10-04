@@ -27,6 +27,44 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+if len(sys.argv) > 1 and sys.argv[1] == '--replay-delta':
+    import argparse
+    import contextlib
+    import importlib.util
+    import io
+    import runpy
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--replay-delta', required=True)
+    parser.add_argument('--adapter')
+    parser.add_argument('--expected-gaps', type=int, choices=(0, 5), required=True)
+    args = parser.parse_args()
+    directory = Path(args.replay_delta)
+    for name, expected in (
+        ('independent_replay.py', 'd8a2151eba65efe1d6cfcd302ae36c6f7102526338a6893b6103eaa781f7d869'),
+        ('new_edge_checks.py', '9f284ec994c9a9e164aef0103ae546bae79b24a7ab6be70c34dea4b1ae3963d9')):
+        assert hashlib.sha256((directory / name).read_bytes()).hexdigest() == expected
+    adapter_path = Path(args.adapter) if args.adapter else Path(__file__).resolve().parents[1] / 'r5_selected_binding_consumer.py'
+    adapter_sha = hashlib.sha256(adapter_path.read_bytes()).hexdigest()
+    if args.adapter:
+        spec = importlib.util.spec_from_file_location('r5_selected_binding_consumer', args.adapter)
+        baseline = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(baseline)
+        sys.modules['r5_selected_binding_consumer'] = baseline
+    # Execute both exact independent programs, including their own fixtures,
+    # assertions, publisher, classifier parity probes and process guards.
+    with contextlib.redirect_stdout(io.StringIO()):
+        namespace = runpy.run_path(str(directory / 'new_edge_checks.py'))
+    prior = namespace['n']['RESULTS']
+    delta = namespace['RESULTS']
+    gaps = [r['name'] for r in delta if r['actual'] != r['expected']]
+    assert len(prior) == 114 and all(r['passed'] for r in prior)
+    assert len(delta) == 18 and len(gaps) == args.expected_gaps
+    assert not PROCESS_EVENTS and not namespace['EVENTS'] and not namespace['n']['EVENTS']
+    print(json.dumps(dict(adapter_sha256=adapter_sha, prior_controls=prior, delta_controls=delta,
+        helper_parity=namespace['helper_results'], unexpected_acceptances=gaps,
+        os_process_events=PROCESS_EVENTS), indent=2))
+    sys.exit(0)
+
 if len(sys.argv) > 1 and sys.argv[1] == '--replay-review':
     # Preserve all 114 externally specified controls. Only replace their earlier
     # incomplete positive schema fixture, plus the obsolete six-gap assertion.
@@ -166,7 +204,7 @@ def fixture_receipt(context):
             GOPATH='/controller/cache', GOMODCACHE='/controller/cache/mod', GOCACHE='/controller/cache/build'),
         go_env=dict(GOVERSION='go1.25.7', GOOS='linux', GOARCH='amd64', GOHOSTOS='linux',
             GOHOSTARCH='amd64', CGO_ENABLED='1', GOWORK='off', GOENV='', GOFLAGS='', GOEXPERIMENT='',
-            GOAMD64='v1', GOTOOLCHAIN='local', GOGCCFLAGS='-fdebug-prefix-map=/tmp/go-build<TEMP>='),
+            GOAMD64='v1', GOTOOLCHAIN='local', GOROOT='/controller/toolchain', GOGCCFLAGS='-fdebug-prefix-map=/tmp/go-build<TEMP>='),
         observation_envelope=envelope, v3_source={v3._V3_FILES[0]: v3._IMPLEMENTATION_SHA256,
         v3.SCHEMA_PATH: sha(v3._REGISTRY_BYTES), v3._V3_FILES[2]: 'd' * 64},
         metadata_producer=dict(version=PRODUCER['version'], executable_sha256=PRODUCER['sha256'],
@@ -576,7 +614,7 @@ class CompleteNestedSchemaChecks(unittest.TestCase):
                 module='tabmail', fields={'GoFiles': ['/controller/cache/build/aa/synthetic-d']}))
             for key in ('root_packages', 'explicit_packages'):
                 r['production_coverage'][key] = sorted(copy.deepcopy(r['selected_local_packages']), key=wire)
-            r['package_records'] = 2
+            r['package_records'] = 4
             r['external_modulecache_inputs'] = [dict(package='example.org/dependency', field='GoFiles',
                 module='example.org/dependency', version='v1.2.3', path='example.org/dependency@v1.2.3/file.go',
                 classification='external_modulecache', qualification='unknown')]
@@ -595,6 +633,150 @@ class CompleteNestedSchemaChecks(unittest.TestCase):
                     else: row[field] = False
                     rebind(b, changed)
                     with self.subTest(container=container, field=field, kind=kind), self.assertRaises(ValueError): verify(b, changed)
+
+
+class ClassifierContractChecks(unittest.TestCase):
+    @staticmethod
+    def sync(r):
+        for key in ('root_packages', 'explicit_packages'):
+            r['production_coverage'][key] = sorted(copy.deepcopy(
+                [p for p in r['selected_local_packages'] if p['module'] == 'tabmail']), key=wire)
+
+    @staticmethod
+    def add_native(r, field):
+        path = 'cmd/native.input'
+        r['base_source']['files'][path] = 'e' * 64
+        r['selected_local'][path] = dict(sha256='e' * 64, fields=[field])
+        r['selected_local_packages'][0]['fields'][field] = ['native.input']
+        ClassifierContractChecks.sync(r)
+        return dict(package='tabmail/cmd', field=field, path=path, qualification='unknown')
+
+    def test_first_four_go_fields_in_every_represented_domain(self):
+        for field in v3.FIELDS[:4]:
+            for domain in ('local', 'toolchain', 'external'):
+                b, r = fixture()
+                receipt = r['before-default']
+                if domain == 'local':
+                    receipt['base_source']['files']['cmd/not-go.txt'] = 'e' * 64
+                    receipt['selected_local_packages'][0]['fields'][field] = ['not-go.txt']
+                    if field == 'GoFiles': receipt['selected_local'].pop('cmd/main.go')
+                    receipt['selected_local']['cmd/not-go.txt'] = dict(sha256='e' * 64, fields=[field])
+                    self.sync(receipt)
+                else:
+                    receipt['package_records'] = 2
+                    if domain == 'toolchain':
+                        receipt['toolchain_source_inputs'] = [dict(package='runtime', field=field,
+                            path='src/runtime/not-go.txt', qualification='unknown', classification='toolchain_source')]
+                    else:
+                        receipt['root_mvs'].append(dict(Path='example.org/dependency', Version='v1.2.3'))
+                        receipt['root_mvs'].sort(key=lambda x: x['Path'])
+                        receipt['external_modulecache_inputs'] = [dict(package='example.org/dependency', field=field,
+                            path='example.org/dependency@v1.2.3/not-go.txt', qualification='unknown',
+                            classification='external_modulecache', module='example.org/dependency', version='v1.2.3')]
+                rebind(b, r)
+                with self.subTest(field=field, domain=domain), self.assertRaisesRegex(ValueError, 'false Go source path'):
+                    verify(b, r)
+
+    def test_all_local_native_fields_complete_package_attributed_occurrences(self):
+        for field in sorted(v3.v2.NATIVE_FIELDS):
+            b, receipts = fixture()
+            expected = self.add_native(receipts['before-default'], field)
+            receipts['before-default']['native_inputs'] = [expected]
+            rebind(b, receipts)
+            verify(b, receipts)
+            raw = dict(Dir=ROOT + '/cmd', ImportPath='tabmail/cmd', Name='package',
+                Module=dict(Path='tabmail', Main=True, Dir=ROOT), GoFiles=['main.go'], **{field: ['native.input']})
+            with mock.patch.object(v3.v2, 'base_markers', return_value=[]):
+                actual = v3.classify([raw], Path(ROOT), set(receipts['before-default']['base_source']['files']), {}, receipts['before-default']['root_mvs'])
+            self.assertEqual(actual[3], [expected])
+            for mode in ('missing', 'foreign-package', 'duplicate', 'wrong-field'):
+                r = copy.deepcopy(receipts)
+                records = r['before-default']['native_inputs']
+                if mode == 'missing': records.clear()
+                if mode == 'foreign-package': records[0]['package'] = 'foreign/unselected'
+                if mode == 'duplicate': records.append(copy.deepcopy(records[0]))
+                if mode == 'wrong-field': records[0]['field'] = next(f for f in v3.v2.NATIVE_FIELDS if f != field)
+                rebind(b, r)
+                with self.subTest(field=field, mode=mode), self.assertRaises(ValueError): verify(b, r)
+
+    def test_native_multiplicity_order_and_shared_paths_across_packages(self):
+        b, receipts = fixture()
+        r = receipts['before-default']
+        first = self.add_native(r, 'CFiles')
+        second_package = copy.deepcopy(r['selected_local_packages'][0])
+        second_package['import_path'] = 'tabmail/cmd [tabmail/cmd.test]'
+        second_package['for_test'] = 'tabmail/cmd'
+        r['selected_local_packages'].append(second_package)
+        r['package_records'] = 2
+        self.sync(r)
+        second = dict(first, package=second_package['import_path'])
+        r['native_inputs'] = [first, second]
+        rebind(b, receipts)
+        verify(b, receipts)
+        r['native_inputs'].reverse()
+        rebind(b, receipts)
+        with self.assertRaises(ValueError): verify(b, receipts)
+
+    def test_non_go_bytes_remain_permitted_for_bound_embeds(self):
+        b, receipts = fixture()
+        r = receipts['before-default']
+        r['base_source']['files']['cmd/data.txt'] = 'e' * 64
+        r['base_source']['embed_inputs'] = {'cmd/main.go:data.txt': ['cmd/data.txt']}
+        r['selected_local_packages'][0]['fields']['EmbedFiles'] = ['data.txt']
+        r['selected_local']['cmd/data.txt'] = dict(sha256='e' * 64, fields=['EmbedFiles'])
+        self.sync(r)
+        rebind(b, receipts)
+        verify(b, receipts)
+
+    def test_generated_cache_exception_complete_linkage_and_wrong_field_rejection(self):
+        b, receipts = fixture()
+        r = receipts['before-default']
+        package = dict(directory='cmd', import_path='tabmail/cmd.test', for_test=None,
+            module='tabmail', fields={'GoFiles': ['/controller/cache/build/aa/generated-d']})
+        record = dict(package=package['import_path'], field='GoFiles', path='aa/generated-d',
+            classification='generated_testmain', qualification='unknown')
+        r['selected_local_packages'].append(package)
+        r['generated_testmain'] = [record]
+        r['package_records'] = 2
+        self.sync(r)
+        rebind(b, receipts)
+        verify(b, receipts)
+        original = copy.deepcopy(receipts)
+        for mode in ('orphan', 'missing', 'duplicate', 'wrong-field', 'local-nongo'):
+            r = copy.deepcopy(original)
+            target = r['before-default']
+            if mode == 'orphan': target['generated_testmain'][0]['package'] = 'foreign/unselected.test'
+            if mode == 'missing': target['generated_testmain'] = []
+            if mode == 'duplicate': target['generated_testmain'].append(copy.deepcopy(record))
+            if mode == 'wrong-field':
+                target['selected_local_packages'][1]['fields'] = {'CgoFiles': ['/controller/cache/build/aa/generated-d']}
+                target['generated_testmain'][0]['field'] = 'CgoFiles'
+                self.sync(target)
+            if mode == 'local-nongo':
+                target['base_source']['files']['cmd/generated.txt'] = 'e' * 64
+                target['selected_local_packages'][1]['fields'] = {'GoFiles': ['generated.txt']}
+                target['selected_local']['cmd/generated.txt'] = dict(sha256='e' * 64, fields=['GoFiles'])
+                target['generated_testmain'] = []
+                self.sync(target)
+            rebind(b, r)
+            with self.subTest(mode=mode), self.assertRaises(ValueError): verify(b, r)
+
+    def test_classifier_isolation_and_nonlocal_package_count_lower_bound(self):
+        b, receipts = fixture()
+        before = v3.classify.__globals__['base_markers']
+        with mock.patch.object(v3.v2, 'base_markers', side_effect=AssertionError('filesystem reader forbidden')) as reader:
+            verify(b, receipts)
+            self.assertIs(v3.classify.__globals__['base_markers'], reader)
+            reader.assert_not_called()
+        self.assertIs(v3.classify.__globals__['base_markers'], before)
+        r = receipts['before-default']
+        r['toolchain_source_inputs'] = [dict(package='runtime', field='GoFiles', path='src/runtime/runtime.go',
+            classification='toolchain_source', qualification='unknown')]
+        rebind(b, receipts)
+        with self.assertRaisesRegex(ValueError, 'represented classification packages'): verify(b, receipts)
+        r['package_records'] = 2
+        rebind(b, receipts)
+        verify(b, receipts)
 
 
 if __name__ == '__main__':
