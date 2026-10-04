@@ -1,0 +1,22 @@
+{
+  "closure": "f89104c6e163a3555a5242d32f48f2af65c07262",
+  "elapsed_seconds": 64.54807700100002,
+  "failure": {
+    "message": "metadata command failed: {\"argv\":[\"/workspace/tabmail-cloud/tools/go/bin/go\",\"list\",\"-mod=readonly\",\"-deps\",\"-test\",\"-json\",\"./...\",\"github.com/jhillyerd/enmime/v2/...\",\"github.com/emersion/go-smtp/...\"],\"exit\":1,\"raw_stdout_bytes\":0,\"raw_stdout_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"role\":\"unbound_dependency_hydration_not_attested\",\"stderr_bytes\":1657,\"stderr_sha256\":\"38e9feb181a49c885eaf2339f47871c302228123adcfe1cb872bcbb62b3db725\"}",
+    "notes": [],
+    "stage": "default-capture",
+    "type": "MetadataCommandFailure"
+  },
+  "go_commands_attempted": 2,
+  "outer_seconds": 1800,
+  "owned_children_completed": true,
+  "per_command_seconds": 180,
+  "qualification": "metadata/static local bytes only; overall blocked; no product/whole-R5 qualification",
+  "source": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+  "source_unchanged": true,
+  "stages": [],
+  "status": "blocked_or_rejected",
+  "supervision": "Python Popen process groups; direct child wait and /proc group completion checks; no cgroup/namespace isolation",
+  "tool_bytes_unchanged": true,
+  "tree": "b5248dfb96e9478c5720ea7d5734433d3ddc6941"
+}

@@ -1,0 +1,32 @@
+{
+  "F52": "unchanged",
+  "central_completion": "10/171 unchanged",
+  "complete_observation_pins": [],
+  "default_capture": {
+    "attempted_commands": 2,
+    "failed_commands": 1,
+    "receipt_produced": false,
+    "successful_commands": 1
+  },
+  "default_validation": "NOT_RUN_NO_RECEIPT",
+  "dependency_failure": "proxy.golang.org DNS lookup: connection refused",
+  "frozen_files_verified": 2331,
+  "measured_go": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "amd64",
+    "GOOS": "linux",
+    "GOTOOLCHAIN": "local",
+    "GOVERSION": "go1.25.7",
+    "GOWORK": "off"
+  },
+  "no_budget_increase": true,
+  "no_settings_changes": true,
+  "product_qualification": false,
+  "race_capture": "NOT_RUN_AFTER_NETWORK_FAILURE",
+  "race_validation": "NOT_RUN_NO_RECEIPT",
+  "serialized_receipt_pins": [],
+  "source_pre_post_equal": true,
+  "status": "BLOCKED_DEPENDENCY_NETWORK",
+  "tool_pre_post_equal": true,
+  "whole_R5_qualification": false
+}

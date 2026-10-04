@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "-I",
+    "-B",
+    "/workspace/tabmail-metadata-gate-pnkZA9ce/gate.py"
+  ],
+  "environment": {
+    "HOME": "/workspace/tabmail-metadata-gate-pnkZA9ce/home",
+    "LANG": "C.UTF-8",
+    "PATH": "/usr/local/bin:/usr/bin:/bin",
+    "R5_DIAGNOSTIC_ROOT": "/workspace/tabmail-metadata-gate-pnkZA9ce/diagnostics",
+    "TMPDIR": "/workspace/tabmail-metadata-gate-pnkZA9ce/tmp"
+  },
+  "exit": 1,
+  "stderr": {
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stdout": {
+    "bytes": 604,
+    "sha256": "a8772cdb09ae103f722fd241609cb9c7cea8aa0296d3b21d9c793a7eb28b3497"
+  }
+}

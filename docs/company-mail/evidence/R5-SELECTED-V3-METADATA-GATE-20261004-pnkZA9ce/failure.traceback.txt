@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/workspace/tabmail-metadata-gate-pnkZA9ce/gate.py", line 178, in <module>
+    receipt=b.capture(ROOT,GO,cache=TASK/'cache',modulecache=TASK/'gomod',context=ctx)
+  File "/workspace/tabmail-metadata-gate-pnkZA9ce/source/scripts/r5_selected_source_binding_v3.py", line 152, in capture
+    return _capture(root, go, cache=cache, modulecache=modulecache, context=context, diagnostics=diagnostics)
+  File "/workspace/tabmail-metadata-gate-pnkZA9ce/source/scripts/r5_selected_source_binding_v3.py", line 233, in _capture
+    run(argv,role='unbound_dependency_hydration_not_attested')
+    ~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/tabmail-metadata-gate-pnkZA9ce/source/scripts/r5_selected_source_binding_v3.py", line 207, in run
+    raise error
+r5_selected_source_binding_v2.MetadataCommandFailure: metadata command failed: {"argv":["/workspace/tabmail-cloud/tools/go/bin/go","list","-mod=readonly","-deps","-test","-json","./...","github.com/jhillyerd/enmime/v2/...","github.com/emersion/go-smtp/..."],"exit":1,"raw_stdout_bytes":0,"raw_stdout_sha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","role":"unbound_dependency_hydration_not_attested","stderr_bytes":1657,"stderr_sha256":"38e9feb181a49c885eaf2339f47871c302228123adcfe1cb872bcbb62b3db725"}

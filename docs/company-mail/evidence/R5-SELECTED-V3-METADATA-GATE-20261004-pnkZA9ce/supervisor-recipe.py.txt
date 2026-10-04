@@ -1,0 +1,223 @@
+import hashlib, json, os, pathlib, signal, stat, subprocess, sys, time, traceback
+
+TASK = pathlib.Path(__file__).resolve().parent
+ROOT = TASK / 'source'
+OUT = TASK / 'evidence'
+GO = '/workspace/tabmail-cloud/tools/go/bin/go'
+GIT = '/usr/local/bin/git'
+SOURCE = '593bbc6a3ac91b5dbf8917602e45900bff094e27'
+TREE = 'b5248dfb96e9478c5720ea7d5734433d3ddc6941'
+GO_PIN = '76ac600b41ad2eceee5d39d02af78009516f8b2a29f30bcc80f765c3e4b4f5a8'
+started = time.monotonic()
+events, active, expected = [], {}, []
+stage = 'preflight'
+dispatch = False
+
+def sha(raw):
+    return hashlib.sha256(raw).hexdigest()
+
+def save(name, value):
+    data = json.dumps(value, sort_keys=True, indent=2).encode() + b'\n'
+    with (OUT / name).open('xb') as f:
+        f.write(data)
+    return sha(data)
+
+def group_members(group):
+    result = []
+    for p in pathlib.Path('/proc').iterdir():
+        if not p.name.isdigit():
+            continue
+        try:
+            text = (p/'stat').read_text()
+            fields = text[text.rfind(')')+2:].split()
+            if int(fields[2]) == group:
+                result.append({'pid':int(p.name), 'state':fields[0], 'ppid':int(fields[1]), 'group':group})
+        except (FileNotFoundError, ProcessLookupError):
+            pass
+    return result
+
+def kill_group(proc):
+    try:
+        os.killpg(proc.pid, signal.SIGKILL)
+    except ProcessLookupError:
+        pass
+
+def alarm(signum, frame):
+    for proc in active.values():
+        kill_group(proc)
+    raise TimeoutError('outer 1800-second limit reached')
+
+def audit(event, args):
+    if event == 'subprocess.Popen' and not dispatch:
+        raise RuntimeError('unsupervised child process rejected')
+    if event in ('os.system','os.posix_spawn','os.fork','os.forkpty'):
+        raise RuntimeError('unapproved process API rejected')
+
+def run(argv, **kw):
+    global dispatch
+    argv = list(map(str, argv))
+    is_go = argv[0] == GO
+    if is_go:
+        if not expected or argv != expected.pop(0):
+            raise RuntimeError('metadata descriptor/order mismatch')
+        if kw.get('timeout') != 180 or not kw.get('capture_output'):
+            raise RuntimeError('helper command bound changed')
+    elif argv[0] != GIT or argv[1] not in ('-C',):
+        raise RuntimeError('command outside read-only pre/post Git inspection')
+    opts = dict(kw)
+    timeout = opts.pop('timeout', 180)
+    capture = opts.pop('capture_output', False)
+    check = opts.pop('check', False)
+    if capture:
+        opts.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    before = time.monotonic()
+    dispatch = True
+    try:
+        proc = subprocess.Popen(argv, start_new_session=True, **opts)
+    finally:
+        dispatch = False
+    active[proc.pid] = proc
+    timed_out = False
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        timed_out = True
+        kill_group(proc)
+        stdout, stderr = proc.communicate()
+    except BaseException:
+        kill_group(proc)
+        stdout, stderr = proc.communicate()
+        raise
+    finally:
+        remaining = group_members(proc.pid)
+        event = dict(stage=stage, argv=argv, pid=proc.pid, group=proc.pid,
+                     returncode=proc.returncode, timeout_seconds=timeout,
+                     timed_out=timed_out, seconds=time.monotonic()-before,
+                     direct_child_waited=True, remaining_group_members=remaining)
+        events.append(event)
+        active.pop(proc.pid, None)
+        if remaining:
+            kill_group(proc)
+            raise RuntimeError('owned process-group completion not established: '+str(remaining))
+    if timed_out:
+        raise subprocess.TimeoutExpired(argv, timeout, output=stdout, stderr=stderr)
+    result = subprocess.CompletedProcess(argv, proc.returncode, stdout, stderr)
+    if check:
+        result.check_returncode()
+    return result
+
+def git(*argv):
+    return run([GIT,'-C',str(ROOT),*argv],capture_output=True,timeout=180,check=True).stdout
+
+def snapshot():
+    if git('rev-parse','HEAD').decode().strip() != SOURCE or git('rev-parse','HEAD^{tree}').decode().strip() != TREE:
+        raise ValueError('source commit/tree mismatch')
+    if git('status','--porcelain','--untracked-files=all'):
+        raise ValueError('source is not clean')
+    rows = []
+    for line in git('ls-tree','-rz','HEAD').split(b'\0'):
+        if not line:
+            continue
+        header, name = line.split(b'\t',1)
+        mode, kind, blob = header.decode().split()
+        path = ROOT / name.decode()
+        info = path.lstat()
+        if not stat.S_ISREG(info.st_mode) or kind != 'blob':
+            raise ValueError('source entry is not regular')
+        raw = path.read_bytes()
+        actual = hashlib.sha1(b'blob '+str(len(raw)).encode()+b'\0'+raw).hexdigest()
+        if actual != blob or bool(info.st_mode & 0o111) != (mode == '100755'):
+            raise ValueError('source blob/mode differs from tree')
+        rows.append(dict(path=name.decode(), git_mode=mode, physical_mode=oct(stat.S_IMODE(info.st_mode)), git_blob=blob, sha256=sha(raw), bytes=len(raw)))
+    for parent in [ROOT,*ROOT.parents]:
+        if parent.is_symlink() or (parent/'node_modules').exists():
+            raise ValueError('source/ancestor dependency shadow or symlink')
+    if list(ROOT.rglob('node_modules')):
+        raise ValueError('source dependency shadow')
+    return rows
+
+os.umask(0o077)
+for name in ('evidence','diagnostics','cache','gomod','home','tmp'):
+    (TASK/name).mkdir(mode=0o700)
+sys.addaudithook(audit)
+signal.signal(signal.SIGALRM, alarm)
+signal.signal(signal.SIGTERM, alarm)
+signal.alarm(1800)
+summary = dict(source=SOURCE,tree=TREE,closure='f89104c6e163a3555a5242d32f48f2af65c07262',
+    per_command_seconds=180,outer_seconds=1800,stages=[],status='not_completed',
+    qualification='metadata/static local bytes only; overall blocked; no product/whole-R5 qualification',
+    supervision='Python Popen process groups; direct child wait and /proc group completion checks; no cgroup/namespace isolation')
+try:
+    before = snapshot()
+    save('source-pre.json',before)
+    tools = {}
+    for name,path in [('go',GO),('python',sys.executable),('git',GIT)]:
+        p = pathlib.Path(path)
+        tools[name] = dict(path=str(p),resolved_path=str(p.resolve()),sha256=sha(p.read_bytes()))
+    tools['python']['version'] = sys.version
+    if tools['go']['sha256'] != GO_PIN:
+        raise ValueError('producer byte pin mismatch')
+    save('tool-identities-pre.json',tools)
+    save('sanitized-environment.json',dict(os.environ))
+    sys.path.insert(0,str(ROOT/'scripts'))
+    import r5_selected_source_binding_v3 as b
+    subprocess.run = run
+    archive = b.boundary.check(ROOT)
+    descriptors = {}
+    for name,ctx in [('default',b.DEFAULT_CONTEXT),('race-r5protocol',b.CONTEXT)]:
+        selected = b.selection_argv(ctx,['./...','github.com/jhillyerd/enmime/v2/...','github.com/emersion/go-smtp/...'])
+        root = b.selection_argv(ctx,['./...'])
+        explicit = b.selection_argv(ctx,['./cmd/...','./internal/...'])
+        variant = b.variant_argv(ctx,archive)
+        descriptors[name] = [[GO,*a] for a in [['env','-json'],selected,selected,b.MVS_ARGV,root,explicit,variant,selected,b.MVS_ARGV,root,explicit,variant]]
+        assert len(descriptors[name]) == 12
+    save('reviewed-descriptors.json',descriptors)
+    captures, held_pins = {}, {}
+    for name,ctx in [('default',b.DEFAULT_CONTEXT),('race-r5protocol',b.CONTEXT)]:
+        stage=name+'-capture'; expected = descriptors[name].copy()
+        receipt=b.capture(ROOT,GO,cache=TASK/'cache',modulecache=TASK/'gomod',context=ctx)
+        assert not expected
+        held_pins[name]=b.observation_digest(receipt)
+        wire=b.inventory.canonical(receipt)
+        (OUT/(stage+'.receipt.json')).write_bytes(wire)
+        captures[name]=dict(path=stage+'.receipt.json',serialized_sha256=sha(wire))
+        save(name+'-independent-pin.json',dict(trusted_complete_observation_sha256=held_pins[name],origin='direct trusted capture return held before validation; not read from candidate self-hash',serialized_sha256=sha(wire)))
+        summary['stages'].append(dict(stage=stage,commands=len(receipt['observation_envelope']),package_records=receipt['package_records'],selected_local_inputs=len(receipt['selected_local']),observation_sha256=held_pins[name],binding_sha256=receipt['binding_sha256'],serialized_sha256=sha(wire)))
+        print(stage+' completed',flush=True)
+    for name in captures:
+        stage=name+'-validate'; expected=descriptors[name].copy()
+        raw=(OUT/captures[name]['path']).read_bytes()
+        assert sha(raw)==captures[name]['serialized_sha256']
+        observed=b.validate(b.inventory.strict_json(raw),ROOT,GO,cache=TASK/'cache',modulecache=TASK/'gomod',trusted_observation_sha256=held_pins[name])
+        assert not expected
+        wire=b.inventory.canonical(observed)
+        (OUT/(stage+'.receipt.json')).write_bytes(wire)
+        summary['stages'].append(dict(stage=stage,commands=len(observed['observation_envelope']),package_records=observed['package_records'],selected_local_inputs=len(observed['selected_local']),observation_sha256=b.observation_digest(observed),binding_sha256=observed['binding_sha256'],serialized_sha256=sha(wire),strict_validation=True))
+        print(stage+' completed',flush=True)
+    summary['status']='metadata_capture_and_validation_passed'
+except BaseException as error:
+    summary['status']='blocked_or_rejected'
+    summary['failure']=dict(stage=stage,type=type(error).__name__,message=str(error),notes=getattr(error,'__notes__',[]))
+    (OUT/'failure.traceback.txt').write_text(traceback.format_exc())
+    print(json.dumps(summary['failure']),flush=True)
+finally:
+    signal.alarm(0)
+    for proc in list(active.values()):
+        kill_group(proc)
+        proc.wait()
+    save('command-supervision.json',events)
+    try:
+        post=snapshot(); save('source-post.json',post)
+        summary['source_unchanged']=post==before
+        posttools={name:dict(value,sha256=sha(pathlib.Path(value['path']).read_bytes())) for name,value in tools.items()}
+        save('tool-identities-post.json',posttools)
+        summary['tool_bytes_unchanged']=posttools==tools
+        if not summary['source_unchanged'] or not summary['tool_bytes_unchanged']:
+            summary['status']='blocked_or_rejected'
+    except BaseException as error:
+        summary['postcheck_failure']=str(error); summary['status']='blocked_or_rejected'
+    summary['elapsed_seconds']=time.monotonic()-started
+    summary['go_commands_attempted']=sum(e['argv'][0]==GO for e in events)
+    summary['owned_children_completed']=all(e['direct_child_waited'] and not e['remaining_group_members'] for e in events)
+    save('summary.json',summary)
+sys.exit(0 if summary['status']=='metadata_capture_and_validation_passed' else 1)

@@ -1,0 +1,72 @@
+[
+  {
+    "bytes": 4762,
+    "path": "REPORT.md",
+    "sha256": "0220e3c06c6ccc1155dd57cd1ff60b14d64518e3632d8a02ab42ba6b28d6b610"
+  },
+  {
+    "bytes": 2496,
+    "path": "command-supervision.json",
+    "sha256": "0cbb3452cee346fb152a4b8ae12fe661f5e2d2ab49f3e7705df662e534916f3d"
+  },
+  {
+    "bytes": 1346,
+    "path": "failure.traceback.txt",
+    "sha256": "092392af6267a0e53b698088dc9d36c2b89e94ea690793cddfaca70b9a47cc47"
+  },
+  {
+    "bytes": 665,
+    "path": "launch-result.json",
+    "sha256": "5b53a5e03c39ffe655b6862dc1e7a45b62dda516d56379fe5f336c52109b238b"
+  },
+  {
+    "bytes": 933,
+    "path": "measured-result.json",
+    "sha256": "4e340e9bb3a31cce51112e8a4d9da82b3c2518884d4160280c658951f8a82e80"
+  },
+  {
+    "bytes": 1153,
+    "path": "private-raw-pins.json",
+    "sha256": "34ffd4ad9d921341da9dba3f9743dd2c1815dc88bc123249a87037c781ae4834"
+  },
+  {
+    "bytes": 13262,
+    "path": "reviewed-descriptors.json",
+    "sha256": "f448e95e78409c49e7f073d3c6c65dbbbfdbef3b7119ebb8a86b04c26c4b5880"
+  },
+  {
+    "bytes": 268,
+    "path": "sanitized-environment.json",
+    "sha256": "a2cfa66ece6f17ffad6dfb5c167879b6cf35b28abea64cecba3abeae90630c4b"
+  },
+  {
+    "bytes": 695706,
+    "path": "source-post.json",
+    "sha256": "d26179cce428e4b6489cafb7f2ff1b49c3a1418484cf6a72add7759e32c32505"
+  },
+  {
+    "bytes": 695706,
+    "path": "source-pre.json",
+    "sha256": "d26179cce428e4b6489cafb7f2ff1b49c3a1418484cf6a72add7759e32c32505"
+  },
+  {
+    "bytes": 1319,
+    "path": "summary.json",
+    "sha256": "3b483e19f57e17ccfd5acb435de13930719e65a37ec6e1f2d0ffc000a5ade89e"
+  },
+  {
+    "bytes": 10845,
+    "path": "supervisor-recipe.py.txt",
+    "sha256": "ae91380568030cb9c1115c621c199efbdb6b7aa96784e11fbe4199273f81ae54"
+  },
+  {
+    "bytes": 638,
+    "path": "tool-identities-post.json",
+    "sha256": "7147596ff0e6265b0972d60c0c283c166bc4a6ba12984f09998d8d8ce5867d73"
+  },
+  {
+    "bytes": 638,
+    "path": "tool-identities-pre.json",
+    "sha256": "7147596ff0e6265b0972d60c0c283c166bc4a6ba12984f09998d8d8ce5867d73"
+  }
+]

@@ -1,0 +1,114 @@
+[
+  {
+    "argv": [
+      "/usr/local/bin/git",
+      "-C",
+      "/workspace/tabmail-metadata-gate-pnkZA9ce/source",
+      "rev-parse",
+      "HEAD"
+    ],
+    "direct_child_waited": true,
+    "group": 774,
+    "pid": 774,
+    "remaining_group_members": [],
+    "returncode": 0,
+    "seconds": 0.0029867119999948955,
+    "stage": "preflight",
+    "timed_out": false,
+    "timeout_seconds": 180
+  },
+  {
+    "argv": [
+      "/usr/local/bin/git",
+      "-C",
+      "/workspace/tabmail-metadata-gate-pnkZA9ce/source",
+      "rev-parse",
+      "HEAD^{tree}"
+    ],
+    "direct_child_waited": true,
+    "group": 775,
+    "pid": 775,
+    "remaining_group_members": [],
+    "returncode": 0,
+    "seconds": 0.0027656869999646005,
+    "stage": "preflight",
+    "timed_out": false,
+    "timeout_seconds": 180
+  },
+  {
+    "argv": [
+      "/usr/local/bin/git",
+      "-C",
+      "/workspace/tabmail-metadata-gate-pnkZA9ce/source",
+      "status",
+      "--porcelain",
+      "--untracked-files=all"
+    ],
+    "direct_child_waited": true,
+    "group": 776,
+    "pid": 776,
+    "remaining_group_members": [],
+    "returncode": 0,
+    "seconds": 0.011020984999959182,
+    "stage": "preflight",
+    "timed_out": false,
+    "timeout_seconds": 180
+  },
+  {
+    "argv": [
+      "/usr/local/bin/git",
+      "-C",
+      "/workspace/tabmail-metadata-gate-pnkZA9ce/source",
+      "ls-tree",
+      "-rz",
+      "HEAD"
+    ],
+    "direct_child_waited": true,
+    "group": 781,
+    "pid": 781,
+    "remaining_group_members": [],
+    "returncode": 0,
+    "seconds": 0.005316709999988234,
+    "stage": "preflight",
+    "timed_out": false,
+    "timeout_seconds": 180
+  },
+  {
+    "argv": [
+      "/workspace/tabmail-cloud/tools/go/bin/go",
+      "env",
+      "-json"
+    ],
+    "direct_child_waited": true,
+    "group": 782,
+    "pid": 782,
+    "remaining_group_members": [],
+    "returncode": 0,
+    "seconds": 0.24698789799998622,
+    "stage": "default-capture",
+    "timed_out": false,
+    "timeout_seconds": 180
+  },
+  {
+    "argv": [
+      "/workspace/tabmail-cloud/tools/go/bin/go",
+      "list",
+      "-mod=readonly",
+      "-deps",
+      "-test",
+      "-json",
+      "./...",
+      "github.com/jhillyerd/enmime/v2/...",
+      "github.com/emersion/go-smtp/..."
+    ],
+    "direct_child_waited": true,
+    "group": 811,
+    "pid": 811,
+    "remaining_group_members": [],
+    "returncode": 1,
+    "seconds": 60.29257261800001,
+    "stage": "default-capture",
+    "timed_out": false,
+    "timeout_seconds": 180
+  }
+]
