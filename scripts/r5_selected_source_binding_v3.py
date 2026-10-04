@@ -23,7 +23,7 @@ _REGISTRY_BYTES = (Path(__file__).parent.parent / SCHEMA_PATH).read_bytes()
 REGISTRY = inventory.strict_json(_REGISTRY_BYTES)
 _IMPLEMENTATION_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 _V3_FILES = ('scripts/r5_selected_source_binding_v3.py', SCHEMA_PATH,
-             'scripts/tests/test_r5_selected_source_binding_v3.py')
+             'scripts/tests/r5_selected_source_binding_v3_checks.py')
 CONTEXT, DEFAULT_CONTEXT = v2.CONTEXT, v2.DEFAULT_CONTEXT
 ARGV, MVS_ARGV = v2.ARGV, v2.MVS_ARGV
 FIELDS, STATIC_EVIDENCE = v2.FIELDS, v2.STATIC_EVIDENCE
