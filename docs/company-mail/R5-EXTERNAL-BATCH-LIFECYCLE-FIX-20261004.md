@@ -1,0 +1,59 @@
+# Batch supervisor lifecycle correction — 2026-10-04
+
+This correction addresses F1/F2/F3 from the independent review at tested source
+`f80b37fe14d856d2f2a048a06fe848fc4420448d`, retained in review commit
+`0a2baf4a6ccd11dca7b9aa3c188e6ae2aab2a338`. The historical review, fault
+counterexamples, failed receipts and exact prior receipt identities remain
+unchanged. This document supersedes the old lifecycle return-bound claims.
+
+The dedicated Linux CLI is the sole subprocess owner. Registered direct roots
+are protected while a serialized subreaper sweep terminates and nonblocking-reaps
+adopted orphans on every pending pipe-drain iteration. An orphan that starts a
+new session and retains stdout/stderr can therefore be terminated before EOF.
+Tail observations persist through the final barrier and reject the entire batch.
+The final barrier remains mandatory and reaps all direct/adopted children. This
+ownership rule cannot safely be generalized to an arbitrary embedded caller
+with unrelated subprocesses.
+
+Full preflight and terminal contract/source/dependency validation run in an owned
+pinned-helper/Python worker. They perform the original complete recapture and
+content/descriptor inventories; no sampled inventory or metadata cache replaces
+those checks. The parent drains the worker with the remaining batch lifetime and
+user cancellation, terminates it on expiry/cancellation, and requires physical
+join plus successful complete validation. Routine execution shutdown uses a
+separate event so it cannot accidentally cancel the mandatory postcheck. A
+second final descendant barrier covers the terminal inventory worker as well.
+
+RPC input reads use short time slices against remaining batch lifetime and
+cancellation. Shutdown seals acceptance, actively shuts down every tracked
+connection, and joins the server and all non-daemon handler/child owners before
+postvalidation. A partial request receives no new 80-second lifetime. Every
+accepted case cancellation before sealing permanently invalidates the batch,
+including a cancellation after successful child results but before exact owner
+acknowledgement. A cancellation after sealing is explicitly rejected as already
+finalized. Exact physical fixture cleanup acknowledgement is still required;
+accepted cancellation never fabricates an acknowledgement.
+
+Go120, batch180, case75 and max4 remain unchanged. Batch180 is an execution
+deadline, including pre/post inventories and active RPC reads. Dispatch and
+eligibility stop at cancellation/expiry. Physical process/socket/owner cleanup
+must still complete, potentially in a cleanup tail. OS uninterruptible waits
+cannot be promised a hard physical-return bound. If any required cleanup or
+validation remains unknown, no qualified receipt may be issued. The live pinned
+capability lease remains held through cleanup and staged all-or-none publication.
+
+Validation passes 10 focused synthetic owned process/socket and controlled
+descriptor inventory tests, all 30 existing batch controls, 21 runtime controls
+and 70 protocol regressions. It also requires a fresh
+fixed-source infrastructure-only probe. See the follow-up evidence report for
+exact fixed source, pins, timings and cleanup observations. A full-supervisor
+late-cancel counterexample is a supervisor-contract test; it does not establish
+a real Go business false-pass. The fixed semantic controls also retain real
+source/dependency mutation rejection and exact restoration checks.
+
+The authoritative 46-ID catalog, 40 Go paths plus 3 Python assertions, 17 handler
+IDs/26 variants, business fixtures/markers/expectations, dependencies, official
+lock, Go1.25.7 and both replaces remain unchanged. Formal43/26/46, wholePG180,
+audit and actual email do not run. default675/sharedDB89e7 are excluded. Central
+10/171 and all earlier failures remain open. No merge/deploy or gate closure is
+part of this correction. An infrastructure receipt credits no business case.

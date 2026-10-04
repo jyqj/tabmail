@@ -13,6 +13,7 @@ import os
 from pathlib import Path
 import secrets
 import signal
+import socket
 import socketserver
 import subprocess
 import sys
@@ -129,6 +130,43 @@ def lease(manifest, cancelled, deadline):
         yield nonce
 
 
+# This registry is valid only in the dedicated sole-executor CLI. It protects
+# live registered roots from the adopted-orphan sweeper; it is not provenance
+# for an arbitrary embedded caller's subprocesses.
+_PROCESS_GUARD = threading.RLock()
+_PROCESS_ROOTS = set()
+_ADOPTED_TAIL = False
+
+
+def sweep_adopted_tails():
+    """Kill/reap adopted orphans even while another root retains open pipes."""
+    global _ADOPTED_TAIL
+    found = False
+    with _PROCESS_GUARD:
+        children = []
+        for entry in Path('/proc').glob('[0-9]*/stat'):
+            try:
+                fields = entry.read_text().rsplit(') ', 1)[1].split()
+                pid = int(entry.parent.name)
+                if int(fields[1]) == os.getpid() and pid not in _PROCESS_ROOTS:
+                    children.append(pid)
+            except (FileNotFoundError, ProcessLookupError):
+                pass
+        for pid in children:
+            found = _ADOPTED_TAIL = True
+            try:
+                os.kill(pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            # WNOHANG keeps pipe draining and other owners progressing. The
+            # final barrier must still wait for physical cleanup, even in D state.
+            try:
+                os.waitpid(pid, os.WNOHANG)
+            except ChildProcessError:
+                pass
+    return found
+
+
 class OwnedProcess:
     """Owned process group; communicate joins pipe readers, wait reaps direct child.
 
@@ -136,8 +174,10 @@ class OwnedProcess:
     is accepted from RPC or any external input.
     """
     def __init__(self, argv, *, cwd, env):
-        self.process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE, start_new_session=True)
+        with _PROCESS_GUARD:
+            self.process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=subprocess.PIPE,
+                                            stderr=subprocess.PIPE, start_new_session=True)
+            _PROCESS_ROOTS.add(self.process.pid)
         self.group = self.process.pid
         self.joined = False
         self.tail = False
@@ -154,6 +194,8 @@ class OwnedProcess:
             if cancelled.is_set() or time.monotonic() >= deadline:
                 timed_out = True
                 self.kill()
+            if sweep_adopted_tails():
+                self.tail = True
             try:
                 stdout, stderr = self.process.communicate(timeout=0.05)
                 break
@@ -188,6 +230,8 @@ class OwnedProcess:
             self.joined = True
         if not self.joined:
             raise ValueError('owned process group not physically joined')
+        with _PROCESS_GUARD:
+            _PROCESS_ROOTS.discard(self.process.pid)
         return dict(exit_code=self.process.returncode, timeout=timed_out, tail=self.tail,
                     stdout=stdout, stderr=stderr)
 
@@ -205,7 +249,8 @@ def join_adopted_tails():
     isolated supervisor; no external PID or process group is accepted as input.
     Any tail rejects the batch, even when it is successfully terminated/reaped.
     """
-    found=False
+    global _ADOPTED_TAIL
+    found = _ADOPTED_TAIL
     while True:
         children=[]
         for entry in Path('/proc').glob('[0-9]*/stat'):
@@ -214,7 +259,11 @@ def join_adopted_tails():
                 if int(fields[1])==os.getpid():children.append(int(entry.parent.name))
             except (FileNotFoundError,ProcessLookupError):pass
         children=sorted(set(children))
-        if not children:return found
+        if not children:
+            with _PROCESS_GUARD:
+                _PROCESS_ROOTS.clear()
+                _ADOPTED_TAIL = False
+            return found
         found=True
         for pid in children:
             try:os.kill(pid,signal.SIGKILL)
@@ -254,6 +303,7 @@ class Batch:
         self.nonce = secrets.token_hex(32)
         self.pin=runtime.digest(runtime.canonical(contract))
         self.cancelled = threading.Event()
+        self.abort = threading.Event()
         self.guard = threading.Lock()
         self.slots = threading.BoundedSemaphore(MAX_WORKERS)
         self.active = {}
@@ -288,7 +338,10 @@ class Batch:
             if set(request) != {'nonce','contract_sha256','operation','key'} or request['key'] not in self.children:
                 raise ValueError('unbound cancel request')
             with self.guard:
+                if self.closed or self.published:
+                    raise ValueError('case cancellation already finalized')
                 self.cancelled_keys.add(request['key'])
+                self.invalid = True
                 child = self.active.get(request['key'])
                 if child:
                     child.kill()
@@ -374,8 +427,34 @@ class Batch:
         owned = OwnedProcess(argv,cwd=cwd,env=env)
         return owned.finish(self.cancelled,min(self.deadline,time.monotonic()+seconds))
 
+    def validate_inventory(self):
+        """Full original checks in an owned worker, within remaining execution time.
+
+        The parent can terminate a blocked inventory worker. Reaping an OS
+        uninterruptible worker is cleanup tail, never a hard return guarantee.
+        """
+        if self.abort.is_set() or time.monotonic() >= self.deadline:
+            raise ValueError('inventory deadline/cancellation')
+        path = self.output/'validation-contract.json'
+        if not path.exists():
+            path.write_bytes(runtime.canonical(self.contract))
+            os.chmod(path, 0o600)
+        owned = OwnedProcess([sys.executable, str(self.source/HELPER), 'validate',
+                              '--contract', str(path), '--pin', self.pin],
+                             cwd=self.source, env=self.env)
+        try:
+            result = owned.finish(self.abort, self.deadline)
+        finally:
+            if not owned.joined:
+                owned.kill()
+                owned.finish(self.abort, time.monotonic())
+        if (result['exit_code'] != 0 or result['timeout'] or result['tail']
+                or self.abort.is_set() or time.monotonic() >= self.deadline):
+            raise ValueError('full inventory worker rejected')
+
     def request_cancel(self):
         self.abort_requested=True
+        self.abort.set()
         self.cancelled.set()
 
     def run(self):
@@ -420,28 +499,75 @@ class Batch:
             token_identity=runtime.preparation.identity(token.lstat())
             for path in (self.source,Path(self.manifest['execution']['cwd']),Path(self.manifest['dependency_root']['path'])):
                 anchors.directory(path)
-            validate_contract(self.contract)
+            self.validate_inventory()
             before = True
             self.leased=True
             batch = self
             class Handler(socketserver.StreamRequestHandler):
                 def handle(self):
                     try:
-                        self.connection.settimeout(80)
-                        raw = self.rfile.readline(65537)
-                        if len(raw)>65536: raise ValueError('bounded RPC required')
+                        # Short reads participate in cancellation/remaining time;
+                        # a partial line cannot acquire a fresh 80-second lifetime.
+                        raw = bytearray()
+                        while not raw.endswith(b'\n'):
+                            remaining = batch.deadline - time.monotonic()
+                            if batch.cancelled.is_set() or remaining <= 0:
+                                raise ValueError('RPC deadline/cancellation')
+                            self.connection.settimeout(min(.05, remaining))
+                            try:
+                                chunk = self.connection.recv(1)
+                            except socket.timeout:
+                                continue
+                            if not chunk:
+                                raise ValueError('incomplete RPC')
+                            raw.extend(chunk)
+                            if len(raw) > 65536:
+                                raise ValueError('bounded RPC required')
                         response = batch.rpc(runtime.source_inventory.strict_json(raw))
                         response['ok'] = True
                     except Exception as error:
                         batch.invalid = True
                         response = dict(ok=False,error=type(error).__name__)
-                    self.wfile.write(runtime.canonical(response)+b'\n')
+                    try:
+                        self.wfile.write(runtime.canonical(response)+b'\n')
+                    except OSError:
+                        batch.invalid = True
             class Server(socketserver.ThreadingUnixStreamServer):
                 daemon_threads = False
                 block_on_close = True
+
+                def __init__(self, *args):
+                    self.connections = set()
+                    self.connections_guard = threading.Lock()
+                    self.stopping = False
+                    super().__init__(*args)
+
+                def process_request(self, request, address):
+                    with self.connections_guard:
+                        if self.stopping:
+                            request.close()
+                            return
+                        self.connections.add(request)
+                    super().process_request(request, address)
+
+                def shutdown_request(self, request):
+                    try:
+                        super().shutdown_request(request)
+                    finally:
+                        with self.connections_guard:
+                            self.connections.discard(request)
+
+                def interrupt_reads(self):
+                    with self.connections_guard:
+                        self.stopping = True
+                        for connection in self.connections:
+                            try:
+                                connection.shutdown(socket.SHUT_RDWR)
+                            except OSError:
+                                pass
             server = Server(str(self.socket),Handler)
             os.chmod(self.socket,0o600)
-            serving = threading.Thread(target=server.serve_forever)
+            serving = threading.Thread(target=server.serve_forever, kwargs=dict(poll_interval=.05))
             serving.start()
             try:
                 env = dict(self.env,TABMAIL_R5_BATCH_SOCKET=str(self.socket),TABMAIL_R5_BATCH_NONCE=self.nonce,
@@ -505,12 +631,15 @@ class Batch:
                 with self.guard:
                     self.closed=True
                     for child in self.active.values():child.kill()
+                server.interrupt_reads()
                 server.shutdown()
                 serving.join()
                 server.server_close() # joins every RPC owner/child before postcheck
                 self.socket.unlink()
                 if join_adopted_tails():
                     errors.append('unregistered/detached owned descendant tail')
+            if self.cancelled_keys:
+                errors.append('accepted case cancellation invalidates batch')
             if self.invalid or self.ack!=sorted(self.children) or self.seen!=set(self.children) or set(self.results)!=set(self.children):
                 errors.append('owner acknowledgement/queue incomplete or invalid')
             if not all(r['passed'] and not r['timeout'] and not r['tail'] for r in self.results.values()):
@@ -521,10 +650,12 @@ class Batch:
             try:
                 if self.ack!=sorted(self.children):
                     raise ValueError('fixture owners did not acknowledge complete cleanup')
-                validate_contract(self.contract)
+                self.validate_inventory()
                 after=True
             except Exception as error:
                 errors.append('terminal inventory rejected: '+type(error).__name__)
+            if join_adopted_tails():
+                errors.append('inventory owned descendant tail')
             try:
                 if runtime.preparation.identity(token.lstat())!=token_identity:
                     raise ValueError('lease token identity drift')
@@ -555,7 +686,7 @@ class Batch:
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=['capture','run'])
+    parser.add_argument('action',choices=['capture','validate','run'])
     parser.add_argument('--source',type=Path)
     parser.add_argument('--go',type=Path)
     parser.add_argument('--mode',choices=['components','probe'],default='components')
@@ -568,6 +699,8 @@ def main():
         validate_contract_candidate= capture(manifest,args.go,args.mode)
         validate_contract(validate_contract_candidate)
         print(runtime.canonical(validate_contract_candidate).decode())
+    elif args.action == 'validate':
+        validate_contract(load(args.contract, args.pin))
     else:
         contract=load(args.contract,args.pin)
         batch=Batch(contract,args.output)
