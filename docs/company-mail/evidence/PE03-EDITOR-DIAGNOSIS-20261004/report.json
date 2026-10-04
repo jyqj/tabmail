@@ -1,0 +1,72 @@
+{
+  "kind": "self_authored_diagnostic_not_formal_qualification",
+  "fixed_production_source": "f875672dea2b68fdec9e0b986f4863724da5d7ba",
+  "formal_evidence_parent": "46de5010b7dc79b841c52d6ff7245d070a846a76",
+  "go_version": "go1.25.7",
+  "node_version": "v24.19.0",
+  "vitest_version": "4.1.11",
+  "dependency_scope": "existing local installed dependency tree; no new formal runtime receipt",
+  "command": [
+    "go",
+    "test",
+    "-mod=readonly",
+    "-count=1",
+    "-tags=r5protocol",
+    "-timeout=120s",
+    "./internal/api/handlers",
+    "-run",
+    "^TestPE03EditorRealChainProbe$",
+    "-v"
+  ],
+  "go_elapsed_seconds": 9.052,
+  "owned_fixture_databases_after": 0,
+  "owned_fixture_connections_after": 0,
+  "owned_pg_shutdown": "success",
+  "formal_rerun": false,
+  "qualification": false,
+  "results": [
+    {
+      "diagnostic": "PE03",
+      "transport": "original-buffered",
+      "alertBeforeRevocation": false,
+      "sseReady": false,
+      "sseProfileChanged": false,
+      "sseEmpty": true,
+      "staleUI": "alert-disabled-draft-retained",
+      "patchStatuses": [
+        200,
+        409,
+        200
+      ],
+      "staleCAS": "409-CONFLICT-no-restoration",
+      "recoveredSave": "200-description-only-revocation-preserved",
+      "tests_passed": 1,
+      "tests_failed": 0,
+      "private_vitest_report_sha256": "4cad77f9a86eb7c425ef1a2882d6ba4c80511179c58dbdc3bd276a2f78c88c53"
+    },
+    {
+      "diagnostic": "PE03",
+      "transport": "live",
+      "alertBeforeRevocation": false,
+      "sseReady": true,
+      "sseProfileChanged": true,
+      "sseEmpty": false,
+      "staleUI": "alert-disabled-draft-retained",
+      "patchStatuses": [
+        200,
+        409,
+        200
+      ],
+      "staleCAS": "409-CONFLICT-no-restoration",
+      "recoveredSave": "200-description-only-revocation-preserved",
+      "tests_passed": 1,
+      "tests_failed": 0,
+      "private_vitest_report_sha256": "967516756db1ea1b101e6fdb71f833c1dcc5f5f00a5ebe83845756b497e8be4b"
+    }
+  ],
+  "probe_sources_sha256": {
+    "internal/api/handlers/pe03_editor_realchain_probe_test.go": "ec610211e76ca2428ee0a99644f1a5a2db4223db44647252d48ba8411c64d297",
+    "web/components/company/pe03-editor-realchain.probe.tsx": "db64a935f6513fcf550cd8b8f0e9152958f19db959d7ccf6eacd0a0f16ede36e",
+    "web/vitest.pe03-probe.config.ts": "a4b7b2d6d18226f8633acca76765712a90eb76a9bd77d0d810600b13f54f57e6"
+  }
+}
