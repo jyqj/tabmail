@@ -269,9 +269,17 @@ def validate(receipt, root, go, *, cache, modulecache, trusted_observation_sha25
     observed = capture(root,go,cache=cache,modulecache=modulecache,
                        context=receipt.get('base_source',{}).get('build_context'))
     if binding_payload(receipt) != binding_payload(observed):
-        with Retention('rejected-selection-v3') as diagnostics:
-            diagnostics.json('observed.json', observed)
-        raise ValueError('selected v3 missing/extra/drifted/context mismatch')
+        error = ValueError('selected v3 missing/extra/drifted/context mismatch')
+        try:
+            with Retention('rejected-selection-v3') as diagnostics:
+                diagnostics.json('observed.json', observed)
+        except Exception as retention_error:
+            # A diagnostic sink failure cannot replace an established rejection.
+            # Preserve the actual secondary error privately, with safe notes.
+            error.retention_errors = (retention_error,)
+            error.add_note('diagnostic retention failed: ' + type(retention_error).__name__ +
+                           '; errno=' + str(getattr(retention_error, 'errno', None)))
+        raise error
     return observed
 
 
