@@ -79,7 +79,7 @@ def capture(manifest, go, mode='components'):
                     build_context=dict(runtime.selected.CONTEXT,build_tag_sets=[[],['r5protocol']]),
                     argv=dict(go_commands=[ [str(go)]+protocol.shared_command(g['package'],g['tag'],[GO_NEW if name==GO_OLD else name for name in g['tests']])[1:] for g in derive(data)['groups']] if mode=='components' else [[str(go)]+protocol.shared_command('./internal/api/handlers','r5protocol',[PROBE])[1:]],
                               child=[manifest['node']['path'],manifest['cli']['path'],'run','--cache=false','--experimental.fsModuleCache=false','--config','vitest.r5protocol.config.ts' if mode=='components' else PROBE_CONFIG,'--reporter=json','--outputFile','<fresh-report>'],
-                              python=protocol.external_component_command(manifest,'<fresh-report>')), 
+                              python=protocol.external_component_command(manifest,'<fresh-report>',probe=mode=='probe')), 
                     helper_sha256=file_digest(source/HELPER), bridge_sha256=file_digest(source/BRIDGE),
                     probe_config_sha256=file_digest(source/'web'/PROBE_CONFIG),
                     concurrency_boundary=runtime.BOUNDARY, product_green=False, task_complete=False)
@@ -427,15 +427,17 @@ class Batch:
                     packets,_=protocol.classify_go_component_packets(data,selected,self.output,self.contract['catalog_sha256'])
                     if len(packets)!=len(self.children) or any(packet['errors'] for packet in packets):
                         errors.append('missing/invalid real Go-owned observation packets')
-                    report=self.output/'python-vitest.json'
-                    command=protocol.external_component_command(self.manifest,report)
-                    result=self.run_process(command,Path(self.manifest['execution']['cwd']),self.env)
-                    (self.output/'python.stdout').write_bytes(result['stdout'])
-                    (self.output/'python.stderr').write_bytes(result['stderr'])
-                    raw=report.read_bytes()
-                    if result['timeout'] or result['tail'] or not exact_assertions(json.loads(raw),self.contract['required']['python_assertions'],result['exit_code']):
-                        errors.append('Python required terminal/assertion failure')
-                    else:terminals.extend(self.contract['required']['python_assertions'])
+                report=self.output/'python-vitest.json'
+                command=[str(report) if arg=='<fresh-report>' else arg.replace('--outputFile=<fresh-report>','--outputFile='+str(report)) for arg in self.contract['argv']['python']]
+                result=self.run_process(command,Path(self.manifest['execution']['cwd']),self.env)
+                (self.output/'python.stdout').write_bytes(result['stdout'])
+                (self.output/'python.stderr').write_bytes(result['stderr'])
+                raw=report.read_bytes()
+                expected_python=self.contract['required']['python_assertions'] if self.contract['mode']=='components' else ['R5 external runtime real TSX CJS ESM worker jsdom']
+                if result['timeout'] or result['tail'] or not exact_assertions(json.loads(raw),expected_python,result['exit_code']):
+                    errors.append('Python required terminal/assertion failure')
+                else:terminals.extend(expected_python)
+
             except Exception as error:
                 errors.append('execution rejected: '+type(error).__name__)
             finally:
@@ -453,7 +455,7 @@ class Batch:
                 errors.append('owner acknowledgement/queue incomplete or invalid')
             if not all(r['passed'] and not r['timeout'] and not r['tail'] for r in self.results.values()):
                 errors.append('staged child assertion/lifecycle failure')
-            required = self.contract['required']['go_paths']+self.contract['required']['python_assertions'] if self.contract['mode']=='components' else [PROBE]+[PROBE+'/owners/probe/'+str(i) for i in range(8)]
+            required = self.contract['required']['go_paths']+self.contract['required']['python_assertions'] if self.contract['mode']=='components' else [PROBE]+[PROBE+'/owners/probe/'+str(i) for i in range(8)]+['R5 external runtime real TSX CJS ESM worker jsdom']
             if any(terminals.count(name)!=1 for name in required):
                 errors.append('missing/duplicate/nonpassing required terminal')
             try:

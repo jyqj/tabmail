@@ -117,7 +117,7 @@ class BatchFinalizationControls(unittest.TestCase):
         self.source=self.root/'source';self.source.mkdir()
         (self.source/'bound').write_text('same content')
         self.manifest=dict(source=dict(path=str(self.source)),dependency_root=dict(path=str(self.root)),execution=dict(cwd=str(self.source)))
-        self.contract=dict(runtime=self.manifest,mode='probe',required={},catalog_sha256='0'*64,go=dict(path=sys.executable),argv=dict(go_commands=[[sys.executable,'synthetic-control']]))
+        self.contract=dict(runtime=self.manifest,mode='probe',required={},catalog_sha256='0'*64,go=dict(path=sys.executable),argv=dict(go_commands=[[sys.executable,'synthetic-control']],python=[sys.executable,'synthetic-python-probe']))
         with batch.runtime.descriptors() as files:self.before=files.tree(self.source,source=True)
         self.events=[]
     def validate(self,contract):
@@ -130,6 +130,9 @@ class BatchFinalizationControls(unittest.TestCase):
         case_keys=list(owner.children)
         test=self
         def synthetic(argv,cwd,env,seconds=180):
+            if argv[-1]=='synthetic-python-probe':
+                (owner.output/'python-vitest.json').write_text(json.dumps(dict(success=True,numTotalTests=1,numPassedTests=1,numFailedTests=0,numPendingTests=0,testResults=[dict(assertionResults=[dict(fullName='R5 external runtime real TSX CJS ESM worker jsdom',status='passed')])])))
+                return dict(exit_code=0,timeout=False,tail=False,stdout=b'',stderr=b'')
             # This control supplies synthetic terminal events only. It never runs
             # or claims business cases; physical-process tests are independent.
             owner.max_active=4
