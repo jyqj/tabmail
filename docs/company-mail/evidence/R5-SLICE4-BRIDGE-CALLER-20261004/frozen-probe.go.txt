@@ -87,10 +87,10 @@ func TestR5ExternalRuntimeProbe(t *testing.T) {
 	}
 	_, file, _, _ := runtime.Caller(0)
 	root := filepath.Clean(filepath.Join(filepath.Dir(file), "../../.."))
-	launcher, node, cli, selectedVersion := r5UIExternalRuntime(t, root)
+	launcher, node, cli := r5UIExternalRuntime(t, root)
 	ctx, cancel := context.WithTimeout(context.Background(), 75*time.Second)
 	defer cancel()
-	cmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, "vitest.r5external-probe.config.ts", report, selectedVersion)
+	cmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, "vitest.r5external-probe.config.ts", report)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		t.Fatalf("real external probe failed: %v: %s", err, output)

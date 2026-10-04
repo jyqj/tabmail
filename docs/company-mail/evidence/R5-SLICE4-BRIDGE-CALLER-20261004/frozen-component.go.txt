@@ -587,7 +587,7 @@ func r5UIState(t *testing.T, f *r5UIFixture) map[string]any {
 // Both producers resolve the same externally pinned CLI. The helper performs
 // full descriptor-bound inventory checks before launch and after termination.
 // This workspace contract does not prevent hostile transient concurrent writes.
-func r5UIExternalRuntime(t *testing.T, root string) (string, string, string, int) {
+func r5UIExternalRuntime(t *testing.T, root string) (string, string, string) {
 	t.Helper()
 	path, pin := os.Getenv("TABMAIL_R5_EXTERNAL_MANIFEST"), os.Getenv("TABMAIL_R5_EXTERNAL_MANIFEST_SHA256")
 	if path == "" || pin == "" || !filepath.IsAbs(path) {
@@ -599,16 +599,6 @@ func r5UIExternalRuntime(t *testing.T, root string) (string, string, string, int
 	if hex.EncodeToString(hash[:]) != pin {
 		t.Fatal("external runtime manifest pin differs")
 	}
-	selectedVersion := 2
-	if value, present := os.LookupEnv("TABMAIL_R5_SELECTED_BINDING_VERSION"); present {
-		switch value {
-		case "2":
-		case "3":
-			selectedVersion = 3
-		default:
-			t.Fatal("external runtime selector must be integer 2 or 3")
-		}
-	}
 	type tool struct {
 		Path   string
 		SHA256 string
@@ -617,17 +607,11 @@ func r5UIExternalRuntime(t *testing.T, root string) (string, string, string, int
 		Policy, Status    string
 		Source            struct{ Path string }
 		Node, CLI, Python tool
-		HelperSHA256      string          `json:"helper_sha256"`
-		SchemaVersion     json.RawMessage `json:"schema_version"`
-		SelectedVersion   json.RawMessage `json:"selected_binding_version"`
-		AdmittedSelection json.RawMessage `json:"admitted_selection"`
+		HelperSHA256      string `json:"helper_sha256"`
 	}
 	r5UIMust(t, json.Unmarshal(raw, &manifest))
-	if string(manifest.SchemaVersion) != fmt.Sprint(selectedVersion) || manifest.Policy != fmt.Sprintf("r5_external_dependency_runtime_v%d", selectedVersion) || manifest.Status != "UNADOPTED" || manifest.Source.Path != root {
+	if manifest.Policy != "r5_external_dependency_runtime_v2" || manifest.Status != "UNADOPTED" || manifest.Source.Path != root {
 		t.Fatal("external runtime policy, status or source differs")
-	}
-	if selectedVersion == 2 && (len(manifest.SelectedVersion) != 0 || len(manifest.AdmittedSelection) != 0) || selectedVersion == 3 && string(manifest.SelectedVersion) != "3" {
-		t.Fatal("external runtime selected version differs")
 	}
 	helper := filepath.Join(root, "scripts/preparation/r5_external_runtime.py")
 	for _, file := range []tool{manifest.Node, manifest.CLI, manifest.Python, {Path: helper, SHA256: manifest.HelperSHA256}} {
@@ -646,16 +630,16 @@ func r5UIExternalRuntime(t *testing.T, root string) (string, string, string, int
 			t.Fatal("external runtime executable drift")
 		}
 	}
-	cmd := exec.Command(manifest.Python.Path, helper, "validate", "--source", root, "--selected-binding-version", fmt.Sprint(selectedVersion))
+	cmd := exec.Command(manifest.Python.Path, helper, "validate", "--source", root)
 	cmd.Dir = filepath.Join(root, "web")
 	if output, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("external runtime validation rejected: %v: %s", err, output)
 	}
-	return manifest.Python.Path, manifest.Node.Path, manifest.CLI.Path, selectedVersion
+	return manifest.Python.Path, manifest.Node.Path, manifest.CLI.Path
 }
 
-func r5UIExternalVitestCommand(ctx context.Context, root, launcher, node, cli, config, report string, selectedVersion int) *exec.Cmd {
-	cmd := exec.CommandContext(ctx, launcher, filepath.Join(root, "scripts/preparation/r5_external_runtime.py"), "launch", "--source", root, "--selected-binding-version", fmt.Sprint(selectedVersion), "--", node, cli, "run", "--cache=false", "--experimental.fsModuleCache=false", "--config", config, "--reporter=json", "--outputFile", report)
+func r5UIExternalVitestCommand(ctx context.Context, root, launcher, node, cli, config, report string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, launcher, filepath.Join(root, "scripts/preparation/r5_external_runtime.py"), "launch", "--source", root, "--", node, cli, "run", "--cache=false", "--experimental.fsModuleCache=false", "--config", config, "--reporter=json", "--outputFile", report)
 	cmd.Dir = filepath.Join(root, "web")
 	return cmd
 }
@@ -666,7 +650,7 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 	}
 	_, file, _, _ := runtime.Caller(0)
 	root := filepath.Clean(filepath.Join(filepath.Dir(file), "../../.."))
-	launcher, node, cli, selectedVersion := r5UIExternalRuntime(t, root)
+	launcher, node, cli := r5UIExternalRuntime(t, root)
 	raw, e := os.ReadFile(filepath.Join(root, "docs/company-mail/evidence/R5-PROTOCOL-CASES.json"))
 	r5UIMust(t, e)
 	hash := sha256.Sum256(raw)
@@ -693,7 +677,7 @@ func TestR5ProtocolComponentObservations(t *testing.T) {
 		for _, variant := range variants {
 			t.Run(c.ID+"/"+variant, func(t *testing.T) {
 				r5UIObserveCase(t, root, c, variant, caseHash, func(ctx context.Context, private, report string) ([]byte, error) {
-					cmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, "vitest.r5protocol.config.ts", report, selectedVersion)
+					cmd := r5UIExternalVitestCommand(ctx, root, launcher, node, cli, "vitest.r5protocol.config.ts", report)
 					cmd.Env = append(os.Environ(), "TABMAIL_R5_PROTOCOL_COMPONENT_FIXTURE="+private)
 					return cmd.CombinedOutput()
 				})
