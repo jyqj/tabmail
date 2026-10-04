@@ -1,0 +1,37 @@
+{
+  "diagnostic_only": true,
+  "files": {
+    "fresh-delta.stderr": {
+      "bytes": 1693,
+      "mode": "0o600",
+      "sha256": "e14af882491098d7cfda26e90043e3a8391a197a54346aec52cd1f3dcd018a66"
+    },
+    "fresh-delta.stdout": {
+      "bytes": 230,
+      "mode": "0o600",
+      "sha256": "30a01d9b9cc205ad4b48bbe1cb23c48751b31084824ac36a76f32560b85ca83b"
+    },
+    "original37-plus-fix8.stderr": {
+      "bytes": 8810,
+      "mode": "0o600",
+      "sha256": "28c48d078dce490078bcb0bceaabd3b55623eafa0160b011863052a79a27a13e"
+    },
+    "original37-plus-fix8.stdout": {
+      "bytes": 0,
+      "mode": "0o600",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "unchanged23.stderr": {
+      "bytes": 3482,
+      "mode": "0o600",
+      "sha256": "bcf2635c567673828ecd6bb18e94f5d3033cf2d2311e0ee62f340d7fc6a03b7b"
+    },
+    "unchanged23.stdout": {
+      "bytes": 218,
+      "mode": "0o600",
+      "sha256": "21988d930eb8d0c0046a2282b1e3a9a1ee012eabe531544e6547a5077d494f69"
+    }
+  },
+  "root": "/tmp/R5-ENV-EVIDENCE-P2-DELTA-INDEPENDENT-20261004",
+  "root_mode": "0o700"
+}

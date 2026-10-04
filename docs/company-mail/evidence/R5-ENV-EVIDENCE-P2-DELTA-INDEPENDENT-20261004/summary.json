@@ -1,0 +1,65 @@
+{
+  "baseline_errors_waived": false,
+  "baseline_inventory_errors_retained": [
+    "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence",
+    "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion"
+  ],
+  "candidate_modified": false,
+  "catalogs_changed": false,
+  "decision": "bounded_accept_two_P2_fixes",
+  "dependencies_changed": false,
+  "distinct_passing_outer_tests": 78,
+  "formal_runs": 0,
+  "fresh_delta": {
+    "errors": [],
+    "expected_failures": [],
+    "failures": [],
+    "repair_base_sha": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+    "skips": [],
+    "tested_source_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+    "tests_run": 10
+  },
+  "general_collectors_rerun": false,
+  "go_executable_sha256": "76ac600b41ad2eceee5d39d02af78009516f8b2a29f30bcc80f765c3e4b4f5a8",
+  "identity_policy_changed": false,
+  "implementation_sha256": {
+    "scripts/check_r5_compatibility.py": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+    "scripts/r5_private_diagnostics.py": "a4bf39ca060f3dced9d2ce14c0e6c7e776676b0382fbb6f8070a89a9008cd580",
+    "scripts/r5_selected_source_binding_v2.py": "4bafe6a0b146c69aaf76dfaa206a95ac581739e3c0efa4a52bf36613ae817d67"
+  },
+  "merge_or_deploy": false,
+  "metadata_controls": 0,
+  "original37_plus_author_fix8": {
+    "errors": 0,
+    "exit": 0,
+    "failures": 0,
+    "outer_skips": 0,
+    "tests_run": 45
+  },
+  "original_findings": [
+    {
+      "id": "R5-ENV-IND-1",
+      "scope": "secondary retention failures preserve producer exception and metadata interface",
+      "status": "resolved_on_fixed_source"
+    },
+    {
+      "id": "R5-ENV-IND-2",
+      "scope": "fdopen ownership transfer prevents double close after context cleanup",
+      "status": "resolved_on_fixed_source"
+    }
+  ],
+  "private_root": "/tmp/R5-ENV-EVIDENCE-P2-DELTA-INDEPENDENT-20261004",
+  "repair_base_sha": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+  "tested_source_sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+  "unchanged23_program_sha256": "be06635e2583374e4415b2059071fed97feeaab026b75c7d7d53e716de870ffd",
+  "unchanged23_raw_report": {
+    "base_sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+    "errors": [],
+    "expected_failures": [],
+    "failures": [],
+    "skipped": [],
+    "source_sha": "df6ffe046611f5b2121f4d48d5114a2ececd2c24",
+    "tests_run": 23
+  },
+  "unchanged23_source_label_note": "Raw program preserves original df6 label and static f52/df6 AST comparison; behavioral imports came from exact checked-out 3f34c31."
+}
