@@ -1,37 +1,31 @@
-# Frozen-union components prestart — 2026-10-04
+# Frozen-union components: observed pass, qualification rejected — 2026-10-04
 
-**PRESTART VALIDATED; FORMAL NOTRUN.** Exact tested source: `f52f8cbbf31dcbfb72ba062af6623248334a2e99`. Zero formal batches and zero qualified terminals. All 43 terminals (40 Go + 3 Python) remain NOTRUN pending root approval of one unchanged components batch.
+**POSTRUN SELECTED BINDING REJECTED.** Exact source: `f52f8cbbf31dcbfb72ba062af6623248334a2e99`. Root approved one formal batch on prestart evidence `194967aa3ff9cf4bca7b8801fcea38949af55a74`. Exactly one batch started, no rerun. All43 terminals observed PASS (40 Go + 3 Python), zero fail/skip/missing, but **zero qualified terminals** after mandatory independent source-selection postchecks failed. Historical675/46/43 is not inherited; no combined or central qualification.
 
-Fresh clean real checkout and official-lock external runtime-v2 use `/workspace/r5-components-f52-tools/source`; all raw receipts/logs/fixtures remain private under `/workspace/r5-components-f52-private`. Scoped PE/LF checks used a separate real checkout of the same SHA with ordinary installed web dependencies. No tracked product/tests/locks/markers/budgets changed. Central TODO was not edited.
+The original producer returned BATCH_QUALIFIED in 97.357s, receipt SHA256 `1bd868adcff81122285337c6181fac530fcebcd804164487688c8dac256a81c2`. Original preflight/postcheck, exact Go fixture-owner acknowledgement and physical process/resource join were all true; peak live children4, errors[]. This passing original receipt is preserved privately and is not substituted or rewritten. Required independent postchecks determine the stricter reported outcome.
 
-## Exact fresh pins
+## Approved pins and actual postchecks
 
-| Binding | SHA256 |
-| --- | --- |
-| archive | `8ac19f7d717939db951e00cdfed380ff962feac67c8bd1f049de8baf4a63d1c1` |
-| selected-default | `5f897be3baefc99b5da50b7307bce4ca485a678aa5d1fecf46a8682296f652b1` |
-| selected-race | `d07912441067ea65adec35d05782eb4ae7106ecc2667b33426e10b819e33b71b` |
-| runtime | `65a881fc40f2cb0b437a37ee78bbd726c656257a0f757c67c2386b850440f10b` |
-| components-contract | `23941df3ca912af698b1f9544fd9b9b7381c21b6a0fcd8c9d947eb8a94871415` |
+Runtime-v2: `65a881fc40f2cb0b437a37ee78bbd726c656257a0f757c67c2386b850440f10b`. Components contract: `23941df3ca912af698b1f9544fd9b9b7381c21b6a0fcd8c9d947eb8a94871415`. Go1.25.7, official npm lock, exactly two local replacements, schema19, all product/tests/locks/markers and Go120/process180/case75/max4 remain unchanged.
 
-## Actual controls
+Immediately before the formal run, both selected attestations revalidated byte-identically and original contract validation passed. After runtime:
 
-- Exact source, all 53 accepted PE/LF union paths, and four f875 lifecycle/owner/cleanup paths: PASS. Original two local replacements and official npm lock unchanged.
-- Preparation controls: 81 PASS, including lifecycle cancellation, missing/complete fixture acknowledgement and lease-held cleanup fault controls. Protocol/source/component pure controls: 70 PASS.
-- Focused PE: 6 top-level / 16 subtests PASS, no failures or skips. Independent pair with race: 9 top-level / 56 subtests PASS, no failures or skips. Corrected LF author selection with race: 10 top-level / 45 subtests PASS, no failures or skips. These are scoped preparation checks, not formal terminals.
-- UI/oracle tests: 30 PASS, zero failed/pending. Full TypeScript noEmit and union-scoped lint: PASS. Go1.25.7 handler and race PostgreSQL warmups: compile-only PASS, zero tests executed.
-- Original runtime-v2 capture, components contract capture, and complete prestart validation: PASS. Go120/process180/case75/max4 unchanged; catalog-derived required set is 40 Go + 3 Python. No generic components producer was substituted.
+- Fresh archive capture exactly equals the approved archive pin `8ac19f7d717939db951e00cdfed380ff962feac67c8bd1f049de8baf4a63d1c1`; formal source stays clean and exactf52.
+- Original runtime-v2 and original components contract validate PASS.
+- Independent original default and race selected-attestation validation each exits1: `selected attestation missing/extra/drifted/context mismatch`.
+- Diagnostic-only fresh metadata captures show all other compared identity fields unchanged. Only bound Go-list stdout hashes differ: six default command observations and eight race command observations. Safe before/after hashes and exact commands are in report.json; raw receipts/logs remain private. The cause within Go-list output was not established. This is analogous to the metadata-postcheck failure root reported in the other session.
+- Fresh post-runtime manifest capture is NOTRUN because source-selection validation failed. No post-observation replaces an approved receipt, no check is waived and no batch is rerun.
 
-## Preparation history and cleanup
+## Lifecycle and cleanup
 
-All actual setup failures and rejected runtime preparation are retained by safe status/hash in [report.json](evidence/R5-UNION-COMPONENTS-F52-20261004/report.json), with logs private. The initial cwd was nonexistent (no command executed); npm's default cache was unavailable; the private wrapper initially used the wrong TypeScript cwd; two lint patterns did not exist; incorrect LF opt-in names produced skips; runtime capture rejected inherited NODE_PATH. Only owned reversible setup was corrected. Initial LF skips are separately reported and never counted as passing controls. The pair was not rerun. Interim successful source capture hashes are recorded separately from final pins; no initial or historical receipt qualifies this source.
+Fresh task-owned PG17 data storage was exclusively initialized after port55447 was proven free, then independently verified by data directory, port and current user. Original fixtures migrate through schema19 with pgcrypto/pg_trgm. The cluster returned zero fixture databases/backends and fast shutdown exit0.
 
-The runtime requires an archive binding both untagged and r5protocol consumer tag sets. The handoff's archive example shows only r5protocol; this preparation used the exact unchanged runtime-required two-tag-set context. Platform NODE_EXTRA_CA_CERTS, SSL_CERT_FILE and REQUESTS_CA_BUNDLE were retained; TLS verification was never disabled. npm used normal lifecycle-enabled official-lock installation; no audit/fix or arbitrary dependency changes.
+Original supervisor cleanup: JOINED; channel joined; 32 registered process roots; zero pending; all directly reaped/group joined/pipes closed; failures[]; lease released; runtime owner token absent. Fixture-owner acknowledgement and process cleanup are separately true. No foreign resources were cleaned.
 
-Port55447 was exclusively bound to prove availability before initialization. Both fresh task-owned PG17 clusters had independently verified data-directory/port/current-user identity; original fixture helpers apply schema19 and pgcrypto/pg_trgm. Both independently returned zero fixture databases and backends, then fast shutdown exit0. Port55447 was proven free again after cleanup. No inherited cluster/process was cleaned. No runtime lease token remains; formal process cleanup and formal fixture-owner acknowledgement are NOTRUN.
+The owned wrapper's immediate post-shutdown exclusive bind returned EADDRINUSE, so wrapper exit1 is preserved separately from original producer exit0. Independent kernel inspection found TIME_WAIT entries and no listener; immediate port-free status is not claimed. No cleanup or qualification check was waived.
 
-PR27 read returned **Forbidden**. No draft creation was attempted and no API retry or reroute occurred. Evidence-only normal Git publication is reported separately. No merge, deploy, actual email, default/sharedDB/HTTP producer, wholePG180, audit or central closure ran. Historical675/46/43 remains separate.
+## Evidence and proposed root TODO append
 
-## Proposed append-only central TODO entry (root owns edit)
+[report.json](evidence/R5-UNION-COMPONENTS-F52-20261004/report.json) contains the actual43 terminal matrix, independent postcheck failures, safe metadata diagnostics and private hashes. [prestart-report.json](evidence/R5-UNION-COMPONENTS-F52-20261004/prestart-report.json) preserves the exact previously delivered report. All earlier preparation failures and Forbidden PR history remain retained. Raw receipts/fixtures/runtime logs remain private under `/workspace/r5-components-f52-private`. Central TODO was untouched; normal evidence Git push only, no API/PR retry, product edits, actual mail, merge or deploy.
 
-`2026-10-04 R5 union components @ f52f8cbbf31dcbfb72ba062af6623248334a2e99: fresh official-lock runtime-v2/components contract captured; complete prestart validation PASS; scoped controls and owned PG cleanup recorded in R5-UNION-COMPONENTS-F52-20261004.md/report.json. Zero formal batches; all43 terminals NOTRUN/zero qualified pending root approval of one Go120/process180/case75/max4 components run. Historical675/46/43 not inherited. Preserve initial cwd/npm/tsc/lint/opt-in/NODE_PATH preparation failures. PR27 read Forbidden; no draft/API retry or reroute. No central TODO edit by components owner.`
+Proposed append: `2026-10-04 components @ f52f8cbbf31dcbfb72ba062af6623248334a2e99: exactly one authorized formal batch observed43 PASS/0 fail/0 skip/0 missing; original producer BATCH_QUALIFIED and full owner/process acknowledgements PASS, but independent post-run default/race selected binding FAILED on Go-list stdout hash drift despite byte-identical source. Overall POSTRUN_SELECTED_BINDING_REJECTED/qualified0; no rerun, receipt substitution or waiver. Owned PG fixture DB/backends0, shutdown0,32 process roots joined/token absent; immediate port bind EADDRINUSE/TIME_WAIT/no listener preserved. See R5-UNION-COMPONENTS-F52-20261004.md/report.json. Historical675/46/43 remains separate; central closure open.`
