@@ -1,7 +1,10 @@
 "use client";
+import { useLayoutEffect, useRef } from "react";
+import { useSWRConfig } from "swr";
 import Link from "next/link";
 import { useAPI } from "@/hooks/use-api";
 import type { WorkMailbox } from "@/lib/company";
+import { assertSession, useSessionScope } from "@/lib/session";
 import { archivedPage, changeArchived } from "../api";
 import { ActionButton, LoadError, useAction, useText } from "@/components/company/common";
 import { SubmissionContentView } from "./submission-content";
@@ -17,8 +20,35 @@ export function SentFolder({ mailbox, folder, q, page, selected, onSelect, onPag
 }) {
     const t = useText();
     const { busy, run } = useAction();
-    const list = useAPI(["sent-assets", mailbox.mailbox.id, folder, q, page], () => archivedPage(mailbox.mailbox.id, folder, q, page), { refreshInterval: 15000 });
+    const scope = useSessionScope();
+    const { mutate } = useSWRConfig();
+    const listKey: [string, ...unknown[]] = ["sent-assets", mailbox.mailbox.id, folder, q, page];
+    const list = useAPI(listKey, () => archivedPage(mailbox.mailbox.id, folder, q, page), { refreshInterval: 15000 });
     const item = !list.error ? list.data?.data.find(m => m.id === selected) : undefined;
+    const view = useRef<object | null>(null);
+    const select = useRef(onSelect);
+    useLayoutEffect(() => { select.current = onSelect; }, [onSelect]);
+    useLayoutEffect(() => {
+        // A committed navigation (including away and back) retires the old
+        // completion's authority. Ordinary refreshes keep the same owner.
+        view.current = {};
+        return () => { view.current = null; };
+    }, [scope, mailbox.mailbox.id, folder, q, page, selected]);
+    async function act(action: string) {
+        if (!item) return;
+        const owner = view.current;
+        try {
+            await changeArchived(mailbox.mailbox.id, item.id, item.revision, action);
+            assertSession(scope);
+        } catch (error) {
+            if (owner && view.current === owner) throw error;
+            return;
+        }
+        if (owner && view.current === owner) select.current("");
+        // SWR's bound mutate follows the hook's latest key. A successful write
+        // must instead invalidate its original list even after navigation.
+        await mutate(["session", scope, listKey]);
+    }
     return <div className="space-y-3">
   <p className="text-xs text-muted-foreground">{t("已发送内容是当前邮箱的邮件资产；即使投递任务归档清理，邮件仍保留。发送结果请查看发送状态。", "Sent content belongs to this mailbox and survives delivery-job cleanup. Delivery status is a separate view.")}</p>
   <LoadError error={list.error} onRetry={() => void list.mutate()}/>
@@ -27,7 +57,7 @@ export function SentFolder({ mailbox, folder, q, page, selected, onSelect, onPag
     <p className="truncate text-sm font-medium">{m.subject || t("无主题", "No subject")}</p><p className="truncate text-xs">{m.from} → {(m.to ?? []).join(", ")}</p><time className="text-xs text-muted-foreground">{new Date(m.created_at).toLocaleString()}</time>
    </button>)}{!list.isLoading && !list.error && !list.data?.data.length && <p className="p-3 text-sm">{t("没有邮件", "No messages")}</p>}</div>
    <div className="min-w-0 space-y-3">{item && <>
-    <div className="flex flex-wrap gap-2">{mailbox.can_organize && (folder === "trash" ? ["restore"] : folder === "archive" ? ["unarchive", "trash"] : ["archive", "trash"]).map(action => <ActionButton key={action} disabled={busy} onClick={() => run(async () => { await changeArchived(mailbox.mailbox.id, item.id, item.revision, action); onSelect(""); await list.mutate(); })}>{({ restore: t("恢复", "Restore"), unarchive: t("移回已发送", "Move to sent"), archive: t("归档", "Archive"), trash: t("移入回收站", "Move to trash") } as Record<string, string>)[action]}</ActionButton>)}
+    <div className="flex flex-wrap gap-2">{mailbox.can_organize && (folder === "trash" ? ["restore"] : folder === "archive" ? ["unarchive", "trash"] : ["archive", "trash"]).map(action => <ActionButton key={action} disabled={busy} onClick={() => run(() => act(action))}>{({ restore: t("恢复", "Restore"), unarchive: t("移回已发送", "Move to sent"), archive: t("归档", "Archive"), trash: t("移入回收站", "Move to trash") } as Record<string, string>)[action]}</ActionButton>)}
     {item.delivery_available ? <Link className="rounded border px-3 py-2 text-sm" href={`/mail?folder=receipts&message=${encodeURIComponent(item.id)}`}>{t("查看发送状态", "View delivery status")}</Link> : <span className="text-xs text-muted-foreground">{t("投递记录已清理，邮件内容仍保留。", "Delivery history was cleaned up; message content remains.")}</span>}</div>
     <SubmissionContentView key={item.id} id={item.id}/>
    </>}</div>
