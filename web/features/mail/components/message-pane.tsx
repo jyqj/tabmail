@@ -26,6 +26,9 @@ export function MessagePane({ mailbox, mailboxes, id, onMutation, onCompose, }: 
     async function act(action: string) {
         await company(`${base}/actions`, { method: "POST", body: { action } });
         onMutation();
+        // Actions return an acknowledgement, not the new message state. Keep
+        // controls busy until the authoritative detail supplies the next action.
+        await detail.mutate();
     }
     return (<Section title={detail.data?.subject || t("邮件详情", "Message details")}>
       <LoadError error={detail.error} onRetry={() => void detail.mutate()}/>
