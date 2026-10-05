@@ -4641,6 +4641,7 @@ paths:
       security:
       - {}
       requestBody:
+        description: JSON request body is limited to 65,536 bytes, including whitespace. Invalid or oversized bodies return 400 BAD_REQUEST.
         required: true
         content:
           application/json:
@@ -4656,6 +4657,8 @@ paths:
                 password:
                   type: string
       responses:
+        '400':
+          description: Invalid or oversized request body (BAD_REQUEST)
         '200':
           description: Login successful
           content:
@@ -4678,6 +4681,7 @@ paths:
       security:
       - {}
       requestBody:
+        description: JSON request body is limited to 65,536 bytes, including whitespace. Invalid or oversized bodies return 400 BAD_REQUEST.
         required: true
         content:
           application/json:
@@ -4696,6 +4700,8 @@ paths:
                 display_name:
                   type: string
       responses:
+        '400':
+          description: Invalid or oversized request body (BAD_REQUEST)
         '201':
           description: Account created
           content:
@@ -4718,17 +4724,18 @@ paths:
       security:
       - {}
       requestBody:
-        required: true
+        description: JSON request body is limited to 65,536 bytes, including whitespace. Invalid or oversized bodies return 400 BAD_REQUEST. The body may be empty or whitespace-only when using a refresh cookie. A supplied malformed body is rejected even when the refresh cookie is valid; cookies and tokens are unchanged on this rejection.
+        required: false
         content:
           application/json:
             schema:
               type: object
-              required:
-              - refresh_token
               properties:
                 refresh_token:
                   type: string
       responses:
+        '400':
+          description: Invalid or oversized request body (BAD_REQUEST)
         '200':
           description: New token pair issued
           content:
@@ -4749,6 +4756,7 @@ paths:
       security:
       - BearerAuth: []
       requestBody:
+        description: JSON request body is limited to 65,536 bytes, including whitespace. Invalid or oversized bodies return 400 BAD_REQUEST. The body may be empty or whitespace-only when using a refresh cookie or authenticated logout. A supplied malformed body is rejected even when the refresh cookie is valid; cookies and tokens are unchanged on this rejection.
         content:
           application/json:
             schema:
@@ -4757,6 +4765,8 @@ paths:
                 refresh_token:
                   type: string
       responses:
+        '400':
+          description: Invalid or oversized request body (BAD_REQUEST)
         '204':
           description: Logged out
   /api/v1/auth/me:
@@ -4788,6 +4798,7 @@ paths:
       security:
       - BearerAuth: []
       requestBody:
+        description: JSON request body is limited to 65,536 bytes, including whitespace. Invalid or oversized bodies return 400 BAD_REQUEST.
         required: true
         content:
           application/json:
@@ -4803,6 +4814,8 @@ paths:
                   type: string
                   minLength: 8
       responses:
+        '400':
+          description: Invalid or oversized request body (BAD_REQUEST)
         '200':
           description: Password changed
           content:

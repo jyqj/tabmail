@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"io"
 	"net/http"
 	"strings"
 	"tabmail/internal/app/credentials"
@@ -87,6 +89,17 @@ const RefreshCookieName = "tabmail_refresh_token"
 // consume it (/api/v1/auth/refresh, /api/v1/auth/logout).
 const refreshCookiePath = "/api/v1/auth"
 
+// Auth bodies contain credentials and small profile fields, never mail content.
+// Stored email/display names are at most 255 characters, passwords at most 72
+// bytes, and refresh tokens 43 ASCII bytes. 64 KiB leaves ample JSON escaping
+// and whitespace headroom while bounding decoding before credential work.
+const maxAuthBodyBytes = 64 * 1024
+
+func decodeAuthBody(w http.ResponseWriter, r *http.Request, dst any) error {
+	r.Body = http.MaxBytesReader(w, r.Body, maxAuthBodyBytes)
+	return decodeBody(r, dst)
+}
+
 func (h *AuthHandler) setRefreshCookie(w http.ResponseWriter, token string) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     RefreshCookieName,
@@ -133,7 +146,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
@@ -211,7 +224,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Password    string `json:"password"`
 		DisplayName string `json:"display_name"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
@@ -300,7 +313,11 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	_ = decodeBody(r, &req)
+	// An absent body is valid for cookie clients; a supplied invalid body is not.
+	if err := decodeAuthBody(w, r, &req); err != nil && !errors.Is(err, io.EOF) {
+		errBadRequest(w, "invalid request body")
+		return
+	}
 	raw := refreshTokenFromRequest(r, req.RefreshToken)
 	if raw == "" {
 		errBadRequest(w, "refresh_token is required")
@@ -359,7 +376,10 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		RefreshToken string `json:"refresh_token"`
 	}
-	_ = decodeBody(r, &req)
+	if err := decodeAuthBody(w, r, &req); err != nil && !errors.Is(err, io.EOF) {
+		errBadRequest(w, "invalid request body")
+		return
+	}
 	raw := refreshTokenFromRequest(r, req.RefreshToken)
 	var err error
 	if raw != "" {
@@ -406,7 +426,7 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		OldPassword string `json:"old_password"`
 		NewPassword string `json:"new_password"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
