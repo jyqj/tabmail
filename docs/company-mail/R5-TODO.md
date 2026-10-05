@@ -576,6 +576,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
   - 实施：将保存队列、submit状态和展示拆到有实际复用的hooks/组件；autosave、显式保存和submit flush共用一条revision队列。
   - 交付：web/components/company/compose与features/mail的职责收口。
   - 验收/测试：用户继续打字时旧save响应不覆盖文本；409可reload/copy；unmount/导航/权限变化不会隐式发信。
+  - 有限进展（2026-10-05）：Compose 在不可逆 submit 前检查初始会话、已提交的挂载身份与发送资格；unmount/带 key 替换、已提交的撤权即使随后恢复也不能续发旧意图，旧 pending 重试不借用新会话。已发出请求不宣称撤销，只隔离失去编辑器/会话归属的晚到 UI 回调。冻结作者14fail/8pass→22pass，保留独审两条控制后24pass；独审19fail/18pass→37pass，最终组合216pass。仅挂载组件+受控fetch；同一 Compose 仍挂载的 URL/query 变化未覆盖，真实browser/Go/PG/send未验，本项/依赖与10/171不变。见[有限验证](COMPOSE-SEND-LIFECYCLE-20261005.md)。
 
 - [ ] **R5-P5-130｜草稿模板附件端到端故障回归**
   - 依赖：`R5-P5-060`、`R5-P5-070`、`R5-P5-090`、`R5-P5-120`；优先级：阻塞。

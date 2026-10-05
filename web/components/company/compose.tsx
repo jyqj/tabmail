@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { errorCode, isConflict, isDeterministicErrorCode } from "@/lib/error-code";
 import { DraftWriter, draftKey } from "@/features/mail/draft-writer";
 import { sessionScope, assertSession } from "@/lib/session";
@@ -75,6 +75,8 @@ export function Compose({
   const [recipientReset, setRecipientReset] = useState(0);
   const [mailboxId, setMailboxId] = useState(initial.mailbox_id);
   const mounted = useRef(true);
+  const [editorScope] = useState(sessionScope);
+  const sendOwnership = useRef({ mount: 0, permission: 0, allowed: false });
   const [writer, setWriter] = useState(() => makeWriter(initial));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<unknown>(null);
@@ -87,7 +89,14 @@ export function Compose({
       read: id => company<MailDraft>(`/drafts/${id}`),
     }, () => assertSession(scope));
   }
-  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  useLayoutEffect(() => {
+    const ownership = sendOwnership.current;
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      ownership.mount += 1;
+    };
+  }, []);
   const [names, setNames] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<RenderedTemplate | null>(null);
   // A pending submission pins the exact key/draft revision so retries are
@@ -129,6 +138,13 @@ export function Compose({
     status !== "missing";
   const invalidVersion = Boolean(payload.template_version_id) &&
     (ineligible || (status === "usable" && !version) || (!eligibility && !version));
+  const sendAllowed = Boolean(from?.can_send) && !invalidVersion && (!from?.template_only || Boolean(version));
+  useLayoutEffect(() => {
+    // Only committed permission changes revoke an in-flight send. Restoring
+    // permission permits a new explicit click, never the old pending intent.
+    if (sendOwnership.current.allowed && !sendAllowed) sendOwnership.current.permission += 1;
+    sendOwnership.current.allowed = sendAllowed;
+  }, [sendAllowed]);
   const notice = status
     ? INELIGIBLE_NOTICES[status as Exclude<DraftTemplateVersionStatus, "usable" | "missing">]
     : undefined;
@@ -175,6 +191,18 @@ export function Compose({
     return () => {active = false; window.clearTimeout(timer);};
   }, [dirty, busy, pending, saveError, from?.can_send, mailboxId, payload, writer]);
   async function send() {
+    const owner = { ...sendOwnership.current };
+    function assertOwner() {
+      assertSession(editorScope);
+      if (!mounted.current || owner.mount !== sendOwnership.current.mount)
+        throw new DOMException("Editor closed; stale send discarded", "AbortError");
+    }
+    function assertSendAllowed() {
+      assertOwner();
+      if (!sendOwnership.current.allowed || owner.permission !== sendOwnership.current.permission)
+        throw new DOMException("Send permission changed; review and send again", "AbortError");
+    }
+    assertOwner();
     if (!from?.can_send) return;
     if (!pending && (invalidVersion || (from.template_only && !version)))
       throw new Error(
@@ -187,7 +215,10 @@ export function Compose({
     if (!snapshot) {
       // The server submits the persisted draft inside the enqueue transaction,
       // so unsaved edits must be flushed first.
-      const saved = await save(undefined, true);
+      let saved: MailDraft;
+      try { saved = await save(undefined, true); }
+      catch (error) { assertOwner(); throw error; }
+      assertSendAllowed();
       if (!saved.id) throw new Error(t("草稿未保存", "Draft not saved"));
       snapshot = {
         key: `${saved.id}.${saved.revision}`,
@@ -196,14 +227,20 @@ export function Compose({
       };
       setPending(snapshot);
     }
+    // This is the irreversible boundary, including retries of a pinned key.
+    assertSendAllowed();
     try {
       const job = await submitDraft(snapshot.draftId, snapshot.revision, snapshot.key);
+      // A dispatched request may already have queued mail. Do not claim it was
+      // canceled, but never let its stale UI completion close a new editor.
+      assertOwner();
       toast.success(
         `${t("已加入发送队列，不代表已送达：", "Queued, not yet delivered: ")}${job.id}`,
       );
       writer.close();
       onSent();
     } catch (e) {
+      assertOwner();
       const err = e as { data?: { revision?: number } };
       if (isConflict(e)) {
         setPending(null);
