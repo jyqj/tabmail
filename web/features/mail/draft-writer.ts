@@ -27,7 +27,7 @@ export function draftKey(input: DraftInput): string {
         return value;
     });
 }
-// One revision lane shared by autosave, explicit save and submit flush. No
+// One revision lane shared by autosave, explicit save, submit flush and reload. No
 // request can observe a stale locally acknowledged revision, and a conflict
 // latches the lane until the user explicitly reloads or creates a copy.
 type PendingWrite = { draft: MailDraftInput; create: boolean; uncertain: boolean };
@@ -125,17 +125,22 @@ export class DraftWriter {
         this.tail = operation;
         return operation;
     }
-    async reload(): Promise<MailDraft> {
-        await this.tail.catch(() => { });
-        this.check();
-        const observed = structuredClone(await this.transport.read(this.id));
-        this.check();
-        if (observed.id !== this.id || !Number.isSafeInteger(observed.revision) || observed.revision < 1)
-            throw new Error("Draft readback identity does not match this editor");
-        this.snapshot = observed;
-        this.confirmed = observed;
-        this.conflict = undefined;
-        this.pending = undefined;
-        return structuredClone(observed);
+    reload(): Promise<MailDraft> {
+        const operation = this.tail.catch(() => { }).then(async () => {
+            this.check();
+            const observed = structuredClone(await this.transport.read(this.id));
+            this.check();
+            if (observed.id !== this.id || !Number.isSafeInteger(observed.revision) || observed.revision < 1)
+                throw new Error("Draft readback identity does not match this editor");
+            this.snapshot = observed;
+            this.confirmed = observed;
+            this.conflict = undefined;
+            this.pending = undefined;
+            return structuredClone(observed);
+        });
+        // Reserve the lane before returning, so later writes and reloads cannot
+        // start against a snapshot that this read may replace.
+        this.tail = operation;
+        return operation;
     }
 }
