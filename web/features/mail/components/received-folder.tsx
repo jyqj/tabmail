@@ -14,7 +14,7 @@ export function ReceivedFolder({ mailbox, mailboxes, folder, q, page, selected, 
     selected: string;
     onSelect: (id: string) => void;
     onPage: (p: number) => void;
-    onCompose: (p: DraftPayload) => void;
+    onCompose: (pending: Promise<DraftPayload>) => void | Promise<void>;
 }) {
     const t = useText();
     const list = useAPI(["work-messages", mailbox.mailbox.id, folder, q, page], () => workMessages(mailbox.mailbox.id, folder, q, page), { refreshInterval: 25000 });

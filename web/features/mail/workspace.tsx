@@ -43,6 +43,14 @@ export function MailWorkspace() {
     const navigationKey = JSON.stringify([scope, pathname, mailbox?.mailbox.id, folder, page, q, selected, archiveSent]);
     const [navigation, setNavigation] = useState({ key: navigationKey });
     if (navigation.key !== navigationKey) setNavigation({ key: navigationKey });
+    // Opening an editor is a separate intent from completing an existing send.
+    // Only committed views publish authority; away/back and unmount retire it.
+    const openingView = useRef<object | null>(null);
+    const openingIntent = useRef<object | null>(null);
+    useLayoutEffect(() => {
+        openingView.current = {};
+        return () => { openingView.current = null; };
+    }, [navigation]);
     const setQuery = (patch: Record<string, string | null>) => { const next = new URLSearchParams(params.toString()); for (const [k, v] of Object.entries(patch)) {
         if (!v || (k === "page" && v === "1") || (k === "folder" && v === "inbox"))
             next.delete(k);
@@ -61,8 +69,30 @@ export function MailWorkspace() {
     useEffect(() => { if (!id)
         return; const abort = new AbortController(); void streamEvents(`/api/v1/company/mailboxes/${encodeURIComponent(id)}/events`, { signal: abort.signal, onEvent: event => { if (event.type !== "ping")
             refresh(); } }).catch(() => { }); return () => abort.abort(); }, [id, refresh]);
-    const start = (payload?: DraftPayload) => { const from = composeIdentity(usable, mailbox); if (from)
-        setEditor({ key: crypto.randomUUID(), draft: { mailbox_id: from.mailbox.id, revision: 0, payload: payload ?? { to: [], subject: "", text_body: "" } } }); };
+    function newDraft(payload: DraftPayload): MailDraftEditor | null {
+        const from = composeIdentity(usable, mailbox);
+        return from ? { mailbox_id: from.mailbox.id, revision: 0, payload } : null;
+    }
+    function start() {
+        // Supersede pending preparation immediately, before the new editor commits.
+        openingIntent.current = {};
+        const draft = newDraft({ to: [], subject: "", text_body: "" });
+        if (draft) setEditor({ key: crypto.randomUUID(), draft });
+    }
+    async function openEditor(pending: Promise<MailDraftEditor | null>) {
+        const view = openingView.current;
+        const intent = {};
+        openingIntent.current = intent;
+        const owns = () => view !== null && openingView.current === view && openingIntent.current === intent;
+        try {
+            const draft = await pending;
+            if (owns() && draft) setEditor({ key: crypto.randomUUID(), draft });
+        } catch (error) {
+            // A superseded read/preparation cannot report into the newer view.
+            if (owns()) throw error;
+        }
+    }
+    const compose = (pending: Promise<DraftPayload>) => openEditor(pending.then(newDraft));
     const label = (f: Folder) => ({ inbox: t("收件箱", "Inbox"), sent: t("已发送邮件", "Sent mail"), drafts: t("草稿", "Drafts"), archive: t("归档", "Archive"), trash: t("回收站", "Trash"), receipts: t("发送状态", "Delivery status") })[f];
     const onPage = (p: number) => setQuery({ page: String(p), message: null });
     const onSelect = (message: string) => setQuery({ message });
@@ -87,7 +117,7 @@ export function MailWorkspace() {
       {folder === "trash" && <p className="text-xs text-muted-foreground">{t("邮件删除后进入 30 天回收站；共享整理影响同邮箱所有成员。", "Deleted mail is recoverable for 30 days; shared organizing affects everyone in the mailbox.")}</p>}
       <SearchMail key={`${mailbox?.mailbox.id}:${folder}:${q}`} value={q} onSearch={q => setQuery({ q, message: null, page: null })}/>
     </>}
-    {folder === "receipts" ? <ReceiptFolder page={page} selected={selected} onPage={onPage} onSelect={onSelect} includeCompatibility/> : folder === "drafts" ? <DraftFolder page={page} mailboxes={usable} onPage={onPage} onEdit={draft => setEditor({ draft, key: crypto.randomUUID() })}/> : !mailbox?.can_read ? <p role="status">{t("当前没有可阅读的邮箱；代发身份仍可用于写信。", "No readable mailbox is selected; authorized send identities remain available for composing.")}</p> : archiveSent ? <SentFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect}/> : <ReceivedFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} mailboxes={usable} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect} onCompose={start}/>}
+    {folder === "receipts" ? <ReceiptFolder page={page} selected={selected} onPage={onPage} onSelect={onSelect} includeCompatibility/> : folder === "drafts" ? <DraftFolder page={page} mailboxes={usable} onPage={onPage} onEdit={openEditor}/> : !mailbox?.can_read ? <p role="status">{t("当前没有可阅读的邮箱；代发身份仍可用于写信。", "No readable mailbox is selected; authorized send identities remain available for composing.")}</p> : archiveSent ? <SentFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect}/> : <ReceivedFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} mailboxes={usable} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect} onCompose={compose}/>}
     </section>
   </div>}
  </main>;

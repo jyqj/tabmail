@@ -11,7 +11,7 @@ export function MessagePane({ mailbox, mailboxes, id, onMutation, onCompose, }: 
     mailboxes?: WorkMailbox[];
     id: string;
     onMutation: () => void;
-    onCompose: (p: DraftPayload) => void;
+    onCompose: (pending: Promise<DraftPayload>) => void | Promise<void>;
 }) {
     const t = useText();
     const { busy, run } = useAction();
@@ -38,7 +38,7 @@ export function MessagePane({ mailbox, mailboxes, id, onMutation, onCompose, }: 
             {detail.data.sender} → {(detail.data.recipients ?? []).join(", ")}
           </p>
           <div className="flex flex-wrap gap-2">
-            {(["reply", "reply_all", "forward"] as const).map((mode, i) => (<ActionButton key={mode} disabled={busy || !canCompose} onClick={() => run(async () => onCompose(await company<DraftPayload>(`${base}/compose`, {
+            {(["reply", "reply_all", "forward"] as const).map((mode, i) => (<ActionButton key={mode} disabled={busy || !canCompose} onClick={() => run(async () => onCompose(company<DraftPayload>(`${base}/compose`, {
                     method: "POST",
                     body: { mode, from_mailbox_id: composeFrom!.mailbox.id },
                 })))}>

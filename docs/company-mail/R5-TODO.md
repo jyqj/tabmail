@@ -908,6 +908,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
   - 实施：授权From选择、template-only限制、reply/reply-all/forward、附件状态与保存/发送按钮统一，不丢未保存内容。
   - 交付：compose/identity selector/draft folder集成。
   - 验收/测试：只读共享邮箱回复需有效send identity；撤销模板pin仍可编辑但不能发送；转发不突破附件当前资格。
+  - 2026-10-05限定进展：草稿继续编辑与reply/reply-all/forward的延迟准备结果按已提交视图及最新开信意图归属，不能覆盖新编辑器/未保存输入或较新导航；实现`8dcb77b`，作者基线16fail/12pass→28/28，关联219/219、前端限定760/760及typecheck/lint通过。独立冻结50/50无阻塞；历史保持81/82，唯一依赖本次漏洞的旧oracle原样保留，另4补充通过；独立限定852pass/1显式skip，不冒称旧82全绿。无build/browser/backend/PG或真实邮件资格，本项/依赖与10/171保持open。见[限定报告](EDITOR-OPENING-OWNERSHIP-20261005.md)。
 
 - [ ] **R5-P9-060｜发件状态与受控详情显示**
   - 依赖：`R5-P9-040`、`R5-P2-100`、`R5-P6-020`；优先级：高。
