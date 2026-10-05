@@ -577,6 +577,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
   - 交付：web/components/company/compose与features/mail的职责收口。
   - 验收/测试：用户继续打字时旧save响应不覆盖文本；409可reload/copy；unmount/导航/权限变化不会隐式发信。
   - 有限进展（2026-10-05）：Compose 在不可逆 submit 前检查初始会话、已提交的挂载身份与发送资格；unmount/带 key 替换、已提交的撤权即使随后恢复也不能续发旧意图，旧 pending 重试不借用新会话。已发出请求不宣称撤销，只隔离失去编辑器/会话归属的晚到 UI 回调。冻结作者14fail/8pass→22pass，保留独审两条控制后24pass；独审19fail/18pass→37pass，最终组合216pass。仅挂载组件+受控fetch；同一 Compose 仍挂载的 URL/query 变化未覆盖，真实browser/Go/PG/send未验，本项/依赖与10/171不变。见[有限验证](COMPOSE-SEND-LIFECYCLE-20261005.md)。
+  - 有限进展（2026-10-05）：MailWorkspace 将发送完成后的跳转限定于原已提交视图，保留更晚邮箱/文件夹/搜索/分页/选择/source与往返导航，并用最新query保留无关参数；仅关闭成功消费的同key编辑器。仍挂载编辑器的query变化保留草稿与已明确点击的发送，不新增取消语义或丢失输入。实现`ffd9dba`；作者冻结2fail/2pass→4pass，扩展15/15、相关166/166；独立预冻结10fail/13pass→23pass，另补充6fail/1pass→7pass，最终独立组合213/213无阻塞。前端限定53文件732/732，产品typecheck/定向及全lint通过（四既有warning），review-only夹具静态诊断另列。仅真实挂载组件+受控fetch，未build/真实browser/Go/PG/send；完整web既有门槛、本项/依赖、10/171及F52failed保留。见[限定验证](COMPOSE-WORKSPACE-COMPLETION-20261005.md)。
 
 - [ ] **R5-P5-130｜草稿模板附件端到端故障回归**
   - 依赖：`R5-P5-060`、`R5-P5-070`、`R5-P5-090`、`R5-P5-120`；优先级：阻塞。
