@@ -915,6 +915,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
   - 实施：区分queued/next-hop accepted/partial/failed/uncertain/cancelled；BCC仅在允许的详情中展示，unknown历史明确。
   - 交付：receipt/sent/submission-pane及能力提示文案。
   - 验收/测试：不能把任务创建称为投递成功；uncertain没有普通retry按钮；旧队列删除后sent仍完整。
+  - 2026-10-05限定进展：MailWorkspace手动刷新/SSE失效/EOF重连补齐当前session内公司回执详情、兼容回执详情及scalar兼容列表；冻结实现`60e064f`，作者基线18fail/2pass→20/20，关联219/219、前端限定780/780及typecheck/lint通过；独立冻结基线13fail/3pass→16/16、关联361/361，无阻塞发现。只新增SWR键匹配，保留session隔离、能力撤销及懒加载正文；已展开的非SWR正文/附件仍走自身15秒重验，工作台刷新未直达该reader的缺口明确open。本项/依赖与10/171不变，无build/browser/backend/PG资格。见[限定报告](RECEIPT-AGGREGATE-REFRESH-20261005.md)。
 
 - [ ] **R5-P9-070｜入职、冻结和离职管理旅程**
   - 依赖：`R5-P9-030`、`R5-P4-120`；优先级：高。

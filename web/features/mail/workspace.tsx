@@ -17,8 +17,9 @@ import { ReceiptFolder } from "./components/receipt-folder";
 const folders = ["inbox", "sent", "drafts", "archive", "trash", "receipts"] as const;
 type Folder = typeof folders[number];
 // Reconnect resync and manual refresh must cover mounted readers as well as
-// folder lists. Attachment and conversation readers do not poll on their own.
-const mailKeys = new Set(["work-messages", "work-message", "inbound-attachments", "mail-conversation", "sent-assets", "work-drafts", "work-submissions", "mail-index-status"]);
+// folder lists. Compatibility receipts do not poll; aggregate details carry
+// current capabilities. Live disclosed content has its own authorization cycle.
+const mailKeys = new Set(["work-messages", "work-message", "inbound-attachments", "mail-conversation", "sent-assets", "work-drafts", "work-submissions", "submission", "legacy-outbound-receipt", "mail-index-status"]);
 export function MailWorkspace() {
     const t = useText();
     const router = useRouter();
@@ -64,7 +65,7 @@ export function MailWorkspace() {
         completion.current = { navigation, editorKey: editor?.key ?? null, setQuery };
         return () => { completion.current = null; };
     });
-    const refresh = useCallback(() => { void mutate((key: unknown) => Array.isArray(key) && key[0] === "session" && key[1] === scope && (key[2] === "work-mailboxes" || (Array.isArray(key[2]) && mailKeys.has(key[2][0])))); }, [mutate, scope]);
+    const refresh = useCallback(() => { void mutate((key: unknown) => Array.isArray(key) && key[0] === "session" && key[1] === scope && (key[2] === "work-mailboxes" || key[2] === "legacy-outbound-receipts" || (Array.isArray(key[2]) && mailKeys.has(key[2][0])))); }, [mutate, scope]);
     const id = mailbox?.can_read ? mailbox.mailbox.id : undefined;
     useEffect(() => { if (!id)
         return; const abort = new AbortController(); void streamEvents(`/api/v1/company/mailboxes/${encodeURIComponent(id)}/events`, { signal: abort.signal, onEvent: event => { if (event.type !== "ping")
