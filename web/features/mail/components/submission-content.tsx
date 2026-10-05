@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { submissionContent, submissionAttachments, downloadCompanyFile, type SubmissionContent, type SubmissionAttachment } from "@/lib/company";
 import { assertSession, useSessionScope } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { ActionButton, MailHTML, useAction, useText } from "@/components/company/common";
+import { LiveContentRefresh } from "../live-content-refresh";
 
 // This is the LIVE sent-asset reader, not an operation receipt or a platform
 // inspection. Private content is intentionally never retained in an SWR cache.
@@ -12,6 +13,7 @@ export function SubmissionContentView({ id }: { id: string }) {
   return <LiveSubmissionContent key={`${scope}:${id}`} id={id} scope={scope} />;
 }
 function LiveSubmissionContent({ id, scope }: { id: string; scope: string }) {
+  const refresh = useContext(LiveContentRefresh);
   const t = useText();
   const { t: receiptText } = useI18n();
   const { busy, run } = useAction();
@@ -50,7 +52,7 @@ function LiveSubmissionContent({ id, scope }: { id: string; scope: string }) {
     void load();
     const timer = window.setInterval(() => { void load(); }, 15000);
     return () => { disposed = true; epoch.current++; controller?.abort(); window.clearInterval(timer); };
-  }, [id, scope, reload]);
+  }, [id, scope, reload, refresh]);
   const content = state.content;
   return <div data-testid="live-submission-content" className="space-y-3 border-t pt-3">
     {state.failed && <div role="alert"><p>{receiptText("ordinaryReceipt.contentUnavailable")}</p><ActionButton onClick={() => setReload(value => value + 1)}>{t("重试加载", "Retry loading")}</ActionButton></div>}

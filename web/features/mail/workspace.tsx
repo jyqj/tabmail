@@ -5,7 +5,7 @@ import { useSWRConfig } from "swr";
 import { useAPI } from "@/hooks/use-api";
 import { workMailboxes, type DraftPayload, type MailDraftEditor } from "@/lib/company";
 import { streamEvents } from "@/lib/api/base";
-import { useSessionScope } from "@/lib/session";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import { composeIdentity } from "@/lib/compose-identity";
 import { ActionButton, LoadError, useText } from "@/components/company/common";
 import { Compose } from "@/components/company/compose";
@@ -14,11 +14,12 @@ import { ReceivedFolder } from "./components/received-folder";
 import { SentFolder } from "./components/sent-folder";
 import { DraftFolder } from "./components/draft-folder";
 import { ReceiptFolder } from "./components/receipt-folder";
+import { LiveContentRefresh } from "./live-content-refresh";
 const folders = ["inbox", "sent", "drafts", "archive", "trash", "receipts"] as const;
 type Folder = typeof folders[number];
 // Reconnect resync and manual refresh must cover mounted readers as well as
 // folder lists. Compatibility receipts do not poll; aggregate details carry
-// current capabilities. Live disclosed content has its own authorization cycle.
+// current capabilities. Private live readers receive a separate local signal.
 const mailKeys = new Set(["work-messages", "work-message", "inbound-attachments", "mail-conversation", "sent-assets", "work-drafts", "work-submissions", "submission", "legacy-outbound-receipt", "mail-index-status"]);
 export function MailWorkspace() {
     const t = useText();
@@ -27,6 +28,7 @@ export function MailWorkspace() {
     const params = useSearchParams();
     const scope = useSessionScope();
     const { mutate } = useSWRConfig();
+    const [contentRefresh, setContentRefresh] = useState(0);
     const [editor, setEditor] = useState<{
         draft: MailDraftEditor;
         key: string;
@@ -65,7 +67,11 @@ export function MailWorkspace() {
         completion.current = { navigation, editorKey: editor?.key ?? null, setQuery };
         return () => { completion.current = null; };
     });
-    const refresh = useCallback(() => { void mutate((key: unknown) => Array.isArray(key) && key[0] === "session" && key[1] === scope && (key[2] === "work-mailboxes" || key[2] === "legacy-outbound-receipts" || (Array.isArray(key[2]) && mailKeys.has(key[2][0])))); }, [mutate, scope]);
+    const refresh = useCallback(() => {
+        // Retired callbacks cannot refresh a replacement session's visible
+        // private reader. The signal never opens disclosure or stores content.
+        if (scope === sessionScope()) setContentRefresh(value => value + 1);
+        void mutate((key: unknown) => Array.isArray(key) && key[0] === "session" && key[1] === scope && (key[2] === "work-mailboxes" || key[2] === "legacy-outbound-receipts" || (Array.isArray(key[2]) && mailKeys.has(key[2][0])))); }, [mutate, scope]);
     const id = mailbox?.can_read ? mailbox.mailbox.id : undefined;
     useEffect(() => { if (!id)
         return; const abort = new AbortController(); void streamEvents(`/api/v1/company/mailboxes/${encodeURIComponent(id)}/events`, { signal: abort.signal, onEvent: event => { if (event.type !== "ping")
@@ -97,7 +103,7 @@ export function MailWorkspace() {
     const label = (f: Folder) => ({ inbox: t("收件箱", "Inbox"), sent: t("已发送邮件", "Sent mail"), drafts: t("草稿", "Drafts"), archive: t("归档", "Archive"), trash: t("回收站", "Trash"), receipts: t("发送状态", "Delivery status") })[f];
     const onPage = (p: number) => setQuery({ page: String(p), message: null });
     const onSelect = (message: string) => setQuery({ message });
-    return <main className="mx-auto w-full max-w-screen-2xl space-y-4 p-4 md:p-6">
+    return <LiveContentRefresh value={contentRefresh}><main className="mx-auto w-full max-w-screen-2xl space-y-4 p-4 md:p-6">
   <header className="flex flex-wrap items-center justify-between gap-3"><div><h1 className="text-2xl font-semibold">{t("公司邮箱", "Company mail")}</h1><p className="text-sm text-muted-foreground">{t("个人与共享邮箱 · 邮件资产与投递状态分离", "Personal and shared mailboxes · message content and delivery status are separate")}</p></div><div className="flex gap-2"><ActionButton onClick={refresh}>{t("刷新", "Refresh")}</ActionButton><ActionButton disabled={Boolean(editor) || !composeIdentity(usable, mailbox)} onClick={() => start()}>{t("写邮件", "Compose")}</ActionButton></div></header>
   <LoadError error={boxes.error} onRetry={() => void boxes.mutate()}/>
   {editor ? <Compose key={editor.key} initial={editor.draft} mailboxes={usable} onClose={() => { setEditor(null); refresh(); }} onSent={() => {
@@ -121,5 +127,5 @@ export function MailWorkspace() {
     {folder === "receipts" ? <ReceiptFolder page={page} selected={selected} onPage={onPage} onSelect={onSelect} includeCompatibility/> : folder === "drafts" ? <DraftFolder page={page} mailboxes={usable} onPage={onPage} onEdit={openEditor}/> : !mailbox?.can_read ? <p role="status">{t("当前没有可阅读的邮箱；代发身份仍可用于写信。", "No readable mailbox is selected; authorized send identities remain available for composing.")}</p> : archiveSent ? <SentFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect}/> : <ReceivedFolder key={`${mailbox.mailbox.id}:${folder}`} mailbox={mailbox} mailboxes={usable} folder={folder} q={q} page={page} selected={selected} onPage={onPage} onSelect={onSelect} onCompose={compose}/>}
     </section>
   </div>}
- </main>;
+ </main></LiveContentRefresh>;
 }
