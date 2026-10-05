@@ -518,6 +518,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
 - [ ] **R5-P5-030｜草稿 CAS 和字段规范化**
   - 依赖：`R5-P5-010`、`R5-P1-020`；优先级：阻塞。
   - 实施：更新必须按观察revision，JSON canonical规则覆盖omit/null/empty/数组顺序，不共享可变输入切片或map。
+  - 有限进展（2026-10-05）：DraftWriter 显式 reload 纳入保存修订队列，防止延迟读回覆盖较新的已确认 revision；作者受控回归15/15、独立冻结回归22/22，相关独立组合88/88；构建/typecheck通过，完整web仍受既有Go/private-PG门槛阻塞。仅客户端writer契约修正，不宣称Compose浏览器或真实草稿全链验收，本项/依赖保持未勾选，10/171及历史F52 failed不变。见[有限验证](DRAFT-RELOAD-SERIALIZATION-20261005.md)。
   - 交付：DraftPayload比较/摘要与Go/TS等价案例。
   - 验收/测试：保存响应必须对应精确输入和next revision；同内容无意义改序不冲突，实际改动不被误去重。
 
