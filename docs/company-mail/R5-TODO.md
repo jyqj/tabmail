@@ -899,6 +899,7 @@ P1–P7 每个协议变更都必须携带相应最小完整 UI 适配和迁移�
   - 交付：features/mail工作台组件与状态处理。
   - 验收/测试：翻页/搜索/切邮箱/到期后不会显示旧正文；消息操作失败不先在UI伪装永久成功。
   - 2026-10-05限定进展：已确认收件操作后补齐当前详情权威GET，并等待重读结束再启用后续操作；发布源码`22974d6`／树`3a876c0`，作者基线11fail/3pass→候选14/14，独立冻结21fail/7pass→28/28且无阻塞问题，关联101/101与独立73/73、typecheck/定向lint/build通过。全web复跑641pass/1fail/3skip，Go1.25.7/private PG fixture阻塞与首次并行build时额外超时均留证；本项完整生命周期/真实browser及依赖仍未关闭，10/171与历史F52failed不变。见[限定报告](MESSAGE-ACTION-RECONCILIATION-20261005.md)。
+  - 2026-10-05限定进展：SentFolder 用已提交视图所有权约束延迟整理结果，保留较新的选择/搜索/分页/邮箱/文件夹/Compose及卸载后的URL，并按原session/list key失效；发布源码`6a2fed0`／被测等价树`c97eaba`。作者20/20，独立冻结基线21fail/12pass→33/33，独立保留组合218/218；前端限定51文件693/693、产品typecheck/定向lint通过。完整web仍有Go/private-PG既有阻塞，独立测试夹具静态诊断另列；不宣称完整browser/backend或build，本项/依赖及10/171不变。见[限定报告](SENT-ACTION-OWNERSHIP-20261005.md)。
 
 - [ ] **R5-P9-050｜写信、模板、回复与附件工作流**
   - 依赖：`R5-P9-020`、`R5-P5-120`；优先级：高。
