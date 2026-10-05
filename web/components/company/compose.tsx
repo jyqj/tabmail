@@ -72,6 +72,7 @@ export function Compose({
   const { busy, run } = useAction();
   const [draft, setDraft] = useState(initial);
   const [payload, setPayload] = useState<DraftPayload>(initial.payload);
+  const [recipientReset, setRecipientReset] = useState(0);
   const [mailboxId, setMailboxId] = useState(initial.mailbox_id);
   const mounted = useRef(true);
   const [writer, setWriter] = useState(() => makeWriter(initial));
@@ -273,7 +274,11 @@ export function Compose({
         <div className="flex flex-wrap gap-2">
           <ActionButton disabled={busy || saving || Boolean(pending)} onClick={() => run(async () => {
             if (!window.confirm(t("载入服务器版本会替换此窗口的编辑，确认？", "Replace this window's edits with the server version?"))) return;
-            const current = await writer.reload();setDraft(current);setPayload(current.payload);setMailboxId(current.mailbox_id);setSaveError(null);setPreview(null);
+            const current = await writer.reload();
+            setDraft(current);setPayload(current.payload);setMailboxId(current.mailbox_id);setSaveError(null);setPreview(null);
+            // Explicit discard resets raw recipient text, even if its parsed
+            // addresses are unchanged. Ordinary saves must preserve typing.
+            setRecipientReset(value => value + 1);
           })}>{t("载入服务器版本", "Reload server draft")}</ActionButton>
           <ActionButton disabled={busy || saving || Boolean(pending) || !from?.can_send} onClick={() => {
             if (!window.confirm(t("创建独立草稿，不会自动发送。提交结果不确定时请先核对发送状态。", "Create a separate draft, without sending. Check delivery status first if submission was uncertain."))) return;
@@ -335,6 +340,7 @@ export function Compose({
           >
             {(id) => (
               <RecipientInput
+                key={recipientReset}
                 id={id}
                 disabled={locked}
                 value={payload[field] ?? []}
