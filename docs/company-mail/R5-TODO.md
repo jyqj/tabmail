@@ -2153,3 +2153,7 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 ### 2026-10-05 bounded Subject wire encoding
 
 - R5-P6-090: Subject-only RFC 2047 encoding/folding now preserves exact sanitized text, including long ASCII, Unicode, whitespace and literal encoded-word-looking strings; the 998-byte input limit is unchanged. Author focused outbound selection: 12 top-level / 54 test-and-subtest passes with race detection; company template selection: 8 / 34 passes; bounded outbound/company vet passes. Independent unchanged oracle: 91 / 91 leaf cases pass. [Bounded report](R5-SUBJECT-WIRE-ENCODING-20261005.md). R5-P6-090 and dependencies R5-P6-040/050 remain open; central **10/171**, historical F52 and other formal gates are unchanged. No full-suite, live mail/database or delivery qualification is claimed.
+
+### 2026-10-06 bounded direct-delivery null MX
+
+- R5-P6-090：PR53 head `9f2982d8366fabded56945991218a69cd715e1b8` 上限定修复有效 sole preference-0／exchange `.`；会话前永久 556／5.1.10，零 session／地址回退，既有收件人分类器落 Permanent。非零／重复／mixed root RRset 明确采用临时无效响应、零 session 的保守规则，不冒称 RFC 永久拒绝。原／seam-only 控制各 47 top-level／388 events race PASS；候选作者 53／417 PASS，独立冻结合同与控制 20／40、最终作者合并复验 26／69、纯 delivery 状态 10／5269、PR53 Subject 2／37 PASS，计数重叠不相加；相关 vet PASS。被测代码／测试 tree `19877df9f5c06d6c8b84d1373214b2db1d7c8652`，交付仅追加报告／本日志。详[限定报告](R5-NULL-MX-20261006.md)。仅离线 resolver／session spy、fake-store／纯状态，9 个既有网络 delivery-context 用例未跑；未全套／真实 DNS、SMTP、PG／fullcaller／CI。040／050／090 与父门禁仍 open，**10/171**、历史 F52 和其他 formal blockers 不变，无新增勾选。

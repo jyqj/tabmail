@@ -65,6 +65,16 @@ func deliverRelayTLS(ctx context.Context, cfg config.Outbound, from string, to [
 // When requireTLS is true, delivery fails if STARTTLS is unavailable or negotiation fails,
 // preventing MITM downgrade attacks.
 func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, requireTLS bool) error {
+	return deliverDirectWith(ctx, from, to, mime, requireTLS, (&net.Resolver{}).LookupMX, deliverDirectMX)
+}
+
+// deliverDirectWith keeps DNS normalization and direct-delivery orchestration
+// shared by the production entry point and offline tests. Dependencies are
+// per-call so independent deliveries never share mutable test hooks.
+func deliverDirectWith(ctx context.Context, from string, to []string, mime []byte, requireTLS bool,
+	resolve func(context.Context, string) ([]*net.MX, error),
+	session func(context.Context, string, string, string, []string, []byte, bool) error,
+) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
@@ -75,7 +85,7 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 			return err
 		}
 		var lastErr error
-		mxs, err := lookupMX(ctx, domain)
+		mxs, err := lookupMXWithResolver(ctx, domain, resolve)
 		if err != nil {
 			failures = append(failures, fmt.Errorf("mx lookup %s: %w", domain, err))
 			continue
@@ -84,7 +94,7 @@ func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, r
 		for _, mx := range mxs {
 			host := strings.TrimSuffix(mx, ".")
 			addr := fmt.Sprintf("%s:25", host)
-			err := deliverDirectMX(ctx, host, addr, from, rcpts, mime, requireTLS)
+			err := session(ctx, host, addr, from, rcpts, mime, requireTLS)
 			if err != nil {
 				if errors.Is(err, store.ErrOutboundUncertain) || ctx.Err() != nil {
 					return err
@@ -194,14 +204,26 @@ func groupByDomain(addrs []string) map[string][]string {
 	return m
 }
 
-func lookupMX(ctx context.Context, domain string) ([]string, error) {
-	resolver := &net.Resolver{}
-	records, err := resolver.LookupMX(ctx, domain)
+func lookupMXWithResolver(ctx context.Context, domain string, resolve func(context.Context, string) ([]*net.MX, error)) ([]string, error) {
+	records, err := resolve(ctx, domain)
 	if err != nil {
 		return nil, err
 	}
 	if len(records) == 0 {
 		return []string{domain}, nil
+	}
+	// RFC 7505: a sole preference-0 root exchange explicitly declines mail.
+	// Keep the SMTP rejection in the error chain for the existing recipient
+	// classifier, and never turn this route into an empty-host connection.
+	if len(records) == 1 && records[0].Pref == 0 && records[0].Host == "." {
+		return nil, &textproto.Error{Code: 556, Msg: "5.1.10 Recipient domain does not accept mail (null MX)"}
+	}
+	// A root exchange in any other answer is malformed. Conservatively leave
+	// it retryable without trying another MX or falling back to the domain.
+	for _, mx := range records {
+		if mx.Host == "." {
+			return nil, fmt.Errorf("invalid MX answer: root exchange must be the sole preference-0 record")
+		}
 	}
 	hosts := make([]string, len(records))
 	for i, mx := range records {
