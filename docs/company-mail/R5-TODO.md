@@ -2157,3 +2157,8 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 ### 2026-10-06 bounded direct-delivery null MX
 
 - R5-P6-090：PR53 head `9f2982d8366fabded56945991218a69cd715e1b8` 上限定修复有效 sole preference-0／exchange `.`；会话前永久 556／5.1.10，零 session／地址回退，既有收件人分类器落 Permanent。非零／重复／mixed root RRset 明确采用临时无效响应、零 session 的保守规则，不冒称 RFC 永久拒绝。原／seam-only 控制各 47 top-level／388 events race PASS；候选作者 53／417 PASS，独立冻结合同与控制 20／40、最终作者合并复验 26／69、纯 delivery 状态 10／5269、PR53 Subject 2／37 PASS，计数重叠不相加；相关 vet PASS。被测代码／测试 tree `19877df9f5c06d6c8b84d1373214b2db1d7c8652`，交付仅追加报告／本日志。详[限定报告](R5-NULL-MX-20261006.md)。仅离线 resolver／session spy、fake-store／纯状态，9 个既有网络 delivery-context 用例未跑；未全套／真实 DNS、SMTP、PG／fullcaller／CI。040／050／090 与父门禁仍 open，**10/171**、历史 F52 和其他 formal blockers 不变，无新增勾选。
+
+
+### 2026-10-06 bounded DATA-final transport cause preservation
+
+- R5-P6-050：PR54 head `2987f509131b0a569094959a2b35a5b8883e9c68` 上仅将 DATA.Close 非协议错误的第二个 `%v` 改为 `%w`，同时保留 `ErrOutboundUncertain` 与底层 `errors.Is`／`errors.As` transport cause；deadline-before-ctx.Err 恢复、明确 4xx／5xx 和已确认 250 后 QUIT／取消返回 nil 均受控制。真正标准库 net/smtp 经 net.Pipe 内存协议实测：同一作者基线仅3个错误链case红，候选6 top-level／21 events及50次重复1050 events PASS；相同53个已有离线控制基线／候选各417 events PASS。独立先冻结oracle基线27 leaf PASS／6 cause-chain FAIL，候选33／33及10次重复330 leaf executions PASS；最终独审组合66 top-level／477 events PASS、无阻塞发现，相关vet／whitespace／patch applicability PASS。被测tree `0017ce652b58b9dadf4fe25c35e85c66deadcca8`，交付只追加报告／本记录，详[限定报告](R5-SMTP-DATA-CAUSE-20261006.md)。9个既有真实listener／dial用例未跑，未真实DNS／TCP／SMTP账号／PG／restart／fullcaller／CI；030／040／050／090及父门禁仍open，**10/171**、历史F52／G0不变，无新增父项勾选。

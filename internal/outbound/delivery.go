@@ -186,7 +186,7 @@ func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error 
 		if errors.As(err, &reply) {
 			return fmt.Errorf("close data: %w", err)
 		}
-		return fmt.Errorf("%w: DATA final reply: %v", store.ErrOutboundUncertain, err)
+		return fmt.Errorf("%w: DATA final reply: %w", store.ErrOutboundUncertain, err)
 	}
 	// DATA final reply was successful; QUIT is merely connection cleanup.
 	_ = client.Quit()
