@@ -13,6 +13,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"tabmail/internal/models"
 )
@@ -101,7 +102,7 @@ func Build(m Message) ([]byte, error) {
 	if len(m.CC) > 0 {
 		writeHeader(&buf, "Cc", strings.Join(m.CC, ", "))
 	}
-	writeHeader(&buf, "Subject", m.Subject)
+	writeSubjectHeader(&buf, m.Subject)
 	writeHeader(&buf, "Date", time.Now().UTC().Format(time.RFC1123Z))
 	writeHeader(&buf, "Message-ID", m.MessageID)
 	writeHeader(&buf, "MIME-Version", "1.0")
@@ -298,4 +299,32 @@ func writeHeader(buf *bytes.Buffer, key, value string) {
 	io.WriteString(buf, ": ")
 	io.WriteString(buf, sanitizeHeaderValue(value))
 	io.WriteString(buf, "\r\n")
+}
+
+// Subject is unstructured text, unlike address and MIME headers. Encode all of
+// it so folding cannot change whitespace or reinterpret literal encoded-words,
+// and long ASCII tokens do not exceed the wire line limit. The 39-byte chunks
+// yield words of at most 64 characters: with "Subject: " the first line is at
+// most 73, below RFC 2047's limit of 76. Words contain complete UTF-8 characters.
+func writeSubjectHeader(buf *bytes.Buffer, subject string) {
+	subject = sanitizeHeaderValue(subject)
+	buf.WriteString("Subject: ")
+	for len(subject) > 0 {
+		n := 0
+		for n < len(subject) {
+			_, size := utf8.DecodeRuneInString(subject[n:])
+			if n+size > 39 {
+				break
+			}
+			n += size
+		}
+		buf.WriteString("=?UTF-8?b?")
+		buf.WriteString(base64.StdEncoding.EncodeToString([]byte(subject[:n])))
+		buf.WriteString("?=")
+		subject = subject[n:]
+		if len(subject) > 0 {
+			buf.WriteString("\r\n ")
+		}
+	}
+	buf.WriteString("\r\n")
 }
