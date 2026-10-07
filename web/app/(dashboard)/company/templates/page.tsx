@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSessionScope } from "@/lib/session";
 import { useAPI } from "@/hooks/use-api";
 import {
   company,
@@ -31,6 +32,11 @@ type TemplateTab = "library" | "editor" | "versions" | "grants";
 // server-side preview), the immutable version history and the per-mailbox
 // usage grants. API calls are unchanged; only the presentation is tabbed.
 export default function TemplatesPage() {
+  const scope = useSessionScope();
+  return <TemplatesSession key={scope} />;
+}
+
+function TemplatesSession() {
   const t = useText();
   const { busy, run } = useAction();
   const templates = useAPI("company-templates", () =>
@@ -38,17 +44,27 @@ export default function TemplatesPage() {
   );
   const boxes = useAPI("template-mailboxes", workMailboxes);
   const [tab, setTab] = useState<TemplateTab>("library");
-  const [edit, setEdit] = useState<MailTemplateEditor | null>(null);
+  const [selection, setSelection] = useState<{ generation: number; edit: MailTemplateEditor | null }>({ generation: 0, edit: null });
+  const edit = selection.edit;
+  // Explicit selection (including selecting the same/new template again) owns
+  // a separate editor. Late setters from older children cannot replace it.
+  function replaceEdit(value: MailTemplateEditor) {
+    setSelection(current => ({ generation: current.generation + 1, edit: value }));
+  }
+  function setEdit(update: (value: MailTemplateEditor | null) => MailTemplateEditor | null) {
+    setSelection(current => current.generation === selection.generation
+      ? { ...current, edit: update(current.edit) } : current);
+  }
   const [mailbox, setMailbox] = useState("");
   const [versionKey, setVersionKey] = useState(0);
   const activeMailbox = mailbox || boxes.data?.[0]?.mailbox.id || "";
 
   function selectTemplate(template: MailTemplate) {
-    setEdit(structuredClone(template));
+    replaceEdit(structuredClone(template));
     setTab("editor");
   }
   function newTemplate() {
-    setEdit({
+    replaceEdit({
       name: "",
       revision: 0,
       draft: {
@@ -78,7 +94,7 @@ export default function TemplatesPage() {
         body: { revision: template.revision, retired: !template.retired },
       });
       await templates.mutate();
-      if (edit?.id === template.id) setEdit(null);
+      if (edit?.id === template.id) setEdit(() => null);
     });
   }
   async function onSaved() {
@@ -90,18 +106,16 @@ export default function TemplatesPage() {
     const list = await templates.mutate();
     if (edit) {
       const fresh = (list ?? []).find((tpl) => tpl.id === edit.id);
-      if (fresh) setEdit(fresh);
+      if (fresh) setEdit(() => fresh);
     }
     setVersionKey((k) => k + 1);
   }
   async function onPublished(value: MailTemplate) {
-    await company(`/templates/${value.id}/publish`, {
-      method: "POST",
-      body: { revision: value.revision },
-    });
-    await templates.mutate();
+    const list = await templates.mutate();
+    const fresh = list?.find(template => template.id === value.id);
+    if (!fresh) throw new Error(t("发布后的模板暂时无法读取，请重试刷新。", "The published template is unavailable. Retry the refresh."));
     setVersionKey((k) => k + 1);
-    setEdit(null);
+    return fresh;
   }
   return (
     <main className="mx-auto max-w-6xl w-full p-4 md:p-7 space-y-6">
@@ -159,6 +173,7 @@ export default function TemplatesPage() {
         </TabsContent>
         <TabsContent value="editor">
           <TemplateEditorView
+            key={selection.generation}
             edit={edit}
             setEdit={setEdit}
             mailboxes={boxes.data ?? []}
