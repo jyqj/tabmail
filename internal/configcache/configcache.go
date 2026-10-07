@@ -22,6 +22,9 @@ type ConfigCache[K comparable, V any] struct {
 	ttl     time.Duration
 	loader  Loader[K, V]
 	entries map[K]cacheEntry[V]
+	// A token belongs only to currently running loads. Invalidation detaches
+	// it so a late result cannot restore an evicted value or replace a new one.
+	inflight map[K]*loadGeneration
 	// nilOK allows caching the zero value / nil pointer (negative caching),
 	// e.g. "this domain has no zone" to avoid re-querying the parent chain.
 	nilOK bool
@@ -30,6 +33,10 @@ type ConfigCache[K comparable, V any] struct {
 type cacheEntry[V any] struct {
 	value     V
 	expiresAt time.Time
+}
+
+type loadGeneration struct {
+	active int
 }
 
 // Option configures a ConfigCache.
@@ -44,9 +51,10 @@ func WithNilCache[K comparable, V any](b bool) Option[K, V] {
 // New constructs a ConfigCache with the given TTL and loader.
 func New[K comparable, V any](ttl time.Duration, loader Loader[K, V], opts ...Option[K, V]) *ConfigCache[K, V] {
 	c := &ConfigCache[K, V]{
-		ttl:     ttl,
-		loader:  loader,
-		entries: make(map[K]cacheEntry[V]),
+		ttl:      ttl,
+		loader:   loader,
+		entries:  make(map[K]cacheEntry[V]),
+		inflight: make(map[K]*loadGeneration),
 	}
 	for _, opt := range opts {
 		opt(c)
@@ -56,7 +64,8 @@ func New[K comparable, V any](ttl time.Duration, loader Loader[K, V], opts ...Op
 
 // Get returns the cached value if present and unexpired, otherwise invokes the
 // loader and caches the result. When nilOK is false, nil/zero loader results
-// are returned to the caller but not cached.
+// are returned to the caller but not cached. A load already in progress when
+// invalidated may finish for its caller, but its result cannot enter the cache.
 func (c *ConfigCache[K, V]) Get(ctx context.Context, key K) (V, error) {
 	now := time.Now()
 
@@ -68,18 +77,42 @@ func (c *ConfigCache[K, V]) Get(ctx context.Context, key K) (V, error) {
 	}
 	c.mu.RUnlock()
 
+	c.mu.Lock()
+	// Another load may have filled the cache while this miss acquired the lock.
+	if entry, ok := c.entries[key]; ok && time.Now().Before(entry.expiresAt) {
+		c.mu.Unlock()
+		return entry.value, nil
+	}
+	generation := c.inflight[key]
+	if generation == nil {
+		generation = &loadGeneration{}
+		c.inflight[key] = generation
+	}
+	generation.active++
+	c.mu.Unlock()
+	defer func() {
+		c.mu.Lock()
+		if c.inflight[key] == generation {
+			generation.active--
+			if generation.active == 0 {
+				delete(c.inflight, key)
+			}
+		}
+		c.mu.Unlock()
+	}()
+
 	value, err := c.loader(ctx, key)
+	cacheable := err == nil && (c.nilOK || !isZero(value))
+
+	c.mu.Lock()
+	if c.inflight[key] == generation && cacheable {
+		c.entries[key] = cacheEntry[V]{value: value, expiresAt: time.Now().Add(c.ttl)}
+	}
+	c.mu.Unlock()
 	if err != nil {
 		var zero V
 		return zero, err
 	}
-	if !c.nilOK && isZero(value) {
-		return value, nil
-	}
-
-	c.mu.Lock()
-	c.entries[key] = cacheEntry[V]{value: value, expiresAt: time.Now().Add(c.ttl)}
-	c.mu.Unlock()
 	return value, nil
 }
 
@@ -87,6 +120,7 @@ func (c *ConfigCache[K, V]) Get(ctx context.Context, key K) (V, error) {
 func (c *ConfigCache[K, V]) Invalidate(key K) {
 	c.mu.Lock()
 	delete(c.entries, key)
+	delete(c.inflight, key)
 	c.mu.Unlock()
 }
 
@@ -94,6 +128,7 @@ func (c *ConfigCache[K, V]) Invalidate(key K) {
 func (c *ConfigCache[K, V]) InvalidateAll() {
 	c.mu.Lock()
 	c.entries = make(map[K]cacheEntry[V])
+	c.inflight = make(map[K]*loadGeneration)
 	c.mu.Unlock()
 }
 

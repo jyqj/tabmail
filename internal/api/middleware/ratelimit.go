@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/go-redis/v9"
 	"tabmail/internal/models"
+	"tabmail/internal/ratelimit"
 )
 
 // RateLimiter enforces per-tenant RPM and per-IP fallback limits.
@@ -94,22 +95,7 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 }
 
 func (rl *RateLimiter) checkSlidingWindow(ctx context.Context, key string, limit int, window time.Duration) (bool, error) {
-	if rl.rdb == nil {
-		return true, nil
-	}
-	now := time.Now().UnixMilli()
-	windowStart := now - window.Milliseconds()
-
-	pipe := rl.rdb.Pipeline()
-	pipe.ZRemRangeByScore(ctx, key, "0", fmt.Sprintf("%d", windowStart))
-	countCmd := pipe.ZCard(ctx, key)
-	pipe.ZAdd(ctx, key, redis.Z{Score: float64(now), Member: fmt.Sprintf("%d:%s", now, uuid.NewString())})
-	pipe.Expire(ctx, key, window+time.Second)
-
-	if _, err := pipe.Exec(ctx); err != nil {
-		return false, err
-	}
-	return countCmd.Val() < int64(limit), nil
+	return ratelimit.Allow(ctx, rl.rdb, key, limit, window)
 }
 
 func (rl *RateLimiter) realIP(r *http.Request) string {
