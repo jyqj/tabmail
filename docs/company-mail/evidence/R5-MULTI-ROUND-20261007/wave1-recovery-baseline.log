@@ -1,0 +1,131 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/scratch/458de7991ac3/tabmail-wave-compose/web
+
+ × features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > retires the inbound inspection and choices after a conflict, preserving the reason 721ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Retry only selected unfinished targets
+</button> instead
+ × features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > retires the outbound inspection and choices after a conflict, preserving the reason 309ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Save evidenced outcomes
+</button> instead
+ × features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > requires a successful new inbound inspection and fresh selection before another write 214ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Retry only selected unfinished targets
+</button> instead
+ × features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > requires a successful new outbound inspection and fresh selection before another write 169ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Save evidenced outcomes
+</button> instead
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > does not auto-replay a denied or unknown inbound write and preserves the operator reason 203ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > does not auto-replay a denied or unknown outbound write and preserves the operator reason 168ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > does not label a newly entered outbound job with an older reconciliation conflict 135ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > retires the inbound inspection and choices after a conflict, preserving the reason
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Retry only selected unfinished targets
+</button> instead
+ ❯ features/company/recovery-reinspection.consumer.test.tsx:101:75
+     99|   it.each(["inbound", "outbound"] as const)("retires the %s inspection…
+    100|     await mount(); await inspect(kind); select(kind); await submit(kin…
+    101|     expect(screen.queryByRole("button", { name: actionLabel[kind] })).…
+       |                                                                           ^
+    102|     expect(screen.getByText(required[kind])).toHaveAttribute("role", "…
+    103|     expect(screen.getByLabelText(reasonLabel)).toHaveValue(reason);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > retires the outbound inspection and choices after a conflict, preserving the reason
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Save evidenced outcomes
+</button> instead
+ ❯ features/company/recovery-reinspection.consumer.test.tsx:101:75
+     99|   it.each(["inbound", "outbound"] as const)("retires the %s inspection…
+    100|     await mount(); await inspect(kind); select(kind); await submit(kin…
+    101|     expect(screen.queryByRole("button", { name: actionLabel[kind] })).…
+       |                                                                           ^
+    102|     expect(screen.getByText(required[kind])).toHaveAttribute("role", "…
+    103|     expect(screen.getByLabelText(reasonLabel)).toHaveValue(reason);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > requires a successful new inbound inspection and fresh selection before another write
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Retry only selected unfinished targets
+</button> instead
+ ❯ features/company/recovery-reinspection.consumer.test.tsx:113:75
+    111|   it.each(["inbound", "outbound"] as const)("requires a successful new…
+    112|     await mount(); await inspect(kind); select(kind); await submit(kin…
+    113|     expect(screen.queryByRole("button", { name: actionLabel[kind] })).…
+       |                                                                           ^
+    114|     const count = inspections().length;
+    115|     inspection = async () => failure("FORBIDDEN", 403);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > requires a successful new outbound inspection and fresh selection before another write
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <button
+  class="rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "
+  type="button"
+>
+  Save evidenced outcomes
+</button> instead
+ ❯ features/company/recovery-reinspection.consumer.test.tsx:113:75
+    111|   it.each(["inbound", "outbound"] as const)("requires a successful new…
+    112|     await mount(); await inspect(kind); select(kind); await submit(kin…
+    113|     expect(screen.queryByRole("button", { name: actionLabel[kind] })).…
+       |                                                                           ^
+    114|     const count = inspections().length;
+    115|     inspection = async () => failure("FORBIDDEN", 403);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  20:25:41
+   Duration  4.74s (transform 550ms, setup 453ms, import 512ms, tests 1.92s, environment 1.51s)
+

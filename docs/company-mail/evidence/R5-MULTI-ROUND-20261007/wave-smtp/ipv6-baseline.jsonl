@@ -1,0 +1,26 @@
+{"Time":"2026-10-07T20:20:07.690933978+07:00","Action":"start","Package":"tabmail/internal/outbound"}
+{"Time":"2026-10-07T20:20:07.784076925+07:00","Action":"run","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel"}
+{"Time":"2026-10-07T20:20:07.784151164+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel","Output":"=== RUN   TestR5RelayNumericHostConnectAndCancel\n"}
+{"Time":"2026-10-07T20:20:07.784869235+07:00","Action":"run","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=false"}
+{"Time":"2026-10-07T20:20:07.784888353+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=false","Output":"=== RUN   TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=false\n"}
+{"Time":"2026-10-07T20:20:07.791954421+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=false","Output":"--- PASS: TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=false (0.01s)\n"}
+{"Time":"2026-10-07T20:20:07.795653649+07:00","Action":"pass","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=false","Elapsed":0.01}
+{"Time":"2026-10-07T20:20:07.795696372+07:00","Action":"run","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=true"}
+{"Time":"2026-10-07T20:20:07.795700528+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=true","Output":"=== RUN   TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=true\n"}
+{"Time":"2026-10-07T20:20:07.799541975+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=true","Output":"--- PASS: TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=true (0.00s)\n"}
+{"Time":"2026-10-07T20:20:07.799567903+07:00","Action":"pass","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/127.0.0.1/cancel=true","Elapsed":0}
+{"Time":"2026-10-07T20:20:07.799731744+07:00","Action":"run","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=false"}
+{"Time":"2026-10-07T20:20:07.799739916+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=false","Output":"=== RUN   TestR5RelayNumericHostConnectAndCancel/::1/cancel=false\n"}
+{"Time":"2026-10-07T20:20:07.800253366+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=false","Output":"    r5_relay_ipv6_test.go:161: connect relay ::1:41677: dial tcp: address ::1:41677: too many colons in address\n"}
+{"Time":"2026-10-07T20:20:07.800996283+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=false","Output":"--- FAIL: TestR5RelayNumericHostConnectAndCancel/::1/cancel=false (0.00s)\n"}
+{"Time":"2026-10-07T20:20:07.801009372+07:00","Action":"fail","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=false","Elapsed":0}
+{"Time":"2026-10-07T20:20:07.80104895+07:00","Action":"run","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=true"}
+{"Time":"2026-10-07T20:20:07.801054018+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=true","Output":"=== RUN   TestR5RelayNumericHostConnectAndCancel/::1/cancel=true\n"}
+{"Time":"2026-10-07T20:20:07.80181748+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=true","Output":"    r5_relay_ipv6_test.go:149: relay failed before actual RCPT: connect relay ::1:33971: dial tcp: address ::1:33971: too many colons in address\n"}
+{"Time":"2026-10-07T20:20:07.801833884+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=true","Output":"--- FAIL: TestR5RelayNumericHostConnectAndCancel/::1/cancel=true (0.00s)\n"}
+{"Time":"2026-10-07T20:20:07.801846122+07:00","Action":"fail","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel/::1/cancel=true","Elapsed":0}
+{"Time":"2026-10-07T20:20:07.802158211+07:00","Action":"output","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel","Output":"--- FAIL: TestR5RelayNumericHostConnectAndCancel (0.02s)\n"}
+{"Time":"2026-10-07T20:20:07.802175426+07:00","Action":"fail","Package":"tabmail/internal/outbound","Test":"TestR5RelayNumericHostConnectAndCancel","Elapsed":0.02}
+{"Time":"2026-10-07T20:20:07.802857258+07:00","Action":"output","Package":"tabmail/internal/outbound","Output":"FAIL\n"}
+{"Time":"2026-10-07T20:20:07.803587062+07:00","Action":"output","Package":"tabmail/internal/outbound","Output":"FAIL\ttabmail/internal/outbound\t0.112s\n"}
+{"Time":"2026-10-07T20:20:07.803644887+07:00","Action":"fail","Package":"tabmail/internal/outbound","Elapsed":0.113}

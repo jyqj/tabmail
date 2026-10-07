@@ -1,0 +1,160 @@
+{
+  "source": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "files": [
+    {
+      "path": "wave-batch-summary.json",
+      "bytes": 7756,
+      "sha256": "d38605d729bbfe641424b61dfcd7efa85148ea54f04b84c4225cbc3798fcfbbc"
+    },
+    {
+      "path": "wave-backend-summary.json",
+      "bytes": 4185,
+      "sha256": "b1ad1cfc4d01863531c459d1369cfd1cecd0faf6c17dd7bffa824f703eb56712"
+    },
+    {
+      "path": "wave-compose-summary.json",
+      "bytes": 4086,
+      "sha256": "f34e4d55c28e8323fc30f46f4ef37b4a121abcc99bb96894bc99c1a4b3f9dfe3"
+    },
+    {
+      "path": "wave-ci/remote-37628534160/acceptance.json",
+      "bytes": 3749,
+      "sha256": "0e633f5d2eea5d20639cf72a51750b33fa67b1e2f8bc56dcf0af5b47db28fb6f"
+    },
+    {
+      "path": "wave-smtp/ipv6-baseline.jsonl",
+      "bytes": 5301,
+      "sha256": "214705550908fa4809d56a7918b677ac132e968ced3d8725229023c6e481b72c"
+    },
+    {
+      "path": "wave-smtp/ipv6-candidate.jsonl",
+      "bytes": 88063,
+      "sha256": "b9bbf28bd13b21022ec470c4729b764cd36088c11e05c72838a4f30b005575e7"
+    },
+    {
+      "path": "wave-smtp/greeting-baseline.jsonl",
+      "bytes": 14702,
+      "sha256": "c27cebb06ba46bb99fc641c617feb12ef7ae75b2708bebbec13742f11d1aceb6"
+    },
+    {
+      "path": "wave-smtp/greeting-candidate.jsonl",
+      "bytes": 142742,
+      "sha256": "bf006cdf607dc9d24876af8339ea5d80e18200b5d95a498fe437827b11bf2932"
+    },
+    {
+      "path": "wave-smtp/recipient-baseline.jsonl",
+      "bytes": 11847,
+      "sha256": "039402d0add40c319a33bb2c03882262cacb4448f455b673ee073f09b7b9c078"
+    },
+    {
+      "path": "wave-smtp/recipient-candidate.jsonl",
+      "bytes": 66431,
+      "sha256": "0f988321017a7c8be7d24640fa8245c17bf481f4e076032ce702ace0f6ad5a0c"
+    },
+    {
+      "path": "wave-smtp/combined-outbound.jsonl",
+      "bytes": 537983,
+      "sha256": "66bfe56c30ad4fc5252628d768f50b9ea18ece717b0c3a53ad93ead274e89302"
+    },
+    {
+      "path": "wave-smtp/combined-outbound-vet.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "wave-backend-config-baseline.jsonl",
+      "bytes": 24460,
+      "sha256": "51dddae4fac1c9dfab75efc6eadc5b974e50591f718315aa7108b0692b791529"
+    },
+    {
+      "path": "wave-backend-config-fixed.jsonl",
+      "bytes": 29849,
+      "sha256": "cbcd7de76a025368bbb3d6dcb94a7345a2b5cd8bc579e662d868bc9c441de69c"
+    },
+    {
+      "path": "wave-backend-errors-baseline.jsonl",
+      "bytes": 15570,
+      "sha256": "db34efe7b6d571c5530b986d358da06bd41753024009d0d0d5a23fb6080068fd"
+    },
+    {
+      "path": "wave-backend-errors-fixed-unit.jsonl",
+      "bytes": 256355,
+      "sha256": "e8c652504bdc335666f019688d0c0b4481f6008d58fa3582ec10f452f1a159c6"
+    },
+    {
+      "path": "wave-backend-errors-fixed-http.jsonl",
+      "bytes": 12247,
+      "sha256": "71fc8acd1484ecef053f5338acee1b72ded035b57d645b47ea01c3c50806875f"
+    },
+    {
+      "path": "wave-backend-read-bounds-baseline.jsonl",
+      "bytes": 8939,
+      "sha256": "492ed324501df9b268dc9219d3cc91f6ab2fba28e37a2ee3910a3fe290718a92"
+    },
+    {
+      "path": "wave-backend-read-bounds-fixed.jsonl",
+      "bytes": 114424,
+      "sha256": "264501fdcd305d2b68b9dd860b05567d315c37238cbf639621966e293b9c3d32"
+    },
+    {
+      "path": "wave1-recovery-baseline.log",
+      "bytes": 7796,
+      "sha256": "4f3f84e0a5b5ab59b2039adb37c931c76bf70fc7b43a37bb91d8e0aa8eff0e63"
+    },
+    {
+      "path": "wave1-recovery-regression.log",
+      "bytes": 10929,
+      "sha256": "cbd7696e6982baedfbb9501597f8a92e7298cc205d4fb938f8b48e19c2e0f218"
+    },
+    {
+      "path": "wave1-recovery-typecheck.log",
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    {
+      "path": "wave1-recovery-lint.log",
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    {
+      "path": "wave2-refresh-baseline.log",
+      "bytes": 5558,
+      "sha256": "942749fe38872101b2dfcb3aaf8507dc85b109454aeace9b0e18136151d11995"
+    },
+    {
+      "path": "wave2-refresh-regression.log",
+      "bytes": 5891,
+      "sha256": "5bcc8d0406592c4bc98d00775f1959cc3224344f2063e1029ec290e1f8e70597"
+    },
+    {
+      "path": "wave2-refresh-typecheck.log",
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    {
+      "path": "wave2-refresh-lint.log",
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    {
+      "path": "wave3-queue-baseline.log",
+      "bytes": 13302,
+      "sha256": "4b3dfee30ed1da01960b1b3efd4446e2656882d02227c0cfb31942b054ec6b75"
+    },
+    {
+      "path": "wave3-queue-regression.log",
+      "bytes": 13526,
+      "sha256": "2679514eb87aac7c85751eced09f618601ca2bbc17e0addc8ade187d91f6ced6"
+    },
+    {
+      "path": "wave3-queue-typecheck.log",
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    {
+      "path": "wave3-queue-lint.log",
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    }
+  ]
+}

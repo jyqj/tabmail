@@ -1,0 +1,268 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/scratch/458de7991ac3/tabmail-wave-compose/web
+
+ × features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > announces the initial load and disables list actions until a response arrives 276ms
+   → Unable to find an element with the text: Loading recovery tasks…. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<section[39m
+  [33mclass[39m=[32m"rounded-xl border bg-card p-5 space-y-4"[39m
+[36m>[39m
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold"[39m
+  [36m>[39m
+    [0mInbound recovery queue[0m
+  [36m</h2>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"flex gap-3"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mdisabled[39m=[32m""[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mPrevious[0m
+    [36m</button>[39m
+    [36m<span>[39m
+      [0m1[0m
+    [36m</span>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mdisabled[39m=[32m""[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mNext[0m
+    [36m</button>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mRefresh[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</section>[39m
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > shows the empty state only after a successful empty response 114ms
+ × features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > does not describe an initial 503 failure as an empty queue 146ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p>
+  No recovery tasks
+</p> instead
+ × features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > does not describe an initial 403 failure as an empty queue 207ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p>
+  No recovery tasks
+</p> instead
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > restores rows and current pagination after explicit retry while retaining operator input 360ms
+ × features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > retires stale rows and pagination after a 503 refresh failure, then accepts a successful retry 108ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p>
+  30000000-0000-4000-8000-000000000001
+   · 
+  held
+</p> instead
+ × features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > retires stale rows and pagination after a 403 refresh failure, then accepts a successful retry 93ms
+   → expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p>
+  30000000-0000-4000-8000-000000000001
+   · 
+  held
+</p> instead
+ × features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > holds pagination while page two loads or fails and retries that same page explicitly 139ms
+   → Unable to find an element with the text: Loading recovery tasks…. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<section[39m
+  [33mclass[39m=[32m"rounded-xl border bg-card p-5 space-y-4"[39m
+[36m>[39m
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold"[39m
+  [36m>[39m
+    [0mInbound recovery queue[0m
+  [36m</h2>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"flex gap-3"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mPrevious[0m
+    [36m</button>[39m
+    [36m<span>[39m
+      [0m2[0m
+    [36m</span>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mdisabled[39m=[32m""[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mNext[0m
+    [36m</button>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mRefresh[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</section>[39m
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > announces the initial load and disables list actions until a response arrives
+TestingLibraryElementError: Unable to find an element with the text: Loading recovery tasks…. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<section[39m
+  [33mclass[39m=[32m"rounded-xl border bg-card p-5 space-y-4"[39m
+[36m>[39m
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold"[39m
+  [36m>[39m
+    [0mInbound recovery queue[0m
+  [36m</h2>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"flex gap-3"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mdisabled[39m=[32m""[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mPrevious[0m
+    [36m</button>[39m
+    [36m<span>[39m
+      [0m1[0m
+    [36m</span>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mdisabled[39m=[32m""[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mNext[0m
+    [36m</button>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mRefresh[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</section>[39m
+ ❯ Object.getElementError ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ features/company/recovery-queue-state.consumer.test.tsx:62:20
+     60|     mount();
+     61|     await waitFor(() => expect(listCalls()).toHaveLength(1));
+     62|     expect(queue().getByText(loading)).toHaveAttribute("role", "status…
+       |                    ^
+     63|     expect(queue().queryByText(empty)).not.toBeInTheDocument();
+     64|     for (const name of ["Previous", "Next", "Refresh"]) expect(queue()…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > does not describe an initial 503 failure as an empty queue
+ FAIL  features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > does not describe an initial 403 failure as an empty queue
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p>
+  No recovery tasks
+</p> instead
+ ❯ features/company/recovery-queue-state.consumer.test.tsx:84:44
+     82|     mount(); await queue().findByText(`Synthetic recovery queue ${stat…
+     83|     expect(queue().getByRole("alert")).toBeInTheDocument();
+     84|     expect(queue().queryByText(empty)).not.toBeInTheDocument();
+       |                                            ^
+     85|     expect(queue().queryByRole("button", { name: "Inspect original and…
+     86|     expect(queue().getByRole("button", { name: "Retry loading" })).toB…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > retires stale rows and pagination after a 503 refresh failure, then accepts a successful retry
+ FAIL  features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > retires stale rows and pagination after a 403 refresh failure, then accepts a successful retry
+Error: expect(element).not.toBeInTheDocument()
+
+expected document not to contain element, found <p>
+  30000000-0000-4000-8000-000000000001
+   · 
+  held
+</p> instead
+ ❯ features/company/recovery-queue-state.consumer.test.tsx:117:59
+    115|     fireEvent.click(queue().getByRole("button", { name: "Refresh" }));
+    116|     await queue().findByText(`Synthetic recovery queue ${status}`);
+    117|     expect(queue().queryByText(`${receiptA} · held`)).not.toBeInTheDoc…
+       |                                                           ^
+    118|     expect(queue().queryByRole("button", { name: "Inspect original and…
+    119|     expect(queue().queryByText(empty)).not.toBeInTheDocument();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > holds pagination while page two loads or fails and retries that same page explicitly
+TestingLibraryElementError: Unable to find an element with the text: Loading recovery tasks…. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<section[39m
+  [33mclass[39m=[32m"rounded-xl border bg-card p-5 space-y-4"[39m
+[36m>[39m
+  [36m<h2[39m
+    [33mclass[39m=[32m"text-lg font-semibold"[39m
+  [36m>[39m
+    [0mInbound recovery queue[0m
+  [36m</h2>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"flex gap-3"[39m
+  [36m>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mPrevious[0m
+    [36m</button>[39m
+    [36m<span>[39m
+      [0m2[0m
+    [36m</span>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mdisabled[39m=[32m""[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mNext[0m
+    [36m</button>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"rounded-md border px-3 py-2 text-sm font-medium hover:bg-muted disabled:opacity-50 "[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0mRefresh[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</section>[39m
+ ❯ Object.getElementError ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ ../../tabmail-deps/web/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ features/company/recovery-queue-state.consumer.test.tsx:138:20
+    136|     fireEvent.click(queue().getByRole("button", { name: "Next" }));
+    137|     await waitFor(() => expect(listCalls()).toHaveLength(2));
+    138|     expect(queue().getByText(loading)).toHaveAttribute("role", "status…
+       |                    ^
+    139|     expect(queue().queryByText(`${receiptA} · held`)).not.toBeInTheDoc…
+    140|     expect(queue().getByRole("button", { name: "Previous" })).toBeDisa…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  6 failed | 2 passed (8)
+   Start at  20:38:21
+   Duration  4.21s (transform 552ms, setup 363ms, import 514ms, tests 1.45s, environment 1.55s)
+

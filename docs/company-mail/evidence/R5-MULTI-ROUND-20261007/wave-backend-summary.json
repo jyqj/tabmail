@@ -1,0 +1,170 @@
+{
+  "source_base": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+  "final_commit": "14697c87d543ddcd215cf14f7a9685d3a07ddee8",
+  "final_tree": "a272540a178cd801d8d9c5145b5d9c951402e03d",
+  "parent_tasks": [
+    "R5-P8-110",
+    "R5-P8-060",
+    "R5-P5-060"
+  ],
+  "parent_task_acceptance_changed": false,
+  "executions": [
+    {
+      "file": "/workspace/scratch/458de7991ac3/validation/wave-backend-config-baseline.jsonl",
+      "sha256": "51dddae4fac1c9dfab75efc6eadc5b974e50591f718315aa7108b0692b791529",
+      "top": {
+        "pass": 1,
+        "fail": 2,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 1,
+        "fail": 17,
+        "skip": 0
+      },
+      "packages": [
+        {
+          "Package": "tabmail/internal/config",
+          "Action": "fail",
+          "Elapsed": 1.171
+        }
+      ]
+    },
+    {
+      "file": "/workspace/scratch/458de7991ac3/validation/wave-backend-config-fixed.jsonl",
+      "sha256": "cbcd7de76a025368bbb3d6dcb94a7345a2b5cd8bc579e662d868bc9c441de69c",
+      "top": {
+        "pass": 13,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 31,
+        "fail": 0,
+        "skip": 0
+      },
+      "packages": [
+        {
+          "Package": "tabmail/internal/config",
+          "Action": "pass",
+          "Elapsed": 5.4030000000000005
+        }
+      ]
+    },
+    {
+      "file": "/workspace/scratch/458de7991ac3/validation/wave-backend-errors-baseline.jsonl",
+      "sha256": "db34efe7b6d571c5530b986d358da06bd41753024009d0d0d5a23fb6080068fd",
+      "top": {
+        "pass": 0,
+        "fail": 4,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 2,
+        "fail": 8,
+        "skip": 0
+      },
+      "packages": [
+        {
+          "Package": "tabmail/internal/app/companymail",
+          "Action": "fail",
+          "Elapsed": 0.138
+        },
+        {
+          "Package": "tabmail/internal/api/handlers",
+          "Action": "fail",
+          "Elapsed": 0.136
+        }
+      ]
+    },
+    {
+      "file": "/workspace/scratch/458de7991ac3/validation/wave-backend-errors-fixed-unit.jsonl",
+      "sha256": "e8c652504bdc335666f019688d0c0b4481f6008d58fa3582ec10f452f1a159c6",
+      "top": {
+        "pass": 44,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 263,
+        "fail": 0,
+        "skip": 0
+      },
+      "packages": [
+        {
+          "Package": "tabmail/internal/app/companymail",
+          "Action": "pass",
+          "Elapsed": 3.714
+        },
+        {
+          "Package": "tabmail/internal/mailcontent",
+          "Action": "pass",
+          "Elapsed": 49.46
+        }
+      ]
+    },
+    {
+      "file": "/workspace/scratch/458de7991ac3/validation/wave-backend-errors-fixed-http.jsonl",
+      "sha256": "71fc8acd1484ecef053f5338acee1b72ded035b57d645b47ea01c3c50806875f",
+      "top": {
+        "pass": 2,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 12,
+        "fail": 0,
+        "skip": 0
+      },
+      "packages": [
+        {
+          "Package": "tabmail/internal/api/handlers",
+          "Action": "pass",
+          "Elapsed": 1.195
+        }
+      ]
+    },
+    {
+      "file": "/workspace/scratch/458de7991ac3/validation/wave-backend-read-bounds-baseline.jsonl",
+      "sha256": "492ed324501df9b268dc9219d3cc91f6ab2fba28e37a2ee3910a3fe290718a92",
+      "top": {
+        "pass": 1,
+        "fail": 5,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 1,
+        "fail": 6,
+        "skip": 0
+      },
+      "packages": [
+        {
+          "Package": "tabmail/internal/app/companymail",
+          "Action": "fail",
+          "Elapsed": 1.074
+        }
+      ]
+    },
+    {
+      "file": "/workspace/scratch/458de7991ac3/validation/wave-backend-read-bounds-fixed.jsonl",
+      "sha256": "264501fdcd305d2b68b9dd860b05567d315c37238cbf639621966e293b9c3d32",
+      "top": {
+        "pass": 28,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 116,
+        "fail": 0,
+        "skip": 0
+      },
+      "packages": [
+        {
+          "Package": "tabmail/internal/app/companymail",
+          "Action": "pass",
+          "Elapsed": 2.62
+        }
+      ]
+    }
+  ]
+}
