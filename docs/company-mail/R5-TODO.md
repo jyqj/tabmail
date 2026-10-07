@@ -9,13 +9,32 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | 2026-10-07：核对原 39 个 draft，关闭 35 个已覆盖 PR，保留 #17/#20/#24/#40 的独立历史内容；SMTP #57、Compose #58、兼容依赖 #59 已合入 #56 工作分支。当前来源目录 revision3 的三个原 CLI 和相关 54 测试通过，组合前端 tsc/build/lint 通过但默认测试保留 1 个私有 fixture 前置条件失败；证据见 [本轮管理记录](R5-PR-MANAGEMENT-20261007.md) |
-| 下一可执行任务 | 读取最终组合的远端 CI 终态；下一批按真实 CI 证据定位 PostgreSQL 串行累积耗尽 180s 的阶段成本，完善必跑 fixture/opt-in 接线，核对当前 frontend/source runner 的剩余失败。随后恢复有效 S/M 基准及 G0，继续真实角色／durable／权限链验收，不以局部绿灯代替父任务 |
-| 下一批范围 | 原生 subagent 独立 worktree：SMTP／Compose／PR与来源目录各自实现或复核，root 负责依赖更新、集成与唯一 TODO。共享生产文件按明确 base SHA 串行合入；目录修复保留原校验器、历史版本、预算、skip 拒绝和审计阈值 |
-| 实现完成数 | 10 / 171；P0 为 10 / 12。010–090及110基线已验收；100原S/M实测与120/G0仍未过 |
-| 当前阻塞 | 首次整合 CI #37619817397：backend PostgreSQL package 180.053s 超时，247 必跑中 180 项未通过／未执行；frontend 当前源 702 tests 中 2 failures/4 errors，来源目录漂移现已按 revision3 修复，待最终远端完整重验。默认前端组合 865 pass/1 fail（缺显式私有 PG fixture）；tsc/build/lint 通过。依赖审计从 12 项降至 8 high/0 critical，仍未达零漏洞。P0-100 的有效 M baseline 与 G0、完整 caller/SMTP/API realPG/Redis、角色终止与持久恢复、usage19/phase/watchdog 等历史未验边界继续保留 |
-| 阶段源码检查点 | 原整合来源 `cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f`（#55，领先 main 252 commits）；三项修复后的组合来源 `97d6b71bb092c4a1fb7af9cc605f32559c4bec71`，API collector 局部命名修正后为 `7b7dbfeaad5c87e875bf19e5a9e213867fda2db3`。后续目录／管理文档提交沿用完整父链，历史 [B01-U 检查点](R5-CHECKPOINT-20260930.md) 保留；当前精确 head 见 #56 |
+| 当前阶段 | 2026-10-07 第二批：按用户要求开展至少三轮原生 multi-subagent，冻结下表 10 个独立实施子项；父任务保持原验收。第一轮三线已合入 #61/#64/#65，SMTP 第二轮 #63 也已合入 #56；共完成 4 项，其余实现／复核进行中 |
+| 下一可执行任务 | 第 1 轮：SMTP IPv6、恢复检查冲突失效、无效资源配置拒绝；root 同步实现 CI 前端失败后证据继续采集。第 2／3 轮分别处理 SMTP 握手／错误链、会话续期／队列状态、附件错误分类／读取消。每轮复核与 PR 后更新子项余数 |
+| 下一批范围 | 三个原生 subagent 各自独立 worktree：SMTP、前端、后端；root 负责 CI、复核、PR 与唯一 TODO。各子项独立 commit，维持原校验器、预算、skip 拒绝及审计阈值 |
+| 实现完成数 | 父任务 **10 / 171，剩余 161**；P0 为 10 / 12。当前 10 个实施子项 **完成 4 / 10，剩余 6**。子项不计入 171 分母，不替代父项完整验收 |
+| 当前阻塞 | 上批最终 CI [37624990816](https://github.com/jyqj/tabmail/actions/runs/37624990816)：production-web/browser-journey 成功；frontend 当前源 708 测试、冻结 4 测试与 Node 49 检查通过，因 8 high/0 critical 的完整 audit 失败，后续 tsc/test/lint/build 未执行；backend 在 PostgreSQL race 步骤失败。原始组合 CI 的 PG package 180.053s 超时已定位为串行累计耗尽预算，不能归因单个测试死锁。有效 M baseline、G0 与完整父项资格仍未通过 |
+| 阶段源码检查点 | 本批统一起点 `4065c4909c8f21a401a9a1af6370fa3f72670b99`（#60 合并后）；本轮阶段整合 `7ea617f86bdca328144c65a30a52b00d72bce77e`（#61/#63/#64/#65）；各 PR 远端发布树与其本地测试树完全一致。新生产改动全部汇集后再核当前目录，历史 revision1/2/3 与固定源证据保留 |
 | 正式发布/部署 | #56 保持 draft；main 未改，尚未发布或部署。完整门禁通过与父任务验收必须各有实际证据 |
+
+### 本批 10 个实施子项（固定计划与独立计数）
+
+用户在 2026-10-07 明确要求“后续每一轮都告诉我还剩余多少 TODO”，继续多轮原生 multi-subagent，至少推进 10 项。下表在本批开始时根据实际代码缺口冻结；每项有独立用户／协议行为及验收，测试用例和日志数量不计作任务。状态“完成”仅表示该限定子项的实现、复核与整合 PR 已完成，原父项的依赖、DB／浏览器／性能或版本门禁仍按第 2 节逐项验收。
+
+| 子项 ID | 原父任务 | 限定目标与验收 | 计划轮次 | 状态／PR |
+|---|---|---|---|---|
+| R5-P6-090-20261007-01 | P6-090 | IPv6 relay 正确 host/port；真实 IPv4/IPv6 SMTP 完整投递与 RCPT 取消 | 1 | 完成；#61；冻结基线 2 pass/2 fail → race 20 顶层/109 pass 事件 |
+| R5-P6-040-20261007-01 | P6-040/050 | required TLS 握手前显式 Hello；保留 EHLO/HELO 协议、传输及取消错误链 | 2 | 完成；#63；固定 6 pass/6 fail → race 28 顶层/152 pass 事件 |
+| R5-P6-050-20261007-01 | P6-050/060 | 收件人 uncertain/checkpoint/temporary 汇总保留原始 cause，已接受目标不重发 | 3 | 已交付，root 复核／PR 中 |
+| R5-P9-080-20261007-01 | P9-080 | 恢复检查遇 409 立即失效旧版本与目标，重检前禁止再次写入且保留理由 | 1 | 完成；#65；固定 3 pass/4 fail → 7 pass，关联 55/55、tsc/lint 通过 |
+| R5-P9-090-20261007-01 | P9-090 | 续期 promise 按会话 scope 隔离，同 scope 去重且 Web Lock 串行 | 2 | 实施中 |
+| R5-P9-100-20261007-01 | P9-100 | 恢复队列 loading/error/empty 分开，失败时不显示假空或旧任务可操作态 | 3 | 待实施 |
+| R5-P8-110-20261007-01 | P8-110 | 拒绝会使 ticker panic 或取消 SMTP 接入上限的非正配置，保留合法边界 | 1 | 完成；#64；固定 leaf 1 pass/17 fail → 全 config race 31 leaf pass |
+| R5-P8-060-20261007-01 | P8-060 | 仅真实不存在的入站附件返回 404，存储／取消／解析预算故障保留 cause | 2 | 实施中 |
+| R5-P5-060-20261007-01 | P5-060 | 附件上传／ready 下载有限 no-progress 读取及取消，保留 20 MiB／完整性规则 | 3 | 待实施 |
+| R5-P11-080-20261007-01 | P11-080 | 前端独立门禁失败后仍取得完整执行证据，原失败仍使 job 失败，绑定实际 checkout | 1–3 | 已独立复核；#62／run37628534160 待实际续行终态 |
+
+本批完成 **4/10**，剩余 **6**；原父任务完成 **10/171**，剩余 **161**。每个后续轮次都同时报告两组数，禁止将完成的子项直接从父级剩余数中扣除。
 
 - 2026-10-05 限定防护：五个 auth 请求体统一 64 KiB；Refresh/Logout 保留预算内空体与 cookie 流程，主动拒绝带有效 cookie 的畸形/超限 JSON（400，无 token/cookie 副作用）。作者 97/97、独立 402 子例/411 事件及相同 97 回归通过；仅有限 fake-store/httptest，65,537 字节为 decoder Read 上界，非 socket/drain；未全套/PG/负载/部署，父项与 10/171 不变。见[限定报告](R5-AUTH-BODY-LIMIT-20261005.md)。
 ### 0.1 状态、依赖与记录规则
@@ -2186,3 +2205,20 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 - R5-P0-020／070／110：以7b7源码更新当前目录revision3，保持134个client branches／7个forwarders；明确19处client行号及附件owner a→Compose、14个PG entry的24处caller位置、14个route rows和10个closure hash变化，包括此前#52的refresh空体cookie契约。固定Git commit/path/blob/SHA256保留rev2原bytes，rev1文件／原validators／collectors／旧wire资格／人工review保持原意，不复制大历史JSON或增加全局frozen选择。精确当前源上的三个原CLI在旧目录均exit1，更新后全部exit0；事务当前62文件／395函数／19迁移，兼容132routes／94source files。三Python模块54/54、原scanner27/27均0fail/error/skip；旧4540源原6方法另行历史实跑6/6，不能继承为新源runtime资格。详[目录报告](evidence/R5-CATALOG-RECONCILIATION-20261007/README.md)。
 - 最终组合前端：53e28562 tree默认完整Vitest仅跑一次，59文件PASS/1FAIL，865测试PASS/1FAIL/0SKIP；唯一失败为未提供显式private PostgreSQL fixture，在原测试前置检查即拒绝。非增量tsc、完整production build（29/29页面）、全lint（0error/4原warning）均exit0。完整suite/build绑定53e，rename后40项限定回归绑定c77，不混作同tree全套绿。详[实际summary与日志](evidence/R5-PR-MANAGEMENT-20261007/combined-web-summary.json)。
 - 完整CI首次run37619817397为production-web/browser-journey PASS、backend/frontend FAIL。backend独审确定串行顶层Elapsed合计179.58s，闹钟时唯一running用例才运行0.4s，19个PAUSE未CONT，不能推断19个DB死锁；root另核实际tested merge49f6与cbc8完整tree相同。下一批补阶段计时并优化真实执行、接线必跑opt-in/私有fixture，保留180s预算与skip拒绝；8high审计、有效M baseline与G0仍阻塞。#56保持draft，171父任务仍10完成，局部修复／静态目录／归档成功不变成完整release资格。
+
+
+## 2026-10-07 多轮推进：第 1 轮记录
+
+用户要求后续每轮报告剩余 TODO，继续多轮原生 multi-subagent 且至少推进 10 项。本批 10 子项范围和验收在执行控制台固定；root 与 SMTP／前端／后端三个原生 subagent 使用独立 worktree，并在已有工作分支整合，不开 cloud session。
+
+| 本轮结果 | 对应实现及核验 | 远端整合 |
+|---|---|---|
+| SMTP 第 1 项／P6-090 | IPv6 relay host/port；真实 IPv4/IPv6 envelope/DATA/QUIT 和 RCPT 取消；基线 leaf 2 pass/2 fail，候选 race 20 顶层/109 pass 事件、0 skip | [#61](https://github.com/jyqj/tabmail/pull/61)，`0c402faa74fff0690e49f7594dae38dea104fc69` |
+| 后端第 1 项／P8-110 | Load/Validate 非正 SMTP/清理边界；基线 leaf 1 pass/17 fail，候选全 config race 31 leaf pass；默认与 connections=0 保留 | [#64](https://github.com/jyqj/tabmail/pull/64)，`8d5fa6f5af728688082ff3445570e2ba837f654b` |
+| 前端第 1 项／P9-080 | 409 后作废旧恢复检查与选择，保留原因，要求显式重新检查；固定 3 pass/4 fail→7 pass，关联55/55，完整tsc/局部lint通过 | [#65](https://github.com/jyqj/tabmail/pull/65)，`7ea617f86bdca328144c65a30a52b00d72bce77e` |
+| SMTP 第 2 项提前完成／P6-040/050 | Hello 保留 typed HELO/EOF/TCP/context cause，再判 STARTTLS；固定 6 pass/6 fail→race 28 顶层/152 pass 事件 | [#63](https://github.com/jyqj/tabmail/pull/63)，`a306da76360e191133cda964591e9507f4230b3d` |
+
+- 第 1 轮三条实现线完成 3 项；含提前完成的 SMTP 第 2 项，当前累计 **4/10，剩余6**。父级 **10/171，剩余161**；不将子项从父级余数直接扣除。
+- CI 子项已提交 [#62](https://github.com/jyqj/tabmail/pull/62)，本地新3/原5测试通过并独立只读复核；只有实际候选CI证明审计/其他门禁失败后后续命令仍执行，才登记完成。原4jobs、15min/180s预算、完整零漏洞和默认Vitest选择保留。
+- 测试命令、固定源/测试hash、覆盖范围与原始日志hash见四个独立报告：`R5-RELAY-IPV6-20261007.md`、`R5-SMTP-GREETING-CAUSE-20261007.md`、`R5-WAVE1-CONFIG-BOUNDS-20261007.md`、`R5-WAVE1-RECOVERY-REINSPECTION-20261007.md`。配置报告日志hash更正使用独立远端fast-forward文档提交，未改写已发布历史，产品／回归字节不变。
+- 新改动后的目录行号/闭包hash会在最终组合统一重采；原校验器和历史目录均保留，不把中间 stale catalog 报成已通过。此阶段限定实现不替代全 PG、真实浏览器、S/M基准、G0及父项验收。
