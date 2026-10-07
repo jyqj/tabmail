@@ -138,6 +138,12 @@ func deliverDirectMXTLS(ctx context.Context, host, addr, from string, to []strin
 			_ = client.Close()
 		}
 	}()
+	// Extension suppresses hello errors. Preserve a failed greeting before
+	// deciding whether the server omitted STARTTLS; use net/smtp's default name
+	// and keep its existing EHLO-to-HELO fallback.
+	if err := client.Hello("localhost"); err != nil {
+		return fmt.Errorf("smtp greeting: %w", err)
+	}
 	if ok, _ := client.Extension("STARTTLS"); ok {
 		if tlsErr := client.StartTLS(tlsConf); tlsErr != nil {
 			_ = client.Close()
