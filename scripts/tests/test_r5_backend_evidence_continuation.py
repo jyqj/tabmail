@@ -34,6 +34,7 @@ GO = SOURCE | {'backend_go', 'backend_archive'}
 CHECKS = {
     'Build': GO,
     'Race tests with PostgreSQL': GO | {'backend_pg_client'},
+    'Template grant revocation with PostgreSQL': GO,
     'Prove missing execution cannot pass': GO,
     'Validation tool regressions': GO | {'backend_node', 'backend_contract_deps'},
     'DTO field contract': SOURCE | {'backend_contract_deps'},
