@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import {
@@ -12,6 +12,7 @@ import {
   type DomainVerification,
 } from "@/lib/company";
 import { safeConfirm } from "@/lib/utils";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import {
   ActionButton,
   Field,
@@ -26,6 +27,11 @@ import {
 // verify and delete. Replaces the former dead link to /admin/domains, which
 // manages platform zone infrastructure and has no tenant onboarding flow.
 export function CompanyDomainsSection() {
+  const scope = useSessionScope();
+  return <CompanyDomainsForSession key={scope} scope={scope} />;
+}
+
+function CompanyDomainsForSession({ scope }: { scope: string }) {
   const t = useText();
   const { busy, run } = useAction();
   const domains = useAPI("company-domains", companyDomains);
@@ -34,6 +40,83 @@ export function CompanyDomainsSection() {
   const [verifications, setVerifications] = useState<
     Record<string, DomainVerification>
   >({});
+  const ready = !domains.error && !domains.isLoading && !domains.isValidating && Array.isArray(domains.data);
+  const lifetime = useRef<object | null>(null);
+  const inputIntent = useRef<object>({});
+  const currentRead = useRef<{ data: CompanyDomain[] | undefined; ready: boolean } | null>(null);
+  useLayoutEffect(() => {
+    lifetime.current = {};
+    return () => { lifetime.current = null; };
+  }, []);
+  useLayoutEffect(() => {
+    currentRead.current = { data: domains.data, ready };
+    return () => { currentRead.current = null; };
+  }, [domains.data, ready]);
+
+  function capture(target?: CompanyDomain) {
+    const owner = lifetime.current;
+    const observed = currentRead.current;
+    const current = () => lifetime.current === owner && scope === sessionScope();
+    if (!owner || !current() || !observed?.ready || (target && !observed.data?.includes(target))) return null;
+    return { current, observed: () => current() && currentRead.current === observed };
+  }
+  function runOwned(owner: NonNullable<ReturnType<typeof capture>>, action: () => Promise<void>) {
+    void run(async () => {
+      try {
+        if (owner.observed()) await action();
+      } catch (error) {
+        // The shared action helper handles errors only for the still-current
+        // domain observation, not a replaced list or a retired section.
+        if (owner.observed()) throw error;
+      }
+    });
+  }
+  function addDomain() {
+    const owner = capture();
+    const submitted = domain.trim();
+    const intent = inputIntent.current;
+    if (!owner || !submitted) return;
+    runOwned(owner, async () => {
+      await addCompanyDomain(submitted);
+      if (!owner.observed()) return;
+      if (inputIntent.current === intent) setDomain("");
+      await domains.mutate();
+      if (owner.current()) toast.success(t("域名已添加，请发布 DNS 记录后验证", "Domain added. Publish the DNS records, then verify"));
+    });
+  }
+  function verifyDomain(target: CompanyDomain) {
+    const owner = capture(target);
+    if (!owner) return;
+    runOwned(owner, async () => {
+      const result = await verifyCompanyDomain(target.id);
+      if (!owner.observed()) return;
+      setVerifications(previous => ({ ...previous, [target.id]: result }));
+      await domains.mutate();
+      if (owner.current()) toast.success(t("验证已执行", "Verification executed"));
+    });
+  }
+  function deleteDomain(target: CompanyDomain) {
+    const owner = capture(target);
+    if (!owner || !safeConfirm(t(
+      "只能删除未使用的域名。有邮箱、邮件或恢复记录的域名会受到保护，不会连带删除邮件。确认删除？",
+      "Only unused domains can be deleted. Mailboxes, messages and recovery records are protected; this does not delete mail. Continue?",
+    )) || !owner.observed()) return;
+    runOwned(owner, async () => {
+      await deleteCompanyDomain(target.id);
+      if (!owner.observed()) return;
+      setVerifications(previous => {
+        const next = { ...previous }; delete next[target.id]; return next;
+      });
+      setExpanded(current => current === target.id ? "" : current);
+      await domains.mutate();
+      if (owner.current()) toast.success(t("域名已删除", "Domain deleted"));
+    });
+  }
+  function retry() {
+    if (!lifetime.current || scope !== sessionScope()) return;
+    setVerifications({});
+    void domains.mutate().catch(() => undefined);
+  }
   return (
     <Section title={t("公司域名与 DNS 验证", "Company domains and DNS verification")}>
       <p className="text-sm text-muted-foreground">
@@ -42,7 +125,14 @@ export function CompanyDomainsSection() {
           "After adding a domain, publish its records at your DNS provider and click Verify. Only verified domains can become the company primary domain.",
         )}
       </p>
-      <LoadError error={domains.error} onRetry={() => void domains.mutate()} />
+      <LoadError error={domains.error} onRetry={retry} />
+      {(domains.isLoading || domains.isValidating) && (
+        <p role="status" className="text-muted-foreground">
+          {domains.data
+            ? t("正在刷新域名…", "Refreshing domains…")
+            : t("正在加载域名…", "Loading domains…")}
+        </p>
+      )}
       <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-end">
         <Field label={t("新增域名", "Add a domain")}>
           {(id) => (
@@ -51,30 +141,18 @@ export function CompanyDomainsSection() {
               className={inputClass}
               placeholder="mail.example.com"
               value={domain}
-              onChange={(e) => setDomain(e.target.value)}
+              onChange={(e) => { inputIntent.current = {}; setDomain(e.target.value); }}
             />
           )}
         </Field>
         <ActionButton
-          disabled={busy || !domain.trim()}
-          onClick={() =>
-            run(async () => {
-              await addCompanyDomain(domain.trim());
-              setDomain("");
-              await domains.mutate();
-              toast.success(
-                t(
-                  "域名已添加，请发布 DNS 记录后验证",
-                  "Domain added. Publish the DNS records, then verify",
-                ),
-              );
-            })
-          }
+          disabled={busy || !ready || !domain.trim()}
+          onClick={addDomain}
         >
           {t("添加域名", "Add domain")}
         </ActionButton>
       </div>
-      {(domains.data ?? []).map((d) => (
+      {!domains.error && !domains.isLoading && (domains.data ?? []).map((d) => (
         <div key={d.id} className="space-y-3 border-t pt-3 text-sm">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
@@ -106,42 +184,14 @@ export function CompanyDomainsSection() {
                   : t("查看 DNS 记录", "View DNS records")}
               </ActionButton>
               <ActionButton
-                disabled={busy}
-                onClick={() =>
-                  run(async () => {
-                    const v = await verifyCompanyDomain(d.id);
-                    setVerifications((prev) => ({ ...prev, [d.id]: v }));
-                    await domains.mutate();
-                    toast.success(t("验证已执行", "Verification executed"));
-                  })
-                }
+                disabled={busy || !ready}
+                onClick={() => verifyDomain(d)}
               >
                 {t("验证", "Verify")}
               </ActionButton>
               <ActionButton
-                disabled={busy}
-                onClick={() =>
-                  run(async () => {
-                    if (
-                      !safeConfirm(
-                        t(
-                          "只能删除未使用的域名。有邮箱、邮件或恢复记录的域名会受到保护，不会连带删除邮件。确认删除？",
-                          "Only unused domains can be deleted. Mailboxes, messages and recovery records are protected; this does not delete mail. Continue?",
-                        ),
-                      )
-                    )
-                      return;
-                    await deleteCompanyDomain(d.id);
-                    setVerifications((prev) => {
-                      const next = { ...prev };
-                      delete next[d.id];
-                      return next;
-                    });
-                    if (expanded === d.id) setExpanded("");
-                    await domains.mutate();
-                    toast.success(t("域名已删除", "Domain deleted"));
-                  })
-                }
+                disabled={busy || !ready}
+                onClick={() => deleteDomain(d)}
               >
                 {t("删除", "Delete")}
               </ActionButton>
@@ -151,7 +201,7 @@ export function CompanyDomainsSection() {
           {verifications[d.id] && <VerificationChecks v={verifications[d.id]} />}
         </div>
       ))}
-      {!domains.isLoading && !(domains.data ?? []).length && (
+      {ready && !domains.data?.length && (
         <p className="text-muted-foreground">{t("暂无域名", "No domains")}</p>
       )}
     </Section>
