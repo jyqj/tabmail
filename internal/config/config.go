@@ -50,10 +50,10 @@ type Root struct {
 type SMTP struct {
 	Addr                string        `default:"0.0.0.0:2525" desc:"SMTP listen address"`
 	Domain              string        `default:"localhost" desc:"SMTP HELO/banner domain"`
-	MaxRecipients       int           `default:"200" desc:"Max RCPT TO per message"`
-	MaxMessageBytes     int           `default:"26214400" desc:"Max message size (bytes)"`
+	MaxRecipients       int           `default:"200" desc:"Max RCPT TO per message (must be positive)"`
+	MaxMessageBytes     int           `default:"26214400" desc:"Max message size in bytes (must be positive)"`
 	MaxConnections      int           `split_words:"true" default:"100" desc:"Max concurrent SMTP connections (0=unlimited)"`
-	Timeout             time.Duration `default:"300s" desc:"Idle connection timeout"`
+	Timeout             time.Duration `default:"300s" desc:"Idle connection timeout (must be positive)"`
 	TLSEnabled          bool          `default:"false" desc:"Enable STARTTLS"`
 	TLSCert             string        `default:"" desc:"TLS certificate path"`
 	TLSKey              string        `default:"" desc:"TLS private key path"`
@@ -94,8 +94,8 @@ type Redis struct {
 }
 
 type Storage struct {
-	RetentionScanInterval time.Duration `default:"60s" desc:"Retention scanner interval"`
-	RetentionBatchSize    int           `default:"1000" desc:"Rows per cleanup batch"`
+	RetentionScanInterval time.Duration `default:"60s" desc:"Retention scanner interval (must be positive)"`
+	RetentionBatchSize    int           `default:"1000" desc:"Rows per cleanup batch (must be positive)"`
 	FallbackRetentionH    int           `default:"24" desc:"System-level fallback retention hours"`
 }
 
@@ -270,6 +270,26 @@ func (c *Root) Validate() error {
 		if strings.TrimSpace(c.Outbound.RelayHost) == "" {
 			return fmt.Errorf("config: TABMAIL_OUTBOUND_RELAY_HOST is required when outbound is enabled in relay mode")
 		}
+	}
+	// Defaults are applied by Load's envconfig tags. Explicit nonpositive
+	// limits must not silently disable SMTP admission or panic/spin retention.
+	for _, bound := range []struct {
+		name  string
+		value int64
+	}{
+		{"TABMAIL_SMTP_MAXRECIPIENTS", int64(c.SMTP.MaxRecipients)},
+		{"TABMAIL_SMTP_MAXMESSAGEBYTES", int64(c.SMTP.MaxMessageBytes)},
+		{"TABMAIL_SMTP_TIMEOUT", int64(c.SMTP.Timeout)},
+		{"TABMAIL_STORAGE_RETENTIONSCANINTERVAL", int64(c.Storage.RetentionScanInterval)},
+		{"TABMAIL_STORAGE_RETENTIONBATCHSIZE", int64(c.Storage.RetentionBatchSize)},
+	} {
+		if bound.value <= 0 {
+			return fmt.Errorf("config: %s must be positive", bound.name)
+		}
+	}
+	// Zero is the documented opt-out for the connection limiter only.
+	if c.SMTP.MaxConnections < 0 {
+		return fmt.Errorf("config: TABMAIL_SMTP_MAX_CONNECTIONS must be nonnegative (0 means unlimited)")
 	}
 	return nil
 }

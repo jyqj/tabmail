@@ -1,6 +1,9 @@
 package config
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestValidateRejectsPlaceholderSecrets(t *testing.T) {
 	cfg := &Root{
@@ -8,6 +11,8 @@ func TestValidateRejectsPlaceholderSecrets(t *testing.T) {
 		MailboxTokenSecret: "change-this-mailbox-token-secret",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
+		SMTP:               SMTP{MaxRecipients: 200, MaxMessageBytes: 25 * 1024 * 1024, Timeout: 300 * time.Second},
+		Storage:            Storage{RetentionScanInterval: time.Minute, RetentionBatchSize: 1000},
 	}
 	if err := cfg.Validate(); err == nil {
 		t.Fatal("expected placeholder secrets to be rejected")
@@ -23,6 +28,8 @@ func TestValidateAcceptsProductionLikeConfig(t *testing.T) {
 		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
+		SMTP:               SMTP{MaxRecipients: 200, MaxMessageBytes: 25 * 1024 * 1024, Timeout: 300 * time.Second},
+		Storage:            Storage{RetentionScanInterval: time.Minute, RetentionBatchSize: 1000},
 	}
 	if err := cfg.Validate(); err != nil {
 		t.Fatalf("unexpected validate error: %v", err)
@@ -41,6 +48,8 @@ func TestValidateRequiresDistinctJWTSecret(t *testing.T) {
 		JWTSecret:          "mailbox-token-secret-123456",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
+		SMTP:               SMTP{MaxRecipients: 200, MaxMessageBytes: 25 * 1024 * 1024, Timeout: 300 * time.Second},
+		Storage:            Storage{RetentionScanInterval: time.Minute, RetentionBatchSize: 1000},
 	}
 	if err := cfg.Validate(); err == nil {
 		t.Fatal("expected identical JWT and mailbox token secrets to be rejected")
@@ -66,6 +75,8 @@ func TestValidateNormalizesAndRejectsDKIMFailPolicy(t *testing.T) {
 		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
+		SMTP:               SMTP{MaxRecipients: 200, MaxMessageBytes: 25 * 1024 * 1024, Timeout: 300 * time.Second},
+		Storage:            Storage{RetentionScanInterval: time.Minute, RetentionBatchSize: 1000},
 		Outbound:           Outbound{DKIMFailPolicy: " FAIL_OPEN "},
 	}
 	if err := cfg.Validate(); err != nil {
@@ -89,6 +100,8 @@ func TestValidateRequiresS3FieldsWhenEnabled(t *testing.T) {
 		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
+		SMTP:               SMTP{MaxRecipients: 200, MaxMessageBytes: 25 * 1024 * 1024, Timeout: 300 * time.Second},
+		Storage:            Storage{RetentionScanInterval: time.Minute, RetentionBatchSize: 1000},
 	}
 	if err := cfg.Validate(); err == nil {
 		t.Fatal("expected missing s3 config to be rejected")
@@ -103,6 +116,8 @@ func TestValidateAcceptsS3Config(t *testing.T) {
 		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
+		SMTP:               SMTP{MaxRecipients: 200, MaxMessageBytes: 25 * 1024 * 1024, Timeout: 300 * time.Second},
+		Storage:            Storage{RetentionScanInterval: time.Minute, RetentionBatchSize: 1000},
 		S3: S3{
 			Endpoint:  "minio:9000",
 			Bucket:    "tabmail",
@@ -125,6 +140,8 @@ func validOutboundConfig() *Root {
 		JWTSecret:          "jwt-secret-123456789012345",
 		DB:                 DB{DSN: "postgres://user:pass@db:5432/tabmail?sslmode=disable"},
 		Redis:              Redis{Addr: "redis:6379"},
+		SMTP:               SMTP{MaxRecipients: 200, MaxMessageBytes: 25 * 1024 * 1024, Timeout: 300 * time.Second},
+		Storage:            Storage{RetentionScanInterval: time.Minute, RetentionBatchSize: 1000},
 	}
 }
 
