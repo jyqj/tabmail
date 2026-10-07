@@ -48,8 +48,10 @@ python3 -B scripts/run_r5_source_version_tests.py --root . --output /tmp/new-sou
 
 It discovers IDs in a clean independent HEAD clone and keeps the four frozen v1
 tests at `41b015c30c66b3ba58a3c1395e8559ebcd27a65f`. Preparation is automatic:
-only the original complete lock SHA256 and official TypeScript 5.9.3 archive
-SHA256/SHA512 integrity are admitted. All 132 regular package files are checked;
+only explicitly reviewed complete lock SHA256 values and the official TypeScript
+5.9.3 archive SHA256/SHA512 integrity are admitted. The original lock and the
+2026-10-07 compatible security update are separately pinned; the preparation
+receipt records the actual lock digest. All 132 regular package files are checked;
 no npm invocation, lifecycle, `.bin`, whole dependency tree, links, native or Go
 files are installed. A pre-existing dependency tree is rejected. Both default
 and race/r5protocol root Go dependency/test selections must be identical before

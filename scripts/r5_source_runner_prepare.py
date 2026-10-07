@@ -1,6 +1,6 @@
 """Minimal source-runner preparation; never installs npm or alters Go policy.
 
-Only the original locked official TypeScript archive is admitted. Every archive
+Only reviewed complete locks and the original official TypeScript archive are admitted. Every archive
 member is checked before writing; no lifecycle, .bin, symlink or native/Go input
 is admitted. Typed wire evidence is freshly compiled/run in the same checkout.
 """
@@ -20,6 +20,12 @@ import r5_go_environment
 import r5_selected_binding_consumer as consumer
 
 LOCK_SHA256 = 'b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3'
+# Preserve the prior lock for historical reproduction and explicitly admit the
+# 2026-10-07 compatible security updates. TypeScript's own identity is unchanged.
+REVIEWED_LOCK_SHA256S = frozenset({
+    LOCK_SHA256,
+    'b1c85223bc1171b16a5994c2f069ada51a5574719445142c31a213e9fda84e89',
+})
 TS_URL = 'https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz'
 TS_SHA256 = '10e108c9cf7d5f2879053dff18515fb405abf2ccef63eaaf017d9c571687a1d3'
 TS_INTEGRITY = 'sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw=='
@@ -69,8 +75,9 @@ def typescript_members(archive):
 def prepare_typescript(root, archive=None):
     root = Path(root)
     lock = (root / 'web/package-lock.json').read_bytes()
-    if digest(lock) != LOCK_SHA256:
-        raise ValueError('original complete lock hash required')
+    lock_sha256 = digest(lock)
+    if lock_sha256 not in REVIEWED_LOCK_SHA256S:
+        raise ValueError('reviewed complete lock hash required')
     package = json.loads(lock)['packages']['node_modules/typescript']
     if (package['version'], package['resolved'], package['integrity']) != ('5.9.3', TS_URL, TS_INTEGRITY):
         raise ValueError('unknown TypeScript lock entry')
@@ -91,7 +98,7 @@ def prepare_typescript(root, archive=None):
         path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
         exclusive(path, data)
     verify_typescript(root, files)
-    return dict(lock_sha256=LOCK_SHA256, archive_sha256=TS_SHA256, integrity=TS_INTEGRITY,
+    return dict(lock_sha256=lock_sha256, archive_sha256=TS_SHA256, integrity=TS_INTEGRITY,
                 files={name: digest(data) for name, data in sorted(files.items())})
 
 
