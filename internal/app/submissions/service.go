@@ -9,6 +9,7 @@ package submissions
 import (
 	"context"
 	"errors"
+	"net/mail"
 	"strings"
 	"time"
 
@@ -318,18 +319,29 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 		}
 	}
 
-	// Preserve caller-owned slices and their roles: appending into To can
-	// overwrite CC or BCC when callers share backing capacity between groups.
+	// Check the same canonical addresses SubmitWithReplay puts on the envelope.
+	// A display name or surrounding whitespace must not bypass the synchronous
+	// rejection and consume quota or a draft before the worker notices it.
+	// Validate every address before consulting suppression storage, without
+	// rewriting caller-owned slices or their To/CC/BCC roles.
+	recipients := make([]string, 0, len(in.To)+len(in.CC)+len(in.BCC))
 	for _, group := range [][]string{in.To, in.CC, in.BCC} {
 		for _, rcpt := range group {
-			suppressed, err := s.store.IsSuppressed(ctx, tenant.ID, rcpt)
+			parsed, err := mail.ParseAddress(rcpt)
 			if err != nil {
-				s.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
-				return nil, false, internalFailure()
+				return nil, false, badRequest("invalid recipient address")
 			}
-			if suppressed {
-				return nil, false, badRequest("recipient " + rcpt + " is suppressed (hard bounce); remove from suppression list to retry")
-			}
+			recipients = append(recipients, strings.ToLower(parsed.Address))
+		}
+	}
+	for _, rcpt := range recipients {
+		suppressed, err := s.store.IsSuppressed(ctx, tenant.ID, rcpt)
+		if err != nil {
+			s.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
+			return nil, false, internalFailure()
+		}
+		if suppressed {
+			return nil, false, badRequest("recipient " + rcpt + " is suppressed (hard bounce); remove from suppression list to retry")
 		}
 	}
 
