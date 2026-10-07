@@ -530,6 +530,47 @@ def external_component_command(manifest, report, *, probe=False):
     return prefix + ['components/company/r5-protocol.test.tsx','--reporter=json','--outputFile='+str(report)]
 
 
+def run_shared_go(command, package, tests, data, env, output, index):
+    """Persist child bytes before classifying; an interrupted run never qualifies."""
+    execution = {'status':'completed', 'returncode':None, 'timeout_seconds':180}
+    stdout, stderr = b'', b''
+    try:
+        result = subprocess.run(command,cwd=ROOT,env=env,capture_output=True,timeout=180)
+        stdout, stderr = result.stdout, result.stderr
+        execution['returncode'] = result.returncode
+    except subprocess.TimeoutExpired as error:
+        # TimeoutExpired carries captured bytes, even when text mode was requested.
+        # It does not expose the killed child's exit code: do not invent one.
+        stdout, stderr = error.output, error.stderr
+        execution.update(status='timed_out', error={'type':type(error).__name__, 'message':str(error),
+                                                    'timeout_seconds':error.timeout})
+    except OSError as error:
+        # A launcher error is not child stderr, nor proof of a child exit code.
+        execution.update(status='process_error', error={'type':type(error).__name__, 'message':str(error)})
+    # Production subprocess output is binary. Retain compatibility with the
+    # existing classifier controls that supply CompletedProcess text fixtures.
+    stdout = stdout.encode() if isinstance(stdout,str) else stdout or b''
+    stderr = stderr.encode() if isinstance(stderr,str) else stderr or b''
+    (output/f'go-{index}.jsonl').write_bytes(stdout)
+    (output/f'go-{index}.stderr').write_bytes(stderr)
+    execution.update(stdout_sha256=hashlib.sha256(stdout).hexdigest(), stderr_sha256=hashlib.sha256(stderr).hexdigest(),
+                     stdout_bytes=len(stdout), stderr_bytes=len(stderr))
+    (output/f'go-{index}.execution.json').write_text(json.dumps(execution,ensure_ascii=False,indent=2)+'\n')
+    try:
+        report = classify_shared_events(stdout.decode('utf-8'),'tabmail/'+package.removeprefix('./'),
+                                        tests,execution['returncode'],data)
+    except (ValueError,TypeError,KeyError,AttributeError) as error:
+        report = {'status':'shared_process_output_invalid', 'task_complete':False, 'product_green':False,
+                  'errors':['invalid Go JSONL: '+type(error).__name__+': '+str(error)],
+                  'log_sha256':execution['stdout_sha256']}
+    if execution['status'] != 'completed':
+        report['errors'].append('Go subprocess '+execution['status']+': '+execution['error']['type']+
+                                '; incomplete execution is never target red or protocol success')
+        report.update(status='shared_process_failed',product_green=False)
+    report.update(command=command,package=package,process_exit_code=execution['returncode'],execution=execution)
+    return report
+
+
 def run_shared(data, layer, output):
     selected = {}
     for row in data['cases']:
@@ -558,12 +599,7 @@ def run_shared(data, layer, output):
     reports = []
     for index, ((package, tag), tests) in enumerate(sorted(selected.items())):
         cmd = shared_command(package,tag,tests)
-        result = subprocess.run(cmd,cwd=ROOT,env=env,capture_output=True,text=True,timeout=180)
-        (output/f'go-{index}.jsonl').write_text(result.stdout)
-        (output/f'go-{index}.stderr').write_text(result.stderr)
-        report = classify_shared_events(result.stdout,'tabmail/'+package.removeprefix('./'),tests,result.returncode,data)
-        report.update(command=cmd,package=package)
-        reports.append(report)
+        reports.append(run_shared_go(cmd,package,tests,data,env,output,index))
     go_pass = all(not r['errors'] for r in reports)
     go_component_verified=set()
     if layer == 'components':
@@ -582,13 +618,29 @@ def run_shared(data, layer, output):
         component.update(command=cmd)
         reports.append(component)
         component_pass = not component['errors']
+    post_errors = []
     if external_runtime is not None:
-        r5_external_runtime.validate(external_runtime, selected_binding_version=selected_binding_version)
-    final_closure = source_closure()
-    if tested_closure != final_closure or hashlib.sha256(CASES.read_bytes()).hexdigest()!=cases_hash:
-        reports.append({'errors':['source/shared input changed during execution; rerun after integration'],'task_complete':False})
+        try:
+            r5_external_runtime.validate(external_runtime, selected_binding_version=selected_binding_version)
+        except (OSError,ValueError) as error:
+            post_errors.append('external runtime validation after execution failed: '+type(error).__name__+': '+str(error))
+    final_closure, final_cases_hash = None, None
+    try:
+        final_closure = source_closure()
+    except (OSError,ValueError) as error:
+        post_errors.append('source validation after execution failed: '+type(error).__name__+': '+str(error))
+    try:
+        final_cases_hash = hashlib.sha256(CASES.read_bytes()).hexdigest()
+    except OSError as error:
+        post_errors.append('shared input validation after execution failed: '+type(error).__name__+': '+str(error))
+    if ((final_closure is not None and tested_closure != final_closure)
+            or (final_cases_hash is not None and final_cases_hash != cases_hash)):
+        post_errors.append('source/shared input changed during execution; rerun after integration')
+    if post_errors:
+        reports.append({'status':'post_execution_validation_failed', 'errors':post_errors,
+                        'task_complete':False, 'product_green':False})
     verified = {}
-    stable = tested_closure == final_closure and hashlib.sha256(CASES.read_bytes()).hexdigest()==cases_hash
+    stable = not post_errors and final_closure is not None and tested_closure == final_closure and final_cases_hash == cases_hash
     for row in data['cases']:
         layers = set()
         for adapter in row.get('shared_adapters', []):
@@ -598,7 +650,7 @@ def run_shared(data, layer, output):
     report = summary(data)
     report.update(status='shared_scoped_evidence_passed' if all(not r['errors'] for r in reports) else 'shared_scoped_evidence_failed',
                   task_complete=False,product_green=bool(reports) and stable and go_pass and all(not r['errors'] for r in reports) and not any(r.get('target_red') for r in reports),source_sha=source,layer=layer,source_closure_before=tested_closure,
-                  source_closure_after=final_closure,cases_sha256=cases_hash,reports=reports,
+                  source_closure_after=final_closure,cases_sha256=cases_hash,cases_sha256_after=final_cases_hash,reports=reports,
                   shared_input_verified_cases=len(verified),shared_input_verified_layers=verified,
                   missing_required_layers={row['id']:sorted(set(row['required_layers'])-set(verified.get(row['id'],[]))) for row in data['cases']},
                   boundary='Only the recorded scoped layers and exact runtime paths are verified. Accepted target red is not product green; missing component journeys and future backfill/migration implementation remain separate gaps.')
