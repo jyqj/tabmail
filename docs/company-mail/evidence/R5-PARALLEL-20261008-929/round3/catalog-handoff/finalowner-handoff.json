@@ -1,0 +1,1160 @@
+{
+  "schema": "r5-catalog-single-owner-handoff-v1",
+  "task_complete": false,
+  "product_green": false,
+  "runtime_verified": false,
+  "maintenance_only_no_extra_todo": true,
+  "final_source": {
+    "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+    "tree": "85135f2dd73c876bcda62d2508a2029c27ffbe62",
+    "kind": "local reviewed integrated product; coordinator must bind publication to the same source tree"
+  },
+  "owner_source": {
+    "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+    "tree": "bf0aef0d86100d4538d98bf00a4e637035e925a2"
+  },
+  "provisional_source": {
+    "commit": "5e82db977d9b81623f1b93753b74e8470459fd14",
+    "tree": "e472fd483f0bdd75ad15d3e4199898247dd237bd",
+    "preserved_raw_results": true
+  },
+  "both_previous_sources_are_ancestors_of_final": true,
+  "ownership_snapshot": {
+    "issue_url": "https://github.com/jyqj/tabmail/issues/78",
+    "retrieved_utc": "2026-10-07 17:41:05 UTC",
+    "owner": "workspace fabe500b93be coordinator",
+    "revision": 6,
+    "state": "explicitly owned, unpublished in latest checked #56",
+    "raw_snapshot": "raw/final/issue78-owner-snapshot.json",
+    "decision": "Single owner handoff only. No revision6 overwrite or speculative revision7. No current catalog, original validator, historical evidence or reconciliation test changes by this task."
+  },
+  "original_five": {
+    "scripts/check_r5_transactions.py": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "scripts/check_r5_transactions.py",
+        "blob": "8f5a423aef4cd11ed689825a9502e08a99db7cd5",
+        "sha256": "1f14b5b4e3ef11cd0642e9d7261cde285c17e47384c90e15b56adc68323b9355",
+        "bytes": 8849
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "scripts/check_r5_transactions.py",
+        "blob": "8f5a423aef4cd11ed689825a9502e08a99db7cd5",
+        "sha256": "1f14b5b4e3ef11cd0642e9d7261cde285c17e47384c90e15b56adc68323b9355",
+        "bytes": 8849
+      },
+      "byte_identical": true
+    },
+    "scripts/check_r5_compatibility.py": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "scripts/check_r5_compatibility.py",
+        "blob": "a9d95f5ce29a3038c0db5a5ffe0945f8d297eb7e",
+        "sha256": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+        "bytes": 25296
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "scripts/check_r5_compatibility.py",
+        "blob": "a9d95f5ce29a3038c0db5a5ffe0945f8d297eb7e",
+        "sha256": "d3d0bd96c84a18c224160faaad96f3a928aab5224d93c31b6ec464489f740209",
+        "bytes": 25296
+      },
+      "byte_identical": true
+    },
+    "scripts/collect_api_calls.cjs": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "scripts/collect_api_calls.cjs",
+        "blob": "6c2088468f0e1e47bb7168d29264db95d986bde0",
+        "sha256": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
+        "bytes": 10058
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "scripts/collect_api_calls.cjs",
+        "blob": "6c2088468f0e1e47bb7168d29264db95d986bde0",
+        "sha256": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
+        "bytes": 10058
+      },
+      "byte_identical": true
+    },
+    "cmd/r5txinventory/main.go": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "cmd/r5txinventory/main.go",
+        "blob": "5c2c9530ba26fdad06179e0d0985f3c6166e6d9f",
+        "sha256": "ad14b919505b23947de335dda6077d4f6745185329d911cc357e60b1001d2361",
+        "bytes": 4112
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "cmd/r5txinventory/main.go",
+        "blob": "5c2c9530ba26fdad06179e0d0985f3c6166e6d9f",
+        "sha256": "ad14b919505b23947de335dda6077d4f6745185329d911cc357e60b1001d2361",
+        "bytes": 4112
+      },
+      "byte_identical": true
+    },
+    "internal/architecture/route_inventory_test.go": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "internal/architecture/route_inventory_test.go",
+        "blob": "e0695bfd973711c1b46571443b21570fca8fb556",
+        "sha256": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
+        "bytes": 8717
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/architecture/route_inventory_test.go",
+        "blob": "e0695bfd973711c1b46571443b21570fca8fb556",
+        "sha256": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
+        "bytes": 8717
+      },
+      "byte_identical": true
+    }
+  },
+  "unchanged_current_catalog_snapshots": {
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+        "blob": "f34b037f26dc23464fe595a85b310bbed2f4a409",
+        "sha256": "0ecb372399d4878fa46d454c88fc48e8cb1e40a06541beaef6309517c8cb6866",
+        "bytes": 2796762
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+        "blob": "f34b037f26dc23464fe595a85b310bbed2f4a409",
+        "sha256": "0ecb372399d4878fa46d454c88fc48e8cb1e40a06541beaef6309517c8cb6866",
+        "bytes": 2796762
+      },
+      "byte_identical": true
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+        "blob": "46175d14abb95668baaed6143d6e038c88e62ba1",
+        "sha256": "73b30e5733dccba31b1330eec0c52b66a96fb9f3f2dfb19fd3069a2ba32ddf80",
+        "bytes": 406977
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+        "blob": "46175d14abb95668baaed6143d6e038c88e62ba1",
+        "sha256": "73b30e5733dccba31b1330eec0c52b66a96fb9f3f2dfb19fd3069a2ba32ddf80",
+        "bytes": 406977
+      },
+      "byte_identical": true
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+        "blob": "c1dc0d0acc96e9f6375bf9a82c9a3a6d3a1d8ae1",
+        "sha256": "76d03e2c33420a36cf49b0e740656ec83e672598028b9b0257a2de8d171acec7",
+        "bytes": 40863
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+        "blob": "c1dc0d0acc96e9f6375bf9a82c9a3a6d3a1d8ae1",
+        "sha256": "76d03e2c33420a36cf49b0e740656ec83e672598028b9b0257a2de8d171acec7",
+        "bytes": 40863
+      },
+      "byte_identical": true
+    },
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+      "owner": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+        "blob": "63a497f7cdcdb4002d0139c8f68681c0dfb32781",
+        "sha256": "39e65cca57bcddfe9a8b67733cd240a2db0c86f372ec491161ee7ec94dd5b72d",
+        "bytes": 49662
+      },
+      "final": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+        "blob": "63a497f7cdcdb4002d0139c8f68681c0dfb32781",
+        "sha256": "39e65cca57bcddfe9a8b67733cd240a2db0c86f372ec491161ee7ec94dd5b72d",
+        "bytes": 49662
+      },
+      "byte_identical": true
+    }
+  },
+  "preserved_revision5_metadata": {
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+      "revision": 5,
+      "source_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+      "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "previous_snapshot_commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+      "previous_snapshot_blob": "bd50c385e9c6c385a650f68ce5c5857ee69986ea",
+      "previous_sha256": "5fc5fb70255b5e6986b9aab38157fbb915b6012377d76d5b2a1956fc2907de2c",
+      "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
+      "review": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/README.md"
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+      "revision": 5,
+      "source_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+      "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "previous_snapshot_commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+      "previous_snapshot_blob": "23a227e3eae3aacc44d2c2be97c35bfa55bcc8a6",
+      "previous_sha256": "56452854110d0c33b5d2ae9eaf1abe43a7f77681a59307fc2470796dbdc18f56",
+      "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
+      "review": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/README.md"
+    }
+  },
+  "preserved_revision5_review_pins": {
+    "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/README.md": {
+      "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/README.md",
+      "blob": "3f905a0910bc37a9a4a6fb834af6f07ca3bf57ad",
+      "sha256": "720070788265ee38de52a1514171594fc4daca3b8bcab3086bb86bf756e3e7ba",
+      "bytes": 8527
+    },
+    "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/reconciliation.json": {
+      "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/reconciliation.json",
+      "blob": "2a248324489a91a1a8df9f117ce4da2d4889bb01",
+      "sha256": "63d3c27f3cc6e183d35ab9f8df57c88e36ad2b3bc889b586fd578ec22c2995ce",
+      "bytes": 17956
+    }
+  },
+  "transaction_delta": {
+    "postgres_function_count": 395,
+    "postgres_file_count": 62,
+    "postgres_function_syntax_unchanged": true,
+    "postgres_file_inventory_unchanged": true,
+    "changed_caller_entry_count": 10,
+    "caller_changes_only_locations": true,
+    "caller_changes": {
+      "internal/store/postgres/mail_content.go:*PgStore:ClaimMailIndexJobs": {
+        "removed": [
+          {
+            "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
+            "expression": "s.repo.ClaimMailIndexJobs",
+            "file": "internal/app/mailindex/service.go",
+            "function": "Batch",
+            "line": 23,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
+            "expression": "s.repo.ClaimMailIndexJobs",
+            "file": "internal/app/mailindex/service.go",
+            "function": "Batch",
+            "line": 26,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/mail_content.go:*PgStore:CompleteMailIndexJob": {
+        "removed": [
+          {
+            "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
+            "expression": "s.repo.CompleteMailIndexJob",
+            "file": "internal/app/mailindex/service.go",
+            "function": "Batch",
+            "line": 35,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
+            "expression": "s.repo.CompleteMailIndexJob",
+            "file": "internal/app/mailindex/service.go",
+            "function": "Batch",
+            "line": 50,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/mail_content.go:*PgStore:FailMailIndexJob": {
+        "removed": [
+          {
+            "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
+            "expression": "s.repo.FailMailIndexJob",
+            "file": "internal/app/mailindex/service.go",
+            "function": "Batch",
+            "line": 30,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
+            "expression": "s.repo.FailMailIndexJob",
+            "file": "internal/app/mailindex/service.go",
+            "function": "Batch",
+            "line": 45,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/postgres.go:*PgStore:Close": {
+        "removed": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+            "expression": "resp.Body.Close",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "dispatch",
+            "line": 423,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*Server:drain",
+            "expression": "ln.Close",
+            "file": "internal/smtp/server.go",
+            "function": "drain",
+            "line": 304,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedConn:Close",
+            "expression": "c.Conn.Close",
+            "file": "internal/smtp/server.go",
+            "function": "Close",
+            "line": 261,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedListener:Accept",
+            "expression": "conn.Close",
+            "file": "internal/smtp/server.go",
+            "function": "Accept",
+            "line": 209,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedListener:Close",
+            "expression": "l.Listener.Close",
+            "file": "internal/smtp/server.go",
+            "function": "Close",
+            "line": 235,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedListener:closeConnections",
+            "expression": "c.Close",
+            "file": "internal/smtp/server.go",
+            "function": "closeConnections",
+            "line": 248,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+            "expression": "resp.Body.Close",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "dispatch",
+            "line": 435,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*Server:drain",
+            "expression": "ln.Close",
+            "file": "internal/smtp/server.go",
+            "function": "drain",
+            "line": 305,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedConn:Close",
+            "expression": "c.Conn.Close",
+            "file": "internal/smtp/server.go",
+            "function": "Close",
+            "line": 262,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedListener:Accept",
+            "expression": "conn.Close",
+            "file": "internal/smtp/server.go",
+            "function": "Accept",
+            "line": 210,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedListener:Close",
+            "expression": "l.Listener.Close",
+            "file": "internal/smtp/server.go",
+            "function": "Close",
+            "line": 236,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/smtp/server.go:*limitedListener:closeConnections",
+            "expression": "c.Close",
+            "file": "internal/smtp/server.go",
+            "function": "closeConnections",
+            "line": 249,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/postgres.go::New": {
+        "removed": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+            "expression": "uuid.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "Publish",
+            "line": 175,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+            "expression": "uuid.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "Publish",
+            "line": 189,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+            "expression": "errors.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "dispatch",
+            "line": 429,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/hooks/dispatcher.go::sign",
+            "expression": "hmac.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "sign",
+            "line": 447,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+            "expression": "uuid.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "Publish",
+            "line": 174,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+            "expression": "uuid.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "Publish",
+            "line": 192,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
+            "expression": "errors.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "dispatch",
+            "line": 441,
+            "status": "name-match-candidate-not-dispatch-proof"
+          },
+          {
+            "caller_id": "internal/hooks/dispatcher.go::sign",
+            "expression": "hmac.New",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "sign",
+            "line": 459,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries": {
+        "removed": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetterSize",
+            "expression": "d.store.CountDeadWebhookDeliveries",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "DeadLetterSize",
+            "line": 219,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetterSize",
+            "expression": "d.store.CountDeadWebhookDeliveries",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "DeadLetterSize",
+            "line": 223,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent": {
+        "removed": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+            "expression": "d.store.CreateOutboxEvent",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "Publish",
+            "line": 174,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
+            "expression": "d.store.CreateOutboxEvent",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "Publish",
+            "line": 177,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries": {
+        "removed": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+            "expression": "d.store.CreateWebhookDeliveries",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "processOutbox",
+            "line": 300,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+            "expression": "d.store.CreateWebhookDeliveries",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "processOutbox",
+            "line": 304,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries": {
+        "removed": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetters",
+            "expression": "d.store.ListDeadWebhookDeliveries",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "DeadLetters",
+            "line": 200,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetters",
+            "expression": "d.store.ListDeadWebhookDeliveries",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "DeadLetters",
+            "line": 204,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      },
+      "internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints": {
+        "removed": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+            "expression": "d.store.ListWebhookEndpoints",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "processOutbox",
+            "line": 283,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ],
+        "added": [
+          {
+            "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
+            "expression": "d.store.ListWebhookEndpoints",
+            "file": "internal/hooks/dispatcher.go",
+            "function": "processOutbox",
+            "line": 287,
+            "status": "name-match-candidate-not-dispatch-proof"
+          }
+        ]
+      }
+    },
+    "qualification": "Original extractor call-name candidates only, not resolved dispatch or runtime/concurrency evidence."
+  },
+  "client_delta": {
+    "before_count": 134,
+    "after_count": 133,
+    "before_forwarders": 7,
+    "after_forwarders": 7,
+    "unique_path_method_forwarder_set_unchanged": true,
+    "exact_row_delta": {
+      "removed": [
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "\"/templates\"",
+          "forwarding": false,
+          "line": 43,
+          "methods": [
+            "GET"
+          ],
+          "owner": "templates",
+          "path": "/api/v1/company/templates",
+          "source": "web/app/(dashboard)/company/templates/page.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/retire`",
+          "forwarding": false,
+          "line": 92,
+          "methods": [
+            "POST"
+          ],
+          "owner": "retireTemplate",
+          "path": "/api/v1/company/templates/{dynamic}/retire",
+          "source": "web/app/(dashboard)/company/templates/page.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template!.id}/grants`",
+          "forwarding": false,
+          "line": 44,
+          "methods": [
+            "GET"
+          ],
+          "owner": "grants",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/grants`",
+          "forwarding": false,
+          "line": 101,
+          "methods": [
+            "PUT"
+          ],
+          "owner": "TemplateGrantsView",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/grants`",
+          "forwarding": false,
+          "line": 159,
+          "methods": [
+            "PUT"
+          ],
+          "owner": "TemplateGrantsView",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        }
+      ],
+      "added": [
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "\"/templates\"",
+          "forwarding": false,
+          "line": 44,
+          "methods": [
+            "GET"
+          ],
+          "owner": "list",
+          "path": "/api/v1/company/templates",
+          "source": "web/app/(dashboard)/company/templates/page.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/retire`",
+          "forwarding": false,
+          "line": 145,
+          "methods": [
+            "POST"
+          ],
+          "owner": "retireTemplate",
+          "path": "/api/v1/company/templates/{dynamic}/retire",
+          "source": "web/app/(dashboard)/company/templates/page.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template!.id}/grants`",
+          "forwarding": false,
+          "line": 57,
+          "methods": [
+            "GET"
+          ],
+          "owner": "grants",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/grants`",
+          "forwarding": false,
+          "line": 81,
+          "methods": [
+            "PUT"
+          ],
+          "owner": "changeGrant",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        }
+      ]
+    },
+    "non_location_multiset_delta": {
+      "removed": [
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "\"/templates\"",
+          "forwarding": false,
+          "methods": [
+            "GET"
+          ],
+          "owner": "templates",
+          "path": "/api/v1/company/templates",
+          "source": "web/app/(dashboard)/company/templates/page.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/grants`",
+          "forwarding": false,
+          "methods": [
+            "PUT"
+          ],
+          "owner": "TemplateGrantsView",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/grants`",
+          "forwarding": false,
+          "methods": [
+            "PUT"
+          ],
+          "owner": "TemplateGrantsView",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        }
+      ],
+      "added": [
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "\"/templates\"",
+          "forwarding": false,
+          "methods": [
+            "GET"
+          ],
+          "owner": "list",
+          "path": "/api/v1/company/templates",
+          "source": "web/app/(dashboard)/company/templates/page.tsx"
+        },
+        {
+          "branch": 0,
+          "callee": "company",
+          "expression": "`/templates/${template.id}/grants`",
+          "forwarding": false,
+          "methods": [
+            "PUT"
+          ],
+          "owner": "changeGrant",
+          "path": "/api/v1/company/templates/{dynamic}/grants",
+          "source": "web/components/company/templates/grants.tsx"
+        }
+      ]
+    },
+    "review": "Two prior template-grant PUT call sites become one shared changeGrant call. The template list and grant/retire rows retain their endpoints but move locations/owners. Review source-branch consolidation before updating both client catalogs; do not pretend that all changes are hash/line repins."
+  },
+  "changed_existing_compatibility_closure_paths": [
+    "web/app/(dashboard)/company/templates/page.tsx",
+    "web/components/company/templates/grants.tsx"
+  ],
+  "changed_source_pins": {
+    "internal/app/mailindex/r5_cancellation_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/app/mailindex/r5_cancellation_test.go",
+        "blob": "bd76868da062143ce19e63f513bf6fabd8adbd7f",
+        "sha256": "9efbb5d8727e83882525db64030e1c1cf0b351354518063433a8ed7dfb49467f",
+        "bytes": 11567
+      }
+    },
+    "internal/app/mailindex/service.go": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "internal/app/mailindex/service.go",
+        "blob": "43b6b19cfc7a2f9cf47ab9c06294f067f557723c",
+        "sha256": "aa7573b7150b98830cf48493de033397bff2b46c489de1c7a83e6ae6b89678ea",
+        "bytes": 1419
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/app/mailindex/service.go",
+        "blob": "f58033105b93fee434be3d81d7fca88a94516766",
+        "sha256": "761c0567fc2789f5656802210d2d8d6a2e42923c3591d17f34fabc073c991dfe",
+        "bytes": 1857
+      }
+    },
+    "internal/hooks/dispatcher.go": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "internal/hooks/dispatcher.go",
+        "blob": "7ec006e52f4e43d56523fb303a17baebe0cc275d",
+        "sha256": "0fad53e15be35fa5fab9b3590142082f4ed6feddadd340b06e81b764b4ba520d",
+        "bytes": 13255
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/hooks/dispatcher.go",
+        "blob": "0fcd4a838c04ee4891e1a05e8b84fbe5f96b3527",
+        "sha256": "568e8690da190a4dfebafc21df16982c18406a8482f8f35729ff15dc49678118",
+        "bytes": 13801
+      }
+    },
+    "internal/hooks/r5_webhook_identity_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/hooks/r5_webhook_identity_test.go",
+        "blob": "e267d23fc5e6a20f10deec58b476b524a1e3b733",
+        "sha256": "ea289dbc6dccdc591597890e6170c93a830bc1d50e515dc820de5801b368f8d1",
+        "bytes": 9711
+      }
+    },
+    "internal/policy/naming.go": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "internal/policy/naming.go",
+        "blob": "fff941cc125840871824e332b93d272061fe77d5",
+        "sha256": "57e4628928e89f521ce5a99229d9154e0b3a802f7aa22173decf7c65375763a4",
+        "bytes": 3687
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/policy/naming.go",
+        "blob": "ea5772114acd7ef772cc10f73bdc11ae779320a3",
+        "sha256": "49a032bf28022da2d93b87d86b691d3dec6fc4819537a8b6ea59155960c6a30d",
+        "bytes": 3808
+      }
+    },
+    "internal/policy/origin.go": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "internal/policy/origin.go",
+        "blob": "33171aaa1cb3dd3e70e8c276c5c2392ea4408215",
+        "sha256": "13cae3b1dc3d436accfec1055e96bff2cc03b77bdbb96a505b8e7abbec29d0ed",
+        "bytes": 593
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/policy/origin.go",
+        "blob": "8b2521fc4ea62420c429316e337bf5678dbb4770",
+        "sha256": "5ac3fb215f8c717171f50ba4cd0efdfdd2f4382c7dde2fe1f4d52e062a3f4da0",
+        "bytes": 397
+      }
+    },
+    "internal/policy/r5_domain_glob_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/policy/r5_domain_glob_test.go",
+        "blob": "43b29da41b53d093bdad15b8e230e301a7e17049",
+        "sha256": "0d0072e40ef3386cc5d13afe30e70b1526b46df07c4c861741b039b69f7deeae",
+        "bytes": 2562
+      }
+    },
+    "internal/policy/r5_domain_hyphen_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/policy/r5_domain_hyphen_test.go",
+        "blob": "fbe7a72043e4a10a93cae51f3a9ef0554ad4b05a",
+        "sha256": "8c2f0ec4be827815ee8ec8e704fe3b7bbff287e5b845aea11c16d0038d11c4cb",
+        "bytes": 1474
+      }
+    },
+    "internal/policy/r5_domain_policy_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/policy/r5_domain_policy_test.go",
+        "blob": "5335194df19846ac39f3645dbd2825ab43a6a42a",
+        "sha256": "09f7b5e51e2b57a5830e915a833fa2d0631f85bf00c7b093da4eb3211c075629",
+        "bytes": 3254
+      }
+    },
+    "internal/policy/recipient.go": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "internal/policy/recipient.go",
+        "blob": "71d69ab77036f53aab6fbeb0f1d789c92ffd6368",
+        "sha256": "298690814fc8e84ef9a6c1f692d3f5a830f097cb9427c8196054f55979772de5",
+        "bytes": 955
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/policy/recipient.go",
+        "blob": "9383bc954c02e93ea2f8d581406742ded8a43468",
+        "sha256": "0ca5e27f3cfe39804349e1062cf4c98f45b26f8ce970f6b668233f1171265137",
+        "bytes": 2103
+      }
+    },
+    "internal/resolver/r5_domain_hyphen_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/resolver/r5_domain_hyphen_test.go",
+        "blob": "88672b4fa0f7eac0210021ce73eb9d44c6de2c0b",
+        "sha256": "da68ce7a7fdc1aafd0a6dcb0da32ac7df1f77ce8ce2fcb227efc58527fb2fd19",
+        "bytes": 1186
+      }
+    },
+    "internal/smtp/r5_domain_policy_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/smtp/r5_domain_policy_test.go",
+        "blob": "92de0537d358f16b1140e2a80802d6d2179672c1",
+        "sha256": "7143e61694f52c4dee2fb513c9b0440b1a8c35b087609067d02ea205c7492155",
+        "bytes": 2475
+      }
+    },
+    "internal/smtp/r5_origin_glob_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/smtp/r5_origin_glob_test.go",
+        "blob": "ec6c29d42665200ad4529b0d66fae908e3b0c14a",
+        "sha256": "37066d63af178a557cb9558c5bd1082b881ff198ced817a5f809c54e5938bdf5",
+        "bytes": 3692
+      }
+    },
+    "internal/smtp/r5_sender_domain_labels_test.go": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/smtp/r5_sender_domain_labels_test.go",
+        "blob": "fdb57017e276828624d02498bee35f2971898e8d",
+        "sha256": "cfdde5c4a2d4c10f7ec560e05c02d0a1b40db7ec9750ba537ed4b2bfc4d55da1",
+        "bytes": 4779
+      }
+    },
+    "internal/smtp/server.go": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "internal/smtp/server.go",
+        "blob": "c92d32dc5bb1816d8f1223b35d88b47d2af19c5c",
+        "sha256": "8cc485e47897b133acc8042eef4d4db69582e6387d1d60e2801714ebef599fbe",
+        "bytes": 15814
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "internal/smtp/server.go",
+        "blob": "73608fa1454f757cc39966843eac2575e089a639",
+        "sha256": "418b5c105d203661eaaa5beeabc23ef74145c25344292f5944c09bb3913eec08",
+        "bytes": 16775
+      }
+    },
+    "web/app/(dashboard)/company/templates/page.tsx": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "web/app/(dashboard)/company/templates/page.tsx",
+        "blob": "2bd61790351471be00d445c13893658b1316591e",
+        "sha256": "51f5da1f71dda1a47a937a92c868783a99d41fbfdfda0255bfa4af09cc2df71f",
+        "bytes": 7344
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "web/app/(dashboard)/company/templates/page.tsx",
+        "blob": "a6ad354761ba0baa431bafa42540c0a2d3ba0124",
+        "sha256": "96cd540aa947f470468f30c962701cd872090591e626b1bd97ba49dfc8032823",
+        "bytes": 10857
+      }
+    },
+    "web/components/company/templates/grants-ownership.test.tsx": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "web/components/company/templates/grants-ownership.test.tsx",
+        "blob": "b52bbfe86fd04b15327767d72106a9d228f134d1",
+        "sha256": "3eeb07c9aa5c895e66cbfa73e4945c7f049b60e1fb266be87a0868349ba1d51d",
+        "bytes": 11683
+      }
+    },
+    "web/components/company/templates/grants.tsx": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "web/components/company/templates/grants.tsx",
+        "blob": "f8c910ce6f47cc41ee1a883bcbfdd9781d78efce",
+        "sha256": "1301da2d76e23687e11b6ffee317ec3897fe33a245013e9d8d067d63afef8288",
+        "bytes": 5735
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "web/components/company/templates/grants.tsx",
+        "blob": "f8c39ab80982680627f9f05f1446f7e6da1c871b",
+        "sha256": "2ff8802065a4b39567f1cea70ce727d4aecd5745158930ca3cad0e43ec01e85c",
+        "bytes": 6439
+      }
+    },
+    "web/components/company/templates/library-load-state.test.tsx": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "web/components/company/templates/library-load-state.test.tsx",
+        "blob": "0fe57841268870fe36c793e1f4a08bfada7be5b3",
+        "sha256": "5ac13dcba1fccf2ea9d47e3488a83a2b31c734f16ed4a3b31d93c5b3e78c8247",
+        "bytes": 16135
+      }
+    },
+    "web/components/company/templates/library-retry-ownership.test.tsx": {
+      "before": null,
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "web/components/company/templates/library-retry-ownership.test.tsx",
+        "blob": "b3f2cd19502dbbd6d337932e360ba13529de4e84",
+        "sha256": "05308feb7986938419e1a28a8c015ec6a006f5a6981e2f441bf27ef53aabaa8e",
+        "bytes": 4786
+      }
+    },
+    "web/components/company/templates/library.tsx": {
+      "before": {
+        "commit": "ad2b8f07ec305fc1a87c77a7f68319b4b8e2359e",
+        "path": "web/components/company/templates/library.tsx",
+        "blob": "07660e6a90248d8e31b8ced8515d5c2b0bdfc74c",
+        "sha256": "a366bff4ac8b2546fe11322eb3bbadbb4c1cd2859137789ccbd930d5fdcfa2f3",
+        "bytes": 1740
+      },
+      "after": {
+        "commit": "7f2f477f967c1b6d2762f8c753c580ad33483521",
+        "path": "web/components/company/templates/library.tsx",
+        "blob": "dc72614221ef236178ef87fbde90bcf3c357c7b0",
+        "sha256": "50e2f4c12930130a7fab01eecdc6d3e56f852d36d648996514bdda1e77ce7398",
+        "bytes": 2367
+      }
+    }
+  },
+  "original_final_cli_results": {
+    "original-transactions": {
+      "exit_code": 1,
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "raw_stdout": "raw/final/original-transactions.stdout",
+      "raw_stderr": "raw/final/original-transactions.stderr",
+      "stdout_sha256": "a78ab88d2b7182c33e85573b66c8879bd8ca09aa27a95cc43da06dab107c85cc",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_output_identical_to_provisional": true
+    },
+    "original-compatibility": {
+      "exit_code": 1,
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "raw_stdout": "raw/final/original-compatibility.stdout",
+      "raw_stderr": "raw/final/original-compatibility.stderr",
+      "stdout_sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "raw_output_identical_to_provisional": true
+    },
+    "original-api-calls": {
+      "exit_code": 1,
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "raw_stdout": "raw/final/original-api-calls.stdout",
+      "raw_stderr": "raw/final/original-api-calls.stderr",
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "ed69c2c77113248edb613099fc635757e6a5b9de25e915967f74d0241e7f32b8",
+      "raw_output_identical_to_provisional": true
+    }
+  },
+  "original_final_cli_failure_reasons": {
+    "transactions": "44 caller drift entries against retained revision5; exact raw output unchanged from provisional source",
+    "compatibility": "client producer differs from reviewed current source inventory",
+    "api_calls": "client inventory count drift (actual 133, retained catalog 134)"
+  },
+  "preserved_provisional_reconciliation": {
+    "source_commit": "5e82db977d9b81623f1b93753b74e8470459fd14",
+    "command": [
+      "python3",
+      "-B",
+      "-m",
+      "unittest",
+      "test_r5_catalog_reconciliation",
+      "-v"
+    ],
+    "tests": 13,
+    "pass": 9,
+    "fail": 3,
+    "error": 1,
+    "skip": 0,
+    "stderr_sha256": "43121c2b899ebadd953682a8dc2e30405ea317801ea82509451da9470637f154",
+    "rerun_on_final": false,
+    "reason": "Final original CLI failure outputs are byte-identical; later product changes retain the same source inventory mismatch. Coordinator requested no redundant expensive reconciliation rerun."
+  },
+  "next_owner_steps": [
+    "Bind the publicly published final product to this local final tree before selecting a catalog source commit. Preserve the separate frozen NEXT product/history and the existing unpublished revision6 ownership.",
+    "Apply the reviewed ad2b8f0-to-final caller locations and 134-to-133 client branch consolidation to the owner revision6 work; recapture all four current catalogs with the original producers and retain exact prior commit/blob/SHA snapshots.",
+    "Keep all original five producers/validators byte-identical. Run original transaction, compatibility, API CLI and targeted reconciliation tests on the completed catalog revision; all present failures remain open until actually resolved."
+  ],
+  "raw_producer_boundary": "Every original AST collector eligible tracked Go file and all tracked web TS/TSX files from the exact owner Git commit; no historical evidence copied. The original Node scan and Go extractor received this root explicitly. No application modules, PG or HTTP executed. Temporary source tree removed after collection.",
+  "raw_evidence_index": [
+    "raw/final/actual-ast-summary.json",
+    "raw/final/actual-ast.stderr",
+    "raw/final/actual-ast.stdout",
+    "raw/final/actual-clients-summary.json",
+    "raw/final/actual-clients.stderr",
+    "raw/final/actual-clients.stdout",
+    "raw/final/issue78-owner-snapshot.json",
+    "raw/final/original-api-calls-summary.json",
+    "raw/final/original-api-calls.stderr",
+    "raw/final/original-api-calls.stdout",
+    "raw/final/original-compatibility-summary.json",
+    "raw/final/original-compatibility.stderr",
+    "raw/final/original-compatibility.stdout",
+    "raw/final/original-transactions-summary.json",
+    "raw/final/original-transactions.stderr",
+    "raw/final/original-transactions.stdout",
+    "raw/original-api-calls-summary.json",
+    "raw/original-api-calls.stderr",
+    "raw/original-api-calls.stdout",
+    "raw/original-compatibility-summary.json",
+    "raw/original-compatibility.stderr",
+    "raw/original-compatibility.stdout",
+    "raw/original-reconciliation-summary.json",
+    "raw/original-reconciliation.stderr",
+    "raw/original-reconciliation.stdout",
+    "raw/original-transactions-summary.json",
+    "raw/original-transactions.stderr",
+    "raw/original-transactions.stdout",
+    "raw/owner-ad2b8f0-ast.json",
+    "raw/owner-ad2b8f0-clients.json",
+    "raw/owner-ad2b8f0-clients.stderr",
+    "raw/owner-handoff-provisional.json",
+    "raw/provisional-5e82db9-ast.json",
+    "raw/provisional-5e82db9-clients.json",
+    "raw/provisional-5e82db9-clients.stderr"
+  ]
+}

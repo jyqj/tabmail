@@ -385,7 +385,7 @@
   },
   {
     "source": "web/components/company/templates/grants.tsx",
-    "line": 42,
+    "line": 57,
     "branch": 0,
     "callee": "company",
     "owner": "grants",
@@ -401,26 +401,10 @@
   },
   {
     "source": "web/components/company/templates/grants.tsx",
-    "line": 90,
+    "line": 81,
     "branch": 0,
     "callee": "company",
-    "owner": "TemplateGrantsView",
-    "expression": "`/templates/${template.id}/grants`",
-    "path": "/api/v1/company/templates/{dynamic}/grants",
-    "methods": [
-      "PUT"
-    ],
-    "forwarding": false,
-    "routes": [
-      "PUT /api/v1/company/templates/{id}/grants"
-    ]
-  },
-  {
-    "source": "web/components/company/templates/grants.tsx",
-    "line": 133,
-    "branch": 0,
-    "callee": "company",
-    "owner": "TemplateGrantsView",
+    "owner": "changeGrant",
     "expression": "`/templates/${template.id}/grants`",
     "path": "/api/v1/company/templates/{dynamic}/grants",
     "methods": [

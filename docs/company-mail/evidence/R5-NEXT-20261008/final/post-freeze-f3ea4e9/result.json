@@ -1,0 +1,71 @@
+{
+  "scope": "Post-freeze current-source guards only. The reviewed revision6/17-method acceptance remains bound to f413; concurrent #87 product at f3ea4e9 is preserved and requires its own catalog reconciliation. Failures below remain failures and are not accepted by fallback.",
+  "reviewed_source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "current_product_commit": "f3ea4e991474cd5f3a82e250903e0f3125f34c02",
+  "local_probe_head": "187e8790eedcc1a85a099db5ed71c938cdcb65bf",
+  "commands": [
+    {
+      "name": "transactions",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "returncode": 1,
+      "elapsed_seconds": 1.441,
+      "stdout": {
+        "path": "transactions.stdout",
+        "bytes": 1019,
+        "sha256": "6e60ac67b0ae9e5b476e64d0edf11b95d1b1215b6bf7c6d14e3e2f38b84740a0"
+      },
+      "stderr": {
+        "path": "transactions.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "compatibility",
+      "argv": [
+        "python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "returncode": 1,
+      "elapsed_seconds": 2.304,
+      "stdout": {
+        "path": "compatibility.stdout",
+        "bytes": 146,
+        "sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55"
+      },
+      "stderr": {
+        "path": "compatibility.stderr",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "returncode": 1,
+      "elapsed_seconds": 1.582,
+      "stdout": {
+        "path": "clients.stdout",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "path": "clients.stderr",
+        "bytes": 953,
+        "sha256": "07767214516d585160282e466fa92629ad11cac4315b748b4d2dcd123d1d3e18"
+      }
+    }
+  ],
+  "status": "source_checks_failed",
+  "whole_ci_qualified": false,
+  "implementation_todos_added": 0
+}

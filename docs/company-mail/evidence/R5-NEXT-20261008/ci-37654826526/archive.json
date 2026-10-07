@@ -1,0 +1,34 @@
+{
+  "run_id": 37654826526,
+  "artifact_id": 11498123972,
+  "github_digest": "sha256:5fb054961534f15243505d276f88c9895d7441515e15adc5c5ef88b93ee5cb35",
+  "encoded_file": "backend-artifact.zip.b64",
+  "decoded_bytes": 1089285,
+  "decoded_sha256": "5fb054961534f15243505d276f88c9895d7441515e15adc5c5ef88b93ee5cb35",
+  "files": {
+    "backend-artifact.zip.b64": {
+      "bytes": 1471491,
+      "sha256": "6bb7e320e25eb2c1cd662a3579043f70ade95381ef3b80d30bdb1cd614b5587e"
+    },
+    "backend-artifact-inventory.json": {
+      "bytes": 8544,
+      "sha256": "76d38583097835e4c2d4daea5e0131f94a86e0d65bf11d66e7bbeebe8a311614"
+    },
+    "github-snapshot.json": {
+      "bytes": 20263,
+      "sha256": "755349cc709ec011ec20dbfafaaf8fff8c9a9bb4fc3c1e33501f9b24f20ea931"
+    },
+    "summary.json": {
+      "bytes": 6997,
+      "sha256": "6dbbddbe6d49717ba99b5993cdc6aad998d9427bebf9326000ce9e2261a000a9"
+    },
+    "tested-commit.json": {
+      "bytes": 297,
+      "sha256": "c0b68b77c0c3443546bb67d8e941f5c1464d58506ef64f275f5766ca4a2d0311"
+    },
+    "protocol-classifier-replay.json": {
+      "bytes": 1779,
+      "sha256": "05f80839b494ec64be87b7a48d274ce24ef338743121962a77b085a4b7dce67a"
+    }
+  }
+}

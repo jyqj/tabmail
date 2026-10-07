@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
-import { useSessionScope } from "@/lib/session";
+import { useLayoutEffect, useRef, useState } from "react";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import { useAPI } from "@/hooks/use-api";
 import {
   company,
+  errorText,
   workMailboxes,
   type MailTemplate,
   type MailTemplateEditor,
@@ -33,15 +34,20 @@ type TemplateTab = "library" | "editor" | "versions" | "grants";
 // usage grants. API calls are unchanged; only the presentation is tabbed.
 export default function TemplatesPage() {
   const scope = useSessionScope();
-  return <TemplatesSession key={scope} />;
+  return <TemplatesSession key={scope} scope={scope} />;
 }
 
-function TemplatesSession() {
+function TemplatesSession({ scope }: { scope: string }) {
   const t = useText();
   const { busy, run } = useAction();
-  const templates = useAPI("company-templates", () =>
-    company<MailTemplate[]>("/templates"),
-  );
+  async function readTemplateLibrary() {
+    const list = await company<MailTemplate[]>("/templates");
+    if (!Array.isArray(list)) {
+      throw new Error(t("模板库响应无效，请重新加载。", "Invalid template library response. Reload the library."));
+    }
+    return list;
+  }
+  const templates = useAPI("company-templates", readTemplateLibrary);
   const boxes = useAPI("template-mailboxes", workMailboxes);
   const [tab, setTab] = useState<TemplateTab>("library");
   const [selection, setSelection] = useState<{ generation: number; edit: MailTemplateEditor | null }>({ generation: 0, edit: null });
@@ -58,6 +64,47 @@ function TemplatesSession() {
   const [mailbox, setMailbox] = useState("");
   const [versionKey, setVersionKey] = useState(0);
   const activeMailbox = mailbox || boxes.data?.[0]?.mailbox.id || "";
+  const [checkingStatus, setCheckingStatus] = useState(false);
+  const [retireRecovery, setRetireRecovery] = useState<Error | null>(null);
+  const libraryError = retireRecovery || templates.error;
+  const libraryValidating = checkingStatus || templates.isValidating;
+  const libraryReady = !libraryError && !templates.isLoading &&
+    !libraryValidating && Array.isArray(templates.data);
+  const lifetime = useRef<object | null>(null);
+  const currentLibrary = useRef<{ data: MailTemplate[] | undefined; ready: boolean } | null>(null);
+  useLayoutEffect(() => {
+    lifetime.current = {};
+    return () => { lifetime.current = null; };
+  }, []);
+  useLayoutEffect(() => {
+    currentLibrary.current = { data: templates.data, ready: libraryReady };
+    return () => { currentLibrary.current = null; };
+  }, [templates.data, libraryReady]);
+  const owns = (owner: object) => lifetime.current === owner && scope === sessionScope();
+
+  async function refreshTemplateLibrary() {
+    const owner = lifetime.current;
+    if (!owner || !owns(owner)) return;
+    setCheckingStatus(true);
+    try {
+      // A revalidation can resolve with retained cached data after its GET
+      // fails. Use an explicit read promise so recovery confirms a new result.
+      const fresh = await templates.mutate(async () => {
+        const list = await readTemplateLibrary();
+        if (!owns(owner)) throw new DOMException("Template view changed", "AbortError");
+        return list;
+      }, { revalidate: false });
+      if (owns(owner)) setRetireRecovery(null);
+      return fresh;
+    } catch (error) {
+      // A failed read can reject before the success-path ownership check.
+      // Keep old retries from reporting errors in a different template view.
+      if (!owns(owner)) throw new DOMException("Template view changed", "AbortError");
+      throw error;
+    } finally {
+      if (owns(owner)) setCheckingStatus(false);
+    }
+  }
 
   function selectTemplate(template: MailTemplate) {
     replaceEdit(structuredClone(template));
@@ -88,13 +135,32 @@ function TemplatesSession() {
     setTab("editor");
   }
   function retireTemplate(template: MailTemplate) {
+    const owner = lifetime.current;
+    const observed = currentLibrary.current;
+    if (!owner || !owns(owner) || !observed?.ready ||
+      !observed.data?.includes(template)) return Promise.resolve();
     return run(async () => {
-      await company(`/templates/${template.id}/retire`, {
-        method: "POST",
-        body: { revision: template.revision, retired: !template.retired },
-      });
-      await templates.mutate();
-      if (edit?.id === template.id) setEdit(() => null);
+      let acknowledged = false;
+      try {
+        await company(`/templates/${template.id}/retire`, {
+          method: "POST",
+          body: { revision: template.revision, retired: !template.retired },
+        });
+        acknowledged = true;
+        if (!owns(owner)) return;
+        await refreshTemplateLibrary();
+        if (owns(owner) && edit?.id === template.id) {
+          setEdit(current => current === edit ? null : current);
+        }
+      } catch (error) {
+        if (!owns(owner)) return;
+        const message = acknowledged
+          ? t("模板状态已保存，但模板库刷新失败。请重试加载以核对当前状态。", "Template status was saved, but the library could not be refreshed. Retry loading to check the current state.")
+          : t("无法确认模板状态是否已变更。请先重新加载模板库，再决定是否重试。", "The template status change could not be confirmed. Reload the library before trying again.");
+        const recovery = new Error(`${message} ${errorText(error)}`);
+        setRetireRecovery(recovery);
+        throw recovery;
+      }
     });
   }
   async function onSaved() {
@@ -136,10 +202,12 @@ function TemplatesSession() {
         </ActionButton>
       </header>
       <LoadError
-        error={templates.error || boxes.error}
+        error={libraryError || boxes.error}
         onRetry={() => {
-          void templates.mutate();
-          void boxes.mutate();
+          void run(async () => {
+            await refreshTemplateLibrary();
+            await boxes.mutate();
+          });
         }}
       />
       <Tabs
@@ -166,6 +234,9 @@ function TemplatesSession() {
           <TemplateLibraryView
             templates={templates.data}
             busy={busy}
+            isLoading={templates.isLoading}
+            isValidating={libraryValidating}
+            error={libraryError}
             selectedId={edit?.id}
             onSelect={selectTemplate}
             onRetire={retireTemplate}
