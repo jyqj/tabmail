@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -171,8 +172,9 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 	case models.SettingAutoCreateRouteRPM, models.SettingAutoCreateTenantRPM,
 		models.SettingMonitorHistory, models.SettingFallbackRetentionH,
 		models.SettingPublicIPRPM:
-		// Must be a valid int
-		if _, err := fmt.Sscanf(value, "%d", new(int)); err != nil {
+		// Match the settings reader: the entire stored value must be an int.
+		// A valid prefix would otherwise be accepted here and default at runtime.
+		if _, err := strconv.Atoi(value); err != nil {
 			return app.BadRequest("value must be an integer for " + key)
 		}
 	case models.SettingStripPlusTag, models.SettingOpenRegistration:

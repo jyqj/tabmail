@@ -75,12 +75,19 @@ func (s *Store) Put(ctx context.Context, raw []byte) (string, error) {
 // reaped the object, it is re-put under the store's advisory lock — the caller
 // never constructs that callback.
 func (s *Store) StoreMessage(ctx context.Context, m *models.Message, raw []byte, maxMessages int) (bool, error) {
+	// The metadata lock and the ensured object must identify the same content.
+	if m == nil || m.RawObjectKey != Key(raw) {
+		return false, fmt.Errorf("rawobject: message key does not match raw content")
+	}
 	return s.refs.CreateMessageWithQuota(ctx, m, maxMessages, s.ensure(raw))
 }
 
 // StoreIngestJob inserts an ingest job referencing raw, with the same re-put
 // guarantee as StoreMessage.
 func (s *Store) StoreIngestJob(ctx context.Context, job *models.IngestJob, raw []byte) error {
+	if job == nil || job.RawObjectKey != Key(raw) {
+		return fmt.Errorf("rawobject: ingest job key does not match raw content")
+	}
 	return s.refs.CreateIngestJob(ctx, job, s.ensure(raw))
 }
 
