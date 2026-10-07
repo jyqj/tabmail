@@ -318,15 +318,18 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 		}
 	}
 
-	// Check suppression list — block sending to suppressed addresses.
-	for _, rcpt := range append(append(in.To, in.CC...), in.BCC...) {
-		suppressed, err := s.store.IsSuppressed(ctx, tenant.ID, rcpt)
-		if err != nil {
-			s.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
-			return nil, false, internalFailure()
-		}
-		if suppressed {
-			return nil, false, badRequest("recipient " + rcpt + " is suppressed (hard bounce); remove from suppression list to retry")
+	// Preserve caller-owned slices and their roles: appending into To can
+	// overwrite CC or BCC when callers share backing capacity between groups.
+	for _, group := range [][]string{in.To, in.CC, in.BCC} {
+		for _, rcpt := range group {
+			suppressed, err := s.store.IsSuppressed(ctx, tenant.ID, rcpt)
+			if err != nil {
+				s.logger.Err(err).Str("address", rcpt).Msg("checking suppression list")
+				return nil, false, internalFailure()
+			}
+			if suppressed {
+				return nil, false, badRequest("recipient " + rcpt + " is suppressed (hard bounce); remove from suppression list to retry")
+			}
 		}
 	}
 

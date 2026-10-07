@@ -33,25 +33,42 @@ jobs:
       TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
     steps:
       - uses: actions/checkout@v4
+        id: backend_checkout
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Record the tested backend checkout
+        id: backend_source
+        if: ${{ !cancelled() && steps.backend_checkout.outcome == 'success' }}
+        run: git rev-parse HEAD > go-test-source-sha.txt
       - uses: actions/setup-go@v5
+        id: backend_go
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
         with:
           go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        id: backend_node
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        with:
+          node-version: '22'
       - name: PostgreSQL client for coordinated restore rehearsal
+        id: backend_pg_client
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y postgresql-client-16
           echo /usr/lib/postgresql/16/bin >> "$GITHUB_PATH"
       - name: Exact immutable archive boundary
+        id: backend_archive
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
         run: python3 -B scripts/r5_archive_boundary.py --root .
       - name: Build
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: go build ./...
       - name: Race tests with PostgreSQL
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_pg_client.outcome == 'success' }}
         run: |
           set -euo pipefail
-          git rev-parse HEAD > go-test-source-sha.txt
           set +e
           go test -json -race -count=1 -timeout=180s ./... | tee go-test.jsonl
           test_exit=$?
@@ -60,28 +77,52 @@ jobs:
             --log go-test.jsonl --exit-code "$test_exit" \
             --source-sha "$(cat go-test-source-sha.txt)" | tee go-test-evidence.json
       - name: Prove missing execution cannot pass
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: |
           python3 -B scripts/test_go_evidence_integration.py \
-            --output-dir go-test-negative-evidence --source-sha "$(git rev-parse HEAD)"
+            --output-dir go-test-negative-evidence --source-sha "$(cat go-test-source-sha.txt)"
       - name: Install pinned contract checker dependency
+        id: backend_contract_deps
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
         run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
+      - name: Prepare the pinned TypeScript scanner dependency
+        id: backend_typescript
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' }}
+        run: |
+          python3 -B - <<'PY'
+          import json
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, 'scripts')
+          from r5_source_runner_prepare import prepare_typescript
+          receipt = prepare_typescript(Path.cwd())
+          receipt['source_sha'] = Path('go-test-source-sha.txt').read_text().strip()
+          Path('backend-typescript-preparation.json').write_text(json.dumps(receipt, indent=2) + '\n')
+          PY
       - name: Validation tool regressions
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_node.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' }}
         run: python3 -B scripts/run_r5_source_version_tests.py --root . --output source-version-tests.json
       - name: DTO field contract
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' }}
         run: python3 scripts/check_contract_drift.py
       - name: Fresh route/client compatibility inventory and upgrade plan
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_node.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' && steps.backend_typescript.outcome == 'success' }}
         run: python3 -B scripts/check_r5_compatibility.py
       - name: Transaction syntax and review inventory drift
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: python3 -B scripts/check_r5_transactions.py
       - name: Real protocol baseline with explicit target failures
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: |
           python3 -B scripts/check_r5_protocol.py \
             --run shared-db --output-dir protocol-baseline-evidence
       - name: Actual HTTP response contracts with PostgreSQL
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' && steps.backend_contract_deps.outcome == 'success' }}
         run: |
           python3 -B scripts/check_http_contract.py \
-            --output-dir http-contract-evidence --source-sha "$(git rev-parse HEAD)"
+            --output-dir http-contract-evidence --source-sha "$(cat go-test-source-sha.txt)"
       - name: Vet
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: go vet ./...
       - name: Upload test evidence
         if: always()
@@ -97,6 +138,8 @@ jobs:
             http-contract-evidence
             !http-contract-evidence/responses.json
             protocol-baseline-evidence
+            backend-typescript-preparation.json
+          if-no-files-found: error
           retention-days: 14
   frontend:
     runs-on: ubuntu-latest
