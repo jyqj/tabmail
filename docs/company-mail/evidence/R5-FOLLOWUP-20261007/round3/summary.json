@@ -1,0 +1,38 @@
+{
+  "round": 3,
+  "source_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+  "local_final_commit": "9bdac9f1c68bbd85c6ded42df492a8ca84b1c02a",
+  "source_tree": "1621d5fefb443d9d314abc2f9e0fab94914ce4c4",
+  "initial_integrated_test_commit": "706d9ea6ff0ce79131778c53731c783dd01b0a0e",
+  "subsequent_change": "Only the new version-history test controller moved into a layout effect for React lint; all Go inputs and product sources are unchanged. The final 123-case frontend subset also passed in the full final-source invocation.",
+  "task_ids": ["R5-FOLLOWUP-20261007-08", "R5-FOLLOWUP-20261007-09", "R5-FOLLOWUP-20261007-10"],
+  "complete": 10,
+  "total": 10,
+  "remaining": 0,
+  "parent_complete": 10,
+  "parent_total": 171,
+  "parent_remaining": 161,
+  "integrated_tests": {
+    "go_leaf_cases": {"pass": 760, "fail": 0, "skip": 0},
+    "frontend_cases": {"pass": 123, "fail": 0, "skip": 0},
+    "go_build_exit": 0,
+    "go_vet_exit": 0,
+    "full_frontend_lint_exit": 0,
+    "exact_final_frontend_build_exit": 0,
+    "frontend_static_pages": 29
+  },
+  "review": {
+    "typed_options": "root reviewed; existing required/type/render safety retained; historical invalid definitions now rejected",
+    "preview": "root reviewed; actual management preview is not ordinary can_send authorization",
+    "version_history": "independent backend and frontend agents accepted; final test bytes independently replayed against the original product"
+  },
+  "qualification": "All ten bounded follow-up tasks are implemented and reviewed. Full CI and parent-task acceptance remain incomplete.",
+  "full_default_frontend": {
+    "initial_incomplete_runtime": {"pass": 985, "fail": 15, "skip": 3},
+    "corrected_go_runtime": {"pass": 989, "fail": 14, "skip": 0},
+    "corrected_failures": {"private_fixture": 1, "original_5000ms_timeouts": 13},
+    "single_worker_four_file_diagnostic": {"pass": 83, "fail": 1, "skip": 0},
+    "qualification": "Not green. The bounded diagnostic does not replace the default full-suite result; no timeout, worker-default or skip configuration was changed."
+  },
+  "publication_scope": "Reviewed source identities, task status and aggregate counts only; raw execution logs remain local."
+}

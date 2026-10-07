@@ -4605,7 +4605,7 @@
       "clients": [
         {
           "source": "web/app/(dashboard)/company/templates/page.tsx",
-          "line": 37,
+          "line": 43,
           "branch": 0,
           "callee": "company",
           "owner": "templates",
@@ -4755,7 +4755,7 @@
       "clients": [
         {
           "source": "web/components/company/templates/versions.tsx",
-          "line": 37,
+          "line": 48,
           "branch": 0,
           "callee": "company",
           "owner": "versions",
@@ -8872,7 +8872,7 @@
       "clients": [
         {
           "source": "web/components/company/templates/editor.tsx",
-          "line": 61,
+          "line": 169,
           "branch": 1,
           "callee": "company",
           "owner": "res",
@@ -8990,10 +8990,10 @@
         },
         {
           "source": "web/components/company/templates/editor.tsx",
-          "line": 310,
+          "line": 111,
           "branch": 0,
           "callee": "company",
-          "owner": "TemplateEditorView",
+          "owner": "value",
           "expression": "\"/templates/preview\"",
           "path": "/api/v1/company/templates/preview",
           "methods": [
@@ -9083,12 +9083,12 @@
       ],
       "clients": [
         {
-          "source": "web/app/(dashboard)/company/templates/page.tsx",
-          "line": 98,
+          "source": "web/components/company/templates/editor.tsx",
+          "line": 199,
           "branch": 0,
           "callee": "company",
-          "owner": "onPublished",
-          "expression": "`/templates/${value.id}/publish`",
+          "owner": "save",
+          "expression": "`/templates/${res.id}/publish`",
           "path": "/api/v1/company/templates/{dynamic}/publish",
           "methods": [
             "POST"
@@ -9176,7 +9176,7 @@
       "clients": [
         {
           "source": "web/app/(dashboard)/company/templates/page.tsx",
-          "line": 76,
+          "line": 92,
           "branch": 0,
           "callee": "company",
           "owner": "retireTemplate",
@@ -9964,11 +9964,11 @@
       "clients": [
         {
           "source": "web/components/company/templates/editor.tsx",
-          "line": 61,
+          "line": 169,
           "branch": 0,
           "callee": "company",
           "owner": "res",
-          "expression": "`/templates/${edit.id}`",
+          "expression": "`/templates/${snapshot.id}`",
           "path": "/api/v1/company/templates/{dynamic}",
           "methods": [
             "PUT"
@@ -10112,7 +10112,7 @@
   ],
   "source_closure": {
     "docs/company-mail/evidence/R5-API-MATRIX.json": "56cc04e6c7727346345853c7fb079eaac408e75164ea630372ad2c0f61d5fbdc",
-    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "83eeb4a43fa3a6c762353c1597c00e998ca64bf68138a7eb165984095b110e3d",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "76d03e2c33420a36cf49b0e740656ec83e672598028b9b0257a2de8d171acec7",
     "internal/api/handlers/admin.go": "7bdcc137f5355abb8b0df2f41f2f38a9926ac94a3de1488a7bacbb9ce72c3917",
     "internal/api/handlers/app_error.go": "1c745e35259f538938df75356997861841a7bb83c7af2302caa8c661efe147ff",
     "internal/api/handlers/audit.go": "ac2cd9156fe0ccea8085670033dd1a2762a9589371e161dd7cc2a287df6dde73",
@@ -10165,7 +10165,7 @@
     "internal/company/permission_editor_decode.go": "0bca03df38ea6a6095dd12c49ff6aecc7ccc406c944970c0759ee43d181ce219",
     "internal/company/permission_profile_json.go": "a2eade6ff3af01531cc75f4e4609057906de8b5305e5743c9e1eae7fd409a83d",
     "internal/company/submissions.go": "3e2cdbfd38091aef3dc7165aa08bf93004d60ee869c26d6c86573705018d1ee9",
-    "internal/company/templates.go": "e35aecef4feb2929c4140dd75c825570e8dfd25722513f0d785c6b3e50ee6010",
+    "internal/company/templates.go": "425d56688eb808f89465e159f183443a5555cb46739aada2d391e955c86e75aa",
     "internal/company/types.go": "7c67ba6d42001bfd704865cb6887146e35541aa8c8808ee8b11eaf647107f305",
     "internal/models/mailbox_grants.go": "ce208909d625521c000934f18240ca0d8a1e7f805161d939096c94d890ae6e83",
     "internal/models/models.go": "497558bbcdb3579034db3744e544c5f09ae5f28d101ea966a6d9e9e6e7ab002d",
@@ -10173,13 +10173,13 @@
     "scripts/check_contract_drift.py": "a1199a4766ebbd30270df438b5cceaa6507bcf239a6d172dde937612d93ab107",
     "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
     "web/app/(dashboard)/company/recovery/page.tsx": "fb7c45ece2271935716c7ab20fce5526d8a74fa3bf7acdb7b879188f42158ba5",
-    "web/app/(dashboard)/company/templates/page.tsx": "283afc6db4e6613add39ad07dca2a11024408182cadd525ce14aa4e0e8b1175f",
+    "web/app/(dashboard)/company/templates/page.tsx": "277cdac03c382617e1e09d81df8624e5df01b4ba11d17c98a3b1b0f961d048c9",
     "web/app/auth/activate/page.tsx": "2b94709d4bf8939db004b35fccd560841e25865afa5861a6272666b91fe015af",
     "web/components/company/compose.tsx": "cb6d6a0a8ce422d4d85a1e147b2b9c7e5947ae516a28415224785c05efff9995",
     "web/components/company/grants.tsx": "3d177a00d1ad2618ecb6c58f106f781b7560760b99bf0022b42ac82302cb38dd",
-    "web/components/company/templates/editor.tsx": "a8fe1fad206dd617f92f9a1430f1c28a992fb567aa33005d44d878481f941130",
+    "web/components/company/templates/editor.tsx": "a88a764923cb19f187e22183cd46d879ab8200a037e0168c9581af0c2e185767",
     "web/components/company/templates/grants.tsx": "6f7f4eb1a3713e0429586d805af9400ccad2dc18d53411c6abfddd9220cfa1bd",
-    "web/components/company/templates/versions.tsx": "dcc1b34e7606df8afab6a1db8fb5ac82f3aeaa4e520a6ade966bb9cb964f77c7",
+    "web/components/company/templates/versions.tsx": "5824b4d9f1fd5c398523b2ca3f5680c788a63601d90a9821e5239efbfc186338",
     "web/features/company/access-explanation.tsx": "542090c78a2a85f0a98d2b99edf8114a71cddc2840cf74892822bb2768b0942a",
     "web/features/company/api.ts": "c604cfbaf0e431b7cfaf0c6709a3ada2b4ef1b99e208e8e0731cde917e863105",
     "web/features/company/audit.tsx": "3eaeac9443ebf33c4a496593c609781e7ad7966ac461809b3c7ae3113c85a99e",
@@ -10212,17 +10212,17 @@
     "qualification": "historical_metadata_only_not_current_wire"
   },
   "acquisition": {
-    "base_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+    "base_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
   },
   "inventory_revision": {
-    "revision": 4,
-    "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+    "revision": 5,
+    "source_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
     "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
-    "previous_snapshot_commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
-    "previous_snapshot_blob": "6b14b9ec4e8aac5caac5d74f47847b16e25e9e5e",
-    "previous_sha256": "0817aa5c77142849401dafe8e5acf3194feedc489539442a3cdcf9686cfd7f0d",
+    "previous_snapshot_commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+    "previous_snapshot_blob": "23a227e3eae3aacc44d2c2be97c35bfa55bcc8a6",
+    "previous_sha256": "56452854110d0c33b5d2ae9eaf1abe43a7f77681a59307fc2470796dbdc18f56",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/README.md"
   }
 }

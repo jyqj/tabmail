@@ -44,6 +44,13 @@ function reconcileSaved(current: MailTemplateEditor | null, snapshot: MailTempla
 
 type PublishedSnapshot = { saved: MailTemplate; owner: object; edits: number };
 
+function isRenderedTemplate(value: unknown): value is RenderedTemplate {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+    && "subject" in value && typeof value.subject === "string"
+    && "text_body" in value && typeof value.text_body === "string"
+    && "html_body" in value && typeof value.html_body === "string";
+}
+
 // TemplateEditorView edits the mutable draft: name, subject, text/HTML body
 // and the declared variables. It also owns server-side validation/preview and
 // the save / save-and-publish actions that create immutable versions.
@@ -70,7 +77,7 @@ export function TemplateEditorView({
   const [editorScope] = useState(sessionScope);
   const { busy, run } = useAction();
   const [vars, setVars] = useState<Record<string, string>>({});
-  const [preview, setPreview] = useState<RenderedTemplate | null>(null);
+  const [previewResult, setPreview] = useState<{ owner: object; value: RenderedTemplate } | null>(null);
   const [publication, setPublication] = useState<PublishedSnapshot | null>(null);
   const lifetime = useRef<object | null>(null);
   const committed = useRef(edit);
@@ -81,6 +88,39 @@ export function TemplateEditorView({
   }, []);
   useLayoutEffect(() => { committed.current = edit; }, [edit]);
   const owns = (owner: object) => lifetime.current === owner && editorScope === sessionScope();
+  const selectedMailbox = mailboxes.find(value => value.mailbox.id === mailbox);
+  // These are the rendering inputs and the selected sender's availability.
+  // Management preview does not depend on ordinary read/send capabilities.
+  const previewSignature = JSON.stringify([scope, edit?.draft, vars, mailbox,
+    !!selectedMailbox, selectedMailbox?.mailbox.full_address]);
+  const [previewIntent, setPreviewIntent] = useState({ signature: previewSignature });
+  if (previewIntent.signature !== previewSignature) setPreviewIntent({ signature: previewSignature });
+  const currentPreview = useRef<object | null>(null);
+  useLayoutEffect(() => {
+    currentPreview.current = previewIntent;
+    return () => { currentPreview.current = null; };
+  }, [previewIntent]);
+  const preview = previewResult?.owner === previewIntent && editorScope === scope ? previewResult.value : null;
+
+  async function renderPreview() {
+    const owner = lifetime.current;
+    const intent = previewIntent;
+    const isCurrent = () => owner !== null && owns(owner) && currentPreview.current === intent;
+    if (!edit || !selectedMailbox || !isCurrent()) return;
+    try {
+      const value = await company<unknown>("/templates/preview", {
+        method: "POST", body: { mailbox_id: mailbox, draft: edit.draft, vars },
+      });
+      // Check ownership before touching response fields or reporting errors.
+      // An away-and-back committed input change never revives an old result.
+      if (!isCurrent()) return;
+      if (!isRenderedTemplate(value))
+        throw new Error(t("模板预览响应无效，请重试。", "Invalid template preview response; try again."));
+      setPreview({ owner: intent, value });
+    } catch (error) {
+      if (isCurrent()) throw error;
+    }
+  }
 
   function update(p: Partial<TemplateDraft>) {
     edits.current += 1;
@@ -359,6 +399,9 @@ export function TemplateEditorView({
             }}
           >
             <option value="" />
+            {mailbox && !selectedMailbox && <option value={mailbox} disabled>
+              {t("所选邮箱当前不可用", "Selected mailbox is unavailable")}
+            </option>}
             {mailboxes.map((v) => (
               <option key={v.mailbox.id} value={v.mailbox.id}>
                 {v.mailbox.full_address}
@@ -384,21 +427,8 @@ export function TemplateEditorView({
         </Field>
       ))}
       <ActionButton
-        disabled={busy || !mailbox}
-        onClick={() =>
-          run(async () =>
-            setPreview(
-              await company<RenderedTemplate>("/templates/preview", {
-                method: "POST",
-                body: {
-                  mailbox_id: mailbox,
-                  draft: edit.draft,
-                  vars,
-                },
-              }),
-            ),
-          )
-        }
+        disabled={busy || !selectedMailbox || editorScope !== scope}
+        onClick={() => run(renderPreview)}
       >
         {t("服务端校验与预览", "Validate and preview on server")}
       </ActionButton>
