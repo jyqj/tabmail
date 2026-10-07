@@ -1,0 +1,37 @@
+{
+  "npm_ci": "pass",
+  "typecheck": "pass",
+  "production_build": "pass",
+  "new_full_lock_tests": {
+    "tests": 3,
+    "pass": 3
+  },
+  "existing_lock_archive_and_runner_controls": {
+    "tests": 10,
+    "pass": 10
+  },
+  "complete_source_runner_unit_file": {
+    "tests": 15,
+    "pass": 14,
+    "fail": 1,
+    "failure": "Linux pinned executable FD unavailable; same unchanged test fails on baseline"
+  },
+  "audit_before": {
+    "high": 11,
+    "critical": 1,
+    "total": 12
+  },
+  "audit_after": {
+    "high": 8,
+    "critical": 0,
+    "total": 8
+  },
+  "audit_gate": "failed",
+  "direct_manifest_and_typescript_unchanged": true,
+  "independent_changed_dependency_edges_checked": 44,
+  "tested_sha256": {
+    "web/package-lock.json": "b1c85223bc1171b16a5994c2f069ada51a5574719445142c31a213e9fda84e89",
+    "scripts/r5_source_runner_prepare.py": "2ef5ab433849d8dbee5241476fe03575a605d57239a09bfa92936b84b806aa35",
+    "scripts/tests/test_r5_reviewed_web_locks.py": "15900f10488277dd1b46cc2ae8dfe4c17c44c495fc6f65ef721c9ea168dde84d"
+  }
+}

@@ -2172,3 +2172,8 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 ### 2026-10-07 Compose 发件身份、附件与预览归属
 
 - R5-P9-050／R5-P5-120：本地实现 `575c2a3` 及预览契约补充 `292eb4b` 保留失效 From 的明确选择，禁止隐式切换邮箱；显式切换保留主题、正文与原始收件人输入。上传与预览绑定已提交 sender generation、挂载和初始 session，撤权恢复不复活旧操作，晚成功/失败不污染新交互；预览三字段在消费前验证为 string，畸形响应保留编辑和上一份有效预览。两份冻结基线分别 14FAIL/7PASS→21PASS、14FAIL/5PASS→19PASS；原关联10文件178/178与新增组合5文件84/84通过，计数重叠不相加。非增量typecheck、定向lint通过，初次全lint通过（4既有warning）；独立ownership复核无阻塞并促成预览修复。详 [报告](COMPOSE-SENDER-OWNERSHIP-20261007.md)。仅挂载组件＋受控fetch，实际上传GC、完整后端/PG与shipping浏览器未因此取得新资格；两父项及依赖保持open，10/171不变，交付至整合PR #56。
+
+
+### 2026-10-07 兼容依赖更新与精确锁准入
+
+- R5-P11-070：本地实现 `556647f` 在现有semver范围内更新 proxy-addr 2.0.8、MCP SDK 1.32.1、sharp 0.35.5及对应平台包、source-map-js 1.2.2；30个lock entry更新，无增删，独审44条父依赖边均兼容。实际完整audit从11high/1critical/12total降为8high/0critical/8total；braces链仍无适用修复，严格total=0门禁保持失败。source-runner只明确准入已审旧/新两个完整锁hash并回写actualhash，TS5.9.3、archive完整性/132文件和未知锁拒绝不变。npm ci、完整tsc、production build通过；新锁3测试及既有archive/runner10控制通过。完整旧runner unit 14PASS/1FAIL，未变FD用例因本环境pinned descriptor不可用而失败，原基线同例亦失败；未豁免或写成通过。详[报告与审计证据](R5-DEPENDENCY-AUDIT-20261007.md)。仅限定依赖/工具修复，父任务、完整CI、R5 10/171保持open。
