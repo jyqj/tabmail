@@ -104,14 +104,16 @@ func (s *Service) Source(ctx context.Context, a authz.Actor, mailbox, id uuid.UU
 		return nil, err
 	}
 	check := func() error { return s.recheckMessage(ctx, a, mailbox, m) }
-	if err = check(); err != nil {
-		_ = r.Close()
-		return nil, err
+	if err = errors.Join(check(), ctx.Err()); err != nil {
+		return nil, errors.Join(err, r.Close())
 	}
-	return &authorizedSource{ReadCloser: r, check: check}, nil
+	return newAuthorizedSource(ctx, r, check), nil
 }
 
 func (s *Service) open(ctx context.Context, key string) (io.ReadCloser, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if key == "" {
 		return nil, app.NotFound("raw source not available")
 	}
@@ -119,11 +121,11 @@ func (s *Service) open(ctx context.Context, key string) (io.ReadCloser, error) {
 		return nil, app.Internal(errors.New("object storage unavailable"))
 	}
 	r, err := s.objects.Get(ctx, key)
-	if err != nil {
-		return nil, app.Internal(err)
-	}
 	if r == nil {
-		return nil, app.Internal(errors.New("object storage returned no reader"))
+		return nil, app.Internal(errors.Join(err, ctx.Err(), errors.New("object storage returned no reader")))
+	}
+	if err = errors.Join(err, ctx.Err()); err != nil {
+		return nil, app.Internal(errors.Join(err, r.Close()))
 	}
 	return r, nil
 }

@@ -112,6 +112,7 @@ jobs:
         if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: python3 -B scripts/check_r5_transactions.py
       - name: Real protocol baseline with explicit target failures
+        id: backend_protocol
         if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         env:
           GOOS: linux
@@ -124,6 +125,7 @@ jobs:
           set -euo pipefail
           python3 -B scripts/prepare_r5_protocol_source.py --root . \
             --output-dir "$RUNNER_TEMP/tabmail-protocol-source"
+          echo "source_directory=$RUNNER_TEMP/tabmail-protocol-source" >> "$GITHUB_OUTPUT"
           python3 -B scripts/check_r5_protocol.py \
             --run shared-db --output-dir protocol-baseline-evidence \
             --source-policy r5_current_local_inputs_archive_boundary_v4 \
@@ -152,9 +154,14 @@ jobs:
             !http-contract-evidence/responses.json
             protocol-baseline-evidence
             backend-typescript-preparation.json
-            ${{ runner.temp }}/tabmail-protocol-source/source-manifest.json
-            ${{ runner.temp }}/tabmail-protocol-source/source-manifest.sha256
-            ${{ runner.temp }}/tabmail-protocol-source/preparation.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload protocol source manifest
+        if: ${{ always() && steps.backend_protocol.outputs.source_directory != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-p0-protocol-source-manifest
+          path: ${{ steps.backend_protocol.outputs.source_directory }}
           if-no-files-found: error
           retention-days: 14
   frontend:
