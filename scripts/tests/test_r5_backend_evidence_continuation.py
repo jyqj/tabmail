@@ -124,7 +124,10 @@ class BackendEvidenceContinuationTests(unittest.TestCase):
             'source-version-tests.json', 'go-test.jsonl', 'go-test-source-sha.txt',
             'go-test-evidence.json', 'go-test-negative-evidence', 'http-contract-evidence',
             '!http-contract-evidence/responses.json', 'protocol-baseline-evidence',
-            'backend-typescript-preparation.json'})
+            'backend-typescript-preparation.json',
+            '${{ runner.temp }}/tabmail-protocol-source/source-manifest.json',
+            '${{ runner.temp }}/tabmail-protocol-source/source-manifest.sha256',
+            '${{ runner.temp }}/tabmail-protocol-source/preparation.json'})
 
     def test_typescript_preparation_reuses_the_reviewed_installer_and_receipt(self):
         command = by_name('Prepare the pinned TypeScript scanner dependency')['run']

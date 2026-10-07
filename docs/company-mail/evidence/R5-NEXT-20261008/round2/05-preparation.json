@@ -1,0 +1,35 @@
+{
+  "status": "source_prepared",
+  "run": "shared-db",
+  "source_policy": "r5_current_local_inputs_archive_boundary_v4",
+  "source_sha": "bf3f5a1474617eb6c94c46fa6a42893d11e9aea9",
+  "source_manifest_sha256": "36699f1694a8c98f099737cb0b4834e618e1648ca453d0e3e03855872b31595a",
+  "build_context": {
+    "goos": "linux",
+    "goarch": "amd64",
+    "cgo_enabled": 1,
+    "build_tag_sets": [
+      [
+        "r5protocol"
+      ]
+    ],
+    "race": true,
+    "go_work": "off",
+    "go_flags": "",
+    "selection": "all_local_variants_superset"
+  },
+  "go_environment": {
+    "CGO_ENABLED": "1",
+    "GOARCH": "amd64",
+    "GOENV": "",
+    "GOFLAGS": "",
+    "GOHOSTARCH": "amd64",
+    "GOHOSTOS": "linux",
+    "GOOS": "linux",
+    "GOVERSION": "go1.25.7",
+    "GOWORK": "off"
+  },
+  "task_complete": false,
+  "product_green": false,
+  "boundary": "Versioned archive static bytes and production variant superset; selected metadata/runtime are separate"
+}

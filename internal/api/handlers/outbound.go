@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -223,8 +222,11 @@ func (h *OutboundHandler) DeleteSuppression(w http.ResponseWriter, r *http.Reque
 	var body struct {
 		Reason string `json:"reason"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		errBadRequest(w, "reason is required")
+	// Bound the entire document, including trailing whitespace, before any
+	// deletion/audit. Content-Length is optional for a streamed request.
+	r.Body = http.MaxBytesReader(w, r.Body, 64*1024)
+	if err := decodeBody(r, &body); err != nil {
+		errBadRequest(w, "invalid suppression deletion body")
 		return
 	}
 	reason, reasonErr := credentials.AuditReason(body.Reason)

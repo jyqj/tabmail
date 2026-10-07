@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { DataTable, DataTablePagination } from "@/components/crud/data-table";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger, } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listUsers, inviteAdmin, updateUser, deleteUser, listPermissionProfiles, listDomains, } from "@/lib/api";
+import { listUsers, updateUser, deleteUser, listPermissionProfiles, listDomains, } from "@/lib/api";
 import type { AdminUser, EffectivePermission, } from "@/lib/types";
-import { Plus, MoreHorizontal, Trash2, Users, Copy, Shield, UserCheck, SlidersHorizontal, Gauge, } from "lucide-react";
+import { MoreHorizontal, Trash2, Users, Copy, Shield, UserCheck, SlidersHorizontal, Gauge, } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
@@ -28,6 +28,7 @@ import { buildPermissionEditorCommand, permissionEditorFormFromSnapshot, validat
 import type { PermissionEditorForm, PermissionEditorSnapshot, PermissionField } from "@/lib/api/permission-editor-types";
 import { useCompanyEventConsumer } from "./company-event-consumer";
 import { useSessionScope } from "@/lib/session";
+import { AdminInvitation } from "./admin-invitation";
 const USERS_PER_PAGE = 20;
 const NONE_PROFILE = "__none__";
 const emptyOverrideForm: PermissionEditorForm = {
@@ -54,13 +55,6 @@ export default function UsersPage() {
     const total = usersRes?.meta?.total ?? users.length;
     const profiles = profilesRes?.data ?? [];
     const domains = domainsRes?.data ?? [];
-    const [inviteOpen, setInviteOpen] = useState(false);
-    const [inviting, setInviting] = useState(false);
-    const [inviteEmail, setInviteEmail] = useState("");
-    const [inviteResult, setInviteResult] = useState<{
-        invite_code: string;
-        email: string;
-    } | null>(null);
     // Permission management dialog
     const [permUser, setPermUser] = useState<AdminUser | null>(null);
     const [permEffective, setPermEffective] = useState<EffectivePermission | null>(null);
@@ -81,7 +75,6 @@ export default function UsersPage() {
         ++permEpoch.current; permRequest.current?.abort();
         setPermUser(null); setPermSnapshot(null); setPermEffective(null); setPermForm(emptyOverrideForm);
         setPermLoading(false); setPermSaving(false); setPermResetting(false); setPermNeedsReload(false); setPermConflict(false);
-        setInviteOpen(false); setInviteResult(null); setInviteEmail("");
     }, [session]);
     const profileName = (profileId?: string) => {
         if (!profileId)
@@ -89,28 +82,6 @@ export default function UsersPage() {
         return profiles.find((p) => p.id === profileId)?.name ?? null;
     };
     const domainLabel = (id: string) => domains.find((domain) => domain.id === id)?.domain ?? id.slice(0, 8);
-    const handleInvite = async () => {
-        if (!inviteEmail.trim())
-            return;
-        setInviting(true);
-        try {
-            const res = await inviteAdmin(inviteEmail.trim());
-            setInviteResult({ invite_code: res.data.invite_code, email: res.data.email });
-            setInviteEmail("");
-            toast.success(t("admin.inviteSent"));
-        }
-        catch (e: unknown) {
-            const err = e as {
-                error?: {
-                    message?: string;
-                };
-            };
-            toast.error(err?.error?.message || t("admin.inviteFailed"));
-        }
-        finally {
-            setInviting(false);
-        }
-    };
     const handleToggleActive = async (user: AdminUser) => {
         try {
             await updateUser(user.id, { is_active: !user.is_active });
@@ -211,7 +182,6 @@ export default function UsersPage() {
         revalidate: () => Promise.all([mutateUsers(), mutateProfiles(), mutateDomains()]),
         onRevoked: () => {
             closePermDialog(); setPermForm(emptyOverrideForm);
-            setInviteOpen(false); setInviteResult(null); setInviteEmail("");
         },
     });
     const editorProfiles = permSnapshot?.profile
@@ -327,63 +297,7 @@ export default function UsersPage() {
         ]
         : [];
     return (<div className="flex flex-col">
-      <PageHeader title={t("admin.usersTitle")} description={t("admin.usersCount", { count: total })} actions={isPlatformAdmin ? (<Dialog open={inviteOpen} onOpenChange={(open) => {
-                setInviteOpen(open);
-                if (!open) {
-                    setInviteResult(null);
-                    setInviteEmail("");
-                }
-            }}>
-            <DialogTrigger render={<Button size="sm" className="gap-1.5"/>}>
-              <Plus className="h-3.5 w-3.5"/>
-              {t("admin.inviteAdmin")}
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>{t("admin.inviteTitle")}</DialogTitle>
-                <DialogDescription>
-                  {t("admin.inviteDesc")}
-                </DialogDescription>
-              </DialogHeader>
-
-              {inviteResult ? (<div className="space-y-4 py-4">
-                  <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950 p-3">
-                    <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                      {t("admin.inviteCreated")}
-                    </p>
-                    <p className="text-xs text-green-700 dark:text-green-300 mb-2">
-                      {inviteResult.email}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <code className="flex-1 text-xs break-all bg-white dark:bg-black/20 p-2 rounded">
-                        {inviteResult.invite_code}
-                      </code>
-                      <Button variant="outline" size="icon" className="h-8 w-8 shrink-0" onClick={() => {
-                    navigator.clipboard.writeText(inviteResult.invite_code);
-                    toast.success(t("admin.copied"));
-                }}>
-                        <Copy className="h-3.5 w-3.5"/>
-                      </Button>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setInviteOpen(false)}>
-                      {t("admin.close")}
-                    </Button>
-                  </DialogFooter>
-                </div>) : (<div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>{t("admin.email")}</Label>
-                    <Input type="email" placeholder={t("admin.emailPlaceholder")} value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleInvite()}/>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}>
-                      {inviting ? t("admin.inviting") : t("admin.sendInvite")}
-                    </Button>
-                  </DialogFooter>
-                </div>)}
-            </DialogContent>
-          </Dialog>) : null}/>
+      <PageHeader title={t("admin.usersTitle")} description={t("admin.usersCount", { count: total })} actions={isPlatformAdmin && !eventRevoked ? <AdminInvitation key={session} scope={session} /> : null}/>
 
       <div className="p-4 space-y-4">
         <Card>
