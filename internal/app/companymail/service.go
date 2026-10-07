@@ -206,7 +206,10 @@ func (s *Service) InboundAttachmentByID(ctx context.Context, a authz.Actor, mail
 	}
 	part, raw, e := s.parser.Attachment(ctx, message, m.RawObjectKey, id)
 	if e != nil {
-		return nil, app.NotFound("attachment not found")
+		if errors.Is(e, mailcontent.ErrAttachmentNotFound) {
+			return nil, app.NotFound("attachment not found")
+		}
+		return nil, app.Internal(e)
 	}
 	if e = s.recheckMessage(ctx, a, mailbox, m); e != nil {
 		return nil, e

@@ -2,7 +2,7 @@
 
 This increment rejects unsafe SMTP/retention resource values at the existing `Root.Validate` startup boundary. It advances one concrete part of R5-P8-110; it does not claim the entire configuration/schema/deployment TODO complete.
 
-Before this change, an explicit zero/negative retention interval passed `Load` and reached `time.NewTicker` in `internal/retention/scanner.go`, which panics. A nonpositive retention batch also cannot terminate the empty sweep via `n < batch`. Nonpositive SMTP message/recipient limits disable those go-smtp bounds, and nonpositive idle timeout removes its time bound. Negative SMTP connections were accepted as an undocumented unlimited setting.
+Before this change, an explicit zero/negative retention interval passed `Load` and reached `time.NewTicker` in `internal/retention/scanner.go`, which panics. A nonpositive retention batch also cannot terminate the empty sweep via `n < batch`. Nonpositive SMTP message/recipient limits disable those go-smtp bounds, while a zero SMTP idle timeout disables the deadline and a negative timeout sets an already expired deadline. Negative SMTP connections were accepted as an undocumented unlimited setting.
 
 | Actual environment key | Accepted value | Existing default |
 |---|---|---|
@@ -31,3 +31,5 @@ go test -mod=readonly -race -count=1 -timeout=60s -json ./internal/config
 The regression file SHA-256 is `b1264289f213271e835b691e4ede38e728d3c2ffbe6216b1395257e355d77a65` on both runs. Local raw evidence: `validation/wave-backend-config-baseline.jsonl` (SHA-256 `51dddae4fac1c9dfab75efc6eadc5b974e50591f718315aa7108b0692b791529`) and `validation/wave-backend-config-fixed.jsonl` (SHA-256 `cbcd7de76a025368bbb3d6dcb94a7345a2b5cd8bc579e662d868bc9c441de69c`) in the session validation directory.
 
 Remaining parent scope includes the other configuration groups, schema/examples/deployment consistency and runtime projection review. This static startup-validation increment does not assert full backend, PostgreSQL, release, or parent-task acceptance.
+
+Documentation correction during the attachment-error increment: the preceding timeout explanation now distinguishes zero from negative values. The configuration fix and frozen tests are unchanged.

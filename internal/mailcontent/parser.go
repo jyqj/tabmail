@@ -26,6 +26,10 @@ const MaxBytes int64 = 25 * 1024 * 1024
 const cacheBudget int64 = 64 * 1024 * 1024
 const maxParts = 512
 
+// ErrAttachmentNotFound means the source parsed successfully, but the requested
+// immutable part ID is absent. Source I/O and MIME errors retain their causes.
+var ErrAttachmentNotFound = errors.New("attachment not found in this source")
+
 // Bound expensive distinct-key work per Parser, independently of the LRU's
 // retained-byte budget. Same-key waiters share one slot through singleflight.
 const maxConcurrentParses = 4
@@ -218,5 +222,5 @@ func (p *Parser) Attachment(ctx context.Context, message uuid.UUID, key, id stri
 			return &company.ParsedAttachment{ID: id, Index: i, Filename: SafeFilename(f.FileName), Size: len(f.Content), ContentType: f.ContentType, SHA256: h}, append([]byte(nil), f.Content...), nil
 		}
 	}
-	return nil, nil, errors.New("attachment not found in this source")
+	return nil, nil, ErrAttachmentNotFound
 }
