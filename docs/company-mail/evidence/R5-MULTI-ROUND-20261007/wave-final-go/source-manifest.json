@@ -1,0 +1,494 @@
+{
+  "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "source_tree": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b",
+  "go_version": "go version go1.25.7 linux/amd64",
+  "packages": [
+    {
+      "import_path": "tabmail/internal/config",
+      "files": {
+        "GoFiles": [
+          {
+            "path": "internal/config/config.go",
+            "sha256": "25d1a9ee74d341d8ef955d1a5e8e0ec1ecbca152b7be4d97c12d903a1c32f6c7"
+          }
+        ],
+        "CgoFiles": [],
+        "TestGoFiles": [
+          {
+            "path": "internal/config/config_test.go",
+            "sha256": "850db153ae59f812af0a442ecc6831a0a0c40b8fb98e9d81938430878585c077"
+          },
+          {
+            "path": "internal/config/r5_resource_bounds_test.go",
+            "sha256": "b1264289f213271e835b691e4ede38e728d3c2ffbe6216b1395257e355d77a65"
+          }
+        ],
+        "XTestGoFiles": [
+          {
+            "path": "internal/config/r5_webhook_canonical_cidrs_test.go",
+            "sha256": "b6b3a0bb783568d3e90306ca9562a3185e9e61d686812f8665c77b9ac4469bea"
+          }
+        ],
+        "EmbedFiles": [],
+        "TestEmbedFiles": [],
+        "XTestEmbedFiles": []
+      }
+    },
+    {
+      "import_path": "tabmail/internal/outbound",
+      "files": {
+        "GoFiles": [
+          {
+            "path": "internal/outbound/adapter.go",
+            "sha256": "03db1c84724250ab169b6c9b57bc186d51c61a149599785b37bea211c4a9291c"
+          },
+          {
+            "path": "internal/outbound/authorization.go",
+            "sha256": "ceca65f3cbfed802c2402facb721ae72fc6351adf7639695360179ebcaff1c4d"
+          },
+          {
+            "path": "internal/outbound/builder.go",
+            "sha256": "17bf3756c2c0dce1b908abd8f4ad91514a20cd33352333acf1d2fa1add1de000"
+          },
+          {
+            "path": "internal/outbound/company.go",
+            "sha256": "d1cf02344fbbb3cef6d4768e73cad8d206d80bd01f9535aa7e69fb92c3060e5b"
+          },
+          {
+            "path": "internal/outbound/delivery.go",
+            "sha256": "5091a1f0089e5fbfadb8858f3a382923c9a2595c53173ffebc5214f7f62278b0"
+          },
+          {
+            "path": "internal/outbound/delivery_context.go",
+            "sha256": "f66f154bf18fce5cf5ee05a4531ca321dc7e88c314de9842edb78fce7ce8014f"
+          },
+          {
+            "path": "internal/outbound/enqueue_quota.go",
+            "sha256": "23f96eaea718801f00388208d50edcaeaeec17c14c0b027345d01cedfe21eea0"
+          },
+          {
+            "path": "internal/outbound/recipient_delivery.go",
+            "sha256": "41362a0ba1a7b680bd9b4b0fb40559542e1aaffc212b2bc93375f935ce01ac3d"
+          },
+          {
+            "path": "internal/outbound/repository.go",
+            "sha256": "4cf64652d7dc97c8ec06b1c7ebb94b655c47ffed85c2f774d55b7b4615afcb55"
+          },
+          {
+            "path": "internal/outbound/retry_authorization.go",
+            "sha256": "983c911590b1d99273218b2fc74f7095f87a309f9bee7a05060c8ed6d34d405d"
+          },
+          {
+            "path": "internal/outbound/service.go",
+            "sha256": "706607b4fea128ae5ca1677eccb3b1b5763ec03e54e853e31a2e0a3012aab4a7"
+          },
+          {
+            "path": "internal/outbound/workqueue.go",
+            "sha256": "8801074ac9162ba2df8f655fa6155dc56933545a35cb44ee4600f6f72064b0f0"
+          }
+        ],
+        "CgoFiles": [],
+        "TestGoFiles": [
+          {
+            "path": "internal/outbound/authorization_test.go",
+            "sha256": "ec5beaf7eee145fd4e0e12cb6a839f80d94839d618411bc9e25ee9ca47a6ed6d"
+          },
+          {
+            "path": "internal/outbound/builder_subject_test.go",
+            "sha256": "48a817ab358bbce5bd099c34b8992555686481caabc3eb519cf9d89d739e21bd"
+          },
+          {
+            "path": "internal/outbound/builder_test.go",
+            "sha256": "05dd0da711607f161797bf381cb20e9038762f0b730874b6d10effb47af7195f"
+          },
+          {
+            "path": "internal/outbound/company_p0_test.go",
+            "sha256": "cb7bb447e34dabda8b2f4ee9f665ee42b9569c5df2a16c6025e8cc20ceb254be"
+          },
+          {
+            "path": "internal/outbound/dkim_policy_test.go",
+            "sha256": "cce7b111093aec9b2a91a107b8a6d05392881bbdfca7b0d02c6965f71264f92d"
+          },
+          {
+            "path": "internal/outbound/enqueue_quota_test.go",
+            "sha256": "0c27fb3395460a9d652a4f6206d374e50ba966b83eb4d2f59be8db72939d3920"
+          },
+          {
+            "path": "internal/outbound/r5_delivery_context_test.go",
+            "sha256": "2c1f99e8a9f7bac629b3674ca690e3f5c1ed8a2a46ae04362ac4b44677e3efd9"
+          },
+          {
+            "path": "internal/outbound/r5_direct_greeting_test.go",
+            "sha256": "83cd188615a1edbd2876308fbdfc9cc70f96a0c003f30aa46ef9dd7fae625646"
+          },
+          {
+            "path": "internal/outbound/r5_null_mx_test.go",
+            "sha256": "2962b23cbe85872493fe0438661e308197b3c55e1e081dcb854c9aede4df6206"
+          },
+          {
+            "path": "internal/outbound/r5_ownerless_retry_authority_test.go",
+            "sha256": "a00d502aabd970eb02c22295974aeaca9572e1f71124e5e2aca86ba2e084a456"
+          },
+          {
+            "path": "internal/outbound/r5_permission_stage_matrix_test.go",
+            "sha256": "e733774edb794e1441a1ba71868ec65ee2614fd949996e8af30e3501c70c77fa"
+          },
+          {
+            "path": "internal/outbound/r5_recipient_checkpoint_order_test.go",
+            "sha256": "fb941210621c5837dd9546c4a8ee6f5ab8669e1abf9163848d0b6139bd758037"
+          },
+          {
+            "path": "internal/outbound/r5_recipient_error_chain_test.go",
+            "sha256": "16b91e8a5159558bfd0b85f63118e93b8b5bb4906a3cbd09896f5bfca31b97c3"
+          },
+          {
+            "path": "internal/outbound/r5_relay_ipv6_test.go",
+            "sha256": "aa4430986f4ded01b5854220b129ea72315f30802fc7f8dca95fbee85b96fbc3"
+          },
+          {
+            "path": "internal/outbound/r5_shutdown_caller_test.go",
+            "sha256": "c8a02b46e42286a40794fad96314f4eb7ccdb0a729d06e2dc5c965d12321f408"
+          },
+          {
+            "path": "internal/outbound/r5_smtp_cause_test.go",
+            "sha256": "d05a995718d44dc03ad2fa486af9c24f7ae5950464a41123c60ba4de04c122c2"
+          },
+          {
+            "path": "internal/outbound/r5_smtp_reply_classification_test.go",
+            "sha256": "f1d362a4d3f1c3cb3255d9e234d027cfc65b92a589afb2f01e50d56f084a8c66"
+          },
+          {
+            "path": "internal/outbound/recovery_test.go",
+            "sha256": "3e33941f58438775645b42ad1144f8fa7cdc144bf2efe18f0b0f8715741fa02a"
+          },
+          {
+            "path": "internal/outbound/service_test.go",
+            "sha256": "1a2d5c5fe5ddc13a66655e07ab31d1c8a20ab3b0b049065db61b8560ba3a8e9d"
+          }
+        ],
+        "XTestGoFiles": [],
+        "EmbedFiles": [],
+        "TestEmbedFiles": [],
+        "XTestEmbedFiles": []
+      }
+    },
+    {
+      "import_path": "tabmail/internal/app/companymail",
+      "files": {
+        "GoFiles": [
+          {
+            "path": "internal/app/companymail/attachment_read.go",
+            "sha256": "35e638c072f858e2ec323b956f9a5e63b5122fee826514868864e4686648af7b"
+          },
+          {
+            "path": "internal/app/companymail/compose.go",
+            "sha256": "5e4042cc672ecac35c1d7e40bec0d15c498383b1f11f230be2d3067db3d14537"
+          },
+          {
+            "path": "internal/app/companymail/read_boundary.go",
+            "sha256": "e3f10be045678b51d4a81d004b588b7beee1d5c7f361d1037b4b5f1fa5ecdaa3"
+          },
+          {
+            "path": "internal/app/companymail/service.go",
+            "sha256": "08568fba5ea6ac448eda6b166c2bd05b445e3ab723bc965a48d976a71524e5b6"
+          }
+        ],
+        "CgoFiles": [],
+        "TestGoFiles": [
+          {
+            "path": "internal/app/companymail/attachment_boundary_test.go",
+            "sha256": "ad4178758c1a670606820fcb3cfe4979755f25827be904e2990f300326b00d4e"
+          },
+          {
+            "path": "internal/app/companymail/compose_boundary_test.go",
+            "sha256": "338dcee2d10bb02087a1c7d5f55e373a55c286a8ce5c64d0107afc3b0c377042"
+          },
+          {
+            "path": "internal/app/companymail/r5_attachment_error_test.go",
+            "sha256": "4c90a33f3e72235124384d31f071bbd1e8667fa5385e9665e7e4d2ce8ca4ae03"
+          },
+          {
+            "path": "internal/app/companymail/r5_attachment_read_bounds_test.go",
+            "sha256": "99ea36bd99441e140130a09cc197a191e204cf6f9de8635508ea0eafda0639da"
+          },
+          {
+            "path": "internal/app/companymail/r5_received_content_eligibility_test.go",
+            "sha256": "ba5f104d45c789943026a5f00ca7d5d151589d6ed2592c2d7232b75fde5386c2"
+          },
+          {
+            "path": "internal/app/companymail/read_boundary_test.go",
+            "sha256": "bffea1ed9db962654f3c02fbf6e13ef28d5db64b3b2db775fd169faa18aff7c1"
+          },
+          {
+            "path": "internal/app/companymail/service_test.go",
+            "sha256": "032be6c112740f79c0e3a526237962ed04ccfcf55a4a14d7fc927efd1133a446"
+          }
+        ],
+        "XTestGoFiles": [],
+        "EmbedFiles": [],
+        "TestEmbedFiles": [],
+        "XTestEmbedFiles": []
+      }
+    },
+    {
+      "import_path": "tabmail/internal/mailcontent",
+      "files": {
+        "GoFiles": [
+          {
+            "path": "internal/mailcontent/mime_budget.go",
+            "sha256": "8b395799d3e3d3777c0ef159764d9a0d9cec3fc63fc6dce701f47ff6f3170199"
+          },
+          {
+            "path": "internal/mailcontent/parser.go",
+            "sha256": "bd35869789f745e9148a02b2722c988548290061f01fae010a7216d9368459df"
+          },
+          {
+            "path": "internal/mailcontent/source.go",
+            "sha256": "32c64183fc10fd141d50d5592c38b858a8839422f2cb25130781437473033d51"
+          }
+        ],
+        "CgoFiles": [],
+        "TestGoFiles": [
+          {
+            "path": "internal/mailcontent/mime_budget_test.go",
+            "sha256": "3feef4b4e944618b57c123f839bd6a337bc236abe937f525206bf401ba1fc51d"
+          },
+          {
+            "path": "internal/mailcontent/parser_resource_benchmark_test.go",
+            "sha256": "3953675693eff2f5b0f388e301b51c797f03bcca229cb2f130363aa038199bf2"
+          },
+          {
+            "path": "internal/mailcontent/parser_resource_test.go",
+            "sha256": "19c6ab0d29d8eab80e673f7f1221b6420e2a8946a21ac34249c1903312f313e9"
+          },
+          {
+            "path": "internal/mailcontent/parser_test.go",
+            "sha256": "d39414ab372fa2e2ffe27822b3d6030efd8cb536f8f2510a07b41342d9d21661"
+          },
+          {
+            "path": "internal/mailcontent/source_test.go",
+            "sha256": "ac6713464a00e7b5c15f38929d0b4cedc6a9a2158ba50004e0919194d27faafd"
+          }
+        ],
+        "XTestGoFiles": [],
+        "EmbedFiles": [],
+        "TestEmbedFiles": [],
+        "XTestEmbedFiles": []
+      }
+    },
+    {
+      "import_path": "tabmail/internal/api/handlers",
+      "files": {
+        "GoFiles": [
+          {
+            "path": "internal/api/handlers/admin.go",
+            "sha256": "7bdcc137f5355abb8b0df2f41f2f38a9926ac94a3de1488a7bacbb9ce72c3917"
+          },
+          {
+            "path": "internal/api/handlers/app_error.go",
+            "sha256": "1c745e35259f538938df75356997861841a7bb83c7af2302caa8c661efe147ff"
+          },
+          {
+            "path": "internal/api/handlers/audit.go",
+            "sha256": "ac2cd9156fe0ccea8085670033dd1a2762a9589371e161dd7cc2a287df6dde73"
+          },
+          {
+            "path": "internal/api/handlers/auth.go",
+            "sha256": "204248871797cbca6638f2d9da4faa46d07505e0d65629ea8e20022e20c7d806"
+          },
+          {
+            "path": "internal/api/handlers/company.go",
+            "sha256": "175bd9f9715c8105ca36121942ecf39fe540a174178831735427babac0c3b09f"
+          },
+          {
+            "path": "internal/api/handlers/company_admin_stream.go",
+            "sha256": "8d6d18887be79ace5a8743adff6a196c4c7388ad9af2e11c34a2e8abfe204548"
+          },
+          {
+            "path": "internal/api/handlers/company_archive.go",
+            "sha256": "bed269f1af47955f734333b0f64460a08e06b2e6c0262deab05315e5f404b62e"
+          },
+          {
+            "path": "internal/api/handlers/company_console.go",
+            "sha256": "cac41d0f51ad5adb3270f4d84b6fdade7213014e4aa4baf7b80bd2adbcf098ba"
+          },
+          {
+            "path": "internal/api/handlers/company_content_index.go",
+            "sha256": "1baa0d1a5c5abdcb7e81fb7623b1840f5ab621a3e52d4f4bebb3f5f114c05afd"
+          },
+          {
+            "path": "internal/api/handlers/company_domains.go",
+            "sha256": "682b3a304be29fcd9baf7cd3a4d031babeeda1f09c81458e8b1f78e03990def4"
+          },
+          {
+            "path": "internal/api/handlers/company_drafts.go",
+            "sha256": "5af1f4449b658b3546a45f6aa13d013972b0ca0d5e5b180aa1c6f98c21c05b0f"
+          },
+          {
+            "path": "internal/api/handlers/company_index.go",
+            "sha256": "e23617e316d5200b60f4aedc82bf7c77dde64a763aa4d1c26268c36d53e09f51"
+          },
+          {
+            "path": "internal/api/handlers/company_lifecycle.go",
+            "sha256": "a24867df3c6e97a28f8a0822e8c0fea95443c93fb5d14955f81a1c676ceeb9f1"
+          },
+          {
+            "path": "internal/api/handlers/company_mail.go",
+            "sha256": "2adf2f4f25ff9fc2474ce7ae3da1d64dd9b3f56fe02ebf9e99cbd3666647f9db"
+          },
+          {
+            "path": "internal/api/handlers/company_mailboxes.go",
+            "sha256": "ef19eb6d3e1d6368e056be483feb2bb07bea35beb94295b290de63e206d957e0"
+          },
+          {
+            "path": "internal/api/handlers/company_projection.go",
+            "sha256": "7dd762b4fce70913d120b6c69b6893cf49bbb77afe846e5aea30c17e9a0ebaaf"
+          },
+          {
+            "path": "internal/api/handlers/company_recovery.go",
+            "sha256": "0761eaa5321bca1754ae0fbd4a7ece35e34733e13b9cf8281bf10a35ee09597c"
+          },
+          {
+            "path": "internal/api/handlers/company_routes.go",
+            "sha256": "11df2fde1266f1ea46e4de3789fd4f7b2985939173644ff1c60b4aeb932ca6a8"
+          },
+          {
+            "path": "internal/api/handlers/company_setup.go",
+            "sha256": "4051ddb8deef81a8a0c95de9c3ecd084b75133f1c79f3506d742b066825f12ee"
+          },
+          {
+            "path": "internal/api/handlers/company_source.go",
+            "sha256": "9a8fbf7e3197272d37b3054efae32d0f26bd9990281df4704529bd12af68a602"
+          },
+          {
+            "path": "internal/api/handlers/company_stream.go",
+            "sha256": "ee6eeaf74def324e73fbd79781f2eb7530c85aa3b3d699aed4bac148fa349d8f"
+          },
+          {
+            "path": "internal/api/handlers/company_templates.go",
+            "sha256": "3a1271dd217ef5760e0dac97fd313fefe31a28c38e5b4abb973fe797eda36d0d"
+          },
+          {
+            "path": "internal/api/handlers/domains.go",
+            "sha256": "36426fb22be04cbe6c803150fd02a603ee66026cd91e009b0eb78dc41ba44e4c"
+          },
+          {
+            "path": "internal/api/handlers/member_errors.go",
+            "sha256": "4c9254b984a8b234ca5a7ea33ee2886e54ff532799231b0bf83788b5bc317659"
+          },
+          {
+            "path": "internal/api/handlers/monitor.go",
+            "sha256": "0fc4ea33da6f8a37541982689ddc1d4c43b72f425105a658e4ca26ba08cbe1fc"
+          },
+          {
+            "path": "internal/api/handlers/outbound.go",
+            "sha256": "535a602f0d2b0566c09a8131040ee25471f0266b5c15395ee9b312ffe83fa5a8"
+          },
+          {
+            "path": "internal/api/handlers/outbound_view.go",
+            "sha256": "0c649053f1c44eaa8f6e8468a57cbaac8618f158fe562e748a0131f47c197808"
+          },
+          {
+            "path": "internal/api/handlers/permissions.go",
+            "sha256": "112403579c8fe55428a9dcc10b59196bd19beeef3fe69fed514880e350f386d6"
+          },
+          {
+            "path": "internal/api/handlers/respond.go",
+            "sha256": "cad0a2150d3bfa2f30e5cd8b75fb6d2bca4b5437ef586bbf3a93c2a514265bf9"
+          },
+          {
+            "path": "internal/api/handlers/users_admin.go",
+            "sha256": "754195f3cea07c2a8805d29426e30d2e311f5886372e096b2ee13f313af81e19"
+          }
+        ],
+        "CgoFiles": [],
+        "TestGoFiles": [
+          {
+            "path": "internal/api/handlers/admin_integration_test.go",
+            "sha256": "9375effa7c6d51bfae61b738e7c87cf7c8fbfac2685d504a2145963e16962524"
+          },
+          {
+            "path": "internal/api/handlers/app_error_contract_test.go",
+            "sha256": "ee6fdc45308543b29a22437b9debaa947411656d51f5f46386958a1ef5d27b82"
+          },
+          {
+            "path": "internal/api/handlers/atomic_retry_test.go",
+            "sha256": "60c48b8a034047083a53091dcddf000dcbc21ac858e90ac6fd370fdae5434ac5"
+          },
+          {
+            "path": "internal/api/handlers/auth_body_limit_test.go",
+            "sha256": "bcf3bafa75b693fb9d265f5beff0bd70f54c1a189adb93d197a961660496e677"
+          },
+          {
+            "path": "internal/api/handlers/company_p0_test.go",
+            "sha256": "52c9c4bc1c1a81526873c6643ee5d67967277f21e794b66673fb6de2a6761ec4"
+          },
+          {
+            "path": "internal/api/handlers/company_projection_test.go",
+            "sha256": "a4eee0d088d52563197ee873a38b1fecfbc80e919c1205abe9266f37b51a0b4a"
+          },
+          {
+            "path": "internal/api/handlers/company_source_test.go",
+            "sha256": "327c4140374d5d296f391090db88f4d2c9394d6e8ac67326c273b1b4cc001bdd"
+          },
+          {
+            "path": "internal/api/handlers/company_stream_boundary_test.go",
+            "sha256": "f980f63a8c4edcb7c87c4e5bf995ab296d363328cfd2e18cd257404b4598ae49"
+          },
+          {
+            "path": "internal/api/handlers/credential_policy_test.go",
+            "sha256": "01db4706859cd805fe74a46170e63d0f34ec6ba5fb1800bc0221fec4450dc2fd"
+          },
+          {
+            "path": "internal/api/handlers/ordinary_receipt_contract_fixture_test.go",
+            "sha256": "4864395fe16df9c5f66043276037103eb373a672fe6aed79424e84bc7af485ab"
+          },
+          {
+            "path": "internal/api/handlers/outbound_test.go",
+            "sha256": "f9e3847ef583235cd6aad5ba9fc72a9f834d7b1d599ab3286f23d3ecceadd3e1"
+          },
+          {
+            "path": "internal/api/handlers/r5_attachment_error_test.go",
+            "sha256": "31a70d65debb30c862c38a12f71e933ae1d2d39007d5e8534e2454980bfb602c"
+          },
+          {
+            "path": "internal/api/handlers/r5_login_background_shutdown_test.go",
+            "sha256": "5319411ec1953d326effb4862c9cab10277d15ccd677557e97a6b06f0d0a0835"
+          },
+          {
+            "path": "internal/api/handlers/r5_protocol_http_test.go",
+            "sha256": "21e8c3851024ed598ef5b88f713206f739381ccde6cd12ec1be4ef5b480aeff9"
+          },
+          {
+            "path": "internal/api/handlers/stats_projection_test.go",
+            "sha256": "d327b8f6f6aa89fb79a02476198a2a0b44bee2992c2e9ea8e6e17783a43c39a4"
+          },
+          {
+            "path": "internal/api/handlers/submission_capabilities_test.go",
+            "sha256": "8cb537ffbf4107a3f48218991ee2d655ef0bce96a009ac1c6cd4386da48504cd"
+          }
+        ],
+        "XTestGoFiles": [
+          {
+            "path": "internal/api/handlers/r5_member_historical_delete_test.go",
+            "sha256": "725a5340c0b91b076b04b150019a71c3459cb35c0cde0650be19c85fb10e57e9"
+          }
+        ],
+        "EmbedFiles": [],
+        "TestEmbedFiles": [],
+        "XTestEmbedFiles": []
+      }
+    }
+  ],
+  "tracked_module_files": {
+    "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V2/go.mod": "fc1d5e130c96ef15961111deaffcccdccee2665d368241d568ab7c51d3ecbd73",
+    "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE-V3/go.mod": "2c40c45631beab477fa31b66e05ec302ff51a05ca410ea8d5e1c5cb2a4b69d08",
+    "docs/company-mail/evidence/R5-MIME-PREPARSE-SOURCE/go.mod": "ee10ef2992b3755bb859a7634f4f09cc0798e5d44ada21ca6dd661bbb0fede1b",
+    "go.mod": "30eb5ba911706a9c88f5cfa77bea60eb61dbd1cb2570232d581847e12902e377",
+    "go.sum": "5b850553522724f8fa71d36a94de2da91da174270ec4d460bb135dd42f53a33f",
+    "third_party/enmime-v2.3.0/go.mod": "976135226793cb303993bce4659b3883783db3225d9e5617d1e3a1540e5c5862",
+    "third_party/enmime-v2.3.0/go.sum": "0c19f867af32840597157de144e8ff9bd39dc3178522df145fd288cc4422aac4",
+    "third_party/go-smtp/go.mod": "c90914c039d7a1eba0c1c07c00435f0561607cb0e56bf43664c63a45c6e17900",
+    "third_party/go-smtp/go.sum": "91f0cc69b3e71d54c3de263a771da33435278b78aad1b4be6608d0f149da8a1f"
+  }
+}

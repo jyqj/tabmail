@@ -26,5 +26,33 @@ bounded plan; it does not assert PostgreSQL, browser, performance or release
 qualification beyond each independently named actual execution.
 
 The common product integration is
-`e32564304c0c84aa80b1184e72129fb0316d989d`. Combined verification and catalog
-reconciliation are recorded separately once their actual runs finish.
+`e32564304c0c84aa80b1184e72129fb0316d989d`. The additional combined evidence is
+now retained here:
+
+- `wave-batch-independent-review.json` and `.md` record ACCEPT for the original
+  fixed checkpoint `9232dee…`, its ten mappings, 31 original files, 80 product
+  scenarios and unchanged parent checklist. That historical 31-file audit is
+  not represented as an audit of later appended files.
+- `wave-final-go/` retains the fresh four-package and eight-handler results,
+  source manifest, vet, and original worktree VCS build failure. The separate
+  `wave-final-go-build-clone/` supplement records the one successful ordinary
+  clone build on the same commit, with default VCS stamping and no test rerun.
+- `wave-combined-web-*` retains the complete default 886-pass/1-fail result,
+  original JSON and logs, lint/build, exact web subtree, existing private
+  fixture preflight failure, and comparison with the previous full execution.
+- `wave-ci/remote-37631117018/` records the actual product CI checkout, PG
+  timeout and mandatory-execution failure, verified artifact identities, and
+  unchanged eight-high dependency audit. Its failure-event JSONL is explicitly
+  a derived subset, not the complete original 7,256,944-byte JSONL.
+
+The actual GitHub product checkout `8a6fe55…` has exactly the same full tree as
+`e325643…`. Catalog revision4 has its own adjacent evidence directory and
+strict historical provenance. See the [complete execution report](../../R5-MULTI-ROUND-20261007.md)
+for scope, results, remaining gates and source relationships.
+
+The final [revision4 remote packet](remote-ci-revision4-37633385810/README.md)
+retains 19 files, including four original digest-verified ZIPs, complete source
+runner and Vitest JSON, strict audit/checker results and exact tested checkout.
+Its current 713 tests and historical four tests passed on their separately
+recorded sources; the complete workflow still failed at its original gates.
+`source-bindings.json` records root's actual Git tree and web-subtree comparisons.

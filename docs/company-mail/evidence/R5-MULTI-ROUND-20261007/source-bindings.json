@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "groups": {
+    "product_source_and_actual_ci_checkout": {
+      "objects": [
+        {
+          "commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+          "tree": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b"
+        },
+        {
+          "commit": "8a6fe55db05bb11f9b6b0d21edd3331490d9d055",
+          "tree": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b"
+        }
+      ],
+      "full_tree_identical": true
+    },
+    "catalog_local_api_actual_ci_and_integration": {
+      "objects": [
+        {
+          "commit": "7254f12e833051ce4a6bb6d4cb145db4795f3adc",
+          "tree": "1eb98c6185e7b8b1e0be5967eb3fa741f84f0097"
+        },
+        {
+          "commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+          "tree": "1eb98c6185e7b8b1e0be5967eb3fa741f84f0097"
+        },
+        {
+          "commit": "57ae4946ea60f0021c531aefc0c091dd984ca784",
+          "tree": "1eb98c6185e7b8b1e0be5967eb3fa741f84f0097"
+        },
+        {
+          "commit": "9bcfa4f77f27ad4f118f32e92efef740ebac2c1e",
+          "tree": "1eb98c6185e7b8b1e0be5967eb3fa741f84f0097"
+        }
+      ],
+      "full_tree_identical": true
+    }
+  },
+  "scope": "Actual local Git object comparisons after fetching the observed GitHub commits; not a claim that different documentation trees were executed as the same checkout.",
+  "web_subtree": [
+    {
+      "commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+      "web_tree": "24f095f234179d15ba692e003fc2f34709026817"
+    },
+    {
+      "commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+      "web_tree": "24f095f234179d15ba692e003fc2f34709026817"
+    }
+  ],
+  "catalog_changed_paths": [
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/README.md",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/clients-baseline.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/clients-current.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/compatibility-baseline.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/compatibility-current.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/python-tests.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/reconciliation.json",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/scanner-current.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/transactions-baseline.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/transactions-current.log",
+    "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/verification.json",
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+    "scripts/tests/test_r5_catalog_reconciliation.py"
+  ]
+}

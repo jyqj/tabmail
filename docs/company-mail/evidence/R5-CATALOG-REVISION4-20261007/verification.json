@@ -1,0 +1,306 @@
+{
+  "schema_version": 1,
+  "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "source_tree": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b",
+  "boundary": "Static catalog, source-policy and scanner verification only; no new runtime, parent-task or release qualification.",
+  "tools": {
+    "go": "go version go1.25.7 linux/amd64",
+    "node": "v24.19.0",
+    "typescript": "5.9.3"
+  },
+  "baseline_cli": [
+    {
+      "name": "transactions",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "exit_code": 1,
+      "log_sha256": "4a3d33b6adcc3664381889862e42427288c7b6f043e0cd09925bb72e58c05b16",
+      "error": "caller drift: internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment\ncaller drift: internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment\ncaller drift: internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment\ncaller drift: internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox\ncaller drift: internal/store/postgres/outbound.go:*PgStore:CreateOutboundAttempt\ncaller drift: internal/store/postgres/outbound.go:*PgStore:IsSuppressed\ncaller drift: internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobFailed\ncaller drift: internal/store/postgres/outbound.go:*PgStore:MarkOutboundJobSent\ncaller drift: internal/store/postgres/outbound_recipients.go:*PgStore:BeginOutboundRecipient\ncaller drift: internal/store/postgres/outbound_recipients.go:*PgStore:CompleteOutboundRecipient\ncaller drift: internal/store/postgres/postgres.go:*PgStore:Close\ncaller drift: internal/store/postgres/postgres.go::New\ncaller drift: internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment\ncaller drift: internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent\ncaller drift: internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments"
+    },
+    {
+      "name": "compatibility",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "exit_code": 1,
+      "log_sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55",
+      "error": "client producer differs from reviewed current source inventory"
+    },
+    {
+      "name": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "exit_code": 1,
+      "log_sha256": "cb6689d856439375bbae4ab9d8c8715328ba9dd4203489bbde6b8b34d1ea83c0",
+      "error": "client source drift: recovery/page.tsx line"
+    }
+  ],
+  "current_cli_and_scanner": [
+    {
+      "name": "transactions",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "exit_code": 0,
+      "log_sha256": "517448bd669e67d3c12da0b4e94ef95e34bf2c94d156a3aadabc4b2a464c80fe",
+      "result": {
+        "status": "PASS",
+        "postgres_files": 62,
+        "functions": 395,
+        "sql_execution_calls": 498,
+        "direct_write_functions": 134,
+        "write_closure_functions": 154,
+        "migration_files": 19,
+        "task_complete": false,
+        "runtime_verified": false,
+        "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+      }
+    },
+    {
+      "name": "compatibility",
+      "argv": [
+        "python",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "exit_code": 0,
+      "log_sha256": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db",
+      "result": {
+        "wire_validation_scope": "not_checked_current_wire_required",
+        "historical_wire_reference": {
+          "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+          "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+          "qualification": "historical_metadata_only_not_current_wire"
+        },
+        "status": "source_inventory_and_upgrade_plan_checked",
+        "task_complete": false,
+        "product_green": false,
+        "routes": 132,
+        "client_branches": 134,
+        "source_files": 94,
+        "openapi_missing": [
+          "DELETE /api/v1/suppression/{id}",
+          "GET /api/v1/suppression",
+          "GET /docs-assets/*"
+        ],
+        "no_shipped_client": [
+          "DELETE /api/v1/suppression/{id}",
+          "GET /api/v1/admin/status",
+          "GET /api/v1/auth/me",
+          "GET /api/v1/company/outbound/{id}/recipients",
+          "GET /api/v1/suppression",
+          "GET /docs",
+          "GET /docs-assets/*",
+          "GET /metrics",
+          "GET /openapi.yaml",
+          "GET /ready",
+          "GET /redoc"
+        ],
+        "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+      }
+    },
+    {
+      "name": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "exit_code": 0,
+      "log_sha256": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db",
+      "result": "API client inventory PASS: 134 branches, 7 explicit transport forwarders"
+    },
+    {
+      "name": "scanner",
+      "argv": [
+        "node",
+        "--test",
+        "scripts/tests/api_calls.test.cjs"
+      ],
+      "exit_code": 0,
+      "log_sha256": "de60b47c422ed3ad96abad4280595b749fe5947fe3cdd6640859c2a9af176fa6",
+      "result": {
+        "tests": 27,
+        "passed": 27,
+        "failed": 0,
+        "skipped": 0
+      }
+    }
+  ],
+  "python_tests": {
+    "modules": [
+      "test_r5_transactions",
+      "test_r5_compatibility",
+      "test_r5_catalog_reconciliation",
+      "test_r5_current_source_inventory"
+    ],
+    "tests_run": 71,
+    "test_ids": [
+      "test_r5_transactions.TransactionInventoryTests.test_cache_has_specific_message_fence_not_ancestor_lock",
+      "test_r5_transactions.TransactionInventoryTests.test_callback_signature_drift_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_constant_backed_observation_is_write_despite_ast_heuristic",
+      "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence",
+      "test_r5_transactions.TransactionInventoryTests.test_current_trigger_and_package_constant_changes_remain_fenced",
+      "test_r5_transactions.TransactionInventoryTests.test_duplicate_entry_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_external_caller_change_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_fk_or_trigger_drift_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_gc_round_and_receipt_projection_are_not_transaction_acceptance",
+      "test_r5_transactions.TransactionInventoryTests.test_literal_and_concatenated_dynamic_sql_distinguished",
+      "test_r5_transactions.TransactionInventoryTests.test_missing_callback_effect_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_missing_file_type_review_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_missing_function_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_missing_specific_assertion_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_missing_specific_sql_effect_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_new_file_without_functions_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_new_migration_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_new_pure_function_is_also_rejected_and_no_inventory_allowlist",
+      "test_r5_transactions.TransactionInventoryTests.test_new_write_function_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_new_write_in_old_function_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_obsolete_function_and_wrong_receiver_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_package_sql_constant_drift_rejected",
+      "test_r5_transactions.TransactionInventoryTests.test_pr23_each_added_and_changed_body_has_independent_source_review",
+      "test_r5_transactions.TransactionInventoryTests.test_read_preview_and_sse_have_real_lock_and_callback_boundaries",
+      "test_r5_transactions.TransactionInventoryTests.test_structure_cannot_claim_runtime_or_parent_acceptance",
+      "test_r5_transactions.TransactionInventoryTests.test_update_detected_but_row_lock_not_mutation",
+      "test_r5_compatibility.CompatibilityGateTests.test_cannot_waive_dependency_runtime_or_legacy_client_unknowns",
+      "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+      "test_r5_compatibility.CompatibilityGateTests.test_dns_exclusions_match_real_HTTP_methods_not_create",
+      "test_r5_compatibility.CompatibilityGateTests.test_duplicate_and_nonfinite_json_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_future_rejection_upgrade_and_task_strategies_mandatory",
+      "test_r5_compatibility.CompatibilityGateTests.test_malformed_and_untrusted_producer_sources_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_missing_duplicate_and_source_drift_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_route_schema_client_and_test_fact_mutations_rejected",
+      "test_r5_compatibility.CompatibilityGateTests.test_routes_and_successor_tasks_match_original_stage_semantics",
+      "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_current_source_rejects_historical_wire",
+      "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_fabricated_client_producer_not_accepted_as_source",
+      "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_future_and_wrong_handler_producer_routes_rejected",
+      "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_new_routes_preserve_release_semantics",
+      "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_old_runtime_cannot_be_re_signed_with_current_spec",
+      "test_r5_compatibility.CurrentHistoricalBoundaryTests.test_re_signing_history_and_current_artifact_claims_rejected",
+      "test_r5_compatibility.SafeWireJoinTests.test_exact_safe_join_remains_metadata_not_product_approval",
+      "test_r5_compatibility.SafeWireJoinTests.test_not_observed_cannot_be_laundered_as_runtime_pass",
+      "test_r5_compatibility.SafeWireJoinTests.test_unknown_private_fields_bad_status_and_aspects_rejected",
+      "test_r5_compatibility.SafeWireJoinTests.test_wrong_tree_report_spec_case_and_closure_hashes_rejected",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_old_pins_reject_and_current_revision_passes_same_actual_facts",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_only_reviewed_body_and_two_closure_hashes_change",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision3_client_inventory_preserves_routes_and_forwarders",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision3_preserves_unmodified_reviews_and_pins_reviewed_sources",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision4_client_locations_and_source_hashes_are_explicitly_bound",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision4_preserves_reviews_and_records_exact_caller_changes",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_closure_bytes_rejected",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_route_source_rejected_by_original_collector",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_source_and_ast_changes_rejected",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_client_and_caller_locations_are_rejected",
+      "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_route_and_ast_fact_changes_rejected",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_c_map_keys_strings_and_comments_are_not_native_imports",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_current_policy_never_enters_frozen_legacy_identity",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_current_tool_cli_binds_v2_source_and_rejects_live_fork_drift",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_fork_embed_and_build_metadata_drift_are_rejected_before_after",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_missing_symlink_and_new_disk_input_are_not_silently_ignored",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_omitted_fork_extra_escape_and_unknown_policy_cannot_reseal",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_output_exclusions_cannot_hide_embed_inputs",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_pinned_v2_protocol_and_benchmark_current_entrypoints",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_protocol_manifest_revalidation_rejects_after_run_drift_without_git",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_protocol_metadata_preserves_shared_and_reference_runtime_boundaries",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_real_native_import_and_linker_inputs_still_fail_closed",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_replacement_path_version_dynamic_workfile_and_extra_directory_fail_closed",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_superset_includes_fork_embed_metadata_helper_and_new_identity_domain",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_symlinked_root_external_local_import_and_adapter_omission_rejected",
+      "test_r5_current_source_inventory.CurrentSourceInventoryTests.test_unknown_build_conditions_and_environment_are_rejected"
+    ],
+    "failures": [],
+    "errors": [],
+    "skips": [],
+    "successful": true,
+    "log_sha256": "3ada16a17c47094eeed8a46cea098dca81a3c7fe426cd2613469aab05b09cf0f"
+  },
+  "test_module_sha256": "d132966eba0f50c7a52eff38afc85884b82c50d902a890194a7ab97470b6eceb",
+  "revision3_test_module_sha256": "94b5f572c1d24f40c3c4bfb8f817e075447893214a548dec223f97f48e636ab9",
+  "unchanged_test_method_ast_sha256": {
+    "test_only_reviewed_body_and_two_closure_hashes_change": "59140b53c17f6f780baece958d0da1edbcfb87f4499a7c22dde302821ce49f39",
+    "test_unapproved_client_and_caller_locations_are_rejected": "4d40e7297e2fc8a6aa3a9f8e10044ecd69c718f5b6a434318286625ad3c91fdb",
+    "test_unapproved_actual_source_and_ast_changes_rejected": "11b567de8a18ac5c0274f994373fdef7c325dd21c24715f1f97fa61037c3ff3c",
+    "test_unapproved_actual_closure_bytes_rejected": "38ed0072e573290ea26a45a10de70e239da020803f8fc4b88406cbf08786b2a2",
+    "test_unapproved_route_and_ast_fact_changes_rejected": "8bff5925981614fbb104231891b3bbdae4e9a78bac499f4be670d238bf2ed82b",
+    "test_unapproved_actual_route_source_rejected_by_original_collector": "b01f06f6d97650c466c23e7e1d572fdf8794e9f8ddb40a0aa513a1f6f9857c86"
+  },
+  "historical_review_files_unchanged": {
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/README.md": "46fb6aefb2bb866d3999789c49ae6df6f901f7ee1795d98e00467fe1f760bab6",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-compatibility-inventory-revision1.json": "cfd20e67cdec8b1c03b4e2f882c5f791f53e28d910af13411e81d777fd621820",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/historical-transaction-inventory-revision1.json": "3ebb5fe8499f663cfe6af906e550787011d17c439db238c22cbe4256c9e59988",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/reconciliation.json": "97c63e9e8e571bbb045efbb3ff102eb0854c625d1cff54767b110762d47e43cc",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/source-change-chain.json": "242d51a0cffeec67f195192ebdbcf401c63874230d149831530ac16205f65a95",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004/verification.json": "0b4d141f79ca59bf25b64cf41ba776823b70e742d9de6cc8452cf2c88db2b7f3",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/README.md": "c85e5d3564a1c1ce4c94e72575c5ffa6b09e633a58d4e3c33aa3b18b378dd5b0",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision2-original-tests.json": "7e4c605274a00d79e550231c3935bc84ae6b913ede3bd8e17328c062cc090b87",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision2-original-tests.log": "7a9c54e078277ca865f4caf61b0f25ebf30957d21e7d0789f7411250c42c04e0",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-client-scanner-tests.log": "d1892002a620d0b9ae0307e9ad2b326e80f922c1dfbbf6c15e7c03f0928ef157",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-baseline-clients.log": "69082a479e0d75b3aa9cb6db6a1964f31b062d2d928d2e3cbabbf740be2896a9",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-baseline-compatibility.log": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-baseline-transactions.log": "ca2b362f470ad89732fa2222860b5c9a8afcf8accc3c29ad59db5082d4804a1a",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-clients.log": "b5e92b0af9e25b23eb3f0ba9fd2ded8ff3a1fca31020a69cb91e0ab94000c5db",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-compatibility.log": "677f536dea0eccc18aba48fb1134bf11abab8c980e362691fb8a01a9bd29d4db",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-final-transactions.log": "517448bd669e67d3c12da0b4e94ef95e34bf2c94d156a3aadabc4b2a464c80fe",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/catalog-revision3-focused-tests.log": "d8edea9bb4874ca027c3fd9ce9b8ba53ef8b5e2f263115f0c2a4d3957569e1a5",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/independent-review.md": "2790eeb8114165c7d5389f01e86e684efef39fc8ca9f6c2cac1471e58d4287e2",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/reconciliation.json": "70138d94bc6ac0e9e845ae1bca6d02d3d985282f804065e8a56bea6f30f259c5",
+    "docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/verification.json": "7200eae3eee38eed7afbca1fba09990934628c372b5b78e2b512fa120486ac6f"
+  },
+  "source_runner_discovery": {
+    "discovered": 717,
+    "current": 713,
+    "frozen": 4,
+    "frozen_baseline": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+    "frozen_ids": [
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_actual_full_scope_fresh_hashes",
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_capture_midflight_drift_refused",
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_omission_extra_hash_flags_abi_and_historical_rejected",
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_real_receipt_roundtrip"
+    ],
+    "new_tests_in_current": [
+      "test_revision4_client_locations_and_source_hashes_are_explicitly_bound",
+      "test_revision4_preserves_reviews_and_records_exact_caller_changes"
+    ],
+    "all_new_ids_dispatched_current": true,
+    "scope": "Discovery and partition only, not execution of the full source runner."
+  },
+  "generated_catalogs": {
+    "transaction": {
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "sha256": "5fc5fb70255b5e6986b9aab38157fbb915b6012377d76d5b2a1956fc2907de2c"
+    },
+    "compatibility": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "sha256": "56452854110d0c33b5d2ae9eaf1abe43a7f77681a59307fc2470796dbdc18f56"
+    },
+    "clients": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "sha256": "83eeb4a43fa3a6c762353c1597c00e998ca64bf68138a7eb165984095b110e3d"
+    },
+    "client_routes": {
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "sha256": "0877601e0a825ba28f2e912bc057cf92e7d607ca568f5d1b29621e2798dc5139"
+    }
+  },
+  "counts": {
+    "client_locations": 9,
+    "client_owner_changes": 0,
+    "transaction_entries": 15,
+    "caller_locations": 29,
+    "caller_added": 1,
+    "caller_removed": 2,
+    "compatibility_routes": 7,
+    "source_closure_hashes": 3,
+    "reviewed_source_files": 7
+  }
+}

@@ -1,0 +1,337 @@
+{
+  "schema_version": 1,
+  "review_kind": "Independent read-only audit of the central ten-item evidence ledger",
+  "reviewer": "native-subagent /root/compose_ownership",
+  "date": "2026-10-07",
+  "decision": "ACCEPT",
+  "blocking_findings": [],
+  "audited_commit": "9232dee62cf209eb67addc339ae9b053555addc7",
+  "product_integration_source": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "source_base": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+  "recording_note": "This records the already completed audit. No audit commands or tests were rerun to create these two evidence files.",
+  "reviewed_paths": [
+    "docs/company-mail/evidence/R5-MULTI-ROUND-20261007/wave-batch-summary.json",
+    "docs/company-mail/evidence/R5-MULTI-ROUND-20261007/evidence-files.json",
+    "docs/company-mail/evidence/R5-MULTI-ROUND-20261007/README.md",
+    "docs/company-mail/R5-TODO.md"
+  ],
+  "evidence_integrity": {
+    "listed_files": 31,
+    "unique_paths": 31,
+    "valid_sha256": 31,
+    "valid_byte_lengths": 31,
+    "corresponding_validation_originals_present": 31,
+    "byte_identical_to_originals": 31,
+    "mismatches": [],
+    "files_outside_manifest": [
+      "README.md",
+      "evidence-files.json"
+    ],
+    "evidence_bytes_modified": false
+  },
+  "implementation_mapping": {
+    "total": 10,
+    "completed": 10,
+    "remaining": 0,
+    "unique_item_ids": 10,
+    "unique_prs": 10,
+    "each_local_remote_and_tested_tree_equal": true,
+    "each_remote_commit_is_corresponding_merge_parent": true,
+    "each_merge_is_ancestor_of_product_integration": true,
+    "all_referenced_parent_tasks_exist_and_remain_open": true,
+    "pr_66_is_progress_only_and_not_counted": true,
+    "items": [
+      {
+        "id": "R5-P6-090-20261007-01",
+        "title": "SMTP IPv6 relay",
+        "pr": 61,
+        "local_commit": "7a4629c793105cde4038ec05b8ba51e084d0806e",
+        "remote_commit": "54dd44534e8f49155c2682827b87da6f376bdca9",
+        "tested_tree": "7fb60d6e7003020f146752e30ed064025f4ddd95",
+        "merge_commit": "0c402faa74fff0690e49f7594dae38dea104fc69",
+        "baseline_passed": 2,
+        "baseline_failed": 2,
+        "candidate_passed": 4,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P6-040-20261007-01",
+        "title": "SMTP greeting causes",
+        "pr": 63,
+        "local_commit": "1386b38c9e156dab4d9c57b4c58c8c9e77c10882",
+        "remote_commit": "43e48bdd7bf2b8fad408b89a696634b4832ee2ad",
+        "tested_tree": "0c85568330258ec62cc4bd9e4a2c8816f2d73135",
+        "merge_commit": "a306da76360e191133cda964591e9507f4230b3d",
+        "baseline_passed": 6,
+        "baseline_failed": 6,
+        "candidate_passed": 12,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P6-050-20261007-01",
+        "title": "Recipient failure causes",
+        "pr": 67,
+        "local_commit": "013bd96e93518dd453df7202bacf54f02a0609f1",
+        "remote_commit": "ae35c883f235060508ef25f54cf34554a90356de",
+        "tested_tree": "90b0f2847173a69bbec015fb2560ed45b60d36c0",
+        "merge_commit": "58da53ea1c912f8d36fc1ae83a5eeebe3301658b",
+        "baseline_passed": 1,
+        "baseline_failed": 7,
+        "candidate_passed": 8,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P9-080-20261007-01",
+        "title": "Recovery conflict reinspection",
+        "pr": 65,
+        "local_commit": "8e976b634f36fdd09a8332b01cfe6cd800f15b75",
+        "remote_commit": "8181f13905cc8edd9d7478a62173422368b25fe2",
+        "tested_tree": "6b77326331231d2381abf5b3a97716fe224ab507",
+        "merge_commit": "7ea617f86bdca328144c65a30a52b00d72bce77e",
+        "baseline_passed": 3,
+        "baseline_failed": 4,
+        "candidate_passed": 7,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P9-090-20261007-01",
+        "title": "Session-scoped refresh",
+        "pr": 69,
+        "local_commit": "d170ef9a37f5d102674b4172018e5dc1f3e05c3d",
+        "remote_commit": "cd39089e983c7da10a9f4a90c1a4cc91e163cbb8",
+        "tested_tree": "eeec7fbd9e052cc5d032e1d8de2a84b1cead2408",
+        "merge_commit": "278ebc1aaa50a5d0dd98944ee67c6825d077a1d0",
+        "baseline_passed": 0,
+        "baseline_failed": 6,
+        "candidate_passed": 6,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P9-100-20261007-01",
+        "title": "Recovery queue load states",
+        "pr": 71,
+        "local_commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+        "remote_commit": "63931188530214708e05e74497f59ddb28285e14",
+        "tested_tree": "d637625d3de97c3dcd8db8e57130dd09dbf743d1",
+        "merge_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+        "baseline_passed": 2,
+        "baseline_failed": 6,
+        "candidate_passed": 8,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P8-110-20261007-01",
+        "title": "SMTP and retention configuration bounds",
+        "pr": 64,
+        "local_commit": "042ad48357671f6181a1ef0ecc0d968988756e37",
+        "remote_commit": "478eec7047d5d74db14ce2c32ba1b8d1a1b90169",
+        "tested_tree": "d83e60be3c98a1467e5a3cb8f8a77bb0787bda8d",
+        "merge_commit": "8d5fa6f5af728688082ff3445570e2ba837f654b",
+        "baseline_passed": 1,
+        "baseline_failed": 17,
+        "candidate_passed": 18,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P8-060-20261007-01",
+        "title": "Attachment source error classification",
+        "pr": 68,
+        "local_commit": "b504ba8e2f529b6e52ff332d667bd21390b37d37",
+        "remote_commit": "49facad80dabf5ef4754d37e964bdfbb3876e0a5",
+        "tested_tree": "5639046e226ea20a8a784d0c42cd487376370e3b",
+        "merge_commit": "1c160d445d9ab7f30c5d80e1ca23daa2ccb7d456",
+        "baseline_passed": 2,
+        "baseline_failed": 8,
+        "candidate_passed": 10,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P5-060-20261007-01",
+        "title": "Attachment progress and cancellation",
+        "pr": 70,
+        "local_commit": "14697c87d543ddcd215cf14f7a9685d3a07ddee8",
+        "remote_commit": "ec1e2b5c5536f0513a6d7a757012c9befb05f75c",
+        "tested_tree": "a272540a178cd801d8d9c5145b5d9c951402e03d",
+        "merge_commit": "ac1afc64e738695b2f7c38c27fbd9b22ccb5c420",
+        "baseline_passed": 1,
+        "baseline_failed": 6,
+        "candidate_passed": 7,
+        "kind": "product",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      },
+      {
+        "id": "R5-P11-080-20261007-01",
+        "title": "Frontend evidence continuation",
+        "pr": 62,
+        "local_commit": "36f5c1f6e430a9d1de8e63f64b6c40321fe4f706",
+        "remote_commit": "e4e0267248979faa974fab124d6cc2e271771876",
+        "tested_tree": "4951a6ead6fe179c869b763e38e18ae532aae943",
+        "merge_commit": "c4b7e1c2c4420e6eb1da6d8d7196ec5a1225e168",
+        "baseline_passed": 1,
+        "baseline_failed": 2,
+        "candidate_passed": 3,
+        "kind": "ci_contract_separate_from_product_80",
+        "local_remote_tested_trees_equal": true,
+        "remote_is_merge_parent": true,
+        "merge_ancestor_of_integration": true,
+        "parent_exists_and_remains_open": true
+      }
+    ]
+  },
+  "parent_tasks": {
+    "total": 171,
+    "unique_ids": 171,
+    "completed": 10,
+    "remaining": 161,
+    "order_ids_and_checkbox_states_identical_to_source_base": true,
+    "parent_acceptance_changed": false
+  },
+  "frozen_product_regressions": {
+    "product_items": 9,
+    "baseline": {
+      "total": 80,
+      "passed": 18,
+      "failed": 62,
+      "skipped": 0
+    },
+    "candidate_same_cases": {
+      "total": 80,
+      "passed": 80,
+      "failed": 0,
+      "skipped": 0
+    },
+    "independent_recount_method": "Read original Go JSONL leaf outcomes keyed by package/test and frontend verbose outcomes keyed by file/full test name; select the same baseline cases in candidate logs.",
+    "groups": [
+      {
+        "group": "SMTP",
+        "items": 3,
+        "cases": 24,
+        "baseline_passed": 9,
+        "baseline_failed": 15,
+        "candidate_passed": 24
+      },
+      {
+        "group": "Backend",
+        "items": 3,
+        "cases": 35,
+        "baseline_passed": 4,
+        "baseline_failed": 31,
+        "candidate_passed": 35
+      },
+      {
+        "group": "Frontend",
+        "items": 3,
+        "cases": 21,
+        "baseline_passed": 5,
+        "baseline_failed": 16,
+        "candidate_passed": 21
+      }
+    ],
+    "all_baseline_case_identities_present_and_passing_in_candidate": true,
+    "frontend_frozen_test_hashes_match_author_commits_and_integration": true,
+    "overlapping_package_and_focused_counts_not_added": true,
+    "ci_contract_assertions_excluded_from_product_80": 3
+  },
+  "product_subtree_identity": [
+    {
+      "path": "web",
+      "author_commit": "6c73230d7f3c00ab640e2a8b7ce10b20bb88a2f4",
+      "tree": "24f095f234179d15ba692e003fc2f34709026817",
+      "identical_in_product_integration": true
+    },
+    {
+      "path": "internal/outbound",
+      "author_commit": "013bd96e93518dd453df7202bacf54f02a0609f1",
+      "tree": "b2cb34f28b2d2dd9557bb9b1bc0a48b44fc3a5cc",
+      "identical_in_product_integration": true
+    },
+    {
+      "path": "internal/config",
+      "author_commit": "14697c87d543ddcd215cf14f7a9685d3a07ddee8",
+      "tree": "5c1a85f307cc0beddd1b868446c8333ed39cc73c",
+      "identical_in_product_integration": true
+    },
+    {
+      "path": "internal/app/companymail",
+      "author_commit": "14697c87d543ddcd215cf14f7a9685d3a07ddee8",
+      "tree": "b469ccbee6cf128681f3405f6df227f15ae33676",
+      "identical_in_product_integration": true
+    },
+    {
+      "path": "internal/mailcontent",
+      "author_commit": "14697c87d543ddcd215cf14f7a9685d3a07ddee8",
+      "tree": "c3a72dd4f6fb2a1bd7eaa2d72f54becb44795126",
+      "identical_in_product_integration": true
+    }
+  ],
+  "post_product_integration_changes_through_audited_commit": "Documentation and evidence only; the five verified product subtrees are unchanged.",
+  "ci_evidence_scope": {
+    "run_id": 37628534160,
+    "head_sha": "e4e0267248979faa974fab124d6cc2e271771876",
+    "tested_checkout_sha": "a8ae5ebff8fd63d6bafde2805ff1a9c49f91e191",
+    "retained_failures": [
+      "Versioned source gate",
+      "Strict dependency audit",
+      "Default Vitest private-fixture preflight"
+    ],
+    "later_checks_executed": [
+      "TypeScript",
+      "Default Vitest",
+      "Lint",
+      "Production build",
+      "Evidence upload"
+    ],
+    "recorded_vitest": {
+      "total": 866,
+      "passed": 865,
+      "failed": 1,
+      "pending": 0
+    },
+    "qualifying_scope": "Failure continuation and evidence retention for the separately identified CI checkout.",
+    "final_product_ci_qualification_claimed": false
+  },
+  "boundaries": {
+    "combined_validation_recorded_separately": true,
+    "source_cross_qualification_errors_found": false,
+    "complete_postgresql_browser_performance_ci_or_release_qualification_granted": false,
+    "new_todo_completions": 0,
+    "root_repository_modified": false,
+    "tests_rerun_for_audit": false,
+    "audit_commands_or_tests_rerun_for_recording": false
+  }
+}

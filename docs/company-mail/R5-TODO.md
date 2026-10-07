@@ -9,12 +9,12 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | 2026-10-07 第二批三轮实施已完成：SMTP 3、前端 3、后端 3、实际 CI 证据 1，共10项独立PR #61–#71（#66是进度记录，不计任务）均已合入 #56。当前在最终产品源 e325643 上执行组合 Go/web 验证及 revision4 目录收口 |
-| 下一可执行任务 | 完成最终组合源码的四完整Go包、精确handler控制、默认完整前端、lint/build；原校验器重采目录并逐项核变化。随后基于真实CI继续解决PG必跑预算/fixture、8 high依赖审计、有效M baseline/G0，不用本批局部完成替代这些资格 |
-| 下一批范围 | 本批10项范围已完成，禁止把目录、重复测试或报告算成额外实施项。三个原生subagent当前分别承担组合web、组合Go/交叉独审、revision4目录；root负责唯一TODO、来源对账与整合PR |
+| 当前阶段 | 三轮10项实施已全部合入 #56，产品整合 e325643 的组合 Go/web 验证已完成并记录实际失败边界。revision4 已经独立复核ACCEPT并由 #73 合入9bcfa4f…，三原CLI、71 Python/27 scanner均通过；#72收录三轮、组合验证和完整来源证据 |
+| 下一可执行任务 | 继续处理真实PG fixture成本/180秒整包预算与必跑接线、8 high依赖审计、有效M baseline/G0。每轮保持原生multi-subagent，分别报告本批与171父项的完成/剩余数；局部通过不替代完整资格 |
+| 下一批范围 | 本批10项已完成。目录、交叉审核、组合重复验证和报告均不增加实施项计数；原171父任务仍按完整验收与依赖推进 |
 | 实现完成数 | 父任务 **10 / 171，剩余 161**；P0 为 10 / 12。当前实施子项 **完成 10 / 10，剩余 0**。子项不计入171分母，父项全部原验收与依赖保留 |
-| 当前阻塞 | 上批最终 CI [37624990816](https://github.com/jyqj/tabmail/actions/runs/37624990816)：production-web/browser-journey 成功；frontend 当前源 708 测试、冻结 4 测试与 Node 49 检查通过，因 8 high/0 critical 的完整 audit 失败，后续 tsc/test/lint/build 未执行；backend 在 PostgreSQL race 步骤失败。原始组合 CI 的 PG package 180.053s 超时已定位为串行累计耗尽预算，不能归因单个测试死锁。有效 M baseline、G0 与完整父项资格仍未通过 |
-| 阶段源码检查点 | 本批统一起点 `4065c4909c8f21a401a9a1af6370fa3f72670b99`；全部10项最终产品整合 `e32564304c0c84aa80b1184e72129fb0316d989d`。root已以Git逐字节确认其整个web、outbound、config/companymail/mailcontent与三条作者最终受测源一致。后续目录和文档提交不修改这些产品字节 |
+| 当前阻塞 | revision4实跑CI37633385810：当前713+独立冻结4全PASS/0skip，前端catalog/tsc/lint/build成功；完整Vitest886/1（原privatefixture），audit8high/0critical仍失败；PG包180.061s超时，105skip事件，247必跑中180未通过/未完成，backend后续步骤未执行。production/browser成功。有效M/G0与完整父项资格仍未通过 |
+| 阶段源码检查点 | 本批起点4065c490…；十项产品整合e32564304c0c84aa80b1184e72129fb0316d989d（tree bfa06a61…）。GitHub实际受测8a6fe55…与该整个tree相同；revision4本地7254f12…/发布6b6163d…同tree1eb98c61…；目录/文档不修改产品字节 |
 | 正式发布/部署 | #56 保持 draft；main 未改，尚未发布或部署。完整门禁通过与父任务验收必须各有实际证据 |
 
 ### 本批 10 个实施子项（固定计划与独立计数）
@@ -2247,3 +2247,18 @@ SMTP greeting错误保留（#63）、入站附件真实缺失/源故障分类（
 本批 **10/10完成，剩余0**；原父级 **10/171完成，剩余161**。九项产品修改的80个固定业务/协议回归场景，基线有62fail/18pass，修复后全部通过；另有3条固定CI契约断言和实际GitHub续行验收。各包/选集计数有重叠，不能相加成全套回归数。完整版本/PG/浏览器/性能/发布资格仍以独立整体验收为准。
 
 父任务复选框仍精确171个/已勾10；没有用子项或文档修改把父任务余数从161中扣除。所有PR/local/remote/tested tree/merge和独立基线对照见[本批机器记录](evidence/R5-MULTI-ROUND-20261007/wave-batch-summary.json)。组合验证和revision4目前运行中，最终结果会作为后续限定证据登记。
+
+
+### 2026-10-07｜三轮后的组合验证与目录 revision4 收口
+
+- 本批10个实施子项完成10/10、剩余0；171父项完成10/171、剩余161，所有父项ID、顺序与勾选保持。目录/文档/复核不另计TODO。完整执行报告为 [R5-MULTI-ROUND-20261007](R5-MULTI-ROUND-20261007.md)。
+- 组合产品源为e32564304c0c84aa80b1184e72129fb0316d989d。四完整Go包和精确8个handler控制合计148顶层、829叶用例PASS，0 FAIL/0 SKIP；相关vet通过。普通独立clone同一tree上保留默认VCS的整仓build通过9.500s；首次worktree VCS失败原日志不覆盖，未重跑已通过测试。
+- 完整默认web为886 PASS/1 FAIL/0 pending或todo，63文件62PASS/1FAIL；唯一失败仍为原private fixture preflight。全部旧866结果保持，仅新增21个PASS。lint为0 errors/4既有warnings；默认Next build 29/29页面通过；相同web源的完整非增量tsc此前已通过。
+- 独立账本审核绑定9232dee…，结论ACCEPT：十项local/API/tested tree和merge祖先一致，原31份证据长度/hash/原件逐字节一致；原始日志重算产品80场景为18PASS/62FAIL→80PASS，CI3断言另计；整个web/outbound/config/companymail/mailcontent与作者和整合源码一致。审核记录与后续组合原始日志已纳入本批证据目录。
+- revision4目录提交本地7254f12…、发布6b6163d…（同tree1eb98c61…）绑定产品e325643。三个原CLI由旧目录exit1→新目录exit0，相关Python71PASS和原scanner27PASS；仅校准9client行号、15事务条目的29调用行号、1增2删同名调用候选、7兼容行与3闭包hash。原collector/validator、旧rev1/2/3对象/报告、预算/skip和false flags不变；详见 [revision4报告](evidence/R5-CATALOG-REVISION4-20261007/README.md)。
+- 实际产品CI37631117018的checkout8a6fe55…整个tree等于e325643。production/browser成功；frontend在原目录、audit和privatefixture处仍失败，后续tsc/test/lint/build及artifact都真实执行。backend原artifact核对ZIP digest后确认PG包180.059秒超时、105skip事件、247必跑中180未通过/未完成；0显式test-fail事件不代表包通过。audit实物仍8high/0critical。上述CI事实与目录校准的局部通过分开，不声称完整发布资格。
+- 上传任意永久阻塞Reader仍受调用方所有权限制，下载取消依赖底层Close解除阻塞；不声称socket期限、完整PG/负载、M或G0通过。#56仍draft；main未变，未发布/部署。
+
+- 目录独立终审ACCEPT：57项只读Git/AST/JSON/真实源行核对成立（不算产品测试/新增TODO）；#73已合入9bcfa4f77f27ad4f118f32e92efef740ebac2c1e。原始复核报告和机器记录入库，固定对象/旧验收边界保留。
+
+- revision4远端完整CI37633385810已结束：actual57ae4946/tree1eb98c61与目录源相同；current713全PASS，frozen-v1原41b015c源码4全PASS，0fail/error/skip且ID无缺失/重叠。前端catalog/tsc/lint/build及证据上传SUCCESS；Vitest886/1与audit8high仍FAIL。production/browserSUCCESS，PG新记录180.061秒超时、105skip、180/247必跑未通过；backend后续显式CLI/DTO/协议/HTTP/vet SKIPPED。19文件原始实物包、ZIP/各文件hash与完整runnerJSON入库，后续文档源码范围单独对账。本批10/10剩0；171父项10/171剩161。
