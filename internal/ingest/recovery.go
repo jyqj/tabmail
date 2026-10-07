@@ -6,7 +6,6 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	"io"
 	"tabmail/internal/metrics"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
@@ -65,21 +64,19 @@ func (s *Service) acceptDurable(ctx context.Context, env Envelope, raw []byte) (
 }
 
 func (s *Service) processReceipt(ctx context.Context, ledger store.IngressLedger, c *store.IngressClaim) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
 	targets, err := ledger.ListIngressTargets(ctx, c.Job.ID)
 	if err != nil {
 		return err
 	}
-	rc, readErr := s.obj.Get(ctx, c.Job.RawObjectKey)
-	var raw []byte
-	if readErr == nil {
-		raw, readErr = io.ReadAll(io.LimitReader(rc, c.RawSize+1))
-		closeErr := rc.Close()
-		if readErr == nil {
-			readErr = closeErr
-		}
-	}
+	raw, readErr := s.readReceiptOriginal(ctx, c.Job.RawObjectKey, c.RawSize)
 	if readErr == nil && (int64(len(raw)) != c.RawSize || fmt.Sprintf("%x", sha256.Sum256(raw)) != c.RawHash) {
 		readErr = permanentIngress("original object size/checksum mismatch; receipt held for recovery")
+	}
+	if err := ctx.Err(); err != nil {
+		return errors.Join(err, readErr)
 	}
 	// One shared bounded parse per receipt: every replayed target sees the same
 	// extracted subject/headers/OTP as the immediate path. The parse result is
@@ -100,7 +97,7 @@ func (s *Service) processReceipt(ctx context.Context, ledger store.IngressLedger
 			continue
 		}
 		if err := ctx.Err(); err != nil {
-			return err
+			return errors.Join(err, readErr)
 		}
 		err = readErr
 		if err == nil {

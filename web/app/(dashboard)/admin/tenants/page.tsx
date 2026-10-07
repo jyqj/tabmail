@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { APIKeyScopePicker } from "@/components/api-key-scope-picker";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,12 +46,8 @@ import {
   listPlans,
   updateTenantOverrides,
   getTenantConfig,
-  createAPIKey,
-  listAPIKeys,
-  revokeAPIKey,
 } from "@/lib/api";
-import { DEFAULT_API_KEY_SCOPES } from "@/lib/api-key-scopes";
-import type { Tenant, TenantAPIKey, APIKeyCreated, TenantOverrideInput, EffectiveConfig } from "@/lib/types";
+import type { Tenant, TenantOverrideInput, EffectiveConfig } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -69,6 +64,8 @@ import { formatDistanceToNow } from "date-fns";
 import { useI18n } from "@/lib/i18n";
 import { safeConfirm } from "@/lib/utils";
 import { useAPI } from "@/hooks/use-api";
+import { sessionScope, useSessionScope } from "@/lib/session";
+import { TenantAPIKeysDialog } from "./api-keys-dialog";
 
 const overrideFields = [
   "max_domains",
@@ -121,12 +118,11 @@ export default function TenantsPage() {
   const [newName, setNewName] = useState("");
   const [newPlanId, setNewPlanId] = useState("");
 
-  const [keysOpen, setKeysOpen] = useState(false);
-  const [keysTenantId, setKeysTenantId] = useState("");
-  const [keys, setKeys] = useState<TenantAPIKey[]>([]);
-  const [keysLoading, setKeysLoading] = useState(false);
-  const [newKeyCreated, setNewKeyCreated] = useState<APIKeyCreated | null>(null);
-  const [newKeyScopes, setNewKeyScopes] = useState<string[]>([...DEFAULT_API_KEY_SCOPES]);
+  const scope = useSessionScope();
+  const keysSequence = useRef(0);
+  const [keysDialog, setKeysDialog] = useState<{
+    tenantId: string; scope: string; instance: number;
+  } | null>(null);
 
   const [overrideOpen, setOverrideOpen] = useState(false);
   const [overrideTenant, setOverrideTenant] = useState<Tenant | null>(null);
@@ -163,44 +159,8 @@ export default function TenantsPage() {
     }
   };
 
-  const openKeys = async (tenantId: string) => {
-    setKeysTenantId(tenantId);
-    setKeysOpen(true);
-    setKeysLoading(true);
-    setNewKeyCreated(null);
-    setNewKeyScopes([...DEFAULT_API_KEY_SCOPES]);
-    try {
-      const res = await listAPIKeys(tenantId);
-      setKeys(res.data ?? []);
-    } catch {
-      toast.error(t("tenants.keysLoadFailed"));
-    } finally {
-      setKeysLoading(false);
-    }
-  };
-
-  const handleCreateKey = async () => {
-    try {
-      const res = await createAPIKey(keysTenantId, { scopes: newKeyScopes });
-      setNewKeyCreated(res.data);
-      const keysRes = await listAPIKeys(keysTenantId);
-      setKeys(keysRes.data ?? []);
-      setNewKeyScopes([...DEFAULT_API_KEY_SCOPES]);
-      toast.success(t("tenants.apiKeyCreated"));
-    } catch {
-      toast.error(t("tenants.apiKeyCreateFailed"));
-    }
-  };
-
-  const handleRevokeKey = async (keyId: string) => {
-    if (!safeConfirm(t("tenants.confirmRevokeKey"))) return;
-    try {
-      await revokeAPIKey(keysTenantId, keyId);
-      setKeys((prev) => prev.filter((k) => k.id !== keyId));
-      toast.success(t("tenants.keyRevoked"));
-    } catch {
-      toast.error(t("tenants.revokeFailed"));
-    }
+  const openKeys = (tenantId: string) => {
+    setKeysDialog({ tenantId, scope: sessionScope(), instance: ++keysSequence.current });
   };
 
   const planName = (id: string) => plans.find((p) => p.id === id)?.name ?? "—";
@@ -381,100 +341,10 @@ export default function TenantsPage() {
         </Card>
       </div>
 
-      {/* API Keys Dialog */}
-      <Dialog open={keysOpen} onOpenChange={setKeysOpen}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t("tenants.apiKeysTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("tenants.apiKeysDesc")}
-            </DialogDescription>
-          </DialogHeader>
-
-          {newKeyCreated && (
-            <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950 p-3">
-              <p className="text-sm font-medium text-green-800 dark:text-green-200 mb-1">
-                {t("tenants.newKeyCreated")}
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 text-xs break-all bg-white dark:bg-black/20 p-2 rounded">
-                  {newKeyCreated.key}
-                </code>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className="h-8 w-8 shrink-0"
-                  onClick={() => {
-                    navigator.clipboard.writeText(newKeyCreated.key);
-                    toast.success(t("tenants.copied"));
-                  }}
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-2">
-            {keysLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            ) : keys.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                {t("tenants.noApiKeys")}
-              </p>
-            ) : (
-              keys.map((k) => (
-                <div
-                  key={k.id}
-                  className="flex items-center justify-between rounded-lg border px-3 py-2"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <code className="text-sm">{k.key_prefix}...</code>
-                      {k.label && (
-                        <Badge variant="secondary" className="text-xs">
-                          {k.label}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {t("tenants.scopes")}: {k.scopes.join(", ")}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive shrink-0"
-                    onClick={() => handleRevokeKey(k.id)}
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </Button>
-                </div>
-              ))
-            )}
-          </div>
-
-          <DialogFooter>
-            <div className="w-full space-y-3">
-              <APIKeyScopePicker value={newKeyScopes} onChange={setNewKeyScopes} />
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  className="gap-1.5"
-                  onClick={handleCreateKey}
-                  disabled={newKeyScopes.length === 0}
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  {t("tenants.generateKey")}
-                </Button>
-              </div>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {keysDialog && keysDialog.scope === scope && (
+        <TenantAPIKeysDialog key={keysDialog.instance} tenantId={keysDialog.tenantId}
+          onClose={() => setKeysDialog(null)} />
+      )}
 
       <Dialog open={overrideOpen} onOpenChange={setOverrideOpen}>
         <DialogContent className="sm:max-w-2xl">
