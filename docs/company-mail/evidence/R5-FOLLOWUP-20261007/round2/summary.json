@@ -1,0 +1,27 @@
+{
+  "round": 2,
+  "source_commit": "68ebd5f10984dd3a7b2c5d413a2fad2c0f758416",
+  "local_tested_commit": "f4711f38427760785fce47cb702300834d336aab",
+  "source_tree": "974de810a97c139c02bec862cb78863322a34436",
+  "baseline_commit": "b1e1be8e04f0e27982cf17d61f45bd1e2953a269",
+  "task_ids": ["R5-FOLLOWUP-20261007-05", "R5-FOLLOWUP-20261007-06", "R5-FOLLOWUP-20261007-07"],
+  "complete": 7,
+  "total": 10,
+  "remaining": 3,
+  "parent_complete": 10,
+  "parent_total": 171,
+  "parent_remaining": 161,
+  "integrated_tests": {
+    "go_leaf_cases": {"pass": 642, "fail": 0, "skip": 0},
+    "frontend_cases": {"pass": 62, "fail": 0, "skip": 0},
+    "typescript_exit": 0,
+    "targeted_eslint_exit": 0
+  },
+  "review": {
+    "recovery_verification": "root reviewed",
+    "editor_save_publish": "root and independent backend agent accepted after checking real revision CAS behavior",
+    "attachment_reads": "independent backend and CI agents accepted; frozen 45-event baseline/candidate compared; root added nil+cancel control"
+  },
+  "qualification": "Bounded implementation and targeted regression only. Full CI, PostgreSQL, private fixtures, audit and parent TODO acceptance remain pending.",
+  "publication_scope": "Reviewed source identities, task status and aggregate counts only; raw logs remain local."
+}
