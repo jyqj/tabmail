@@ -2162,3 +2162,8 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 ### 2026-10-06 bounded DATA-final transport cause preservation
 
 - R5-P6-050：PR54 head `2987f509131b0a569094959a2b35a5b8883e9c68` 上仅将 DATA.Close 非协议错误的第二个 `%v` 改为 `%w`，同时保留 `ErrOutboundUncertain` 与底层 `errors.Is`／`errors.As` transport cause；deadline-before-ctx.Err 恢复、明确 4xx／5xx 和已确认 250 后 QUIT／取消返回 nil 均受控制。真正标准库 net/smtp 经 net.Pipe 内存协议实测：同一作者基线仅3个错误链case红，候选6 top-level／21 events及50次重复1050 events PASS；相同53个已有离线控制基线／候选各417 events PASS。独立先冻结oracle基线27 leaf PASS／6 cause-chain FAIL，候选33／33及10次重复330 leaf executions PASS；最终独审组合66 top-level／477 events PASS、无阻塞发现，相关vet／whitespace／patch applicability PASS。被测tree `0017ce652b58b9dadf4fe25c35e85c66deadcca8`，交付只追加报告／本记录，详[限定报告](R5-SMTP-DATA-CAUSE-20261006.md)。9个既有真实listener／dial用例未跑，未真实DNS／TCP／SMTP账号／PG／restart／fullcaller／CI；030／040／050／090及父门禁仍open，**10/171**、历史F52／G0不变，无新增父项勾选。
+
+
+### 2026-10-07 SMTP DATA 最终回复与重发边界
+
+- R5-P6-050：实现 `27b4bfa319ef0d330387a05da7e377aba6b07b3d` 修正 DATA.Close 将任意 textproto.Error 当成明确拒绝的问题；仅 400–599 保持确定负回复，其他非 250 数字终态保留 uncertain 与底层原因，阻止第二 MX 回退和 recipient 自动／手动重发。相同冻结回归基线 38 leaf 中 20 FAIL，修复后全 PASS；新矩阵＋cause＋context 19 top-level／104 events PASS，完整 outbound race 71 top-level／520 events PASS，0 fail／skip，vet PASS。9 个既有真实本地 listener／dial 控制此次全部实跑；独立代码与调用链复核无阻塞。详见 [产品与验证报告](R5-SMTP-FINAL-REPLY-CLASSIFICATION-20261007.md) 和 [独立审查](evidence/R5-SMTP-FINAL-REPLY-20261007/independent-review.md)。recipient 使用 FakeStore；PG持久化、restart、外部邮件与完整发布门禁未验，R5-P6-030／040／050及父门禁仍 open，10/171 不变。后续通过独立子 PR 整合至 #56。
