@@ -183,7 +183,11 @@ func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error 
 	}
 	if err := w.Close(); err != nil {
 		var reply *textproto.Error
-		if errors.As(err, &reply) {
+		// net/smtp expects exactly 250 here. textproto.Error also represents
+		// unexpected positive, intermediate, or invalid reply codes; only a
+		// 4xx/5xx completion proves rejection and permits ordinary failure
+		// handling. Other final replies must not trigger another delivery.
+		if errors.As(err, &reply) && reply.Code >= 400 && reply.Code < 600 {
 			return fmt.Errorf("close data: %w", err)
 		}
 		return fmt.Errorf("%w: DATA final reply: %w", store.ErrOutboundUncertain, err)
