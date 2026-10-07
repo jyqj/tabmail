@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/smtp"
 	"net/textproto"
+	"strconv"
 	"strings"
 	"tabmail/internal/store"
 
@@ -23,7 +24,7 @@ func DeliverRelay(ctx context.Context, cfg config.Outbound, from string, to []st
 // trust policy; the exported entry point always uses normal system trust.
 func deliverRelayTLS(ctx context.Context, cfg config.Outbound, from string, to []string, mime []byte, tlsConf *tls.Config) (err error) {
 	defer func() { err = smtpContextError(ctx, err) }()
-	addr := fmt.Sprintf("%s:%d", cfg.RelayHost, cfg.RelayPort)
+	addr := net.JoinHostPort(cfg.RelayHost, strconv.Itoa(cfg.RelayPort))
 
 	conn, release, err := dialSMTPContext(ctx, addr)
 	if err != nil {
