@@ -8,13 +8,13 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-最新执行为 **B01-AI（2026-10-01）**：默认1456/0/1、247必跑，tag18pass/12必跑、23controller门禁0；070事务原四条与090设施/deps经独立实物审验收，完成10/171。100 S/M未实跑、G0未过，后续产品目标红不豁免。见 [AI记录](docs/company-mail/R5-B01-AI-VALIDATION.md)。
+**2026-10-07 已恢复并行推进。** 当前工作入口为 [R5 整合 PR #56](https://github.com/jyqj/tabmail/pull/56)，分支 `integration/company-mail-r5-pr-management-20261007`。已核对原 39 个草稿 PR 的提交与内容归属，关闭 35 个被整合版本完整覆盖的 PR；#17、#20、#24、#40 保留独立历史内容，继续保持 draft。处理依据与验收边界见 [本轮管理记录](docs/company-mail/R5-PR-MANAGEMENT-20261007.md)。
 
-**2026-10-01 用户暂停实现，当前10/171；全部已验收提交与未验收benchmark WIP/安全失败日志上传工作分支，不宣S/M或G0通过。** 见[暂停状态](docs/company-mail/R5-PAUSED-20261001.md)。
+本轮已在工作分支合入 [SMTP 最终回复判定 #57](https://github.com/jyqj/tabmail/pull/57)、[写信身份／附件／模板预览归属 #58](https://github.com/jyqj/tabmail/pull/58)、[兼容依赖更新与精确锁准入 #59](https://github.com/jyqj/tabmail/pull/59)。新增回归、独立复核与组合验证各自记录实际源码和覆盖范围；[当前来源目录](docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/README.md) 已按组合源码更新到 revision3，保留原校验规则和旧版证据。
 
-唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段/171工作包/25批次/38验收场景。目前仍 **6/171，P0为6/12**。新增 [有限事务目录](docs/company-mail/R5-TRANSACTION-COVERAGE.md) 覆盖350函数/66重点，结构清点不冒称全runtime正确；070具体未验证关系与080的RC02精确组件入口／BC02–03未来写入适用性等仍待验收，G0不提前关闭。
+唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12 阶段／171 工作包／25 批次／38 验收场景。**父任务完成 10/171，P0 为 10/12**；有限修复和目录更新不代替整项验收。P0-100 的有效 S/M 基准与 P0-120/G0 仍未通过。
 
-已上传B01-U见 [检查点](docs/company-mail/R5-CHECKPOINT-20260930.md)；V/W/X/Y/Z为后续本地工作，不代表主线合并、远端CI通过、R5正式发布或部署。
+**R5 尚未取得完整 CI／发布资格，#56 保持 draft。** 首次整合 CI 在 PostgreSQL 测试超时和过期来源目录处失败；目录现已修复，完整默认前端仍有 1 项私有 PG fixture 前置条件失败；依赖更新后审计仍有 8 项 high（0 critical），零漏洞门禁保持失败。当前分支未合入 `main`，未发布或部署。历史 [B01-AI 验收](docs/company-mail/R5-B01-AI-VALIDATION.md)、[2026-10-01 暂停记录](docs/company-mail/R5-PAUSED-20261001.md) 与 [B01-U 检查点](docs/company-mail/R5-CHECKPOINT-20260930.md) 保留为当时的事实，不再充当当前进度。
 
 ## 公司工作流
 

@@ -1,0 +1,37 @@
+{
+  "before_source": "97d6b71bb092c4a1fb7af9cc605f32559c4bec71",
+  "before_tree": "53e28562bbbdc80dbba764e72555d783a0bf7f66",
+  "after_source": "7b7dbfeaad5c87e875bf19e5a9e213867fda2db3",
+  "after_tree": "c77ac064af69390ef493f6a7f1599b3ed7173738",
+  "local_tested_commit": "221cdc9e70972bbc32a65d6ab46c1098dc34f1a3",
+  "before_count": 135,
+  "after_count": 134,
+  "removed_rows": [
+    {
+      "source": "web/components/company/compose.tsx",
+      "line": 192,
+      "branch": 0,
+      "callee": "request",
+      "owner": "value",
+      "expression": "",
+      "path": "",
+      "methods": [
+        "GET"
+      ],
+      "forwarding": false
+    }
+  ],
+  "added_rows": [],
+  "collector_changed": false,
+  "after_compose_sha256": "cb6d6a0a8ce422d4d85a1e147b2b9c7e5947ae516a28415224785c05efff9995",
+  "collector_before_sha256": "d3f75fee5ab6a676bf00daf5285cf8bf7772c27f890b3cd789706c6e28b0558e",
+  "collector_after_sha256": "842ade963ab45a9215123929ed1db529da5d94c4a8c2462f612df9c615e3399c",
+  "regression_command": "npm test -- components/company/compose-sender-ownership.test.tsx components/company/compose-preview-response.test.tsx --maxWorkers=2",
+  "test_files_passed": 2,
+  "test_passed": 40,
+  "test_failed": 0,
+  "test_skipped": 0,
+  "test_exit_code": 0,
+  "test_log": "compose-collector-rename-tests.log",
+  "independent_review": "Compose implementation agent confirmed only parameter declaration and its unique use changed; no control flow, exception or state changes."
+}

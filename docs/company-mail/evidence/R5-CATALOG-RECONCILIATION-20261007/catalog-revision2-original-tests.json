@@ -1,0 +1,12 @@
+{
+  "source_commit": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+  "test_module_sha256": "e76e9feec0f7963506a1fbb43e696ac4cd22921fd354be8859a1dc4f62987900",
+  "tests_run": 6,
+  "failures": [],
+  "errors": [],
+  "skips": [],
+  "successful": true,
+  "log_sha256": "7a9c54e078277ca865f4caf61b0f25ebf30957d21e7d0789f7411250c42c04e0",
+  "tracked_diff": "",
+  "scope": "Original six revision-2 source-only methods on exact historical source; no runtime qualification"
+}

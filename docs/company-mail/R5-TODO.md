@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；B01-AA验收080可执行真值基线，AB后验验收110兼容清点／协调方案，完成10/171。协议目标红与未知错误严格分离；100／G0及后续产品实现仍未完成。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；2026-10-07 已恢复并行实施并整理 PR，父任务完成仍为 10/171。当前工作入口为 [R5 整合 PR #56](https://github.com/jyqj/tabmail/pull/56)，尚未取得完整 CI／发布资格。有限修复、静态目录与历史证据不代替 100／G0 及后续父任务验收。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,13 +9,13 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | 新组合树 API/SMTP/前端限定复验见文末集成日志；真实 caller/SMTP/API SOURCE 已接线，完整 fullcaller realPG/Redis 与 browser 仍未验。Current19 D1九leaf/D2clean/D3BS六top8leaf10race各独审actualP，C0/V8 pretestINFRA_UNKNOWN无终态，V9只SOURCE待审不C资格；原A/旧D2F保。P5编码8top34P非race与workqueue24top28raceP独审限定，不PGHTTP/send或正式shutdown。PGphaseR3 B2/B5仍SOURCEblock/watchdog N1合同接受但formalexact8/runtime拒；C18/Method19/Docker四CI未资格，10/171保 |
-| 下一可执行任务 | V9 Conly observer SOURCE独审→root单次C；PGphase lifecycle竞态/native后代与watchdog drained真实证/terminalflush独立修，HARD1200不删；已接线 formalcaller/SMTP/API → fullcaller realPG/Redis、真实角色signal与durable门禁；旧Go组件baseline producer另设计secure验收，不能拿历史insecure红宣布新安全通过；编码PGHTTP权限链、C18-09/07/02/05/06/current19Method/完整CI-shipping，不复已绿scope |
-| 下一批范围 | 根线程仅分派；唯一integration operator持有共享生产/fixture/manifest/TODO/统一PG及全回归，测试agent独占写集串行接收。070已确认cache/password死锁和NULL scan不重复，静态未验证不直接宣称漏洞。P0目标基线与未来P1–P7产品修复不混淆 |
+| 当前阶段 | 2026-10-07：核对原 39 个 draft，关闭 35 个已覆盖 PR，保留 #17/#20/#24/#40 的独立历史内容；SMTP #57、Compose #58、兼容依赖 #59 已合入 #56 工作分支。当前来源目录 revision3 的三个原 CLI 和相关 54 测试通过，组合前端 tsc/build/lint 通过但默认测试保留 1 个私有 fixture 前置条件失败；证据见 [本轮管理记录](R5-PR-MANAGEMENT-20261007.md) |
+| 下一可执行任务 | 读取最终组合的远端 CI 终态；下一批按真实 CI 证据定位 PostgreSQL 串行累积耗尽 180s 的阶段成本，完善必跑 fixture/opt-in 接线，核对当前 frontend/source runner 的剩余失败。随后恢复有效 S/M 基准及 G0，继续真实角色／durable／权限链验收，不以局部绿灯代替父任务 |
+| 下一批范围 | 原生 subagent 独立 worktree：SMTP／Compose／PR与来源目录各自实现或复核，root 负责依赖更新、集成与唯一 TODO。共享生产文件按明确 base SHA 串行合入；目录修复保留原校验器、历史版本、预算、skip 拒绝和审计阈值 |
 | 实现完成数 | 10 / 171；P0 为 10 / 12。010–090及110基线已验收；100原S/M实测与120/G0仍未过 |
-| 当前阻塞 | P0-100有效1M baseline缺、原M10800FAILED；usage19 C未知/未资格，旧legacy Stop兼容仍需界定；当前caller/SMTP/API已接线，auth asyncTouch已有owner限定测试但完整durable join/拒409边界仍缺。watchdog scope_drained无true路径/terminal需flush、phase采样/native后代BLOCK，runtime拒；P5pure不业务链/P6组件不durableSMTP。Docker未ready/四CI/Method当前19/全角色/事务coverage/长期SSE/received残项保 |
-| 阶段源码检查点 | `chore/company-mail-r5-checkpoint-20260930` / `baseline/company-mail-r5-b01u-20260930`；含截至 B01-U 的完整提交链与本 TODO，见 [交付说明](R5-CHECKPOINT-20260930.md)。push 不改变 6/171 或未完成任务状态 |
-| 正式发布/部署 | 未授权执行；无 Release、迁移或部署动作由本清单自动触发 |
+| 当前阻塞 | 首次整合 CI #37619817397：backend PostgreSQL package 180.053s 超时，247 必跑中 180 项未通过／未执行；frontend 当前源 702 tests 中 2 failures/4 errors，来源目录漂移现已按 revision3 修复，待最终远端完整重验。默认前端组合 865 pass/1 fail（缺显式私有 PG fixture）；tsc/build/lint 通过。依赖审计从 12 项降至 8 high/0 critical，仍未达零漏洞。P0-100 的有效 M baseline 与 G0、完整 caller/SMTP/API realPG/Redis、角色终止与持久恢复、usage19/phase/watchdog 等历史未验边界继续保留 |
+| 阶段源码检查点 | 原整合来源 `cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f`（#55，领先 main 252 commits）；三项修复后的组合来源 `97d6b71bb092c4a1fb7af9cc605f32559c4bec71`，API collector 局部命名修正后为 `7b7dbfeaad5c87e875bf19e5a9e213867fda2db3`。后续目录／管理文档提交沿用完整父链，历史 [B01-U 检查点](R5-CHECKPOINT-20260930.md) 保留；当前精确 head 见 #56 |
+| 正式发布/部署 | #56 保持 draft；main 未改，尚未发布或部署。完整门禁通过与父任务验收必须各有实际证据 |
 
 - 2026-10-05 限定防护：五个 auth 请求体统一 64 KiB；Refresh/Logout 保留预算内空体与 cookie 流程，主动拒绝带有效 cookie 的畸形/超限 JSON（400，无 token/cookie 副作用）。作者 97/97、独立 402 子例/411 事件及相同 97 回归通过；仅有限 fake-store/httptest，65,537 字节为 decoder Read 上界，非 socket/drain；未全套/PG/负载/部署，父项与 10/171 不变。见[限定报告](R5-AUTH-BODY-LIMIT-20261005.md)。
 ### 0.1 状态、依赖与记录规则
@@ -2177,3 +2177,12 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 ### 2026-10-07 兼容依赖更新与精确锁准入
 
 - R5-P11-070：本地实现 `556647f` 在现有semver范围内更新 proxy-addr 2.0.8、MCP SDK 1.32.1、sharp 0.35.5及对应平台包、source-map-js 1.2.2；30个lock entry更新，无增删，独审44条父依赖边均兼容。实际完整audit从11high/1critical/12total降为8high/0critical/8total；braces链仍无适用修复，严格total=0门禁保持失败。source-runner只明确准入已审旧/新两个完整锁hash并回写actualhash，TS5.9.3、archive完整性/132文件和未知锁拒绝不变。npm ci、完整tsc、production build通过；新锁3测试及既有archive/runner10控制通过。完整旧runner unit 14PASS/1FAIL，未变FD用例因本环境pinned descriptor不可用而失败，原基线同例亦失败；未豁免或写成通过。详[报告与审计证据](R5-DEPENDENCY-AUDIT-20261007.md)。仅限定依赖/工具修复，父任务、完整CI、R5 10/171保持open。
+
+
+### 2026-10-07 PR 归属整理、当前目录 revision3 与组合验证
+
+- R5-P0-010：逐一核对原 #17–#55 的 39 个 draft。以 #55 `cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f` 的完整 tree 建立 [整合 PR #56](https://github.com/jyqj/tabmail/pull/56)；33 个 head 为祖先／相同，#18 的全部13个变更路径相同，#26实现为祖先且其余2文档blob相同，合计35个PR关闭为已收录。#17/#20/#24/#40仍有独立历史证据／实验内容，保留draft及说明。main仍为 `d6d512172fb6b874c3283d9df3f4d56758684a13`；本轮未发布／部署。完整逐项判断见[管理报告](R5-PR-MANAGEMENT-20261007.md)。
+- 三项本轮修复分别经独立审阅后以普通 merge 合入工作分支：[SMTP #57](https://github.com/jyqj/tabmail/pull/57)、[Compose #58](https://github.com/jyqj/tabmail/pull/58)、[兼容依赖 #59](https://github.com/jyqj/tabmail/pull/59)。组合source为 `97d6b71bb092c4a1fb7af9cc605f32559c4bec71` / tree `53e28562bbbdc80dbba764e72555d783a0bf7f66`。真实collector发现Compose局部 `request()` 伪API行，随后仅重命名参数及唯一调用；新source `7b7dbfeaad5c87e875bf19e5a9e213867fda2db3` / tree `c77ac064af69390ef493f6a7f1599b3ed7173738`，collector135→134只删除该假行、0新增，40项ownership/preview回归再次通过。
+- R5-P0-020／070／110：以7b7源码更新当前目录revision3，保持134个client branches／7个forwarders；明确19处client行号及附件owner a→Compose、14个PG entry的24处caller位置、14个route rows和10个closure hash变化，包括此前#52的refresh空体cookie契约。固定Git commit/path/blob/SHA256保留rev2原bytes，rev1文件／原validators／collectors／旧wire资格／人工review保持原意，不复制大历史JSON或增加全局frozen选择。精确当前源上的三个原CLI在旧目录均exit1，更新后全部exit0；事务当前62文件／395函数／19迁移，兼容132routes／94source files。三Python模块54/54、原scanner27/27均0fail/error/skip；旧4540源原6方法另行历史实跑6/6，不能继承为新源runtime资格。详[目录报告](evidence/R5-CATALOG-RECONCILIATION-20261007/README.md)。
+- 最终组合前端：53e28562 tree默认完整Vitest仅跑一次，59文件PASS/1FAIL，865测试PASS/1FAIL/0SKIP；唯一失败为未提供显式private PostgreSQL fixture，在原测试前置检查即拒绝。非增量tsc、完整production build（29/29页面）、全lint（0error/4原warning）均exit0。完整suite/build绑定53e，rename后40项限定回归绑定c77，不混作同tree全套绿。详[实际summary与日志](evidence/R5-PR-MANAGEMENT-20261007/combined-web-summary.json)。
+- 完整CI首次run37619817397为production-web/browser-journey PASS、backend/frontend FAIL。backend独审确定串行顶层Elapsed合计179.58s，闹钟时唯一running用例才运行0.4s，19个PAUSE未CONT，不能推断19个DB死锁；root另核实际tested merge49f6与cbc8完整tree相同。下一批补阶段计时并优化真实执行、接线必跑opt-in/私有fixture，保留180s预算与skip拒绝；8high审计、有效M baseline与G0仍阻塞。#56保持draft，171父任务仍10完成，局部修复／静态目录／归档成功不变成完整release资格。
