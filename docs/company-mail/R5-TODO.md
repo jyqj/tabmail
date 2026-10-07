@@ -5,7 +5,9 @@
 
 [Issue #90](https://github.com/jyqj/tabmail/issues/90) 跟踪十个与 NEXT／STREAM／并行批次 929 去重的实施子项。后端、前端、存储三个原生 subagent 按 **4＋3＋3** 分轮实施及交叉复核。任务、验证范围和逐轮数量见 [R5-QUALITY-20261008](R5-QUALITY-20261008.md)。
 
-第 1 轮 [#92](https://github.com/jyqj/tabmail/pull/92) 完成整数设置、密码字节规则、S3 错误分类和原件引用一致性 4 项。第 2 轮完成原子限流、邮箱保留期输入和缓存失效代际 3 项：**本批完成 7/10，剩余 3**；原父级仍 **完成 10/171，剩余 161**。逐轮剩余为 6、3；局部实现不替代父任务完整验收。已保留并行 #84 和 #91；本轮组合 race 为 233 PASS / 10 既有 PG SKIP，相关 UI 96 PASS，完整非增量 TypeScript 通过。
+第 1 轮 [#92](https://github.com/jyqj/tabmail/pull/92) 完成整数设置、密码字节规则、S3 错误分类和原件引用一致性 4 项；第 2 轮 [#93](https://github.com/jyqj/tabmail/pull/93) 完成原子限流、邮箱保留期输入和缓存失效代际 3 项；第 3 轮完成附件返回值隔离、留存取消交接和收件选择失效 3 项。**本批三轮 4＋3＋3＝完成 10/10，剩余 0**；原父级仍 **完成 10/171，剩余 161**。每轮结束的本批余数依次为 **6、3、0**。第三轮整合 PR 及最终状态见 [Issue #90](https://github.com/jyqj/tabmail/issues/90)。
+
+十项均有固定失败基线、实现回归和交叉审查。最终九包 race **464 PASS / 0 FAIL / 10 既有 PG SKIP**；19 个相关 UI 文件 **265 PASS / 0 FAIL / 0 SKIP**；完整 Go build/vet、非增量 TypeScript 和全量 lint 均通过，lint 保留 4 个既有 warnings。三个原始当前 source 目录 CLI 实际拒绝新漂移，待增量对账；全 PG／私有 fixture、依赖审计、最终 CI 和 M/G0 仍未验收。并行 #84/#91 完整保留，局部实现不替代父级资格，#56 保持 draft。公开交付仅含代码、合成回归测试与简明记录。
 <!-- R5-QUALITY-20261008:END -->
 
 <!-- R5-PARALLEL-20261008-929:BEGIN -->
