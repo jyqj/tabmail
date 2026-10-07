@@ -1,0 +1,65 @@
+{
+  "scope": "R5-NEXT-20261008 round 1",
+  "tasks": [
+    "R5-NEXT-20261008-01",
+    "R5-NEXT-20261008-02",
+    "R5-NEXT-20261008-03",
+    "R5-NEXT-20261008-04"
+  ],
+  "baseline_commit": "bcef70553ae0e2c541981e41edaa5e6993542d63",
+  "tested_local_product_commit": "bfad3e4",
+  "parent_tasks": {
+    "total": 171,
+    "accepted": 10,
+    "remaining": 161
+  },
+  "batch": {
+    "total": 10,
+    "accepted_after_integration": 4,
+    "remaining": 6
+  },
+  "results": {
+    "go_complete_testpg_domains_models": {
+      "leaf_pass": 41,
+      "leaf_fail": 0,
+      "leaf_skip": 0,
+      "race": true
+    },
+    "go_selected_http": {
+      "leaf_pass": 12,
+      "leaf_fail": 0,
+      "leaf_skip": 0,
+      "race": true
+    },
+    "web_four_related_files": {
+      "pass": 36,
+      "fail": 0,
+      "skip": 0,
+      "maxWorkers": 1
+    }
+  },
+  "commands": [
+    "GOMAXPROCS=2 go test -mod=readonly -p=2 -json -race -count=1 -timeout=120s ./internal/testpg ./internal/app/domains ./internal/models",
+    "GOMAXPROCS=2 go test -mod=readonly -p=2 -json -race -count=1 -timeout=120s ./internal/api/handlers -run ^(TestSuppressionPaginationDoesNotWrapOversizedPages|TestOutboundJobAccessCheckCoversGetRetryAndAttempts|TestOutboundListJobsScopesRegularPrincipalsAndTenantContext|TestDeleteSuppressionIsTenantScoped)$",
+    "npm test -- --maxWorkers=1 --reporter=json --outputFile=round1-web.json lib/utils-confirmation.test.ts features/company/user-delete-confirmation.test.tsx components/company/domains.test.tsx components/company/templates/versions.test.tsx"
+  ],
+  "logs": {
+    "round1-go.jsonl": {
+      "bytes": 42056,
+      "sha256": "11b4bfb3eaedb52ea2deb67ecd152bf8b57c9135664a1c5b061cf40a2e7910b9"
+    },
+    "round1-http.jsonl": {
+      "bytes": 11884,
+      "sha256": "d3e8a31a0bdc9d59e735fbdad30ef30bd89e2ed410e44b5d66de15973fa4c371"
+    },
+    "round1-web.json": {
+      "bytes": 12171,
+      "sha256": "428aadb951b04ccbac65827f2eca63d6847a0eb381db6172932de96feba32d84"
+    }
+  },
+  "limits": [
+    "No local PostgreSQL server: real pgx TCP cancellation regression, not successful migration or full PG qualification.",
+    "Scoped component execution, not a complete browser journey.",
+    "Original parent dependencies, full CI, source catalogs, private fixtures, audit and M/G0 remain open."
+  ]
+}
