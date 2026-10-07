@@ -161,7 +161,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 83,
+    "line": 87,
     "branch": 0,
     "callee": "company",
     "owner": "makeWriter",
@@ -177,7 +177,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 83,
+    "line": 87,
     "branch": 1,
     "callee": "company",
     "owner": "makeWriter",
@@ -193,7 +193,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 86,
+    "line": 90,
     "branch": 0,
     "callee": "company",
     "owner": "makeWriter",
@@ -209,7 +209,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 101,
+    "line": 121,
     "branch": 0,
     "callee": "company",
     "owner": "templates",
@@ -225,7 +225,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 474,
+    "line": 563,
     "branch": 0,
     "callee": "company",
     "owner": "Compose",
@@ -241,10 +241,10 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 552,
+    "line": 648,
     "branch": 0,
     "callee": "company",
-    "owner": "a",
+    "owner": "Compose",
     "expression": "`${workPath(mailboxId)}/attachments`",
     "path": "/api/v1/company/mailboxes/{id}/attachments",
     "methods": [
@@ -257,7 +257,7 @@
   },
   {
     "source": "web/components/company/compose.tsx",
-    "line": 575,
+    "line": 672,
     "branch": 0,
     "callee": "downloadCompanyFile",
     "owner": "Compose",
@@ -817,7 +817,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 38,
+    "line": 41,
     "branch": 0,
     "callee": "company",
     "owner": "MessagePane",
@@ -833,7 +833,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 48,
+    "line": 51,
     "branch": 0,
     "callee": "downloadCompanyFile",
     "owner": "MessagePane",
@@ -849,7 +849,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 62,
+    "line": 65,
     "branch": 0,
     "callee": "downloadCompanyFile",
     "owner": "MessagePane",
@@ -865,7 +865,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 62,
+    "line": 65,
     "branch": 1,
     "callee": "downloadCompanyFile",
     "owner": "MessagePane",
@@ -881,7 +881,7 @@
   },
   {
     "source": "web/features/mail/components/submission-content.tsx",
-    "line": 68,
+    "line": 70,
     "branch": 0,
     "callee": "downloadCompanyFile",
     "owner": "LiveSubmissionContent",
@@ -897,7 +897,7 @@
   },
   {
     "source": "web/features/mail/workspace.tsx",
-    "line": 48,
+    "line": 77,
     "branch": 0,
     "callee": "streamEvents",
     "owner": "MailWorkspace",
@@ -1441,7 +1441,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 98,
+    "line": 99,
     "branch": 0,
     "callee": "fetch",
     "owner": "res",
@@ -1455,7 +1455,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 123,
+    "line": 124,
     "branch": 0,
     "callee": "fetch",
     "owner": "run",
@@ -1469,7 +1469,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 205,
+    "line": 206,
     "branch": 0,
     "callee": "fetch",
     "owner": "execute",
@@ -1483,7 +1483,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 290,
+    "line": 291,
     "branch": 0,
     "callee": "fetch",
     "owner": "res",
@@ -1499,7 +1499,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 363,
+    "line": 364,
     "branch": 0,
     "callee": "fetch",
     "owner": "res",
@@ -1513,7 +1513,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 380,
+    "line": 381,
     "branch": 0,
     "callee": "fetch",
     "owner": "streamEvents",
