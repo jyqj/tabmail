@@ -7818,7 +7818,7 @@
       "clients": [
         {
           "source": "web/features/company/mailbox-admin.tsx",
-          "line": 48,
+          "line": 65,
           "branch": 0,
           "callee": "company",
           "owner": "MailboxAdmin",
@@ -10112,7 +10112,7 @@
   ],
   "source_closure": {
     "docs/company-mail/evidence/R5-API-MATRIX.json": "56cc04e6c7727346345853c7fb079eaac408e75164ea630372ad2c0f61d5fbdc",
-    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "e818ee078423dce13e46d5a314dddd1a9d4dd28dbf1c6162a900218f177e9a4d",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "7cc241cd0a0b83cab845bee62697a4301fa73a7de8115d3a56b09fbcbec64a60",
     "internal/api/handlers/admin.go": "7bdcc137f5355abb8b0df2f41f2f38a9926ac94a3de1488a7bacbb9ce72c3917",
     "internal/api/handlers/app_error.go": "1c745e35259f538938df75356997861841a7bb83c7af2302caa8c661efe147ff",
     "internal/api/handlers/audit.go": "ac2cd9156fe0ccea8085670033dd1a2762a9589371e161dd7cc2a287df6dde73",
@@ -10148,7 +10148,7 @@
     "internal/api/middleware/apikey_touch.go": "7d574639cc3f0d598d8fad6df1fb29ca70e2643cdd391bc69d07d9fa12f42f16",
     "internal/api/middleware/auth.go": "a9bc166859e6991dbccdde1ac3c071d9a7b590912a6fe4bdf4476f4a8c3bc0b4",
     "internal/api/middleware/auth_cache.go": "9d7462fcd86674d2732b46d40fa10bfc3a11a223a650449bce94936c48a43eb5",
-    "internal/api/middleware/ratelimit.go": "8940529485fc973d8618a3481934652da56451bb50628ac824d7d2b5717cc350",
+    "internal/api/middleware/ratelimit.go": "b8ff789b5204ee9931195aae33e5c33b9044a2abf4b9edc041c630d6f6561159",
     "internal/api/middleware/revalidate.go": "5c01d49b8084502ce4b346e18a8432dfc32d42df2f3ce5edd23428ca55be0315",
     "internal/api/openapi.yaml": "2cd1caeb0bbff4fa11d028860b6f514611e18f57de1f28a9a392525f9a8a4dda",
     "internal/api/router.go": "4082b31aef753ca2f9ffd6eac3c8fd0830d71d2532461b613a13bd73ad1df11f",
@@ -10186,7 +10186,7 @@
     "web/features/company/company-event-consumer.tsx": "1f8b8a65839a5ea29542ac4ddda9b210003332a24b76f90242d3eff48a873096",
     "web/features/company/domain-settings.tsx": "fe8a3786aac3e8e5664f8767957e2839a0db5867d6dc4500cd6a7800bf1b16ec",
     "web/features/company/employees.tsx": "90a9b3089cd151333811df7ed00bed96cf2068cf09c45d1b6fa55bb6893df932",
-    "web/features/company/mailbox-admin.tsx": "609f160e311cc3d40ebce821ae8cc36bf0275bcddb181c8b61ad432414b4492b",
+    "web/features/company/mailbox-admin.tsx": "70db99f72080531dc9c9c046c38b724cdb0cbb5c9f5b7d3e5e1218237055e4a6",
     "web/features/company/overview.tsx": "565a70314c43039d78415a63840defac31a812d40a40bf92f2e1a199ef486251",
     "web/features/mail/api.ts": "fb126f68df692218db562b651b5c4d9876f69d8485460d513a5548bddd6be7f5",
     "web/features/mail/components/conversation-list.tsx": "22db279e75a8f08545d63d26a583230b7649785dd2f5281f7f33b206ebc80d1f",
@@ -10212,17 +10212,17 @@
     "qualification": "historical_metadata_only_not_current_wire"
   },
   "acquisition": {
-    "base_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
+    "base_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
   },
   "inventory_revision": {
-    "revision": 7,
-    "source_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
+    "revision": 8,
+    "source_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
     "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
-    "previous_snapshot_commit": "c3e1419e6245baf0190291ea868787cb2b0177ca",
-    "previous_snapshot_blob": "4e134e4fbc8f35fff6be9d1da51511e2869fe971",
-    "previous_sha256": "457fcd6c63ce7f0b80a3d38aa2d7153e243eaa06569898ff47932bc02ca0983c",
+    "previous_snapshot_commit": "f77c31e2da38bb926dfe6fa134eabad652e94f8c",
+    "previous_snapshot_blob": "1ae3373eb5b57c95e219420995558bb0afe68c8f",
+    "previous_sha256": "115294363d6c05a88e1bf08c535a7d4411f8e9409fe9b854dd71821760ec44f7",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION7-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008/README.md"
   }
 }
