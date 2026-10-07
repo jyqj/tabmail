@@ -6,6 +6,7 @@ import { request } from "@/lib/api/base";
 import type { APIListResponse, APIResponse } from "@/lib/types";
 import { company, type Receipt } from "@/lib/company";
 import { useAuth } from "@/contexts/auth-context";
+import { isConflict } from "@/lib/error-code";
 import {
   isInspectionID,
   parseOutboundInspection,
@@ -42,9 +43,11 @@ export default function RecoveryPage() {
     original_valid: boolean;
   } | null>(null);
   const [targets, setTargets] = useState<string[]>([]);
+  const [inboundReviewRequired, setInboundReviewRequired] = useState(false);
   const [reason, setReason] = useState("");
   const [jobId, setJobId] = useState("");
   const [jobInspection, setJobInspection] = useState<OutboundInspection | null>(null);
+  const [outboundReviewRequired, setOutboundReviewRequired] = useState(false);
   // Target edits fence in-page requests. Account/company/session changes use
   // the existing request lease and AuthProvider's session-keyed subtree.
   const inspectionVersion = useRef(0);
@@ -129,6 +132,7 @@ export default function RecoveryPage() {
                   });
                   setInspection(next);
                   setTargets([]);
+                  setInboundReviewRequired(false);
                 })
               }
             >
@@ -157,6 +161,14 @@ export default function RecoveryPage() {
             {t("刷新", "Refresh")}
           </ActionButton>
         </div>
+        {inboundReviewRequired && (
+          <p role="alert" className="text-sm text-destructive">
+            {t(
+              "恢复状态已变化。请重新检查原件与目标后再重试。",
+              "Recovery state changed. Inspect the original and targets again before retrying.",
+            )}
+          </p>
+        )}
         {inspection && (
           <div className="space-y-3 rounded border p-4">
             <p className="font-medium">{inspection.receipt.id}</p>
@@ -209,14 +221,23 @@ export default function RecoveryPage() {
               }
               onClick={() =>
                 run(async () => {
-                  await company(`/recovery/${inspection.receipt.id}/retry`, {
-                    method: "POST",
-                    body: {
-                      updated_at: inspection.receipt.updated_at,
-                      targets,
-                      reason,
-                    },
-                  });
+                  try {
+                    await company(`/recovery/${inspection.receipt.id}/retry`, {
+                      method: "POST",
+                      body: {
+                        updated_at: inspection.receipt.updated_at,
+                        targets,
+                        reason,
+                      },
+                    });
+                  } catch (error) {
+                    if (isConflict(error)) {
+                      setInspection(null);
+                      setTargets([]);
+                      setInboundReviewRequired(true);
+                    }
+                    throw error;
+                  }
                   setInspection(null);
                   await receipts.mutate();
                   toast.success(
@@ -259,6 +280,7 @@ export default function RecoveryPage() {
                 setJobId(e.target.value);
                 setJobInspection(null);
                 setOutcomes({});
+                setOutboundReviewRequired(false);
               }}
             />
           )}
@@ -280,11 +302,20 @@ export default function RecoveryPage() {
               });
               if (version !== inspectionVersion.current) return;
               setJobInspection(parseOutboundInspection(value, { jobId: target, tenantId }));
+              setOutboundReviewRequired(false);
             })
           }
         >
           {t("记录审计并检查", "Audit and inspect")}
         </ActionButton>
+        {outboundReviewRequired && (
+          <p role="alert" className="text-sm text-destructive">
+            {t(
+              "投递状态已变化。请重新检查此任务后再保存有证据的结果。",
+              "Delivery state changed. Inspect this job again before saving evidenced outcomes.",
+            )}
+          </p>
+        )}
         {canInspect && jobInspection && (
           <div className="rounded border p-4 space-y-3" aria-label={t("受审计出站检查结果", "Audited outbound inspection result")}>
             <h3 className="font-medium">{jobInspection.job.subject}</h3>
@@ -368,16 +399,26 @@ export default function RecoveryPage() {
               onClick={() =>
                 run(async () => {
                   if (!canInspect || !validInspectionReason(reason)) return;
-                  await company(`/outbound/${jobInspection.job.id}/reconcile`, {
-                    method: "POST",
-                    body: {
-                      updated_at: jobInspection.job.updated_at,
-                      reason,
-                      results: Object.entries(outcomes)
-                        .filter(([, state]) => state)
-                        .map(([address, state]) => ({ address, state })),
-                    },
-                  });
+                  const version = inspectionVersion.current;
+                  try {
+                    await company(`/outbound/${jobInspection.job.id}/reconcile`, {
+                      method: "POST",
+                      body: {
+                        updated_at: jobInspection.job.updated_at,
+                        reason,
+                        results: Object.entries(outcomes)
+                          .filter(([, state]) => state)
+                          .map(([address, state]) => ({ address, state })),
+                      },
+                    });
+                  } catch (error) {
+                    if (isConflict(error) && version === inspectionVersion.current) {
+                      setJobInspection(null);
+                      setOutcomes({});
+                      setOutboundReviewRequired(true);
+                    }
+                    throw error;
+                  }
                   setJobInspection(null);
                   toast.success(
                     t(
