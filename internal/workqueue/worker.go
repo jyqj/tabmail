@@ -66,16 +66,20 @@ type ExponentialBackoff[T any] struct {
 func (p ExponentialBackoff[T]) Dead(job *Job[T]) bool { return job.Attempts >= p.Max }
 
 func (p ExponentialBackoff[T]) NextAttempt(job *Job[T]) time.Duration {
-	exp := job.Attempts - 1
-	if exp < 0 {
-		exp = 0
+	exp := 0
+	if job.Attempts > 1 {
+		exp = job.Attempts - 1
 	}
-	if exp > p.CapExp {
-		exp = p.CapExp
+	if capExp := max(p.CapExp, 0); exp > capExp {
+		exp = capExp
 	}
-	d := p.Base * time.Duration(1<<uint(exp))
+	d := exponentialDelay(p.Base, uint(exp), 0)
 	if p.Jitter != nil {
-		d += p.Jitter()
+		jitter := p.Jitter()
+		if jitter > 0 && d > maximumBackoff-jitter {
+			return maximumBackoff
+		}
+		d += jitter
 	}
 	return d
 }
@@ -90,7 +94,14 @@ type LinearBackoff[T any] struct {
 func (p LinearBackoff[T]) Dead(job *Job[T]) bool { return job.Attempts >= p.Max }
 
 func (p LinearBackoff[T]) NextAttempt(job *Job[T]) time.Duration {
-	return p.Base * time.Duration(job.Attempts)
+	if p.Base <= 0 || job.Attempts <= 0 {
+		return 0
+	}
+	multiplier := time.Duration(job.Attempts)
+	if multiplier > maximumBackoff/p.Base {
+		return maximumBackoff
+	}
+	return p.Base * multiplier
 }
 
 // FixedBackoff implements webhook outbox's backoff: a constant base delay
@@ -119,17 +130,35 @@ type ExponentialCappedBackoff[T any] struct {
 }
 
 func (p ExponentialCappedBackoff[T]) Dead(job *Job[T]) bool {
-	attempt := job.Attempts + 1
-	return attempt >= p.MaxAttempts(job)
+	limit := p.MaxAttempts(job)
+	return limit <= 0 || job.Attempts >= limit-1
 }
 
 func (p ExponentialCappedBackoff[T]) NextAttempt(job *Job[T]) time.Duration {
-	attempt := job.Attempts + 1
-	d := p.Base * time.Duration(1<<uint(attempt))
-	if p.Cap > 0 && d > p.Cap {
-		d = p.Cap
+	var exponent uint
+	if job.Attempts >= 0 {
+		// Convert before adding: MaxInt is a terminal job, but asking for its
+		// delay must not wrap the exponent to a negative signed integer.
+		exponent = uint(job.Attempts) + 1
 	}
-	return d
+	return exponentialDelay(p.Base, exponent, p.Cap)
+}
+
+const maximumBackoff = time.Duration(1<<63 - 1)
+
+// Check the cap before shifting or multiplying. Applying it to an overflowed
+// duration would turn a long retry into an immediate or past-due retry.
+func exponentialDelay(base time.Duration, exponent uint, limit time.Duration) time.Duration {
+	if base <= 0 {
+		return 0
+	}
+	if limit <= 0 {
+		limit = maximumBackoff
+	}
+	if base >= limit || exponent >= 63 || base > limit>>exponent {
+		return limit
+	}
+	return base << exponent
 }
 
 // Store is the claim/mark surface a Worker drives. Each implementation wraps
