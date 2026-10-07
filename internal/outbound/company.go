@@ -61,6 +61,13 @@ func (s *Service) SetObjectStore(st store.ObjectStore) { s.objects = st }
 func (s *Service) buildQueuedMIME(ctx context.Context, j *models.OutboundJob) ([]byte, error) {
 	m := messageFromJob(j)
 	if len(j.AttachmentIDs) > 0 {
+		pinned := make(map[uuid.UUID]struct{}, len(j.AttachmentIDs))
+		for _, id := range j.AttachmentIDs {
+			if _, duplicate := pinned[id]; id == uuid.Nil || duplicate {
+				return nil, fmt.Errorf("invalid pinned attachment set")
+			}
+			pinned[id] = struct{}{}
+		}
 		repo, ok := s.store.(interface {
 			OutboundAttachments(context.Context, uuid.UUID) ([]company.Attachment, error)
 		})
@@ -73,6 +80,15 @@ func (s *Service) buildQueuedMIME(ctx context.Context, j *models.OutboundJob) ([
 		}
 		if len(rows) != len(j.AttachmentIDs) {
 			return nil, fmt.Errorf("pinned attachment set incomplete")
+		}
+		// A matching count is insufficient: a duplicate or substituted row
+		// must never supply bytes for an attachment fixed by this submission.
+		// Check the whole relation before opening any object.
+		for _, a := range rows {
+			if _, expected := pinned[a.ID]; !expected {
+				return nil, fmt.Errorf("pinned attachment set mismatch")
+			}
+			delete(pinned, a.ID)
 		}
 		var total int64
 		for _, a := range rows {

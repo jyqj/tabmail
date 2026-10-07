@@ -1,0 +1,41 @@
+{
+  "round": 1,
+  "source_commit": "0846d2cdef09494b2abd155ceaaa1f3ea469c04f",
+  "baseline_commit": "28052dff454d04c8d28c4abe4bb8ed3a8bd5f6fa",
+  "task_ids": [
+    "R5-FOLLOWUP-20261007-01",
+    "R5-FOLLOWUP-20261007-02",
+    "R5-FOLLOWUP-20261007-03",
+    "R5-FOLLOWUP-20261007-04"
+  ],
+  "complete": 4,
+  "total": 10,
+  "remaining": 6,
+  "parent_complete": 10,
+  "parent_total": 171,
+  "parent_remaining": 161,
+  "integrated_tests": {
+    "go_leaf_cases": {
+      "pass": 577,
+      "fail": 0,
+      "skip": 0
+    },
+    "frontend_cases": {
+      "pass": 27,
+      "fail": 0,
+      "skip": 0
+    },
+    "ci_control_methods": {
+      "pass": 14,
+      "fail": 0,
+      "skip": 0
+    }
+  },
+  "review": {
+    "recipients": "root reviewed",
+    "offboarding": "root and independent backend agent accepted",
+    "attachment_identities": "independent backend agent accepted",
+    "ci": "root reviewed; actual Actions continuation pending"
+  },
+  "publication_scope": "Reviewed source identifiers, task status and aggregate test counts only. Raw CI/test logs are retained locally and are not part of this branch."
+}
