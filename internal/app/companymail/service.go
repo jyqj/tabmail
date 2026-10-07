@@ -267,8 +267,11 @@ func (s *Service) UploadAttachment(ctx context.Context, a authz.Actor, mailbox u
 	if s.objects == nil || input == nil {
 		return nil, app.Internal(errors.New("attachment storage unavailable"))
 	}
-	raw, err := io.ReadAll(io.LimitReader(input, MaxAttachmentBytes+1))
+	raw, err := readAttachment(ctx, input, MaxAttachmentBytes+1)
 	if err != nil {
+		if canceled := ctx.Err(); canceled != nil {
+			return nil, canceled
+		}
 		return nil, app.BadRequest("unable to read attachment")
 	}
 	if int64(len(raw)) > MaxAttachmentBytes {
@@ -300,9 +303,11 @@ func (s *Service) verifiedFile(ctx context.Context, key, filename, state string,
 	if err != nil {
 		return nil, err
 	}
-	defer r.Close()
-	raw, err := io.ReadAll(io.LimitReader(r, size+1))
-	if err != nil || int64(len(raw)) != size || digest(raw) != hash {
+	raw, err := readOwnedAttachment(ctx, r, size+1)
+	if err != nil {
+		return nil, app.Internal(err)
+	}
+	if int64(len(raw)) != size || digest(raw) != hash {
 		return nil, app.Internal(errors.New("attachment integrity check failed"))
 	}
 	return &File{Filename: SafeFilename(filename), Content: raw}, nil
