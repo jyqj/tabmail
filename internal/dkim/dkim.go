@@ -69,30 +69,58 @@ func DNSTXTValue(publicKeyBase64 string) string {
 // DNS/display whitespace from the p= tag; other tag values are parsed
 // case-insensitively where DKIM allows it.
 func TXTValueMatchesPublicKey(txtValue, publicKeyBase64 string) bool {
+	expected := stripWhitespace(publicKeyBase64)
+	if expected == "" {
+		return false
+	}
 	tags := parseDKIMTags(txtValue)
 	if !strings.EqualFold(tags["v"], "DKIM1") {
 		return false
 	}
-	if k := strings.TrimSpace(tags["k"]); k != "" && !strings.EqualFold(k, "rsa") {
+	if k, present := tags["k"]; present && !strings.EqualFold(k, "rsa") {
 		return false
 	}
-	return stripWhitespace(tags["p"]) == stripWhitespace(publicKeyBase64)
+	return stripWhitespace(tags["p"]) == expected
 }
 
+// A malformed or repeated tag invalidates the record. In particular, a later
+// p= must not overwrite an earlier revocation or a different public key.
+// Preserve this matching helper's existing display whitespace/case handling;
+// it is not a replacement for the DKIM signature verifier.
 func parseDKIMTags(txtValue string) map[string]string {
 	tags := make(map[string]string)
-	for _, part := range strings.Split(txtValue, ";") {
+	parts := strings.Split(txtValue, ";")
+	for i, part := range parts {
+		if strings.TrimSpace(part) == "" && i == len(parts)-1 {
+			break // One trailing semicolon is allowed.
+		}
 		key, value, ok := strings.Cut(part, "=")
 		if !ok {
-			continue
+			return nil
 		}
 		key = strings.ToLower(strings.TrimSpace(key))
-		if key == "" {
-			continue
+		if !validTagName(key) {
+			return nil
+		}
+		if _, exists := tags[key]; exists {
+			return nil
 		}
 		tags[key] = strings.TrimSpace(value)
 	}
 	return tags
+}
+
+func validTagName(name string) bool {
+	if name == "" || name[0] < 'a' || name[0] > 'z' {
+		return false
+	}
+	for i := 1; i < len(name); i++ {
+		ch := name[i]
+		if !((ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_') {
+			return false
+		}
+	}
+	return true
 }
 
 func stripWhitespace(v string) string {

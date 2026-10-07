@@ -23,7 +23,10 @@ export function GrantEditor({
     company<MailboxGrantSnapshot>(`${workPath(mailbox.mailbox.id)}/grants`),
   );
   const [grantRevision, setGrantRevision] = useState<number | null>(null);
-  const [conflict, setConflict] = useState(false);
+  const [conflictRevision, setConflictRevision] = useState<number | null>(null);
+  const [reviewError, setReviewError] = useState<unknown>(null);
+  const loadError = reviewError ?? grants.error;
+  const readReady = Boolean(grants.data) && !loadError && !grants.isLoading && !grants.isValidating;
   const empty: WorkGrantInput = {
     user_id: "",
     can_read: false,
@@ -32,12 +35,39 @@ export function GrantEditor({
     template_only: false,
   };
   const [grant, setGrant] = useState(empty);
-  const stale = conflict || (grantRevision !== null && grants.data?.revision !== grantRevision);
+  const stale = conflictRevision !== null || (grantRevision !== null && grants.data?.revision !== grantRevision);
   const [nextOwner, setNextOwner] = useState("");
   const [reason, setReason] = useState("");
+  const reloadGrants = () => run(async () => {
+    setReviewError(null);
+    const minimumRevision = Math.max(grantRevision ?? 0, conflictRevision ?? 0, grants.data?.revision ?? 0);
+    try {
+      // mutate() without data may resolve with the old cache after a failed
+      // revalidation. An explicit fetch mutation must succeed before review
+      // can discard the form or release a conflict.
+      const latest = await grants.mutate(async () => {
+        const snapshot = await company<MailboxGrantSnapshot>(`${workPath(mailbox.mailbox.id)}/grants`);
+        if (!snapshot || !Number.isSafeInteger(snapshot.revision) ||
+          snapshot.revision < minimumRevision || !Array.isArray(snapshot.grants)) {
+          throw new Error(t("无法确认当前权限版本，请重新加载权限。", "Could not confirm the current permission version. Reload permissions."));
+        }
+        return snapshot;
+      }, { revalidate: false });
+      if (!latest) throw new Error(t("权限读取未完成，请重新加载。", "Permission read did not complete. Reload permissions."));
+      await refresh();
+      setGrant(empty);
+      setGrantRevision(null);
+      // A fresh same-revision read is valid after a transient lock conflict.
+      // Selecting a member from the pre-conflict cache is never a review.
+      setConflictRevision(null);
+    } catch (error) {
+      setReviewError(error);
+      throw error;
+    }
+  });
   return (
     <div className="space-y-4">
-      <LoadError error={grants.error} onRetry={() => void grants.mutate()} />
+      <LoadError error={loadError} onRetry={reloadGrants} />
       <p className="text-sm text-muted-foreground">
         {t(
           "属主具有内建权限；其他成员必须显式授权。全不选即撤销授权。",
@@ -52,8 +82,7 @@ export function GrantEditor({
         )}
         onChange={(id) => {
           setGrant(grants.data?.grants.find((v) => v.user_id === id) ?? { ...empty, user_id: id });
-          setGrantRevision(grants.data?.revision ?? null);
-          setConflict(false);
+          setGrantRevision(readReady ? grants.data?.revision ?? null : null);
         }}
       />
       <div className="flex flex-wrap gap-5">
@@ -89,17 +118,12 @@ export function GrantEditor({
         ))}
       </div>
       {stale && <p role="alert">{t("权限已经变化，请重新加载并选择成员核对，旧表单不会自动覆盖。", "Permissions changed. Reload and select the member again; the old form will not overwrite them.")}</p>}
-      <ActionButton disabled={busy} onClick={() => run(async () => {
-        await grants.mutate();
-        await refresh();
-        setGrant(empty);
-        setGrantRevision(null);
-        setConflict(false);
-      })}>{t("重新加载权限", "Reload permissions")}</ActionButton>
+      <ActionButton disabled={busy} onClick={reloadGrants}>{t("重新加载权限", "Reload permissions")}</ActionButton>
       <ActionButton
-        disabled={busy || stale || grantRevision === null || !grant.user_id || Boolean(grants.error)}
+        disabled={busy || stale || !readReady || grantRevision === null || !grant.user_id}
         onClick={() =>
           run(async () => {
+            if (stale || !readReady || grantRevision === null || !grant.user_id) return;
             try {
               await company(`${workPath(mailbox.mailbox.id)}/grants`, {
                 method: "PUT",
@@ -108,7 +132,7 @@ export function GrantEditor({
                   template_only: grant.template_only, revision: grantRevision },
               });
             } catch (error) {
-              if (isConflict(error)) setConflict(true);
+              if (isConflict(error)) setConflictRevision(grantRevision);
               throw error;
             }
             setGrant(empty);

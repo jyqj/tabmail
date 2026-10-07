@@ -194,6 +194,7 @@ function TemplatesSession() {
           <TemplateGrantsView
             template={edit?.id ? edit : null}
             mailboxes={boxes.data ?? []}
+            mailboxesReady={!boxes.error && !boxes.isLoading && !boxes.isValidating && Array.isArray(boxes.data)}
             mailbox={activeMailbox}
             setMailbox={setMailbox}
           />
