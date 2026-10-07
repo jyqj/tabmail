@@ -72,7 +72,7 @@ func (s *Store) Delete(ctx context.Context, key string) error {
 		return nil
 	}
 	resp := minio.ToErrorResponse(err)
-	if resp.Code == "NoSuchKey" || resp.Code == "NoSuchObject" || resp.Code == "NoSuchBucket" {
+	if resp.Code == "NoSuchKey" || resp.Code == "NoSuchObject" {
 		return nil
 	}
 	return fmt.Errorf("s3obj: delete %s: %w", key, err)
@@ -84,7 +84,7 @@ func (s *Store) Exists(ctx context.Context, key string) (bool, error) {
 		return true, nil
 	}
 	resp := minio.ToErrorResponse(err)
-	if resp.Code == "NoSuchKey" || resp.Code == "NoSuchObject" || resp.Code == "NoSuchBucket" {
+	if resp.Code == "NoSuchKey" || resp.Code == "NoSuchObject" {
 		return false, nil
 	}
 	return false, fmt.Errorf("s3obj: stat %s: %w", key, err)
