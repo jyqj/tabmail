@@ -174,7 +174,7 @@ export function Compose({
     setPayload((v) => ({ ...v, ...patch }));
     setPreview(null);
   }
-  async function senderOperation<T>(request: () => Promise<T>, complete: (value: T) => void, preview = false) {
+  async function senderOperation<T>(performRequest: () => Promise<T>, complete: (value: T) => void, preview = false) {
     const owner = {
       mount: sendOwnership.current.mount,
       sender: senderOwnership.current.generation,
@@ -189,7 +189,7 @@ export function Compose({
     }
     assertOwner();
     try {
-      const value = await request();
+      const value = await performRequest();
       assertOwner();
       complete(value);
     } catch (error) {
