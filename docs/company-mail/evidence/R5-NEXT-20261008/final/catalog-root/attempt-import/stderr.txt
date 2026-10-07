@@ -1,0 +1,52 @@
+test_r5_catalog_reconciliation (unittest.loader._FailedTest.test_r5_catalog_reconciliation) ... ERROR
+test_r5_transactions (unittest.loader._FailedTest.test_r5_transactions) ... ERROR
+test_r5_compatibility (unittest.loader._FailedTest.test_r5_compatibility) ... ERROR
+
+======================================================================
+ERROR: test_r5_catalog_reconciliation (unittest.loader._FailedTest.test_r5_catalog_reconciliation)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_r5_catalog_reconciliation
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/fabe500b93be/tabmail/scripts/tests/test_r5_catalog_reconciliation.py", line 14, in <module>
+    import check_r5_transactions as tx
+ModuleNotFoundError: No module named 'check_r5_transactions'
+
+
+======================================================================
+ERROR: test_r5_transactions (unittest.loader._FailedTest.test_r5_transactions)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_r5_transactions
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/fabe500b93be/tabmail/scripts/tests/test_r5_transactions.py", line 9, in <module>
+    spec.loader.exec_module(tx)
+  File "/workspace/scratch/fabe500b93be/tabmail/scripts/check_r5_transactions.py", line 11, in <module>
+    import r5_go_environment
+ModuleNotFoundError: No module named 'r5_go_environment'
+
+
+======================================================================
+ERROR: test_r5_compatibility (unittest.loader._FailedTest.test_r5_compatibility)
+----------------------------------------------------------------------
+ImportError: Failed to import test module: test_r5_compatibility
+Traceback (most recent call last):
+  File "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/unittest/loader.py", line 137, in loadTestsFromName
+    module = __import__(module_name)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/fabe500b93be/tabmail/scripts/tests/test_r5_compatibility.py", line 10, in <module>
+    gate=importlib.util.module_from_spec(spec);spec.loader.exec_module(gate)
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/scratch/fabe500b93be/tabmail/scripts/check_r5_compatibility.py", line 13, in <module>
+    import r5_go_environment
+ModuleNotFoundError: No module named 'r5_go_environment'
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+FAILED (errors=3)

@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+  "baseline_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -1996,7 +1996,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
           "file": "internal/app/domains/service.go",
           "function": "CreateZone",
-          "line": 273,
+          "line": 312,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2004,7 +2004,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:TriggerVerify",
           "file": "internal/app/domains/service.go",
           "function": "TriggerVerify",
-          "line": 345,
+          "line": 390,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -4388,7 +4388,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 287,
+          "line": 289,
           "expression": "s.repo.FinishMailAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4552,7 +4552,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 151,
+          "line": 152,
           "expression": "s.repo.GetMailDraft",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4747,7 +4747,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
           "file": "internal/app/companymail/service.go",
           "function": "Attachment",
-          "line": 317,
+          "line": 319,
           "expression": "s.repo.GetWorkAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -4755,7 +4755,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
           "file": "internal/app/companymail/service.go",
           "function": "Attachment",
-          "line": 332,
+          "line": 334,
           "expression": "s.repo.GetWorkAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -5774,7 +5774,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 280,
+          "line": 282,
           "expression": "s.repo.ReserveMailAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -6823,7 +6823,7 @@
           "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:Read",
           "file": "internal/app/companymail/read_boundary.go",
           "function": "Read",
-          "line": 51,
+          "line": 75,
           "expression": "r.check",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -9344,7 +9344,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:sender",
           "file": "internal/app/companymail/service.go",
           "function": "sender",
-          "line": 240,
+          "line": 242,
           "expression": "s.repo.GetWorkMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -19448,7 +19448,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:DeleteZone",
           "file": "internal/app/domains/service.go",
           "function": "DeleteZone",
-          "line": 295,
+          "line": 334,
           "expression": "s.store.DeleteZone",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -24247,7 +24247,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:document",
           "file": "internal/app/companymail/service.go",
           "function": "document",
-          "line": 136,
+          "line": 138,
           "expression": "cache.GetParsedMessage",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -24554,7 +24554,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:document",
           "file": "internal/app/companymail/service.go",
           "function": "document",
-          "line": 157,
+          "line": 159,
           "expression": "cache.SaveParsedMessage",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -26587,7 +26587,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 178,
+          "line": 179,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -27561,7 +27561,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 178,
+          "line": 179,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -33049,7 +33049,7 @@
           "caller_id": "internal/api/handlers/outbound.go:*OutboundHandler:DeleteSuppression",
           "file": "internal/api/handlers/outbound.go",
           "function": "DeleteSuppression",
-          "line": 247,
+          "line": 249,
           "expression": "h.store.DeleteSuppressionAuthorized",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -33354,7 +33354,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitAuthorized",
-          "line": 325,
+          "line": 338,
           "expression": "s.store.IsSuppressed",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -33797,7 +33797,7 @@
           "caller_id": "internal/api/handlers/outbound.go:*OutboundHandler:ListSuppressions",
           "file": "internal/api/handlers/outbound.go",
           "function": "ListSuppressions",
-          "line": 195,
+          "line": 194,
           "expression": "h.store.ListSuppressions",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -36478,7 +36478,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:ContentAllowed",
           "file": "internal/app/submissions/service.go",
           "function": "ContentAllowed",
-          "line": 413,
+          "line": 425,
           "expression": "s.store.CanReadOutboundContent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -40840,7 +40840,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:RetryOutboundJob",
           "file": "internal/app/submissions/service.go",
           "function": "RetryOutboundJob",
-          "line": 427,
+          "line": 439,
           "expression": "s.store.RequeueOutboundJobAuthorized",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -41855,7 +41855,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:ownedZone",
           "file": "internal/app/domains/service.go",
           "function": "ownedZone",
-          "line": 392,
+          "line": 443,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41863,7 +41863,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:validateZoneAncestry",
           "file": "internal/app/domains/service.go",
           "function": "validateZoneAncestry",
-          "line": 505,
+          "line": 566,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42430,7 +42430,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 178,
+          "line": 179,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49687,7 +49687,7 @@
           "caller_id": "internal/api/handlers/respond.go::decodeBody",
           "file": "internal/api/handlers/respond.go",
           "function": "decodeBody",
-          "line": 100,
+          "line": 106,
           "expression": "r.Body.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49700,18 +49700,18 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:Close",
+          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:closeUnderlying",
           "file": "internal/app/companymail/read_boundary.go",
-          "function": "Close",
-          "line": 65,
+          "function": "closeUnderlying",
+          "line": 105,
           "expression": "r.ReadCloser.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:Read",
+          "caller_id": "internal/app/companymail/read_boundary.go:*authorizedSource:finish",
           "file": "internal/app/companymail/read_boundary.go",
-          "function": "Read",
-          "line": 56,
+          "function": "finish",
+          "line": 97,
           "expression": "r.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49720,6 +49720,14 @@
           "file": "internal/app/companymail/service.go",
           "function": "Source",
           "line": 108,
+          "expression": "r.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/app/companymail/service.go:*Service:open",
+          "file": "internal/app/companymail/service.go",
+          "function": "open",
+          "line": 128,
           "expression": "r.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49751,7 +49759,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
           "file": "internal/hooks/dispatcher.go",
           "function": "dispatch",
-          "line": 423,
+          "line": 435,
           "expression": "resp.Body.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50799,7 +50807,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 59,
+          "line": 73,
           "expression": "st.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51189,7 +51197,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 268,
+          "line": 270,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51197,7 +51205,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:open",
           "file": "internal/app/companymail/service.go",
           "function": "open",
-          "line": 119,
+          "line": 121,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51205,7 +51213,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:open",
           "file": "internal/app/companymail/service.go",
           "function": "open",
-          "line": 126,
+          "line": 125,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51213,7 +51221,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
           "file": "internal/app/companymail/service.go",
           "function": "verifiedFile",
-          "line": 300,
+          "line": 302,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51221,7 +51229,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
           "file": "internal/app/companymail/service.go",
           "function": "verifiedFile",
-          "line": 311,
+          "line": 313,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51237,7 +51245,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
           "file": "internal/app/domains/service.go",
           "function": "CreateZone",
-          "line": 242,
+          "line": 281,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51245,7 +51253,7 @@
           "caller_id": "internal/app/domains/service.go::NewService",
           "file": "internal/app/domains/service.go",
           "function": "NewService",
-          "line": 104,
+          "line": 130,
           "expression": "authz.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51301,7 +51309,7 @@
           "caller_id": "internal/app/submissions/service.go::NewService",
           "file": "internal/app/submissions/service.go",
           "function": "NewService",
-          "line": 124,
+          "line": 125,
           "expression": "authz.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51349,7 +51357,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
           "file": "internal/hooks/dispatcher.go",
           "function": "Publish",
-          "line": 175,
+          "line": 174,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51357,7 +51365,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
           "file": "internal/hooks/dispatcher.go",
           "function": "Publish",
-          "line": 189,
+          "line": 192,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51365,7 +51373,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
           "file": "internal/hooks/dispatcher.go",
           "function": "dispatch",
-          "line": 429,
+          "line": 441,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51373,7 +51381,7 @@
           "caller_id": "internal/hooks/dispatcher.go::sign",
           "file": "internal/hooks/dispatcher.go",
           "function": "sign",
-          "line": 447,
+          "line": 459,
           "expression": "hmac.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51933,7 +51941,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 32,
+          "line": 46,
           "expression": "pgxpool.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51941,7 +51949,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 55,
+          "line": 69,
           "expression": "postgres.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51949,7 +51957,7 @@
           "caller_id": "internal/testpg/fixture.go::NewPostgres",
           "file": "internal/testpg/fixture.go",
           "function": "NewPostgres",
-          "line": 60,
+          "line": 74,
           "expression": "pgxpool.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53137,7 +53145,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetterSize",
           "file": "internal/hooks/dispatcher.go",
           "function": "DeadLetterSize",
-          "line": 219,
+          "line": 223,
           "expression": "d.store.CountDeadWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -53704,7 +53712,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
           "file": "internal/hooks/dispatcher.go",
           "function": "Publish",
-          "line": 174,
+          "line": 177,
           "expression": "d.store.CreateOutboxEvent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -53852,7 +53860,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
           "file": "internal/hooks/dispatcher.go",
           "function": "processOutbox",
-          "line": 300,
+          "line": 304,
           "expression": "d.store.CreateWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -53976,7 +53984,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetters",
           "file": "internal/hooks/dispatcher.go",
           "function": "DeadLetters",
-          "line": 200,
+          "line": 204,
           "expression": "d.store.ListDeadWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -56110,7 +56118,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
           "file": "internal/app/domains/service.go",
           "function": "CreateZone",
-          "line": 270,
+          "line": 309,
           "expression": "s.store.CreateSendIdentity",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -56726,7 +56734,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:TriggerVerify",
           "file": "internal/app/domains/service.go",
           "function": "TriggerVerify",
-          "line": 342,
+          "line": 387,
           "expression": "s.store.UpdateSendIdentitiesVerifiedByZone",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59133,7 +59141,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachment",
-          "line": 351,
+          "line": 353,
           "expression": "s.repo.GetSubmissionAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -59141,7 +59149,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachment",
-          "line": 367,
+          "line": 369,
           "expression": "s.repo.GetSubmissionAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59244,7 +59252,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionContent",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionContent",
-          "line": 343,
+          "line": 345,
           "expression": "s.repo.GetSubmissionContent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59423,7 +59431,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachments",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachments",
-          "line": 347,
+          "line": 349,
           "expression": "s.repo.ListSubmissionAttachments",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -60540,7 +60548,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
           "file": "internal/app/domains/service.go",
           "function": "CreateZone",
-          "line": 226,
+          "line": 265,
           "expression": "s.store.EffectiveConfig",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63851,7 +63859,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
           "file": "internal/hooks/dispatcher.go",
           "function": "processOutbox",
-          "line": 283,
+          "line": 287,
           "expression": "d.store.ListWebhookEndpoints",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64135,7 +64143,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
           "file": "internal/app/domains/service.go",
           "function": "CreateZone",
-          "line": 230,
+          "line": 269,
           "expression": "s.store.CountZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64249,7 +64257,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
           "file": "internal/app/domains/service.go",
           "function": "CreateZone",
-          "line": 254,
+          "line": 293,
           "expression": "s.store.CreateZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64607,7 +64615,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:ownedZone",
           "file": "internal/app/domains/service.go",
           "function": "ownedZone",
-          "line": 392,
+          "line": 443,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64615,7 +64623,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:validateZoneAncestry",
           "file": "internal/app/domains/service.go",
           "function": "validateZoneAncestry",
-          "line": 505,
+          "line": 566,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64760,7 +64768,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:findParentZone",
           "file": "internal/app/domains/service.go",
           "function": "findParentZone",
-          "line": 478,
+          "line": 539,
           "expression": "s.store.GetZoneByDomain",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64776,7 +64784,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitAuthorized",
-          "line": 240,
+          "line": 241,
           "expression": "s.store.GetZoneByDomain",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64897,7 +64905,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:ListAllZones",
           "file": "internal/app/domains/service.go",
           "function": "ListAllZones",
-          "line": 157,
+          "line": 193,
           "expression": "s.store.ListAllZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65231,7 +65239,7 @@
           "caller_id": "internal/app/domains/service.go::countOwnedZones",
           "file": "internal/app/domains/service.go",
           "function": "countOwnedZones",
-          "line": 570,
+          "line": 631,
           "expression": "st.ListZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65348,7 +65356,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:ListOpenZones",
           "file": "internal/app/domains/service.go",
           "function": "ListOpenZones",
-          "line": 169,
+          "line": 205,
           "expression": "s.store.ListZonesByVisibilities",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65509,7 +65517,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:ListZones",
           "file": "internal/app/domains/service.go",
           "function": "ListZones",
-          "line": 146,
+          "line": 182,
           "expression": "s.store.ListZonesScoped",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65605,7 +65613,7 @@
           "caller_id": "internal/app/domains/service.go:*Service:TriggerVerify",
           "file": "internal/app/domains/service.go",
           "function": "TriggerVerify",
-          "line": 336,
+          "line": 381,
           "expression": "s.store.UpdateZone",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -66989,16 +66997,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
-  "current_review_boundary": "Revision 5 current AST/file/migration inventory only; eight external caller locations and three added name-match candidates reconciled at the declared published source commit. PostgreSQL syntax, body/file hashes, classifications, migrations and per-entry manual reviews remain revision-4 facts. Historical runtime links and manual acceptance are preserved, not recertified. No PostgreSQL tests executed in this reconciliation.",
+  "last_review_base_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "current_review_boundary": "Revision 6 current AST/file/migration inventory only. Exact external caller changes are recorded at the declared product commit. PostgreSQL syntax, file hashes, classifications, migrations and per-entry manual reviews remain revision-5 facts. Historical runtime links are preserved, not recertified. No PostgreSQL tests or parent-task acceptance result from this reconciliation.",
   "inventory_revision": {
-    "revision": 5,
-    "source_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+    "revision": 6,
+    "source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
-    "previous_snapshot_blob": "bd50c385e9c6c385a650f68ce5c5857ee69986ea",
-    "previous_sha256": "5fc5fb70255b5e6986b9aab38157fbb915b6012377d76d5b2a1956fc2907de2c",
+    "previous_snapshot_commit": "697b12d70b84658f5429e9a88ad2efde94e2e443",
+    "previous_snapshot_blob": "f34b037f26dc23464fe595a85b310bbed2f4a409",
+    "previous_sha256": "0ecb372399d4878fa46d454c88fc48e8cb1e40a06541beaef6309517c8cb6866",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md"
   }
 }

@@ -1,4 +1,5 @@
-"""Frozen revision-1/2/3/4 reviews and current revision-5 facts; original validators."""
+"""Frozen revision-1/2/3/4/5 reviews and current revision-6 facts; original validators."""
+import ast
 import copy
 from collections import Counter
 import hashlib
@@ -18,8 +19,12 @@ ROOT = Path(__file__).resolve().parents[2]
 EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261004'
 REVISION3_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007'
 REVISION4_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007'
-CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007'
-SOURCE_COMMIT = '79738c17d185f1cd5cd1c8d550a9f15a5501f31c'
+REVISION5_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007'
+CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008'
+SOURCE_COMMIT = 'f413a9138d305cf154ed2cecaddcf9b9a2397666'
+SOURCE_TREE = '37adfe5efb4ae49274a6d52a5d769bcb5b116cf0'
+REVISION5_SOURCE_COMMIT = '79738c17d185f1cd5cd1c8d550a9f15a5501f31c'
+REVISION5_COMMIT = '697b12d70b84658f5429e9a88ad2efde94e2e443'
 REVISION4_SOURCE_COMMIT = 'e32564304c0c84aa80b1184e72129fb0316d989d'
 REVISION4_COMMIT = '6b6163dc8941aa36bb9fa2b75f40c101b8f662fe'
 REVISION3_SOURCE_COMMIT = '7b7dbfeaad5c87e875bf19e5a9e213867fda2db3'
@@ -100,6 +105,610 @@ REVISION4_SNAPSHOTS = {
 }
 
 
+REVISION5_SNAPSHOTS = {'transaction': {'path': 'docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json',
+                 'blob': 'f34b037f26dc23464fe595a85b310bbed2f4a409',
+                 'sha256': '0ecb372399d4878fa46d454c88fc48e8cb1e40a06541beaef6309517c8cb6866'},
+ 'compatibility': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json',
+                   'blob': '46175d14abb95668baaed6143d6e038c88e62ba1',
+                   'sha256': '73b30e5733dccba31b1330eec0c52b66a96fb9f3f2dfb19fd3069a2ba32ddf80'},
+ 'clients': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json',
+             'blob': 'c1dc0d0acc96e9f6375bf9a82c9a3a6d3a1d8ae1',
+             'sha256': '76d03e2c33420a36cf49b0e740656ec83e672598028b9b0257a2de8d171acec7'},
+ 'client_routes': {'path': 'docs/company-mail/evidence/R5-CLIENT-CALLS.json',
+                   'blob': '63a497f7cdcdb4002d0139c8f68681c0dfb32781',
+                   'sha256': '39e65cca57bcddfe9a8b67733cd240a2db0c86f372ec491161ee7ec94dd5b72d'}}
+
+REVISION6_EXPECTED = {'caller_ids': ['internal/store/postgres/audit.go:*PgStore:InsertAudit',
+                'internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment',
+                'internal/store/postgres/company_mail.go:*PgStore:GetMailDraft',
+                'internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment',
+                'internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment',
+                'internal/store/postgres/company_mail.go:*capturedRestoreDeadline:check',
+                'internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox',
+                'internal/store/postgres/domain_delete.go:*PgStore:DeleteZone',
+                'internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage',
+                'internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage',
+                'internal/store/postgres/mailboxes.go:*PgStore:GetMailbox',
+                'internal/store/postgres/mailboxes.go:*pgTenantView:GetMailbox',
+                'internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized',
+                'internal/store/postgres/outbound.go:*PgStore:IsSuppressed',
+                'internal/store/postgres/outbound.go:*PgStore:ListSuppressions',
+                'internal/store/postgres/outbound_content.go:*PgStore:CanReadOutboundContent',
+                'internal/store/postgres/outbound_retry.go:*PgStore:RequeueOutboundJobAuthorized',
+                'internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone',
+                'internal/store/postgres/outbound_retry_reader.go:retryTenantView:GetMailbox',
+                'internal/store/postgres/postgres.go:*PgStore:Close',
+                'internal/store/postgres/postgres.go::New',
+                'internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries',
+                'internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent',
+                'internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries',
+                'internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries',
+                'internal/store/postgres/send_identities.go:*PgStore:CreateSendIdentity',
+                'internal/store/postgres/send_identities.go:*PgStore:UpdateSendIdentitiesVerifiedByZone',
+                'internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment',
+                'internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent',
+                'internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments',
+                'internal/store/postgres/tenants.go:*PgStore:EffectiveConfig',
+                'internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints',
+                'internal/store/postgres/zones.go:*PgStore:CountZones',
+                'internal/store/postgres/zones.go:*PgStore:CreateZone',
+                'internal/store/postgres/zones.go:*PgStore:GetZone',
+                'internal/store/postgres/zones.go:*PgStore:GetZoneByDomain',
+                'internal/store/postgres/zones.go:*PgStore:ListAllZones',
+                'internal/store/postgres/zones.go:*PgStore:ListZones',
+                'internal/store/postgres/zones.go:*PgStore:ListZonesByVisibilities',
+                'internal/store/postgres/zones.go:*PgStore:ListZonesScoped',
+                'internal/store/postgres/zones.go:*PgStore:UpdateZone'],
+ 'caller_locations': [{'id': 'internal/store/postgres/audit.go:*PgStore:InsertAudit',
+                       'caller_id': 'internal/app/domains/service.go:*Service:CreateZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 'app.InsertAudit',
+                       'before_line': 273,
+                       'after_line': 312},
+                      {'id': 'internal/store/postgres/audit.go:*PgStore:InsertAudit',
+                       'caller_id': 'internal/app/domains/service.go:*Service:TriggerVerify',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 'app.InsertAudit',
+                       'before_line': 345,
+                       'after_line': 390},
+                      {'id': 'internal/store/postgres/company_mail.go:*PgStore:FinishMailAttachment',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:UploadAttachment',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.FinishMailAttachment',
+                       'before_line': 287,
+                       'after_line': 289},
+                      {'id': 'internal/store/postgres/company_mail.go:*PgStore:GetMailDraft',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:SubmitDraft',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.repo.GetMailDraft',
+                       'before_line': 151,
+                       'after_line': 152},
+                      {'id': 'internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:Attachment',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.GetWorkAttachment',
+                       'before_line': 317,
+                       'after_line': 319},
+                      {'id': 'internal/store/postgres/company_mail.go:*PgStore:GetWorkAttachment',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:Attachment',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.GetWorkAttachment',
+                       'before_line': 332,
+                       'after_line': 334},
+                      {'id': 'internal/store/postgres/company_mail.go:*PgStore:ReserveMailAttachment',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:UploadAttachment',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.ReserveMailAttachment',
+                       'before_line': 280,
+                       'after_line': 282},
+                      {'id': 'internal/store/postgres/company_mail.go:*capturedRestoreDeadline:check',
+                       'caller_id': 'internal/app/companymail/read_boundary.go:*authorizedSource:Read',
+                       'source': 'internal/app/companymail/read_boundary.go',
+                       'expression': 'r.check',
+                       'before_line': 51,
+                       'after_line': 75},
+                      {'id': 'internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:sender',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.GetWorkMailbox',
+                       'before_line': 240,
+                       'after_line': 242},
+                      {'id': 'internal/store/postgres/domain_delete.go:*PgStore:DeleteZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:DeleteZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.DeleteZone',
+                       'before_line': 295,
+                       'after_line': 334},
+                      {'id': 'internal/store/postgres/mail_content.go:*PgStore:GetParsedMessage',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:document',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 'cache.GetParsedMessage',
+                       'before_line': 136,
+                       'after_line': 138},
+                      {'id': 'internal/store/postgres/mail_content.go:*PgStore:SaveParsedMessage',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:document',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 'cache.SaveParsedMessage',
+                       'before_line': 157,
+                       'after_line': 159},
+                      {'id': 'internal/store/postgres/mailboxes.go:*PgStore:GetMailbox',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:SubmitDraft',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.store.GetMailbox',
+                       'before_line': 178,
+                       'after_line': 179},
+                      {'id': 'internal/store/postgres/mailboxes.go:*pgTenantView:GetMailbox',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:SubmitDraft',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.store.GetMailbox',
+                       'before_line': 178,
+                       'after_line': 179},
+                      {'id': 'internal/store/postgres/outbound.go:*PgStore:DeleteSuppressionAuthorized',
+                       'caller_id': 'internal/api/handlers/outbound.go:*OutboundHandler:DeleteSuppression',
+                       'source': 'internal/api/handlers/outbound.go',
+                       'expression': 'h.store.DeleteSuppressionAuthorized',
+                       'before_line': 247,
+                       'after_line': 249},
+                      {'id': 'internal/store/postgres/outbound.go:*PgStore:IsSuppressed',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:SubmitAuthorized',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.store.IsSuppressed',
+                       'before_line': 325,
+                       'after_line': 338},
+                      {'id': 'internal/store/postgres/outbound.go:*PgStore:ListSuppressions',
+                       'caller_id': 'internal/api/handlers/outbound.go:*OutboundHandler:ListSuppressions',
+                       'source': 'internal/api/handlers/outbound.go',
+                       'expression': 'h.store.ListSuppressions',
+                       'before_line': 195,
+                       'after_line': 194},
+                      {'id': 'internal/store/postgres/outbound_content.go:*PgStore:CanReadOutboundContent',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:ContentAllowed',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.store.CanReadOutboundContent',
+                       'before_line': 413,
+                       'after_line': 425},
+                      {'id': 'internal/store/postgres/outbound_retry.go:*PgStore:RequeueOutboundJobAuthorized',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:RetryOutboundJob',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.store.RequeueOutboundJobAuthorized',
+                       'before_line': 427,
+                       'after_line': 439},
+                      {'id': 'internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:ownedZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.GetZone',
+                       'before_line': 392,
+                       'after_line': 443},
+                      {'id': 'internal/store/postgres/outbound_retry_reader.go:*outboundRetryReader:GetZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:validateZoneAncestry',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.GetZone',
+                       'before_line': 505,
+                       'after_line': 566},
+                      {'id': 'internal/store/postgres/outbound_retry_reader.go:retryTenantView:GetMailbox',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:SubmitDraft',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.store.GetMailbox',
+                       'before_line': 178,
+                       'after_line': 179},
+                      {'id': 'internal/store/postgres/postgres.go:*PgStore:Close',
+                       'caller_id': 'internal/api/handlers/respond.go::decodeBody',
+                       'source': 'internal/api/handlers/respond.go',
+                       'expression': 'r.Body.Close',
+                       'before_line': 100,
+                       'after_line': 106},
+                      {'id': 'internal/store/postgres/postgres.go:*PgStore:Close',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:dispatch',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'resp.Body.Close',
+                       'before_line': 423,
+                       'after_line': 435},
+                      {'id': 'internal/store/postgres/postgres.go:*PgStore:Close',
+                       'caller_id': 'internal/testpg/fixture.go::NewPostgres',
+                       'source': 'internal/testpg/fixture.go',
+                       'expression': 'st.Close',
+                       'before_line': 59,
+                       'after_line': 73},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:UploadAttachment',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 'errors.New',
+                       'before_line': 268,
+                       'after_line': 270},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:open',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 'errors.New',
+                       'before_line': 119,
+                       'after_line': 121},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:open',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 'errors.New',
+                       'before_line': 126,
+                       'after_line': 125},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:verifiedFile',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 'errors.New',
+                       'before_line': 300,
+                       'after_line': 302},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:verifiedFile',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 'errors.New',
+                       'before_line': 311,
+                       'after_line': 313},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/domains/service.go:*Service:CreateZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 'uuid.New',
+                       'before_line': 242,
+                       'after_line': 281},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/domains/service.go::NewService',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 'authz.New',
+                       'before_line': 104,
+                       'after_line': 130},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/app/submissions/service.go::NewService',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 'authz.New',
+                       'before_line': 124,
+                       'after_line': 125},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:Publish',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'uuid.New',
+                       'before_line': 175,
+                       'after_line': 174},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:Publish',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'uuid.New',
+                       'before_line': 189,
+                       'after_line': 192},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:dispatch',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'errors.New',
+                       'before_line': 429,
+                       'after_line': 441},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/hooks/dispatcher.go::sign',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'hmac.New',
+                       'before_line': 447,
+                       'after_line': 459},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/testpg/fixture.go::NewPostgres',
+                       'source': 'internal/testpg/fixture.go',
+                       'expression': 'pgxpool.New',
+                       'before_line': 32,
+                       'after_line': 46},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/testpg/fixture.go::NewPostgres',
+                       'source': 'internal/testpg/fixture.go',
+                       'expression': 'postgres.New',
+                       'before_line': 55,
+                       'after_line': 69},
+                      {'id': 'internal/store/postgres/postgres.go::New',
+                       'caller_id': 'internal/testpg/fixture.go::NewPostgres',
+                       'source': 'internal/testpg/fixture.go',
+                       'expression': 'pgxpool.New',
+                       'before_line': 60,
+                       'after_line': 74},
+                      {'id': 'internal/store/postgres/queue.go:*PgStore:CountDeadWebhookDeliveries',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:DeadLetterSize',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'd.store.CountDeadWebhookDeliveries',
+                       'before_line': 219,
+                       'after_line': 223},
+                      {'id': 'internal/store/postgres/queue.go:*PgStore:CreateOutboxEvent',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:Publish',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'd.store.CreateOutboxEvent',
+                       'before_line': 174,
+                       'after_line': 177},
+                      {'id': 'internal/store/postgres/queue.go:*PgStore:CreateWebhookDeliveries',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:processOutbox',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'd.store.CreateWebhookDeliveries',
+                       'before_line': 300,
+                       'after_line': 304},
+                      {'id': 'internal/store/postgres/queue.go:*PgStore:ListDeadWebhookDeliveries',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:DeadLetters',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'd.store.ListDeadWebhookDeliveries',
+                       'before_line': 200,
+                       'after_line': 204},
+                      {'id': 'internal/store/postgres/send_identities.go:*PgStore:CreateSendIdentity',
+                       'caller_id': 'internal/app/domains/service.go:*Service:CreateZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.CreateSendIdentity',
+                       'before_line': 270,
+                       'after_line': 309},
+                      {'id': 'internal/store/postgres/send_identities.go:*PgStore:UpdateSendIdentitiesVerifiedByZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:TriggerVerify',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.UpdateSendIdentitiesVerifiedByZone',
+                       'before_line': 342,
+                       'after_line': 387},
+                      {'id': 'internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:SubmissionAttachment',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.GetSubmissionAttachment',
+                       'before_line': 351,
+                       'after_line': 353},
+                      {'id': 'internal/store/postgres/submissions.go:*PgStore:GetSubmissionAttachment',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:SubmissionAttachment',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.GetSubmissionAttachment',
+                       'before_line': 367,
+                       'after_line': 369},
+                      {'id': 'internal/store/postgres/submissions.go:*PgStore:GetSubmissionContent',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:SubmissionContent',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.GetSubmissionContent',
+                       'before_line': 343,
+                       'after_line': 345},
+                      {'id': 'internal/store/postgres/submissions.go:*PgStore:ListSubmissionAttachments',
+                       'caller_id': 'internal/app/companymail/service.go:*Service:SubmissionAttachments',
+                       'source': 'internal/app/companymail/service.go',
+                       'expression': 's.repo.ListSubmissionAttachments',
+                       'before_line': 347,
+                       'after_line': 349},
+                      {'id': 'internal/store/postgres/tenants.go:*PgStore:EffectiveConfig',
+                       'caller_id': 'internal/app/domains/service.go:*Service:CreateZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.EffectiveConfig',
+                       'before_line': 226,
+                       'after_line': 265},
+                      {'id': 'internal/store/postgres/webhook_endpoints.go:*PgStore:ListWebhookEndpoints',
+                       'caller_id': 'internal/hooks/dispatcher.go:*Dispatcher:processOutbox',
+                       'source': 'internal/hooks/dispatcher.go',
+                       'expression': 'd.store.ListWebhookEndpoints',
+                       'before_line': 283,
+                       'after_line': 287},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:CountZones',
+                       'caller_id': 'internal/app/domains/service.go:*Service:CreateZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.CountZones',
+                       'before_line': 230,
+                       'after_line': 269},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:CreateZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:CreateZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.CreateZone',
+                       'before_line': 254,
+                       'after_line': 293},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:GetZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:ownedZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.GetZone',
+                       'before_line': 392,
+                       'after_line': 443},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:GetZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:validateZoneAncestry',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.GetZone',
+                       'before_line': 505,
+                       'after_line': 566},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:GetZoneByDomain',
+                       'caller_id': 'internal/app/domains/service.go:*Service:findParentZone',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.GetZoneByDomain',
+                       'before_line': 478,
+                       'after_line': 539},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:GetZoneByDomain',
+                       'caller_id': 'internal/app/submissions/service.go:*Service:SubmitAuthorized',
+                       'source': 'internal/app/submissions/service.go',
+                       'expression': 's.store.GetZoneByDomain',
+                       'before_line': 240,
+                       'after_line': 241},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:ListAllZones',
+                       'caller_id': 'internal/app/domains/service.go:*Service:ListAllZones',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.ListAllZones',
+                       'before_line': 157,
+                       'after_line': 193},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:ListZones',
+                       'caller_id': 'internal/app/domains/service.go::countOwnedZones',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 'st.ListZones',
+                       'before_line': 570,
+                       'after_line': 631},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:ListZonesByVisibilities',
+                       'caller_id': 'internal/app/domains/service.go:*Service:ListOpenZones',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.ListZonesByVisibilities',
+                       'before_line': 169,
+                       'after_line': 205},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:ListZonesScoped',
+                       'caller_id': 'internal/app/domains/service.go:*Service:ListZones',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.ListZonesScoped',
+                       'before_line': 146,
+                       'after_line': 182},
+                      {'id': 'internal/store/postgres/zones.go:*PgStore:UpdateZone',
+                       'caller_id': 'internal/app/domains/service.go:*Service:TriggerVerify',
+                       'source': 'internal/app/domains/service.go',
+                       'expression': 's.store.UpdateZone',
+                       'before_line': 336,
+                       'after_line': 381}],
+ 'callers_added': [('internal/store/postgres/postgres.go:*PgStore:Close',
+                    'internal/app/companymail/read_boundary.go:*authorizedSource:closeUnderlying',
+                    'r.ReadCloser.Close'),
+                   ('internal/store/postgres/postgres.go:*PgStore:Close',
+                    'internal/app/companymail/read_boundary.go:*authorizedSource:finish',
+                    'r.Close'),
+                   ('internal/store/postgres/postgres.go:*PgStore:Close',
+                    'internal/app/companymail/service.go:*Service:open',
+                    'r.Close')],
+ 'callers_removed': [('internal/store/postgres/postgres.go:*PgStore:Close',
+                      'internal/app/companymail/read_boundary.go:*authorizedSource:Close',
+                      'r.ReadCloser.Close'),
+                     ('internal/store/postgres/postgres.go:*PgStore:Close',
+                      'internal/app/companymail/read_boundary.go:*authorizedSource:Read',
+                      'r.Close')],
+ 'client_previous_indices': [0,
+                             1,
+                             2,
+                             3,
+                             4,
+                             5,
+                             6,
+                             7,
+                             8,
+                             9,
+                             10,
+                             11,
+                             12,
+                             13,
+                             14,
+                             15,
+                             16,
+                             17,
+                             18,
+                             19,
+                             20,
+                             21,
+                             22,
+                             23,
+                             24,
+                             25,
+                             27,
+                             28,
+                             29,
+                             30,
+                             31,
+                             32,
+                             33,
+                             34,
+                             35,
+                             36,
+                             37,
+                             38,
+                             39,
+                             40,
+                             41,
+                             42,
+                             43,
+                             44,
+                             45,
+                             46,
+                             47,
+                             48,
+                             49,
+                             50,
+                             51,
+                             52,
+                             53,
+                             54,
+                             55,
+                             56,
+                             57,
+                             58,
+                             59,
+                             60,
+                             61,
+                             62,
+                             63,
+                             64,
+                             65,
+                             66,
+                             67,
+                             68,
+                             69,
+                             70,
+                             71,
+                             72,
+                             73,
+                             74,
+                             75,
+                             76,
+                             77,
+                             78,
+                             79,
+                             80,
+                             81,
+                             82,
+                             83,
+                             84,
+                             85,
+                             86,
+                             87,
+                             88,
+                             89,
+                             90,
+                             91,
+                             92,
+                             93,
+                             94,
+                             95,
+                             96,
+                             97,
+                             98,
+                             99,
+                             100,
+                             101,
+                             102,
+                             103,
+                             104,
+                             105,
+                             106,
+                             107,
+                             108,
+                             109,
+                             110,
+                             111,
+                             112,
+                             113,
+                             114,
+                             115,
+                             116,
+                             117,
+                             118,
+                             119,
+                             120,
+                             121,
+                             122,
+                             123,
+                             124,
+                             125,
+                             126,
+                             127,
+                             128,
+                             129,
+                             130,
+                             131,
+                             132,
+                             133],
+ 'client_branch_count': 133,
+ 'client_merges': [{'before_indices': [25, 26], 'after_index': 25}],
+ 'client_changed_indices': [(24, 24), (25, 25)],
+ 'client_overrides': {25: {'owner': 'changeGrant'}},
+ 'changed_routes': ['GET /api/v1/company/templates/{id}/grants', 'PUT /api/v1/company/templates/{id}/grants'],
+ 'closure_paths': ['docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json',
+                   'internal/api/handlers/outbound.go',
+                   'internal/api/handlers/respond.go',
+                   'internal/models/models.go',
+                   'web/app/(dashboard)/company/templates/page.tsx',
+                   'web/components/company/templates/grants.tsx'],
+ 'source_paths': ['internal/api/handlers/outbound.go',
+                  'internal/api/handlers/respond.go',
+                  'internal/app/companymail/read_boundary.go',
+                  'internal/app/companymail/service.go',
+                  'internal/app/domains/service.go',
+                  'internal/app/submissions/service.go',
+                  'internal/hooks/dispatcher.go',
+                  'internal/models/models.go',
+                  'internal/testpg/fixture.go',
+                  'web/app/(dashboard)/company/templates/page.tsx',
+                  'web/components/company/templates/grants.tsx']}
+
+
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args])
 
@@ -137,6 +746,17 @@ def revision4_snapshot(name):
     return json.loads(raw)
 
 
+def revision5_snapshot(name):
+    pin = REVISION5_SNAPSHOTS[name]
+    ref = REVISION5_COMMIT + ':' + pin['path']
+    if git('rev-parse', ref).decode().strip() != pin['blob']:
+        raise ValueError('revision-5 Git blob differs: ' + name)
+    raw = git('show', ref)
+    if hashlib.sha256(raw).hexdigest() != pin['sha256']:
+        raise ValueError('revision-5 complete snapshot bytes differ: ' + name)
+    return json.loads(raw)
+
+
 class ReviewedCatalogReconciliationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -153,6 +773,9 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         cls.revision4 = {name: revision4_snapshot(name) for name in REVISION4_SNAPSHOTS}
         cls.rev4_tx = cls.revision4['transaction']
         cls.rev4_compat = cls.revision4['compatibility']
+        cls.revision5 = {name: revision5_snapshot(name) for name in REVISION5_SNAPSHOTS}
+        cls.rev5_tx = cls.revision5['transaction']
+        cls.rev5_compat = cls.revision5['compatibility']
         cls.ast = tx.extract()
         cls.migrations = tx.migration_inventory()
         cls.routes, cls.clients = gate.collect()
@@ -166,20 +789,24 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             tx.validate(self.rev3_tx, self.ast, self.migrations)
         with self.assertRaisesRegex(ValueError, '^caller drift:'):
             tx.validate(self.rev4_tx, self.ast, self.migrations)
+        with self.assertRaisesRegex(ValueError, '^caller drift:'):
+            tx.validate(self.rev5_tx, self.ast, self.migrations)
         # The old rows fail before the closure hash check because
         # reviewed client locations changed. The original hash-only rev1->rev2
         # assertion remains verified unchanged in the fixed historical checkout.
         for old in (self.old_compat, self.rev2_compat, self.rev3_compat, self.rev4_compat):
             with self.assertRaisesRegex(ValueError, '^route/schema/client/test source drift:'):
                 gate.validate(old, self.routes, self.clients)
+        with self.assertRaisesRegex(ValueError, '^route/schema/client/test\\ source\\ drift:\\ GET\\ /api/v1/company/templates/\\{id\\}/grants$'):
+            gate.validate(self.rev5_compat, self.routes, self.clients)
         self.assertFalse(tx.validate(self.tx, self.ast, self.migrations)['runtime_verified'])
         self.assertFalse(gate.validate(self.compat, self.routes, self.clients)['product_green'])
         for name, current in (('transaction', self.tx), ('compatibility', self.compat)):
             revision = current['inventory_revision']
-            pin = REVISION4_SNAPSHOTS[name]
-            self.assertEqual(revision['revision'], 5)
+            pin = REVISION5_SNAPSHOTS[name]
+            self.assertEqual(revision['revision'], 6)
             self.assertEqual(revision['source_commit'], SOURCE_COMMIT)
-            self.assertEqual(revision['previous_snapshot_commit'], REVISION4_COMMIT)
+            self.assertEqual(revision['previous_snapshot_commit'], REVISION5_COMMIT)
             self.assertEqual(revision['previous_snapshot'], pin['path'])
             self.assertEqual(revision['previous_snapshot_blob'], pin['blob'])
             self.assertEqual(revision['previous_sha256'], pin['sha256'])
@@ -419,11 +1046,11 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(review['unchanged_validators_and_collectors'], historical_review['unchanged_validators_and_collectors'])
 
     def test_revision5_preserves_reviews_and_records_exact_caller_changes(self):
-        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        review = json.loads(git('show', REVISION5_COMMIT + ':' + str((REVISION5_EVIDENCE / 'reconciliation.json').relative_to(ROOT))))
         self.assertEqual(review['inventory_revision'], 5)
-        self.assertEqual(review['source_commit'], SOURCE_COMMIT)
+        self.assertEqual(review['source_commit'], REVISION5_SOURCE_COMMIT)
         self.assertEqual(review['source_tree'], '1621d5fefb443d9d314abc2f9e0fab94914ce4c4')
-        self.assertEqual(review['source_tree'], git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip())
+        self.assertEqual(review['source_tree'], git('rev-parse', REVISION5_SOURCE_COMMIT + '^{tree}').decode().strip())
         self.assertEqual(review['revision4_snapshots'], {name: dict(commit=REVISION4_COMMIT, **pin) for name, pin in REVISION4_SNAPSHOTS.items()})
         for name, historical in [('transaction', self.rev4_tx), ('compatibility', self.rev4_compat)]:
             revision = historical['inventory_revision']
@@ -434,7 +1061,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 self.assertEqual(revision[field], REVISION3_SNAPSHOTS[name][pin_field])
 
         old = {entry['id']: entry for entry in self.rev4_tx['entries']}
-        current = {entry['id']: entry for entry in self.tx['entries']}
+        current = {entry['id']: entry for entry in self.rev5_tx['entries']}
         self.assertEqual(set(old), set(current))
         changes = {row['id']: row for row in review['transaction_callers']}
         self.assertEqual(len(changes), len(review['transaction_callers']))
@@ -477,27 +1104,27 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(removals, [])
         mutable = {'entries', 'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary'}
         self.assertEqual({k: v for k, v in self.rev4_tx.items() if k not in mutable},
-                         {k: v for k, v in self.tx.items() if k not in mutable})
-        self.assertEqual(self.tx['baseline_commit'], SOURCE_COMMIT)
-        self.assertEqual(self.tx['last_review_base_commit'], SOURCE_COMMIT)
+                         {k: v for k, v in self.rev5_tx.items() if k not in mutable})
+        self.assertEqual(self.rev5_tx['baseline_commit'], REVISION5_SOURCE_COMMIT)
+        self.assertEqual(self.rev5_tx['last_review_base_commit'], REVISION5_SOURCE_COMMIT)
         self.assertFalse(review['transaction']['task_complete'])
         self.assertFalse(review['transaction']['runtime_verified'])
         self.assertFalse(review['compatibility']['task_complete'])
         self.assertFalse(review['compatibility']['product_green'])
 
     def test_revision5_client_moves_and_source_hashes_are_explicitly_bound(self):
-        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
-        documented = json.loads((ROOT / REVISION4_SNAPSHOTS['client_routes']['path']).read_text())
-        self.assertEqual(len(self.clients), 134)
+        review = json.loads(git('show', REVISION5_COMMIT + ':' + str((REVISION5_EVIDENCE / 'reconciliation.json').relative_to(ROOT))))
+        documented = self.revision5['client_routes']
+        self.assertEqual(len(self.revision5['clients']), 134)
         self.assertEqual(len(documented), 134)
-        self.assertEqual(sum(row['forwarding'] for row in self.clients), 7)
+        self.assertEqual(sum(row['forwarding'] for row in self.revision5['clients']), 7)
         # Publish moves from the page into save; preview moves ahead of save in
         # the editor. Preserve the original route identities through both moves.
         previous_indices = list(range(8)) + list(range(9, 21)) + [23, 21, 22, 8] + list(range(24, 134))
         self.assertEqual(sorted(previous_indices), list(range(134)))
         client_changes, reordered = [], []
         for index, previous_index in enumerate(previous_indices):
-            before, after = self.revision4['clients'][previous_index], self.clients[index]
+            before, after = self.revision4['clients'][previous_index], self.revision5['clients'][index]
             expected = {k: v for k, v in before.items() if k != 'line'}
             if previous_index == 8:
                 expected.update(source='web/components/company/templates/editor.tsx', owner='save',
@@ -520,11 +1147,11 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(review['client_reorder'], reordered)
         mutable = {'routes', 'source_closure', 'inventory_revision', 'acquisition'}
         self.assertEqual({k: v for k, v in self.rev4_compat.items() if k not in mutable},
-                         {k: v for k, v in self.compat.items() if k not in mutable})
-        self.assertEqual(self.compat['acquisition'], dict(self.rev4_compat['acquisition'], base_commit=SOURCE_COMMIT))
-        self.assertEqual(len(self.rev4_compat['routes']), len(self.compat['routes']))
+                         {k: v for k, v in self.rev5_compat.items() if k not in mutable})
+        self.assertEqual(self.rev5_compat['acquisition'], dict(self.rev4_compat['acquisition'], base_commit=REVISION5_SOURCE_COMMIT))
+        self.assertEqual(len(self.rev4_compat['routes']), len(self.rev5_compat['routes']))
         changed_routes = []
-        for before, after in zip(self.rev4_compat['routes'], self.compat['routes']):
+        for before, after in zip(self.rev4_compat['routes'], self.rev5_compat['routes']):
             self.assertEqual({k: v for k, v in before.items() if k != 'clients'}, {k: v for k, v in after.items() if k != 'clients'})
             if before != after:
                 changed_routes.append(dict(route=after['route'], changed_fields=['clients']))
@@ -536,8 +1163,8 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         closure_changes = {str(gate.CURRENT_CLIENTS), 'internal/company/templates.go',
             'web/app/(dashboard)/company/templates/page.tsx', 'web/components/company/templates/editor.tsx',
             'web/components/company/templates/versions.tsx'}
-        self.assertEqual(set(self.rev4_compat['source_closure']), set(self.compat['source_closure']))
-        self.assertEqual({p for p, sha in self.compat['source_closure'].items() if self.rev4_compat['source_closure'][p] != sha}, closure_changes)
+        self.assertEqual(set(self.rev4_compat['source_closure']), set(self.rev5_compat['source_closure']))
+        self.assertEqual({p for p, sha in self.rev5_compat['source_closure'].items() if self.rev4_compat['source_closure'][p] != sha}, closure_changes)
         paths = (closure_changes - {str(gate.CURRENT_CLIENTS)}) | {
             'internal/app/recovery/verify.go', 'internal/app/submissions/service.go',
             'internal/outbound/company.go', 'internal/outbound/queued_attachment_read.go'}
@@ -552,14 +1179,14 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             else:
                 self.assertEqual(git('rev-parse', REVISION4_COMMIT + ':' + path).decode().strip(), row['before_blob'])
                 self.assertEqual(hashlib.sha256(git('show', REVISION4_COMMIT + ':' + path)).hexdigest(), row['before_sha256'])
-            raw = git('show', SOURCE_COMMIT + ':' + path)
-            self.assertEqual(git('rev-parse', SOURCE_COMMIT + ':' + path).decode().strip(), row['after_blob'])
+            raw = git('show', REVISION5_SOURCE_COMMIT + ':' + path)
+            self.assertEqual(git('rev-parse', REVISION5_SOURCE_COMMIT + ':' + path).decode().strip(), row['after_blob'])
             self.assertEqual(hashlib.sha256(raw).hexdigest(), row['after_sha256'])
-            self.assertEqual((ROOT / path).read_bytes(), raw)
+            self.assertEqual(git('show', REVISION5_COMMIT + ':' + path), raw)
         self.assertEqual(set(review['generated_catalogs']), set(REVISION4_SNAPSHOTS))
         for name, value in review['generated_catalogs'].items():
             self.assertEqual(value['path'], REVISION4_SNAPSHOTS[name]['path'])
-            self.assertEqual(hashlib.sha256((ROOT / value['path']).read_bytes()).hexdigest(), value['sha256'])
+            self.assertEqual(hashlib.sha256(git('show', REVISION5_COMMIT + ':' + value['path'])).hexdigest(), value['sha256'])
         previous_review = json.loads(git('show', REVISION4_COMMIT + ':' + str((REVISION4_EVIDENCE / 'reconciliation.json').relative_to(ROOT))))
         self.assertEqual(review['unchanged_validators_and_collectors'], previous_review['unchanged_validators_and_collectors'])
         # All existing historical packets remain byte-for-byte pinned, including
@@ -654,3 +1281,170 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             after = subprocess.run(argv, cwd=root, env=env, capture_output=True, text=True, timeout=60)
             self.assertNotEqual(after.returncode, 0)
             self.assertIn('undocumented route GET /unreviewed-docs-assets/*', after.stdout)
+
+
+    def test_revision6_preserves_reviews_and_records_exact_caller_changes(self):
+        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        self.assertEqual(review['inventory_revision'], 6)
+        self.assertEqual(review['source_commit'], SOURCE_COMMIT)
+        self.assertEqual(review['source_tree'], SOURCE_TREE)
+        self.assertEqual(SOURCE_TREE, git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip())
+        self.assertEqual(review['revision5_snapshots'],
+                         {name: dict(commit=REVISION5_COMMIT, **pin) for name, pin in REVISION5_SNAPSHOTS.items()})
+        for name, historical in [('transaction', self.rev5_tx), ('compatibility', self.rev5_compat)]:
+            revision = historical['inventory_revision']
+            self.assertEqual(revision['revision'], 5)
+            self.assertEqual(revision['source_commit'], REVISION5_SOURCE_COMMIT)
+            self.assertEqual(revision['previous_snapshot_commit'], REVISION4_COMMIT)
+            for field, pin_field in [('previous_snapshot', 'path'), ('previous_snapshot_blob', 'blob'), ('previous_sha256', 'sha256')]:
+                self.assertEqual(revision[field], REVISION4_SNAPSHOTS[name][pin_field])
+
+        old = {entry['id']: entry for entry in self.rev5_tx['entries']}
+        current = {entry['id']: entry for entry in self.tx['entries']}
+        self.assertEqual(set(old), set(current))
+        changes = {row['id']: row for row in review['transaction_callers']}
+        self.assertEqual(len(changes), len(review['transaction_callers']))
+        self.assertEqual(sorted(changes), REVISION6_EXPECTED['caller_ids'])
+        additions, removals, locations = [], [], []
+        for name, before in old.items():
+            after = current[name]
+            self.assertEqual({k: v for k, v in before.items() if k != 'callers'},
+                             {k: v for k, v in after.items() if k != 'callers'})
+            if name not in changes:
+                self.assertEqual(before['callers'], after['callers'])
+                continue
+            delta = changes[name]
+            for prefix, value in [('before', before['callers']), ('after', after['callers'])]:
+                self.assertEqual(delta[prefix + '_count'], len(value))
+                self.assertEqual(delta[prefix + '_sha256'], hashlib.sha256(gate.canonical_bytes(value)).hexdigest())
+            transformed = copy.deepcopy(before['callers'])
+            for row in delta['removed']:
+                transformed.remove(row)
+                removals.append((name, row['caller_id'], row['expression']))
+            for row in delta['locations']:
+                matches = [c for c in transformed if c['caller_id'] == row['caller_id'] and c['file'] == row['source']
+                           and c['expression'] == row['expression'] and c['line'] == row['before_line']]
+                self.assertEqual(len(matches), 1)
+                self.assertNotEqual(row['before_line'], row['after_line'])
+                matches[0]['line'] = row['after_line']
+                locations.append(dict(id=name, **row))
+            for row in delta['added']:
+                transformed.append(row)
+                additions.append((name, row['caller_id'], row['expression']))
+            self.assertEqual(Counter(json.dumps(row, sort_keys=True) for row in transformed),
+                             Counter(json.dumps(row, sort_keys=True) for row in after['callers']))
+        self.assertEqual(locations, REVISION6_EXPECTED['caller_locations'])
+        self.assertEqual(additions, REVISION6_EXPECTED['callers_added'])
+        self.assertEqual(removals, REVISION6_EXPECTED['callers_removed'])
+        mutable = {'entries', 'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary'}
+        self.assertEqual({k: v for k, v in self.rev5_tx.items() if k not in mutable},
+                         {k: v for k, v in self.tx.items() if k not in mutable})
+        self.assertEqual(self.tx['baseline_commit'], SOURCE_COMMIT)
+        self.assertEqual(self.tx['last_review_base_commit'], SOURCE_COMMIT)
+        self.assertFalse(review['transaction']['task_complete'])
+        self.assertFalse(review['transaction']['runtime_verified'])
+        self.assertFalse(review['compatibility']['task_complete'])
+        self.assertFalse(review['compatibility']['product_green'])
+
+    def test_revision6_client_facts_source_bytes_and_historical_guards_are_bound(self):
+        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        documented = json.loads((ROOT / REVISION5_SNAPSHOTS['client_routes']['path']).read_text())
+        self.assertEqual(len(self.clients), REVISION6_EXPECTED['client_branch_count'])
+        self.assertEqual(len(documented), REVISION6_EXPECTED['client_branch_count'])
+        self.assertEqual(sum(row['forwarding'] for row in self.clients), 7)
+        indices = REVISION6_EXPECTED['client_previous_indices']
+        groups = {index: [previous] for index, previous in enumerate(indices)}
+        self.assertEqual(review['client_merges'], REVISION6_EXPECTED['client_merges'])
+        for merge in REVISION6_EXPECTED['client_merges']:
+            index, previous = merge['after_index'], merge['before_indices']
+            self.assertEqual(indices[index], previous[0])
+            self.assertGreaterEqual(len(previous), 2)
+            for old_index in previous[1:]:
+                self.assertEqual({k: v for k, v in self.revision5['clients'][old_index].items() if k != 'line'},
+                                 {k: v for k, v in self.revision5['clients'][previous[0]].items() if k != 'line'})
+                self.assertEqual(self.revision5['client_routes'][old_index]['routes'], documented[index]['routes'])
+            groups[index] = previous
+        self.assertEqual(sorted(previous for group in groups.values() for previous in group), list(range(134)))
+        self.assertEqual(review['client_previous_indices'], indices)
+        changes, reordered = [], []
+        for index, previous in enumerate(indices):
+            before, after = self.revision5['clients'][previous], self.clients[index]
+            expected = {k: v for k, v in before.items() if k != 'line'}
+            expected.update(REVISION6_EXPECTED['client_overrides'].get(index, {}))
+            self.assertEqual(expected, {k: v for k, v in after.items() if k != 'line'})
+            self.assertEqual(self.revision5['client_routes'][previous]['routes'], documented[index]['routes'])
+            self.assertEqual({k: v for k, v in documented[index].items() if k != 'routes'}, after)
+            if before != after:
+                changes.append(dict(before_index=previous, after_index=index, path=after['path'], methods=after['methods'],
+                    changes={k: dict(before=before[k], after=after[k]) for k in before if before[k] != after[k]}))
+            if previous != index:
+                reordered.append(dict(before_index=previous, after_index=index))
+        self.assertEqual([(row['before_index'], row['after_index']) for row in changes], REVISION6_EXPECTED['client_changed_indices'])
+        self.assertEqual(review['client_changes'], changes)
+        self.assertEqual(review['client_reorder'], reordered)
+        mutable = {'routes', 'source_closure', 'inventory_revision', 'acquisition'}
+        self.assertEqual({k: v for k, v in self.rev5_compat.items() if k not in mutable},
+                         {k: v for k, v in self.compat.items() if k not in mutable})
+        self.assertEqual(self.compat['acquisition'], dict(self.rev5_compat['acquisition'], base_commit=SOURCE_COMMIT))
+        self.assertEqual(len(self.rev5_compat['routes']), len(self.compat['routes']))
+        changed_routes = []
+        for before, after in zip(self.rev5_compat['routes'], self.compat['routes']):
+            self.assertEqual({k: v for k, v in before.items() if k != 'clients'}, {k: v for k, v in after.items() if k != 'clients'})
+            if before != after:
+                changed_routes.append(dict(route=after['route'], changed_fields=['clients']))
+        self.assertEqual(sorted(row['route'] for row in changed_routes), REVISION6_EXPECTED['changed_routes'])
+        self.assertEqual(review['compatibility_routes'], changed_routes)
+        self.assertEqual(len(self.compat['source_closure']), 94)
+        self.assertEqual(set(self.rev5_compat['source_closure']), set(self.compat['source_closure']))
+        changed = sorted(path for path, digest in self.compat['source_closure'].items()
+                         if digest != self.rev5_compat['source_closure'][path])
+        self.assertEqual(changed, REVISION6_EXPECTED['closure_paths'])
+        self.assertEqual(review['closure_changes'], changed)
+        self.assertEqual([row['path'] for row in review['source_changes']], REVISION6_EXPECTED['source_paths'])
+        for row in review['source_changes']:
+            path = row['path']
+            if git('ls-tree', REVISION5_COMMIT, '--', path):
+                before = git('show', REVISION5_COMMIT + ':' + path)
+                self.assertEqual(git('rev-parse', REVISION5_COMMIT + ':' + path).decode().strip(), row['before_blob'])
+                self.assertEqual(hashlib.sha256(before).hexdigest(), row['before_sha256'])
+            else:
+                before = None
+                self.assertIsNone(row['before_blob'])
+                self.assertIsNone(row['before_sha256'])
+            raw = git('show', SOURCE_COMMIT + ':' + path)
+            self.assertNotEqual(before, raw)
+            self.assertEqual(git('rev-parse', SOURCE_COMMIT + ':' + path).decode().strip(), row['after_blob'])
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), row['after_sha256'])
+            self.assertEqual((ROOT / path).read_bytes(), raw)
+        self.assertEqual(set(review['generated_catalogs']), set(REVISION5_SNAPSHOTS))
+        for name, value in review['generated_catalogs'].items():
+            self.assertEqual(value['path'], REVISION5_SNAPSHOTS[name]['path'])
+            self.assertEqual(hashlib.sha256((ROOT / value['path']).read_bytes()).hexdigest(), value['sha256'])
+        previous_review = json.loads(git('show', REVISION5_COMMIT + ':' + str((REVISION5_EVIDENCE / 'reconciliation.json').relative_to(ROOT))))
+        self.assertEqual(review['unchanged_validators_and_collectors'], previous_review['unchanged_validators_and_collectors'])
+        self.assertEqual(len(review['unchanged_validators_and_collectors']), 5)
+        for path, digest in review['unchanged_validators_and_collectors'].items():
+            raw = git('show', REVISION5_COMMIT + ':' + path)
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), digest)
+            self.assertEqual((ROOT / path).read_bytes(), raw)
+        historical_files = 0
+        for directory in (EVIDENCE, REVISION3_EVIDENCE, REVISION4_EVIDENCE, REVISION5_EVIDENCE):
+            names = git('ls-tree', '-r', '--name-only', REVISION5_COMMIT, '--', str(directory.relative_to(ROOT))).decode().splitlines()
+            self.assertTrue(names)
+            self.assertEqual({str(p.relative_to(ROOT)) for p in directory.rglob('*') if p.is_file()}, set(names))
+            historical_files += len(names)
+            for path in names:
+                self.assertEqual((ROOT / path).read_bytes(), git('show', REVISION5_COMMIT + ':' + path))
+        self.assertEqual(historical_files, 33)
+        test_path = 'scripts/tests/test_r5_catalog_reconciliation.py'
+        def methods(raw):
+            return {node.name: ast.dump(node, include_attributes=False) for node in ast.walk(ast.parse(raw))
+                    if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
+        before, after = methods(git('show', REVISION5_COMMIT + ':' + test_path)), methods((ROOT / test_path).read_bytes())
+        self.assertEqual(len(before), 13)
+        self.assertEqual(len(after), 15)
+        self.assertTrue(set(before).issubset(after))
+        mutations = {name for name in before if name.startswith('test_unapproved_')}
+        self.assertEqual(len(mutations), 5)
+        for name in mutations:
+            self.assertEqual(before[name], after[name])

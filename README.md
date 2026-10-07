@@ -8,15 +8,15 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-**2026-10-07 已完成三轮原生 multi-subagent 的十项实施改动：本批 10/10，剩余 0。** 当前入口为 [R5 整合 PR #56](https://github.com/jyqj/tabmail/pull/56)，分支 `integration/company-mail-r5-pr-management-20261007`。SMTP、附件与配置、恢复前端及 CI 证据共十项独立 PR 已合入集成分支；三轮分工、逐项行为、冻结基线与实际测试见 [本批执行报告](docs/company-mail/R5-MULTI-ROUND-20261007.md)。
+**2026-10-08 NEXT批次三轮原生 multi-subagent 完成10项新实施子项，剩余0。** [#79](https://github.com/jyqj/tabmail/pull/79)、[#80](https://github.com/jyqj/tabmail/pull/80)、[#82](https://github.com/jyqj/tabmail/pull/82) 已合入 [R5整合PR #56](https://github.com/jyqj/tabmail/pull/56)。改动覆盖PG fixture取消、明确删除确认、域名配额/分页/JSON边界、协议CI源码及失败证据、邀请与域名页面归属、DNS取消。每轮4＋3＋3和完整行为证据见[本批报告](docs/company-mail/R5-NEXT-20261008.md)。前两批20项实施保持历史，不重复计数。
 
-九项产品改动共80个固定场景，基线18 PASS/62 FAIL，修复后80 PASS；CI另有独立契约断言和真实运行证据。最终产品源的四完整Go包与8个handler控制均通过，相关vet和整仓build通过；完整默认前端886 PASS/1 FAIL，lint和默认生产build通过。远端当前源码713项及固定历史4项检查均通过；原始结果绑定实际源码，完整前端唯一失败仍为私有fixture前置条件；[当前目录revision4](docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/README.md)保留原校验规则与历史证据。
+**原父任务仍完成10/171，剩余161；P0为10/12。** 唯一父清单为[R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见[R5-DESIGN](docs/company-mail/R5-DESIGN.md)。本批有限改进不自动完成父项依赖和全部验收；[并行批次 #81](https://github.com/jyqj/tabmail/issues/81)及[STREAM批次](docs/company-mail/R5-STREAM-20261008.md)各有独立范围和计数。
 
-唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段／171工作包／25批次／38验收场景。**父任务完成10/171，剩余161；P0为10/12。** 本批子项分别绑定父任务，有限修复和目录更新不代替整项验收。后续每轮同时报告这两组剩余数；有效M基准与G0仍未通过。
+本批产品源码为`ff8872b737a947c158035a0b07d78396397ad626`，与本地受测db7702d整树相同。第3轮根验证：相关Go三包54叶PASS（race），全仓Go build/vet与完整非增量tsc通过；84个Python控制、35个域名UI和单独22个邀请UI通过。不同运行、基线和资格边界分别保存；[revision6源码目录](docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md)按公开集成f413a91重新采集，保留随后合入的#83/#85/#86事实。在f413检查点上原3条CLI及根17项检查通过。其后并行#87合入f3ea4e9，新增产品完整保留；原3条当前源码门禁均实际拒绝新增漂移，须继续对账。各次结果绑定各自源码，静态目录不提供运行或发布资格。
 
-原39个草稿PR已逐项核对，35个被整合内容完整覆盖的PR已关闭；#17、#20、#24、#40保留独立历史内容与draft状态。此前#57–#60的修复和PR处理依据见 [PR管理记录](docs/company-mail/R5-PR-MANAGEMENT-20261007.md)。
+[真实第2轮CI37654826526](https://github.com/jyqj/tabmail/actions/runs/37654826526)的协议接线已进入PostgreSQL：19顶层/88叶PASS、0FAIL/SKIP，源码manifest前后相同；production-web与browser-journey成功。但完整后端PG/必跑、源码目录、前端版本、默认测试和严格审计仍使该运行失败。这些结果绑定实际合成checkout93889b26，不冒充最终revision6运行。原始artifact、GitHub digest和逐范围结果见[CI证据](docs/company-mail/evidence/R5-NEXT-20261008/ci-37654826526/summary.json)。
 
-**R5尚未取得完整CI／发布资格，#56保持draft。** 产品整合的真实production-web与browser-journey通过；完整PG包仍超时且必跑接线未齐，完整audit仍8 high/0 critical，私有fixture仍待提供。门禁保持实际失败。集成分支未合入`main`，未发布或部署。历史验收和暂停记录保留为当时事实，当前进度以唯一TODO为准。
+本轮关闭了已被#76逐字节覆盖的重复恢复#77；#17、#20、#24、#40仍有独立历史内容，保留draft。前批PR整理和关闭历史见[管理记录](docs/company-mail/R5-PR-MANAGEMENT-20261007.md)。**#56保持draft，完整CI、PG/opt-in fixture、私有前端fixture、完整依赖审计和有效M/G0仍待验收。** main未合入本批集成，未发布或部署。
 
 ## 公司工作流
 
