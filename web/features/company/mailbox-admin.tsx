@@ -8,6 +8,19 @@ import { GrantEditor } from "@/components/company/grants";
 import { EmployeeField } from "@/components/company/employee-field";
 import { MailboxSendPolicyEditor } from "@/components/company/send-policy";
 import { AccessExplanationPanel } from "./access-explanation";
+// Validate the entered decimal exactly before converting it to wire hours.
+// Number alone rounds tiny fractions to zero, which would mean permanence.
+function parseRetentionHours(value: string): number | null {
+    const match = /^([+-]?)(\d*)(?:\.(\d*))?(?:[eE]([+-]?\d+))?$/.exec(value);
+    const hours = Number(value);
+    if (!match || !Number.isSafeInteger(hours) || hours < 0 || hours > 876000) return null;
+    const digits = match[2] + (match[3] ?? "");
+    if (!digits) return null;
+    const trailingZeros = digits.length - digits.replace(/0+$/, "").length;
+    const fractionalPlaces = (match[3]?.length ?? 0) - Number(match[4] ?? "0");
+    if (/[1-9]/.test(digits) && fractionalPlaces > trailingZeros) return null;
+    return hours;
+}
 export function MailboxAdmin() {
     const t = useText();
     const { busy, run } = useAction();
@@ -16,7 +29,11 @@ export function MailboxAdmin() {
     const [boxLocal, setBoxLocal] = useState("");
     const [kind, setKind] = useState("shared");
     const [owner, setOwner] = useState("");
-    const [retention, setRetention] = useState(0);
+    const [retention, setRetention] = useState("0");
+    // An empty field is unfinished input, not an instruction for permanence.
+    const retentionHours = parseRetentionHours(retention);
+    const validRetention = retentionHours !== null;
+    const validCreate = Boolean(boxLocal) && (kind === "personal" ? Boolean(owner) : validRetention);
     const [selected, setSelected] = useState("");
     const active = (members.data ?? []).filter(u => u.is_active);
     const mailbox = boxes.data?.find(v => v.mailbox.id === selected);
@@ -37,21 +54,21 @@ export function MailboxAdmin() {
               </select>)}
           </Field>
           {kind === "personal" ? (<EmployeeField label={t("邮箱属主", "Mailbox owner")} value={owner} onChange={setOwner} employees={active}/>) : (<Field label={t("保留小时数（0 为永久）", "Retention hours (0 = permanent)")}>
-              {(id) => (<input id={id} className={inputClass} type="number" min={0} max={876000} step={1} value={retention} onChange={(e) => setRetention(Number(e.target.value))}/>)}
+              {(id) => (<>
+                <input id={id} className={inputClass} type="number" min={0} max={876000} step={1} value={retention} aria-invalid={!validRetention || undefined} aria-describedby={!validRetention ? `${id}-error` : undefined} onChange={(e) => setRetention(e.target.value)}/>
+                {!validRetention && <p id={`${id}-error`} role="alert" className="text-sm text-destructive">{t("请输入 0–876000 的整数小时数；0 表示永久保留。", "Enter a whole number of hours from 0 to 876000; 0 means permanent storage.")}</p>}
+              </>)}
             </Field>)}
         </div>
-        <ActionButton disabled={busy ||
-            !boxLocal ||
-            (kind === "personal" && !owner) ||
-            !Number.isInteger(retention) ||
-            retention < 0} onClick={() => run(async () => {
+        <ActionButton disabled={busy || !validCreate} onClick={() => run(async () => {
+            if (!validCreate) return;
             await company("/mailboxes", {
                 method: "POST",
                 body: {
                     local_part: boxLocal,
                     kind,
                     owner_user_id: kind === "personal" ? owner : undefined,
-                    retention_hours: kind === "personal" ? 0 : retention,
+                    retention_hours: kind === "personal" ? 0 : retentionHours,
                 },
             });
             setBoxLocal("");
