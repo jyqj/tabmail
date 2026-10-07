@@ -77,6 +77,7 @@ export function Compose({
   const mounted = useRef(true);
   const [editorScope] = useState(sessionScope);
   const sendOwnership = useRef({ mount: 0, permission: 0, allowed: false });
+  const senderOwnership = useRef({ mailboxId, generation: 0, allowed: false });
   const [writer, setWriter] = useState(() => makeWriter(initial));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<unknown>(null);
@@ -107,6 +108,15 @@ export function Compose({
     revision: number;
   } | null>(null);
   const from = mailboxes.find((v) => v.mailbox.id === mailboxId);
+  const senderAllowed = Boolean(from?.can_send);
+  useLayoutEffect(() => {
+    const owner = senderOwnership.current;
+    // Keep the selected identity explicit. A committed removal/revocation
+    // invalidates its pending operations even if permission is later restored.
+    if (owner.mailboxId !== mailboxId || (owner.allowed && !senderAllowed)) owner.generation += 1;
+    owner.mailboxId = mailboxId;
+    owner.allowed = senderAllowed;
+  }, [mailboxId, senderAllowed]);
   const templates = useAPI(["usable-templates", mailboxId], () =>
     company<TemplateVersion[]>(`${workPath(mailboxId)}/templates`),
   );
@@ -163,6 +173,30 @@ export function Compose({
   function change(patch: Partial<DraftPayload>) {
     setPayload((v) => ({ ...v, ...patch }));
     setPreview(null);
+  }
+  async function senderOperation<T>(request: () => Promise<T>, complete: (value: T) => void, preview = false) {
+    const owner = {
+      mount: sendOwnership.current.mount,
+      sender: senderOwnership.current.generation,
+      permission: sendOwnership.current.permission,
+    };
+    function assertOwner() {
+      assertSession(editorScope);
+      if (!mounted.current || owner.mount !== sendOwnership.current.mount ||
+          !senderOwnership.current.allowed || owner.sender !== senderOwnership.current.generation ||
+          (preview && (!sendOwnership.current.allowed || owner.permission !== sendOwnership.current.permission)))
+        throw new DOMException("Sender authorization changed; stale editor result discarded", "AbortError");
+    }
+    assertOwner();
+    try {
+      const value = await request();
+      assertOwner();
+      complete(value);
+    } catch (error) {
+      // An old editor's error must not surface over the current interaction.
+      assertOwner();
+      throw error;
+    }
   }
   async function save(next: DraftPayload = payload, silent = false) {
     setSaving(true);
@@ -352,6 +386,13 @@ export function Compose({
               });
             }}
           >
+            {!senderAllowed && (
+              <option value={mailboxId} disabled>
+                {from?.mailbox.full_address
+                  ? `${from.mailbox.full_address} · ${t("当前无发件授权", "Sending unavailable")}`
+                  : t("当前发件邮箱不可用", "Current sender unavailable")}
+              </option>
+            )}
             {mailboxes
               .filter((v) => v.can_send)
               .map((v) => (
@@ -363,6 +404,11 @@ export function Compose({
           </select>
         )}
       </Field>
+      {!senderAllowed && (
+        <p role="status" className="text-sm text-amber-700 dark:text-amber-400">
+          {t("该邮箱当前无发件授权。编辑已保留，请选择可发件的邮箱。", "This mailbox cannot send. Your edits are preserved; select an authorized sender.")}
+        </p>
+      )}
       <div className="grid gap-4 md:grid-cols-3">
         {(["to", "cc", "bcc"] as const).map((field, i) => (
           <Field
@@ -510,11 +556,11 @@ export function Compose({
             </Field>
           ))}
           <ActionButton
-            disabled={busy || Boolean(pending)}
+            disabled={busy || Boolean(pending) || !sendAllowed}
             onClick={() =>
-              run(async () =>
-                setPreview(
-                  await company<RenderedTemplate>("/templates/preview", {
+              run(() =>
+                senderOperation(
+                  () => company<RenderedTemplate>("/templates/preview", {
                     method: "POST",
                     body: {
                       mailbox_id: mailboxId,
@@ -522,6 +568,13 @@ export function Compose({
                       vars: payload.template_vars ?? {},
                     },
                   }),
+                  value => {
+                    if (!value || typeof value !== "object" || typeof value.subject !== "string" ||
+                        typeof value.text_body !== "string" || typeof value.html_body !== "string")
+                      throw new Error(t("模板预览响应无效，请重试。", "Invalid template preview response; try again."));
+                    setPreview(value);
+                  },
+                  true,
                 ),
               )
             }
@@ -582,25 +635,26 @@ export function Compose({
             id={id}
             type="file"
             className={inputClass}
-            disabled={locked || (payload.attachment_ids?.length ?? 0) >= 10}
+            disabled={locked || !senderAllowed || (payload.attachment_ids?.length ?? 0) >= 10}
             onChange={(e) => {
               const f = e.target.files?.[0];
               e.target.value = "";
               if (!f) return;
-              void run(async () => {
+              void run(() => senderOperation(async () => {
                 if (f.size > 20 * 1024 * 1024)
                   throw new Error(t("附件过大", "Attachment too large"));
                 const fd = new FormData();
                 fd.append("file", f);
-                const a = await company<MailAttachment>(
+                return company<MailAttachment>(
                   `${workPath(mailboxId)}/attachments`,
                   { method: "POST", body: fd },
                 );
+              }, a => {
                 setNames((v) => ({ ...v, [a.id]: a.filename }));
                 change({
                   attachment_ids: [...(payload.attachment_ids ?? []), a.id],
                 });
-              });
+              }));
             }}
           />
         )}
