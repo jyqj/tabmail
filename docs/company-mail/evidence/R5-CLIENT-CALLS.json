@@ -97,10 +97,10 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 43,
+    "line": 44,
     "branch": 0,
     "callee": "company",
-    "owner": "templates",
+    "owner": "list",
     "expression": "\"/templates\"",
     "path": "/api/v1/company/templates",
     "methods": [
@@ -113,7 +113,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 92,
+    "line": 145,
     "branch": 0,
     "callee": "company",
     "owner": "retireTemplate",
@@ -273,7 +273,23 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 104,
+    "line": 49,
+    "branch": 0,
+    "callee": "company",
+    "owner": "snapshot",
+    "expression": "`${workPath(mailbox.mailbox.id)}/grants`",
+    "path": "/api/v1/company/mailboxes/{id}/grants",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/mailboxes/{id}/grants"
+    ]
+  },
+  {
+    "source": "web/components/company/grants.tsx",
+    "line": 128,
     "branch": 0,
     "callee": "company",
     "owner": "GrantEditor",
@@ -289,7 +305,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 170,
+    "line": 194,
     "branch": 0,
     "callee": "company",
     "owner": "GrantEditor",
@@ -305,7 +321,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 179,
+    "line": 203,
     "branch": 0,
     "callee": "company",
     "owner": "GrantEditor",

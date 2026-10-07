@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+  "baseline_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -22007,7 +22007,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:acceptDurable",
           "file": "internal/ingest/recovery.go",
           "function": "acceptDurable",
-          "line": 61,
+          "line": 60,
           "expression": "ledger.CreateIngress",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -22351,7 +22351,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
           "file": "internal/ingest/recovery.go",
           "function": "deliverTarget",
-          "line": 183,
+          "line": 180,
           "expression": "ledger.DeliverIngress",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -22555,7 +22555,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:processReceipt",
           "file": "internal/ingest/recovery.go",
           "function": "processReceipt",
-          "line": 117,
+          "line": 114,
           "expression": "ledger.FailIngressTarget",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -22900,7 +22900,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:processReceipt",
           "file": "internal/ingest/recovery.go",
           "function": "processReceipt",
-          "line": 115,
+          "line": 112,
           "expression": "ledger.HoldIngressTarget",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -23017,7 +23017,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:processReceipt",
           "file": "internal/ingest/recovery.go",
           "function": "processReceipt",
-          "line": 68,
+          "line": 70,
           "expression": "ledger.ListIngressTargets",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -23658,7 +23658,7 @@
           "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
           "file": "internal/app/mailindex/service.go",
           "function": "Batch",
-          "line": 23,
+          "line": 26,
           "expression": "s.repo.ClaimMailIndexJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -23845,7 +23845,7 @@
           "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
           "file": "internal/app/mailindex/service.go",
           "function": "Batch",
-          "line": 35,
+          "line": 50,
           "expression": "s.repo.CompleteMailIndexJob",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -24115,7 +24115,7 @@
           "caller_id": "internal/app/mailindex/service.go:*Service:Batch",
           "file": "internal/app/mailindex/service.go",
           "function": "Batch",
-          "line": 30,
+          "line": 45,
           "expression": "s.repo.FailMailIndexJob",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -26595,7 +26595,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
           "file": "internal/ingest/recovery.go",
           "function": "deliverTarget",
-          "line": 141,
+          "line": 138,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -27569,7 +27569,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
           "file": "internal/ingest/recovery.go",
           "function": "deliverTarget",
-          "line": 141,
+          "line": 138,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41887,7 +41887,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
           "file": "internal/ingest/recovery.go",
           "function": "deliverTarget",
-          "line": 148,
+          "line": 145,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42438,7 +42438,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
           "file": "internal/ingest/recovery.go",
           "function": "deliverTarget",
-          "line": 141,
+          "line": 138,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49796,11 +49796,11 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/ingest/recovery.go:*Service:processReceipt",
-          "file": "internal/ingest/recovery.go",
-          "function": "processReceipt",
-          "line": 76,
-          "expression": "rc.Close",
+          "caller_id": "internal/ingest/recovery_read.go:*Service:readReceiptOriginal",
+          "file": "internal/ingest/recovery_read.go",
+          "function": "readReceiptOriginal",
+          "line": 29,
+          "expression": "input.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -49935,7 +49935,7 @@
           "caller_id": "internal/smtp/server.go:*Server:drain",
           "file": "internal/smtp/server.go",
           "function": "drain",
-          "line": 304,
+          "line": 305,
           "expression": "ln.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49943,7 +49943,7 @@
           "caller_id": "internal/smtp/server.go:*limitedConn:Close",
           "file": "internal/smtp/server.go",
           "function": "Close",
-          "line": 261,
+          "line": 262,
           "expression": "c.Conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49951,7 +49951,7 @@
           "caller_id": "internal/smtp/server.go:*limitedListener:Accept",
           "file": "internal/smtp/server.go",
           "function": "Accept",
-          "line": 209,
+          "line": 210,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49959,7 +49959,7 @@
           "caller_id": "internal/smtp/server.go:*limitedListener:Close",
           "file": "internal/smtp/server.go",
           "function": "Close",
-          "line": 235,
+          "line": 236,
           "expression": "l.Listener.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49967,7 +49967,7 @@
           "caller_id": "internal/smtp/server.go:*limitedListener:closeConnections",
           "file": "internal/smtp/server.go",
           "function": "closeConnections",
-          "line": 248,
+          "line": 249,
           "expression": "c.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51397,7 +51397,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:acceptDurable",
           "file": "internal/ingest/recovery.go",
           "function": "acceptDurable",
-          "line": 53,
+          "line": 52,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51405,7 +51405,15 @@
           "caller_id": "internal/ingest/recovery.go:*Service:processReceipt",
           "file": "internal/ingest/recovery.go",
           "function": "processReceipt",
-          "line": 99,
+          "line": 96,
+          "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/ingest/recovery_read.go:*Service:readReceiptOriginal",
+          "file": "internal/ingest/recovery_read.go",
+          "function": "readReceiptOriginal",
+          "line": 23,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64510,7 +64518,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
           "file": "internal/ingest/recovery.go",
           "function": "deliverTarget",
-          "line": 166,
+          "line": 163,
           "expression": "s.store.GetRoute",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64647,7 +64655,7 @@
           "caller_id": "internal/ingest/recovery.go:*Service:deliverTarget",
           "file": "internal/ingest/recovery.go",
           "function": "deliverTarget",
-          "line": 148,
+          "line": 145,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -66997,16 +67005,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
-  "current_review_boundary": "Revision 6 current AST/file/migration inventory only. Exact external caller changes are recorded at the declared product commit. PostgreSQL syntax, file hashes, classifications, migrations and per-entry manual reviews remain revision-5 facts. Historical runtime links are preserved, not recertified. No PostgreSQL tests or parent-task acceptance result from this reconciliation.",
+  "last_review_base_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
+  "current_review_boundary": "Revision 7 static AST/file/migration inventory only. Exact external caller changes are reviewed against revision-6 product f413, with immutable published revision-6 catalogs at c3e1419. PostgreSQL syntax, file hashes, classifications, migrations and manual reviews remain unchanged. Historical runtime links are preserved, not recertified. No implementation TODO, PostgreSQL/runtime or parent-task acceptance.",
   "inventory_revision": {
-    "revision": 6,
-    "source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+    "revision": 7,
+    "source_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "697b12d70b84658f5429e9a88ad2efde94e2e443",
-    "previous_snapshot_blob": "f34b037f26dc23464fe595a85b310bbed2f4a409",
-    "previous_sha256": "0ecb372399d4878fa46d454c88fc48e8cb1e40a06541beaef6309517c8cb6866",
+    "previous_snapshot_commit": "c3e1419e6245baf0190291ea868787cb2b0177ca",
+    "previous_snapshot_blob": "5b7b8a28f5b3817c0cd4049be4c9d350d7b4f1b1",
+    "previous_sha256": "e820435ec2357f2fa0d0509e4e0759124a85054c0f4fc35df887f683a3c4e715",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION7-20261008/README.md"
   }
 }
