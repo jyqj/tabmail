@@ -25,7 +25,8 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 	if len(recipients) == 0 {
 		return fmt.Errorf("recipient ledger is empty")
 	}
-	temporary, permanent := 0, 0
+	var temporaryErrors []error
+	permanent := 0
 	for _, rcpt := range recipients {
 		switch rcpt.State {
 		case delivery.Accepted:
@@ -34,7 +35,10 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 			permanent++
 			continue
 		case delivery.Uncertain:
-			return s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance is uncertain; operator review required", false)
+			if err := s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance is uncertain; operator review required", false); err != nil {
+				return fmt.Errorf("%w: mark uncertain recipient job: %w", store.ErrOutboundUncertain, err)
+			}
+			return nil
 		}
 		if err := s.ValidateJobAuthorization(ctx, j); err != nil {
 			if authz.IsAuthzError(err) {
@@ -75,7 +79,7 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 		}
 		if errors.Is(deliveryErr, store.ErrOutboundUncertain) {
 			if err := s.store.MarkOutboundJobFailed(ctx, j.ID, token, "Recipient acceptance uncertain: "+rcpt.Address, false); err != nil {
-				return err
+				return fmt.Errorf("%w: mark uncertain recipient job: %w", deliveryErr, err)
 			}
 			recordAttempt()
 			return nil
@@ -94,18 +98,19 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 			}
 		}
 		if err = st.CompleteOutboundRecipient(ctx, j.ID, token, rcpt.Address, state, code, diagnostic); err != nil {
-			return fmt.Errorf("%w: recipient checkpoint: %w", store.ErrOutboundUncertain, err)
+			// A checkpoint failure cannot erase the delivery outcome or its cause.
+			return errors.Join(fmt.Errorf("%w: recipient checkpoint: %w", store.ErrOutboundUncertain, err), deliveryErr)
 		}
 		recordAttempt()
 		if state == delivery.Temporary {
-			temporary++
+			temporaryErrors = append(temporaryErrors, fmt.Errorf("recipient %s: %w", rcpt.Address, deliveryErr))
 		}
 		if state == delivery.Permanent {
 			permanent++
 		}
 	}
-	if temporary > 0 {
-		return fmt.Errorf("%d recipient(s) temporarily failed; accepted recipients will not be resent", temporary)
+	if len(temporaryErrors) > 0 {
+		return fmt.Errorf("%d recipient(s) temporarily failed; accepted recipients will not be resent: %w", len(temporaryErrors), errors.Join(temporaryErrors...))
 	}
 	if permanent > 0 {
 		return s.store.MarkOutboundJobFailed(ctx, j.ID, token, fmt.Sprintf("%d recipient(s) permanently rejected; remaining recipients accepted", permanent), false)
