@@ -1,0 +1,9 @@
+{
+  "source": "8e5a2c63a23a3e5b1492a069b06eb0baaf7aa82d",
+  "command": "python3 -B scripts/check_r5_protocol.py \\\n  --run shared-db --output-dir protocol-baseline-evidence\n",
+  "exit_code": 2,
+  "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stderr_sha256": "9a881086dbed6a1e20f1f551cb217a5e0954f76e9b35d3a1bc7751512782257a",
+  "parser_rejected_before_runtime": true,
+  "database_available": false
+}

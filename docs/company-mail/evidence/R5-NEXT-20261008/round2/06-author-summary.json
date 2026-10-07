@@ -1,0 +1,92 @@
+{
+  "task": "R5-NEXT-20261008-06",
+  "base": "b88e39d402db2c13d8ea0eb3fc9873432162e8b1",
+  "candidate": "8ddf1585d53f68d5fdb1add5a8abaa27b862ce65",
+  "tree": "8b0918399d5b35fb9c92d65a33434766b6ec45c1",
+  "worktree": "/workspace/scratch/fabe500b93be/tabmail-ui",
+  "files_sha256": {
+    "web/features/company/admin-invitation.tsx": "0667775bcf780dc39c07f97be84ad1d7c2acccb67f8b81c9ff95a501c80ac48d",
+    "web/features/company/admin-invitation-ownership.test.tsx": "30a90f85d9773779cd5186cb52e82a908c73d0e0c4c410bd3e5c7ed62662c367",
+    "web/features/company/user-management.tsx": "129b8adbde6e6c18a349d4b51a5797536d2bc48f3b8f39f1b18bcd7cf5cc27b6"
+  },
+  "runs": [
+    {
+      "name": "baseline",
+      "meaning": "Initial fixture attempt; includes UI trigger timing failures, retained but not the behavioral baseline",
+      "total": 22,
+      "passed": 2,
+      "failed": 20,
+      "skipped": 0,
+      "test_files": [
+        "admin-invitation-ownership.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round2/baseline.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round2/baseline.log"
+    },
+    {
+      "name": "baseline-v2",
+      "meaning": "Frozen valid baseline; 20 behavior failures, no timeout; only test opening helper corrected before product changes",
+      "total": 22,
+      "passed": 2,
+      "failed": 20,
+      "skipped": 0,
+      "test_files": [
+        "admin-invitation-ownership.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round2/baseline-v2.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round2/baseline-v2.log"
+    },
+    {
+      "name": "candidate",
+      "meaning": "Same frozen invitation tests plus prior user-delete regressions",
+      "total": 27,
+      "passed": 27,
+      "failed": 0,
+      "skipped": 0,
+      "test_files": [
+        "admin-invitation-ownership.test.tsx",
+        "user-delete-confirmation.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round2/candidate.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round2/candidate.log"
+    },
+    {
+      "name": "permission-regression",
+      "meaning": "Existing permission editor consumer regression after invitation extraction",
+      "total": 22,
+      "passed": 22,
+      "failed": 0,
+      "skipped": 0,
+      "test_files": [
+        "permission-editor.consumer.test.tsx"
+      ],
+      "json": "/workspace/scratch/fabe500b93be/ui-evidence/round2/permission-regression.json",
+      "log": "/workspace/scratch/fabe500b93be/ui-evidence/round2/permission-regression.log"
+    }
+  ],
+  "vitest": {
+    "maxWorkers": 1,
+    "timeout_ms": 5000,
+    "timeouts_changed": false
+  },
+  "eslint": {
+    "exit_code": 0,
+    "files": [
+      "web/features/company/admin-invitation.tsx",
+      "web/features/company/admin-invitation-ownership.test.tsx",
+      "web/features/company/user-management.tsx"
+    ],
+    "log": "/workspace/scratch/fabe500b93be/ui-evidence/round2/eslint.log"
+  },
+  "git_diff_check": 0,
+  "typecheck": "Deferred to root for once-per-round integration validation",
+  "behavior": [
+    "session-keyed child unmounts old invitation UI on account, tenant, role, logout and event revocation",
+    "live scope checked before POST and completion, including before React observes cross-tab storage change",
+    "synchronous request owner coalesces Enter/click",
+    "dialog owner invalidates close/reopen; footer close clears prior result",
+    "input intent identity prevents stale result/error and ABA edits from replacing continued input",
+    "only current request finally releases busy; old completion after new request/result is ignored",
+    "current success/error and explicit retry preserved"
+  ]
+}
