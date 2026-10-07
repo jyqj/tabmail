@@ -186,7 +186,7 @@ func TestR5TemplateGrantFrozenEmployeeRevocation(t *testing.T) {
 				case "foreign-mailbox":
 					zone := &models.DomainZone{TenantID: foreign.ID, Domain: "foreign.test", IsVerified: true, MXVerified: true}
 					must(t, f.st.CreateZone(ctx, zone))
-					mailbox := &models.Mailbox{TenantID: foreign.ID, ZoneID: zone.ID, LocalPart: "employee", ResolvedDomain: zone.Domain, FullAddress: "employee@foreign.test", AccessMode: models.AccessToken}
+					mailbox := &models.Mailbox{TenantID: foreign.ID, ZoneID: zone.ID, LocalPart: "employee", ResolvedDomain: zone.Domain, FullAddress: "employee@foreign.test", AccessMode: models.AccessToken, OwnerUserID: &user.ID}
 					must(t, f.st.CreateMailbox(ctx, mailbox))
 					grant.MailboxID, want = mailbox.ID, app.KindNotFound
 				case "foreign-template":
