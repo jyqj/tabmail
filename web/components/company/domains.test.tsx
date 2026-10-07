@@ -155,4 +155,31 @@ describe("CompanyDomainsSection", () => {
     });
     expect(toastSuccess).toHaveBeenCalledWith("Domain deleted");
   });
+
+  it.each(["missing", "throws", "undefined", "dismissed"])(
+    "does not delete a domain when confirmation is %s",
+    async (failure) => {
+      deleteMock.mockResolvedValue(undefined);
+      const confirm = vi.spyOn(window, "confirm");
+      if (failure === "missing") {
+        vi.stubGlobal("confirm", undefined);
+      } else if (failure === "throws") {
+        confirm.mockImplementation(() => { throw new Error("dialog blocked"); });
+      } else {
+        confirm.mockReturnValue(failure === "dismissed" ? false : undefined as unknown as boolean);
+      }
+      try {
+        render(<CompanyDomainsSection />);
+        await screen.findByText("mail.example.com");
+        const reads = domainsMock.mock.calls.length;
+        fireEvent.click(screen.getAllByRole("button", { name: "Delete" })[0]);
+        await waitFor(() => expect(screen.getAllByRole("button", { name: "Delete" })[0]).toBeEnabled());
+        expect(deleteMock).not.toHaveBeenCalled();
+        expect(domainsMock).toHaveBeenCalledTimes(reads);
+        expect(toastSuccess).not.toHaveBeenCalled();
+      } finally {
+        vi.unstubAllGlobals();
+      }
+    },
+  );
 });

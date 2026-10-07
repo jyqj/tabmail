@@ -2,6 +2,7 @@ package models
 
 import (
 	"encoding/json"
+	"math"
 	"time"
 
 	"github.com/google/uuid"
@@ -483,7 +484,18 @@ type Page struct {
 	PerPage int `json:"per_page"`
 }
 
-func (p Page) Offset() int { return (p.Page - 1) * p.PerPage }
+// Offset saturates an unrepresentable page position instead of wrapping it
+// into an earlier page or a negative SQL/slice offset. Normalize retains the
+// public page and page-size defaults; it does not cap the requested page.
+func (p Page) Offset() int {
+	if p.Page <= 1 || p.PerPage <= 0 {
+		return 0
+	}
+	if p.Page-1 > math.MaxInt/p.PerPage {
+		return math.MaxInt
+	}
+	return (p.Page - 1) * p.PerPage
+}
 
 func (p Page) Normalize() Page {
 	if p.Page < 1 {

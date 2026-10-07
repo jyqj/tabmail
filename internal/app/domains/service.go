@@ -193,7 +193,10 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	// do not have owner-level quotas.
 	ownerUserID := actor.EffectiveUserID()
 	if actor.Permission != nil && !isAdmin && ownerUserID != nil && !models.IsUnlimited(actor.Permission.MaxDomains) {
-		owned := countOwnedZones(ctx, s.store, tenant.ID, ownerUserID)
+		owned, err := countOwnedZones(ctx, s.store, tenant.ID, ownerUserID)
+		if err != nil {
+			return nil, app.Internal(err)
+		}
 		if owned >= actor.Permission.MaxDomains {
 			return nil, app.Forbidden("domain limit reached")
 		}
@@ -563,13 +566,13 @@ func (s *Service) lookupDKIMRecord(zone *models.DomainZone) DNSCheck {
 	return check
 }
 
-func countOwnedZones(ctx context.Context, st store, tenantID uuid.UUID, ownerUserID *uuid.UUID) int {
+func countOwnedZones(ctx context.Context, st store, tenantID uuid.UUID, ownerUserID *uuid.UUID) (int, error) {
 	if ownerUserID == nil {
-		return 0
+		return 0, nil
 	}
 	zones, err := st.ListZones(ctx, tenantID)
 	if err != nil {
-		return 0
+		return 0, err
 	}
 	n := 0
 	for _, z := range zones {
@@ -577,7 +580,7 @@ func countOwnedZones(ctx context.Context, st store, tenantID uuid.UUID, ownerUse
 			n++
 		}
 	}
-	return n
+	return n, nil
 }
 
 func normalizeDNSName(v string) string {

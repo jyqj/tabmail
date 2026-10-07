@@ -28,7 +28,21 @@ func NewPostgres(t *testing.T) (*postgres.PgStore, *pgxpool.Pool, string) {
 	if err != nil {
 		t.Fatalf("parse test database URL: %T", err)
 	}
-	ctx := context.Background()
+	// Initialization owns its cancellation deadline. Keep the existing DROP
+	// budget available before testing's hard process timeout, and inherit a
+	// cancelled test context instead of opening a new database during teardown.
+	setupDeadline := time.Now().Add(postgresFixtureSetupTimeout)
+	if testDeadline, ok := t.Deadline(); ok {
+		latestSetup := testDeadline.Add(-postgresFixtureDropTimeout)
+		if latestSetup.Before(setupDeadline) {
+			setupDeadline = latestSetup
+		}
+	}
+	ctx, cancel := context.WithDeadline(t.Context(), setupDeadline)
+	defer cancel()
+	if ctx.Err() != nil {
+		t.Fatal("PostgreSQL fixture setup has no remaining lifecycle budget")
+	}
 	admin, err := pgxpool.New(ctx, dsn)
 	if err != nil {
 		t.Fatal(err)
@@ -65,7 +79,10 @@ func NewPostgres(t *testing.T) (*postgres.PgStore, *pgxpool.Pool, string) {
 	return st, pool, testDSN
 }
 
-const postgresFixtureDropTimeout = 10 * time.Second
+const (
+	postgresFixtureSetupTimeout = 30 * time.Second
+	postgresFixtureDropTimeout  = 10 * time.Second
+)
 
 // Registration is incremental, immediately after each resource is acquired.
 // These closures are fixture-owned, not shared connections or a migrated DB
