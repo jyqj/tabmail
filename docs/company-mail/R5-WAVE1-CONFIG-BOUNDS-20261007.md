@@ -28,6 +28,6 @@ go test -mod=readonly -race -count=1 -timeout=60s -json ./internal/config
 - Candidate full config package: 13 top-level tests / 31 leaf cases PASS, 0 FAIL, 0 SKIP, with the same 18 new leaf cases all passing. Existing webhook canonical-CIDR and configuration compatibility tests remain included.
 - `git diff --check`: PASS.
 
-The regression file SHA-256 is `b1264289f213271e835b691e4ede38e728d3c2ffbe6216b1395257e355d77a65` on both runs. Local raw evidence: `validation/wave-backend-config-baseline.jsonl` (SHA-256 `66cc4563bc60d71face5e36ee98b404ac1e09b18c0dde4a598e2e6058ad06e7a`) and `validation/wave-backend-config-fixed.jsonl` (SHA-256 `cbcd7de76a025368bbb3d6dcb94a7345a2b5cd8bc579e662d868bc9c441de69c`) in the session validation directory.
+The regression file SHA-256 is `b1264289f213271e835b691e4ede38e728d3c2ffbe6216b1395257e355d77a65` on both runs. Local raw evidence: `validation/wave-backend-config-baseline.jsonl` (SHA-256 `51dddae4fac1c9dfab75efc6eadc5b974e50591f718315aa7108b0692b791529`) and `validation/wave-backend-config-fixed.jsonl` (SHA-256 `cbcd7de76a025368bbb3d6dcb94a7345a2b5cd8bc579e662d868bc9c441de69c`) in the session validation directory.
 
 Remaining parent scope includes the other configuration groups, schema/examples/deployment consistency and runtime projection review. This static startup-validation increment does not assert full backend, PostgreSQL, release, or parent-task acceptance.
