@@ -2167,3 +2167,8 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 ### 2026-10-07 SMTP DATA 最终回复与重发边界
 
 - R5-P6-050：实现 `27b4bfa319ef0d330387a05da7e377aba6b07b3d` 修正 DATA.Close 将任意 textproto.Error 当成明确拒绝的问题；仅 400–599 保持确定负回复，其他非 250 数字终态保留 uncertain 与底层原因，阻止第二 MX 回退和 recipient 自动／手动重发。相同冻结回归基线 38 leaf 中 20 FAIL，修复后全 PASS；新矩阵＋cause＋context 19 top-level／104 events PASS，完整 outbound race 71 top-level／520 events PASS，0 fail／skip，vet PASS。9 个既有真实本地 listener／dial 控制此次全部实跑；独立代码与调用链复核无阻塞。详见 [产品与验证报告](R5-SMTP-FINAL-REPLY-CLASSIFICATION-20261007.md) 和 [独立审查](evidence/R5-SMTP-FINAL-REPLY-20261007/independent-review.md)。recipient 使用 FakeStore；PG持久化、restart、外部邮件与完整发布门禁未验，R5-P6-030／040／050及父门禁仍 open，10/171 不变。后续通过独立子 PR 整合至 #56。
+
+
+### 2026-10-07 Compose 发件身份、附件与预览归属
+
+- R5-P9-050／R5-P5-120：本地实现 `575c2a3` 及预览契约补充 `292eb4b` 保留失效 From 的明确选择，禁止隐式切换邮箱；显式切换保留主题、正文与原始收件人输入。上传与预览绑定已提交 sender generation、挂载和初始 session，撤权恢复不复活旧操作，晚成功/失败不污染新交互；预览三字段在消费前验证为 string，畸形响应保留编辑和上一份有效预览。两份冻结基线分别 14FAIL/7PASS→21PASS、14FAIL/5PASS→19PASS；原关联10文件178/178与新增组合5文件84/84通过，计数重叠不相加。非增量typecheck、定向lint通过，初次全lint通过（4既有warning）；独立ownership复核无阻塞并促成预览修复。详 [报告](COMPOSE-SENDER-OWNERSHIP-20261007.md)。仅挂载组件＋受控fetch，实际上传GC、完整后端/PG与shipping浏览器未因此取得新资格；两父项及依赖保持open，10/171不变，交付至整合PR #56。
