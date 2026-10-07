@@ -33,6 +33,9 @@ export default function RecoveryPage() {
       params: { page, per_page: 30 },
     }),
   );
+  const queueLoading = receipts.isLoading || receipts.isValidating;
+  const queueAvailable = !!receipts.data && !receipts.error;
+  const receiptRows = queueAvailable ? (receipts.data?.data ?? []) : [];
   const runtime = useAPI("runtime-config", () =>
     request<APIResponse<Record<string, unknown>>>(
       "/api/v1/admin/runtime-config",
@@ -102,11 +105,18 @@ export default function RecoveryPage() {
         )}
       </Field>
       <Section title={t("入站恢复队列", "Inbound recovery queue")}>
+        {queueLoading && (
+          <p role="status" className="text-sm text-muted-foreground">
+            {receipts.data
+              ? t("正在刷新恢复任务…", "Refreshing recovery tasks…")
+              : t("正在加载恢复任务…", "Loading recovery tasks…")}
+          </p>
+        )}
         <LoadError
-          error={receipts.error}
+          error={queueLoading ? undefined : receipts.error}
           onRetry={() => void receipts.mutate()}
         />
-        {(receipts.data?.data ?? []).map((v) => (
+        {receiptRows.map((v) => (
           <div
             key={v.id}
             className="flex flex-wrap items-center justify-between gap-3 border-b py-3"
@@ -120,7 +130,7 @@ export default function RecoveryPage() {
               </p>
             </div>
             <ActionButton
-              disabled={busy}
+              disabled={busy || queueLoading}
               onClick={() =>
                 run(async () => {
                   const next = await company<{
@@ -140,24 +150,24 @@ export default function RecoveryPage() {
             </ActionButton>
           </div>
         ))}
-        {!receipts.isLoading && !receipts.data?.data.length && (
+        {!queueLoading && queueAvailable && !receiptRows.length && (
           <p>{t("没有待恢复任务", "No recovery tasks")}</p>
         )}
         <div className="flex gap-3">
           <ActionButton
-            disabled={page === 1}
+            disabled={queueLoading || !queueAvailable || page === 1}
             onClick={() => setPage((v) => v - 1)}
           >
             {t("上一页", "Previous")}
           </ActionButton>
           <span>{page}</span>
           <ActionButton
-            disabled={page * 30 >= (receipts.data?.meta.total ?? 0)}
+            disabled={queueLoading || !queueAvailable || page * 30 >= (receipts.data?.meta.total ?? 0)}
             onClick={() => setPage((v) => v + 1)}
           >
             {t("下一页", "Next")}
           </ActionButton>
-          <ActionButton onClick={() => void receipts.mutate()}>
+          <ActionButton disabled={queueLoading} onClick={() => void receipts.mutate()}>
             {t("刷新", "Refresh")}
           </ActionButton>
         </div>
