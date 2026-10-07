@@ -1,0 +1,576 @@
+{
+  "run_id": 37654826526,
+  "jobs": {
+    "jobs": [
+      {
+        "id": 112907161048,
+        "name": "backend",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 37654826526,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Record the tested backend checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "PostgreSQL client for coordinated restore rehearsal",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Exact immutable archive boundary",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Race tests with PostgreSQL",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 10
+          },
+          {
+            "name": "Prove missing execution cannot pass",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Install pinned contract checker dependency",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 12
+          },
+          {
+            "name": "Prepare the pinned TypeScript scanner dependency",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Validation tool regressions",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 14
+          },
+          {
+            "name": "DTO field contract",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Fresh route/client compatibility inventory and upgrade plan",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 16
+          },
+          {
+            "name": "Transaction syntax and review inventory drift",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 17
+          },
+          {
+            "name": "Real protocol baseline with explicit target failures",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Actual HTTP response contracts with PostgreSQL",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          },
+          {
+            "name": "Vet",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 20
+          },
+          {
+            "name": "Upload test evidence",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 21
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 39
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 40
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 41
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 42
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 43
+          }
+        ]
+      },
+      {
+        "id": 112907161272,
+        "name": "browser-journey",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37654826526,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Initialize containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned isolated browser driver",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Build the shipping standalone frontend",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Exercise the production UI against the real API and loopback SMTP",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Stop containers",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 18
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 19
+          }
+        ]
+      },
+      {
+        "id": 112907161518,
+        "name": "production-web",
+        "status": "completed",
+        "conclusion": "success",
+        "run_id": 37654826526,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Validate company Compose contract",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Build production standalone image and inspect baked API origin",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 8
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          }
+        ]
+      },
+      {
+        "id": 112907161618,
+        "name": "frontend",
+        "status": "completed",
+        "conclusion": "failure",
+        "run_id": 37654826526,
+        "logs_url": null,
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1
+          },
+          {
+            "name": "Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2
+          },
+          {
+            "name": "Record the tested frontend checkout",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3
+          },
+          {
+            "name": "Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 4
+          },
+          {
+            "name": "Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 5
+          },
+          {
+            "name": "Install pinned version-test checker dependency",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6
+          },
+          {
+            "name": "Run npm ci",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7
+          },
+          {
+            "name": "Versioned source tests from independent clean Git checkouts",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 8
+          },
+          {
+            "name": "Catalog and TypeScript source validation",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 9
+          },
+          {
+            "name": "Record full dependency audit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 10
+          },
+          {
+            "name": "Run actions/upload-artifact@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 11
+          },
+          {
+            "name": "Require a complete clean dependency audit",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 12
+          },
+          {
+            "name": "Run npx tsc --noEmit",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 13
+          },
+          {
+            "name": "Run npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json",
+            "status": "completed",
+            "conclusion": "failure",
+            "number": 14
+          },
+          {
+            "name": "Run npm run lint",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 15
+          },
+          {
+            "name": "Run npm run build",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 16
+          },
+          {
+            "name": "Retain frontend evidence after validation failures",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 17
+          },
+          {
+            "name": "Post Run actions/setup-go@v5",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 32
+          },
+          {
+            "name": "Post Run actions/setup-node@v4",
+            "status": "completed",
+            "conclusion": "skipped",
+            "number": 33
+          },
+          {
+            "name": "Post Run actions/checkout@v4",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 34
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 35
+          }
+        ]
+      }
+    ]
+  },
+  "artifacts": {
+    "artifacts": [
+      {
+        "id": 11498198088,
+        "name": "company-browser-evidence",
+        "size_in_bytes": 1609,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11498198088",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11498198088/zip",
+        "expired": false,
+        "created_at": "2026-10-07T16:50:07Z",
+        "expires_at": "2026-10-21T16:50:06Z",
+        "updated_at": "2026-10-07T16:50:07Z",
+        "digest": "sha256:f3ed1f735ea9afc1ce84594888496cb88b3d7ca753996c102db584cb89f31bc2",
+        "workflow_run": {
+          "id": 37654826526,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "integration/company-mail-r5-pr-management-20261007",
+          "head_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8"
+        }
+      },
+      {
+        "id": 11498133692,
+        "name": "dependency-audit",
+        "size_in_bytes": 1064,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11498133692",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11498133692/zip",
+        "expired": false,
+        "created_at": "2026-10-07T16:53:27Z",
+        "expires_at": "2026-10-21T16:53:27Z",
+        "updated_at": "2026-10-07T16:53:27Z",
+        "digest": "sha256:bf8e676aaf6d89d08fb2f2a91b6cba31adca6bd5623c8ba0c66da0d1719840c5",
+        "workflow_run": {
+          "id": 37654826526,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "integration/company-mail-r5-pr-management-20261007",
+          "head_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8"
+        }
+      },
+      {
+        "id": 11498123972,
+        "name": "company-p0-test-evidence",
+        "size_in_bytes": 1089285,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11498123972",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11498123972/zip",
+        "expired": false,
+        "created_at": "2026-10-07T16:56:36Z",
+        "expires_at": "2026-10-21T16:56:35Z",
+        "updated_at": "2026-10-07T16:56:36Z",
+        "digest": "sha256:5fb054961534f15243505d276f88c9895d7441515e15adc5c5ef88b93ee5cb35",
+        "workflow_run": {
+          "id": 37654826526,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "integration/company-mail-r5-pr-management-20261007",
+          "head_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8"
+        }
+      },
+      {
+        "id": 11497399523,
+        "name": "company-frontend-evidence",
+        "size_in_bytes": 350563,
+        "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11497399523",
+        "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11497399523/zip",
+        "expired": false,
+        "created_at": "2026-10-07T16:55:48Z",
+        "expires_at": "2026-10-21T16:55:48Z",
+        "updated_at": "2026-10-07T16:55:48Z",
+        "digest": "sha256:a42fde19c5922ce72acb52d6a210dfaead5d040e86e8c56cfd704acd83ff2adc",
+        "workflow_run": {
+          "id": 37654826526,
+          "repository_id": 1188928152,
+          "head_repository_id": 1188928152,
+          "head_branch": "integration/company-mail-r5-pr-management-20261007",
+          "head_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8"
+        }
+      }
+    ]
+  },
+  "pr80": {
+    "url": "https://github.com/jyqj/tabmail/pull/80",
+    "number": 80,
+    "state": "closed",
+    "merged": true,
+    "mergeable": false,
+    "draft": false,
+    "body": "## Problem and changes\n\nThis implements three frozen tasks from #78 against draft integration #56:\n\n- **05:** The protocol CI command stopped at argument parsing because no current-source manifest was supplied. Prepare a fresh archive-v4 manifest from actual source and reviewed build inputs, revalidate its bytes and SHA-256 with the original validator, then pass the explicit policy/manifest/hash into the original runner.\n- **06:** Administrator invitation completions could survive dialog, session or input changes. Bind result and busy ownership to the current session, dialog, request and draft; discard obsolete responses without replaying an issued POST.\n- **07:** Suppression-removal JSON accepted unbounded/incomplete input. Apply a 64 KiB body limit and the original strict single-document decoder while preserving authorization, audit-reason byte limits and transactional deletion.\n\n## Validation and review\n\nIntegrated product `1cc2d50c883a016e5528c365452012ea149245f1`; final local delivery `d9d19038e255871f836273daad56b7a80fac5743`, exact tree `2ecb9c22bfca6f6593f156dc6788bde6d72cc061`.\n\n- HTTP selection: **32 leaf PASS**, race enabled, 0 FAIL/SKIP.\n- Protocol preparation, original protocol and backend-continuation controls: **70 methods PASS**, 0 FAIL/SKIP.\n- Invitation, deletion and permission UI: **49 PASS**, 0 FAIL/SKIP. Full tsc then found one unsupported test-query option; removing that unrecognized option preserved exact name matching. Corrected invitation file: **22 PASS**, and full nonincremental tsc exits 0. These are separate runs.\n- Actual preparation and original archive-v4 validation succeed. With no local PG DSN, the subsequent original runner correctly exits 1; no real PG pass is claimed.\n- Independent native-subagent review accepts 05 and 06 including the type correction; root accepts 07.\n\nOriginal timeouts, source/archive rejection, non-idempotent request transport, permission rules and PostgreSQL transaction boundaries remain intact. Raw scoped evidence and source pins are in `docs/company-mail/evidence/R5-NEXT-20261008/round2`.\n\nAfter this integration: **7/10 new bounded tasks complete, 3 remaining; original parents remain 10/171 accepted, 161 remaining**. Final catalogs follow all ten product tasks; full CI, PG/opt-in fixtures, private frontend fixture, dependency audit and M/G0 remain open. This PR targets the existing draft integration and does not promote it to main.",
+    "title": "fix: complete three R5 protocol and administrator reliability tasks",
+    "base": "integration/company-mail-r5-pr-management-20261007",
+    "base_sha": "6172a69d9b24867369cdd891b5b00703143697ba",
+    "head": "fix/tabmail-next-round2-20261008",
+    "head_sha": "7c5684917de133bc14d3e57c7ebfb864d07b649a",
+    "head_repo_id": 1188928152,
+    "head_repo_full_name": "jyqj/tabmail",
+    "merge_commit_sha": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8",
+    "user": {
+      "login": "jyqj",
+      "name": "jyqj",
+      "email": null,
+      "avatar_url": "https://avatars.githubusercontent.com/u/174292474?v=4",
+      "id": 174292474
+    },
+    "requested_reviewers": null,
+    "requested_team_reviewers": null,
+    "diff": null,
+    "comments": null,
+    "created_at": "2026-10-07T16:46:58Z",
+    "updated_at": "2026-10-07T16:47:37Z",
+    "closed_at": "2026-10-07T16:47:34Z",
+    "merged_at": "2026-10-07T16:47:34Z",
+    "commits": 1,
+    "changed_files": 27,
+    "additions": 1785,
+    "deletions": 105,
+    "display_url": "https://github.com/jyqj/tabmail/pull/80",
+    "display_title": "fix: complete three R5 protocol and administrator reliability tasks"
+  },
+  "backend_log_error": {
+    "content": [
+      {
+        "type": "text",
+        "text": "tool call error: tool call failed for `codex_apps/github.fetch_workflow_job_logs`\n\nCaused by:\n    Transport closed"
+      }
+    ],
+    "isError": true
+  }
+}
