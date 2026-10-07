@@ -3,7 +3,7 @@
 <!-- R5-PARALLEL-20261008-929:BEGIN -->
 ## 并行批次 929（Issue #81）
 
-本批独立认领10项，与其他批次范围去重。第1轮[#85](https://github.com/jyqj/tabmail/pull/85)完成4项；第2轮[#86](https://github.com/jyqj/tabmail/pull/86)完成3项；第3轮完成索引取消、模板库及重试恢复、域名策略3项，整合PR绑定见[Issue #81](https://github.com/jyqj/tabmail/issues/81)。本批 **10/10完成，剩余0**；父任务仍 **10/171已验收，剩余161**。本批源九包race558/0/0，保留#87后十包620PASS/10PG-SKIP、相关前端194PASS；完整默认前端在其冻结源为1122PASS/8FAIL，未冒作全绿。原始记录、明确源码与范围见[本批报告](R5-PARALLEL-20261008-929.md)。#88的revision6历史完整保留，随后revision7目录对账不计新实施项。#56保持draft。
+本批独立认领 10 项，与其他批次范围去重。第 1 轮 [#85](https://github.com/jyqj/tabmail/pull/85) 完成 4 项；第 2 轮 [#86](https://github.com/jyqj/tabmail/pull/86) 完成 3 项；第 3 轮 [#89](https://github.com/jyqj/tabmail/pull/89) 完成索引取消、模板库及重试恢复、域名策略 3 项。本批 **10/10 完成，剩余 0**；父任务仍 **10/171 已验收，剩余 161**。本批源九包 race 为 558 PASS / 0 FAIL / 0 SKIP；保留 #87 后十包为 620 PASS / 10 PG-SKIP，相关前端 194 PASS；完整默认前端在其冻结源为 1122 PASS / 8 FAIL。原始记录和明确源码范围见[本批报告](R5-PARALLEL-20261008-929.md)。#88 的 revision 6 历史完整保留，revision 7 目录对账已通过作者和独立审查，新增实施项为 0。#56 保持 draft，维护 PR 和最终 CI 状态登记于 [Issue #81](https://github.com/jyqj/tabmail/issues/81)。
 <!-- R5-PARALLEL-20261008-929:END -->
 
 

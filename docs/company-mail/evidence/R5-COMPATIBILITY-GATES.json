@@ -3101,6 +3101,19 @@
             "GET"
           ],
           "forwarding": false
+        },
+        {
+          "source": "web/components/company/grants.tsx",
+          "line": 49,
+          "branch": 0,
+          "callee": "company",
+          "owner": "snapshot",
+          "expression": "`${workPath(mailbox.mailbox.id)}/grants`",
+          "path": "/api/v1/company/mailboxes/{id}/grants",
+          "methods": [
+            "GET"
+          ],
+          "forwarding": false
         }
       ],
       "test_bindings": [
@@ -4605,10 +4618,10 @@
       "clients": [
         {
           "source": "web/app/(dashboard)/company/templates/page.tsx",
-          "line": 43,
+          "line": 44,
           "branch": 0,
           "callee": "company",
-          "owner": "templates",
+          "owner": "list",
           "expression": "\"/templates\"",
           "path": "/api/v1/company/templates",
           "methods": [
@@ -7994,7 +8007,7 @@
       "clients": [
         {
           "source": "web/components/company/grants.tsx",
-          "line": 179,
+          "line": 203,
           "branch": 0,
           "callee": "company",
           "owner": "GrantEditor",
@@ -8093,7 +8106,7 @@
       "clients": [
         {
           "source": "web/components/company/grants.tsx",
-          "line": 170,
+          "line": 194,
           "branch": 0,
           "callee": "company",
           "owner": "GrantEditor",
@@ -9176,7 +9189,7 @@
       "clients": [
         {
           "source": "web/app/(dashboard)/company/templates/page.tsx",
-          "line": 92,
+          "line": 145,
           "branch": 0,
           "callee": "company",
           "owner": "retireTemplate",
@@ -9683,7 +9696,7 @@
       "clients": [
         {
           "source": "web/components/company/grants.tsx",
-          "line": 104,
+          "line": 128,
           "branch": 0,
           "callee": "company",
           "owner": "GrantEditor",
@@ -10099,7 +10112,7 @@
   ],
   "source_closure": {
     "docs/company-mail/evidence/R5-API-MATRIX.json": "56cc04e6c7727346345853c7fb079eaac408e75164ea630372ad2c0f61d5fbdc",
-    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "c673d9b6d049283bcba582a5465448c94234d1388a4a55b43035fc8fcdebb679",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "e818ee078423dce13e46d5a314dddd1a9d4dd28dbf1c6162a900218f177e9a4d",
     "internal/api/handlers/admin.go": "7bdcc137f5355abb8b0df2f41f2f38a9926ac94a3de1488a7bacbb9ce72c3917",
     "internal/api/handlers/app_error.go": "1c745e35259f538938df75356997861841a7bb83c7af2302caa8c661efe147ff",
     "internal/api/handlers/audit.go": "ac2cd9156fe0ccea8085670033dd1a2762a9589371e161dd7cc2a287df6dde73",
@@ -10160,10 +10173,10 @@
     "scripts/check_contract_drift.py": "a1199a4766ebbd30270df438b5cceaa6507bcf239a6d172dde937612d93ab107",
     "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
     "web/app/(dashboard)/company/recovery/page.tsx": "fb7c45ece2271935716c7ab20fce5526d8a74fa3bf7acdb7b879188f42158ba5",
-    "web/app/(dashboard)/company/templates/page.tsx": "51f5da1f71dda1a47a937a92c868783a99d41fbfdfda0255bfa4af09cc2df71f",
+    "web/app/(dashboard)/company/templates/page.tsx": "96cd540aa947f470468f30c962701cd872090591e626b1bd97ba49dfc8032823",
     "web/app/auth/activate/page.tsx": "2b94709d4bf8939db004b35fccd560841e25865afa5861a6272666b91fe015af",
     "web/components/company/compose.tsx": "cb6d6a0a8ce422d4d85a1e147b2b9c7e5947ae516a28415224785c05efff9995",
-    "web/components/company/grants.tsx": "3d177a00d1ad2618ecb6c58f106f781b7560760b99bf0022b42ac82302cb38dd",
+    "web/components/company/grants.tsx": "5dbfd5e29147276e45932188cd2ba9b93d6850a1492dcd6f361eacc4a47469e2",
     "web/components/company/templates/editor.tsx": "a88a764923cb19f187e22183cd46d879ab8200a037e0168c9581af0c2e185767",
     "web/components/company/templates/grants.tsx": "2ff8802065a4b39567f1cea70ce727d4aecd5745158930ca3cad0e43ec01e85c",
     "web/components/company/templates/versions.tsx": "5824b4d9f1fd5c398523b2ca3f5680c788a63601d90a9821e5239efbfc186338",
@@ -10199,17 +10212,17 @@
     "qualification": "historical_metadata_only_not_current_wire"
   },
   "acquisition": {
-    "base_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+    "base_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
   },
   "inventory_revision": {
-    "revision": 6,
-    "source_commit": "f413a9138d305cf154ed2cecaddcf9b9a2397666",
+    "revision": 7,
+    "source_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
     "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
-    "previous_snapshot_commit": "697b12d70b84658f5429e9a88ad2efde94e2e443",
-    "previous_snapshot_blob": "46175d14abb95668baaed6143d6e038c88e62ba1",
-    "previous_sha256": "73b30e5733dccba31b1330eec0c52b66a96fb9f3f2dfb19fd3069a2ba32ddf80",
+    "previous_snapshot_commit": "c3e1419e6245baf0190291ea868787cb2b0177ca",
+    "previous_snapshot_blob": "4e134e4fbc8f35fff6be9d1da51511e2869fe971",
+    "previous_sha256": "457fcd6c63ce7f0b80a3d38aa2d7153e243eaa06569898ff47932bc02ca0983c",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION6-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION7-20261008/README.md"
   }
 }
