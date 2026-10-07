@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import {
   allEmployees,
   company,
@@ -22,19 +23,31 @@ import { EmployeeField } from "@/components/company/employee-field";
 // TemplateGrantsView manages the per template usage grants: an employee may
 // use the template to send from a specific mailbox. Grants never confer
 // additional sender identities.
-export function TemplateGrantsView({
-  template,
-  mailboxes,
-  mailboxesReady,
-  mailbox,
-  setMailbox,
-}: {
+type TemplateGrantsProps = {
   template: MailTemplate | null;
   mailboxes: WorkMailbox[];
   mailboxesReady: boolean;
   mailbox: string;
   setMailbox: (id: string) => void;
-}) {
+};
+
+export function TemplateGrantsView(props: TemplateGrantsProps) {
+  const scope = useSessionScope();
+  return <TemplateGrantSession
+    key={JSON.stringify([scope, props.template?.id])}
+    {...props}
+    scope={scope}
+  />;
+}
+
+function TemplateGrantSession({
+  template,
+  mailboxes,
+  mailboxesReady,
+  mailbox,
+  setMailbox,
+  scope,
+}: TemplateGrantsProps & { scope: string }) {
   const t = useText();
   const { busy, run } = useAction();
   const [grantee, setGrantee] = useState("");
@@ -53,6 +66,32 @@ export function TemplateGrantsView({
   const activeUsers = (users.error ? [] : users.data ?? []).filter(user => user.is_active);
   const canGrant = ready && activeUsers.some(user => user.id === grantee) &&
     mailboxes.some(box => box.mailbox.id === mailbox);
+  const lifetime = useRef<object | null>(null);
+  useLayoutEffect(() => {
+    lifetime.current = {};
+    return () => { lifetime.current = null; };
+  }, []);
+  const owns = (owner: object) => lifetime.current === owner && scope === sessionScope();
+
+  function changeGrant(userId: string, mailboxId: string, enabled: boolean) {
+    const owner = lifetime.current;
+    if (!template?.id || busy || !ready || !owner || !owns(owner)) return;
+    void run(async () => {
+      try {
+        await company(`/templates/${template.id}/grants`, {
+          method: "PUT",
+          body: { user_id: userId, mailbox_id: mailboxId, enabled },
+        });
+        if (!owns(owner)) return;
+        await grants.mutate();
+        if (enabled && owns(owner)) {
+          toast.success(t("模板使用授权已添加", "Template usage granted"));
+        }
+      } catch (error) {
+        if (owns(owner)) throw error;
+      }
+    });
+  }
   if (!template) {
     return (
       <Section title={t("使用授权", "Usage grants")}>
@@ -97,20 +136,7 @@ export function TemplateGrantsView({
         disabled={busy || !canGrant}
         onClick={() => {
           if (busy || !canGrant) return;
-          void run(async () => {
-            await company(`/templates/${template.id}/grants`, {
-              method: "PUT",
-              body: {
-                user_id: grantee,
-                mailbox_id: mailbox,
-                enabled: true,
-              },
-            });
-            await grants.mutate();
-            toast.success(
-              t("模板使用授权已添加", "Template usage granted"),
-            );
-          });
+          changeGrant(grantee, mailbox, true);
         }}
       >
         {t(
@@ -155,13 +181,7 @@ export function TemplateGrantsView({
             disabled={busy || !ready}
             onClick={() => {
               if (busy || !ready || !grants.data?.includes(g)) return;
-              void run(async () => {
-                await company(`/templates/${template.id}/grants`, {
-                  method: "PUT",
-                  body: { ...g, enabled: false },
-                });
-                await grants.mutate();
-              });
+              changeGrant(g.user_id, g.mailbox_id, false);
             }}
           >
             {t("撤销使用权", "Revoke usage")}
