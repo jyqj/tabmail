@@ -97,7 +97,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 37,
+    "line": 43,
     "branch": 0,
     "callee": "company",
     "owner": "templates",
@@ -113,7 +113,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 76,
+    "line": 92,
     "branch": 0,
     "callee": "company",
     "owner": "retireTemplate",
@@ -125,22 +125,6 @@
     "forwarding": false,
     "routes": [
       "POST /api/v1/company/templates/{id}/retire"
-    ]
-  },
-  {
-    "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 98,
-    "branch": 0,
-    "callee": "company",
-    "owner": "onPublished",
-    "expression": "`/templates/${value.id}/publish`",
-    "path": "/api/v1/company/templates/{dynamic}/publish",
-    "methods": [
-      "POST"
-    ],
-    "forwarding": false,
-    "routes": [
-      "POST /api/v1/company/templates/{id}/publish"
     ]
   },
   {
@@ -337,11 +321,27 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 61,
+    "line": 111,
+    "branch": 0,
+    "callee": "company",
+    "owner": "value",
+    "expression": "\"/templates/preview\"",
+    "path": "/api/v1/company/templates/preview",
+    "methods": [
+      "POST"
+    ],
+    "forwarding": false,
+    "routes": [
+      "POST /api/v1/company/templates/preview"
+    ]
+  },
+  {
+    "source": "web/components/company/templates/editor.tsx",
+    "line": 169,
     "branch": 0,
     "callee": "company",
     "owner": "res",
-    "expression": "`/templates/${edit.id}`",
+    "expression": "`/templates/${snapshot.id}`",
     "path": "/api/v1/company/templates/{dynamic}",
     "methods": [
       "PUT"
@@ -353,7 +353,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 61,
+    "line": 169,
     "branch": 1,
     "callee": "company",
     "owner": "res",
@@ -369,18 +369,18 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 310,
+    "line": 199,
     "branch": 0,
     "callee": "company",
-    "owner": "TemplateEditorView",
-    "expression": "\"/templates/preview\"",
-    "path": "/api/v1/company/templates/preview",
+    "owner": "save",
+    "expression": "`/templates/${res.id}/publish`",
+    "path": "/api/v1/company/templates/{dynamic}/publish",
     "methods": [
       "POST"
     ],
     "forwarding": false,
     "routes": [
-      "POST /api/v1/company/templates/preview"
+      "POST /api/v1/company/templates/{id}/publish"
     ]
   },
   {
@@ -433,7 +433,7 @@
   },
   {
     "source": "web/components/company/templates/versions.tsx",
-    "line": 37,
+    "line": 48,
     "branch": 0,
     "callee": "company",
     "owner": "versions",

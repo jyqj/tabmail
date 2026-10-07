@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "baseline_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -5556,7 +5556,7 @@
           "caller_id": "internal/outbound/company.go:*Service:buildQueuedMIME",
           "file": "internal/outbound/company.go",
           "function": "buildQueuedMIME",
-          "line": 70,
+          "line": 84,
           "expression": "repo.OutboundAttachments",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -33354,7 +33354,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitAuthorized",
-          "line": 323,
+          "line": 325,
           "expression": "s.store.IsSuppressed",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -36478,7 +36478,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:ContentAllowed",
           "file": "internal/app/submissions/service.go",
           "function": "ContentAllowed",
-          "line": 410,
+          "line": 413,
           "expression": "s.store.CanReadOutboundContent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -40840,7 +40840,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:RetryOutboundJob",
           "file": "internal/app/submissions/service.go",
           "function": "RetryOutboundJob",
-          "line": 424,
+          "line": 427,
           "expression": "s.store.RequeueOutboundJobAuthorized",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49743,7 +49743,7 @@
           "caller_id": "internal/app/recovery/verify.go::Verify",
           "file": "internal/app/recovery/verify.go",
           "function": "Verify",
-          "line": 23,
+          "line": 35,
           "expression": "r.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49839,7 +49839,7 @@
           "caller_id": "internal/outbound/company.go:*Service:buildQueuedMIME",
           "file": "internal/outbound/company.go",
           "function": "buildQueuedMIME",
-          "line": 91,
+          "line": 121,
           "expression": "r.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49913,6 +49913,14 @@
           "function": "dialSMTPWithConnector",
           "line": 51,
           "expression": "conn.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/outbound/queued_attachment_read.go::readQueuedAttachment",
+          "file": "internal/outbound/queued_attachment_read.go",
+          "function": "readQueuedAttachment",
+          "line": 18,
+          "expression": "input.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -51274,6 +51282,14 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
+          "caller_id": "internal/app/recovery/verify.go::Verify",
+          "file": "internal/app/recovery/verify.go",
+          "function": "Verify",
+          "line": 43,
+          "expression": "sha256.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
           "caller_id": "internal/app/submissions/receipts.go:*Service:ListOutboundReceiptViews",
           "file": "internal/app/submissions/receipts.go",
           "function": "ListOutboundReceiptViews",
@@ -51317,7 +51333,7 @@
           "caller_id": "internal/company/templates.go::renderValidated",
           "file": "internal/company/templates.go",
           "function": "renderValidated",
-          "line": 149,
+          "line": 164,
           "expression": "texttemplate.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51325,7 +51341,7 @@
           "caller_id": "internal/company/templates.go::renderValidated",
           "file": "internal/company/templates.go",
           "function": "renderValidated",
-          "line": 165,
+          "line": 180,
           "expression": "htmltemplate.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51422,6 +51438,14 @@
           "file": "internal/mailcontent/source.go",
           "function": "readSource",
           "line": 51,
+          "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/outbound/queued_attachment_read.go::readQueuedAttachment",
+          "file": "internal/outbound/queued_attachment_read.go",
+          "function": "readQueuedAttachment",
+          "line": 14,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -66965,16 +66989,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
-  "current_review_boundary": "Revision 4 current AST/file/migration inventory only; reviewed external caller locations and one added/two removed name-match candidates reconciled at the declared source commit. PostgreSQL syntax, body/file hashes, classifications, migrations and per-entry manual reviews remain revision-3 facts. Historical runtime links and manual acceptance are preserved, not recertified. No PostgreSQL tests executed in this reconciliation.",
+  "last_review_base_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+  "current_review_boundary": "Revision 5 current AST/file/migration inventory only; eight external caller locations and three added name-match candidates reconciled at the declared published source commit. PostgreSQL syntax, body/file hashes, classifications, migrations and per-entry manual reviews remain revision-4 facts. Historical runtime links and manual acceptance are preserved, not recertified. No PostgreSQL tests executed in this reconciliation.",
   "inventory_revision": {
-    "revision": 4,
-    "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+    "revision": 5,
+    "source_commit": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
-    "previous_snapshot_blob": "2dbd71b6b9f2ccd6eb1bf141f439b6ff83a1f26e",
-    "previous_sha256": "3a49928f35308951340025741ba0c308e8fecf20fc7792bc5b45115175f3f009",
+    "previous_snapshot_commit": "6b6163dc8941aa36bb9fa2b75f40c101b8f662fe",
+    "previous_snapshot_blob": "bd50c385e9c6c385a650f68ce5c5857ee69986ea",
+    "previous_sha256": "5fc5fb70255b5e6986b9aab38157fbb915b6012377d76d5b2a1956fc2907de2c",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION5-20261007/README.md"
   }
 }

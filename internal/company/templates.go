@@ -58,6 +58,9 @@ func ValidateTemplate(t TemplateDraft) error {
 			if utf8.RuneCountInString(option) > v.MaxLength {
 				return app.BadRequest("oversized variable option")
 			}
+			if err := validateVariableScalar(v, option); err != nil {
+				return app.BadRequest("invalid variable option: " + v.Name)
+			}
 		}
 		declared[v.Name] = true
 	}
@@ -105,28 +108,10 @@ func Render(t TemplateDraft, values map[string]string, employee, companyName, se
 		if !utf8.ValidString(value) || utf8.RuneCountInString(value) > v.MaxLength {
 			return "", "", "", app.BadRequest("oversized variable: " + v.Name)
 		}
-		if v.Required && strings.TrimSpace(value) == "" {
-			return "", "", "", app.BadRequest("required variable: " + v.Name)
+		if err := validateVariableScalar(v, value); err != nil {
+			return "", "", "", err
 		}
 		if value != "" {
-			valid := true
-			switch v.Type {
-			case "email":
-				a, e := mail.ParseAddress(value)
-				valid = e == nil && a.Address == value
-			case "integer":
-				_, e := strconv.ParseInt(value, 10, 64)
-				valid = e == nil
-			case "date":
-				_, e := time.Parse("2006-01-02", value)
-				valid = e == nil
-			case "url":
-				u, e := url.Parse(value)
-				valid = e == nil && u.Host != "" && (u.Scheme == "https" || u.Scheme == "http") && u.User == nil
-			}
-			if !valid {
-				return "", "", "", app.BadRequest("invalid variable type: " + v.Name)
-			}
 			if len(v.Options) > 0 {
 				found := false
 				for _, o := range v.Options {
@@ -142,6 +127,36 @@ func Render(t TemplateDraft, values map[string]string, employee, companyName, se
 		data[v.Name] = value
 	}
 	return renderValidated(t, data)
+}
+
+// Publication choices and supplied values share required/type rules. Their
+// encoding and length checks retain the existing caller-specific errors.
+func validateVariableScalar(v Variable, value string) error {
+	if v.Required && strings.TrimSpace(value) == "" {
+		return app.BadRequest("required variable: " + v.Name)
+	}
+	if value == "" {
+		return nil
+	}
+	valid := true
+	switch v.Type {
+	case "email":
+		a, e := mail.ParseAddress(value)
+		valid = e == nil && a.Address == value
+	case "integer":
+		_, e := strconv.ParseInt(value, 10, 64)
+		valid = e == nil
+	case "date":
+		_, e := time.Parse("2006-01-02", value)
+		valid = e == nil
+	case "url":
+		u, e := url.Parse(value)
+		valid = e == nil && u.Host != "" && (u.Scheme == "https" || u.Scheme == "http") && u.User == nil
+	}
+	if !valid {
+		return app.BadRequest("invalid variable type: " + v.Name)
+	}
+	return nil
 }
 
 func renderValidated(t TemplateDraft, data map[string]string) (string, string, string, error) {
