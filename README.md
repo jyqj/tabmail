@@ -8,6 +8,12 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
+<!-- R5-STREAM-20261008:BEGIN -->
+**STREAM批次以三轮原生multiagent完成10个独立实施TODO：4＋3＋3，每轮剩余6、3、0。** [#83](https://github.com/jyqj/tabmail/pull/83)、[#87](https://github.com/jyqj/tabmail/pull/87)、[#84](https://github.com/jyqj/tabmail/pull/84)覆盖同步suppression、原件流及ingest恢复读取、JSON缓存策略、protocol工件路径、API key对话框、邮箱成员/发送策略复核、冻结员工模板授权撤销与预览资格。并行NEXT、PARALLEL-929及其历史完整保留，重叠计划已撤出STREAM计数。
+
+完整产品固定为`2aa4f4c18c18ef5417e36bc997034422b27a03c7`，tree `cac18fef263d85b193372bbab9ff4fac6b95d31e`。真实PostgreSQL固定撤销9叶由有效基线7PASS/2FAIL变为9PASS、零SKIP；受影响九个完整Go包1149叶PASS/10既有本地PG-SKIP，相关前端77PASS，完整build/vet、tsc/lint及29页生产构建通过。完整默认前端和完整CI另按实际失败保留，有限验证不自动提供发布资格。父任务仍10/171验收、161剩余，#56保持draft。各轮实现、审查、实际源码、验证限制见[STREAM报告](docs/company-mail/R5-STREAM-20261008.md)。
+<!-- R5-STREAM-20261008:END -->
+
 **2026-10-08 NEXT批次三轮原生 multi-subagent 完成10项新实施子项，剩余0。** [#79](https://github.com/jyqj/tabmail/pull/79)、[#80](https://github.com/jyqj/tabmail/pull/80)、[#82](https://github.com/jyqj/tabmail/pull/82) 已合入 [R5整合PR #56](https://github.com/jyqj/tabmail/pull/56)。改动覆盖PG fixture取消、明确删除确认、域名配额/分页/JSON边界、协议CI源码及失败证据、邀请与域名页面归属、DNS取消。每轮4＋3＋3和完整行为证据见[本批报告](docs/company-mail/R5-NEXT-20261008.md)。前两批20项实施保持历史，不重复计数。
 
 **原父任务仍完成10/171，剩余161；P0为10/12。** 唯一父清单为[R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见[R5-DESIGN](docs/company-mail/R5-DESIGN.md)。本批有限改进不自动完成父项依赖和全部验收；[并行批次 #81](https://github.com/jyqj/tabmail/issues/81)及[STREAM批次](docs/company-mail/R5-STREAM-20261008.md)各有独立范围和计数。

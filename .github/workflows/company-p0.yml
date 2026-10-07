@@ -76,6 +76,29 @@ jobs:
           python3 -B scripts/check_go_test_evidence.py --suite backend \
             --log go-test.jsonl --exit-code "$test_exit" \
             --source-sha "$(cat go-test-source-sha.txt)" | tee go-test-evidence.json
+      - name: Template grant revocation with PostgreSQL
+        id: backend_template_grant
+        if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          template_grant_evidence="$(mktemp -d "$RUNNER_TEMP/tabmail-template-grant.XXXXXXXX")"
+          echo "evidence_directory=$template_grant_evidence" >> "$GITHUB_OUTPUT"
+          cp go-test-source-sha.txt "$template_grant_evidence/go-test-source-sha.txt"
+          cp scripts/required_go_tests.json "$template_grant_evidence/required_go_tests.json"
+          : "${TABMAIL_TEST_DB_DSN:?explicit disposable TABMAIL_TEST_DB_DSN required}"
+          set +e
+          go test -mod=readonly -json -race -count=1 -timeout=120s \
+            -run '^TestR5TemplateGrantFrozenEmployeeRevocation$' ./internal/store/postgres \
+            > "$template_grant_evidence/go-test.jsonl" 2> "$template_grant_evidence/go-test.stderr"
+          template_grant_exit=$?
+          set -e
+          printf '%s\n' "$template_grant_exit" > "$template_grant_evidence/go-test.exit"
+          python3 -B scripts/check_go_test_evidence.py --suite template-grant-revocation \
+            --manifest "$template_grant_evidence/required_go_tests.json" \
+            --log "$template_grant_evidence/go-test.jsonl" --exit-code "$template_grant_exit" \
+            --source-sha "$(cat "$template_grant_evidence/go-test-source-sha.txt")" \
+            | tee "$template_grant_evidence/go-test-evidence.json"
       - name: Prove missing execution cannot pass
         if: ${{ !cancelled() && steps.backend_source.outcome == 'success' && steps.backend_go.outcome == 'success' && steps.backend_archive.outcome == 'success' }}
         run: |
@@ -162,6 +185,14 @@ jobs:
         with:
           name: company-p0-protocol-source-manifest
           path: ${{ steps.backend_protocol.outputs.source_directory }}
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload template grant PostgreSQL evidence
+        if: ${{ always() && steps.backend_template_grant.outputs.evidence_directory != '' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-template-grant-postgres-evidence
+          path: ${{ steps.backend_template_grant.outputs.evidence_directory }}
           if-no-files-found: error
           retention-days: 14
   frontend:

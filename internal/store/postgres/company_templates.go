@@ -228,8 +228,20 @@ func (s *PgStore) SetTemplateGrant(ctx context.Context, a authz.Actor, g company
 		if _, e := s.mailboxAccessTx(ctx, tx, a, g.MailboxID); e != nil {
 			return e
 		}
-		if e := activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
-			return e
+		if enabled {
+			if e := activeCompanyUser(ctx, tx, a.TenantID, g.UserID); e != nil {
+				return e
+			}
+		} else {
+			// A frozen employee must still be removable from an existing grant.
+			// Keep the tenant boundary and required audit in this transaction.
+			var exists bool
+			if e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan(&exists); e != nil {
+				return e
+			}
+			if !exists {
+				return app.BadRequest("same-company employee required")
+			}
 		}
 		var valid bool
 		if e := tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.TemplateID).Scan(&valid); e != nil {
