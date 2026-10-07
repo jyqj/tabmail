@@ -259,7 +259,7 @@ export async function request<T>(
   }
 }
 
-let refreshPromise: Promise<boolean> | null = null;
+let refreshOperation: { scope: string; promise: Promise<boolean> } | null = null;
 
 // Web Locks serializes the shared HttpOnly refresh cookie across tabs. The
 // second tab observes the first tab's replacement access token and does not
@@ -269,7 +269,8 @@ export async function tryRefreshToken(
   failedToken: string,
   scope = sessionScope(),
 ): Promise<boolean> {
-  if (refreshPromise) return refreshPromise;
+  if (scope !== sessionScope()) return false;
+  if (refreshOperation?.scope === scope) return refreshOperation.promise;
   if (typeof navigator === "undefined" || !navigator.locks) return false;
   const promise = (async () =>
     await navigator.locks.request("tabmail-refresh", async () => {
@@ -279,9 +280,11 @@ export async function tryRefreshToken(
       if (current !== failedToken) return true;
       return doRefreshToken(scope, failedToken);
     }))().finally(() => {
-    refreshPromise = null;
+    // A queued operation from a retired scope can finish while its replacement
+    // is still running. It must not release the new scope's coalescing entry.
+    if (refreshOperation?.promise === promise) refreshOperation = null;
   });
-  refreshPromise = promise;
+  refreshOperation = { scope, promise };
   return promise;
 }
 
