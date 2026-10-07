@@ -3,7 +3,7 @@
 <!-- R5-PARALLEL-20261008-929:BEGIN -->
 ## 并行批次 929（Issue #81）
 
-本批独立认领 10 项，与下方 #78 范围去重。第1轮[#85](https://github.com/jyqj/tabmail/pull/85)完成4项；第2轮再完成Webhook稳定标识、模板授权操作归属和合法内部连字符3项。本批 **7/10完成，剩余3**。父任务仍 **10/171 已验收，剩余161**。逐项 ID、原父任务、三轮分工、测试边界和后续状态见 [本批报告](R5-PARALLEL-20261008-929.md) 与 [Issue #81](https://github.com/jyqj/tabmail/issues/81)。其他批次计数属于各自认领，不重复计入本批。
+本批独立认领10项，与其他批次范围去重。第1轮[#85](https://github.com/jyqj/tabmail/pull/85)完成4项；第2轮[#86](https://github.com/jyqj/tabmail/pull/86)完成3项；第3轮完成索引取消、模板库及重试恢复、域名策略3项，整合PR绑定见[Issue #81](https://github.com/jyqj/tabmail/issues/81)。本批 **10/10完成，剩余0**；父任务仍 **10/171已验收，剩余161**。本批源九包race558/0/0，保留#87后十包620PASS/10PG-SKIP、相关前端194PASS；完整默认前端在其冻结源为1122PASS/8FAIL，未冒作全绿。原始记录、明确源码与范围见[本批报告](R5-PARALLEL-20261008-929.md)。#88的revision6历史完整保留，随后revision7目录对账不计新实施项。#56保持draft。
 <!-- R5-PARALLEL-20261008-929:END -->
 
 
