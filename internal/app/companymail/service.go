@@ -232,7 +232,9 @@ func (s *Service) InboundAttachment(ctx context.Context, a authz.Actor, mailbox,
 		return nil, app.NotFound("attachment not found")
 	}
 	p := files[index]
-	return &File{Filename: SafeFilename(p.FileName), Content: p.Content}, nil
+	// The parsed source is shared; a returned File belongs to its caller just
+	// like the stable-ID attachment result and must not expose cached bytes.
+	return &File{Filename: SafeFilename(p.FileName), Content: bytes.Clone(p.Content)}, nil
 }
 
 func (s *Service) sender(ctx context.Context, a authz.Actor, mailbox uuid.UUID) (*company.MailboxAccess, error) {
