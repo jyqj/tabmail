@@ -130,7 +130,9 @@ func ValidateDomainPart(domain string) bool {
 			hasAlphaNum = true
 			labelLen++
 		case c == '-':
-			if prev == '.' || prev == '-' {
+			// RFC 5321's Ldh-str permits repeated interior hyphens, including
+			// the xn-- prefix of an ASCII IDNA label. Edges stay invalid.
+			if prev == '.' {
 				return false
 			}
 			labelLen++

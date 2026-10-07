@@ -169,10 +169,13 @@ func (d *Dispatcher) Publish(event Event) {
 		metrics.WebhookFailed()
 		return
 	}
+	// One publication owns one event identity, shared by all fanout targets.
+	// Retries use the existing delivery record and never regenerate either ID.
+	eventID := uuid.New()
 	if d.store != nil {
 		metrics.WebhookQueued()
 		if err := d.store.CreateOutboxEvent(context.Background(), &models.OutboxEvent{
-			ID:         uuid.New(),
+			ID:         eventID,
 			EventType:  event.Type,
 			Payload:    body,
 			OccurredAt: event.OccurredAt,
@@ -187,6 +190,7 @@ func (d *Dispatcher) Publish(event Event) {
 		metrics.WebhookQueued()
 		go d.dispatchDirect(&models.WebhookDelivery{
 			ID:        uuid.New(),
+			EventID:   eventID,
 			URL:       url,
 			EventType: event.Type,
 			Payload:   body,
@@ -404,6 +408,14 @@ func (d *Dispatcher) dispatch(ctx context.Context, delivery *models.WebhookDeliv
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-TabMail-Event", delivery.EventType)
 	req.Header.Set("X-TabMail-Attempt", strconv.Itoa(delivery.Attempts))
+	// Missing identities cannot become a shared all-zero deduplication key.
+	// In particular, dispatch must not invent a fresh identity on each retry.
+	if delivery.EventID != uuid.Nil {
+		req.Header.Set("X-TabMail-Event-ID", delivery.EventID.String())
+	}
+	if delivery.ID != uuid.Nil {
+		req.Header.Set("X-TabMail-Delivery-ID", delivery.ID.String())
+	}
 	if d.secret != "" {
 		req.Header.Set("X-TabMail-Signature", sign(d.secret, delivery.Payload))
 	}
