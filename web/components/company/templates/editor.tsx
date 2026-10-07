@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import {
   company,
   type MailTemplate,
@@ -20,6 +21,29 @@ import {
   useText,
 } from "@/components/company/common";
 
+function sameFields(left: Pick<MailTemplate, "name" | "draft">, right: Pick<MailTemplate, "name" | "draft">) {
+  return left.name === right.name && JSON.stringify(left.draft) === JSON.stringify(right.draft);
+}
+
+// Only the response metadata is authoritative for edits made after the saved
+// snapshot. Merge unchanged fields so server normalization is still applied.
+function reconcileSaved(current: MailTemplateEditor | null, snapshot: MailTemplateEditor, saved: MailTemplate): MailTemplateEditor | null {
+  if (!current || current.id !== snapshot.id || current.revision !== snapshot.revision) return current;
+  return {
+    ...saved,
+    name: current.name === snapshot.name ? saved.name : current.name,
+    draft: {
+      subject: current.draft.subject === snapshot.draft.subject ? saved.draft.subject : current.draft.subject,
+      text_body: current.draft.text_body === snapshot.draft.text_body ? saved.draft.text_body : current.draft.text_body,
+      html_body: current.draft.html_body === snapshot.draft.html_body ? saved.draft.html_body : current.draft.html_body,
+      variables: JSON.stringify(current.draft.variables) === JSON.stringify(snapshot.draft.variables)
+        ? saved.draft.variables : current.draft.variables,
+    },
+  };
+}
+
+type PublishedSnapshot = { saved: MailTemplate; owner: object; edits: number };
+
 // TemplateEditorView edits the mutable draft: name, subject, text/HTML body
 // and the declared variables. It also owns server-side validation/preview and
 // the save / save-and-publish actions that create immutable versions.
@@ -38,14 +62,28 @@ export function TemplateEditorView({
   mailbox: string;
   setMailbox: (id: string) => void;
   onSaved: (template: MailTemplate) => Promise<void>;
-  onPublished: (template: MailTemplate) => Promise<void>;
+  /** Refresh only: publication is already acknowledged before this callback. */
+  onPublished: (template: MailTemplate) => Promise<MailTemplate>;
 }) {
   const t = useText();
+  const scope = useSessionScope();
+  const [editorScope] = useState(sessionScope);
   const { busy, run } = useAction();
   const [vars, setVars] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<RenderedTemplate | null>(null);
+  const [publication, setPublication] = useState<PublishedSnapshot | null>(null);
+  const lifetime = useRef<object | null>(null);
+  const committed = useRef(edit);
+  const edits = useRef(0);
+  useLayoutEffect(() => {
+    lifetime.current = {};
+    return () => { lifetime.current = null; };
+  }, []);
+  useLayoutEffect(() => { committed.current = edit; }, [edit]);
+  const owns = (owner: object) => lifetime.current === owner && editorScope === sessionScope();
 
   function update(p: Partial<TemplateDraft>) {
+    edits.current += 1;
     setEdit((v) => (v ? { ...v, draft: { ...v.draft, ...p } } : v));
     setPreview(null);
   }
@@ -56,28 +94,76 @@ export function TemplateEditorView({
       ),
     });
   }
-  async function save() {
-    if (!edit) throw new Error("No template selected");
-    const res = await company<MailTemplate>(
-      edit.id ? `/templates/${edit.id}` : "/templates",
-      {
-        method: edit.id ? "PUT" : "POST",
-        body: {
-          name: edit.name,
-          revision: edit.revision,
-          draft: {
-            ...edit.draft,
-            variables: edit.draft.variables.map((v) => ({
-              ...v,
-              options: v.options?.filter(Boolean),
-            })),
+  async function finishPublication(published: PublishedSnapshot) {
+    if (!owns(published.owner)) return;
+    try {
+      const fresh = await onPublished(published.saved);
+      if (!owns(published.owner)) return;
+      // Publish increments the template revision but returns a version, not
+      // that new revision. Reconcile only a fresh authoritative template read.
+      if (fresh.id !== published.saved.id || !Number.isSafeInteger(fresh.revision) || fresh.revision <= published.saved.revision)
+        throw new Error(t("发布已完成，但尚未读取到新的模板版本。请重试刷新。", "Publication completed, but the new template revision is unavailable. Retry the refresh."));
+      const changed = edits.current !== published.edits;
+      if (changed && !sameFields(fresh, published.saved))
+        throw new Error(t("发布后模板内容又发生了变化。请保留当前编辑，并从模板库核对最新内容。", "The template changed again after publication. Keep these edits and review the latest content from the library."));
+      setEdit(current => {
+        if (changed) return reconcileSaved(current, published.saved, fresh);
+        return current?.id === published.saved.id && current.revision === published.saved.revision ? null : current;
+      });
+      setPublication(null);
+      setVars({});
+      setPreview(null);
+      toast.success(changed
+        ? t("不可变版本已发布；后续编辑尚未保存。", "Immutable version published; newer edits remain unsaved.")
+        : t("不可变版本已发布", "Immutable version published"));
+    } catch (error) {
+      if (owns(published.owner)) throw error;
+    }
+  }
+  async function save(publish: boolean) {
+    const owner = lifetime.current;
+    if (!edit || !owner || !owns(owner) || publication) return;
+    const snapshot = edit;
+    const started = edits.current;
+    try {
+      const res = await company<MailTemplate>(
+        snapshot.id ? `/templates/${snapshot.id}` : "/templates",
+        {
+          method: snapshot.id ? "PUT" : "POST",
+          body: {
+            name: snapshot.name,
+            revision: snapshot.revision,
+            draft: {
+              ...snapshot.draft,
+              variables: snapshot.draft.variables.map((v) => ({
+                ...v,
+                options: v.options?.filter(Boolean),
+              })),
+            },
           },
         },
-      },
-    );
-    setEdit(() => res);
-    await onSaved(res);
-    return res;
+      );
+      if (!owns(owner)) return;
+      if (!res.id || (snapshot.id && res.id !== snapshot.id) || !Number.isSafeInteger(res.revision) || res.revision <= snapshot.revision)
+        throw new Error(t("保存结果缺少有效的模板版本，请核对模板。", "The save result has no valid template revision. Review the template."));
+      if (!committed.current || committed.current.id !== snapshot.id || committed.current.revision !== snapshot.revision) return;
+      setEdit(current => reconcileSaved(current, snapshot, res));
+      await onSaved(res);
+      if (!owns(owner)) return;
+      if (!publish || edits.current !== started) {
+        toast.success(edits.current !== started
+          ? t("请求中的草稿已保存；后续编辑尚未保存，请核对后再保存或发布。", "Draft saved; newer edits remain unsaved. Review them before saving or publishing.")
+          : t("草稿已保存", "Draft saved"));
+        return;
+      }
+      await company(`/templates/${res.id}/publish`, { method: "POST", body: { revision: res.revision } });
+      if (!owns(owner)) return;
+      const published = { owner, saved: res, edits: started };
+      setPublication(published);
+      await finishPublication(published);
+    } catch (error) {
+      if (owns(owner)) throw error;
+    }
   }
   if (!edit) {
     return (
@@ -100,7 +186,11 @@ export function TemplateEditorView({
             className={inputClass}
             value={edit.name}
             maxLength={120}
-            onChange={(e) => setEdit(() => ({ ...edit, name: e.target.value }))}
+            onChange={(e) => {
+              edits.current += 1;
+              const name = e.target.value;
+              setEdit(value => value ? { ...value, name } : value);
+            }}
           />
         )}
       </Field>
@@ -239,33 +329,24 @@ export function TemplateEditorView({
       </ActionButton>
       <div className="flex flex-wrap gap-3">
         <ActionButton
-          disabled={busy || !edit.name}
-          onClick={() =>
-            run(async () => {
-              await save();
-              toast.success(t("草稿已保存", "Draft saved"));
-            })
-          }
+          disabled={busy || !!publication || editorScope !== scope || !edit.name}
+          onClick={() => run(() => save(false))}
         >
           {t("保存模板草稿", "Save template draft")}
         </ActionButton>
         <ActionButton
-          disabled={busy || !edit.name || edit.retired}
-          onClick={() =>
-            run(async () => {
-              const value = await save();
-              await onPublished(value);
-              setVars({});
-              setPreview(null);
-              toast.success(
-                t("不可变版本已发布", "Immutable version published"),
-              );
-            })
-          }
+          disabled={busy || !!publication || editorScope !== scope || !edit.name || edit.retired}
+          onClick={() => run(() => save(true))}
         >
           {t("保存并发布新版本", "Save and publish new version")}
         </ActionButton>
       </div>
+      {publication && <div role="status" className="space-y-2 rounded border p-3 text-sm">
+        <p>{t("版本已发布。继续保存或发布前，请先读取最新模板版本；当前编辑已保留。", "The version was published. Refresh the template revision before saving or publishing again; current edits are retained.")}</p>
+        <ActionButton disabled={busy || editorScope !== scope} onClick={() => run(() => finishPublication(publication))}>
+          {t("刷新模板版本", "Refresh template revision")}
+        </ActionButton>
+      </div>}
       <Field label={t("预览 / 授权所用邮箱", "Preview / grant mailbox")}>
         {(id) => (
           <select
