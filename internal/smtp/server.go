@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"sync"
 
 	"github.com/emersion/go-sasl"
@@ -454,7 +455,11 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 	if opts != nil && opts.Auth != nil {
 		return gosmtp.ErrAuthUnsupported
 	}
-	s.from = policy.SanitizeAddr(from)
+	addr := policy.SanitizeAddr(from)
+	if senderDomainHasEmptyLabel(addr) {
+		return smtpErr(501, "invalid sender domain")
+	}
+	s.from = addr
 	pol, err := s.backend.ingest.CurrentPolicy(s.workContext())
 	if err != nil {
 		return smtpErr(451, "temporary policy lookup failure")
@@ -463,6 +468,27 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 		return smtpErr(550, "sender domain rejected by policy")
 	}
 	return nil
+}
+
+// go-smtp decodes the local part but does not validate the domain's labels.
+// Check just that DNS structure here: one terminal root dot is permitted,
+// while an empty label must not evade the origin policy or be repaired away.
+// Address literals have no DNS labels. Leave quoted/UTF8 local parts and the
+// existing SMTPUTF8 domain handling to the protocol parser.
+func senderDomainHasEmptyLabel(from string) bool {
+	if from == "" {
+		return false // Null reverse path.
+	}
+	at := strings.LastIndexByte(from, '@')
+	if at < 0 || at == len(from)-1 {
+		return true
+	}
+	domain := from[at+1:]
+	if strings.HasPrefix(domain, "[") && strings.HasSuffix(domain, "]") {
+		return false
+	}
+	domain = strings.TrimSuffix(domain, ".")
+	return domain == "" || strings.HasPrefix(domain, ".") || strings.HasSuffix(domain, ".") || strings.Contains(domain, "..")
 }
 
 func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
