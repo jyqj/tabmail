@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
+  "baseline_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -63,7 +63,7 @@
     },
     {
       "path": "internal/store/postgres/company_templates.go",
-      "sha256": "b36537f0030ea0006a85bd3e7fc85ac4d8248ea9c15f79eb6a3c9e49426cab70"
+      "sha256": "520502656509d73730d7fed4587bbbe147ab12d22f3d4d75a30731f15ff5ae02"
     },
     {
       "path": "internal/store/postgres/content_eligibility.go",
@@ -679,7 +679,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 414,
+          "line": 416,
           "expression": "s.store.CreateAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -831,7 +831,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 472,
+          "line": 474,
           "expression": "s.store.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -839,7 +839,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 468,
+          "line": 470,
           "expression": "s.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -961,7 +961,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 452,
+          "line": 454,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1110,7 +1110,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeys",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeys",
-          "line": 436,
+          "line": 438,
           "expression": "s.store.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1227,7 +1227,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeysByOwner",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeysByOwner",
-          "line": 444,
+          "line": 446,
           "expression": "s.store.ListAPIKeysByOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1916,7 +1916,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 417,
+          "line": 419,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1924,7 +1924,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 276,
+          "line": 278,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1932,7 +1932,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 225,
+          "line": 227,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1940,7 +1940,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 475,
+          "line": 477,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1948,7 +1948,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 304,
+          "line": 306,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1956,7 +1956,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 262,
+          "line": 264,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1964,7 +1964,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 290,
+          "line": 292,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1972,7 +1972,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 588,
+          "line": 590,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1980,7 +1980,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSetting",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSetting",
-          "line": 194,
+          "line": 196,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1988,7 +1988,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 247,
+          "line": 249,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2190,7 +2190,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 505,
+          "line": 507,
           "expression": "s.store.ListAuditEntries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -2327,7 +2327,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAudit",
           "file": "internal/app/admin/service.go",
           "function": "ListAudit",
-          "line": 541,
+          "line": 543,
           "expression": "s.store.ListAuditEntriesPaged",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4388,7 +4388,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 289,
+          "line": 291,
           "expression": "s.repo.FinishMailAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4747,7 +4747,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
           "file": "internal/app/companymail/service.go",
           "function": "Attachment",
-          "line": 319,
+          "line": 321,
           "expression": "s.repo.GetWorkAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -4755,7 +4755,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
           "file": "internal/app/companymail/service.go",
           "function": "Attachment",
-          "line": 334,
+          "line": 336,
           "expression": "s.repo.GetWorkAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -5774,7 +5774,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 282,
+          "line": 284,
           "expression": "s.repo.ReserveMailAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -9216,10 +9216,10 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/app/templates/service.go:*Service:Preview",
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
-          "function": "Preview",
-          "line": 62,
+          "function": "previewSource",
+          "line": 131,
           "expression": "s.GetCompanySettings",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -9344,15 +9344,15 @@
           "caller_id": "internal/app/companymail/service.go:*Service:sender",
           "file": "internal/app/companymail/service.go",
           "function": "sender",
-          "line": 242,
+          "line": 244,
           "expression": "s.repo.GetWorkMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/app/templates/service.go:*Service:Preview",
+          "caller_id": "internal/app/templates/service.go:*Service:previewMailbox",
           "file": "internal/app/templates/service.go",
-          "function": "Preview",
-          "line": 43,
+          "function": "previewMailbox",
+          "line": 177,
           "expression": "s.GetWorkMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -11107,7 +11107,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:ListUsableTemplates",
           "file": "internal/store/postgres/company_templates.go",
           "function": "ListUsableTemplates",
-          "line": 255,
+          "line": 267,
           "expression": "s.companyReadTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -11115,7 +11115,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:TemplateForSend",
           "file": "internal/store/postgres/company_templates.go",
           "function": "TemplateForSend",
-          "line": 370,
+          "line": 382,
           "expression": "s.companyReadTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12267,7 +12267,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:ListUsableTemplates",
           "file": "internal/store/postgres/company_templates.go",
           "function": "ListUsableTemplates",
-          "line": 256,
+          "line": 268,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12283,7 +12283,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:loadTemplateForSendTx",
           "file": "internal/store/postgres/company_templates.go",
           "function": "loadTemplateForSendTx",
-          "line": 378,
+          "line": 390,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12634,7 +12634,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:SetTemplateGrant",
           "file": "internal/store/postgres/company_templates.go",
           "function": "SetTemplateGrant",
-          "line": 231,
+          "line": 232,
           "expression": "activeCompanyUser",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -12928,7 +12928,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:SetTemplateGrant",
           "file": "internal/store/postgres/company_templates.go",
           "function": "SetTemplateGrant",
-          "line": 250,
+          "line": 262,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -15403,7 +15403,7 @@
           "caller_id": "internal/retention/scanner.go:*Scanner:sweep",
           "file": "internal/retention/scanner.go",
           "function": "sweep",
-          "line": 69,
+          "line": 72,
           "expression": "metadata.SweepCompanyMetadata",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -16674,90 +16674,90 @@
         "file": "internal/store/postgres/company_templates.go",
         "name": "ListUsableTemplates",
         "receiver": "*PgStore",
-        "line": 253,
-        "end": 280,
+        "line": 265,
+        "end": 292,
         "sha256": "42e300b854df2d2ce035b897b356496dfad6d9a04948c70be014df2c1ea91000",
         "calls": [
           {
-            "line": 255,
+            "line": 267,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           },
           {
-            "line": 256,
+            "line": 268,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 261,
+            "line": 273,
             "expr": "app.Forbidden",
             "name": "Forbidden"
           },
           {
-            "line": 263,
+            "line": 275,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "companyVersionColumns + fmt.Sprintf(templateVersionEligibilityTail, \"4\", \"1\", \"$2\", \"3\") + companyVersionFrom + ` WHERE v.tenant_id=$1 AND v.version=(SELECT max(w.version) FROM mail_template_versions w WHERE w.template_id=v.template_id AND w.revoked_at IS NULL) ORDER BY t.name`"
           },
           {
-            "line": 263,
+            "line": 275,
             "expr": "fmt.Sprintf",
             "name": "Sprintf"
           },
           {
-            "line": 267,
+            "line": 279,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 268,
+            "line": 280,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 269,
+            "line": 281,
             "expr": "scanTemplateVersionStatus",
             "name": "scanTemplateVersionStatus"
           },
           {
-            "line": 273,
+            "line": 285,
             "expr": "classifyTemplateVersion",
             "name": "classifyTemplateVersion"
           },
           {
-            "line": 274,
+            "line": 286,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 277,
+            "line": 289,
             "expr": "rows.Err",
             "name": "Err"
           }
         ],
         "strings": [
           {
-            "line": 261,
+            "line": 273,
             "value": "mailbox send permission required"
           },
           {
-            "line": 263,
+            "line": 275,
             "value": "4"
           },
           {
-            "line": 263,
+            "line": 275,
             "value": "1"
           },
           {
-            "line": 263,
+            "line": 275,
             "value": "$2"
           },
           {
-            "line": 263,
+            "line": 275,
             "value": "3"
           },
           {
-            "line": 263,
+            "line": 275,
             "value": " WHERE v.tenant_id=$1 AND v.version=(SELECT max(w.version) FROM mail_template_versions w WHERE w.template_id=v.template_id AND w.revoked_at IS NULL) ORDER BY t.name"
           }
         ],
@@ -16793,7 +16793,7 @@
         "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
       },
       "evidence": [
-        "internal/store/postgres/company_templates.go:253-280 sha256=42e300b854df2d2ce035b897b356496dfad6d9a04948c70be014df2c1ea91000",
+        "internal/store/postgres/company_templates.go:265-292 sha256=42e300b854df2d2ce035b897b356496dfad6d9a04948c70be014df2c1ea91000",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -16809,14 +16809,14 @@
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 255,
+            "line": 267,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 263,
+            "line": 275,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "companyVersionColumns + fmt.Sprintf(templateVersionEligibilityTail, \"4\", \"1\", \"$2\", \"3\") + companyVersionFrom + ` WHERE v.tenant_id=$1 AND v.version=(SELECT max(w.version) FROM mail_template_versions w WHERE w.template_id=v.template_id AND w.revoked_at IS NULL) ORDER BY t.name`"
@@ -17606,8 +17606,8 @@
         "name": "SetTemplateGrant",
         "receiver": "*PgStore",
         "line": 226,
-        "end": 252,
-        "sha256": "d2c2c015359cf16ca386599bcf57eea991fee25e4f8a4fcc1c73e5b87635e808",
+        "end": 264,
+        "sha256": "d21a74b8dc69addbf67208f94fa94fe948b3aa7eccbbbc65d214f8ecf43f3e3d",
         "calls": [
           {
             "line": 227,
@@ -17620,79 +17620,103 @@
             "name": "mailboxAccessTx"
           },
           {
-            "line": 231,
+            "line": 232,
             "expr": "activeCompanyUser",
             "name": "activeCompanyUser"
           },
           {
-            "line": 235,
+            "line": 239,
+            "expr": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 239,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`"
+          },
+          {
+            "line": 243,
+            "expr": "app.BadRequest",
+            "name": "BadRequest"
+          },
+          {
+            "line": 247,
             "expr": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.TemplateID).Scan",
             "name": "Scan"
           },
           {
-            "line": 235,
+            "line": 247,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)`"
           },
           {
-            "line": 239,
+            "line": 251,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 243,
+            "line": 255,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mail_template_grants(tenant_id,template_id,mailbox_id,user_id,granted_by) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`"
           },
           {
-            "line": 245,
+            "line": 257,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mail_template_grants WHERE tenant_id=$1 AND template_id=$2 AND mailbox_id=$3 AND user_id=$4`"
           },
           {
-            "line": 250,
+            "line": 262,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 235,
-            "value": "SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)"
-          },
-          {
             "line": 239,
-            "value": "template not found"
+            "value": "SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)"
           },
           {
             "line": 243,
+            "value": "same-company employee required"
+          },
+          {
+            "line": 247,
+            "value": "SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)"
+          },
+          {
+            "line": 251,
+            "value": "template not found"
+          },
+          {
+            "line": 255,
             "value": "INSERT INTO mail_template_grants(tenant_id,template_id,mailbox_id,user_id,granted_by) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING"
           },
           {
-            "line": 245,
+            "line": 257,
             "value": "DELETE FROM mail_template_grants WHERE tenant_id=$1 AND template_id=$2 AND mailbox_id=$3 AND user_id=$4"
           },
           {
-            "line": 250,
+            "line": 262,
             "value": "template.grant"
           },
           {
-            "line": 250,
+            "line": 262,
             "value": "template"
           },
           {
-            "line": 250,
+            "line": 262,
             "value": "mailbox_id"
           },
           {
-            "line": 250,
+            "line": 262,
             "value": "user_id"
           },
           {
-            "line": 250,
+            "line": 262,
             "value": "enabled"
           }
         ],
@@ -17708,10 +17732,11 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "companyTx T UPDATE→actor/profile→template版本/目标user/M资格检查→grant INSERT或DELETE/FK template/M/U→audit/outbox→Commit。",
+      "lock_fk_wait_fence": "companyTx tenant FOR UPDATE -> current actor reread and administrator gate -> mailbox access -> enabled: active same-tenant user / disabled: existing same-tenant user -> template existence -> exact scoped grant INSERT or DELETE -> mandatory audit/outbox -> Commit. Source review only.",
       "evidence": [
-        "internal/store/postgres/company_templates.go:226-252 sha256=d2c2c015359cf16ca386599bcf57eea991fee25e4f8a4fcc1c73e5b87635e808",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/company_templates.go:226-264 sha256=d21a74b8dc69addbf67208f94fa94fe948b3aa7eccbbbc65d214f8ecf43f3e3d",
+        "migration source definitions; no current runtime catalog claim",
+        "docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008/README.md: static SetTemplateGrant revocation review; no runtime recertification"
       ],
       "unverified_risks": [
         "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证"
@@ -17724,11 +17749,11 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 243,
+            "line": 255,
             "sql_fragment": "INSERT INTO mail_template_grants(tenant_id,template_id,mailbox_id,user_id,granted_by) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING"
           },
           {
-            "line": 245,
+            "line": 257,
             "sql_fragment": "DELETE FROM mail_template_grants WHERE tenant_id=$1 AND template_id=$2 AND mailbox_id=$3 AND user_id=$4"
           }
         ],
@@ -17742,19 +17767,25 @@
         ],
         "sql_execution_expressions": [
           {
-            "line": 235,
+            "line": 239,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`"
+          },
+          {
+            "line": 247,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)`"
           },
           {
-            "line": 243,
+            "line": 255,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mail_template_grants(tenant_id,template_id,mailbox_id,user_id,granted_by) VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`"
           },
           {
-            "line": 245,
+            "line": 257,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mail_template_grants WHERE tenant_id=$1 AND template_id=$2 AND mailbox_id=$3 AND user_id=$4`"
@@ -17762,7 +17793,14 @@
         ],
         "effect_status": "source-fragments-not-evaluated-SQL",
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
-        "entry_role": "store-exported-interface-candidate"
+        "entry_role": "store-exported-interface-candidate",
+        "reviewed_revocation_subject": {
+          "enabled_true": "activeCompanyUser retains the active same-tenant target-user requirement.",
+          "enabled_false": "A new SELECT EXISTS users predicate on tenant_id and id permits revoking an existing frozen employee; a missing or foreign-tenant target returns BadRequest.",
+          "transaction_order": "companyTx acquires the tenant write lock, rereads the current actor, requires current company administration, then checks mailbox access, target-user eligibility, and template existence. The grant DELETE remains scoped to tenant, template, mailbox and user.",
+          "atomicity": "Grant mutation, mandatory companyAudit and outbox insert remain in the same transaction; errors return before commit.",
+          "qualification": "static source inspection only; no PostgreSQL, concurrency, wire, dependency, release or parent-task acceptance"
+        }
       },
       "file_family_context": "Save/retire/revoke T KEY SHARE→actor/profile→template CAS或version UPDATE；publish/grant T UPDATE；FK版本→模板、grant→模板/M/U；immutable版本trigger保留",
       "evidence_level": "source-only"
@@ -17786,37 +17824,37 @@
         "file": "internal/store/postgres/company_templates.go",
         "name": "TemplateForSend",
         "receiver": "*PgStore",
-        "line": 363,
-        "end": 374,
+        "line": 375,
+        "end": 386,
         "sha256": "197ee5a2dbeda7e0eaf5fd9da8c43d443378f3fe67602a157a19dc4e1d62bb6d",
         "calls": [
           {
-            "line": 365,
+            "line": 377,
             "expr": "authz.ErrForbidden",
             "name": "ErrForbidden"
           },
           {
-            "line": 370,
+            "line": 382,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           },
           {
-            "line": 371,
+            "line": 383,
             "expr": "s.loadTemplateForSendTx",
             "name": "loadTemplateForSendTx"
           }
         ],
         "strings": [
           {
-            "line": 365,
+            "line": 377,
             "value": ""
           },
           {
-            "line": 365,
+            "line": 377,
             "value": ""
           },
           {
-            "line": 365,
+            "line": 377,
             "value": "published templates require an employee sender"
           }
         ],
@@ -17824,10 +17862,10 @@
       },
       "callers": [
         {
-          "caller_id": "internal/app/templates/service.go:*Service:Preview",
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
-          "function": "Preview",
-          "line": 71,
+          "function": "previewSource",
+          "line": 149,
           "expression": "s.TemplateForSend",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -17870,7 +17908,7 @@
         "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
       },
       "evidence": [
-        "internal/store/postgres/company_templates.go:363-374 sha256=197ee5a2dbeda7e0eaf5fd9da8c43d443378f3fe67602a157a19dc4e1d62bb6d",
+        "internal/store/postgres/company_templates.go:375-386 sha256=197ee5a2dbeda7e0eaf5fd9da8c43d443378f3fe67602a157a19dc4e1d62bb6d",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -17886,7 +17924,7 @@
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 370,
+            "line": 382,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           }
@@ -17918,40 +17956,30 @@
         "file": "internal/store/postgres/company_templates.go",
         "name": "loadTemplateForSendTx",
         "receiver": "*PgStore",
-        "line": 377,
-        "end": 417,
+        "line": 389,
+        "end": 429,
         "sha256": "c36b8b1f42dd39d2b8127bb65d81818ad2b192518694a935368b358605a703da",
         "calls": [
           {
-            "line": 378,
+            "line": 390,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 383,
+            "line": 395,
             "expr": "authz.ErrForbidden",
             "name": "ErrForbidden"
           },
           {
-            "line": 387,
+            "line": 399,
             "expr": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`, *key, tenant, *user).Scan",
             "name": "Scan"
           },
           {
-            "line": 387,
+            "line": 399,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`"
-          },
-          {
-            "line": 392,
-            "expr": "authz.ErrForbidden",
-            "name": "ErrForbidden"
-          },
-          {
-            "line": 395,
-            "expr": "templateVersionStatusTx",
-            "name": "templateVersionStatusTx"
           },
           {
             "line": 404,
@@ -17959,74 +17987,84 @@
             "name": "ErrForbidden"
           },
           {
-            "line": 406,
+            "line": 407,
+            "expr": "templateVersionStatusTx",
+            "name": "templateVersionStatusTx"
+          },
+          {
+            "line": 416,
             "expr": "authz.ErrForbidden",
             "name": "ErrForbidden"
           },
           {
-            "line": 409,
+            "line": 418,
+            "expr": "authz.ErrForbidden",
+            "name": "ErrForbidden"
+          },
+          {
+            "line": 421,
             "expr": "tx.QueryRow(ctx, `SELECT display_name FROM users WHERE id=$1`, *user).Scan",
             "name": "Scan"
           },
           {
-            "line": 409,
+            "line": 421,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT display_name FROM users WHERE id=$1`"
           },
           {
-            "line": 412,
+            "line": 424,
             "expr": "tx.QueryRow(ctx, `SELECT name FROM company_settings WHERE tenant_id=$1`, tenant).Scan",
             "name": "Scan"
           },
           {
-            "line": 412,
+            "line": 424,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT name FROM company_settings WHERE tenant_id=$1`"
           },
           {
-            "line": 413,
+            "line": 425,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 414,
+            "line": 426,
             "expr": "authz.ErrForbidden",
             "name": "ErrForbidden"
           }
         ],
         "strings": [
           {
-            "line": 383,
+            "line": 395,
             "value": "template sender mailbox permission revoked"
           },
           {
-            "line": 387,
+            "line": 399,
             "value": "SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))"
           },
           {
-            "line": 392,
+            "line": 404,
             "value": "template sending key revoked"
           },
           {
-            "line": 404,
+            "line": 416,
             "value": "published template integrity mismatch"
           },
           {
-            "line": 406,
+            "line": 418,
             "value": "published template unavailable or not granted"
           },
           {
-            "line": 409,
+            "line": 421,
             "value": "SELECT display_name FROM users WHERE id=$1"
           },
           {
-            "line": 412,
+            "line": 424,
             "value": "SELECT name FROM company_settings WHERE tenant_id=$1"
           },
           {
-            "line": 414,
+            "line": 426,
             "value": "company settings unavailable"
           }
         ],
@@ -18037,7 +18075,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:TemplateForSend",
           "file": "internal/store/postgres/company_templates.go",
           "function": "TemplateForSend",
-          "line": 371,
+          "line": 383,
           "expression": "s.loadTemplateForSendTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -18076,7 +18114,7 @@
         "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
       },
       "evidence": [
-        "internal/store/postgres/company_templates.go:377-417 sha256=c36b8b1f42dd39d2b8127bb65d81818ad2b192518694a935368b358605a703da",
+        "internal/store/postgres/company_templates.go:389-429 sha256=c36b8b1f42dd39d2b8127bb65d81818ad2b192518694a935368b358605a703da",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -18093,19 +18131,19 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 387,
+            "line": 399,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`"
           },
           {
-            "line": 409,
+            "line": 421,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT display_name FROM users WHERE id=$1`"
           },
           {
-            "line": 412,
+            "line": 424,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT name FROM company_settings WHERE tenant_id=$1`"
@@ -18137,12 +18175,12 @@
         "file": "internal/store/postgres/company_templates.go",
         "name": "classifyTemplateVersion",
         "receiver": "",
-        "line": 304,
-        "end": 317,
+        "line": 316,
+        "end": 329,
         "sha256": "f8cf798a945fe71664b0391ab70f4826faca6337552d8a233382c4789eb11f5b",
         "calls": [
           {
-            "line": 312,
+            "line": 324,
             "expr": "company.Digest",
             "name": "Digest"
           }
@@ -18163,7 +18201,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:ListUsableTemplates",
           "file": "internal/store/postgres/company_templates.go",
           "function": "ListUsableTemplates",
-          "line": 273,
+          "line": 285,
           "expression": "classifyTemplateVersion",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -18171,7 +18209,7 @@
           "caller_id": "internal/store/postgres/company_templates.go::templateVersionStatusTx",
           "file": "internal/store/postgres/company_templates.go",
           "function": "templateVersionStatusTx",
-          "line": 339,
+          "line": 351,
           "expression": "classifyTemplateVersion",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -18183,7 +18221,7 @@
         "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
       },
       "evidence": [
-        "internal/store/postgres/company_templates.go:304-317 sha256=f8cf798a945fe71664b0391ab70f4826faca6337552d8a233382c4789eb11f5b",
+        "internal/store/postgres/company_templates.go:316-329 sha256=f8cf798a945fe71664b0391ab70f4826faca6337552d8a233382c4789eb11f5b",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -18225,8 +18263,8 @@
         "file": "internal/store/postgres/company_templates.go",
         "name": "newDraftTemplateVersion",
         "receiver": "",
-        "line": 349,
-        "end": 359,
+        "line": 361,
+        "end": 371,
         "sha256": "4376f89a06270c4dc0d7ab04b0b6c9ccee4b6171f942f23ebf023949a11b191d",
         "calls": [],
         "strings": [],
@@ -18257,7 +18295,7 @@
         "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
       },
       "evidence": [
-        "internal/store/postgres/company_templates.go:349-359 sha256=4376f89a06270c4dc0d7ab04b0b6c9ccee4b6171f942f23ebf023949a11b191d",
+        "internal/store/postgres/company_templates.go:361-371 sha256=4376f89a06270c4dc0d7ab04b0b6c9ccee4b6171f942f23ebf023949a11b191d",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -18461,17 +18499,17 @@
         "file": "internal/store/postgres/company_templates.go",
         "name": "scanTemplateVersionStatus",
         "receiver": "",
-        "line": 285,
-        "end": 295,
+        "line": 297,
+        "end": 307,
         "sha256": "333bb09dddd44474ae5c38a24a8934fa4cb5ee2aa6e53e7ff1cb71c3adcf4429",
         "calls": [
           {
-            "line": 289,
+            "line": 301,
             "expr": "row.Scan",
             "name": "Scan"
           },
           {
-            "line": 293,
+            "line": 305,
             "expr": "json.Unmarshal",
             "name": "Unmarshal"
           }
@@ -18484,7 +18522,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:ListUsableTemplates",
           "file": "internal/store/postgres/company_templates.go",
           "function": "ListUsableTemplates",
-          "line": 269,
+          "line": 281,
           "expression": "scanTemplateVersionStatus",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -18492,7 +18530,7 @@
           "caller_id": "internal/store/postgres/company_templates.go::templateVersionStatusTx",
           "file": "internal/store/postgres/company_templates.go",
           "function": "templateVersionStatusTx",
-          "line": 330,
+          "line": 342,
           "expression": "scanTemplateVersionStatus",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -18504,7 +18542,7 @@
         "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
       },
       "evidence": [
-        "internal/store/postgres/company_templates.go:285-295 sha256=333bb09dddd44474ae5c38a24a8934fa4cb5ee2aa6e53e7ff1cb71c3adcf4429",
+        "internal/store/postgres/company_templates.go:297-307 sha256=333bb09dddd44474ae5c38a24a8934fa4cb5ee2aa6e53e7ff1cb71c3adcf4429",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -18546,65 +18584,65 @@
         "file": "internal/store/postgres/company_templates.go",
         "name": "templateVersionStatusTx",
         "receiver": "",
-        "line": 328,
-        "end": 344,
+        "line": 340,
+        "end": 356,
         "sha256": "67d955937b336c9df562272894484c5659537137cf4968c0acf6b09064a5fb0e",
         "calls": [
           {
-            "line": 330,
+            "line": 342,
             "expr": "scanTemplateVersionStatus",
             "name": "scanTemplateVersionStatus"
           },
           {
-            "line": 330,
+            "line": 342,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "companyVersionColumns + fmt.Sprintf(templateVersionEligibilityTail, \"5\", \"1\", \"$3\", \"4\") + companyVersionFrom + ` WHERE v.tenant_id=$1 AND v.id=$2`"
           },
           {
-            "line": 331,
+            "line": 343,
             "expr": "fmt.Sprintf",
             "name": "Sprintf"
           },
           {
-            "line": 332,
+            "line": 344,
             "expr": "a.IsTenantAdmin",
             "name": "IsTenantAdmin"
           },
           {
-            "line": 333,
+            "line": 345,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 339,
+            "line": 351,
             "expr": "classifyTemplateVersion",
             "name": "classifyTemplateVersion"
           }
         ],
         "strings": [
           {
-            "line": 331,
+            "line": 343,
             "value": "5"
           },
           {
-            "line": 331,
+            "line": 343,
             "value": "1"
           },
           {
-            "line": 331,
+            "line": 343,
             "value": "$3"
           },
           {
-            "line": 331,
+            "line": 343,
             "value": "4"
           },
           {
-            "line": 331,
+            "line": 343,
             "value": " WHERE v.tenant_id=$1 AND v.id=$2"
           },
           {
-            "line": 337,
+            "line": 349,
             "value": ""
           }
         ],
@@ -18623,7 +18661,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:loadTemplateForSendTx",
           "file": "internal/store/postgres/company_templates.go",
           "function": "loadTemplateForSendTx",
-          "line": 395,
+          "line": 407,
           "expression": "templateVersionStatusTx",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -18642,7 +18680,7 @@
         "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
       },
       "evidence": [
-        "internal/store/postgres/company_templates.go:328-344 sha256=67d955937b336c9df562272894484c5659537137cf4968c0acf6b09064a5fb0e",
+        "internal/store/postgres/company_templates.go:340-356 sha256=67d955937b336c9df562272894484c5659537137cf4968c0acf6b09064a5fb0e",
         "migration source definitions; no current runtime catalog claim"
       ],
       "unverified_risks": [
@@ -18659,7 +18697,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 330,
+            "line": 342,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "companyVersionColumns + fmt.Sprintf(templateVersionEligibilityTail, \"5\", \"1\", \"$3\", \"4\") + companyVersionFrom + ` WHERE v.tenant_id=$1 AND v.id=$2`"
@@ -21616,13 +21654,13 @@
             "name": "BadRequest"
           },
           {
-            "expr": "authz.CanManageTenantMember",
             "line": 58,
+            "expr": "authz.CanManageTenantMember",
             "name": "CanManageTenantMember"
           },
           {
-            "expr": "app.Forbidden",
             "line": 59,
+            "expr": "app.Forbidden",
             "name": "Forbidden"
           }
         ],
@@ -26015,7 +26053,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 497,
+          "line": 499,
           "expression": "s.store.CountAllMailboxes",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -29243,7 +29281,7 @@
           "caller_id": "internal/retention/scanner.go:*Scanner:clearRetry",
           "file": "internal/retention/scanner.go",
           "function": "clearRetry",
-          "line": 139,
+          "line": 214,
           "expression": "sc.store.ClearOrphanRetry",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -29346,7 +29384,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 501,
+          "line": 503,
           "expression": "s.store.CountAllMessages",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -30005,7 +30043,7 @@
           "caller_id": "internal/rawobject/store.go:*Store:StoreMessage",
           "file": "internal/rawobject/store.go",
           "function": "StoreMessage",
-          "line": 78,
+          "line": 82,
           "expression": "s.refs.CreateMessageWithQuota",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -30182,7 +30220,7 @@
           "caller_id": "internal/retention/scanner.go:*Scanner:sweep",
           "file": "internal/retention/scanner.go",
           "function": "sweep",
-          "line": 77,
+          "line": 89,
           "expression": "sc.store.DeleteExpiredMessagesReturningKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -30424,7 +30462,15 @@
           "caller_id": "internal/retention/scanner.go:*Scanner:enqueueRetry",
           "file": "internal/retention/scanner.go",
           "function": "enqueueRetry",
-          "line": 133,
+          "line": 208,
+          "expression": "sc.store.EnqueueOrphanRetry",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/retention/scanner.go:*Scanner:handoffCancelledKeys",
+          "file": "internal/retention/scanner.go",
+          "function": "handoffCancelledKeys",
+          "line": 164,
           "expression": "sc.store.EnqueueOrphanRetry",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -30829,7 +30875,7 @@
           "caller_id": "internal/retention/scanner.go:*Scanner:retryFailedKeys",
           "file": "internal/retention/scanner.go",
           "function": "retryFailedKeys",
-          "line": 145,
+          "line": 223,
           "expression": "sc.store.ListPendingOrphanRetries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -31158,7 +31204,7 @@
           "caller_id": "internal/retention/scanner.go:*Scanner:reapExhausted",
           "file": "internal/retention/scanner.go",
           "function": "reapExhausted",
-          "line": 167,
+          "line": 250,
           "expression": "sc.store.ReapExhaustedOrphanRetries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -38566,7 +38612,15 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:SetTemplateGrant",
           "file": "internal/store/postgres/company_templates.go",
           "function": "SetTemplateGrant",
-          "line": 235,
+          "line": 239,
+          "expression": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/company_templates.go:*PgStore:SetTemplateGrant",
+          "file": "internal/store/postgres/company_templates.go",
+          "function": "SetTemplateGrant",
+          "line": 247,
           "expression": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM mail_templates WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.TemplateID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38574,7 +38628,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:loadTemplateForSendTx",
           "file": "internal/store/postgres/company_templates.go",
           "function": "loadTemplateForSendTx",
-          "line": 387,
+          "line": 399,
           "expression": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM tenant_api_keys WHERE id=$1 AND tenant_id=$2 AND owner_user_id=$3 AND (expires_at IS NULL OR expires_at>now()))`, *key, tenant, *user).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38582,7 +38636,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:loadTemplateForSendTx",
           "file": "internal/store/postgres/company_templates.go",
           "function": "loadTemplateForSendTx",
-          "line": 409,
+          "line": 421,
           "expression": "tx.QueryRow(ctx, `SELECT display_name FROM users WHERE id=$1`, *user).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38590,7 +38644,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:loadTemplateForSendTx",
           "file": "internal/store/postgres/company_templates.go",
           "function": "loadTemplateForSendTx",
-          "line": 412,
+          "line": 424,
           "expression": "tx.QueryRow(ctx, `SELECT name FROM company_settings WHERE tenant_id=$1`, tenant).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38614,7 +38668,7 @@
           "caller_id": "internal/store/postgres/company_templates.go::scanTemplateVersionStatus",
           "file": "internal/store/postgres/company_templates.go",
           "function": "scanTemplateVersionStatus",
-          "line": 289,
+          "line": 301,
           "expression": "row.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41353,7 +41407,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 452,
+          "line": 454,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41673,10 +41727,10 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/app/templates/service.go:*Service:Preview",
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
-          "function": "Preview",
-          "line": 54,
+          "function": "previewSource",
+          "line": 120,
           "expression": "s.identities.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41847,7 +41901,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 373,
+          "line": 375,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42151,10 +42205,10 @@
       },
       "callers": [
         {
-          "caller_id": "internal/app/templates/service.go:*Service:Preview",
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
-          "function": "Preview",
-          "line": 71,
+          "function": "previewSource",
+          "line": 149,
           "expression": "s.TemplateForSend",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49103,7 +49157,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 273,
+          "line": 275,
           "expression": "s.store.CreatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49215,7 +49269,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 301,
+          "line": 303,
           "expression": "s.store.DeletePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49321,7 +49375,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 214,
+          "line": 216,
           "expression": "s.store.GetPlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49453,7 +49507,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 489,
+          "line": 491,
           "expression": "s.store.ListPlans",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49557,7 +49611,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 287,
+          "line": 289,
           "expression": "s.store.UpdatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -50335,7 +50389,7 @@
           "caller_id": "internal/store/postgres/company_templates.go:*PgStore:ListUsableTemplates",
           "file": "internal/store/postgres/company_templates.go",
           "function": "ListUsableTemplates",
-          "line": 267,
+          "line": 279,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51197,7 +51251,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 270,
+          "line": 272,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51221,7 +51275,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
           "file": "internal/app/companymail/service.go",
           "function": "verifiedFile",
-          "line": 302,
+          "line": 304,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51229,7 +51283,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
           "file": "internal/app/companymail/service.go",
           "function": "verifiedFile",
-          "line": 313,
+          "line": 315,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51318,6 +51372,14 @@
           "file": "internal/app/support.go",
           "function": "InsertAuditRequired",
           "line": 56,
+          "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
+          "file": "internal/app/templates/service.go",
+          "function": "previewSource",
+          "line": 115,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53584,7 +53646,7 @@
           "caller_id": "internal/rawobject/store.go:*Store:StoreIngestJob",
           "file": "internal/rawobject/store.go",
           "function": "StoreIngestJob",
-          "line": 84,
+          "line": 91,
           "expression": "s.refs.CreateIngestJob",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -54251,7 +54313,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListIngestJobs",
           "file": "internal/app/admin/service.go",
           "function": "ListIngestJobs",
-          "line": 552,
+          "line": 554,
           "expression": "s.store.ListIngestJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -54520,7 +54582,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListWebhookDeliveries",
           "file": "internal/app/admin/service.go",
           "function": "ListWebhookDeliveries",
-          "line": 563,
+          "line": 565,
           "expression": "s.store.ListWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -55343,7 +55405,7 @@
           "caller_id": "internal/retention/scanner.go:*Scanner:purgeIngestJobs",
           "file": "internal/retention/scanner.go",
           "function": "purgeIngestJobs",
-          "line": 102,
+          "line": 120,
           "expression": "sc.store.PurgeOldIngestJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -58583,7 +58645,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:GetSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "GetSMTPPolicy",
-          "line": 574,
+          "line": 576,
           "expression": "s.store.GetSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -58725,7 +58787,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 585,
+          "line": 587,
           "expression": "s.store.UpsertSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59149,7 +59211,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachment",
-          "line": 353,
+          "line": 355,
           "expression": "s.repo.GetSubmissionAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -59157,7 +59219,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachment",
-          "line": 369,
+          "line": 371,
           "expression": "s.repo.GetSubmissionAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59260,7 +59322,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionContent",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionContent",
-          "line": 345,
+          "line": 347,
           "expression": "s.repo.GetSubmissionContent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59439,7 +59501,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachments",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachments",
-          "line": 349,
+          "line": 351,
           "expression": "s.repo.ListSubmissionAttachments",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -60303,7 +60365,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 222,
+          "line": 224,
           "expression": "s.store.CreateTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60424,7 +60486,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 259,
+          "line": 261,
           "expression": "s.store.DeleteTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -60548,7 +60610,7 @@
           "caller_id": "internal/api/middleware/ratelimit.go:*RateLimiter:Middleware",
           "file": "internal/api/middleware/ratelimit.go",
           "function": "Middleware",
-          "line": 55,
+          "line": 56,
           "expression": "rl.store.EffectiveConfig",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60816,7 +60878,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 314,
+          "line": 316,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60824,7 +60886,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 236,
+          "line": 238,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60957,7 +61019,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 485,
+          "line": 487,
           "expression": "s.store.ListTenants",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61064,7 +61126,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 244,
+          "line": 246,
           "expression": "s.store.UpsertOverride",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62253,10 +62315,10 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/app/templates/service.go:*Service:Preview",
+          "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
-          "function": "Preview",
-          "line": 54,
+          "function": "previewSource",
+          "line": 120,
           "expression": "s.identities.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64054,7 +64116,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 493,
+          "line": 495,
           "expression": "s.store.CountAllZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64615,7 +64677,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 373,
+          "line": 375,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -67005,16 +67067,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
-  "current_review_boundary": "Revision 7 static AST/file/migration inventory only. Exact external caller changes are reviewed against revision-6 product f413, with immutable published revision-6 catalogs at c3e1419. PostgreSQL syntax, file hashes, classifications, migrations and manual reviews remain unchanged. Historical runtime links are preserved, not recertified. No implementation TODO, PostgreSQL/runtime or parent-task acceptance.",
+  "last_review_base_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+  "current_review_boundary": "Revision 8 final static inventory at product source e0cd175 after completed STREAM/QUALITY integrations. Immutable revision-7 catalogs are pinned at f77c31e2 and their separately reviewed product source is 9b12c93. One SetTemplateGrant body adds a same-tenant user-existence SELECT for revocation; seven following functions move by 12 lines. The earlier 53cd5de checkpoint and its actual verification remain recorded separately. Complete current caller candidates and source references are refreshed; classifications, migrations, evidence levels, unrelated manual reviews and historical runtime links remain unchanged. No implementation TODO, runtime, dependency, release or parent-task acceptance.",
   "inventory_revision": {
-    "revision": 7,
-    "source_commit": "9b12c93cb03285298267e27893f74aebe742a8a2",
+    "revision": 8,
+    "source_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "c3e1419e6245baf0190291ea868787cb2b0177ca",
-    "previous_snapshot_blob": "5b7b8a28f5b3817c0cd4049be4c9d350d7b4f1b1",
-    "previous_sha256": "e820435ec2357f2fa0d0509e4e0759124a85054c0f4fc35df887f683a3c4e715",
+    "previous_snapshot_commit": "f77c31e2da38bb926dfe6fa134eabad652e94f8c",
+    "previous_snapshot_blob": "86df3d6e8e9807b19fc5b907c7385fef80c6b8fd",
+    "previous_sha256": "9ad325330fc53f4ded0ea5a20ae25c85bfc2026c6274a3ef78815a36d95859cb",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION7-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008/README.md"
   }
 }

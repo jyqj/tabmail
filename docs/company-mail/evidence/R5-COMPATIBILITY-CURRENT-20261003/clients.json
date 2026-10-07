@@ -508,7 +508,7 @@
   },
   {
     "source": "web/features/company/mailbox-admin.tsx",
-    "line": 48,
+    "line": 65,
     "branch": 0,
     "callee": "company",
     "owner": "MailboxAdmin",
