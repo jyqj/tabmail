@@ -1,0 +1,18 @@
+{
+  "source_base": "4065c4909c8f21a401a9a1af6370fa3f72670b99",
+  "baseline_workflow_sha256": "94eccfc6196ca9a978cdd8e96e9d8a63bbbf5da6ef6dbf9ffd9eacac32f10697",
+  "candidate_workflow_sha256": "0e0ef80e11d744c35d68d469417405f33e97284423cf33d5b055bb9228164971",
+  "frozen_test_sha256": "008062d9b9390ed7c23e52676a8af2cfc3a2376cb8337fb77d92ddd4873b3c9c",
+  "baseline": {
+    "run": 3,
+    "failures": 2,
+    "errors": 0,
+    "skipped": 0
+  },
+  "candidate": {
+    "run": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

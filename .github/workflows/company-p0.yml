@@ -106,6 +106,8 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
+      - name: Record the tested frontend checkout
+        run: git rev-parse HEAD > frontend-source-sha.txt
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -117,33 +119,54 @@ jobs:
       - name: Install pinned version-test checker dependency
         run: python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
       - run: npm ci
+        id: web_install
         working-directory: web
       - name: Versioned source tests from independent clean Git checkouts
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         run: python3 -B scripts/run_r5_source_version_tests.py --root . --output frontend-source-version-tests.json
       - name: Catalog and TypeScript source validation
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         run: |
           node --test scripts/tests/*.test.cjs
           node scripts/collect_api_calls.cjs --check
           python3 -B scripts/check_i18n_keys.py
       - name: Record full dependency audit
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
         run: npm audit --json > /tmp/tabmail-npm-audit.json || test -s /tmp/tabmail-npm-audit.json
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         with:
           name: dependency-audit
           path: /tmp/tabmail-npm-audit.json
           retention-days: 14
       - name: Require a complete clean dependency audit
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         run: |
           node -e 'const d=require("/tmp/tabmail-npm-audit.json"); if(!d.metadata?.vulnerabilities || d.error || d.metadata.vulnerabilities.total !== 0) throw new Error("dependency audit missing, failed or contains vulnerabilities");'
       - run: npx tsc --noEmit
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
-      - run: npm test
+      - run: npm test -- --reporter=default --reporter=json --outputFile=../frontend-vitest.json
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
       - run: npm run lint
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
       - run: npm run build
+        if: ${{ !cancelled() && steps.web_install.outcome == 'success' }}
         working-directory: web
+      - name: Retain frontend evidence after validation failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: company-frontend-evidence
+          path: |
+            frontend-source-sha.txt
+            frontend-source-version-tests.json
+            frontend-vitest.json
+          if-no-files-found: error
+          retention-days: 14
 
   production-web:
     runs-on: ubuntu-latest
