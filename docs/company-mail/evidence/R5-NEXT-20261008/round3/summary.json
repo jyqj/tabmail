@@ -1,0 +1,172 @@
+{
+  "batch": "R5-NEXT-20261008",
+  "round": 3,
+  "tasks": [
+    "08",
+    "09",
+    "10"
+  ],
+  "parent_remote_commit": "b916bee08399eacd199d3bef8e5e5ebc2265a7d8",
+  "product_local_commit": "db7702d765d14a8272ae8d66a91b471db9d5e3ae",
+  "product_tree": "87d50267a34657765f666594aa56195539bccfc3",
+  "root_results": {
+    "go_race": {
+      "leaf_pass": 54,
+      "fail": 0,
+      "skip": 0
+    },
+    "python": {
+      "methods_pass": 84,
+      "fail": 0,
+      "skip": 0
+    },
+    "domains_web": {
+      "tests_pass": 35,
+      "fail": 0,
+      "skip": 0
+    },
+    "invitations_web": {
+      "tests_pass": 22,
+      "fail": 0,
+      "skip": 0
+    },
+    "go_build_exit": 0,
+    "go_vet_exit": 0,
+    "full_tsc_nonincremental_exit": 0
+  },
+  "source_bindings": {
+    "go_run": "40545ee; all Go files and go.mod/go.sum identical in final product",
+    "web_run": "a5d0372; entire web tree identical in final product",
+    "python_run": "db7702d765d14a8272ae8d66a91b471db9d5e3ae"
+  },
+  "commands": [
+    "GOMAXPROCS=2 go test -mod=readonly -p=2 -json -race -count=1 -timeout=120s ./internal/testpg ./internal/app/domains ./internal/models",
+    "GOMAXPROCS=2 go build -mod=readonly -p=2 ./...",
+    "GOMAXPROCS=2 go vet -mod=readonly -p=2 ./...",
+    "PYTHONPATH=scripts:scripts/tests python -B -m unittest test_r5_protocol_process_evidence test_r5_protocol test_r5_protocol_source_preparation test_r5_backend_evidence_continuation -v",
+    "npm test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=round3-domains.json components/company/domains-ownership.test.tsx components/company/domains.test.tsx",
+    "npm test -- --maxWorkers=1 --reporter=default --reporter=json --outputFile=round3-web.json features/company/domains-ownership.test.tsx features/company/domains.test.tsx features/company/admin-invitation-ownership.test.tsx",
+    "npx tsc --noEmit --incremental false"
+  ],
+  "selection_note": "The initial frontend command contained two nonmatching features/company domain paths; its raw JSON proves only the 22 invitation cases ran. The corrected components/company command separately ran all 35 domain cases. Counts are reported separately, never as one 57-case run.",
+  "environment": {
+    "go": "1.25.7",
+    "node": "24.19.0",
+    "GOMAXPROCS": 2,
+    "go_p": 2,
+    "vitest_maxWorkers": 1,
+    "vitest_timeout_ms": 5000,
+    "formal_timeouts_changed": false
+  },
+  "review": {
+    "08": "/root/pr_audit ACCEPT; independently checked child byte/hash evidence and source rejection",
+    "09": "/root/pr_audit ACCEPT; original 25 tests preserved inside final26 and original9 unchanged",
+    "10": "/root/pr_audit ACCEPT scoped to DNS-phase cancellation"
+  },
+  "archives": {
+    "08-raw-evidence.zip": {
+      "files": 244,
+      "manifest": "08-evidence-inventory.json",
+      "encoded_file": "08-raw-evidence.zip.b64",
+      "decoded_archive_bytes": 503913,
+      "decoded_archive_sha256": "76ff7166249dbc804e1a70596cf268048fb894a576db15aacac3763482b1e7ab"
+    },
+    "09-raw-evidence.zip": {
+      "files": 12,
+      "manifest": "09-evidence-inventory.json",
+      "encoded_file": "09-raw-evidence.zip.b64",
+      "decoded_archive_bytes": 29427,
+      "decoded_archive_sha256": "61534de066063c84f10363a66c19a3e08eac3ae6e72025da1e34fd178c679f94"
+    },
+    "../round2/author-raw-supplement.zip": {
+      "files": 18,
+      "manifest": "../round2/author-raw-supplement.json",
+      "encoded_file": "../round2/author-raw-supplement.zip.b64",
+      "decoded_archive_bytes": 141320,
+      "decoded_archive_sha256": "5189fadac965e8ce36590ebf39c1f2e9e33ccc99467857461c5775a21ef0e0c5"
+    }
+  },
+  "boundary": [
+    "No actual local PostgreSQL instance or full formal protocol run. Actual Python process controls use 0.75s and synthetic Go events/source controls; original Go120s and process180s budgets remain.",
+    "Shared Go process evidence only; reference/Vitest launchers and full descendant-process cleanup are not certified.",
+    "DNS cancellation stops later queries and persistence while DNS is in flight; legacy non-context callbacks and already-committed DB writes retain their stated limits.",
+    "Author red, intermediate candidate, diagnostic selection and final green runs are preserved separately.",
+    "Parent task checkboxes remain 10/171 accepted and 161 remaining; final source catalog reconciliation is additional maintenance, not task11."
+  ],
+  "files": {
+    "root-invitations.json": {
+      "bytes": 9716,
+      "sha256": "6e03ba69fa4b0730b4db73552cbfbb822d60fa3eb3f32aa055e1a0471f997e47"
+    },
+    "10-baseline.jsonl": {
+      "bytes": 23546,
+      "sha256": "17791b8697e4fa7934b2f7d7cbb02afd6ca7d43c93f69f0ea29e321a399eaa0f"
+    },
+    "root-python.log": {
+      "bytes": 13554,
+      "sha256": "2db91f6d39094c5a643d1ec769c275007397a1c1829aa799f24c500b31e17c13"
+    },
+    "08-evidence-inventory.json": {
+      "bytes": 54372,
+      "sha256": "fa9b340b1466d368226b33dab4570d2c19a644f273d5a4f4be53263266a1f967"
+    },
+    "10-author-summary.json": {
+      "bytes": 1783,
+      "sha256": "7ffe432a38dd638e1acff08f7d2aa94503dd6594e7be3b01f9c953dfccd8ada2"
+    },
+    "09-author-summary.json": {
+      "bytes": 3526,
+      "sha256": "0acea6b2131822dc0099ff848d570b2bcadc543dd691cd44a9ef40aef0cc1797"
+    },
+    "08-raw-evidence.zip.b64": {
+      "bytes": 680725,
+      "sha256": "ce4c55dfc77ef0c1c40b0ec4669b951269959c86ad7b1d68811559f9413fc9e2"
+    },
+    "root-domains.json": {
+      "bytes": 13312,
+      "sha256": "5789807485b9d9749a3a5307c373eb1c0afb3d9a6ca8240bfca1a0c6e36325da"
+    },
+    "10-context-only.jsonl": {
+      "bytes": 29906,
+      "sha256": "09a68a345fe440c4d34413350bc6135befc15df2e0711fbe48c870bf86169116"
+    },
+    "root-build.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "08-author-summary.json": {
+      "bytes": 15557,
+      "sha256": "e7cc98613c2643b5404058e94fbad9be11684cd95b45c9cf972ed3b5094996fc"
+    },
+    "10-candidate.jsonl": {
+      "bytes": 29335,
+      "sha256": "732ceae4363dcb6a2ad7c80e4d03a8aec0f6b0981d695b78a5dff95c3dcec230"
+    },
+    "root-vet.log": {
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "root-go.jsonl": {
+      "bytes": 55280,
+      "sha256": "e4d758119e368180df9d4636f95dc7479e22943745db1f868d9d2a73b61b2e39"
+    },
+    "root-tsc.log": {
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    "09-evidence-inventory.json": {
+      "bytes": 1802,
+      "sha256": "d77c7aaa80756f12296350e6eee70d326abed48fd3c78f2875a64077249c8427"
+    },
+    "09-raw-evidence.zip.b64": {
+      "bytes": 39753,
+      "sha256": "637681d346259b0e3c3ad3507fe85e25d59fa2494c214297e84922e453dadaf4"
+    },
+    "README.md": {
+      "bytes": 2481,
+      "sha256": "a34cd9757393c0ab9be8f875bbce853a924d34354f66e901c52cab37aceacebe"
+    }
+  },
+  "published_product_commit": "ff8872b737a947c158035a0b07d78396397ad626",
+  "published_product_tree": "87d50267a34657765f666594aa56195539bccfc3"
+}
