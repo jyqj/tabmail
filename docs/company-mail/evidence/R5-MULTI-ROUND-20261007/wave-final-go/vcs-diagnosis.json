@@ -1,0 +1,60 @@
+{
+  "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "observed_ancestor_repository_marker_types": [
+    {
+      "directory": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "repository_marker_is_directory": false,
+      "repository_marker_is_file": true
+    },
+    {
+      "directory": "/workspace",
+      "repository_marker_is_directory": true,
+      "repository_marker_is_file": false
+    }
+  ],
+  "nearest_directory_repository_marker": "/workspace",
+  "diagnostic_commands": [
+    {
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "argv": [
+        "git",
+        "-c",
+        "log.showsignature=false",
+        "log",
+        "-1",
+        "--format=%H:%ct"
+      ],
+      "exit_code": 0,
+      "stdout": "e32564304c0c84aa80b1184e72129fb0316d989d:1791380748\n",
+      "stderr": ""
+    },
+    {
+      "cwd": "/workspace",
+      "argv": [
+        "git",
+        "status",
+        "--porcelain"
+      ],
+      "exit_code": 128,
+      "stdout": "",
+      "stderr": "fatal: not a git repository (or any of the parent directories): .git\n"
+    }
+  ],
+  "build_rerun": false,
+  "buildvcs_disabled": false,
+  "local_go_implementation_sha256": {
+    "src/cmd/go/internal/vcs/vcs.go": "a1c40768fd2ad50b345ab83e621107c82feb2dcdaf2e1ac2bb8ccc7b10bd0d6f",
+    "src/cmd/go/internal/load/pkg.go": "ae3866bb04014e27f186572df158068f954b30b72166d30eb34f9f29edb48d31"
+  }
+}

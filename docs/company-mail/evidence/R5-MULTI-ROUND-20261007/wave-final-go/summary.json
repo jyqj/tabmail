@@ -1,0 +1,636 @@
+{
+  "schema_version": 1,
+  "started_at": "2026-10-07T13:49:55.927909+00:00",
+  "worktree": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+  "source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "source_tree": "bfa06a61ce4bc8411243d3b57de26db5e161dc8b",
+  "initial_git_status": "",
+  "environment_overrides": {
+    "GOTOOLCHAIN": "local",
+    "GOMODCACHE": "/workspace/scratch/458de7991ac3/go-cache/mod",
+    "GOCACHE": "/workspace/scratch/458de7991ac3/go-cache/build",
+    "GOPROXY": "off"
+  },
+  "test_timeout_seconds_per_package": 180,
+  "full_packages": [
+    "./internal/config",
+    "./internal/outbound",
+    "./internal/app/companymail",
+    "./internal/mailcontent"
+  ],
+  "handler_selected_tests": [
+    "TestOrdinaryReceiptOpenAPIWireFixtures",
+    "TestOutboundJobAccessCheckCoversGetRetryAndAttempts",
+    "TestOutboundListJobsScopesRegularPrincipalsAndTenantContext",
+    "TestSubmissionReceiptCapabilities",
+    "TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted",
+    "TestRetryJobConflictReasonMapping",
+    "TestR5InboundAttachmentHTTPSourceFailureIsNotMissing",
+    "TestRespondAppErrorContract"
+  ],
+  "commands": [
+    {
+      "label": "go-version",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "version"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go version",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "started_at": "2026-10-07T13:49:56.000460+00:00",
+      "log": "go-version.log",
+      "exit_code": 0,
+      "finished_at": "2026-10-07T13:49:56.026813+00:00",
+      "elapsed_seconds": 0.026,
+      "log_sha256": "5c6c3b76041f333573b7ce6f02858efc54e5fb57ed1d298d295c824fff748f89",
+      "log_bytes": 32
+    },
+    {
+      "label": "package-list",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "list",
+        "-mod=readonly",
+        "-json",
+        "./internal/config",
+        "./internal/outbound",
+        "./internal/app/companymail",
+        "./internal/mailcontent",
+        "./internal/api/handlers"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go list -mod=readonly -json ./internal/config ./internal/outbound ./internal/app/companymail ./internal/mailcontent ./internal/api/handlers",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "started_at": "2026-10-07T13:49:56.028830+00:00",
+      "log": "package-list.log",
+      "exit_code": 0,
+      "finished_at": "2026-10-07T13:49:56.886132+00:00",
+      "elapsed_seconds": 0.858,
+      "log_sha256": "eef241c39c46c7c9be78bb5fdc456fde1694a44d329676be0e7e3a7c7c9f8e36",
+      "log_bytes": 39535
+    },
+    {
+      "label": "handler-test-list",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "test",
+        "-mod=readonly",
+        "-race",
+        "-count=1",
+        "-timeout=180s",
+        "-list",
+        "^(TestOrdinaryReceiptOpenAPIWireFixtures|TestOutboundJobAccessCheckCoversGetRetryAndAttempts|TestOutboundListJobsScopesRegularPrincipalsAndTenantContext|TestSubmissionReceiptCapabilities|TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted|TestRetryJobConflictReasonMapping|TestR5InboundAttachmentHTTPSourceFailureIsNotMissing|TestRespondAppErrorContract)$",
+        "./internal/api/handlers"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go test -mod=readonly -race -count=1 -timeout=180s -list '^(TestOrdinaryReceiptOpenAPIWireFixtures|TestOutboundJobAccessCheckCoversGetRetryAndAttempts|TestOutboundListJobsScopesRegularPrincipalsAndTenantContext|TestSubmissionReceiptCapabilities|TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted|TestRetryJobConflictReasonMapping|TestR5InboundAttachmentHTTPSourceFailureIsNotMissing|TestRespondAppErrorContract)$' ./internal/api/handlers",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "started_at": "2026-10-07T13:49:56.905060+00:00",
+      "log": "handler-test-list.log",
+      "exit_code": 0,
+      "finished_at": "2026-10-07T13:50:18.128780+00:00",
+      "elapsed_seconds": 21.224,
+      "log_sha256": "39a5ceb2ef4e59e6ae72d1153f83051bdf775ad98751d6d2ac987506c5f0e6d2",
+      "log_bytes": 403
+    },
+    {
+      "label": "four-full-packages",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "test",
+        "-mod=readonly",
+        "-race",
+        "-count=1",
+        "-timeout=180s",
+        "-json",
+        "./internal/config",
+        "./internal/outbound",
+        "./internal/app/companymail",
+        "./internal/mailcontent"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go test -mod=readonly -race -count=1 -timeout=180s -json ./internal/config ./internal/outbound ./internal/app/companymail ./internal/mailcontent",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "started_at": "2026-10-07T13:50:18.142077+00:00",
+      "log": "four-full-packages.jsonl",
+      "exit_code": 0,
+      "finished_at": "2026-10-07T13:51:02.363595+00:00",
+      "elapsed_seconds": 44.223,
+      "log_sha256": "ecea6a58dba535d4250182ac6315ef2da3e2a588f999a99a85285938d03f1403",
+      "log_bytes": 830899,
+      "non_json_output_lines": 0
+    },
+    {
+      "label": "handler-controls",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "test",
+        "-mod=readonly",
+        "-race",
+        "-count=1",
+        "-timeout=180s",
+        "-json",
+        "-run",
+        "^(TestOrdinaryReceiptOpenAPIWireFixtures|TestOutboundJobAccessCheckCoversGetRetryAndAttempts|TestOutboundListJobsScopesRegularPrincipalsAndTenantContext|TestSubmissionReceiptCapabilities|TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted|TestRetryJobConflictReasonMapping|TestR5InboundAttachmentHTTPSourceFailureIsNotMissing|TestRespondAppErrorContract)$",
+        "./internal/api/handlers"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go test -mod=readonly -race -count=1 -timeout=180s -json -run '^(TestOrdinaryReceiptOpenAPIWireFixtures|TestOutboundJobAccessCheckCoversGetRetryAndAttempts|TestOutboundListJobsScopesRegularPrincipalsAndTenantContext|TestSubmissionReceiptCapabilities|TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted|TestRetryJobConflictReasonMapping|TestR5InboundAttachmentHTTPSourceFailureIsNotMissing|TestRespondAppErrorContract)$' ./internal/api/handlers",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "started_at": "2026-10-07T13:51:02.399459+00:00",
+      "log": "handler-controls.jsonl",
+      "additional_environment": {
+        "ORDINARY_RECEIPT_WIRE_FIXTURE": "/workspace/scratch/458de7991ac3/validation/wave-final-go/ordinary-receipt-wire.json"
+      },
+      "exit_code": 0,
+      "finished_at": "2026-10-07T13:51:08.659305+00:00",
+      "elapsed_seconds": 6.261,
+      "log_sha256": "4fb67a74601e78c94924d56186b1eb3c8c45f883bfde250b639bdec993e614a0",
+      "log_bytes": 17415,
+      "non_json_output_lines": 0
+    },
+    {
+      "label": "build-all",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "build",
+        "-mod=readonly",
+        "./..."
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go build -mod=readonly ./...",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "started_at": "2026-10-07T13:51:08.676031+00:00",
+      "log": "build-all.log",
+      "exit_code": 1,
+      "finished_at": "2026-10-07T13:51:10.101696+00:00",
+      "elapsed_seconds": 1.426,
+      "log_sha256": "c22e63c843e0f636aca439f1a8bb37724c43d8f4bcbfe0ce046e79a83c54e87f",
+      "log_bytes": 180
+    },
+    {
+      "label": "vet-related",
+      "argv": [
+        "/workspace/scratch/458de7991ac3/toolchains/go/bin/go",
+        "vet",
+        "-mod=readonly",
+        "./internal/config",
+        "./internal/outbound",
+        "./internal/app/companymail",
+        "./internal/mailcontent",
+        "./internal/api/handlers"
+      ],
+      "shell_command": "/workspace/scratch/458de7991ac3/toolchains/go/bin/go vet -mod=readonly ./internal/config ./internal/outbound ./internal/app/companymail ./internal/mailcontent ./internal/api/handlers",
+      "cwd": "/workspace/scratch/458de7991ac3/tabmail-wave-verify",
+      "started_at": "2026-10-07T13:51:10.105755+00:00",
+      "log": "vet-related.log",
+      "exit_code": 0,
+      "finished_at": "2026-10-07T13:51:21.526135+00:00",
+      "elapsed_seconds": 11.42,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "log_bytes": 0
+    }
+  ],
+  "scope_notes": [
+    "Fresh execution on the fixed combined source; no earlier worker result is inherited.",
+    "All four named packages run in full; only the eight explicitly listed handler tests run.",
+    "Selected handler controls use real handlers/services and synthetic repository/object seams, not PostgreSQL.",
+    "The ordinary wire fixture is typed projection/envelope evidence, not live router or PostgreSQL admission.",
+    "Any test skip is counted separately; unselected PostgreSQL or external probes have no qualification here.",
+    "No repository source, test, budget, validator, exclusion, or module file is changed by this runner."
+  ],
+  "go_version": "go version go1.25.7 linux/amd64",
+  "source_manifest": "source-manifest.json",
+  "source_manifest_sha256": "f73ee21624452a3de8bf4057c28c8ba9f7e4d6200e552c5b95434859c41e4d7a",
+  "handler_listed_tests": [
+    "TestRespondAppErrorContract",
+    "TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted",
+    "TestOrdinaryReceiptOpenAPIWireFixtures",
+    "TestOutboundJobAccessCheckCoversGetRetryAndAttempts",
+    "TestOutboundListJobsScopesRegularPrincipalsAndTenantContext",
+    "TestR5InboundAttachmentHTTPSourceFailureIsNotMissing",
+    "TestSubmissionReceiptCapabilities",
+    "TestRetryJobConflictReasonMapping"
+  ],
+  "handler_preflight_matches_exact_selection": true,
+  "test_results": [
+    {
+      "package": "tabmail/internal/app/companymail",
+      "command_label": "four-full-packages",
+      "package_status": "pass",
+      "package_elapsed_seconds": 2.402,
+      "top_level": {
+        "pass": 28,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 116,
+        "fail": 0,
+        "skip": 0
+      },
+      "all_test_terminal_events": {
+        "pass": 130,
+        "fail": 0,
+        "skip": 0
+      },
+      "run_events": 130,
+      "top_level_test_names": [
+        "TestCompanyAttachmentIntegrityAndBounds",
+        "TestCompanyAttachmentRechecksAfterReadingBytes",
+        "TestCompanyCachedContentRechecksAuthorityAndProvenance",
+        "TestCompanyComposeBoundaryPreservesForward",
+        "TestCompanyComposeNeedsDestinationSendAndSourceRead",
+        "TestCompanyComposeRechecksDestinationAfterParsing",
+        "TestCompanyComposeRecipientRules",
+        "TestCompanyContentAuthorizesBeforeOpeningObjects",
+        "TestCompanyContentRechecksAfterCacheWrite",
+        "TestCompanyForwardRechecksSourceBetweenCopies",
+        "TestCompanyMessageKeepsPersonalStateAndRemovesObjectKey",
+        "TestCompanyReadCancellationDoesNotReturnSource",
+        "TestCompanyReadRechecksAfterObjectOpen",
+        "TestCompanySafeFilename",
+        "TestCompanySourceRechecksBeforeFirstBytes",
+        "TestCompanySourceSuccessfulStreamDoesNotReauthorizeEachChunk",
+        "TestCompanyUploadReservePutFinishAndFailures",
+        "TestR5AttachmentDownloadCancellationClosesBlockedSource",
+        "TestR5AttachmentDownloadCancellationStopsFurtherReads",
+        "TestR5AttachmentDownloadRejectsNoProgress",
+        "TestR5AttachmentUploadAllowsProgressAndKeepsReaderOwnership",
+        "TestR5AttachmentUploadCancellationStopsBeforeReservation",
+        "TestR5AttachmentUploadRejectsNoProgress",
+        "TestR5InboundAttachmentDistinguishesMalformedSourceAndMissingPart",
+        "TestR5InboundAttachmentPreservesActiveCancellation",
+        "TestR5InboundAttachmentPreservesSourceFailure",
+        "TestR5ReceivedEmptyEOFRechecksAuthority",
+        "TestR5ReceivedRecordBindingAcrossIO"
+      ],
+      "failed_tests": [],
+      "skipped_tests": [],
+      "tests_without_terminal_event": []
+    },
+    {
+      "package": "tabmail/internal/config",
+      "command_label": "four-full-packages",
+      "package_status": "pass",
+      "package_elapsed_seconds": 6.049,
+      "top_level": {
+        "pass": 13,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 31,
+        "fail": 0,
+        "skip": 0
+      },
+      "all_test_terminal_events": {
+        "pass": 34,
+        "fail": 0,
+        "skip": 0
+      },
+      "run_events": 34,
+      "top_level_test_names": [
+        "TestCompanyModeAndObjectStoreCompatibility",
+        "TestR5ResourceConfigDefaultsAndPositiveBoundaries",
+        "TestR5ResourceConfigRejectsUnsafeEnvironment",
+        "TestR5ResourceConfigValidateRejectsUnsafeValues",
+        "TestR5WebhookCanonicalCIDRsLoad",
+        "TestValidateAcceptsProductionLikeConfig",
+        "TestValidateAcceptsS3Config",
+        "TestValidateNormalizesAndRejectsDKIMFailPolicy",
+        "TestValidateNormalizesAndRejectsOutboundMode",
+        "TestValidateNormalizesAndRejectsRelayTLS",
+        "TestValidateRejectsPlaceholderSecrets",
+        "TestValidateRequiresDistinctJWTSecret",
+        "TestValidateRequiresS3FieldsWhenEnabled"
+      ],
+      "failed_tests": [],
+      "skipped_tests": [],
+      "tests_without_terminal_event": []
+    },
+    {
+      "package": "tabmail/internal/mailcontent",
+      "command_label": "four-full-packages",
+      "package_status": "pass",
+      "package_elapsed_seconds": 37.822,
+      "top_level": {
+        "pass": 22,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 154,
+        "fail": 0,
+        "skip": 0
+      },
+      "all_test_terminal_events": {
+        "pass": 163,
+        "fail": 0,
+        "skip": 0
+      },
+      "run_events": 163,
+      "top_level_test_names": [
+        "TestConcurrentParseHasBoundedSharedCache",
+        "TestDocumentIDsBindMessageSourceAndPart",
+        "TestMIMEPreparseBudgetAncestorTemporaryEOF",
+        "TestMIMEPreparseBudgetBoundaryDrain",
+        "TestMIMEPreparseBudgetBoundaryOffsets",
+        "TestMIMEPreparseBudgetCompatibility",
+        "TestMIMEPreparseBudgetDepthAndAllNodes",
+        "TestMIMEPreparseBudgetProjectionCompatibility",
+        "TestMIMEPreparseBudgetReaderBoundaries",
+        "TestParseBoundedAppliesSharedLimits",
+        "TestParserRejectsOversizedSources",
+        "TestParserResourceAdmissionAndCache",
+        "TestParserResourceCancelledWaiterPreservesSharedLoad",
+        "TestParserResourceFailuresReleaseAdmission",
+        "TestParserResourceLateOpenDoesNotPopulateCache",
+        "TestParserResourceLimitClosesAndDoesNotCache",
+        "TestParserResourceNoProgressFailsAndRetries",
+        "TestParserResourceOpenErrorClosesReader",
+        "TestParserResourceQueuedDeadlineDoesNotOpenObject",
+        "TestParserResourceTimeoutClosesDeferredReader",
+        "TestSourceReadRejectsCancelledContextBeforeOpen",
+        "TestSourceReadWireBoundaries"
+      ],
+      "failed_tests": [],
+      "skipped_tests": [],
+      "tests_without_terminal_event": []
+    },
+    {
+      "package": "tabmail/internal/outbound",
+      "command_label": "four-full-packages",
+      "package_status": "pass",
+      "package_elapsed_seconds": 2.967,
+      "top_level": {
+        "pass": 77,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 510,
+        "fail": 0,
+        "skip": 0
+      },
+      "all_test_terminal_events": {
+        "pass": 549,
+        "fail": 0,
+        "skip": 0
+      },
+      "run_events": 549,
+      "top_level_test_names": [
+        "TestBuild_BCCNeverLeaksWithoutMetadata",
+        "TestBuild_BCCNotInHeaders",
+        "TestBuild_CustomHeaders",
+        "TestBuild_ForbiddenHeadersBlocked",
+        "TestBuild_HTMLOnly",
+        "TestBuild_HeaderNameInjectionBlocked",
+        "TestBuild_HeaderValueCRLFStripped",
+        "TestBuild_MultipartAlternative",
+        "TestBuild_SubjectRenderedTemplateAtByteLimit",
+        "TestBuild_SubjectWireRoundTrip",
+        "TestBuild_TextOnly",
+        "TestCurrentEnqueueQuotaPreservesExplicitInternalAndOwnerlessReservations",
+        "TestCurrentEnqueueQuotaRejectsUnavailablePolicyAndPropagatesErrors",
+        "TestCurrentEnqueueQuotaUsesCurrentRoleAndOwnedKeyPolicy",
+        "TestDKIMFailClosedDefaultsSecure",
+        "TestDKIMSendBlockReason",
+        "TestIsValidHeaderName",
+        "TestP0DataAcceptedQuitDisconnectedIsSuccess",
+        "TestP0OutboundCheckpointFailureRetainsUncertainMarker",
+        "TestP0OutboundPartialDomainRecoverySkipsAcceptedDomain",
+        "TestP0OutboundRevokedGrantAndInactiveOwnerBlockQueuedSend",
+        "TestP0OutboundUncertainAcceptanceCannotBeBlindlyRetried",
+        "TestR5DeliveryContextActualDialControlCancel",
+        "TestR5DeliveryContextDirectMXCancelStages",
+        "TestR5DeliveryContextDirectTLSRequiredNoDowngrade",
+        "TestR5DeliveryContextOwnedDialSocketCancel",
+        "TestR5DeliveryContextPreCanceledAdapters",
+        "TestR5DeliveryContextPublicTLSRejectsPrivateCA",
+        "TestR5DeliveryContextRelayCancelStages",
+        "TestR5DeliveryContextRelayDeadline",
+        "TestR5DeliveryContextReleaseIsIdempotent",
+        "TestR5DeliveryContextTrustedTLSSuccessAndCancel",
+        "TestR5DirectGreetingContextCauses",
+        "TestR5DirectGreetingReplyCauses",
+        "TestR5NullMXMalformedRootIsTemporaryWithoutSession",
+        "TestR5NullMXOrdinaryRoutingPreserved",
+        "TestR5NullMXPermanentWithoutSession",
+        "TestR5NullMXRecipientPermanentAndRetryIdempotency",
+        "TestR5NullMXResolverErrorsAndCancellationPreserved",
+        "TestR5NullMXSessionErrorControls",
+        "TestR5OutboundShutdownCallerCancellationReachesHandler",
+        "TestR5OutboundShutdownCallerIdleAndDisabled",
+        "TestR5OutboundShutdownCallerIncompletePreservesErrorIdentity",
+        "TestR5OutboundShutdownCallerLegacyStopRemainsGraceful",
+        "TestR5OutboundShutdownCallerSnapshotSharesWorkerMu",
+        "TestR5OwnerlessRetryAuthorityKeepsOwnedKeyAndJWTFences",
+        "TestR5OwnerlessRetryAuthorityRejectsStaleOrDifferentAuthority",
+        "TestR5OwnerlessRetryAuthorityResolverPolicyNeverSelfGrantsTemplate",
+        "TestR5OwnerlessRetryAuthoritySameKeyDurableLegacyMailbox",
+        "TestR5PermissionStageDurableCredentialMatrix",
+        "TestR5PermissionStageKeyMutationRechecks",
+        "TestR5RecipientCheckpointOrderAuthorizationStoreErrorPreserved",
+        "TestR5RecipientCheckpointOrderBlockedTelemetryCancelKeepsAccepted",
+        "TestR5RecipientCheckpointOrderFailureKeepsUncertainNoTelemetry",
+        "TestR5RecipientCheckpointOrderFencingBeforeNetwork",
+        "TestR5RecipientCheckpointOrderJobMarkErrorsAreNotTelemetry",
+        "TestR5RecipientCheckpointOrderKnownResults",
+        "TestR5RecipientCheckpointOrderUncertainTerminalBeforeTelemetry",
+        "TestR5RecipientErrorChainCompletionFailures",
+        "TestR5RecipientErrorChainTemporarySummaryAndProgress",
+        "TestR5RecipientErrorChainUncertainTerminalFailures",
+        "TestR5RelayNumericHostConnectAndCancel",
+        "TestR5SMTPCauseAcknowledgedDataIgnoresCleanup",
+        "TestR5SMTPCauseDefinitiveReplies",
+        "TestR5SMTPCauseFinalCancellation",
+        "TestR5SMTPCauseFinalDeadlineRace",
+        "TestR5SMTPCauseFinalEOF",
+        "TestR5SMTPCausePreFinalDisconnects",
+        "TestR5SMTPFinalReplyClassification",
+        "TestR5SMTPFinalReplyRecipientClassification",
+        "TestR5SMTPFinalReplyStopsMXFallback",
+        "TestResolveSendAuthorization",
+        "TestRetryRequesterPreservesAuthenticatedSessionVersion",
+        "TestSubmitReservesSendAsDailyQuotaWithJobCreation",
+        "TestSubmitReservesUserDailyQuotaWithJobCreation",
+        "TestValidateJobAuthorizationPicksUpPolicyChange",
+        "TestValidateJobAuthorizationUsesSharedResolver"
+      ],
+      "failed_tests": [],
+      "skipped_tests": [],
+      "tests_without_terminal_event": []
+    },
+    {
+      "package": "tabmail/internal/api/handlers",
+      "command_label": "handler-controls",
+      "package_status": "pass",
+      "package_elapsed_seconds": 1.165,
+      "top_level": {
+        "pass": 8,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 18,
+        "fail": 0,
+        "skip": 0
+      },
+      "all_test_terminal_events": {
+        "pass": 20,
+        "fail": 0,
+        "skip": 0
+      },
+      "run_events": 20,
+      "top_level_test_names": [
+        "TestAtomicRetryCommittedResponseStaysSuccessfulAndRestricted",
+        "TestOrdinaryReceiptOpenAPIWireFixtures",
+        "TestOutboundJobAccessCheckCoversGetRetryAndAttempts",
+        "TestOutboundListJobsScopesRegularPrincipalsAndTenantContext",
+        "TestR5InboundAttachmentHTTPSourceFailureIsNotMissing",
+        "TestRespondAppErrorContract",
+        "TestRetryJobConflictReasonMapping",
+        "TestSubmissionReceiptCapabilities"
+      ],
+      "failed_tests": [],
+      "skipped_tests": [],
+      "tests_without_terminal_event": []
+    }
+  ],
+  "handler_execution_matches_exact_selection": true,
+  "source_hashes_unchanged_after": true,
+  "module_hashes_unchanged_after": true,
+  "final_git_status": "",
+  "final_source_commit": "e32564304c0c84aa80b1184e72129fb0316d989d",
+  "finished_at": "2026-10-07T13:51:21.614133+00:00",
+  "all_requested_commands_passed": false,
+  "all_executed_tests_passed_without_skip": true,
+  "qualification_passed": false,
+  "artifacts": [
+    {
+      "path": "build-all.log",
+      "sha256": "c22e63c843e0f636aca439f1a8bb37724c43d8f4bcbfe0ce046e79a83c54e87f",
+      "bytes": 180
+    },
+    {
+      "path": "four-full-packages.jsonl",
+      "sha256": "ecea6a58dba535d4250182ac6315ef2da3e2a588f999a99a85285938d03f1403",
+      "bytes": 830899
+    },
+    {
+      "path": "go-version.log",
+      "sha256": "5c6c3b76041f333573b7ce6f02858efc54e5fb57ed1d298d295c824fff748f89",
+      "bytes": 32
+    },
+    {
+      "path": "handler-controls.jsonl",
+      "sha256": "4fb67a74601e78c94924d56186b1eb3c8c45f883bfde250b639bdec993e614a0",
+      "bytes": 17415
+    },
+    {
+      "path": "handler-test-list.log",
+      "sha256": "39a5ceb2ef4e59e6ae72d1153f83051bdf775ad98751d6d2ac987506c5f0e6d2",
+      "bytes": 403
+    },
+    {
+      "path": "ordinary-receipt-wire.json",
+      "sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+      "bytes": 18228
+    },
+    {
+      "path": "package-list.log",
+      "sha256": "eef241c39c46c7c9be78bb5fdc456fde1694a44d329676be0e7e3a7c7c9f8e36",
+      "bytes": 39535
+    },
+    {
+      "path": "source-manifest.json",
+      "sha256": "f73ee21624452a3de8bf4057c28c8ba9f7e4d6200e552c5b95434859c41e4d7a",
+      "bytes": 20746
+    },
+    {
+      "path": "vcs-diagnosis.json",
+      "sha256": "2ee3aa08c10787fa719202a6ae0eba71adb591f66bc441efb4a9d44bbf236341",
+      "bytes": 1635
+    },
+    {
+      "path": "verify.py",
+      "sha256": "7e45fa2ce67c4fc2f08a57e0e45ec3dfd2113e00ff0766a57913cc98f2cf8c7d",
+      "bytes": 12899
+    },
+    {
+      "path": "vet-related.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    }
+  ],
+  "totals": {
+    "four_complete_packages": {
+      "top_level": {
+        "pass": 140,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 811,
+        "fail": 0,
+        "skip": 0
+      },
+      "all_test_terminal_events": {
+        "pass": 876,
+        "fail": 0,
+        "skip": 0
+      }
+    },
+    "all_executed_scopes": {
+      "top_level": {
+        "pass": 148,
+        "fail": 0,
+        "skip": 0
+      },
+      "leaf": {
+        "pass": 829,
+        "fail": 0,
+        "skip": 0
+      },
+      "all_test_terminal_events": {
+        "pass": 896,
+        "fail": 0,
+        "skip": 0
+      }
+    }
+  },
+  "package_source_manifest_digests": [
+    {
+      "package": "tabmail/internal/config",
+      "compiled_source_file_count": 1,
+      "canonical_manifest_sha256": "10dfc25458873f5c29d0df9f5a37c6958e6585759fcb796030634528ebac020d"
+    },
+    {
+      "package": "tabmail/internal/outbound",
+      "compiled_source_file_count": 12,
+      "canonical_manifest_sha256": "8aee03947a9f598e20654c345ca19e6f6554fec45fad7a7b1ba0f4ce7b6d7ce4"
+    },
+    {
+      "package": "tabmail/internal/app/companymail",
+      "compiled_source_file_count": 4,
+      "canonical_manifest_sha256": "9a68cdb9949c8ab76f5a23c740807d33bf5d1b0779f34bafea89f6a3d137b1c1"
+    },
+    {
+      "package": "tabmail/internal/mailcontent",
+      "compiled_source_file_count": 3,
+      "canonical_manifest_sha256": "e40c4ab66081cc4bd4bc6b36fc52f1a0498408f7c04d74c349c0ff3fa1afcfbe"
+    },
+    {
+      "package": "tabmail/internal/api/handlers",
+      "compiled_source_file_count": 30,
+      "canonical_manifest_sha256": "1202587c71a73674962e0931b642b33b7d86dab584da868088910c108eaf0236"
+    }
+  ],
+  "build_failure_analysis": {
+    "observed_result": "go build -mod=readonly ./... exited 1 with only VCS-status acquisition errors; no repository-wide build PASS was obtained",
+    "classification": "local worktree VCS root-discovery failure",
+    "inference_basis": "Pinned Go 1.25.7 vcsGit.RootNames requires a directory marker; FromDir/isVCSRoot skips this worktree regular-file marker and selects ancestor /workspace. Its gitStatus starts with git status --porcelain. That exact Git command succeeds in the worktree and exits 128 in the inferred ancestor.",
+    "exact_go_child_trace_captured": false,
+    "evidence": "vcs-diagnosis.json",
+    "evidence_sha256": "2ee3aa08c10787fa719202a6ae0eba71adb591f66bc441efb4a9d44bbf236341",
+    "follow_up": "If a complete local build is needed, use a normal independent Git clone of the exact commit with valid repository metadata and rerun only the failed build. No test rerun is required for this VCS-only issue.",
+    "build_rerun": false,
+    "buildvcs_disabled": false
+  }
+}

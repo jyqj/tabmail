@@ -8,13 +8,15 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
-**2026-10-07 已恢复并行推进。** 当前工作入口为 [R5 整合 PR #56](https://github.com/jyqj/tabmail/pull/56)，分支 `integration/company-mail-r5-pr-management-20261007`。已核对原 39 个草稿 PR 的提交与内容归属，关闭 35 个被整合版本完整覆盖的 PR；#17、#20、#24、#40 保留独立历史内容，继续保持 draft。处理依据与验收边界见 [本轮管理记录](docs/company-mail/R5-PR-MANAGEMENT-20261007.md)。
+**2026-10-07 已完成三轮原生 multi-subagent 的十项实施改动：本批 10/10，剩余 0。** 当前入口为 [R5 整合 PR #56](https://github.com/jyqj/tabmail/pull/56)，分支 `integration/company-mail-r5-pr-management-20261007`。SMTP、附件与配置、恢复前端及 CI 证据共十项独立 PR 已合入集成分支；三轮分工、逐项行为、冻结基线与实际测试见 [本批执行报告](docs/company-mail/R5-MULTI-ROUND-20261007.md)。
 
-本轮已在工作分支合入 [SMTP 最终回复判定 #57](https://github.com/jyqj/tabmail/pull/57)、[写信身份／附件／模板预览归属 #58](https://github.com/jyqj/tabmail/pull/58)、[兼容依赖更新与精确锁准入 #59](https://github.com/jyqj/tabmail/pull/59)。新增回归、独立复核与组合验证各自记录实际源码和覆盖范围；[当前来源目录](docs/company-mail/evidence/R5-CATALOG-RECONCILIATION-20261007/README.md) 已按组合源码更新到 revision3，保留原校验规则和旧版证据。
+九项产品改动共80个固定场景，基线18 PASS/62 FAIL，修复后80 PASS；CI另有独立契约断言和真实运行证据。最终产品源的四完整Go包与8个handler控制均通过，相关vet和整仓build通过；完整默认前端886 PASS/1 FAIL，lint和默认生产build通过。远端当前源码713项及固定历史4项检查均通过；原始结果绑定实际源码，完整前端唯一失败仍为私有fixture前置条件；[当前目录revision4](docs/company-mail/evidence/R5-CATALOG-REVISION4-20261007/README.md)保留原校验规则与历史证据。
 
-唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12 阶段／171 工作包／25 批次／38 验收场景。**父任务完成 10/171，P0 为 10/12**；有限修复和目录更新不代替整项验收。P0-100 的有效 S/M 基准与 P0-120/G0 仍未通过。
+唯一活跃进度为 [R5-TODO](docs/company-mail/R5-TODO.md)，完整目标见 [R5-DESIGN](docs/company-mail/R5-DESIGN.md)：12阶段／171工作包／25批次／38验收场景。**父任务完成10/171，剩余161；P0为10/12。** 本批子项分别绑定父任务，有限修复和目录更新不代替整项验收。后续每轮同时报告这两组剩余数；有效M基准与G0仍未通过。
 
-**R5 尚未取得完整 CI／发布资格，#56 保持 draft。** 首次整合 CI 在 PostgreSQL 测试超时和过期来源目录处失败；目录现已修复，完整默认前端仍有 1 项私有 PG fixture 前置条件失败；依赖更新后审计仍有 8 项 high（0 critical），零漏洞门禁保持失败。当前分支未合入 `main`，未发布或部署。历史 [B01-AI 验收](docs/company-mail/R5-B01-AI-VALIDATION.md)、[2026-10-01 暂停记录](docs/company-mail/R5-PAUSED-20261001.md) 与 [B01-U 检查点](docs/company-mail/R5-CHECKPOINT-20260930.md) 保留为当时的事实，不再充当当前进度。
+原39个草稿PR已逐项核对，35个被整合内容完整覆盖的PR已关闭；#17、#20、#24、#40保留独立历史内容与draft状态。此前#57–#60的修复和PR处理依据见 [PR管理记录](docs/company-mail/R5-PR-MANAGEMENT-20261007.md)。
+
+**R5尚未取得完整CI／发布资格，#56保持draft。** 产品整合的真实production-web与browser-journey通过；完整PG包仍超时且必跑接线未齐，完整audit仍8 high/0 critical，私有fixture仍待提供。门禁保持实际失败。集成分支未合入`main`，未发布或部署。历史验收和暂停记录保留为当时事实，当前进度以唯一TODO为准。
 
 ## 公司工作流
 

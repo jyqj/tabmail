@@ -1,6 +1,6 @@
 # R5 全版本深度重构与优化任务清单
 
-> **唯一活跃待办；2026-10-07 已恢复并行实施并整理 PR，父任务完成仍为 10/171。当前工作入口为 [R5 整合 PR #56](https://github.com/jyqj/tabmail/pull/56)，尚未取得完整 CI／发布资格。有限修复、静态目录与历史证据不代替 100／G0 及后续父任务验收。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
+> **唯一活跃待办；2026-10-07 已完成本批三轮并行的 10 个实施子项（10/10，剩余0），父任务完成仍为 10/171（剩余161）。当前工作入口为 [R5 整合 PR #56](https://github.com/jyqj/tabmail/pull/56)，尚未取得完整 CI／发布资格。有限修复、静态目录与历史证据不代替 100／G0 及后续父任务验收。** 建立日期：2026-09-28。规划源码基线：`d6d512172fb6b874c3283d9df3f4d56758684a13`。本版目标设计见 [R5-DESIGN](R5-DESIGN.md)，现行基线/版本约定见 [VERSIONING](../VERSIONING.md)。历史 [ROADMAP](ROADMAP.md) 不再用于判断当前任务完成度。
 >
 > 本文件的每个复选框代表一个可验收实现/验证工作包，初始全部未完成。建立文档、读过代码或写下测试名称都不算实现完成。R5 是一个完整优化版本，可拆多批 PR，不等于一次大 PR 或正式版本号。
 
@@ -9,12 +9,12 @@
 | 字段 | 当前值 |
 |---|---|
 | 产品目标 | 公司员工邮箱：多级管理、收发、管理员模板、可靠恢复；不扩张成另一套平台 |
-| 当前阶段 | 2026-10-07 第二批：按用户要求开展至少三轮原生 multi-subagent，冻结下表 10 个独立实施子项；父任务保持原验收。第一轮三线已合入 #61/#64/#65，SMTP 第二轮 #63 也已合入 #56；共完成 4 项，其余实现／复核进行中 |
-| 下一可执行任务 | 第 1 轮：SMTP IPv6、恢复检查冲突失效、无效资源配置拒绝；root 同步实现 CI 前端失败后证据继续采集。第 2／3 轮分别处理 SMTP 握手／错误链、会话续期／队列状态、附件错误分类／读取消。每轮复核与 PR 后更新子项余数 |
-| 下一批范围 | 三个原生 subagent 各自独立 worktree：SMTP、前端、后端；root 负责 CI、复核、PR 与唯一 TODO。各子项独立 commit，维持原校验器、预算、skip 拒绝及审计阈值 |
-| 实现完成数 | 父任务 **10 / 171，剩余 161**；P0 为 10 / 12。当前 10 个实施子项 **完成 4 / 10，剩余 6**。子项不计入 171 分母，不替代父项完整验收 |
-| 当前阻塞 | 上批最终 CI [37624990816](https://github.com/jyqj/tabmail/actions/runs/37624990816)：production-web/browser-journey 成功；frontend 当前源 708 测试、冻结 4 测试与 Node 49 检查通过，因 8 high/0 critical 的完整 audit 失败，后续 tsc/test/lint/build 未执行；backend 在 PostgreSQL race 步骤失败。原始组合 CI 的 PG package 180.053s 超时已定位为串行累计耗尽预算，不能归因单个测试死锁。有效 M baseline、G0 与完整父项资格仍未通过 |
-| 阶段源码检查点 | 本批统一起点 `4065c4909c8f21a401a9a1af6370fa3f72670b99`（#60 合并后）；本轮阶段整合 `7ea617f86bdca328144c65a30a52b00d72bce77e`（#61/#63/#64/#65）；各 PR 远端发布树与其本地测试树完全一致。新生产改动全部汇集后再核当前目录，历史 revision1/2/3 与固定源证据保留 |
+| 当前阶段 | 三轮10项实施已全部合入 #56，产品整合 e325643 的组合 Go/web 验证已完成并记录实际失败边界。revision4 已经独立复核ACCEPT并由 #73 合入9bcfa4f…，三原CLI、71 Python/27 scanner均通过；#72收录三轮、组合验证和完整来源证据 |
+| 下一可执行任务 | 继续处理真实PG fixture成本/180秒整包预算与必跑接线、8 high依赖审计、有效M baseline/G0。每轮保持原生multi-subagent，分别报告本批与171父项的完成/剩余数；局部通过不替代完整资格 |
+| 下一批范围 | 本批10项已完成。目录、交叉审核、组合重复验证和报告均不增加实施项计数；原171父任务仍按完整验收与依赖推进 |
+| 实现完成数 | 父任务 **10 / 171，剩余 161**；P0 为 10 / 12。当前实施子项 **完成 10 / 10，剩余 0**。子项不计入171分母，父项全部原验收与依赖保留 |
+| 当前阻塞 | revision4实跑CI37633385810：当前713+独立冻结4全PASS/0skip，前端catalog/tsc/lint/build成功；完整Vitest886/1（原privatefixture），audit8high/0critical仍失败；PG包180.061s超时，105skip事件，247必跑中180未通过/未完成，backend后续步骤未执行。production/browser成功。有效M/G0与完整父项资格仍未通过 |
+| 阶段源码检查点 | 本批起点4065c490…；十项产品整合e32564304c0c84aa80b1184e72129fb0316d989d（tree bfa06a61…）。GitHub实际受测8a6fe55…与该整个tree相同；revision4本地7254f12…/发布6b6163d…同tree1eb98c61…；目录/文档不修改产品字节 |
 | 正式发布/部署 | #56 保持 draft；main 未改，尚未发布或部署。完整门禁通过与父任务验收必须各有实际证据 |
 
 ### 本批 10 个实施子项（固定计划与独立计数）
@@ -23,18 +23,18 @@
 
 | 子项 ID | 原父任务 | 限定目标与验收 | 计划轮次 | 状态／PR |
 |---|---|---|---|---|
-| R5-P6-090-20261007-01 | P6-090 | IPv6 relay 正确 host/port；真实 IPv4/IPv6 SMTP 完整投递与 RCPT 取消 | 1 | 完成；#61；冻结基线 2 pass/2 fail → race 20 顶层/109 pass 事件 |
-| R5-P6-040-20261007-01 | P6-040/050 | required TLS 握手前显式 Hello；保留 EHLO/HELO 协议、传输及取消错误链 | 2 | 完成；#63；固定 6 pass/6 fail → race 28 顶层/152 pass 事件 |
-| R5-P6-050-20261007-01 | P6-050/060 | 收件人 uncertain/checkpoint/temporary 汇总保留原始 cause，已接受目标不重发 | 3 | 已交付，root 复核／PR 中 |
-| R5-P9-080-20261007-01 | P9-080 | 恢复检查遇 409 立即失效旧版本与目标，重检前禁止再次写入且保留理由 | 1 | 完成；#65；固定 3 pass/4 fail → 7 pass，关联 55/55、tsc/lint 通过 |
-| R5-P9-090-20261007-01 | P9-090 | 续期 promise 按会话 scope 隔离，同 scope 去重且 Web Lock 串行 | 2 | 实施中 |
-| R5-P9-100-20261007-01 | P9-100 | 恢复队列 loading/error/empty 分开，失败时不显示假空或旧任务可操作态 | 3 | 待实施 |
-| R5-P8-110-20261007-01 | P8-110 | 拒绝会使 ticker panic 或取消 SMTP 接入上限的非正配置，保留合法边界 | 1 | 完成；#64；固定 leaf 1 pass/17 fail → 全 config race 31 leaf pass |
-| R5-P8-060-20261007-01 | P8-060 | 仅真实不存在的入站附件返回 404，存储／取消／解析预算故障保留 cause | 2 | 实施中 |
-| R5-P5-060-20261007-01 | P5-060 | 附件上传／ready 下载有限 no-progress 读取及取消，保留 20 MiB／完整性规则 | 3 | 待实施 |
-| R5-P11-080-20261007-01 | P11-080 | 前端独立门禁失败后仍取得完整执行证据，原失败仍使 job 失败，绑定实际 checkout | 1–3 | 已独立复核；#62／run37628534160 待实际续行终态 |
+| R5-P6-090-20261007-01 | P6-090 | IPv6 relay 正确 host/port；真实 IPv4/IPv6 SMTP 完整投递与 RCPT 取消 | 1 | 完成；#61 |
+| R5-P6-040-20261007-01 | P6-040/050 | required TLS 握手前显式 Hello；保留 EHLO/HELO 协议、传输及取消错误链 | 2 | 完成；#63 |
+| R5-P6-050-20261007-01 | P6-050/060 | 收件人 uncertain/checkpoint/temporary 汇总保留原始 cause，已接受目标不重发 | 3 | 完成；#67 |
+| R5-P9-080-20261007-01 | P9-080 | 恢复检查遇 409 立即失效旧版本与目标，重检前禁止再次写入且保留理由 | 1 | 完成；#65 |
+| R5-P9-090-20261007-01 | P9-090 | 续期 promise 按会话 scope 隔离，同 scope 去重且 Web Lock 串行 | 2 | 完成；#69 |
+| R5-P9-100-20261007-01 | P9-100 | 恢复队列 loading/error/empty 分开，失败时不显示假空或旧任务可操作态 | 3 | 完成；#71 |
+| R5-P8-110-20261007-01 | P8-110 | 拒绝会使 ticker panic 或取消 SMTP 接入上限的非正配置，保留合法边界 | 1 | 完成；#64 |
+| R5-P8-060-20261007-01 | P8-060 | 仅真实不存在的入站附件返回 404，存储／取消／解析预算故障保留 cause | 2 | 完成；#68 |
+| R5-P5-060-20261007-01 | P5-060 | 附件上传／ready 下载有限 no-progress 读取及取消，保留 20 MiB／完整性规则 | 3 | 完成；#70 |
+| R5-P11-080-20261007-01 | P11-080 | 前端独立门禁失败后仍取得完整执行证据，原失败仍使 job 失败，绑定实际 checkout | 1–3 | 完成；#62；实际CI失败后续行与artifact已核对 |
 
-本批完成 **4/10**，剩余 **6**；原父任务完成 **10/171**，剩余 **161**。每个后续轮次都同时报告两组数，禁止将完成的子项直接从父级剩余数中扣除。
+本批完成 **10/10**，剩余 **0**；原父任务完成 **10/171**，剩余 **161**。每个后续轮次都同时报告两组数，禁止将完成的子项直接从父级剩余数中扣除。
 
 - 2026-10-05 限定防护：五个 auth 请求体统一 64 KiB；Refresh/Logout 保留预算内空体与 cookie 流程，主动拒绝带有效 cookie 的畸形/超限 JSON（400，无 token/cookie 副作用）。作者 97/97、独立 402 子例/411 事件及相同 97 回归通过；仅有限 fake-store/httptest，65,537 字节为 decoder Read 上界，非 socket/drain；未全套/PG/负载/部署，父项与 10/171 不变。见[限定报告](R5-AUTH-BODY-LIMIT-20261005.md)。
 ### 0.1 状态、依赖与记录规则
@@ -44,6 +44,8 @@
 复选框只表示最终完成：`[ ]` 包括 pending/in_progress/blocked，`[x]` 只用于全部验收通过。进行中/阻塞原因记在执行日志，不使用多个互相矛盾的状态文件。任务 ID 永不重用；拆分添加后缀编号并写依赖，取消任务保留决策与范围变更，不通过删除任务虚增进度。
 
 依赖必须全部关闭后才能开始依赖它的实现；资料阅读与独立测试设计可并行，不预先勾选。 用户后续明确授权未验的并行WIP作为执行例外：原依赖、171父任务验收和最终门禁不改变；WIP不能据局部green勾完成，运行源/参考源分开，待真实依赖与整批验收后逐项裁决。表内未显式依赖的同阶段任务可并行，但共享 migration、DTO、事务辅助的 PR 必须指定集成顺序。任何七项审计发现必须通过基线与修复后对照关闭；若当前源码已变化，先记录原基线到新 SHA 的映射。
+
+按用户 2026-10-07 的持续要求，后续每一轮进度汇报都必须写出“本批已完成／总数／剩余”与“171父任务已完成／剩余”，分别计数；推进采用多轮原生 multi-subagent。
 
 每个完成项在文末执行日志登记：任务 ID、PR/commit、被测 SHA/树、实际命令、测试总数/pass/fail/skip、结果证据路径、兼容变化、未覆盖边界。日志没有凭据、邮件正文、真实个人信息或可用激活链接。测试名称只是要求，不是结果。
 
@@ -2222,3 +2224,41 @@ Independent review `5b7368286b292ed540293bcb04d1d4c1bdc2e1c4` rejected df6's exc
 - CI 子项已提交 [#62](https://github.com/jyqj/tabmail/pull/62)，本地新3/原5测试通过并独立只读复核；只有实际候选CI证明审计/其他门禁失败后后续命令仍执行，才登记完成。原4jobs、15min/180s预算、完整零漏洞和默认Vitest选择保留。
 - 测试命令、固定源/测试hash、覆盖范围与原始日志hash见四个独立报告：`R5-RELAY-IPV6-20261007.md`、`R5-SMTP-GREETING-CAUSE-20261007.md`、`R5-WAVE1-CONFIG-BOUNDS-20261007.md`、`R5-WAVE1-RECOVERY-REINSPECTION-20261007.md`。配置报告日志hash更正使用独立远端fast-forward文档提交，未改写已发布历史，产品／回归字节不变。
 - 新改动后的目录行号/闭包hash会在最终组合统一重采；原校验器和历史目录均保留，不把中间 stale catalog 报成已通过。此阶段限定实现不替代全 PG、真实浏览器、S/M基准、G0及父项验收。
+
+
+## 2026-10-07 多轮推进：第 2／3 轮记录
+
+### 第 2 轮：三个独立领域继续推进
+
+SMTP greeting错误保留（#63）、入站附件真实缺失/源故障分类（#68）、按会话scope归属合并refresh（#69）全部复核合入。另有SMTP第3项（#67）和CI证据项（#62）提前完成。对用户汇报的阶段累计为 **8/10，剩余2**；父级 **10/171，剩余161**。
+
+- #68：冻结真实parser/service/HTTP回归10leaf基线2pass/8fail→全通过，完整companymail+mailcontent race44顶层/263leaf，HTTP12leaf。仅成功parse后的缺失part ID为404；存储/取消/格式/深度失败保留cause并由HTTP固定500脱敏。独立SMTP subagent沿handler完整路径复核。
+- #69：冻结6场景基线全fail→全pass；实际request/session使用共享Web Lock，新scope独立排队且旧finally不能清新owner，同scope仍去重；原403清凭据/503保留/POST不重放不变，关联35/35，tsc/lint通过。
+- #67：冻结8leaf基线1pass/7fail→全pass；保留uncertain/SMTP/checkpoint/多目标temporary原因，成功mark仍nil，已接受目标不重发。三SMTP变化完整outbound race77顶层/549pass事件、0skip，vet通过。root查明ordinary ReceiptView固定允许字段不包含LastError，未因新增错误链扩大普通回执暴露。
+- #62：候选实际[CI37628534160](https://github.com/jyqj/tabmail/actions/runs/37628534160)，checkout `a8ae5ebff8fd63d6bafde2805ff1a9c49f91e191`。source gate失败（711测试中1failure/2errors，属于新source旧目录），严格audit失败后tsc通过、完整Vitest真正运行865pass/1fail/0pending、lint/build通过，frontend仍FAILURE，证据上传通过。工件三文件完整，ZIP SHA256 `9e2990de374011531c0b31d79712106a73524da49d9f41cfe1cb683ed88e38c5`等于GitHub digest；唯一Vitest失败仍是缺私有PG fixture，没有排除。原4jobs、15min/180s、零漏洞与失败退出语义保持。
+
+### 第 3 轮：最后两个实施项合入
+
+| 实施项 | 真实结果与限制 | PR／合并 |
+|---|---|---|
+| P5-060 附件读取无进展／取消 | 冻结7leaf基线1pass/6fail→全pass；完整companymail race28顶层/116leaf、0skip。100次连续空读受限，上传取消后不reserve/put/finish；owned下载Close恰一次。任意caller-owned上传reader永久阻塞时不能强行中断，下载依赖Close解除Read | [#70](https://github.com/jyqj/tabmail/pull/70)，`ac1afc64e738695b2f7c38c27fbd9b22ccb5c420` |
+| P9-100 恢复队列加载/失败/空状态 | 冻结8场景基线2pass/6fail→全pass；三轮前端+原关联69/69、完整非增量tsc/局部lint通过。403/503不再显示假空与旧可操作行；重试仍请求当前页并更新total，保留原因和独立检查 | [#71](https://github.com/jyqj/tabmail/pull/71)，`e32564304c0c84aa80b1184e72129fb0316d989d` |
+
+本批 **10/10完成，剩余0**；原父级 **10/171完成，剩余161**。九项产品修改的80个固定业务/协议回归场景，基线有62fail/18pass，修复后全部通过；另有3条固定CI契约断言和实际GitHub续行验收。各包/选集计数有重叠，不能相加成全套回归数。完整版本/PG/浏览器/性能/发布资格仍以独立整体验收为准。
+
+父任务复选框仍精确171个/已勾10；没有用子项或文档修改把父任务余数从161中扣除。所有PR/local/remote/tested tree/merge和独立基线对照见[本批机器记录](evidence/R5-MULTI-ROUND-20261007/wave-batch-summary.json)。组合验证和revision4目前运行中，最终结果会作为后续限定证据登记。
+
+
+### 2026-10-07｜三轮后的组合验证与目录 revision4 收口
+
+- 本批10个实施子项完成10/10、剩余0；171父项完成10/171、剩余161，所有父项ID、顺序与勾选保持。目录/文档/复核不另计TODO。完整执行报告为 [R5-MULTI-ROUND-20261007](R5-MULTI-ROUND-20261007.md)。
+- 组合产品源为e32564304c0c84aa80b1184e72129fb0316d989d。四完整Go包和精确8个handler控制合计148顶层、829叶用例PASS，0 FAIL/0 SKIP；相关vet通过。普通独立clone同一tree上保留默认VCS的整仓build通过9.500s；首次worktree VCS失败原日志不覆盖，未重跑已通过测试。
+- 完整默认web为886 PASS/1 FAIL/0 pending或todo，63文件62PASS/1FAIL；唯一失败仍为原private fixture preflight。全部旧866结果保持，仅新增21个PASS。lint为0 errors/4既有warnings；默认Next build 29/29页面通过；相同web源的完整非增量tsc此前已通过。
+- 独立账本审核绑定9232dee…，结论ACCEPT：十项local/API/tested tree和merge祖先一致，原31份证据长度/hash/原件逐字节一致；原始日志重算产品80场景为18PASS/62FAIL→80PASS，CI3断言另计；整个web/outbound/config/companymail/mailcontent与作者和整合源码一致。审核记录与后续组合原始日志已纳入本批证据目录。
+- revision4目录提交本地7254f12…、发布6b6163d…（同tree1eb98c61…）绑定产品e325643。三个原CLI由旧目录exit1→新目录exit0，相关Python71PASS和原scanner27PASS；仅校准9client行号、15事务条目的29调用行号、1增2删同名调用候选、7兼容行与3闭包hash。原collector/validator、旧rev1/2/3对象/报告、预算/skip和false flags不变；详见 [revision4报告](evidence/R5-CATALOG-REVISION4-20261007/README.md)。
+- 实际产品CI37631117018的checkout8a6fe55…整个tree等于e325643。production/browser成功；frontend在原目录、audit和privatefixture处仍失败，后续tsc/test/lint/build及artifact都真实执行。backend原artifact核对ZIP digest后确认PG包180.059秒超时、105skip事件、247必跑中180未通过/未完成；0显式test-fail事件不代表包通过。audit实物仍8high/0critical。上述CI事实与目录校准的局部通过分开，不声称完整发布资格。
+- 上传任意永久阻塞Reader仍受调用方所有权限制，下载取消依赖底层Close解除阻塞；不声称socket期限、完整PG/负载、M或G0通过。#56仍draft；main未变，未发布/部署。
+
+- 目录独立终审ACCEPT：57项只读Git/AST/JSON/真实源行核对成立（不算产品测试/新增TODO）；#73已合入9bcfa4f77f27ad4f118f32e92efef740ebac2c1e。原始复核报告和机器记录入库，固定对象/旧验收边界保留。
+
+- revision4远端完整CI37633385810已结束：actual57ae4946/tree1eb98c61与目录源相同；current713全PASS，frozen-v1原41b015c源码4全PASS，0fail/error/skip且ID无缺失/重叠。前端catalog/tsc/lint/build及证据上传SUCCESS；Vitest886/1与audit8high仍FAIL。production/browserSUCCESS，PG新记录180.061秒超时、105skip、180/247必跑未通过；backend后续显式CLI/DTO/协议/HTTP/vet SKIPPED。19文件原始实物包、ZIP/各文件hash与完整runnerJSON入库，后续文档源码范围单独对账。本批10/10剩0；171父项10/171剩161。

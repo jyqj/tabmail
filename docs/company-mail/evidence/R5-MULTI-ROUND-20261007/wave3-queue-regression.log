@@ -1,0 +1,82 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.11 /workspace/scratch/458de7991ac3/tabmail-wave-compose/web
+
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > renders the safe recipient class/code and next-hop acceptance, not a raw diagnostic 771ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > retires the inbound inspection and choices after a conflict, preserving the reason 1182ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > renders subject, structured recipients, bodies and safe headers without executing untrusted HTML 431ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > rejects job raw/private extensions without rendering body, BCC or secret canary 152ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > rejects recipient raw/private extensions without rendering body, BCC or secret canary 106ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > retires the outbound inspection and choices after a conflict, preserving the reason 307ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > rejects header raw/private extensions without rendering body, BCC or secret canary 154ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > rejects top-level raw/private extensions without rendering body, BCC or secret canary 117ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > renders fixed unknown-category fallbacks without importing raw enum strings or enabling reconciliation 130ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > requires a successful new inbound inspection and fresh selection before another write 450ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > fails closed instead of reusing an old DTO when mandatory status is absent 161ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > fails closed instead of reusing an old DTO when mandatory bcc is absent 105ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > fails closed instead of reusing an old DTO when mandatory headers is absent 120ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > fails closed instead of reusing an old DTO when mandatory html_body is absent 107ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > fails closed instead of reusing an old DTO when mandatory kind is absent 110ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > fails closed instead of reusing an old DTO when mandatory diagnostic_class is absent 60ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > requires a successful new outbound inspection and fresh selection before another write 529ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > rejects a successful response with the wrong id before disclosing any content 88ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > rejects a successful response with the wrong tenant_id before disclosing any content 102ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > does not auto-replay a denied or unknown inbound write and preserves the operator reason 308ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > uses the actively selected company, not the super administrator's home company 183ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > discards an old target's late response even if the input is changed away and back 101ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > does not auto-replay a denied or unknown outbound write and preserves the operator reason 279ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > company changes clear already loaded inspection body/BCC and do not replay its POST 134ms
+ ✓ features/company/recovery-reinspection.consumer.test.tsx > Recovery inspection conflicts require explicit reinspection > does not label a newly entered outbound job with an older reconciliation conflict 254ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > company changes fence a late inspect POST with the production session lease 105ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > company changes fence a late reconcile POST with the production session lease 238ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > session changes clear already loaded inspection body/BCC and do not replay its POST 146ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > session changes fence a late inspect POST with the production session lease 173ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > session changes fence a late reconcile POST with the production session lease 172ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > logout changes clear already loaded inspection body/BCC and do not replay its POST 132ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > logout changes fence a late inspect POST with the production session lease 87ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > logout changes fence a late reconcile POST with the production session lease 196ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > retains same-scope loaded results through token rotation without replaying the audited POST 86ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > accepts a same-scope late inspection through token rotation without aborting or replaying it 85ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > requires an explicit review/resubmit after 401 refresh; does not automatically replay inspection 141ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > does not enable the audited body exception for ordinary admin rows 54ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > does not enable the audited body exception for ordinary user rows 50ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > enforces the trimmed reason byte boundary and valid job ID before issuing an inspection 59ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > renders the accepted job status as next-hop acceptance, not final delivery 168ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > a denied response cannot import success-shaped data or an inspection body 752ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > reinspection clears a previous safe result before rejecting malformed replacement data 135ms
+ ✓ features/company/outbound-inspection.consumer.test.tsx > audited outbound inspection shipping consumer > renders missing optional enhanced code as absent, never falls back to raw diagnostic 276ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > announces the initial load and disables list actions until a response arrives 748ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > shows the empty state only after a successful empty response 142ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > does not describe an initial 503 failure as an empty queue 172ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > does not describe an initial 403 failure as an empty queue 119ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > restores rows and current pagination after explicit retry while retaining operator input 285ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > retires stale rows and pagination after a 503 refresh failure, then accepts a successful retry 260ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > retires stale rows and pagination after a 403 refresh failure, then accepts a successful retry 1047ms
+ ✓ features/company/recovery-queue-state.consumer.test.tsx > Recovery queue authoritative load states > holds pagination while page two loads or fails and retries that same page explicitly 181ms
+ ✓ contexts/auth-context.test.tsx > auth-context > 默认从 localStorage 读取并推导 public level 49ms
+ ✓ contexts/auth-context.test.tsx > auth-context > 支持 JWT / tenant 状态写入与清理 316ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > does not log out after a temporary refresh failure 9ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > coalesces concurrent refresh calls and uses the replacement token 4ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > does not overwrite another account with a stale refresh response 55ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > aborts requests and discards response bodies after account switching 3ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > does not automatically replay unsafe POST after renewal 4ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > retries an idempotent send with the same key and request body 3ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > keeps the current session when server logout fails 2ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > holds the shared cookie lock until login body and local identity are installed 54ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > changes scope on tenant changes but not token rotation 4ms
+ ✓ lib/session-safety.test.ts > credential and identity boundaries > fails closed without Web Locks rather than racing refresh cookies 3ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new account scope to refresh behind an older queued operation 20ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new tenant scope to refresh behind an older queued operation 4ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > allows the new epoch scope to refresh behind an older queued operation 4ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > lets an actual current-tenant GET renew after 401 instead of inheriting a stale false result 8ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > keeps current-scope callers coalesced after the older scope finishes, including a temporary failure 6ms
+ ✓ lib/refresh-scope.test.ts > refresh coalescing belongs to the requesting session scope > does not mask a current-scope denied refresh or replay its unsafe write 6ms
+
+ Test Files  6 passed (6)
+      Tests  69 passed (69)
+   Start at  20:39:46
+   Duration  18.08s (transform 2.59s, setup 3.80s, import 4.46s, tests 13.02s, environment 10.74s)
+
