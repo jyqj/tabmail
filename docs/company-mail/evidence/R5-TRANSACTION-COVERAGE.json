@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "740126660526db987b7914c50a8731b7cac9bf42",
+  "baseline_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -15,7 +15,7 @@
   "postgres_files": [
     {
       "path": "internal/store/postgres/apikeys.go",
-      "sha256": "f7e333f6a2036c4f389fcfa9f74346ceb035446bf3f427a96c95e6eac2d3d801"
+      "sha256": "8b62e7af8dd8aa1790c93297059fb17c5156a5791a9cb703951b054a69fc85fc"
     },
     {
       "path": "internal/store/postgres/audit.go",
@@ -274,7 +274,17 @@
     "internal/store/postgres/apikeys.go": {
       "group": "PR23-STRUCTURE",
       "review": "CreateAPIKey: Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.; GetAPIKey: pool query uses apiKeyMetadataSelect LEFT JOIN usage; select whole timestamp/IP observation; legacy display fallback only if no usage row.; ListAPIKeys: pool query uses apiKeyMetadataSelect LEFT JOIN usage; select whole timestamp/IP observation; legacy display fallback only if no usage row.; ListAPIKeysByOwner: pool query uses apiKeyMetadataSelect LEFT JOIN usage; select whole timestamp/IP observation; legacy display fallback only if no usage row.; TouchAPIKey: pool SELECT clock_timestamp once then touchAPIKeyObservation; separate statements; authority row never read/written.; touchAPIKeyObservation: pool.Exec(apiKeyUsageUpdateSQL): UPDATE usage timestamp/IP as a whole only when newer; never INSERT or read authority; unchanged FK key. AST direct_write=false because SQL is a package constant.",
-      "remaining": "Source-only; see per-function unverified_risks. Existing unchanged functions retain historical bounded review, not new runtime proof."
+      "remaining": "Source-only; see per-function unverified_risks. Existing unchanged functions retain historical bounded review, not new runtime proof.",
+      "revision15_additions": {
+        "source_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+        "review": "原PR23文件级字段保持原值。CreateAPIKey现在委托同tx的insertAPIKeyRows；新增CreateAPIKeyAuthorized承载当前JWT身份、权限/zone保护及key/usage/required-audit原子发行。两个新增条目及旧CreateAPIKey的完整历史归档提供精确手工链。",
+        "entry_ids": [
+          "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey",
+          "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+          "internal/store/postgres/apikeys.go::insertAPIKeyRows"
+        ],
+        "remaining": "目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR #209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。"
+      }
     },
     "internal/store/postgres/audit.go": {
       "group": "CTX26",
@@ -599,8 +609,8 @@
       "entry": "CreateAPIKey",
       "group": "CTX25",
       "classification": {
-        "kind": "direct-write",
-        "direct_write": true,
+        "kind": "write-call-closure",
+        "direct_write": false,
         "write_closure": true,
         "explicit_lock": false,
         "transaction_calls": true,
@@ -612,68 +622,32 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "CreateAPIKey",
         "receiver": "*PgStore",
-        "line": 20,
-        "end": 51,
-        "sha256": "f0c5e9e7b13cd7b9678bf22db651c5b0a01981025ed73fad26b624c828499c79",
+        "line": 26,
+        "end": 36,
+        "sha256": "63d0e139223af39dcaae5e12c17ec4bd5688655b8e1ce678feb8179f71737ec0",
         "calls": [
           {
-            "line": 22,
-            "expr": "uuid.New",
-            "name": "New"
-          },
-          {
-            "line": 24,
-            "expr": "time.Now",
-            "name": "Now"
-          },
-          {
-            "line": 25,
-            "expr": "json.Marshal",
-            "name": "Marshal"
-          },
-          {
-            "line": 30,
-            "expr": "len",
-            "name": "len"
-          },
-          {
-            "line": 33,
+            "line": 27,
             "expr": "s.pool.Begin",
             "name": "Begin"
           },
           {
-            "line": 37,
+            "line": 31,
             "expr": "tx.Rollback",
             "name": "Rollback"
           },
           {
-            "line": 38,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`"
+            "line": 32,
+            "expr": "insertAPIKeyRows",
+            "name": "insertAPIKeyRows"
           },
           {
-            "line": 47,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`"
-          },
-          {
-            "line": 50,
+            "line": 35,
             "expr": "tx.Commit",
             "name": "Commit"
           }
         ],
-        "strings": [
-          {
-            "line": 38,
-            "value": "\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
-          },
-          {
-            "line": 47,
-            "value": "INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)"
-          }
-        ],
+        "strings": [],
         "params": "func(ctx context.Context, k *models.TenantAPIKey) error"
       },
       "callers": [
@@ -681,7 +655,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:CreateAPIKey",
           "file": "internal/api/handlers/admin.go",
           "function": "CreateAPIKey",
-          "line": 199,
+          "line": 205,
           "expression": "h.service.CreateAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -689,62 +663,528 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserCreateAPIKey",
           "file": "internal/api/handlers/admin.go",
           "function": "UserCreateAPIKey",
-          "line": 363,
+          "line": 355,
           "expression": "h.service.CreateAPIKey",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
-        {
-          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
-          "file": "internal/app/admin/service.go",
-          "function": "CreateAPIKey",
-          "line": 467,
-          "expression": "s.store.CreateAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
       "lock_fk_wait_fence": {
-        "boundary": "Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.",
-        "direct_lock_fragments": [],
+        "boundary": "可信seed/import事务入口：Begin → insertAPIKeyRows(ctx, tx, k) → Commit；helper错误向上传递并由defer Rollback清理。两次INSERT已移到同tx的helper，因此本体无direct SQL而保留write-call-closure与Begin。这里仍不重载交互身份、不检查权限或zone、也不写发行audit；正式HTTP发行通过必需CreateAPIKeyAuthorized接口，名字匹配caller不能证明dispatch。",
         "local_operations": [
           {
-            "line": 33,
+            "line": 27,
             "operation": "s.pool.Begin",
             "sql_expression": "",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 37,
+            "line": 31,
             "operation": "tx.Rollback",
             "sql_expression": "",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 38,
-            "operation": "tx.Exec",
-            "sql_expression": "`\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`",
+            "line": 32,
+            "operation": "insertAPIKeyRows",
+            "sql_expression": "",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           },
           {
-            "line": 47,
-            "operation": "tx.Exec",
-            "sql_expression": "`INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`",
-            "status": "lexical-order-with-branches-not-single-total-runtime-order"
-          },
-          {
-            "line": 50,
+            "line": 35,
             "operation": "tx.Commit",
             "sql_expression": "",
             "status": "lexical-order-with-branches-not-single-total-runtime-order"
           }
         ],
-        "implicit_fk": "See exact migration Up hashes; FK/trigger indirect effects are not evaluated by this AST."
+        "direct_lock_fragments": [],
+        "implicit_fk": "00001_baseline.sql：tenant_api_keys.tenant_id→tenants(id) ON DELETE CASCADE，owner_user_id→users(id) ON DELETE CASCADE（NOT VALID不免除新写检查）；00019_api_key_usage.sql：usage.api_key_id→tenant_api_keys(id) ON DELETE CASCADE。key与audit的tenant引用会取得FK父锁；正式发行提前取得目标tenant KEY SHARE。allowed_zone_ids为无FK UUID数组，zone存在性/tenant判定依赖显式SHARE NOWAIT。这里不执行FK、触发器或未来写者协议。"
       },
       "evidence": [
-        "internal/store/postgres/apikeys.go:20-51 sha256=f0c5e9e7b13cd7b9678bf22db651c5b0a01981025ed73fad26b624c828499c79",
-        "PR23 source-only review; no PostgreSQL execution in this task"
+        "internal/store/postgres/apikeys.go:26-36 sha256=63d0e139223af39dcaae5e12c17ec4bd5688655b8e1ce678feb8179f71737ec0",
+        "PR #209 / Issue #204 separately records bounded actual PostgreSQL issuance and independent authz tests; this catalog executes syntax producers only."
       ],
       "unverified_risks": [
-        "Tenant/owner FKs and deletion/provision atomicity not executed; outer authorization required."
+        "Tenant/owner FKs and deletion/provision atomicity not executed; outer authorization required.",
+        "目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR #209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。",
+        "此公开低层接口仅适用于可信seed/import；未来业务调用不得绕过必需授权命令。保留原接口并不使旧调用路径获得新JWT、权限或audit保证。"
+      ],
+      "review_status": "static-type-review",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "assertions": {
+        "direct_sql_effects": [],
+        "direct_lock_fragments": [],
+        "transaction_helper_calls": [
+          {
+            "line": 27,
+            "expr": "s.pool.Begin",
+            "name": "Begin"
+          }
+        ],
+        "sql_execution_expressions": [],
+        "effect_status": "source-fragments-not-evaluated-SQL",
+        "callback_effect": "No declared external callback parameter; nested pgx callbacks/helper effects are described in source_review; no dynamic acceptance.",
+        "entry_role": "store-exported-interface-candidate"
+      },
+      "file_family_context": "可信seed/import事务入口：Begin → insertAPIKeyRows(ctx, tx, k) → Commit；helper错误向上传递并由defer Rollback清理。两次INSERT已移到同tx的helper，因此本体无direct SQL而保留write-call-closure与Begin。这里仍不重载交互身份、不检查权限或zone、也不写发行audit；正式HTTP发行通过必需CreateAPIKeyAuthorized接口，名字匹配caller不能证明dispatch。",
+      "evidence_level": "source-only",
+      "source_review": {
+        "base_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+        "source_sha256": "63d0e139223af39dcaae5e12c17ec4bd5688655b8e1ce678feb8179f71737ec0",
+        "role": "trusted-seed-transaction-owner",
+        "trace": "可信seed/import事务入口：Begin → insertAPIKeyRows(ctx, tx, k) → Commit；helper错误向上传递并由defer Rollback清理。两次INSERT已移到同tx的helper，因此本体无direct SQL而保留write-call-closure与Begin。这里仍不重载交互身份、不检查权限或zone、也不写发行audit；正式HTTP发行通过必需CreateAPIKeyAuthorized接口，名字匹配caller不能证明dispatch。",
+        "unverified": "目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR #209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md"
+      },
+      "historical_revision14_review": {
+        "lock_fk_wait_fence": {
+          "boundary": "Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.",
+          "direct_lock_fragments": [],
+          "local_operations": [
+            {
+              "line": 33,
+              "operation": "s.pool.Begin",
+              "sql_expression": "",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            },
+            {
+              "line": 37,
+              "operation": "tx.Rollback",
+              "sql_expression": "",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            },
+            {
+              "line": 38,
+              "operation": "tx.Exec",
+              "sql_expression": "`\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            },
+            {
+              "line": 47,
+              "operation": "tx.Exec",
+              "sql_expression": "`INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            },
+            {
+              "line": 50,
+              "operation": "tx.Commit",
+              "sql_expression": "",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            }
+          ],
+          "implicit_fk": "See exact migration Up hashes; FK/trigger indirect effects are not evaluated by this AST."
+        },
+        "evidence": [
+          "internal/store/postgres/apikeys.go:20-51 sha256=f0c5e9e7b13cd7b9678bf22db651c5b0a01981025ed73fad26b624c828499c79",
+          "PR23 source-only review; no PostgreSQL execution in this task"
+        ],
+        "unverified_risks": [
+          "Tenant/owner FKs and deletion/provision atomicity not executed; outer authorization required."
+        ],
+        "file_family_context": "Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.",
+        "source_review": {
+          "role": "transaction-owner-write",
+          "trace": "Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.",
+          "unverified": "Tenant/owner FKs and deletion/provision atomicity not executed; outer authorization required.",
+          "source_sha256": "f0c5e9e7b13cd7b9678bf22db651c5b0a01981025ed73fad26b624c828499c79",
+          "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+        }
+      }
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+      "owner": "postgres.PgStore/apikeys.go",
+      "entry": "CreateAPIKeyAuthorized",
+      "group": "CTX25",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "syntax": {
+        "id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+        "file": "internal/store/postgres/apikeys.go",
+        "name": "CreateAPIKeyAuthorized",
+        "receiver": "*PgStore",
+        "line": 70,
+        "end": 146,
+        "sha256": "63d0d21220f001ee79261adb93a6506c3deeb6b7727bc55673fcc3ecd8cebbe2",
+        "calls": [
+          {
+            "line": 71,
+            "expr": "func() {\n\tvar pg *pgconn.PgError\n\tif errors.As(err, &pg) && (pg.Code == \"55P03\" || pg.Code == \"40001\") {\n\t\terr = &app.Error{Kind: app.KindConflict, Message: \"API key authority is changing; reload before retrying\", Err: err}\n\t}\n}",
+            "name": ""
+          },
+          {
+            "line": 73,
+            "expr": "errors.As",
+            "name": "As"
+          },
+          {
+            "line": 78,
+            "expr": "authz.ErrForbidden",
+            "name": "ErrForbidden"
+          },
+          {
+            "line": 80,
+            "expr": "s.pool.Begin",
+            "name": "Begin"
+          },
+          {
+            "line": 84,
+            "expr": "tx.Rollback",
+            "name": "Rollback"
+          },
+          {
+            "line": 86,
+            "expr": "tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, key.TenantID).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 86,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`"
+          },
+          {
+            "line": 87,
+            "expr": "errors.Is",
+            "name": "Is"
+          },
+          {
+            "line": 88,
+            "expr": "app.NotFound",
+            "name": "NotFound"
+          },
+          {
+            "line": 92,
+            "expr": "scanUser",
+            "name": "scanUser"
+          },
+          {
+            "line": 92,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "userSelect + ` WHERE id=$1 FOR SHARE`"
+          },
+          {
+            "line": 96,
+            "expr": "issuer.Refresh",
+            "name": "Refresh"
+          },
+          {
+            "line": 98,
+            "expr": "authz.ErrForbidden",
+            "name": "ErrForbidden"
+          },
+          {
+            "line": 100,
+            "expr": "actor.IsTenantAdmin",
+            "name": "IsTenantAdmin"
+          },
+          {
+            "line": 101,
+            "expr": "effectivePermissionSnapshot",
+            "name": "effectivePermissionSnapshot"
+          },
+          {
+            "line": 107,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 107,
+            "expr": "[]string",
+            "name": ""
+          },
+          {
+            "line": 108,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 108,
+            "expr": "[]uuid.UUID",
+            "name": ""
+          },
+          {
+            "line": 109,
+            "expr": "authz.ConfigureIssuedAPIKey",
+            "name": "ConfigureIssuedAPIKey"
+          },
+          {
+            "line": 114,
+            "expr": "append",
+            "name": "append"
+          },
+          {
+            "line": 114,
+            "expr": "[]uuid.UUID",
+            "name": ""
+          },
+          {
+            "line": 115,
+            "expr": "sort.Slice",
+            "name": "Slice"
+          },
+          {
+            "line": 115,
+            "expr": "zones[i].String",
+            "name": "String"
+          },
+          {
+            "line": 115,
+            "expr": "zones[j].String",
+            "name": "String"
+          },
+          {
+            "line": 121,
+            "expr": "tx.QueryRow(ctx, `SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT`, id).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 121,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT`"
+          },
+          {
+            "line": 122,
+            "expr": "errors.Is",
+            "name": "Is"
+          },
+          {
+            "line": 123,
+            "expr": "app.BadRequest",
+            "name": "BadRequest"
+          },
+          {
+            "line": 123,
+            "expr": "id.String",
+            "name": "String"
+          },
+          {
+            "line": 128,
+            "expr": "authz.ErrForbidden",
+            "name": "ErrForbidden"
+          },
+          {
+            "line": 128,
+            "expr": "id.String",
+            "name": "String"
+          },
+          {
+            "line": 131,
+            "expr": "insertAPIKeyRows",
+            "name": "insertAPIKeyRows"
+          },
+          {
+            "line": 134,
+            "expr": "json.Marshal",
+            "name": "Marshal"
+          },
+          {
+            "line": 138,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)`"
+          },
+          {
+            "line": 138,
+            "expr": "actor.AuditLabel",
+            "name": "AuditLabel"
+          },
+          {
+            "line": 141,
+            "expr": "tx.Commit",
+            "name": "Commit"
+          }
+        ],
+        "strings": [
+          {
+            "line": 73,
+            "value": "55P03"
+          },
+          {
+            "line": 73,
+            "value": "40001"
+          },
+          {
+            "line": 74,
+            "value": "API key authority is changing; reload before retrying"
+          },
+          {
+            "line": 78,
+            "value": "current interactive JWT issuer required"
+          },
+          {
+            "line": 86,
+            "value": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
+          },
+          {
+            "line": 88,
+            "value": "tenant not found"
+          },
+          {
+            "line": 92,
+            "value": " WHERE id=$1 FOR SHARE"
+          },
+          {
+            "line": 98,
+            "value": "API key issuer no longer matches the authenticated session"
+          },
+          {
+            "line": 121,
+            "value": "SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT"
+          },
+          {
+            "line": 123,
+            "value": "zone "
+          },
+          {
+            "line": 123,
+            "value": " not found"
+          },
+          {
+            "line": 128,
+            "value": "zone "
+          },
+          {
+            "line": 128,
+            "value": " does not belong to tenant"
+          },
+          {
+            "line": 134,
+            "value": "label"
+          },
+          {
+            "line": 134,
+            "value": "key_prefix"
+          },
+          {
+            "line": 134,
+            "value": "scopes"
+          },
+          {
+            "line": 134,
+            "value": "owner_user_id"
+          },
+          {
+            "line": 138,
+            "value": "INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)"
+          }
+        ],
+        "params": "func(ctx context.Context, issuer authz.APIKeyIssuer, key *models.TenantAPIKey) (err error)"
+      },
+      "callers": [
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
+          "file": "internal/app/admin/service.go",
+          "function": "CreateAPIKey",
+          "line": 393,
+          "expression": "s.store.CreateAPIKeyAuthorized",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": {
+        "boundary": "正式HTTP发行事务：先锁目标tenants行FOR KEY SHARE，再按真实JWT user ID读userSelect FOR SHARE；issuer.Refresh对比home tenant、ID、active、原role及session proof，selected tenant与target不替代home身份。非admin经effectivePermissionSnapshot取profile SHARE NOWAIT及当前合并权限。ConfigureIssuedAPIKey按当前能力/zone赋owner，无法表达的deny-all范围直接拒绝。实际zone UUID排序去重，逐行FOR SHARE NOWAIT并核对tenant。随后同tx insertAPIKeyRows写key→usage，再必需audit_log INSERT，最后Commit确认才回写输出key。任何前置或写入失败不返回secret；本函数外层defer直接观察到的55P03/40001原始PgError保留cause并转409；profile helper的55P03已自行转为typed409且未挂底层cause，不能把外层保证扩到该路径；提交应答丢失不等于确定未提交。",
+        "local_operations": [
+          {
+            "line": 80,
+            "operation": "s.pool.Begin",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 84,
+            "operation": "tx.Rollback",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 86,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 92,
+            "operation": "tx.QueryRow",
+            "sql_expression": "userSelect + ` WHERE id=$1 FOR SHARE`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 96,
+            "operation": "issuer.Refresh",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 101,
+            "operation": "effectivePermissionSnapshot",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 109,
+            "operation": "authz.ConfigureIssuedAPIKey",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 121,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 131,
+            "operation": "insertAPIKeyRows",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 138,
+            "operation": "tx.Exec",
+            "sql_expression": "`INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 141,
+            "operation": "tx.Commit",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 86,
+            "sql_fragment": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
+          },
+          {
+            "line": 92,
+            "sql_fragment": " WHERE id=$1 FOR SHARE"
+          },
+          {
+            "line": 121,
+            "sql_fragment": "SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT"
+          }
+        ],
+        "implicit_fk": "00001_baseline.sql：tenant_api_keys.tenant_id→tenants(id) ON DELETE CASCADE，owner_user_id→users(id) ON DELETE CASCADE（NOT VALID不免除新写检查）；00019_api_key_usage.sql：usage.api_key_id→tenant_api_keys(id) ON DELETE CASCADE。key与audit的tenant引用会取得FK父锁；正式发行提前取得目标tenant KEY SHARE。allowed_zone_ids为无FK UUID数组，zone存在性/tenant判定依赖显式SHARE NOWAIT。这里不执行FK、触发器或未来写者协议。"
+      },
+      "evidence": [
+        "internal/store/postgres/apikeys.go:70-146 sha256=63d0d21220f001ee79261adb93a6506c3deeb6b7727bc55673fcc3ecd8cebbe2",
+        "PR #209 / Issue #204 separately records bounded actual PostgreSQL issuance and independent authz tests; this catalog executes syntax producers only."
+      ],
+      "unverified_risks": [
+        "目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR #209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。",
+        "有限18项PG证据不覆盖所有zone删除/转移、profile删除、跨租户管理交错、网络commit不确定性或重复发行；未来权限写者需保持user/profile/zone锁协议。NOWAIT冲突要求重新加载后重试，并非自动重放或exact-once保证。"
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -754,48 +1194,70 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 38,
-            "sql_fragment": "\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
-          },
-          {
-            "line": 47,
-            "sql_fragment": "INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)"
+            "line": 138,
+            "sql_fragment": "INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)"
           }
         ],
-        "direct_lock_fragments": [],
+        "direct_lock_fragments": [
+          {
+            "line": 86,
+            "sql_fragment": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
+          },
+          {
+            "line": 92,
+            "sql_fragment": " WHERE id=$1 FOR SHARE"
+          },
+          {
+            "line": 121,
+            "sql_fragment": "SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT"
+          }
+        ],
         "transaction_helper_calls": [
           {
-            "line": 33,
+            "line": 80,
             "expr": "s.pool.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 38,
-            "expr": "tx.Exec",
-            "name": "Exec",
-            "sql_expr": "`\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`"
+            "line": 86,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`"
           },
           {
-            "line": 47,
+            "line": 92,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "userSelect + ` WHERE id=$1 FOR SHARE`"
+          },
+          {
+            "line": 121,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT`"
+          },
+          {
+            "line": 138,
             "expr": "tx.Exec",
             "name": "Exec",
-            "sql_expr": "`INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`"
+            "sql_expr": "`INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)`"
           }
         ],
         "effect_status": "source-fragments-not-evaluated-SQL",
-        "callback_effect": "No declared external callback parameter; nested pgx callbacks/helper effects are described in source_review; no dynamic acceptance.",
+        "callback_effect": "没有外部callback参数。defer闭包只映射typed错误；sort.Slice局部比较只读UUID；权限helper和key-row helper使用本事务，不能从名字匹配推断任意外部动态调用的效果。",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.",
+      "file_family_context": "正式HTTP发行事务：先锁目标tenants行FOR KEY SHARE，再按真实JWT user ID读userSelect FOR SHARE；issuer.Refresh对比home tenant、ID、active、原role及session proof，selected tenant与target不替代home身份。非admin经effectivePermissionSnapshot取profile SHARE NOWAIT及当前合并权限。ConfigureIssuedAPIKey按当前能力/zone赋owner，无法表达的deny-all范围直接拒绝。实际zone UUID排序去重，逐行FOR SHARE NOWAIT并核对tenant。随后同tx insertAPIKeyRows写key→usage，再必需audit_log INSERT，最后Commit确认才回写输出key。任何前置或写入失败不返回secret；本函数外层defer直接观察到的55P03/40001原始PgError保留cause并转409；profile helper的55P03已自行转为typed409且未挂底层cause，不能把外层保证扩到该路径；提交应答丢失不等于确定未提交。",
       "evidence_level": "source-only",
       "source_review": {
-        "role": "transaction-owner-write",
-        "trace": "Begin; authority key INSERT then usage INSERT; Commit, rollback on either failure; no current-actor reload in this low-level entry.",
-        "unverified": "Tenant/owner FKs and deletion/provision atomicity not executed; outer authorization required.",
-        "source_sha256": "f0c5e9e7b13cd7b9678bf22db651c5b0a01981025ed73fad26b624c828499c79",
-        "base_commit": "aeed47f0e1998d9925acb680992b051463821d69"
+        "base_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+        "source_sha256": "63d0d21220f001ee79261adb93a6506c3deeb6b7727bc55673fcc3ecd8cebbe2",
+        "role": "authorized-credential-transaction-owner",
+        "trace": "正式HTTP发行事务：先锁目标tenants行FOR KEY SHARE，再按真实JWT user ID读userSelect FOR SHARE；issuer.Refresh对比home tenant、ID、active、原role及session proof，selected tenant与target不替代home身份。非admin经effectivePermissionSnapshot取profile SHARE NOWAIT及当前合并权限。ConfigureIssuedAPIKey按当前能力/zone赋owner，无法表达的deny-all范围直接拒绝。实际zone UUID排序去重，逐行FOR SHARE NOWAIT并核对tenant。随后同tx insertAPIKeyRows写key→usage，再必需audit_log INSERT，最后Commit确认才回写输出key。任何前置或写入失败不返回secret；本函数外层defer直接观察到的55P03/40001原始PgError保留cause并转409；profile helper的55P03已自行转为typed409且未挂底层cause，不能把外层保证扩到该路径；提交应答丢失不等于确定未提交。",
+        "unverified": "目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR #209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md"
       }
     },
     {
@@ -817,12 +1279,12 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "DeleteAPIKey",
         "receiver": "*PgStore",
-        "line": 131,
-        "end": 134,
+        "line": 226,
+        "end": 229,
         "sha256": "9efdd6a8d40da92772a7680d2cedc3ef3a66a5058816b8976d5ad3c4519e4e2c",
         "calls": [
           {
-            "line": 132,
+            "line": 227,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM tenant_api_keys WHERE id=$1`"
@@ -830,7 +1292,7 @@
         ],
         "strings": [
           {
-            "line": 132,
+            "line": 227,
             "value": "DELETE FROM tenant_api_keys WHERE id=$1"
           }
         ],
@@ -841,7 +1303,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:DeleteAPIKey",
           "file": "internal/api/handlers/admin.go",
           "function": "DeleteAPIKey",
-          "line": 227,
+          "line": 233,
           "expression": "h.service.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -849,7 +1311,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 525,
+          "line": 439,
           "expression": "s.store.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -857,7 +1319,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 521,
+          "line": 435,
           "expression": "s.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -890,7 +1352,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 132,
+            "line": 227,
             "sql_fragment": "DELETE FROM tenant_api_keys WHERE id=$1"
           }
         ],
@@ -898,7 +1360,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 132,
+            "line": 227,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM tenant_api_keys WHERE id=$1`"
@@ -930,45 +1392,45 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "GetAPIKey",
         "receiver": "*PgStore",
-        "line": 106,
-        "end": 129,
+        "line": 201,
+        "end": 224,
         "sha256": "6485f66d77ec6f10a57fd7d017c626a1180f31cc32194fe22af4041a9a56b765",
         "calls": [
           {
-            "line": 110,
+            "line": 205,
             "expr": "s.pool.QueryRow(ctx, apiKeyMetadataSelect+` WHERE k.id=$1`, id).\n\tScan",
             "name": "Scan"
           },
           {
-            "line": 110,
+            "line": 205,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "apiKeyMetadataSelect + ` WHERE k.id=$1`"
           },
           {
-            "line": 113,
+            "line": 208,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 120,
+            "line": 215,
             "expr": "uuid.UUID",
             "name": "UUID"
           },
           {
-            "line": 123,
+            "line": 218,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 124,
+            "line": 219,
             "expr": "json.Unmarshal",
             "name": "Unmarshal"
           }
         ],
         "strings": [
           {
-            "line": 110,
+            "line": 205,
             "value": " WHERE k.id=$1"
           }
         ],
@@ -979,7 +1441,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 505,
+          "line": 419,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1039,7 +1501,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 110,
+            "line": 205,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "apiKeyMetadataSelect + ` WHERE k.id=$1`"
@@ -1078,30 +1540,30 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "ListAPIKeys",
         "receiver": "*PgStore",
-        "line": 64,
-        "end": 71,
+        "line": 159,
+        "end": 166,
         "sha256": "0d161d2032eecbb1e0d51daabb67e57b22f0d7de523cc4dd6c77321e22043fb2",
         "calls": [
           {
-            "line": 65,
+            "line": 160,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "apiKeyMetadataSelect + ` WHERE k.tenant_id=$1 ORDER BY k.created_at`"
           },
           {
-            "line": 69,
+            "line": 164,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 70,
+            "line": 165,
             "expr": "scanAPIKeys",
             "name": "scanAPIKeys"
           }
         ],
         "strings": [
           {
-            "line": 65,
+            "line": 160,
             "value": " WHERE k.tenant_id=$1 ORDER BY k.created_at"
           }
         ],
@@ -1112,7 +1574,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListAPIKeys",
           "file": "internal/api/handlers/admin.go",
           "function": "ListAPIKeys",
-          "line": 213,
+          "line": 219,
           "expression": "h.service.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1120,7 +1582,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserListAPIKeys",
           "file": "internal/api/handlers/admin.go",
           "function": "UserListAPIKeys",
-          "line": 393,
+          "line": 385,
           "expression": "h.service.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1128,7 +1590,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeys",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeys",
-          "line": 489,
+          "line": 403,
           "expression": "s.store.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1164,7 +1626,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 65,
+            "line": 160,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "apiKeyMetadataSelect + ` WHERE k.tenant_id=$1 ORDER BY k.created_at`"
@@ -1203,30 +1665,30 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "ListAPIKeysByOwner",
         "receiver": "*PgStore",
-        "line": 73,
-        "end": 80,
+        "line": 168,
+        "end": 175,
         "sha256": "9272161054b8e842c7c203ad9245d5d1240bfcd422b8ced3b97989119274fdeb",
         "calls": [
           {
-            "line": 74,
+            "line": 169,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "apiKeyMetadataSelect + ` WHERE k.tenant_id=$1 AND k.owner_user_id=$2 ORDER BY k.created_at`"
           },
           {
-            "line": 78,
+            "line": 173,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 79,
+            "line": 174,
             "expr": "scanAPIKeys",
             "name": "scanAPIKeys"
           }
         ],
         "strings": [
           {
-            "line": 74,
+            "line": 169,
             "value": " WHERE k.tenant_id=$1 AND k.owner_user_id=$2 ORDER BY k.created_at"
           }
         ],
@@ -1237,7 +1699,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserListAPIKeys",
           "file": "internal/api/handlers/admin.go",
           "function": "UserListAPIKeys",
-          "line": 383,
+          "line": 375,
           "expression": "h.service.ListAPIKeysByOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1245,7 +1707,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeysByOwner",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeysByOwner",
-          "line": 497,
+          "line": 411,
           "expression": "s.store.ListAPIKeysByOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1281,7 +1743,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 74,
+            "line": 169,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "apiKeyMetadataSelect + ` WHERE k.tenant_id=$1 AND k.owner_user_id=$2 ORDER BY k.created_at`"
@@ -1320,50 +1782,50 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "ResolveAPIKey",
         "receiver": "*PgStore",
-        "line": 136,
-        "end": 168,
+        "line": 231,
+        "end": 263,
         "sha256": "0942a0ae746e5d2d980ab47ebbbc0ab473098c76ea2fa308adfa9ed979ba041d",
         "calls": [
           {
-            "line": 137,
+            "line": 232,
             "expr": "hashKey",
             "name": "hashKey"
           },
           {
-            "line": 144,
+            "line": 239,
             "expr": "s.pool.QueryRow(ctx, `\n\t\tSELECT k.id, k.scopes, k.allowed_zone_ids, k.owner_user_id, t.id, t.name, t.plan_id, t.is_super, t.created_at\n\t\tFROM tenant_api_keys k\n\t\tJOIN tenants t ON t.id = k.tenant_id\n\t\tWHERE k.key_hash = $1\n\t\t  AND (k.expires_at IS NULL OR k.expires_at > now())`, h).\n\tScan",
             "name": "Scan"
           },
           {
-            "line": 144,
+            "line": 239,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`\n\t\tSELECT k.id, k.scopes, k.allowed_zone_ids, k.owner_user_id, t.id, t.name, t.plan_id, t.is_super, t.created_at\n\t\tFROM tenant_api_keys k\n\t\tJOIN tenants t ON t.id = k.tenant_id\n\t\tWHERE k.key_hash = $1\n\t\t  AND (k.expires_at IS NULL OR k.expires_at > now())`"
           },
           {
-            "line": 151,
+            "line": 246,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 157,
+            "line": 252,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 158,
+            "line": 253,
             "expr": "json.Unmarshal",
             "name": "Unmarshal"
           },
           {
-            "line": 164,
+            "line": 259,
             "expr": "uuid.UUID",
             "name": "UUID"
           }
         ],
         "strings": [
           {
-            "line": 144,
+            "line": 239,
             "value": "\n\t\tSELECT k.id, k.scopes, k.allowed_zone_ids, k.owner_user_id, t.id, t.name, t.plan_id, t.is_super, t.created_at\n\t\tFROM tenant_api_keys k\n\t\tJOIN tenants t ON t.id = k.tenant_id\n\t\tWHERE k.key_hash = $1\n\t\t  AND (k.expires_at IS NULL OR k.expires_at > now())"
           }
         ],
@@ -1418,7 +1880,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 144,
+            "line": 239,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`\n\t\tSELECT k.id, k.scopes, k.allowed_zone_ids, k.owner_user_id, t.id, t.name, t.plan_id, t.is_super, t.created_at\n\t\tFROM tenant_api_keys k\n\t\tJOIN tenants t ON t.id = k.tenant_id\n\t\tWHERE k.key_hash = $1\n\t\t  AND (k.expires_at IS NULL OR k.expires_at > now())`"
@@ -1450,30 +1912,30 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "TouchAPIKey",
         "receiver": "*PgStore",
-        "line": 170,
-        "end": 180,
+        "line": 265,
+        "end": 275,
         "sha256": "a7e167c5e26aaf48a662cbc3a61bc6f6db9f0eef96b821dee74b00a0a2eb2391",
         "calls": [
           {
-            "line": 176,
+            "line": 271,
             "expr": "s.pool.QueryRow(ctx, `SELECT clock_timestamp()`).Scan",
             "name": "Scan"
           },
           {
-            "line": 176,
+            "line": 271,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT clock_timestamp()`"
           },
           {
-            "line": 179,
+            "line": 274,
             "expr": "s.touchAPIKeyObservation",
             "name": "touchAPIKeyObservation"
           }
         ],
         "strings": [
           {
-            "line": 176,
+            "line": 271,
             "value": "SELECT clock_timestamp()"
           }
         ],
@@ -1528,7 +1990,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 176,
+            "line": 271,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT clock_timestamp()`"
@@ -1561,12 +2023,12 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "touchAPIKeyObservation",
         "receiver": "*PgStore",
-        "line": 184,
-        "end": 196,
+        "line": 279,
+        "end": 291,
         "sha256": "67511e02dc86606847f5e36fa1cea9ba15ef2d9f1e51d0c88f03818ba19302a4",
         "calls": [
           {
-            "line": 194,
+            "line": 289,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "apiKeyUsageUpdateSQL"
@@ -1574,7 +2036,7 @@
         ],
         "strings": [
           {
-            "line": 186,
+            "line": 281,
             "value": ""
           }
         ],
@@ -1594,7 +2056,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey",
           "file": "internal/store/postgres/apikeys.go",
           "function": "TouchAPIKey",
-          "line": 179,
+          "line": 274,
           "expression": "s.touchAPIKeyObservation",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1635,7 +2097,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 194,
+            "line": 289,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "apiKeyUsageUpdateSQL"
@@ -1644,6 +2106,166 @@
         "effect_status": "source-fragments-not-evaluated-SQL",
         "callback_effect": "No declared callable callback; query interfaces are not callback parameters; helper effects need separate review.",
         "entry_role": "package-or-receiver-helper"
+      }
+    },
+    {
+      "id": "internal/store/postgres/apikeys.go::insertAPIKeyRows",
+      "owner": "postgres/apikeys.go",
+      "entry": "insertAPIKeyRows",
+      "group": "CTX25",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "syntax": {
+        "id": "internal/store/postgres/apikeys.go::insertAPIKeyRows",
+        "file": "internal/store/postgres/apikeys.go",
+        "name": "insertAPIKeyRows",
+        "receiver": "",
+        "line": 38,
+        "end": 64,
+        "sha256": "293516617d7e09d2e86cc1877d45da7ee2eba6829f4b78b8ff8f9124c66c3ddf",
+        "calls": [
+          {
+            "line": 40,
+            "expr": "uuid.New",
+            "name": "New"
+          },
+          {
+            "line": 42,
+            "expr": "time.Now",
+            "name": "Now"
+          },
+          {
+            "line": 43,
+            "expr": "json.Marshal",
+            "name": "Marshal"
+          },
+          {
+            "line": 48,
+            "expr": "len",
+            "name": "len"
+          },
+          {
+            "line": 51,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`"
+          },
+          {
+            "line": 60,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`"
+          }
+        ],
+        "strings": [
+          {
+            "line": 51,
+            "value": "\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
+          },
+          {
+            "line": 60,
+            "value": "INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)"
+          }
+        ],
+        "params": "func(ctx context.Context, tx pgx.Tx, k *models.TenantAPIKey) error"
+      },
+      "callers": [
+        {
+          "caller_id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey",
+          "file": "internal/store/postgres/apikeys.go",
+          "function": "CreateAPIKey",
+          "line": 32,
+          "expression": "insertAPIKeyRows",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+          "file": "internal/store/postgres/apikeys.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 131,
+          "expression": "insertAPIKeyRows",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": {
+        "boundary": "局部SQL写入helper，由调用者持有pgx.Tx：按需分配key UUID及时间、marshal scopes，先INSERT tenant_api_keys再INSERT tenant_api_key_usage，遇错立即返回。没有Begin/Commit、显式authority锁、JWT/权限检查或audit；trusted CreateAPIKey与正式CreateAPIKeyAuthorized分别拥有其外围事务，不能将此helper单独视为已授权发行。",
+        "local_operations": [
+          {
+            "line": 51,
+            "operation": "tx.Exec",
+            "sql_expression": "`\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 60,
+            "operation": "tx.Exec",
+            "sql_expression": "`INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "implicit_fk": "00001_baseline.sql：tenant_api_keys.tenant_id→tenants(id) ON DELETE CASCADE，owner_user_id→users(id) ON DELETE CASCADE（NOT VALID不免除新写检查）；00019_api_key_usage.sql：usage.api_key_id→tenant_api_keys(id) ON DELETE CASCADE。key与audit的tenant引用会取得FK父锁；正式发行提前取得目标tenant KEY SHARE。allowed_zone_ids为无FK UUID数组，zone存在性/tenant判定依赖显式SHARE NOWAIT。这里不执行FK、触发器或未来写者协议。"
+      },
+      "evidence": [
+        "internal/store/postgres/apikeys.go:38-64 sha256=293516617d7e09d2e86cc1877d45da7ee2eba6829f4b78b8ff8f9124c66c3ddf",
+        "PR #209 / Issue #204 separately records bounded actual PostgreSQL issuance and independent authz tests; this catalog executes syntax producers only."
+      ],
+      "unverified_risks": [
+        "目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR #209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。",
+        "必须由调用者承担事务回滚与所需authority/audit协议；此helper不鉴别调用者、也不独立证明可信seed与HTTP路径的dispatch。"
+      ],
+      "review_status": "static-type-review",
+      "followup_tasks": [
+        "R5-P0-070",
+        "R5-P1-030"
+      ],
+      "assertions": {
+        "direct_sql_effects": [
+          {
+            "line": 51,
+            "sql_fragment": "\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)"
+          },
+          {
+            "line": 60,
+            "sql_fragment": "INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "transaction_helper_calls": [],
+        "sql_execution_expressions": [
+          {
+            "line": 51,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`\n\t\tINSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`"
+          },
+          {
+            "line": 60,
+            "expr": "tx.Exec",
+            "name": "Exec",
+            "sql_expr": "`INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`"
+          }
+        ],
+        "effect_status": "source-fragments-not-evaluated-SQL",
+        "callback_effect": "没有外部callback参数，仅本地UUID/时间/JSON转换及传入pgx.Tx的两次INSERT；事务提交、回滚和上层授权由调用者控制。",
+        "entry_role": "local-or-adapter-helper"
+      },
+      "file_family_context": "局部SQL写入helper，由调用者持有pgx.Tx：按需分配key UUID及时间、marshal scopes，先INSERT tenant_api_keys再INSERT tenant_api_key_usage，遇错立即返回。没有Begin/Commit、显式authority锁、JWT/权限检查或audit；trusted CreateAPIKey与正式CreateAPIKeyAuthorized分别拥有其外围事务，不能将此helper单独视为已授权发行。",
+      "evidence_level": "source-only",
+      "source_review": {
+        "base_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+        "source_sha256": "293516617d7e09d2e86cc1877d45da7ee2eba6829f4b78b8ff8f9124c66c3ddf",
+        "role": "caller-owned-transaction-write-helper",
+        "trace": "局部SQL写入helper，由调用者持有pgx.Tx：按需分配key UUID及时间、marshal scopes，先INSERT tenant_api_keys再INSERT tenant_api_key_usage，遇错立即返回。没有Begin/Commit、显式authority锁、JWT/权限检查或audit；trusted CreateAPIKey与正式CreateAPIKeyAuthorized分别拥有其外围事务，不能将此helper单独视为已授权发行。",
+        "unverified": "目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR #209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md"
       }
     },
     {
@@ -1665,42 +2287,42 @@
         "file": "internal/store/postgres/apikeys.go",
         "name": "scanAPIKeys",
         "receiver": "",
-        "line": 82,
-        "end": 104,
+        "line": 177,
+        "end": 199,
         "sha256": "67ab2308953cfb38448b520f477cf7ab79af283f3053cc9687c47a0ad9bc01c2",
         "calls": [
           {
-            "line": 84,
+            "line": 179,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 88,
+            "line": 183,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 93,
+            "line": 188,
             "expr": "uuid.UUID",
             "name": "UUID"
           },
           {
-            "line": 96,
+            "line": 191,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 97,
+            "line": 192,
             "expr": "json.Unmarshal",
             "name": "Unmarshal"
           },
           {
-            "line": 101,
+            "line": 196,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 103,
+            "line": 198,
             "expr": "rows.Err",
             "name": "Err"
           }
@@ -1713,7 +2335,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys",
           "file": "internal/store/postgres/apikeys.go",
           "function": "ListAPIKeys",
-          "line": 70,
+          "line": 165,
           "expression": "scanAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1721,7 +2343,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner",
           "file": "internal/store/postgres/apikeys.go",
           "function": "ListAPIKeysByOwner",
-          "line": 79,
+          "line": 174,
           "expression": "scanAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1931,18 +2553,10 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
-          "file": "internal/app/admin/service.go",
-          "function": "CreateAPIKey",
-          "line": 470,
-          "expression": "app.InsertAudit",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
-        {
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 323,
+          "line": 324,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1950,7 +2564,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 258,
+          "line": 259,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1958,7 +2572,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 528,
+          "line": 442,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1966,7 +2580,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 357,
+          "line": 358,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1974,7 +2588,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 303,
+          "line": 304,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1982,7 +2596,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 343,
+          "line": 344,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1990,7 +2604,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 641,
+          "line": 555,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1998,7 +2612,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 288,
+          "line": 289,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2006,7 +2620,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:updateValidatedSetting",
           "file": "internal/app/admin/service.go",
           "function": "updateValidatedSetting",
-          "line": 214,
+          "line": 215,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2208,7 +2822,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 558,
+          "line": 472,
           "expression": "s.store.ListAuditEntries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -2345,7 +2959,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAudit",
           "file": "internal/app/admin/service.go",
           "function": "ListAudit",
-          "line": 594,
+          "line": 508,
           "expression": "s.store.ListAuditEntriesPaged",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -26270,7 +26884,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 550,
+          "line": 464,
           "expression": "s.store.CountAllMailboxes",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -28227,7 +28841,7 @@
           "caller_id": "internal/api/handlers/users_admin.go:*UserAdminHandler:DeleteUserByAdmin",
           "file": "internal/api/handlers/users_admin.go",
           "function": "DeleteUserByAdmin",
-          "line": 274,
+          "line": 280,
           "expression": "h.store.DeleteUserGuarded",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -28594,7 +29208,7 @@
           "caller_id": "internal/api/handlers/users_admin.go:*UserAdminHandler:UpdateUserByAdmin",
           "file": "internal/api/handlers/users_admin.go",
           "function": "UpdateUserByAdmin",
-          "line": 226,
+          "line": 232,
           "expression": "h.store.UpdateUserGuarded",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -29601,7 +30215,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 554,
+          "line": 468,
           "expression": "s.store.CountAllMessages",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -38186,10 +38800,26 @@
       },
       "callers": [
         {
+          "caller_id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+          "file": "internal/store/postgres/apikeys.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 86,
+          "expression": "tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, key.TenantID).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+          "file": "internal/store/postgres/apikeys.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 121,
+          "expression": "tx.QueryRow(ctx, `SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT`, id).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:GetAPIKey",
           "file": "internal/store/postgres/apikeys.go",
           "function": "GetAPIKey",
-          "line": 110,
+          "line": 205,
           "expression": "s.pool.QueryRow(ctx, apiKeyMetadataSelect+` WHERE k.id=$1`, id).\n\tScan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38197,7 +38827,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:ResolveAPIKey",
           "file": "internal/store/postgres/apikeys.go",
           "function": "ResolveAPIKey",
-          "line": 144,
+          "line": 239,
           "expression": "s.pool.QueryRow(ctx, `\n\t\tSELECT k.id, k.scopes, k.allowed_zone_ids, k.owner_user_id, t.id, t.name, t.plan_id, t.is_super, t.created_at\n\t\tFROM tenant_api_keys k\n\t\tJOIN tenants t ON t.id = k.tenant_id\n\t\tWHERE k.key_hash = $1\n\t\t  AND (k.expires_at IS NULL OR k.expires_at > now())`, h).\n\tScan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38205,7 +38835,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:TouchAPIKey",
           "file": "internal/store/postgres/apikeys.go",
           "function": "TouchAPIKey",
-          "line": 176,
+          "line": 271,
           "expression": "s.pool.QueryRow(ctx, `SELECT clock_timestamp()`).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -38213,7 +38843,7 @@
           "caller_id": "internal/store/postgres/apikeys.go::scanAPIKeys",
           "file": "internal/store/postgres/apikeys.go",
           "function": "scanAPIKeys",
-          "line": 88,
+          "line": 183,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41338,6 +41968,14 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
+          "caller_id": "internal/testutil/fake_store_api_key_issuer.go:*FakeStore:CreateAPIKeyAuthorized",
+          "file": "internal/testutil/fake_store_api_key_issuer.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 34,
+          "expression": "s.EffectivePermission",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
           "caller_id": "internal/testutil/fake_store_outbound_retry.go:*fakeRetryReader:EffectivePermission",
           "file": "internal/testutil/fake_store_outbound_retry.go",
           "function": "EffectivePermission",
@@ -41640,7 +42278,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 505,
+          "line": 419,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41883,7 +42521,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 483,
+          "line": 497,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41891,7 +42529,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 370,
+          "line": 384,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41899,7 +42537,7 @@
           "caller_id": "internal/api/handlers/users_admin.go:*UserAdminHandler:DeleteUserByAdmin",
           "file": "internal/api/handlers/users_admin.go",
           "function": "DeleteUserByAdmin",
-          "line": 259,
+          "line": 265,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42130,14 +42768,6 @@
         "params": "func(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)"
       },
       "callers": [
-        {
-          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
-          "file": "internal/app/admin/service.go",
-          "function": "CreateAPIKey",
-          "line": 426,
-          "expression": "s.store.GetZone",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
         {
           "caller_id": "internal/app/domains/service.go:*Service:ownedZone",
           "file": "internal/app/domains/service.go",
@@ -47541,6 +48171,14 @@
       },
       "callers": [
         {
+          "caller_id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+          "file": "internal/store/postgres/apikeys.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 101,
+          "expression": "effectivePermissionSnapshot",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
           "caller_id": "internal/store/postgres/company_access_explanation.go:*PgStore:ExplainMailboxAccess",
           "file": "internal/store/postgres/company_access_explanation.go",
           "function": "ExplainMailboxAccess",
@@ -48090,6 +48728,14 @@
           "function": "TemplateForSend",
           "line": 143,
           "expression": "r.EffectivePermission",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_api_key_issuer.go:*FakeStore:CreateAPIKeyAuthorized",
+          "file": "internal/testutil/fake_store_api_key_issuer.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 34,
+          "expression": "s.EffectivePermission",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -49390,7 +50036,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 320,
+          "line": 321,
           "expression": "s.store.CreatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49502,7 +50148,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 354,
+          "line": 355,
           "expression": "s.store.DeletePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49608,7 +50254,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 247,
+          "line": 248,
           "expression": "s.store.GetPlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49740,7 +50386,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 542,
+          "line": 456,
           "expression": "s.store.ListPlans",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49844,7 +50490,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 340,
+          "line": 341,
           "expression": "s.store.UpdatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -50102,7 +50748,7 @@
           "caller_id": "internal/outbound/builder.go::encodeQP",
           "file": "internal/outbound/builder.go",
           "function": "encodeQP",
-          "line": 232,
+          "line": 236,
           "expression": "qpw.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50110,7 +50756,7 @@
           "caller_id": "internal/outbound/builder.go::writeBody",
           "file": "internal/outbound/builder.go",
           "function": "writeBody",
-          "line": 198,
+          "line": 202,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50118,7 +50764,7 @@
           "caller_id": "internal/outbound/builder.go::writeMessageBody",
           "file": "internal/outbound/builder.go",
           "function": "writeMessageBody",
-          "line": 179,
+          "line": 183,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50174,7 +50820,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 125,
+          "line": 127,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50182,7 +50828,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 133,
+          "line": 135,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50190,7 +50836,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 137,
+          "line": 139,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50198,7 +50844,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 144,
+          "line": 146,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50214,7 +50860,7 @@
           "caller_id": "internal/rawobject/integrity.go:*Store:matchesExisting",
           "file": "internal/rawobject/integrity.go",
           "function": "matchesExisting",
-          "line": 25,
+          "line": 22,
           "expression": "input.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50342,7 +50988,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeys",
           "file": "internal/store/postgres/apikeys.go",
           "function": "ListAPIKeys",
-          "line": 69,
+          "line": 164,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50350,7 +50996,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:ListAPIKeysByOwner",
           "file": "internal/store/postgres/apikeys.go",
           "function": "ListAPIKeysByOwner",
-          "line": 78,
+          "line": 173,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51356,7 +52002,7 @@
           "caller_id": "internal/api/handlers/auth.go::NewAuthHandler",
           "file": "internal/api/handlers/auth.go",
           "function": "NewAuthHandler",
-          "line": 64,
+          "line": 65,
           "expression": "lifecycle.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51644,7 +52290,7 @@
           "caller_id": "internal/company/templates.go::renderValidated",
           "file": "internal/company/templates.go",
           "function": "renderValidated",
-          "line": 164,
+          "line": 170,
           "expression": "texttemplate.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51652,7 +52298,7 @@
           "caller_id": "internal/company/templates.go::renderValidated",
           "file": "internal/company/templates.go",
           "function": "renderValidated",
-          "line": 180,
+          "line": 186,
           "expression": "htmltemplate.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51804,7 +52450,7 @@
           "caller_id": "internal/rawobject/integrity.go:*Store:matchesExisting",
           "file": "internal/rawobject/integrity.go",
           "function": "matchesExisting",
-          "line": 21,
+          "line": 18,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51812,7 +52458,7 @@
           "caller_id": "internal/rawobject/integrity.go:*Store:matchesExisting",
           "file": "internal/rawobject/integrity.go",
           "function": "matchesExisting",
-          "line": 38,
+          "line": 40,
           "expression": "sha256.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51865,10 +52511,10 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
-          "caller_id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey",
+          "caller_id": "internal/store/postgres/apikeys.go::insertAPIKeyRows",
           "file": "internal/store/postgres/apikeys.go",
-          "function": "CreateAPIKey",
-          "line": 22,
+          "function": "insertAPIKeyRows",
+          "line": 40,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52326,6 +52972,22 @@
           "function": "Get",
           "line": 152,
           "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_api_key_issuer.go:*FakeStore:CreateAPIKeyAuthorized",
+          "file": "internal/testutil/fake_store_api_key_issuer.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 55,
+          "expression": "uuid.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store_api_key_issuer.go:*FakeStore:CreateAPIKeyAuthorized",
+          "file": "internal/testutil/fake_store_api_key_issuer.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 62,
+          "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -52813,7 +53475,7 @@
           "caller_id": "internal/store/postgres/apikeys.go:*PgStore:ResolveAPIKey",
           "file": "internal/store/postgres/apikeys.go",
           "function": "ResolveAPIKey",
-          "line": 137,
+          "line": 232,
           "expression": "hashKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -54725,7 +55387,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListIngestJobs",
           "file": "internal/api/handlers/admin.go",
           "function": "ListIngestJobs",
-          "line": 255,
+          "line": 261,
           "expression": "h.service.ListIngestJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -54733,7 +55395,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListIngestJobs",
           "file": "internal/app/admin/service.go",
           "function": "ListIngestJobs",
-          "line": 605,
+          "line": 519,
           "expression": "s.store.ListIngestJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -54994,7 +55656,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListWebhookDeliveries",
           "file": "internal/api/handlers/admin.go",
           "function": "ListWebhookDeliveries",
-          "line": 265,
+          "line": 271,
           "expression": "h.service.ListWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -55002,7 +55664,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListWebhookDeliveries",
           "file": "internal/app/admin/service.go",
           "function": "ListWebhookDeliveries",
-          "line": 616,
+          "line": 530,
           "expression": "s.store.ListWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -56595,7 +57257,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 404,
+          "line": 418,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -56603,7 +57265,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 376,
+          "line": 390,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -56831,7 +57493,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 350,
+          "line": 364,
           "expression": "h.store.RotateRefreshToken",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59457,7 +60119,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListSettings",
           "file": "internal/api/handlers/admin.go",
           "function": "ListSettings",
-          "line": 297,
+          "line": 303,
           "expression": "h.service.ListSettings",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -59465,7 +60127,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UpdateSettings",
           "file": "internal/api/handlers/admin.go",
           "function": "UpdateSettings",
-          "line": 320,
+          "line": 326,
           "expression": "h.service.ListSettings",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -59704,7 +60366,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:GetSMTPPolicy",
           "file": "internal/api/handlers/admin.go",
           "function": "GetSMTPPolicy",
-          "line": 274,
+          "line": 280,
           "expression": "h.service.GetSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -59712,7 +60374,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:GetSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "GetSMTPPolicy",
-          "line": 627,
+          "line": 541,
           "expression": "s.store.GetSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -59854,7 +60516,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 638,
+          "line": 552,
           "expression": "s.store.UpsertSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61424,7 +62086,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 287,
+          "line": 301,
           "expression": "h.store.CreateTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61432,7 +62094,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 255,
+          "line": 256,
           "expression": "s.store.CreateTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61553,7 +62215,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 300,
+          "line": 301,
           "expression": "s.store.DeleteTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61953,7 +62615,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 367,
+          "line": 375,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61961,7 +62623,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 272,
+          "line": 273,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62102,7 +62764,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 538,
+          "line": 452,
           "expression": "s.store.ListTenants",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62209,7 +62871,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 285,
+          "line": 286,
           "expression": "s.store.UpsertOverride",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62403,7 +63065,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 472,
+          "line": 486,
           "expression": "atomic.ChangePasswordAtomic",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62706,7 +63368,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:issueTokenPair",
           "file": "internal/api/handlers/auth.go",
           "function": "issueTokenPair",
-          "line": 525,
+          "line": 539,
           "expression": "h.store.CreateRefreshToken",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62877,7 +63539,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 301,
+          "line": 315,
           "expression": "h.store.CreateUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63418,7 +64080,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 483,
+          "line": 497,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63426,7 +64088,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 370,
+          "line": 384,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63434,7 +64096,7 @@
           "caller_id": "internal/api/handlers/users_admin.go:*UserAdminHandler:DeleteUserByAdmin",
           "file": "internal/api/handlers/users_admin.go",
           "function": "DeleteUserByAdmin",
-          "line": 259,
+          "line": 265,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63664,7 +64326,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Login",
           "file": "internal/api/handlers/auth.go",
           "function": "Login",
-          "line": 166,
+          "line": 167,
           "expression": "h.store.GetUserByEmail",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63672,7 +64334,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 264,
+          "line": 278,
           "expression": "h.store.GetUserByEmail",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64145,7 +64807,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 497,
+          "line": 511,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64153,7 +64815,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 406,
+          "line": 420,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64255,7 +64917,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Login",
           "file": "internal/api/handlers/auth.go",
           "function": "Login",
-          "line": 197,
+          "line": 198,
           "expression": "h.store.TouchUserLogin",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64455,7 +65117,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:updatePasswordHash",
           "file": "internal/api/handlers/auth.go",
           "function": "updatePasswordHash",
-          "line": 533,
+          "line": 547,
           "expression": "h.store.UpdateUserPassword",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64642,6 +65304,14 @@
         "params": "func(row pgx.Row) (*models.User, error)"
       },
       "callers": [
+        {
+          "caller_id": "internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized",
+          "file": "internal/store/postgres/apikeys.go",
+          "function": "CreateAPIKeyAuthorized",
+          "line": 92,
+          "expression": "scanUser",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
         {
           "caller_id": "internal/store/postgres/company_access_explanation.go:*PgStore:ExplainMailboxAccess",
           "file": "internal/store/postgres/company_access_explanation.go",
@@ -65397,7 +66067,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 546,
+          "line": 460,
           "expression": "s.store.CountAllZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65968,14 +66638,6 @@
         "params": "func(ctx context.Context, id uuid.UUID) (*models.DomainZone, error)"
       },
       "callers": [
-        {
-          "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
-          "file": "internal/app/admin/service.go",
-          "function": "CreateAPIKey",
-          "line": 426,
-          "expression": "s.store.GetZone",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
         {
           "caller_id": "internal/app/domains/service.go:*Service:ownedZone",
           "file": "internal/app/domains/service.go",
@@ -68362,16 +69024,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "740126660526db987b7914c50a8731b7cac9bf42",
-  "current_review_boundary": "Revision 14 binds the final public FINISH merge. Five existing company transaction/provisioning bodies and one pure typed error helper are explicitly reviewed; existing classifications and migrations are unchanged. Existing manual fields are retained in historical_revision13_review only for the five changed bodies; other manual judgments remain intact. Fresh syntax, exact derived assertions and name-match callers are resampled. The three existing wrappers retain broad uniqueness mapping, while mailbox creation disables that mapping and classifies only its INSERT. Maintenance completes 0 implementation TODOs and grants no full runtime, release or parent acceptance.",
+  "last_review_base_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+  "current_review_boundary": "Revision 15 binds the actual public ADVANCE merge 26a30e3. One existing trusted key-creation body is reclassified from direct-write to write-call-closure and its complete prior manual/source review is preserved in historical_revision14_review. Two new key-row/authorized-issuance functions are manually reviewed against exact body hashes. Existing file-review fields remain unchanged with one additive revision15 note. Fresh syntax, exact derived assertions, name-match callers, client locations and compatibility closure bytes are reconciled. Migrations, collectors, gates, frozen history and unapproved-source guards remain unchanged. Maintenance completes 0 implementation TODOs and grants no global runtime, release or parent acceptance.",
   "inventory_revision": {
-    "revision": 14,
-    "source_commit": "740126660526db987b7914c50a8731b7cac9bf42",
+    "revision": 15,
+    "source_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "be3a6bf41daa198a39306c90fd03411e38a017d8",
-    "previous_snapshot_blob": "fcea69d4b04676ac4d643bdd60963ed9cca2265a",
-    "previous_sha256": "d9fb50b5476e00bd55e339beb7540e53564d7867738fc866d30ea8385b64fdac",
+    "previous_snapshot_commit": "fdea2178759ce9842844926374ea98517bc4188b",
+    "previous_snapshot_blob": "1415c2f371648ac093f1d69a0cfb8242c50778f9",
+    "previous_sha256": "3061dda4280598710648616781b72dbe2cb2c2f78b28b70a636a976f0b0b644f",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md"
   }
 }

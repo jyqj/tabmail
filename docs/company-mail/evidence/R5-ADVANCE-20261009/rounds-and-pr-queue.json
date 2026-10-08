@@ -1,0 +1,201 @@
+{
+  "scope": "Read-only final product delivery snapshot before revision15 maintenance",
+  "product_source": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+  "implementation_todos": {
+    "completed": 10,
+    "remaining": 0,
+    "round_remaining": [
+      6,
+      3,
+      0
+    ]
+  },
+  "maintenance_todos_added": 0,
+  "source": "GitHub current issues API and PR metadata",
+  "entries": [
+    {
+      "kind": "issue",
+      "number": 197,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-01: Validate registration email identity before account creation",
+      "url": "https://github.com/jyqj/tabmail/issues/197",
+      "closed_at": "2026-10-08T18:31:57Z",
+      "updated_at": "2026-10-08T18:48:45Z"
+    },
+    {
+      "kind": "issue",
+      "number": 198,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-02: Retire offboarding plans when the member list cannot be revalidated",
+      "url": "https://github.com/jyqj/tabmail/issues/198",
+      "closed_at": "2026-10-08T18:31:58Z",
+      "updated_at": "2026-10-08T18:48:46Z"
+    },
+    {
+      "kind": "issue",
+      "number": 199,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-03: Validate administrator profile updates before guarded persistence",
+      "url": "https://github.com/jyqj/tabmail/issues/199",
+      "closed_at": "2026-10-08T18:31:59Z",
+      "updated_at": "2026-10-08T18:48:47Z"
+    },
+    {
+      "kind": "issue",
+      "number": 200,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-04: Require a complete SMTP final reply before recording delivery",
+      "url": "https://github.com/jyqj/tabmail/issues/200",
+      "closed_at": "2026-10-08T18:32:00Z",
+      "updated_at": "2026-10-08T18:48:48Z"
+    },
+    {
+      "kind": "issue",
+      "number": 201,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-05: Accept valid quoted local parts in template email variables",
+      "url": "https://github.com/jyqj/tabmail/issues/201",
+      "closed_at": "2026-10-08T18:41:40Z",
+      "updated_at": "2026-10-08T18:48:49Z"
+    },
+    {
+      "kind": "issue",
+      "number": 202,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-06: Preserve unsaved template edits when a version is revoked",
+      "url": "https://github.com/jyqj/tabmail/issues/202",
+      "closed_at": "2026-10-08T18:41:41Z",
+      "updated_at": "2026-10-08T18:48:51Z"
+    },
+    {
+      "kind": "issue",
+      "number": 203,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-07: Fold outbound recipient headers within SMTP line limits",
+      "url": "https://github.com/jyqj/tabmail/issues/203",
+      "closed_at": "2026-10-08T18:41:42Z",
+      "updated_at": "2026-10-08T18:48:52Z"
+    },
+    {
+      "kind": "issue",
+      "number": 204,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-08: Fence API key issuance against current account and permission changes",
+      "url": "https://github.com/jyqj/tabmail/issues/204",
+      "closed_at": "2026-10-08T18:58:09Z",
+      "updated_at": "2026-10-08T19:00:52Z"
+    },
+    {
+      "kind": "issue",
+      "number": 205,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-09: Expose read failures and recovery in operational list pages",
+      "url": "https://github.com/jyqj/tabmail/issues/205",
+      "closed_at": "2026-10-08T18:58:10Z",
+      "updated_at": "2026-10-08T19:00:53Z"
+    },
+    {
+      "kind": "issue",
+      "number": 206,
+      "state": "closed",
+      "state_reason": "completed",
+      "title": "ADVANCE-20261009-10: Close existing raw object streams returned alongside Get errors",
+      "url": "https://github.com/jyqj/tabmail/issues/206",
+      "closed_at": "2026-10-08T18:58:11Z",
+      "updated_at": "2026-10-08T19:00:54Z"
+    },
+    {
+      "kind": "pr",
+      "number": 17,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head_sha": "5b7f8774643243711e8065f2403e419f5ba81065",
+      "base_sha": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+      "merge_commit_sha": null,
+      "title": "fix: enforce R5 benchmark evidence types and current index identity",
+      "url": "https://github.com/jyqj/tabmail/pull/17"
+    },
+    {
+      "kind": "pr",
+      "number": 20,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head_sha": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+      "base_sha": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+      "merge_commit_sha": "b1051d661ed421a081c6ebe2305efe77c2e414af",
+      "title": "test(r5): independent selected-attestation v1 review rejects first-capture drift",
+      "url": "https://github.com/jyqj/tabmail/pull/20"
+    },
+    {
+      "kind": "pr",
+      "number": 24,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head_sha": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+      "base_sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+      "merge_commit_sha": "f6e41ed02e862d4bd62e9c868a742812a748a510",
+      "title": "Experiment: Goose 64 KiB parser equivalence; wholePG still times out",
+      "url": "https://github.com/jyqj/tabmail/pull/24"
+    },
+    {
+      "kind": "pr",
+      "number": 40,
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head_sha": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+      "base_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+      "merge_commit_sha": "69c4dcc486e50e23702a0dc960224ba73be0dad9",
+      "title": "Verify existing closure covers v3 consumers",
+      "url": "https://github.com/jyqj/tabmail/pull/40"
+    },
+    {
+      "kind": "pr",
+      "number": 207,
+      "state": "closed",
+      "draft": false,
+      "merged": true,
+      "head_sha": "2f505fe1ba6e583e28961c8c749401f861a964a4",
+      "base_sha": "fdea2178759ce9842844926374ea98517bc4188b",
+      "merge_commit_sha": "899e5bd96a9839bd2fab1b1afe7a95adaf1f643c",
+      "title": "ADVANCE 20261009 round 1: four account, handover and SMTP fixes",
+      "url": "https://github.com/jyqj/tabmail/pull/207"
+    },
+    {
+      "kind": "pr",
+      "number": 208,
+      "state": "closed",
+      "draft": false,
+      "merged": true,
+      "head_sha": "a32a1a3d6cffcb3ee286d4a3e9b6d0cfa0d0565f",
+      "base_sha": "899e5bd96a9839bd2fab1b1afe7a95adaf1f643c",
+      "merge_commit_sha": "f05ce6c0cb60035f4eb5a9d4438522b9fcd92203",
+      "title": "ADVANCE 20261009 round 2: three template and message fixes",
+      "url": "https://github.com/jyqj/tabmail/pull/208"
+    },
+    {
+      "kind": "pr",
+      "number": 209,
+      "state": "closed",
+      "draft": false,
+      "merged": true,
+      "head_sha": "f8ad0533246fdf0d9257a31ade956b581a0c4426",
+      "base_sha": "f05ce6c0cb60035f4eb5a9d4438522b9fcd92203",
+      "merge_commit_sha": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+      "title": "ADVANCE 20261009 round 3: atomic keys, reliable lists and owned raw streams",
+      "url": "https://github.com/jyqj/tabmail/pull/209"
+    }
+  ]
+}

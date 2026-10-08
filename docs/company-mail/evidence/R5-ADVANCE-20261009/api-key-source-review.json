@@ -1,0 +1,112 @@
+{
+  "status": "source-accepted-pending-actual-postgresql",
+  "source_commit": "09bddd1e3853a216fa96cb2712f8e7c284d8c970",
+  "source_tree": "4d1e611d0716a3696ec32c0badce231dc3133e7a",
+  "source_clean": true,
+  "independent_test_commit": "8f18e372855639563533e9a0c156ddb6965a16c7",
+  "independent_test_baseline": {
+    "leaves": 15,
+    "passed": 12,
+    "failed": 3,
+    "skipped": 0
+  },
+  "independent_test_candidate": {
+    "leaves": 15,
+    "passed": 15,
+    "failed": 0,
+    "skipped": 0
+  },
+  "all_candidate_race": {
+    "leaves": 197,
+    "passed": 197,
+    "failed": 0,
+    "skipped": 0,
+    "packages": {
+      "internal/authz": 190,
+      "internal/api/handlers TestAdminHandler": 7
+    },
+    "includes_independent_15": true
+  },
+  "python_verifier": {
+    "methods": 3,
+    "passed": 3,
+    "boundary": "Synthetic verifier input; not PostgreSQL execution."
+  },
+  "test": {
+    "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/internal/authz/r5_api_key_issuer_review_test.go",
+    "bytes": 7344,
+    "sha256": "2646c06912b281b3148689965e249af6a0a3f70525033b4d59b71c859fad8e65"
+  },
+  "frozen_pg_test": {
+    "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/internal/api/handlers/r5_api_key_issuance_pg_test.go",
+    "bytes": 14178,
+    "sha256": "90fd26b6ce36a867a0ba56da1b32486bf76eb1489ebfa1af52e56afac7def5f9"
+  },
+  "source_files": [
+    {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/internal/authz/api_key_issuer.go",
+      "bytes": 4556,
+      "sha256": "f74030ba2a235fa1836c81be18659907dafe98cb14fb9c56cd7caa83f3a0da01"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/internal/store/postgres/apikeys.go",
+      "bytes": 10736,
+      "sha256": "8b62e7af8dd8aa1790c93297059fb17c5156a5791a9cb703951b054a69fc85fc"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/internal/app/admin/service.go",
+      "bytes": 19041,
+      "sha256": "e7e82fc8f6d2ea076b10866917ef2725b6d2c1cda4613a6e96d451d1add108b2"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/internal/api/handlers/admin.go",
+      "bytes": 11971,
+      "sha256": "6e7ef2e274a48907d5af78f4b0537e4abaef840aa9d0d313c3c4b56f46697a35"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/scripts/run_r5_api_key_issuance.py",
+      "bytes": 9313,
+      "sha256": "88437e23f5a9903919abab74f3aab8a7009524d17ef6c460e6813e329039ae42"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-review-backend-204/.github/workflows/api-key-issuance.yml",
+      "bytes": 1850,
+      "sha256": "c88e5a23a6017be34163b4ae93579b0b441dbe2621b03a2df54ca929ab2c8f1a"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/workspace/scratch/02f0b8733500/review-204-proof-baseline.jsonl",
+      "bytes": 16721,
+      "sha256": "3a8afcc403ac19ec43b6f8c73e794eabc7020bf78195aef036dca58083f1d393"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/review-204-authz-candidate.jsonl",
+      "bytes": 168975,
+      "sha256": "18a55d67950189c94b3215750a6f2daa4950417c02fff75a5b3071ab15a9da10"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/review-204-admin-candidate.jsonl",
+      "bytes": 6314,
+      "sha256": "b3b6bcc86f53850de0ae15915970c9f81d43dfc8c16259020e52d29c9c95d4b4"
+    },
+    {
+      "path": "/workspace/scratch/02f0b8733500/review-204-runner-candidate.log",
+      "bytes": 577,
+      "sha256": "c81c23a63eabe877df5806f37b56b0b921b19338373b7e87c187a451638b6508"
+    }
+  ],
+  "findings_resolved": [
+    "Unrepresentable inherited deny-all zone scope rejected rather than stored as unrestricted.",
+    "OpenAPI 500 does not claim that a commit with a lost acknowledgement cannot have committed."
+  ],
+  "checked": [
+    "Mandatory authorized Store method; no runtime fallback to trusted seed command.",
+    "Owned JWT session proof, current user/role/home revalidation, distinct selected and target company for super administrator.",
+    "Target tenant KEY SHARE before current user SHARE; effective profile SHARE NOWAIT; sorted deduplicated actual zones SHARE NOWAIT.",
+    "Key and usage rows and required audit share one transaction; returned key model updated only after commit acknowledgement.",
+    "Original 18-leaf PG test bytes fixed; exact baseline effects required; errors/skips/missing IDs are failures."
+  ],
+  "postgresql_verified": false,
+  "implementation_todos_completed": 0
+}
