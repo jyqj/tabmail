@@ -11,11 +11,11 @@
 <!-- R5-COMPLETE-20261008:END -->
 
 <!-- R5-CONTINUE-20261008:BEGIN -->
-## CONTINUE 批次：新十项，原生多 agent 三轮推进
+## CONTINUE 批次：新十项，原生多 agent 三轮全部完成
 
 本批从公开 `1322c9284d5dad8984adb61d2b4627b331c3740f` 继续，十项完整范围见 [CONTINUE 账本](R5-CONTINUE-20261008.md)。新认领 #125/#126/#127/#129、#133/#134/#135、#136/#137/#139，按 **4＋3＋3** 完成固定失败基线、实现、同字节回归、独立审查、精确树合入及逐项 closed/completed。前批十项和另一原生工作区 COMPLETE 批次不重复计数。
 
-前两轮 [#143](https://github.com/jyqj/tabmail/pull/143)、[#150](https://github.com/jyqj/tabmail/pull/150) 已精确树合入，七个 Issue 均 closed/completed；本批 **7/10 完成，剩余 3**。第三轮 #136/#137/#139 的实现、固定对照及交叉独审完成；同一干净联合源实际 320 Go / 144 UI / 99 Python 通过，完整契约 CLI 通过，待精确树合入并实际关闭三项。完整 UI 首跑、残余依赖审计及 PG 跳过均在账本如实保留。原父清单仍 **10/171，剩余 161**，原门槛保持。
+三轮 [#143](https://github.com/jyqj/tabmail/pull/143)、[#150](https://github.com/jyqj/tabmail/pull/150)、[#151](https://github.com/jyqj/tabmail/pull/151) 均已精确树合入，十个 Issue 逐项核实 closed/completed；本批 **10/10 完成，剩余 0**，逐轮剩余 **6 → 3 → 0**。最后实际 merge `33f61fde3cf37d3cec2dd360146369c291eb0930`、完整树 `d982493e28431e644fd4018d8f746d8940280268` 与最终独审源一致且双 parent 已核对；source-evidence `37745039711` SUCCESS。同一干净联合产品源实际 320 Go / 144 UI / 99 Python 通过，完整契约 CLI 通过。完整 UI 首跑、残余依赖审计及 PG 跳过均在账本如实保留，第三轮完整 CI 合入时仍在运行。目录及 PR 维护计 0 TODO；原父清单仍 **10/171，剩余 161**，原门槛保持。
 <!-- R5-CONTINUE-20261008:END -->
 
 <!-- R5-ADVANCE-20261008:BEGIN -->
