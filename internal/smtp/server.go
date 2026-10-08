@@ -9,6 +9,7 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/emersion/go-sasl"
 	gosmtp "github.com/emersion/go-smtp"
@@ -432,6 +433,19 @@ func (s *session) workContext() context.Context {
 	return context.Background()
 }
 
+// Socket deadlines cannot interrupt a policy or recipient database lookup.
+// Give each envelope command one shared budget, retaining any earlier shutdown
+// cancellation. DATA continues to use the independent durable work lifetime.
+func (s *session) admissionContext() (context.Context, context.CancelFunc) {
+	timeout := s.backend.cfg.Timeout
+	if timeout <= 0 {
+		// Config validation requires a positive value. Standalone constructors
+		// that bypass config loading still get its existing 300s default.
+		timeout = 5 * time.Minute
+	}
+	return context.WithTimeout(s.workContext(), timeout)
+}
+
 func (s *session) AuthPlain(_ string, _ string) error {
 	return gosmtp.ErrAuthUnsupported
 }
@@ -449,6 +463,8 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 		return smtpErr(451, "SMTP server shutting down")
 	}
 	defer s.backend.workWG.Done()
+	ctx, cancel := s.admissionContext()
+	defer cancel()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -460,7 +476,7 @@ func (s *session) Mail(from string, opts *gosmtp.MailOptions) error {
 		return smtpErr(501, "invalid sender domain")
 	}
 	s.from = addr
-	pol, err := s.backend.ingest.CurrentPolicy(s.workContext())
+	pol, err := s.backend.ingest.CurrentPolicy(ctx)
 	if err != nil {
 		return smtpErr(451, "temporary policy lookup failure")
 	}
@@ -496,6 +512,8 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 		return smtpErr(451, "SMTP server shutting down")
 	}
 	defer s.backend.workWG.Done()
+	ctx, cancel := s.admissionContext()
+	defer cancel()
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -505,7 +523,7 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 		metrics.SMTPRecipientRejected()
 		return smtpErr(550, "invalid recipient")
 	}
-	pol, err := s.backend.ingest.CurrentPolicy(s.workContext())
+	pol, err := s.backend.ingest.CurrentPolicy(ctx)
 	if err != nil {
 		return smtpErr(451, "temporary policy lookup failure")
 	}
@@ -514,7 +532,7 @@ func (s *session) Rcpt(to string, _ *gosmtp.RcptOptions) error {
 		metrics.MailboxRecipientRejected(addr)
 		return smtpErr(550, "recipient domain rejected by policy")
 	}
-	res, err := s.backend.resolver.Check(s.workContext(), addr)
+	res, err := s.backend.resolver.Check(ctx, addr)
 	if err != nil {
 		s.logger.Warn().Err(err).Str("rcpt", addr).Msg("recipient validation failed")
 		return smtpErr(451, "temporary recipient validation failure")

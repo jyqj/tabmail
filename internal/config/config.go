@@ -54,7 +54,7 @@ type SMTP struct {
 	MaxRecipients       int           `default:"200" desc:"Max RCPT TO per message (must be positive)"`
 	MaxMessageBytes     int           `default:"26214400" desc:"Max message size in bytes (must be positive)"`
 	MaxConnections      int           `split_words:"true" default:"100" desc:"Max concurrent SMTP connections (0=unlimited)"`
-	Timeout             time.Duration `default:"300s" desc:"Idle connection timeout (must be positive)"`
+	Timeout             time.Duration `default:"300s" desc:"Idle connection and MAIL/RCPT lookup timeout (must be positive)"`
 	TLSEnabled          bool          `default:"false" desc:"Enable STARTTLS"`
 	TLSCert             string        `default:"" desc:"TLS certificate path"`
 	TLSKey              string        `default:"" desc:"TLS private key path"`
