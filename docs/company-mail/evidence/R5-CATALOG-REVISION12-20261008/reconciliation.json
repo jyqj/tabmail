@@ -8857,8 +8857,364 @@
     "boundary": "Original three CLIs and five Python modules executed against the recorded uncommitted catalog candidate on the public product HEAD. Exact catalog and test input hashes were equal before/after. A separate public core will be used for the original complete source-version runner."
   },
   "source_version_validation": {
-    "state": "pending_public_catalog_core",
-    "executed": false,
-    "boundary": "Original complete source-version runner has not been executed for revision12 in this core; its real public source identity and outcome must be appended after publication."
+    "state": "executed_non_green_local",
+    "executed": true,
+    "source_commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+    "source_tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+    "exit_code": 1,
+    "elapsed_seconds": 289.383454013001,
+    "source_unchanged": true,
+    "summary": {
+      "status": "failed",
+      "dispatch_no_missing": true,
+      "dispatch_no_overlap": true,
+      "no_missing": false,
+      "no_overlap": true,
+      "preparation_output": "/workspace/scratch/4f09dfb9aa92/backend-catalog-prep/final-public/full-source-b87df7a/r5-source-preparation-thwlytqd",
+      "discovered": 812,
+      "missing_test_ids": [
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_actual_default_and_race_production_fork_coverage",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_capture_marker_registry_archive_source_drift",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_dirty_ignored_go_actual_selected_and_rejected",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_hydration_failure_retains_execution_and_raw_diagnostics",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_live_capture_control_and_archive_mutations",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip",
+        "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_unimported_package_and_undefined_build"
+      ],
+      "groups": [
+        {
+          "group": "current",
+          "source_sha": "b87df7a77656457549d6f2d678c56d321ae0d869",
+          "exit_code": 1,
+          "requested": 808,
+          "loaded": 808,
+          "actual_methods": 801,
+          "unittest_tests_run": 801,
+          "missing_test_ids": [
+            "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_actual_default_and_race_production_fork_coverage",
+            "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_capture_marker_registry_archive_source_drift",
+            "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_dirty_ignored_go_actual_selected_and_rejected",
+            "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_hydration_failure_retains_execution_and_raw_diagnostics",
+            "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_live_capture_control_and_archive_mutations",
+            "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_receipt_roundtrip",
+            "test_r5_selected_source_binding_v2.ActualRootBindingV2Tests.test_real_unimported_package_and_undefined_build"
+          ],
+          "failures": {
+            "occurrences": 4,
+            "method_count": 4,
+            "method_ids": [
+              "test_r5_benchmark.BenchmarkProcessTests.test_real_timeout_terminal_leader_keeps_group_identity_until_kill",
+              "test_r5_cold_web.ColdWebTests.test_interruption_persists_current_group_cleanup_in_terminal_receipt",
+              "test_r5_cold_web.ColdWebTests.test_owned_child_group_cleanup_even_when_leader_exits_zero",
+              "test_r5_cold_web.ColdWebTests.test_wrong_node_major_records_rejection"
+            ],
+            "unassociated_ids": []
+          },
+          "errors": {
+            "occurrences": 7,
+            "method_count": 5,
+            "method_ids": [
+              "test_r5_cold_web.ColdWebTests.test_failed_build_preserves_red_raw_and_exit",
+              "test_r5_cold_web.ColdWebTests.test_fake_build_command_receipts_are_exact_and_not_shipping_browser_G0",
+              "test_r5_cold_web.ColdWebTests.test_zero_exit_without_standalone_artifacts_is_not_pass",
+              "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_nested_module_links_fifo_socket_public_entries",
+              "test_r5_source_excluded_metadata.ExcludedMetadataTests.test_multilevel_modules_links_and_special_files_rejected_by_cli"
+            ],
+            "unassociated_ids": [
+              "setUpClass (test_r5_selected_source_binding_v2.ActualRootBindingV2Tests)"
+            ]
+          },
+          "skips": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "expected_failures": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "unexpected_successes": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "passed_methods": 792,
+          "requested_equals_actual_ordered": false
+        },
+        {
+          "group": "frozen-v1",
+          "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+          "exit_code": 0,
+          "requested": 4,
+          "loaded": 4,
+          "actual_methods": 4,
+          "unittest_tests_run": 4,
+          "missing_test_ids": [],
+          "failures": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "errors": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "skips": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "expected_failures": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "unexpected_successes": {
+            "occurrences": 0,
+            "method_count": 0,
+            "method_ids": [],
+            "unassociated_ids": []
+          },
+          "passed_methods": 4,
+          "requested_equals_actual_ordered": true
+        }
+      ],
+      "boundary": "Counts derive from original requested/actual method IDs and outcome IDs. Subtest outcome occurrences are retained separately; class initialization errors are not silently converted to method passes. Nested test harness diagnostic FAIL/skip text is not an outer outcome."
+    },
+    "artifacts": {
+      "source-version-tests.json": {
+        "path": "source-version-tests.json",
+        "sha256": "f93407503ba78cc07d0b1c6d9b592c72c2c126533d6f78b8b600c3e4256aa3fe",
+        "bytes": 2706191
+      },
+      "source-version-execution.json": {
+        "path": "source-version-execution.json",
+        "sha256": "340f33df8ea3fe50c7b0ee1bcdb442f29283c34ee13a3e813d44360f6f0c2e94",
+        "bytes": 2101
+      },
+      "source-version-summary.json": {
+        "path": "source-version-summary.json",
+        "sha256": "e778f654f62f992ad284226e08b8a02cfb00caa43ab3124d8e47cc7119a646db",
+        "bytes": 5458
+      },
+      "source-version.stdout.txt": {
+        "path": "source-version.stdout.txt",
+        "sha256": "c797b235dc3c91bcdae719724e2d48e01a1941f47c6e51597aff8dbdf0994d73",
+        "bytes": 3268
+      },
+      "source-version.stderr.txt": {
+        "path": "source-version.stderr.txt",
+        "sha256": "d3e5fc31aaa844df55ba3034bdc747e4bdcbbbcabde39ead9dddc16ce3eac876",
+        "bytes": 144981
+      }
+    },
+    "boundary": "One original complete default runner invocation on the exact clean public core. Failures, repeated error occurrences, class initialization error, and seven missing methods remain non-green. Catalog CLI/review successes do not replace this original result."
+  },
+  "environment_observations": {
+    "artifact": {
+      "path": "environment-observations.json",
+      "sha256": "52615b86e5b3d78726e59e6a644878c64b4c2181e17e3fd6f3d27f7679ae90a5",
+      "bytes": 1483
+    },
+    "boundary": "Separate root diagnostics, not reconstructed first-run per-test receipts; process identity observations do not explain the separate AF_UNIX EPERM and ancestor identity error by themselves."
+  },
+  "independent_reviews": [
+    {
+      "reviewer": "/root/storage",
+      "decision": "ACCEPT",
+      "source_commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+      "source_tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+      "source_unchanged": true,
+      "actual_scope": "Original three CLI commands and all five related Python modules; 94 PASS, including 27 reconciliation methods and all five original unapproved-source guards. No second full runner.",
+      "artifacts": {
+        "execution": {
+          "path": "storage-review.json",
+          "sha256": "0dc53e63b349a568f46b9cb91583c755b6b73548104b5da90b1506fc946a259a",
+          "bytes": 6648
+        },
+        "static": {
+          "path": "storage-static-review.json",
+          "sha256": "55d6a655db42aca5204cb09e030c7a8d5a02509300907550e62faf56141c7654",
+          "bytes": 1750
+        },
+        "transactions.stdout.txt": {
+          "path": "storage-transactions.stdout.txt",
+          "sha256": "75ae46d78f95d41f145e505836e8a8e30503140c248f2c561e4730322c409dfd",
+          "bytes": 309
+        },
+        "transactions.stderr.txt": {
+          "path": "storage-transactions.stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "compatibility.stdout.txt": {
+          "path": "storage-compatibility.stdout.txt",
+          "sha256": "d0954efef62572f718c0d4a4dc38485d1e60599ce81088ee6a4efb731707ed71",
+          "bytes": 1117
+        },
+        "compatibility.stderr.txt": {
+          "path": "storage-compatibility.stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "clients.stdout.txt": {
+          "path": "storage-clients.stdout.txt",
+          "sha256": "47b96ae470deec0228831298df2ab391d0e25b90aec7aaabbaa7c78ebc5536eb",
+          "bytes": 73
+        },
+        "clients.stderr.txt": {
+          "path": "storage-clients.stderr.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "python-related.stdout.txt": {
+          "path": "storage-python-related.stdout.txt",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "bytes": 0
+        },
+        "python-related.stderr.txt": {
+          "path": "storage-python-related.stderr.txt",
+          "sha256": "ad6d3b293c2d7abbf5e7ced20b0d22a71b46de0bb7995b3789d0bc8752496d9b",
+          "bytes": 17206
+        }
+      }
+    },
+    {
+      "reviewer": "/root/frontend",
+      "decision": "ACCEPT",
+      "source_commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+      "source_tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+      "source_unchanged": true,
+      "actual_scope": "Network-only public clone: original three CLI commands plus 27 reconciliation methods, including all five unchanged negative guards; no local private Git objects, alternates, promisor packs, or shared hardlinks. No second full runner.",
+      "artifacts": {
+        "review": {
+          "path": "frontend-review.json",
+          "sha256": "6dc2479b808ddd01cff980ab7b34625b3d5bd1e742b8f37f4d6cd69d00e62ecb",
+          "bytes": 10141
+        },
+        "public-clone.log": {
+          "path": "frontend-public-clone.log",
+          "sha256": "35b1eca1136ebd16617e02eac92261b19a0501b2fb07b8a9fbf0dec0035a4760",
+          "bytes": 91
+        },
+        "initial-provenance.json": {
+          "path": "frontend-initial-provenance.json",
+          "sha256": "515ec0514f3b65d7d3424c3d71a75eee31669679a0413bd53d25f7bbc6242d8d",
+          "bytes": 1090
+        },
+        "public-provenance.json": {
+          "path": "frontend-public-provenance.json",
+          "sha256": "5cc6c1f01d1b59b980b6f332bcd65a055cff98264871ec7954a878c2d86ea148",
+          "bytes": 3043
+        },
+        "transactions.log": {
+          "path": "frontend-transactions.log",
+          "sha256": "75ae46d78f95d41f145e505836e8a8e30503140c248f2c561e4730322c409dfd",
+          "bytes": 309
+        },
+        "compatibility.log": {
+          "path": "frontend-compatibility.log",
+          "sha256": "d0954efef62572f718c0d4a4dc38485d1e60599ce81088ee6a4efb731707ed71",
+          "bytes": 1117
+        },
+        "clients.log": {
+          "path": "frontend-clients.log",
+          "sha256": "47b96ae470deec0228831298df2ab391d0e25b90aec7aaabbaa7c78ebc5536eb",
+          "bytes": 73
+        },
+        "catalog27.log": {
+          "path": "frontend-catalog27.log",
+          "sha256": "6161d9fae0ebb973002f6269fd26eb52e80f17eeba9bd2a6eb06d52d3e2ff605",
+          "bytes": 5743
+        },
+        "execution.json": {
+          "path": "frontend-execution.json",
+          "sha256": "9efd9e06e7a50af93d6504ce8ee2d749727c388303ed685ae2a555d871e13c9c",
+          "bytes": 4499
+        },
+        "source-review.json": {
+          "path": "frontend-source-review.json",
+          "sha256": "3542cb61e9c8b6a51c3789db4d48920509cd0db4d454808f9c70d828de7b9998",
+          "bytes": 74558
+        },
+        "source-audit.log": {
+          "path": "frontend-source-audit.log",
+          "sha256": "c5e5a8f5c66c08daf1719962ba767688019590e34c346fe6c09499273760c09c",
+          "bytes": 170
+        },
+        "source-audit-execution.json": {
+          "path": "frontend-source-audit-execution.json",
+          "sha256": "f9b532c129aa2a3abd68edbb4478881a971f10add119205506c05585155cacdf",
+          "bytes": 899
+        },
+        "audit_source.py": {
+          "path": "frontend-audit_source.py",
+          "sha256": "3f644efb765b545b253194dd78878c60ebec9900fc801d7e042fc5043823fd32",
+          "bytes": 12871
+        }
+      }
+    }
+  ],
+  "ci_source_version_validation": {
+    "state": "passed_on_github_runner",
+    "ci_run": 37759167593,
+    "ci_job": 113251091189,
+    "ci_run_url": "https://github.com/jyqj/tabmail/actions/runs/37759167593",
+    "source_commit": "83c91dff12bc470b613102534d5784cad5df2d1e",
+    "source_tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+    "source_parents": [
+      "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+      "b87df7a77656457549d6f2d678c56d321ae0d869"
+    ],
+    "public_catalog_core": "b87df7a77656457549d6f2d678c56d321ae0d869",
+    "same_full_tree_as_public_catalog_core": true,
+    "artifact_id": 11542325253,
+    "artifact_zip_sha256": "1ab13d395f6c9e4ad25c6d818998fdb7043501dbd1547a7a49e1b163c9c5c286",
+    "discovered_tests": 812,
+    "current_tests": 808,
+    "frozen_v1_tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "missing": 0,
+    "overlap": false,
+    "status": "pass",
+    "artifacts": {
+      "frontend-source-sha.txt": {
+        "path": "ci/frontend-source-sha.txt",
+        "sha256": "28c22190bfb3a980e0dbb3cb474c20eec2c7346566447cd68dfbad2500d6d66a",
+        "bytes": 41
+      },
+      "frontend-source-version-tests.json": {
+        "path": "ci/frontend-source-version-tests.json",
+        "sha256": "3ac5a0f7a3854f34b32185afb6331588f928b8d5324f6b4ed0d4572cf2ba6386",
+        "bytes": 2699190
+      },
+      "root-summary.json": {
+        "path": "ci/root-summary.json",
+        "sha256": "f0ad8794dff1235db0491a98600ec8e7e8ad1bdab1da2d84f6612b96f18a82d5",
+        "bytes": 2446
+      },
+      "ci-frontend-decoded.log": {
+        "path": "ci/ci-frontend-decoded.log",
+        "sha256": "1f63c09842b9128f4aeac77cbc8bd79d1a25db49d305c236cea941e3daa69267",
+        "bytes": 287773
+      },
+      "provenance.json": {
+        "path": "ci/provenance.json",
+        "sha256": "a20b1f92b1df1d2433f095a764bb2c009105599daab3c0249b1af2bc0cc19cc9",
+        "bytes": 1176
+      }
+    },
+    "boundary": "Actual GitHub merge-ref execution SHA is retained verbatim and differs from the local public-core execution SHA. Complete tree equality is verified. This source-version step passed; the separate local non-green run and overall frontend/private-fixture/dependency release failures are not rewritten."
   }
 }

@@ -1,0 +1,102 @@
+{
+  "checked_at": "2026-10-08T09:55:47.754852+00:00",
+  "repository": "https://github.com/jyqj/tabmail",
+  "worktree": "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public",
+  "clone": {
+    "method": "git clone over configured GitHub connector network remote, not from a local path",
+    "transport_scheme": "https",
+    "transport_host": "github.com",
+    "credentials_redacted": true,
+    "argv_redacted": [
+      "git",
+      "clone",
+      "--no-checkout",
+      "--single-branch",
+      "--branch",
+      "work/tabmail-progress-catalog12-20261008",
+      "<configured remote URL>",
+      "/workspace/scratch/4f09dfb9aa92/tabmail-frontend-review-catalog12-public"
+    ],
+    "exit_code": 0,
+    "log": "/workspace/scratch/4f09dfb9aa92/frontend-progress-evidence/catalog12-review/public-clone.log",
+    "checkout_argv": [
+      "git",
+      "checkout",
+      "--detach",
+      "b87df7a77656457549d6f2d678c56d321ae0d869"
+    ]
+  },
+  "head": "b87df7a77656457549d6f2d678c56d321ae0d869",
+  "tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+  "parents": [
+    "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6"
+  ],
+  "status": "",
+  "alternates_present": false,
+  "shallow_present": false,
+  "partial_clone_config": "",
+  "promisor_config": "",
+  "promisor_packs": [],
+  "object_environment": {},
+  "pack_link_counts": {
+    "pack-0b345513d9a8569cebc0163273f465a995fe8da2.rev": 1,
+    "pack-0b345513d9a8569cebc0163273f465a995fe8da2.pack": 1,
+    "pack-0b345513d9a8569cebc0163273f465a995fe8da2.idx": 1
+  },
+  "public_commit_objects": [
+    {
+      "commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+      "type": "commit",
+      "exit_code": 0,
+      "tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d"
+    },
+    {
+      "commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+      "type": "commit",
+      "exit_code": 0,
+      "tree": "3abdbfca4c0318644a01755c6e6bbb1929b74633"
+    },
+    {
+      "commit": "58d0c9cf274569258319ff4b5dcab7912b0174f4",
+      "type": "commit",
+      "exit_code": 0,
+      "tree": "e4c4550481d9dc9efc5d4d849f85d496b99f65c4"
+    },
+    {
+      "commit": "9bcc542dcaa0bb7c280c380ea278c1a2a52717d3",
+      "type": "commit",
+      "exit_code": 0,
+      "tree": "c86a86f0a252159e068c8458e343eb59248ff979"
+    },
+    {
+      "commit": "f2713367dd949487c632ebee51de3a0cc1d2c6f7",
+      "type": "commit",
+      "exit_code": 0,
+      "tree": "7d1ca2357292cc35160011afe91fdbde011106c1"
+    }
+  ],
+  "private_commit_objects": [
+    {
+      "commit": "f7ba05a2fc602ca2f3b9c7cda882b8146bf75065",
+      "type": "",
+      "exit_code": 128
+    },
+    {
+      "commit": "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+      "type": "",
+      "exit_code": 128
+    },
+    {
+      "commit": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+      "type": "",
+      "exit_code": 128
+    },
+    {
+      "commit": "fd87031aa117dc48346bbdc22b663e0385704c20",
+      "type": "",
+      "exit_code": 128
+    }
+  ],
+  "catalog_test_sha256": "c2b4799c7a602bff94591c7bdbf312ca97f27d4aeacad1d122ac035dd5e5f754",
+  "diff_check_exit": 0
+}

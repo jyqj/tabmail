@@ -59,7 +59,58 @@ revision11 原来跟随当前树的两个正例，现在在独立 `git clone --n
 
 ## 完整 source-version runner 与独立审查
 
-本核心提交阶段，revision12 完整 source-version runner **尚未执行**。先发布精确目录核心，再以公开核心 SHA 在干净 checkout 执行原 runner，随后只追加真实报告、原始输出和独审结果。不得预先写成通过，也不得用 revision11 冻结的历史运行替代。
+### 本机：公开核心上的完整原始运行
+
+目录核心先实际发布为 [PR #168](https://github.com/jyqj/tabmail/pull/168) 的公开 head [`b87df7a77656457549d6f2d678c56d321ae0d869`](https://github.com/jyqj/tabmail/commit/b87df7a77656457549d6f2d678c56d321ae0d869)，tree `312dbed6634b7b173e6ec9e180bbf5d0f1809d9d`，parent 是产品源 `ed81ee2`。它包含已验证目录核心和仅两份中央进度文档的更新。本机在这个精确、干净的公开 core 上执行**一次原完整 runner，外层耗时 289.383 秒，exit 1**；执行前后 HEAD/tree/clean 状态一致。
+
+原 preparation 实际成功：Go 1.25.7 的 default 与 race-r5protocol 两种选择前后一致；从原官方 URL 取得的 TypeScript 5.9.3 archive 通过原 SHA256、integrity 和完整 132-file 检查；`TestOrdinaryReceiptOpenAPIWireFixtures` 经原 pinned proc FD 实际运行通过。这一准备成功单独记录，未算入 Python 方法通过数。
+
+| 原派发组 | 分配/加载 | 实际方法 | 通过方法 | 失败方法 | 错误方法 | skip | 未执行方法 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| current，公开 `b87df7a` | 808 | 801 | 792 | 4 | 5 | 0 | 7 |
+| frozen-v1，原 `41b015c` | 4 | 4 | 4 | 0 | 0 | 0 | 0 |
+
+原始 [source-version-tests.json](source-version-tests.json)、[执行元数据](source-version-execution.json)、[stdout](source-version.stdout.txt)、[stderr](source-version.stderr.txt) 和仅从原 ID 派发/结果计算的[方法统计](source-version-summary.json) 全部保留。共发现 812 个 ID，分组无缺失且不重叠；实际执行有 7 项未派发，所以原 `no_missing=false`、`no_overlap=true`、`status=failed`。这 7 项未执行不是 skip，更不是 PASS。
+
+current unittest 原汇总为 **4 failure、7 error occurrences**。七次错误包含五个实际方法、一个重复的 Unix socket subtest 错误和一个 `setUpClass` 错误，不能用 801−4−7 计算方法通过数。原 runner 的 27 个 catalog 方法及五个 `test_unapproved_*` 均实际通过；嵌套负例自己打印的 FAIL/skip 文本不算作外层结果。
+
+| 原始失败范围 | 实际结果与可证明边界 |
+| --- | --- |
+| 三项 ColdWeb 假构建测试与一项错误 Node major 控制 | 三项 ERROR 均由 `node-version` 阶段的 `tool version command failed` 提前中止；第四项原本期待 `Node 22 required`，却收到同一提前错误而 FAIL。原测试注入临时 fake node/npm，这些结果不能直接证明安装的 Node 版本错误或真实 Next build 失败。 |
+| 三项进程清理控制 | benchmark 的 `cleanup_live_processes_absent`、两项 ColdWeb 的 `cleanup_verified` 实际为 false，三个原断言因此 FAIL。未将未知清理状态视为成功。 |
+| 两项 Unix socket fixture 方法 | 三次错误均在创建 `socket.socket(AF_UNIX)` 时收到实际 `EPERM`，两个 fork subtest 各一次，另一个方法一次。 |
+| ActualRootBindingV2Tests 类初始化 | 原 `r5_archive_boundary.root_fd` 在检查祖先描述符身份时报告 `boundary root ancestor identity changed`；该类七项方法未启动。原报告没有记录具体哪层或哪个身份字段变化，不能把它与上述进程问题合并归因或推定只是负载。 |
+
+[单独环境观察](environment-observations.json) 保留 root 在另一次诊断中真实观察到的 `ps` self lookup 失败及 PID 与 `/proc/self` 身份不一致，也保留之后 `/bin/ps` 成功的对照。仅针对新拥有的子进程尝试私有 namespace 时，原环境以 `uid_map: Operation not permitted` 拒绝；没有升级权限、改系统 `/proc`、替换 ps 或修改原 guard。该诊断说明进程观察不可靠，**不是首次失败的 per-test receipt 重建**，也不解释独立的 AF_UNIX 与 ancestor identity 错误。
+
+原 ColdWeb 每例临时目录由 unittest 的 `addCleanup` 删除；benchmark 失败断言发生在 receipt 持久化之前。因此首次测试中未保留的临时 receipt 没有事后补造；完整原 trace、返回结果和来源仍可核验。没有在本机重复整套 runner 掩盖失败。
+
+### 公开核心的独立目录审查
+
+storage reviewer 对相同公开 `b87df7a` / tree `312dbed` **ACCEPT**：在独立干净 worktree 中，原三条 CLI 实际 **0/0/0**，原五个 Python 模块 **94/94 PASS、0 failure/error/skip**，外层耗时 **89.160 秒**；其中包括 27 个 catalog 方法与五个原始拒绝测试。执行前后源码身份与 clean 状态一致。完整原[独审回执](storage-review.json)、[静态核对](storage-static-review.json) 与[Python 原始日志](storage-python-related.stderr.txt) 已保留；该 reviewer 没有执行第二套完整 source-version runner。
+
+frontend reviewer 在从网络取得的独立 public clone 上对相同公开 core **ACCEPT**：原三条 CLI 实际 **0/0/0**，完整 **27/27 catalog 方法 PASS、0 failure/error/skip**，unittest 耗时 **41.109 秒**，包括实际执行五个原 `test_unapproved_*`。没有把作者或 storage 的 94 项扩写为本 reviewer 的范围。原[独审回执](frontend-review.json)、[命令与环境](frontend-execution.json)、[目录测试日志](frontend-catalog27.log)、[完整源码核对](frontend-source-review.json) 和[公开来源证明](frontend-public-provenance.json) 均以原字节保存。
+
+这个 public clone 没有 object alternates、partial clone、promisor pack 或共享 pack hardlink；公开 `58d0c9cf`、`9bcc542`、`f271336` 可直接读取，历史的私有中间对象实际不存在。原门禁仍通过，证明历史复现不依赖本机私有 Git 对象。reviewer 辅助审计脚本最初使用错误的 schema 字段而提前停止，修正辅助脚本后完成源码核对；该自有 helper 错误单独记在回执中，没有改产品、原 collector 或测试规则，也没有把它称作原测试失败。
+
+两份独审共同核对 65 份历史文件、167 份保护源码、原 25 个方法及五个负例、两个冻结 revision11 断言体、401 个函数的全部非 caller 字段、133 条路由人工字段和 135 个旧客户端逻辑分支。两人均未另跑完整 runner，以上 ACCEPT 只属于各自已记录的目录审查范围。
+
+### GitHub：同一完整树的原完整 runner 通过
+
+[CI run 37759167593](https://github.com/jyqj/tabmail/actions/runs/37759167593)、frontend job `113251091189` 的原 source-version 步骤实际通过，原 Catalog/TypeScript 步骤也通过。取回 artifact `11542325253` 时已核对完整 ZIP SHA256 `1ab13d395f6c9e4ad25c6d818998fdb7043501dbd1547a7a49e1b163c9c5c286`；原[执行 SHA 文件](ci/frontend-source-sha.txt)、[完整 runner 报告](ci/frontend-source-version-tests.json)、[解码完整 job 日志](ci/ci-frontend-decoded.log)、[来源核验](ci/provenance.json) 和[范围摘要](ci/root-summary.json) 原样保留。
+
+CI 实际执行 SHA 是 **`83c91dff12bc470b613102534d5784cad5df2d1e`**，来自 `refs/pull/168/merge`；不是本机的 `b87df7a`。已实际 fetch 并核对其两个 parents 为 `ed81ee2` 与 `b87df7a`，完整 tree 仍为 **`312dbed6634b7b173e6ec9e180bbf5d0f1809d9d`**，与公开核心逐文件完全相同。原报告不把 CI 执行身份重写为本机 SHA。
+
+| CI 原派发组 | 分配/加载/实际 | 通过 | failure / error / skip / missing |
+| --- | ---: | ---: | --- |
+| current，实际 `83c91df` | 808 | 808 | 0 / 0 / 0 / 0 |
+| frozen-v1，原 `41b015c` | 4 | 4 | 0 / 0 / 0 / 0 |
+
+CI 共 **812/812 实际方法 PASS**，原报告 `status=pass`、`no_missing=true`、`no_overlap=true`；没有 expected failures 或 unexpected successes。原 current/frozen unittest 分别耗时 **203.760 / 13.787 秒**，准备阶段另计。该成功提供原完整源码检查在相同完整树上的真实通过证据，同时保留本机那次失败的原始结果、环境限制和未执行范围；没有替换原 ps、改变源选择、排除失败方法或放宽门槛。
+
+本次维护的通过依据是四份目录与实际源码对齐、三条原 CLI、两份各自明确范围的独审，以及同树 CI 原完整 runner 的实际通过。**整体前端/发布门禁仍未全绿**：同一 CI 的完整 UI 为 1758 PASS / 1 FAIL，唯一失败是原 `explicit private fixture required` 控制；依赖审计仍有 8 high。完整 Vitest JSON 保留在原 artifact，公开摘要明确该范围。目录维护没有关闭或伪造私有 fixture，没有把 source-version 步骤的通过写成整份 workflow、生产部署或 R5 父任务完成。
+
+最终追加仅涉及本 revision12 的 README、reconciliation 和原始证据文件。已执行的公开 core 中四份目录、产品源码、脚本、测试、原 collector/guard 和 revision1–11 历史字节保持不变。
 
 复现使用原命令和已安装的固定依赖：
 
