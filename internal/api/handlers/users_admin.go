@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/mail"
 	"strings"
 	"tabmail/internal/app/credentials"
 	"time"
+	"unicode/utf8"
 
 	"tabmail/internal/api/middleware"
 	"tabmail/internal/authz"
@@ -53,13 +55,22 @@ func (h *UserAdminHandler) InviteAdmin(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email string `json:"email"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
 	req.Email = strings.ToLower(strings.TrimSpace(req.Email))
 	if req.Email == "" {
 		errBadRequest(w, "email is required")
+		return
+	}
+	// Invitations persist the same VARCHAR(255) identity consumed on account
+	// acceptance. Reject invalid text before lookup or credential generation.
+	// Parse the address instead of rejecting quoted/Unicode local parts.
+	address, addressErr := mail.ParseAddress(req.Email)
+	if strings.ContainsRune(req.Email, 0) || utf8.RuneCountInString(req.Email) > 255 ||
+		addressErr != nil || address.Name != "" || strings.HasPrefix(req.Email, "<") || strings.HasSuffix(req.Email, ">") {
+		errBadRequest(w, "email must be a valid address of at most 255 characters")
 		return
 	}
 

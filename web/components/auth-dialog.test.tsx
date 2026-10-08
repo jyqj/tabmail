@@ -1,15 +1,13 @@
 import React from "react";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AuthDialog } from "./auth-dialog";
 
-const { toastSuccess, toastError, loginMock, registerMock, logoutSessionMock, authStateRef } = vi.hoisted(() => ({
+const { toastSuccess, toastError, fetchMock, authStateRef } = vi.hoisted(() => ({
   toastSuccess: vi.fn(),
   toastError: vi.fn(),
-  loginMock: vi.fn(),
-  registerMock: vi.fn(),
-  logoutSessionMock: vi.fn(),
+  fetchMock: vi.fn(),
   authStateRef: {
     current: null as {
       level: "public" | "admin" | "user";
@@ -28,12 +26,6 @@ vi.mock("@/lib/i18n", () => ({
   useI18n: () => ({
     t: (key: string) => key,
   }),
-}));
-
-vi.mock("@/lib/api", () => ({
-  login: (...args: unknown[]) => loginMock(...args),
-  register: (...args: unknown[]) => registerMock(...args),
-  logoutSession: (...args: unknown[]) => logoutSessionMock(...args),
 }));
 
 vi.mock("sonner", () => ({
@@ -90,18 +82,18 @@ describe("AuthDialog", () => {
       loginWithTokens: vi.fn(),
       logout: vi.fn(),
     };
-    loginMock.mockReset();
-    registerMock.mockReset();
-    logoutSessionMock.mockReset();
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+    vi.stubGlobal("navigator", { locks: { request: vi.fn(async (_name: string, run: () => Promise<unknown>) => run()) } });
     toastSuccess.mockReset();
     toastError.mockReset();
   });
+  afterEach(() => { vi.unstubAllGlobals(); });
 
   it("支持账号登录并写入 JWT", async () => {
-    loginMock.mockResolvedValue({
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({
       data: {
         access_token: "access-token",
-        refresh_token: "refresh-token",
         user: {
           id: "user-1",
           email: "user@mail.test",
@@ -110,7 +102,7 @@ describe("AuthDialog", () => {
           tenant_id: "tenant-1",
         },
       },
-    });
+    }), { status: 200, headers: { "Content-Type": "application/json" } }));
 
     render(<AuthDialog />);
 
@@ -124,13 +116,16 @@ describe("AuthDialog", () => {
     fireEvent.click(screen.getAllByRole("button", { name: /auth.loginBtn/ }).at(-1) as HTMLButtonElement);
 
     await waitFor(() => {
-      expect(loginMock).toHaveBeenCalledWith("user@mail.test", "Passw0rd!");
+      expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/api/v1/auth/login"), expect.objectContaining({
+        method: "POST", credentials: "include", body: JSON.stringify({ email: "user@mail.test", password: "Passw0rd!" }),
+      }));
     });
-    expect(authStateRef.current?.loginWithTokens).toHaveBeenCalledWith(
-      "access-token",
-      expect.objectContaining({ email: "user@mail.test" })
-    );
-    expect(toastSuccess).toHaveBeenCalledWith("Welcome, User");
+    await waitFor(() => expect(toastSuccess).toHaveBeenCalledWith("Welcome, User"));
+    // Cookie-changing requests install identity while owning the shared lock;
+    // a component must never install those credentials a second time later.
+    expect(localStorage.getItem("tabmail_access_token")).toBe("access-token");
+    expect(JSON.parse(localStorage.getItem("tabmail_user")!)).toEqual(expect.objectContaining({ email: "user@mail.test" }));
+    expect(authStateRef.current?.loginWithTokens).not.toHaveBeenCalled();
   });
 
 });

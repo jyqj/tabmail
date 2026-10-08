@@ -135,6 +135,7 @@
   "auth.displayNameOpt": "选填",
   "auth.passwordMin": "12–72 个 UTF-8 字节",
   "auth.passwordBytes": "当前 {bytes} 个 UTF-8 字节，需为 12–72 字节。",
+  "auth.close": "关闭登录对话框",
   "auth.loginBtn": "登录",
   "auth.registerBtn": "创建账号",
   "auth.unlockBtn": "解锁收件箱",
