@@ -6,6 +6,7 @@ import { useSessionScope } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
 import { ActionButton, LoadError, useText } from "@/components/company/common";
 import { ReceiptContentDisclosure, ReceiptSummary } from "./submission-pane";
+import { ListFeedback } from "./list-controls";
 
 // Compatibility entry points share ordinary aggregate receipts. No raw job
 // field can confer content permission or supply the subject/address/body.
@@ -18,7 +19,8 @@ export function LegacyReceiptFolder({ initialSelected }: { initialSelected?: str
   const detail = useAPI(selected ? ["legacy-outbound-receipt", selected] : null, () => legacyOutboundReceipt(selected));
   return <section aria-label={t("兼容任务回执", "Compatibility task receipts")}>
     <p>{receiptText("ordinaryReceipt.nextHopNotice")}</p>
-    <LoadError error={rows.error} onRetry={() => void rows.mutate()} />
+    <ListFeedback list={rows} loading={t("正在加载兼容回执…", "Loading compatibility receipts…")} refreshing={t("正在刷新兼容回执…", "Refreshing compatibility receipts…")}
+      empty={!rows.data?.length ? t("没有兼容回执", "No compatibility receipts") : undefined}/>
     {!rows.error && (rows.data ?? []).map(row => <div key={row.id}>
       <span>{receiptText("ordinaryReceipt.task")}: {row.id}</span>
       <ActionButton onClick={() => setSelected(row.id === selected ? "" : row.id)}>{t("查看兼容回执", "View compatibility receipt")}</ActionButton>

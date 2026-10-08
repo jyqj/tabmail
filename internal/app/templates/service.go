@@ -55,6 +55,14 @@ func (s *Service) Preview(ctx context.Context, a authz.Actor, in PreviewInput) (
 	if e = errors.Join(e, ctx.Err()); e != nil {
 		return nil, e
 	}
+	// Match submission's final content requirement after expansion and HTML
+	// sanitization. Generic Render still allows optional fields to be omitted.
+	if subject == "" {
+		return nil, app.BadRequest("subject is required")
+	}
+	if text == "" && html == "" {
+		return nil, app.BadRequest("text_body or html_body required")
+	}
 	// Re-read the same authority and rendering inputs before releasing bytes.
 	// This is a finite pre-release check, not a lock across rendering or a
 	// promise to revoke a result after it has already been returned.
