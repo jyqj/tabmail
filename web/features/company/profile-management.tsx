@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, type Dispatch, type SetStateAction } from "react";
+import { useState, useRef, useEffect, useId, type Dispatch, type SetStateAction } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,6 +119,7 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
     disabled?: boolean;
 }) {
     const { t } = useI18n();
+    const formId = useId();
     const scopedDomainOptions = isPlatformAdmin && form.tenant_id
         ? domainOptions.filter((zone) => zone.tenant_id === form.tenant_id)
         : isPlatformAdmin
@@ -145,16 +146,16 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
     ];
     return (<div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
       <div className="space-y-1.5">
-        <Label className="text-xs">{t("permissions.name")}</Label>
-        <Input disabled={disabled} value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} placeholder={t("permissions.namePlaceholder")}/>
+        <Label htmlFor={`${formId}-name`} className="text-xs">{t("permissions.name")}</Label>
+        <Input id={`${formId}-name`} disabled={disabled} value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} placeholder={t("permissions.namePlaceholder")}/>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-xs">{t("permissions.descriptionField")}</Label>
-        <Input disabled={disabled} value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} placeholder={t("permissions.descriptionPlaceholder")}/>
+        <Label htmlFor={`${formId}-description`} className="text-xs">{t("permissions.descriptionField")}</Label>
+        <Input id={`${formId}-description`} disabled={disabled} value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} placeholder={t("permissions.descriptionPlaceholder")}/>
       </div>
 
       {isPlatformAdmin && (<div className="space-y-1.5">
-          <Label className="text-xs">{t("permissions.scope")}</Label>
+          <Label id={`${formId}-scope-label`} htmlFor={`${formId}-scope`} className="text-xs">{t("permissions.scope")}</Label>
           <Select value={form.tenant_id ?? GLOBAL_PROFILE_SCOPE} disabled={disabled || tenantScopeLocked} onValueChange={(value) => setForm((prev) => {
                 const nextTenantID = value === GLOBAL_PROFILE_SCOPE ? null : value;
                 return {
@@ -165,7 +166,7 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
                         : [],
                 };
             })}>
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${formId}-scope`} aria-labelledby={`${formId}-scope-label`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -184,15 +185,15 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
 
       <div className="grid grid-cols-2 gap-3">
         {switchFields.map((f) => (<div key={f.key} className="flex items-center justify-between rounded-md border p-3">
-            <Label className="text-xs font-normal">{f.label}</Label>
-            <Switch disabled={disabled} size="sm" checked={form[f.key] as boolean} onCheckedChange={(checked: boolean) => setForm((prev) => ({ ...prev, [f.key]: checked }))}/>
+            <Label id={`${formId}-${f.key}-label`} htmlFor={`${formId}-${f.key}`} className="text-xs font-normal">{f.label}</Label>
+            <Switch id={`${formId}-${f.key}`} aria-labelledby={`${formId}-${f.key}-label`} disabled={disabled} size="sm" checked={form[f.key] as boolean} onCheckedChange={(checked: boolean) => setForm((prev) => ({ ...prev, [f.key]: checked }))}/>
           </div>))}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {numberFields.map((f) => (<div key={f.key} className="space-y-1.5">
-            <Label className="text-xs">{f.label}</Label>
-            <Input disabled={disabled} type="number" min={0} value={form[f.key] as string} onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))} placeholder="0"/>
+            <Label htmlFor={`${formId}-${f.key}`} className="text-xs">{f.label}</Label>
+            <Input id={`${formId}-${f.key}`} disabled={disabled} type="number" min={0} value={form[f.key] as string} onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))} placeholder="0"/>
             <p className="text-[10px] text-muted-foreground">
               {t("permissions.zeroUnlimited")}
             </p>
@@ -217,9 +218,9 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
             </p>) : scopedDomainOptions.length === 0 ? (<p className="text-xs text-muted-foreground">{t("permissions.noDomainsHint")}</p>) : (<div className="grid gap-2">
               {scopedDomainOptions.map((zone) => {
                 const checked = form.allowed_zone_ids.includes(zone.id);
-                return (<label key={zone.id} className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs">
-                    <span className="truncate" title={zone.domain}>{zoneLabel(zone)}</span>
-                    <Switch disabled={disabled} size="sm" checked={checked} onCheckedChange={(next: boolean) => setForm((prev) => ({
+                return (<label key={zone.id} htmlFor={`${formId}-zone-${zone.id}`} className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs">
+                    <span id={`${formId}-zone-${zone.id}-label`} className="truncate" title={zone.domain}>{zoneLabel(zone)}</span>
+                    <Switch id={`${formId}-zone-${zone.id}`} aria-labelledby={`${formId}-zone-${zone.id}-label`} disabled={disabled} size="sm" checked={checked} onCheckedChange={(next: boolean) => setForm((prev) => ({
                         ...prev,
                         allowed_zone_ids: next
                             ? Array.from(new Set([...prev.allowed_zone_ids, zone.id]))

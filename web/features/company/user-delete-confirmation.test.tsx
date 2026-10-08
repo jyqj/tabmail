@@ -5,7 +5,7 @@ import UsersPage from "./user-management";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { installSession } from "@/lib/session";
 
-vi.mock("@/contexts/auth-context", () => ({ useAuth: () => ({ level: "admin", tenantId: tenant }) }));
+vi.mock("@/contexts/auth-context", () => ({ useAuth: () => ({ level: "admin", tenantId: tenant, user: { id: "admin", role: "admin", tenant_id: tenant } }) }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const tenant = "10000000-0000-4000-8000-000000000001";
