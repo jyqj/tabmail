@@ -1,8 +1,12 @@
 import copy
+from contextlib import contextmanager
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
+import tempfile
 import unittest
+from unittest import mock
 
 spec = importlib.util.spec_from_file_location('r5_transactions', Path(__file__).resolve().parents[1] / 'check_r5_transactions.py')
 tx = importlib.util.module_from_spec(spec)
@@ -22,7 +26,7 @@ class TransactionInventoryTests(unittest.TestCase):
 
     def test_current_inventory_is_only_structure_evidence(self):
         result = tx.validate(self.data, self.ast, self.migrations)
-        self.assertEqual(result['functions'], 402)
+        self.assertEqual(result['functions'], 404)
         self.assertEqual(result['postgres_files'], 64)
         self.assertEqual(result['migration_files'], 19)
         self.assertFalse(result['runtime_verified'])
@@ -119,38 +123,65 @@ class TransactionInventoryTests(unittest.TestCase):
     def entry(self, name):
         return next(e for e in self.data['entries'] if e['entry'] == name)
 
+    @contextmanager
+    def pr23_revision14_context(self):
+        # This one historical PR23 assertion keeps its complete original body.
+        # Current entries are checked separately by the revision15 source review.
+        with tempfile.TemporaryDirectory(prefix='r5-pr23-revision14-') as directory:
+            root = Path(directory) / 'source'
+            subprocess.run(['git', 'clone', '--quiet', '--no-hardlinks', '--no-checkout', str(tx.ROOT), str(root)], check=True)
+            commit = 'fdea2178759ce9842844926374ea98517bc4188b'
+            tree = 'e37024707b91a0e79363c73b2dce1c8feebcb2da'
+            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', commit], check=True)
+            def identity():
+                return tuple(subprocess.check_output(['git', '-C', str(root), *args]).decode().strip() for args in (
+                    ('rev-parse', 'HEAD'), ('rev-parse', 'HEAD^{tree}'),
+                    ('status', '--porcelain', '--untracked-files=all'), ('rev-parse', '--git-common-dir')))
+            expected = (commit, tree, '', '.git')
+            if identity() != expected or not (root / '.git').is_dir():
+                raise ValueError('PR23 review requires the exact clean ordinary revision14 clone')
+            catalog = root / tx.CATALOG.relative_to(tx.ROOT)
+            data = json.loads(catalog.read_text())
+            try:
+                with mock.patch.object(tx, 'ROOT', root), mock.patch.object(tx, 'CATALOG', catalog), mock.patch.object(self, 'data', data):
+                    yield
+            finally:
+                if identity() != expected:
+                    raise ValueError('historical PR23 source changed during its original assertion')
+
     def test_pr23_each_added_and_changed_body_has_independent_source_review(self):
-        evidence = tx.CATALOG.parent / 'PR23-TRANSACTION-INVENTORY-20261003/function-review.json'
-        review = json.loads(evidence.read_text())
-        self.assertEqual((review['added'], review['removed'], review['body_changed']), (45, 2, 33))
-        historical = json.loads((tx.CATALOG.parent / 'R5-CATALOG-RECONCILIATION-20261004/historical-transaction-inventory-revision1.json').read_text())
-        entries = {e['id']: e for e in historical['entries']}
-        current = {e['id']: e for e in self.data['entries']}
-        self.assertEqual(len(review['functions']), 78)
-        self.assertEqual(len({r['id'] for r in review['functions']}), 78)
-        for row in review['functions']:
-            with self.subTest(function=row['id']):
-                e = entries[row['id']]
-                self.assertEqual(e['source_review'], {k: row[k] for k in
-                    ('role', 'trace', 'unverified', 'source_sha256', 'base_commit')})
-                self.assertEqual(e['syntax']['sha256'], row['source_sha256'])
-                self.assertEqual(e['classification'], row['classification'])
-                self.assertEqual(e['evidence_level'], 'source-only')
-                now = current[row['id']]
-                if row['id'] == tx.PG + 'employee_disposition.go::offboardingSubjectsTx':
-                    self.assertEqual(now['source_review']['source_sha256'], now['syntax']['sha256'])
-                    self.assertEqual(now['source_review']['base_commit'], '3f34c31ed51a721b318a76512805e4a14dc292c3')
-                    self.assertIn('authz.CanManageTenantMember', now['source_review']['trace'])
-                    self.assertIn('current caller', now['source_review']['trace'])
-                    self.assertNotEqual(now['syntax']['sha256'], row['source_sha256'])
-                else:
-                    self.assertEqual(now['source_review'], e['source_review'])
-                    self.assertEqual(now['syntax']['sha256'], row['source_sha256'])
-                self.assertEqual(now['classification'], row['classification'])
-                self.assertEqual(now['evidence_level'], 'source-only')
-        for row in review['removed_functions']:
-            self.assertNotIn(row['id'], entries)
-        self.assertFalse(review['runtime_verified'])
+        with self.pr23_revision14_context():
+            evidence = tx.CATALOG.parent / 'PR23-TRANSACTION-INVENTORY-20261003/function-review.json'
+            review = json.loads(evidence.read_text())
+            self.assertEqual((review['added'], review['removed'], review['body_changed']), (45, 2, 33))
+            historical = json.loads((tx.CATALOG.parent / 'R5-CATALOG-RECONCILIATION-20261004/historical-transaction-inventory-revision1.json').read_text())
+            entries = {e['id']: e for e in historical['entries']}
+            current = {e['id']: e for e in self.data['entries']}
+            self.assertEqual(len(review['functions']), 78)
+            self.assertEqual(len({r['id'] for r in review['functions']}), 78)
+            for row in review['functions']:
+                with self.subTest(function=row['id']):
+                    e = entries[row['id']]
+                    self.assertEqual(e['source_review'], {k: row[k] for k in
+                        ('role', 'trace', 'unverified', 'source_sha256', 'base_commit')})
+                    self.assertEqual(e['syntax']['sha256'], row['source_sha256'])
+                    self.assertEqual(e['classification'], row['classification'])
+                    self.assertEqual(e['evidence_level'], 'source-only')
+                    now = current[row['id']]
+                    if row['id'] == tx.PG + 'employee_disposition.go::offboardingSubjectsTx':
+                        self.assertEqual(now['source_review']['source_sha256'], now['syntax']['sha256'])
+                        self.assertEqual(now['source_review']['base_commit'], '3f34c31ed51a721b318a76512805e4a14dc292c3')
+                        self.assertIn('authz.CanManageTenantMember', now['source_review']['trace'])
+                        self.assertIn('current caller', now['source_review']['trace'])
+                        self.assertNotEqual(now['syntax']['sha256'], row['source_sha256'])
+                    else:
+                        self.assertEqual(now['source_review'], e['source_review'])
+                        self.assertEqual(now['syntax']['sha256'], row['source_sha256'])
+                    self.assertEqual(now['classification'], row['classification'])
+                    self.assertEqual(now['evidence_level'], 'source-only')
+            for row in review['removed_functions']:
+                self.assertNotIn(row['id'], entries)
+            self.assertFalse(review['runtime_verified'])
 
     def test_obsolete_function_and_wrong_receiver_rejected(self):
         for identity in [tx.PG+'submissions.go::loadSubmissionRecipients',

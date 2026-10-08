@@ -1,0 +1,69 @@
+{
+  "before": {
+    "commit": "d79c5ba04ce43f420ea95d28f2367a6aa27228c2",
+    "tree": "01bd88c23bb18a494e6727a5418b140e44037ad7",
+    "status": ""
+  },
+  "command": [
+    "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "-B",
+    "-m",
+    "unittest",
+    "test_r5_transactions",
+    "test_r5_compatibility",
+    "test_r5_catalog_reconciliation",
+    "test_r5_current_source_inventory",
+    "test_r5_reviewed_web_locks",
+    "-v"
+  ],
+  "module_inputs": {
+    "test_r5_transactions": {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-catalog15/scripts/tests/test_r5_transactions.py",
+      "bytes": 13558,
+      "sha256": "3d697975c510421dd95938ba5fbc90611835f35e1bf1392b28809167b93d92da"
+    },
+    "test_r5_compatibility": {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-catalog15/scripts/tests/test_r5_compatibility.py",
+      "bytes": 13605,
+      "sha256": "193447b257b2eb132da5002e386ba02db2a74f93895a453fc771dd38d9cfb143"
+    },
+    "test_r5_catalog_reconciliation": {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-catalog15/scripts/tests/test_r5_catalog_reconciliation.py",
+      "bytes": 571552,
+      "sha256": "abb71f6c72dbd5b5639533fd2ff8ef69652626d65e00fe478ebfbdf27d150e71"
+    },
+    "test_r5_current_source_inventory": {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-catalog15/scripts/tests/test_r5_current_source_inventory.py",
+      "bytes": 19900,
+      "sha256": "d7a786f1644fd0b07fd3f8dba9e0e98e30d6cac8f750f528facb5b517f3779d8"
+    },
+    "test_r5_reviewed_web_locks": {
+      "path": "/workspace/scratch/02f0b8733500/tabmail-catalog15/scripts/tests/test_r5_reviewed_web_locks.py",
+      "bytes": 10090,
+      "sha256": "5165c5c244a03acab2a19413744a5d9614b6d943a46b099f647f0dc7c87427c3"
+    }
+  },
+  "boundary": "Original five modules on an exact clean ordinary clone; not a product runtime or release verdict.",
+  "after": {
+    "commit": "d79c5ba04ce43f420ea95d28f2367a6aa27228c2",
+    "tree": "01bd88c23bb18a494e6727a5418b140e44037ad7",
+    "status": ""
+  },
+  "elapsed_seconds": 121.03784881599859,
+  "exit_code": 1,
+  "stdout": {
+    "path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules/stdout.txt",
+    "bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "stderr": {
+    "path": "/workspace/scratch/02f0b8733500/catalog15-prep/evidence/final-modules/stderr.txt",
+    "bytes": 19707,
+    "sha256": "a76127043c30846abd0d4294fd5544174b47912d6c05a9a41e3a69d2c2a9806b"
+  },
+  "reported_tests": 100,
+  "reported_elapsed_seconds": 120.297,
+  "exact_source_unchanged": true,
+  "module_inputs_unchanged": true,
+  "reported_ok": false
+}

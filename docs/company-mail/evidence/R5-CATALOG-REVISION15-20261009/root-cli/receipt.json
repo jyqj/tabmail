@@ -1,0 +1,83 @@
+{
+  "scope": "root original three catalog CLIs on combined final documents and reviewed catalog source",
+  "preparation_observation": {
+    "commit": "b7a7b07b476f501d9d25c7225436f53c887fe13d",
+    "tree": "72c50244f3cd060456541103a9da5f15cf1bbc37",
+    "status": "?? scripts/__pycache__/run_r5_api_key_issuance.cpython-312.pyc"
+  },
+  "preparation_note": "Earlier preflight stopped before invoking any CLI because this generated Python bytecode file existed. Only that reproducible cache was removed before the following clean execution.",
+  "source_before": {
+    "commit": "b7a7b07b476f501d9d25c7225436f53c887fe13d",
+    "tree": "72c50244f3cd060456541103a9da5f15cf1bbc37",
+    "status": ""
+  },
+  "source_after": {
+    "commit": "b7a7b07b476f501d9d25c7225436f53c887fe13d",
+    "tree": "72c50244f3cd060456541103a9da5f15cf1bbc37",
+    "status": ""
+  },
+  "commands": [
+    {
+      "name": "transactions",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 2.2916867040039506,
+      "stdout": {
+        "file": "transactions.stdout.txt",
+        "bytes": 309,
+        "sha256": "a79bcab41032525de3384015573540388e1752ed585cb81376d8c84e8db32636"
+      },
+      "stderr": {
+        "file": "transactions.stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "compatibility",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 4.934484085999429,
+      "stdout": {
+        "file": "compatibility.stdout.txt",
+        "bytes": 1117,
+        "sha256": "d0954efef62572f718c0d4a4dc38485d1e60599ce81088ee6a4efb731707ed71"
+      },
+      "stderr": {
+        "file": "compatibility.stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "name": "clients",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/node/bin/node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 3.0294332660050713,
+      "stdout": {
+        "file": "clients.stdout.txt",
+        "bytes": 73,
+        "sha256": "47b96ae470deec0228831298df2ab391d0e25b90aec7aaabbaa7c78ebc5536eb"
+      },
+      "stderr": {
+        "file": "clients.stderr.txt",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "product_source": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+  "does_not_claim_complete_release_or_new_product_tests": true
+}

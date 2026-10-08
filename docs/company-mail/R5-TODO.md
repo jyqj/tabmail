@@ -1,9 +1,13 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-ADVANCE-20261009:BEGIN -->
-## ADVANCE-20261009：十项独立实施，三轮推进
+## ADVANCE-20261009：三轮十项已实际完成
 
-本批从公开 `fdea2178` 继续，独立认领 #197–#206，完整编号带日期，与前日同名批次分别计数。首轮 [#207](https://github.com/jyqj/tabmail/pull/207) 已实际合入 `899e5bd9`，完整tree与审查交付相同，#197/#198/#199/#200均closed/completed。当前远端 **4/10完成、剩余6**；第二轮 #201/#202/#203 实现与独审通过，固定整合源179 Go race叶、105 UI全PASS，等待第二轮PR实际合入后登记7/10、剩余3。父清单仍 **10/171已验收、剩余161**。逐项正常/失败边界、实际执行身份及原失败见 [本日三轮账本](R5-ADVANCE-20261009.md)。后续两轮由原生子智能体继续推进；文档、目录与重复验证不增加计数。
+本批从公开 `fdea2178` 继续，root 与 backend/frontend/transport 三个原生子智能体按 4＋3＋3 推进 #197–#206。三轮 [#207](https://github.com/jyqj/tabmail/pull/207)、[#208](https://github.com/jyqj/tabmail/pull/208)、[#209](https://github.com/jyqj/tabmail/pull/209) 已实际合入，merge 依次 `899e5bd9`、`f05ce6c0`、`26a30e3c`，十个 Issue 均 closed/completed。**本批 10/10 完成、剩余 0；每轮剩余 6 → 3 → 0。** 原父任务仍 **10/171 已验收、剩余 161**；原父项及当前全部 checkbox 行逐字保持。
+
+最终产品 tree `437de0716fc9247e188f0409654f4f178905dc33` 与公开 f8ad053、本地 e741a84、实际 merge 26a30e3 一致。root 最终同源 **603 个不同 Go race 叶、181 UI 全 PASS**，完整非增量 TypeScript 和默认全 Go build 通过；[真实 API key PG](https://github.com/jyqj/tabmail/actions/runs/37826809127) 同字节 18 例 **6P/12F → 18P/0F/SKIP**，原始 artifact 已打开并独审 ACCEPT。精确源码、各项原失败与独立反例、原始 PG 包及实际交付见 [三轮账本](R5-ADVANCE-20261009.md)。
+
+[revision15 目录维护](evidence/R5-CATALOG-REVISION15-20261009/README.md) 对齐该产品源，原三 CLI 从 1/1/1 到 0/0/0，旧历史、检查器及拒绝守卫保持；维护计 0 个新增实施 TODO。产品 f8ad053 的五个专项 CI 成功，完整发布 CI 仍失败；后续维护源的实际 CI 另在 [PR #56](https://github.com/jyqj/tabmail/pull/56) 登记。#56 继续 draft，全 PG/必跑、独立私有 fixture、严格依赖审计、有效 M/G0 及全部父项验收门槛保持。
 <!-- R5-ADVANCE-20261009:END -->
 
 <!-- R5-FINISH-20261009:BEGIN -->

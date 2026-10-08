@@ -628,7 +628,7 @@
       "clients": [
         {
           "source": "web/features/company/employees.tsx",
-          "line": 97,
+          "line": 98,
           "branch": 0,
           "callee": "company",
           "owner": "revokeInvitation",
@@ -4692,7 +4692,7 @@
       "clients": [
         {
           "source": "web/app/(dashboard)/company/templates/page.tsx",
-          "line": 44,
+          "line": 83,
           "branch": 0,
           "callee": "company",
           "owner": "list",
@@ -4842,7 +4842,7 @@
       "clients": [
         {
           "source": "web/components/company/templates/versions.tsx",
-          "line": 48,
+          "line": 51,
           "branch": 0,
           "callee": "company",
           "owner": "versions",
@@ -5947,24 +5947,36 @@
       ],
       "request_schema_refs": [],
       "request_contract": {
-        "required": false,
+        "required": true,
         "media_type_schemas": {
           "application/json": {
             "type": "object",
             "properties": {
               "role": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "enum": [
                   "super_admin",
                   "admin",
-                  "user"
+                  "user",
+                  null
                 ]
               },
               "is_active": {
-                "type": "boolean"
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "display_name": {
-                "type": "string"
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 255,
+                "description": "Exact text is retained, including whitespace. NUL characters are forbidden. Null leaves the display name unchanged."
               }
             }
           }
@@ -6476,8 +6488,12 @@
       "conditions": [],
       "openapi_operation_present": true,
       "schema_components": [
+        "#/components/responses/BadRequest",
+        "#/components/responses/Forbidden",
+        "#/components/responses/NotFound",
         "APIKeyCreated",
-        "APIKeyScope"
+        "APIKeyScope",
+        "Error"
       ],
       "request_schema_refs": [
         "APIKeyScope"
@@ -6497,13 +6513,25 @@
                 "items": {
                   "$ref": "#/components/schemas/APIKeyScope"
                 }
+              },
+              "allowed_zone_ids": {
+                "type": "array",
+                "description": "Explicit zones within the target tenant and the current issuer's permission. Omission inherits the current user's zone restriction.",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
               }
             }
           }
         }
       },
       "response_schema_refs": [
-        "APIKeyCreated"
+        "#/components/responses/BadRequest",
+        "#/components/responses/Forbidden",
+        "#/components/responses/NotFound",
+        "APIKeyCreated",
+        "Error"
       ],
       "go_ts_dto_bindings": [],
       "reviewed_response_binding": null,
@@ -6955,7 +6983,8 @@
             "properties": {
               "email": {
                 "type": "string",
-                "format": "email"
+                "format": "email",
+                "maxLength": 255
               },
               "password": {
                 "type": "string",
@@ -7805,7 +7834,7 @@
       "clients": [
         {
           "source": "web/features/company/employees.tsx",
-          "line": 68,
+          "line": 69,
           "branch": 0,
           "callee": "company",
           "owner": "value",
@@ -8961,7 +8990,7 @@
       "clients": [
         {
           "source": "web/components/company/templates/editor.tsx",
-          "line": 176,
+          "line": 179,
           "branch": 1,
           "callee": "company",
           "owner": "res",
@@ -9079,7 +9108,7 @@
         },
         {
           "source": "web/components/company/templates/editor.tsx",
-          "line": 118,
+          "line": 121,
           "branch": 0,
           "callee": "company",
           "owner": "value",
@@ -9173,7 +9202,7 @@
       "clients": [
         {
           "source": "web/components/company/templates/editor.tsx",
-          "line": 206,
+          "line": 209,
           "branch": 0,
           "callee": "company",
           "owner": "save",
@@ -9265,7 +9294,7 @@
       "clients": [
         {
           "source": "web/app/(dashboard)/company/templates/page.tsx",
-          "line": 145,
+          "line": 186,
           "branch": 0,
           "callee": "company",
           "owner": "retireTemplate",
@@ -9407,8 +9436,10 @@
       "schema_components": [
         "#/components/responses/BadRequest",
         "#/components/responses/Forbidden",
+        "#/components/responses/NotFound",
         "APIKeyCreated",
-        "APIKeyScope"
+        "APIKeyScope",
+        "Error"
       ],
       "request_schema_refs": [
         "APIKeyScope"
@@ -9428,6 +9459,14 @@
                 "items": {
                   "$ref": "#/components/schemas/APIKeyScope"
                 }
+              },
+              "allowed_zone_ids": {
+                "type": "array",
+                "description": "Explicit zones within the target tenant and the current issuer's permission. Omission inherits the current user's zone restriction.",
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                }
               }
             }
           }
@@ -9436,7 +9475,9 @@
       "response_schema_refs": [
         "#/components/responses/BadRequest",
         "#/components/responses/Forbidden",
-        "APIKeyCreated"
+        "#/components/responses/NotFound",
+        "APIKeyCreated",
+        "Error"
       ],
       "go_ts_dto_bindings": [],
       "reviewed_response_binding": null,
@@ -10060,7 +10101,7 @@
       "clients": [
         {
           "source": "web/components/company/templates/editor.tsx",
-          "line": 176,
+          "line": 179,
           "branch": 0,
           "callee": "company",
           "owner": "res",
@@ -10195,12 +10236,12 @@
   ],
   "source_closure": {
     "docs/company-mail/evidence/R5-API-MATRIX.json": "99d60110159c0001dae4cabab51e5bc878b7f7628cd3dea32c3f1e6d10b33c09",
-    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "8bfc12c746edccd83c637d14691d2255b3d83c4611f6efc067e5c0ad2a78011d",
-    "internal/api/handlers/admin.go": "efb4fd396514192f8857f6c884852a446d9c3ecb3768c135037f60b05c080bf7",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "a2aa98cfdfb99ac8a7eade5348102c1ecde26dd9032b9278e546db25ae394b47",
+    "internal/api/handlers/admin.go": "6e7ef2e274a48907d5af78f4b0537e4abaef840aa9d0d313c3c4b56f46697a35",
     "internal/api/handlers/admin_tenant_override.go": "e0bee7424078f67619ea48c4e9754851855b37bfbb02fbea089465f78c2fcfb6",
     "internal/api/handlers/app_error.go": "1c745e35259f538938df75356997861841a7bb83c7af2302caa8c661efe147ff",
     "internal/api/handlers/audit.go": "ac2cd9156fe0ccea8085670033dd1a2762a9589371e161dd7cc2a287df6dde73",
-    "internal/api/handlers/auth.go": "632c1f97642d2f09c2dc3d5ece2a82b3f8b7595d9765a883acf4988dc9ea61d2",
+    "internal/api/handlers/auth.go": "7a5806ef691478bbd0648945c1f74fb1a850a7e35f6219154da45cd944e1dca2",
     "internal/api/handlers/company.go": "175bd9f9715c8105ca36121942ecf39fe540a174178831735427babac0c3b09f",
     "internal/api/handlers/company_admin_stream.go": "8d6d18887be79ace5a8743adff6a196c4c7388ad9af2e11c34a2e8abfe204548",
     "internal/api/handlers/company_archive.go": "bed269f1af47955f734333b0f64460a08e06b2e6c0262deab05315e5f404b62e",
@@ -10227,14 +10268,14 @@
     "internal/api/handlers/permissions.go": "112403579c8fe55428a9dcc10b59196bd19beeef3fe69fed514880e350f386d6",
     "internal/api/handlers/r5_protocol_component_observations_test.go": "22c7eff281505fef03e4adfd8b6d7fe1724e157446153ede9640d3c0ff588dc7",
     "internal/api/handlers/respond.go": "1ee1d18afbac384f36c254a74be3e8dbc11768e796501ccd9815a68a194e2a84",
-    "internal/api/handlers/users_admin.go": "9b75203c389d388026b3c31b31c0a42c92cb82bebc80d799ab76437ad8ace9ea",
+    "internal/api/handlers/users_admin.go": "e1760358edf9ee3ffad5d7e833c2d3528693135e28202cc6bb7995b624ad2d16",
     "internal/api/http_contract_test.go": "e78928722ab513c1a70adb3c4dadf7b67f06ccc255d1ac985ee93a3aec93a9d3",
     "internal/api/middleware/apikey_touch.go": "7d574639cc3f0d598d8fad6df1fb29ca70e2643cdd391bc69d07d9fa12f42f16",
     "internal/api/middleware/auth.go": "a9bc166859e6991dbccdde1ac3c071d9a7b590912a6fe4bdf4476f4a8c3bc0b4",
     "internal/api/middleware/auth_cache.go": "9d7462fcd86674d2732b46d40fa10bfc3a11a223a650449bce94936c48a43eb5",
     "internal/api/middleware/ratelimit.go": "b374746b29f8329c6cc0764047df78c1d380e085116e4c3c03aad2b0149431ea",
     "internal/api/middleware/revalidate.go": "5c01d49b8084502ce4b346e18a8432dfc32d42df2f3ce5edd23428ca55be0315",
-    "internal/api/openapi.yaml": "69a9120629a7930b12607e7d3ad78b5e9e7e96f1ae4173ea79b14ba8a7b0a27f",
+    "internal/api/openapi.yaml": "4635c870b9f4ad33bca2df018a92c2ffd9b5ea89df985d0741cc4c8c3ed3b999",
     "internal/api/router.go": "4f3c2410b0b5cf051385b800119fead832ca8a94a6105619ef8371a0bdb67a88",
     "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
     "internal/company/archive.go": "aad2725c16d391afb3ac90ed3d84b25eff35e12704202b8cd157270f08a9d785",
@@ -10249,7 +10290,7 @@
     "internal/company/permission_editor_decode.go": "0bca03df38ea6a6095dd12c49ff6aecc7ccc406c944970c0759ee43d181ce219",
     "internal/company/permission_profile_json.go": "a2eade6ff3af01531cc75f4e4609057906de8b5305e5743c9e1eae7fd409a83d",
     "internal/company/submissions.go": "3e2cdbfd38091aef3dc7165aa08bf93004d60ee869c26d6c86573705018d1ee9",
-    "internal/company/templates.go": "425d56688eb808f89465e159f183443a5555cb46739aada2d391e955c86e75aa",
+    "internal/company/templates.go": "57a1b2544c0814792ed3a16d1906b41b4281efc06f0767779f9f85359368f13d",
     "internal/company/types.go": "7c67ba6d42001bfd704865cb6887146e35541aa8c8808ee8b11eaf647107f305",
     "internal/models/mailbox_grants.go": "2f4db91be99435b19b9b491028f459e8f614a8d44a7edeb68d4cd29ba02dd353",
     "internal/models/models.go": "e2058895877834ab9330ce4457cf00d2b1a1da0034f47a597ae702b2270af933",
@@ -10257,19 +10298,19 @@
     "scripts/check_contract_drift.py": "39776809d4a918b7298e3a1fc680656e6ad7a55d8ee48c2ef09ec43494850485",
     "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
     "web/app/(dashboard)/company/recovery/page.tsx": "fb7c45ece2271935716c7ab20fce5526d8a74fa3bf7acdb7b879188f42158ba5",
-    "web/app/(dashboard)/company/templates/page.tsx": "96cd540aa947f470468f30c962701cd872090591e626b1bd97ba49dfc8032823",
+    "web/app/(dashboard)/company/templates/page.tsx": "0d1fe8f21bcbdb5791ef4be438b934c4c9b3aa96913ca8dbe7be9d0f0f9193c8",
     "web/app/auth/activate/page.tsx": "229c5d38f01aea23c82575840e5189d93ebcf9b5e264e896756d36e8a938eac1",
     "web/components/company/compose.tsx": "001100759db85b1cbf270410c0fb223c0bdd488db572368d5bf5a675ac57342a",
     "web/components/company/grants.tsx": "5dbfd5e29147276e45932188cd2ba9b93d6850a1492dcd6f361eacc4a47469e2",
-    "web/components/company/templates/editor.tsx": "1fdef63d0d9c6b1130f5a2b3c4040429c499c1eb8765fe587b46644b3f9a438e",
+    "web/components/company/templates/editor.tsx": "b3c6bbc9a00b8526f39720a959a9e2e9604334764d4ebfaf7eaa4d1a95f6df3f",
     "web/components/company/templates/grants.tsx": "2ff8802065a4b39567f1cea70ce727d4aecd5745158930ca3cad0e43ec01e85c",
-    "web/components/company/templates/versions.tsx": "5824b4d9f1fd5c398523b2ca3f5680c788a63601d90a9821e5239efbfc186338",
+    "web/components/company/templates/versions.tsx": "5a89ddd6a9aa8ab4a4e985ce6ca72d5dfc568ff32a7a8569b3576b61fc6dcfc5",
     "web/features/company/access-explanation.tsx": "542090c78a2a85f0a98d2b99edf8114a71cddc2840cf74892822bb2768b0942a",
     "web/features/company/api.ts": "c604cfbaf0e431b7cfaf0c6709a3ada2b4ef1b99e208e8e0731cde917e863105",
     "web/features/company/audit.tsx": "06838e996314485ddd81ddeadcf53c359e92152675ee83baacde3a6ebe08d060",
     "web/features/company/company-event-consumer.tsx": "1f8b8a65839a5ea29542ac4ddda9b210003332a24b76f90242d3eff48a873096",
     "web/features/company/domain-settings.tsx": "5e68ad4ce0e8a656d1c0e6f6b4e8f89ae511ae686c4ed0884e8d3dcc8b8718cb",
-    "web/features/company/employees.tsx": "b51865627a91e32dccbe09ac97afac6de658897248e6f6ab7d27f888bd40bb01",
+    "web/features/company/employees.tsx": "01ac9442f13ce0707c7e03bad1f614d352985a85f30d9c7eb040bc89598a1d17",
     "web/features/company/mailbox-admin.tsx": "6bd58b468c9c1d97f5efcaaca7255d30a281678d99ffc3c7710cea8901ead506",
     "web/features/company/overview.tsx": "565a70314c43039d78415a63840defac31a812d40a40bf92f2e1a199ef486251",
     "web/features/mail/api.ts": "fb126f68df692218db562b651b5c4d9876f69d8485460d513a5548bddd6be7f5",
@@ -10296,17 +10337,17 @@
     "qualification": "historical_metadata_only_not_current_wire"
   },
   "acquisition": {
-    "base_commit": "740126660526db987b7914c50a8731b7cac9bf42",
+    "base_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
   },
   "inventory_revision": {
-    "revision": 14,
-    "source_commit": "740126660526db987b7914c50a8731b7cac9bf42",
+    "revision": 15,
+    "source_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
     "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
-    "previous_snapshot_commit": "be3a6bf41daa198a39306c90fd03411e38a017d8",
-    "previous_snapshot_blob": "397e76a5f3c3859704c5ef2a6bc665a0d68c7a9f",
-    "previous_sha256": "4276d86ebcf9fb6fbddb610c37de69cc49670ba79b1a97181eaba42b8fc32de1",
+    "previous_snapshot_commit": "fdea2178759ce9842844926374ea98517bc4188b",
+    "previous_snapshot_blob": "b25c4bfca6bd8b9771ba0d13016e8bddaebe911c",
+    "previous_sha256": "7c6f530ab43d729fc844f5ecf00e205b2dc2af5d3b28a761bba05dd830967d09",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md"
   }
 }

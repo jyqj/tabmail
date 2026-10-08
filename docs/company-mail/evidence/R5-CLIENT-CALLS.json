@@ -97,7 +97,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 44,
+    "line": 83,
     "branch": 0,
     "callee": "company",
     "owner": "list",
@@ -113,7 +113,7 @@
   },
   {
     "source": "web/app/(dashboard)/company/templates/page.tsx",
-    "line": 145,
+    "line": 186,
     "branch": 0,
     "callee": "company",
     "owner": "retireTemplate",
@@ -337,7 +337,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 118,
+    "line": 121,
     "branch": 0,
     "callee": "company",
     "owner": "value",
@@ -353,7 +353,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 176,
+    "line": 179,
     "branch": 0,
     "callee": "company",
     "owner": "res",
@@ -369,7 +369,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 176,
+    "line": 179,
     "branch": 1,
     "callee": "company",
     "owner": "res",
@@ -385,7 +385,7 @@
   },
   {
     "source": "web/components/company/templates/editor.tsx",
-    "line": 206,
+    "line": 209,
     "branch": 0,
     "callee": "company",
     "owner": "save",
@@ -433,7 +433,7 @@
   },
   {
     "source": "web/components/company/templates/versions.tsx",
-    "line": 48,
+    "line": 51,
     "branch": 0,
     "callee": "company",
     "owner": "versions",
@@ -609,7 +609,7 @@
   },
   {
     "source": "web/features/company/employees.tsx",
-    "line": 68,
+    "line": 69,
     "branch": 0,
     "callee": "company",
     "owner": "value",
@@ -625,7 +625,7 @@
   },
   {
     "source": "web/features/company/employees.tsx",
-    "line": 97,
+    "line": 98,
     "branch": 0,
     "callee": "company",
     "owner": "revokeInvitation",

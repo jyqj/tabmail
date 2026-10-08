@@ -1,4 +1,4 @@
-"""Frozen revision-1 through revision-13 reviews and current revision-14 facts."""
+"""Frozen revision-1 through revision-14 reviews and current revision-15 facts."""
 import ast
 from contextlib import contextmanager, ExitStack
 import copy
@@ -26,7 +26,7 @@ REVISION7_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION7-202
 REVISION8_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008'
 REVISION9_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008'
 REVISION10_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008'
-CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008'
+CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009'
 REVISION10_COMMIT = '20c39ab3ebaee46e5ac51e25d90a455166c9a31d'
 REVISION10_SOURCE_COMMIT = '703a572864296120fff3efe0880c560ad9c74d57'
 REVISION10_SOURCE_TREE = '40e1d2d16258e0e2bc3afea29553dbb148920e4e'
@@ -36,10 +36,10 @@ REVISION9_SOURCE_TREE = 'db7c422fcdd63405706a2f2cb7631a5380f87fd6'
 REVISION8_COMMIT = '1d856bd8a552c30dfb48b4902858edad7e53aaf5'
 REVISION8_SOURCE_COMMIT = 'e0cd175996ca4ee314d7d8b8cf836023b680346c'
 REVISION8_SOURCE_TREE = '5307be3cf057104d1bf1529e38235bbaf0c2bcdf'
-SOURCE_COMMIT = '740126660526db987b7914c50a8731b7cac9bf42'
+SOURCE_COMMIT = '26a30e3c6963d553efdd8a8b33c095feb924c758'
 REVISION7_COMMIT = 'f77c31e2da38bb926dfe6fa134eabad652e94f8c'
 REVISION7_SOURCE_COMMIT = '9b12c93cb03285298267e27893f74aebe742a8a2'
-SOURCE_TREE = '5ee1ec138c6854b3068ec3576ea1e824510a9ee2'
+SOURCE_TREE = '437de0716fc9247e188f0409654f4f178905dc33'
 REVISION7_SOURCE_TREE = '87c87a0db72ac444050b43fbe67d906f45c4a2ac'
 REVISION6_COMMIT = 'c3e1419e6245baf0190291ea868787cb2b0177ca'
 REVISION6_SOURCE_COMMIT = 'f413a9138d305cf154ed2cecaddcf9b9a2397666'
@@ -2287,6 +2287,1036 @@ def revision13_snapshot(name):
     return json.loads(raw)
 
 
+
+REVISION14_COMMIT = 'fdea2178759ce9842844926374ea98517bc4188b'
+REVISION14_TREE = 'e37024707b91a0e79363c73b2dce1c8feebcb2da'
+REVISION14_SOURCE_COMMIT = '740126660526db987b7914c50a8731b7cac9bf42'
+REVISION14_SOURCE_TREE = '5ee1ec138c6854b3068ec3576ea1e824510a9ee2'
+REVISION14_SNAPSHOTS = {'transaction': {'path': 'docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json',
+                 'blob': '1415c2f371648ac093f1d69a0cfb8242c50778f9',
+                 'sha256': '3061dda4280598710648616781b72dbe2cb2c2f78b28b70a636a976f0b0b644f',
+                 'bytes': 2889207},
+ 'compatibility': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json',
+                   'blob': 'b25c4bfca6bd8b9771ba0d13016e8bddaebe911c',
+                   'sha256': '7c6f530ab43d729fc844f5ecf00e205b2dc2af5d3b28a761bba05dd830967d09',
+                   'bytes': 410313},
+ 'clients': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json',
+             'blob': 'f4016a61962e4e0e25a5af0c1ba57834ec511e8b',
+             'sha256': '8bfc12c746edccd83c637d14691d2255b3d83c4611f6efc067e5c0ad2a78011d',
+             'bytes': 41444},
+ 'client_routes': {'path': 'docs/company-mail/evidence/R5-CLIENT-CALLS.json',
+                   'blob': 'decb2ad276c1ef4b44c36d06e3b1a09eb1ab9e80',
+                   'sha256': '0805d5705d2d0680735ab7249209ef77dd31b32dbf86694c27d3cf6f3ff2b0d3',
+                   'bytes': 50365}}
+REVISION15_PR23_CONTEXT = (
+    '    @contextmanager\n'
+    '    def pr23_revision14_context(self):\n'
+    '        # This one historical PR23 assertion keeps its complete original body.\n'
+    '        # Current entries are checked separately by the revision15 source review.\n'
+    "        with tempfile.TemporaryDirectory(prefix='r5-pr23-revision14-') as directory:\n"
+    "            root = Path(directory) / 'source'\n"
+    "            subprocess.run(['git', 'clone', '--quiet', '--no-hardlinks', '--no-checkout', str(tx.ROOT), str(root)], check=True)\n"
+    "            commit = 'fdea2178759ce9842844926374ea98517bc4188b'\n"
+    "            tree = 'e37024707b91a0e79363c73b2dce1c8feebcb2da'\n"
+    "            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', commit], check=True)\n"
+    '            def identity():\n'
+    "                return tuple(subprocess.check_output(['git', '-C', str(root), *args]).decode().strip() for args in (\n"
+    "                    ('rev-parse', 'HEAD'), ('rev-parse', 'HEAD^{tree}'),\n"
+    "                    ('status', '--porcelain', '--untracked-files=all'), ('rev-parse', '--git-common-dir')))\n"
+    "            expected = (commit, tree, '', '.git')\n"
+    "            if identity() != expected or not (root / '.git').is_dir():\n"
+    "                raise ValueError('PR23 review requires the exact clean ordinary revision14 clone')\n"
+    '            catalog = root / tx.CATALOG.relative_to(tx.ROOT)\n'
+    '            data = json.loads(catalog.read_text())\n'
+    '            try:\n'
+    "                with mock.patch.object(tx, 'ROOT', root), mock.patch.object(tx, 'CATALOG', catalog), mock.patch.object(self, 'data', data):\n"
+    '                    yield\n'
+    '            finally:\n'
+    '                if identity() != expected:\n'
+    "                    raise ValueError('historical PR23 source changed during its original assertion')\n"
+    '\n'
+)
+
+REVISION15_EXPECTED = {'transaction': {'status': 'PASS',
+                 'postgres_files': 64,
+                 'functions': 404,
+                 'sql_execution_calls': 505,
+                 'direct_write_functions': 139,
+                 'write_closure_functions': 160,
+                 'migration_files': 19,
+                 'task_complete': False,
+                 'runtime_verified': False,
+                 'meaning': 'syntax inventory current; no concurrency or behavior equivalence claim'},
+ 'compatibility': {'wire_validation_scope': 'not_checked_current_wire_required',
+                   'historical_wire_reference': {'artifact_ref': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json',
+                                                 'sha256': '61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22',
+                                                 'qualification': 'historical_metadata_only_not_current_wire'},
+                   'status': 'source_inventory_and_upgrade_plan_checked',
+                   'task_complete': False,
+                   'product_green': False,
+                   'routes': 133,
+                   'client_branches': 136,
+                   'source_files': 95,
+                   'openapi_missing': ['DELETE /api/v1/suppression/{id}',
+                                       'GET /api/v1/suppression',
+                                       'GET /docs-assets/*'],
+                   'no_shipped_client': ['DELETE /api/v1/suppression/{id}',
+                                         'GET /api/v1/admin/status',
+                                         'GET /api/v1/auth/me',
+                                         'GET /api/v1/company/outbound/{id}/recipients',
+                                         'GET /api/v1/suppression',
+                                         'GET /docs',
+                                         'GET /docs-assets/*',
+                                         'GET /metrics',
+                                         'GET /openapi.yaml',
+                                         'GET /ready',
+                                         'GET /redoc'],
+                   'runtime_boundary': 'No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency '
+                                       'review remain required.'},
+ 'review_field_sha256': {'transaction_callers': 'a2601be8bc6d4b4da7c12526e4072024ce434b4cd73328dbdd91d8eda575643d',
+                         'compatibility_route_changes': 'e1cbde7c7b320d3e3f648e3f6e453a9ebd793ce2ac026ff5f2c527f340b0a850',
+                         'closure_changes': '113f0730308a8f46dcc913088542c13e677f21651c65e6edcbbde9c71263d9c6',
+                         'source_changes': 'd9941c4600bb8de0b64e0bfee2e9ac8a7add98d2c41c9c7f6da97de53d955678',
+                         'current_rejections': 'a4b12230ce46012d6c53fa5bf86f88d0ba0996d04f8967244765895baad9e8c3',
+                         'generated_catalogs': '66d00726657de7b92b2c3209f607526e0dd26d5526e1e3fdc458b689832e1ca8',
+                         'additional_api_schema_changes': '4bbecc2c045f39da2cf7f47c5314c8911aa06bf807119c01e5ecfb0150cea1c6',
+                         'transaction_body_changes': '03174e436b9931fa9345b07e95c900b2c750ef0ab1e697bf680f161f6de0411c',
+                         'transaction_classification_changes': '0277b72a97eb093a7df43538bec4fa92cc227c6595846962ee25fb5c00e290cb',
+                         'transaction_entry_changes': '83d3f14e24034d81fd1662ec647cc37946e4df112bf151cf913d6832e387b9b7',
+                         'transaction_added_entries': '123dcd90349882c2cb214d3e0c6168af579d97570ff4c83370bc127b37b1f037',
+                         'transaction_removed_entries': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'manual_review_fields': '92d1b1de252791ba0c817b12318e0252200d471f47269643315b6c151d937e05',
+                         'transaction_file_review_additions': '4e4a31081659df63a61a406bf1b2734569a63cba8cf84a35cac1f35e13ea2cb3',
+                         'baseline_validation': 'b653151b446953005ded78265238e2fecea1bdeb8090a770a2bc52fc464985c1'},
+ 'historical_manifest_sha256': 'a3f5147c2f98f5c1d051f44038c6bf8ca59377f67397d75deb18d86830d2a4a1',
+ 'protected_source_manifest_sha256': 'ea188474efd9dd7d56307870678e87f45b2ce6df2dbe0b4c609146c41c1ebdff',
+ 'product_paths': ['internal/api/handlers/admin.go',
+                   'internal/api/handlers/auth.go',
+                   'internal/api/handlers/users_admin.go',
+                   'internal/app/admin/service.go',
+                   'internal/authz/api_key_issuer.go',
+                   'internal/company/templates.go',
+                   'internal/outbound/builder.go',
+                   'internal/outbound/delivery_context.go',
+                   'internal/rawobject/integrity.go',
+                   'internal/store/postgres/apikeys.go',
+                   'internal/store/store.go',
+                   'internal/testutil/fake_store_api_key_issuer.go',
+                   'web/app/(dashboard)/admin/audit/page.tsx',
+                   'web/app/(dashboard)/admin/domains/page.tsx',
+                   'web/app/(dashboard)/admin/ingest/page.tsx',
+                   'web/app/(dashboard)/admin/webhooks/page.tsx',
+                   'web/app/(dashboard)/company/templates/page.tsx',
+                   'web/components/company/templates/editor.tsx',
+                   'web/components/company/templates/versions.tsx',
+                   'web/components/crud/list-read-state.tsx',
+                   'web/features/company/employees.tsx',
+                   'web/features/company/offboarding-panel.tsx'],
+ 'body_changes': [{'id': 'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey',
+                   'before_sha256': 'f0c5e9e7b13cd7b9678bf22db651c5b0a01981025ed73fad26b624c828499c79',
+                   'after_sha256': '63d0e139223af39dcaae5e12c17ec4bd5688655b8e1ce678feb8179f71737ec0'}],
+ 'classification_changes': [{'id': 'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey',
+                             'before': {'kind': 'direct-write',
+                                        'direct_write': True,
+                                        'write_closure': True,
+                                        'explicit_lock': False,
+                                        'transaction_calls': True,
+                                        'callback_parameter': False,
+                                        'dynamic_sql_expression': False},
+                             'after': {'kind': 'write-call-closure',
+                                       'direct_write': False,
+                                       'write_closure': True,
+                                       'explicit_lock': False,
+                                       'transaction_calls': True,
+                                       'callback_parameter': False,
+                                       'dynamic_sql_expression': False}}],
+ 'manual_review_fields': {'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey': {'lock_fk_wait_fence': {'boundary': '可信seed/import事务入口：Begin '
+                                                                                                                          '→ '
+                                                                                                                          'insertAPIKeyRows(ctx, '
+                                                                                                                          'tx, '
+                                                                                                                          'k) '
+                                                                                                                          '→ '
+                                                                                                                          'Commit；helper错误向上传递并由defer '
+                                                                                                                          'Rollback清理。两次INSERT已移到同tx的helper，因此本体无direct '
+                                                                                                                          'SQL而保留write-call-closure与Begin。这里仍不重载交互身份、不检查权限或zone、也不写发行audit；正式HTTP发行通过必需CreateAPIKeyAuthorized接口，名字匹配caller不能证明dispatch。',
+                                                                                                              'local_operations': [{'line': 27,
+                                                                                                                                    'operation': 's.pool.Begin',
+                                                                                                                                    'sql_expression': '',
+                                                                                                                                    'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                   {'line': 31,
+                                                                                                                                    'operation': 'tx.Rollback',
+                                                                                                                                    'sql_expression': '',
+                                                                                                                                    'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                   {'line': 32,
+                                                                                                                                    'operation': 'insertAPIKeyRows',
+                                                                                                                                    'sql_expression': '',
+                                                                                                                                    'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                   {'line': 35,
+                                                                                                                                    'operation': 'tx.Commit',
+                                                                                                                                    'sql_expression': '',
+                                                                                                                                    'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                              'direct_lock_fragments': [],
+                                                                                                              'implicit_fk': '00001_baseline.sql：tenant_api_keys.tenant_id→tenants(id) '
+                                                                                                                             'ON '
+                                                                                                                             'DELETE '
+                                                                                                                             'CASCADE，owner_user_id→users(id) '
+                                                                                                                             'ON '
+                                                                                                                             'DELETE '
+                                                                                                                             'CASCADE（NOT '
+                                                                                                                             'VALID不免除新写检查）；00019_api_key_usage.sql：usage.api_key_id→tenant_api_keys(id) '
+                                                                                                                             'ON '
+                                                                                                                             'DELETE '
+                                                                                                                             'CASCADE。key与audit的tenant引用会取得FK父锁；正式发行提前取得目标tenant '
+                                                                                                                             'KEY '
+                                                                                                                             'SHARE。allowed_zone_ids为无FK '
+                                                                                                                             'UUID数组，zone存在性/tenant判定依赖显式SHARE '
+                                                                                                                             'NOWAIT。这里不执行FK、触发器或未来写者协议。'},
+                                                                                       'evidence': ['internal/store/postgres/apikeys.go:26-36 '
+                                                                                                    'sha256=63d0e139223af39dcaae5e12c17ec4bd5688655b8e1ce678feb8179f71737ec0',
+                                                                                                    'PR #209 / Issue '
+                                                                                                    '#204 separately '
+                                                                                                    'records bounded '
+                                                                                                    'actual PostgreSQL '
+                                                                                                    'issuance and '
+                                                                                                    'independent authz '
+                                                                                                    'tests; this '
+                                                                                                    'catalog executes '
+                                                                                                    'syntax producers '
+                                                                                                    'only.'],
+                                                                                       'unverified_risks': ['Tenant/owner '
+                                                                                                            'FKs and '
+                                                                                                            'deletion/provision '
+                                                                                                            'atomicity '
+                                                                                                            'not '
+                                                                                                            'executed; '
+                                                                                                            'outer '
+                                                                                                            'authorization '
+                                                                                                            'required.',
+                                                                                                            '目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR '
+                                                                                                            '#209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。',
+                                                                                                            '此公开低层接口仅适用于可信seed/import；未来业务调用不得绕过必需授权命令。保留原接口并不使旧调用路径获得新JWT、权限或audit保证。'],
+                                                                                       'file_family_context': '可信seed/import事务入口：Begin '
+                                                                                                              '→ '
+                                                                                                              'insertAPIKeyRows(ctx, '
+                                                                                                              'tx, k) '
+                                                                                                              '→ '
+                                                                                                              'Commit；helper错误向上传递并由defer '
+                                                                                                              'Rollback清理。两次INSERT已移到同tx的helper，因此本体无direct '
+                                                                                                              'SQL而保留write-call-closure与Begin。这里仍不重载交互身份、不检查权限或zone、也不写发行audit；正式HTTP发行通过必需CreateAPIKeyAuthorized接口，名字匹配caller不能证明dispatch。',
+                                                                                       'source_review': {'base_commit': '26a30e3c6963d553efdd8a8b33c095feb924c758',
+                                                                                                         'source_sha256': '63d0e139223af39dcaae5e12c17ec4bd5688655b8e1ce678feb8179f71737ec0',
+                                                                                                         'role': 'trusted-seed-transaction-owner',
+                                                                                                         'trace': '可信seed/import事务入口：Begin '
+                                                                                                                  '→ '
+                                                                                                                  'insertAPIKeyRows(ctx, '
+                                                                                                                  'tx, '
+                                                                                                                  'k) '
+                                                                                                                  '→ '
+                                                                                                                  'Commit；helper错误向上传递并由defer '
+                                                                                                                  'Rollback清理。两次INSERT已移到同tx的helper，因此本体无direct '
+                                                                                                                  'SQL而保留write-call-closure与Begin。这里仍不重载交互身份、不检查权限或zone、也不写发行audit；正式HTTP发行通过必需CreateAPIKeyAuthorized接口，名字匹配caller不能证明dispatch。',
+                                                                                                         'unverified': '目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR '
+                                                                                                                       '#209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。',
+                                                                                                         'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md'}}},
+ 'added_entries': {'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized': {'id': 'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized',
+                                                                                          'owner': 'postgres.PgStore/apikeys.go',
+                                                                                          'entry': 'CreateAPIKeyAuthorized',
+                                                                                          'group': 'CTX25',
+                                                                                          'classification': {'kind': 'direct-write',
+                                                                                                             'direct_write': True,
+                                                                                                             'write_closure': True,
+                                                                                                             'explicit_lock': True,
+                                                                                                             'transaction_calls': True,
+                                                                                                             'callback_parameter': False,
+                                                                                                             'dynamic_sql_expression': True},
+                                                                                          'syntax': {'id': 'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized',
+                                                                                                     'file': 'internal/store/postgres/apikeys.go',
+                                                                                                     'name': 'CreateAPIKeyAuthorized',
+                                                                                                     'receiver': '*PgStore',
+                                                                                                     'line': 70,
+                                                                                                     'end': 146,
+                                                                                                     'sha256': '63d0d21220f001ee79261adb93a6506c3deeb6b7727bc55673fcc3ecd8cebbe2',
+                                                                                                     'calls': [{'line': 71,
+                                                                                                                'expr': 'func() '
+                                                                                                                        '{\n'
+                                                                                                                        '\t'
+                                                                                                                        'var '
+                                                                                                                        'pg '
+                                                                                                                        '*pgconn.PgError\n'
+                                                                                                                        '\t'
+                                                                                                                        'if '
+                                                                                                                        'errors.As(err, '
+                                                                                                                        '&pg) '
+                                                                                                                        '&& '
+                                                                                                                        '(pg.Code '
+                                                                                                                        '== '
+                                                                                                                        '"55P03" '
+                                                                                                                        '|| '
+                                                                                                                        'pg.Code '
+                                                                                                                        '== '
+                                                                                                                        '"40001") '
+                                                                                                                        '{\n'
+                                                                                                                        '\t\t'
+                                                                                                                        'err '
+                                                                                                                        '= '
+                                                                                                                        '&app.Error{Kind: '
+                                                                                                                        'app.KindConflict, '
+                                                                                                                        'Message: '
+                                                                                                                        '"API '
+                                                                                                                        'key '
+                                                                                                                        'authority '
+                                                                                                                        'is '
+                                                                                                                        'changing; '
+                                                                                                                        'reload '
+                                                                                                                        'before '
+                                                                                                                        'retrying", '
+                                                                                                                        'Err: '
+                                                                                                                        'err}\n'
+                                                                                                                        '\t'
+                                                                                                                        '}\n'
+                                                                                                                        '}',
+                                                                                                                'name': ''},
+                                                                                                               {'line': 73,
+                                                                                                                'expr': 'errors.As',
+                                                                                                                'name': 'As'},
+                                                                                                               {'line': 78,
+                                                                                                                'expr': 'authz.ErrForbidden',
+                                                                                                                'name': 'ErrForbidden'},
+                                                                                                               {'line': 80,
+                                                                                                                'expr': 's.pool.Begin',
+                                                                                                                'name': 'Begin'},
+                                                                                                               {'line': 84,
+                                                                                                                'expr': 'tx.Rollback',
+                                                                                                                'name': 'Rollback'},
+                                                                                                               {'line': 86,
+                                                                                                                'expr': 'tx.QueryRow(ctx, '
+                                                                                                                        '`SELECT '
+                                                                                                                        'id '
+                                                                                                                        'FROM '
+                                                                                                                        'tenants '
+                                                                                                                        'WHERE '
+                                                                                                                        'id=$1 '
+                                                                                                                        'FOR '
+                                                                                                                        'KEY '
+                                                                                                                        'SHARE`, '
+                                                                                                                        'key.TenantID).Scan',
+                                                                                                                'name': 'Scan'},
+                                                                                                               {'line': 86,
+                                                                                                                'expr': 'tx.QueryRow',
+                                                                                                                'name': 'QueryRow',
+                                                                                                                'sql_expr': '`SELECT '
+                                                                                                                            'id '
+                                                                                                                            'FROM '
+                                                                                                                            'tenants '
+                                                                                                                            'WHERE '
+                                                                                                                            'id=$1 '
+                                                                                                                            'FOR '
+                                                                                                                            'KEY '
+                                                                                                                            'SHARE`'},
+                                                                                                               {'line': 87,
+                                                                                                                'expr': 'errors.Is',
+                                                                                                                'name': 'Is'},
+                                                                                                               {'line': 88,
+                                                                                                                'expr': 'app.NotFound',
+                                                                                                                'name': 'NotFound'},
+                                                                                                               {'line': 92,
+                                                                                                                'expr': 'scanUser',
+                                                                                                                'name': 'scanUser'},
+                                                                                                               {'line': 92,
+                                                                                                                'expr': 'tx.QueryRow',
+                                                                                                                'name': 'QueryRow',
+                                                                                                                'sql_expr': 'userSelect '
+                                                                                                                            '+ '
+                                                                                                                            '` '
+                                                                                                                            'WHERE '
+                                                                                                                            'id=$1 '
+                                                                                                                            'FOR '
+                                                                                                                            'SHARE`'},
+                                                                                                               {'line': 96,
+                                                                                                                'expr': 'issuer.Refresh',
+                                                                                                                'name': 'Refresh'},
+                                                                                                               {'line': 98,
+                                                                                                                'expr': 'authz.ErrForbidden',
+                                                                                                                'name': 'ErrForbidden'},
+                                                                                                               {'line': 100,
+                                                                                                                'expr': 'actor.IsTenantAdmin',
+                                                                                                                'name': 'IsTenantAdmin'},
+                                                                                                               {'line': 101,
+                                                                                                                'expr': 'effectivePermissionSnapshot',
+                                                                                                                'name': 'effectivePermissionSnapshot'},
+                                                                                                               {'line': 107,
+                                                                                                                'expr': 'append',
+                                                                                                                'name': 'append'},
+                                                                                                               {'line': 107,
+                                                                                                                'expr': '[]string',
+                                                                                                                'name': ''},
+                                                                                                               {'line': 108,
+                                                                                                                'expr': 'append',
+                                                                                                                'name': 'append'},
+                                                                                                               {'line': 108,
+                                                                                                                'expr': '[]uuid.UUID',
+                                                                                                                'name': ''},
+                                                                                                               {'line': 109,
+                                                                                                                'expr': 'authz.ConfigureIssuedAPIKey',
+                                                                                                                'name': 'ConfigureIssuedAPIKey'},
+                                                                                                               {'line': 114,
+                                                                                                                'expr': 'append',
+                                                                                                                'name': 'append'},
+                                                                                                               {'line': 114,
+                                                                                                                'expr': '[]uuid.UUID',
+                                                                                                                'name': ''},
+                                                                                                               {'line': 115,
+                                                                                                                'expr': 'sort.Slice',
+                                                                                                                'name': 'Slice'},
+                                                                                                               {'line': 115,
+                                                                                                                'expr': 'zones[i].String',
+                                                                                                                'name': 'String'},
+                                                                                                               {'line': 115,
+                                                                                                                'expr': 'zones[j].String',
+                                                                                                                'name': 'String'},
+                                                                                                               {'line': 121,
+                                                                                                                'expr': 'tx.QueryRow(ctx, '
+                                                                                                                        '`SELECT '
+                                                                                                                        'tenant_id '
+                                                                                                                        'FROM '
+                                                                                                                        'domain_zones '
+                                                                                                                        'WHERE '
+                                                                                                                        'id=$1 '
+                                                                                                                        'FOR '
+                                                                                                                        'SHARE '
+                                                                                                                        'NOWAIT`, '
+                                                                                                                        'id).Scan',
+                                                                                                                'name': 'Scan'},
+                                                                                                               {'line': 121,
+                                                                                                                'expr': 'tx.QueryRow',
+                                                                                                                'name': 'QueryRow',
+                                                                                                                'sql_expr': '`SELECT '
+                                                                                                                            'tenant_id '
+                                                                                                                            'FROM '
+                                                                                                                            'domain_zones '
+                                                                                                                            'WHERE '
+                                                                                                                            'id=$1 '
+                                                                                                                            'FOR '
+                                                                                                                            'SHARE '
+                                                                                                                            'NOWAIT`'},
+                                                                                                               {'line': 122,
+                                                                                                                'expr': 'errors.Is',
+                                                                                                                'name': 'Is'},
+                                                                                                               {'line': 123,
+                                                                                                                'expr': 'app.BadRequest',
+                                                                                                                'name': 'BadRequest'},
+                                                                                                               {'line': 123,
+                                                                                                                'expr': 'id.String',
+                                                                                                                'name': 'String'},
+                                                                                                               {'line': 128,
+                                                                                                                'expr': 'authz.ErrForbidden',
+                                                                                                                'name': 'ErrForbidden'},
+                                                                                                               {'line': 128,
+                                                                                                                'expr': 'id.String',
+                                                                                                                'name': 'String'},
+                                                                                                               {'line': 131,
+                                                                                                                'expr': 'insertAPIKeyRows',
+                                                                                                                'name': 'insertAPIKeyRows'},
+                                                                                                               {'line': 134,
+                                                                                                                'expr': 'json.Marshal',
+                                                                                                                'name': 'Marshal'},
+                                                                                                               {'line': 138,
+                                                                                                                'expr': 'tx.Exec',
+                                                                                                                'name': 'Exec',
+                                                                                                                'sql_expr': '`INSERT '
+                                                                                                                            'INTO '
+                                                                                                                            'audit_log(tenant_id,actor,action,resource_type,resource_id,details) '
+                                                                                                                            "VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)`"},
+                                                                                                               {'line': 138,
+                                                                                                                'expr': 'actor.AuditLabel',
+                                                                                                                'name': 'AuditLabel'},
+                                                                                                               {'line': 141,
+                                                                                                                'expr': 'tx.Commit',
+                                                                                                                'name': 'Commit'}],
+                                                                                                     'strings': [{'line': 73,
+                                                                                                                  'value': '55P03'},
+                                                                                                                 {'line': 73,
+                                                                                                                  'value': '40001'},
+                                                                                                                 {'line': 74,
+                                                                                                                  'value': 'API '
+                                                                                                                           'key '
+                                                                                                                           'authority '
+                                                                                                                           'is '
+                                                                                                                           'changing; '
+                                                                                                                           'reload '
+                                                                                                                           'before '
+                                                                                                                           'retrying'},
+                                                                                                                 {'line': 78,
+                                                                                                                  'value': 'current '
+                                                                                                                           'interactive '
+                                                                                                                           'JWT '
+                                                                                                                           'issuer '
+                                                                                                                           'required'},
+                                                                                                                 {'line': 86,
+                                                                                                                  'value': 'SELECT '
+                                                                                                                           'id '
+                                                                                                                           'FROM '
+                                                                                                                           'tenants '
+                                                                                                                           'WHERE '
+                                                                                                                           'id=$1 '
+                                                                                                                           'FOR '
+                                                                                                                           'KEY '
+                                                                                                                           'SHARE'},
+                                                                                                                 {'line': 88,
+                                                                                                                  'value': 'tenant '
+                                                                                                                           'not '
+                                                                                                                           'found'},
+                                                                                                                 {'line': 92,
+                                                                                                                  'value': ' '
+                                                                                                                           'WHERE '
+                                                                                                                           'id=$1 '
+                                                                                                                           'FOR '
+                                                                                                                           'SHARE'},
+                                                                                                                 {'line': 98,
+                                                                                                                  'value': 'API '
+                                                                                                                           'key '
+                                                                                                                           'issuer '
+                                                                                                                           'no '
+                                                                                                                           'longer '
+                                                                                                                           'matches '
+                                                                                                                           'the '
+                                                                                                                           'authenticated '
+                                                                                                                           'session'},
+                                                                                                                 {'line': 121,
+                                                                                                                  'value': 'SELECT '
+                                                                                                                           'tenant_id '
+                                                                                                                           'FROM '
+                                                                                                                           'domain_zones '
+                                                                                                                           'WHERE '
+                                                                                                                           'id=$1 '
+                                                                                                                           'FOR '
+                                                                                                                           'SHARE '
+                                                                                                                           'NOWAIT'},
+                                                                                                                 {'line': 123,
+                                                                                                                  'value': 'zone '},
+                                                                                                                 {'line': 123,
+                                                                                                                  'value': ' '
+                                                                                                                           'not '
+                                                                                                                           'found'},
+                                                                                                                 {'line': 128,
+                                                                                                                  'value': 'zone '},
+                                                                                                                 {'line': 128,
+                                                                                                                  'value': ' '
+                                                                                                                           'does '
+                                                                                                                           'not '
+                                                                                                                           'belong '
+                                                                                                                           'to '
+                                                                                                                           'tenant'},
+                                                                                                                 {'line': 134,
+                                                                                                                  'value': 'label'},
+                                                                                                                 {'line': 134,
+                                                                                                                  'value': 'key_prefix'},
+                                                                                                                 {'line': 134,
+                                                                                                                  'value': 'scopes'},
+                                                                                                                 {'line': 134,
+                                                                                                                  'value': 'owner_user_id'},
+                                                                                                                 {'line': 138,
+                                                                                                                  'value': 'INSERT '
+                                                                                                                           'INTO '
+                                                                                                                           'audit_log(tenant_id,actor,action,resource_type,resource_id,details) '
+                                                                                                                           "VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)"}],
+                                                                                                     'params': 'func(ctx '
+                                                                                                               'context.Context, '
+                                                                                                               'issuer '
+                                                                                                               'authz.APIKeyIssuer, '
+                                                                                                               'key '
+                                                                                                               '*models.TenantAPIKey) '
+                                                                                                               '(err '
+                                                                                                               'error)'},
+                                                                                          'callers': [{'caller_id': 'internal/app/admin/service.go:*Service:CreateAPIKey',
+                                                                                                       'file': 'internal/app/admin/service.go',
+                                                                                                       'function': 'CreateAPIKey',
+                                                                                                       'line': 393,
+                                                                                                       'expression': 's.store.CreateAPIKeyAuthorized',
+                                                                                                       'status': 'name-match-candidate-not-dispatch-proof'}],
+                                                                                          'lock_fk_wait_fence': {'boundary': '正式HTTP发行事务：先锁目标tenants行FOR '
+                                                                                                                             'KEY '
+                                                                                                                             'SHARE，再按真实JWT '
+                                                                                                                             'user '
+                                                                                                                             'ID读userSelect '
+                                                                                                                             'FOR '
+                                                                                                                             'SHARE；issuer.Refresh对比home '
+                                                                                                                             'tenant、ID、active、原role及session '
+                                                                                                                             'proof，selected '
+                                                                                                                             'tenant与target不替代home身份。非admin经effectivePermissionSnapshot取profile '
+                                                                                                                             'SHARE '
+                                                                                                                             'NOWAIT及当前合并权限。ConfigureIssuedAPIKey按当前能力/zone赋owner，无法表达的deny-all范围直接拒绝。实际zone '
+                                                                                                                             'UUID排序去重，逐行FOR '
+                                                                                                                             'SHARE '
+                                                                                                                             'NOWAIT并核对tenant。随后同tx '
+                                                                                                                             'insertAPIKeyRows写key→usage，再必需audit_log '
+                                                                                                                             'INSERT，最后Commit确认才回写输出key。任何前置或写入失败不返回secret；本函数外层defer直接观察到的55P03/40001原始PgError保留cause并转409；profile '
+                                                                                                                             'helper的55P03已自行转为typed409且未挂底层cause，不能把外层保证扩到该路径；提交应答丢失不等于确定未提交。',
+                                                                                                                 'local_operations': [{'line': 80,
+                                                                                                                                       'operation': 's.pool.Begin',
+                                                                                                                                       'sql_expression': '',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 84,
+                                                                                                                                       'operation': 'tx.Rollback',
+                                                                                                                                       'sql_expression': '',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 86,
+                                                                                                                                       'operation': 'tx.QueryRow',
+                                                                                                                                       'sql_expression': '`SELECT '
+                                                                                                                                                         'id '
+                                                                                                                                                         'FROM '
+                                                                                                                                                         'tenants '
+                                                                                                                                                         'WHERE '
+                                                                                                                                                         'id=$1 '
+                                                                                                                                                         'FOR '
+                                                                                                                                                         'KEY '
+                                                                                                                                                         'SHARE`',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 92,
+                                                                                                                                       'operation': 'tx.QueryRow',
+                                                                                                                                       'sql_expression': 'userSelect '
+                                                                                                                                                         '+ '
+                                                                                                                                                         '` '
+                                                                                                                                                         'WHERE '
+                                                                                                                                                         'id=$1 '
+                                                                                                                                                         'FOR '
+                                                                                                                                                         'SHARE`',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 96,
+                                                                                                                                       'operation': 'issuer.Refresh',
+                                                                                                                                       'sql_expression': '',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 101,
+                                                                                                                                       'operation': 'effectivePermissionSnapshot',
+                                                                                                                                       'sql_expression': '',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 109,
+                                                                                                                                       'operation': 'authz.ConfigureIssuedAPIKey',
+                                                                                                                                       'sql_expression': '',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 121,
+                                                                                                                                       'operation': 'tx.QueryRow',
+                                                                                                                                       'sql_expression': '`SELECT '
+                                                                                                                                                         'tenant_id '
+                                                                                                                                                         'FROM '
+                                                                                                                                                         'domain_zones '
+                                                                                                                                                         'WHERE '
+                                                                                                                                                         'id=$1 '
+                                                                                                                                                         'FOR '
+                                                                                                                                                         'SHARE '
+                                                                                                                                                         'NOWAIT`',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 131,
+                                                                                                                                       'operation': 'insertAPIKeyRows',
+                                                                                                                                       'sql_expression': '',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 138,
+                                                                                                                                       'operation': 'tx.Exec',
+                                                                                                                                       'sql_expression': '`INSERT '
+                                                                                                                                                         'INTO '
+                                                                                                                                                         'audit_log(tenant_id,actor,action,resource_type,resource_id,details) '
+                                                                                                                                                         "VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)`",
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                                      {'line': 141,
+                                                                                                                                       'operation': 'tx.Commit',
+                                                                                                                                       'sql_expression': '',
+                                                                                                                                       'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                                 'direct_lock_fragments': [{'line': 86,
+                                                                                                                                            'sql_fragment': 'SELECT '
+                                                                                                                                                            'id '
+                                                                                                                                                            'FROM '
+                                                                                                                                                            'tenants '
+                                                                                                                                                            'WHERE '
+                                                                                                                                                            'id=$1 '
+                                                                                                                                                            'FOR '
+                                                                                                                                                            'KEY '
+                                                                                                                                                            'SHARE'},
+                                                                                                                                           {'line': 92,
+                                                                                                                                            'sql_fragment': ' '
+                                                                                                                                                            'WHERE '
+                                                                                                                                                            'id=$1 '
+                                                                                                                                                            'FOR '
+                                                                                                                                                            'SHARE'},
+                                                                                                                                           {'line': 121,
+                                                                                                                                            'sql_fragment': 'SELECT '
+                                                                                                                                                            'tenant_id '
+                                                                                                                                                            'FROM '
+                                                                                                                                                            'domain_zones '
+                                                                                                                                                            'WHERE '
+                                                                                                                                                            'id=$1 '
+                                                                                                                                                            'FOR '
+                                                                                                                                                            'SHARE '
+                                                                                                                                                            'NOWAIT'}],
+                                                                                                                 'implicit_fk': '00001_baseline.sql：tenant_api_keys.tenant_id→tenants(id) '
+                                                                                                                                'ON '
+                                                                                                                                'DELETE '
+                                                                                                                                'CASCADE，owner_user_id→users(id) '
+                                                                                                                                'ON '
+                                                                                                                                'DELETE '
+                                                                                                                                'CASCADE（NOT '
+                                                                                                                                'VALID不免除新写检查）；00019_api_key_usage.sql：usage.api_key_id→tenant_api_keys(id) '
+                                                                                                                                'ON '
+                                                                                                                                'DELETE '
+                                                                                                                                'CASCADE。key与audit的tenant引用会取得FK父锁；正式发行提前取得目标tenant '
+                                                                                                                                'KEY '
+                                                                                                                                'SHARE。allowed_zone_ids为无FK '
+                                                                                                                                'UUID数组，zone存在性/tenant判定依赖显式SHARE '
+                                                                                                                                'NOWAIT。这里不执行FK、触发器或未来写者协议。'},
+                                                                                          'evidence': ['internal/store/postgres/apikeys.go:70-146 '
+                                                                                                       'sha256=63d0d21220f001ee79261adb93a6506c3deeb6b7727bc55673fcc3ecd8cebbe2',
+                                                                                                       'PR #209 / '
+                                                                                                       'Issue #204 '
+                                                                                                       'separately '
+                                                                                                       'records '
+                                                                                                       'bounded actual '
+                                                                                                       'PostgreSQL '
+                                                                                                       'issuance and '
+                                                                                                       'independent '
+                                                                                                       'authz tests; '
+                                                                                                       'this catalog '
+                                                                                                       'executes '
+                                                                                                       'syntax '
+                                                                                                       'producers '
+                                                                                                       'only.'],
+                                                                                          'unverified_risks': ['目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR '
+                                                                                                               '#209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。',
+                                                                                                               '有限18项PG证据不覆盖所有zone删除/转移、profile删除、跨租户管理交错、网络commit不确定性或重复发行；未来权限写者需保持user/profile/zone锁协议。NOWAIT冲突要求重新加载后重试，并非自动重放或exact-once保证。'],
+                                                                                          'review_status': 'static-type-review',
+                                                                                          'followup_tasks': ['R5-P0-070',
+                                                                                                             'R5-P1-030'],
+                                                                                          'assertions': {'direct_sql_effects': [{'line': 138,
+                                                                                                                                 'sql_fragment': 'INSERT '
+                                                                                                                                                 'INTO '
+                                                                                                                                                 'audit_log(tenant_id,actor,action,resource_type,resource_id,details) '
+                                                                                                                                                 "VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)"}],
+                                                                                                         'direct_lock_fragments': [{'line': 86,
+                                                                                                                                    'sql_fragment': 'SELECT '
+                                                                                                                                                    'id '
+                                                                                                                                                    'FROM '
+                                                                                                                                                    'tenants '
+                                                                                                                                                    'WHERE '
+                                                                                                                                                    'id=$1 '
+                                                                                                                                                    'FOR '
+                                                                                                                                                    'KEY '
+                                                                                                                                                    'SHARE'},
+                                                                                                                                   {'line': 92,
+                                                                                                                                    'sql_fragment': ' '
+                                                                                                                                                    'WHERE '
+                                                                                                                                                    'id=$1 '
+                                                                                                                                                    'FOR '
+                                                                                                                                                    'SHARE'},
+                                                                                                                                   {'line': 121,
+                                                                                                                                    'sql_fragment': 'SELECT '
+                                                                                                                                                    'tenant_id '
+                                                                                                                                                    'FROM '
+                                                                                                                                                    'domain_zones '
+                                                                                                                                                    'WHERE '
+                                                                                                                                                    'id=$1 '
+                                                                                                                                                    'FOR '
+                                                                                                                                                    'SHARE '
+                                                                                                                                                    'NOWAIT'}],
+                                                                                                         'transaction_helper_calls': [{'line': 80,
+                                                                                                                                       'expr': 's.pool.Begin',
+                                                                                                                                       'name': 'Begin'}],
+                                                                                                         'sql_execution_expressions': [{'line': 86,
+                                                                                                                                        'expr': 'tx.QueryRow',
+                                                                                                                                        'name': 'QueryRow',
+                                                                                                                                        'sql_expr': '`SELECT '
+                                                                                                                                                    'id '
+                                                                                                                                                    'FROM '
+                                                                                                                                                    'tenants '
+                                                                                                                                                    'WHERE '
+                                                                                                                                                    'id=$1 '
+                                                                                                                                                    'FOR '
+                                                                                                                                                    'KEY '
+                                                                                                                                                    'SHARE`'},
+                                                                                                                                       {'line': 92,
+                                                                                                                                        'expr': 'tx.QueryRow',
+                                                                                                                                        'name': 'QueryRow',
+                                                                                                                                        'sql_expr': 'userSelect '
+                                                                                                                                                    '+ '
+                                                                                                                                                    '` '
+                                                                                                                                                    'WHERE '
+                                                                                                                                                    'id=$1 '
+                                                                                                                                                    'FOR '
+                                                                                                                                                    'SHARE`'},
+                                                                                                                                       {'line': 121,
+                                                                                                                                        'expr': 'tx.QueryRow',
+                                                                                                                                        'name': 'QueryRow',
+                                                                                                                                        'sql_expr': '`SELECT '
+                                                                                                                                                    'tenant_id '
+                                                                                                                                                    'FROM '
+                                                                                                                                                    'domain_zones '
+                                                                                                                                                    'WHERE '
+                                                                                                                                                    'id=$1 '
+                                                                                                                                                    'FOR '
+                                                                                                                                                    'SHARE '
+                                                                                                                                                    'NOWAIT`'},
+                                                                                                                                       {'line': 138,
+                                                                                                                                        'expr': 'tx.Exec',
+                                                                                                                                        'name': 'Exec',
+                                                                                                                                        'sql_expr': '`INSERT '
+                                                                                                                                                    'INTO '
+                                                                                                                                                    'audit_log(tenant_id,actor,action,resource_type,resource_id,details) '
+                                                                                                                                                    "VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)`"}],
+                                                                                                         'effect_status': 'source-fragments-not-evaluated-SQL',
+                                                                                                         'callback_effect': '没有外部callback参数。defer闭包只映射typed错误；sort.Slice局部比较只读UUID；权限helper和key-row '
+                                                                                                                            'helper使用本事务，不能从名字匹配推断任意外部动态调用的效果。',
+                                                                                                         'entry_role': 'store-exported-interface-candidate'},
+                                                                                          'file_family_context': '正式HTTP发行事务：先锁目标tenants行FOR '
+                                                                                                                 'KEY '
+                                                                                                                 'SHARE，再按真实JWT '
+                                                                                                                 'user '
+                                                                                                                 'ID读userSelect '
+                                                                                                                 'FOR '
+                                                                                                                 'SHARE；issuer.Refresh对比home '
+                                                                                                                 'tenant、ID、active、原role及session '
+                                                                                                                 'proof，selected '
+                                                                                                                 'tenant与target不替代home身份。非admin经effectivePermissionSnapshot取profile '
+                                                                                                                 'SHARE '
+                                                                                                                 'NOWAIT及当前合并权限。ConfigureIssuedAPIKey按当前能力/zone赋owner，无法表达的deny-all范围直接拒绝。实际zone '
+                                                                                                                 'UUID排序去重，逐行FOR '
+                                                                                                                 'SHARE '
+                                                                                                                 'NOWAIT并核对tenant。随后同tx '
+                                                                                                                 'insertAPIKeyRows写key→usage，再必需audit_log '
+                                                                                                                 'INSERT，最后Commit确认才回写输出key。任何前置或写入失败不返回secret；本函数外层defer直接观察到的55P03/40001原始PgError保留cause并转409；profile '
+                                                                                                                 'helper的55P03已自行转为typed409且未挂底层cause，不能把外层保证扩到该路径；提交应答丢失不等于确定未提交。',
+                                                                                          'evidence_level': 'source-only',
+                                                                                          'source_review': {'base_commit': '26a30e3c6963d553efdd8a8b33c095feb924c758',
+                                                                                                            'source_sha256': '63d0d21220f001ee79261adb93a6506c3deeb6b7727bc55673fcc3ecd8cebbe2',
+                                                                                                            'role': 'authorized-credential-transaction-owner',
+                                                                                                            'trace': '正式HTTP发行事务：先锁目标tenants行FOR '
+                                                                                                                     'KEY '
+                                                                                                                     'SHARE，再按真实JWT '
+                                                                                                                     'user '
+                                                                                                                     'ID读userSelect '
+                                                                                                                     'FOR '
+                                                                                                                     'SHARE；issuer.Refresh对比home '
+                                                                                                                     'tenant、ID、active、原role及session '
+                                                                                                                     'proof，selected '
+                                                                                                                     'tenant与target不替代home身份。非admin经effectivePermissionSnapshot取profile '
+                                                                                                                     'SHARE '
+                                                                                                                     'NOWAIT及当前合并权限。ConfigureIssuedAPIKey按当前能力/zone赋owner，无法表达的deny-all范围直接拒绝。实际zone '
+                                                                                                                     'UUID排序去重，逐行FOR '
+                                                                                                                     'SHARE '
+                                                                                                                     'NOWAIT并核对tenant。随后同tx '
+                                                                                                                     'insertAPIKeyRows写key→usage，再必需audit_log '
+                                                                                                                     'INSERT，最后Commit确认才回写输出key。任何前置或写入失败不返回secret；本函数外层defer直接观察到的55P03/40001原始PgError保留cause并转409；profile '
+                                                                                                                     'helper的55P03已自行转为typed409且未挂底层cause，不能把外层保证扩到该路径；提交应答丢失不等于确定未提交。',
+                                                                                                            'unverified': '目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR '
+                                                                                                                          '#209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。',
+                                                                                                            'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md'}},
+                   'internal/store/postgres/apikeys.go::insertAPIKeyRows': {'id': 'internal/store/postgres/apikeys.go::insertAPIKeyRows',
+                                                                            'owner': 'postgres/apikeys.go',
+                                                                            'entry': 'insertAPIKeyRows',
+                                                                            'group': 'CTX25',
+                                                                            'classification': {'kind': 'direct-write',
+                                                                                               'direct_write': True,
+                                                                                               'write_closure': True,
+                                                                                               'explicit_lock': False,
+                                                                                               'transaction_calls': False,
+                                                                                               'callback_parameter': False,
+                                                                                               'dynamic_sql_expression': False},
+                                                                            'syntax': {'id': 'internal/store/postgres/apikeys.go::insertAPIKeyRows',
+                                                                                       'file': 'internal/store/postgres/apikeys.go',
+                                                                                       'name': 'insertAPIKeyRows',
+                                                                                       'receiver': '',
+                                                                                       'line': 38,
+                                                                                       'end': 64,
+                                                                                       'sha256': '293516617d7e09d2e86cc1877d45da7ee2eba6829f4b78b8ff8f9124c66c3ddf',
+                                                                                       'calls': [{'line': 40,
+                                                                                                  'expr': 'uuid.New',
+                                                                                                  'name': 'New'},
+                                                                                                 {'line': 42,
+                                                                                                  'expr': 'time.Now',
+                                                                                                  'name': 'Now'},
+                                                                                                 {'line': 43,
+                                                                                                  'expr': 'json.Marshal',
+                                                                                                  'name': 'Marshal'},
+                                                                                                 {'line': 48,
+                                                                                                  'expr': 'len',
+                                                                                                  'name': 'len'},
+                                                                                                 {'line': 51,
+                                                                                                  'expr': 'tx.Exec',
+                                                                                                  'name': 'Exec',
+                                                                                                  'sql_expr': '`\n'
+                                                                                                              '\t\t'
+                                                                                                              'INSERT '
+                                                                                                              'INTO '
+                                                                                                              'tenant_api_keys '
+                                                                                                              '(id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n'
+                                                                                                              '\t\t'
+                                                                                                              'VALUES '
+                                                                                                              '($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`'},
+                                                                                                 {'line': 60,
+                                                                                                  'expr': 'tx.Exec',
+                                                                                                  'name': 'Exec',
+                                                                                                  'sql_expr': '`INSERT '
+                                                                                                              'INTO '
+                                                                                                              'tenant_api_key_usage(api_key_id) '
+                                                                                                              'VALUES($1)`'}],
+                                                                                       'strings': [{'line': 51,
+                                                                                                    'value': '\n'
+                                                                                                             '\t\t'
+                                                                                                             'INSERT '
+                                                                                                             'INTO '
+                                                                                                             'tenant_api_keys '
+                                                                                                             '(id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n'
+                                                                                                             '\t\t'
+                                                                                                             'VALUES '
+                                                                                                             '($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'},
+                                                                                                   {'line': 60,
+                                                                                                    'value': 'INSERT '
+                                                                                                             'INTO '
+                                                                                                             'tenant_api_key_usage(api_key_id) '
+                                                                                                             'VALUES($1)'}],
+                                                                                       'params': 'func(ctx '
+                                                                                                 'context.Context, tx '
+                                                                                                 'pgx.Tx, k '
+                                                                                                 '*models.TenantAPIKey) '
+                                                                                                 'error'},
+                                                                            'callers': [{'caller_id': 'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey',
+                                                                                         'file': 'internal/store/postgres/apikeys.go',
+                                                                                         'function': 'CreateAPIKey',
+                                                                                         'line': 32,
+                                                                                         'expression': 'insertAPIKeyRows',
+                                                                                         'status': 'name-match-candidate-not-dispatch-proof'},
+                                                                                        {'caller_id': 'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized',
+                                                                                         'file': 'internal/store/postgres/apikeys.go',
+                                                                                         'function': 'CreateAPIKeyAuthorized',
+                                                                                         'line': 131,
+                                                                                         'expression': 'insertAPIKeyRows',
+                                                                                         'status': 'name-match-candidate-not-dispatch-proof'}],
+                                                                            'lock_fk_wait_fence': {'boundary': '局部SQL写入helper，由调用者持有pgx.Tx：按需分配key '
+                                                                                                               'UUID及时间、marshal '
+                                                                                                               'scopes，先INSERT '
+                                                                                                               'tenant_api_keys再INSERT '
+                                                                                                               'tenant_api_key_usage，遇错立即返回。没有Begin/Commit、显式authority锁、JWT/权限检查或audit；trusted '
+                                                                                                               'CreateAPIKey与正式CreateAPIKeyAuthorized分别拥有其外围事务，不能将此helper单独视为已授权发行。',
+                                                                                                   'local_operations': [{'line': 51,
+                                                                                                                         'operation': 'tx.Exec',
+                                                                                                                         'sql_expression': '`\n'
+                                                                                                                                           '\t\t'
+                                                                                                                                           'INSERT '
+                                                                                                                                           'INTO '
+                                                                                                                                           'tenant_api_keys '
+                                                                                                                                           '(id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n'
+                                                                                                                                           '\t\t'
+                                                                                                                                           'VALUES '
+                                                                                                                                           '($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`',
+                                                                                                                         'status': 'lexical-order-with-branches-not-single-total-runtime-order'},
+                                                                                                                        {'line': 60,
+                                                                                                                         'operation': 'tx.Exec',
+                                                                                                                         'sql_expression': '`INSERT '
+                                                                                                                                           'INTO '
+                                                                                                                                           'tenant_api_key_usage(api_key_id) '
+                                                                                                                                           'VALUES($1)`',
+                                                                                                                         'status': 'lexical-order-with-branches-not-single-total-runtime-order'}],
+                                                                                                   'direct_lock_fragments': [],
+                                                                                                   'implicit_fk': '00001_baseline.sql：tenant_api_keys.tenant_id→tenants(id) '
+                                                                                                                  'ON '
+                                                                                                                  'DELETE '
+                                                                                                                  'CASCADE，owner_user_id→users(id) '
+                                                                                                                  'ON '
+                                                                                                                  'DELETE '
+                                                                                                                  'CASCADE（NOT '
+                                                                                                                  'VALID不免除新写检查）；00019_api_key_usage.sql：usage.api_key_id→tenant_api_keys(id) '
+                                                                                                                  'ON '
+                                                                                                                  'DELETE '
+                                                                                                                  'CASCADE。key与audit的tenant引用会取得FK父锁；正式发行提前取得目标tenant '
+                                                                                                                  'KEY '
+                                                                                                                  'SHARE。allowed_zone_ids为无FK '
+                                                                                                                  'UUID数组，zone存在性/tenant判定依赖显式SHARE '
+                                                                                                                  'NOWAIT。这里不执行FK、触发器或未来写者协议。'},
+                                                                            'evidence': ['internal/store/postgres/apikeys.go:38-64 '
+                                                                                         'sha256=293516617d7e09d2e86cc1877d45da7ee2eba6829f4b78b8ff8f9124c66c3ddf',
+                                                                                         'PR #209 / Issue #204 '
+                                                                                         'separately records bounded '
+                                                                                         'actual PostgreSQL issuance '
+                                                                                         'and independent authz tests; '
+                                                                                         'this catalog executes syntax '
+                                                                                         'producers only.'],
+                                                                            'unverified_risks': ['目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR '
+                                                                                                 '#209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。',
+                                                                                                 '必须由调用者承担事务回滚与所需authority/audit协议；此helper不鉴别调用者、也不独立证明可信seed与HTTP路径的dispatch。'],
+                                                                            'review_status': 'static-type-review',
+                                                                            'followup_tasks': ['R5-P0-070',
+                                                                                               'R5-P1-030'],
+                                                                            'assertions': {'direct_sql_effects': [{'line': 51,
+                                                                                                                   'sql_fragment': '\n'
+                                                                                                                                   '\t\t'
+                                                                                                                                   'INSERT '
+                                                                                                                                   'INTO '
+                                                                                                                                   'tenant_api_keys '
+                                                                                                                                   '(id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n'
+                                                                                                                                   '\t\t'
+                                                                                                                                   'VALUES '
+                                                                                                                                   '($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)'},
+                                                                                                                  {'line': 60,
+                                                                                                                   'sql_fragment': 'INSERT '
+                                                                                                                                   'INTO '
+                                                                                                                                   'tenant_api_key_usage(api_key_id) '
+                                                                                                                                   'VALUES($1)'}],
+                                                                                           'direct_lock_fragments': [],
+                                                                                           'transaction_helper_calls': [],
+                                                                                           'sql_execution_expressions': [{'line': 51,
+                                                                                                                          'expr': 'tx.Exec',
+                                                                                                                          'name': 'Exec',
+                                                                                                                          'sql_expr': '`\n'
+                                                                                                                                      '\t\t'
+                                                                                                                                      'INSERT '
+                                                                                                                                      'INTO '
+                                                                                                                                      'tenant_api_keys '
+                                                                                                                                      '(id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)\n'
+                                                                                                                                      '\t\t'
+                                                                                                                                      'VALUES '
+                                                                                                                                      '($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`'},
+                                                                                                                         {'line': 60,
+                                                                                                                          'expr': 'tx.Exec',
+                                                                                                                          'name': 'Exec',
+                                                                                                                          'sql_expr': '`INSERT '
+                                                                                                                                      'INTO '
+                                                                                                                                      'tenant_api_key_usage(api_key_id) '
+                                                                                                                                      'VALUES($1)`'}],
+                                                                                           'effect_status': 'source-fragments-not-evaluated-SQL',
+                                                                                           'callback_effect': '没有外部callback参数，仅本地UUID/时间/JSON转换及传入pgx.Tx的两次INSERT；事务提交、回滚和上层授权由调用者控制。',
+                                                                                           'entry_role': 'local-or-adapter-helper'},
+                                                                            'file_family_context': '局部SQL写入helper，由调用者持有pgx.Tx：按需分配key '
+                                                                                                   'UUID及时间、marshal '
+                                                                                                   'scopes，先INSERT '
+                                                                                                   'tenant_api_keys再INSERT '
+                                                                                                   'tenant_api_key_usage，遇错立即返回。没有Begin/Commit、显式authority锁、JWT/权限检查或audit；trusted '
+                                                                                                   'CreateAPIKey与正式CreateAPIKeyAuthorized分别拥有其外围事务，不能将此helper单独视为已授权发行。',
+                                                                            'evidence_level': 'source-only',
+                                                                            'source_review': {'base_commit': '26a30e3c6963d553efdd8a8b33c095feb924c758',
+                                                                                              'source_sha256': '293516617d7e09d2e86cc1877d45da7ee2eba6829f4b78b8ff8f9124c66c3ddf',
+                                                                                              'role': 'caller-owned-transaction-write-helper',
+                                                                                              'trace': '局部SQL写入helper，由调用者持有pgx.Tx：按需分配key '
+                                                                                                       'UUID及时间、marshal '
+                                                                                                       'scopes，先INSERT '
+                                                                                                       'tenant_api_keys再INSERT '
+                                                                                                       'tenant_api_key_usage，遇错立即返回。没有Begin/Commit、显式authority锁、JWT/权限检查或audit；trusted '
+                                                                                                       'CreateAPIKey与正式CreateAPIKeyAuthorized分别拥有其外围事务，不能将此helper单独视为已授权发行。',
+                                                                                              'unverified': '目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR '
+                                                                                                            '#209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。',
+                                                                                              'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md'}}},
+ 'file_review_additions': {'internal/store/postgres/apikeys.go': {'source_commit': '26a30e3c6963d553efdd8a8b33c095feb924c758',
+                                                                  'review': '原PR23文件级字段保持原值。CreateAPIKey现在委托同tx的insertAPIKeyRows；新增CreateAPIKeyAuthorized承载当前JWT身份、权限/zone保护及key/usage/required-audit原子发行。两个新增条目及旧CreateAPIKey的完整历史归档提供精确手工链。',
+                                                                  'entry_ids': ['internal/store/postgres/apikeys.go:*PgStore:CreateAPIKey',
+                                                                                'internal/store/postgres/apikeys.go:*PgStore:CreateAPIKeyAuthorized',
+                                                                                'internal/store/postgres/apikeys.go::insertAPIKeyRows'],
+                                                                  'remaining': '目录只运行未修改的语法采集器；SQL片段、调用名字与局部顺序不等同于已执行SQL、已解析dispatch或并发正确性。PR '
+                                                                               '#209的18项实际PostgreSQL回归及独立197项authz/HTTP测试另有固定源码与原始证据，只支持其限定场景；本目录不授予整体runtime、发布、性能或父任务验收。'}}}
+
+def revision14_snapshot(name):
+    pin = REVISION14_SNAPSHOTS[name]
+    ref = REVISION14_COMMIT + ':' + pin['path']
+    raw = git('show', ref)
+    if git('rev-parse', ref).decode().strip() != pin['blob'] or hashlib.sha256(raw).hexdigest() != pin['sha256'] or len(raw) != pin['bytes']:
+        raise ValueError('revision14 public historical catalog identity drift: ' + name)
+    return json.loads(raw)
+
+
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args])
 
@@ -2463,6 +3493,9 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         cls.revision13 = {name: revision13_snapshot(name) for name in REVISION13_SNAPSHOTS}
         cls.rev13_tx = cls.revision13['transaction']
         cls.rev13_compat = cls.revision13['compatibility']
+        cls.revision14 = {name: revision14_snapshot(name) for name in REVISION14_SNAPSHOTS}
+        cls.rev14_tx = cls.revision14['transaction']
+        cls.rev14_compat = cls.revision14['compatibility']
         cls.ast = tx.extract()
         cls.migrations = tx.migration_inventory()
         cls.routes, cls.clients = gate.collect()
@@ -2594,17 +3627,60 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 patches.enter_context(mock.patch.object(self, name, value))
             yield
 
+
+    @classmethod
+    def frozen_revision14_root(cls):
+        if '_revision14_root' not in cls.__dict__:
+            temporary = tempfile.TemporaryDirectory(prefix='r5-catalog-revision14-')
+            cls.addClassCleanup(temporary.cleanup)
+            root = Path(temporary.name) / 'source'
+            subprocess.run(['git', 'clone', '--quiet', '--no-hardlinks', '--no-checkout', str(ROOT), str(root)], check=True)
+            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', REVISION14_COMMIT], check=True)
+            def frozen_git(*args):
+                return subprocess.check_output(['git', '-C', str(root), *args]).decode().strip()
+            if frozen_git('rev-parse', 'HEAD') != REVISION14_COMMIT or frozen_git('rev-parse', 'HEAD^{tree}') != REVISION14_TREE or frozen_git('status', '--porcelain', '--untracked-files=all'):
+                raise ValueError('revision14 source checkout is not the exact clean public snapshot')
+            # Reuse only the installed compiler. All historical Go/TypeScript
+            # inputs and original assertion bodies come from public revision14.
+            compiler = ROOT / 'web/node_modules/typescript'
+            if not compiler.is_dir():
+                raise ValueError('TypeScript required for historical original collection')
+            (root / 'web/node_modules').mkdir()
+            (root / 'web/node_modules/typescript').symlink_to(compiler.resolve(), target_is_directory=True)
+            cls.revision14_ast = tx.extract(root)
+            cls.revision14_migrations = tx.migration_inventory(root)
+            with mock.patch.object(gate, 'ROOT', root):
+                cls.revision14_routes, cls.revision14_clients = gate.collect()
+            if frozen_git('rev-parse', 'HEAD') != REVISION14_COMMIT or frozen_git('rev-parse', 'HEAD^{tree}') != REVISION14_TREE or frozen_git('status', '--porcelain', '--untracked-files=all'):
+                raise ValueError('revision14 public checkout changed during original collection')
+            cls._revision14_root = root
+        return cls._revision14_root
+
+    @contextmanager
+    def revision14_context(self):
+        root = self.frozen_revision14_root()
+        with ExitStack() as patches:
+            patches.enter_context(mock.patch.dict(globals(), ROOT=root,
+                CURRENT_EVIDENCE=root / 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008',
+                SOURCE_COMMIT=REVISION14_SOURCE_COMMIT, SOURCE_TREE=REVISION14_SOURCE_TREE))
+            patches.enter_context(mock.patch.object(gate, 'ROOT', root))
+            for name, value in dict(tx=self.rev14_tx, compat=self.rev14_compat,
+                    ast=self.revision14_ast, migrations=self.revision14_migrations,
+                    routes=self.revision14_routes, clients=self.revision14_clients).items():
+                patches.enter_context(mock.patch.object(self, name, value))
+            yield
+
     def test_old_pins_reject_and_current_revision_passes_same_actual_facts(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
         expected = review['current_rejections']
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(expected)).hexdigest(),
-                         REVISION14_EXPECTED['review_field_sha256']['current_rejections'])
+                         REVISION15_EXPECTED['review_field_sha256']['current_rejections'])
         historical = [('revision1', self.old_tx, self.old_compat),
                       ('revision2', self.rev2_tx, self.rev2_compat), ('revision3', self.rev3_tx, self.rev3_compat),
                       ('revision4', self.rev4_tx, self.rev4_compat), ('revision5', self.rev5_tx, self.rev5_compat),
                       ('revision6', self.rev6_tx, self.rev6_compat), ('revision7', self.rev7_tx, self.rev7_compat),
                       ('revision8', self.rev8_tx, self.rev8_compat), ('revision9', self.rev9_tx, self.rev9_compat),
-                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat), ('revision13', self.rev13_tx, self.rev13_compat)]
+                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat), ('revision13', self.rev13_tx, self.rev13_compat), ('revision14', self.rev14_tx, self.rev14_compat)]
         for revision, transaction, compatibility in historical:
             with self.assertRaises(ValueError) as rejected:
                 tx.validate(transaction, self.ast, self.migrations)
@@ -2616,10 +3692,10 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertFalse(gate.validate(self.compat, self.routes, self.clients)['product_green'])
         for name, current in (('transaction', self.tx), ('compatibility', self.compat)):
             revision = current['inventory_revision']
-            pin = REVISION13_SNAPSHOTS[name]
-            self.assertEqual(revision['revision'], 14)
+            pin = REVISION14_SNAPSHOTS[name]
+            self.assertEqual(revision['revision'], 15)
             self.assertEqual(revision['source_commit'], SOURCE_COMMIT)
-            self.assertEqual(revision['previous_snapshot_commit'], REVISION13_COMMIT)
+            self.assertEqual(revision['previous_snapshot_commit'], REVISION14_COMMIT)
             self.assertEqual(revision['previous_snapshot'], pin['path'])
             self.assertEqual(revision['previous_snapshot_blob'], pin['blob'])
             self.assertEqual(revision['previous_sha256'], pin['sha256'])
@@ -4897,47 +5973,335 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     self.assertEqual(ast.get_source_segment(before_raw, value), ast.get_source_segment(after_raw, new_values[name]))
 
     def test_revision14_binds_actual_source_facts_and_preserves_manual_reviews(self):
+        with self.revision14_context():
+            review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+            self.assertEqual(review['inventory_revision'], 14)
+            self.assertEqual(review['source_commit'], SOURCE_COMMIT)
+            self.assertEqual(review['source_tree'], SOURCE_TREE)
+            self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
+            self.assertEqual(review['previous_catalog_commit'], REVISION13_COMMIT)
+            self.assertEqual(review['previous_product_source_commit'], REVISION13_SOURCE_COMMIT)
+            self.assertEqual(review['revision13_snapshots'],
+                             {name: dict(commit=REVISION13_COMMIT, **pin) for name, pin in REVISION13_SNAPSHOTS.items()})
+            for field, expected in REVISION14_EXPECTED['review_field_sha256'].items():
+                self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), expected)
+            self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
+            self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
+            self.assertEqual(review['transaction'], REVISION14_EXPECTED['transaction'])
+            self.assertEqual(review['compatibility'], REVISION14_EXPECTED['compatibility'])
+            actual_files = [dict(path=item['path'], sha256=item['sha256']) for item in self.ast['files'] if item['path'].startswith(tx.PG)]
+            self.assertEqual(self.tx['postgres_files'], actual_files)
+            before_files = {item['path']: item['sha256'] for item in self.rev13_tx['postgres_files']}
+            after_files = {item['path']: item['sha256'] for item in self.tx['postgres_files']}
+            self.assertEqual(set(after_files), set(before_files) | {'internal/store/postgres/mailbox_errors.go'})
+            self.assertEqual((len(before_files), len(after_files)), (63, 64))
+            self.assertEqual([path for path in before_files if before_files[path] != after_files[path]],
+                             ['internal/store/postgres/company_members.go'])
+            new_file = 'internal/store/postgres/mailbox_errors.go'
+            self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev13_tx['reviewed_file_types']) | {new_file})
+            self.assertEqual({path: value for path, value in self.tx['reviewed_file_types'].items() if path != new_file}, self.rev13_tx['reviewed_file_types'])
+            self.assertEqual(self.tx['reviewed_file_types'][new_file], REVISION14_EXPECTED['added_file_review'])
+            self.assertEqual(self.tx['migrations'], self.rev13_tx['migrations'])
+            self.assertEqual(self.tx['historical_review_metadata'], self.rev13_tx['historical_review_metadata'])
+            mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'reviewed_file_types', 'entries'}
+            self.assertEqual({key: value for key, value in self.rev13_tx.items() if key not in mutable_transaction},
+                             {key: value for key, value in self.tx.items() if key not in mutable_transaction})
+            functions = {item['id']: item for item in self.ast['functions'] if item['file'].startswith(tx.PG)}
+            classes = tx.classify(self.ast)
+            old = {entry['id']: entry for entry in self.rev13_tx['entries']}
+            current = {entry['id']: entry for entry in self.tx['entries']}
+            new_id = 'internal/store/postgres/mailbox_errors.go::classifyWorkMailboxCreateError'
+            reviewed = {row['id']: row for row in REVISION14_EXPECTED['body_changes']}
+            self.assertEqual(set(current), set(old) | {new_id})
+            self.assertEqual(set(current), set(functions))
+            self.assertEqual((len(old), len(current)), (401, 402))
+            fingerprint = lambda value: hashlib.sha256(gate.canonical_bytes(value)).hexdigest()
+            def derived_assertions(function):
+                return {
+                    'direct_sql_effects': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.MUTATION.search(item['value'])],
+                    'direct_lock_fragments': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.LOCK.search(item['value'])],
+                    'transaction_helper_calls': [call for call in function['calls'] if call['name'] in tx.TX],
+                    'sql_execution_expressions': [call for call in function['calls'] if call['name'] in tx.SQL_CALLS],
+                }
+            def actual_callers(function):
+                return [dict(caller_id=item['id'], file=item['file'], function=item['name'],
+                    line=call['line'], expression=call['expr'], status='name-match-candidate-not-dispatch-proof')
+                    for item in self.ast['functions'] for call in item['calls'] if call['name'] == function['name']]
+            caller_changes, body_changes, classification_changes, entry_changes = [], [], [], []
+            for identity, before in old.items():
+                after, function = current[identity], functions[identity]
+                self.assertEqual(after['syntax'], function)
+                self.assertEqual(after['classification'], classes[identity])
+                self.assertEqual(before['classification'], after['classification'])
+                self.assertEqual(after['callers'], actual_callers(function))
+                derived = derived_assertions(function)
+                self.assertEqual({key: after['assertions'][key] for key in derived}, derived)
+                self.assertEqual({key: value for key, value in before['assertions'].items() if key not in derived},
+                                 {key: value for key, value in after['assertions'].items() if key not in derived})
+                mutable = {'syntax', 'classification', 'callers', 'assertions'}
+                if identity in reviewed:
+                    self.assertEqual(before['syntax']['sha256'], reviewed[identity]['before_sha256'])
+                    self.assertEqual(function['sha256'], reviewed[identity]['after_sha256'])
+                    self.assertNotIn('source_review', before)
+                    manual = ('lock_fk_wait_fence', 'evidence', 'unverified_risks', 'file_family_context')
+                    self.assertEqual(after['historical_revision13_review'], {key: before[key] for key in manual})
+                    self.assertEqual({key: after[key] for key in (*manual, 'source_review')},
+                                     REVISION14_EXPECTED['manual_review_fields'][identity])
+                    self.assertEqual(after['source_review']['base_commit'], SOURCE_COMMIT)
+                    self.assertEqual(after['source_review']['source_sha256'], function['sha256'])
+                    mutable.update((*manual, 'historical_revision13_review', 'source_review'))
+                else:
+                    self.assertEqual(before['syntax']['sha256'], function['sha256'])
+                    if before['syntax'] != function:
+                        self.assertEqual(function['file'], 'internal/store/postgres/company_members.go')
+                self.assertEqual({key: value for key, value in before.items() if key not in mutable},
+                                 {key: value for key, value in after.items() if key not in mutable})
+                if before['callers'] != after['callers']:
+                    caller_changes.append(dict(id=identity, before=before['callers'], after=after['callers'],
+                        before_sha256=fingerprint(before['callers']), after_sha256=fingerprint(after['callers'])))
+                if before['syntax']['sha256'] != function['sha256']:
+                    body_changes.append(dict(id=identity, before_sha256=before['syntax']['sha256'], after_sha256=function['sha256']))
+                if before['classification'] != after['classification']:
+                    classification_changes.append(dict(id=identity, before=before['classification'], after=after['classification']))
+                if before != after:
+                    entry_changes.append(dict(id=identity,
+                        changed_fields=[key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)],
+                        before_sha256=fingerprint(before), after_sha256=fingerprint(after)))
+            added = current[new_id]
+            self.assertEqual(added, REVISION14_EXPECTED['added_entry'])
+            self.assertEqual(added['syntax'], functions[new_id])
+            self.assertEqual(added['classification'], classes[new_id])
+            self.assertEqual(added['classification']['kind'], 'read-or-pure')
+            self.assertTrue(all(value is False for key, value in added['classification'].items() if key != 'kind'))
+            self.assertEqual(added['callers'], actual_callers(functions[new_id]))
+            self.assertEqual({key: added['assertions'][key] for key in derived_assertions(functions[new_id])}, derived_assertions(functions[new_id]))
+            self.assertEqual(added['source_review']['base_commit'], SOURCE_COMMIT)
+            self.assertEqual(added['source_review']['source_sha256'], functions[new_id]['sha256'])
+            self.assertEqual(caller_changes, review['transaction_callers'])
+            self.assertEqual(body_changes, review['transaction_body_changes'])
+            self.assertEqual(classification_changes, review['transaction_classification_changes'])
+            self.assertEqual(entry_changes, review['transaction_entry_changes'])
+            self.assertEqual(body_changes, REVISION14_EXPECTED['body_changes'])
+            self.assertEqual(classification_changes, [])
+            self.assertEqual(review['transaction_added_entries'], [dict(id=new_id, entry_sha256=fingerprint(added))])
+            self.assertEqual(review['transaction_removed_entries'], [])
+            self.assertEqual(review['manual_review_fields'], REVISION14_EXPECTED['manual_review_fields'])
+            self.assertEqual(review['migration_changes'], [])
+            self.assertEqual(review['client_before'], self.revision13['clients'])
+            self.assertEqual(review['client_after'], self.clients)
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision13['clients'])).hexdigest(), review['client_before_sha256'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.clients)).hexdigest(), review['client_after_sha256'])
+            old_routes = {row['route']: row for row in self.rev13_compat['routes']}
+            new_routes = {row['route']: row for row in self.compat['routes']}
+            fresh_routes = {row['route']: row for row in gate.source_facts(self.routes, self.clients)}
+            self.assertEqual(set(old_routes), set(new_routes))
+            route_changes = []
+            for identity, before in old_routes.items():
+                after = new_routes[identity]
+                fact_keys = set(fresh_routes[identity])
+                self.assertEqual({key: value for key, value in before.items() if key not in fact_keys},
+                                 {key: value for key, value in after.items() if key not in fact_keys})
+                changed = [key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)]
+                if changed:
+                    route_changes.append(dict(route=identity, changed_fields=changed,
+                        before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
+                        after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest()))
+            self.assertEqual(route_changes, review['compatibility_route_changes'])
+            old_closure, new_closure = self.rev13_compat['source_closure'], self.compat['source_closure']
+            closure_changes = [dict(path=path, before_sha256=old_closure.get(path), after_sha256=new_closure.get(path))
+                               for path in sorted(set(old_closure) | set(new_closure)) if old_closure.get(path) != new_closure.get(path)]
+            self.assertEqual(closure_changes, review['closure_changes'])
+            mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
+            self.assertEqual({k: v for k, v in self.rev13_compat.items() if k not in mutable},
+                             {k: v for k, v in self.compat.items() if k not in mutable})
+            self.assertEqual(self.compat['acquisition'], dict(self.rev13_compat['acquisition'], base_commit=SOURCE_COMMIT))
+            for name, pin in review['generated_catalogs'].items():
+                self.assertEqual(pin['path'], REVISION13_SNAPSHOTS[name]['path'])
+                raw = (ROOT / pin['path']).read_bytes()
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
+                self.assertEqual(len(raw), pin['bytes'])
+            self.assertEqual(set(review['generated_catalogs']), set(REVISION13_SNAPSHOTS))
+            route_map = {(row['method'], gate.norm(row['path'])): row['method'] + ' ' + row['path'] for row in self.routes}
+            documented = json.loads((ROOT / REVISION13_SNAPSHOTS['client_routes']['path']).read_text())
+            self.assertEqual(documented, [dict(row, routes=[] if row['forwarding'] else
+                             [route_map[(method, gate.norm(row['path']))] for method in row['methods']]) for row in self.clients])
+            changed = git('diff', '--name-only', REVISION13_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+            product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
+                             (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
+                             (p.startswith('web/locales/') and p.endswith('.json'))]
+            self.assertEqual(product_paths, [row['path'] for row in review['source_changes']])
+            self.assertEqual(product_paths, REVISION14_EXPECTED['product_paths'])
+            self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in new_closure])
+            build_paths = [path for path in ('web/package.json', 'web/package-lock.json')
+                           if git('show', REVISION13_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+            self.assertEqual(build_paths, [row['path'] for row in review['additional_build_metadata_changes']])
+            schema_paths = [path for path in ('internal/api/openapi.yaml',)
+                            if git('show', REVISION13_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+            self.assertEqual(schema_paths, [row['path'] for row in review['additional_api_schema_changes']])
+            for row in review['source_changes'] + review['additional_build_metadata_changes'] + review['additional_api_schema_changes']:
+                self.assertEqual(row['before_commit'], REVISION13_SOURCE_COMMIT)
+                self.assertEqual(row['after_commit'], SOURCE_COMMIT)
+                for prefix, commit in (('before', REVISION13_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
+                    if row[prefix + '_blob'] is None:
+                        self.assertFalse(git('ls-tree', commit, '--', row['path']))
+                        self.assertIsNone(row[prefix + '_sha256'])
+                        self.assertIsNone(row[prefix + '_bytes'])
+                    else:
+                        ref = commit + ':' + row['path']
+                        raw = git('show', ref)
+                        self.assertEqual(git('rev-parse', ref).decode().strip(), row[prefix + '_blob'])
+                        self.assertEqual(hashlib.sha256(raw).hexdigest(), row[prefix + '_sha256'])
+                        self.assertEqual(len(raw), row[prefix + '_bytes'])
+                self.assertEqual((ROOT / row['path']).read_bytes(), git('show', SOURCE_COMMIT + ':' + row['path']))
+            self.assertFalse(review['runtime_verified'])
+            self.assertFalse(review['product_green'])
+            self.assertFalse(review['task_complete'])
+            self.assertEqual(review['implementation_todos_completed'], 0)
+            self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
+
+    def test_revision14_preserves_public_history_collectors_and_original_rejections(self):
+        with self.revision14_context():
+            review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+            self.assertEqual(git('rev-parse', REVISION13_COMMIT + '^{tree}').decode().strip(), REVISION13_TREE)
+            historical = []
+            for directory in review['historical_directories']:
+                names = git('ls-tree', '-r', '--name-only', REVISION13_COMMIT, '--', directory).decode().splitlines()
+                self.assertTrue(names)
+                self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
+                for path in names:
+                    ref = REVISION13_COMMIT + ':' + path
+                    raw = git('show', ref)
+                    self.assertEqual((ROOT / path).read_bytes(), raw)
+                    historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                           sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+            self.assertEqual(historical, review['historical_manifest'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION14_EXPECTED['historical_manifest_sha256'])
+            roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
+            mutable = ['scripts/tests/test_r5_catalog_reconciliation.py', 'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py']
+            self.assertEqual(review['mutable_current_positive_test_paths'], mutable)
+            paths = git('ls-tree', '-r', '--name-only', SOURCE_COMMIT, '--', *roots).decode().splitlines()
+            self.assertEqual({str(path.relative_to(ROOT)) for folder in ('scripts', '.github/workflows', 'cmd/r5txinventory')
+                              for path in (ROOT / folder).rglob('*') if path.is_file() and '__pycache__' not in str(path) and path.suffix != '.pyc'} |
+                             {'internal/architecture/route_inventory_test.go'}, set(paths))
+            protected = []
+            for path in paths:
+                if path in mutable:
+                    continue
+                ref = SOURCE_COMMIT + ':' + path
+                raw = git('show', ref)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                      sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+            self.assertEqual(protected, review['protected_source_manifest'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION14_EXPECTED['protected_source_manifest_sha256'])
+            for path, expected in review['unchanged_validators_and_collectors'].items():
+                raw = git('show', REVISION13_COMMIT + ':' + path)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
+            for path, replacements in (
+                ('scripts/tests/test_r5_transactions.py', [("result['functions'], 401", "result['functions'], %d" % REVISION14_EXPECTED['transaction']['functions']),
+                    ("result['postgres_files'], 63", "result['postgres_files'], %d" % REVISION14_EXPECTED['transaction']['postgres_files'])]),
+                ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION14_EXPECTED['compatibility']['routes']),
+                    ("result['client_branches'],136", "result['client_branches'],%d" % REVISION14_EXPECTED['compatibility']['client_branches'])]),
+            ):
+                expected = git('show', REVISION13_COMMIT + ':' + path).decode()
+                for before, after in replacements:
+                    self.assertEqual(expected.count(before), 1)
+                    expected = expected.replace(before, after)
+                self.assertEqual((ROOT / path).read_text(), expected)
+            path = 'scripts/tests/test_r5_catalog_reconciliation.py'
+            before_raw = git('show', REVISION13_COMMIT + ':' + path).decode()
+            after_raw = (ROOT / path).read_text()
+            def methods(raw):
+                return {node.name: node for node in ast.walk(ast.parse(raw))
+                        if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
+            before, after = methods(before_raw), methods(after_raw)
+            self.assertEqual((len(before), len(after)), (29, 31))
+            self.assertTrue(set(before).issubset(after))
+            self.assertEqual(set(after) - set(before), {'test_revision14_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision14_preserves_public_history_collectors_and_original_rejections'})
+            frozen = {'test_revision13_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision13_preserves_public_history_collectors_and_original_rejections'}
+            allowed = frozen | {'test_old_pins_reject_and_current_revision_passes_same_actual_facts'}
+            for name in before:
+                if name not in allowed:
+                    self.assertEqual(ast.dump(before[name], include_attributes=False), ast.dump(after[name], include_attributes=False))
+                    self.assertEqual(ast.get_source_segment(before_raw, before[name]), ast.get_source_segment(after_raw, after[name]))
+            for name in frozen:
+                self.assertEqual(len(after[name].body), 1)
+                wrapper = after[name].body[0]
+                self.assertIsInstance(wrapper, ast.With)
+                self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision13_context()')
+                self.assertEqual([ast.dump(node, include_attributes=False) for node in before[name].body],
+                                 [ast.dump(node, include_attributes=False) for node in wrapper.body])
+                original_body = ''.join(before_raw.splitlines(keepends=True)[before[name].lineno:before[name].end_lineno])
+                wrapped_body = ''.join(after_raw.splitlines(keepends=True)[after[name].lineno + 1:after[name].end_lineno])
+                self.assertEqual(''.join(line[4:] if line.strip() else line for line in wrapped_body.splitlines(keepends=True)), original_body)
+            guards = {name for name in before if name.startswith('test_unapproved_')}
+            self.assertEqual(len(guards), 5)
+            for name in guards:
+                self.assertEqual(hashlib.sha256(ast.get_source_segment(after_raw, after[name]).encode()).hexdigest(),
+                                 review['original_unapproved_methods'][name]['source_sha256'])
+                self.assertEqual(hashlib.sha256(ast.dump(after[name], include_attributes=False).encode()).hexdigest(),
+                                 review['original_unapproved_methods'][name]['ast_sha256'])
+            # Fixed revision13 values and all earlier review constants are retained;
+            # only the fresh root/source identifiers advance to revision14.
+            def assignments(raw):
+                return {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
+                        for target in node.targets if isinstance(target, ast.Name)}
+            old_values, new_values = assignments(before_raw), assignments(after_raw)
+            for name, value in old_values.items():
+                if name.startswith('REVISION'):
+                    self.assertEqual(ast.dump(value, include_attributes=False), ast.dump(new_values[name], include_attributes=False))
+                    self.assertEqual(ast.get_source_segment(before_raw, value), ast.get_source_segment(after_raw, new_values[name]))
+
+    def test_revision15_binds_actual_source_facts_and_preserves_manual_reviews(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
-        self.assertEqual(review['inventory_revision'], 14)
+        self.assertEqual(review['inventory_revision'], 15)
         self.assertEqual(review['source_commit'], SOURCE_COMMIT)
         self.assertEqual(review['source_tree'], SOURCE_TREE)
         self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
-        self.assertEqual(review['previous_catalog_commit'], REVISION13_COMMIT)
-        self.assertEqual(review['previous_product_source_commit'], REVISION13_SOURCE_COMMIT)
-        self.assertEqual(review['revision13_snapshots'],
-                         {name: dict(commit=REVISION13_COMMIT, **pin) for name, pin in REVISION13_SNAPSHOTS.items()})
-        for field, expected in REVISION14_EXPECTED['review_field_sha256'].items():
+        self.assertEqual(review['previous_catalog_commit'], REVISION14_COMMIT)
+        self.assertEqual(review['previous_product_source_commit'], REVISION14_SOURCE_COMMIT)
+        self.assertEqual(review['revision14_snapshots'],
+                         {name: dict(commit=REVISION14_COMMIT, **pin) for name, pin in REVISION14_SNAPSHOTS.items()})
+        for field, expected in REVISION15_EXPECTED['review_field_sha256'].items():
             self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), expected)
         self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
         self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
-        self.assertEqual(review['transaction'], REVISION14_EXPECTED['transaction'])
-        self.assertEqual(review['compatibility'], REVISION14_EXPECTED['compatibility'])
+        self.assertEqual(review['transaction'], REVISION15_EXPECTED['transaction'])
+        self.assertEqual(review['compatibility'], REVISION15_EXPECTED['compatibility'])
         actual_files = [dict(path=item['path'], sha256=item['sha256']) for item in self.ast['files'] if item['path'].startswith(tx.PG)]
         self.assertEqual(self.tx['postgres_files'], actual_files)
-        before_files = {item['path']: item['sha256'] for item in self.rev13_tx['postgres_files']}
+        before_files = {item['path']: item['sha256'] for item in self.rev14_tx['postgres_files']}
         after_files = {item['path']: item['sha256'] for item in self.tx['postgres_files']}
-        self.assertEqual(set(after_files), set(before_files) | {'internal/store/postgres/mailbox_errors.go'})
-        self.assertEqual((len(before_files), len(after_files)), (63, 64))
+        self.assertEqual(set(after_files), set(before_files))
+        self.assertEqual((len(before_files), len(after_files)), (64, 64))
         self.assertEqual([path for path in before_files if before_files[path] != after_files[path]],
-                         ['internal/store/postgres/company_members.go'])
-        new_file = 'internal/store/postgres/mailbox_errors.go'
-        self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev13_tx['reviewed_file_types']) | {new_file})
-        self.assertEqual({path: value for path, value in self.tx['reviewed_file_types'].items() if path != new_file}, self.rev13_tx['reviewed_file_types'])
-        self.assertEqual(self.tx['reviewed_file_types'][new_file], REVISION14_EXPECTED['added_file_review'])
-        self.assertEqual(self.tx['migrations'], self.rev13_tx['migrations'])
-        self.assertEqual(self.tx['historical_review_metadata'], self.rev13_tx['historical_review_metadata'])
+                         ['internal/store/postgres/apikeys.go'])
+        changed_file = 'internal/store/postgres/apikeys.go'
+        self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev14_tx['reviewed_file_types']))
+        for path, before in self.rev14_tx['reviewed_file_types'].items():
+            after = self.tx['reviewed_file_types'][path]
+            if path == changed_file:
+                self.assertEqual(set(after), set(before) | {'revision15_additions'})
+                self.assertEqual({key: value for key, value in after.items() if key != 'revision15_additions'}, before)
+                self.assertEqual(after['revision15_additions'], REVISION15_EXPECTED['file_review_additions'][path])
+            else:
+                self.assertEqual(after, before)
+        self.assertEqual(review['transaction_file_review_additions'], REVISION15_EXPECTED['file_review_additions'])
+        self.assertEqual(self.tx['migrations'], self.rev14_tx['migrations'])
+        self.assertEqual(self.tx['historical_review_metadata'], self.rev14_tx['historical_review_metadata'])
         mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'reviewed_file_types', 'entries'}
-        self.assertEqual({key: value for key, value in self.rev13_tx.items() if key not in mutable_transaction},
+        self.assertEqual({key: value for key, value in self.rev14_tx.items() if key not in mutable_transaction},
                          {key: value for key, value in self.tx.items() if key not in mutable_transaction})
         functions = {item['id']: item for item in self.ast['functions'] if item['file'].startswith(tx.PG)}
         classes = tx.classify(self.ast)
-        old = {entry['id']: entry for entry in self.rev13_tx['entries']}
+        old = {entry['id']: entry for entry in self.rev14_tx['entries']}
         current = {entry['id']: entry for entry in self.tx['entries']}
-        new_id = 'internal/store/postgres/mailbox_errors.go::classifyWorkMailboxCreateError'
-        reviewed = {row['id']: row for row in REVISION14_EXPECTED['body_changes']}
-        self.assertEqual(set(current), set(old) | {new_id})
+        added_ids = set(REVISION15_EXPECTED['added_entries'])
+        reviewed = {row['id']: row for row in REVISION15_EXPECTED['body_changes']}
+        self.assertEqual(set(current), set(old) | added_ids)
         self.assertEqual(set(current), set(functions))
-        self.assertEqual((len(old), len(current)), (401, 402))
+        self.assertEqual((len(old), len(current)), (402, 404))
         fingerprint = lambda value: hashlib.sha256(gate.canonical_bytes(value)).hexdigest()
         def derived_assertions(function):
             return {
@@ -4955,7 +6319,6 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             after, function = current[identity], functions[identity]
             self.assertEqual(after['syntax'], function)
             self.assertEqual(after['classification'], classes[identity])
-            self.assertEqual(before['classification'], after['classification'])
             self.assertEqual(after['callers'], actual_callers(function))
             derived = derived_assertions(function)
             self.assertEqual({key: after['assertions'][key] for key in derived}, derived)
@@ -4965,18 +6328,18 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             if identity in reviewed:
                 self.assertEqual(before['syntax']['sha256'], reviewed[identity]['before_sha256'])
                 self.assertEqual(function['sha256'], reviewed[identity]['after_sha256'])
-                self.assertNotIn('source_review', before)
+                self.assertIn('source_review', before)
                 manual = ('lock_fk_wait_fence', 'evidence', 'unverified_risks', 'file_family_context')
-                self.assertEqual(after['historical_revision13_review'], {key: before[key] for key in manual})
+                self.assertEqual(after['historical_revision14_review'], {key: before[key] for key in (*manual, 'source_review')})
                 self.assertEqual({key: after[key] for key in (*manual, 'source_review')},
-                                 REVISION14_EXPECTED['manual_review_fields'][identity])
+                                 REVISION15_EXPECTED['manual_review_fields'][identity])
                 self.assertEqual(after['source_review']['base_commit'], SOURCE_COMMIT)
                 self.assertEqual(after['source_review']['source_sha256'], function['sha256'])
-                mutable.update((*manual, 'historical_revision13_review', 'source_review'))
+                mutable.update((*manual, 'historical_revision14_review', 'source_review'))
             else:
                 self.assertEqual(before['syntax']['sha256'], function['sha256'])
                 if before['syntax'] != function:
-                    self.assertEqual(function['file'], 'internal/store/postgres/company_members.go')
+                    self.assertEqual(function['file'], 'internal/store/postgres/apikeys.go')
             self.assertEqual({key: value for key, value in before.items() if key not in mutable},
                              {key: value for key, value in after.items() if key not in mutable})
             if before['callers'] != after['callers']:
@@ -4990,31 +6353,32 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 entry_changes.append(dict(id=identity,
                     changed_fields=[key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)],
                     before_sha256=fingerprint(before), after_sha256=fingerprint(after)))
-        added = current[new_id]
-        self.assertEqual(added, REVISION14_EXPECTED['added_entry'])
-        self.assertEqual(added['syntax'], functions[new_id])
-        self.assertEqual(added['classification'], classes[new_id])
-        self.assertEqual(added['classification']['kind'], 'read-or-pure')
-        self.assertTrue(all(value is False for key, value in added['classification'].items() if key != 'kind'))
-        self.assertEqual(added['callers'], actual_callers(functions[new_id]))
-        self.assertEqual({key: added['assertions'][key] for key in derived_assertions(functions[new_id])}, derived_assertions(functions[new_id]))
-        self.assertEqual(added['source_review']['base_commit'], SOURCE_COMMIT)
-        self.assertEqual(added['source_review']['source_sha256'], functions[new_id]['sha256'])
+        for identity in sorted(added_ids):
+            added, function = current[identity], functions[identity]
+            self.assertEqual(added, REVISION15_EXPECTED['added_entries'][identity])
+            self.assertEqual(added['syntax'], function)
+            self.assertEqual(added['classification'], classes[identity])
+            self.assertEqual(added['classification']['kind'], 'direct-write')
+            self.assertTrue(added['classification']['direct_write'])
+            self.assertEqual(added['callers'], actual_callers(function))
+            self.assertEqual({key: added['assertions'][key] for key in derived_assertions(function)}, derived_assertions(function))
+            self.assertEqual(added['source_review']['base_commit'], SOURCE_COMMIT)
+            self.assertEqual(added['source_review']['source_sha256'], function['sha256'])
         self.assertEqual(caller_changes, review['transaction_callers'])
         self.assertEqual(body_changes, review['transaction_body_changes'])
         self.assertEqual(classification_changes, review['transaction_classification_changes'])
         self.assertEqual(entry_changes, review['transaction_entry_changes'])
-        self.assertEqual(body_changes, REVISION14_EXPECTED['body_changes'])
-        self.assertEqual(classification_changes, [])
-        self.assertEqual(review['transaction_added_entries'], [dict(id=new_id, entry_sha256=fingerprint(added))])
+        self.assertEqual(body_changes, REVISION15_EXPECTED['body_changes'])
+        self.assertEqual(classification_changes, REVISION15_EXPECTED['classification_changes'])
+        self.assertEqual(review['transaction_added_entries'], [dict(id=identity, entry_sha256=fingerprint(current[identity])) for identity in sorted(added_ids)])
         self.assertEqual(review['transaction_removed_entries'], [])
-        self.assertEqual(review['manual_review_fields'], REVISION14_EXPECTED['manual_review_fields'])
+        self.assertEqual(review['manual_review_fields'], REVISION15_EXPECTED['manual_review_fields'])
         self.assertEqual(review['migration_changes'], [])
-        self.assertEqual(review['client_before'], self.revision13['clients'])
+        self.assertEqual(review['client_before'], self.revision14['clients'])
         self.assertEqual(review['client_after'], self.clients)
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision13['clients'])).hexdigest(), review['client_before_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision14['clients'])).hexdigest(), review['client_before_sha256'])
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.clients)).hexdigest(), review['client_after_sha256'])
-        old_routes = {row['route']: row for row in self.rev13_compat['routes']}
+        old_routes = {row['route']: row for row in self.rev14_compat['routes']}
         new_routes = {row['route']: row for row in self.compat['routes']}
         fresh_routes = {row['route']: row for row in gate.source_facts(self.routes, self.clients)}
         self.assertEqual(set(old_routes), set(new_routes))
@@ -5030,41 +6394,41 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
                     after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest()))
         self.assertEqual(route_changes, review['compatibility_route_changes'])
-        old_closure, new_closure = self.rev13_compat['source_closure'], self.compat['source_closure']
+        old_closure, new_closure = self.rev14_compat['source_closure'], self.compat['source_closure']
         closure_changes = [dict(path=path, before_sha256=old_closure.get(path), after_sha256=new_closure.get(path))
                            for path in sorted(set(old_closure) | set(new_closure)) if old_closure.get(path) != new_closure.get(path)]
         self.assertEqual(closure_changes, review['closure_changes'])
         mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
-        self.assertEqual({k: v for k, v in self.rev13_compat.items() if k not in mutable},
+        self.assertEqual({k: v for k, v in self.rev14_compat.items() if k not in mutable},
                          {k: v for k, v in self.compat.items() if k not in mutable})
-        self.assertEqual(self.compat['acquisition'], dict(self.rev13_compat['acquisition'], base_commit=SOURCE_COMMIT))
+        self.assertEqual(self.compat['acquisition'], dict(self.rev14_compat['acquisition'], base_commit=SOURCE_COMMIT))
         for name, pin in review['generated_catalogs'].items():
-            self.assertEqual(pin['path'], REVISION13_SNAPSHOTS[name]['path'])
+            self.assertEqual(pin['path'], REVISION14_SNAPSHOTS[name]['path'])
             raw = (ROOT / pin['path']).read_bytes()
             self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
             self.assertEqual(len(raw), pin['bytes'])
-        self.assertEqual(set(review['generated_catalogs']), set(REVISION13_SNAPSHOTS))
+        self.assertEqual(set(review['generated_catalogs']), set(REVISION14_SNAPSHOTS))
         route_map = {(row['method'], gate.norm(row['path'])): row['method'] + ' ' + row['path'] for row in self.routes}
-        documented = json.loads((ROOT / REVISION13_SNAPSHOTS['client_routes']['path']).read_text())
+        documented = json.loads((ROOT / REVISION14_SNAPSHOTS['client_routes']['path']).read_text())
         self.assertEqual(documented, [dict(row, routes=[] if row['forwarding'] else
                          [route_map[(method, gate.norm(row['path']))] for method in row['methods']]) for row in self.clients])
-        changed = git('diff', '--name-only', REVISION13_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+        changed = git('diff', '--name-only', REVISION14_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
         product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
                          (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
                          (p.startswith('web/locales/') and p.endswith('.json'))]
         self.assertEqual(product_paths, [row['path'] for row in review['source_changes']])
-        self.assertEqual(product_paths, REVISION14_EXPECTED['product_paths'])
+        self.assertEqual(product_paths, REVISION15_EXPECTED['product_paths'])
         self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in new_closure])
         build_paths = [path for path in ('web/package.json', 'web/package-lock.json')
-                       if git('show', REVISION13_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+                       if git('show', REVISION14_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
         self.assertEqual(build_paths, [row['path'] for row in review['additional_build_metadata_changes']])
         schema_paths = [path for path in ('internal/api/openapi.yaml',)
-                        if git('show', REVISION13_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+                        if git('show', REVISION14_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
         self.assertEqual(schema_paths, [row['path'] for row in review['additional_api_schema_changes']])
         for row in review['source_changes'] + review['additional_build_metadata_changes'] + review['additional_api_schema_changes']:
-            self.assertEqual(row['before_commit'], REVISION13_SOURCE_COMMIT)
+            self.assertEqual(row['before_commit'], REVISION14_SOURCE_COMMIT)
             self.assertEqual(row['after_commit'], SOURCE_COMMIT)
-            for prefix, commit in (('before', REVISION13_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
+            for prefix, commit in (('before', REVISION14_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
                 if row[prefix + '_blob'] is None:
                     self.assertFalse(git('ls-tree', commit, '--', row['path']))
                     self.assertIsNone(row[prefix + '_sha256'])
@@ -5082,22 +6446,22 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(review['implementation_todos_completed'], 0)
         self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
 
-    def test_revision14_preserves_public_history_collectors_and_original_rejections(self):
+    def test_revision15_preserves_public_history_collectors_and_original_rejections(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
-        self.assertEqual(git('rev-parse', REVISION13_COMMIT + '^{tree}').decode().strip(), REVISION13_TREE)
+        self.assertEqual(git('rev-parse', REVISION14_COMMIT + '^{tree}').decode().strip(), REVISION14_TREE)
         historical = []
         for directory in review['historical_directories']:
-            names = git('ls-tree', '-r', '--name-only', REVISION13_COMMIT, '--', directory).decode().splitlines()
+            names = git('ls-tree', '-r', '--name-only', REVISION14_COMMIT, '--', directory).decode().splitlines()
             self.assertTrue(names)
             self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
             for path in names:
-                ref = REVISION13_COMMIT + ':' + path
+                ref = REVISION14_COMMIT + ':' + path
                 raw = git('show', ref)
                 self.assertEqual((ROOT / path).read_bytes(), raw)
                 historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
                                        sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
         self.assertEqual(historical, review['historical_manifest'])
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION14_EXPECTED['historical_manifest_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION15_EXPECTED['historical_manifest_sha256'])
         roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
         mutable = ['scripts/tests/test_r5_catalog_reconciliation.py', 'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py']
         self.assertEqual(review['mutable_current_positive_test_paths'], mutable)
@@ -5115,33 +6479,66 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
                                   sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
         self.assertEqual(protected, review['protected_source_manifest'])
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION14_EXPECTED['protected_source_manifest_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION15_EXPECTED['protected_source_manifest_sha256'])
         for path, expected in review['unchanged_validators_and_collectors'].items():
-            raw = git('show', REVISION13_COMMIT + ':' + path)
+            raw = git('show', REVISION14_COMMIT + ':' + path)
             self.assertEqual((ROOT / path).read_bytes(), raw)
             self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
         for path, replacements in (
-            ('scripts/tests/test_r5_transactions.py', [("result['functions'], 401", "result['functions'], %d" % REVISION14_EXPECTED['transaction']['functions']),
-                ("result['postgres_files'], 63", "result['postgres_files'], %d" % REVISION14_EXPECTED['transaction']['postgres_files'])]),
-            ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION14_EXPECTED['compatibility']['routes']),
-                ("result['client_branches'],136", "result['client_branches'],%d" % REVISION14_EXPECTED['compatibility']['client_branches'])]),
+            ('scripts/tests/test_r5_transactions.py', [("result['functions'], 402", "result['functions'], %d" % REVISION15_EXPECTED['transaction']['functions']),
+                ("result['postgres_files'], 64", "result['postgres_files'], %d" % REVISION15_EXPECTED['transaction']['postgres_files'])]),
+            ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION15_EXPECTED['compatibility']['routes']),
+                ("result['client_branches'],136", "result['client_branches'],%d" % REVISION15_EXPECTED['compatibility']['client_branches'])]),
         ):
-            expected = git('show', REVISION13_COMMIT + ':' + path).decode()
+            expected = git('show', REVISION14_COMMIT + ':' + path).decode()
             for before, after in replacements:
                 self.assertEqual(expected.count(before), 1)
                 expected = expected.replace(before, after)
+            if path == 'scripts/tests/test_r5_transactions.py':
+                for before_import, after_import in (
+                    ('import copy\n', 'import copy\nfrom contextlib import contextmanager\n'),
+                    ('from pathlib import Path\n', 'from pathlib import Path\nimport subprocess\nimport tempfile\n'),
+                    ('import unittest\n', 'import unittest\nfrom unittest import mock\n'),
+                ):
+                    self.assertEqual(expected.count(before_import), 1)
+                    expected = expected.replace(before_import, after_import, 1)
+                method_name = 'test_pr23_each_added_and_changed_body_has_independent_source_review'
+                original = next(node for node in ast.walk(ast.parse(expected))
+                                if isinstance(node, ast.FunctionDef) and node.name == method_name)
+                original_lines = expected.splitlines(keepends=True)
+                original_method = ''.join(original_lines[original.lineno - 1:original.end_lineno])
+                original_body = ''.join(original_lines[original.lineno:original.end_lineno])
+                self.assertEqual(hashlib.sha256(original_body.encode()).hexdigest(),
+                                 '645376ce0d324122b53a9426a6caea4ed18ee2738d25ed983a74f0264c3e756c')
+                self.assertEqual(hashlib.sha256(ast.dump(original, include_attributes=False).encode()).hexdigest(),
+                                 '5b82e67898cecb5946b58450a5bc72b62ce8c227bac4b058d3aa267b89432b0e')
+                wrapped = original_lines[original.lineno - 1] + '        with self.pr23_revision14_context():\n'
+                wrapped += ''.join('    ' + line if line.strip() else line for line in original_body.splitlines(keepends=True))
+                self.assertEqual(expected.count(original_method), 1)
+                expected = expected.replace(original_method, REVISION15_PR23_CONTEXT + wrapped, 1)
+                actual = (ROOT / path).read_text()
+                current = next(node for node in ast.walk(ast.parse(actual))
+                               if isinstance(node, ast.FunctionDef) and node.name == method_name)
+                self.assertEqual(len(current.body), 1)
+                wrapper = current.body[0]
+                self.assertIsInstance(wrapper, ast.With)
+                self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.pr23_revision14_context()')
+                self.assertEqual([ast.dump(node, include_attributes=False) for node in original.body],
+                                 [ast.dump(node, include_attributes=False) for node in wrapper.body])
+                body = ''.join(actual.splitlines(keepends=True)[current.lineno + 1:current.end_lineno])
+                self.assertEqual(''.join(line[4:] if line.strip() else line for line in body.splitlines(keepends=True)), original_body)
             self.assertEqual((ROOT / path).read_text(), expected)
         path = 'scripts/tests/test_r5_catalog_reconciliation.py'
-        before_raw = git('show', REVISION13_COMMIT + ':' + path).decode()
+        before_raw = git('show', REVISION14_COMMIT + ':' + path).decode()
         after_raw = (ROOT / path).read_text()
         def methods(raw):
             return {node.name: node for node in ast.walk(ast.parse(raw))
                     if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
         before, after = methods(before_raw), methods(after_raw)
-        self.assertEqual((len(before), len(after)), (29, 31))
+        self.assertEqual((len(before), len(after)), (31, 33))
         self.assertTrue(set(before).issubset(after))
-        self.assertEqual(set(after) - set(before), {'test_revision14_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision14_preserves_public_history_collectors_and_original_rejections'})
-        frozen = {'test_revision13_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision13_preserves_public_history_collectors_and_original_rejections'}
+        self.assertEqual(set(after) - set(before), {'test_revision15_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision15_preserves_public_history_collectors_and_original_rejections'})
+        frozen = {'test_revision14_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision14_preserves_public_history_collectors_and_original_rejections'}
         allowed = frozen | {'test_old_pins_reject_and_current_revision_passes_same_actual_facts'}
         for name in before:
             if name not in allowed:
@@ -5151,7 +6548,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             self.assertEqual(len(after[name].body), 1)
             wrapper = after[name].body[0]
             self.assertIsInstance(wrapper, ast.With)
-            self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision13_context()')
+            self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision14_context()')
             self.assertEqual([ast.dump(node, include_attributes=False) for node in before[name].body],
                              [ast.dump(node, include_attributes=False) for node in wrapper.body])
             original_body = ''.join(before_raw.splitlines(keepends=True)[before[name].lineno:before[name].end_lineno])
@@ -5164,8 +6561,8 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                              review['original_unapproved_methods'][name]['source_sha256'])
             self.assertEqual(hashlib.sha256(ast.dump(after[name], include_attributes=False).encode()).hexdigest(),
                              review['original_unapproved_methods'][name]['ast_sha256'])
-        # Fixed revision13 values and all earlier review constants are retained;
-        # only the fresh root/source identifiers advance to revision14.
+        # Fixed revision14 values and all earlier review constants are retained;
+        # only the fresh root/source identifiers advance to revision15.
         def assignments(raw):
             return {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
                     for target in node.targets if isinstance(target, ast.Name)}
