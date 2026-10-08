@@ -528,9 +528,20 @@ components:
           type: integer
     DeliveryStats:
       type: object
+      description: >-
+        Process-lifetime delivery counters. Up to the first 4096 tenant keys
+        and 4096 mailbox keys are retained independently. Further keys share
+        a separate aggregate without losing global totals. Top lists reserve
+        their final row for that aggregate when present, within the row limit;
+        ordinary rows rank the retained keys by delivery volume.
       properties:
         key:
           type: string
+          description: Real tenant or mailbox key; empty only for an aggregate row.
+        aggregate:
+          type: boolean
+          default: false
+          description: True for the combined counters of all keys beyond the retained set; omitted for ordinary rows.
         accepted:
           type: integer
         rejected:

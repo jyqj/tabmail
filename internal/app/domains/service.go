@@ -615,12 +615,20 @@ func (s *Service) lookupDKIMRecord(ctx context.Context, zone *models.DomainZone)
 	vals, err := s.lookupTXT(ctx, name)
 	for _, v := range vals {
 		check.Details = append(check.Details, v)
-		if tabdkim.TXTValueMatchesPublicKey(v, publicKey) {
-			check.Status = "pass"
-		}
 	}
 	if err != nil {
 		check.Details = append(check.Details, err.Error())
+		return check
+	}
+	// LookupTXT already joins character strings belonging to one TXT RR.
+	// Multiple records for a selector are ambiguous (RFC 6376 section 3.6.2.2)
+	// and rejected by our signature verifier, even if one key matches.
+	if len(vals) != 1 {
+		check.Details = append(check.Details, "expected exactly one DKIM TXT record")
+		return check
+	}
+	if tabdkim.TXTValueMatchesPublicKey(vals[0], publicKey) {
+		check.Status = "pass"
 	}
 	return check
 }

@@ -372,6 +372,7 @@ type MetricPoint struct {
 
 type DeliveryStats struct {
 	Key              string `json:"key"`
+	Aggregate        bool   `json:"aggregate,omitempty"` // Combined untracked keys; Key is empty.
 	Accepted         int64  `json:"accepted"`
 	Rejected         int64  `json:"rejected"`
 	DeliveriesOK     int64  `json:"deliveries_ok"`

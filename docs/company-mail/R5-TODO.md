@@ -1,11 +1,11 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-PROGRESS-20261008:BEGIN -->
-## PROGRESS 批次：第 2 轮三项交付
+## PROGRESS 批次：第 3 轮三项交付
 
 从公开 `58d0c9cf274569258319ff4b5dcab7912b0174f4` 继续，root 与三个原生子智能体按 **4＋3＋3** 推进 [#154–#163](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+PROGRESS-%22)，完整范围、认领及逐轮证据见 [PROGRESS 账本](R5-PROGRESS-20261008.md)。前批任务不重复计数。
 
-第 1 轮 [#164](https://github.com/jyqj/tabmail/pull/164) 已实际合入 `66f14c11`，#154/#155/#156/#157 已逐项 closed/completed，完成 4/10、剩余 6。第 2 轮 #158/#159/#160 已完成实现、同字节回归和独立审查，root 同一组合源 553 Go 叶及 64 UI 全过、零失败/跳过；**随本轮 PR 实际合入，本批完成 7/10，剩余 3；原父任务完成 10/171，剩余 161**。第三轮三项正在独立工作树推进。具体任务的实现、固定回归、交叉审查、合入与状态更新齐全才算完成；目录、测试数量及报告不另计 TODO。#56 仍为 draft，原发布门槛保持。
+第 1 轮 [#164](https://github.com/jyqj/tabmail/pull/164) 与第 2 轮 [#165](https://github.com/jyqj/tabmail/pull/165) 已实际合入，#154–#160 均已 closed/completed，前两轮累计 7/10、剩余 3。第 3 轮 #161/#162/#163 已完成实现、固定回归和独立审查；DKIM 真实签名验证、真实 SMTP 8192 次拒收洪泛与设置 CAS/截断响应恢复均已验收。root 235 Go race 叶与最终 97 UI 全过、零失败/跳过，全 Go 编译、默认生产前端构建、TypeScript/ESLint/DTO/i18n 检查通过；具体执行源码和保留失败见账本。**随本轮 PR 实际合入，本批完成 10/10，剩余 0；三轮余量 6 → 3 → 0；原父任务完成 10/171，剩余 161**。#166 将单独完成最终 source catalog 维护并保留原 guards，计0个新增实施TODO。具体任务的实现、固定回归、交叉审查、合入与状态更新齐全才算完成；#56 仍为 draft，原发布门槛保持。
 <!-- R5-PROGRESS-20261008:END -->
 
 <!-- R5-COMPLETE-20261008:BEGIN -->
