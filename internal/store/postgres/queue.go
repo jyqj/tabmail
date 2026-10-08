@@ -91,6 +91,14 @@ func (s *PgStore) MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastEr
 	return err
 }
 
+func (s *PgStore) MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.MarkOutboxEventDone(ctx, id)
+}
+
+func (s *PgStore) MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error {
+	return s.MarkOutboxEventRetry(ctx, id, lastError, nextAttemptAt)
+}
+
 func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error {
 	if event == nil || len(urls) == 0 {
 		return nil
@@ -174,6 +182,14 @@ func (s *PgStore) MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, la
 		SET state=$2, last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=$5
 		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
 	return err
+}
+
+func (s *PgStore) MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.MarkWebhookDeliveryDone(ctx, id)
+}
+
+func (s *PgStore) MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error {
+	return s.MarkWebhookDeliveryRetry(ctx, id, lastError, nextAttemptAt, dead)
 }
 
 func (s *PgStore) ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error) {

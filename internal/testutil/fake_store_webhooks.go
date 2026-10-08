@@ -96,6 +96,14 @@ func (s *FakeStore) MarkOutboxEventRetry(_ context.Context, id uuid.UUID, lastEr
 	return nil
 }
 
+func (s *FakeStore) MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.MarkOutboxEventDone(ctx, id)
+}
+
+func (s *FakeStore) MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error {
+	return s.MarkOutboxEventRetry(ctx, id, lastError, nextAttemptAt)
+}
+
 func (s *FakeStore) CreateWebhookDeliveries(_ context.Context, event *models.OutboxEvent, urls []string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -195,6 +203,14 @@ func (s *FakeStore) MarkWebhookDeliveryRetry(_ context.Context, id uuid.UUID, la
 		d.UpdatedAt = time.Now().UTC()
 	}
 	return nil
+}
+
+func (s *FakeStore) MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.MarkWebhookDeliveryDone(ctx, id)
+}
+
+func (s *FakeStore) MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error {
+	return s.MarkWebhookDeliveryRetry(ctx, id, lastError, nextAttemptAt, dead)
 }
 
 func (s *FakeStore) ListDeadWebhookDeliveries(_ context.Context, limit int) ([]models.DeadLetter, error) {
