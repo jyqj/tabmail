@@ -142,10 +142,10 @@ func TestContinueRegistrationPersistentTextPreservesValidIdentity(t *testing.T) 
 		{"display-emoji-255", "user@example.test", strings.Repeat("😀", 255), "user@example.test", strings.Repeat("😀", 255)},
 		{"display-combining-255", "user@example.test", strings.Repeat("e\u0301", 127) + "e", "user@example.test", strings.Repeat("e\u0301", 127) + "e"},
 		{"trim-before-length", "user@example.test", " " + strings.Repeat("中", 255) + " ", "user@example.test", strings.Repeat("中", 255)},
-		{"email-ascii-255", strings.Repeat("A", 255), "Name", strings.Repeat("a", 255), "Name"},
-		{"email-emoji-255", strings.Repeat("😀", 255), "Name", strings.Repeat("😀", 255), "Name"},
+		{"email-ascii-255", strings.Repeat("A", 242) + "@example.test", "Name", strings.Repeat("a", 242) + "@example.test", "Name"},
+		{"email-emoji-255", strings.Repeat("😀", 242) + "@example.test", "Name", strings.Repeat("😀", 242) + "@example.test", "Name"},
 		{"default-display", "User@Example.TEST", " \t\n", "user@example.test", "user"},
-		{"default-display-255", strings.Repeat("中", 255), "", strings.Repeat("中", 255), strings.Repeat("中", 255)},
+		{"default-display-long-local", strings.Repeat("中", 242) + "@example.test", "", strings.Repeat("中", 242) + "@example.test", strings.Repeat("中", 242)},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			st := &registrationTextStore{}

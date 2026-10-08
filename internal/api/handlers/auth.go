@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/mail"
 	"strings"
 	"tabmail/internal/app/credentials"
 	"time"
@@ -259,6 +260,19 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 			errBadRequest(w, "email and display_name must contain at most 255 characters and no NUL characters")
 			return
 		}
+	}
+	// Registration stores one mailbox identity, not an RFC 5322 display-name,
+	// group or list. Wrapping in angle brackets asks the parser for an addr-spec
+	// while retaining legitimate quoted local parts and the existing normalized
+	// spelling. This validates syntax; it does not prove ownership or delivery.
+	// net/mail also accepts obsolete whitespace after @ and removes it from
+	// the parsed value. Do not store that spelling as a different account
+	// identity. The last @ is the delimiter even inside a quoted local part.
+	separator := strings.LastIndexByte(req.Email, '@')
+	if _, err := mail.ParseAddress("<" + req.Email + ">"); err != nil ||
+		separator < 0 || strings.ContainsAny(req.Email[separator+1:], " \t\r\n") {
+		errBadRequest(w, "email must be a single mailbox address")
+		return
 	}
 
 	existing, err := h.store.GetUserByEmail(r.Context(), req.Email)

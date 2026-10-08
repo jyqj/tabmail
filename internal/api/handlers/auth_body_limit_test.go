@@ -334,12 +334,13 @@ func TestAuthBodyLimitBodyTokenFallback(t *testing.T) {
 }
 
 func TestAuthBodyLimitEscapedFieldHeadroom(t *testing.T) {
-	// VARCHAR(255) counts characters, not bytes. Two maximum-width escaped
-	// profile strings plus a fully escaped 72-byte password fit well below the
-	// body budget; this does not impose a new per-field credential policy.
+	// VARCHAR(255) counts characters, not bytes. Two 255-character escaped
+	// profile fields (including the mailbox syntax) plus a fully escaped
+	// 72-byte password fit well below the body budget.
 	profile := strings.Repeat(`\ud83d\ude00`, 255)
+	email := strings.Repeat(`\ud83d\ude00`, 242) + `\u0040\u0065\u0078\u0061\u006d\u0070\u006c\u0065\u002e\u0074\u0065\u0073\u0074`
 	password := strings.Repeat(`\u0061`, 72)
-	body := `{"email":"` + profile + `","display_name":"` + profile + `","password":"` + password + `"}`
+	body := `{"email":"` + email + `","display_name":"` + profile + `","password":"` + password + `"}`
 	if len(body) >= 7*1024 || len(body) >= maxAuthBodyBytes {
 		t.Fatalf("maximum escaped field envelope unexpectedly large: %d", len(body))
 	}
@@ -348,7 +349,7 @@ func TestAuthBodyLimitEscapedFieldHeadroom(t *testing.T) {
 	r, reader := authBodyLimitRequest(body, false)
 	w := httptest.NewRecorder()
 	h.Register(w, r)
-	if w.Code != http.StatusConflict || st.lookups != 1 || st.lastEmail != strings.Repeat("😀", 255) {
+	if w.Code != http.StatusConflict || st.lookups != 1 || st.lastEmail != strings.Repeat("😀", 242)+"@example.test" {
 		t.Errorf("escaped fields rejected or altered: status=%d lookups=%d", w.Code, st.lookups)
 	}
 	checkAuthBodyLimitRead(t, reader, len(body))

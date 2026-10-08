@@ -186,13 +186,13 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	patch := models.UserAdminPatch{}
-	var req struct {
+	var req *struct {
 		Role                *string         `json:"role"`
 		IsActive            *bool           `json:"is_active"`
 		DisplayName         *string         `json:"display_name"`
 		PermissionProfileID json.RawMessage `json:"permission_profile_id"`
 	}
-	if err := decodeBody(r, &req); err != nil {
+	if err := decodeAuthBody(w, r, &req); err != nil || req == nil {
 		errBadRequest(w, "invalid request body")
 		return
 	}
@@ -216,6 +216,12 @@ func (h *UserAdminHandler) UpdateUserByAdmin(w http.ResponseWriter, r *http.Requ
 		patch.IsActive = req.IsActive
 	}
 	if req.DisplayName != nil {
+		// Keep PATCH's exact text and null/omission semantics, but reject text
+		// PostgreSQL cannot persist before any role/status/profile command.
+		if strings.ContainsRune(*req.DisplayName, 0) || utf8.RuneCountInString(*req.DisplayName) > 255 {
+			errBadRequest(w, "display_name must contain at most 255 characters and no NUL characters")
+			return
+		}
 		patch.DisplayName = req.DisplayName
 	}
 	if req.PermissionProfileID != nil {
