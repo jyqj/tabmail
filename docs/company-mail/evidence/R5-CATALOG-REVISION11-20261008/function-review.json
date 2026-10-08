@@ -1,0 +1,274 @@
+{
+  "schema_version": 1,
+  "source_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79",
+  "source_tree": "5e454667e0c99e816d20c499514d0e17f645bd22",
+  "review_status": "static-type-review",
+  "evidence_level": "linked-existing-test",
+  "actual_postgres_executed_by_this_review": false,
+  "implementation_todos_completed": 0,
+  "production_binding": "cmd/tabmail/main.go hooks.New(...).BindStore(pg) → dispatcherStore → hooks outbox/delivery adapter → claimed job.ID/Attempts → four Claim marks → markQueueClaim",
+  "binding_limit": "Human source trace supplements the unchanged call-name inventory; inventory caller rows remain name-match-candidate-not-dispatch-proof.",
+  "functions": [
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:MarkOutboxEventDoneClaim",
+      "source_review": {
+        "role": "claim-fenced-outbox-completion-entry",
+        "trace": "hooks.outboxStore.MarkDone 将 claim 的 job.ID/Attempts 传入；委托 markQueueClaim 锁 outbox_events 指定 id 后，仅当 processing、attempt匹配且数据库租约未过期，写 state=done、清 claimed_at/lease_until、更新DB updated_at。attempt/payload/last_error/next_attempt_at不改；processOutbox fanout事务在此mark之前结束。",
+        "unverified": "本目录未执行 PostgreSQL；链接的既有冻结测试及公开产品 CI 保持各自原始来源，不能改签为本轮 runtime 验收。 冻结78个PG叶覆盖入口取消与UPDATE约束23514，但未注入等待中取消、Commit/连接失败、所有FK/父删除交叉等待或任意系统时钟偏差。 返回 Commit 原始错误不等于提交结果可确定；HTTP/确认丢失可能导致重复投递，未证明 receiver 去重或 exactly once。旧ID-only API仍无claim fence。",
+        "source_sha256": "d6226de9a10ad7e6903e78bceace05f4c3036168f84c24115024193432fe46d7",
+        "base_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79"
+      },
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "lock_fk_wait_fence": {
+        "boundary": "hooks.outboxStore.MarkDone 将 claim 的 job.ID/Attempts 传入；委托 markQueueClaim 锁 outbox_events 指定 id 后，仅当 processing、attempt匹配且数据库租约未过期，写 state=done、清 claimed_at/lease_until、更新DB updated_at。attempt/payload/last_error/next_attempt_at不改；processOutbox fanout事务在此mark之前结束。",
+        "local_operations": [
+          {
+            "line": 98,
+            "operation": "s.markQueueClaim",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 99,
+            "sql_fragment": "SELECT id FROM outbox_events WHERE id=$1 FOR UPDATE"
+          }
+        ],
+        "implicit_fk": "00001_baseline.sql:487–525：outbox_events 无上游 FK；webhook_deliveries.event_id REFERENCES outbox_events(id) ON DELETE CASCADE。这组 mark 不写 id/event_id、不显式取得第二行/第二表锁。记录已存在 FK 与行锁等待；不将静态键不变推定为全部父删除交叉等待的运行证明。"
+      },
+      "callback_effect": "无函数回调；本入口保存固定 SELECT/UPDATE 字符串，实际事务、锁取得和写入均委托 markQueueClaim；不在确认事务内发起fanout或网络请求。",
+      "evidence_level": "linked-existing-test",
+      "pg_leaf_count": 15,
+      "pg_variants": [
+        "outbox-done"
+      ]
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:MarkOutboxEventRetryClaim",
+      "source_review": {
+        "role": "claim-fenced-outbox-retry-entry",
+        "trace": "hooks.outboxStore.MarkRetry 与 MarkDead fallback 均传递 job.ID/Attempts；锁 outbox 指定行后验证 processing/attempt/DB lease，写 state=retry、last_error=$3、next_attempt_at=$4 UTC，清claim并更新DB时间；attempt不重置。当前 FixedBackoff 不走dead，fallback仍只安排retry，不丢弃outbox事件。",
+        "unverified": "本目录未执行 PostgreSQL；链接的既有冻结测试及公开产品 CI 保持各自原始来源，不能改签为本轮 runtime 验收。 冻结78个PG叶覆盖入口取消与UPDATE约束23514，但未注入等待中取消、Commit/连接失败、所有FK/父删除交叉等待或任意系统时钟偏差。 返回 Commit 原始错误不等于提交结果可确定；HTTP/确认丢失可能导致重复投递，未证明 receiver 去重或 exactly once。旧ID-only API仍无claim fence。",
+        "source_sha256": "4fc859da8dc1bf9d34514909e0751e19028458dd2d4bdecfc72edd03cf6a70c2",
+        "base_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79"
+      },
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "lock_fk_wait_fence": {
+        "boundary": "hooks.outboxStore.MarkRetry 与 MarkDead fallback 均传递 job.ID/Attempts；锁 outbox 指定行后验证 processing/attempt/DB lease，写 state=retry、last_error=$3、next_attempt_at=$4 UTC，清claim并更新DB时间；attempt不重置。当前 FixedBackoff 不走dead，fallback仍只安排retry，不丢弃outbox事件。",
+        "local_operations": [
+          {
+            "line": 106,
+            "operation": "s.markQueueClaim",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 107,
+            "sql_fragment": "SELECT id FROM outbox_events WHERE id=$1 FOR UPDATE"
+          }
+        ],
+        "implicit_fk": "00001_baseline.sql:487–525：outbox_events 无上游 FK；webhook_deliveries.event_id REFERENCES outbox_events(id) ON DELETE CASCADE。这组 mark 不写 id/event_id、不显式取得第二行/第二表锁。记录已存在 FK 与行锁等待；不将静态键不变推定为全部父删除交叉等待的运行证明。"
+      },
+      "callback_effect": "无函数回调；两个固定SQL字符串与lastError/UTC nextAttemptAt参数交给markQueueClaim；重试调度并不在本函数执行外部请求。",
+      "evidence_level": "linked-existing-test",
+      "pg_leaf_count": 15,
+      "pg_variants": [
+        "outbox-retry"
+      ]
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:MarkWebhookDeliveryDoneClaim",
+      "source_review": {
+        "role": "claim-fenced-webhook-delivered-entry",
+        "trace": "hooks.deliveryStore.MarkDone 传入 claim 的 job.ID/Attempts；单个 delivery 行锁之后验证 processing/attempt/DB lease；写 delivered，delivered_at/updated_at各调用clock_timestamp，清claim，不改event_id/attempt/last_tried_at。HTTP dispatch 已先结束，确认不确定性仍可导致重试，不能据此宣称exactly once。",
+        "unverified": "本目录未执行 PostgreSQL；链接的既有冻结测试及公开产品 CI 保持各自原始来源，不能改签为本轮 runtime 验收。 冻结78个PG叶覆盖入口取消与UPDATE约束23514，但未注入等待中取消、Commit/连接失败、所有FK/父删除交叉等待或任意系统时钟偏差。 返回 Commit 原始错误不等于提交结果可确定；HTTP/确认丢失可能导致重复投递，未证明 receiver 去重或 exactly once。旧ID-only API仍无claim fence。",
+        "source_sha256": "7df521485bf4ae5fec0c9cb77bc25d28247d77d8f780530f5f8d4e187b02c923",
+        "base_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79"
+      },
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "lock_fk_wait_fence": {
+        "boundary": "hooks.deliveryStore.MarkDone 传入 claim 的 job.ID/Attempts；单个 delivery 行锁之后验证 processing/attempt/DB lease；写 delivered，delivered_at/updated_at各调用clock_timestamp，清claim，不改event_id/attempt/last_tried_at。HTTP dispatch 已先结束，确认不确定性仍可导致重试，不能据此宣称exactly once。",
+        "local_operations": [
+          {
+            "line": 200,
+            "operation": "s.markQueueClaim",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 201,
+            "sql_fragment": "SELECT id FROM webhook_deliveries WHERE id=$1 FOR UPDATE"
+          }
+        ],
+        "implicit_fk": "00001_baseline.sql:487–525：outbox_events 无上游 FK；webhook_deliveries.event_id REFERENCES outbox_events(id) ON DELETE CASCADE。这组 mark 不写 id/event_id、不显式取得第二行/第二表锁。记录已存在 FK 与行锁等待；不将静态键不变推定为全部父删除交叉等待的运行证明。"
+      },
+      "callback_effect": "无函数回调；固定delivery SELECT/UPDATE交给markQueueClaim，不在数据库确认事务内发起HTTP。",
+      "evidence_level": "linked-existing-test",
+      "pg_leaf_count": 16,
+      "pg_variants": [
+        "webhook-done"
+      ]
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:MarkWebhookDeliveryRetryClaim",
+      "source_review": {
+        "role": "claim-fenced-webhook-retry-or-dead-entry",
+        "trace": "hooks.deliveryStore.MarkRetry(dead=false) 与 MarkDead(dead=true) 传入 job.ID/Attempts；布尔值先选择retry/dead，再在单个delivery行锁后验证processing/attempt/DB lease并参数化写state=$3、error=$4、UTC next=$5；清claim、更新DB时间，不改event_id/attempt/delivered_at/last_tried_at。",
+        "unverified": "本目录未执行 PostgreSQL；链接的既有冻结测试及公开产品 CI 保持各自原始来源，不能改签为本轮 runtime 验收。 冻结78个PG叶覆盖入口取消与UPDATE约束23514，但未注入等待中取消、Commit/连接失败、所有FK/父删除交叉等待或任意系统时钟偏差。 返回 Commit 原始错误不等于提交结果可确定；HTTP/确认丢失可能导致重复投递，未证明 receiver 去重或 exactly once。旧ID-only API仍无claim fence。",
+        "source_sha256": "598ef068b3b388c652595421459c2632b7c495568aa99306fe1545f77857b0d3",
+        "base_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79"
+      },
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "lock_fk_wait_fence": {
+        "boundary": "hooks.deliveryStore.MarkRetry(dead=false) 与 MarkDead(dead=true) 传入 job.ID/Attempts；布尔值先选择retry/dead，再在单个delivery行锁后验证processing/attempt/DB lease并参数化写state=$3、error=$4、UTC next=$5；清claim、更新DB时间，不改event_id/attempt/delivered_at/last_tried_at。",
+        "local_operations": [
+          {
+            "line": 212,
+            "operation": "s.markQueueClaim",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 213,
+            "sql_fragment": "SELECT id FROM webhook_deliveries WHERE id=$1 FOR UPDATE"
+          }
+        ],
+        "implicit_fk": "00001_baseline.sql:487–525：outbox_events 无上游 FK；webhook_deliveries.event_id REFERENCES outbox_events(id) ON DELETE CASCADE。这组 mark 不写 id/event_id、不显式取得第二行/第二表锁。记录已存在 FK 与行锁等待；不将静态键不变推定为全部父删除交叉等待的运行证明。"
+      },
+      "callback_effect": "无函数回调；retry/dead两个显式分支只选择绑定值，SQL与实际事务写入统一交给markQueueClaim。",
+      "evidence_level": "linked-existing-test",
+      "pg_leaf_count": 32,
+      "pg_variants": [
+        "webhook-retry",
+        "webhook-dead"
+      ]
+    },
+    {
+      "id": "internal/store/postgres/queue.go:*PgStore:markQueueClaim",
+      "source_review": {
+        "role": "single-row-claim-fenced-transaction-owner",
+        "trace": "ctx.Err→非nil id/attempt>0→pool.Begin→SELECT id FOR UPDATE取得并持有单行锁→独立guarded UPDATE语句→RowsAffected必须1→Commit；defer Rollback处理所有返回路径。锁取得后才检查 processing/current attempt/lease_until>clock_timestamp，避免先求WHERE后等锁的过期窗口。四个Claim mark是全部生产源码caller；lockSQL/updateSQL来自这四处固定字面量，数据仅经绑定参数输入。ctx.Err 优先保留；uuid.Nil/attempt<=0、SELECT无行、guarded UPDATE受影响行数不是1返回 store.ErrClaimLeaseLost；Begin/Scan/Exec/Commit 其他错误原样返回，退出执行 deferred Rollback。hooks claimMarkError 用 errors.Join 保留 store sentinel 及 workqueue.ErrLeaseLost，worker不在失败确认后触发成功/重试/死信hooks。",
+        "unverified": "本目录未执行 PostgreSQL；链接的既有冻结测试及公开产品 CI 保持各自原始来源，不能改签为本轮 runtime 验收。 冻结78个PG叶覆盖入口取消与UPDATE约束23514，但未注入等待中取消、Commit/连接失败、所有FK/父删除交叉等待或任意系统时钟偏差。 返回 Commit 原始错误不等于提交结果可确定；HTTP/确认丢失可能导致重复投递，未证明 receiver 去重或 exactly once。旧ID-only API仍无claim fence。",
+        "source_sha256": "b5f93fb0871e879ec79e2d68f9021ba3f0b603dfc1f4499f536fad96a755699c",
+        "base_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79"
+      },
+      "classification": {
+        "kind": "transaction-or-callback",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": true,
+        "callback_parameter": false,
+        "dynamic_sql_expression": true
+      },
+      "lock_fk_wait_fence": {
+        "boundary": "ctx.Err→非nil id/attempt>0→pool.Begin→SELECT id FOR UPDATE取得并持有单行锁→独立guarded UPDATE语句→RowsAffected必须1→Commit；defer Rollback处理所有返回路径。锁取得后才检查 processing/current attempt/lease_until>clock_timestamp，避免先求WHERE后等锁的过期窗口。四个Claim mark是全部生产源码caller；lockSQL/updateSQL来自这四处固定字面量，数据仅经绑定参数输入。ctx.Err 优先保留；uuid.Nil/attempt<=0、SELECT无行、guarded UPDATE受影响行数不是1返回 store.ErrClaimLeaseLost；Begin/Scan/Exec/Commit 其他错误原样返回，退出执行 deferred Rollback。hooks claimMarkError 用 errors.Join 保留 store sentinel 及 workqueue.ErrLeaseLost，worker不在失败确认后触发成功/重试/死信hooks。",
+        "local_operations": [
+          {
+            "line": 231,
+            "operation": "s.pool.Begin",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 235,
+            "operation": "tx.Rollback",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 237,
+            "operation": "tx.QueryRow",
+            "sql_expression": "lockSQL",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 244,
+            "operation": "tx.Exec",
+            "sql_expression": "updateSQL",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 251,
+            "operation": "tx.Commit",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "implicit_fk": "00001_baseline.sql:487–525：outbox_events 无上游 FK；webhook_deliveries.event_id REFERENCES outbox_events(id) ON DELETE CASCADE。这组 mark 不写 id/event_id、不显式取得第二行/第二表锁。记录已存在 FK 与行锁等待；不将静态键不变推定为全部父删除交叉等待的运行证明。"
+      },
+      "callback_effect": "无函数回调。helper用动态lockSQL/updateSQL参数执行真实SELECT FOR UPDATE和UPDATE，四个固定caller提供SQL。原AST的direct_write/write_closure/explicit_lock=false仅反映helper没有SQL字面量，不能解释成无锁/只读；transaction_calls=true/dynamic_sql_expression=true保留原producer事实。",
+      "evidence_level": "linked-existing-test",
+      "pg_leaf_count": 78,
+      "pg_variants": [
+        "outbox-done",
+        "outbox-retry",
+        "webhook-done",
+        "webhook-retry",
+        "webhook-dead"
+      ]
+    }
+  ],
+  "shared_error_semantics": "ctx.Err 优先保留；uuid.Nil/attempt<=0、SELECT无行、guarded UPDATE受影响行数不是1返回 store.ErrClaimLeaseLost；Begin/Scan/Exec/Commit 其他错误原样返回，退出执行 deferred Rollback。hooks claimMarkError 用 errors.Join 保留 store sentinel 及 workqueue.ErrLeaseLost，worker不在失败确认后触发成功/重试/死信hooks。",
+  "shared_fk_scope": "00001_baseline.sql:487–525：outbox_events 无上游 FK；webhook_deliveries.event_id REFERENCES outbox_events(id) ON DELETE CASCADE。这组 mark 不写 id/event_id、不显式取得第二行/第二表锁。记录已存在 FK 与行锁等待；不将静态键不变推定为全部父删除交叉等待的运行证明。",
+  "linked_test": {
+    "path": "internal/store/postgres/r5_webhook_claim_completion_test.go",
+    "sha256": "dbb0435f481c4aa011477b052a13e2ee9107780ecd48073322f9c2b9d9e2e835",
+    "distinct_pg_leaves": 78,
+    "allocation": {
+      "outbox-done": 15,
+      "outbox-retry": 15,
+      "webhook-done": 16,
+      "webhook-retry": 16,
+      "webhook-dead": 16
+    },
+    "groups": {
+      "current": 5,
+      "lost-ownership": 45,
+      "newer-terminal-state": 13,
+      "cancelled-or-write-rejected": 10,
+      "actual-row-lock-wait-expiry": 5
+    },
+    "qualification": "One shared 78-leaf suite; helper coverage is the same leaves, not an additional 78. No PostgreSQL execution performed for this source-catalog maintenance."
+  }
+}

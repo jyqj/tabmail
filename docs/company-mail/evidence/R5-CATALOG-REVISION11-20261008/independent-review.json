@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "source_commit": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+  "source_tree": "c86a86f0a252159e068c8458e343eb59248ff979",
+  "catalog_test_module_sha256": "47eedf382d0bae1a297fac3a60584c31b6137684f1a6fabf3b8f61abadd40690",
+  "implementation_todos_completed": 0,
+  "runtime_verified": false,
+  "product_green": false,
+  "scope": "Independent review of the exact revision11 catalog core and its original guards; neither reviewer reran the complete source runner or business PG for this review.",
+  "reviews": [
+    {
+      "reviewer": "frontend_quality",
+      "decision": "ACCEPT",
+      "source_clean_before_after": true,
+      "working_directory": "/workspace/scratch/b8f95a1acb4c/tabmail-review-catalog",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "test_r5_catalog_reconciliation",
+        "-v"
+      ],
+      "environment": {
+        "PYTHONPATH": "scripts:scripts/tests",
+        "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+        "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+        "R5_TEST_CACHE": "/workspace/scratch/b8f95a1acb4c/go-cache",
+        "GOPROXY": "off",
+        "GOMAXPROCS": "2",
+        "PYTHONDONTWRITEBYTECODE": "1",
+        "GOTOOLCHAIN": "unset"
+      },
+      "counts": {
+        "tests": 25,
+        "passed": 25,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "unittest_seconds": 32.935,
+      "exit_code": 0,
+      "log": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/frontend-review.txt",
+        "bytes": 5299,
+        "sha256": "54e662ec53b2eba723528fd481635119b6b9b1125dd9b06668a37a7eb9f3a64a"
+      },
+      "checks": [
+        "All134 prior logical client calls preserved plus unique tenant GET",
+        "Draft GET/DELETE route mapping follows semantic calls across index47/48 swap",
+        "All7 explicit forwarders preserved",
+        "Current133 routes/135 client rows/95-file limited closure independently collected",
+        "47 historical files/167 current fixed protected sources/2 exact count-only positive edits",
+        "All5 original unapproved method source bytes and AST unchanged",
+        "Caller moves consume original unique entries before appending moved records; complete Counter multiplicity preserved"
+      ],
+      "initial_invocation_rejection": {
+        "argv": [
+          "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "scripts/tests",
+          "-p",
+          "test_r5_catalog_reconciliation.py",
+          "-v"
+        ],
+        "exit_code": 1,
+        "cause": "PYTHONPATH was omitted; synthetic unittest loader ImportError for check_r5_transactions before any actual catalog test dispatch.",
+        "actual_catalog_tests_dispatched": 0,
+        "log": {
+          "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/frontend-review-invocation-error.txt",
+          "bytes": 1189,
+          "sha256": "6de20ced7cab0d192434c17b8e8ceb36b48736cbf4150295f4fbfd96f555d6b2"
+        },
+        "resolution": "Used README PYTHONPATH for the original unittest command; no source, catalog, test or guard changes."
+      }
+    },
+    {
+      "reviewer": "pr_audit",
+      "decision": "ACCEPT",
+      "source_clean_before_after": true,
+      "baseline_original_cli": {
+        "source": "3a103cda4363cb8f32839eaaa73ab065eb967f79",
+        "tree": "5e454667e0c99e816d20c499514d0e17f645bd22",
+        "source_clean_before_after": true,
+        "commands": [
+          {
+            "name": "transactions",
+            "argv": [
+              "python3",
+              "-B",
+              "scripts/check_r5_transactions.py"
+            ],
+            "exit": 1,
+            "seconds": 23.188,
+            "stdout_sha256": "c6f6a5ba741723a92c59de7c15c003fe1a243f8bbde6ef6eda69ea2600391666",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_bytes": 11541,
+            "stderr_bytes": 0
+          },
+          {
+            "name": "compatibility",
+            "argv": [
+              "python3",
+              "-B",
+              "scripts/check_r5_compatibility.py"
+            ],
+            "exit": 1,
+            "seconds": 6.712,
+            "stdout_sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_bytes": 146,
+            "stderr_bytes": 0
+          },
+          {
+            "name": "clients",
+            "argv": [
+              "node",
+              "scripts/collect_api_calls.cjs",
+              "--check"
+            ],
+            "exit": 1,
+            "seconds": 2.702,
+            "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stderr_sha256": "28c9b70954d92f2334b11a191897236411fceded86c296842c6c522af9228965",
+            "stdout_bytes": 0,
+            "stderr_bytes": 1019
+          }
+        ]
+      },
+      "candidate_original_cli": {
+        "source": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+        "tree": "c86a86f0a252159e068c8458e343eb59248ff979",
+        "source_clean_before_after": true,
+        "commands": [
+          {
+            "name": "transactions",
+            "argv": [
+              "python3",
+              "-B",
+              "scripts/check_r5_transactions.py"
+            ],
+            "exit": 0,
+            "seconds": 1.352,
+            "stdout_sha256": "3f85a1cb472e44d329c4ab2ecf2c46cd419e2e666b1f7b278cd59c118636fd16",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_bytes": 309,
+            "stderr_bytes": 0
+          },
+          {
+            "name": "compatibility",
+            "argv": [
+              "python3",
+              "-B",
+              "scripts/check_r5_compatibility.py"
+            ],
+            "exit": 0,
+            "seconds": 3.435,
+            "stdout_sha256": "acc9893148d225195c0ae09203eb941cf750ab66ece2edbe27f44a4a6cdaeb12",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_bytes": 1117,
+            "stderr_bytes": 0
+          },
+          {
+            "name": "clients",
+            "argv": [
+              "node",
+              "scripts/collect_api_calls.cjs",
+              "--check"
+            ],
+            "exit": 0,
+            "seconds": 1.178,
+            "stdout_sha256": "b17fa6318b473021a98f1960d1dfe854ca7f7cbe1307436dbddf0042d9220328",
+            "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "stdout_bytes": 73,
+            "stderr_bytes": 0
+          }
+        ]
+      },
+      "catalog_test_execution": {
+        "source": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+        "argv": [
+          "python3",
+          "-B",
+          "-m",
+          "unittest",
+          "test_r5_catalog_reconciliation",
+          "-v"
+        ],
+        "exit": 0,
+        "seconds": 35.625,
+        "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "stderr_sha256": "585cb96e9352f7c839a2aa39b3cffcea28f60eb6ae8e1c2c50c15687164cae81",
+        "source_clean": true
+      },
+      "unittest_seconds": 35.305,
+      "counts": {
+        "tests": 25,
+        "passed": 25,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "log": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/storage-review.txt",
+        "bytes": 5299,
+        "sha256": "585cb96e9352f7c839a2aa39b3cffcea28f60eb6ae8e1c2c50c15687164cae81"
+      },
+      "invariant_record": {
+        "source": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+        "tree": "c86a86f0a252159e068c8458e343eb59248ff979",
+        "historical_unchanged": 47,
+        "original_protected": 164,
+        "original_delta": [
+          "scripts/tests/test_r5_compatibility.py",
+          "scripts/tests/test_r5_transactions.py"
+        ],
+        "current_protected_exact_3a": 167,
+        "original_methods_retained": 23,
+        "current_methods": 25,
+        "original_negative_source_and_ast_unchanged": [
+          "test_unapproved_client_and_caller_locations_are_rejected",
+          "test_unapproved_actual_source_and_ast_changes_rejected",
+          "test_unapproved_actual_closure_bytes_rejected",
+          "test_unapproved_route_and_ast_fact_changes_rejected",
+          "test_unapproved_actual_route_source_rejected_by_original_collector"
+        ],
+        "product_paths_changed": [],
+        "positive_count_edits_exact": true
+      },
+      "invariant_time_boundary": "original_delta in this reviewer record describes count-only positive test edits between the product anchor3a103cda and catalog core8e4fd58. The separate historical20c39ab→3a103cda protected delta is two previously approved source edits plus five additions, preserved in reconciliation.json.",
+      "checks": [
+        "Original3CLI actually reject old catalogs on3a and accept core8e4 with same commands",
+        "All67 caller-delta IDs unique; original-pool consumption and complete row Counter retain multiplicity",
+        "All23 original catalog methods preserved; all5 original unapproved source+AST exact",
+        "47 historical files and167 current protected sources exact plus2 exact positive count replacements",
+        "All5 new PG manual reviews check lease lock order/callers/error and shared78-leaf scope",
+        "Current GET route/API matrix and missing named DTO or route-specific runtime fixture remain accurately bounded"
+      ]
+    }
+  ]
+}

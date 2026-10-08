@@ -1,13 +1,13 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-COMPLETE-20261008:BEGIN -->
-## COMPLETE 批次：独立缺口多轮实施中
+## COMPLETE 批次：十项独立缺口已完整关闭
 
 本批从公开 `1322c9284d5dad8984adb61d2b4627b331c3740f` 开始，root 与三个原生 subagent 分轮实施、固定失败复现、交叉审查并通过独立 PR 整合。目标至少完整关闭 10 个独立子项；前批 ADVANCE/CLOSE 与并发 CONTINUE 不重复计数。任务、限定验收和真实命令见 [COMPLETE 账本](R5-COMPLETE-20261008.md)。
 
-首轮 [#145](https://github.com/jyqj/tabmail/pull/145) 已实际合入 `edce9ea6479bcbf499959fea328e58e28be301e0`，源码树与真实 CI 完全一致。#128/#130/#131/#132 已逐项 closed/completed，解决 procfs 执行身份、SSE 临时续期、Webhook 串行领取及 claim-generation 写入。真实 PostgreSQL [37739497288](https://github.com/jyqj/tabmail/actions/runs/37739497288) 的固定基线 15 PASS/63 FAIL，修复后 78 PASS、0 FAIL/SKIP；原首跑解析器缺陷和全部原始证据保留。第二轮 [#147](https://github.com/jyqj/tabmail/pull/147) 已实际合入 `52e791ddf0dfae4d18d5c0994bc829755ad41fc0`，#138/#140/#141 均已 closed/completed：同源 273 Go/21 UI PASS，另 10 既有 PG SKIP 明记，精确 head 的 source evidence 和真实 PG CI 均 SUCCESS。第三轮 #142/#144/#146 已含两次复审发现的激活生命周期缺口修正，独审及 root 的 591 Go/31 UI PASS、完整构建/TypeScript 通过，待末轮 PR 实际合入。
+首轮 [#145](https://github.com/jyqj/tabmail/pull/145) 已实际合入 `edce9ea6479bcbf499959fea328e58e28be301e0`，源码树与真实 CI 完全一致。#128/#130/#131/#132 已逐项 closed/completed，解决 procfs 执行身份、SSE 临时续期、Webhook 串行领取及 claim-generation 写入。真实 PostgreSQL [37739497288](https://github.com/jyqj/tabmail/actions/runs/37739497288) 的固定基线 15 PASS/63 FAIL，修复后 78 PASS、0 FAIL/SKIP；原首跑解析器缺陷和全部原始证据保留。第二轮 [#147](https://github.com/jyqj/tabmail/pull/147) 已实际合入 `52e791ddf0dfae4d18d5c0994bc829755ad41fc0`，#138/#140/#141 均已 closed/completed：同源 273 Go/21 UI PASS，另 10 既有 PG SKIP 明记，精确 head 的 source evidence 和真实 PG CI 均 SUCCESS。第三轮 [#148](https://github.com/jyqj/tabmail/pull/148) 已实际合入 `23eda8a73549e16c8d149da7628b3e7261de8151`，#142/#144/#146 均已 closed/completed，含两次复审发现的激活生命周期缺口修正；root 的 591 Go/31 UI PASS、完整构建/TypeScript 通过，精确公开 head 的 source evidence 和真实 PG CI 均 SUCCESS，完整树与双 parent 已核对。
 
-当前 **本批 7/10 正式关闭，剩余 3**；原父任务仍 **10/171 已验收，剩余 161**。每轮合入后据实际关闭状态更新。#56 保持 draft；原 M/G0、完整 PG/必跑 fixture 与依赖审计条件不改变。
+当前 **本批 10/10 正式关闭，剩余 0**；三轮余量依次 **6 → 3 → 0**。原父任务仍 **10/171 已验收，剩余 161**。[维护 #149](https://github.com/jyqj/tabmail/issues/149) 的 [revision 11](evidence/R5-CATALOG-REVISION11-20261008/README.md) 最终对齐公开 `33f61fde`：63 个 PG 文件、401 个函数、133 条路由、135 个客户端调用；原三个 CLI、92 Python 检查和两位独立增量复审通过（7 项与 25 项均全过），仅有公开 Git 历史的隔离仓库复现也通过。第一阶段本地完整 runner 的真实失败及 7 项 missing 单独保留，最终公开源 CI 与合入结果由 #149 记录。目录和报告不算新增 TODO。#56 保持 draft；原 M/G0、完整 PG/必跑 fixture 与依赖审计条件不改变。
 <!-- R5-COMPLETE-20261008:END -->
 
 <!-- R5-CONTINUE-20261008:BEGIN -->

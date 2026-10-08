@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "source_commit": "33f61fde3cf37d3cec2dd360146369c291eb0930",
+  "source_tree": "d982493e28431e644fd4018d8f746d8940280268",
+  "issue": 139,
+  "implementation_todos_completed": 0,
+  "actual_postgres_used": false,
+  "original_claim_manual_preserved": {
+    "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/function-review.json",
+    "source_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79",
+    "sha256": "bf591e14ba46c5b440caa40a1289339598bd8f0985d1861b9c1426c2d6255a63",
+    "qualification": "All5 claim-function bodies and queue.go source bytes unchanged at33; the original3a manual and its78 shared PG leaves remain original evidence, not rerun or re-signed."
+  },
+  "added_function": "internal/store/postgres/zone_errors.go::classifyZoneCreateError",
+  "changed_existing_function": "internal/store/postgres/zones.go:*PgStore:CreateZone",
+  "body_changes": [
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:CreateZone",
+      "before_sha256": "f02a80b8f21e9d6e2e36bbf4b4f515b01588cf53b177785f05c4bd5817b2c5bf",
+      "after_sha256": "00b4ee15b6d00ff7453ca033833a22bed98fc56d04ace5a276df1a78c581c3c0"
+    }
+  ],
+  "functions": [
+    {
+      "id": "internal/store/postgres/zone_errors.go::classifyZoneCreateError",
+      "source_review": {
+        "role": "pure-zone-create-unique-constraint-error-classifier",
+        "trace": "errors.As 只识别非 nil *pgconn.PgError；SQLSTATE 必须精确23505且ConstraintName必须精确domain_zones_domain_key，才errors.Join(store.ErrDomainAlreadyExists,原始err)。nil、其他状态/约束、文字伪装和取消均返回原始err；无SQL、锁、事务、回调、重试或外部I/O。",
+        "unverified": "纯 pgconn 错误对象、FakeStore 和 service/HTTP fixture 不是 live PostgreSQL 唯一约束、并发插入、父删除/FK 等待或整个创建链事务验收；本目录不运行数据库、不升级父任务。",
+        "source_sha256": "49772c79c228e17b93d6dd454300fe83c6e421e1b9fca806655e1d2f3f115e6c",
+        "base_commit": "33f61fde3cf37d3cec2dd360146369c291eb0930"
+      },
+      "classification": {
+        "kind": "read-or-pure",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "syntax_sha256": "49772c79c228e17b93d6dd454300fe83c6e421e1b9fca806655e1d2f3f115e6c",
+      "evidence_level": "linked-existing-test",
+      "callers": [
+        {
+          "caller_id": "internal/store/postgres/zones.go:*PgStore:CreateZone",
+          "file": "internal/store/postgres/zones.go",
+          "function": "CreateZone",
+          "line": 36,
+          "expression": "classifyZoneCreateError",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": {
+        "boundary": "errors.As 只识别非 nil *pgconn.PgError；SQLSTATE 必须精确23505且ConstraintName必须精确domain_zones_domain_key，才errors.Join(store.ErrDomainAlreadyExists,原始err)。nil、其他状态/约束、文字伪装和取消均返回原始err；无SQL、锁、事务、回调、重试或外部I/O。",
+        "local_operations": [],
+        "direct_lock_fragments": [],
+        "implicit_fk": "本函数不调用数据库；唯一约束来源及CreateZone插入等待由调用者记录。00001_baseline.sql:264 的 domain_zones.domain 全局 UNIQUE 对应 domain_zones_domain_key；tenant/owner/parent FK 及唯一/主键 INSERT 等待保持原边界。00005:22 的 tenant identity 唯一约束不是本翻译目标。无新增显式锁或事务。"
+      }
+    },
+    {
+      "id": "internal/store/postgres/zones.go:*PgStore:CreateZone",
+      "source_review": {
+        "role": "single-statement-zone-create-error-translation",
+        "trace": "原UUID生成、default visibility、CreatedAt赋值、单条pool.Exec INSERT及15个绑定参数原样保留；仅return err变为return classifyZoneCreateError(err)。因此仍是单语句自动事务，无新锁/事务/回调/重试。00001_baseline.sql:264 的 domain_zones.domain 全局 UNIQUE 对应 domain_zones_domain_key；tenant/owner/parent FK 及唯一/主键 INSERT 等待保持原边界。00005:22 的 tenant identity 唯一约束不是本翻译目标。无新增显式锁或事务。 service.CreateZone对errors.Is(store.ErrDomainAlreadyExists)返回KindConflict并保留Err cause，其他错误KindInternal；失败不进入后续身份创建、成功审计或缓存失效。",
+        "unverified": "纯 pgconn 错误对象、FakeStore 和 service/HTTP fixture 不是 live PostgreSQL 唯一约束、并发插入、父删除/FK 等待或整个创建链事务验收；本目录不运行数据库、不升级父任务。",
+        "source_sha256": "00b4ee15b6d00ff7453ca033833a22bed98fc56d04ace5a276df1a78c581c3c0",
+        "base_commit": "33f61fde3cf37d3cec2dd360146369c291eb0930"
+      },
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "syntax_sha256": "00b4ee15b6d00ff7453ca033833a22bed98fc56d04ace5a276df1a78c581c3c0",
+      "evidence_level": "source-only",
+      "callers": [
+        {
+          "caller_id": "internal/api/handlers/company_domains.go:*CompanyDomainHandler:Create",
+          "file": "internal/api/handlers/company_domains.go",
+          "function": "Create",
+          "line": 106,
+          "expression": "h.service.CreateZone",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/app/domains/service.go:*Service:CreateZone",
+          "file": "internal/app/domains/service.go",
+          "function": "CreateZone",
+          "line": 295,
+          "expression": "s.store.CreateZone",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testpg/r5_fixture.go::NewR5Fixture",
+          "file": "internal/testpg/r5_fixture.go",
+          "function": "NewR5Fixture",
+          "line": 59,
+          "expression": "st.CreateZone",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/testutil/fake_store.go:*FakeStore:SeedZone",
+          "file": "internal/testutil/fake_store.go",
+          "function": "SeedZone",
+          "line": 98,
+          "expression": "s.CreateZone",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": {
+        "boundary": "pool/database statement独立提交；多分支/循环不是整体事务",
+        "local_operations": [
+          {
+            "line": 30,
+            "operation": "s.pool.Exec",
+            "sql_expression": "`\n\t\tINSERT INTO domain_zones (id,tenant_id,owner_user_id,parent_zone_id,domain,visibility,\n\t\t\tallow_random_subdomains,is_verified,mx_verified,txt_record,dkim_private_key_pem,dkim_selector,dkim_enabled,dkim_required_for_send,created_at)\n\t\tVALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
+      }
+    }
+  ],
+  "linked_test": {
+    "path": "internal/store/postgres/r5_domain_conflict_error_test.go",
+    "sha256": "b398612f70ee512dd43f54c17ebaf53205d7f0d679e49b188ba412cc11694bfa",
+    "direct_mapper_leaves": 13,
+    "qualification": "pgconn error objects only; service/HTTP andFakeStore49-leaf independent review remains no livePG."
+  },
+  "independent_domain_review": {
+    "source": "33f61fde3cf37d3cec2dd360146369c291eb0930",
+    "argv": [
+      "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+      "test",
+      "-race",
+      "./internal/store/postgres",
+      "./internal/testutil",
+      "./internal/api/handlers",
+      "-run",
+      "^TestContinueDomainConflict(PGClassification|FakeStore|Pipeline|Authorization)$",
+      "-count=1",
+      "-json",
+      "-timeout",
+      "120s"
+    ],
+    "exit": 0,
+    "seconds": 28.461,
+    "leaf_counts": {
+      "pass": 49
+    },
+    "terminal_counts": {
+      "pass": 53
+    },
+    "packages": [
+      {
+        "package": "tabmail/internal/testutil",
+        "action": "pass"
+      },
+      {
+        "package": "tabmail/internal/store/postgres",
+        "action": "pass"
+      },
+      {
+        "package": "tabmail/internal/api/handlers",
+        "action": "pass"
+      }
+    ],
+    "test_json_sha256": "01f86d398b3104f3f7e8af4ddb78162bc969474924fd33403274b07ea206a563",
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "source_clean": true,
+    "actual_postgres_used": false
+  },
+  "remaining_boundary": "纯 pgconn 错误对象、FakeStore 和 service/HTTP fixture 不是 live PostgreSQL 唯一约束、并发插入、父删除/FK 等待或整个创建链事务验收；本目录不运行数据库、不升级父任务。"
+}
