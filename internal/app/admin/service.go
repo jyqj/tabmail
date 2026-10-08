@@ -28,6 +28,7 @@ type Store interface {
 	CreateTenant(ctx context.Context, t *models.Tenant) error
 	ListTenants(ctx context.Context) ([]*models.Tenant, error)
 	GetTenant(ctx context.Context, id uuid.UUID) (*models.Tenant, error)
+	GetOverride(ctx context.Context, tenantID uuid.UUID) (*models.TenantOverride, error)
 	UpsertOverride(ctx context.Context, o *models.TenantOverride) error
 	DeleteTenant(ctx context.Context, id uuid.UUID) error
 	EffectiveConfig(ctx context.Context, tenantID uuid.UUID) (*models.EffectiveConfig, error)
@@ -242,6 +243,9 @@ func (s *Service) CreateTenant(ctx context.Context, name string, planID uuid.UUI
 }
 
 func (s *Service) UpdateTenantOverride(ctx context.Context, tenantID uuid.UUID, body models.TenantOverride, actor string) (*models.TenantOverride, error) {
+	if err := validateConfigIntegers(body); err != nil {
+		return nil, err
+	}
 	tenant, err := s.store.GetTenant(ctx, tenantID)
 	if err != nil {
 		return nil, app.Internal(err)
@@ -284,6 +288,9 @@ func (s *Service) DeleteTenant(ctx context.Context, id uuid.UUID, actor string) 
 }
 
 func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if err := validatePlanIntegers(p); err != nil {
+		return nil, err
+	}
 	if _, err := models.MessageExpiry(nil, p.RetentionHours, time.Now()); err != nil {
 		return nil, app.BadRequest(err.Error())
 	}
@@ -301,6 +308,9 @@ func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) 
 }
 
 func (s *Service) UpdatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if err := validatePlanIntegers(p); err != nil {
+		return nil, err
+	}
 	if _, err := models.MessageExpiry(nil, p.RetentionHours, time.Now()); err != nil {
 		return nil, app.BadRequest(err.Error())
 	}

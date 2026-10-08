@@ -38,16 +38,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   listTenants,
   createTenant,
   deleteTenant,
   listPlans,
-  updateTenantOverrides,
-  getTenantConfig,
 } from "@/lib/api";
-import type { Tenant, TenantOverrideInput, EffectiveConfig } from "@/lib/types";
+import type { Tenant } from "@/lib/types";
 import {
   Plus,
   MoreHorizontal,
@@ -57,7 +54,6 @@ import {
   Users,
   Shield,
   SlidersHorizontal,
-  Gauge,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
@@ -66,30 +62,7 @@ import { safeConfirm } from "@/lib/utils";
 import { useAPI } from "@/hooks/use-api";
 import { sessionScope, useSessionScope } from "@/lib/session";
 import { TenantAPIKeysDialog } from "./api-keys-dialog";
-
-const overrideFields = [
-  "max_domains",
-  "max_mailboxes_per_domain",
-  "max_messages_per_mailbox",
-  "max_message_bytes",
-  "retention_hours",
-  "rpm_limit",
-  "daily_quota",
-] as const;
-
-type TenantOverrideEditableKey = (typeof overrideFields)[number];
-type TenantOverrideForm = Record<TenantOverrideEditableKey, string>;
-
-const emptyOverrideForm: TenantOverrideForm = {
-  max_domains: "",
-  max_mailboxes_per_domain: "",
-  max_messages_per_mailbox: "",
-  max_message_bytes: "",
-  retention_hours: "",
-  rpm_limit: "",
-  daily_quota: "",
-};
-
+import { TenantOverridesDialog } from "./overrides-dialog";
 
 export default function TenantsPage() {
   const { t } = useI18n();
@@ -124,11 +97,10 @@ export default function TenantsPage() {
     tenantId: string; scope: string; instance: number;
   } | null>(null);
 
-  const [overrideOpen, setOverrideOpen] = useState(false);
-  const [overrideTenant, setOverrideTenant] = useState<Tenant | null>(null);
-  const [overrideSaving, setOverrideSaving] = useState(false);
-  const [effectiveConfig, setEffectiveConfig] = useState<EffectiveConfig | null>(null);
-  const [overrideForm, setOverrideForm] = useState<TenantOverrideForm>(emptyOverrideForm);
+  const overrideSequence = useRef(0);
+  const [overrideDialog, setOverrideDialog] = useState<{
+    tenant: Tenant; scope: string; instance: number;
+  } | null>(null);
 
   const handleCreate = async () => {
     if (!newName.trim() || !newPlanId) return;
@@ -165,39 +137,8 @@ export default function TenantsPage() {
 
   const planName = (id: string) => plans.find((p) => p.id === id)?.name ?? "—";
 
-  const openOverrides = async (tenant: Tenant) => {
-    setOverrideTenant(tenant);
-    setOverrideOpen(true);
-    setEffectiveConfig(null);
-    setOverrideForm(emptyOverrideForm);
-    try {
-      const res = await getTenantConfig(tenant.id);
-      setEffectiveConfig(res.data);
-    } catch {
-      toast.error(t("tenants.configLoadFailed"));
-    }
-  };
-
-  const handleSaveOverrides = async () => {
-    if (!overrideTenant) return;
-    const body = Object.fromEntries(
-      Object.entries(overrideForm).map(([key, value]) => [
-        key,
-        value.trim() === "" ? null : Number(value),
-      ])
-    ) as TenantOverrideInput;
-    setOverrideSaving(true);
-    try {
-      await updateTenantOverrides(overrideTenant.id, body);
-      const res = await getTenantConfig(overrideTenant.id);
-      setEffectiveConfig(res.data);
-      toast.success(t("tenants.overridesUpdated"));
-    } catch (e: unknown) {
-      const err = e as { error?: { message?: string } };
-      toast.error(err?.error?.message || t("tenants.overridesUpdateFailed"));
-    } finally {
-      setOverrideSaving(false);
-    }
+  const openOverrides = (tenant: Tenant) => {
+    setOverrideDialog({ tenant, scope: sessionScope(), instance: ++overrideSequence.current });
   };
 
   return (
@@ -346,69 +287,10 @@ export default function TenantsPage() {
           onClose={() => setKeysDialog(null)} />
       )}
 
-      <Dialog open={overrideOpen} onOpenChange={setOverrideOpen}>
-        <DialogContent className="sm:max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{t("tenants.overridesTitle")}</DialogTitle>
-            <DialogDescription>
-              {t("tenants.overridesDesc", { name: overrideTenant?.name ?? "" })}
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="grid gap-6 py-4 lg:grid-cols-[0.9fr_1.1fr]">
-            <Card className="border-primary/10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.08),transparent_35%),var(--card)]">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Gauge className="h-4 w-4 text-primary" />
-                  {t("tenants.effectiveConfig")}
-                </CardTitle>
-                <CardDescription>{t("tenants.effectiveConfigDesc")}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {effectiveConfig ? (
-                  <>
-                    {Object.entries(effectiveConfig).map(([key, value]) => (
-                      <div key={key} className="flex items-center justify-between gap-3 text-sm">
-                        <span className="text-muted-foreground">{key}</span>
-                        <span className="font-medium tabular-nums">{String(value)}</span>
-                      </div>
-                    ))}
-                  </>
-                ) : (
-                  <div className="space-y-3">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Skeleton key={i} className="h-6 w-full" />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="space-y-4">
-              {overrideFields.map((field) => (
-                <div key={field} className="space-y-2">
-                  <Label>{field}</Label>
-                  <Input
-                    type="number"
-                    placeholder={t("tenants.inherit")}
-                    value={overrideForm[field]}
-                    onChange={(e) => setOverrideForm((prev) => ({ ...prev, [field]: e.target.value }))}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOverrideOpen(false)}>
-              {t("tenants.close")}
-            </Button>
-            <Button onClick={handleSaveOverrides} disabled={overrideSaving || !overrideTenant}>
-              {overrideSaving ? t("tenants.saving") : t("tenants.saveOverrides")}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {overrideDialog && overrideDialog.scope === scope && (
+        <TenantOverridesDialog key={overrideDialog.instance} tenant={overrideDialog.tenant}
+          onClose={() => setOverrideDialog(null)} />
+      )}
     </div>
   );
 }

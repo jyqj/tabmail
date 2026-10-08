@@ -1537,6 +1537,54 @@ def check_company_operations(document: dict, inventory: object) -> list[str]:
     return errors
 
 
+def check_admin_tenant_override_contract(
+    document: dict, inventory: object, go_text: str, ts_text: str,
+) -> list[str]:
+    """Check the explicit raw admin DTO, separately from persistence models."""
+    name = 'TenantOverrideSnapshot'
+    pairs = {name: name}
+    errors = check_pairs(pairs, [go_text], [ts_text], pairs)
+    go = merge_go_sources([go_text], errors)
+    ts = merge_ts_sources([ts_text], errors)
+    errors += check_openapi_pairs(pairs, pairs, go, ts, document, pairs)
+    schema = _object_at(document, 'components', 'schemas', name)
+    if schema.get('additionalProperties') is not False:
+        errors.append('[admin-snapshot] response DTO must be closed')
+    for field, prop in _object_at(schema, 'properties').items():
+        if field != 'tenant_id' and (not isinstance(prop, dict)
+                or prop.get('minimum') != -2147483648 or prop.get('maximum') != 2147483647):
+            errors.append(f'[admin-snapshot] {field}: signed PG INT bounds required')
+    path = '/api/v1/admin/tenants/{id}'
+    rows = [row for row in inventory if isinstance(row, dict)
+            and row.get('method') == 'GET' and row.get('path') == path] if isinstance(inventory, list) else []
+    if len(rows) != 1 or rows[0].get('handler') != 'adm.GetTenantOverride':
+        errors.append('[admin-snapshot] expected one reviewed GET handler binding')
+    elif (not isinstance(rows[0].get('middleware'), list)
+            or 'middleware.RequireSuperAdmin' not in rows[0]['middleware']
+            or not any(isinstance(item, str) and item.startswith('middleware.Auth(')
+                       for item in rows[0]['middleware'])):
+        errors.append('[admin-snapshot] authenticated super-admin middleware required')
+    operation = _object_at(document, 'paths', path, 'get')
+    if operation.get('operationId') != 'getTenantOverrides':
+        errors.append('[admin-snapshot] reviewed GET operation is missing or renamed')
+    if operation.get('security') != [{'BearerAuth': []}]:
+        errors.append('[admin-snapshot] BearerAuth security required')
+    parameters = operation.get('parameters')
+    ids = [p for p in parameters if isinstance(p, dict) and p.get('in') == 'path'
+           and p.get('name') == 'id'] if isinstance(parameters, list) else []
+    if (len(ids) != 1 or ids[0].get('required') is not True
+            or _object_at(ids[0], 'schema') != {'type': 'string', 'format': 'uuid'}):
+        errors.append('[admin-snapshot] required UUID tenant path parameter missing')
+    responses = _object_at(operation, 'responses')
+    if {str(code) for code in responses if str(code).startswith('2')} != {'200'}:
+        errors.append('[admin-snapshot] expected only successful status 200')
+    envelope = _object_at(responses, '200', 'content', 'application/json', 'schema')
+    if (envelope.get('type') != 'object' or 'data' not in _required_names(envelope)
+            or not _is_component_ref(_object_at(envelope, 'properties', 'data'), name)):
+        errors.append('[admin-snapshot] required data envelope must reference raw snapshot DTO')
+    return errors
+
+
 def check_shared(go_text: str, ts_text: str) -> list[str]:
     return check_pairs(SHARED_PAIRS, [go_text], [ts_text], NESTED_MAP)
 
@@ -1591,6 +1639,11 @@ def main() -> int:
         try:
             inventory = json.loads((ROOT / 'docs/company-mail/evidence/R5-API-MATRIX.json').read_text())
             problems += check_company_operations(openapi_document, inventory)
+            problems += check_admin_tenant_override_contract(
+                openapi_document, inventory,
+                (ROOT / 'internal/app/admin/tenant_override.go').read_text(),
+                shared_ts_text,
+            )
             problems += check_input_schemas(openapi_document)
             problems += check_receipt_schemas(openapi_document)
         except (OSError, ValueError) as exc:
@@ -1613,6 +1666,7 @@ def main() -> int:
     streamed = sum(r['handler'] in COMPANY_STREAMS for r in company_rows)
     print(f"OpenAPI routing: {len(company_rows)} company operations; {typed} JSON bindings, "
           f"{streamed} non-JSON bindings, including both submit success statuses. "
+          "One protected raw admin snapshot DTO/GET binding is also verified. "
           "Runtime response coverage is reported separately by check_http_contract.py.")
     return 0
 

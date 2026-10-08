@@ -151,6 +151,65 @@ components:
         daily_quota:
           type: integer
           nullable: true
+    TenantOverrideSnapshot:
+      type: object
+      additionalProperties: false
+      description: Raw tenant overrides. Null means inherited; a tenant without an override row has all seven fields null.
+      required:
+      - tenant_id
+      - max_domains
+      - max_mailboxes_per_domain
+      - max_messages_per_mailbox
+      - max_message_bytes
+      - retention_hours
+      - rpm_limit
+      - daily_quota
+      properties:
+        tenant_id:
+          type: string
+          format: uuid
+        max_domains:
+          type:
+          - integer
+          - 'null'
+          minimum: -2147483648
+          maximum: 2147483647
+        max_mailboxes_per_domain:
+          type:
+          - integer
+          - 'null'
+          minimum: -2147483648
+          maximum: 2147483647
+        max_messages_per_mailbox:
+          type:
+          - integer
+          - 'null'
+          minimum: -2147483648
+          maximum: 2147483647
+        max_message_bytes:
+          type:
+          - integer
+          - 'null'
+          minimum: -2147483648
+          maximum: 2147483647
+        retention_hours:
+          type:
+          - integer
+          - 'null'
+          minimum: -2147483648
+          maximum: 2147483647
+        rpm_limit:
+          type:
+          - integer
+          - 'null'
+          minimum: -2147483648
+          maximum: 2147483647
+        daily_quota:
+          type:
+          - integer
+          - 'null'
+          minimum: -2147483648
+          maximum: 2147483647
     EffectiveConfig:
       type: object
       properties:
@@ -4280,6 +4339,42 @@ paths:
         '201':
           description: Created
   /api/v1/admin/tenants/{id}:
+    get:
+      tags:
+      - Admin
+      summary: Read raw tenant overrides (super admin only)
+      operationId: getTenantOverrides
+      security:
+      - BearerAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Raw override snapshot with explicit nullable fields; no override row returns all null fields.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - data
+                properties:
+                  data:
+                    $ref: '#/components/schemas/TenantOverrideSnapshot'
+        '400':
+          description: Invalid tenant UUID
+        '401':
+          description: Authentication required
+        '403':
+          description: Super admin required
+        '404':
+          description: Tenant not found
+        '500':
+          description: Snapshot could not be read
     patch:
       tags:
       - Admin
