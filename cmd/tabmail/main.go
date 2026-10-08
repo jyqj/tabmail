@@ -106,7 +106,7 @@ func main() {
 		}
 		logger.Info().Str("backend", "fs").Str("data_dir", cfg.DataDir).Msg("object store initialized")
 	case "s3":
-		obj, err = s3obj.New(cfg.S3)
+		obj, err = s3obj.NewWithContext(ctx, cfg.S3)
 		if err != nil {
 			logger.Fatal().Err(err).Msg("initializing s3 object store")
 		}

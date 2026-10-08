@@ -17,7 +17,17 @@ type Store struct {
 	bucket string
 }
 
+// New preserves the standalone constructor's background-context behavior.
+// Process startup should use NewWithContext so shutdown cancels its check.
 func New(cfg config.S3) (*Store, error) {
+	return NewWithContext(context.Background(), cfg)
+}
+
+// NewWithContext initializes the store for the caller's startup lifetime.
+func NewWithContext(ctx context.Context, cfg config.S3) (*Store, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if strings.TrimSpace(cfg.Endpoint) == "" {
 		return nil, fmt.Errorf("s3obj: endpoint is required")
 	}
@@ -33,10 +43,12 @@ func New(cfg config.S3) (*Store, error) {
 	if err != nil {
 		return nil, fmt.Errorf("s3obj: create client: %w", err)
 	}
-	ctx := context.Background()
 	exists, err := client.BucketExists(ctx, strings.TrimSpace(cfg.Bucket))
 	if err != nil {
 		return nil, fmt.Errorf("s3obj: bucket exists check: %w", err)
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
 	}
 	if !exists {
 		return nil, fmt.Errorf("s3obj: bucket %q does not exist", cfg.Bucket)
