@@ -1,5 +1,11 @@
 # R5 全版本深度重构与优化任务清单
 
+<!-- R5-DELIVER-20261008:BEGIN -->
+## DELIVER 批次：第一轮四项已完成，第二轮并行实施
+
+从公开 `b7247c3f66bd5f0ec5c6390305e2ff7268c135f8` 继续，root 与三个原生子代理按 **4＋3＋3** 推进十个独立业务缺口，完整范围与证据见 [DELIVER 账本](R5-DELIVER-20261008.md)。第一轮 [#179](https://github.com/jyqj/tabmail/pull/179) 已实际合入 `9a8cbd73712eae89c787af7c4990c47f729b3e05`；#169/#170/#171/#176 已 closed/completed，修复日配额、登录签发竞争、模板变量和 quoted-local 收件地址。真实 PostgreSQL 登录回归固定九叶从 3 PASS / 6 FAIL 转为 9 PASS；同源六个相关 Go 包 994 叶与相关 UI 95 项全通过，独审完成。**本批完成 4/10、剩余 6；原父任务仍完成 10/171、剩余 161。** 第二轮 #172/#173/#177 从同一公开合入点实施。测试、CI、目录和 PR 维护不额外计 TODO；#56 保持 draft，完整发布门槛继续保留。
+<!-- R5-DELIVER-20261008:END -->
+
 <!-- R5-PROGRESS-20261008:BEGIN -->
 ## PROGRESS 批次：三轮十项已全部完成
 

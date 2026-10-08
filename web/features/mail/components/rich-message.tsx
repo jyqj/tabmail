@@ -28,11 +28,12 @@ export function cleanEditorHTML(raw: string): string {
 function escaped(text: string) {
     return text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll("\n", "<br>");
 }
-export function RichMessage({ id, text, html, disabled, onChange }: {
+export function RichMessage({ id, text, html, disabled, resetKey = 0, onChange }: {
     id: string;
     text: string;
     html?: string;
     disabled?: boolean;
+    resetKey?: number;
     onChange: (value: {
         text_body: string;
         html_body?: string;
@@ -42,11 +43,16 @@ export function RichMessage({ id, text, html, disabled, onChange }: {
     // Plain text remains first-class and backwards compatible, including RFC quotes.
     const [rich, setRich] = useState(false);
     const editor = useRef<HTMLDivElement>(null);
+    const lastReset = useRef(resetKey);
     useEffect(() => {
+        const reset = lastReset.current !== resetKey;
+        lastReset.current = resetKey;
         const el = editor.current;
-        if (rich && el && document.activeElement !== el)
+        // Explicit server reload owns focused DOM, including an unchanged
+        // body. Normal input/save updates preserve the browser's selection.
+        if (rich && el && (reset || document.activeElement !== el))
             el.innerHTML = cleanEditorHTML(html || escaped(text));
-    }, [rich, html, text]);
+    }, [rich, html, text, resetKey]);
     const emit = () => {
         const el = editor.current;
         if (el)

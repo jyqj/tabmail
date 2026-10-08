@@ -166,6 +166,13 @@ func (s *Service) ListSettings(ctx context.Context) ([]*models.SystemSetting, er
 
 // UpdateSetting updates a single system setting.
 func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor string) error {
+	if err := validateSetting(key, value, time.Now()); err != nil {
+		return err
+	}
+	return s.updateValidatedSetting(ctx, key, value, actor)
+}
+
+func validateSetting(key, value string, now time.Time) error {
 	if key == "" {
 		return app.BadRequest("key is required")
 	}
@@ -181,7 +188,7 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 			return app.BadRequest("value must be an integer for " + key)
 		}
 		if key == models.SettingFallbackRetentionH {
-			if _, err := models.MessageExpiry(nil, hours, time.Now()); err != nil {
+			if _, err := models.MessageExpiry(nil, hours, now); err != nil {
 				return app.BadRequest(err.Error())
 			}
 		}
@@ -197,7 +204,10 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 			return app.BadRequest("value must be full, local, or domain for " + key)
 		}
 	}
+	return nil
+}
 
+func (s *Service) updateValidatedSetting(ctx context.Context, key, value, actor string) error {
 	if err := s.settings.Set(ctx, key, value, ""); err != nil {
 		return app.Internal(err)
 	}
@@ -210,10 +220,23 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 	return nil
 }
 
-// BulkUpdateSettings updates multiple settings at once.
+// BulkUpdateSettings validates the complete request before applying updates.
+// Storage failures can still leave preceding successful writes in place.
 func (s *Service) BulkUpdateSettings(ctx context.Context, updates map[string]string, actor string) error {
+	type settingUpdate struct{ key, value string }
+	batch := make([]settingUpdate, 0, len(updates))
 	for key, value := range updates {
-		if err := s.UpdateSetting(ctx, key, value, actor); err != nil {
+		batch = append(batch, settingUpdate{key: key, value: value})
+	}
+	sort.Slice(batch, func(i, j int) bool { return batch[i].key < batch[j].key })
+	now := time.Now()
+	for _, update := range batch {
+		if err := validateSetting(update.key, update.value, now); err != nil {
+			return err
+		}
+	}
+	for _, update := range batch {
+		if err := s.updateValidatedSetting(ctx, update.key, update.value, actor); err != nil {
 			return err
 		}
 	}
