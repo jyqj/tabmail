@@ -13,6 +13,11 @@ import (
 
 var startedAt = time.Now().UTC()
 
+// Keep process-lifetime detail for the first keys observed. Arbitrary rejected
+// SMTP recipients must not grow this diagnostic state without a bound. Later
+// keys share an independent aggregate; admitted keys never lose their totals.
+const maxDeliveryKeys = 4096
+
 type deliveryCounter struct {
 	accepted         int64
 	rejected         int64
@@ -29,10 +34,12 @@ type histogram struct {
 }
 
 type collector struct {
-	mu         sync.Mutex
-	timeSeries []models.MetricPoint
-	tenants    map[string]*deliveryCounter
-	mailboxes  map[string]*deliveryCounter
+	mu              sync.Mutex
+	timeSeries      []models.MetricPoint
+	tenants         map[string]*deliveryCounter
+	mailboxes       map[string]*deliveryCounter
+	tenantOverflow  deliveryCounter
+	mailboxOverflow deliveryCounter
 }
 
 var c = &collector{
@@ -124,30 +131,30 @@ func ObserveRetentionSweepDuration(d time.Duration) {
 
 func SMTPDeliverySucceeded(tenantID, mailbox string) {
 	smtpDeliveriesSucceeded.Add(1)
-	withCounter(c.tenants, tenantID, func(dc *deliveryCounter) { dc.deliveriesOK++ })
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.deliveriesOK++ })
+	withCounter(c.tenants, &c.tenantOverflow, tenantID, func(dc *deliveryCounter) { dc.deliveriesOK++ })
+	withCounter(c.mailboxes, &c.mailboxOverflow, mailbox, func(dc *deliveryCounter) { dc.deliveriesOK++ })
 }
 
 func SMTPDeliveryFailed(tenantID, mailbox string) {
 	smtpDeliveriesFailed.Add(1)
-	withCounter(c.tenants, tenantID, func(dc *deliveryCounter) { dc.deliveriesFailed++ })
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.deliveriesFailed++ })
+	withCounter(c.tenants, &c.tenantOverflow, tenantID, func(dc *deliveryCounter) { dc.deliveriesFailed++ })
+	withCounter(c.mailboxes, &c.mailboxOverflow, mailbox, func(dc *deliveryCounter) { dc.deliveriesFailed++ })
 }
 
 func TenantRecipientAccepted(tenantID string) {
-	withCounter(c.tenants, tenantID, func(dc *deliveryCounter) { dc.accepted++ })
+	withCounter(c.tenants, &c.tenantOverflow, tenantID, func(dc *deliveryCounter) { dc.accepted++ })
 }
 
 func TenantRecipientRejected(tenantID string) {
-	withCounter(c.tenants, tenantID, func(dc *deliveryCounter) { dc.rejected++ })
+	withCounter(c.tenants, &c.tenantOverflow, tenantID, func(dc *deliveryCounter) { dc.rejected++ })
 }
 
 func MailboxRecipientAccepted(mailbox string) {
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.accepted++ })
+	withCounter(c.mailboxes, &c.mailboxOverflow, mailbox, func(dc *deliveryCounter) { dc.accepted++ })
 }
 
 func MailboxRecipientRejected(mailbox string) {
-	withCounter(c.mailboxes, mailbox, func(dc *deliveryCounter) { dc.rejected++ })
+	withCounter(c.mailboxes, &c.mailboxOverflow, mailbox, func(dc *deliveryCounter) { dc.rejected++ })
 }
 
 func Snapshot(webhooksEnabled bool, deadLetterSize int) models.MetricsSnapshot {
@@ -187,14 +194,14 @@ func Snapshot(webhooksEnabled bool, deadLetterSize int) models.MetricsSnapshot {
 }
 
 func TopTenantDelivery(limit int) []models.DeliveryStats {
-	return topDeliveryStats(c.tenants, limit)
+	return topDeliveryStats(c.tenants, &c.tenantOverflow, limit)
 }
 
 func TopMailboxDelivery(limit int) []models.DeliveryStats {
-	return topDeliveryStats(c.mailboxes, limit)
+	return topDeliveryStats(c.mailboxes, &c.mailboxOverflow, limit)
 }
 
-func withCounter(m map[string]*deliveryCounter, key string, fn func(*deliveryCounter)) {
+func withCounter(m map[string]*deliveryCounter, overflow *deliveryCounter, key string, fn func(*deliveryCounter)) {
 	if key == "" {
 		return
 	}
@@ -202,8 +209,12 @@ func withCounter(m map[string]*deliveryCounter, key string, fn func(*deliveryCou
 	defer c.mu.Unlock()
 	dc := m[key]
 	if dc == nil {
-		dc = &deliveryCounter{}
-		m[key] = dc
+		if len(m) >= maxDeliveryKeys {
+			dc = overflow
+		} else {
+			dc = &deliveryCounter{}
+			m[key] = dc
+		}
 	}
 	fn(dc)
 }
@@ -232,13 +243,12 @@ func recordPoint() {
 	}
 }
 
-func topDeliveryStats(m map[string]*deliveryCounter, limit int) []models.DeliveryStats {
+func topDeliveryStats(m map[string]*deliveryCounter, overflow *deliveryCounter, limit int) []models.DeliveryStats {
 	if limit <= 0 {
 		limit = 10
 	}
 	c.mu.Lock()
-	defer c.mu.Unlock()
-	out := make([]models.DeliveryStats, 0, len(m))
+	out := make([]models.DeliveryStats, 0, len(m)+1)
 	for key, dc := range m {
 		out = append(out, models.DeliveryStats{
 			Key:              key,
@@ -248,11 +258,36 @@ func topDeliveryStats(m map[string]*deliveryCounter, limit int) []models.Deliver
 			DeliveriesFailed: dc.deliveriesFailed,
 		})
 	}
+	aggregate := models.DeliveryStats{
+		Aggregate:        true,
+		Accepted:         overflow.accepted,
+		Rejected:         overflow.rejected,
+		DeliveriesOK:     overflow.deliveriesOK,
+		DeliveriesFailed: overflow.deliveriesFailed,
+	}
+	c.mu.Unlock()
+	// Sort the bounded snapshot outside the writer lock. Stable key ties make
+	// repeated admin reads useful even when many keys only have RCPT counters.
 	sort.Slice(out, func(i, j int) bool {
-		return (out[i].DeliveriesOK + out[i].DeliveriesFailed) > (out[j].DeliveriesOK + out[j].DeliveriesFailed)
+		left := out[i].DeliveriesOK + out[i].DeliveriesFailed
+		right := out[j].DeliveriesOK + out[j].DeliveriesFailed
+		if left != right {
+			return left > right
+		}
+		return out[i].Key < out[j].Key
 	})
-	if len(out) > limit {
-		out = out[:limit]
+	hasOverflow := aggregate.Accepted != 0 || aggregate.Rejected != 0 || aggregate.DeliveriesOK != 0 || aggregate.DeliveriesFailed != 0
+	detailLimit := limit
+	if hasOverflow {
+		// The last row always explains the untracked population, even if its
+		// events are all rejected RCPTs and would rank below successful mail.
+		detailLimit--
+	}
+	if len(out) > detailLimit {
+		out = out[:detailLimit]
+	}
+	if hasOverflow {
+		out = append(out, aggregate)
 	}
 	return out
 }

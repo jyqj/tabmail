@@ -65,9 +65,9 @@ func DNSTXTValue(publicKeyBase64 string) string {
 }
 
 // TXTValueMatchesPublicKey reports whether a DKIM DNS TXT value contains the
-// expected RSA public key. The public-key comparison is exact after removing
-// DNS/display whitespace from the p= tag; other tag values are parsed
-// case-insensitively where DKIM allows it.
+// expected RSA public key and permits this signer's SHA-256 email signatures.
+// The public-key comparison is exact after removing DNS/display whitespace
+// from the p= tag; existing version and key-type display handling is preserved.
 func TXTValueMatchesPublicKey(txtValue, publicKeyBase64 string) bool {
 	expected := stripWhitespace(publicKeyBase64)
 	if expected == "" {
@@ -80,7 +80,25 @@ func TXTValueMatchesPublicKey(txtValue, publicKeyBase64 string) bool {
 	if k, present := tags["k"]; present && !strings.EqualFold(k, "rsa") {
 		return false
 	}
+	// RFC 6376 section 3.6.1: omitted h=/s= allow all supported hashes and
+	// services; explicit lists must allow the hash and service we actually use.
+	// Their identifiers are case-sensitive, and only s= defines a wildcard.
+	if h, present := tags["h"]; present && !tagListContains(h, "sha256") {
+		return false
+	}
+	if s, present := tags["s"]; present && !tagListContains(s, "email") && !tagListContains(s, "*") {
+		return false
+	}
 	return stripWhitespace(tags["p"]) == expected
+}
+
+func tagListContains(value, expected string) bool {
+	for _, item := range strings.Split(value, ":") {
+		if strings.TrimSpace(item) == expected {
+			return true
+		}
+	}
+	return false
 }
 
 // A malformed or repeated tag invalidates the record. In particular, a later

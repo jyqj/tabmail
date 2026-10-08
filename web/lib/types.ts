@@ -180,6 +180,7 @@ export interface SystemStats {
   messages_count: number;
   tenant_delivery: {
     key: string;
+    aggregate?: boolean;
     accepted: number;
     rejected: number;
     deliveries_ok: number;
@@ -187,6 +188,7 @@ export interface SystemStats {
   }[];
   mailbox_delivery: {
     key: string;
+    aggregate?: boolean;
     accepted: number;
     rejected: number;
     deliveries_ok: number;
