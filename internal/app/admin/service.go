@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -174,8 +175,14 @@ func (s *Service) UpdateSetting(ctx context.Context, key, value string, actor st
 		models.SettingPublicIPRPM:
 		// Match the settings reader: the entire stored value must be an int.
 		// A valid prefix would otherwise be accepted here and default at runtime.
-		if _, err := strconv.Atoi(value); err != nil {
+		hours, err := strconv.Atoi(value)
+		if err != nil {
 			return app.BadRequest("value must be an integer for " + key)
+		}
+		if key == models.SettingFallbackRetentionH {
+			if _, err := models.MessageExpiry(nil, hours, time.Now()); err != nil {
+				return app.BadRequest(err.Error())
+			}
 		}
 	case models.SettingStripPlusTag, models.SettingOpenRegistration:
 		// Must be a valid bool
@@ -242,6 +249,11 @@ func (s *Service) UpdateTenantOverride(ctx context.Context, tenantID uuid.UUID, 
 	if tenant == nil {
 		return nil, app.NotFound("tenant not found")
 	}
+	if body.RetentionHours != nil {
+		if _, err := models.MessageExpiry(nil, *body.RetentionHours, time.Now()); err != nil {
+			return nil, app.BadRequest(err.Error())
+		}
+	}
 	body.TenantID = tenantID
 	if err := s.store.UpsertOverride(ctx, &body); err != nil {
 		return nil, app.Internal(err)
@@ -272,6 +284,9 @@ func (s *Service) DeleteTenant(ctx context.Context, id uuid.UUID, actor string) 
 }
 
 func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if _, err := models.MessageExpiry(nil, p.RetentionHours, time.Now()); err != nil {
+		return nil, app.BadRequest(err.Error())
+	}
 	if err := s.store.CreatePlan(ctx, p); err != nil {
 		return nil, app.Internal(err)
 	}
@@ -286,6 +301,9 @@ func (s *Service) CreatePlan(ctx context.Context, p *models.Plan, actor string) 
 }
 
 func (s *Service) UpdatePlan(ctx context.Context, p *models.Plan, actor string) (*models.Plan, error) {
+	if _, err := models.MessageExpiry(nil, p.RetentionHours, time.Now()); err != nil {
+		return nil, app.BadRequest(err.Error())
+	}
 	if err := s.store.UpdatePlan(ctx, p); err != nil {
 		return nil, app.Internal(err)
 	}

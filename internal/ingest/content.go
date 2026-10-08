@@ -202,6 +202,10 @@ func (s *Service) prepareDelivery(ctx context.Context, in deliveryInput) (*deliv
 	}
 	mbRetention, routeRetention, tenantRetention := retentionOf(in.mb, route, cfg)
 	retH := resolveRetention(mbRetention, routeRetention, tenantRetention, s.fallbackRetentionH)
+	expiresAt, err := models.MessageExpiry(in.mb, retH, in.at)
+	if err != nil {
+		return nil, &deliveryFailure{stage: "retention_config", err: err}
+	}
 	msg := &models.Message{
 		TenantID:     in.mb.TenantID,
 		MailboxID:    in.mb.ID,
@@ -212,7 +216,7 @@ func (s *Service) prepareDelivery(ctx context.Context, in deliveryInput) (*deliv
 		Size:         int64(len(in.raw)),
 		RawObjectKey: in.objKey,
 		HeadersJSON:  in.content.headers,
-		ExpiresAt:    models.MessageExpiry(in.mb, retH, in.at),
+		ExpiresAt:    expiresAt,
 	}
 	// OTP extraction reuses the shared parsed envelope (no extra decode).
 	// OTPCode/OTPConfidence stay zero-value when MIME was unusable or nothing

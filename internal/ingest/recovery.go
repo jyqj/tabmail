@@ -164,6 +164,9 @@ func (s *Service) deliverTarget(ctx context.Context, ledger store.IngressLedger,
 		},
 	})
 	if pf != nil {
+		if errors.Is(pf.err, models.ErrRetentionExpiry) {
+			return permanentIngress(pf.err.Error() + "; accepted bytes retained for review")
+		}
 		if pf.terminal() {
 			switch pf.code {
 			case rejectStorePolicyDiscard:

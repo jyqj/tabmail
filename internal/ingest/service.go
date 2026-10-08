@@ -40,6 +40,7 @@ type serviceStore interface {
 	MarkIngestJobDone(ctx context.Context, id uuid.UUID) error
 	MarkIngestJobRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
 	ReleaseRawObjectIfUnreferenced(ctx context.Context, key string, del func(context.Context) error) (bool, error)
+	EnqueueOrphanRetry(ctx context.Context, key string) error
 }
 
 type Envelope struct {
@@ -465,6 +466,11 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 			Int64("size", int64(len(raw))).
 			Msg("message delivered")
 	}
+	if deliveredCount(outcomes) == 0 {
+		// An error may follow a committed metadata write. The reference lock,
+		// not these outcomes, decides whether this content key can be deleted.
+		s.deleteRawObjectIfOrphaned(ctx, objKey, "no observed delivery")
+	}
 	return outcomes, nil
 }
 
@@ -492,9 +498,27 @@ func (s *Service) deleteRawObjectIfOrphaned(ctx context.Context, key, reason str
 	if s == nil {
 		return
 	}
-	switch out, err := s.objects.Release(ctx, key); out {
-	case rawobject.CountFailed, rawobject.DeleteFailed:
+	// Cleanup stays synchronous and bounded. A cancelled request does not
+	// authorize deleting an unchecked key, or discard its recovery handoff.
+	release, cancel := context.WithTimeout(ctx, 5*time.Second)
+	out, err := rawobject.Noop, release.Err()
+	if err == nil {
+		out, err = s.objects.Release(release, key)
+	}
+	interrupted := release.Err() != nil
+	cancel()
+	if interrupted || out == rawobject.CountFailed || out == rawobject.DeleteFailed {
 		s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("release orphan raw object")
+		// One attempt through the existing durable queue. A failed/uncertain
+		// enqueue remains visible; this is not atomic with the earlier Put.
+		handoff, stop := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+		defer stop()
+		if err := s.store.EnqueueOrphanRetry(handoff, key); err != nil {
+			s.logger.Warn().Err(err).Str("key", key).Str("reason", reason).Msg("enqueue orphan retry after unused raw release")
+		}
+		return
+	}
+	switch out {
 	case rawobject.StillReferenced:
 		s.logger.Debug().Str("key", key).Str("reason", reason).Msg("raw object still referenced")
 	case rawobject.Deleted:

@@ -24,7 +24,8 @@ func r5RestoreFiniteFixture(t *testing.T, f *companyFixture) (*models.Mailbox, *
 	must(t, grantCurrent(f.st, ctx, f.a, models.MailboxGrant{MailboxID: mb.ID, UserID: f.employee.ID, CanRead: true, CanOrganize: true}))
 	var now time.Time
 	must(t, f.pool.QueryRow(ctx, `SELECT clock_timestamp()`).Scan(&now))
-	expiry := models.MessageExpiry(mb, hours, now)
+	expiry, e := models.MessageExpiry(mb, hours, now)
+	must(t, e)
 	if mb.RetentionHoursOverride == nil || *mb.RetentionHoursOverride != hours || expiry == nil {
 		t.Fatal("formal shared finite fixture lost retention policy")
 	}

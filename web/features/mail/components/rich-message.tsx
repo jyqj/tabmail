@@ -82,11 +82,18 @@ export function RichMessage({ id, text, html, disabled, onChange }: {
                 // Paste text only; clipboard HTML cannot introduce images, trackers,
                 // executable attributes or remote content into the editor DOM.
                 event.preventDefault();
-                const value = event.clipboardData.getData("text/plain");
+                const el = editor.current;
+                if (disabled || !el)
+                    return;
                 const sel = window.getSelection();
-                if (!sel?.rangeCount || !editor.current?.contains(sel.anchorNode))
+                if (!sel || sel.rangeCount !== 1)
                     return;
                 const range = sel.getRangeAt(0);
+                // The anchor alone does not own a forward or backward range.
+                // Never delete or insert outside this enabled editor.
+                if (!el.contains(range.startContainer) || !el.contains(range.endContainer) || !el.contains(range.commonAncestorContainer))
+                    return;
+                const value = event.clipboardData.getData("text/plain");
                 range.deleteContents();
                 const node = document.createTextNode(value);
                 range.insertNode(node);
