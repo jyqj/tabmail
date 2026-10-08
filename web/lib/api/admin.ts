@@ -16,6 +16,7 @@ import type {
   TenantAPIKey,
   TenantOverride,
   TenantOverrideInput,
+  TenantOverrideSnapshot,
   UpdateUserRequest,
   WebhookDelivery,
 } from "../types";
@@ -81,6 +82,22 @@ export function updateTenantOverrides(id: string, overrides: TenantOverrideInput
     method: "PATCH",
     body: overrides,
   });
+}
+
+export async function getTenantOverrides(id: string) {
+  const response = await request<APIResponse<TenantOverrideSnapshot>>(`/api/v1/admin/tenants/${id}`);
+  const snapshot = response.data;
+  const fields: (keyof TenantOverrideInput)[] = [
+    "max_domains", "max_mailboxes_per_domain", "max_messages_per_mailbox",
+    "max_message_bytes", "retention_hours", "rpm_limit", "daily_quota",
+  ];
+  // A missing value is not evidence of inheritance. Refuse incomplete or
+  // misattributed snapshots before they can drive a replacement PATCH.
+  if (!snapshot || snapshot.tenant_id !== id || fields.some(key => {
+    const value = snapshot[key];
+    return value !== null && (typeof value !== "number" || !Number.isInteger(value) || value < -2147483648 || value > 2147483647);
+  })) throw new Error("Invalid tenant override snapshot");
+  return response;
 }
 
 export function deleteTenant(id: string) {

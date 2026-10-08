@@ -15,7 +15,7 @@
 
 本批从公开 `1322c9284d5dad8984adb61d2b4627b331c3740f` 继续，十项完整范围见 [CONTINUE 账本](R5-CONTINUE-20261008.md)。新认领 #125/#126/#127/#129、#133/#134/#135、#136/#137/#139，按 **4＋3＋3** 完成固定失败基线、实现、同字节回归、独立审查、精确树合入及逐项 closed/completed。前批十项和另一原生工作区 COMPLETE 批次不重复计数。
 
-第一轮四项实现、作者红绿及独审已通过；root 同一干净整合源 `21d0dbda92f2bea894321a435812a105b49616be` 的 **39 Go 叶 / 50 UI 全通过**。此候选提交时尚待公开合入关闭，本批 **0/10 完成，剩余 10**。每轮实际关闭后更新数量；原父级保持 **10/171，剩余 161**。#56 保持 draft，main、M/G0、PG、完整 audit 和必需私有 fixture 门槛均不改动。
+第一轮四项已通过 [PR #143](https://github.com/jyqj/tabmail/pull/143) 实际合入，merge `f8a94421c437d6d528a6b0f62377cb4704b04639`、完整树 `949e727565579a63cc5c8479ad614bf44290e7b5` 与最终独审源一致，两个 parents 经 Git API 核对；精确 head source-evidence SUCCESS。#125/#126/#127/#129 已逐项 closed/completed。root 同一干净整合源的 **39 Go 叶 / 50 UI 全通过**，最后整包独审 ACCEPT。本批 **4/10 完成，剩余 6**；第二轮从该实际公开 merge 实施。原父级保持 **10/171，剩余 161**。#56 保持 draft，main、M/G0、PG、完整 audit 和必需私有 fixture 门槛均不改动。
 <!-- R5-CONTINUE-20261008:END -->
 
 <!-- R5-ADVANCE-20261008:BEGIN -->

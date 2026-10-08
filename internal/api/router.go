@@ -266,6 +266,7 @@ func NewRouter(cfg RouterConfig) *Router {
 
 			r.Get("/admin/tenants", adm.ListTenants)
 			r.Post("/admin/tenants", adm.CreateTenant)
+			r.Get("/admin/tenants/{id}", adm.GetTenantOverride)
 			r.Patch("/admin/tenants/{id}", adm.UpdateTenantOverride)
 			r.Delete("/admin/tenants/{id}", adm.DeleteTenant)
 			r.Get("/admin/tenants/{id}/config", adm.GetEffectiveConfig)

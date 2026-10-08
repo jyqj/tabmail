@@ -33,6 +33,17 @@ export interface TenantOverride {
   updated_at: string;
 }
 export type TenantOverrideInput = Omit<TenantOverride, "id" | "tenant_id" | "updated_at">;
+// Unlike the legacy PATCH response, the raw read includes every nullable field.
+export interface TenantOverrideSnapshot {
+  tenant_id: string;
+  max_domains: number | null;
+  max_mailboxes_per_domain: number | null;
+  max_messages_per_mailbox: number | null;
+  max_message_bytes: number | null;
+  retention_hours: number | null;
+  rpm_limit: number | null;
+  daily_quota: number | null;
+}
 
 export interface TenantAPIKey {
   id: string;
