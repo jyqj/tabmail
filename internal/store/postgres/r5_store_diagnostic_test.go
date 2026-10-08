@@ -3,6 +3,7 @@
 package postgres
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -1140,6 +1141,9 @@ type r5DiagnosticDelegateBlob struct {
 func (b *r5DiagnosticDelegateBlob) Exists(context.Context, string) (bool, error) {
 	b.existsCalls++
 	return false, nil
+}
+func (b *r5DiagnosticDelegateBlob) Get(context.Context, string) (io.ReadCloser, error) {
+	return io.NopCloser(bytes.NewReader(b.raw)), nil
 }
 func (b *r5DiagnosticDelegateBlob) Put(_ context.Context, key string, r io.Reader, n int64) error {
 	b.putCalls++

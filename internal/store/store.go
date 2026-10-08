@@ -12,6 +12,9 @@ import (
 )
 
 var (
+	// ErrDomainAlreadyExists identifies the domain-name uniqueness conflict.
+	// Adapters preserve their original cause for errors.Is/errors.As callers.
+	ErrDomainAlreadyExists        = errors.New("domain already exists")
 	ErrOutboundDailyQuotaExceeded = errors.New("outbound daily quota exceeded")
 	ErrSendAsDailyQuotaExceeded   = errors.New("send-as daily quota exceeded")
 	// ErrClaimLeaseLost means the claimed queue generation no longer owns a
