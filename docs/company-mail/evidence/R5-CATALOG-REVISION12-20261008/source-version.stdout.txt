@@ -1,0 +1,22 @@
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-969bzd7a/atomic-baseexception-0"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-969bzd7a/atomic-baseexception-1"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-969bzd7a/atomic-baseexception-2"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-y8zramnb/atomic-revoke"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-ib22nf6x/match"}
+{"status": "finalization_prepared_not_admitted", "evidence": "/tmp/r5-cold-unit-vv9s8_d8/prepared"}
+{"fork": "third_party/enmime-v2.3.0", "action": "capture", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/enmime-v2.3.0", "action": "validate", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/go-smtp", "action": "capture", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+{"fork": "third_party/go-smtp", "action": "validate", "cli_exit": 1, "same_receipt": false, "observation": "CLI_RACE_OBSERVATION 2 True"}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "capture", "entry": "cli", "rejected": true, "old": [27, 1126561], "new": [27, 1126703], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "capture", "entry": "api", "rejected": true, "old": [27, 1126561], "new": [27, 1126703], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "validate", "entry": "cli", "rejected": true, "old": [27, 1126561], "new": [27, 1126703], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/enmime-v2.3.0", "action": "validate", "entry": "api", "rejected": true, "old": [27, 1126561], "new": [27, 1126703], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "capture", "entry": "cli", "rejected": true, "old": [27, 1116746], "new": [27, 1116747], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "capture", "entry": "api", "rejected": true, "old": [27, 1116746], "new": [27, 1116747], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "validate", "entry": "cli", "rejected": true, "old": [27, 1116746], "new": [27, 1116747], "phase": 1, "anchor_matches_old": true}
+DESCRIPTOR_REPLACEMENT {"fork": "third_party/go-smtp", "action": "validate", "entry": "api", "rejected": true, "old": [27, 1116746], "new": [27, 1116747], "phase": 1, "anchor_matches_old": true}
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/enmime-v2.3.0", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "capture", "nofollow_stats": 2, "symlink_at_return": true}
+RACE_OBSERVATION {"fork": "third_party/go-smtp", "entry": "<lambda>", "nofollow_stats": 2, "symlink_at_return": true}

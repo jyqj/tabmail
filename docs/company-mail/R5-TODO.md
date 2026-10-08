@@ -1,11 +1,11 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-PROGRESS-20261008:BEGIN -->
-## PROGRESS 批次：第 3 轮三项交付
+## PROGRESS 批次：三轮十项已全部完成
 
 从公开 `58d0c9cf274569258319ff4b5dcab7912b0174f4` 继续，root 与三个原生子智能体按 **4＋3＋3** 推进 [#154–#163](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+PROGRESS-%22)，完整范围、认领及逐轮证据见 [PROGRESS 账本](R5-PROGRESS-20261008.md)。前批任务不重复计数。
 
-第 1 轮 [#164](https://github.com/jyqj/tabmail/pull/164) 与第 2 轮 [#165](https://github.com/jyqj/tabmail/pull/165) 已实际合入，#154–#160 均已 closed/completed，前两轮累计 7/10、剩余 3。第 3 轮 #161/#162/#163 已完成实现、固定回归和独立审查；DKIM 真实签名验证、真实 SMTP 8192 次拒收洪泛与设置 CAS/截断响应恢复均已验收。root 235 Go race 叶与最终 97 UI 全过、零失败/跳过，全 Go 编译、默认生产前端构建、TypeScript/ESLint/DTO/i18n 检查通过；具体执行源码和保留失败见账本。**随本轮 PR 实际合入，本批完成 10/10，剩余 0；三轮余量 6 → 3 → 0；原父任务完成 10/171，剩余 161**。#166 将单独完成最终 source catalog 维护并保留原 guards，计0个新增实施TODO。具体任务的实现、固定回归、交叉审查、合入与状态更新齐全才算完成；#56 仍为 draft，原发布门槛保持。
+第 1 轮 [#164](https://github.com/jyqj/tabmail/pull/164)、第 2 轮 [#165](https://github.com/jyqj/tabmail/pull/165)、第 3 轮 [#167](https://github.com/jyqj/tabmail/pull/167) 均已实际合入，#154–#163 全部 closed/completed；最终产品 merge `ed81ee2fcadc9e8cfcd165947561f8b4b65589e6`，完整 tree `3abdbfca4c0318644a01755c6e6bbb1929b74633` 与被验收交付相同，双 parent 和 source evidence SUCCESS 已核实。DKIM 真实签名验证、真实 SMTP 8192 次拒收洪泛与设置 CAS/截断响应恢复均已验收。第三轮 root 235 Go race 叶与最终 97 UI 全过、零失败/跳过，全 Go 编译、默认生产前端构建、TypeScript/ESLint/DTO/i18n 检查通过；具体执行源码和保留失败见账本。**本批实际完成 10/10，剩余 0；三轮余量 6 → 3 → 0；原父任务完成 10/171，剩余 161**。[维护 #166](https://github.com/jyqj/tabmail/issues/166) 由 [#168](https://github.com/jyqj/tabmail/pull/168) 交付 revision12：原三个 CLI 通过，两个独审 ACCEPT，同树 GitHub 原完整 source-version runner 812/812 PASS、零失败/错误/跳过/遗漏；本地运行的环境与边界失败另行保留，不重写执行身份，详见账本和原报告。维护计0个新增实施TODO。#56 仍为 draft，PostgreSQL race、严格审计和必需私有 fixture 等原发布门槛保持。
 <!-- R5-PROGRESS-20261008:END -->
 
 <!-- R5-COMPLETE-20261008:BEGIN -->

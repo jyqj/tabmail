@@ -1,0 +1,33 @@
+{
+  "wire_validation_scope": "not_checked_current_wire_required",
+  "historical_wire_reference": {
+    "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+    "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+    "qualification": "historical_metadata_only_not_current_wire"
+  },
+  "status": "source_inventory_and_upgrade_plan_checked",
+  "task_complete": false,
+  "product_green": false,
+  "routes": 133,
+  "client_branches": 136,
+  "source_files": 95,
+  "openapi_missing": [
+    "DELETE /api/v1/suppression/{id}",
+    "GET /api/v1/suppression",
+    "GET /docs-assets/*"
+  ],
+  "no_shipped_client": [
+    "DELETE /api/v1/suppression/{id}",
+    "GET /api/v1/admin/status",
+    "GET /api/v1/auth/me",
+    "GET /api/v1/company/outbound/{id}/recipients",
+    "GET /api/v1/suppression",
+    "GET /docs",
+    "GET /docs-assets/*",
+    "GET /metrics",
+    "GET /openapi.yaml",
+    "GET /ready",
+    "GET /redoc"
+  ],
+  "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+}

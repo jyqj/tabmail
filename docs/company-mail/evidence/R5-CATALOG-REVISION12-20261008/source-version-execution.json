@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "before": {
+    "commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+    "tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+    "status": ""
+  },
+  "argv": [
+    "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python3",
+    "-B",
+    "scripts/run_r5_source_version_tests.py",
+    "--root",
+    ".",
+    "--output",
+    "/workspace/scratch/4f09dfb9aa92/backend-catalog-prep/final-public/full-source-b87df7a/source-version-tests.json"
+  ],
+  "cwd": "/workspace/scratch/4f09dfb9aa92/tabmail-backend-catalog",
+  "python": {
+    "executable": "/workspace/scratch/4f09dfb9aa92/backend-catalog-python/bin/python3",
+    "version": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]"
+  },
+  "environment": {
+    "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+    "R5_TEST_CACHE": "/workspace/scratch/4f09dfb9aa92/go-build",
+    "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+    "GOPROXY": "off",
+    "GOMAXPROCS": "4",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "runner_sha256": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+  "boundary": "One original default full source-version runner invocation; raw outcome preserved, no skips or failures converted to success.",
+  "exit_code": 1,
+  "elapsed_seconds": 289.383454013001,
+  "after": {
+    "commit": "b87df7a77656457549d6f2d678c56d321ae0d869",
+    "tree": "312dbed6634b7b173e6ec9e180bbf5d0f1809d9d",
+    "status": ""
+  },
+  "source_unchanged": true,
+  "artifacts": {
+    "source-version.stdout.txt": {
+      "path": "source-version.stdout.txt",
+      "sha256": "c797b235dc3c91bcdae719724e2d48e01a1941f47c6e51597aff8dbdf0994d73",
+      "bytes": 3268
+    },
+    "source-version.stderr.txt": {
+      "path": "source-version.stderr.txt",
+      "sha256": "d3e5fc31aaa844df55ba3034bdc747e4bdcbbbcabde39ead9dddc16ce3eac876",
+      "bytes": 144981
+    },
+    "source-version-tests.json": {
+      "path": "source-version-tests.json",
+      "sha256": "f93407503ba78cc07d0b1c6d9b592c72c2c126533d6f78b8b600c3e4256aa3fe",
+      "bytes": 2706191
+    }
+  }
+}

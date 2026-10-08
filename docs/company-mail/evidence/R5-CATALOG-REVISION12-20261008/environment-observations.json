@@ -1,0 +1,56 @@
+{
+  "scope": "Separate root diagnostic observations; not reconstructed per-test receipts and not a replay of the full runner.",
+  "initial_ps_version": {
+    "argv": [
+      "ps",
+      "--version"
+    ],
+    "exit": 1,
+    "stderr": "fatal library error, lookup self"
+  },
+  "subsequent_self_probe": {
+    "os_getpid": 5,
+    "proc_self_symlink": "1137796",
+    "proc_self_stat_pid": 1137796,
+    "proc_numeric_pid_stat_pid": 5,
+    "identity_consistent": false
+  },
+  "subsequent_ps_controls": [
+    {
+      "argv": [
+        "/bin/ps",
+        "--version"
+      ],
+      "exit": 0,
+      "stdout_length": 24,
+      "stderr": ""
+    },
+    {
+      "argv": [
+        "/bin/ps",
+        "-axo",
+        "pid=,pgid=,stat="
+      ],
+      "exit": 0,
+      "stdout_length": 440,
+      "stderr": ""
+    }
+  ],
+  "isolated_namespace_probe": {
+    "argv": [
+      "unshare",
+      "--user",
+      "--map-root-user",
+      "--mount",
+      "--pid",
+      "--fork",
+      "--mount-proc",
+      "python3",
+      "-c",
+      "self identity and ps version diagnostic"
+    ],
+    "exit": 1,
+    "stderr": "unshare: write failed /proc/self/uid_map: Operation not permitted"
+  },
+  "qualification": "The process observer is unreliable in this local execution environment. These separate observations are consistent with, but do not reconstruct the missing original per-test receipts. No checker, ps command, source, test or system mount was changed; no elevated permission retry was attempted."
+}

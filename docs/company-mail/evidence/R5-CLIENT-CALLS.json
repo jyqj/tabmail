@@ -497,7 +497,7 @@
   },
   {
     "source": "web/features/company/audit.tsx",
-    "line": 12,
+    "line": 18,
     "branch": 0,
     "callee": "request",
     "owner": "list",
@@ -529,7 +529,7 @@
   },
   {
     "source": "web/features/company/domain-settings.tsx",
-    "line": 12,
+    "line": 51,
     "branch": 0,
     "callee": "company",
     "owner": "settings",
@@ -545,10 +545,26 @@
   },
   {
     "source": "web/features/company/domain-settings.tsx",
-    "line": 51,
+    "line": 99,
     "branch": 0,
     "callee": "company",
-    "owner": "DomainSettings",
+    "owner": "[settingsResult, domainsResult]",
+    "expression": "\"/settings\"",
+    "path": "/api/v1/company/settings",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/company/settings"
+    ]
+  },
+  {
+    "source": "web/features/company/domain-settings.tsx",
+    "line": 138,
+    "branch": 0,
+    "callee": "company",
+    "owner": "save",
     "expression": "\"/settings\"",
     "path": "/api/v1/company/settings",
     "methods": [
@@ -561,7 +577,7 @@
   },
   {
     "source": "web/features/company/employees.tsx",
-    "line": 12,
+    "line": 17,
     "branch": 0,
     "callee": "company",
     "owner": "settings",
@@ -577,10 +593,10 @@
   },
   {
     "source": "web/features/company/employees.tsx",
-    "line": 14,
+    "line": 20,
     "branch": 0,
     "callee": "company",
-    "owner": "invitations",
+    "owner": "values",
     "expression": "\"/invitations\"",
     "path": "/api/v1/company/invitations",
     "methods": [
@@ -593,10 +609,10 @@
   },
   {
     "source": "web/features/company/employees.tsx",
-    "line": 36,
+    "line": 68,
     "branch": 0,
     "callee": "company",
-    "owner": "v",
+    "owner": "value",
     "expression": "\"/invitations\"",
     "path": "/api/v1/company/invitations",
     "methods": [
@@ -609,12 +625,12 @@
   },
   {
     "source": "web/features/company/employees.tsx",
-    "line": 79,
+    "line": 97,
     "branch": 0,
     "callee": "company",
-    "owner": "Employees",
-    "expression": "`/invitations/${v.id}`",
-    "path": "/api/v1/company/invitations/{dynamic}",
+    "owner": "revokeInvitation",
+    "expression": "`/invitations/${encodeURIComponent(value.id)}`",
+    "path": "/api/v1/company/invitations/{id}",
     "methods": [
       "DELETE"
     ],
@@ -625,10 +641,10 @@
   },
   {
     "source": "web/features/company/mailbox-admin.tsx",
-    "line": 81,
+    "line": 108,
     "branch": 0,
     "callee": "company",
-    "owner": "MailboxAdmin",
+    "owner": "createMailbox",
     "expression": "\"/mailboxes\"",
     "path": "/api/v1/company/mailboxes",
     "methods": [

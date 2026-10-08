@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "33f61fde3cf37d3cec2dd360146369c291eb0930",
+  "baseline_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -4397,7 +4397,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 291,
+          "line": 297,
           "expression": "s.repo.FinishMailAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4756,7 +4756,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
           "file": "internal/app/companymail/service.go",
           "function": "Attachment",
-          "line": 321,
+          "line": 327,
           "expression": "s.repo.GetWorkAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -4764,7 +4764,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:Attachment",
           "file": "internal/app/companymail/service.go",
           "function": "Attachment",
-          "line": 336,
+          "line": 342,
           "expression": "s.repo.GetWorkAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4995,7 +4995,7 @@
           "caller_id": "internal/api/handlers/company_stream.go:*MailboxEventHandler:streamDurable",
           "file": "internal/api/handlers/company_stream.go",
           "function": "streamDurable",
-          "line": 91,
+          "line": 118,
           "expression": "h.eventReader.ListMailboxEvents",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -5783,7 +5783,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 284,
+          "line": 290,
           "expression": "s.repo.ReserveMailAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -9345,7 +9345,7 @@
           "caller_id": "internal/api/handlers/company_stream.go:*MailboxEventHandler:streamDurable",
           "file": "internal/api/handlers/company_stream.go",
           "function": "streamDurable",
-          "line": 87,
+          "line": 93,
           "expression": "h.eventReader.GetWorkMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -9353,7 +9353,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:sender",
           "file": "internal/app/companymail/service.go",
           "function": "sender",
-          "line": 244,
+          "line": 250,
           "expression": "s.repo.GetWorkMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -24601,7 +24601,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:document",
           "file": "internal/app/companymail/service.go",
           "function": "document",
-          "line": 159,
+          "line": 165,
           "expression": "cache.SaveParsedMessage",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -51284,7 +51284,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:UploadAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "UploadAttachment",
-          "line": 272,
+          "line": 278,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51308,7 +51308,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
           "file": "internal/app/companymail/service.go",
           "function": "verifiedFile",
-          "line": 304,
+          "line": 310,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51316,7 +51316,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:verifiedFile",
           "file": "internal/app/companymail/service.go",
           "function": "verifiedFile",
-          "line": 315,
+          "line": 321,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51446,6 +51446,14 @@
           "function": "renderValidated",
           "line": 180,
           "expression": "htmltemplate.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/configcache/configcache.go::New",
+          "file": "internal/configcache/configcache.go",
+          "function": "New",
+          "line": 68,
+          "expression": "list.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -60054,7 +60062,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachment",
-          "line": 355,
+          "line": 361,
           "expression": "s.repo.GetSubmissionAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60062,7 +60070,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachment",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachment",
-          "line": 371,
+          "line": 377,
           "expression": "s.repo.GetSubmissionAttachment",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -60165,7 +60173,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionContent",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionContent",
-          "line": 347,
+          "line": 353,
           "expression": "s.repo.GetSubmissionContent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -60344,7 +60352,7 @@
           "caller_id": "internal/app/companymail/service.go:*Service:SubmissionAttachments",
           "file": "internal/app/companymail/service.go",
           "function": "SubmissionAttachments",
-          "line": 351,
+          "line": 357,
           "expression": "s.repo.ListSubmissionAttachments",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -66275,7 +66283,7 @@
           "caller_id": "internal/app/domains/service.go::countOwnedZones",
           "file": "internal/app/domains/service.go",
           "function": "countOwnedZones",
-          "line": 632,
+          "line": 640,
           "expression": "st.ListZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -68033,16 +68041,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "33f61fde3cf37d3cec2dd360146369c291eb0930",
-  "current_review_boundary": "Revision11 current facts include public33f61fde, retaining the original COMPLETE scope4d2de05 and the earlier3a/8e source/execution records. Six functions added since revision10: five unchanged claim marks reviewed at3a plus one pure zone-error classifier reviewed at33. Of the original395 function bodies,394 are unchanged and only CreateZone changes its returned error through the typed classifier; original SQL and all19 migrations are unchanged. No implementation TODO, business/runtime/dependency/release/G0 or parent acceptance is granted by this inventory.",
+  "last_review_base_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+  "current_review_boundary": "Revision 12 binds the final public three-round source. All 401 PostgreSQL function syntax bodies, classifications, manual review fields, 63 file hashes and 19 migrations remain byte-identical to revision 11. Only fresh call-name candidate facts are reconciled. This maintenance completes 0 implementation TODOs and grants no runtime, dependency, release, G0 or parent acceptance.",
   "inventory_revision": {
-    "revision": 11,
-    "source_commit": "33f61fde3cf37d3cec2dd360146369c291eb0930",
+    "revision": 12,
+    "source_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "20c39ab3ebaee46e5ac51e25d90a455166c9a31d",
-    "previous_snapshot_blob": "948ae430554121c8ac68bed83fe32d576c0839e2",
-    "previous_sha256": "270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438",
+    "previous_snapshot_commit": "58d0c9cf274569258319ff4b5dcab7912b0174f4",
+    "previous_snapshot_blob": "d6aacdc204f8d068f97aabd9eec5fd92b996fb4c",
+    "previous_sha256": "7b4737f5b1737206ededeb415a3fe6d69de94ff27ff51a24d93893e01cd60417",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION12-20261008/README.md"
   }
 }
