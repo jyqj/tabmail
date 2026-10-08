@@ -57,10 +57,10 @@ def verify(log, exit_code, baseline):
         raise ValueError("duplicate test execution")
     positive, negative = expected()
     leaves = positive | negative
-    all_ids = set(leaves)
-    for leaf in leaves:
-        pieces = leaf.split("/")
-        all_ids.update("/".join(pieces[:index]) for index in range(1, len(pieces)))
+    # The frozen Go source calls t.Run("kind/boundary", ...) directly from
+    # each top-level test. Slashes in that name do not execute intermediate
+    # t.Run calls, so require exactly 78 leaves and their five actual parents.
+    all_ids = leaves | {leaf.split("/", 1)[0] for leaf in leaves}
     if set(started) != all_ids:
         raise ValueError("missing or unexpected required PostgreSQL test IDs")
     terminal = {}

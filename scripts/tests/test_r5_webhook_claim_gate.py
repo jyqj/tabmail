@@ -18,15 +18,49 @@ class WebhookClaimEvidenceTests(unittest.TestCase):
     def events(self):
         positive, negative = gate.expected()
         names = set(positive | negative)
-        for name in tuple(names):
-            parts = name.split("/")
-            names.update("/".join(parts[:index]) for index in range(1, len(parts)))
+        names.update(name.split("/", 1)[0] for name in tuple(names))
         rows = [{"Package": gate.PACKAGE, "Test": name, "Action": "run"} for name in sorted(names)]
         for name in sorted(names):
             failed = name in negative or any(leaf.startswith(name + "/") for leaf in negative)
             rows.append({"Package": gate.PACKAGE, "Test": name, "Action": "fail" if failed else "pass"})
         rows.append({"Package": gate.PACKAGE, "Action": "fail"})
         return rows
+
+    def defect_events(self):
+        rows = self.events()
+        observations = {
+            "RejectsLostOwnership": "lost ownership did not return ErrClaimLeaseLost: <nil>",
+            "PreservesNewerTerminalState": "stale completion did not report lost generation: <nil>",
+            "ChecksLeaseAfterRowWait": "completion after lease expiry was not fenced: <nil>",
+        }
+        for name in gate.expected()[1]:
+            family = name.split("/", 1)[0].removeprefix("TestR5WebhookClaimCompletion")
+            rows.append({"Package": gate.PACKAGE, "Test": name, "Action": "output",
+                         "Output": observations[family] + "\n"})
+        return rows
+
+    def test_direct_subtest_names_with_slashes_have_no_phantom_parent_execution(self):
+        # Mirrors the frozen source's direct t.Run("kind/boundary") calls and
+        # the actual first PostgreSQL run, not nested t.Run("kind") calls.
+        rows = self.defect_events()
+        self.assertEqual(sum(row["Action"] == "run" for row in rows), 83)
+        self.write(rows)
+        result = gate.verify(self.log, 1, baseline=True)
+        self.assertEqual((result["passed"], result["failed"], result["skipped"]), (15, 63, 0))
+        for row in rows:
+            if row["Action"] == "fail":
+                row["Action"] = "pass"
+        self.write(rows)
+        self.assertEqual(gate.verify(self.log, 0, baseline=False)["passed"], 78)
+
+    def test_extra_intermediate_execution_is_rejected(self):
+        rows = self.defect_events()
+        phantom = "TestR5WebhookClaimCompletionRejectsLostOwnership/outbox-done"
+        rows += [{"Package": gate.PACKAGE, "Test": phantom, "Action": action}
+                 for action in ("run", "fail")]
+        self.write(rows)
+        with self.assertRaisesRegex(ValueError, "missing or unexpected"):
+            gate.verify(self.log, 1, baseline=True)
 
     def write(self, rows):
         self.log.write_text("".join(json.dumps(row) + "\n" for row in rows))
