@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"sync"
 
 	"github.com/jhillyerd/enmime/v2"
 )
@@ -26,17 +25,7 @@ var ErrMIMEParse = errors.New("MIME parsing failed")
 // Close must unblock Read for prompt cancellation. No unbounded worker is
 // started, and Reader's optional WriterTo cannot bypass byte/context checks.
 func ParseBoundedReader(ctx context.Context, r io.ReadCloser) (*enmime.Envelope, error) {
-	if r == nil {
-		return nil, errors.New("object reader unavailable")
-	}
-	var once sync.Once
-	closeReader := func() { once.Do(func() { _ = r.Close() }) }
-	stop := context.AfterFunc(ctx, closeReader)
-	defer func() { stop(); closeReader() }()
-	raw, err := io.ReadAll(io.LimitReader(&sourceProgressReader{ctx: ctx, reader: r}, MaxBytes+1))
-	if cancelled := ctx.Err(); cancelled != nil {
-		return nil, cancelled
-	}
+	raw, err := readOwnedSource(ctx, r, nil)
 	if err != nil {
 		return nil, err
 	}
