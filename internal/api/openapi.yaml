@@ -3338,6 +3338,7 @@ paths:
       - Auth
       summary: Create an API key for the current user's tenant
       operationId: userCreateAPIKey
+      description: Requires a current interactive JWT. User ownership, scope capabilities and zone restrictions are rechecked at issuance. The key, usage record and required audit commit together; failed issuance returns no secret. Administrator keys remain ownerless integrations.
       security:
       - BearerAuth: []
       requestBody:
@@ -3353,6 +3354,12 @@ paths:
                   description: Explicit API key scopes. If omitted, a read-only default is used.
                   items:
                     $ref: '#/components/schemas/APIKeyScope'
+                allowed_zone_ids:
+                  type: array
+                  description: Explicit zones within the target tenant and the current issuer's permission. Omission inherits the current user's zone restriction.
+                  items:
+                    type: string
+                    format: uuid
       responses:
         '201':
           description: Created (key shown only once)
@@ -3367,6 +3374,20 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '403':
           $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Authority or a referenced zone is changing; reload before retrying.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Issuance failed; no key secret is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     get:
       tags:
       - Auth
@@ -4457,6 +4478,7 @@ paths:
       - Admin
       summary: Issue a new API key for a tenant
       operationId: createAPIKey
+      description: Requires a current platform administrator JWT, including when the target differs from the administrator home tenant. Current identity and role are rechecked at issuance. The ownerless key, usage record and required audit commit together; failed issuance returns no secret.
       security:
       - BearerAuth: []
       parameters:
@@ -4480,6 +4502,12 @@ paths:
                     scopes are not accepted.
                   items:
                     $ref: '#/components/schemas/APIKeyScope'
+                allowed_zone_ids:
+                  type: array
+                  description: Explicit zones within the target tenant and the current issuer's permission. Omission inherits the current user's zone restriction.
+                  items:
+                    type: string
+                    format: uuid
       responses:
         '201':
           description: Created (key shown only once)
@@ -4490,6 +4518,25 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/APIKeyCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Authority or a referenced zone is changing; reload before retrying.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Issuance failed; no key secret is returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     get:
       tags:
       - Admin

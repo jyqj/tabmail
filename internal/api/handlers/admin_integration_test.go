@@ -371,8 +371,9 @@ func doAdminRequest(
 		Email:        uuid.NewString() + "@example.test",
 		PasswordHash: "hash",
 		DisplayName:  "Admin",
-		Role:         models.RoleAdmin,
-		IsActive:     true,
+		// These /admin routes require a current platform administrator.
+		Role:     models.RoleSuperAdmin,
+		IsActive: true,
 	}
 	if err := st.CreateUser(context.Background(), admin); err != nil {
 		t.Fatalf("seed admin user: %v", err)

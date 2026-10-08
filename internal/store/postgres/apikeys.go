@@ -4,12 +4,16 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"sort"
 	"time"
 
+	"tabmail/internal/app"
+	"tabmail/internal/authz"
 	"tabmail/internal/models"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -17,7 +21,21 @@ import (
 // Tenant API keys
 // ================================================================
 
+// CreateAPIKey is the trusted seed/import entry point. HTTP credential issuers
+// use CreateAPIKeyAuthorized, which fences current authority and required audit.
 func (s *PgStore) CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error {
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	if err = insertAPIKeyRows(ctx, tx, k); err != nil {
+		return err
+	}
+	return tx.Commit(ctx)
+}
+
+func insertAPIKeyRows(ctx context.Context, tx pgx.Tx, k *models.TenantAPIKey) error {
 	if k.ID == uuid.Nil {
 		k.ID = uuid.New()
 	}
@@ -30,11 +48,6 @@ func (s *PgStore) CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) erro
 	if len(k.AllowedZoneIDs) > 0 {
 		zoneIDs = k.AllowedZoneIDs
 	}
-	tx, err := s.pool.Begin(ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(ctx)
 	_, err = tx.Exec(ctx, `
 		INSERT INTO tenant_api_keys (id,tenant_id,key_hash,key_prefix,label,scopes,owner_user_id,allowed_zone_ids,expires_at,created_at)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
@@ -47,7 +60,89 @@ func (s *PgStore) CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) erro
 	if _, err = tx.Exec(ctx, `INSERT INTO tenant_api_key_usage(api_key_id) VALUES($1)`, k.ID); err != nil {
 		return err
 	}
-	return tx.Commit(ctx)
+	return nil
+}
+
+// CreateAPIKeyAuthorized linearizes issuance with freeze, role/session changes
+// and permission writers. Acquire the target tenant reference before the user
+// fence, matching tenant-first member administration. A foreign super admin is
+// still fenced by their actual user/home identity, never by a target substitute.
+func (s *PgStore) CreateAPIKeyAuthorized(ctx context.Context, issuer authz.APIKeyIssuer, key *models.TenantAPIKey) (err error) {
+	defer func() {
+		var pg *pgconn.PgError
+		if errors.As(err, &pg) && (pg.Code == "55P03" || pg.Code == "40001") {
+			err = &app.Error{Kind: app.KindConflict, Message: "API key authority is changing; reload before retrying", Err: err}
+		}
+	}()
+	if key == nil || issuer.Actor.Type != authz.PrincipalUser || issuer.Actor.SessionVersion == nil || issuer.HomeTenantID == uuid.Nil {
+		return authz.ErrForbidden("current interactive JWT issuer required")
+	}
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var tenant uuid.UUID
+	if err = tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, key.TenantID).Scan(&tenant); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return app.NotFound("tenant not found")
+		}
+		return err
+	}
+	current, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 FOR SHARE`, issuer.Actor.ID))
+	if err != nil {
+		return err
+	}
+	actor, valid := issuer.Refresh(current, key.TenantID)
+	if !valid {
+		return authz.ErrForbidden("API key issuer no longer matches the authenticated session")
+	}
+	if !actor.IsTenantAdmin() {
+		actor.Permission, err = effectivePermissionSnapshot(ctx, tx, actor.ID)
+		if err != nil {
+			return err
+		}
+	}
+	candidate := *key
+	candidate.Scopes = append([]string(nil), key.Scopes...)
+	candidate.AllowedZoneIDs = append([]uuid.UUID(nil), key.AllowedZoneIDs...)
+	if err = authz.ConfigureIssuedAPIKey(actor, &candidate); err != nil {
+		return err
+	}
+	// Profile/zone writers may hold the zone before a user; never wait back on
+	// these references while holding that user's authority fence.
+	zones := append([]uuid.UUID(nil), candidate.AllowedZoneIDs...)
+	sort.Slice(zones, func(i, j int) bool { return zones[i].String() < zones[j].String() })
+	for i, id := range zones {
+		if i > 0 && zones[i-1] == id {
+			continue
+		}
+		var owner uuid.UUID
+		if err = tx.QueryRow(ctx, `SELECT tenant_id FROM domain_zones WHERE id=$1 FOR SHARE NOWAIT`, id).Scan(&owner); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return app.BadRequest("zone " + id.String() + " not found")
+			}
+			return err
+		}
+		if owner != key.TenantID {
+			return authz.ErrForbidden("zone " + id.String() + " does not belong to tenant")
+		}
+	}
+	if err = insertAPIKeyRows(ctx, tx, &candidate); err != nil {
+		return err
+	}
+	details, err := json.Marshal(map[string]any{"label": candidate.Label, "key_prefix": candidate.KeyPrefix, "scopes": candidate.Scopes, "owner_user_id": candidate.OwnerUserID})
+	if err != nil {
+		return err
+	}
+	if _, err = tx.Exec(ctx, `INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'api_key.create','tenant_api_key',$3,$4)`, candidate.TenantID, actor.AuditLabel(), candidate.ID, details); err != nil {
+		return err
+	}
+	if err = tx.Commit(ctx); err != nil {
+		return err
+	}
+	*key = candidate
+	return nil
 }
 
 // Metadata readers expose a host address string, not PostgreSQL's binary inet

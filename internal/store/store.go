@@ -123,6 +123,9 @@ type TenantStore interface {
 
 	// --- Tenant API keys -------------------------------------------------
 	CreateAPIKey(ctx context.Context, k *models.TenantAPIKey) error
+	// HTTP issuers must use this command: current JWT identity, permissions,
+	// key, usage row and required audit share one transaction.
+	CreateAPIKeyAuthorized(ctx context.Context, issuer authz.APIKeyIssuer, k *models.TenantAPIKey) error
 	GetAPIKey(ctx context.Context, id uuid.UUID) (*models.TenantAPIKey, error)
 	ListAPIKeys(ctx context.Context, tenantID uuid.UUID) ([]*models.TenantAPIKey, error)
 	ListAPIKeysByOwner(ctx context.Context, tenantID uuid.UUID, ownerUserID uuid.UUID) ([]*models.TenantAPIKey, error)
