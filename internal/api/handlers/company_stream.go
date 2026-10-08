@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"io"
@@ -55,8 +55,7 @@ func (h *MonitorHandler) SetStreamRevalidator(f func(*http.Request) (*http.Reque
 	h.revalidate = f
 }
 func (h *MailboxEventHandler) streamDurable(w http.ResponseWriter, r *http.Request, mb *models.Mailbox) {
-	_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(35 * time.Second))
-	flusher, ok := w.(http.Flusher)
+	_, ok := w.(http.Flusher)
 	if !ok {
 		errInternal(w)
 		return
@@ -95,22 +94,22 @@ func (h *MailboxEventHandler) streamDurable(w http.ResponseWriter, r *http.Reque
 		}
 		cursor = next
 		for _, event := range events {
-			_, _ = fmt.Fprintf(w, "id: %d\n", event.Sequence)
 			id := ""
 			if event.MessageID != nil {
 				id = event.MessageID.String()
 			}
-			writeSSE(w, event.Type, realtime.Event{Type: realtime.EventType(event.Type), Mailbox: mb.FullAddress, MessageID: id})
+			if err := writeSSEFrame(w, strconv.FormatInt(event.Sequence, 10), event.Type, realtime.Event{Type: realtime.EventType(event.Type), Mailbox: mb.FullAddress, MessageID: id}); err != nil {
+				return false
+			}
 		}
-		flusher.Flush()
 		return true
 	}
 	if !poll() {
 		return
 	}
-	writeSSE(w, "ready", map[string]any{"mailbox": mb.FullAddress, "cursor": cursor})
-	writeSSE(w, "resync", map[string]string{"mailbox": mb.FullAddress})
-	flusher.Flush()
+	if writeSSE(w, "ready", map[string]any{"mailbox": mb.FullAddress, "cursor": cursor}) != nil || writeSSE(w, "resync", map[string]string{"mailbox": mb.FullAddress}) != nil {
+		return
+	}
 	for {
 		select {
 		case <-r.Context().Done():
@@ -123,15 +122,48 @@ func (h *MailboxEventHandler) streamDurable(w http.ResponseWriter, r *http.Reque
 			if !poll() {
 				return
 			}
-			writeSSE(w, "resync", map[string]string{"mailbox": mb.FullAddress})
-			flusher.Flush()
+			if writeSSE(w, "resync", map[string]string{"mailbox": mb.FullAddress}) != nil {
+				return
+			}
 		}
 	}
 }
 
-func writeSSE(w http.ResponseWriter, event string, payload any) {
-	_ = http.NewResponseController(w).SetWriteDeadline(time.Now().Add(35 * time.Second))
-	data, _ := json.Marshal(payload)
-	_, _ = io.WriteString(w, "event: "+event+"\n")
-	_, _ = io.WriteString(w, "data: "+string(data)+"\n\n")
+func writeSSE(w http.ResponseWriter, event string, payload any) error {
+	return writeSSEFrame(w, "", event, payload)
+}
+
+func writeSSEFrame(w http.ResponseWriter, id, event string, payload any) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		return err
+	}
+	frame := "event: " + event + "\ndata: " + string(data) + "\n\n"
+	if id != "" {
+		frame = "id: " + id + "\n" + frame
+	}
+	controller := http.NewResponseController(w)
+	// net/http supports deadlines for both HTTP/1 and HTTP/2. Keep the
+	// existing 35-second budget through the actual flush, then clear it for
+	// the idle interval. Simple in-memory writers may not expose deadlines;
+	// an actual error from a supported deadline implementation is terminal.
+	err = controller.SetWriteDeadline(time.Now().Add(35 * time.Second))
+	deadlineSupported := err == nil
+	if err != nil && !errors.Is(err, http.ErrNotSupported) {
+		return err
+	}
+	n, err := io.WriteString(w, frame)
+	if err != nil {
+		return err
+	}
+	if n != len(frame) {
+		return io.ErrShortWrite
+	}
+	if err := controller.Flush(); err != nil {
+		return err
+	}
+	if deadlineSupported {
+		return controller.SetWriteDeadline(time.Time{})
+	}
+	return nil
 }
