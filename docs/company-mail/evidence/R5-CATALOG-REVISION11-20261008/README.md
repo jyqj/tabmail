@@ -10,6 +10,7 @@
 | revision 10 当时审查的产品源码 | `703a572864296120fff3efe0880c560ad9c74d57` | `40e1d2d16258e0e2bc3afea29553dbb148920e4e` |
 | 本批十项 COMPLETE 的永久产品范围 | `4d2de05aa4bda226840fd591f2f356e8dd39ac20` | `52c8b95130b31d75b53d01010b333621ffc644eb` |
 | 本目录最终审查的整合源码 | `3a103cda4363cb8f32839eaaa73ab065eb967f79` | `5e454667e0c99e816d20c499514d0e17f645bd22` |
+| 本目录核心候选与完整 runner 的执行源 | `8e4fd58f63f4e111eca8e5482ae91abbec0484b2` | `c86a86f0a252159e068c8458e343eb59248ff979` |
 
 `3a103cda` 还包含已批准的 CONTINUE #133/#134/#135：整数配置校验、原始租户覆盖快照、RCPT 缓存时效。它们进入当前目录，**不计入本批十项 COMPLETE 的完成数**。先前在 `4d2de05` 上执行的原 CLI 拒绝结果及原始 AST/routes/clients 已作为中间记录保留；最终四目录重新采集自 `3a103cda`。
 
@@ -66,7 +67,33 @@ revision 1–10 的九组历史目录共 **47 文件**，文件集合、blob 和
 
 两个首次未通过的开发检查也保留：archive 正确拒绝作者创建的 `web/node_modules` 软链接，随后仅替换为同版本 132 文件真实目录；Python 84/85 通过，唯一失败来自新增 revision11 正例对相邻 caller 行号进行就地移动。修正先消耗原位置再集中加入移动项，保持唯一匹配与完整多重集合比较，同一 85 项复验全部通过。两次修正均未修改原 CLI、原 producer、历史检测或五个未批准变更负例。
 
-当前原 CLI、针对性测试和完整 source-version runner 的实际结果分别保存，互不替代。完整 runner 必须在干净核心提交上实际执行；若 preparation 提前退出，记录 0 dispatch，不能把定向 source gate 或 source-evidence 上传成功写成全量通过。
+### 两份独立审查
+
+[独立审查记录](independent-review.json) 绑定同一核心 `8e4fd58` / tree `c86a86f`。frontend reviewer 与 storage reviewer 分别执行完整 25 项目录测试，均 **25 PASS、0 failure、0 error、0 skip**。第二位 reviewer 还在独立工作区用同样三条原 CLI 实际得到 `3a103cda` 旧目录全拒绝、核心新目录全通过。两位均检查原五个负例、47 个历史文件、167 个固定当前源码、精确计数正例、完整 caller 多重集合和新增接口/PG 人工说明。
+
+第一位 reviewer 的首次命令漏设 `PYTHONPATH`，导致 unittest loader 的 `ImportError(check_r5_transactions)`；**25 个实际目录测试均未派发**。其原始导入拒绝日志单独保存，随后按照本 README 环境运行原命令全通过，期间源码及目录未变。
+
+### 原完整 source-version runner：本机实跑未通过
+
+在干净 `8e4fd58` 上只执行一次原完整 runner，耗时 **494.6 秒，exit 1**；执行前后 HEAD、tree 和 Git clean 状态一致。preparation 成功，随后当前与冻结组均实际派发。原始 [runner 报告](source-version-tests.json)、[执行元数据](source-version-execution.json)、[stdout](source-version.stdout.txt) 和 [stderr](source-version.stderr.txt) 均保留。
+
+| 组 | 分配/加载 | 实际方法 | 通过 | 失败 | 错误方法 | skip | 未派发 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 当前 `8e4fd58` | 802 | 795 | 765 | 4 | 26 | 0 | 7 |
+| 冻结 v1 `41b015c` | 4 | 4 | 4 | 0 | 0 | 0 | 0 |
+
+当前 unittest 原始汇总为 **4 failure、30 error occurrences**。30 次错误包含重复 subtest 和一项 `setUpClass` 错误，因此不能直接从 795 减去 30 来计算方法通过数。上表使用原报告 `actual_test_ids` 与失败/错误 ID 的精确对应，保留多次错误及类初始化记录。806 个发现 ID 全部分组且无重叠，但 7 个方法未执行，所以原报告 `no_missing=false`、`no_overlap=true`；这 7 项不写成 skip，也不算通过。runner 自身负例故意打印的嵌套 FAIL/skip 不计为外层失败。
+
+| 实际问题 | 原始结果与可证明原因 |
+| --- | --- |
+| HTTP 契约依赖未安装 | 24 次错误涉及 21 个已执行方法，`ModuleNotFoundError: jsonschema` 被原 validator 转成“安装 requirements-contract.txt，不能跳过验证”的错误。另一个类初始化因此中止，其 7 个方法未派发。原 CI 已固定安装该依赖文件，本次本机调用未具备它。 |
+| Unix socket fixture | 3 次错误涉及 2 个方法，均在 `socket.socket(AF_UNIX)` 创建时收到 `PermissionError: EPERM`。这是该环境拒绝创建 fixture，并非目录检查器拒绝目录。 |
+| Cold-web 模拟命令阶段 | 3 个方法在 `node-version` 阶段收到 `tool version command failed`；另一项期待“Node 22 required”的测试收到同一提前错误而失败。该阶段通过条件也包括清理验证，现有堆栈不能证明实际 Node 版本错误、子进程非零退出或真实 Next 构建失败。 |
+| 进程清理验证 | benchmark 超时测试的 `cleanup_live_processes_absent` 为 false，另两个 ColdWeb 测试的 `cleanup_verified` 为 false，共 3 个失败。日志没有证明更深层原因；本次未重复运行、放宽检查或将未知进程状态视作成功。 |
+
+四动态目录、原 3 CLI 与两位独立 reviewer 的目录测试通过，和这次本机全量运行未通过是不同范围。该记录不能写成 full-source green、source-evidence 上传成功、业务 PG、G0 或父任务完成。公开维护 PR 应继续使用原 CI 的固定依赖准备和原完整 runner 验证其实际公开源码。
+
+当前原 CLI、针对性测试、独立审查和完整 source-version runner 的实际结果分别保存，互不替代。
 
 复现环境使用已安装的 Go 与模块缓存，不变更 producer 或门禁：
 
@@ -77,6 +104,8 @@ export R5_TEST_MODULECACHE=/path/to/go-module-cache
 export GOPROXY=off
 export GOMAXPROCS=2
 unset GOTOOLCHAIN
+# 原 CI 的运行时契约依赖准备；本次本机 full run 未执行此安装。
+python3 -m pip install --disable-pip-version-check -r scripts/requirements-contract.txt
 
 python3 -B scripts/check_r5_transactions.py
 python3 -B scripts/check_r5_compatibility.py
@@ -89,4 +118,4 @@ python3 -B scripts/r5_archive_boundary.py --root .
 python3 -B scripts/run_r5_source_version_tests.py --root . --output /private/source-version-tests.json
 ```
 
-`validation` 与 `complete_source_runner` 只记录各自实跑结果。未执行的业务 PG、HTTP、旧客户端升级、M/G0、发布和父任务验收保持未执行范围；本修订不关闭它们。
+`validation` 与 `complete_source_runner` 只记录各自实跑结果。完整 runner preparation 的有限 typed wire fixture 不扩大目录的 runtime 等级；业务真实 PG、旧客户端升级、M/G0、发布和父任务验收保持未执行范围，本修订不关闭它们。

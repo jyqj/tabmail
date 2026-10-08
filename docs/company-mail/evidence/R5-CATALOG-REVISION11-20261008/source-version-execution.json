@@ -1,0 +1,42 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "scripts/run_r5_source_version_tests.py",
+    "--root",
+    ".",
+    "--output",
+    "/workspace/scratch/b8f95a1acb4c/catalog-private/full-source-version-tests.json"
+  ],
+  "cwd": "/workspace/scratch/b8f95a1acb4c/tabmail-catalog-quality",
+  "source_sha": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+  "source_tree": "c86a86f0a252159e068c8458e343eb59248ff979",
+  "clean_before": true,
+  "selectors": {
+    "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+    "R5_TEST_CACHE": "/workspace/scratch/b8f95a1acb4c/go-cache-runtime",
+    "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+    "GOMAXPROCS": "2",
+    "GOPROXY": "off"
+  },
+  "GOTOOLCHAIN_present": false,
+  "runner_sha256": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+  "preparer_sha256": "257325418e2424ccf836e60517c04e1890e11940f0ce6293884226ab9f5edf47",
+  "exit_code": 1,
+  "seconds": 494.6,
+  "source_sha_after": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+  "source_tree_after": "c86a86f0a252159e068c8458e343eb59248ff979",
+  "clean_after": true,
+  "full-source.stdout.txt": {
+    "bytes": 3252,
+    "sha256": "257655292f7f181c6ea3d8bf2879c2c4fe55101a22221170bcbe678167798657"
+  },
+  "full-source.stderr.txt": {
+    "bytes": 173142,
+    "sha256": "0de1e01c487471bdd00cad0bba7b933b1ca42c244f6fd506ae2f8124371fa2d1"
+  },
+  "full-source-version-tests.json": {
+    "bytes": 2654971,
+    "sha256": "2ea34e42fd45d4c2ad7e3c16d576559b0ce38fec8281034260a125c739fba923"
+  }
+}

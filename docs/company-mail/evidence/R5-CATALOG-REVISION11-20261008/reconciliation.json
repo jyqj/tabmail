@@ -9698,11 +9698,207 @@
           "ast_sha256": "8bff5925981614fbb104231891b3bbdae4e9a78bac499f4be670d238bf2ed82b"
         }
       ]
+    },
+    "independent_review": {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/independent-review.json",
+      "bytes": 9866,
+      "sha256": "bd1f51141d39cbc6c39c33e621cfe038a6c7313ec31f52b5d6b1b11f857a6ee1"
     }
   },
   "complete_source_runner": {
-    "executed_in_this_revision": false,
-    "qualification": "Pending original complete runner on a clean catalog candidate; targeted source gates are not a substitute."
+    "executed_in_this_revision": true,
+    "attempts": 1,
+    "source_commit": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+    "source_tree": "c86a86f0a252159e068c8458e343eb59248ff979",
+    "clean_before": true,
+    "clean_after": true,
+    "original_runner_unchanged": true,
+    "original_preparer_unchanged_from_product_anchor": true,
+    "argv": [
+      "python3",
+      "-B",
+      "scripts/run_r5_source_version_tests.py",
+      "--root",
+      ".",
+      "--output",
+      "/workspace/scratch/b8f95a1acb4c/catalog-private/full-source-version-tests.json"
+    ],
+    "selectors": {
+      "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+      "R5_TEST_CACHE": "/workspace/scratch/b8f95a1acb4c/go-cache-runtime",
+      "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+      "GOMAXPROCS": "2",
+      "GOPROXY": "off"
+    },
+    "GOTOOLCHAIN_present": false,
+    "exit_code": 1,
+    "seconds": 494.6,
+    "preparation_completed": true,
+    "preparation_go_version": "go1.25.7",
+    "preparation_actual_started_test_ids": [
+      "TestOrdinaryReceiptOpenAPIWireFixtures"
+    ],
+    "preparation_actual_passed_test_ids": [
+      "TestOrdinaryReceiptOpenAPIWireFixtures"
+    ],
+    "preparation_exit": 0,
+    "discovered_ids": 806,
+    "partition_no_missing": true,
+    "partition_no_overlap": true,
+    "actual_no_missing": false,
+    "actual_no_overlap": true,
+    "missing_test_ids": [
+      "test_http_contract.RecipientsAggregateContractTests.test_actual_operation_and_binding_are_one_existing_strict_receipt",
+      "test_http_contract.RecipientsAggregateContractTests.test_content_authority_does_not_admit_sensitive_or_unknown_fields",
+      "test_http_contract.RecipientsAggregateContractTests.test_counts_keep_complete_nonnegative_integer_shape",
+      "test_http_contract.RecipientsAggregateContractTests.test_known_complete_counts_and_unknown_without_counts_pass",
+      "test_http_contract.RecipientsAggregateContractTests.test_known_missing_counts_and_unknown_fabricated_counts_fail",
+      "test_http_contract.RecipientsAggregateContractTests.test_nested_progress_counts_and_capabilities_remain_closed",
+      "test_http_contract.RecipientsAggregateContractTests.test_old_per_address_array_is_not_an_aggregate_receipt"
+    ],
+    "groups": [
+      {
+        "group": "current",
+        "source_sha": "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+        "requested_ids": 802,
+        "loaded_ids": 802,
+        "executed_tests": 795,
+        "distinct_executed_ids": 795,
+        "distinct_passed_ids": 765,
+        "distinct_failed_ids": 4,
+        "distinct_error_ids": 26,
+        "distinct_skipped_ids": 0,
+        "failure_occurrences": 4,
+        "error_occurrences": 30,
+        "unmapped_setup_errors": [
+          "setUpClass (test_http_contract.RecipientsAggregateContractTests)"
+        ],
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "missing_ids": [
+          "test_http_contract.RecipientsAggregateContractTests.test_actual_operation_and_binding_are_one_existing_strict_receipt",
+          "test_http_contract.RecipientsAggregateContractTests.test_content_authority_does_not_admit_sensitive_or_unknown_fields",
+          "test_http_contract.RecipientsAggregateContractTests.test_counts_keep_complete_nonnegative_integer_shape",
+          "test_http_contract.RecipientsAggregateContractTests.test_known_complete_counts_and_unknown_without_counts_pass",
+          "test_http_contract.RecipientsAggregateContractTests.test_known_missing_counts_and_unknown_fabricated_counts_fail",
+          "test_http_contract.RecipientsAggregateContractTests.test_nested_progress_counts_and_capabilities_remain_closed",
+          "test_http_contract.RecipientsAggregateContractTests.test_old_per_address_array_is_not_an_aggregate_receipt"
+        ],
+        "failed_test_ids": [
+          "test_r5_benchmark.BenchmarkProcessTests.test_real_timeout_terminal_leader_keeps_group_identity_until_kill",
+          "test_r5_cold_web.ColdWebTests.test_interruption_persists_current_group_cleanup_in_terminal_receipt",
+          "test_r5_cold_web.ColdWebTests.test_owned_child_group_cleanup_even_when_leader_exits_zero",
+          "test_r5_cold_web.ColdWebTests.test_wrong_node_major_records_rejection"
+        ],
+        "errored_test_ids": [
+          "test_http_contract.AdditionalWireSafetyTests.test_public_cache_directive_cannot_hide_among_download_requirements",
+          "test_http_contract.CaptureBoundTests.test_encoded_body_is_rejected_before_allocation",
+          "test_http_contract.CaptureCompletenessTests.test_missing_cases_and_duplicate_ids_fail",
+          "test_http_contract.CompanyAdminStreamCaptureTests.test_admin_json_response_cannot_replace_sse_media",
+          "test_http_contract.CompanyAdminStreamCaptureTests.test_admin_missing_or_unterminated_frame_is_not_execution",
+          "test_http_contract.CompanyAdminStreamCaptureTests.test_admin_name_on_mailbox_route_cannot_cover_admin_operation",
+          "test_http_contract.CompanyAdminStreamCaptureTests.test_distinct_admin_and_mailbox_sse_captures_pass",
+          "test_http_contract.CompanyAdminStreamCaptureTests.test_mailbox_stream_cannot_cover_missing_admin_capture",
+          "test_http_contract.RuntimeResponseTests.test_binary_headers_and_sse_framing",
+          "test_http_contract.RuntimeResponseTests.test_capture_types_and_base64_are_strict",
+          "test_http_contract.RuntimeResponseTests.test_false_zero_and_wrong_scalar_are_not_coerced",
+          "test_http_contract.RuntimeResponseTests.test_json_duplicates_and_nonfinite_numbers_are_rejected",
+          "test_http_contract.RuntimeResponseTests.test_missing_required_and_unexpected_field_fail",
+          "test_http_contract.RuntimeResponseTests.test_nullable_collection_is_not_an_array",
+          "test_http_contract.RuntimeResponseTests.test_real_format_checks_are_enabled",
+          "test_http_contract.RuntimeResponseTests.test_remote_refs_are_rejected_before_any_network_access",
+          "test_http_contract.RuntimeResponseTests.test_resolves_local_response_and_nested_component_refs",
+          "test_http_contract.RuntimeResponseTests.test_schema_error_messages_do_not_echo_response_content",
+          "test_http_contract.RuntimeResponseTests.test_secret_fields_fail_even_in_permissive_old_components",
+          "test_http_contract.RuntimeResponseTests.test_status_method_route_and_content_type_are_checked",
+          "test_http_contract.WireSafetyRegressionTests.test_binary_public_directive_cannot_override_private_no_store",
+          "test_r5_cold_web.ColdWebTests.test_failed_build_preserves_red_raw_and_exit",
+          "test_r5_cold_web.ColdWebTests.test_fake_build_command_receipts_are_exact_and_not_shipping_browser_G0",
+          "test_r5_cold_web.ColdWebTests.test_zero_exit_without_standalone_artifacts_is_not_pass",
+          "test_r5_excluded_descriptor_metadata.DescriptorMetadataTests.test_nested_module_links_fifo_socket_public_entries",
+          "test_r5_source_excluded_metadata.ExcludedMetadataTests.test_multilevel_modules_links_and_special_files_rejected_by_cli"
+        ],
+        "exit_code": 1
+      },
+      {
+        "group": "frozen-v1",
+        "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+        "requested_ids": 4,
+        "loaded_ids": 4,
+        "executed_tests": 4,
+        "distinct_executed_ids": 4,
+        "distinct_passed_ids": 4,
+        "distinct_failed_ids": 0,
+        "distinct_error_ids": 0,
+        "distinct_skipped_ids": 0,
+        "failure_occurrences": 0,
+        "error_occurrences": 0,
+        "unmapped_setup_errors": [],
+        "expected_failures": 0,
+        "unexpected_successes": 0,
+        "missing_ids": [],
+        "failed_test_ids": [],
+        "errored_test_ids": [],
+        "exit_code": 0
+      }
+    ],
+    "counting_rule": "Distinct outcomes are derived from original actual_test_ids and failure/error/skip IDs, matching subtest suffixes to their actual parent test. Unittest error occurrences also include repeated subtests and setUpClass. Intentional nested failure/skip diagnostics inside passing runner-negative tests are not actual suite failures.",
+    "failure_analysis": [
+      {
+        "scope": "HTTP contract dependency",
+        "error_occurrences": 24,
+        "affected_executed_methods": 21,
+        "undispatched_methods": 7,
+        "observed_cause": "ModuleNotFoundError: jsonschema, then RuntimeError: install scripts/requirements-contract.txt; runtime validation cannot be skipped. RecipientsAggregateContractTests setUpClass aborts before7 methods.",
+        "source": "scripts/check_http_contract.py:167–171",
+        "environment_boundary": "This invocation had not installed the existing pinned requirements-contract.txt dependencies. Original company-p0 workflow already installs that file; no runtime skip or fallback was added."
+      },
+      {
+        "scope": "Unix socket fixture setup",
+        "error_occurrences": 3,
+        "affected_executed_methods": 2,
+        "observed_cause": "socket.socket(socket.AF_UNIX) raises PermissionError [Errno1] Operation not permitted, in two descriptor-metadata subtests and one excluded-metadata test.",
+        "causal_limit": "Observed OS capability rejection before socket fixture creation; not an archive or catalog mismatch."
+      },
+      {
+        "scope": "Cold-web version-command fixture admission",
+        "error_occurrences": 3,
+        "affected_executed_methods": 3,
+        "failed_methods": 1,
+        "observed_cause": "Three methods raise GateError: tool version command failed: node-version. The wrong-node-major test receives that same earlier error instead of the expected Node22-required error.",
+        "causal_limit": "execute_build rejects the node-version command record. command_passed also requires verified cleanup, so this stack alone does not establish a wrong installed Node version, a nonzero child exit, or a real Next build failure; command-level receipts were not retained by these failed fixtures."
+      },
+      {
+        "scope": "Process cleanup observations",
+        "failed_methods": 3,
+        "observed_cause": "Benchmark timeout assertion sees cleanup_live_processes_absent=false; two ColdWeb lifecycle assertions see cleanup_verified=false.",
+        "causal_limit": "This attempt preserves the failed cleanup-verification assertions. It does not establish whether live descendants, denied/unknown process observation, deadline expiry, or another OS condition caused them; no separate reproduction or rerun was performed."
+      }
+    ],
+    "artifacts": {
+      "original_report": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/source-version-tests.json",
+        "bytes": 2654971,
+        "sha256": "2ea34e42fd45d4c2ad7e3c16d576559b0ce38fec8281034260a125c739fba923"
+      },
+      "execution": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/source-version-execution.json",
+        "bytes": 1536,
+        "sha256": "d0f9c45642f5a2280c6c437c3cdae3de19e38af467c78a82eb60f1485d2d3f5c"
+      },
+      "stdout": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/source-version.stdout.txt",
+        "bytes": 3252,
+        "sha256": "257655292f7f181c6ea3d8bf2879c2c4fe55101a22221170bcbe678167798657"
+      },
+      "stderr": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/source-version.stderr.txt",
+        "bytes": 173142,
+        "sha256": "0de1e01c487471bdd00cad0bba7b933b1ca42c244f6fd506ae2f8124371fa2d1"
+      }
+    },
+    "status": "failed",
+    "qualification": "One original complete runner invocation on the clean reviewed core. Current795 methods executed with765 distinct passes/4 failures/26 errored methods and7 undispatched due setup failure; frozen4 pass. This is not full-source green, business/parent acceptance, or a replacement for the public CI with its pinned dependency installation. No retry, environment mutation during execution, test skip, guard change, or result laundering occurred."
   },
   "implementation_todos_completed": 0,
   "runtime_verified": false,
