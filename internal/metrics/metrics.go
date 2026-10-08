@@ -65,6 +65,8 @@ var (
 	webhooksRetried          atomic.Int64
 	realtimeSubscribers      atomic.Int64
 	realtimePublished        atomic.Int64
+	monitorEventsRecorded    atomic.Int64
+	monitorEventsFailed      atomic.Int64
 	retentionMessagesDeleted atomic.Int64
 	retentionObjectsDeleted  atomic.Int64
 	retentionObjectsFailed   atomic.Int64
@@ -104,6 +106,8 @@ func WebhookRetried()            { webhooksRetried.Add(1) }
 func RealtimeSubscriberAdded()   { realtimeSubscribers.Add(1) }
 func RealtimeSubscriberRemoved() { realtimeSubscribers.Add(-1) }
 func RealtimeEventPublished()    { realtimePublished.Add(1) }
+func MonitorEventRecorded()      { monitorEventsRecorded.Add(1) }
+func MonitorEventFailed()        { monitorEventsFailed.Add(1) }
 
 func RetentionMessagesDeleted(n int) { retentionMessagesDeleted.Add(int64(n)) }
 func RetentionObjectDeleted()        { retentionObjectsDeleted.Add(1) }
@@ -278,6 +282,8 @@ func RenderPrometheus(snapshot models.MetricsSnapshot, extras map[string]float64
 	writeGauge("tabmail_webhooks_dead_letter_size", snapshot.Webhooks.DeadLetterSize)
 	writeGauge("tabmail_realtime_subscribers_current", snapshot.Realtime.SubscribersCurrent)
 	writeGauge("tabmail_realtime_events_published_total", snapshot.Realtime.EventsPublished)
+	writeGauge("tabmail_realtime_monitor_events_recorded_total", monitorEventsRecorded.Load())
+	writeGauge("tabmail_realtime_monitor_events_failed_total", monitorEventsFailed.Load())
 	writeGauge("tabmail_retention_messages_deleted_total", retentionMessagesDeleted.Load())
 	writeGauge("tabmail_retention_objects_deleted_total", retentionObjectsDeleted.Load())
 	writeGauge("tabmail_retention_objects_failed_total", retentionObjectsFailed.Load())

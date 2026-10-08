@@ -1,19 +1,22 @@
 "use client";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useAPI } from "@/hooks/use-api";
 import { company, workMessage, workPath, downloadCompanyFile, type DraftPayload, type WorkMailbox, type InboundAttachment } from "@/lib/company";
 import { composeIdentity } from "@/lib/compose-identity";
+import { assertSession, useSessionScope } from "@/lib/session";
 import { ActionButton, LoadError, MailHTML, Section, useAction, useText } from "@/components/company/common";
 import { ConversationList } from "./conversation-list";
-export function MessagePane({ mailbox, mailboxes, id, onMutation, onCompose, }: {
+export function MessagePane({ mailbox, mailboxes, id, viewKey, onMutation, onCompose, }: {
     mailbox: WorkMailbox;
     /** Send-identity data source; defaults to the current mailbox only. */
     mailboxes?: WorkMailbox[];
     id: string;
+    viewKey?: string;
     onMutation: () => void;
     onCompose: (pending: Promise<DraftPayload>) => void | Promise<void>;
 }) {
     const t = useText();
+    const scope = useSessionScope();
     const { busy, run } = useAction();
     const [conversation, setConversation] = useState(false);
     // Reply/forward only needs some sendable identity to exist — the compose
@@ -23,12 +26,26 @@ export function MessagePane({ mailbox, mailboxes, id, onMutation, onCompose, }: 
     const detail = useAPI(["work-message", mailbox.mailbox.id, id], () => workMessage(mailbox.mailbox.id, id), { refreshInterval: 15000 });
     const base = `${workPath(mailbox.mailbox.id)}/messages/${id}`;
     const files = useAPI(["inbound-attachments", mailbox.mailbox.id, id], () => company<InboundAttachment[]>(`${base}/attachments`));
+    const view = useRef<object | null>(null);
+    useLayoutEffect(() => {
+        view.current = {};
+        return () => { view.current = null; };
+    }, [scope, mailbox.mailbox.id, id, viewKey]);
     async function act(action: string) {
-        await company(`${base}/actions`, { method: "POST", body: { action } });
-        onMutation();
-        // Actions return an acknowledgement, not the new message state. Keep
-        // controls busy until the authoritative detail supplies the next action.
-        await detail.mutate();
+        const owner = view.current;
+        try {
+            assertSession(scope);
+            await company(`${base}/actions`, { method: "POST", body: { action } });
+            assertSession(scope);
+            // The parent pins this invalidation to the original folder query.
+            // A later page/search must not redirect it through a bound mutate.
+            onMutation();
+            // Only the still-current view waits for its authoritative detail;
+            // departure also retires any late failure's permission to report.
+            if (owner && view.current === owner) await detail.mutate();
+        } catch (error) {
+            if (owner && view.current === owner) throw error;
+        }
     }
     return (<Section title={detail.data?.subject || t("邮件详情", "Message details")}>
       <LoadError error={detail.error} onRetry={() => void detail.mutate()}/>

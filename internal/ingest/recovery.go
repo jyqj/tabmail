@@ -187,7 +187,7 @@ func (s *Service) deliverTarget(ctx context.Context, ledger store.IngressLedger,
 	if inserted {
 		metrics.SMTPDeliverySucceeded(t.TenantID.String(), t.Address)
 		if s.hub != nil {
-			s.hub.Publish(realtime.Event{Type: realtime.EventMessage, Mailbox: t.Address, MessageID: m.ID.String(), Sender: m.Sender, Subject: m.Subject, Size: m.Size})
+			s.hub.PublishContext(ctx, realtime.Event{Type: realtime.EventMessage, Mailbox: t.Address, MessageID: m.ID.String(), Sender: m.Sender, Subject: m.Subject, Size: m.Size})
 		}
 		// The durable outbox is inserted inside DeliverIngress. Do not Publish the
 		// webhook a second time; realtime remains best effort (clients can poll).

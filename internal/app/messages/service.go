@@ -219,7 +219,7 @@ func (s *Service) DeleteMessage(ctx context.Context, address string, msgID uuid.
 	_, _ = s.objects.Release(ctx, msg.RawObjectKey)
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "message.delete", ResourceType: "message", ResourceID: app.UUIDPtr(msg.ID), Details: app.MustJSON(map[string]any{"mailbox": mb.FullAddress})})
 	if s.hub != nil {
-		s.hub.Publish(realtime.Event{Type: realtime.EventDelete, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: msg.Sender, Subject: msg.Subject, Size: msg.Size})
+		s.hub.PublishContext(ctx, realtime.Event{Type: realtime.EventDelete, Mailbox: mb.FullAddress, MessageID: msg.ID.String(), Sender: msg.Sender, Subject: msg.Subject, Size: msg.Size})
 	}
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "message.deleted", Mailbox: mb.FullAddress, MessageID: msg.ID.String(), TenantID: mb.TenantID.String()})
@@ -253,7 +253,7 @@ func (s *Service) PurgeMailbox(ctx context.Context, address string, viewer Viewe
 	}
 	app.InsertAudit(ctx, s.store, s.logger, models.AuditEntry{TenantID: app.UUIDPtr(mb.TenantID), Actor: actor, Action: "mailbox.purge", ResourceType: "mailbox", ResourceID: app.UUIDPtr(mb.ID), Details: app.MustJSON(map[string]any{"address": mb.FullAddress, "deleted_objects": len(keys)})})
 	if s.hub != nil {
-		s.hub.Publish(realtime.Event{Type: realtime.EventPurge, Mailbox: mb.FullAddress})
+		s.hub.PublishContext(ctx, realtime.Event{Type: realtime.EventPurge, Mailbox: mb.FullAddress})
 	}
 	if s.dispatcher != nil {
 		s.dispatcher.Publish(hooks.Event{Type: "mailbox.purged", Mailbox: mb.FullAddress, TenantID: mb.TenantID.String()})
