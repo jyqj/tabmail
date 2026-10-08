@@ -1,4 +1,4 @@
-"""Frozen revision-1 through revision-12 reviews and current revision-13 facts."""
+"""Frozen revision-1 through revision-13 reviews and current revision-14 facts."""
 import ast
 from contextlib import contextmanager, ExitStack
 import copy
@@ -26,7 +26,7 @@ REVISION7_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION7-202
 REVISION8_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008'
 REVISION9_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008'
 REVISION10_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008'
-CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION13-20261008'
+CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008'
 REVISION10_COMMIT = '20c39ab3ebaee46e5ac51e25d90a455166c9a31d'
 REVISION10_SOURCE_COMMIT = '703a572864296120fff3efe0880c560ad9c74d57'
 REVISION10_SOURCE_TREE = '40e1d2d16258e0e2bc3afea29553dbb148920e4e'
@@ -36,10 +36,10 @@ REVISION9_SOURCE_TREE = 'db7c422fcdd63405706a2f2cb7631a5380f87fd6'
 REVISION8_COMMIT = '1d856bd8a552c30dfb48b4902858edad7e53aaf5'
 REVISION8_SOURCE_COMMIT = 'e0cd175996ca4ee314d7d8b8cf836023b680346c'
 REVISION8_SOURCE_TREE = '5307be3cf057104d1bf1529e38235bbaf0c2bcdf'
-SOURCE_COMMIT = '9b73b13f376f7e8d589a06fc7078dae4c342d5d5'
+SOURCE_COMMIT = '740126660526db987b7914c50a8731b7cac9bf42'
 REVISION7_COMMIT = 'f77c31e2da38bb926dfe6fa134eabad652e94f8c'
 REVISION7_SOURCE_COMMIT = '9b12c93cb03285298267e27893f74aebe742a8a2'
-SOURCE_TREE = '8e3f458f8cec51c031a06fd280151116164244ec'
+SOURCE_TREE = '5ee1ec138c6854b3068ec3576ea1e824510a9ee2'
 REVISION7_SOURCE_TREE = '87c87a0db72ac444050b43fbe67d906f45c4a2ac'
 REVISION6_COMMIT = 'c3e1419e6245baf0190291ea868787cb2b0177ca'
 REVISION6_SOURCE_COMMIT = 'f413a9138d305cf154ed2cecaddcf9b9a2397666'
@@ -1824,6 +1824,469 @@ def revision12_snapshot(name):
     return json.loads(raw)
 
 
+
+REVISION13_COMMIT = 'be3a6bf41daa198a39306c90fd03411e38a017d8'
+REVISION13_TREE = '350a848972e02ef8f7edc8a1a43db087c844405c'
+REVISION13_SOURCE_COMMIT = '9b73b13f376f7e8d589a06fc7078dae4c342d5d5'
+REVISION13_SOURCE_TREE = '8e3f458f8cec51c031a06fd280151116164244ec'
+REVISION13_SNAPSHOTS = {'transaction': {'path': 'docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json',
+                 'blob': 'fcea69d4b04676ac4d643bdd60963ed9cca2265a',
+                 'sha256': 'd9fb50b5476e00bd55e339beb7540e53564d7867738fc866d30ea8385b64fdac',
+                 'bytes': 2868243},
+ 'compatibility': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json',
+                   'blob': '397e76a5f3c3859704c5ef2a6bc665a0d68c7a9f',
+                   'sha256': '4276d86ebcf9fb6fbddb610c37de69cc49670ba79b1a97181eaba42b8fc32de1',
+                   'bytes': 409919},
+ 'clients': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json',
+             'blob': 'f4016a61962e4e0e25a5af0c1ba57834ec511e8b',
+             'sha256': '8bfc12c746edccd83c637d14691d2255b3d83c4611f6efc067e5c0ad2a78011d',
+             'bytes': 41444},
+ 'client_routes': {'path': 'docs/company-mail/evidence/R5-CLIENT-CALLS.json',
+                   'blob': 'decb2ad276c1ef4b44c36d06e3b1a09eb1ab9e80',
+                   'sha256': '0805d5705d2d0680735ab7249209ef77dd31b32dbf86694c27d3cf6f3ff2b0d3',
+                   'bytes': 50365}}
+REVISION14_EXPECTED = {'transaction': {'status': 'PASS',
+                 'postgres_files': 64,
+                 'functions': 402,
+                 'sql_execution_calls': 501,
+                 'direct_write_functions': 138,
+                 'write_closure_functions': 158,
+                 'migration_files': 19,
+                 'task_complete': False,
+                 'runtime_verified': False,
+                 'meaning': 'syntax inventory current; no concurrency or behavior equivalence claim'},
+ 'compatibility': {'wire_validation_scope': 'not_checked_current_wire_required',
+                   'historical_wire_reference': {'artifact_ref': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json',
+                                                 'sha256': '61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22',
+                                                 'qualification': 'historical_metadata_only_not_current_wire'},
+                   'status': 'source_inventory_and_upgrade_plan_checked',
+                   'task_complete': False,
+                   'product_green': False,
+                   'routes': 133,
+                   'client_branches': 136,
+                   'source_files': 95,
+                   'openapi_missing': ['DELETE /api/v1/suppression/{id}',
+                                       'GET /api/v1/suppression',
+                                       'GET /docs-assets/*'],
+                   'no_shipped_client': ['DELETE /api/v1/suppression/{id}',
+                                         'GET /api/v1/admin/status',
+                                         'GET /api/v1/auth/me',
+                                         'GET /api/v1/company/outbound/{id}/recipients',
+                                         'GET /api/v1/suppression',
+                                         'GET /docs',
+                                         'GET /docs-assets/*',
+                                         'GET /metrics',
+                                         'GET /openapi.yaml',
+                                         'GET /ready',
+                                         'GET /redoc'],
+                   'runtime_boundary': 'No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency '
+                                       'review remain required.'},
+ 'review_field_sha256': {'transaction_callers': '8fbec849bd8bf9f89429faf1d91ed01079a01571e81819f0c44e2ff8d07912ed',
+                         'compatibility_route_changes': 'e4488262d8f895003c08d0f928c22b6754f7c23c3cabb32c824fbb07277e4d62',
+                         'closure_changes': 'cb0942d2812b67f101d4c5a50121d10424f1e3e26c743390f3456a1b263984f7',
+                         'source_changes': '83dcf30afd2c845ca60ed477f347b104cafc61397c565dc7a7b35266cf6c4a9f',
+                         'current_rejections': '31043e4cb9f353d3f2b655f4a2a088779f4e4389c13aa08e4efbf0d16b36b33e',
+                         'generated_catalogs': '83bf61bfe147be2e345a74f11b2a56c11fd9c05016a5700ad39928861ec9d212',
+                         'additional_api_schema_changes': '6d4332625ea37c5ed4d00996dfc2cc2a1c9820e827a8380182bc8506d6dc1998',
+                         'transaction_body_changes': '4ab29731ef537f74f8dba6871785ac3d890068bae9e05b540bdc7570a64b4ab5',
+                         'transaction_classification_changes': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'transaction_entry_changes': 'e5f4c50195bc86cbd22ecf84ebb217b7c44b1be31f3d4adc00081394d89e53cc',
+                         'transaction_added_entries': '086b2cdc3998d80d7755152161db76da84efcca00ed889d504d30ad2e6286296',
+                         'transaction_removed_entries': '37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570',
+                         'manual_review_fields': '6a3f8ab9d7e2941930f71d855673ad33c3418c74698072e621b4d7a8a7a0fb4f',
+                         'baseline_validation': '960333cb39612a117b51266cd941e8e770352feaa121ea0c5219508d4257ed2e'},
+ 'historical_manifest_sha256': '8bfe31b658960f1d08d3b564c1e85bc28b8268d892eb606cebe2ccfeefa3563d',
+ 'protected_source_manifest_sha256': '9f28d12e75efae6c2b651bc7c4d0a3629726d712f3ab08b9f1775bc6ae7e4582',
+ 'product_paths': ['internal/api/handlers/company_mailboxes.go',
+                   'internal/api/handlers/company_templates.go',
+                   'internal/api/handlers/users_admin.go',
+                   'internal/app/companymail/compose.go',
+                   'internal/store/postgres/company_members.go',
+                   'internal/store/postgres/mailbox_errors.go',
+                   'internal/store/s3obj/s3obj.go',
+                   'internal/store/s3obj/upload_reader.go',
+                   'web/app/(dashboard)/account/page.tsx',
+                   'web/components/auth-dialog.tsx',
+                   'web/lib/company.ts',
+                   'web/locales/en.json',
+                   'web/locales/zh.json'],
+ 'body_changes': [{'id': 'internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox',
+                   'before_sha256': 'a8b0fdeefb41cae3dd687412d439b3aeaf8ff323853965a771a615c24dbc7405',
+                   'after_sha256': '0c676692f35bdb0c53a6437f3af2e1d432ae4d1db312379aad67887c88a43ab4'},
+                  {'id': 'internal/store/postgres/company_members.go:*PgStore:companyReadTx',
+                   'before_sha256': '34050d3e709da3d74f8b5ffa61073e51d18d40a85d9eeeb0dac94c844678d01c',
+                   'after_sha256': '08b44a3844bcd1e8a2f044ade1fbe4feec731d20ed911b6a607c0f06ba677463'},
+                  {'id': 'internal/store/postgres/company_members.go:*PgStore:companyReferencedTx',
+                   'before_sha256': '9ac0566b82d37c4e4c2cf9c4599480b4616dabfdf3b794f414b2b33e723e7cb8',
+                   'after_sha256': 'e5eeb7d588ae1415c2b80290d9804016609eb9c398a5a2fb9a6ead03cff86cce'},
+                  {'id': 'internal/store/postgres/company_members.go:*PgStore:companyTx',
+                   'before_sha256': 'c23879cc9e2bf0c608300df270e9a8a5ddfe598df9d0b1fb132b073190cb1037',
+                   'after_sha256': 'e9e236564ef8244fc785b085bfd67001192b1deb88852f0a8fafa568fd92ceaf'},
+                  {'id': 'internal/store/postgres/company_members.go:*PgStore:companyTxScope',
+                   'before_sha256': '5e4e432fc4a3be1922f4f732809f4a3fc050a4047e73bb8dc268882deed14270',
+                   'after_sha256': '63a7abfc93a82f4a5c92303d24823f372a61d1aeb1f06d5796a994d989e9152c'}],
+ 'manual_review_fields': {'internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox': {'lock_fk_wait_fence': '先规范化local_part及校验kind/retention/owner组合；调用companyTxScope(admin=true,T '
+                                                                                                                          'UPDATE,uniqueConflicts=false)。T→U '
+                                                                                                                          'SHARE当前管理员复核→普通SELECT验证公司domain/MX和可选owner '
+                                                                                                                          'active→M '
+                                                                                                                          'INSERT及原有唯一/FK等待→仅该INSERT错误交classifyWorkMailboxCreateError→companyAudit依次audit_log/outbox→重读新M→Commit。当前管理员通过后不走非管理员profile加载分支；domain/owner普通读不等于新增行锁或全生命周期不变性证明。审计/后续错误不进入地址分类器，未知23505保留HTTP500路径；失败事务沿原defer '
+                                                                                                                          'Rollback回滚。',
+                                                                                                    'evidence': ['internal/store/postgres/company_members.go:564-601 '
+                                                                                                                 'sha256=0c676692f35bdb0c53a6437f3af2e1d432ae4d1db312379aad67887c88a43ab4',
+                                                                                                                 'PR '
+                                                                                                                 '#195 '
+                                                                                                                 '/ '
+                                                                                                                 'Issue '
+                                                                                                                 '#189 '
+                                                                                                                 'separately '
+                                                                                                                 'records '
+                                                                                                                 'typed '
+                                                                                                                 'error '
+                                                                                                                 'and '
+                                                                                                                 'bounded '
+                                                                                                                 'PostgreSQL '
+                                                                                                                 'tests; '
+                                                                                                                 'this '
+                                                                                                                 'catalog '
+                                                                                                                 'runs '
+                                                                                                                 'syntax '
+                                                                                                                 'producers '
+                                                                                                                 'only.'],
+                                                                                                    'unverified_risks': ['Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行',
+                                                                                                                         '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。'],
+                                                                                                    'file_family_context': 'companyTxScope三种T模式：UPDATE/KEY '
+                                                                                                                           'SHARE/无T→actor '
+                                                                                                                           'SHARE→profile '
+                                                                                                                           'SHARE '
+                                                                                                                           'NOWAIT→callback→Commit；grant/移交先mailbox '
+                                                                                                                           'revision；Activate独立事务 '
+                                                                                                                           'uniqueConflicts由三个既有wrapper固定true保留旧23505映射；CreateWorkMailbox固定false只在mailboxes '
+                                                                                                                           'INSERT分类地址约束，后续审计/未知唯一性错误保持原因。',
+                                                                                                    'source_review': {'base_commit': '740126660526db987b7914c50a8731b7cac9bf42',
+                                                                                                                      'source_sha256': '0c676692f35bdb0c53a6437f3af2e1d432ae4d1db312379aad67887c88a43ab4',
+                                                                                                                      'role': 'authorized '
+                                                                                                                              'mailbox '
+                                                                                                                              'provisioning '
+                                                                                                                              'with '
+                                                                                                                              'write-local '
+                                                                                                                              'duplicate-address '
+                                                                                                                              'classification',
+                                                                                                                      'trace': '先规范化local_part及校验kind/retention/owner组合；调用companyTxScope(admin=true,T '
+                                                                                                                               'UPDATE,uniqueConflicts=false)。T→U '
+                                                                                                                               'SHARE当前管理员复核→普通SELECT验证公司domain/MX和可选owner '
+                                                                                                                               'active→M '
+                                                                                                                               'INSERT及原有唯一/FK等待→仅该INSERT错误交classifyWorkMailboxCreateError→companyAudit依次audit_log/outbox→重读新M→Commit。当前管理员通过后不走非管理员profile加载分支；domain/owner普通读不等于新增行锁或全生命周期不变性证明。审计/后续错误不进入地址分类器，未知23505保留HTTP500路径；失败事务沿原defer '
+                                                                                                                               'Rollback回滚。',
+                                                                                                                      'unverified': '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。',
+                                                                                                                      'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md'}},
+                          'internal/store/postgres/company_members.go:*PgStore:companyReadTx': {'lock_fk_wait_fence': '委托 '
+                                                                                                                      'companyTxScope(admin, '
+                                                                                                                      'companyNoTenantLock, '
+                                                                                                                      'uniqueConflicts=true, '
+                                                                                                                      'f)；不预取T锁，仍重载并锁定当前交互actor，非管理员读取有效权限快照。Read名称不证明只读，callback仍可能写入；true仅保留原23505映射。',
+                                                                                                'evidence': ['internal/store/postgres/company_members.go:46-48 '
+                                                                                                             'sha256=08b44a3844bcd1e8a2f044ade1fbe4feec731d20ed911b6a607c0f06ba677463',
+                                                                                                             'PR #195 '
+                                                                                                             '/ Issue '
+                                                                                                             '#189 '
+                                                                                                             'separately '
+                                                                                                             'records '
+                                                                                                             'typed '
+                                                                                                             'error '
+                                                                                                             'and '
+                                                                                                             'bounded '
+                                                                                                             'PostgreSQL '
+                                                                                                             'tests; '
+                                                                                                             'this '
+                                                                                                             'catalog '
+                                                                                                             'runs '
+                                                                                                             'syntax '
+                                                                                                             'producers '
+                                                                                                             'only.'],
+                                                                                                'unverified_risks': ['Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行',
+                                                                                                                     '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。'],
+                                                                                                'file_family_context': 'companyTxScope三种T模式：UPDATE/KEY '
+                                                                                                                       'SHARE/无T→actor '
+                                                                                                                       'SHARE→profile '
+                                                                                                                       'SHARE '
+                                                                                                                       'NOWAIT→callback→Commit；grant/移交先mailbox '
+                                                                                                                       'revision；Activate独立事务 '
+                                                                                                                       'uniqueConflicts由三个既有wrapper固定true保留旧23505映射；CreateWorkMailbox固定false只在mailboxes '
+                                                                                                                       'INSERT分类地址约束，后续审计/未知唯一性错误保持原因。',
+                                                                                                'source_review': {'base_commit': '740126660526db987b7914c50a8731b7cac9bf42',
+                                                                                                                  'source_sha256': '08b44a3844bcd1e8a2f044ade1fbe4feec731d20ed911b6a607c0f06ba677463',
+                                                                                                                  'role': 'tenant-lock-free '
+                                                                                                                          'wrapper '
+                                                                                                                          'retaining '
+                                                                                                                          'existing '
+                                                                                                                          'uniqueness '
+                                                                                                                          'mapping',
+                                                                                                                  'trace': '委托 '
+                                                                                                                           'companyTxScope(admin, '
+                                                                                                                           'companyNoTenantLock, '
+                                                                                                                           'uniqueConflicts=true, '
+                                                                                                                           'f)；不预取T锁，仍重载并锁定当前交互actor，非管理员读取有效权限快照。Read名称不证明只读，callback仍可能写入；true仅保留原23505映射。',
+                                                                                                                  'unverified': '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。',
+                                                                                                                  'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md'}},
+                          'internal/store/postgres/company_members.go:*PgStore:companyReferencedTx': {'lock_fk_wait_fence': '委托 '
+                                                                                                                            'companyTxScope(admin, '
+                                                                                                                            'companyTenantReferenceLock, '
+                                                                                                                            'uniqueConflicts=true, '
+                                                                                                                            'f)；T '
+                                                                                                                            'FOR '
+                                                                                                                            'KEY '
+                                                                                                                            'SHARE先于actor '
+                                                                                                                            'U '
+                                                                                                                            'SHARE及条件profile '
+                                                                                                                            'SHARE '
+                                                                                                                            'NOWAIT、资源callback和必要审计。true只保留原唯一性映射，不增加锁或改变回调范围。',
+                                                                                                      'evidence': ['internal/store/postgres/company_members.go:56-58 '
+                                                                                                                   'sha256=e5eeb7d588ae1415c2b80290d9804016609eb9c398a5a2fb9a6ead03cff86cce',
+                                                                                                                   'PR '
+                                                                                                                   '#195 '
+                                                                                                                   '/ '
+                                                                                                                   'Issue '
+                                                                                                                   '#189 '
+                                                                                                                   'separately '
+                                                                                                                   'records '
+                                                                                                                   'typed '
+                                                                                                                   'error '
+                                                                                                                   'and '
+                                                                                                                   'bounded '
+                                                                                                                   'PostgreSQL '
+                                                                                                                   'tests; '
+                                                                                                                   'this '
+                                                                                                                   'catalog '
+                                                                                                                   'runs '
+                                                                                                                   'syntax '
+                                                                                                                   'producers '
+                                                                                                                   'only.'],
+                                                                                                      'unverified_risks': ['Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行',
+                                                                                                                           '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。'],
+                                                                                                      'file_family_context': 'companyTxScope三种T模式：UPDATE/KEY '
+                                                                                                                             'SHARE/无T→actor '
+                                                                                                                             'SHARE→profile '
+                                                                                                                             'SHARE '
+                                                                                                                             'NOWAIT→callback→Commit；grant/移交先mailbox '
+                                                                                                                             'revision；Activate独立事务 '
+                                                                                                                             'uniqueConflicts由三个既有wrapper固定true保留旧23505映射；CreateWorkMailbox固定false只在mailboxes '
+                                                                                                                             'INSERT分类地址约束，后续审计/未知唯一性错误保持原因。',
+                                                                                                      'source_review': {'base_commit': '740126660526db987b7914c50a8731b7cac9bf42',
+                                                                                                                        'source_sha256': 'e5eeb7d588ae1415c2b80290d9804016609eb9c398a5a2fb9a6ead03cff86cce',
+                                                                                                                        'role': 'tenant-reference '
+                                                                                                                                'wrapper '
+                                                                                                                                'retaining '
+                                                                                                                                'existing '
+                                                                                                                                'uniqueness '
+                                                                                                                                'mapping',
+                                                                                                                        'trace': '委托 '
+                                                                                                                                 'companyTxScope(admin, '
+                                                                                                                                 'companyTenantReferenceLock, '
+                                                                                                                                 'uniqueConflicts=true, '
+                                                                                                                                 'f)；T '
+                                                                                                                                 'FOR '
+                                                                                                                                 'KEY '
+                                                                                                                                 'SHARE先于actor '
+                                                                                                                                 'U '
+                                                                                                                                 'SHARE及条件profile '
+                                                                                                                                 'SHARE '
+                                                                                                                                 'NOWAIT、资源callback和必要审计。true只保留原唯一性映射，不增加锁或改变回调范围。',
+                                                                                                                        'unverified': '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。',
+                                                                                                                        'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md'}},
+                          'internal/store/postgres/company_members.go:*PgStore:companyTx': {'lock_fk_wait_fence': '委托 '
+                                                                                                                  'companyTxScope(admin, '
+                                                                                                                  'companyTenantWriteLock, '
+                                                                                                                  'uniqueConflicts=true, '
+                                                                                                                  'f)。保留T '
+                                                                                                                  'FOR '
+                                                                                                                  'UPDATE→当前交互actor '
+                                                                                                                  'U '
+                                                                                                                  'FOR '
+                                                                                                                  'SHARE→按需非管理员profile '
+                                                                                                                  'SHARE '
+                                                                                                                  'NOWAIT→callback→Commit；新增true只保留既有通用23505映射，无新增SQL、锁或授权绕过。',
+                                                                                            'evidence': ['internal/store/postgres/company_members.go:34-36 '
+                                                                                                         'sha256=e9e236564ef8244fc785b085bfd67001192b1deb88852f0a8fafa568fd92ceaf',
+                                                                                                         'PR #195 / '
+                                                                                                         'Issue #189 '
+                                                                                                         'separately '
+                                                                                                         'records '
+                                                                                                         'typed error '
+                                                                                                         'and bounded '
+                                                                                                         'PostgreSQL '
+                                                                                                         'tests; this '
+                                                                                                         'catalog runs '
+                                                                                                         'syntax '
+                                                                                                         'producers '
+                                                                                                         'only.'],
+                                                                                            'unverified_risks': ['Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行',
+                                                                                                                 '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。'],
+                                                                                            'file_family_context': 'companyTxScope三种T模式：UPDATE/KEY '
+                                                                                                                   'SHARE/无T→actor '
+                                                                                                                   'SHARE→profile '
+                                                                                                                   'SHARE '
+                                                                                                                   'NOWAIT→callback→Commit；grant/移交先mailbox '
+                                                                                                                   'revision；Activate独立事务 '
+                                                                                                                   'uniqueConflicts由三个既有wrapper固定true保留旧23505映射；CreateWorkMailbox固定false只在mailboxes '
+                                                                                                                   'INSERT分类地址约束，后续审计/未知唯一性错误保持原因。',
+                                                                                            'source_review': {'base_commit': '740126660526db987b7914c50a8731b7cac9bf42',
+                                                                                                              'source_sha256': 'e9e236564ef8244fc785b085bfd67001192b1deb88852f0a8fafa568fd92ceaf',
+                                                                                                              'role': 'tenant-write '
+                                                                                                                      'wrapper '
+                                                                                                                      'retaining '
+                                                                                                                      'existing '
+                                                                                                                      'uniqueness '
+                                                                                                                      'mapping',
+                                                                                                              'trace': '委托 '
+                                                                                                                       'companyTxScope(admin, '
+                                                                                                                       'companyTenantWriteLock, '
+                                                                                                                       'uniqueConflicts=true, '
+                                                                                                                       'f)。保留T '
+                                                                                                                       'FOR '
+                                                                                                                       'UPDATE→当前交互actor '
+                                                                                                                       'U '
+                                                                                                                       'FOR '
+                                                                                                                       'SHARE→按需非管理员profile '
+                                                                                                                       'SHARE '
+                                                                                                                       'NOWAIT→callback→Commit；新增true只保留既有通用23505映射，无新增SQL、锁或授权绕过。',
+                                                                                                              'unverified': '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。',
+                                                                                                              'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md'}},
+                          'internal/store/postgres/company_members.go:*PgStore:companyTxScope': {'lock_fk_wait_fence': 'Begin→按枚举T '
+                                                                                                                       'UPDATE/KEY '
+                                                                                                                       'SHARE/无T→currentMemberActor校验交互主体、U '
+                                                                                                                       'FOR '
+                                                                                                                       'SHARE后刷新active/tenant/current '
+                                                                                                                       'role及已有JWT '
+                                                                                                                       'session '
+                                                                                                                       'version→要求admin时检查当前IsTenantAdmin→仅非管理员加载有效profile '
+                                                                                                                       'SHARE '
+                                                                                                                       'NOWAIT→f→Commit。回调错误42501仍Forbidden；40001/55P03仍Conflict；只有uniqueConflicts=true才泛化23505。false保留调用者在具体写边界分类的app.Error及PgError原因，未分类23505原样返回。Begin/锁/身份/权限阶段错误和Commit错误仍按原路径返回，无自动重试，40P01不会变成成功。',
+                                                                                                 'evidence': ['internal/store/postgres/company_members.go:63-110 '
+                                                                                                              'sha256=63a7abfc93a82f4a5c92303d24823f372a61d1aeb1f06d5796a994d989e9152c',
+                                                                                                              'PR #195 '
+                                                                                                              '/ Issue '
+                                                                                                              '#189 '
+                                                                                                              'separately '
+                                                                                                              'records '
+                                                                                                              'typed '
+                                                                                                              'error '
+                                                                                                              'and '
+                                                                                                              'bounded '
+                                                                                                              'PostgreSQL '
+                                                                                                              'tests; '
+                                                                                                              'this '
+                                                                                                              'catalog '
+                                                                                                              'runs '
+                                                                                                              'syntax '
+                                                                                                              'producers '
+                                                                                                              'only.'],
+                                                                                                 'unverified_risks': ['Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行',
+                                                                                                                      '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。'],
+                                                                                                 'file_family_context': 'companyTxScope三种T模式：UPDATE/KEY '
+                                                                                                                        'SHARE/无T→actor '
+                                                                                                                        'SHARE→profile '
+                                                                                                                        'SHARE '
+                                                                                                                        'NOWAIT→callback→Commit；grant/移交先mailbox '
+                                                                                                                        'revision；Activate独立事务 '
+                                                                                                                        'uniqueConflicts由三个既有wrapper固定true保留旧23505映射；CreateWorkMailbox固定false只在mailboxes '
+                                                                                                                        'INSERT分类地址约束，后续审计/未知唯一性错误保持原因。',
+                                                                                                 'source_review': {'base_commit': '740126660526db987b7914c50a8731b7cac9bf42',
+                                                                                                                   'source_sha256': '63a7abfc93a82f4a5c92303d24823f372a61d1aeb1f06d5796a994d989e9152c',
+                                                                                                                   'role': 'shared '
+                                                                                                                           'transaction/authentication '
+                                                                                                                           'boundary '
+                                                                                                                           'with '
+                                                                                                                           'explicit '
+                                                                                                                           'uniqueness '
+                                                                                                                           'mapping '
+                                                                                                                           'selection',
+                                                                                                                   'trace': 'Begin→按枚举T '
+                                                                                                                            'UPDATE/KEY '
+                                                                                                                            'SHARE/无T→currentMemberActor校验交互主体、U '
+                                                                                                                            'FOR '
+                                                                                                                            'SHARE后刷新active/tenant/current '
+                                                                                                                            'role及已有JWT '
+                                                                                                                            'session '
+                                                                                                                            'version→要求admin时检查当前IsTenantAdmin→仅非管理员加载有效profile '
+                                                                                                                            'SHARE '
+                                                                                                                            'NOWAIT→f→Commit。回调错误42501仍Forbidden；40001/55P03仍Conflict；只有uniqueConflicts=true才泛化23505。false保留调用者在具体写边界分类的app.Error及PgError原因，未分类23505原样返回。Begin/锁/身份/权限阶段错误和Commit错误仍按原路径返回，无自动重试，40P01不会变成成功。',
+                                                                                                                   'unverified': '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。',
+                                                                                                                   'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md'}}},
+ 'added_entry': {'id': 'internal/store/postgres/mailbox_errors.go::classifyWorkMailboxCreateError',
+                 'owner': 'postgres/mailbox_errors.go',
+                 'entry': 'classifyWorkMailboxCreateError',
+                 'group': 'TX01',
+                 'classification': {'kind': 'read-or-pure',
+                                    'direct_write': False,
+                                    'write_closure': False,
+                                    'explicit_lock': False,
+                                    'transaction_calls': False,
+                                    'callback_parameter': False,
+                                    'dynamic_sql_expression': False},
+                 'syntax': {'id': 'internal/store/postgres/mailbox_errors.go::classifyWorkMailboxCreateError',
+                            'file': 'internal/store/postgres/mailbox_errors.go',
+                            'name': 'classifyWorkMailboxCreateError',
+                            'receiver': '',
+                            'line': 13,
+                            'end': 19,
+                            'sha256': 'fd8459fc863319e7d82e662b6f7be9e4a67a017f0d23ef4d73188fe678b07e74',
+                            'calls': [{'line': 15, 'expr': 'errors.As', 'name': 'As'}],
+                            'strings': [{'line': 15, 'value': '23505'},
+                                        {'line': 15, 'value': 'mailboxes_full_address_key'},
+                                        {'line': 16, 'value': 'mailbox address already exists'}],
+                            'params': 'func(err error) error'},
+                 'callers': [{'caller_id': 'internal/store/postgres/company_members.go:*PgStore:CreateWorkMailbox',
+                              'file': 'internal/store/postgres/company_members.go',
+                              'function': 'CreateWorkMailbox',
+                              'line': 592,
+                              'expression': 'classifyWorkMailboxCreateError',
+                              'status': 'name-match-candidate-not-dispatch-proof'}],
+                 'lock_fk_wait_fence': {'boundary': '仅errors.As得到非nil '
+                                                    '*pgconn.PgError且SQLSTATE=23505、ConstraintName=mailboxes_full_address_key时，返回带原始err原因链的app.KindConflict。所有其他错误原样返回；不匹配本地化诊断文本，不执行SQL、不加锁、不发起事务或重试。生产调用仅位于CreateWorkMailbox的mailboxes '
+                                                    'INSERT失败分支，审计/后续错误不进入该分类器。',
+                                        'local_operations': [],
+                                        'direct_lock_fragments': [],
+                                        'implicit_fk': '本函数不访问数据库；约束来自00001_baseline.sql的mailboxes.full_address全局UNIQUE。邮箱INSERT的唯一/FK等待和审计/outbox原子性属于CreateWorkMailbox及companyTxScope。只有调用位置保证该23505来自邮箱INSERT；helper本身不识别SQL阶段。'},
+                 'evidence': ['internal/store/postgres/mailbox_errors.go:13-19 '
+                              'sha256=fd8459fc863319e7d82e662b6f7be9e4a67a017f0d23ef4d73188fe678b07e74',
+                              'PR #195 / Issue #189 separately records typed error and bounded PostgreSQL tests; this '
+                              'catalog runs syntax producers only.'],
+                 'unverified_risks': ['本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。',
+                                      '必须保留CreateWorkMailbox的uniqueConflicts=false；否则外层通用23505映射会再次泛化错误并丢失原因。'],
+                 'review_status': 'static-type-review',
+                 'followup_tasks': ['R5-P0-070', 'R5-P1-030'],
+                 'assertions': {'direct_sql_effects': [],
+                                'direct_lock_fragments': [],
+                                'transaction_helper_calls': [],
+                                'sql_execution_expressions': [],
+                                'effect_status': 'source-fragments-not-evaluated-SQL',
+                                'callback_effect': '仅errors.As和构造app.Error保留原始Err；无函数参数回调、数据库或外部副作用。',
+                                'entry_role': 'local-or-adapter-helper'},
+                 'file_family_context': '公司工作邮箱创建错误的纯typed分类；精确SQLSTATE/约束名且保留原错误链，实际INSERT边界由调用者限定。',
+                 'evidence_level': 'source-only',
+                 'source_review': {'base_commit': '740126660526db987b7914c50a8731b7cac9bf42',
+                                   'source_sha256': 'fd8459fc863319e7d82e662b6f7be9e4a67a017f0d23ef4d73188fe678b07e74',
+                                   'role': 'pure typed PostgreSQL mailbox address conflict classifier',
+                                   'trace': '仅errors.As得到非nil '
+                                            '*pgconn.PgError且SQLSTATE=23505、ConstraintName=mailboxes_full_address_key时，返回带原始err原因链的app.KindConflict。所有其他错误原样返回；不匹配本地化诊断文本，不执行SQL、不加锁、不发起事务或重试。生产调用仅位于CreateWorkMailbox的mailboxes '
+                                            'INSERT失败分支，审计/后续错误不进入该分类器。',
+                                   'unverified': '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。',
+                                   'review': 'docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md'}},
+ 'added_file_review': {'group': 'TX01',
+                       'review': '仅errors.As得到非nil '
+                                 '*pgconn.PgError且SQLSTATE=23505、ConstraintName=mailboxes_full_address_key时，返回带原始err原因链的app.KindConflict。所有其他错误原样返回；不匹配本地化诊断文本，不执行SQL、不加锁、不发起事务或重试。生产调用仅位于CreateWorkMailbox的mailboxes '
+                                 'INSERT失败分支，审计/后续错误不进入该分类器。',
+                       'remaining': '本轮是精确源码审查；错误分类变化不建立新的锁序、重试、跨事务授权或全局无死锁证明。CreateWorkMailbox的固定PG10用例为另行记录的有限证据，不升级此目录runtime_verified或R5-P0-070完成。既有callback/隐式FK/并发等待及其他工作流风险保留。'}}
+
+def revision13_snapshot(name):
+    pin = REVISION13_SNAPSHOTS[name]
+    ref = REVISION13_COMMIT + ':' + pin['path']
+    raw = git('show', ref)
+    if git('rev-parse', ref).decode().strip() != pin['blob'] or hashlib.sha256(raw).hexdigest() != pin['sha256'] or len(raw) != pin['bytes']:
+        raise ValueError('revision13 public historical catalog identity drift: ' + name)
+    return json.loads(raw)
+
+
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args])
 
@@ -1997,6 +2460,9 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         cls.revision12 = {name: revision12_snapshot(name) for name in REVISION12_SNAPSHOTS}
         cls.rev12_tx = cls.revision12['transaction']
         cls.rev12_compat = cls.revision12['compatibility']
+        cls.revision13 = {name: revision13_snapshot(name) for name in REVISION13_SNAPSHOTS}
+        cls.rev13_tx = cls.revision13['transaction']
+        cls.rev13_compat = cls.revision13['compatibility']
         cls.ast = tx.extract()
         cls.migrations = tx.migration_inventory()
         cls.routes, cls.clients = gate.collect()
@@ -2085,17 +2551,60 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 patches.enter_context(mock.patch.object(self, name, value))
             yield
 
+
+    @classmethod
+    def frozen_revision13_root(cls):
+        if '_revision13_root' not in cls.__dict__:
+            temporary = tempfile.TemporaryDirectory(prefix='r5-catalog-revision13-')
+            cls.addClassCleanup(temporary.cleanup)
+            root = Path(temporary.name) / 'source'
+            subprocess.run(['git', 'clone', '--quiet', '--no-hardlinks', '--no-checkout', str(ROOT), str(root)], check=True)
+            subprocess.run(['git', '-C', str(root), 'checkout', '--quiet', '--detach', REVISION13_COMMIT], check=True)
+            def frozen_git(*args):
+                return subprocess.check_output(['git', '-C', str(root), *args]).decode().strip()
+            if frozen_git('rev-parse', 'HEAD') != REVISION13_COMMIT or frozen_git('rev-parse', 'HEAD^{tree}') != REVISION13_TREE or frozen_git('status', '--porcelain', '--untracked-files=all'):
+                raise ValueError('revision13 source checkout is not the exact clean public snapshot')
+            # Reuse only the installed compiler. All historical Go/TypeScript
+            # inputs and original assertion bodies come from public revision13.
+            compiler = ROOT / 'web/node_modules/typescript'
+            if not compiler.is_dir():
+                raise ValueError('TypeScript required for historical original collection')
+            (root / 'web/node_modules').mkdir()
+            (root / 'web/node_modules/typescript').symlink_to(compiler.resolve(), target_is_directory=True)
+            cls.revision13_ast = tx.extract(root)
+            cls.revision13_migrations = tx.migration_inventory(root)
+            with mock.patch.object(gate, 'ROOT', root):
+                cls.revision13_routes, cls.revision13_clients = gate.collect()
+            if frozen_git('rev-parse', 'HEAD') != REVISION13_COMMIT or frozen_git('rev-parse', 'HEAD^{tree}') != REVISION13_TREE or frozen_git('status', '--porcelain', '--untracked-files=all'):
+                raise ValueError('revision13 public checkout changed during original collection')
+            cls._revision13_root = root
+        return cls._revision13_root
+
+    @contextmanager
+    def revision13_context(self):
+        root = self.frozen_revision13_root()
+        with ExitStack() as patches:
+            patches.enter_context(mock.patch.dict(globals(), ROOT=root,
+                CURRENT_EVIDENCE=root / 'docs/company-mail/evidence/R5-CATALOG-REVISION13-20261008',
+                SOURCE_COMMIT=REVISION13_SOURCE_COMMIT, SOURCE_TREE=REVISION13_SOURCE_TREE))
+            patches.enter_context(mock.patch.object(gate, 'ROOT', root))
+            for name, value in dict(tx=self.rev13_tx, compat=self.rev13_compat,
+                    ast=self.revision13_ast, migrations=self.revision13_migrations,
+                    routes=self.revision13_routes, clients=self.revision13_clients).items():
+                patches.enter_context(mock.patch.object(self, name, value))
+            yield
+
     def test_old_pins_reject_and_current_revision_passes_same_actual_facts(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
         expected = review['current_rejections']
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(expected)).hexdigest(),
-                         REVISION13_EXPECTED['review_field_sha256']['current_rejections'])
+                         REVISION14_EXPECTED['review_field_sha256']['current_rejections'])
         historical = [('revision1', self.old_tx, self.old_compat),
                       ('revision2', self.rev2_tx, self.rev2_compat), ('revision3', self.rev3_tx, self.rev3_compat),
                       ('revision4', self.rev4_tx, self.rev4_compat), ('revision5', self.rev5_tx, self.rev5_compat),
                       ('revision6', self.rev6_tx, self.rev6_compat), ('revision7', self.rev7_tx, self.rev7_compat),
                       ('revision8', self.rev8_tx, self.rev8_compat), ('revision9', self.rev9_tx, self.rev9_compat),
-                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat)]
+                      ('revision10', self.rev10_tx, self.rev10_compat), ('revision11', self.rev11_tx, self.rev11_compat), ('revision12', self.rev12_tx, self.rev12_compat), ('revision13', self.rev13_tx, self.rev13_compat)]
         for revision, transaction, compatibility in historical:
             with self.assertRaises(ValueError) as rejected:
                 tx.validate(transaction, self.ast, self.migrations)
@@ -2107,10 +2616,10 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertFalse(gate.validate(self.compat, self.routes, self.clients)['product_green'])
         for name, current in (('transaction', self.tx), ('compatibility', self.compat)):
             revision = current['inventory_revision']
-            pin = REVISION12_SNAPSHOTS[name]
-            self.assertEqual(revision['revision'], 13)
+            pin = REVISION13_SNAPSHOTS[name]
+            self.assertEqual(revision['revision'], 14)
             self.assertEqual(revision['source_commit'], SOURCE_COMMIT)
-            self.assertEqual(revision['previous_snapshot_commit'], REVISION12_COMMIT)
+            self.assertEqual(revision['previous_snapshot_commit'], REVISION13_COMMIT)
             self.assertEqual(revision['previous_snapshot'], pin['path'])
             self.assertEqual(revision['previous_snapshot_blob'], pin['blob'])
             self.assertEqual(revision['previous_sha256'], pin['sha256'])
@@ -4121,85 +4630,353 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     self.assertEqual(ast.dump(value, include_attributes=False), ast.dump(new_values[name], include_attributes=False))
 
     def test_revision13_binds_actual_source_facts_and_preserves_manual_reviews(self):
+        with self.revision13_context():
+            review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+            self.assertEqual(review['inventory_revision'], 13)
+            self.assertEqual(review['source_commit'], SOURCE_COMMIT)
+            self.assertEqual(review['source_tree'], SOURCE_TREE)
+            self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
+            self.assertEqual(review['previous_catalog_commit'], REVISION12_COMMIT)
+            self.assertEqual(review['previous_product_source_commit'], REVISION12_SOURCE_COMMIT)
+            self.assertEqual(review['revision12_snapshots'],
+                             {name: dict(commit=REVISION12_COMMIT, **pin) for name, pin in REVISION12_SNAPSHOTS.items()})
+            for field, expected in REVISION13_EXPECTED['review_field_sha256'].items():
+                self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), expected)
+            self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
+            self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
+            self.assertEqual(review['transaction'], REVISION13_EXPECTED['transaction'])
+            self.assertEqual(review['compatibility'], REVISION13_EXPECTED['compatibility'])
+            actual_files = [dict(path=item['path'], sha256=item['sha256']) for item in self.ast['files'] if item['path'].startswith(tx.PG)]
+            self.assertEqual(self.tx['postgres_files'], actual_files)
+            before_files = {item['path']: item['sha256'] for item in self.rev12_tx['postgres_files']}
+            after_files = {item['path']: item['sha256'] for item in self.tx['postgres_files']}
+            self.assertEqual(set(before_files), set(after_files))
+            self.assertEqual([path for path in before_files if before_files[path] != after_files[path]],
+                             ['internal/store/postgres/users.go'])
+            self.assertEqual(self.tx['reviewed_file_types'], self.rev12_tx['reviewed_file_types'])
+            self.assertEqual(self.tx['migrations'], self.rev12_tx['migrations'])
+            self.assertEqual(self.tx['historical_review_metadata'], self.rev12_tx['historical_review_metadata'])
+            mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'entries'}
+            self.assertEqual({key: value for key, value in self.rev12_tx.items() if key not in mutable_transaction},
+                             {key: value for key, value in self.tx.items() if key not in mutable_transaction})
+            functions = {item['id']: item for item in self.ast['functions'] if item['file'].startswith(tx.PG)}
+            classes = tx.classify(self.ast)
+            old = {entry['id']: entry for entry in self.rev12_tx['entries']}
+            current = {entry['id']: entry for entry in self.tx['entries']}
+            self.assertEqual(set(old), set(current))
+            self.assertEqual(set(current), set(functions))
+            reviewed_id = 'internal/store/postgres/users.go:*PgStore:CreateRefreshToken'
+            reviewed_sha = '66e6bd4224e13273b7bf3904de303f128c1d4cfb980f1773b24ebf879198f1d0'
+            fingerprint = lambda value: hashlib.sha256(gate.canonical_bytes(value)).hexdigest()
+            caller_changes, body_changes, classification_changes, entry_changes = [], [], [], []
+            for identity, before in old.items():
+                after, function = current[identity], functions[identity]
+                self.assertEqual(after['syntax'], function)
+                self.assertEqual(after['classification'], classes[identity])
+                actual_callers = [dict(caller_id=item['id'], file=item['file'], function=item['name'],
+                    line=call['line'], expression=call['expr'], status='name-match-candidate-not-dispatch-proof')
+                    for item in self.ast['functions'] for call in item['calls'] if call['name'] == function['name']]
+                self.assertEqual(after['callers'], actual_callers)
+                derived = {
+                    'direct_sql_effects': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.MUTATION.search(item['value'])],
+                    'direct_lock_fragments': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.LOCK.search(item['value'])],
+                    'transaction_helper_calls': [call for call in function['calls'] if call['name'] in tx.TX],
+                    'sql_execution_expressions': [call for call in function['calls'] if call['name'] in tx.SQL_CALLS],
+                }
+                self.assertEqual({key: after['assertions'][key] for key in derived}, derived)
+                self.assertEqual({key: value for key, value in before['assertions'].items() if key not in derived},
+                                 {key: value for key, value in after['assertions'].items() if key not in derived})
+                mutable = {'syntax', 'classification', 'callers', 'assertions'}
+                if identity == reviewed_id:
+                    self.assertEqual(before['syntax']['sha256'], '84457782c35718446b19a00ba7e07022a0b58f5cf6bf96172bf8bd67da887edb')
+                    self.assertEqual(function['sha256'], reviewed_sha)
+                    self.assertNotIn('source_review', before)
+                    manual = ('lock_fk_wait_fence', 'evidence', 'unverified_risks', 'file_family_context')
+                    self.assertEqual(after['historical_revision12_review'], {key: before[key] for key in manual})
+                    self.assertEqual({key: after[key] for key in (*manual, 'source_review')},
+                                     REVISION13_EXPECTED['refresh_manual_fields'])
+                    self.assertEqual(after['source_review']['base_commit'], SOURCE_COMMIT)
+                    self.assertEqual(after['source_review']['source_sha256'], function['sha256'])
+                    # Function-valued exec aliases remain outside the unchanged
+                    # call-name SQL collector. The explicit manual record binds it.
+                    self.assertTrue(any(call['name'] == 'exec' for call in function['calls']))
+                    self.assertFalse(any(call['name'] == 'exec' for call in derived['sql_execution_expressions']))
+                    self.assertEqual(after['lock_fk_wait_fence']['local_operations'],
+                        [dict(line=call['line'], operation=call['expr'], sql_expression=call.get('sql_expr'), status='lexical-source-only')
+                         for call in function['calls'] if call['name'] in tx.SQL_CALLS or call['name'] == 'exec'])
+                    mutable.update((*manual, 'historical_revision12_review', 'source_review'))
+                else:
+                    self.assertEqual(before['syntax']['sha256'], function['sha256'])
+                    self.assertEqual(before['classification'], after['classification'])
+                    if before['syntax'] != function:
+                        self.assertEqual(function['file'], 'internal/store/postgres/users.go')
+                self.assertEqual({key: value for key, value in before.items() if key not in mutable},
+                                 {key: value for key, value in after.items() if key not in mutable})
+                if before['callers'] != after['callers']:
+                    caller_changes.append(dict(id=identity, before=before['callers'], after=after['callers'],
+                        before_sha256=fingerprint(before['callers']), after_sha256=fingerprint(after['callers'])))
+                if before['syntax']['sha256'] != function['sha256']:
+                    body_changes.append(dict(id=identity, before_sha256=before['syntax']['sha256'], after_sha256=function['sha256']))
+                if before['classification'] != after['classification']:
+                    classification_changes.append(dict(id=identity, before=before['classification'], after=after['classification']))
+                if before != after:
+                    entry_changes.append(dict(id=identity,
+                        changed_fields=[key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)],
+                        before_sha256=fingerprint(before), after_sha256=fingerprint(after)))
+            self.assertEqual(caller_changes, review['transaction_callers'])
+            self.assertEqual(body_changes, review['transaction_body_changes'])
+            self.assertEqual(classification_changes, review['transaction_classification_changes'])
+            self.assertEqual(entry_changes, review['transaction_entry_changes'])
+            self.assertEqual([row['id'] for row in body_changes], [reviewed_id])
+            self.assertEqual([row['id'] for row in classification_changes], [reviewed_id])
+            self.assertEqual(review['migration_changes'], [])
+            self.assertEqual(review['client_before'], self.revision12['clients'])
+            self.assertEqual(review['client_after'], self.clients)
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision12['clients'])).hexdigest(), review['client_before_sha256'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.clients)).hexdigest(), review['client_after_sha256'])
+            old_routes = {row['route']: row for row in self.rev12_compat['routes']}
+            new_routes = {row['route']: row for row in self.compat['routes']}
+            fresh_routes = {row['route']: row for row in gate.source_facts(self.routes, self.clients)}
+            self.assertEqual(set(old_routes), set(new_routes))
+            route_changes = []
+            for identity, before in old_routes.items():
+                after = new_routes[identity]
+                fact_keys = set(fresh_routes[identity])
+                self.assertEqual({key: value for key, value in before.items() if key not in fact_keys},
+                                 {key: value for key, value in after.items() if key not in fact_keys})
+                changed = [key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)]
+                if changed:
+                    route_changes.append(dict(route=identity, changed_fields=changed,
+                        before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
+                        after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest()))
+            self.assertEqual(route_changes, review['compatibility_route_changes'])
+            old_closure, new_closure = self.rev12_compat['source_closure'], self.compat['source_closure']
+            closure_changes = [dict(path=path, before_sha256=old_closure.get(path), after_sha256=new_closure.get(path))
+                               for path in sorted(set(old_closure) | set(new_closure)) if old_closure.get(path) != new_closure.get(path)]
+            self.assertEqual(closure_changes, review['closure_changes'])
+            mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
+            self.assertEqual({k: v for k, v in self.rev12_compat.items() if k not in mutable},
+                             {k: v for k, v in self.compat.items() if k not in mutable})
+            self.assertEqual(self.compat['acquisition'], dict(self.rev12_compat['acquisition'], base_commit=SOURCE_COMMIT))
+            for name, pin in review['generated_catalogs'].items():
+                self.assertEqual(pin['path'], REVISION12_SNAPSHOTS[name]['path'])
+                raw = (ROOT / pin['path']).read_bytes()
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
+                self.assertEqual(len(raw), pin['bytes'])
+            self.assertEqual(set(review['generated_catalogs']), set(REVISION12_SNAPSHOTS))
+            route_map = {(row['method'], gate.norm(row['path'])): row['method'] + ' ' + row['path'] for row in self.routes}
+            documented = json.loads((ROOT / REVISION12_SNAPSHOTS['client_routes']['path']).read_text())
+            self.assertEqual(documented, [dict(row, routes=[] if row['forwarding'] else
+                             [route_map[(method, gate.norm(row['path']))] for method in row['methods']]) for row in self.clients])
+            changed = git('diff', '--name-only', REVISION12_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+            product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
+                             (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
+                             (p.startswith('web/locales/') and p.endswith('.json'))]
+            self.assertEqual(product_paths, [row['path'] for row in review['source_changes']])
+            self.assertEqual(product_paths, REVISION13_EXPECTED['product_paths'])
+            self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in new_closure])
+            build_paths = [path for path in ('web/package.json', 'web/package-lock.json')
+                           if git('show', REVISION12_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+            self.assertEqual(build_paths, [row['path'] for row in review['additional_build_metadata_changes']])
+            schema_paths = [path for path in ('internal/api/openapi.yaml',)
+                            if git('show', REVISION12_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+            self.assertEqual(schema_paths, [row['path'] for row in review['additional_api_schema_changes']])
+            for row in review['source_changes'] + review['additional_build_metadata_changes'] + review['additional_api_schema_changes']:
+                self.assertEqual(row['before_commit'], REVISION12_SOURCE_COMMIT)
+                self.assertEqual(row['after_commit'], SOURCE_COMMIT)
+                for prefix, commit in (('before', REVISION12_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
+                    if row[prefix + '_blob'] is None:
+                        self.assertFalse(git('ls-tree', commit, '--', row['path']))
+                        self.assertIsNone(row[prefix + '_sha256'])
+                        self.assertIsNone(row[prefix + '_bytes'])
+                    else:
+                        ref = commit + ':' + row['path']
+                        raw = git('show', ref)
+                        self.assertEqual(git('rev-parse', ref).decode().strip(), row[prefix + '_blob'])
+                        self.assertEqual(hashlib.sha256(raw).hexdigest(), row[prefix + '_sha256'])
+                        self.assertEqual(len(raw), row[prefix + '_bytes'])
+                self.assertEqual((ROOT / row['path']).read_bytes(), git('show', SOURCE_COMMIT + ':' + row['path']))
+            self.assertFalse(review['runtime_verified'])
+            self.assertFalse(review['product_green'])
+            self.assertFalse(review['task_complete'])
+            self.assertEqual(review['implementation_todos_completed'], 0)
+            self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
+
+    def test_revision13_preserves_public_history_collectors_and_original_rejections(self):
+        with self.revision13_context():
+            review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+            self.assertEqual(git('rev-parse', REVISION12_COMMIT + '^{tree}').decode().strip(), REVISION12_TREE)
+            historical = []
+            for directory in review['historical_directories']:
+                names = git('ls-tree', '-r', '--name-only', REVISION12_COMMIT, '--', directory).decode().splitlines()
+                self.assertTrue(names)
+                self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
+                for path in names:
+                    ref = REVISION12_COMMIT + ':' + path
+                    raw = git('show', ref)
+                    self.assertEqual((ROOT / path).read_bytes(), raw)
+                    historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                           sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+            self.assertEqual(historical, review['historical_manifest'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION13_EXPECTED['historical_manifest_sha256'])
+            roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
+            mutable = ['scripts/tests/test_r5_catalog_reconciliation.py', 'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py']
+            self.assertEqual(review['mutable_current_positive_test_paths'], mutable)
+            paths = git('ls-tree', '-r', '--name-only', SOURCE_COMMIT, '--', *roots).decode().splitlines()
+            self.assertEqual({str(path.relative_to(ROOT)) for folder in ('scripts', '.github/workflows', 'cmd/r5txinventory')
+                              for path in (ROOT / folder).rglob('*') if path.is_file() and '__pycache__' not in str(path) and path.suffix != '.pyc'} |
+                             {'internal/architecture/route_inventory_test.go'}, set(paths))
+            protected = []
+            for path in paths:
+                if path in mutable:
+                    continue
+                ref = SOURCE_COMMIT + ':' + path
+                raw = git('show', ref)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                      sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+            self.assertEqual(protected, review['protected_source_manifest'])
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION13_EXPECTED['protected_source_manifest_sha256'])
+            for path, expected in review['unchanged_validators_and_collectors'].items():
+                raw = git('show', REVISION12_COMMIT + ':' + path)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
+            for path, replacements in (
+                ('scripts/tests/test_r5_transactions.py', [("result['functions'], 401", "result['functions'], %d" % REVISION13_EXPECTED['transaction']['functions']),
+                    ("result['postgres_files'], 63", "result['postgres_files'], %d" % REVISION13_EXPECTED['transaction']['postgres_files'])]),
+                ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION13_EXPECTED['compatibility']['routes']),
+                    ("result['client_branches'],136", "result['client_branches'],%d" % REVISION13_EXPECTED['compatibility']['client_branches'])]),
+            ):
+                expected = git('show', REVISION12_COMMIT + ':' + path).decode()
+                for before, after in replacements:
+                    self.assertEqual(expected.count(before), 1)
+                    expected = expected.replace(before, after)
+                self.assertEqual((ROOT / path).read_text(), expected)
+            path = 'scripts/tests/test_r5_catalog_reconciliation.py'
+            before_raw = git('show', REVISION12_COMMIT + ':' + path).decode()
+            after_raw = (ROOT / path).read_text()
+            def methods(raw):
+                return {node.name: node for node in ast.walk(ast.parse(raw))
+                        if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
+            before, after = methods(before_raw), methods(after_raw)
+            self.assertEqual((len(before), len(after)), (27, 29))
+            self.assertTrue(set(before).issubset(after))
+            self.assertEqual(set(after) - set(before), {'test_revision13_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision13_preserves_public_history_collectors_and_original_rejections'})
+            frozen = {'test_revision12_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision12_preserves_public_history_collectors_and_original_rejections'}
+            allowed = frozen | {'test_old_pins_reject_and_current_revision_passes_same_actual_facts'}
+            for name in before:
+                if name not in allowed:
+                    self.assertEqual(ast.dump(before[name], include_attributes=False), ast.dump(after[name], include_attributes=False))
+                    self.assertEqual(ast.get_source_segment(before_raw, before[name]), ast.get_source_segment(after_raw, after[name]))
+            for name in frozen:
+                self.assertEqual(len(after[name].body), 1)
+                wrapper = after[name].body[0]
+                self.assertIsInstance(wrapper, ast.With)
+                self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision12_context()')
+                self.assertEqual([ast.dump(node, include_attributes=False) for node in before[name].body],
+                                 [ast.dump(node, include_attributes=False) for node in wrapper.body])
+                original_body = ''.join(before_raw.splitlines(keepends=True)[before[name].lineno:before[name].end_lineno])
+                wrapped_body = ''.join(after_raw.splitlines(keepends=True)[after[name].lineno + 1:after[name].end_lineno])
+                self.assertEqual(''.join(line[4:] if line.strip() else line for line in wrapped_body.splitlines(keepends=True)), original_body)
+            guards = {name for name in before if name.startswith('test_unapproved_')}
+            self.assertEqual(len(guards), 5)
+            for name in guards:
+                self.assertEqual(hashlib.sha256(ast.get_source_segment(after_raw, after[name]).encode()).hexdigest(),
+                                 review['original_unapproved_methods'][name]['source_sha256'])
+                self.assertEqual(hashlib.sha256(ast.dump(after[name], include_attributes=False).encode()).hexdigest(),
+                                 review['original_unapproved_methods'][name]['ast_sha256'])
+            # Fixed revision12 values and all earlier review constants are retained;
+            # only the fresh root/source identifiers advance to revision13.
+            def assignments(raw):
+                return {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
+                        for target in node.targets if isinstance(target, ast.Name)}
+            old_values, new_values = assignments(before_raw), assignments(after_raw)
+            for name, value in old_values.items():
+                if name.startswith('REVISION'):
+                    self.assertEqual(ast.dump(value, include_attributes=False), ast.dump(new_values[name], include_attributes=False))
+                    self.assertEqual(ast.get_source_segment(before_raw, value), ast.get_source_segment(after_raw, new_values[name]))
+
+    def test_revision14_binds_actual_source_facts_and_preserves_manual_reviews(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
-        self.assertEqual(review['inventory_revision'], 13)
+        self.assertEqual(review['inventory_revision'], 14)
         self.assertEqual(review['source_commit'], SOURCE_COMMIT)
         self.assertEqual(review['source_tree'], SOURCE_TREE)
         self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
-        self.assertEqual(review['previous_catalog_commit'], REVISION12_COMMIT)
-        self.assertEqual(review['previous_product_source_commit'], REVISION12_SOURCE_COMMIT)
-        self.assertEqual(review['revision12_snapshots'],
-                         {name: dict(commit=REVISION12_COMMIT, **pin) for name, pin in REVISION12_SNAPSHOTS.items()})
-        for field, expected in REVISION13_EXPECTED['review_field_sha256'].items():
+        self.assertEqual(review['previous_catalog_commit'], REVISION13_COMMIT)
+        self.assertEqual(review['previous_product_source_commit'], REVISION13_SOURCE_COMMIT)
+        self.assertEqual(review['revision13_snapshots'],
+                         {name: dict(commit=REVISION13_COMMIT, **pin) for name, pin in REVISION13_SNAPSHOTS.items()})
+        for field, expected in REVISION14_EXPECTED['review_field_sha256'].items():
             self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), expected)
         self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
         self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
-        self.assertEqual(review['transaction'], REVISION13_EXPECTED['transaction'])
-        self.assertEqual(review['compatibility'], REVISION13_EXPECTED['compatibility'])
+        self.assertEqual(review['transaction'], REVISION14_EXPECTED['transaction'])
+        self.assertEqual(review['compatibility'], REVISION14_EXPECTED['compatibility'])
         actual_files = [dict(path=item['path'], sha256=item['sha256']) for item in self.ast['files'] if item['path'].startswith(tx.PG)]
         self.assertEqual(self.tx['postgres_files'], actual_files)
-        before_files = {item['path']: item['sha256'] for item in self.rev12_tx['postgres_files']}
+        before_files = {item['path']: item['sha256'] for item in self.rev13_tx['postgres_files']}
         after_files = {item['path']: item['sha256'] for item in self.tx['postgres_files']}
-        self.assertEqual(set(before_files), set(after_files))
+        self.assertEqual(set(after_files), set(before_files) | {'internal/store/postgres/mailbox_errors.go'})
+        self.assertEqual((len(before_files), len(after_files)), (63, 64))
         self.assertEqual([path for path in before_files if before_files[path] != after_files[path]],
-                         ['internal/store/postgres/users.go'])
-        self.assertEqual(self.tx['reviewed_file_types'], self.rev12_tx['reviewed_file_types'])
-        self.assertEqual(self.tx['migrations'], self.rev12_tx['migrations'])
-        self.assertEqual(self.tx['historical_review_metadata'], self.rev12_tx['historical_review_metadata'])
-        mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'entries'}
-        self.assertEqual({key: value for key, value in self.rev12_tx.items() if key not in mutable_transaction},
+                         ['internal/store/postgres/company_members.go'])
+        new_file = 'internal/store/postgres/mailbox_errors.go'
+        self.assertEqual(set(self.tx['reviewed_file_types']), set(self.rev13_tx['reviewed_file_types']) | {new_file})
+        self.assertEqual({path: value for path, value in self.tx['reviewed_file_types'].items() if path != new_file}, self.rev13_tx['reviewed_file_types'])
+        self.assertEqual(self.tx['reviewed_file_types'][new_file], REVISION14_EXPECTED['added_file_review'])
+        self.assertEqual(self.tx['migrations'], self.rev13_tx['migrations'])
+        self.assertEqual(self.tx['historical_review_metadata'], self.rev13_tx['historical_review_metadata'])
+        mutable_transaction = {'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary', 'postgres_files', 'reviewed_file_types', 'entries'}
+        self.assertEqual({key: value for key, value in self.rev13_tx.items() if key not in mutable_transaction},
                          {key: value for key, value in self.tx.items() if key not in mutable_transaction})
         functions = {item['id']: item for item in self.ast['functions'] if item['file'].startswith(tx.PG)}
         classes = tx.classify(self.ast)
-        old = {entry['id']: entry for entry in self.rev12_tx['entries']}
+        old = {entry['id']: entry for entry in self.rev13_tx['entries']}
         current = {entry['id']: entry for entry in self.tx['entries']}
-        self.assertEqual(set(old), set(current))
+        new_id = 'internal/store/postgres/mailbox_errors.go::classifyWorkMailboxCreateError'
+        reviewed = {row['id']: row for row in REVISION14_EXPECTED['body_changes']}
+        self.assertEqual(set(current), set(old) | {new_id})
         self.assertEqual(set(current), set(functions))
-        reviewed_id = 'internal/store/postgres/users.go:*PgStore:CreateRefreshToken'
-        reviewed_sha = '66e6bd4224e13273b7bf3904de303f128c1d4cfb980f1773b24ebf879198f1d0'
+        self.assertEqual((len(old), len(current)), (401, 402))
         fingerprint = lambda value: hashlib.sha256(gate.canonical_bytes(value)).hexdigest()
-        caller_changes, body_changes, classification_changes, entry_changes = [], [], [], []
-        for identity, before in old.items():
-            after, function = current[identity], functions[identity]
-            self.assertEqual(after['syntax'], function)
-            self.assertEqual(after['classification'], classes[identity])
-            actual_callers = [dict(caller_id=item['id'], file=item['file'], function=item['name'],
-                line=call['line'], expression=call['expr'], status='name-match-candidate-not-dispatch-proof')
-                for item in self.ast['functions'] for call in item['calls'] if call['name'] == function['name']]
-            self.assertEqual(after['callers'], actual_callers)
-            derived = {
+        def derived_assertions(function):
+            return {
                 'direct_sql_effects': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.MUTATION.search(item['value'])],
                 'direct_lock_fragments': [dict(line=item['line'], sql_fragment=item['value']) for item in function['strings'] if tx.LOCK.search(item['value'])],
                 'transaction_helper_calls': [call for call in function['calls'] if call['name'] in tx.TX],
                 'sql_execution_expressions': [call for call in function['calls'] if call['name'] in tx.SQL_CALLS],
             }
+        def actual_callers(function):
+            return [dict(caller_id=item['id'], file=item['file'], function=item['name'],
+                line=call['line'], expression=call['expr'], status='name-match-candidate-not-dispatch-proof')
+                for item in self.ast['functions'] for call in item['calls'] if call['name'] == function['name']]
+        caller_changes, body_changes, classification_changes, entry_changes = [], [], [], []
+        for identity, before in old.items():
+            after, function = current[identity], functions[identity]
+            self.assertEqual(after['syntax'], function)
+            self.assertEqual(after['classification'], classes[identity])
+            self.assertEqual(before['classification'], after['classification'])
+            self.assertEqual(after['callers'], actual_callers(function))
+            derived = derived_assertions(function)
             self.assertEqual({key: after['assertions'][key] for key in derived}, derived)
             self.assertEqual({key: value for key, value in before['assertions'].items() if key not in derived},
                              {key: value for key, value in after['assertions'].items() if key not in derived})
             mutable = {'syntax', 'classification', 'callers', 'assertions'}
-            if identity == reviewed_id:
-                self.assertEqual(before['syntax']['sha256'], '84457782c35718446b19a00ba7e07022a0b58f5cf6bf96172bf8bd67da887edb')
-                self.assertEqual(function['sha256'], reviewed_sha)
+            if identity in reviewed:
+                self.assertEqual(before['syntax']['sha256'], reviewed[identity]['before_sha256'])
+                self.assertEqual(function['sha256'], reviewed[identity]['after_sha256'])
                 self.assertNotIn('source_review', before)
                 manual = ('lock_fk_wait_fence', 'evidence', 'unverified_risks', 'file_family_context')
-                self.assertEqual(after['historical_revision12_review'], {key: before[key] for key in manual})
+                self.assertEqual(after['historical_revision13_review'], {key: before[key] for key in manual})
                 self.assertEqual({key: after[key] for key in (*manual, 'source_review')},
-                                 REVISION13_EXPECTED['refresh_manual_fields'])
+                                 REVISION14_EXPECTED['manual_review_fields'][identity])
                 self.assertEqual(after['source_review']['base_commit'], SOURCE_COMMIT)
                 self.assertEqual(after['source_review']['source_sha256'], function['sha256'])
-                # Function-valued exec aliases remain outside the unchanged
-                # call-name SQL collector. The explicit manual record binds it.
-                self.assertTrue(any(call['name'] == 'exec' for call in function['calls']))
-                self.assertFalse(any(call['name'] == 'exec' for call in derived['sql_execution_expressions']))
-                self.assertEqual(after['lock_fk_wait_fence']['local_operations'],
-                    [dict(line=call['line'], operation=call['expr'], sql_expression=call.get('sql_expr'), status='lexical-source-only')
-                     for call in function['calls'] if call['name'] in tx.SQL_CALLS or call['name'] == 'exec'])
-                mutable.update((*manual, 'historical_revision12_review', 'source_review'))
+                mutable.update((*manual, 'historical_revision13_review', 'source_review'))
             else:
                 self.assertEqual(before['syntax']['sha256'], function['sha256'])
-                self.assertEqual(before['classification'], after['classification'])
                 if before['syntax'] != function:
-                    self.assertEqual(function['file'], 'internal/store/postgres/users.go')
+                    self.assertEqual(function['file'], 'internal/store/postgres/company_members.go')
             self.assertEqual({key: value for key, value in before.items() if key not in mutable},
                              {key: value for key, value in after.items() if key not in mutable})
             if before['callers'] != after['callers']:
@@ -4213,18 +4990,31 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 entry_changes.append(dict(id=identity,
                     changed_fields=[key for key in sorted(set(before) | set(after)) if before.get(key) != after.get(key)],
                     before_sha256=fingerprint(before), after_sha256=fingerprint(after)))
+        added = current[new_id]
+        self.assertEqual(added, REVISION14_EXPECTED['added_entry'])
+        self.assertEqual(added['syntax'], functions[new_id])
+        self.assertEqual(added['classification'], classes[new_id])
+        self.assertEqual(added['classification']['kind'], 'read-or-pure')
+        self.assertTrue(all(value is False for key, value in added['classification'].items() if key != 'kind'))
+        self.assertEqual(added['callers'], actual_callers(functions[new_id]))
+        self.assertEqual({key: added['assertions'][key] for key in derived_assertions(functions[new_id])}, derived_assertions(functions[new_id]))
+        self.assertEqual(added['source_review']['base_commit'], SOURCE_COMMIT)
+        self.assertEqual(added['source_review']['source_sha256'], functions[new_id]['sha256'])
         self.assertEqual(caller_changes, review['transaction_callers'])
         self.assertEqual(body_changes, review['transaction_body_changes'])
         self.assertEqual(classification_changes, review['transaction_classification_changes'])
         self.assertEqual(entry_changes, review['transaction_entry_changes'])
-        self.assertEqual([row['id'] for row in body_changes], [reviewed_id])
-        self.assertEqual([row['id'] for row in classification_changes], [reviewed_id])
+        self.assertEqual(body_changes, REVISION14_EXPECTED['body_changes'])
+        self.assertEqual(classification_changes, [])
+        self.assertEqual(review['transaction_added_entries'], [dict(id=new_id, entry_sha256=fingerprint(added))])
+        self.assertEqual(review['transaction_removed_entries'], [])
+        self.assertEqual(review['manual_review_fields'], REVISION14_EXPECTED['manual_review_fields'])
         self.assertEqual(review['migration_changes'], [])
-        self.assertEqual(review['client_before'], self.revision12['clients'])
+        self.assertEqual(review['client_before'], self.revision13['clients'])
         self.assertEqual(review['client_after'], self.clients)
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision12['clients'])).hexdigest(), review['client_before_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.revision13['clients'])).hexdigest(), review['client_before_sha256'])
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(self.clients)).hexdigest(), review['client_after_sha256'])
-        old_routes = {row['route']: row for row in self.rev12_compat['routes']}
+        old_routes = {row['route']: row for row in self.rev13_compat['routes']}
         new_routes = {row['route']: row for row in self.compat['routes']}
         fresh_routes = {row['route']: row for row in gate.source_facts(self.routes, self.clients)}
         self.assertEqual(set(old_routes), set(new_routes))
@@ -4240,41 +5030,41 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
                     after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest()))
         self.assertEqual(route_changes, review['compatibility_route_changes'])
-        old_closure, new_closure = self.rev12_compat['source_closure'], self.compat['source_closure']
+        old_closure, new_closure = self.rev13_compat['source_closure'], self.compat['source_closure']
         closure_changes = [dict(path=path, before_sha256=old_closure.get(path), after_sha256=new_closure.get(path))
                            for path in sorted(set(old_closure) | set(new_closure)) if old_closure.get(path) != new_closure.get(path)]
         self.assertEqual(closure_changes, review['closure_changes'])
         mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
-        self.assertEqual({k: v for k, v in self.rev12_compat.items() if k not in mutable},
+        self.assertEqual({k: v for k, v in self.rev13_compat.items() if k not in mutable},
                          {k: v for k, v in self.compat.items() if k not in mutable})
-        self.assertEqual(self.compat['acquisition'], dict(self.rev12_compat['acquisition'], base_commit=SOURCE_COMMIT))
+        self.assertEqual(self.compat['acquisition'], dict(self.rev13_compat['acquisition'], base_commit=SOURCE_COMMIT))
         for name, pin in review['generated_catalogs'].items():
-            self.assertEqual(pin['path'], REVISION12_SNAPSHOTS[name]['path'])
+            self.assertEqual(pin['path'], REVISION13_SNAPSHOTS[name]['path'])
             raw = (ROOT / pin['path']).read_bytes()
             self.assertEqual(hashlib.sha256(raw).hexdigest(), pin['sha256'])
             self.assertEqual(len(raw), pin['bytes'])
-        self.assertEqual(set(review['generated_catalogs']), set(REVISION12_SNAPSHOTS))
+        self.assertEqual(set(review['generated_catalogs']), set(REVISION13_SNAPSHOTS))
         route_map = {(row['method'], gate.norm(row['path'])): row['method'] + ' ' + row['path'] for row in self.routes}
-        documented = json.loads((ROOT / REVISION12_SNAPSHOTS['client_routes']['path']).read_text())
+        documented = json.loads((ROOT / REVISION13_SNAPSHOTS['client_routes']['path']).read_text())
         self.assertEqual(documented, [dict(row, routes=[] if row['forwarding'] else
                          [route_map[(method, gate.norm(row['path']))] for method in row['methods']]) for row in self.clients])
-        changed = git('diff', '--name-only', REVISION12_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+        changed = git('diff', '--name-only', REVISION13_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
         product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
                          (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
                          (p.startswith('web/locales/') and p.endswith('.json'))]
         self.assertEqual(product_paths, [row['path'] for row in review['source_changes']])
-        self.assertEqual(product_paths, REVISION13_EXPECTED['product_paths'])
+        self.assertEqual(product_paths, REVISION14_EXPECTED['product_paths'])
         self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in new_closure])
         build_paths = [path for path in ('web/package.json', 'web/package-lock.json')
-                       if git('show', REVISION12_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+                       if git('show', REVISION13_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
         self.assertEqual(build_paths, [row['path'] for row in review['additional_build_metadata_changes']])
         schema_paths = [path for path in ('internal/api/openapi.yaml',)
-                        if git('show', REVISION12_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
+                        if git('show', REVISION13_SOURCE_COMMIT + ':' + path) != git('show', SOURCE_COMMIT + ':' + path)]
         self.assertEqual(schema_paths, [row['path'] for row in review['additional_api_schema_changes']])
         for row in review['source_changes'] + review['additional_build_metadata_changes'] + review['additional_api_schema_changes']:
-            self.assertEqual(row['before_commit'], REVISION12_SOURCE_COMMIT)
+            self.assertEqual(row['before_commit'], REVISION13_SOURCE_COMMIT)
             self.assertEqual(row['after_commit'], SOURCE_COMMIT)
-            for prefix, commit in (('before', REVISION12_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
+            for prefix, commit in (('before', REVISION13_SOURCE_COMMIT), ('after', SOURCE_COMMIT)):
                 if row[prefix + '_blob'] is None:
                     self.assertFalse(git('ls-tree', commit, '--', row['path']))
                     self.assertIsNone(row[prefix + '_sha256'])
@@ -4292,22 +5082,22 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(review['implementation_todos_completed'], 0)
         self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
 
-    def test_revision13_preserves_public_history_collectors_and_original_rejections(self):
+    def test_revision14_preserves_public_history_collectors_and_original_rejections(self):
         review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
-        self.assertEqual(git('rev-parse', REVISION12_COMMIT + '^{tree}').decode().strip(), REVISION12_TREE)
+        self.assertEqual(git('rev-parse', REVISION13_COMMIT + '^{tree}').decode().strip(), REVISION13_TREE)
         historical = []
         for directory in review['historical_directories']:
-            names = git('ls-tree', '-r', '--name-only', REVISION12_COMMIT, '--', directory).decode().splitlines()
+            names = git('ls-tree', '-r', '--name-only', REVISION13_COMMIT, '--', directory).decode().splitlines()
             self.assertTrue(names)
             self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
             for path in names:
-                ref = REVISION12_COMMIT + ':' + path
+                ref = REVISION13_COMMIT + ':' + path
                 raw = git('show', ref)
                 self.assertEqual((ROOT / path).read_bytes(), raw)
                 historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
                                        sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
         self.assertEqual(historical, review['historical_manifest'])
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION13_EXPECTED['historical_manifest_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), REVISION14_EXPECTED['historical_manifest_sha256'])
         roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
         mutable = ['scripts/tests/test_r5_catalog_reconciliation.py', 'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py']
         self.assertEqual(review['mutable_current_positive_test_paths'], mutable)
@@ -4325,33 +5115,33 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
                                   sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
         self.assertEqual(protected, review['protected_source_manifest'])
-        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION13_EXPECTED['protected_source_manifest_sha256'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION14_EXPECTED['protected_source_manifest_sha256'])
         for path, expected in review['unchanged_validators_and_collectors'].items():
-            raw = git('show', REVISION12_COMMIT + ':' + path)
+            raw = git('show', REVISION13_COMMIT + ':' + path)
             self.assertEqual((ROOT / path).read_bytes(), raw)
             self.assertEqual(hashlib.sha256(raw).hexdigest(), expected)
         for path, replacements in (
-            ('scripts/tests/test_r5_transactions.py', [("result['functions'], 401", "result['functions'], %d" % REVISION13_EXPECTED['transaction']['functions']),
-                ("result['postgres_files'], 63", "result['postgres_files'], %d" % REVISION13_EXPECTED['transaction']['postgres_files'])]),
-            ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION13_EXPECTED['compatibility']['routes']),
-                ("result['client_branches'],136", "result['client_branches'],%d" % REVISION13_EXPECTED['compatibility']['client_branches'])]),
+            ('scripts/tests/test_r5_transactions.py', [("result['functions'], 401", "result['functions'], %d" % REVISION14_EXPECTED['transaction']['functions']),
+                ("result['postgres_files'], 63", "result['postgres_files'], %d" % REVISION14_EXPECTED['transaction']['postgres_files'])]),
+            ('scripts/tests/test_r5_compatibility.py', [("result['routes'],133", "result['routes'],%d" % REVISION14_EXPECTED['compatibility']['routes']),
+                ("result['client_branches'],136", "result['client_branches'],%d" % REVISION14_EXPECTED['compatibility']['client_branches'])]),
         ):
-            expected = git('show', REVISION12_COMMIT + ':' + path).decode()
+            expected = git('show', REVISION13_COMMIT + ':' + path).decode()
             for before, after in replacements:
                 self.assertEqual(expected.count(before), 1)
                 expected = expected.replace(before, after)
             self.assertEqual((ROOT / path).read_text(), expected)
         path = 'scripts/tests/test_r5_catalog_reconciliation.py'
-        before_raw = git('show', REVISION12_COMMIT + ':' + path).decode()
+        before_raw = git('show', REVISION13_COMMIT + ':' + path).decode()
         after_raw = (ROOT / path).read_text()
         def methods(raw):
             return {node.name: node for node in ast.walk(ast.parse(raw))
                     if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
         before, after = methods(before_raw), methods(after_raw)
-        self.assertEqual((len(before), len(after)), (27, 29))
+        self.assertEqual((len(before), len(after)), (29, 31))
         self.assertTrue(set(before).issubset(after))
-        self.assertEqual(set(after) - set(before), {'test_revision13_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision13_preserves_public_history_collectors_and_original_rejections'})
-        frozen = {'test_revision12_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision12_preserves_public_history_collectors_and_original_rejections'}
+        self.assertEqual(set(after) - set(before), {'test_revision14_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision14_preserves_public_history_collectors_and_original_rejections'})
+        frozen = {'test_revision13_binds_actual_source_facts_and_preserves_manual_reviews', 'test_revision13_preserves_public_history_collectors_and_original_rejections'}
         allowed = frozen | {'test_old_pins_reject_and_current_revision_passes_same_actual_facts'}
         for name in before:
             if name not in allowed:
@@ -4361,7 +5151,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             self.assertEqual(len(after[name].body), 1)
             wrapper = after[name].body[0]
             self.assertIsInstance(wrapper, ast.With)
-            self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision12_context()')
+            self.assertEqual(ast.unparse(wrapper.items[0].context_expr), 'self.revision13_context()')
             self.assertEqual([ast.dump(node, include_attributes=False) for node in before[name].body],
                              [ast.dump(node, include_attributes=False) for node in wrapper.body])
             original_body = ''.join(before_raw.splitlines(keepends=True)[before[name].lineno:before[name].end_lineno])
@@ -4374,8 +5164,8 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                              review['original_unapproved_methods'][name]['source_sha256'])
             self.assertEqual(hashlib.sha256(ast.dump(after[name], include_attributes=False).encode()).hexdigest(),
                              review['original_unapproved_methods'][name]['ast_sha256'])
-        # Fixed revision12 values and all earlier review constants are retained;
-        # only the fresh root/source identifiers advance to revision13.
+        # Fixed revision13 values and all earlier review constants are retained;
+        # only the fresh root/source identifiers advance to revision14.
         def assignments(raw):
             return {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
                     for target in node.targets if isinstance(target, ast.Name)}

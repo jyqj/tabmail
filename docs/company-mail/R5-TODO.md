@@ -1,9 +1,11 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-FINISH-20261009:BEGIN -->
-## FINISH批次：前两轮七项已完成，第三轮推进中
+## FINISH批次：三轮十项已全部完成
 
-当前批次从公开 `be3a6bf4` 继续，十项 [#183–#192](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+FINISH-%22) 按4＋3＋3由root及三个原生subagent推进，范围及原始通过/失败见[FINISH账本](R5-FINISH-20261009.md)。前两轮 [#193](https://github.com/jyqj/tabmail/pull/193)、[#194](https://github.com/jyqj/tabmail/pull/194) 已实际合入，#183–#189均closed/completed；正式完成7/10、剩余3。第二轮真实PG固定10叶从7 PASS/3 FAIL变为10 PASS，精确完整tree和双parent核对。第三轮三项已交叉审查及联合验证：root1247Go race叶、107UI全过，等待实际合入后计数。原父任务仍10/171、剩余161。目录、测试、文档与PR维护不新增实施计数；未接入生产的旧mailboxapp候选已剔除，未认领或计数。#56保持draft。
+本批从公开 `be3a6bf4` 继续，十项 [#183–#192](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+FINISH-%22) 按4＋3＋3由root及三个原生subagent推进，固定失败、同字节回归、交叉审查及准确执行身份见[FINISH账本](R5-FINISH-20261009.md)。三轮 [#193](https://github.com/jyqj/tabmail/pull/193)、[#194](https://github.com/jyqj/tabmail/pull/194)、[#195](https://github.com/jyqj/tabmail/pull/195) 已实际合入，#183–#192均closed/completed；**本批10/10完成、剩余0；三轮剩余6→3→0。** 最终产品merge `740126660526db987b7914c50a8731b7cac9bf42` / tree `5ee1ec138c6854b3068ec3576ea1e824510a9ee2` 与受审完整tree相同，双parent及实际fetch核对。第二轮真实PG固定10叶从7 PASS/3 FAIL变为10 PASS；第三轮root1247Go race叶、107UI全过，原默认Go build在相同源码的普通clone通过；精确head四个源码/PG专项workflow均SUCCESS。原父任务仍10/171、剩余161。最终目录与文档维护不新增实施计数；未接入生产的旧mailboxapp候选已剔除，未认领或计数。#56保持draft，完整发布门槛单独保留。
+
+[revision14目录](evidence/R5-CATALOG-REVISION14-20261008/README.md)已在实际产品merge上完成原始采集与独立复核；三个原CLI、98项相关Python测试通过。原历史断言、拒绝用例、手工字段与资格限制保留，执行源码及原完整CI的失败分别记录于账本。本次目录与文档维护计0个实施TODO。
 <!-- R5-FINISH-20261009:END -->
 
 <!-- R5-DELIVER-20261008:BEGIN -->

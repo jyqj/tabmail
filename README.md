@@ -8,6 +8,14 @@
 
 ## R5 重构进度（实施中，尚未发布）
 
+<!-- R5-FINISH-20261009:BEGIN -->
+**FINISH批次三轮已完成10/10个独立实施TODO，剩余0；逐轮剩余6→3→0。** [#193](https://github.com/jyqj/tabmail/pull/193)、[#194](https://github.com/jyqj/tabmail/pull/194)、[#195](https://github.com/jyqj/tabmail/pull/195)已实际合入，#183–#192均closed/completed。改动覆盖明确的邮箱/模板修改意图、注册密码字节策略、登录与改密会话归属、管理员邀请输入、真实邮箱事务错误分类、带引号回复地址的生成与编辑、S3上传流结束及重播边界。
+
+root与三个原生subagent实施并交叉审查，修复了独审发现的真实Provider成功反馈回归和事务外层错误映射缺口。最终产品merge为`740126660526db987b7914c50a8731b7cac9bf42`；第三轮六个相关Go包1247 race叶、107个UI全部PASS，原默认Go构建及类型/静态检查通过。真实PostgreSQL固定10叶从基线7PASS/3FAIL变为10PASS；精确head的源码证据、PG登录、邮箱PG、Webhook四个workflow均SUCCESS。[revision14目录对账](docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md)已完成采集与独审，三个原CLI及98项相关Python测试通过，准确执行身份另记。准确执行源、完整CI的失败和限定验收见[FINISH账本](docs/company-mail/R5-FINISH-20261009.md)。
+
+原父清单仍**10/171已验收、剩余161**，以[R5-TODO](docs/company-mail/R5-TODO.md)为准；源码目录和文档维护不算新增实施TODO。[整合PR #56](https://github.com/jyqj/tabmail/pull/56)保持draft，完整PG、严格依赖审计、必需私有fixture和有效M/G0继续开放。以下保留此前批次的各自历史记录。
+<!-- R5-FINISH-20261009:END -->
+
 <!-- R5-STREAM-20261008:BEGIN -->
 **STREAM批次以三轮原生multiagent完成10个独立实施TODO：4＋3＋3，每轮剩余6、3、0。** [#83](https://github.com/jyqj/tabmail/pull/83)、[#87](https://github.com/jyqj/tabmail/pull/87)、[#84](https://github.com/jyqj/tabmail/pull/84)覆盖同步suppression、原件流及ingest恢复读取、JSON缓存策略、protocol工件路径、API key对话框、邮箱成员/发送策略复核、冻结员工模板授权撤销与预览资格。并行NEXT、PARALLEL-929及其历史完整保留，重叠计划已撤出STREAM计数。
 

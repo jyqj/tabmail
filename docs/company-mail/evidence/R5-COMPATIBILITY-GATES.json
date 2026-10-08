@@ -6133,7 +6133,9 @@
             "properties": {
               "email": {
                 "type": "string",
-                "format": "email"
+                "format": "email",
+                "maxLength": 255,
+                "description": "A valid bare mailbox address, without a display name or NUL characters; the normalized value must contain at most 255 Unicode characters."
               }
             }
           }
@@ -9751,7 +9753,11 @@
             },
             "required": [
               "user_id",
-              "revision"
+              "revision",
+              "can_read",
+              "can_organize",
+              "can_send",
+              "template_only"
             ],
             "additionalProperties": false
           }
@@ -9846,6 +9852,8 @@
                   "null"
                 ],
                 "enum": [
+                  null,
+                  "",
                   "free",
                   "template_required",
                   "disabled"
@@ -9854,7 +9862,8 @@
               }
             },
             "required": [
-              "revision"
+              "revision",
+              "send_policy"
             ],
             "additionalProperties": false
           }
@@ -10202,14 +10211,14 @@
     "internal/api/handlers/company_index.go": "e23617e316d5200b60f4aedc82bf7c77dde64a763aa4d1c26268c36d53e09f51",
     "internal/api/handlers/company_lifecycle.go": "a24867df3c6e97a28f8a0822e8c0fea95443c93fb5d14955f81a1c676ceeb9f1",
     "internal/api/handlers/company_mail.go": "2adf2f4f25ff9fc2474ce7ae3da1d64dd9b3f56fe02ebf9e99cbd3666647f9db",
-    "internal/api/handlers/company_mailboxes.go": "ef19eb6d3e1d6368e056be483feb2bb07bea35beb94295b290de63e206d957e0",
+    "internal/api/handlers/company_mailboxes.go": "2ba7f71cc5bdcfa12bda0b64f2402a212cffe732cfe5a524d3d7fc9ba96a7c3f",
     "internal/api/handlers/company_projection.go": "7dd762b4fce70913d120b6c69b6893cf49bbb77afe846e5aea30c17e9a0ebaaf",
     "internal/api/handlers/company_recovery.go": "0761eaa5321bca1754ae0fbd4a7ece35e34733e13b9cf8281bf10a35ee09597c",
     "internal/api/handlers/company_routes.go": "11df2fde1266f1ea46e4de3789fd4f7b2985939173644ff1c60b4aeb932ca6a8",
     "internal/api/handlers/company_setup.go": "4051ddb8deef81a8a0c95de9c3ecd084b75133f1c79f3506d742b066825f12ee",
     "internal/api/handlers/company_source.go": "9a8fbf7e3197272d37b3054efae32d0f26bd9990281df4704529bd12af68a602",
     "internal/api/handlers/company_stream.go": "7476bcc058b3b3f5d7d9acda3786c99397cf6ae42aecef4d7b0708b12c26042d",
-    "internal/api/handlers/company_templates.go": "3a1271dd217ef5760e0dac97fd313fefe31a28c38e5b4abb973fe797eda36d0d",
+    "internal/api/handlers/company_templates.go": "a7e9051cad6f1fce57dc4af95eb9e264b1782e89947975a4011e7719c6fc69ef",
     "internal/api/handlers/domains.go": "36426fb22be04cbe6c803150fd02a603ee66026cd91e009b0eb78dc41ba44e4c",
     "internal/api/handlers/member_errors.go": "4c9254b984a8b234ca5a7ea33ee2886e54ff532799231b0bf83788b5bc317659",
     "internal/api/handlers/monitor.go": "1bd0140bd04f33ebb6f84840a7d34ecbad3ef0ab099c10a9ad47d8308137fc10",
@@ -10218,14 +10227,14 @@
     "internal/api/handlers/permissions.go": "112403579c8fe55428a9dcc10b59196bd19beeef3fe69fed514880e350f386d6",
     "internal/api/handlers/r5_protocol_component_observations_test.go": "22c7eff281505fef03e4adfd8b6d7fe1724e157446153ede9640d3c0ff588dc7",
     "internal/api/handlers/respond.go": "1ee1d18afbac384f36c254a74be3e8dbc11768e796501ccd9815a68a194e2a84",
-    "internal/api/handlers/users_admin.go": "754195f3cea07c2a8805d29426e30d2e311f5886372e096b2ee13f313af81e19",
-    "internal/api/http_contract_test.go": "a5127099c5d4c25ee72232e7446f40cd7a93fd1be772935164af5963c471950c",
+    "internal/api/handlers/users_admin.go": "9b75203c389d388026b3c31b31c0a42c92cb82bebc80d799ab76437ad8ace9ea",
+    "internal/api/http_contract_test.go": "e78928722ab513c1a70adb3c4dadf7b67f06ccc255d1ac985ee93a3aec93a9d3",
     "internal/api/middleware/apikey_touch.go": "7d574639cc3f0d598d8fad6df1fb29ca70e2643cdd391bc69d07d9fa12f42f16",
     "internal/api/middleware/auth.go": "a9bc166859e6991dbccdde1ac3c071d9a7b590912a6fe4bdf4476f4a8c3bc0b4",
     "internal/api/middleware/auth_cache.go": "9d7462fcd86674d2732b46d40fa10bfc3a11a223a650449bce94936c48a43eb5",
     "internal/api/middleware/ratelimit.go": "b374746b29f8329c6cc0764047df78c1d380e085116e4c3c03aad2b0149431ea",
     "internal/api/middleware/revalidate.go": "5c01d49b8084502ce4b346e18a8432dfc32d42df2f3ce5edd23428ca55be0315",
-    "internal/api/openapi.yaml": "0bfb85d2bd25411fcb2ad2e095c7a8ab4cd0a56eec8a83c3799ed8928a936894",
+    "internal/api/openapi.yaml": "69a9120629a7930b12607e7d3ad78b5e9e7e96f1ae4173ea79b14ba8a7b0a27f",
     "internal/api/router.go": "4f3c2410b0b5cf051385b800119fead832ca8a94a6105619ef8371a0bdb67a88",
     "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
     "internal/company/archive.go": "aad2725c16d391afb3ac90ed3d84b25eff35e12704202b8cd157270f08a9d785",
@@ -10277,7 +10286,7 @@
     "web/lib/api/permission-editor-types.ts": "f22886717c7c0d100c7d051a2fdb3b45d74d18ec67329e5e3fae72ab617e9dab",
     "web/lib/api/permissions.ts": "e3584b27f15d957917582130e38ea1e1e035575786aaf6630dcfa8450f797f8a",
     "web/lib/api/system.ts": "d9d54a968dea375cc28899d087f351cb01dcfc39cffcc8c326e14bf91e62e868",
-    "web/lib/company.ts": "448a6321906f118da40a0c03c05668c16c99805d86a4a59a0d34cc7261ee91c3",
+    "web/lib/company.ts": "b03f6a18f161515bc3e792096551b0b0f6351acf2c9100c2fd338365d0362573",
     "web/lib/legacy-outbound.ts": "4238af8ff874dd7dbd8a5104f161ceedb0d2d6275656ede4b0b80f3b72e7a934",
     "web/lib/types.ts": "99aefce0914d52926997f7837c390bea1459210d59e5f070fdb218f70ab82c85"
   },
@@ -10287,17 +10296,17 @@
     "qualification": "historical_metadata_only_not_current_wire"
   },
   "acquisition": {
-    "base_commit": "9b73b13f376f7e8d589a06fc7078dae4c342d5d5",
+    "base_commit": "740126660526db987b7914c50a8731b7cac9bf42",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
   },
   "inventory_revision": {
-    "revision": 13,
-    "source_commit": "9b73b13f376f7e8d589a06fc7078dae4c342d5d5",
+    "revision": 14,
+    "source_commit": "740126660526db987b7914c50a8731b7cac9bf42",
     "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
-    "previous_snapshot_commit": "b7247c3f66bd5f0ec5c6390305e2ff7268c135f8",
-    "previous_snapshot_blob": "74b64a51552302ab5155b5968568ee7d95aaeac2",
-    "previous_sha256": "05293f4608ef7066b3e2257bf00e20a7347aa7914e6f63a172cb070789e43237",
+    "previous_snapshot_commit": "be3a6bf41daa198a39306c90fd03411e38a017d8",
+    "previous_snapshot_blob": "397e76a5f3c3859704c5ef2a6bc665a0d68c7a9f",
+    "previous_sha256": "4276d86ebcf9fb6fbddb610c37de69cc49670ba79b1a97181eaba42b8fc32de1",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION13-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION14-20261008/README.md"
   }
 }
