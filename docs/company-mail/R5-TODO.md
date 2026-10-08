@@ -3,9 +3,9 @@
 <!-- R5-CLOSE-20261008:BEGIN -->
 ## CLOSE 批次：十项独立 Issue 到关闭
 
-本批从 #95 合入源 `1d856bd` 开始，以三个原生 subagent 与 root 认领十项新产品范围，逐项 Issue [#96–#105](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+CLOSE-%22)，按 **4＋3＋3** 分轮验证、独立审查、合入并关闭。完整认领、关闭条件、源码和逐轮数量见 [R5-CLOSE-20261008](R5-CLOSE-20261008.md)。
+本批从 #95 合入源 `1d856bd` 开始，以三个原生 subagent 与 root 认领十项新产品范围，逐项 Issue [#96–#105](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+CLOSE-%22)，按 **4＋3＋3** 分轮验证、独立审查、合入并关闭。第一轮 [#106](https://github.com/jyqj/tabmail/pull/106) 已合入并关闭 #96/#99/#100/#103。完整认领、关闭条件、源码和逐轮数量见 [R5-CLOSE-20261008](R5-CLOSE-20261008.md)。
 
-当前本批 **0/10 关闭，剩余 10**；原父任务仍 **10/171 已验收，剩余 161**。原 M/G0 及发布门禁保持原条件，#56 保持 draft。
+当前本批 **4/10 关闭，剩余 6**；原父任务仍 **10/171 已验收，剩余 161**。原 M/G0 及发布门禁保持原条件，#56 保持 draft。
 <!-- R5-CLOSE-20261008:END -->
 
 

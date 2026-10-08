@@ -82,12 +82,14 @@ func (h *AdminHandler) UpdateTenantOverride(w http.ResponseWriter, r *http.Reque
 		errBadRequest(w, "invalid tenant id")
 		return
 	}
-	var body models.TenantOverride
-	if err := decodeBody(r, &body); err != nil {
+	// This endpoint replaces all overrides. A JSON null must not turn into
+	// the empty object that explicitly clears them back to inherited values.
+	var body *models.TenantOverride
+	if err := decodeBody(r, &body); err != nil || body == nil {
 		errBadRequest(w, "invalid body")
 		return
 	}
-	item, err := h.service.UpdateTenantOverride(r.Context(), tenantID, body, middleware.ActorFromContext(r.Context()).AuditLabel())
+	item, err := h.service.UpdateTenantOverride(r.Context(), tenantID, *body, middleware.ActorFromContext(r.Context()).AuditLabel())
 	if err != nil {
 		respondAppError(w, h.logger, err)
 		return

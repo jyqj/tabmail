@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAPI } from "@/hooks/use-api";
 import { ActionButton, Field, inputClass, LoadError, Section, useAction, useText } from "@/components/company/common";
 import { company, allEmployees, workMailboxes } from "@/lib/company";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import { GrantEditor } from "@/components/company/grants";
 import { EmployeeField } from "@/components/company/employee-field";
 import { MailboxSendPolicyEditor } from "@/components/company/send-policy";
@@ -23,19 +24,34 @@ function parseRetentionHours(value: string): number | null {
 }
 export function MailboxAdmin() {
     const t = useText();
+    const scope = useSessionScope();
     const { busy, run } = useAction();
     const members = useAPI("company-employees", allEmployees);
     const boxes = useAPI("company-managed-mailboxes", workMailboxes);
     const [boxLocal, setBoxLocal] = useState("");
     const [kind, setKind] = useState("shared");
-    const [owner, setOwner] = useState("");
+    const [ownerSelection, setOwnerSelection] = useState({ scope, id: "" });
     const [retention, setRetention] = useState("0");
     // An empty field is unfinished input, not an instruction for permanence.
     const retentionHours = parseRetentionHours(retention);
     const validRetention = retentionHours !== null;
-    const validCreate = Boolean(boxLocal) && (kind === "personal" ? Boolean(owner) : validRetention);
     const [selected, setSelected] = useState("");
     const active = (members.data ?? []).filter(u => u.is_active);
+    const tenant = typeof window === "undefined" ? null : localStorage.getItem("tabmail_tenant_id");
+    const owners = active.filter(user => !!tenant && user.tenant_id === tenant);
+    const directoryReady = !members.error && !members.isLoading && !members.isValidating && Array.isArray(members.data);
+    // Keep an eligible selection during a pending refresh. A failed or settled
+    // ineligible observation retires it, even while the personal field is hidden.
+    const retireOwner = ownerSelection.scope !== scope || (ownerSelection.id !== "" &&
+        (!!members.error || (directoryReady && !owners.some(user => user.id === ownerSelection.id))));
+    if (retireOwner) setOwnerSelection({ scope, id: "" });
+    const owner = retireOwner ? "" : ownerSelection.id;
+    const validOwner = directoryReady && owners.some(user => user.id === owner);
+    const validCreate = Boolean(boxLocal) && (kind === "personal" ? validOwner : validRetention);
+    const selectOwner = (id: string) => {
+        if (scope !== sessionScope() || !directoryReady || (id !== "" && !owners.some(user => user.id === id))) return;
+        setOwnerSelection({ scope, id });
+    };
     const mailbox = boxes.data?.find(v => v.mailbox.id === selected);
     return <div className="space-y-5"><LoadError error={members.error || boxes.error} onRetry={() => { void members.mutate(); void boxes.mutate(); }}/>
       <Section title={t("创建长期公司邮箱", "Create a company mailbox")}>
@@ -53,7 +69,7 @@ export function MailboxAdmin() {
                 </option>
               </select>)}
           </Field>
-          {kind === "personal" ? (<EmployeeField label={t("邮箱属主", "Mailbox owner")} value={owner} onChange={setOwner} employees={active}/>) : (<Field label={t("保留小时数（0 为永久）", "Retention hours (0 = permanent)")}>
+          {kind === "personal" ? (<EmployeeField label={t("邮箱属主", "Mailbox owner")} value={owner} onChange={selectOwner} employees={owners} disabled={!directoryReady}/>) : (<Field label={t("保留小时数（0 为永久）", "Retention hours (0 = permanent)")}>
               {(id) => (<>
                 <input id={id} className={inputClass} type="number" min={0} max={876000} step={1} value={retention} aria-invalid={!validRetention || undefined} aria-describedby={!validRetention ? `${id}-error` : undefined} onChange={(e) => setRetention(e.target.value)}/>
                 {!validRetention && <p id={`${id}-error`} role="alert" className="text-sm text-destructive">{t("请输入 0–876000 的整数小时数；0 表示永久保留。", "Enter a whole number of hours from 0 to 876000; 0 means permanent storage.")}</p>}
@@ -61,7 +77,7 @@ export function MailboxAdmin() {
             </Field>)}
         </div>
         <ActionButton disabled={busy || !validCreate} onClick={() => run(async () => {
-            if (!validCreate) return;
+            if (!validCreate || scope !== sessionScope()) return;
             await company("/mailboxes", {
                 method: "POST",
                 body: {
