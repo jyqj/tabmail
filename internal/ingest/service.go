@@ -387,11 +387,12 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 			continue
 		}
 		cfg, msg := plan.cfg, plan.msg
-		if ok, err := s.reserveTenantDaily(ctx, mb.TenantID, cfg.DailyQuota); err != nil {
-			s.logger.Warn().Err(err).Str("tenant", mb.TenantID.String()).Msg("reserve tenant daily quota")
+		allowed, reservationKey, reserveErr := s.reserveTenantDaily(ctx, mb.TenantID, cfg.DailyQuota)
+		if reserveErr != nil {
+			s.logger.Warn().Err(reserveErr).Str("tenant", mb.TenantID.String()).Msg("reserve tenant daily quota")
 			outcomes = append(outcomes, erroredOutcome(addr, "quota_error"))
 			continue
-		} else if !ok {
+		} else if !allowed {
 			s.logger.Warn().
 				Str("tenant", mb.TenantID.String()).
 				Int("limit", cfg.DailyQuota).
@@ -401,14 +402,14 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		}
 		ok, err := s.objects.StoreMessage(ctx, msg, raw, cfg.MaxMessagesPerMailbox)
 		if err != nil {
-			_ = s.releaseTenantDaily(ctx, mb.TenantID)
+			_ = s.releaseTenantDaily(ctx, reservationKey)
 			metrics.SMTPDeliveryFailed(mb.TenantID.String(), mb.FullAddress)
 			s.logger.Err(err).Str("mailbox", mb.FullAddress).Msg("storing message metadata")
 			outcomes = append(outcomes, erroredOutcome(addr, "store_failed"))
 			continue
 		}
 		if !ok {
-			_ = s.releaseTenantDaily(ctx, mb.TenantID)
+			_ = s.releaseTenantDaily(ctx, reservationKey)
 			s.logger.Warn().
 				Str("mailbox", mb.FullAddress).
 				Int("limit", cfg.MaxMessagesPerMailbox).
@@ -487,16 +488,18 @@ func (s *Service) deleteRawObjectIfOrphaned(ctx context.Context, key, reason str
 	}
 }
 
-func (s *Service) reserveTenantDaily(ctx context.Context, tenantID uuid.UUID, limit int) (bool, error) {
+// The returned key identifies this call's observed Redis increment. Unlimited,
+// database-counted and denied calls own no Redis unit to release.
+func (s *Service) reserveTenantDaily(ctx context.Context, tenantID uuid.UUID, limit int) (bool, string, error) {
 	if limit <= 0 {
-		return true, nil
+		return true, "", nil
 	}
 	if s.rdb == nil {
 		count, err := s.store.CountTenantMessagesSince(ctx, tenantID, time.Now().UTC().Truncate(24*time.Hour))
 		if err != nil {
-			return false, err
+			return false, "", err
 		}
-		return count < limit, nil
+		return count < limit, "", nil
 	}
 	key := fmt.Sprintf("smtp:quota:tenant:%s:%s", tenantID, time.Now().UTC().Format("20060102"))
 	res, err := s.rdb.Eval(ctx, `
@@ -515,16 +518,20 @@ end
 return 1
 `, []string{key}, limit, int((25 * time.Hour).Seconds())).Int()
 	if err != nil {
-		return false, err
+		return false, "", err
 	}
-	return res == 1, nil
+	if res != 1 {
+		return false, "", nil
+	}
+	return true, key, nil
 }
 
-func (s *Service) releaseTenantDaily(ctx context.Context, tenantID uuid.UUID) error {
-	if s.rdb == nil {
+func (s *Service) releaseTenantDaily(ctx context.Context, reservationKey string) error {
+	if s.rdb == nil || reservationKey == "" {
 		return nil
 	}
-	key := fmt.Sprintf("smtp:quota:tenant:%s:%s", tenantID, time.Now().UTC().Format("20060102"))
+	// A metadata write can finish after midnight; never debit the new day's
+	// unrelated reservations when unwinding an increment made on the old day.
 	_, err := s.rdb.Eval(ctx, `
 local current = redis.call("GET", KEYS[1])
 if not current then
@@ -535,7 +542,7 @@ if tonumber(current) <= 1 then
   return 0
 end
 return redis.call("DECR", KEYS[1])
-`, []string{key}).Result()
+`, []string{reservationKey}).Result()
 	return err
 }
 

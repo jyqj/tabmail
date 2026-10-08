@@ -89,10 +89,7 @@ type Dispatcher struct {
 func New(cfg Config, logger zerolog.Logger) *Dispatcher {
 	var urls []string
 	for _, u := range strings.Split(cfg.URLs, ",") {
-		u = strings.TrimSpace(u)
-		if u != "" {
-			urls = append(urls, u)
-		}
+		urls = appendUniqueURL(urls, u)
 	}
 	timeout := cfg.Timeout
 	if timeout <= 0 {
