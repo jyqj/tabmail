@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
+	"tabmail/internal/models"
 )
 
 const (
@@ -177,6 +178,9 @@ func Load() (*Root, error) {
 func (c *Root) Validate() error {
 	if c == nil {
 		return fmt.Errorf("config: nil root config")
+	}
+	if _, err := models.MessageExpiry(nil, c.Storage.FallbackRetentionH, time.Now()); err != nil {
+		return fmt.Errorf("config: TABMAIL_STORAGE_FALLBACKRETENTIONH: %w", err)
 	}
 	if c.CompanyOnly && (c.MailboxNaming != "full" || !c.Ingest.Durable) {
 		return fmt.Errorf("config: company mode requires full mailbox naming and durable ingress")
