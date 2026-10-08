@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/fs"
 	"strings"
 
 	"github.com/minio/minio-go/v7"
@@ -57,7 +58,10 @@ func NewWithContext(ctx context.Context, cfg config.S3) (*Store, error) {
 }
 
 func (s *Store) Put(ctx context.Context, key string, r io.Reader, size int64) error {
-	_, err := s.client.PutObject(ctx, s.bucket, normalizeKey(key), r, size, minio.PutObjectOptions{
+	if err := validateKey(ctx, key); err != nil {
+		return err
+	}
+	_, err := s.client.PutObject(ctx, s.bucket, key, r, size, minio.PutObjectOptions{
 		ContentType: "message/rfc822",
 	})
 	if err != nil {
@@ -67,7 +71,10 @@ func (s *Store) Put(ctx context.Context, key string, r io.Reader, size int64) er
 }
 
 func (s *Store) Get(ctx context.Context, key string) (io.ReadCloser, error) {
-	obj, err := s.client.GetObject(ctx, s.bucket, normalizeKey(key), minio.GetObjectOptions{})
+	if err := validateKey(ctx, key); err != nil {
+		return nil, err
+	}
+	obj, err := s.client.GetObject(ctx, s.bucket, key, minio.GetObjectOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("s3obj: get %s: %w", key, err)
 	}
@@ -79,7 +86,10 @@ func (s *Store) Get(ctx context.Context, key string) (io.ReadCloser, error) {
 }
 
 func (s *Store) Delete(ctx context.Context, key string) error {
-	err := s.client.RemoveObject(ctx, s.bucket, normalizeKey(key), minio.RemoveObjectOptions{})
+	if err := validateKey(ctx, key); err != nil {
+		return err
+	}
+	err := s.client.RemoveObject(ctx, s.bucket, key, minio.RemoveObjectOptions{})
 	if err == nil {
 		return nil
 	}
@@ -91,7 +101,10 @@ func (s *Store) Delete(ctx context.Context, key string) error {
 }
 
 func (s *Store) Exists(ctx context.Context, key string) (bool, error) {
-	_, err := s.client.StatObject(ctx, s.bucket, normalizeKey(key), minio.StatObjectOptions{})
+	if err := validateKey(ctx, key); err != nil {
+		return false, err
+	}
+	_, err := s.client.StatObject(ctx, s.bucket, key, minio.StatObjectOptions{})
 	if err == nil {
 		return true, nil
 	}
@@ -102,8 +115,17 @@ func (s *Store) Exists(ctx context.Context, key string) (bool, error) {
 	return false, fmt.Errorf("s3obj: stat %s: %w", key, err)
 }
 
-func normalizeKey(key string) string {
-	return strings.TrimPrefix(strings.TrimSpace(key), "/")
+// Metadata reference locks and counts use the exact stored key. Do not turn a
+// different spelling into another object's read, overwrite or delete request.
+// Keep canonical legacy names, Unicode and URL metacharacters byte-for-byte.
+func validateKey(ctx context.Context, key string) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if !fs.ValidPath(key) || key == "." || strings.TrimSpace(key) != key || strings.ContainsAny(key, "\\\x00") {
+		return fmt.Errorf("s3obj: object key must be a canonical relative path")
+	}
+	return nil
 }
 
 func bucketLookup(forcePathStyle bool) minio.BucketLookupType {

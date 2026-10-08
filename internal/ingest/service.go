@@ -434,7 +434,7 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		}
 		metrics.SMTPDeliverySucceeded(mb.TenantID.String(), mb.FullAddress)
 		if s.hub != nil {
-			s.hub.Publish(realtime.Event{
+			s.hub.PublishContext(ctx, realtime.Event{
 				Type:      realtime.EventMessage,
 				Mailbox:   mb.FullAddress,
 				MessageID: msg.ID.String(),

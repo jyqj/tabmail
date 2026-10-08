@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useSWRConfig } from "swr";
 import { useAPI } from "@/hooks/use-api";
 import { workMessages, type WorkMailbox, type DraftPayload } from "@/lib/company";
 import { sessionScope, useSessionScope } from "@/lib/session";
@@ -21,7 +22,9 @@ export function ReceivedFolder({ mailbox, mailboxes, folder, q, page, selected, 
 }) {
     const t = useText();
     const scope = useSessionScope();
-    const list = useAPI(["work-messages", mailbox.mailbox.id, folder, q, page], () => workMessages(mailbox.mailbox.id, folder, q, page), { refreshInterval: 25000 });
+    const { mutate } = useSWRConfig();
+    const listKey: [string, ...unknown[]] = ["work-messages", mailbox.mailbox.id, folder, q, page];
+    const list = useAPI(listKey, () => workMessages(mailbox.mailbox.id, folder, q, page), { refreshInterval: 25000 });
     const index = useAPI(["mail-index-status", mailbox.mailbox.id], () => indexStatus(mailbox.mailbox.id), { refreshInterval: 15000 });
     const selectionKey = JSON.stringify([scope, mailbox.mailbox.id, folder, q, page, selected]);
     const [selection, setSelection] = useState<SelectionObservation>({ key: selectionKey, observed: false, retired: false });
@@ -52,7 +55,7 @@ export function ReceivedFolder({ mailbox, mailboxes, folder, q, page, selected, 
     </button>)}
     {!list.isLoading && !list.error && !list.data?.data.length && <p className="p-3 text-sm">{t("没有邮件", "No messages")}</p>}
    </div>
-   <div className="min-w-0">{selected && !observation.retired ? <MessagePane key={`${mailbox.mailbox.id}:${selected}`} mailbox={mailbox} mailboxes={mailboxes} id={selected} onMutation={() => void list.mutate()} onCompose={onCompose}/> : <p className="p-5 text-sm text-muted-foreground">{t("选择邮件以阅读", "Select a message to read")}</p>}</div>
+   <div className="min-w-0">{selected && !observation.retired ? <MessagePane key={`${mailbox.mailbox.id}:${selected}`} mailbox={mailbox} mailboxes={mailboxes} id={selected} viewKey={selectionKey} onMutation={() => void mutate(["session", scope, listKey])} onCompose={onCompose}/> : <p className="p-5 text-sm text-muted-foreground">{t("选择邮件以阅读", "Select a message to read")}</p>}</div>
   </div>
   <Pager page={page} total={list.data?.meta.total ?? 0} onPage={onPage}/>
  </div>;
