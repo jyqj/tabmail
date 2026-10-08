@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+  "baseline_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -663,7 +663,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:CreateAPIKey",
           "file": "internal/api/handlers/admin.go",
           "function": "CreateAPIKey",
-          "line": 197,
+          "line": 199,
           "expression": "h.service.CreateAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -671,7 +671,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserCreateAPIKey",
           "file": "internal/api/handlers/admin.go",
           "function": "UserCreateAPIKey",
-          "line": 361,
+          "line": 363,
           "expression": "h.service.CreateAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -823,7 +823,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:DeleteAPIKey",
           "file": "internal/api/handlers/admin.go",
           "function": "DeleteAPIKey",
-          "line": 225,
+          "line": 227,
           "expression": "h.service.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1094,7 +1094,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListAPIKeys",
           "file": "internal/api/handlers/admin.go",
           "function": "ListAPIKeys",
-          "line": 211,
+          "line": 213,
           "expression": "h.service.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1102,7 +1102,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserListAPIKeys",
           "file": "internal/api/handlers/admin.go",
           "function": "UserListAPIKeys",
-          "line": 391,
+          "line": 393,
           "expression": "h.service.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1219,7 +1219,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UserListAPIKeys",
           "file": "internal/api/handlers/admin.go",
           "function": "UserListAPIKeys",
-          "line": 381,
+          "line": 383,
           "expression": "h.service.ListAPIKeysByOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -29754,7 +29754,7 @@
           "caller_id": "internal/ingest/service.go:*Service:reserveTenantDaily",
           "file": "internal/ingest/service.go",
           "function": "reserveTenantDaily",
-          "line": 495,
+          "line": 498,
           "expression": "s.store.CountTenantMessagesSince",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -41650,7 +41650,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 465,
+          "line": 471,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41658,7 +41658,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 352,
+          "line": 358,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -43211,7 +43211,7 @@
           "caller_id": "internal/app/permissions/editor.go:*Service:AssignEditor",
           "file": "internal/app/permissions/editor.go",
           "function": "AssignEditor",
-          "line": 152,
+          "line": 155,
           "expression": "port.AssignPermissionEditor",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49149,7 +49149,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:CreatePlan",
           "file": "internal/api/handlers/admin.go",
           "function": "CreatePlan",
-          "line": 140,
+          "line": 142,
           "expression": "h.service.CreatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49261,7 +49261,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:DeletePlan",
           "file": "internal/api/handlers/admin.go",
           "function": "DeletePlan",
-          "line": 174,
+          "line": 176,
           "expression": "h.service.DeletePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49499,7 +49499,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListPlans",
           "file": "internal/api/handlers/admin.go",
           "function": "ListPlans",
-          "line": 126,
+          "line": 128,
           "expression": "h.store.ListPlans",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49603,7 +49603,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UpdatePlan",
           "file": "internal/api/handlers/admin.go",
           "function": "UpdatePlan",
-          "line": 160,
+          "line": 162,
           "expression": "h.service.UpdatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49813,7 +49813,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
           "file": "internal/hooks/dispatcher.go",
           "function": "dispatch",
-          "line": 435,
+          "line": 432,
           "expression": "resp.Body.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49909,7 +49909,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 138,
+          "line": 177,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49917,7 +49917,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 149,
+          "line": 188,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49941,7 +49941,7 @@
           "caller_id": "internal/outbound/delivery.go::sendSMTP",
           "file": "internal/outbound/delivery.go",
           "function": "sendSMTP",
-          "line": 191,
+          "line": 230,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51419,7 +51419,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
           "file": "internal/hooks/dispatcher.go",
           "function": "Publish",
-          "line": 174,
+          "line": 171,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51427,7 +51427,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
           "file": "internal/hooks/dispatcher.go",
           "function": "Publish",
-          "line": 192,
+          "line": 189,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51435,7 +51435,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:dispatch",
           "file": "internal/hooks/dispatcher.go",
           "function": "dispatch",
-          "line": 441,
+          "line": 438,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51443,7 +51443,7 @@
           "caller_id": "internal/hooks/dispatcher.go::sign",
           "file": "internal/hooks/dispatcher.go",
           "function": "sign",
-          "line": 459,
+          "line": 456,
           "expression": "hmac.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53215,7 +53215,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetterSize",
           "file": "internal/hooks/dispatcher.go",
           "function": "DeadLetterSize",
-          "line": 223,
+          "line": 220,
           "expression": "d.store.CountDeadWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -53782,7 +53782,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:Publish",
           "file": "internal/hooks/dispatcher.go",
           "function": "Publish",
-          "line": 177,
+          "line": 174,
           "expression": "d.store.CreateOutboxEvent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -53930,7 +53930,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
           "file": "internal/hooks/dispatcher.go",
           "function": "processOutbox",
-          "line": 304,
+          "line": 301,
           "expression": "d.store.CreateWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -54054,7 +54054,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:DeadLetters",
           "file": "internal/hooks/dispatcher.go",
           "function": "DeadLetters",
-          "line": 204,
+          "line": 201,
           "expression": "d.store.ListDeadWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -54305,7 +54305,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListIngestJobs",
           "file": "internal/api/handlers/admin.go",
           "function": "ListIngestJobs",
-          "line": 253,
+          "line": 255,
           "expression": "h.service.ListIngestJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -54574,7 +54574,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListWebhookDeliveries",
           "file": "internal/api/handlers/admin.go",
           "function": "ListWebhookDeliveries",
-          "line": 263,
+          "line": 265,
           "expression": "h.service.ListWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -55528,7 +55528,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 386,
+          "line": 392,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -55536,7 +55536,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 358,
+          "line": 364,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -55764,7 +55764,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 332,
+          "line": 338,
           "expression": "h.store.RotateRefreshToken",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -58390,7 +58390,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:ListSettings",
           "file": "internal/api/handlers/admin.go",
           "function": "ListSettings",
-          "line": 295,
+          "line": 297,
           "expression": "h.service.ListSettings",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -58398,7 +58398,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:UpdateSettings",
           "file": "internal/api/handlers/admin.go",
           "function": "UpdateSettings",
-          "line": 318,
+          "line": 320,
           "expression": "h.service.ListSettings",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -58637,7 +58637,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:GetSMTPPolicy",
           "file": "internal/api/handlers/admin.go",
           "function": "GetSMTPPolicy",
-          "line": 272,
+          "line": 274,
           "expression": "h.service.GetSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60357,7 +60357,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 264,
+          "line": 270,
           "expression": "h.store.CreateTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60478,7 +60478,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:DeleteTenant",
           "file": "internal/api/handlers/admin.go",
           "function": "DeleteTenant",
-          "line": 104,
+          "line": 106,
           "expression": "h.service.DeleteTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60602,7 +60602,7 @@
           "caller_id": "internal/api/handlers/admin.go:*AdminHandler:GetEffectiveConfig",
           "file": "internal/api/handlers/admin.go",
           "function": "GetEffectiveConfig",
-          "line": 117,
+          "line": 119,
           "expression": "h.store.EffectiveConfig",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61320,7 +61320,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 454,
+          "line": 460,
           "expression": "atomic.ChangePasswordAtomic",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61580,7 +61580,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:issueTokenPair",
           "file": "internal/api/handlers/auth.go",
           "function": "issueTokenPair",
-          "line": 503,
+          "line": 509,
           "expression": "h.store.CreateRefreshToken",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61697,7 +61697,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 283,
+          "line": 289,
           "expression": "h.store.CreateUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62238,7 +62238,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 465,
+          "line": 471,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62246,7 +62246,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 352,
+          "line": 358,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62484,7 +62484,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Login",
           "file": "internal/api/handlers/auth.go",
           "function": "Login",
-          "line": 159,
+          "line": 165,
           "expression": "h.store.GetUserByEmail",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62492,7 +62492,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 241,
+          "line": 247,
           "expression": "h.store.GetUserByEmail",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62965,7 +62965,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 479,
+          "line": 485,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62973,7 +62973,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 388,
+          "line": 394,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -63075,7 +63075,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Login",
           "file": "internal/api/handlers/auth.go",
           "function": "Login",
-          "line": 186,
+          "line": 192,
           "expression": "h.store.TouchUserLogin",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -63275,7 +63275,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:updatePasswordHash",
           "file": "internal/api/handlers/auth.go",
           "function": "updatePasswordHash",
-          "line": 511,
+          "line": 517,
           "expression": "h.store.UpdateUserPassword",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -63929,7 +63929,7 @@
           "caller_id": "internal/hooks/dispatcher.go:*Dispatcher:processOutbox",
           "file": "internal/hooks/dispatcher.go",
           "function": "processOutbox",
-          "line": 287,
+          "line": 284,
           "expression": "d.store.ListWebhookEndpoints",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -67067,16 +67067,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
-  "current_review_boundary": "Revision 8 final static inventory at product source e0cd175 after completed STREAM/QUALITY integrations. Immutable revision-7 catalogs are pinned at f77c31e2 and their separately reviewed product source is 9b12c93. One SetTemplateGrant body adds a same-tenant user-existence SELECT for revocation; seven following functions move by 12 lines. The earlier 53cd5de checkpoint and its actual verification remain recorded separately. Complete current caller candidates and source references are refreshed; classifications, migrations, evidence levels, unrelated manual reviews and historical runtime links remain unchanged. No implementation TODO, runtime, dependency, release or parent-task acceptance.",
+  "last_review_base_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
+  "current_review_boundary": "Revision 9 static inventory after the final public CLOSE integration. Immutable revision-8 catalogs are pinned at 1d856bd8 and their separately reviewed product source is e0cd1759. PostgreSQL syntax, migrations, classifications, evidence levels and all manual transaction reviews remain unchanged; caller candidates are freshly collected. No implementation TODO, runtime, dependency, release, M/G0 or parent-task acceptance.",
   "inventory_revision": {
-    "revision": 8,
-    "source_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+    "revision": 9,
+    "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "f77c31e2da38bb926dfe6fa134eabad652e94f8c",
-    "previous_snapshot_blob": "86df3d6e8e9807b19fc5b907c7385fef80c6b8fd",
-    "previous_sha256": "9ad325330fc53f4ded0ea5a20ae25c85bfc2026c6274a3ef78815a36d95859cb",
+    "previous_snapshot_commit": "1d856bd8a552c30dfb48b4902858edad7e53aaf5",
+    "previous_snapshot_blob": "8ba42265c61b74a1e40bb29c3e302b811cfc2f97",
+    "previous_sha256": "52477ba99dbec5eeb0d900d98be039cc383acb0c7284b269fcd0f71ea53cc404",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008/README.md"
   }
 }
