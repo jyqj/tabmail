@@ -31,6 +31,7 @@ func deliverRelayTLS(ctx context.Context, cfg config.Outbound, from string, to [
 		return fmt.Errorf("connect relay %s: %w", addr, err)
 	}
 	defer release()
+	responseBudget := conn.(*smtpResponseConn)
 	if strings.ToLower(cfg.RelayTLS) == "tls" {
 		tlsConn := tls.Client(conn, tlsConf)
 		if err := tlsConn.HandshakeContext(ctx); err != nil {
@@ -40,21 +41,27 @@ func deliverRelayTLS(ctx context.Context, cfg config.Outbound, from string, to [
 	}
 
 	client, err := smtp.NewClient(conn, cfg.RelayHost)
+	err = responseBudget.responseError(err)
 	if err != nil {
 		conn.Close()
 		return fmt.Errorf("smtp client: %w", err)
 	}
 	defer client.Close()
+	// Guard the greeting before Mail/Auth/StartTLS can run their implicit
+	// hello followed by another command after a truncated positive reply.
+	if err := responseBudget.responseError(client.Hello("localhost")); err != nil {
+		return fmt.Errorf("smtp greeting: %w", err)
+	}
 
 	if strings.ToLower(cfg.RelayTLS) == "starttls" {
-		if err := client.StartTLS(tlsConf); err != nil {
+		if err := responseBudget.responseError(client.StartTLS(tlsConf)); err != nil {
 			return fmt.Errorf("starttls: %w", err)
 		}
 	}
 
 	if cfg.RelayUser != "" {
 		auth := smtp.PlainAuth("", cfg.RelayUser, cfg.RelayPass, cfg.RelayHost)
-		if err := client.Auth(auth); err != nil {
+		if err := responseBudget.responseError(client.Auth(auth)); err != nil {
 			return fmt.Errorf("auth: %w", err)
 		}
 	}
@@ -168,7 +175,9 @@ func deliverDirectMXTLS(ctx context.Context, host, addr, from string, to []strin
 		return err
 	}
 	defer func() { release() }()
+	responseBudget := conn.(*smtpResponseConn)
 	client, err := smtp.NewClient(conn, host)
+	err = responseBudget.responseError(err)
 	if err != nil {
 		return fmt.Errorf("smtp client: %w", err)
 	}
@@ -180,11 +189,11 @@ func deliverDirectMXTLS(ctx context.Context, host, addr, from string, to []strin
 	// Extension suppresses hello errors. Preserve a failed greeting before
 	// deciding whether the server omitted STARTTLS; use net/smtp's default name
 	// and keep its existing EHLO-to-HELO fallback.
-	if err := client.Hello("localhost"); err != nil {
+	if err := responseBudget.responseError(client.Hello("localhost")); err != nil {
 		return fmt.Errorf("smtp greeting: %w", err)
 	}
 	if ok, _ := client.Extension("STARTTLS"); ok {
-		if tlsErr := client.StartTLS(tlsConf); tlsErr != nil {
+		if tlsErr := responseBudget.responseError(client.StartTLS(tlsConf)); tlsErr != nil {
 			_ = client.Close()
 			release()
 			// A canceled handshake is not a reason to reconnect or try another MX.
@@ -200,9 +209,14 @@ func deliverDirectMXTLS(ctx context.Context, host, addr, from string, to []strin
 				release = func() {}
 				return fmt.Errorf("reconnect to %s after TLS failure: %w", host, err)
 			}
+			responseBudget = conn.(*smtpResponseConn)
 			client, err = smtp.NewClient(conn, host)
+			err = responseBudget.responseError(err)
 			if err != nil {
 				return fmt.Errorf("smtp client after reconnect: %w", err)
+			}
+			if err := responseBudget.responseError(client.Hello("localhost")); err != nil {
+				return fmt.Errorf("smtp greeting after reconnect: %w", err)
 			}
 		}
 	} else if requireTLS {
@@ -212,22 +226,25 @@ func deliverDirectMXTLS(ctx context.Context, host, addr, from string, to []strin
 }
 
 func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error {
-	if err := client.Mail(from); err != nil {
+	reader, responseError := guardSMTPReplyReader(client.Text.Reader.R)
+	client.Text.Reader.R = reader
+	if err := responseError(client.Mail(from)); err != nil {
 		return fmt.Errorf("MAIL FROM: %w", err)
 	}
 	for _, rcpt := range to {
-		if err := client.Rcpt(rcpt); err != nil {
+		if err := responseError(client.Rcpt(rcpt)); err != nil {
 			return fmt.Errorf("RCPT TO %s: %w", rcpt, err)
 		}
 	}
 	w, err := client.Data()
+	err = responseError(err)
 	if err != nil {
 		return fmt.Errorf("DATA: %w", err)
 	}
 	if _, err := w.Write(mime); err != nil {
 		return fmt.Errorf("write data: %w", err)
 	}
-	if err := w.Close(); err != nil {
+	if err := responseError(w.Close()); err != nil {
 		var reply *textproto.Error
 		// net/smtp expects exactly 250 here. textproto.Error also represents
 		// unexpected positive, intermediate, or invalid reply codes; only a
