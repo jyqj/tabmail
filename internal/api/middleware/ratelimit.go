@@ -99,23 +99,51 @@ func (rl *RateLimiter) checkSlidingWindow(ctx context.Context, key string, limit
 }
 
 func (rl *RateLimiter) realIP(r *http.Request) string {
-	host, _, _ := net.SplitHostPort(r.RemoteAddr)
-	remoteIP := net.ParseIP(strings.TrimSpace(host))
-	if remoteIP != nil && rl.isTrustedProxy(remoteIP) {
-		if xri := r.Header.Get("X-Real-Ip"); xri != "" {
-			return strings.TrimSpace(xri)
+	host, _, err := net.SplitHostPort(r.RemoteAddr)
+	if err != nil {
+		// A portless synthetic peer can still have a stable bucket, but it
+		// cannot establish the proxy provenance supplied by a TCP peer.
+		if ip := net.ParseIP(strings.TrimSpace(r.RemoteAddr)); ip != nil {
+			return ip.String()
 		}
-		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-			parts := strings.Split(xff, ",")
-			if len(parts) > 0 {
-				return strings.TrimSpace(parts[0])
+		return "unknown"
+	}
+	remoteIP := net.ParseIP(strings.TrimSpace(host))
+	if remoteIP == nil {
+		return "unknown"
+	}
+	peer := remoteIP.String()
+	if !rl.isTrustedProxy(remoteIP) {
+		return peer
+	}
+	if values := r.Header.Values("X-Forwarded-For"); len(values) != 0 {
+		// Each trusted proxy appends its observed peer. Walk that chain from
+		// the socket towards the client, stopping at the first untrusted IP.
+		// Anything before that IP is client-controlled, including malformed
+		// prefixes. Include all field lines in their wire order.
+		chain := strings.Split(strings.Join(values, ","), ",")
+		current := remoteIP
+		for i := len(chain) - 1; i >= 0; i-- {
+			if !rl.isTrustedProxy(current) {
+				return current.String()
+			}
+			current = net.ParseIP(strings.TrimSpace(chain[i]))
+			if current == nil {
+				// Invalid data within the trusted suffix cannot prove a
+				// client or defer to a conflicting alternate header.
+				return peer
 			}
 		}
+		return current.String()
 	}
-	if xri := r.Header.Get("X-Real-Ip"); xri != "" && remoteIP == nil {
-		return strings.TrimSpace(xri)
+	// Preserve single-header deployments when no forwarded chain is present.
+	// The trusted ingress must overwrite X-Real-IP with the observed client.
+	if values := r.Header.Values("X-Real-IP"); len(values) == 1 {
+		if ip := net.ParseIP(strings.TrimSpace(values[0])); ip != nil {
+			return ip.String()
+		}
 	}
-	return host
+	return peer
 }
 
 func (rl *RateLimiter) checkDailyQuota(ctx context.Context, key string, limit int) (bool, error) {
