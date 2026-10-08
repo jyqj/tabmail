@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -134,6 +135,32 @@ func (s *PgStore) TouchUserLogin(ctx context.Context, id uuid.UUID) error {
 // ================================================================
 
 func (s *PgStore) CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error {
+	if rt == nil {
+		return errors.New("refresh token is required")
+	}
+	exec := s.pool.Exec
+	var tx pgx.Tx
+	if rt.Issuance != nil {
+		// New authenticated families serialize with password changes, member
+		// freeze and deletion on the same user row. No tenant/audit/family lock
+		// is acquired after this user lock: only its refresh-token child is
+		// inserted, so tenant-first account commands keep their lock order.
+		proof := *rt.Issuance
+		var err error
+		tx, err = s.pool.Begin(ctx)
+		if err != nil {
+			return err
+		}
+		defer tx.Rollback(ctx)
+		current, err := scanUser(tx.QueryRow(ctx, userSelect+` WHERE id=$1 FOR SHARE`, rt.UserID))
+		if err != nil {
+			return err
+		}
+		if !proof.MatchesUser(rt.UserID, current) {
+			return store.ErrAuthenticationChanged
+		}
+		exec = tx.Exec
+	}
 	if rt.ID == uuid.Nil {
 		rt.ID = uuid.New()
 	}
@@ -141,11 +168,17 @@ func (s *PgStore) CreateRefreshToken(ctx context.Context, rt *models.RefreshToke
 		rt.FamilyID = rt.ID
 	}
 	rt.CreatedAt = time.Now()
-	_, err := s.pool.Exec(ctx, `
+	_, err := exec(ctx, `
 		INSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)
 		VALUES ($1, $2, $3, $4, $5, $6)`,
 		rt.ID, rt.UserID, rt.TokenHash, rt.ExpiresAt, rt.CreatedAt, rt.FamilyID)
-	return err
+	if err != nil {
+		return err
+	}
+	if tx != nil {
+		return tx.Commit(ctx)
+	}
+	return nil
 }
 
 func (s *PgStore) GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error) {

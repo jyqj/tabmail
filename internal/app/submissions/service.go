@@ -9,7 +9,6 @@ package submissions
 import (
 	"context"
 	"errors"
-	"net/mail"
 	"strings"
 	"time"
 
@@ -327,11 +326,11 @@ func (s *Service) SubmitAuthorized(ctx context.Context, tenant *models.Tenant, a
 	recipients := make([]string, 0, len(in.To)+len(in.CC)+len(in.BCC))
 	for _, group := range [][]string{in.To, in.CC, in.BCC} {
 		for _, rcpt := range group {
-			parsed, err := mail.ParseAddress(rcpt)
+			parsed, err := outbound.ParseRecipientAddress(rcpt)
 			if err != nil {
 				return nil, false, badRequest("invalid recipient address")
 			}
-			recipients = append(recipients, strings.ToLower(parsed.Address))
+			recipients = append(recipients, parsed.Identity)
 		}
 	}
 	for _, rcpt := range recipients {

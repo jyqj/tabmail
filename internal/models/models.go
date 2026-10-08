@@ -36,13 +36,16 @@ type User struct {
 }
 
 type RefreshToken struct {
-	FamilyID  uuid.UUID  `json:"-" db:"family_id"`
-	ID        uuid.UUID  `json:"id" db:"id"`
-	UserID    uuid.UUID  `json:"user_id" db:"user_id"`
-	TokenHash string     `json:"-" db:"token_hash"`
-	ExpiresAt time.Time  `json:"expires_at" db:"expires_at"`
-	CreatedAt time.Time  `json:"created_at" db:"created_at"`
-	RevokedAt *time.Time `json:"revoked_at,omitempty" db:"revoked_at"`
+	// Issuance is an ephemeral command precondition, never a stored token field.
+	// Interactive login/registration must provide the authenticated snapshot.
+	Issuance  *RefreshTokenIssuance `json:"-" db:"-"`
+	FamilyID  uuid.UUID             `json:"-" db:"family_id"`
+	ID        uuid.UUID             `json:"id" db:"id"`
+	UserID    uuid.UUID             `json:"user_id" db:"user_id"`
+	TokenHash string                `json:"-" db:"token_hash"`
+	ExpiresAt time.Time             `json:"expires_at" db:"expires_at"`
+	CreatedAt time.Time             `json:"created_at" db:"created_at"`
+	RevokedAt *time.Time            `json:"revoked_at,omitempty" db:"revoked_at"`
 }
 
 type AdminInvitation struct {

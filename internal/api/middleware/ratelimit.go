@@ -67,20 +67,19 @@ func (rl *RateLimiter) Middleware(next http.Handler) http.Handler {
 			limit = rl.ipRPM
 		}
 
-		if limit <= 0 {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		allowed, err := rl.checkSlidingWindow(ctx, key, limit, time.Minute)
-		if err != nil {
-			next.ServeHTTP(w, r)
-			return
-		}
-		if !allowed {
-			w.Header().Set("Retry-After", "60")
-			writeQuotaError(w, http.StatusTooManyRequests, "RATE_LIMITED", "too many requests")
-			return
+		// A disabled RPM window only disables that window. Tenant daily
+		// admission remains independent, including when its RPM is unlimited.
+		if limit > 0 {
+			allowed, err := rl.checkSlidingWindow(ctx, key, limit, time.Minute)
+			if err != nil {
+				next.ServeHTTP(w, r)
+				return
+			}
+			if !allowed {
+				w.Header().Set("Retry-After", "60")
+				writeQuotaError(w, http.StatusTooManyRequests, "RATE_LIMITED", "too many requests")
+				return
+			}
 		}
 
 		if tenantScoped && tenantCfg != nil && tenantCfg.DailyQuota > 0 {

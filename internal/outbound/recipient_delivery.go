@@ -60,13 +60,20 @@ func (s *Service) deliverRecipients(ctx context.Context, j *models.OutboundJob, 
 		attempt.RcptTo = []string{rcpt.Address}
 		var result *DeliveryResult
 		var deliveryErr error
-		suppressed, suppressErr := s.store.IsSuppressed(ctx, j.TenantID, rcpt.Address)
-		if suppressErr != nil {
-			deliveryErr = suppressErr
-		} else if suppressed {
-			deliveryErr = &textproto.Error{Code: 550, Msg: "Recipient suppressed"}
+		address, addressErr := ParseRecipientAddress(rcpt.Address)
+		if addressErr != nil {
+			deliveryErr = fmt.Errorf("invalid queued recipient: %w", addressErr)
 		} else {
-			result, deliveryErr = s.adapter.Deliver(ctx, &attempt, mime)
+			// Use the same decoded identity as the synchronous submission check;
+			// SMTP quoting must not create a second suppression identity.
+			suppressed, suppressErr := s.store.IsSuppressed(ctx, j.TenantID, address.Identity)
+			if suppressErr != nil {
+				deliveryErr = suppressErr
+			} else if suppressed {
+				deliveryErr = &textproto.Error{Code: 550, Msg: "Recipient suppressed"}
+			} else {
+				result, deliveryErr = s.adapter.Deliver(ctx, &attempt, mime)
+			}
 		}
 		recordAttempt := func() {
 			if result != nil {

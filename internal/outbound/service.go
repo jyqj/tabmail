@@ -135,11 +135,11 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	req.From = canonical
 	for _, group := range [][]string{req.To, req.CC, req.BCC} {
 		for i, a := range group {
-			parsed, parseErr := mail.ParseAddress(a)
+			parsed, parseErr := ParseRecipientAddress(a)
 			if parseErr != nil {
 				return nil, false, app.BadRequest("invalid recipient address")
 			}
-			group[i] = strings.ToLower(parsed.Address)
+			group[i] = parsed.Envelope
 		}
 	}
 	if len(req.IdempotencyKey) > 128 || strings.ContainsAny(req.IdempotencyKey, "\r\n") {

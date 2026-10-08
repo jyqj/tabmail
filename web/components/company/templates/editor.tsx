@@ -77,6 +77,13 @@ export function TemplateEditorView({
   const [editorScope] = useState(sessionScope);
   const { busy, run } = useAction();
   const [vars, setVars] = useState<Record<string, string>>({});
+  // A removed or renamed field no longer owns its preview value. Reconcile
+  // local edits and server-returned schemas before committing another request
+  // handler; bringing a retired name back must start with a fresh input.
+  const declaredNames = new Set(edit?.draft.variables.map(variable => variable.name));
+  const declaredEntries = Object.entries(vars).filter(([name]) => declaredNames.has(name));
+  const previewVars = declaredEntries.length === Object.keys(vars).length ? vars : Object.fromEntries(declaredEntries);
+  if (previewVars !== vars) setVars(previewVars);
   const [previewResult, setPreview] = useState<{ owner: object; value: RenderedTemplate } | null>(null);
   const [publication, setPublication] = useState<PublishedSnapshot | null>(null);
   const lifetime = useRef<object | null>(null);
@@ -91,7 +98,7 @@ export function TemplateEditorView({
   const selectedMailbox = mailboxes.find(value => value.mailbox.id === mailbox);
   // These are the rendering inputs and the selected sender's availability.
   // Management preview does not depend on ordinary read/send capabilities.
-  const previewSignature = JSON.stringify([scope, edit?.draft, vars, mailbox,
+  const previewSignature = JSON.stringify([scope, edit?.draft, previewVars, mailbox,
     !!selectedMailbox, selectedMailbox?.mailbox.full_address]);
   const [previewIntent, setPreviewIntent] = useState({ signature: previewSignature });
   if (previewIntent.signature !== previewSignature) setPreviewIntent({ signature: previewSignature });
@@ -109,7 +116,7 @@ export function TemplateEditorView({
     if (!edit || !selectedMailbox || !isCurrent()) return;
     try {
       const value = await company<unknown>("/templates/preview", {
-        method: "POST", body: { mailbox_id: mailbox, draft: edit.draft, vars },
+        method: "POST", body: { mailbox_id: mailbox, draft: edit.draft, vars: previewVars },
       });
       // Check ownership before touching response fields or reporting errors.
       // An away-and-back committed input change never revives an old result.
@@ -417,9 +424,9 @@ export function TemplateEditorView({
               id={id}
               className={inputClass}
               maxLength={v.max_length}
-              value={vars[v.name] ?? ""}
+              value={previewVars[v.name] ?? ""}
               onChange={(e) => {
-                setVars({ ...vars, [v.name]: e.target.value });
+                setVars({ ...previewVars, [v.name]: e.target.value });
                 setPreview(null);
               }}
             />
