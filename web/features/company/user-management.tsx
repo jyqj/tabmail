@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ import { getUserPermissionEditor, patchUserPermissionEditor, assignUserPermissio
 import { buildPermissionEditorCommand, permissionEditorFormFromSnapshot, validateObservedPermissionProfile } from "@/lib/api/permission-editor-types";
 import type { PermissionEditorForm, PermissionEditorSnapshot, PermissionField } from "@/lib/api/permission-editor-types";
 import { useCompanyEventConsumer } from "./company-event-consumer";
-import { useSessionScope } from "@/lib/session";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import { AdminInvitation } from "./admin-invitation";
 const USERS_PER_PAGE = 20;
 const NONE_PROFILE = "__none__";
@@ -44,7 +44,8 @@ const emptyOverrideForm: PermissionEditorForm = {
 };
 export default function UsersPage() {
     const { t } = useI18n();
-    const { level, tenantId: activeTenantId } = useAuth();
+    const permissionFormId = useId();
+    const { level, tenantId: activeTenantId, user: actorUser } = useAuth();
     // UX-only gate; the backend authz seam is authoritative.
     const isPlatformAdmin = canManageTenantUsers(level);
     const [page, setPage] = useState(1);
@@ -71,6 +72,8 @@ export default function UsersPage() {
     const [permSaving, setPermSaving] = useState(false);
     const [permResetting, setPermResetting] = useState(false);
     const session = useSessionScope();
+    const memberRevokedScope = useRef<string | null>(null);
+    const currentMemberContext = () => session === sessionScope() && memberRevokedScope.current !== session;
     useEffect(() => {
         ++permEpoch.current; permRequest.current?.abort();
         setPermUser(null); setPermSnapshot(null); setPermEffective(null); setPermForm(emptyOverrideForm);
@@ -83,24 +86,32 @@ export default function UsersPage() {
     };
     const domainLabel = (id: string) => domains.find((domain) => domain.id === id)?.domain ?? id.slice(0, 8);
     const handleToggleActive = async (user: AdminUser) => {
+        if (!canManageMember(user) || !currentMemberContext()) return;
         try {
             await updateUser(user.id, { is_active: !user.is_active });
+            if (!currentMemberContext()) return;
             toast.success(user.is_active ? t("admin.userDeactivated") : t("admin.userActivated"));
             mutateUsers();
         }
         catch {
+            if (!currentMemberContext()) return;
             toast.error(t("admin.updateFailed"));
         }
     };
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (user: AdminUser) => {
+        if (!canDeleteMember(user) || !currentMemberContext()) return;
         if (!safeConfirm(t("admin.confirmDeleteUser")))
             return;
+        // Confirmation may outlive the identity that opened this row.
+        if (!canDeleteMember(user) || !currentMemberContext()) return;
         try {
-            await deleteUser(id);
+            await deleteUser(user.id);
+            if (!currentMemberContext()) return;
             toast.success(t("admin.userDeleted"));
             mutateUsers();
         }
         catch (e: unknown) {
+            if (!currentMemberContext()) return;
             const err = e as {
                 error?: {
                     message?: string;
@@ -181,9 +192,15 @@ export default function UsersPage() {
         },
         revalidate: () => Promise.all([mutateUsers(), mutateProfiles(), mutateDomains()]),
         onRevoked: () => {
+            memberRevokedScope.current = session;
             closePermDialog(); setPermForm(emptyOverrideForm);
         },
     });
+    // UX-only mirror of the member guard. Superadmins may select another
+    // tenant; ordinary admins stay in their own. Backend guards stay authoritative.
+    const canManageMember = (user: AdminUser) => !eventRevoked && !!actorUser?.id && !!activeTenantId &&
+        user.tenant_id === activeTenantId && (level === "super_admin" || (level === "admin" && actorUser.tenant_id === activeTenantId && user.role === "user"));
+    const canDeleteMember = (user: AdminUser) => canManageMember(user) && user.id !== actorUser?.id;
     const editorProfiles = permSnapshot?.profile
         ? [permSnapshot.profile, ...profiles.filter(profile => profile.id !== permSnapshot.profile?.id)] : profiles;
     const knownProfile = (id: string) => {
@@ -339,7 +356,7 @@ export default function UsersPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Switch size="sm" checked={user.is_active} onCheckedChange={() => handleToggleActive(user)}/>
+                          <Switch size="sm" disabled={!canManageMember(user)} checked={user.is_active} onCheckedChange={() => handleToggleActive(user)}/>
                           <span className="text-xs text-muted-foreground">
                             {user.is_active ? t("admin.active") : t("admin.inactive")}
                           </span>
@@ -370,7 +387,7 @@ export default function UsersPage() {
                               {t("admin.copyId")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => handleDelete(user.id)} className="text-destructive focus:text-destructive">
+                            <DropdownMenuItem disabled={!canDeleteMember(user)} onClick={() => handleDelete(user)} className="text-destructive focus:text-destructive">
                               <Trash2 className="h-4 w-4 mr-2"/>
                               {t("admin.deleteUser")}
                             </DropdownMenuItem>
@@ -419,9 +436,9 @@ export default function UsersPage() {
             <div className="space-y-4">
               {/* Profile selector */}
               <div className="space-y-2">
-                <Label>{t("admin.permProfileLabel")}</Label>
+                <Label htmlFor={`${permissionFormId}-profile`}>{t("admin.permProfileLabel")}</Label>
                 <Select value={permProfileId} onValueChange={handlePermProfileChange} disabled={!canAssign}>
-                  <SelectTrigger aria-label={t("admin.permProfileLabel")}>
+                  <SelectTrigger id={`${permissionFormId}-profile`} aria-label={t("admin.permProfileLabel")}>
                     <SelectValue placeholder={t("admin.permSelectProfile")} >
                       {permProfileId === NONE_PROFILE ? t("admin.permDefault") : editorProfiles.find(profile => profile.id === permProfileId)?.name ?? t("admin.permSelectProfile")}
                     </SelectValue>
@@ -440,44 +457,44 @@ export default function UsersPage() {
 
                 {/* Boolean switches */}
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanSend")}</Label>
+                  <Label id={`${permissionFormId}-can_send-label`} htmlFor={`${permissionFormId}-can_send`}>{t("admin.permCanSend")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch disabled={!canPatch} size="sm" checked={permForm.can_send === null ? false : permForm.can_send} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_send: checked }))}/>
-                    {permForm.can_send !== null && (<Button disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_send: null }))}>
+                    <Switch id={`${permissionFormId}-can_send`} aria-labelledby={`${permissionFormId}-can_send-label`} disabled={!canPatch} size="sm" checked={permForm.can_send === null ? false : permForm.can_send} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_send: checked }))}/>
+                    {permForm.can_send !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanSend")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanSend")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_send: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanCreateDomains")}</Label>
+                  <Label id={`${permissionFormId}-can_create_domains-label`} htmlFor={`${permissionFormId}-can_create_domains`}>{t("admin.permCanCreateDomains")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch disabled={!canPatch} size="sm" checked={permForm.can_create_domains === null ? false : permForm.can_create_domains} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_domains: checked }))}/>
-                    {permForm.can_create_domains !== null && (<Button disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_domains: null }))}>
+                    <Switch id={`${permissionFormId}-can_create_domains`} aria-labelledby={`${permissionFormId}-can_create_domains-label`} disabled={!canPatch} size="sm" checked={permForm.can_create_domains === null ? false : permForm.can_create_domains} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_domains: checked }))}/>
+                    {permForm.can_create_domains !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateDomains")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateDomains")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_domains: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanCreateRoutes")}</Label>
+                  <Label id={`${permissionFormId}-can_create_routes-label`} htmlFor={`${permissionFormId}-can_create_routes`}>{t("admin.permCanCreateRoutes")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch disabled={!canPatch} size="sm" checked={permForm.can_create_routes === null ? false : permForm.can_create_routes} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_routes: checked }))}/>
-                    {permForm.can_create_routes !== null && (<Button disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_routes: null }))}>
+                    <Switch id={`${permissionFormId}-can_create_routes`} aria-labelledby={`${permissionFormId}-can_create_routes-label`} disabled={!canPatch} size="sm" checked={permForm.can_create_routes === null ? false : permForm.can_create_routes} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_routes: checked }))}/>
+                    {permForm.can_create_routes !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateRoutes")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateRoutes")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_routes: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <Label>{t("admin.permCanCreateApiKeys")}</Label>
+                  <Label id={`${permissionFormId}-can_create_api_keys-label`} htmlFor={`${permissionFormId}-can_create_api_keys`}>{t("admin.permCanCreateApiKeys")}</Label>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">{t("admin.permInherit")}</span>
-                    <Switch disabled={!canPatch} size="sm" checked={permForm.can_create_api_keys === null ? false : permForm.can_create_api_keys} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_api_keys: checked }))}/>
-                    {permForm.can_create_api_keys !== null && (<Button disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_api_keys: null }))}>
+                    <Switch id={`${permissionFormId}-can_create_api_keys`} aria-labelledby={`${permissionFormId}-can_create_api_keys-label`} disabled={!canPatch} size="sm" checked={permForm.can_create_api_keys === null ? false : permForm.can_create_api_keys} onCheckedChange={(checked) => setPermForm((prev) => ({ ...prev, can_create_api_keys: checked }))}/>
+                    {permForm.can_create_api_keys !== null && (<Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateApiKeys")}`} title={`${t("admin.permInheritShort")}: ${t("admin.permCanCreateApiKeys")}`} disabled={!canPatch} variant="ghost" size="icon" className="h-6 w-6" onClick={() => setPermForm((prev) => ({ ...prev, can_create_api_keys: null }))}>
                         <Trash2 className="h-3 w-3"/>
                       </Button>)}
                   </div>
@@ -492,7 +509,7 @@ export default function UsersPage() {
                       </p>
                     </div>
                     <div className="flex shrink-0 gap-2">
-                      <Button type="button" disabled={!canPatch} variant={permForm.domain_access.mode === "inherit" ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, domain_access: { mode: "inherit", zone_ids: [] } }))}>
+                      <Button type="button" aria-label={`${t("admin.permInheritShort")}: ${t("admin.permAllowedZoneScope")}`} disabled={!canPatch} variant={permForm.domain_access.mode === "inherit" ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, domain_access: { mode: "inherit", zone_ids: [] } }))}>
                         {t("admin.permInheritShort")}
                       </Button>
                       <Button type="button" disabled={!canPatch} variant={permForm.domain_access.mode === "all" ? "default" : "outline"} size="sm" onClick={() => setPermForm((prev) => ({ ...prev, domain_access: { mode: "all", zone_ids: [] } }))}>
@@ -507,9 +524,9 @@ export default function UsersPage() {
                   {domains.length === 0 ? (<p className="text-xs text-muted-foreground">{t("admin.permNoDomains")}</p>) : (<div className="grid gap-2">
                       {domains.map((domain) => {
                 const selected = permForm.domain_access.mode === "list" && permForm.domain_access.zone_ids.includes(domain.id);
-                return (<label key={domain.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
-                            <span className="truncate">{domain.domain}</span>
-                            <Switch disabled={!canPatch} size="sm" checked={selected} onCheckedChange={(checked) => setPermForm((prev) => {
+                return (<label key={domain.id} htmlFor={`${permissionFormId}-zone-${domain.id}`} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                            <span id={`${permissionFormId}-zone-${domain.id}-label`} className="truncate">{domain.domain}</span>
+                            <Switch id={`${permissionFormId}-zone-${domain.id}`} aria-labelledby={`${permissionFormId}-zone-${domain.id}-label`} disabled={!canPatch} size="sm" checked={selected} onCheckedChange={(checked) => setPermForm((prev) => {
                         const current = prev.domain_access.mode === "list" ? prev.domain_access.zone_ids : [];
                         const zone_ids = checked ? Array.from(new Set([...current, domain.id])) : current.filter((id) => id !== domain.id);
                         return {
@@ -524,26 +541,26 @@ export default function UsersPage() {
 
                 {/* Number inputs */}
                 <div className="space-y-2">
-                  <Label>{t("admin.permDailySendQuota")}</Label>
-                  <Input disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.daily_send_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_send_quota: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-daily_send_quota`}>{t("admin.permDailySendQuota")}</Label>
+                  <Input id={`${permissionFormId}-daily_send_quota`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.daily_send_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_send_quota: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("admin.permDailyReceiveQuota")}</Label>
-                  <Input disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.daily_receive_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_receive_quota: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-daily_receive_quota`}>{t("admin.permDailyReceiveQuota")}</Label>
+                  <Input id={`${permissionFormId}-daily_receive_quota`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.daily_receive_quota} onChange={(e) => setPermForm((prev) => ({ ...prev, daily_receive_quota: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("admin.permMaxMailboxes")}</Label>
-                  <Input disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.max_mailboxes} onChange={(e) => setPermForm((prev) => ({ ...prev, max_mailboxes: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-max_mailboxes`}>{t("admin.permMaxMailboxes")}</Label>
+                  <Input id={`${permissionFormId}-max_mailboxes`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.max_mailboxes} onChange={(e) => setPermForm((prev) => ({ ...prev, max_mailboxes: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label>{t("admin.permMaxDomains")}</Label>
-                  <Input disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.max_domains} onChange={(e) => setPermForm((prev) => ({ ...prev, max_domains: e.target.value }))}/>
+                  <Label htmlFor={`${permissionFormId}-max_domains`}>{t("admin.permMaxDomains")}</Label>
+                  <Input id={`${permissionFormId}-max_domains`} disabled={!canPatch} min={0} step={1} type="number" placeholder={t("admin.permInherit")} value={permForm.max_domains} onChange={(e) => setPermForm((prev) => ({ ...prev, max_domains: e.target.value }))}/>
                   <p className="text-xs text-muted-foreground">{t("admin.permZeroUnlimited")}</p>
                 </div>
               </div>

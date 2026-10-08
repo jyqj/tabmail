@@ -328,7 +328,7 @@ describe("permission editor real consumer", () => {
     expect(writes()[1].body).toEqual({ expected_revision: current.revision, patch: { daily_send_quota: 30 } });
   });
 
-  it.each([["All", "all"], ["No domains allowed", "none"], ["Inherit", "inherit"]])("domain %s preserves empty-zone mode instead of treating all empty arrays alike", async (label, mode) => {
+  it.each([["All", "all"], ["No domains allowed", "none"], ["Inherit: Allowed Domain Scope", "inherit"]])("domain %s preserves empty-zone mode instead of treating all empty arrays alike", async (label, mode) => {
     // Start from list so every tested choice is a true dirty source transition.
     current.overrides.domain_access = { mode: "list", zone_ids: [zone] };
     current.overrides.allowed_zone_ids = [zone];

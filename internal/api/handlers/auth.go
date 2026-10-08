@@ -155,6 +155,12 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, "email and password are required")
 		return
 	}
+	// bcrypt comparison ignores bytes after its 72-byte input boundary.
+	// Reject them before account lookup, while retaining legacy short passwords.
+	if len(req.Password) > credentials.MaxPasswordBytes {
+		writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid email or password"}})
+		return
+	}
 
 	user, err := h.store.GetUserByEmail(r.Context(), req.Email)
 	if err != nil {
@@ -438,7 +444,7 @@ func (h *AuthHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, err.Error())
 		return
 	}
-	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword)); err != nil {
+	if len(req.OldPassword) > credentials.MaxPasswordBytes || bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(req.OldPassword)) != nil {
 		writeJSON(w, http.StatusForbidden, envelope{Error: &apiErr{Code: "INVALID_PASSWORD", Message: "incorrect old password"}})
 		return
 	}
