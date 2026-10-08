@@ -1,13 +1,13 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-ADVANCE-20261008:BEGIN -->
-## ADVANCE 批次：十项独立认领，按三轮继续完成
+## ADVANCE 批次：十项完整实施，三轮全部完成
 
 本批承接上一批完整交付的公开整合 `f2215611158d33ff9caed468bf6314e32dcf5046`。新认领 [#111–#120](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+ADVANCE-%22) 十个不同生产缺口，root 与三个原生 subagent 按 **4＋3＋3** 实施、同一固定失败基线验证、交叉审查、整合并在实际合入后逐项关闭。范围及逐轮证据见 [ADVANCE 关闭账本](R5-ADVANCE-20261008.md)。
 
-第 1 轮 [#121](https://github.com/jyqj/tabmail/pull/121) 已实际合入 `d15a1e375ebab8d99c6b8e3e0951596b1eb1af6e`，#111/#112/#113/#114 已逐项 closed/completed。第二轮 [#122](https://github.com/jyqj/tabmail/pull/122) 已实际合入 `908c8418a62fe32bd65b2f08cdc072373af7a797`，#115/#116/#117 已逐项 closed/completed。当前本批 **7/10 完成，剩余 3**；原父级 **10/171 已验收，剩余 161**。上一批 CLOSE 十项不重复计数，文档/目录维护不算新实施项。原 M/G0、完整 PG、依赖审计和必跑 fixture 保持原条件；#56 保持 draft，main 未合入。
+第 1 轮 [#121](https://github.com/jyqj/tabmail/pull/121) 已实际合入 `d15a1e375ebab8d99c6b8e3e0951596b1eb1af6e`，#111/#112/#113/#114 已逐项 closed/completed。第二轮 [#122](https://github.com/jyqj/tabmail/pull/122) 已实际合入 `908c8418a62fe32bd65b2f08cdc072373af7a797`，#115/#116/#117 已逐项 closed/completed。第三轮 [#123](https://github.com/jyqj/tabmail/pull/123) 已实际合入 `703a572864296120fff3efe0880c560ad9c74d57`，#118/#119/#120 已逐项 closed/completed。当前本批 **10/10 完成，剩余 0**；原父级 **10/171 已验收，剩余 161**。上一批 CLOSE 十项不重复计数，文档/目录维护不算新实施项。原 M/G0、完整 PG、依赖审计和必跑 fixture 保持原条件；#56 保持 draft，main 未合入。
 
-第二轮固定红绿、独立审查及同一干净整合源 49 Go / 96 UI 全通过，精确完整树已核对。第三轮 #118/#119/#120 从 `908c8418` 分别完成日期边界、富文本选区/禁用状态、未使用原件引用锁回收及恢复交接，作者固定红绿和独立审查全部通过。root 同一干净整合 `2a02f043` 的 140 Go / 25 UI 全通过，实际 cmd 构造编译成功（0 测试执行）；尚待精确树 PR 合入和 Issue 状态回写，仍计 7/10。
+第二轮固定红绿、独立审查及同一干净整合源 49 Go / 96 UI 全通过，精确完整树已核对。第三轮 #118/#119/#120 从 `908c8418` 分别完成日期边界、富文本选区/禁用状态、未使用原件引用锁回收及恢复交接，作者固定红绿和独立审查全部通过。root 同一干净整合 `2a02f043` 的 140 Go / 25 UI 全通过，实际 cmd 构造编译成功（0 测试执行）；精确树 `40e1d2d16258e0e2bc3afea29553dbb148920e4e` 与最终独审源一致，实际 merge 双 parent 已核对，精确 head source-evidence 37728167484 SUCCESS。三轮剩余依次为 **6 → 3 → 0**；最终证据目录 [revision10](evidence/R5-CATALOG-REVISION10-20261008/README.md) 实采及独立复核完成：三个原 CLI、83 Python / 27 Node 全通过；原完整 runner 因既有 Linux pinned executable FD 前置条件拒绝，774 发现 / 0 分派，未赋予完整发布资格。维护计 0 个新 TODO。
 <!-- R5-ADVANCE-20261008:END -->
 
 <!-- R5-CLOSE-20261008:BEGIN -->
