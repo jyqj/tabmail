@@ -185,6 +185,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	accessToken, refreshToken, err := h.issueTokenPair(r.Context(), user)
 	if err != nil {
+		if errors.Is(err, store.ErrAuthenticationChanged) {
+			writeJSON(w, http.StatusUnauthorized, envelope{Error: &apiErr{Code: "UNAUTHORIZED", Message: "invalid email or password"}})
+			return
+		}
 		h.logger.Err(err).Msg("login: issue tokens")
 		errInternal(w)
 		return
@@ -513,6 +517,10 @@ func (h *AuthHandler) issueTokenPair(ctx context.Context, user *models.User) (ac
 		UserID:    user.ID,
 		TokenHash: refreshHash,
 		ExpiresAt: time.Now().Add(authn.RefreshTokenTTL),
+		// The authenticated values are immutable command input. The store
+		// rechecks them under the same lock that protects this token insertion;
+		// a later active state alone cannot resurrect a pre-freeze login.
+		Issuance: &models.RefreshTokenIssuance{UserID: user.ID, TenantID: user.TenantID, PasswordHash: user.PasswordHash, SessionVersion: user.SessionVersion},
 	}
 	if err := h.store.CreateRefreshToken(ctx, rt); err != nil {
 		return "", "", err

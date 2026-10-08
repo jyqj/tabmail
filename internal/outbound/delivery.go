@@ -246,9 +246,11 @@ func sendSMTP(client *smtp.Client, from string, to []string, mime []byte) error 
 func groupByDomain(addrs []string) map[string][]string {
 	m := make(map[string][]string)
 	for _, addr := range addrs {
-		parts := strings.SplitN(addr, "@", 2)
-		if len(parts) == 2 {
-			m[parts[1]] = append(m[parts[1]], addr)
+		// Quoted local parts may contain @. The final @ separates the domain
+		// in the canonical addr-spec stored by the submission boundary.
+		if at := strings.LastIndexByte(addr, '@'); at >= 0 {
+			domain := addr[at+1:]
+			m[domain] = append(m[domain], addr)
 		}
 	}
 	return m

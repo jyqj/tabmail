@@ -12,6 +12,9 @@ import (
 )
 
 var (
+	// ErrAuthenticationChanged means the credentials verified by an issuer no
+	// longer describe a current active user. No refresh token was created.
+	ErrAuthenticationChanged = errors.New("credentials or account changed during authentication")
 	// ErrDomainAlreadyExists identifies the domain-name uniqueness conflict.
 	// Adapters preserve their original cause for errors.Is/errors.As callers.
 	ErrDomainAlreadyExists        = errors.New("domain already exists")
@@ -79,6 +82,9 @@ type UserStore interface {
 	TouchUserLogin(ctx context.Context, id uuid.UUID) error
 
 	// --- Refresh tokens --------------------------------------------------
+	// Production authentication supplies rt.Issuance. The adapter must validate
+	// it and insert under the same user lock; nil preserves direct internal
+	// token-loading compatibility and is not an interactive issuance protocol.
 	CreateRefreshToken(ctx context.Context, rt *models.RefreshToken) error
 	GetRefreshToken(ctx context.Context, tokenHash string) (*models.RefreshToken, error)
 	RevokeRefreshToken(ctx context.Context, id uuid.UUID) error
