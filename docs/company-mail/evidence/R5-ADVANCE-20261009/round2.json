@@ -1,0 +1,4119 @@
+{
+  "batch": "ADVANCE-20261009",
+  "round": 2,
+  "execution_commit": "a58eb8edb64eecfd9ff2206f8f87ea9c83e2436a",
+  "execution_tree": "ad86d50d9528576b46879eb6ca378df8f8a75c2e",
+  "clean_source": true,
+  "merged_round1": {
+    "pr": 207,
+    "commit": "899e5bd96a9839bd2fab1b1afe7a95adaf1f643c",
+    "tree": "89289e26c28fbe93114b87fb5ec563cf664caa4b",
+    "issues_closed_completed": [
+      197,
+      198,
+      199,
+      200
+    ]
+  },
+  "fixed_go_command": "go test -mod=readonly -race -p 1 -count=1 -json ./internal/company ./internal/app/templates ./internal/outbound -run '^(TestAdvanceTemplateEmail|TestR5AdvanceRecipient|TestAdvanceRecipientIndependent|TestBuild_)'",
+  "fixed_go": {
+    "raw_sha256": "2288c9ecfa76cd53bd671f8fe8e9d369a95b7cf1f0a845ddd2dc76d851a3e3fb",
+    "raw_bytes": 161941,
+    "result_counts": {
+      "pass": 179
+    },
+    "leaf_results": [
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/plus",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/address_literal",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_backslash",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_html",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/redundant_quotes",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/display_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/empty_display_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/angle_wrapped",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/group",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/list",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/leading_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/trailing_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_tab",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_domain_fws",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/crlf",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/nul",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/missing_domain",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/plus",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/address_literal",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_quote",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_backslash",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_html",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/redundant_quotes",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_unicode",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/display_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/empty_display_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/angle_wrapped",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/group",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/list",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/comment",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/leading_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/trailing_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_tab",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_domain_fws",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/crlf",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/nul",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/missing_domain",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/at_length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/over_length",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/outside_enum",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/required_empty",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/optional_omitted",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/company",
+        "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/reserved_identity",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_html",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/display_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/domain_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/ordinary",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_comma",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_at",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_html",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/display_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/app/templates",
+        "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/domain_space",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/empty",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/ascii",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/chinese",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/emoji",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/mixed_scripts",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/combining_marks",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/spaces",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/tabs",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/whitespace_only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/punctuation",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/literal_encoded_word",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/literal_encoded_words",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/malformed_encoded_word",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/crlf_stripped",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/ascii_unspaced_989",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/ascii_spaced_989",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/ascii_unspaced_990",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/ascii_spaced_990",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/ascii_unspaced_998",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/ascii_spaced_998",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_39_c3a9",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_39_e4b8ad",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_39_f09f9982",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_40_c3a9",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_40_e4b8ad",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_40_f09f9982",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_41_c3a9",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_41_e4b8ad",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_41_f09f9982",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_42_c3a9",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_42_e4b8ad",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_42_f09f9982",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_43_c3a9",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_43_e4b8ad",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectWireRoundTrip/character_boundary_43_f09f9982",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_SubjectRenderedTemplateAtByteLimit",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_TextOnly",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HTMLOnly",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_MultipartAlternative",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_BCCNotInHeaders",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_BCCNeverLeaksWithoutMetadata",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_CustomHeaders",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderNameInjectionBlocked/CRLF_injection",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderNameInjectionBlocked/LF_injection",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderNameInjectionBlocked/CR_injection",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderNameInjectionBlocked/space_in_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderNameInjectionBlocked/colon_in_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderNameInjectionBlocked/empty_name",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderNameInjectionBlocked/starts_with_hyphen",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_ForbiddenHeadersBlocked",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestBuild_HeaderValueCRLFStripped",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/73/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/73/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/74/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/74/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/996/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/996/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/997/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/To/997/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/73/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/73/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/74/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/74/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/996/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/996/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/997/false",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentTokenBounds/Cc/997/true",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentQuotedTokensAndOtherHeaders/To",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestAdvanceRecipientIndependentQuotedTokensAndOtherHeaders/Cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/plain/1/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/plain/1/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/plain/2/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/plain/2/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/plain/50/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/plain/50/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/quoted/1/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/quoted/1/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/quoted/2/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/quoted/2/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/quoted/50/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/quoted/50/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/unicode/1/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/unicode/1/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/unicode/2/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/unicode/2/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/unicode/50/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/unicode/50/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/mixed",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderFolding/bcc-only",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/to/77",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/to/78",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/to/995",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/to/996",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/to/997",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/to/998",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/to/1200",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/cc/77",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/cc/78",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/cc/995",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/cc/996",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/cc/997",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/cc/998",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeaderHardLimit/cc/1200",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeadersSubmitAndSMTP/direct/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeadersSubmitAndSMTP/direct/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeadersSubmitAndSMTP/direct/mixed",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeadersSubmitAndSMTP/relay/to",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeadersSubmitAndSMTP/relay/cc",
+        "result": "pass"
+      },
+      {
+        "package": "tabmail/internal/outbound",
+        "test": "TestR5AdvanceRecipientHeadersSubmitAndSMTP/relay/mixed",
+        "result": "pass"
+      }
+    ],
+    "projection_note": "Derived leaf result projection; original Output records are not published."
+  },
+  "six_template_ui_files": {
+    "raw_sha256": "0244d6e69a3689534b0df90cabb4a2a007499224355f4dbcbf4add9470c11340",
+    "raw_bytes": 34658,
+    "result_counts": {
+      "passed": 105
+    },
+    "cases": [
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "saves once, accepts server normalization and uses the returned revision on the next save",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves Template name edited during save and reconciles the saved revision",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves Subject template edited during save and reconciles the saved revision",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves Text body template edited during save and reconciles the saved revision",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves HTML template edited during save and reconciles the saved revision",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves Allowed values (optional, one per line) edited during save and reconciles the saved revision",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves new-template edits while adopting the created ID, then updates instead of creating again",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not overwrite the different editor with an obsolete save response",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not overwrite the same-again editor with an obsolete save response",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not overwrite the new editor with an obsolete save response",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not overwrite the new-again editor with an obsolete save response",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "suppresses a save rejection after the user selects a new editor",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "has no save callback or notification after unmount",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not leave the old template selected when the account changes during save",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "retains an active save across token-only rotation",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "requires a new publish decision when the draft changed during its save",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not dispatch publish after the editor was replaced while its save was pending",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not dispatch publish after its save callback outlives the selected editor",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "publishes the saved revision exactly once and closes an unchanged editor",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves edits during an already dispatched publish and uses the refreshed revision for their next save",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not clear a newly selected editor when an earlier publish finishes",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves input and authoritative revision when the post-publish refresh completes late",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "retries only the read after an acknowledged publish could not refresh its revision",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "preserves the saved draft and makes no automatic write after a publish conflict",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "rejects a same post-publish revision read and retains edits for a read-only retry",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "rejects a older post-publish revision read and retains edits for a read-only retry",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "rejects a missing post-publish revision read and retains edits for a read-only retry",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "rejects a wrong-id post-publish revision read and retains edits for a read-only retry",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "does not silently rebase newer local edits onto concurrently replaced server content",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "ignores a post-publish refresh after its editor is replaced",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "ignores a post-publish refresh after its editor is unmounted",
+        "result": "passed"
+      },
+      {
+        "file": "editor-save-ownership.test.tsx",
+        "test": "continues a new-template publication with the created ID and returned revision",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "announces an initial library read without claiming that no templates exist",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "shows an empty library only after a successful empty response",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "does not describe an initial 403 as an empty library and retries reads",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "does not describe an initial 503 as an empty library and retries reads",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "hides cached selection and retire controls after a 403 refresh error",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "hides cached selection and retire controls after a 503 refresh error",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "blocks stale library selection and retirement during a pending revalidation",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "does not retain an empty claim while an empty library is being revalidated",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "uses the newly confirmed library revision after a failed refresh and explicit retry",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "recovers an acknowledged retire whose readback fails without replaying the POST",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "ignores a pending retire after the page unmounts (failure=false)",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "ignores a pending retire after the page unmounts (failure=true)",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "preserves explicit retire and reactivate requests with successive authoritative revisions",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "preserves unsaved editor input when a background library read fails",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "does not clear a newer selected editor when an older retire completes",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "keeps a newer session independent from an older pending retire response",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "identifies a confirmed status change separately from its failed readback",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "reconciles a lost mutation response through GET before permitting another status change",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "retains edits made in the same selected editor while retirement is pending",
+        "result": "passed"
+      },
+      {
+        "file": "library-load-state.test.tsx",
+        "test": "treats a malformed successful library response as a retryable read failure",
+        "result": "passed"
+      },
+      {
+        "file": "library-retry-ownership.test.tsx",
+        "test": "suppresses a rejected manual library retry after unmount",
+        "result": "passed"
+      },
+      {
+        "file": "library-retry-ownership.test.tsx",
+        "test": "suppresses a rejected manual library retry after session",
+        "result": "passed"
+      },
+      {
+        "file": "library-retry-ownership.test.tsx",
+        "test": "suppresses a failed HTTP response from a manual retry after unmount",
+        "result": "passed"
+      },
+      {
+        "file": "library-retry-ownership.test.tsx",
+        "test": "keeps a current owner's real retry failure visible and does not start subsequent reads",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed missing readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed negative readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed fractional readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed string readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed missing draft readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries recovers a rejected revoke at the unchanged revision without replaying the command",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries accepts identical concurrent field changes without an unnecessary conflict",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries deduplicates synchronous revoke clicks while the command is pending",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries retires a pending command's continuation after selecting another template",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries retires a pending command's continuation after selecting same template",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent retains Template name and sends it with the post-revocation revision only after explicit save",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent retains Subject template and sends it with the post-revocation revision only after explicit save",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent retains Text body template and sends it with the post-revocation revision only after explicit save",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent retains HTML template and sends it with the post-revocation revision only after explicit save",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent retains Allowed values (optional, one per line) and sends it with the post-revocation revision only after explicit save",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent keeps removed variables removed when the administrator revokes a published version",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent allows the untouched editor to save against the new revision",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent blocks saving while the revoke is in flight, survives tab navigation and keeps later edits",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent preserves edits after post-revocation read 403 and retries only the authoritative GET",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent preserves edits after post-revocation read 503 and retries only the authoritative GET",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent keeps a readback at the old revision blocked instead of treating cached content as current",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent merges an untouched server field while retaining independent unsaved edits",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent requires explicit review when the server changed a locally edited field",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent uses a successful draft save as the baseline for the next revoke reconciliation",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent keeps the unknown revoke result blocked until an explicit read confirms the current revision",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent does not notify or overwrite after the revoke page leaves by unmount",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent does not notify or overwrite after the revoke page leaves by session",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "template version revocation retains editor intent does not interrupt an owned revoke when only the access token rotates",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "requests no versions until a template is selected",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "announces a pending initial read without claiming empty history",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "shows empty history after a successful empty response",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "does not label an initial 403 error as empty and restores data on retry",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "does not label an initial 503 error as empty and restores data on retry",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "announces cache revalidation without a stale action or empty claim (empty=false)",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "announces cache revalidation without a stale action or empty claim (empty=true)",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "hides cached revocation after a 403 refresh error until successful retry",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "hides cached revocation after a 503 refresh error until successful retry",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "revalidates a changed template revision before revoking with that revision",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "ignores a delayed read after selecting a different template",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "does not send an old revocation if the session changes during confirmation",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "keeps the confirmed current-version request and refresh callback intact",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "has no stale read, callback or error after unmounting a pending revocation (failure=false)",
+        "result": "passed"
+      },
+      {
+        "file": "versions-load-state.test.tsx",
+        "test": "has no stale read, callback or error after unmounting a pending revocation (failure=true)",
+        "result": "passed"
+      },
+      {
+        "file": "versions.test.tsx",
+        "test": "TemplateVersionsView revoke flow offers revoke only on live versions, never reusing the retire wording",
+        "result": "passed"
+      },
+      {
+        "file": "versions.test.tsx",
+        "test": "TemplateVersionsView revoke flow aborts without calling the API when the confirm is dismissed",
+        "result": "passed"
+      },
+      {
+        "file": "versions.test.tsx",
+        "test": "TemplateVersionsView revoke flow revokes with the current revision, states the irreversibility and refreshes",
+        "result": "passed"
+      },
+      {
+        "file": "versions.test.tsx",
+        "test": "TemplateVersionsView revoke flow does not revoke or refresh when confirmation is missing",
+        "result": "passed"
+      },
+      {
+        "file": "versions.test.tsx",
+        "test": "TemplateVersionsView revoke flow does not revoke or refresh when confirmation is throws",
+        "result": "passed"
+      },
+      {
+        "file": "versions.test.tsx",
+        "test": "TemplateVersionsView revoke flow does not revoke or refresh when confirmation is undefined",
+        "result": "passed"
+      }
+    ],
+    "projection_note": "Derived result projection; failureMessages and environment-specific paths omitted."
+  },
+  "independent_202_baseline": {
+    "raw_sha256": "4deeb8848a474dbb6519ef950609b2826a272b1620eef72b7286d2c18281c69b",
+    "raw_bytes": 16918,
+    "result_counts": {
+      "failed": 6,
+      "passed": 4
+    },
+    "cases": [
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed missing readback blocked and recovers by GET only",
+        "result": "failed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed negative readback blocked and recovers by GET only",
+        "result": "failed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed fractional readback blocked and recovers by GET only",
+        "result": "failed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed string readback blocked and recovers by GET only",
+        "result": "failed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed missing draft readback blocked and recovers by GET only",
+        "result": "failed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries recovers a rejected revoke at the unchanged revision without replaying the command",
+        "result": "failed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries accepts identical concurrent field changes without an unnecessary conflict",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries deduplicates synchronous revoke clicks while the command is pending",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries retires a pending command's continuation after selecting another template",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries retires a pending command's continuation after selecting same template",
+        "result": "passed"
+      }
+    ],
+    "projection_note": "Derived result projection; failureMessages and environment-specific paths omitted."
+  },
+  "independent_202_baseline_source": "899e5bd96a9839bd2fab1b1afe7a95adaf1f643c with identical frozen test-file overlay; target product bytes identical to fdea217",
+  "independent_202_candidate": {
+    "raw_sha256": "0244d6e69a3689534b0df90cabb4a2a007499224355f4dbcbf4add9470c11340",
+    "raw_bytes": 34658,
+    "result_counts": {
+      "passed": 10
+    },
+    "cases": [
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed missing readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed negative readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed fractional readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed string readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries keeps malformed missing draft readback blocked and recovers by GET only",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries recovers a rejected revoke at the unchanged revision without replaying the command",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries accepts identical concurrent field changes without an unnecessary conflict",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries deduplicates synchronous revoke clicks while the command is pending",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries retires a pending command's continuation after selecting another template",
+        "result": "passed"
+      },
+      {
+        "file": "version-revoke-editor.test.tsx",
+        "test": "independent revision review boundaries retires a pending command's continuation after selecting same template",
+        "result": "passed"
+      }
+    ],
+    "projection_note": "Derived result projection; failureMessages and environment-specific paths omitted."
+  },
+  "author_201": {
+    "baseline_commit": "fd2b897",
+    "candidate_commit": "3134b84b4ddd6fc0ecaeede2713bbb0235bcc19f",
+    "baseline": {
+      "raw_sha256": "9ce5654f9f674cd40cc24d1f856c442fc195ade521ec7e28010d6e7c15f3ab4b",
+      "raw_bytes": 78395,
+      "result_counts": {
+        "pass": 47,
+        "fail": 23
+      },
+      "leaf_results": [
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_space",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_quote",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_backslash",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/redundant_quotes",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_unicode",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_space",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_quote",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_backslash",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/redundant_quotes",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_unicode",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/at_length",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/over_length",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/outside_enum",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/optional_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/reserved_identity",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/domain_space",
+          "result": "pass"
+        }
+      ],
+      "projection_note": "Derived leaf result projection; original Output records are not published."
+    },
+    "candidate": {
+      "raw_sha256": "361d2a7ee3eebff3c9ea9f78fadd02d50a472ff1155d2598d4e3c534dfed4851",
+      "raw_bytes": 68618,
+      "result_counts": {
+        "pass": 70
+      },
+      "leaf_results": [
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_quote",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_backslash",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/redundant_quotes",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_quote",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_backslash",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/redundant_quotes",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/at_length",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/over_length",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/outside_enum",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/optional_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/reserved_identity",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/domain_space",
+          "result": "pass"
+        }
+      ],
+      "projection_note": "Derived leaf result projection; original Output records are not published."
+    },
+    "related": {
+      "raw_sha256": "fb0f5c63d5035890707b26bfa1a30b21036ca60f22b261be7d9179afb9a8f683",
+      "raw_bytes": 282638,
+      "result_counts": {
+        "pass": 283
+      },
+      "leaf_results": [
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionExplicitAllowlist",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/next-hop-not-final-delivery",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/private-failure",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/private-uncertainty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/truncated",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/wrong-address",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/duplicate",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionFullLedgerStatusEvidence/unknown-state",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionHeadersFailClosed",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestOutboundInspectionEnhancedCodeOnly",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeIntent",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"unknown\":1}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"Can_Send\":true}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"can_send\":false,\"can_send\":true}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"can_send\":1}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"daily_send_quota\":-1}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"daily_send_quota\":1.5}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"daily_send_quota\":\"0\"}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"max_domains\":9223372036854775808}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"none\",\"unknown\":true}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"none\",\"Mode\":\"all\"}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"list\",\"zone_ids\":[]}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"all\",\"zone_ids\":[\"11111111-1111-4111-8111-111111111111\"]}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"list\",\"zone_ids\":[\"bogus\"]}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"list\",\"zone_ids\":[\"00000000-0000-0000-0000-000000000000\"]}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"list\",\"zone_ids\":[\"11111111-1111-4111-8111-111111111111\",\"11111111-1111-4111-8111-111111111111\"]}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRejectsAmbiguity/{\"domain_access\":{\"mode\":\"bogus\"}}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeEmptyAndDomainModes",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionEditorDecodeRequiresCompleteObservation",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionAssignmentDecodeExplicitIntent",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionAssignmentDecodeRejectsMissingOrAmbiguousIntent",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_quote",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_backslash",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/redundant_quotes",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_quote",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_backslash",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/redundant_quotes",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/at_length",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/over_length",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/outside_enum",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/optional_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/reserved_identity",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundarySource/subject",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundarySource/text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundarySource/html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundarySource/unused_option",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryIdentity/employee_name/referenced",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryIdentity/employee_name/unreferenced",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryIdentity/company_name/referenced",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryIdentity/company_name/unreferenced",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryIdentity/sender_address/referenced",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryIdentity/sender_address/unreferenced",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryClientValue",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryUnicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryBudgets/subject_at_byte_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryBudgets/subject_over_byte_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryBudgets/body_at_byte_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryBudgets/body_over_byte_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryBudgets/escaped_html_within_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryBudgets/escaped_html_over_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryReservedIdentity/employee_name/client_override",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryReservedIdentity/employee_name/subject_crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryReservedIdentity/company_name/client_override",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryReservedIdentity/company_name/subject_crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryReservedIdentity/sender_address/client_override",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateEncodingBoundaryReservedIdentity/sender_address/subject_crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/email_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/email_invalid",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/integer_decimal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/integer_overflow",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/date_invalid_day",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/date_invalid_format",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/url_scheme",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/url_missing_host",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/url_credentials",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/text_required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/text_required_whitespace",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/email_required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/email_required_whitespace",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/integer_required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/integer_required_whitespace",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/date_required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/date_required_whitespace",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/url_required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRejectUnusableChoices/url_required_whitespace",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/email",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/integer",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/date",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/url",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/optional_text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/optional_email",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/optional_integer",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/optional_date",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsEveryValidChoiceRenders/optional_url",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsPreserveScalarBoundaries/unicode_at_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsPreserveScalarBoundaries/unicode_over_limit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsPreserveScalarBoundaries/invalid_utf8",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsRemainDataAndEnforceMembership",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestR5TemplateOptionsDoNotBypassRenderedSubjectSafety",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestDeriveSubmissionStatus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestTemplateValidationAndDataBoundaries/missing",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestTemplateValidationAndDataBoundaries/identity_override",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestTemplateValidationAndDataBoundaries/long",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestTemplateValidationAndDataBoundaries/header_injection",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestTypedTemplateVariablesAndBoundedExpansion",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchFieldIntent/omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchFieldIntent/inherit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchFieldIntent/false-zero",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchFieldIntent/explicit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchRejectsMalformedQuotas/{\"daily_send_quota\":-1}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchRejectsMalformedQuotas/{\"daily_send_quota\":0.5}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchRejectsMalformedQuotas/{\"daily_send_quota\":\"0\"}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchRejectsMalformedQuotas/{\"daily_receive_quota\":-1}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchRejectsMalformedQuotas/{\"max_mailboxes\":-1}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionPatchRejectsMalformedQuotas/{\"max_domains\":-1}",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/inherit",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/all",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/none",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/empty-list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/all-with-list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/none-with-list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/inherit-with-list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/zero-id",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/duplicate",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionDomainAccessIntent/unknown",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestPermissionRevisionExactObservation",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPreservesSeparateCapabilities/management-without-content-rights",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPreservesSeparateCapabilities/published-send-without-read",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPreservesSeparateCapabilities/draft-precedes-version",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/nil-mailbox",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/wrong-mailbox",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/foreign-mailbox",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/nil-user",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/wrong-user",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/foreign-user",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/inactive-user",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/nil-company",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/foreign-company",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/nil-version",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/wrong-version",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/revoked-version",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryRejectsInvalidInitialSources/corrupt-snapshot",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryManagementRechecksBeforeRelease/management-revoked",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryManagementRechecksBeforeRelease/mailbox-address",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryManagementRechecksBeforeRelease/employee-frozen",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryManagementRechecksBeforeRelease/employee-name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryManagementRechecksBeforeRelease/company-name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryManagementRechecksBeforeRelease/company-removed",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryManagementRechecksBeforeRelease/repository-error",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPublishedRechecksBeforeRelease/send-revoked",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPublishedRechecksBeforeRelease/mailbox-address",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPublishedRechecksBeforeRelease/grant-revoked",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPublishedRechecksBeforeRelease/version-revoked",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPublishedRechecksBeforeRelease/snapshot-replaced",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPublishedRechecksBeforeRelease/employee-name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryPublishedRechecksBeforeRelease/company-name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/management/before-call",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/management/mailbox-initial",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/management/user-initial",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/management/settings-initial",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/management/mailbox-recheck",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/management/user-recheck",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/management/settings-recheck",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/published/before-call",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/published/mailbox-initial",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/published/version-initial",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/published/mailbox-recheck",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewBoundaryCancellationStopsAtEachPort/published/version-recheck",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeCurrentManagement/selected-company",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeCurrentManagement/fresh-role-over-stale-flags",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeCurrentManagement/same-home-admin",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRejectsStaleIdentity/ordinary-admin-foreign",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRejectsStaleIdentity/ordinary-user-foreign",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRejectsStaleIdentity/inactive-superadmin",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRejectsStaleIdentity/wrong-session",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRejectsStaleIdentity/noninteractive",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRechecksBeforeRelease/demoted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRechecksBeforeRelease/frozen",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRechecksBeforeRelease/session-changed",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRechecksBeforeRelease/company-changed",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRechecksBeforeRelease/management-revoked",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomeRechecksBeforeRelease/mailbox-renamed",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomePublishedCapabilitiesStaySeparate/management-without-send",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomePublishedCapabilitiesStaySeparate/published-use",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewCrossHomePublishedCapabilitiesStaySeparate/published-grant-revoked",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_comma",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_at",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewManagementLastSourceReadCannotOutliveAuthority/management-revoked",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewManagementLastSourceReadCannotOutliveAuthority/mailbox-address",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewManagementFinalMailboxErrorAndCancellation/error",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewManagementFinalMailboxErrorAndCancellation/cancel-and-error",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/subject_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/subject_explicit_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/subject_empty_identity",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/text_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/html_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/both_bodies_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/html_sanitized_away",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/management/subject_and_body_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/subject_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/subject_explicit_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/subject_empty_identity",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/text_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/html_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/both_bodies_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/html_sanitized_away",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentMatchesSubmission/published/subject_and_body_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/text_only",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/html_only",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/optional_text_with_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/optional_html_with_text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/whitespace_subject",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/whitespace_text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/sanitized_html_with_text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/management/server_identity",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/text_only",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/html_only",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/optional_text_with_html",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/optional_html_with_text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/whitespace_subject",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/whitespace_text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/sanitized_html_with_text",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestR5PreviewRequiredContentPreservesUsableOutput/published/server_identity",
+          "result": "pass"
+        }
+      ],
+      "projection_note": "Derived leaf result projection; original Output records are not published."
+    },
+    "earlier_fixture_failure": {
+      "raw_sha256": "cf381940b2b8be0757921e636c335cbb46d60928421e2e7a00aa6fc424fa0a75",
+      "raw_bytes": 79156,
+      "result_counts": {
+        "pass": 45,
+        "fail": 25
+      },
+      "leaf_results": [
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_space",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_quote",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_backslash",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/redundant_quotes",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_unicode",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailVariableKeepsMailboxSpelling/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/ordinary",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/plus",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/unicode",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/address_literal",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_space",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_quote",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_backslash",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/redundant_quotes",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_unicode",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/empty_display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/angle_wrapped",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/group",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/list",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/comment",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/leading_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/trailing_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/domain_tab",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/quoted_domain_fws",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/crlf",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/nul",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailOptionsUseSameMailboxGrammar/missing_domain",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/at_length",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/over_length",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/outside_enum",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/required_empty",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/optional_omitted",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/company",
+          "test": "TestAdvanceTemplateEmailRetainsRequiredLengthAndEnumRules/reserved_identity",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/ordinary",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/management/domain_space",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/ordinary",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_comma",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_at",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/quoted_html",
+          "result": "fail"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/display_name",
+          "result": "pass"
+        },
+        {
+          "package": "tabmail/internal/app/templates",
+          "test": "TestAdvanceTemplateEmailPreviewMatchesPublishedSubmission/published/domain_space",
+          "result": "pass"
+        }
+      ],
+      "projection_note": "Derived leaf result projection; original Output records are not published."
+    }
+  },
+  "static": {
+    "round2-tsc.log": {
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "round2-lint.log": {
+      "exit_code": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "source_sha256": {
+    "internal/company/r5_template_email_addr_spec_test.go": "ec357566b81a70ccf6b18f80ec224616d554e7ef1ef83f5747284f72482ef3db",
+    "internal/app/templates/r5_preview_email_addr_spec_test.go": "bcc12dd9e3e0b5a4f81ec68c8deba779bd001703b7d5882058726edb1dc6a61f",
+    "internal/outbound/builder.go": "b54e7913043b2438fbd942c4cb6c52dd6e269055506c65ae550a9d9bc0636b66",
+    "web/app/(dashboard)/company/templates/page.tsx": "0d1fe8f21bcbdb5791ef4be438b934c4c9b3aa96913ca8dbe7be9d0f0f9193c8",
+    "web/components/company/templates/editor.tsx": "b3c6bbc9a00b8526f39720a959a9e2e9604334764d4ebfaf7eaa4d1a95f6df3f",
+    "web/components/company/templates/versions.tsx": "5a89ddd6a9aa8ab4a4e985ce6ca72d5dfc568ff32a7a8569b3576b61fc6dcfc5",
+    "web/components/company/templates/version-revoke-editor.test.tsx": "bce57d3b45faf2e242fc814261ddf9fe7dff7a4d5bd83aaa18661e3799088b5b"
+  },
+  "review": {
+    "201": "ACCEPT transport; 70 fixed cases independently passed, governance fixture correction reviewed",
+    "202": "ACCEPT root; 10 extra real page boundaries 4PASS/6FAIL ->10PASS; full related selection105PASS",
+    "203": "ACCEPT frontend; independent18 cases4PASS/14FAIL ->18PASS; related109PASS"
+  },
+  "scope_limits": "These targeted suites do not claim whole PG, full frontend/private fixture, shipping browser, complete audit, M/G0 or parent task acceptance."
+}

@@ -2652,6 +2652,7 @@ components:
         variables: {type: array, items: {$ref: '#/components/schemas/CompanyVariableInput'}}
     CompanyVariableInput:
       type: object
+      description: Email variables accept a single bare mailbox addr-spec, including quoted local parts. Display names, groups, lists and whitespace outside the local-part quotes are rejected. Supplied spelling is retained as template data; options and runtime values obey the same grammar.
       required: [name, type, max_length]
       properties:
         name: {type: string}
