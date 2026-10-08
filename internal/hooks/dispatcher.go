@@ -79,6 +79,7 @@ type Dispatcher struct {
 	// outboxWorker fans claimed outbox events out into webhook_delivery rows.
 	// deliveryWorker POSTs each delivery to its URL. Both are built lazily in
 	// Run so a dispatcher without a store stays a no-op.
+	workersMu      sync.Mutex
 	outboxWorker   *workqueue.Worker[*outboxPayload]
 	deliveryWorker *workqueue.Worker[*deliveryPayload]
 
@@ -231,7 +232,7 @@ func (d *Dispatcher) Run(ctx context.Context) {
 	if !d.Enabled() || d.store == nil {
 		return
 	}
-	d.ensureWorkers()
+	outboxWorker, deliveryWorker := d.ensureWorkers()
 	// Two independent workers run concurrently: the outbox worker fans events
 	// out into delivery rows, the delivery worker POSTs each delivery. The
 	// legacy single-loop serialized them, but the two stages share no
@@ -239,15 +240,18 @@ func (d *Dispatcher) Run(ctx context.Context) {
 	// state transitions or retry cadence.
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go func() { defer wg.Done(); d.outboxWorker.Run(ctx) }()
-	go func() { defer wg.Done(); d.deliveryWorker.Run(ctx) }()
+	go func() { defer wg.Done(); outboxWorker.Run(ctx) }()
+	go func() { defer wg.Done(); deliveryWorker.Run(ctx) }()
 	wg.Wait()
 }
 
-// ensureWorkers builds the outbox and delivery workers once. Idempotent.
-func (d *Dispatcher) ensureWorkers() {
+// ensureWorkers publishes one complete worker pair. Only construction is
+// serialized; each Run caller keeps its independent worker capacity and context.
+func (d *Dispatcher) ensureWorkers() (*workqueue.Worker[*outboxPayload], *workqueue.Worker[*deliveryPayload]) {
+	d.workersMu.Lock()
+	defer d.workersMu.Unlock()
 	if d.outboxWorker != nil && d.deliveryWorker != nil {
-		return
+		return d.outboxWorker, d.deliveryWorker
 	}
 	d.outboxWorker = workqueue.NewWorker[*outboxPayload](
 		newOutboxStore(d.store),
@@ -271,6 +275,7 @@ func (d *Dispatcher) ensureWorkers() {
 		d.logger,
 		workqueue.WithSerialClaims(),
 	)
+	return d.outboxWorker, d.deliveryWorker
 }
 
 // processOutbox fans one claimed outbox event out into a webhook_delivery row

@@ -35,31 +35,39 @@ func (p *Parser) readSource(ctx context.Context, key string) ([]byte, error) {
 		return nil, err
 	}
 	r, err := p.objects.Get(ctx, key)
-	if r != nil {
-		var once sync.Once
-		closeReader := func() { once.Do(func() { _ = r.Close() }) }
-		stop := context.AfterFunc(ctx, closeReader)
-		defer func() { stop(); closeReader() }()
-	}
-	if cancelled := ctx.Err(); cancelled != nil {
-		return nil, cancelled
-	}
-	if err != nil {
+	return readOwnedSource(ctx, r, err)
+}
+
+// Closing is part of a successful owned read. Join its result before returning
+// bytes to MIME parsing or cache publication, including when Get already failed
+// or cancellation has started the closer concurrently.
+func readOwnedSource(ctx context.Context, r io.ReadCloser, openErr error) (raw []byte, err error) {
+	if r == nil {
+		if err = errors.Join(openErr, ctx.Err()); err == nil {
+			err = errors.New("object reader unavailable")
+		}
 		return nil, err
 	}
-	if r == nil {
-		return nil, errors.New("object reader unavailable")
+	var once sync.Once
+	var closeErr error
+	closeReader := func() { once.Do(func() { closeErr = r.Close() }) }
+	stop := context.AfterFunc(ctx, closeReader)
+	defer func() {
+		stop()
+		// Once waits for an in-flight cancellation callback before closeErr is
+		// observed, and never calls the underlying Close a second time.
+		closeReader()
+		err = errors.Join(err, closeErr, ctx.Err())
+		if err != nil {
+			raw = nil
+		}
+	}()
+	if openErr != nil {
+		return nil, openErr
 	}
 	// Deliberately wrap Read without forwarding WriterTo or ReaderFrom. Those
 	// fast paths cannot bypass byte, cancellation, or no-progress checks.
-	raw, err := io.ReadAll(io.LimitReader(&sourceProgressReader{ctx: ctx, reader: r}, MaxBytes+1))
-	if cancelled := ctx.Err(); cancelled != nil {
-		return nil, cancelled
-	}
-	if err != nil {
-		return nil, err
-	}
-	return raw, nil
+	return io.ReadAll(io.LimitReader(&sourceProgressReader{ctx: ctx, reader: r}, MaxBytes+1))
 }
 
 type sourceProgressReader struct {
@@ -78,7 +86,7 @@ func (r *sourceProgressReader) Read(buf []byte) (int, error) {
 		n, err := r.reader.Read(buf)
 		if cancelled := r.ctx.Err(); cancelled != nil {
 			clear(buf)
-			return 0, cancelled
+			return 0, errors.Join(err, cancelled)
 		}
 		if n < 0 || n > len(buf) {
 			clear(buf)

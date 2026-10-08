@@ -5,9 +5,9 @@
 
 本批从公开 `1322c9284d5dad8984adb61d2b4627b331c3740f` 开始，root 与三个原生 subagent 分轮实施、固定失败复现、交叉审查并通过独立 PR 整合。目标至少完整关闭 10 个独立子项；前批 ADVANCE/CLOSE 与并发 CONTINUE 不重复计数。任务、限定验收和真实命令见 [COMPLETE 账本](R5-COMPLETE-20261008.md)。
 
-首轮 [#145](https://github.com/jyqj/tabmail/pull/145) 已实际合入 `edce9ea6479bcbf499959fea328e58e28be301e0`，源码树与真实 CI 完全一致。#128/#130/#131/#132 已逐项 closed/completed，解决 procfs 执行身份、SSE 临时续期、Webhook 串行领取及 claim-generation 写入。真实 PostgreSQL [37739497288](https://github.com/jyqj/tabmail/actions/runs/37739497288) 的固定基线 15 PASS/63 FAIL，修复后 78 PASS、0 FAIL/SKIP；原首跑解析器缺陷和全部原始证据保留。第二轮 #138/#140/#141 已通过独审和同源 273 Go/21 UI PASS，另 10 既有 PG SKIP 明记；第三轮 #142/#144/#146 在完成最后复审后整合。
+首轮 [#145](https://github.com/jyqj/tabmail/pull/145) 已实际合入 `edce9ea6479bcbf499959fea328e58e28be301e0`，源码树与真实 CI 完全一致。#128/#130/#131/#132 已逐项 closed/completed，解决 procfs 执行身份、SSE 临时续期、Webhook 串行领取及 claim-generation 写入。真实 PostgreSQL [37739497288](https://github.com/jyqj/tabmail/actions/runs/37739497288) 的固定基线 15 PASS/63 FAIL，修复后 78 PASS、0 FAIL/SKIP；原首跑解析器缺陷和全部原始证据保留。第二轮 [#147](https://github.com/jyqj/tabmail/pull/147) 已实际合入 `52e791ddf0dfae4d18d5c0994bc829755ad41fc0`，#138/#140/#141 均已 closed/completed：同源 273 Go/21 UI PASS，另 10 既有 PG SKIP 明记，精确 head 的 source evidence 和真实 PG CI 均 SUCCESS。第三轮 #142/#144/#146 已含两次复审发现的激活生命周期缺口修正，独审及 root 的 591 Go/31 UI PASS、完整构建/TypeScript 通过，待末轮 PR 实际合入。
 
-当前 **本批 4/10 正式关闭，剩余 6**；原父任务仍 **10/171 已验收，剩余 161**。每轮合入后据实际关闭状态更新。#56 保持 draft；原 M/G0、完整 PG/必跑 fixture 与依赖审计条件不改变。
+当前 **本批 7/10 正式关闭，剩余 3**；原父任务仍 **10/171 已验收，剩余 161**。每轮合入后据实际关闭状态更新。#56 保持 draft；原 M/G0、完整 PG/必跑 fixture 与依赖审计条件不改变。
 <!-- R5-COMPLETE-20261008:END -->
 
 <!-- R5-CONTINUE-20261008:BEGIN -->
