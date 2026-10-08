@@ -2,6 +2,7 @@ package s3obj
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/fs"
@@ -61,9 +62,24 @@ func (s *Store) Put(ctx context.Context, key string, r io.Reader, size int64) er
 	if err := validateKey(ctx, key); err != nil {
 		return err
 	}
-	_, err := s.client.PutObject(ctx, s.bucket, key, r, size, minio.PutObjectOptions{
+	if r == nil || size < -1 {
+		return fmt.Errorf("s3obj: invalid reader or declared size")
+	}
+	reader := newUploadReader(ctx, r, size)
+	if size == 0 {
+		// The SDK omits a zero-length request body, so it never asks the
+		// source whether there are unexpected bytes or a read failure.
+		var probe [1]byte
+		if _, err := reader.Read(probe[:]); err != io.EOF {
+			return fmt.Errorf("s3obj: put %s: %w", key, err)
+		}
+	}
+	_, err := s.client.PutObject(ctx, s.bucket, key, reader, size, minio.PutObjectOptions{
 		ContentType: "message/rfc822",
 	})
+	// HTTP transport errors can replace the input error. Keep that cause,
+	// and never acknowledge a response before source validation completed.
+	err = errors.Join(err, reader.completionError(), ctx.Err())
 	if err != nil {
 		return fmt.Errorf("s3obj: put %s: %w", key, err)
 	}

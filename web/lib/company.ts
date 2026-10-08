@@ -396,13 +396,48 @@ export async function downloadCompanyFile(path: string, filename: string) {
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
-// Plain addresses only: this deliberately matches the compose form contract.
-// Display-name parsing belongs on the server; do not guess with an ad-hoc RFC parser.
-export const addresses = (value: string) => [
-  ...new Set(
-    value
-      .split(/[,;\n]+/)
-      .map((v) => v.trim())
-      .filter(Boolean),
-  ),
-];
+// Separate entered recipients without rewriting their address syntax. Quoted
+// local parts, display names, and comments can contain the same separators.
+// This only tokenizes: unfinished/invalid input stays intact for server validation.
+export const addresses = (value: string) => {
+  const parts: string[] = [];
+  let start = 0;
+  let quoted = false;
+  let escaped = false;
+  let commentDepth = 0;
+  const append = (end: number) => {
+    const part = value.slice(start, end).trim();
+    if (part) parts.push(part);
+  };
+  for (let i = 0; i < value.length; i++) {
+    const character = value[i];
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+    if (character === "\\" && (quoted || commentDepth > 0)) {
+      escaped = true;
+      continue;
+    }
+    if (commentDepth > 0) {
+      if (character === "(") commentDepth++;
+      else if (character === ")") commentDepth--;
+      continue;
+    }
+    if (character === '"') {
+      quoted = !quoted;
+      continue;
+    }
+    if (quoted) continue;
+    if (character === "(") {
+      commentDepth = 1;
+      continue;
+    }
+    if (character === "," || character === ";" || character === "\n") {
+      append(i);
+      start = i + 1;
+    }
+  }
+  append(value.length);
+  return [...new Set(parts)];
+};

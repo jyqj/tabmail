@@ -1,9 +1,9 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-FINISH-20261009:BEGIN -->
-## FINISH批次：第一轮四项已完成，第二轮推进中
+## FINISH批次：前两轮七项已完成，第三轮推进中
 
-当前批次从公开 `be3a6bf4` 继续，十项 [#183–#192](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+FINISH-%22) 按4＋3＋3由root及三个原生subagent推进，范围及原始通过/失败见[FINISH账本](R5-FINISH-20261009.md)。第一轮 [#193](https://github.com/jyqj/tabmail/pull/193) 已实际合入，#183–#186均closed/completed；正式完成4/10、剩余6。第二轮正在修复独审发现的真实Provider成功反馈回归，并执行真实PG邮箱冲突基线/候选。原父任务仍10/171、剩余161。目录、测试、文档与PR维护不新增实施计数；未接入生产的旧mailboxapp候选已剔除，未认领或计数。#56保持draft。
+当前批次从公开 `be3a6bf4` 继续，十项 [#183–#192](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+FINISH-%22) 按4＋3＋3由root及三个原生subagent推进，范围及原始通过/失败见[FINISH账本](R5-FINISH-20261009.md)。前两轮 [#193](https://github.com/jyqj/tabmail/pull/193)、[#194](https://github.com/jyqj/tabmail/pull/194) 已实际合入，#183–#189均closed/completed；正式完成7/10、剩余3。第二轮真实PG固定10叶从7 PASS/3 FAIL变为10 PASS，精确完整tree和双parent核对。第三轮三项已交叉审查及联合验证：root1247Go race叶、107UI全过，等待实际合入后计数。原父任务仍10/171、剩余161。目录、测试、文档与PR维护不新增实施计数；未接入生产的旧mailboxapp候选已剔除，未认领或计数。#56保持draft。
 <!-- R5-FINISH-20261009:END -->
 
 <!-- R5-DELIVER-20261008:BEGIN -->

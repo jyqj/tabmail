@@ -59,7 +59,11 @@ func (s *Service) Compose(ctx context.Context, actor authz.Actor, mailbox, messa
 			v := strings.ToLower(a.Address)
 			if !seen[v] {
 				seen[v] = true
-				out = append(out, v)
+				// Address is decoded identity, which can contain an @, comma,
+				// space, or escape inside a quoted local part. Keep it for
+				// deduplication, and serialize a valid addr-spec for submission.
+				wire := (&mail.Address{Address: v}).String()
+				out = append(out, wire[1:len(wire)-1])
 			}
 		}
 		return out, nil
