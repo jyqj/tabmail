@@ -8,6 +8,7 @@ import (
 	"strings"
 	"tabmail/internal/app/credentials"
 	"time"
+	"unicode/utf8"
 
 	"tabmail/internal/api/lifecycle"
 	"tabmail/internal/api/middleware"
@@ -243,6 +244,18 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		errBadRequest(w, err.Error())
 		return
 	}
+	displayName := strings.TrimSpace(req.DisplayName)
+	if displayName == "" {
+		displayName = strings.Split(req.Email, "@")[0]
+	}
+	// Validate the normalized values before lookup or tenant creation. PostgreSQL
+	// stores these fields as VARCHAR(255), measured in characters, and rejects NUL.
+	for _, value := range []string{req.Email, displayName} {
+		if strings.ContainsRune(value, 0) || utf8.RuneCountInString(value) > 255 {
+			errBadRequest(w, "email and display_name must contain at most 255 characters and no NUL characters")
+			return
+		}
+	}
 
 	existing, err := h.store.GetUserByEmail(r.Context(), req.Email)
 	if err != nil {
@@ -271,11 +284,6 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		h.logger.Err(err).Msg("register: create tenant")
 		errInternal(w)
 		return
-	}
-
-	displayName := strings.TrimSpace(req.DisplayName)
-	if displayName == "" {
-		displayName = strings.Split(req.Email, "@")[0]
 	}
 
 	user := &models.User{

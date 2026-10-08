@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { Radar, Mail, Trash2, Eraser, Activity, RefreshCw, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +9,7 @@ import { listMonitorHistory, streamAdminMonitorEvents } from "@/lib/api";
 import type { MonitorEvent } from "@/lib/types";
 import { useI18n } from "@/lib/i18n";
 import { useCRUDPage } from "@/hooks/use-crud-page";
+import { sessionScope, useSessionScope } from "@/lib/session";
 import { PageHeader } from "@/components/layout/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,6 +36,23 @@ export default function AdminMonitorPage() {
   const [filterType, setFilterType] = useState("all");
   const [filterMailbox, setFilterMailbox] = useState("");
   const [filterSender, setFilterSender] = useState("");
+  const scope = useSessionScope();
+
+  const { data: historyRes, isLoading: historyLoading, mutate: refreshHistory } = useCRUDPage(
+    ["monitor-history", historyPage, filterType, filterMailbox, filterSender],
+    () => listMonitorHistory({
+      page: historyPage,
+      per_page: 30,
+      type: filterType === "all" ? undefined : filterType,
+      mailbox: filterMailbox || undefined,
+      sender: filterSender || undefined,
+    }),
+    "monitor.loadHistoryFailed",
+  );
+  // A connection survives filter changes. Its resync hints must refresh the
+  // currently committed history key, not the filters captured at connection.
+  const historyRefresh = useRef(refreshHistory);
+  useLayoutEffect(() => { historyRefresh.current = refreshHistory; }, [refreshHistory]);
 
   const eventStyles: Record<string, { label: string; className: string; icon: typeof Mail }> = {
     message: { label: t("monitor.message"), className: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", icon: Mail },
@@ -49,35 +67,32 @@ export default function AdminMonitorPage() {
     streamAdminMonitorEvents({
       signal: controller.signal,
       onEvent: ({ type, data }) => {
+        if (controller.signal.aborted || scope !== sessionScope()) return;
+        if (type === "resync") {
+          // Both the transport's null control and the journal's {history:true}
+          // control invalidate history. Neither is a buffered mail event.
+          void historyRefresh.current().catch(() => {});
+          return;
+        }
         if (type === "ready") {
           setConnected(true);
           return;
         }
-        if (type === "ping") return;
+        if (!["message", "delete", "purge"].includes(type) || !data || typeof data !== "object") return;
         const event = data as MonitorEvent;
+        if (event.type !== type || typeof event.mailbox !== "string" ||
+            typeof event.at !== "string" || !Number.isFinite(Date.parse(event.at))) return;
         setEvents((prev) => [event, ...prev].slice(0, MAX_EVENTS));
       },
     }).catch((e) => {
       const err = e as { error?: { message?: string } };
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && scope === sessionScope()) {
         setConnected(false);
         toast.error(err?.error?.message || t("monitor.streamDisconnected"));
       }
     });
     return () => controller.abort();
-  }, [reconnectKey, t]);
-
-  const { data: historyRes, isLoading: historyLoading } = useCRUDPage(
-    ["monitor-history", historyPage, filterType, filterMailbox, filterSender],
-    () => listMonitorHistory({
-      page: historyPage,
-      per_page: 30,
-      type: filterType === "all" ? undefined : filterType,
-      mailbox: filterMailbox || undefined,
-      sender: filterSender || undefined,
-    }),
-    "monitor.loadHistoryFailed",
-  );
+  }, [reconnectKey, t, scope]);
   const history = historyRes?.data ?? [];
   const historyTotal = historyRes?.meta?.total ?? 0;
 
