@@ -7,7 +7,7 @@
 
 最终产品 tree `437de0716fc9247e188f0409654f4f178905dc33` 与公开 f8ad053、本地 e741a84、实际 merge 26a30e3 一致。root 最终同源 **603 个不同 Go race 叶、181 UI 全 PASS**，完整非增量 TypeScript 和默认全 Go build 通过；[真实 API key PG](https://github.com/jyqj/tabmail/actions/runs/37826809127) 同字节 18 例 **6P/12F → 18P/0F/SKIP**，原始 artifact 已打开并独审 ACCEPT。精确源码、各项原失败与独立反例、原始 PG 包及实际交付见 [三轮账本](R5-ADVANCE-20261009.md)。
 
-[revision15 目录维护](evidence/R5-CATALOG-REVISION15-20261009/README.md) 对齐该产品源，原三 CLI 从 1/1/1 到 0/0/0，旧历史、检查器及拒绝守卫保持；维护计 0 个新增实施 TODO。产品 f8ad053 的五个专项 CI 成功，完整发布 CI 仍失败；后续维护源的实际 CI 另在 [PR #56](https://github.com/jyqj/tabmail/pull/56) 登记。#56 继续 draft，全 PG/必跑、独立私有 fixture、严格依赖审计、有效 M/G0 及全部父项验收门槛保持。
+[revision15 目录维护](evidence/R5-CATALOG-REVISION15-20261009/README.md) 对齐该产品源，原三 CLI 从 1/1/1 到 0/0/0，旧历史、检查器及拒绝守卫保持；维护计 0 个新增实施 TODO。最终 CI 又揭示新增 API verifier 测试的入口导入问题，[精确导入补修与原始回执](evidence/R5-VERIFIER-IMPORT-20261009/README.md) 保留原三个方法及所有判定，并以完整字节校验约束唯一已审导入变换，同样计 0 项。产品 f8ad053 与维护 ad6b394 的五个专项 CI 各自成功，完整 Company CI 各自失败；后续补修源的实际 CI 另在 [PR #56](https://github.com/jyqj/tabmail/pull/56) 登记。#56 继续 draft，全 PG/必跑、独立私有 fixture、严格依赖审计、有效 M/G0 及全部父项验收门槛保持。
 <!-- R5-ADVANCE-20261009:END -->
 
 <!-- R5-FINISH-20261009:BEGIN -->

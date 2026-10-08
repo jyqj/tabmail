@@ -1,10 +1,15 @@
 """Synthetic verifier checks, not evidence of PostgreSQL execution."""
+import importlib.util
 import json
 from pathlib import Path
 import tempfile
 import unittest
 
-from scripts import run_r5_api_key_issuance as runner
+spec = importlib.util.spec_from_file_location(
+    "r5_api_key_issuance_runner", Path(__file__).resolve().parents[1] / "run_r5_api_key_issuance.py"
+)
+runner = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(runner)
 
 
 class APIKeyIssuanceVerifierTest(unittest.TestCase):
