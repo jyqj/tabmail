@@ -301,8 +301,9 @@ func (s *Service) deliver(ctx context.Context, env Envelope, raw []byte) ([]Reci
 	return s.deliverResolved(ctx, env, raw, nil)
 }
 
-// deliverResolved attempts to store the envelope for every recipient and returns
-// one RecipientOutcome per recipient. The per-recipient drop reasons are part of
+// deliverResolved attempts to store the envelope once per destination mailbox.
+// Repeated canonical addresses are resolved once; distinct aliases of the same
+// mailbox share its first attempt, including failures. The drop reasons are part of
 // the return value (not just logs), so the accept decision can be asserted
 // through this interface. A non-nil error signals an envelope-level failure
 // (policy load or raw persistence) that should be retried, distinct from
@@ -323,6 +324,8 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 
 	now := time.Now()
 	outcomes := make([]RecipientOutcome, 0, len(env.Recipients))
+	seenAddresses := make(map[string]bool, len(env.Recipients))
+	seenMailboxes := make(map[uuid.UUID]bool, len(env.Recipients))
 	tenantConfigs := map[uuid.UUID]*models.EffectiveConfig{}
 	pol, err := s.currentPolicy(ctx)
 	if err != nil {
@@ -336,6 +339,10 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 
 	for _, rcpt := range env.Recipients {
 		addr := policy.SanitizeAddr(rcpt)
+		if seenAddresses[addr] {
+			continue
+		}
+		seenAddresses[addr] = true
 		// Reuse a RCPT-phase Result when it is safe (Mailbox present, not just
 		// Created): this is the SMTP-session-reuse fast path. Auto-create
 		// results (Mailbox nil) and freshly-Created results always fall through
@@ -370,6 +377,13 @@ func (s *Service) deliverResolved(ctx context.Context, env Envelope, raw []byte,
 		}
 
 		mb := result.Mailbox
+		// Deduplicate before policy, quota and persistence. A failed or
+		// uncertain metadata write must not be retried through another alias
+		// within the same envelope; the original outcome remains authoritative.
+		if seenMailboxes[mb.ID] {
+			continue
+		}
+		seenMailboxes[mb.ID] = true
 		// Shared kernel: store policy → effective config → size gate →
 		// retention → Message(+OTP). Destination resolution above and the
 		// quota/persistence/event differences below stay shell-owned.

@@ -111,9 +111,10 @@ func (m *Manager) Set(ctx context.Context, key, value, description string) error
 	if err := m.store.UpsertSetting(ctx, key, value, description); err != nil {
 		return err
 	}
-	m.mu.Lock()
-	m.cache[key] = value
-	m.mu.Unlock()
+	// Successful replies can arrive out of commit order. Without a database
+	// revision, this reply's value cannot safely replace an observed snapshot.
+	// Reload the current persisted values through the existing refresh lock.
+	m.Invalidate()
 	return nil
 }
 

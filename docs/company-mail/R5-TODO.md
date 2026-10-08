@@ -1,5 +1,13 @@
 # R5 全版本深度重构与优化任务清单
 
+<!-- R5-ADVANCE-20261008:BEGIN -->
+## ADVANCE 批次：十项独立认领，按三轮继续完成
+
+本批承接上一批完整交付的公开整合 `f2215611158d33ff9caed468bf6314e32dcf5046`。新认领 [#111–#120](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+ADVANCE-%22) 十个不同生产缺口，root 与三个原生 subagent 按 **4＋3＋3** 实施、同一固定失败基线验证、交叉审查、整合并在实际合入后逐项关闭。范围及逐轮证据见 [ADVANCE 关闭账本](R5-ADVANCE-20261008.md)。
+
+当前本批 **0/10 完成，剩余 10**；原父级 **10/171 已验收，剩余 161**。上一批 CLOSE 十项不重复计数，文档/目录维护不算新实施项。原 M/G0、完整 PG、依赖审计和必跑 fixture 保持原条件；#56 保持 draft，main 未合入。
+<!-- R5-ADVANCE-20261008:END -->
+
 <!-- R5-CLOSE-20261008:BEGIN -->
 ## CLOSE 批次：十项独立 Issue 已关闭
 
