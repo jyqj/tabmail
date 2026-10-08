@@ -145,6 +145,9 @@ func (s *Service) AssignEditor(ctx context.Context, a authz.Actor, tenant *uuid.
 	if err != nil {
 		return nil, err
 	}
+	if err = cmd.Patch.Validate(); err != nil {
+		return nil, app.BadRequest(err.Error())
+	}
 	port, ok := s.store.(ProfileCASStore)
 	if !ok {
 		return nil, app.Internal(nilEditorPortError{})

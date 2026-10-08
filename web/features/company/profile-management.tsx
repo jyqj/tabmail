@@ -109,13 +109,14 @@ function tenantLabel(tenants: Tenant[], tenantId?: string | null): string {
 function zoneLabel(zone: DomainZone): string {
     return zone.domain || shortId(zone.id);
 }
-function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, tenants, tenantScopeLocked = false, }: {
+function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, tenants, tenantScopeLocked = false, disabled = false, }: {
     form: PermissionFormData;
     setForm: Dispatch<SetStateAction<PermissionFormData>>;
     domainOptions: DomainZone[];
     isPlatformAdmin: boolean;
     tenants: Tenant[];
     tenantScopeLocked?: boolean;
+    disabled?: boolean;
 }) {
     const { t } = useI18n();
     const scopedDomainOptions = isPlatformAdmin && form.tenant_id
@@ -145,16 +146,16 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
     return (<div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
       <div className="space-y-1.5">
         <Label className="text-xs">{t("permissions.name")}</Label>
-        <Input value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} placeholder={t("permissions.namePlaceholder")}/>
+        <Input disabled={disabled} value={form.name} onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))} placeholder={t("permissions.namePlaceholder")}/>
       </div>
       <div className="space-y-1.5">
         <Label className="text-xs">{t("permissions.descriptionField")}</Label>
-        <Input value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} placeholder={t("permissions.descriptionPlaceholder")}/>
+        <Input disabled={disabled} value={form.description} onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))} placeholder={t("permissions.descriptionPlaceholder")}/>
       </div>
 
       {isPlatformAdmin && (<div className="space-y-1.5">
           <Label className="text-xs">{t("permissions.scope")}</Label>
-          <Select value={form.tenant_id ?? GLOBAL_PROFILE_SCOPE} disabled={tenantScopeLocked} onValueChange={(value) => setForm((prev) => {
+          <Select value={form.tenant_id ?? GLOBAL_PROFILE_SCOPE} disabled={disabled || tenantScopeLocked} onValueChange={(value) => setForm((prev) => {
                 const nextTenantID = value === GLOBAL_PROFILE_SCOPE ? null : value;
                 return {
                     ...prev,
@@ -184,14 +185,14 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
       <div className="grid grid-cols-2 gap-3">
         {switchFields.map((f) => (<div key={f.key} className="flex items-center justify-between rounded-md border p-3">
             <Label className="text-xs font-normal">{f.label}</Label>
-            <Switch size="sm" checked={form[f.key] as boolean} onCheckedChange={(checked: boolean) => setForm((prev) => ({ ...prev, [f.key]: checked }))}/>
+            <Switch disabled={disabled} size="sm" checked={form[f.key] as boolean} onCheckedChange={(checked: boolean) => setForm((prev) => ({ ...prev, [f.key]: checked }))}/>
           </div>))}
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         {numberFields.map((f) => (<div key={f.key} className="space-y-1.5">
             <Label className="text-xs">{f.label}</Label>
-            <Input type="number" min={0} value={form[f.key] as string} onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))} placeholder="0"/>
+            <Input disabled={disabled} type="number" min={0} value={form[f.key] as string} onChange={(e) => setForm((prev) => ({ ...prev, [f.key]: e.target.value }))} placeholder="0"/>
             <p className="text-[10px] text-muted-foreground">
               {t("permissions.zeroUnlimited")}
             </p>
@@ -208,7 +209,7 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
           </span>
         </div>
         <div className="rounded-md border p-3 space-y-2">
-          <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setForm((prev) => ({ ...prev, allowed_zone_ids: [] }))} disabled={domainPickerDisabled}>
+          <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setForm((prev) => ({ ...prev, allowed_zone_ids: [] }))} disabled={disabled || domainPickerDisabled}>
             {t("permissions.allowAllDomains")}
           </Button>
           {domainPickerDisabled ? (<p className="text-xs text-muted-foreground">
@@ -218,7 +219,7 @@ function PermissionFormFields({ form, setForm, domainOptions, isPlatformAdmin, t
                 const checked = form.allowed_zone_ids.includes(zone.id);
                 return (<label key={zone.id} className="flex items-center justify-between gap-3 rounded border px-2 py-1.5 text-xs">
                     <span className="truncate" title={zone.domain}>{zoneLabel(zone)}</span>
-                    <Switch size="sm" checked={checked} onCheckedChange={(next: boolean) => setForm((prev) => ({
+                    <Switch disabled={disabled} size="sm" checked={checked} onCheckedChange={(next: boolean) => setForm((prev) => ({
                         ...prev,
                         allowed_zone_ids: next
                             ? Array.from(new Set([...prev.allowed_zone_ids, zone.id]))
@@ -454,7 +455,7 @@ export default function PermissionsPage() {
                   {t("permissions.createDesc")}
                 </DialogDescription>
               </DialogHeader>
-              <PermissionFormFields form={form} setForm={setForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants}/>
+              <PermissionFormFields form={form} setForm={setForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants} disabled={creating}/>
               <DialogFooter>
                 <Button onClick={handleCreate} disabled={!!accessError || !!profilesError || loading || eventRevoked || creating || !form.name.trim() || !validQuotas(form)}>
                   {creating ? t("permissions.creating") : t("permissions.create")}
@@ -592,7 +593,7 @@ export default function PermissionsPage() {
                 {t("permissions.editDesc")}
               </DialogDescription>
             </DialogHeader>
-            <PermissionFormFields form={editForm} setForm={setEditForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants} tenantScopeLocked/>
+            <PermissionFormFields form={editForm} setForm={setEditForm} domainOptions={domainOptions} isPlatformAdmin={isPlatformAdmin} tenants={tenants} tenantScopeLocked disabled={saving}/>
             {freshProfile && <section className="max-h-48 overflow-auto rounded border p-3 text-xs">
               <p>{t("permissions.latestProfileVersion")} · {freshProfile.revision}</p>
               <pre className="whitespace-pre-wrap break-all">{JSON.stringify({ name: freshProfile.name, description: freshProfile.description, can_send: freshProfile.can_send, daily_send_quota: freshProfile.daily_send_quota, daily_receive_quota: freshProfile.daily_receive_quota, max_mailboxes: freshProfile.max_mailboxes, max_domains: freshProfile.max_domains, allowed_zone_ids: freshProfile.allowed_zone_ids, can_create_domains: freshProfile.can_create_domains, can_create_routes: freshProfile.can_create_routes, can_create_api_keys: freshProfile.can_create_api_keys }, null, 2)}</pre>

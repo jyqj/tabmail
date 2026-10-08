@@ -104,8 +104,8 @@ type PermissionPatch struct {
 
 func (p PermissionPatch) Validate() error {
 	for _, f := range []PermissionField[int]{p.DailySendQuota, p.DailyReceiveQuota, p.MaxMailboxes, p.MaxDomains} {
-		if f.Present && !f.Inherit && f.Value < 0 {
-			return fmt.Errorf("quota must be a nonnegative integer")
+		if f.Present && !f.Inherit && (f.Value < 0 || int64(f.Value) > 2147483647) {
+			return fmt.Errorf("quota must be a nonnegative database integer")
 		}
 	}
 	if p.DomainAccess.Present && !p.DomainAccess.Inherit {
