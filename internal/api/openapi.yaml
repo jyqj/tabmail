@@ -4943,6 +4943,7 @@ paths:
       - Admin
       summary: Send an admin invitation
       operationId: inviteAdmin
+      description: The JSON request is limited to 64 KiB. Email is trimmed and lowercased before validation and invitation creation.
       security:
       - BearerAuth: []
       requestBody:
@@ -4957,6 +4958,8 @@ paths:
                 email:
                   type: string
                   format: email
+                  maxLength: 255
+                  description: A valid bare mailbox address, without a display name or NUL characters; the normalized value must contain at most 255 Unicode characters.
       responses:
         '201':
           description: Invitation created
@@ -4969,6 +4972,8 @@ paths:
                     $ref: '#/components/schemas/AdminInvitation'
         '409':
           description: Email already registered
+        '400':
+          description: Invalid email or malformed, unknown-field, trailing-data, or oversized request body
   /api/v1/admin/users:
     get:
       tags:

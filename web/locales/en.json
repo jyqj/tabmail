@@ -135,6 +135,7 @@
   "auth.displayNameOpt": "optional",
   "auth.passwordMin": "12–72 UTF-8 bytes",
   "auth.passwordBytes": "{bytes} UTF-8 bytes; enter 12–72 bytes.",
+  "auth.close": "Close sign-in dialog",
   "auth.loginBtn": "Sign In",
   "auth.registerBtn": "Create Account",
   "auth.unlockBtn": "Unlock Inbox",

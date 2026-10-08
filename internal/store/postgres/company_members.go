@@ -32,7 +32,7 @@ const (
 // never trusted from the HTTP handshake. Normal resource access is separate
 // from management.
 func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
-	return s.companyTxScope(ctx, actor, admin, companyTenantWriteLock, f)
+	return s.companyTxScope(ctx, actor, admin, companyTenantWriteLock, true, f)
 }
 
 // companyReadTx is the tenant-lock-free counterpart of companyTx for pure reads and
@@ -44,7 +44,7 @@ func (s *PgStore) companyTx(ctx context.Context, actor authz.Actor, admin bool, 
 // concurrent administration (multi-row invariants, grant clearing vs
 // offboarding, MAX(version)+1 publication) stays on companyTx.
 func (s *PgStore) companyReadTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
-	return s.companyTxScope(ctx, actor, admin, companyNoTenantLock, f)
+	return s.companyTxScope(ctx, actor, admin, companyNoTenantLock, true, f)
 }
 
 // companyReferencedTx orders a mutation that inserts tenant-referencing rows
@@ -54,10 +54,13 @@ func (s *PgStore) companyReadTx(ctx context.Context, actor authz.Actor, admin bo
 // this is not the exclusive company administration lock. Pure reads stay on
 // companyReadTx, and neither helper substitutes for mailbox authorization.
 func (s *PgStore) companyReferencedTx(ctx context.Context, actor authz.Actor, admin bool, f func(pgx.Tx, authz.Actor) error) error {
-	return s.companyTxScope(ctx, actor, admin, companyTenantReferenceLock, f)
+	return s.companyTxScope(ctx, actor, admin, companyTenantReferenceLock, true, f)
 }
 
-func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin bool, lock companyTenantLock, f func(pgx.Tx, authz.Actor) error) error {
+// uniqueConflicts retains the shared legacy mapping for existing callers.
+// Operations that classify uniqueness at the actual write boundary disable
+// that mapping so unrelated INSERT/audit errors and original causes survive.
+func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin bool, lock companyTenantLock, uniqueConflicts bool, f func(pgx.Tx, authz.Actor) error) error {
 	tx, err := s.pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -98,7 +101,7 @@ func (s *PgStore) companyTxScope(ctx context.Context, actor authz.Actor, admin b
 		if errors.As(err, &pg) && pg.Code == "42501" {
 			return app.Forbidden("employee authority changed")
 		}
-		if errors.As(err, &pg) && (pg.Code == "23505" || pg.Code == "40001" || pg.Code == "55P03") {
+		if errors.As(err, &pg) && (uniqueConflicts && pg.Code == "23505" || pg.Code == "40001" || pg.Code == "55P03") {
 			return app.Conflict("resource changed or already exists; reload before retrying")
 		}
 		return err
@@ -570,7 +573,7 @@ func (s *PgStore) CreateWorkMailbox(ctx context.Context, a authz.Actor, in compa
 		return nil, app.BadRequest("shared mailbox belongs to company; use grants")
 	}
 	var out *models.Mailbox
-	e := s.companyTx(ctx, a, true, func(tx pgx.Tx, a authz.Actor) error {
+	e := s.companyTxScope(ctx, a, true, companyTenantWriteLock, false, func(tx pgx.Tx, a authz.Actor) error {
 		zone, domain, e := companyDomain(ctx, tx, a.TenantID)
 		if e != nil {
 			return e
@@ -586,7 +589,7 @@ func (s *PgStore) CreateWorkMailbox(ctx context.Context, a authz.Actor, in compa
 		}
 		id := uuid.New()
 		if _, e = tx.Exec(ctx, `INSERT INTO mailboxes(id,tenant_id,zone_id,local_part,resolved_domain,full_address,access_mode,owner_user_id,mailbox_kind,retention_hours_override) VALUES($1,$2,$3,$4,$5,$6,'token',$7,$8,$9)`, id, a.TenantID, zone, in.LocalPart, domain, in.LocalPart+"@"+domain, in.OwnerUserID, in.Kind, hours); e != nil {
-			return e
+			return classifyWorkMailboxCreateError(e)
 		}
 		if e = companyAudit(ctx, tx, a, "mailbox.provision", "mailbox", id, in); e != nil {
 			return e
