@@ -129,10 +129,10 @@
   },
   {
     "source": "web/app/auth/activate/page.tsx",
-    "line": 52,
+    "line": 96,
     "branch": 0,
     "callee": "company",
-    "owner": "ActivatePage",
+    "owner": "response",
     "expression": "\"/activate\"",
     "path": "/api/v1/company/activate",
     "methods": [
@@ -753,7 +753,23 @@
   },
   {
     "source": "web/features/mail/components/draft-folder.tsx",
-    "line": 20,
+    "line": 31,
+    "branch": 0,
+    "callee": "company",
+    "owner": "remove",
+    "expression": "`/drafts/${draft.id}`",
+    "path": "/api/v1/company/drafts/{dynamic}",
+    "methods": [
+      "DELETE"
+    ],
+    "forwarding": false,
+    "routes": [
+      "DELETE /api/v1/company/drafts/{id}"
+    ]
+  },
+  {
+    "source": "web/features/mail/components/draft-folder.tsx",
+    "line": 44,
     "branch": 0,
     "callee": "company",
     "owner": "DraftFolder",
@@ -768,24 +784,8 @@
     ]
   },
   {
-    "source": "web/features/mail/components/draft-folder.tsx",
-    "line": 22,
-    "branch": 0,
-    "callee": "company",
-    "owner": "DraftFolder",
-    "expression": "`/drafts/${d.id}`",
-    "path": "/api/v1/company/drafts/{dynamic}",
-    "methods": [
-      "DELETE"
-    ],
-    "forwarding": false,
-    "routes": [
-      "DELETE /api/v1/company/drafts/{id}"
-    ]
-  },
-  {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 25,
+    "line": 28,
     "branch": 0,
     "callee": "company",
     "owner": "files",
@@ -801,7 +801,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 27,
+    "line": 38,
     "branch": 0,
     "callee": "company",
     "owner": "act",
@@ -817,7 +817,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 41,
+    "line": 58,
     "branch": 0,
     "callee": "company",
     "owner": "MessagePane",
@@ -833,7 +833,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 51,
+    "line": 68,
     "branch": 0,
     "callee": "downloadCompanyFile",
     "owner": "MessagePane",
@@ -849,7 +849,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 65,
+    "line": 82,
     "branch": 0,
     "callee": "downloadCompanyFile",
     "owner": "MessagePane",
@@ -865,7 +865,7 @@
   },
   {
     "source": "web/features/mail/components/message-pane.tsx",
-    "line": 65,
+    "line": 82,
     "branch": 1,
     "callee": "downloadCompanyFile",
     "owner": "MessagePane",
@@ -913,7 +913,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 27,
+    "line": 28,
     "branch": 0,
     "callee": "streamEvents",
     "owner": "streamAdminMonitorEvents",
@@ -929,7 +929,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 37,
+    "line": 38,
     "branch": 0,
     "callee": "request",
     "owner": "listMonitorHistory",
@@ -945,7 +945,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 45,
+    "line": 46,
     "branch": 0,
     "callee": "request",
     "owner": "listSettings",
@@ -961,7 +961,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 49,
+    "line": 50,
     "branch": 0,
     "callee": "request",
     "owner": "updateSettings",
@@ -977,7 +977,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 58,
+    "line": 59,
     "branch": 0,
     "callee": "request",
     "owner": "getSMTPPolicy",
@@ -993,7 +993,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 62,
+    "line": 63,
     "branch": 0,
     "callee": "request",
     "owner": "updateSMTPPolicy",
@@ -1009,7 +1009,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 69,
+    "line": 70,
     "branch": 0,
     "callee": "request",
     "owner": "listTenants",
@@ -1025,7 +1025,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 73,
+    "line": 74,
     "branch": 0,
     "callee": "request",
     "owner": "createTenant",
@@ -1041,7 +1041,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 80,
+    "line": 81,
     "branch": 0,
     "callee": "request",
     "owner": "updateTenantOverrides",
@@ -1057,7 +1057,23 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 87,
+    "line": 88,
+    "branch": 0,
+    "callee": "request",
+    "owner": "response",
+    "expression": "`/api/v1/admin/tenants/${id}`",
+    "path": "/api/v1/admin/tenants/{dynamic}",
+    "methods": [
+      "GET"
+    ],
+    "forwarding": false,
+    "routes": [
+      "GET /api/v1/admin/tenants/{id}"
+    ]
+  },
+  {
+    "source": "web/lib/api/admin.ts",
+    "line": 104,
     "branch": 0,
     "callee": "request",
     "owner": "deleteTenant",
@@ -1073,7 +1089,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 91,
+    "line": 108,
     "branch": 0,
     "callee": "request",
     "owner": "getTenantConfig",
@@ -1089,7 +1105,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 98,
+    "line": 115,
     "branch": 0,
     "callee": "request",
     "owner": "createAPIKey",
@@ -1105,7 +1121,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 105,
+    "line": 122,
     "branch": 0,
     "callee": "request",
     "owner": "listAPIKeys",
@@ -1121,7 +1137,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 109,
+    "line": 126,
     "branch": 0,
     "callee": "request",
     "owner": "revokeAPIKey",
@@ -1137,7 +1153,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 117,
+    "line": 134,
     "branch": 0,
     "callee": "request",
     "owner": "createUserAPIKey",
@@ -1153,7 +1169,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 124,
+    "line": 141,
     "branch": 0,
     "callee": "request",
     "owner": "listUserAPIKeys",
@@ -1169,7 +1185,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 128,
+    "line": 145,
     "branch": 0,
     "callee": "request",
     "owner": "revokeUserAPIKey",
@@ -1185,7 +1201,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 132,
+    "line": 149,
     "branch": 0,
     "callee": "request",
     "owner": "listPlans",
@@ -1201,7 +1217,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 136,
+    "line": 153,
     "branch": 0,
     "callee": "request",
     "owner": "createPlan",
@@ -1217,7 +1233,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 143,
+    "line": 160,
     "branch": 0,
     "callee": "request",
     "owner": "updatePlan",
@@ -1233,7 +1249,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 150,
+    "line": 167,
     "branch": 0,
     "callee": "request",
     "owner": "deletePlan",
@@ -1249,7 +1265,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 154,
+    "line": 171,
     "branch": 0,
     "callee": "request",
     "owner": "getStats",
@@ -1265,7 +1281,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 158,
+    "line": 175,
     "branch": 0,
     "callee": "request",
     "owner": "listAudit",
@@ -1281,7 +1297,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 170,
+    "line": 187,
     "branch": 0,
     "callee": "request",
     "owner": "listIngestJobs",
@@ -1297,7 +1313,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 182,
+    "line": 199,
     "branch": 0,
     "callee": "request",
     "owner": "listWebhookDeliveries",
@@ -1313,7 +1329,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 190,
+    "line": 207,
     "branch": 0,
     "callee": "request",
     "owner": "inviteAdmin",
@@ -1329,7 +1345,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 197,
+    "line": 214,
     "branch": 0,
     "callee": "request",
     "owner": "listUsers",
@@ -1345,7 +1361,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 206,
+    "line": 223,
     "branch": 0,
     "callee": "request",
     "owner": "updateUser",
@@ -1361,7 +1377,7 @@
   },
   {
     "source": "web/lib/api/admin.ts",
-    "line": 213,
+    "line": 230,
     "branch": 0,
     "callee": "request",
     "owner": "deleteUser",
@@ -1499,7 +1515,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 367,
+    "line": 374,
     "branch": 0,
     "callee": "fetch",
     "owner": "res",
@@ -1513,7 +1529,7 @@
   },
   {
     "source": "web/lib/api/base.ts",
-    "line": 384,
+    "line": 396,
     "branch": 0,
     "callee": "fetch",
     "owner": "streamEvents",

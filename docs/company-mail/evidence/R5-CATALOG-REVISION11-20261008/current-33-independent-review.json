@@ -1,0 +1,285 @@
+{
+  "schema_version": 1,
+  "candidate_commit": "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+  "candidate_tree": "ef5a5548c47cc7cb489ad082ec31033b42473242",
+  "product_anchor": "33f61fde3cf37d3cec2dd360146369c291eb0930",
+  "product_tree": "d982493e28431e644fd4018d8f746d8940280268",
+  "decision": "ACCEPT",
+  "boundary": "Two independent reviews of the final33 catalog increment; these are distinct from the preserved first3a reviews and the failed local8e full source runner. No new TODO completion or business/runtime acceptance is claimed.",
+  "reviews": [
+    {
+      "reviewer": "frontend_quality",
+      "decision": "ACCEPT",
+      "source_commit": "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+      "source_tree": "ef5a5548c47cc7cb489ad082ec31033b42473242",
+      "working_directory": "/workspace/scratch/b8f95a1acb4c/tabmail-review-catalog",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "-B",
+        "-m",
+        "unittest",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision11_reconciles_actual_functions_clients_routes_and_source",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_revision11_preserves_history_and_all_unapproved_rejection_guards",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_closure_bytes_rejected",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_route_source_rejected_by_original_collector",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_source_and_ast_changes_rejected",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_client_and_caller_locations_are_rejected",
+        "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_route_and_ast_fact_changes_rejected",
+        "-v"
+      ],
+      "environment_selectors": {
+        "PYTHONPATH": "scripts:scripts/tests",
+        "R5_TEST_GO": "/workspace/scratch/9e3fd1ca3a13/toolchains/go/bin/go",
+        "R5_TEST_MODULECACHE": "/workspace/scratch/9e3fd1ca3a13/go-cache/mod",
+        "R5_TEST_CACHE": "/workspace/scratch/b8f95a1acb4c/go-cache",
+        "GOPROXY": "off",
+        "GOMAXPROCS": "2",
+        "PYTHONDONTWRITEBYTECODE": "1"
+      },
+      "GOTOOLCHAIN_present": false,
+      "PATH_qualification": "Reviewer prepended the existing Go bin and established Node bin; no source or test files changed for execution.",
+      "exit_code": 0,
+      "unittest_seconds": 13.836,
+      "counts": {
+        "tests": 7,
+        "passed": 7,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "test_scope": "Exactly two current revision11 positive methods and the five original unapproved negative methods. This increment did not repeat the complete25 module or the author92 run.",
+      "test_module": {
+        "path": "scripts/tests/test_r5_catalog_reconciliation.py",
+        "bytes": 249897,
+        "sha256": "ae34f1501c897c9694a4543b1611a288d510b9cffa120d41d530db7c2ae2576b"
+      },
+      "stderr": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/current-33-frontend-review.stderr.txt",
+        "bytes": 1458,
+        "sha256": "d5a627fb1fdad2c2267eb17242d31efc2c93320db160e95a57f313fab5391038"
+      },
+      "manual_findings": [
+        "All product internal/cmd/web bytes equal public33; the original3 CLIs, producers, source preparer and reviewed-lock test equal public33.",
+        "The five original unapproved negative source bodies and ASTs remain unchanged; new snapshot reads use public9bcc/f271 and published anchors, not private8e/fd.",
+        "The sole existing PG function body change CreateZone is bound to exact before/after hashes and unchanged SQL effects; the added classifier is pure and adds no live-PG acceptance.",
+        "Both135-client catalog files remain byte-identical; compatibility differs from the first3a core only in source acquisition/inventory anchor fields, with133 routes and95 closure paths unchanged.",
+        "The nine earlier artifacts and two intermediate packet copies are byte-identical to publicf271; the earlier complete runner does not apply to current33 and current33 was not completely run locally.",
+        "The40 filtered product paths plus two explicit build JSON files,167 fixed protected sources and exact positive count transformations are accurately scoped.",
+        "The separately completed seven reviewed-lock tests do not establish a Next build or complete npm audit; older8e execution evidence is not reused as a33 execution."
+      ]
+    },
+    {
+      "reviewer": "pr_audit",
+      "decision": "ACCEPT",
+      "source_tree": "ef5a5548c47cc7cb489ad082ec31033b42473242",
+      "working_directory": "/workspace/scratch/b8f95a1acb4c/tabmail-catalog-public-review",
+      "execution_identity": "8c4b7fd6cd4d8ef32bbb4269b6155cfc4c5a4597",
+      "execution_identity_qualification": "Local synthetic commit has exact candidate tree and only public 33/f271 parents. No private candidate commit or its ancestors were imported.",
+      "original_records": {
+        "public-final-validation/summary.json": {
+          "original_record": {
+            "bytes": 2788,
+            "sha256": "0babca5b0a30ce3008680db317346a5806a7e71e1c08b8fc3dfca04a27efe71b"
+          },
+          "data": {
+            "candidate_commit": "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+            "tree": "ef5a5548c47cc7cb489ad082ec31033b42473242",
+            "review_commit": "8c4b7fd6cd4d8ef32bbb4269b6155cfc4c5a4597",
+            "review_commit_qualification": "Local synthetic commit has exact candidate tree and only public 33/f271 parents. No private candidate commit or its ancestors were imported.",
+            "public_parents": [
+              "33f61fde3cf37d3cec2dd360146369c291eb0930",
+              "f2713367dd949487c632ebee51de3a0cc1d2c6f7"
+            ],
+            "private_commits_absent": [
+              "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+              "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+              "fd87031aa117dc48346bbdc22b663e0385704c20"
+            ],
+            "no_object_alternates": true,
+            "no_shared_object_files": true,
+            "source_clean": true,
+            "setup_seconds": 1.774,
+            "source_clean_before_after": true,
+            "private_objects_absent_after": {
+              "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71": true,
+              "8e4fd58f63f4e111eca8e5482ae91abbec0484b2": true,
+              "fd87031aa117dc48346bbdc22b663e0385704c20": true
+            },
+            "objects_still_isolated": true,
+            "commands": [
+              {
+                "name": "transactions",
+                "argv": [
+                  "python3",
+                  "-B",
+                  "scripts/check_r5_transactions.py"
+                ],
+                "exit": 0,
+                "seconds": 0.99,
+                "stdout_sha256": "75ae46d78f95d41f145e505836e8a8e30503140c248f2c561e4730322c409dfd",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 309,
+                "stderr_bytes": 0
+              },
+              {
+                "name": "compatibility",
+                "argv": [
+                  "python3",
+                  "-B",
+                  "scripts/check_r5_compatibility.py"
+                ],
+                "exit": 0,
+                "seconds": 1.872,
+                "stdout_sha256": "acc9893148d225195c0ae09203eb941cf750ab66ece2edbe27f44a4a6cdaeb12",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 1117,
+                "stderr_bytes": 0
+              },
+              {
+                "name": "clients",
+                "argv": [
+                  "node",
+                  "scripts/collect_api_calls.cjs",
+                  "--check"
+                ],
+                "exit": 0,
+                "seconds": 1.182,
+                "stdout_sha256": "b17fa6318b473021a98f1960d1dfe854ca7f7cbe1307436dbddf0042d9220328",
+                "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stdout_bytes": 73,
+                "stderr_bytes": 0
+              },
+              {
+                "name": "catalog-tests",
+                "argv": [
+                  "python3",
+                  "-B",
+                  "-m",
+                  "unittest",
+                  "test_r5_catalog_reconciliation",
+                  "-v"
+                ],
+                "exit": 0,
+                "seconds": 32.911,
+                "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                "stderr_sha256": "48bb9f935f18307ff05f73c96ea86c09e199fbd527832b6a69db09739a2b5a87",
+                "stdout_bytes": 0,
+                "stderr_bytes": 5299
+              }
+            ]
+          }
+        },
+        "public-final-invariants.json": {
+          "original_record": {
+            "bytes": 748,
+            "sha256": "225a5910e36449046886a51182013de2cc044963411a4383a556049c6334f4fd"
+          },
+          "data": {
+            "tree": "ef5a5548c47cc7cb489ad082ec31033b42473242",
+            "historical47_unchanged": true,
+            "protected167_equal_public33": true,
+            "original23_tests_retained": true,
+            "current25_tests": true,
+            "original5_negative_source_and_AST_equal": true,
+            "two_positive_count_files_exact_substitutions": true,
+            "nine_original_artifacts_unchanged": true,
+            "two_intermediate_reports_equal_public_f271": true,
+            "product_and_workflow_changes": [],
+            "one_existing_pg_body_change": [
+              "internal/store/postgres/zones.go:*PgStore:CreateZone"
+            ],
+            "added_pg_function": [
+              "internal/store/postgres/zone_errors.go::classifyZoneCreateError"
+            ],
+            "new_source_anchor": "33f61fde3cf37d3cec2dd360146369c291eb0930",
+            "private_commit_objects_required": false
+          }
+        },
+        "public-candidate-tree.json": {
+          "original_record": {
+            "bytes": 779,
+            "sha256": "281a6b53b44c09c5ba0386faafd9eb477af2d91926898f084e4af0ff08538357"
+          },
+          "data": {
+            "candidate_commit": "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+            "tree": "ef5a5548c47cc7cb489ad082ec31033b42473242",
+            "review_commit": "8c4b7fd6cd4d8ef32bbb4269b6155cfc4c5a4597",
+            "review_commit_qualification": "Local synthetic commit has exact candidate tree and only public 33/f271 parents. No private candidate commit or its ancestors were imported.",
+            "public_parents": [
+              "33f61fde3cf37d3cec2dd360146369c291eb0930",
+              "f2713367dd949487c632ebee51de3a0cc1d2c6f7"
+            ],
+            "private_commits_absent": [
+              "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+              "8e4fd58f63f4e111eca8e5482ae91abbec0484b2",
+              "fd87031aa117dc48346bbdc22b663e0385704c20"
+            ],
+            "no_object_alternates": true,
+            "no_shared_object_files": true,
+            "source_clean": true,
+            "setup_seconds": 1.774
+          }
+        },
+        "public-object-isolation.json": {
+          "original_record": {
+            "bytes": 238,
+            "sha256": "558239b9159f9fe0ba3127f8fabf640cb1400b38d6b05e4bc7ac266228b9832c"
+          },
+          "data": {
+            "no_git_object_env_overrides": true,
+            "no_object_alternates": true,
+            "object_files_have_single_link": true,
+            "object_file_count": 3,
+            "typescript_version": "5.9.3",
+            "typescript_real_files": 132,
+            "tracked_source_clean": true
+          }
+        }
+      },
+      "original_cli_outputs": {
+        "transactions": {
+          "stdout": "{\"status\": \"PASS\", \"postgres_files\": 63, \"functions\": 401, \"sql_execution_calls\": 501, \"direct_write_functions\": 138, \"write_closure_functions\": 158, \"migration_files\": 19, \"task_complete\": false, \"runtime_verified\": false, \"meaning\": \"syntax inventory current; no concurrency or behavior equivalence claim\"}\n",
+          "stderr": ""
+        },
+        "compatibility": {
+          "stdout": "{\n  \"wire_validation_scope\": \"not_checked_current_wire_required\",\n  \"historical_wire_reference\": {\n    \"artifact_ref\": \"docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json\",\n    \"sha256\": \"61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22\",\n    \"qualification\": \"historical_metadata_only_not_current_wire\"\n  },\n  \"status\": \"source_inventory_and_upgrade_plan_checked\",\n  \"task_complete\": false,\n  \"product_green\": false,\n  \"routes\": 133,\n  \"client_branches\": 135,\n  \"source_files\": 95,\n  \"openapi_missing\": [\n    \"DELETE /api/v1/suppression/{id}\",\n    \"GET /api/v1/suppression\",\n    \"GET /docs-assets/*\"\n  ],\n  \"no_shipped_client\": [\n    \"DELETE /api/v1/suppression/{id}\",\n    \"GET /api/v1/admin/status\",\n    \"GET /api/v1/auth/me\",\n    \"GET /api/v1/company/outbound/{id}/recipients\",\n    \"GET /api/v1/suppression\",\n    \"GET /docs\",\n    \"GET /docs-assets/*\",\n    \"GET /metrics\",\n    \"GET /openapi.yaml\",\n    \"GET /ready\",\n    \"GET /redoc\"\n  ],\n  \"runtime_boundary\": \"No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required.\"\n}\n",
+          "stderr": ""
+        },
+        "clients": {
+          "stdout": "API client inventory PASS: 135 branches, 7 explicit transport forwarders\n",
+          "stderr": ""
+        }
+      },
+      "exit_code": 0,
+      "unittest_seconds": 32.509,
+      "wrapper_seconds": 32.911,
+      "counts": {
+        "tests": 25,
+        "passed": 25,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0
+      },
+      "test_scope": "The three unchanged original CLI commands and the complete25 catalog module on the exact candidate tree, imported into a separate repository with only public33/f271 parents and public history.",
+      "stderr": {
+        "path": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/current-33-storage-review.stderr.txt",
+        "bytes": 5299,
+        "sha256": "48bb9f935f18307ff05f73c96ea86c09e199fbd527832b6a69db09739a2b5a87"
+      },
+      "isolation_qualification": "Private candidate d2a, original local core8e and local evidencefd commit objects were absent before and after. No alternates, shared object files or Git object environment overrides were used. Same-tree public snapshots supply the history required by tests.",
+      "manual_findings": [
+        "All47 historical artifacts,167 protected current33 sources, the five original unapproved negative method sources/ASTs, the nine earlier artifacts and two intermediate reports preserve exact bytes.",
+        "Original23 catalog methods remain; only the two permitted positive count files undergo exact count substitutions.",
+        "CreateZone is the sole existing PG body delta and the new zone classifier is correctly scoped; no product or workflow path was changed by this catalog maintenance.",
+        "No local full runner was repeated and no business PostgreSQL, old-client, M/G0 or parent-task completion is inferred."
+      ]
+    }
+  ],
+  "evidence_only_followup": {
+    "baseline_commit": "d2a4f21d3cc6742bc2cb7e831eeedd771ddd1c71",
+    "baseline_tree": "ef5a5548c47cc7cb489ad082ec31033b42473242",
+    "purpose": "Append these two final independent review records and their raw logs; preserve tested catalogs, current tests, all product code, guards, workflows and the original3a artifacts.",
+    "new_tests_executed": false,
+    "new_complete_source_runner_executed": false
+  }
+}
