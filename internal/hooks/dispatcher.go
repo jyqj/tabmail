@@ -48,13 +48,13 @@ type Event struct {
 type dispatcherStore interface {
 	CreateOutboxEvent(ctx context.Context, e *models.OutboxEvent) error
 	ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error)
-	MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error
-	MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error
 	CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error
 	ListWebhookEndpoints(ctx context.Context, tenantID uuid.UUID) ([]*models.WebhookEndpoint, error)
 	ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error)
-	MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error
-	MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error
 	ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error)
 	CountDeadWebhookDeliveries(ctx context.Context) (int, error)
 }
@@ -258,6 +258,7 @@ func (d *Dispatcher) ensureWorkers() {
 		d.pollInterval,
 		d.batchSize,
 		d.logger,
+		workqueue.WithSerialClaims(),
 	)
 	d.deliveryWorker = workqueue.NewWorker[*deliveryPayload](
 		newDeliveryStore(d.store),
@@ -268,6 +269,7 @@ func (d *Dispatcher) ensureWorkers() {
 		d.pollInterval,
 		d.batchSize,
 		d.logger,
+		workqueue.WithSerialClaims(),
 	)
 }
 

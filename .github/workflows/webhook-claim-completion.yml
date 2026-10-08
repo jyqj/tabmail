@@ -1,0 +1,56 @@
+name: Webhook claim completion regression
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches:
+      - main
+      - work/company-mail-r5-goal-20260930
+      - integration/company-mail-r5-*
+permissions:
+  contents: read
+concurrency:
+  group: webhook-claim-completion-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  webhook-claim-completion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: tabmail_test
+          POSTGRES_PASSWORD: disposable-test-password
+          POSTGRES_DB: tabmail_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U tabmail_test -d tabmail_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      GOSUMDB: sum.golang.org
+      GODEBUG: asynctimerchan=0
+      TABMAIL_TEST_DB_DSN: postgres://tabmail_test:disposable-test-password@localhost:5432/tabmail_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Fixed baseline and candidate webhook ownership regression
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/tabmail-webhook-baseline" fc00a9d0b087b9390630f0980454f69b91ca2617
+          python3 -B scripts/run_r5_webhook_claim_completion.py \
+            --baseline "$RUNNER_TEMP/tabmail-webhook-baseline" --candidate . \
+            --output "$RUNNER_TEMP/tabmail-webhook-claim-evidence"
+      - name: Retain both actual PostgreSQL executions
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: webhook-claim-completion-evidence
+          path: ${{ runner.temp }}/tabmail-webhook-claim-evidence
+          if-no-files-found: error
+          retention-days: 14

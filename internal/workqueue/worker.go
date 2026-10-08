@@ -195,6 +195,17 @@ func (noopHooks[T]) OnDead(context.Context, *Job[T], error)  {}
 // write and the Store's MarkDone is a no-op.
 type Handler[T any] func(ctx context.Context, job *Job[T]) error
 
+// Option selects a worker dispatch policy at construction time.
+type Option struct {
+	serialClaims bool
+}
+
+// WithSerialClaims claims each job immediately before processing it. BatchSize
+// remains the maximum work per poll, so a busy queue does not gain a poll delay
+// between jobs. This is for serial consumers whose handler may outlast leases
+// that would otherwise already be running on later, unstarted rows.
+func WithSerialClaims() Option { return Option{serialClaims: true} }
+
 // Worker drives a claim loop against one Store. Run blocks until ctx is
 // cancelled (ingest/hooks shape); Start launches a goroutine. Stop preserves
 // the legacy graceful batch join; StopContext cancels and bounds the join.
@@ -206,6 +217,7 @@ type Worker[T any] struct {
 	leaseTTL     time.Duration // informational; claim SQL owns the real lease
 	pollInterval time.Duration
 	batchSize    int
+	serialClaims bool
 	logger       zerolog.Logger
 
 	// lifecycleMu protects generation membership and admission, never I/O.
@@ -239,6 +251,7 @@ func NewWorker[T any](
 	leaseTTL, pollInterval time.Duration,
 	batchSize int,
 	logger zerolog.Logger,
+	options ...Option,
 ) *Worker[T] {
 	if hooks == nil {
 		hooks = noopHooks[T]{}
@@ -252,7 +265,7 @@ func NewWorker[T any](
 	if batchSize <= 0 {
 		batchSize = 100
 	}
-	return &Worker[T]{
+	w := &Worker[T]{
 		store:        store,
 		handler:      handler,
 		policy:       policy,
@@ -262,6 +275,10 @@ func NewWorker[T any](
 		batchSize:    batchSize,
 		logger:       logger,
 	}
+	for _, option := range options {
+		w.serialClaims = w.serialClaims || option.serialClaims
+	}
+	return w
 }
 
 // Run processes immediately, then polls until its context or the generation is
@@ -423,6 +440,10 @@ func (w *Worker[T]) admit(ctx context.Context, g *workerGeneration, claim bool) 
 }
 
 func (w *Worker[T]) processManagedBatch(ctx context.Context, g *workerGeneration) {
+	if w.serialClaims {
+		w.processSerialBatch(ctx, g)
+		return
+	}
 	if !w.admit(ctx, g, true) {
 		return
 	}
@@ -436,6 +457,33 @@ func (w *Worker[T]) processManagedBatch(ctx context.Context, g *workerGeneration
 			return
 		}
 		w.processOne(ctx, job)
+	}
+}
+
+func (w *Worker[T]) processSerialBatch(ctx context.Context, g *workerGeneration) {
+	for range w.batchSize {
+		if !w.admit(ctx, g, true) {
+			return
+		}
+		jobs, err := w.store.Claim(ctx, time.Now().UTC(), 1)
+		if err != nil {
+			w.logger.Warn().Err(err).Msg("workqueue: claim")
+			return
+		}
+		if len(jobs) == 0 {
+			return
+		}
+		if len(jobs) != 1 {
+			// A store that violates the one-row claim contract has already leased
+			// those rows. Leave them for lease recovery instead of dispatching an
+			// unbounded batch under deadlines that started before its work.
+			w.logger.Error().Int("claimed", len(jobs)).Msg("workqueue: serial claim returned more than one job")
+			return
+		}
+		if !w.admit(ctx, g, false) {
+			return
+		}
+		w.processOne(ctx, jobs[0])
 	}
 }
 
