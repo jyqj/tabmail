@@ -36,6 +36,7 @@ function EmployeesSession({ scope }: { scope: string }) {
     }, []);
     const owns = (owner: object) => lifetime.current === owner && scope === sessionScope();
     const settingsReady = !!settings.data && !settings.error && !settings.isLoading && !settings.isValidating;
+    const membersReady = !members.error && !members.isLoading && !members.isValidating && Array.isArray(members.data);
     const invitationsReady = !invitations.error && !readbackError && !invitations.isLoading &&
         !invitations.isValidating && !checkingInvitations && Array.isArray(invitations.data);
     const validInvite = settingsReady && invitationsReady && !!email.trim() && !!local.trim() && !!name.trim();
@@ -173,6 +174,9 @@ function EmployeesSession({ scope }: { scope: string }) {
             {t("管理账号状态、角色与权限配置", "Manage account status, roles and permission profiles")}
           </Link>
         </p>
+        {(members.isLoading || members.isValidating) && <p role="status" className="text-sm text-muted-foreground">
+          {members.data ? t("正在刷新成员…", "Refreshing members…") : t("正在加载成员…", "Loading members…")}
+        </p>}
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead>
@@ -183,7 +187,7 @@ function EmployeesSession({ scope }: { scope: string }) {
               </tr>
             </thead>
             <tbody>
-              {(members.data ?? []).map((v) => (<tr className="border-t" key={v.id}>
+              {(membersReady ? members.data ?? [] : []).map((v) => (<tr className="border-t" key={v.id}>
                   <td className="py-3">
                     {v.display_name}{" "}
                     <span className="text-muted-foreground">{v.email}</span>
@@ -196,7 +200,8 @@ function EmployeesSession({ scope }: { scope: string }) {
             </tbody>
           </table>
         </div>
+        {membersReady && members.data?.length === 0 && <p className="text-sm text-muted-foreground">{t("暂无成员", "No members")}</p>}
       </Section>
-    <OffboardingPanel employees={members.data ?? []} refresh={async () => { await members.mutate(); await invitations.mutate(); }}/>
+    <OffboardingPanel employees={members.data ?? []} employeesReady={membersReady} refresh={async () => { await members.mutate(); await invitations.mutate(); }}/>
     </div>;
 }

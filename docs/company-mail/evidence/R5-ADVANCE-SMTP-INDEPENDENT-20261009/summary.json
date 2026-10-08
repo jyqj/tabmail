@@ -1,0 +1,24 @@
+{
+  "decision": "ACCEPT",
+  "scope": "ADVANCE-04 / issue #200",
+  "reviewed_commit": "fcad85135e86f59d5ad59391a6a6f7991310faf8",
+  "baseline_commit": "fdea2178759ce9842844926374ea98517bc4188b",
+  "test_sha256": "e4b21ca09c62c127f8d5d3fc6b61c9326715e5b4599746a6a327b2edd6f911f5",
+  "independent_baseline": {
+    "pass": 13,
+    "fail": 22,
+    "skip": 0
+  },
+  "independent_candidate": {
+    "pass": 35,
+    "fail": 0,
+    "skip": 0
+  },
+  "combined_candidate": {
+    "pass": 76,
+    "fail": 0,
+    "skip": 0
+  },
+  "whole_suite": false,
+  "database_qualification": false
+}

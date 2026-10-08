@@ -60,13 +60,13 @@ type smtpReplyReader struct {
 	io.Reader
 	tail     []byte
 	received int64
-	limitHit bool
+	readErr  error
 }
 
 func (r *smtpReplyReader) Read(p []byte) (int, error) {
 	n, err := r.Reader.Read(p)
-	if errors.Is(err, errSMTPResponseByteLimit) {
-		r.limitHit = true
+	if err != nil {
+		r.readErr = err
 	}
 	// Retain only enough plaintext to find the byte immediately before the
 	// outer bufio.Reader's unread suffix, even when a read prefetches replies.
@@ -91,10 +91,12 @@ func guardSMTPReplyReader(reader *bufio.Reader) (*bufio.Reader, func(error) erro
 	observed.tail = make([]byte, buffered.Size()+1)
 	return buffered, func(err error) error {
 		consumed := observed.received - int64(buffered.Buffered())
-		if observed.limitHit && (consumed == 0 || observed.tail[(consumed-1)%int64(len(observed.tail))] != '\n') {
+		if observed.readErr != nil && (consumed == 0 || observed.tail[(consumed-1)%int64(len(observed.tail))] != '\n') {
 			// A truncated 4xx/5xx is not an authoritative rejection either;
 			// replace it rather than keeping a textproto.Error in the chain.
-			return errSMTPResponseByteLimit
+			// EOF, timeout and other failures can end a short fragment just
+			// as the byte limit can. Preserve the actual transport cause.
+			return observed.readErr
 		}
 		// TLS may deliver a complete authenticated reply together with an
 		// error while prefetching the next record. A real final LF still

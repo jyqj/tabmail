@@ -4783,6 +4783,7 @@ paths:
       tags:
       - Auth
       summary: Register a new account (when open registration is enabled)
+      description: Email is trimmed and lowercased, then validated as one mailbox addr-spec before account lookup or creation. Display names, angle-addresses, groups and lists are rejected; valid quoted local parts are retained. This syntax check does not verify ownership or deliverability. Existing accounts keep the unchanged login contract.
       operationId: register
       security:
       - {}
@@ -4800,6 +4801,7 @@ paths:
                 email:
                   type: string
                   format: email
+                  maxLength: 255
                 password:
                   type: string
                   minLength: 8
@@ -5005,6 +5007,7 @@ paths:
       - Admin
       summary: Update a user (role, active status, display name)
       operationId: updateUser
+      description: Accepts one JSON object of at most 64 KiB, including trailing whitespace. Omitted or null member fields are unchanged; an explicit empty display name is retained. Invalid input is rejected before the member mutation.
       security:
       - BearerAuth: []
       parameters:
@@ -5015,21 +5018,25 @@ paths:
           type: string
           format: uuid
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
               properties:
                 role:
-                  type: string
+                  type: [string, 'null']
                   enum:
                   - super_admin
                   - admin
                   - user
+                  - null
                 is_active:
-                  type: boolean
+                  type: [boolean, 'null']
                 display_name:
-                  type: string
+                  type: [string, 'null']
+                  maxLength: 255
+                  description: Exact text is retained, including whitespace. NUL characters are forbidden. Null leaves the display name unchanged.
       responses:
         '200':
           description: Updated
@@ -5040,6 +5047,12 @@ paths:
                 properties:
                   data:
                     $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid JSON, request over 64 KiB, invalid role, or display name outside the text contract
+        '403':
+          description: The current administrator cannot manage this member or requested role
+        '409':
+          description: Member lifecycle guard refused the change, or a legacy permission_profile_id field requires the versioned permission editor
         '404':
           description: User not found
     delete:
