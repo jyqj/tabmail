@@ -16,6 +16,7 @@ import (
 // same io.Reader Put signature so the real ObjectStore satisfies it directly.
 type BlobStore interface {
 	Put(ctx context.Context, key string, r io.Reader, size int64) error
+	Get(ctx context.Context, key string) (io.ReadCloser, error)
 	Exists(ctx context.Context, key string) (bool, error)
 	Delete(ctx context.Context, key string) error
 }
@@ -54,18 +55,32 @@ func Key(raw []byte) string {
 	return fmt.Sprintf("sha256/%s/%s.eml", hexSum[:2], hexSum)
 }
 
-// Put writes raw under its content key, deduplicating: an object already present
-// (same content) is left untouched. Returns the content key.
+// Put writes raw under its content key. An existing object is left untouched
+// only after its bytes have been verified; confirmed corruption is repaired
+// through the backend's atomic Put. Uncertain reads never authorize a repair.
 func (s *Store) Put(ctx context.Context, raw []byte) (string, error) {
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
 	key := Key(raw)
 	exists, err := s.blob.Exists(ctx, key)
 	if err != nil {
 		return "", fmt.Errorf("checking raw object existence: %w", err)
 	}
-	if !exists {
-		if err := s.blob.Put(ctx, key, bytes.NewReader(raw), int64(len(raw))); err != nil {
-			return "", fmt.Errorf("storing raw .eml: %w", err)
+	if exists {
+		matches, err := s.matchesExisting(ctx, key, raw)
+		if err != nil {
+			return "", fmt.Errorf("checking raw object integrity: %w", err)
 		}
+		if matches {
+			return key, nil
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return "", err
+	}
+	if err := s.blob.Put(ctx, key, bytes.NewReader(raw), int64(len(raw))); err != nil {
+		return "", fmt.Errorf("storing raw .eml: %w", err)
 	}
 	return key, nil
 }

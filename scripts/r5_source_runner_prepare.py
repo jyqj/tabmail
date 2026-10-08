@@ -25,6 +25,7 @@ LOCK_SHA256 = 'b839b59e9aa06133819adca60659e0f807ca1e321fbdc35fe55afe1c7b52eba3'
 REVIEWED_LOCK_SHA256S = frozenset({
     LOCK_SHA256,
     'b1c85223bc1171b16a5994c2f069ada51a5574719445142c31a213e9fda84e89',
+    'c4f70934466c07c0a2589ead49f120d1b2278d9775e13fdbf7386913b1658869',
 })
 TS_URL = 'https://registry.npmjs.org/typescript/-/typescript-5.9.3.tgz'
 TS_SHA256 = '10e108c9cf7d5f2879053dff18515fb405abf2ccef63eaaf017d9c571687a1d3'

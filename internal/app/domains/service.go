@@ -2,6 +2,7 @@ package domainapp
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"strings"
@@ -15,6 +16,7 @@ import (
 	"tabmail/internal/hooks"
 	"tabmail/internal/models"
 	"tabmail/internal/policy"
+	storeport "tabmail/internal/store"
 )
 
 type store interface {
@@ -291,9 +293,8 @@ func (s *Service) CreateZone(ctx context.Context, actor authz.Actor, tenant *mod
 	zone.DKIMSelector = tabdkim.DefaultSelector
 	zone.DKIMEnabled = false
 	if err := s.store.CreateZone(ctx, zone); err != nil {
-		errLower := strings.ToLower(err.Error())
-		if strings.Contains(errLower, "duplicate") || strings.Contains(errLower, "unique") || strings.Contains(errLower, "23505") {
-			return nil, app.Conflict("domain already exists")
+		if errors.Is(err, storeport.ErrDomainAlreadyExists) {
+			return nil, &app.Error{Kind: app.KindConflict, Message: "domain already exists", Err: err}
 		}
 		return nil, app.Internal(err)
 	}
