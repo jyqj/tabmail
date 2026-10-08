@@ -364,6 +364,7 @@
   "plans.retentionHours": "保留时间（小时）",
   "plans.rpmLimit": "每分钟请求限制",
   "plans.dailyQuota": "每日配额",
+  "plans.integerRequired": "请输入 -2147483648 到 2147483647 之间的整数。",
   "plans.creating": "创建中...",
   "plans.create": "创建",
   "plans.allPlans": "所有方案",

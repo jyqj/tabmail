@@ -121,7 +121,10 @@ func (s *Service) previewSource(ctx context.Context, a authz.Actor, in PreviewIn
 		if e = errors.Join(e, ctx.Err()); e != nil {
 			return nil, e
 		}
-		if u == nil || u.ID != a.ID || !u.IsActive || u.TenantID != a.TenantID {
+		// Match the repository's current-member rule: a current super admin
+		// may manage a selected company outside their home tenant. Stored role
+		// and session version, not cached administrator flags, decide eligibility.
+		if _, current := authz.RefreshMemberActor(a, a.TenantID, u); !current {
 			return nil, app.Forbidden("active employee required")
 		}
 		source.identity.employee = u.DisplayName
