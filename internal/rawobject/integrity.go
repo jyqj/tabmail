@@ -14,11 +14,8 @@ import (
 // cannot turn a partial verification into a successful dedup or repair.
 func (s *Store) matchesExisting(ctx context.Context, key string, raw []byte) (matches bool, err error) {
 	input, err := s.blob.Get(ctx, key)
-	if err != nil {
-		return false, err
-	}
 	if input == nil {
-		return false, errors.New("raw object reader is nil")
+		return false, errors.Join(err, ctx.Err(), errors.New("raw object reader is nil"))
 	}
 	var once sync.Once
 	var closeErr error
@@ -32,6 +29,11 @@ func (s *Store) matchesExisting(ctx context.Context, key string, raw []byte) (ma
 			matches = false
 		}
 	}()
+	// Acquisition can return an owned partial resource alongside its error.
+	// Close and join it without consuming any bytes or authorizing a repair.
+	if err != nil {
+		return false, err
+	}
 
 	// One excess byte proves an oversized object; do not drain it. The memory
 	// cost is io.Copy's fixed buffer, independent of the stored object's size.
