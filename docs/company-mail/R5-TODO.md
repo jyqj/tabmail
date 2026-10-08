@@ -1,9 +1,11 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-DELIVER-20261008:BEGIN -->
-## DELIVER 批次：前两轮七项已完成，最后三项并行实施
+## DELIVER 批次：三轮十项已全部完成
 
-从公开 `b7247c3f66bd5f0ec5c6390305e2ff7268c135f8` 继续，root 与三个原生子代理按 **4＋3＋3** 推进十个独立业务缺口，完整范围与证据见 [DELIVER 账本](R5-DELIVER-20261008.md)。第一轮 [#179](https://github.com/jyqj/tabmail/pull/179) 已实际合入 `9a8cbd73`；#169/#170/#171/#176 已关闭。第二轮 [#180](https://github.com/jyqj/tabmail/pull/180) 已实际合入 `e9b4ed8c855a0762e05771095632b2af1c1e56f5`；#172/#173/#177 已 closed/completed，解决批量设置预验证、聚焦草稿重载和 SMTP 准入查询期限。root 同树相关四包 179 Go race 叶与 102 UI 全过，固定真实红绿、独立审查、公开源码及真实 PG 登录 CI 均通过。**本批完成 7/10、剩余 3，逐轮剩余 6 → 3；原父任务仍完成 10/171、剩余 161。** 第三轮 #174/#175/#178 从同一公开合入点并行实施。测试、CI、目录和 PR 维护不额外计 TODO；#56 保持 draft，完整发布门槛继续保留。
+从公开 `b7247c3f66bd5f0ec5c6390305e2ff7268c135f8` 继续，root与三个原生子代理按 **4＋3＋3** 推进十个独立业务缺口。三轮 [#179](https://github.com/jyqj/tabmail/pull/179)、[#180](https://github.com/jyqj/tabmail/pull/180)、[#181](https://github.com/jyqj/tabmail/pull/181) 均已实际合入，#169/#170/#171/#176、#172/#173/#177、#174/#175/#178逐项核实closed/completed。完整范围与固定失败、独审、执行身份见 [DELIVER账本](R5-DELIVER-20261008.md)。
+
+最终产品merge `9b73b13f376f7e8d589a06fc7078dae4c342d5d5` / tree `8e3f458f8cec51c031a06fd280151116164244ec` 与公开候选、本地验收完整tree相同，双parent已核对。root最终925 Go race叶全PASS、零失败/跳过，默认全Go build/相关vet通过；UI240独立PASS，最终web字节保持。精确第三轮公开head的source evidence、真实PG登录竞争和Webhook回归均SUCCESS。**本批10/10完成、剩余0；三轮剩余6 → 3 → 0；原父任务仍10/171、剩余161。** [revision13目录对账](evidence/R5-CATALOG-REVISION13-20261008/README.md) 绑定该实际公开merge，保留原历史和守卫，维护计0个新增实施TODO。#56保持draft，main和完整发布门槛保持。
 <!-- R5-DELIVER-20261008:END -->
 
 <!-- R5-PROGRESS-20261008:BEGIN -->
