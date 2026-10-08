@@ -158,7 +158,7 @@
       "release_batch": "stable",
       "handler": "adm.DeletePlan",
       "route_source": "internal/api/router.go",
-      "route_line": 290,
+      "route_line": 291,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -179,7 +179,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 150,
+          "line": 167,
           "branch": 0,
           "callee": "request",
           "owner": "deletePlan",
@@ -215,7 +215,7 @@
       "release_batch": "stable",
       "handler": "adm.DeleteTenant",
       "route_source": "internal/api/router.go",
-      "route_line": 270,
+      "route_line": 271,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -236,7 +236,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 87,
+          "line": 104,
           "branch": 0,
           "callee": "request",
           "owner": "deleteTenant",
@@ -272,7 +272,7 @@
       "release_batch": "stable",
       "handler": "adm.DeleteAPIKey",
       "route_source": "internal/api/router.go",
-      "route_line": 275,
+      "route_line": 276,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -293,7 +293,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 109,
+          "line": 126,
           "branch": 0,
           "callee": "request",
           "owner": "revokeAPIKey",
@@ -350,7 +350,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 213,
+          "line": 230,
           "branch": 0,
           "callee": "request",
           "owner": "deleteUser",
@@ -556,11 +556,11 @@
       "clients": [
         {
           "source": "web/features/mail/components/draft-folder.tsx",
-          "line": 22,
+          "line": 31,
           "branch": 0,
           "callee": "company",
-          "owner": "DraftFolder",
-          "expression": "`/drafts/${d.id}`",
+          "owner": "remove",
+          "expression": "`/drafts/${draft.id}`",
           "path": "/api/v1/company/drafts/{dynamic}",
           "methods": [
             "DELETE"
@@ -692,7 +692,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 128,
+          "line": 145,
           "branch": 0,
           "callee": "request",
           "owner": "revokeUserAPIKey",
@@ -773,7 +773,7 @@
       "release_batch": "stable",
       "handler": "adm.ListAudit",
       "route_source": "internal/api/router.go",
-      "route_line": 281,
+      "route_line": 282,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -809,7 +809,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 158,
+          "line": 175,
           "branch": 0,
           "callee": "request",
           "owner": "listAudit",
@@ -913,7 +913,7 @@
       "release_batch": "stable",
       "handler": "adm.ListIngestJobs",
       "route_source": "internal/api/router.go",
-      "route_line": 282,
+      "route_line": 283,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -949,7 +949,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 170,
+          "line": 187,
           "branch": 0,
           "callee": "request",
           "owner": "listIngestJobs",
@@ -985,7 +985,7 @@
       "release_batch": "stable",
       "handler": "mon.StreamAll",
       "route_source": "internal/api/router.go",
-      "route_line": 279,
+      "route_line": 280,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1006,7 +1006,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 27,
+          "line": 28,
           "branch": 0,
           "callee": "streamEvents",
           "owner": "streamAdminMonitorEvents",
@@ -1042,7 +1042,7 @@
       "release_batch": "stable",
       "handler": "mon.History",
       "route_source": "internal/api/router.go",
-      "route_line": 280,
+      "route_line": 281,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1078,7 +1078,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 37,
+          "line": 38,
           "branch": 0,
           "callee": "request",
           "owner": "listMonitorHistory",
@@ -1248,7 +1248,7 @@
       "release_batch": "stable",
       "handler": "adm.ListPlans",
       "route_source": "internal/api/router.go",
-      "route_line": 287,
+      "route_line": 288,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1280,7 +1280,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 132,
+          "line": 149,
           "branch": 0,
           "callee": "request",
           "owner": "listPlans",
@@ -1316,7 +1316,7 @@
       "release_batch": "stable",
       "handler": "adm.GetSMTPPolicy",
       "route_source": "internal/api/router.go",
-      "route_line": 292,
+      "route_line": 293,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1348,7 +1348,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 58,
+          "line": 59,
           "branch": 0,
           "callee": "request",
           "owner": "getSMTPPolicy",
@@ -1384,7 +1384,7 @@
       "release_batch": "stable",
       "handler": "func(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Content-Type\", \"application/json\")\n\t_ = json.NewEncoder(w).Encode(map[string]any{\"data\": cfg.RuntimeConfig})\n}",
       "route_source": "internal/api/router.go",
-      "route_line": 296,
+      "route_line": 297,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1441,7 +1441,7 @@
       "release_batch": "stable",
       "handler": "adm.ListSettings",
       "route_source": "internal/api/router.go",
-      "route_line": 300,
+      "route_line": 301,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1473,7 +1473,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 45,
+          "line": 46,
           "branch": 0,
           "callee": "request",
           "owner": "listSettings",
@@ -1509,7 +1509,7 @@
       "release_batch": "stable",
       "handler": "adm.Stats",
       "route_source": "internal/api/router.go",
-      "route_line": 277,
+      "route_line": 278,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1541,7 +1541,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 154,
+          "line": 171,
           "branch": 0,
           "callee": "request",
           "owner": "getStats",
@@ -1577,7 +1577,7 @@
       "release_batch": "stable",
       "handler": "adm.Stats",
       "route_source": "internal/api/router.go",
-      "route_line": 278,
+      "route_line": 279,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1652,7 +1652,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 69,
+          "line": 70,
           "branch": 0,
           "callee": "request",
           "owner": "listTenants",
@@ -1684,11 +1684,72 @@
       "runtime_evidence_scope": "not_executed_by_this_gate"
     },
     {
+      "legacy_client_disposition": "shipped_client_upgrade_and_external_usage_unknown",
+      "runtime_evidence_scope": "not_executed_by_this_gate",
+      "route": "GET /api/v1/admin/tenants/{id}",
+      "release_batch": "stable",
+      "handler": "adm.GetTenantOverride",
+      "route_source": "internal/api/router.go",
+      "route_line": 269,
+      "middleware": [
+        "chimw.RequestID",
+        "chimw.Recoverer",
+        "cors.Handler(cors.Options{\n\tAllowedOrigins:   append([]string(nil), cfg.HTTP.AllowedOrigins...),\n\tAllowedMethods:   []string{\"GET\", \"POST\", \"PUT\", \"PATCH\", \"DELETE\", \"OPTIONS\"},\n\tAllowedHeaders:   append([]string(nil), cfg.HTTP.AllowedHeaders...),\n\tAllowCredentials: cfg.HTTP.AllowCredentials,\n\tMaxAge:           86400,\n})",
+        "middleware.Auth(cached, cfg.JWTSecret, cfg.PublicTenantID, authState)",
+        "middleware.PermissionLoader(cached)",
+        "cfg.RateLimiter.Middleware",
+        "middleware.RequireSuperAdmin"
+      ],
+      "conditions": [],
+      "openapi_operation_present": true,
+      "schema_components": [
+        "TenantOverrideSnapshot"
+      ],
+      "request_schema_refs": [],
+      "request_contract": null,
+      "response_schema_refs": [
+        "TenantOverrideSnapshot"
+      ],
+      "go_ts_dto_bindings": [],
+      "reviewed_response_binding": null,
+      "clients": [
+        {
+          "source": "web/lib/api/admin.ts",
+          "line": 88,
+          "branch": 0,
+          "callee": "request",
+          "owner": "response",
+          "expression": "`/api/v1/admin/tenants/${id}`",
+          "path": "/api/v1/admin/tenants/{dynamic}",
+          "methods": [
+            "GET"
+          ],
+          "forwarding": false
+        }
+      ],
+      "test_bindings": [
+        {
+          "source": "internal/architecture/route_inventory_test.go",
+          "name": "TestR5RouteInventory",
+          "scope": "source Go AST route registration"
+        }
+      ],
+      "runtime_test_registration": "no_route_specific_runtime_fixture_recorded_by_this_map",
+      "api_key_authority": [
+        "middleware.RequireSuperAdmin"
+      ],
+      "coverage_limits": [
+        "Syntax/field/schema presence is not actual authorization, CAS, nil slice normalization, or dynamic request-body proof.",
+        "Client AST identifies paths/methods; dynamic payload fields need real HTTP consumers.",
+        "No explicit reviewed Go/TS DTO binding"
+      ]
+    },
+    {
       "route": "GET /api/v1/admin/tenants/{id}/config",
       "release_batch": "stable",
       "handler": "adm.GetEffectiveConfig",
       "route_source": "internal/api/router.go",
-      "route_line": 271,
+      "route_line": 272,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1720,7 +1781,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 91,
+          "line": 108,
           "branch": 0,
           "callee": "request",
           "owner": "getTenantConfig",
@@ -1756,7 +1817,7 @@
       "release_batch": "stable",
       "handler": "adm.ListAPIKeys",
       "route_source": "internal/api/router.go",
-      "route_line": 274,
+      "route_line": 275,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -1777,7 +1838,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 105,
+          "line": 122,
           "branch": 0,
           "callee": "request",
           "owner": "listAPIKeys",
@@ -1842,7 +1903,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 197,
+          "line": 214,
           "branch": 0,
           "callee": "request",
           "owner": "listUsers",
@@ -2027,7 +2088,7 @@
       "release_batch": "P7",
       "handler": "adm.ListWebhookDeliveries",
       "route_source": "internal/api/router.go",
-      "route_line": 283,
+      "route_line": 284,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -2063,7 +2124,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 182,
+          "line": 199,
           "branch": 0,
           "callee": "request",
           "owner": "listWebhookDeliveries",
@@ -2641,7 +2702,7 @@
         },
         {
           "source": "web/features/mail/components/draft-folder.tsx",
-          "line": 20,
+          "line": 44,
           "branch": 0,
           "callee": "company",
           "owner": "DraftFolder",
@@ -3405,7 +3466,7 @@
       "clients": [
         {
           "source": "web/features/mail/components/message-pane.tsx",
-          "line": 25,
+          "line": 28,
           "branch": 0,
           "callee": "company",
           "owner": "files",
@@ -3471,7 +3532,7 @@
       "clients": [
         {
           "source": "web/features/mail/components/message-pane.tsx",
-          "line": 65,
+          "line": 82,
           "branch": 1,
           "callee": "downloadCompanyFile",
           "owner": "MessagePane",
@@ -3616,7 +3677,7 @@
       "clients": [
         {
           "source": "web/features/mail/components/message-pane.tsx",
-          "line": 65,
+          "line": 82,
           "branch": 0,
           "callee": "downloadCompanyFile",
           "owner": "MessagePane",
@@ -3682,7 +3743,7 @@
       "clients": [
         {
           "source": "web/features/mail/components/message-pane.tsx",
-          "line": 51,
+          "line": 68,
           "branch": 0,
           "callee": "downloadCompanyFile",
           "owner": "MessagePane",
@@ -4902,7 +4963,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 124,
+          "line": 141,
           "branch": 0,
           "callee": "request",
           "owner": "listUserAPIKeys",
@@ -5194,7 +5255,7 @@
       "release_batch": "stable",
       "handler": "serveSwaggerUI",
       "route_source": "internal/api/router.go",
-      "route_line": 315,
+      "route_line": 316,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5234,7 +5295,7 @@
       "release_batch": "stable",
       "handler": "func(w http.ResponseWriter, r *http.Request) {\n\tw.Header().Set(\"Cache-Control\", \"public, max-age=3600\")\n\tdocsAssetsServer.ServeHTTP(w, r)\n}",
       "route_source": "internal/api/router.go",
-      "route_line": 319,
+      "route_line": 320,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5274,7 +5335,7 @@
       "release_batch": "stable",
       "handler": "NewRouter.outerHealthWrapper",
       "route_source": "internal/api/router.go",
-      "route_line": 324,
+      "route_line": 325,
       "middleware": [],
       "conditions": [],
       "openapi_operation_present": true,
@@ -5321,7 +5382,7 @@
       "release_batch": "stable",
       "handler": "func(w http.ResponseWriter, r *http.Request) {\n\n\tif !metricsAuthorized(r, metricsToken) {\n\t\tw.Header().Set(\"WWW-Authenticate\", \"Bearer\")\n\t\thttp.Error(w, \"unauthorized\", http.StatusUnauthorized)\n\t\treturn\n\t}\n\tcounts := metricsCounts.Get(time.Now(), func() metricsDBCounts {\n\t\twebhookDead, _ := st.CountWebhookDeliveriesByState(r.Context(), \"dead\")\n\t\twebhookPending, _ := st.CountWebhookDeliveriesByState(r.Context(), \"pending\", \"retry\", \"processing\")\n\t\tingestReady, _ := st.CountIngestJobsByState(r.Context(), \"pending\", \"retry\")\n\t\tingestProcessing, _ := st.CountIngestJobsByState(r.Context(), \"processing\")\n\t\treturn metricsDBCounts{\n\t\t\twebhookDead:      webhookDead,\n\t\t\twebhookPending:   webhookPending,\n\t\t\tingestReady:      ingestReady,\n\t\t\tingestProcessing: ingestProcessing,\n\t\t}\n\t})\n\tsnapshot := metrics.Snapshot(cfg.Dispatcher != nil && cfg.Dispatcher.Enabled(), counts.webhookDead)\n\tvalues := map[string]float64{\n\t\t\"tabmail_webhooks_backlog\":         float64(counts.webhookPending),\n\t\t\"tabmail_ingest_backlog\":           float64(counts.ingestReady + counts.ingestProcessing),\n\t\t\"tabmail_ingest_queue_depth\":       float64(counts.ingestReady + counts.ingestProcessing),\n\t\t\"tabmail_ingest_queue_ready_depth\": float64(counts.ingestReady),\n\t\t\"tabmail_ingest_queue_inflight\":    float64(counts.ingestProcessing),\n\t}\n\tif health, ok := st.(interface {\n\t\tCompanyMetrics(context.Context) (map[string]float64, error)\n\t}); ok {\n\t\textra, err := health.CompanyMetrics(r.Context())\n\t\tif err != nil {\n\t\t\tvalues[\"tabmail_operational_metrics_error\"] = 1\n\t\t} else {\n\t\t\tvalues[\"tabmail_operational_metrics_error\"] = 0\n\t\t\tfor k, v := range extra {\n\t\t\t\tvalues[k] = v\n\t\t\t}\n\t\t}\n\t}\n\tbody := metrics.RenderPrometheus(snapshot, values)\n\tw.Header().Set(\"Content-Type\", \"text/plain; version=0.0.4; charset=utf-8\")\n\t_, _ = w.Write([]byte(body))\n}",
       "route_source": "internal/api/router.go",
-      "route_line": 329,
+      "route_line": 330,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5361,7 +5422,7 @@
       "release_batch": "stable",
       "handler": "func(w http.ResponseWriter, r *http.Request) {\n\tdata, err := fs.ReadFile(openapiSpec, \"openapi.yaml\")\n\tif err != nil {\n\t\thttp.Error(w, \"spec not found\", http.StatusNotFound)\n\t\treturn\n\t}\n\tw.Header().Set(\"Content-Type\", \"text/yaml; charset=utf-8\")\n\tw.Write(data)\n}",
       "route_source": "internal/api/router.go",
-      "route_line": 306,
+      "route_line": 307,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5434,7 +5495,7 @@
       "release_batch": "stable",
       "handler": "serveRedoc",
       "route_source": "internal/api/router.go",
-      "route_line": 316,
+      "route_line": 317,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5552,7 +5613,7 @@
       "release_batch": "stable",
       "handler": "adm.UpdatePlan",
       "route_source": "internal/api/router.go",
-      "route_line": 289,
+      "route_line": 290,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5591,7 +5652,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 143,
+          "line": 160,
           "branch": 0,
           "callee": "request",
           "owner": "updatePlan",
@@ -5627,7 +5688,7 @@
       "release_batch": "stable",
       "handler": "adm.UpdateSMTPPolicy",
       "route_source": "internal/api/router.go",
-      "route_line": 293,
+      "route_line": 294,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5666,7 +5727,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 62,
+          "line": 63,
           "branch": 0,
           "callee": "request",
           "owner": "updateSMTPPolicy",
@@ -5702,7 +5763,7 @@
       "release_batch": "stable",
       "handler": "adm.UpdateSettings",
       "route_source": "internal/api/router.go",
-      "route_line": 301,
+      "route_line": 302,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5745,7 +5806,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 49,
+          "line": 50,
           "branch": 0,
           "callee": "request",
           "owner": "updateSettings",
@@ -5781,7 +5842,7 @@
       "release_batch": "stable",
       "handler": "adm.UpdateTenantOverride",
       "route_source": "internal/api/router.go",
-      "route_line": 269,
+      "route_line": 270,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -5820,7 +5881,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 80,
+          "line": 81,
           "branch": 0,
           "callee": "request",
           "owner": "updateTenantOverrides",
@@ -5904,7 +5965,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 206,
+          "line": 223,
           "branch": 0,
           "callee": "request",
           "owner": "updateUser",
@@ -6032,7 +6093,7 @@
       "release_batch": "stable",
       "handler": "ua.InviteAdmin",
       "route_source": "internal/api/router.go",
-      "route_line": 285,
+      "route_line": 286,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -6073,7 +6134,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 190,
+          "line": 207,
           "branch": 0,
           "callee": "request",
           "owner": "inviteAdmin",
@@ -6235,7 +6296,7 @@
       "release_batch": "stable",
       "handler": "adm.CreatePlan",
       "route_source": "internal/api/router.go",
-      "route_line": 288,
+      "route_line": 289,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -6274,7 +6335,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 136,
+          "line": 153,
           "branch": 0,
           "callee": "request",
           "owner": "createPlan",
@@ -6351,7 +6412,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 73,
+          "line": 74,
           "branch": 0,
           "callee": "request",
           "owner": "createTenant",
@@ -6387,7 +6448,7 @@
       "release_batch": "stable",
       "handler": "adm.CreateAPIKey",
       "route_source": "internal/api/router.go",
-      "route_line": 273,
+      "route_line": 274,
       "middleware": [
         "chimw.RequestID",
         "chimw.Recoverer",
@@ -6434,7 +6495,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 98,
+          "line": 115,
           "branch": 0,
           "callee": "request",
           "owner": "createAPIKey",
@@ -6990,10 +7051,10 @@
       "clients": [
         {
           "source": "web/app/auth/activate/page.tsx",
-          "line": 52,
+          "line": 96,
           "branch": 0,
           "callee": "company",
-          "owner": "ActivatePage",
+          "owner": "response",
           "expression": "\"/activate\"",
           "path": "/api/v1/company/activate",
           "methods": [
@@ -8202,7 +8263,7 @@
       "clients": [
         {
           "source": "web/features/mail/components/message-pane.tsx",
-          "line": 27,
+          "line": 38,
           "branch": 0,
           "callee": "company",
           "owner": "act",
@@ -8306,7 +8367,7 @@
       "clients": [
         {
           "source": "web/features/mail/components/message-pane.tsx",
-          "line": 41,
+          "line": 58,
           "branch": 0,
           "callee": "company",
           "owner": "MessagePane",
@@ -9367,7 +9428,7 @@
       "clients": [
         {
           "source": "web/lib/api/admin.ts",
-          "line": 117,
+          "line": 134,
           "branch": 0,
           "callee": "request",
           "owner": "createUserAPIKey",
@@ -10111,12 +10172,13 @@
     }
   ],
   "source_closure": {
-    "docs/company-mail/evidence/R5-API-MATRIX.json": "56cc04e6c7727346345853c7fb079eaac408e75164ea630372ad2c0f61d5fbdc",
-    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+    "docs/company-mail/evidence/R5-API-MATRIX.json": "99d60110159c0001dae4cabab51e5bc878b7f7628cd3dea32c3f1e6d10b33c09",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "84282d32b16d1dfc66a37c48ebb4b14fb2aafced02d72b906f5defcac12c805e",
     "internal/api/handlers/admin.go": "efb4fd396514192f8857f6c884852a446d9c3ecb3768c135037f60b05c080bf7",
+    "internal/api/handlers/admin_tenant_override.go": "e0bee7424078f67619ea48c4e9754851855b37bfbb02fbea089465f78c2fcfb6",
     "internal/api/handlers/app_error.go": "1c745e35259f538938df75356997861841a7bb83c7af2302caa8c661efe147ff",
     "internal/api/handlers/audit.go": "ac2cd9156fe0ccea8085670033dd1a2762a9589371e161dd7cc2a287df6dde73",
-    "internal/api/handlers/auth.go": "d5e286534fa0d9967a30772ee3f3268e876c2770472916e31dfb8c50216e509e",
+    "internal/api/handlers/auth.go": "aecf9aa558d6d119a159ad8c8176e431f785e49477d6fe058de5a974b7bae801",
     "internal/api/handlers/company.go": "175bd9f9715c8105ca36121942ecf39fe540a174178831735427babac0c3b09f",
     "internal/api/handlers/company_admin_stream.go": "8d6d18887be79ace5a8743adff6a196c4c7388ad9af2e11c34a2e8abfe204548",
     "internal/api/handlers/company_archive.go": "bed269f1af47955f734333b0f64460a08e06b2e6c0262deab05315e5f404b62e",
@@ -10150,8 +10212,8 @@
     "internal/api/middleware/auth_cache.go": "9d7462fcd86674d2732b46d40fa10bfc3a11a223a650449bce94936c48a43eb5",
     "internal/api/middleware/ratelimit.go": "b8ff789b5204ee9931195aae33e5c33b9044a2abf4b9edc041c630d6f6561159",
     "internal/api/middleware/revalidate.go": "5c01d49b8084502ce4b346e18a8432dfc32d42df2f3ce5edd23428ca55be0315",
-    "internal/api/openapi.yaml": "2cd1caeb0bbff4fa11d028860b6f514611e18f57de1f28a9a392525f9a8a4dda",
-    "internal/api/router.go": "4082b31aef753ca2f9ffd6eac3c8fd0830d71d2532461b613a13bd73ad1df11f",
+    "internal/api/openapi.yaml": "7bbcc5afdfa23856bf12098c4d240a7f04d8af08c7235ef736ac11a7c2cbe872",
+    "internal/api/router.go": "4f3c2410b0b5cf051385b800119fead832ca8a94a6105619ef8371a0bdb67a88",
     "internal/architecture/route_inventory_test.go": "609ee5489c3e021f9b1a0238b47e4a01d09c5e5eef1144df780d6456e2ed4f05",
     "internal/company/archive.go": "aad2725c16d391afb3ac90ed3d84b25eff35e12704202b8cd157270f08a9d785",
     "internal/company/console.go": "908b925682dd1d6f77fb8cfdd69680f254d8a2c93819eece50adb3a014196023",
@@ -10170,11 +10232,11 @@
     "internal/models/mailbox_grants.go": "2f4db91be99435b19b9b491028f459e8f614a8d44a7edeb68d4cd29ba02dd353",
     "internal/models/models.go": "0e3ad3d5c5da7291854e3ce6e71662e5316c151e3084e8a4fac7164727fccc0f",
     "internal/store/postgres/r5_protocol_shared_test.go": "c3a961063e532cdf41957edbc85455dc2a142ad1d664741da43b07afab83e6b8",
-    "scripts/check_contract_drift.py": "a1199a4766ebbd30270df438b5cceaa6507bcf239a6d172dde937612d93ab107",
+    "scripts/check_contract_drift.py": "39776809d4a918b7298e3a1fc680656e6ad7a55d8ee48c2ef09ec43494850485",
     "scripts/collect_api_calls.cjs": "06896de9f18dda8c7fd4f1ef2d520e4bd71fa831a99f0d63863a1fa6a06682e8",
     "web/app/(dashboard)/company/recovery/page.tsx": "fb7c45ece2271935716c7ab20fce5526d8a74fa3bf7acdb7b879188f42158ba5",
     "web/app/(dashboard)/company/templates/page.tsx": "96cd540aa947f470468f30c962701cd872090591e626b1bd97ba49dfc8032823",
-    "web/app/auth/activate/page.tsx": "2b94709d4bf8939db004b35fccd560841e25865afa5861a6272666b91fe015af",
+    "web/app/auth/activate/page.tsx": "229c5d38f01aea23c82575840e5189d93ebcf9b5e264e896756d36e8a938eac1",
     "web/components/company/compose.tsx": "cb6d6a0a8ce422d4d85a1e147b2b9c7e5947ae516a28415224785c05efff9995",
     "web/components/company/grants.tsx": "5dbfd5e29147276e45932188cd2ba9b93d6850a1492dcd6f361eacc4a47469e2",
     "web/components/company/templates/editor.tsx": "a88a764923cb19f187e22183cd46d879ab8200a037e0168c9581af0c2e185767",
@@ -10190,13 +10252,13 @@
     "web/features/company/overview.tsx": "565a70314c43039d78415a63840defac31a812d40a40bf92f2e1a199ef486251",
     "web/features/mail/api.ts": "fb126f68df692218db562b651b5c4d9876f69d8485460d513a5548bddd6be7f5",
     "web/features/mail/components/conversation-list.tsx": "22db279e75a8f08545d63d26a583230b7649785dd2f5281f7f33b206ebc80d1f",
-    "web/features/mail/components/draft-folder.tsx": "2b3faeb3393440aaec1df1ce21a815bc889993187c731e3980791abefaf7aa66",
-    "web/features/mail/components/message-pane.tsx": "585af13103d69a5f12c8eeb13c90e1bce792bd5023279ace6a21a1e2d9ad52fe",
+    "web/features/mail/components/draft-folder.tsx": "257fcfb6dc6d8f36ff19e87f02064f46d8048384b6cc069dbc7f726bd8ff12f5",
+    "web/features/mail/components/message-pane.tsx": "44c93804909f652449cbdfb58b8a94da52d871f7d56c8f5993e24864c9a3f7c1",
     "web/features/mail/components/submission-content.tsx": "fcfa8b6fe00556265b82881f28af00839b0a1021757799e093faa376388c7f83",
     "web/features/mail/workspace.tsx": "3ec52a9bb69fc2026af68c254cd2c9a32ec09e227b0c959884274d5ba068d283",
-    "web/lib/api/admin.ts": "a4a618e67834c595f82e9167b4f04aa33f5931cd26a5b2496ca61d7a03b87c40",
+    "web/lib/api/admin.ts": "93ec31ae336af6736c4c0ee07bd8faa7f3cf6a2f410d4296054d4f755a552d50",
     "web/lib/api/auth.ts": "b1484cebfa8210fd24b928649f4b6d61dd11b0a44856e26558c83f1b93d7806d",
-    "web/lib/api/base.ts": "8a8fe993b3694ab4578cef5f7e63023ac21e7da0239bb6ec653f559be3e487bf",
+    "web/lib/api/base.ts": "338f359b42f9924ff8bdb326a9315708ca6a0941fec8b29b8ca45f216c72f501",
     "web/lib/api/company-events.ts": "a69f4dd8b0090dd06338ab47264a77cc36eb80789dd121b787273bb8e1dc2236",
     "web/lib/api/domains.ts": "2e17db6610b3ef38f2efe4513f009726d7c1f3773aa1a33d819041bfe2c777b3",
     "web/lib/api/permission-editor-types.ts": "f22886717c7c0d100c7d051a2fdb3b45d74d18ec67329e5e3fae72ab617e9dab",
@@ -10204,7 +10266,7 @@
     "web/lib/api/system.ts": "d9d54a968dea375cc28899d087f351cb01dcfc39cffcc8c326e14bf91e62e868",
     "web/lib/company.ts": "448a6321906f118da40a0c03c05668c16c99805d86a4a59a0d34cc7261ee91c3",
     "web/lib/legacy-outbound.ts": "4238af8ff874dd7dbd8a5104f161ceedb0d2d6275656ede4b0b80f3b72e7a934",
-    "web/lib/types.ts": "09e7a9c57cc2bc27197e37f7fba57c3fbdb3424afb3cf5e606b6355802ea2c34"
+    "web/lib/types.ts": "71e3ed710e7b78110f4a1fcd65da9d2ef2878a1e029e0f4da84b1c990d7ca2c5"
   },
   "historical_wire_reference": {
     "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
@@ -10212,17 +10274,17 @@
     "qualification": "historical_metadata_only_not_current_wire"
   },
   "acquisition": {
-    "base_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+    "base_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
   },
   "inventory_revision": {
-    "revision": 10,
-    "source_commit": "703a572864296120fff3efe0880c560ad9c74d57",
+    "revision": 11,
+    "source_commit": "3a103cda4363cb8f32839eaaa73ab065eb967f79",
     "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
-    "previous_snapshot_commit": "f2215611158d33ff9caed468bf6314e32dcf5046",
-    "previous_snapshot_blob": "739574b45bcb1715e7a10c478c8fa3c85e095d2f",
-    "previous_sha256": "1af19406cb5bad0df43b1b36fc95310dfa28566ceb5b4ce8cbb9e7577f1bb314",
+    "previous_snapshot_commit": "20c39ab3ebaee46e5ac51e25d90a455166c9a31d",
+    "previous_snapshot_blob": "148068966b895865d6e4caaee174f60050456602",
+    "previous_sha256": "125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008/README.md"
   }
 }

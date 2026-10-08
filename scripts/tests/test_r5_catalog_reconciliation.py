@@ -1,4 +1,4 @@
-"""Frozen revision-1 through revision-9 reviews and current revision-10 facts."""
+"""Frozen revision-1 through revision-10 reviews and current revision-11 facts."""
 import ast
 import copy
 from collections import Counter
@@ -24,17 +24,21 @@ REVISION6_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION6-202
 REVISION7_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION7-20261008'
 REVISION8_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008'
 REVISION9_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008'
-CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008'
+REVISION10_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008'
+CURRENT_EVIDENCE = ROOT / 'docs/company-mail/evidence/R5-CATALOG-REVISION11-20261008'
+REVISION10_COMMIT = '20c39ab3ebaee46e5ac51e25d90a455166c9a31d'
+REVISION10_SOURCE_COMMIT = '703a572864296120fff3efe0880c560ad9c74d57'
+REVISION10_SOURCE_TREE = '40e1d2d16258e0e2bc3afea29553dbb148920e4e'
 REVISION9_COMMIT = 'f2215611158d33ff9caed468bf6314e32dcf5046'
 REVISION9_SOURCE_COMMIT = '25b0b294f4fa0bb93b0c82304a570eae43a0923a'
 REVISION9_SOURCE_TREE = 'db7c422fcdd63405706a2f2cb7631a5380f87fd6'
 REVISION8_COMMIT = '1d856bd8a552c30dfb48b4902858edad7e53aaf5'
 REVISION8_SOURCE_COMMIT = 'e0cd175996ca4ee314d7d8b8cf836023b680346c'
 REVISION8_SOURCE_TREE = '5307be3cf057104d1bf1529e38235bbaf0c2bcdf'
-SOURCE_COMMIT = '703a572864296120fff3efe0880c560ad9c74d57'
+SOURCE_COMMIT = '3a103cda4363cb8f32839eaaa73ab065eb967f79'
 REVISION7_COMMIT = 'f77c31e2da38bb926dfe6fa134eabad652e94f8c'
 REVISION7_SOURCE_COMMIT = '9b12c93cb03285298267e27893f74aebe742a8a2'
-SOURCE_TREE = '40e1d2d16258e0e2bc3afea29553dbb148920e4e'
+SOURCE_TREE = '5e454667e0c99e816d20c499514d0e17f645bd22'
 REVISION7_SOURCE_TREE = '87c87a0db72ac444050b43fbe67d906f45c4a2ac'
 REVISION6_COMMIT = 'c3e1419e6245baf0190291ea868787cb2b0177ca'
 REVISION6_SOURCE_COMMIT = 'f413a9138d305cf154ed2cecaddcf9b9a2397666'
@@ -1499,6 +1503,69 @@ REVISION10_EXPECTED = {'transaction_callers_sha256': '482df905525bccc17bd1f5c8d8
                                     'internal/store/postgres/zones.go:*PgStore:GetZone'}
 
 
+
+REVISION10_SNAPSHOTS = {'transaction': {'path': 'docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json',
+                 'blob': '948ae430554121c8ac68bed83fe32d576c0839e2',
+                 'sha256': '270efaae609d5cd16b43272806428e4306353762df40c2a63d4f52487d78f438',
+                 'bytes': 2801187},
+ 'compatibility': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json',
+                   'blob': '148068966b895865d6e4caaee174f60050456602',
+                   'sha256': '125d40cfdc3f0abc500e5286cbf27abb44f5443868fc32447dce5eeea8839137',
+                   'bytes': 406948},
+ 'clients': {'path': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json',
+             'blob': 'f6eb4c08f02e313d230ef97f8f02f1b2f3bf2b55',
+             'sha256': 'c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057',
+             'bytes': 40832},
+ 'client_routes': {'path': 'docs/company-mail/evidence/R5-CLIENT-CALLS.json',
+                   'blob': 'd8dcb3a29190e689612eeac383e4f5b8f3482e8c',
+                   'sha256': '11196f0fce4773d317d53b12ecf107ae21f5fbeb0fefe2c27c84e37571ca625d',
+                   'bytes': 49631}}
+
+REVISION10_REVIEW = {'path': 'docs/company-mail/evidence/R5-CATALOG-REVISION10-20261008/reconciliation.json',
+ 'blob': '424bb8ee441fa40e1ff3bc19dba3c8d993b1ca44',
+ 'sha256': '2ce2c1339ac03dc3673f5cb6e9868dfa1bc943cdf691782ce218241cd292e953',
+ 'bytes': 71208}
+
+REVISION11_EXPECTED = {'review_field_sha256': {'transaction_callers': 'ff69cd630d745625739bb3a19d2da72cf8199c3da188a66b2f42b2a96bc79f34',
+                         'transaction_existing_entry_deltas': 'b88a875d59bc9b4ff0242b4200cd8a5f30885290bdc53e377e8318e29fa83afc',
+                         'transaction_added_function_ids': '66be0201fc148d8285ccb43e3b5e7d91842f998c10235827ab46c24a5d4dfaa7',
+                         'transaction_syntax_changes': '459891416c6c92d8f724993c85cf3e42ba35cf594a72d65b2bc7195aa76be36f',
+                         'transaction_manual_review_changes': 'aa7ab3c7faf61b3b55fc78d930a1cfdd020a2a19844be144bbe3ae70226dfbb9',
+                         'transaction_file_review_change': '39998ebcabbfaec55af6f2da77c8ed11d0aec7d80d47c822171fb77d0d41034a',
+                         'client_previous_indices': '99a5be0103bb2b95d815c85ae28105282294d33c821f2f0167841b6d0c89a67a',
+                         'client_changes': '12b267f78c9d67e3a319f281501f3ea091f8e0051871a8d63e4d61561c766a0d',
+                         'client_added': 'e3c1e4aa4985a6977b6781ac72aee10fdc65d48b361e24bdef5daa1fc57c6556',
+                         'compatibility_routes': 'b7c39ab372b0aee4f864777658751a0de08ae86942ed23f64acb40d686ffa97e',
+                         'new_route_review': '8068a43d70e8718e43f4138f79715183eb97895ae8d238369f016024b55966c1',
+                         'closure_changes': 'c9ecbee74bc675715bb262e41ec66d9d25e050f092b44c2d7069e5b9dc5c0a51',
+                         'closure_added': 'b3b674cf0abd5d60f99cdc1606e5549c9708bc18bd2785e83fba269948c548ad',
+                         'source_changes': 'c2bf4a2f6c07d2fc723562b4893785bce163e612b4734010cb36dc3897c5152c',
+                         'protected_source_changes': '576792f5e6f6ec03192ec9f28eb1b738df4d623672acb728fa9ec8f4748d711d',
+                         'historical_manifest': '690c1c57cb8d06dad1bcf772da404194069209c820f3a6dfc6ef64a8787631e5',
+                         'protected_source_manifest': 'c4e08d3939c0eaf3fcdc8ec5142584b0eea70efd51825cb40a6f180273fbe239',
+                         'current_rejections': '282d9b2bbbc4da6ea4f81dc737263b7e35c411e8756136b559c2d920469f1555'},
+ 'transaction': {'status': 'PASS',
+                 'postgres_files': 62,
+                 'functions': 400,
+                 'sql_execution_calls': 501,
+                 'direct_write_functions': 138,
+                 'write_closure_functions': 158,
+                 'migration_files': 19,
+                 'task_complete': False,
+                 'runtime_verified': False,
+                 'meaning': 'syntax inventory current; no concurrency or behavior equivalence claim'},
+ 'new_function_source_sha256': {'internal/store/postgres/queue.go:*PgStore:MarkOutboxEventDoneClaim': 'd6226de9a10ad7e6903e78bceace05f4c3036168f84c24115024193432fe46d7',
+                                'internal/store/postgres/queue.go:*PgStore:MarkOutboxEventRetryClaim': '4fc859da8dc1bf9d34514909e0751e19028458dd2d4bdecfc72edd03cf6a70c2',
+                                'internal/store/postgres/queue.go:*PgStore:MarkWebhookDeliveryDoneClaim': '7df521485bf4ae5fec0c9cb77bc25d28247d77d8f780530f5f8d4e187b02c923',
+                                'internal/store/postgres/queue.go:*PgStore:MarkWebhookDeliveryRetryClaim': '598ef068b3b388c652595421459c2632b7c495568aa99306fe1545f77857b0d3',
+                                'internal/store/postgres/queue.go:*PgStore:markQueueClaim': 'b5f93fb0871e879ec79e2d68f9021ba3f0b603dfc1f4499f536fad96a755699c'},
+ 'new_function_review_sha256': 'bf591e14ba46c5b440caa40a1289339598bd8f0985d1861b9c1426c2d6255a63',
+ 'generated_catalog_sha256': {'transaction': 'f7e15726f1c6cd8eb5b09a8b52197a50c8f1784e5f2b6379887323c05261dc56',
+                              'compatibility': 'db674027a9b7c100b2e4e0adbd0dd02dab8cd6634ef5dad0d9591bf8b17d3e61',
+                              'clients': '84282d32b16d1dfc66a37c48ebb4b14fb2aafced02d72b906f5defcac12c805e',
+                              'client_routes': 'd839c48614f2a329ac97680b5d2ba49180af2b20900d12ffe77cd74a9286788f'}}
+
+
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args])
 
@@ -1613,6 +1680,25 @@ def revision9_review():
     return json.loads(raw)
 
 
+
+def revision10_snapshot(name):
+    pin = REVISION10_SNAPSHOTS[name]
+    ref = REVISION10_COMMIT + ':' + pin['path']
+    raw = git('show', ref)
+    if git('rev-parse', ref).decode().strip() != pin['blob'] or hashlib.sha256(raw).hexdigest() != pin['sha256'] or len(raw) != pin['bytes']:
+        raise ValueError('revision-10 historical catalog identity drift: ' + name)
+    return json.loads(raw)
+
+
+def revision10_review():
+    pin = REVISION10_REVIEW
+    ref = REVISION10_COMMIT + ':' + pin['path']
+    raw = git('show', ref)
+    if git('rev-parse', ref).decode().strip() != pin['blob'] or hashlib.sha256(raw).hexdigest() != pin['sha256'] or len(raw) != pin['bytes']:
+        raise ValueError('revision-10 historical review identity drift')
+    return json.loads(raw)
+
+
 class ReviewedCatalogReconciliationTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -1644,50 +1730,39 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         cls.revision9 = {name: revision9_snapshot(name) for name in REVISION9_SNAPSHOTS}
         cls.rev9_tx = cls.revision9['transaction']
         cls.rev9_compat = cls.revision9['compatibility']
+        cls.revision10 = {name: revision10_snapshot(name) for name in REVISION10_SNAPSHOTS}
+        cls.rev10_tx = cls.revision10['transaction']
+        cls.rev10_compat = cls.revision10['compatibility']
         cls.ast = tx.extract()
         cls.migrations = tx.migration_inventory()
         cls.routes, cls.clients = gate.collect()
 
     def test_old_pins_reject_and_current_revision_passes_same_actual_facts(self):
-        with self.assertRaisesRegex(ValueError, 'function syntax drift:.*employee_disposition'):
-            tx.validate(self.old_tx, self.ast, self.migrations)
-        with self.assertRaisesRegex(ValueError, '^caller drift:'):
-            tx.validate(self.rev2_tx, self.ast, self.migrations)
-        with self.assertRaisesRegex(ValueError, '^caller drift:'):
-            tx.validate(self.rev3_tx, self.ast, self.migrations)
-        with self.assertRaisesRegex(ValueError, '^caller drift:'):
-            tx.validate(self.rev4_tx, self.ast, self.migrations)
-        with self.assertRaisesRegex(ValueError, '^caller drift:'):
-            tx.validate(self.rev5_tx, self.ast, self.migrations)
-        with self.assertRaisesRegex(ValueError, '^caller drift:'):
-            tx.validate(self.rev6_tx, self.ast, self.migrations)
-        with self.assertRaisesRegex(ValueError, '^caller drift:'):
-            tx.validate(self.rev7_tx, self.ast, self.migrations)
-        # Historical revision-9 rejection expectations remain in REVISION9_COMMIT.
-        # Current expectations are the exact original-validator errors observed
-        # against independently collected revision-10 facts.
-        for revision, previous in [('revision1', self.old_compat), ('revision2', self.rev2_compat),
-                                   ('revision3', self.rev3_compat), ('revision4', self.rev4_compat),
-                                   ('revision5', self.rev5_compat), ('revision6', self.rev6_compat),
-                                   ('revision7', self.rev7_compat), ('revision8', self.rev8_compat),
-                                   ('revision9', self.rev9_compat)]:
+        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        expected = review['current_rejections']
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(expected)).hexdigest(),
+                         REVISION11_EXPECTED['review_field_sha256']['current_rejections'])
+        historical = [('revision1', self.old_tx, self.old_compat),
+                      ('revision2', self.rev2_tx, self.rev2_compat), ('revision3', self.rev3_tx, self.rev3_compat),
+                      ('revision4', self.rev4_tx, self.rev4_compat), ('revision5', self.rev5_tx, self.rev5_compat),
+                      ('revision6', self.rev6_tx, self.rev6_compat), ('revision7', self.rev7_tx, self.rev7_compat),
+                      ('revision8', self.rev8_tx, self.rev8_compat), ('revision9', self.rev9_tx, self.rev9_compat),
+                      ('revision10', self.rev10_tx, self.rev10_compat)]
+        for revision, transaction, compatibility in historical:
             with self.assertRaises(ValueError) as rejected:
-                gate.validate(previous, self.routes, self.clients)
-            self.assertEqual(str(rejected.exception), REVISION10_EXPECTED['compatibility_rejections'][revision])
-        with self.assertRaises(ValueError) as rejected:
-            tx.validate(self.rev8_tx, self.ast, self.migrations)
-        self.assertEqual(str(rejected.exception), REVISION10_EXPECTED['transaction_revision8_rejection'])
-        with self.assertRaises(ValueError) as rejected:
-            tx.validate(self.rev9_tx, self.ast, self.migrations)
-        self.assertEqual(str(rejected.exception), REVISION10_EXPECTED['transaction_revision9_rejection'])
+                tx.validate(transaction, self.ast, self.migrations)
+            self.assertEqual(str(rejected.exception), expected['transaction'][revision])
+            with self.assertRaises(ValueError) as rejected:
+                gate.validate(compatibility, self.routes, self.clients)
+            self.assertEqual(str(rejected.exception), expected['compatibility'][revision])
         self.assertFalse(tx.validate(self.tx, self.ast, self.migrations)['runtime_verified'])
         self.assertFalse(gate.validate(self.compat, self.routes, self.clients)['product_green'])
         for name, current in (('transaction', self.tx), ('compatibility', self.compat)):
             revision = current['inventory_revision']
-            pin = REVISION9_SNAPSHOTS[name]
-            self.assertEqual(revision['revision'], 10)
+            pin = REVISION10_SNAPSHOTS[name]
+            self.assertEqual(revision['revision'], 11)
             self.assertEqual(revision['source_commit'], SOURCE_COMMIT)
-            self.assertEqual(revision['previous_snapshot_commit'], REVISION9_COMMIT)
+            self.assertEqual(revision['previous_snapshot_commit'], REVISION10_COMMIT)
             self.assertEqual(revision['previous_snapshot'], pin['path'])
             self.assertEqual(revision['previous_snapshot_blob'], pin['blob'])
             self.assertEqual(revision['previous_sha256'], pin['sha256'])
@@ -2718,14 +2793,15 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
             raw = git('show', REVISION7_COMMIT + ':' + path)
             self.assertEqual(hashlib.sha256(raw).hexdigest(), digest)
             self.assertEqual((ROOT / path).read_bytes(), raw)
+        # Historical runner and compatibility-test bytes stay bound to their published revision.
         for path, digest in review['unchanged_source_runner_files'].items():
             raw = git('show', REVISION8_SOURCE_COMMIT + ':' + path)
-            self.assertEqual((ROOT / path).read_bytes(), raw)
+            self.assertEqual(git('show', REVISION8_COMMIT + ':' + path), raw)
             self.assertEqual(hashlib.sha256(raw).hexdigest(), digest)
         test_path = review['unchanged_compatibility_test']['path']
         self.assertEqual(test_path, 'scripts/tests/test_r5_compatibility.py')
-        self.assertEqual((ROOT / test_path).read_bytes(), git('show', REVISION7_COMMIT + ':' + test_path))
-        self.assertEqual(hashlib.sha256((ROOT / test_path).read_bytes()).hexdigest(), review['unchanged_compatibility_test']['sha256'])
+        self.assertEqual(git('show', REVISION8_COMMIT + ':' + test_path), git('show', REVISION7_COMMIT + ':' + test_path))
+        self.assertEqual(hashlib.sha256(git('show', REVISION8_COMMIT + ':' + test_path)).hexdigest(), review['unchanged_compatibility_test']['sha256'])
         actual_paths = []
         for directory in (EVIDENCE, REVISION3_EVIDENCE, REVISION4_EVIDENCE, REVISION5_EVIDENCE, REVISION6_EVIDENCE, REVISION7_EVIDENCE):
             names = git('ls-tree', '-r', '--name-only', REVISION7_COMMIT, '--', str(directory.relative_to(ROOT))).decode().splitlines()
@@ -2913,7 +2989,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 continue
             ref = REVISION8_COMMIT + ':' + path
             raw = git('show', ref)
-            self.assertEqual((ROOT / path).read_bytes(), raw)
+            self.assertEqual(git('show', REVISION9_COMMIT + ':' + path), raw)
             protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(), sha256=hashlib.sha256(raw).hexdigest()))
         self.assertEqual(len(protected), 164)
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION9_EXPECTED['protected_source_manifest_sha256'])
@@ -2944,18 +3020,20 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(review['compatibility_rejections'], REVISION9_EXPECTED['compatibility_rejections'])
 
     def test_revision10_preserves_manual_reviews_and_binds_fresh_source_facts(self):
-        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        review = revision10_review()
+        # Immutable review/catalog identities preserve revision-10 acceptance;
+        # current original collectors and validators execute in revision 11.
         self.assertEqual(review['inventory_revision'], 10)
-        self.assertEqual(review['source_commit'], SOURCE_COMMIT)
-        self.assertEqual(review['source_tree'], SOURCE_TREE)
-        self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
+        self.assertEqual(review['source_commit'], REVISION10_SOURCE_COMMIT)
+        self.assertEqual(review['source_tree'], REVISION10_SOURCE_TREE)
+        self.assertEqual(git('rev-parse', REVISION10_SOURCE_COMMIT + '^{tree}').decode().strip(), REVISION10_SOURCE_TREE)
         self.assertEqual(review['revision9_snapshots'],
                          {name: dict(commit=REVISION9_COMMIT, **pin) for name, pin in REVISION9_SNAPSHOTS.items()})
         for field in ('transaction_callers', 'client_changes', 'compatibility_routes', 'closure_changes', 'source_changes'):
             self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(),
                              REVISION10_EXPECTED[field + '_sha256'])
         old = {entry['id']: entry for entry in self.rev9_tx['entries']}
-        current = {entry['id']: entry for entry in self.tx['entries']}
+        current = {entry['id']: entry for entry in self.rev10_tx['entries']}
         self.assertEqual(set(old), set(current))
         deltas = {row['id']: row for row in review['transaction_callers']}
         self.assertEqual(len(deltas), len(review['transaction_callers']))
@@ -2985,10 +3063,10 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                              Counter(json.dumps(row, sort_keys=True) for row in after['callers']))
         mutable = {'entries', 'inventory_revision', 'baseline_commit', 'last_review_base_commit', 'current_review_boundary'}
         self.assertEqual({k: v for k, v in self.rev9_tx.items() if k not in mutable},
-                         {k: v for k, v in self.tx.items() if k not in mutable})
-        self.assertEqual(self.tx['baseline_commit'], SOURCE_COMMIT)
-        self.assertEqual(self.tx['last_review_base_commit'], SOURCE_COMMIT)
-        self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
+                         {k: v for k, v in self.rev10_tx.items() if k not in mutable})
+        self.assertEqual(self.rev10_tx['baseline_commit'], REVISION10_SOURCE_COMMIT)
+        self.assertEqual(self.rev10_tx['last_review_base_commit'], REVISION10_SOURCE_COMMIT)
+        self.assertEqual({'status': 'PASS', 'postgres_files': 62, 'functions': 395, 'sql_execution_calls': 499, 'direct_write_functions': 134, 'write_closure_functions': 154, 'migration_files': 19, 'task_complete': False, 'runtime_verified': False, 'meaning': 'syntax inventory current; no concurrency or behavior equivalence claim'}, review['transaction'])
         self.assertEqual({k: review['transaction'][k] for k in
                           ('postgres_files', 'functions', 'migration_files', 'direct_write_functions',
                            'write_closure_functions', 'sql_execution_calls')},
@@ -2996,11 +3074,11 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                               direct_write_functions=134, write_closure_functions=154, sql_execution_calls=499))
         self.assertEqual(review['transaction_syntax_changes'], [])
         self.assertEqual(review['transaction_manual_review_changes'], [])
-        documented = json.loads((ROOT / REVISION9_SNAPSHOTS['client_routes']['path']).read_text())
-        self.assertEqual(len(self.clients), len(self.revision9['clients']))
-        self.assertEqual(len(documented), len(self.clients))
+        documented = self.revision10['client_routes']
+        self.assertEqual(len(self.revision10['clients']), len(self.revision9['clients']))
+        self.assertEqual(len(documented), len(self.revision10['clients']))
         client_changes = []
-        for index, (before, after) in enumerate(zip(self.revision9['clients'], self.clients)):
+        for index, (before, after) in enumerate(zip(self.revision9['clients'], self.revision10['clients'])):
             self.assertEqual({k: v for k, v in before.items() if k != 'line'},
                              {k: v for k, v in after.items() if k != 'line'})
             self.assertEqual({k: v for k, v in documented[index].items() if k != 'routes'}, after)
@@ -3010,41 +3088,41 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                                            before_line=before['line'], after_line=after['line']))
         self.assertEqual(client_changes, review['client_changes'])
         route_changes = []
-        self.assertEqual(len(self.rev9_compat['routes']), len(self.compat['routes']))
-        for before, after in zip(self.rev9_compat['routes'], self.compat['routes']):
+        self.assertEqual(len(self.rev9_compat['routes']), len(self.rev10_compat['routes']))
+        for before, after in zip(self.rev9_compat['routes'], self.rev10_compat['routes']):
             self.assertEqual({k: v for k, v in before.items() if k != 'clients'},
                              {k: v for k, v in after.items() if k != 'clients'})
             if before != after:
                 route_changes.append(dict(route=after['route'], changed_fields=['clients']))
         self.assertEqual(route_changes, review['compatibility_routes'])
-        self.assertEqual(set(self.compat['source_closure']), set(self.rev9_compat['source_closure']))
-        self.assertEqual(len(self.compat['source_closure']), 94)
-        closure_changes = [dict(path=path, before_sha256=digest, after_sha256=self.compat['source_closure'][path])
+        self.assertEqual(set(self.rev10_compat['source_closure']), set(self.rev9_compat['source_closure']))
+        self.assertEqual(len(self.rev10_compat['source_closure']), 94)
+        closure_changes = [dict(path=path, before_sha256=digest, after_sha256=self.rev10_compat['source_closure'][path])
                            for path, digest in self.rev9_compat['source_closure'].items()
-                           if digest != self.compat['source_closure'][path]]
+                           if digest != self.rev10_compat['source_closure'][path]]
         self.assertEqual(closure_changes, review['closure_changes'])
         mutable = {'inventory_revision', 'acquisition', 'routes', 'source_closure'}
         self.assertEqual({k: v for k, v in self.rev9_compat.items() if k not in mutable},
-                         {k: v for k, v in self.compat.items() if k not in mutable})
-        self.assertEqual(self.compat['acquisition'], dict(self.rev9_compat['acquisition'], base_commit=SOURCE_COMMIT))
-        self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
+                         {k: v for k, v in self.rev10_compat.items() if k not in mutable})
+        self.assertEqual(self.rev10_compat['acquisition'], dict(self.rev9_compat['acquisition'], base_commit=REVISION10_SOURCE_COMMIT))
+        self.assertEqual({'wire_validation_scope': 'not_checked_current_wire_required', 'historical_wire_reference': {'artifact_ref': 'docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json', 'sha256': '61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22', 'qualification': 'historical_metadata_only_not_current_wire'}, 'status': 'source_inventory_and_upgrade_plan_checked', 'task_complete': False, 'product_green': False, 'routes': 132, 'client_branches': 134, 'source_files': 94, 'openapi_missing': ['DELETE /api/v1/suppression/{id}', 'GET /api/v1/suppression', 'GET /docs-assets/*'], 'no_shipped_client': ['DELETE /api/v1/suppression/{id}', 'GET /api/v1/admin/status', 'GET /api/v1/auth/me', 'GET /api/v1/company/outbound/{id}/recipients', 'GET /api/v1/suppression', 'GET /docs', 'GET /docs-assets/*', 'GET /metrics', 'GET /openapi.yaml', 'GET /ready', 'GET /redoc'], 'runtime_boundary': 'No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required.'}, review['compatibility'])
         for name, value in review['generated_catalogs'].items():
             self.assertEqual(value['path'], REVISION9_SNAPSHOTS[name]['path'])
-            raw = (ROOT / value['path']).read_bytes()
+            raw = git('show', REVISION10_COMMIT + ':' + value['path'])
             self.assertEqual(hashlib.sha256(raw).hexdigest(), value['sha256'])
             self.assertEqual(len(raw), value['bytes'])
         self.assertEqual(set(review['generated_catalogs']), set(REVISION9_SNAPSHOTS))
         self.assertEqual([row['path'] for row in review['source_changes']], REVISION10_EXPECTED['source_paths'])
-        changed = git('diff', '--name-only', REVISION9_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+        changed = git('diff', '--name-only', REVISION9_SOURCE_COMMIT, REVISION10_SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
         product_paths = [p for p in changed if (p.endswith('.go') and not p.endswith('_test.go')) or
                          (p.endswith(('.ts', '.tsx', '.css')) and '.test.' not in p) or
                          (p.startswith('web/locales/') and p.endswith('.json'))]
         self.assertEqual(product_paths, REVISION10_EXPECTED['source_paths'])
-        self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in self.compat['source_closure']])
+        self.assertEqual(review['excluded_closure_product_paths'], [path for path in product_paths if path not in self.rev10_compat['source_closure']])
         for row in review['source_changes']:
             self.assertEqual(row['before_commit'], REVISION9_SOURCE_COMMIT)
-            self.assertEqual(row['after_commit'], SOURCE_COMMIT)
-            for prefix, commit in [('before', REVISION9_SOURCE_COMMIT), ('after', SOURCE_COMMIT)]:
+            self.assertEqual(row['after_commit'], REVISION10_SOURCE_COMMIT)
+            for prefix, commit in [('before', REVISION9_SOURCE_COMMIT), ('after', REVISION10_SOURCE_COMMIT)]:
                 ref = commit + ':' + row['path']
                 if prefix == 'before' and row['before_blob'] is None:
                     self.assertFalse(git('ls-tree', commit, '--', row['path']))
@@ -3053,7 +3131,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                     raw = git('show', ref)
                     self.assertEqual(git('rev-parse', ref).decode().strip(), row[prefix + '_blob'])
                     self.assertEqual(hashlib.sha256(raw).hexdigest(), row[prefix + '_sha256'])
-            self.assertEqual((ROOT / row['path']).read_bytes(), git('show', SOURCE_COMMIT + ':' + row['path']))
+            self.assertEqual(git('show', REVISION10_COMMIT + ':' + row['path']), git('show', REVISION10_SOURCE_COMMIT + ':' + row['path']))
         self.assertFalse(review['transaction']['runtime_verified'])
         self.assertFalse(review['transaction']['task_complete'])
         self.assertFalse(review['compatibility']['product_green'])
@@ -3065,7 +3143,7 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
 
     def test_revision10_preserves_all_historical_bytes_and_original_rejection_guards(self):
-        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        review = revision10_review()
         directories = (EVIDENCE, REVISION3_EVIDENCE, REVISION4_EVIDENCE, REVISION5_EVIDENCE,
                        REVISION6_EVIDENCE, REVISION7_EVIDENCE, REVISION8_EVIDENCE, REVISION9_EVIDENCE)
         manifest = []
@@ -3092,14 +3170,14 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
                 continue
             ref = REVISION9_COMMIT + ':' + path
             raw = git('show', ref)
-            self.assertEqual((ROOT / path).read_bytes(), raw)
+            self.assertEqual(git('show', REVISION10_COMMIT + ':' + path), raw)
             protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(), sha256=hashlib.sha256(raw).hexdigest()))
         self.assertEqual(len(protected), 164)
         self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), REVISION10_EXPECTED['protected_source_manifest_sha256'])
         self.assertEqual(review['protected_sources'], 164)
         self.assertEqual(review['protected_source_manifest_sha256'], REVISION10_EXPECTED['protected_source_manifest_sha256'])
         before_raw = git('show', REVISION9_COMMIT + ':' + test_path).decode()
-        after_raw = (ROOT / test_path).read_text()
+        after_raw = git('show', REVISION10_COMMIT + ':' + test_path).decode()
         def methods(raw):
             return {node.name: node for node in ast.walk(ast.parse(raw))
                     if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
@@ -3112,14 +3190,281 @@ class ReviewedCatalogReconciliationTests(unittest.TestCase):
         for name in mutations:
             self.assertEqual(ast.dump(before[name], include_attributes=False), ast.dump(after[name], include_attributes=False))
             self.assertEqual(ast.get_source_segment(before_raw, before[name]), ast.get_source_segment(after_raw, after[name]))
-        with self.assertRaises(ValueError) as rejected:
-            tx.validate(self.rev9_tx, self.ast, self.migrations)
-        self.assertEqual(str(rejected.exception), REVISION10_EXPECTED['transaction_revision9_rejection'])
-        with self.assertRaises(ValueError) as rejected:
-            gate.validate(self.rev9_compat, self.routes, self.clients)
-        self.assertEqual(str(rejected.exception), REVISION10_EXPECTED['compatibility_rejections']['revision9'])
+        # Exact historical rejection contracts stay attached to the immutable
+        # published review; no fabricated old AST or current-source substitution.
+        self.assertEqual(review['transaction_revision9_rejection'], REVISION10_EXPECTED['transaction_revision9_rejection'])
+        self.assertEqual(review['compatibility_rejections'], REVISION10_EXPECTED['compatibility_rejections'])
         fixed_tree = ast.parse(before_raw)
         fixed_expected = next(ast.literal_eval(node.value) for node in fixed_tree.body
                               if isinstance(node, ast.Assign) and any(
                                   isinstance(t, ast.Name) and t.id == 'REVISION9_EXPECTED' for t in node.targets))
         self.assertEqual(fixed_expected, REVISION9_EXPECTED)
+
+
+    def test_revision11_reconciles_actual_functions_clients_routes_and_source(self):
+        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        self.assertEqual(review['inventory_revision'], 11)
+        self.assertEqual(review['source_commit'], SOURCE_COMMIT)
+        self.assertEqual(review['source_tree'], SOURCE_TREE)
+        self.assertEqual(git('rev-parse', SOURCE_COMMIT + '^{tree}').decode().strip(), SOURCE_TREE)
+        self.assertEqual(review['revision10_snapshots'],
+                         {name: dict(commit=REVISION10_COMMIT, **pin) for name, pin in REVISION10_SNAPSHOTS.items()})
+        for field, digest in REVISION11_EXPECTED['review_field_sha256'].items():
+            self.assertEqual(hashlib.sha256(gate.canonical_bytes(review[field])).hexdigest(), digest)
+        self.assertEqual(tx.validate(self.tx, self.ast, self.migrations), review['transaction'])
+        self.assertEqual(gate.validate(self.compat, self.routes, self.clients), review['compatibility'])
+        self.assertEqual(review['transaction'], REVISION11_EXPECTED['transaction'])
+        self.assertEqual({key: review['compatibility'][key] for key in ('routes', 'client_branches', 'source_files')},
+                         dict(routes=133, client_branches=135, source_files=95))
+        old = {entry['id']: entry for entry in self.rev10_tx['entries']}
+        current = {entry['id']: entry for entry in self.tx['entries']}
+        self.assertEqual(set(current) - set(old), set(REVISION11_EXPECTED['new_function_source_sha256']))
+        self.assertEqual(sorted(set(current) - set(old)), review['transaction_added_function_ids'])
+        self.assertEqual(set(old) - set(current), set())
+        self.assertEqual(review['transaction_removed_function_ids'], [])
+        self.assertEqual(self.tx['migrations'], self.rev10_tx['migrations'])
+        self.assertEqual(self.tx['historical_review_metadata'], self.rev10_tx['historical_review_metadata'])
+        actual_deltas = []
+        for identity, before in old.items():
+            after = current[identity]
+            self.assertEqual(before['syntax']['sha256'], after['syntax']['sha256'])
+            self.assertEqual(before['classification'], after['classification'])
+            self.assertEqual(before['evidence_level'], after['evidence_level'])
+            for key in ('owner', 'entry', 'group', 'followup_tasks', 'review_status', 'source_review'):
+                self.assertEqual(before.get(key), after.get(key))
+            if before != after:
+                actual_deltas.append(dict(id=identity,
+                    before_sha256=hashlib.sha256(gate.canonical_bytes(before)).hexdigest(),
+                    after_sha256=hashlib.sha256(gate.canonical_bytes(after)).hexdigest(),
+                    changed_fields=[key for key in before if before[key] != after[key]]))
+        self.assertEqual(actual_deltas, review['transaction_existing_entry_deltas'])
+        caller_deltas = {row['id']: row for row in review['transaction_callers']}
+        self.assertEqual(set(caller_deltas), {identity for identity in old if old[identity]['callers'] != current[identity]['callers']})
+        for identity, delta in caller_deltas.items():
+            before, after = old[identity]['callers'], current[identity]['callers']
+            for side, value in [('before', before), ('after', after)]:
+                self.assertEqual(len(value), delta[side + '_count'])
+                self.assertEqual(hashlib.sha256(gate.canonical_bytes(value)).hexdigest(), delta[side + '_sha256'])
+            changed = copy.deepcopy(before)
+            for removed in delta['removed']:
+                changed.remove(removed)
+            moved = []
+            for move in delta['locations']:
+                matches = [caller for caller in changed if caller['caller_id'] == move['caller_id']
+                           and caller['file'] == move['source'] and caller['expression'] == move['expression']
+                           and caller['line'] == move['before_line']]
+                self.assertEqual(len(matches), 1)
+                # Consume the original location before changing it: adjacent
+                # old lines may shift onto one another's original positions.
+                changed.remove(matches[0])
+                matches[0]['line'] = move['after_line']
+                moved.append(matches[0])
+            changed.extend(moved)
+            changed.extend(delta['added'])
+            self.assertEqual(Counter(json.dumps(row, sort_keys=True) for row in changed),
+                             Counter(json.dumps(row, sort_keys=True) for row in after))
+        function_pin = review['new_function_review']
+        function_raw = (ROOT / function_pin['path']).read_bytes()
+        self.assertEqual(hashlib.sha256(function_raw).hexdigest(), REVISION11_EXPECTED['new_function_review_sha256'])
+        self.assertEqual(function_pin['sha256'], REVISION11_EXPECTED['new_function_review_sha256'])
+        functions = json.loads(function_raw)
+        self.assertEqual(functions['source_commit'], SOURCE_COMMIT)
+        self.assertEqual(functions['source_tree'], SOURCE_TREE)
+        self.assertFalse(functions['actual_postgres_executed_by_this_review'])
+        self.assertEqual(functions['linked_test']['distinct_pg_leaves'], 78)
+        self.assertEqual({row['id'] for row in functions['functions']}, set(REVISION11_EXPECTED['new_function_source_sha256']))
+        for row in functions['functions']:
+            entry = current[row['id']]
+            self.assertEqual(entry['source_review'], row['source_review'])
+            self.assertEqual(entry['lock_fk_wait_fence'], row['lock_fk_wait_fence'])
+            self.assertEqual(entry['classification'], row['classification'])
+            self.assertEqual(entry['assertions']['callback_effect'], row['callback_effect'])
+            self.assertEqual(entry['syntax']['sha256'], REVISION11_EXPECTED['new_function_source_sha256'][row['id']])
+            self.assertEqual(entry['evidence_level'], 'linked-existing-test')
+        helper = current[tx.PG + 'queue.go:*PgStore:markQueueClaim']
+        self.assertEqual(helper['classification'], dict(kind='transaction-or-callback', direct_write=False,
+            write_closure=False, explicit_lock=False, transaction_calls=True, callback_parameter=False, dynamic_sql_expression=True))
+        self.assertEqual([row['sql_expr'] for row in helper['assertions']['sql_execution_expressions']], ['lockSQL', 'updateSQL'])
+        documented = json.loads((ROOT / REVISION10_SNAPSHOTS['client_routes']['path']).read_text())
+        self.assertEqual(len(documented), len(self.clients))
+        indices = review['client_previous_indices']
+        self.assertEqual(len(indices), len(self.clients))
+        self.assertEqual(sorted(value for value in indices if value is not None), list(range(134)))
+        self.assertEqual(indices[47:49], [48, 47])
+        self.assertEqual([index for index, value in enumerate(indices) if value is None], [66])
+        logical_keys = ('source', 'branch', 'callee', 'path', 'methods', 'forwarding')
+        changed_clients, added_clients = [], []
+        for index, (row, previous_index) in enumerate(zip(self.clients, indices)):
+            self.assertEqual({key: value for key, value in documented[index].items() if key != 'routes'}, row)
+            if previous_index is None:
+                self.assertEqual(documented[index]['routes'], ['GET /api/v1/admin/tenants/{id}'])
+                added_clients.append(dict(index=index, after=row, routes=documented[index]['routes']))
+                continue
+            before = self.revision10['clients'][previous_index]
+            self.assertEqual({key: before[key] for key in logical_keys}, {key: row[key] for key in logical_keys})
+            self.assertEqual(documented[index]['routes'], self.revision10['client_routes'][previous_index]['routes'])
+            if before != row or index != previous_index:
+                changed_clients.append(dict(index=index, previous_index=previous_index, before=before, after=row,
+                    changed_fields=[key for key in before if before[key] != row[key]], routes=documented[index]['routes']))
+        self.assertEqual(changed_clients, review['client_changes'])
+        self.assertEqual(added_clients, review['client_added'])
+        self.assertEqual(review['client_removed'], [])
+        self.assertEqual(sum(row['forwarding'] for row in self.clients), 7)
+        before_routes = {row['route']: row for row in self.rev10_compat['routes']}
+        after_routes = {row['route']: row for row in self.compat['routes']}
+        self.assertEqual(set(after_routes) - set(before_routes), {'GET /api/v1/admin/tenants/{id}'})
+        self.assertTrue(set(before_routes).issubset(after_routes))
+        self.assertEqual(review['compatibility_added_routes'], ['GET /api/v1/admin/tenants/{id}'])
+        route_changes = []
+        for row in self.compat['routes']:
+            if row['route'] not in before_routes:
+                continue
+            before = before_routes[row['route']]
+            self.assertEqual({key: value for key, value in before.items() if key not in {'clients', 'route_line'}},
+                             {key: value for key, value in row.items() if key not in {'clients', 'route_line'}})
+            if before != row:
+                route_changes.append(dict(route=row['route'], changed_fields=[key for key in before if before[key] != row[key]]))
+        self.assertEqual(route_changes, review['compatibility_routes'])
+        new_route = after_routes['GET /api/v1/admin/tenants/{id}']
+        self.assertEqual(new_route['handler'], 'adm.GetTenantOverride')
+        self.assertIn('middleware.RequireSuperAdmin', new_route['middleware'])
+        self.assertEqual(new_route['schema_components'], ['TenantOverrideSnapshot'])
+        self.assertEqual(new_route['go_ts_dto_bindings'], [])
+        self.assertIsNone(new_route['reviewed_response_binding'])
+        self.assertEqual(new_route['runtime_evidence_scope'], 'not_executed_by_this_gate')
+        self.assertEqual(new_route['runtime_test_registration'], 'no_route_specific_runtime_fixture_recorded_by_this_map')
+        matrix = json.loads((ROOT / 'docs/company-mail/evidence/R5-API-MATRIX.json').read_text())
+        self.assertEqual(next(row for row in matrix if row['method'] == 'GET' and row['path'] == '/api/v1/admin/tenants/{id}'),
+                         review['new_route_review']['original_api_matrix_row'])
+        self.assertEqual((ROOT / 'docs/company-mail/evidence/R5-API-MATRIX.json').read_bytes(),
+                         git('show', SOURCE_COMMIT + ':docs/company-mail/evidence/R5-API-MATRIX.json'))
+        before_closure, after_closure = self.rev10_compat['source_closure'], self.compat['source_closure']
+        self.assertEqual(set(after_closure) - set(before_closure), {'internal/api/handlers/admin_tenant_override.go'})
+        self.assertTrue(set(before_closure).issubset(after_closure))
+        self.assertEqual([dict(path=path, before_sha256=value, after_sha256=after_closure[path])
+                          for path, value in before_closure.items() if value != after_closure[path]], review['closure_changes'])
+        self.assertEqual([dict(path=path, sha256=value) for path, value in after_closure.items()
+                          if path not in before_closure], review['closure_added'])
+        for key in ('release_batches', 'historical_wire_reference', 'dependencies', 'dependency_acceptance'):
+            self.assertEqual(self.compat[key], self.rev10_compat[key])
+        for name, value in review['generated_catalogs'].items():
+            self.assertEqual(value['path'], REVISION10_SNAPSHOTS[name]['path'])
+            raw = (ROOT / value['path']).read_bytes()
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), value['sha256'])
+            self.assertEqual(value['sha256'], REVISION11_EXPECTED['generated_catalog_sha256'][name])
+            self.assertEqual(len(raw), value['bytes'])
+        changed = git('diff', '--name-only', REVISION10_SOURCE_COMMIT, SOURCE_COMMIT, '--', 'internal', 'cmd', 'web').decode().splitlines()
+        products = [path for path in changed if (path.endswith('.go') and not path.endswith('_test.go')) or
+                    (path.endswith(('.ts', '.tsx', '.css')) and '.test.' not in path) or
+                    (path.startswith('web/locales/') and path.endswith('.json'))]
+        self.assertEqual(products, [row['path'] for row in review['source_changes']])
+        self.assertEqual(review['excluded_closure_product_paths'], [path for path in products if path not in after_closure])
+        for row in review['source_changes']:
+            self.assertEqual(row['before_commit'], REVISION10_SOURCE_COMMIT)
+            self.assertEqual(row['after_commit'], SOURCE_COMMIT)
+            for side, commit in [('before', REVISION10_SOURCE_COMMIT), ('after', SOURCE_COMMIT)]:
+                if row[side + '_blob'] is None:
+                    self.assertFalse(git('ls-tree', commit, '--', row['path']))
+                    continue
+                ref = commit + ':' + row['path']
+                raw = git('show', ref)
+                self.assertEqual(git('rev-parse', ref).decode().strip(), row[side + '_blob'])
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), row[side + '_sha256'])
+                self.assertEqual(len(raw), row[side + '_bytes'])
+            self.assertEqual((ROOT / row['path']).read_bytes(), git('show', SOURCE_COMMIT + ':' + row['path']))
+        self.assertEqual(review['implementation_todos_completed'], 0)
+        self.assertEqual(review['parent_tasks'], dict(accepted=10, total=171, remaining=161))
+        for key in ('runtime_verified', 'product_green', 'task_complete'):
+            self.assertFalse(review[key])
+
+    def test_revision11_preserves_history_and_all_unapproved_rejection_guards(self):
+        review = json.loads((CURRENT_EVIDENCE / 'reconciliation.json').read_text())
+        historical = []
+        for directory in review['historical_directories']:
+            names = git('ls-tree', '-r', '--name-only', REVISION10_COMMIT, '--', directory).decode().splitlines()
+            self.assertTrue(names)
+            self.assertEqual({str(path.relative_to(ROOT)) for path in (ROOT / directory).rglob('*') if path.is_file()}, set(names))
+            for path in names:
+                ref = REVISION10_COMMIT + ':' + path
+                raw = git('show', ref)
+                self.assertEqual((ROOT / path).read_bytes(), raw)
+                historical.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(),
+                                       sha256=hashlib.sha256(raw).hexdigest(), bytes=len(raw)))
+        self.assertEqual(historical, review['historical_manifest'])
+        self.assertEqual(len(historical), 47)
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(historical)).hexdigest(), review['historical_manifest_sha256'])
+        roots = ('scripts', '.github/workflows', 'cmd/r5txinventory', 'internal/architecture/route_inventory_test.go')
+        mutable = review['mutable_current_positive_test_paths']
+        self.assertEqual(mutable, ['scripts/tests/test_r5_catalog_reconciliation.py',
+                                  'scripts/tests/test_r5_transactions.py', 'scripts/tests/test_r5_compatibility.py'])
+        paths = git('ls-tree', '-r', '--name-only', SOURCE_COMMIT, '--', *roots).decode().splitlines()
+        protected = []
+        for path in paths:
+            if path in mutable:
+                continue
+            ref = SOURCE_COMMIT + ':' + path
+            raw = git('show', ref)
+            self.assertEqual((ROOT / path).read_bytes(), raw)
+            protected.append(dict(path=path, blob=git('rev-parse', ref).decode().strip(), sha256=hashlib.sha256(raw).hexdigest()))
+        self.assertEqual(protected, review['protected_source_manifest'])
+        self.assertEqual(len(protected), review['protected_sources'])
+        self.assertEqual(hashlib.sha256(gate.canonical_bytes(protected)).hexdigest(), review['protected_source_manifest_sha256'])
+        changes = git('diff', '--name-only', REVISION10_COMMIT, SOURCE_COMMIT, '--', *roots).decode().splitlines()
+        self.assertEqual(changes, [row['path'] for row in review['protected_source_changes']])
+        for row in review['protected_source_changes']:
+            for side, commit in [('before', REVISION10_COMMIT), ('after', SOURCE_COMMIT)]:
+                if row[side + '_blob'] is None:
+                    self.assertFalse(git('ls-tree', commit, '--', row['path']))
+                    continue
+                ref = commit + ':' + row['path']
+                raw = git('show', ref)
+                self.assertEqual(git('rev-parse', ref).decode().strip(), row[side + '_blob'])
+                self.assertEqual(hashlib.sha256(raw).hexdigest(), row[side + '_sha256'])
+        for path, digest in review['unchanged_validators_and_collectors'].items():
+            raw = git('show', REVISION10_COMMIT + ':' + path)
+            self.assertEqual((ROOT / path).read_bytes(), raw)
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), digest)
+        # The two small current-count assertions evolve; every other byte of
+        # their original validators/negative tests is retained.
+        path = 'scripts/tests/test_r5_transactions.py'
+        before = git('show', SOURCE_COMMIT + ':' + path).decode()
+        self.assertEqual(before.count("result['functions'], 395"), 1)
+        self.assertEqual((ROOT / path).read_text(), before.replace("result['functions'], 395", "result['functions'], 400"))
+        path = 'scripts/tests/test_r5_compatibility.py'
+        before = git('show', SOURCE_COMMIT + ':' + path).decode()
+        self.assertEqual(before.count("result['routes'],132"), 1)
+        self.assertEqual(before.count("result['client_branches'],134"), 1)
+        expected = before.replace("result['routes'],132", "result['routes'],133").replace("result['client_branches'],134", "result['client_branches'],135")
+        self.assertEqual((ROOT / path).read_text(), expected)
+        path = 'scripts/tests/test_r5_catalog_reconciliation.py'
+        before_raw = git('show', REVISION10_COMMIT + ':' + path).decode()
+        after_raw = (ROOT / path).read_text()
+        def methods(raw):
+            return {node.name: node for node in ast.walk(ast.parse(raw))
+                    if isinstance(node, ast.FunctionDef) and node.name.startswith('test_')}
+        before, after = methods(before_raw), methods(after_raw)
+        self.assertEqual((len(before), len(after)), (23, 25))
+        self.assertTrue(set(before).issubset(after))
+        allowed = {
+            'test_old_pins_reject_and_current_revision_passes_same_actual_facts',
+            'test_revision8_preserves_client_closure_history_and_all_original_guards',
+            'test_revision9_preserves_all_historical_bytes_and_original_rejection_guards',
+            'test_revision10_preserves_manual_reviews_and_binds_fresh_source_facts',
+            'test_revision10_preserves_all_historical_bytes_and_original_rejection_guards',
+        }
+        for name in before:
+            if name not in allowed:
+                self.assertEqual(ast.dump(before[name], include_attributes=False), ast.dump(after[name], include_attributes=False))
+                self.assertEqual(ast.get_source_segment(before_raw, before[name]), ast.get_source_segment(after_raw, after[name]))
+        mutations = {name for name in before if name.startswith('test_unapproved_')}
+        self.assertEqual(len(mutations), 5)
+        self.assertFalse(mutations & allowed)
+        for raw in (before_raw, after_raw):
+            assignments = {target.id: node.value for node in ast.parse(raw).body if isinstance(node, ast.Assign)
+                           for target in node.targets if isinstance(target, ast.Name)}
+            if raw == before_raw:
+                historical_assignments = assignments
+            else:
+                for name, node in historical_assignments.items():
+                    if name.startswith('REVISION') and name.endswith(('_SNAPSHOTS', '_EXPECTED', '_COMMIT', '_TREE', '_REVIEW')):
+                        self.assertEqual(ast.dump(node, include_attributes=False), ast.dump(assignments[name], include_attributes=False))
