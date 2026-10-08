@@ -220,9 +220,21 @@ def execute_binary(root, go, binary, expected_hash, source_sha, fixture, env):
                 return hashlib.file_digest(file, 'sha256').hexdigest()
         if not stat.S_ISREG(identity.st_mode) or pinned_hash() != expected_hash:
             raise ValueError('typed binary replaced/tampered before execution')
-        executable = f'/proc/{os.getpid()}/fd/{fd}'
-        if not Path(executable).exists():
-            raise ValueError('Linux pinned executable FD unavailable')
+        # procfs may expose a different PID namespace from getpid(). Resolve
+        # its own self link, then retain the parent-qualified FD path so the
+        # test2json child cannot accidentally address its own descriptor table.
+        try:
+            proc_pid = os.readlink('/proc/self')
+            if (not proc_pid.isascii() or not proc_pid.isdecimal() or
+                    proc_pid.startswith('0')):
+                raise ValueError('invalid Linux procfs process identity')
+            executable = f'/proc/{proc_pid}/fd/{fd}'
+            visible = os.stat(executable)
+        except OSError as error:
+            raise ValueError('Linux pinned executable FD unavailable') from error
+        if (not stat.S_ISREG(visible.st_mode) or
+                (visible.st_dev, visible.st_ino) != (identity.st_dev, identity.st_ino)):
+            raise ValueError('Linux pinned executable FD identity differs')
         argv = [go, 'tool', 'test2json', '-t', '-p', 'tabmail/internal/api/handlers', executable,
                 '-test.v=test2json', '-test.run=^' + TEST_NAME + '$', '-test.count=1']
         cwd = Path(root) / 'internal/api/handlers'

@@ -358,27 +358,39 @@ export async function streamEvents(
   const lease = sessionRequest(signal);
   let cursor = "";
   let failures = 0;
+  const assertCurrent = () => {
+    assertSession(lease.scope);
+    if (lease.signal.aborted) throw new DOMException("Aborted", "AbortError");
+  };
   try {
     while (!lease.signal.aborted) {
-      assertSession(lease.scope);
+      assertCurrent();
       try {
         const headers = buildHeaders(path);
+        // A different tab can rotate this token while fetch is pending. The
+        // response belongs to the token actually sent, not the latest one.
+        const usedSessionToken = requestUsedAccessToken(headers);
         if (cursor) headers["Last-Event-ID"] = cursor;
         let res = await fetch(`${getBaseUrl()}${path}`, {
           headers,
           credentials: "include",
           signal: lease.signal,
         });
-        assertSession(lease.scope);
-        if (res.status === 401 && requestUsedAccessToken(headers)) {
-          if (
-            !(await tryRefreshToken(
-              headers.Authorization?.slice(7) || "",
-              lease.scope,
-            ))
-          )
-            throw new DOMException("Stream permission revoked", "NotAllowedError");
-          assertSession(lease.scope);
+        assertCurrent();
+        if (res.status === 401 && usedSessionToken) {
+          const renewed = await tryRefreshToken(
+            headers.Authorization?.slice(7) || "",
+            lease.scope,
+          );
+          assertCurrent();
+          if (!renewed) {
+            // A rejected refresh clears the identity. Network, server and
+            // malformed-response failures preserve it and use stream backoff;
+            // they are not evidence that administrative authority was revoked.
+            if (typeof navigator === "undefined" || !navigator.locks || !getStoredKey("tabmail_access_token"))
+              throw new DOMException("Stream permission revoked", "NotAllowedError");
+            throw new Error("Stream authentication temporarily unavailable");
+          }
           const retry = buildHeaders(path);
           if (cursor) retry["Last-Event-ID"] = cursor;
           res = await fetch(`${getBaseUrl()}${path}`, {
@@ -387,6 +399,7 @@ export async function streamEvents(
             signal: lease.signal,
           });
         }
+        assertCurrent();
         if (res.status === 401 || res.status === 403)
           throw new DOMException(
             "Stream permission revoked",
@@ -399,8 +412,7 @@ export async function streamEvents(
         const reader = res.body.getReader();
         const decoder = new TextDecoder();
         const parser = createEventStreamParser(frame => {
-          assertSession(lease.scope);
-          if (lease.signal.aborted) throw new DOMException("Aborted", "AbortError");
+          assertCurrent();
           if (frame.id !== undefined) cursor = frame.id;
           if (frame.data === undefined) return;
           let data: unknown = frame.data;
@@ -418,7 +430,7 @@ export async function streamEvents(
         try {
           while (!lease.signal.aborted) {
             const { value, done } = await reader.read();
-            assertSession(lease.scope);
+            assertCurrent();
             if (done) break;
             parser.push(decoder.decode(value, { stream: true }));
           }

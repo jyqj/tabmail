@@ -376,12 +376,12 @@ func (s *r5WebhookBoundaryStore) ClaimWebhookDeliveries(context.Context, time.Ti
 	return []*models.WebhookDelivery{delivery}, nil
 }
 
-func (s *r5WebhookBoundaryStore) MarkWebhookDeliveryDone(_ context.Context, id uuid.UUID) error {
+func (s *r5WebhookBoundaryStore) MarkWebhookDeliveryDoneClaim(_ context.Context, id uuid.UUID, _ int) error {
 	s.marks <- r5WebhookMark{id: id, state: "delivered"}
 	return nil
 }
 
-func (s *r5WebhookBoundaryStore) MarkWebhookDeliveryRetry(_ context.Context, id uuid.UUID, lastError string, next time.Time, dead bool) error {
+func (s *r5WebhookBoundaryStore) MarkWebhookDeliveryRetryClaim(_ context.Context, id uuid.UUID, _ int, lastError string, next time.Time, dead bool) error {
 	state := "retry"
 	if dead {
 		state = "dead"

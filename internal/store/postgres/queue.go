@@ -2,13 +2,16 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 	"time"
 
 	"tabmail/internal/models"
+	"tabmail/internal/store"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 )
 
 // ================================================================
@@ -89,6 +92,23 @@ func (s *PgStore) MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastEr
 		SET state='retry', last_error=$2, next_attempt_at=$3, claimed_at=NULL, lease_until=NULL, updated_at=$4
 		WHERE id=$1`, id, lastError, nextAttemptAt.UTC(), time.Now().UTC())
 	return err
+}
+
+func (s *PgStore) MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM outbox_events WHERE id=$1 FOR UPDATE`,
+		`UPDATE outbox_events
+		 SET state='done', claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`)
+}
+
+func (s *PgStore) MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error {
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM outbox_events WHERE id=$1 FOR UPDATE`,
+		`UPDATE outbox_events
+		 SET state='retry', last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`,
+		lastError, nextAttemptAt.UTC())
 }
 
 func (s *PgStore) CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error {
@@ -174,6 +194,61 @@ func (s *PgStore) MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, la
 		SET state=$2, last_error=$3, next_attempt_at=$4, claimed_at=NULL, lease_until=NULL, updated_at=$5
 		WHERE id=$1`, id, state, lastError, nextAttemptAt.UTC(), time.Now().UTC())
 	return err
+}
+
+func (s *PgStore) MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error {
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM webhook_deliveries WHERE id=$1 FOR UPDATE`,
+		`UPDATE webhook_deliveries
+		 SET state='delivered', delivered_at=clock_timestamp(), claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`)
+}
+
+func (s *PgStore) MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error {
+	state := "retry"
+	if dead {
+		state = "dead"
+	}
+	return s.markQueueClaim(ctx, id, attempt,
+		`SELECT id FROM webhook_deliveries WHERE id=$1 FOR UPDATE`,
+		`UPDATE webhook_deliveries
+		 SET state=$3, last_error=$4, next_attempt_at=$5, claimed_at=NULL, lease_until=NULL, updated_at=clock_timestamp()
+		 WHERE id=$1 AND state='processing' AND attempts=$2 AND lease_until>clock_timestamp()`,
+		state, lastError, nextAttemptAt.UTC())
+}
+
+// The attempt counter is advanced by each successful claim and is never reset
+// on these queues. Lock first, then evaluate the current database lease in a
+// separate statement: an UPDATE alone may wait after evaluating its predicate.
+// A stale observation never changes state or clears a successor's lease.
+func (s *PgStore) markQueueClaim(ctx context.Context, id uuid.UUID, attempt int, lockSQL, updateSQL string, values ...any) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if id == uuid.Nil || attempt <= 0 {
+		return store.ErrClaimLeaseLost
+	}
+	tx, err := s.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback(ctx)
+	var lockedID uuid.UUID
+	if err = tx.QueryRow(ctx, lockSQL, id).Scan(&lockedID); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return store.ErrClaimLeaseLost
+		}
+		return err
+	}
+	args := append([]any{id, attempt}, values...)
+	result, err := tx.Exec(ctx, updateSQL, args...)
+	if err != nil {
+		return err
+	}
+	if result.RowsAffected() != 1 {
+		return store.ErrClaimLeaseLost
+	}
+	return tx.Commit(ctx)
 }
 
 func (s *PgStore) ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error) {

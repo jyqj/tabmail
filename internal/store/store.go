@@ -14,6 +14,9 @@ import (
 var (
 	ErrOutboundDailyQuotaExceeded = errors.New("outbound daily quota exceeded")
 	ErrSendAsDailyQuotaExceeded   = errors.New("send-as daily quota exceeded")
+	// ErrClaimLeaseLost means the claimed queue generation no longer owns a
+	// processing row. Workers must not report completion for this observation.
+	ErrClaimLeaseLost = errors.New("queue claim lease lost")
 	// ErrDraftAlreadyConsumed is returned when the draft deletion inside the
 	// enqueue transaction affects no row: the draft revision was consumed by a
 	// concurrent submission or changed underneath the caller. The whole
@@ -232,10 +235,14 @@ type OutboxStore interface {
 	ClaimOutboxEvents(ctx context.Context, now time.Time, limit int) ([]*models.OutboxEvent, error)
 	MarkOutboxEventDone(ctx context.Context, id uuid.UUID) error
 	MarkOutboxEventRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time) error
+	MarkOutboxEventDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkOutboxEventRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time) error
 	CreateWebhookDeliveries(ctx context.Context, event *models.OutboxEvent, urls []string) error
 	ClaimWebhookDeliveries(ctx context.Context, now time.Time, limit int) ([]*models.WebhookDelivery, error)
 	MarkWebhookDeliveryDone(ctx context.Context, id uuid.UUID) error
 	MarkWebhookDeliveryRetry(ctx context.Context, id uuid.UUID, lastError string, nextAttemptAt time.Time, dead bool) error
+	MarkWebhookDeliveryDoneClaim(ctx context.Context, id uuid.UUID, attempt int) error
+	MarkWebhookDeliveryRetryClaim(ctx context.Context, id uuid.UUID, attempt int, lastError string, nextAttemptAt time.Time, dead bool) error
 	ListDeadWebhookDeliveries(ctx context.Context, limit int) ([]models.DeadLetter, error)
 	CountDeadWebhookDeliveries(ctx context.Context) (int, error)
 	ListWebhookDeliveries(ctx context.Context, pg models.Page, state, eventType, url string) ([]*models.WebhookDelivery, int, error)
