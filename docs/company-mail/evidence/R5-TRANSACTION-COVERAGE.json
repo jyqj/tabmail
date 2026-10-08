@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+  "baseline_commit": "9b73b13f376f7e8d589a06fc7078dae4c342d5d5",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -251,7 +251,7 @@
     },
     {
       "path": "internal/store/postgres/users.go",
-      "sha256": "4ca53ee517363391326cdc447828a71cded3bf0b2ed06d35edde45ceda1d8fda"
+      "sha256": "0fc6506e52a01f59c29141f1286efc4538090dbe64064f64144b1d6200496ae9"
     },
     {
       "path": "internal/store/postgres/webhook_endpoints.go",
@@ -688,7 +688,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 444,
+          "line": 467,
           "expression": "s.store.CreateAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -840,7 +840,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 502,
+          "line": 525,
           "expression": "s.store.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -848,7 +848,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 498,
+          "line": 521,
           "expression": "s.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -970,7 +970,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 482,
+          "line": 505,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1119,7 +1119,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeys",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeys",
-          "line": 466,
+          "line": 489,
           "expression": "s.store.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1236,7 +1236,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeysByOwner",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeysByOwner",
-          "line": 474,
+          "line": 497,
           "expression": "s.store.ListAPIKeysByOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1925,7 +1925,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 447,
+          "line": 470,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1933,7 +1933,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 300,
+          "line": 323,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1941,7 +1941,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 235,
+          "line": 258,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1949,7 +1949,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 505,
+          "line": 528,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1957,7 +1957,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 334,
+          "line": 357,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1965,7 +1965,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 280,
+          "line": 303,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1973,7 +1973,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 320,
+          "line": 343,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1981,15 +1981,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 618,
-          "expression": "app.InsertAudit",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
-        {
-          "caller_id": "internal/app/admin/service.go:*Service:UpdateSetting",
-          "file": "internal/app/admin/service.go",
-          "function": "UpdateSetting",
-          "line": 204,
+          "line": 641,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1997,7 +1989,15 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 265,
+          "line": 288,
+          "expression": "app.InsertAudit",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/app/admin/service.go:*Service:updateValidatedSetting",
+          "file": "internal/app/admin/service.go",
+          "function": "updateValidatedSetting",
+          "line": 214,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2199,7 +2199,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 535,
+          "line": 558,
           "expression": "s.store.ListAuditEntries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -2336,7 +2336,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAudit",
           "file": "internal/app/admin/service.go",
           "function": "ListAudit",
-          "line": 571,
+          "line": 594,
           "expression": "s.store.ListAuditEntriesPaged",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4561,7 +4561,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 152,
+          "line": 151,
           "expression": "s.repo.GetMailDraft",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -9228,7 +9228,7 @@
           "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
           "function": "previewSource",
-          "line": 134,
+          "line": 142,
           "expression": "s.GetCompanySettings",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -9361,7 +9361,7 @@
           "caller_id": "internal/app/templates/service.go:*Service:previewMailbox",
           "file": "internal/app/templates/service.go",
           "function": "previewMailbox",
-          "line": 180,
+          "line": 188,
           "expression": "s.GetWorkMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -17874,7 +17874,7 @@
           "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
           "function": "previewSource",
-          "line": 152,
+          "line": 160,
           "expression": "s.TemplateForSend",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26062,7 +26062,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 527,
+          "line": 550,
           "expression": "s.store.CountAllMailboxes",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -26634,7 +26634,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 179,
+          "line": 178,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -27608,7 +27608,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 179,
+          "line": 178,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -29393,7 +29393,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 531,
+          "line": 554,
           "expression": "s.store.CountAllMessages",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -32274,7 +32274,7 @@
           "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
           "file": "internal/outbound/recipient_delivery.go",
           "function": "deliverRecipients",
-          "line": 75,
+          "line": 82,
           "expression": "s.store.CreateOutboundAttempt",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -33417,7 +33417,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitAuthorized",
-          "line": 338,
+          "line": 337,
           "expression": "s.store.IsSuppressed",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -33425,7 +33425,7 @@
           "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
           "file": "internal/outbound/recipient_delivery.go",
           "function": "deliverRecipients",
-          "line": 63,
+          "line": 69,
           "expression": "s.store.IsSuppressed",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -33974,7 +33974,7 @@
           "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
           "file": "internal/outbound/recipient_delivery.go",
           "function": "deliverRecipients",
-          "line": 81,
+          "line": 88,
           "expression": "s.store.MarkOutboundJobFailed",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -33982,7 +33982,7 @@
           "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
           "file": "internal/outbound/recipient_delivery.go",
           "function": "deliverRecipients",
-          "line": 116,
+          "line": 123,
           "expression": "s.store.MarkOutboundJobFailed",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -34152,7 +34152,7 @@
           "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
           "file": "internal/outbound/recipient_delivery.go",
           "function": "deliverRecipients",
-          "line": 118,
+          "line": 125,
           "expression": "s.store.MarkOutboundJobSent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -36541,7 +36541,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:ContentAllowed",
           "file": "internal/app/submissions/service.go",
           "function": "ContentAllowed",
-          "line": 425,
+          "line": 424,
           "expression": "s.store.CanReadOutboundContent",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -40013,7 +40013,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic",
           "file": "internal/store/postgres/users.go",
           "function": "ChangePasswordAtomic",
-          "line": 272,
+          "line": 305,
           "expression": "tx.QueryRow(ctx, `SELECT tenant_id FROM users WHERE id=$1`, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40021,7 +40021,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic",
           "file": "internal/store/postgres/users.go",
           "function": "ChangePasswordAtomic",
-          "line": 280,
+          "line": 313,
           "expression": "tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, tenant).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40029,7 +40029,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic",
           "file": "internal/store/postgres/users.go",
           "function": "ChangePasswordAtomic",
-          "line": 283,
+          "line": 316,
           "expression": "tx.QueryRow(ctx, `UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id`, id, expectedHash, nextHash, tenant).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40037,7 +40037,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:DeleteExpiredRefreshTokens",
           "file": "internal/store/postgres/users.go",
           "function": "DeleteExpiredRefreshTokens",
-          "line": 199,
+          "line": 232,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40045,7 +40045,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:GetAdminInvitationByCode",
           "file": "internal/store/postgres/users.go",
           "function": "GetAdminInvitationByCode",
-          "line": 238,
+          "line": 271,
           "expression": "s.pool.QueryRow(ctx, `\n\t\tSELECT id, email, invite_code, invited_by, expires_at, accepted_at, created_at\n\t\tFROM admin_invitations WHERE invite_code = $1`, hashInviteCode(code)).\n\tScan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40053,7 +40053,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:GetRefreshToken",
           "file": "internal/store/postgres/users.go",
           "function": "GetRefreshToken",
-          "line": 153,
+          "line": 186,
           "expression": "s.pool.QueryRow(ctx, `\n\t\tSELECT id, user_id, token_hash, expires_at, created_at, revoked_at, family_id\n\t\tFROM refresh_tokens WHERE token_hash = $1`, tokenHash).\n\tScan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40061,7 +40061,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ListUsers",
           "file": "internal/store/postgres/users.go",
           "function": "ListUsers",
-          "line": 75,
+          "line": 76,
           "expression": "s.pool.QueryRow(ctx, `SELECT COUNT(*) FROM users WHERE tenant_id = $1`, tenantID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40069,7 +40069,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:RevokeUserRefreshTokens",
           "file": "internal/store/postgres/users.go",
           "function": "RevokeUserRefreshTokens",
-          "line": 175,
+          "line": 208,
           "expression": "tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 FOR UPDATE`, userID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40077,7 +40077,7 @@
           "caller_id": "internal/store/postgres/users.go::scanUser",
           "file": "internal/store/postgres/users.go",
           "function": "scanUser",
-          "line": 49,
+          "line": 50,
           "expression": "row.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -40497,7 +40497,7 @@
           "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
           "file": "internal/outbound/recipient_delivery.go",
           "function": "deliverRecipients",
-          "line": 100,
+          "line": 107,
           "expression": "st.CompleteOutboundRecipient",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -40919,7 +40919,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:RetryOutboundJob",
           "file": "internal/app/submissions/service.go",
           "function": "RetryOutboundJob",
-          "line": 439,
+          "line": 438,
           "expression": "s.store.RequeueOutboundJobAuthorized",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -41432,7 +41432,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 482,
+          "line": 505,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41675,7 +41675,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 479,
+          "line": 483,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41683,7 +41683,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 366,
+          "line": 370,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41755,7 +41755,7 @@
           "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
           "function": "previewSource",
-          "line": 120,
+          "line": 128,
           "expression": "s.identities.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41926,7 +41926,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 403,
+          "line": 426,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42233,7 +42233,7 @@
           "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
           "function": "previewSource",
-          "line": 152,
+          "line": 160,
           "expression": "s.TemplateForSend",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42509,7 +42509,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitDraft",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitDraft",
-          "line": 179,
+          "line": 178,
           "expression": "s.store.GetMailbox",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49182,7 +49182,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 297,
+          "line": 320,
           "expression": "s.store.CreatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49294,7 +49294,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 331,
+          "line": 354,
           "expression": "s.store.DeletePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49400,7 +49400,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 224,
+          "line": 247,
           "expression": "s.store.GetPlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49532,7 +49532,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 519,
+          "line": 542,
           "expression": "s.store.ListPlans",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49636,7 +49636,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 317,
+          "line": 340,
           "expression": "s.store.UpdatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -49926,7 +49926,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 177,
+          "line": 186,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49934,7 +49934,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 188,
+          "line": 197,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49942,7 +49942,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverRelayTLS",
-          "line": 44,
+          "line": 46,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49950,7 +49950,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverRelayTLS",
-          "line": 47,
+          "line": 49,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49958,7 +49958,7 @@
           "caller_id": "internal/outbound/delivery.go::sendSMTP",
           "file": "internal/outbound/delivery.go",
           "function": "sendSMTP",
-          "line": 230,
+          "line": 247,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49966,7 +49966,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 32,
+          "line": 125,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49974,7 +49974,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 40,
+          "line": 133,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49982,7 +49982,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 44,
+          "line": 137,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -49990,7 +49990,7 @@
           "caller_id": "internal/outbound/delivery_context.go::dialSMTPWithConnector",
           "file": "internal/outbound/delivery_context.go",
           "function": "dialSMTPWithConnector",
-          "line": 51,
+          "line": 144,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50014,7 +50014,7 @@
           "caller_id": "internal/smtp/server.go:*Server:drain",
           "file": "internal/smtp/server.go",
           "function": "drain",
-          "line": 305,
+          "line": 306,
           "expression": "ln.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50022,7 +50022,7 @@
           "caller_id": "internal/smtp/server.go:*limitedConn:Close",
           "file": "internal/smtp/server.go",
           "function": "Close",
-          "line": 262,
+          "line": 263,
           "expression": "c.Conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50030,7 +50030,7 @@
           "caller_id": "internal/smtp/server.go:*limitedListener:Accept",
           "file": "internal/smtp/server.go",
           "function": "Accept",
-          "line": 210,
+          "line": 211,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50038,7 +50038,7 @@
           "caller_id": "internal/smtp/server.go:*limitedListener:Close",
           "file": "internal/smtp/server.go",
           "function": "Close",
-          "line": 236,
+          "line": 237,
           "expression": "l.Listener.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50046,7 +50046,7 @@
           "caller_id": "internal/smtp/server.go:*limitedListener:closeConnections",
           "file": "internal/smtp/server.go",
           "function": "closeConnections",
-          "line": 249,
+          "line": 250,
           "expression": "c.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50822,7 +50822,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:DeleteExpiredRefreshTokens",
           "file": "internal/store/postgres/users.go",
           "function": "DeleteExpiredRefreshTokens",
-          "line": 200,
+          "line": 233,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50830,7 +50830,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:DeleteExpiredRefreshTokens",
           "file": "internal/store/postgres/users.go",
           "function": "DeleteExpiredRefreshTokens",
-          "line": 206,
+          "line": 239,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50838,7 +50838,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ListUsers",
           "file": "internal/store/postgres/users.go",
           "function": "ListUsers",
-          "line": 84,
+          "line": 85,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51396,7 +51396,7 @@
           "caller_id": "internal/app/submissions/service.go::NewService",
           "file": "internal/app/submissions/service.go",
           "function": "NewService",
-          "line": 125,
+          "line": 124,
           "expression": "authz.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51412,7 +51412,7 @@
           "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
           "function": "previewSource",
-          "line": 115,
+          "line": 123,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51564,7 +51564,7 @@
           "caller_id": "internal/outbound/recipient_delivery.go:*Service:deliverRecipients",
           "file": "internal/outbound/recipient_delivery.go",
           "function": "deliverRecipients",
-          "line": 75,
+          "line": 82,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52004,7 +52004,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic",
           "file": "internal/store/postgres/users.go",
           "function": "ChangePasswordAtomic",
-          "line": 274,
+          "line": 307,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52012,7 +52012,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ChangePasswordAtomic",
           "file": "internal/store/postgres/users.go",
           "function": "ChangePasswordAtomic",
-          "line": 285,
+          "line": 318,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52020,7 +52020,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:CreateAdminInvitation",
           "file": "internal/store/postgres/users.go",
           "function": "CreateAdminInvitation",
-          "line": 224,
+          "line": 257,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52028,7 +52028,15 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:CreateRefreshToken",
           "file": "internal/store/postgres/users.go",
           "function": "CreateRefreshToken",
-          "line": 138,
+          "line": 139,
+          "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/users.go:*PgStore:CreateRefreshToken",
+          "file": "internal/store/postgres/users.go",
+          "function": "CreateRefreshToken",
+          "line": 165,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52036,7 +52044,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:CreateUser",
           "file": "internal/store/postgres/users.go",
           "function": "CreateUser",
-          "line": 29,
+          "line": 30,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52340,7 +52348,7 @@
           "caller_id": "internal/testutil/fake_store_refresh.go:*FakeStore:createRefreshLocked",
           "file": "internal/testutil/fake_store_refresh.go",
           "function": "createRefreshLocked",
-          "line": 29,
+          "line": 36,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -54517,7 +54525,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListIngestJobs",
           "file": "internal/app/admin/service.go",
           "function": "ListIngestJobs",
-          "line": 582,
+          "line": 605,
           "expression": "s.store.ListIngestJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -54786,7 +54794,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListWebhookDeliveries",
           "file": "internal/app/admin/service.go",
           "function": "ListWebhookDeliveries",
-          "line": 593,
+          "line": 616,
           "expression": "s.store.ListWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -56379,7 +56387,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 400,
+          "line": 404,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -56387,7 +56395,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 372,
+          "line": 376,
           "expression": "h.store.RevokeRefreshTokenByHash",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -56615,7 +56623,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 346,
+          "line": 350,
           "expression": "h.store.RotateRefreshToken",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -56781,7 +56789,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:DeleteExpiredRefreshTokens",
           "file": "internal/store/postgres/users.go",
           "function": "DeleteExpiredRefreshTokens",
-          "line": 211,
+          "line": 244,
           "expression": "s.deleteExpiredRefreshFamily",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59496,7 +59504,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:GetSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "GetSMTPPolicy",
-          "line": 604,
+          "line": 627,
           "expression": "s.store.GetSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -59638,7 +59646,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 615,
+          "line": 638,
           "expression": "s.store.UpsertSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61208,7 +61216,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 283,
+          "line": 287,
           "expression": "h.store.CreateTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61216,7 +61224,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 232,
+          "line": 255,
           "expression": "s.store.CreateTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61337,7 +61345,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 277,
+          "line": 300,
           "expression": "s.store.DeleteTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61737,7 +61745,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 344,
+          "line": 367,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61745,7 +61753,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 249,
+          "line": 272,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -61886,7 +61894,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 515,
+          "line": 538,
           "expression": "s.store.ListTenants",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -61993,7 +62001,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 262,
+          "line": 285,
           "expression": "s.store.UpsertOverride",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62066,117 +62074,117 @@
         "file": "internal/store/postgres/users.go",
         "name": "ChangePasswordAtomic",
         "receiver": "*PgStore",
-        "line": 261,
-        "end": 297,
+        "line": 294,
+        "end": 330,
         "sha256": "ffd26aaf9936cf1103e8bf9df93d9ef5fb150e9aecfdb682d5b6059aa263c7d6",
         "calls": [
           {
-            "line": 262,
+            "line": 295,
             "expr": "s.pool.Begin",
             "name": "Begin"
           },
           {
-            "line": 266,
+            "line": 299,
             "expr": "tx.Rollback",
             "name": "Rollback"
           },
           {
-            "line": 272,
+            "line": 305,
             "expr": "tx.QueryRow(ctx, `SELECT tenant_id FROM users WHERE id=$1`, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 272,
+            "line": 305,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT tenant_id FROM users WHERE id=$1`"
           },
           {
-            "line": 274,
+            "line": 307,
             "expr": "errors.New",
             "name": "New"
           },
           {
-            "line": 280,
+            "line": 313,
             "expr": "tx.QueryRow(ctx, `SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`, tenant).Scan",
             "name": "Scan"
           },
           {
-            "line": 280,
+            "line": 313,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`"
           },
           {
-            "line": 283,
+            "line": 316,
             "expr": "tx.QueryRow(ctx, `UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id`, id, expectedHash, nextHash, tenant).Scan",
             "name": "Scan"
           },
           {
-            "line": 283,
+            "line": 316,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id`"
           },
           {
-            "line": 285,
+            "line": 318,
             "expr": "errors.New",
             "name": "New"
           },
           {
-            "line": 290,
+            "line": 323,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL`"
           },
           {
-            "line": 293,
+            "line": 326,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'user.password_change','user',$3,'{}')`"
           },
           {
-            "line": 293,
+            "line": 326,
             "expr": "id.String",
             "name": "String"
           },
           {
-            "line": 296,
+            "line": 329,
             "expr": "tx.Commit",
             "name": "Commit"
           }
         ],
         "strings": [
           {
-            "line": 272,
+            "line": 305,
             "value": "SELECT tenant_id FROM users WHERE id=$1"
           },
           {
-            "line": 274,
+            "line": 307,
             "value": "password or account changed during reauthentication"
           },
           {
-            "line": 280,
+            "line": 313,
             "value": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
           },
           {
-            "line": 283,
+            "line": 316,
             "value": "UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id"
           },
           {
-            "line": 285,
+            "line": 318,
             "value": "password or account changed during reauthentication"
           },
           {
-            "line": 290,
+            "line": 323,
             "value": "UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL"
           },
           {
-            "line": 293,
+            "line": 326,
             "value": "INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'user.password_change','user',$3,'{}')"
           },
           {
-            "line": 293,
+            "line": 326,
             "value": "user:"
           }
         ],
@@ -62187,7 +62195,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 468,
+          "line": 472,
           "expression": "atomic.ChangePasswordAtomic",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62208,58 +62216,58 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 283,
+            "line": 316,
             "sql_fragment": "UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id"
           },
           {
-            "line": 290,
+            "line": 323,
             "sql_fragment": "UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL"
           },
           {
-            "line": 293,
+            "line": 326,
             "sql_fragment": "INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'user.password_change','user',$3,'{}')"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 280,
+            "line": 313,
             "sql_fragment": "SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 262,
+            "line": 295,
             "expr": "s.pool.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 272,
+            "line": 305,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT tenant_id FROM users WHERE id=$1`"
           },
           {
-            "line": 280,
+            "line": 313,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT id FROM tenants WHERE id=$1 FOR KEY SHARE`"
           },
           {
-            "line": 283,
+            "line": 316,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`UPDATE users SET password_hash=$3,session_version=session_version+1,updated_at=now() WHERE id=$1 AND password_hash=$2 AND is_active AND tenant_id=$4 RETURNING tenant_id`"
           },
           {
-            "line": 290,
+            "line": 323,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL`"
           },
           {
-            "line": 293,
+            "line": 326,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO audit_log(tenant_id,actor,action,resource_type,resource_id,details) VALUES($1,$2,'user.password_change','user',$3,'{}')`"
@@ -62291,45 +62299,45 @@
         "file": "internal/store/postgres/users.go",
         "name": "CreateAdminInvitation",
         "receiver": "*PgStore",
-        "line": 222,
-        "end": 233,
+        "line": 255,
+        "end": 266,
         "sha256": "d5d719f2a20260a79a905c86496a9b9e5939c74e01cd0532e9fab66d18dbe2a6",
         "calls": [
           {
-            "line": 224,
+            "line": 257,
             "expr": "uuid.New",
             "name": "New"
           },
           {
-            "line": 226,
+            "line": 259,
             "expr": "time.Now",
             "name": "Now"
           },
           {
-            "line": 227,
+            "line": 260,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\tINSERT INTO admin_invitations (id, email, invite_code, invited_by, expires_at, created_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)`"
           },
           {
-            "line": 230,
+            "line": 263,
             "expr": "strings.ToLower",
             "name": "ToLower"
           },
           {
-            "line": 230,
+            "line": 263,
             "expr": "strings.TrimSpace",
             "name": "TrimSpace"
           },
           {
-            "line": 230,
+            "line": 263,
             "expr": "hashInviteCode",
             "name": "hashInviteCode"
           }
         ],
         "strings": [
           {
-            "line": 227,
+            "line": 260,
             "value": "\n\t\tINSERT INTO admin_invitations (id, email, invite_code, invited_by, expires_at, created_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)"
           }
         ],
@@ -62373,7 +62381,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 227,
+            "line": 260,
             "sql_fragment": "\n\t\tINSERT INTO admin_invitations (id, email, invite_code, invited_by, expires_at, created_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)"
           }
         ],
@@ -62381,7 +62389,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 227,
+            "line": 260,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\tINSERT INTO admin_invitations (id, email, invite_code, invited_by, expires_at, created_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)`"
@@ -62403,40 +62411,83 @@
         "kind": "direct-write",
         "direct_write": true,
         "write_closure": true,
-        "explicit_lock": false,
-        "transaction_calls": false,
+        "explicit_lock": true,
+        "transaction_calls": true,
         "callback_parameter": false,
-        "dynamic_sql_expression": false
+        "dynamic_sql_expression": true
       },
       "syntax": {
         "id": "internal/store/postgres/users.go:*PgStore:CreateRefreshToken",
         "file": "internal/store/postgres/users.go",
         "name": "CreateRefreshToken",
         "receiver": "*PgStore",
-        "line": 136,
-        "end": 149,
-        "sha256": "84457782c35718446b19a00ba7e07022a0b58f5cf6bf96172bf8bd67da887edb",
+        "line": 137,
+        "end": 182,
+        "sha256": "66e6bd4224e13273b7bf3904de303f128c1d4cfb980f1773b24ebf879198f1d0",
         "calls": [
           {
-            "line": 138,
+            "line": 139,
+            "expr": "errors.New",
+            "name": "New"
+          },
+          {
+            "line": 150,
+            "expr": "s.pool.Begin",
+            "name": "Begin"
+          },
+          {
+            "line": 154,
+            "expr": "tx.Rollback",
+            "name": "Rollback"
+          },
+          {
+            "line": 155,
+            "expr": "scanUser",
+            "name": "scanUser"
+          },
+          {
+            "line": 155,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "userSelect + ` WHERE id=$1 FOR SHARE`"
+          },
+          {
+            "line": 159,
+            "expr": "proof.MatchesUser",
+            "name": "MatchesUser"
+          },
+          {
+            "line": 165,
             "expr": "uuid.New",
             "name": "New"
           },
           {
-            "line": 143,
+            "line": 170,
             "expr": "time.Now",
             "name": "Now"
           },
           {
-            "line": 144,
-            "expr": "s.pool.Exec",
-            "name": "Exec",
-            "sql_expr": "`\n\t\tINSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)`"
+            "line": 171,
+            "expr": "exec",
+            "name": "exec"
+          },
+          {
+            "line": 179,
+            "expr": "tx.Commit",
+            "name": "Commit"
           }
         ],
         "strings": [
           {
-            "line": 144,
+            "line": 139,
+            "value": "refresh token is required"
+          },
+          {
+            "line": 155,
+            "value": " WHERE id=$1 FOR SHARE"
+          },
+          {
+            "line": 171,
             "value": "\n\t\tINSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)"
           }
         ],
@@ -62447,30 +62498,43 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:issueTokenPair",
           "file": "internal/api/handlers/auth.go",
           "function": "issueTokenPair",
-          "line": 517,
+          "line": 525,
           "expression": "h.store.CreateRefreshToken",
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
       "lock_fk_wait_fence": {
-        "boundary": "pool/database statement独立提交；多分支/循环不是整体事务",
+        "boundary": "Issuance proof present: Begin -> user FOR SHARE -> compare IDs/password/session_version/active -> refresh INSERT -> Commit; the user lock is held until transaction end. Nil proof keeps the existing internal pool-statement path; current production issueTokenPair always supplies proof.",
         "local_operations": [
           {
-            "line": 144,
-            "operation": "s.pool.Exec",
-            "sql_expression": "`\n\t\tINSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)`",
-            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            "line": 155,
+            "operation": "tx.QueryRow",
+            "sql_expression": "userSelect + ` WHERE id=$1 FOR SHARE`",
+            "status": "lexical-source-only"
+          },
+          {
+            "line": 171,
+            "operation": "exec",
+            "sql_expression": null,
+            "status": "lexical-source-only"
           }
         ],
-        "direct_lock_fragments": [],
-        "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
+        "direct_lock_fragments": [
+          {
+            "line": 155,
+            "sql_fragment": " WHERE id=$1 FOR SHARE"
+          }
+        ],
+        "implicit_fk": "refresh_tokens.user_id references the already SHARE-locked users row. The issuance transaction takes no tenant/audit/family lock after this row; unknown external triggers are not certified.",
+        "dynamic_execution": "The unchanged AST SQL-call-name collector sees tx.QueryRow; exec(ctx, INSERT...) is a function-valued alias selected from pool.Exec or tx.Exec and is manually reviewed, not counted as type-resolved SQL execution."
       },
       "evidence": [
-        "internal/store/postgres/users.go:136-149 sha256=84457782c35718446b19a00ba7e07022a0b58f5cf6bf96172bf8bd67da887edb",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/users.go:137-182 sha256=66e6bd4224e13273b7bf3904de303f128c1d4cfb980f1773b24ebf879198f1d0",
+        "PR #179 / Issue #170: actual PostgreSQL 16 fixed 9-leaf red-green; catalog remains source-only and does not replace parent gates."
       ],
       "unverified_risks": [
-        "ChangePassword的Pwd/freeze父键关系已由本批3事件三轮验证；其它tenant/user删除及旧DeleteUser Key→U与冻结U→Key相反仍需独立运行；不覆盖提交不明。"
+        "Nil-proof compatibility callers must not become interactive issuance entry points; the current sole production caller always supplies proof.",
+        "The fixed PostgreSQL cancellation control stops at the user-read barrier, not an in-flight INSERT. Commit-acknowledgement loss and all unrelated transaction relations remain outside this review."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -62480,26 +62544,67 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 144,
+            "line": 171,
             "sql_fragment": "\n\t\tINSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)"
           }
         ],
-        "direct_lock_fragments": [],
-        "transaction_helper_calls": [],
+        "direct_lock_fragments": [
+          {
+            "line": 155,
+            "sql_fragment": " WHERE id=$1 FOR SHARE"
+          }
+        ],
+        "transaction_helper_calls": [
+          {
+            "line": 150,
+            "expr": "s.pool.Begin",
+            "name": "Begin"
+          }
+        ],
         "sql_execution_expressions": [
           {
-            "line": 144,
-            "expr": "s.pool.Exec",
-            "name": "Exec",
-            "sql_expr": "`\n\t\tINSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)`"
+            "line": 155,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "userSelect + ` WHERE id=$1 FOR SHARE`"
           }
         ],
         "effect_status": "source-fragments-not-evaluated-SQL",
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "ChangePassword定位tenant→T KEY SHARE→U条件W→refresh W→audit；RevokeUser U UPDATE→R；旧DeleteUser Key DELETE→U DELETE；旧CRUD/refresh创建单SQL",
-      "evidence_level": "source-only"
+      "file_family_context": "ChangePassword定位tenant→T KEY SHARE→U条件W→refresh W→audit；RevokeUser U UPDATE→R；旧DeleteUser Key DELETE→U DELETE；旧CRUD保持；有proof的refresh创建在用户SHARE锁事务中，nil-proof内部兼容为单SQL",
+      "evidence_level": "source-only",
+      "historical_revision12_review": {
+        "lock_fk_wait_fence": {
+          "boundary": "pool/database statement独立提交；多分支/循环不是整体事务",
+          "local_operations": [
+            {
+              "line": 144,
+              "operation": "s.pool.Exec",
+              "sql_expression": "`\n\t\tINSERT INTO refresh_tokens (id, user_id, token_hash, expires_at, created_at, family_id)\n\t\tVALUES ($1, $2, $3, $4, $5, $6)`",
+              "status": "lexical-order-with-branches-not-single-total-runtime-order"
+            }
+          ],
+          "direct_lock_fragments": [],
+          "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
+        },
+        "evidence": [
+          "internal/store/postgres/users.go:136-149 sha256=84457782c35718446b19a00ba7e07022a0b58f5cf6bf96172bf8bd67da887edb",
+          "migration source definitions; no current runtime catalog claim"
+        ],
+        "unverified_risks": [
+          "ChangePassword的Pwd/freeze父键关系已由本批3事件三轮验证；其它tenant/user删除及旧DeleteUser Key→U与冻结U→Key相反仍需独立运行；不覆盖提交不明。"
+        ],
+        "file_family_context": "ChangePassword定位tenant→T KEY SHARE→U条件W→refresh W→audit；RevokeUser U UPDATE→R；旧DeleteUser Key DELETE→U DELETE；旧CRUD/refresh创建单SQL"
+      },
+      "source_review": {
+        "base_commit": "9b73b13f376f7e8d589a06fc7078dae4c342d5d5",
+        "source_sha256": "66e6bd4224e13273b7bf3904de303f128c1d4cfb980f1773b24ebf879198f1d0",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION13-20261008/README.md",
+        "qualification": "static-type-review; actual login issuance evidence is separately scoped in PR179",
+        "historical_manual_fields_preserved_in": "historical_revision12_review"
+      }
     },
     {
       "id": "internal/store/postgres/users.go:*PgStore:CreateUser",
@@ -62520,40 +62625,40 @@
         "file": "internal/store/postgres/users.go",
         "name": "CreateUser",
         "receiver": "*PgStore",
-        "line": 27,
-        "end": 40,
+        "line": 28,
+        "end": 41,
         "sha256": "60269378196730db67dea8e8697d7606a56352be1a792f111d492638b4aed4fa",
         "calls": [
           {
-            "line": 29,
+            "line": 30,
             "expr": "uuid.New",
             "name": "New"
           },
           {
-            "line": 31,
+            "line": 32,
             "expr": "time.Now",
             "name": "Now"
           },
           {
-            "line": 34,
+            "line": 35,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\tINSERT INTO users (id, tenant_id, email, password_hash, display_name, role, is_active, permission_profile_id, created_at, updated_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`"
           },
           {
-            "line": 37,
+            "line": 38,
             "expr": "strings.ToLower",
             "name": "ToLower"
           },
           {
-            "line": 37,
+            "line": 38,
             "expr": "strings.TrimSpace",
             "name": "TrimSpace"
           }
         ],
         "strings": [
           {
-            "line": 34,
+            "line": 35,
             "value": "\n\t\tINSERT INTO users (id, tenant_id, email, password_hash, display_name, role, is_active, permission_profile_id, created_at, updated_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
           }
         ],
@@ -62564,7 +62669,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 297,
+          "line": 301,
           "expression": "h.store.CreateUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62605,7 +62710,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 34,
+            "line": 35,
             "sql_fragment": "\n\t\tINSERT INTO users (id, tenant_id, email, password_hash, display_name, role, is_active, permission_profile_id, created_at, updated_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
           }
         ],
@@ -62613,7 +62718,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 34,
+            "line": 35,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\tINSERT INTO users (id, tenant_id, email, password_hash, display_name, role, is_active, permission_profile_id, created_at, updated_at)\n\t\tVALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`"
@@ -62645,55 +62750,55 @@
         "file": "internal/store/postgres/users.go",
         "name": "DeleteExpiredRefreshTokens",
         "receiver": "*PgStore",
-        "line": 188,
-        "end": 216,
+        "line": 221,
+        "end": 249,
         "sha256": "1528954d1b2ba93c643e39caa66a785636ab39e7e566977a54da30f9035a37c0",
         "calls": [
           {
-            "line": 192,
+            "line": 225,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "`SELECT DISTINCT family_id FROM refresh_tokens WHERE expires_at <= clock_timestamp()`"
           },
           {
-            "line": 197,
+            "line": 230,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 199,
+            "line": 232,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 200,
+            "line": 233,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 203,
+            "line": 236,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 205,
+            "line": 238,
             "expr": "rows.Err",
             "name": "Err"
           },
           {
-            "line": 206,
+            "line": 239,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 211,
+            "line": 244,
             "expr": "s.deleteExpiredRefreshFamily",
             "name": "deleteExpiredRefreshFamily"
           }
         ],
         "strings": [
           {
-            "line": 192,
+            "line": 225,
             "value": "SELECT DISTINCT family_id FROM refresh_tokens WHERE expires_at <= clock_timestamp()"
           }
         ],
@@ -62731,7 +62836,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 192,
+            "line": 225,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "`SELECT DISTINCT family_id FROM refresh_tokens WHERE expires_at <= clock_timestamp()`"
@@ -62763,45 +62868,45 @@
         "file": "internal/store/postgres/users.go",
         "name": "DeleteUser",
         "receiver": "*PgStore",
-        "line": 112,
-        "end": 125,
+        "line": 113,
+        "end": 126,
         "sha256": "0761055bb22d87f970d637061a4e32780a6a65ac47acca8aedb914a3f8819504",
         "calls": [
           {
-            "line": 113,
+            "line": 114,
             "expr": "s.pool.Begin",
             "name": "Begin"
           },
           {
-            "line": 117,
+            "line": 118,
             "expr": "tx.Rollback",
             "name": "Rollback"
           },
           {
-            "line": 118,
+            "line": 119,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM tenant_api_keys WHERE owner_user_id = $1`"
           },
           {
-            "line": 121,
+            "line": 122,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM users WHERE id = $1`"
           },
           {
-            "line": 124,
+            "line": 125,
             "expr": "tx.Commit",
             "name": "Commit"
           }
         ],
         "strings": [
           {
-            "line": 118,
+            "line": 119,
             "value": "DELETE FROM tenant_api_keys WHERE owner_user_id = $1"
           },
           {
-            "line": 121,
+            "line": 122,
             "value": "DELETE FROM users WHERE id = $1"
           }
         ],
@@ -62824,31 +62929,31 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 118,
+            "line": 119,
             "sql_fragment": "DELETE FROM tenant_api_keys WHERE owner_user_id = $1"
           },
           {
-            "line": 121,
+            "line": 122,
             "sql_fragment": "DELETE FROM users WHERE id = $1"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 113,
+            "line": 114,
             "expr": "s.pool.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 118,
+            "line": 119,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM tenant_api_keys WHERE owner_user_id = $1`"
           },
           {
-            "line": 121,
+            "line": 122,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM users WHERE id = $1`"
@@ -62880,40 +62985,40 @@
         "file": "internal/store/postgres/users.go",
         "name": "GetAdminInvitationByCode",
         "receiver": "*PgStore",
-        "line": 235,
-        "end": 254,
+        "line": 268,
+        "end": 287,
         "sha256": "d963acd9f4ec9e78d89fb3e680e3c4d87f695a87bc494e9d7dedaea9ec429a60",
         "calls": [
           {
-            "line": 238,
+            "line": 271,
             "expr": "s.pool.QueryRow(ctx, `\n\t\tSELECT id, email, invite_code, invited_by, expires_at, accepted_at, created_at\n\t\tFROM admin_invitations WHERE invite_code = $1`, hashInviteCode(code)).\n\tScan",
             "name": "Scan"
           },
           {
-            "line": 238,
+            "line": 271,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`\n\t\tSELECT id, email, invite_code, invited_by, expires_at, accepted_at, created_at\n\t\tFROM admin_invitations WHERE invite_code = $1`"
           },
           {
-            "line": 240,
+            "line": 273,
             "expr": "hashInviteCode",
             "name": "hashInviteCode"
           },
           {
-            "line": 243,
+            "line": 276,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 250,
+            "line": 283,
             "expr": "uuid.UUID",
             "name": "UUID"
           }
         ],
         "strings": [
           {
-            "line": 238,
+            "line": 271,
             "value": "\n\t\tSELECT id, email, invite_code, invited_by, expires_at, accepted_at, created_at\n\t\tFROM admin_invitations WHERE invite_code = $1"
           }
         ],
@@ -62951,7 +63056,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 238,
+            "line": 271,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`\n\t\tSELECT id, email, invite_code, invited_by, expires_at, accepted_at, created_at\n\t\tFROM admin_invitations WHERE invite_code = $1`"
@@ -62983,30 +63088,30 @@
         "file": "internal/store/postgres/users.go",
         "name": "GetRefreshToken",
         "receiver": "*PgStore",
-        "line": 151,
-        "end": 161,
+        "line": 184,
+        "end": 194,
         "sha256": "700f6417634c6b5f9609975e0d5955d1a06d46b4a1966c4b981e60c0cb7a210e",
         "calls": [
           {
-            "line": 153,
+            "line": 186,
             "expr": "s.pool.QueryRow(ctx, `\n\t\tSELECT id, user_id, token_hash, expires_at, created_at, revoked_at, family_id\n\t\tFROM refresh_tokens WHERE token_hash = $1`, tokenHash).\n\tScan",
             "name": "Scan"
           },
           {
-            "line": 153,
+            "line": 186,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`\n\t\tSELECT id, user_id, token_hash, expires_at, created_at, revoked_at, family_id\n\t\tFROM refresh_tokens WHERE token_hash = $1`"
           },
           {
-            "line": 157,
+            "line": 190,
             "expr": "errors.Is",
             "name": "Is"
           }
         ],
         "strings": [
           {
-            "line": 153,
+            "line": 186,
             "value": "\n\t\tSELECT id, user_id, token_hash, expires_at, created_at, revoked_at, family_id\n\t\tFROM refresh_tokens WHERE token_hash = $1"
           }
         ],
@@ -63044,7 +63149,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 153,
+            "line": 186,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`\n\t\tSELECT id, user_id, token_hash, expires_at, created_at, revoked_at, family_id\n\t\tFROM refresh_tokens WHERE token_hash = $1`"
@@ -63076,17 +63181,17 @@
         "file": "internal/store/postgres/users.go",
         "name": "GetUser",
         "receiver": "*PgStore",
-        "line": 64,
-        "end": 66,
+        "line": 65,
+        "end": 67,
         "sha256": "7573025307c138ca026746173d235e19c95c6d2300d226e3ebae29a531e16d5c",
         "calls": [
           {
-            "line": 65,
+            "line": 66,
             "expr": "scanUser",
             "name": "scanUser"
           },
           {
-            "line": 65,
+            "line": 66,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "userSelect + ` WHERE id = $1`"
@@ -63094,7 +63199,7 @@
         ],
         "strings": [
           {
-            "line": 65,
+            "line": 66,
             "value": " WHERE id = $1"
           }
         ],
@@ -63105,7 +63210,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 479,
+          "line": 483,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63113,7 +63218,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Refresh",
           "file": "internal/api/handlers/auth.go",
           "function": "Refresh",
-          "line": 366,
+          "line": 370,
           "expression": "h.store.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63185,7 +63290,7 @@
           "caller_id": "internal/app/templates/service.go:*Service:previewSource",
           "file": "internal/app/templates/service.go",
           "function": "previewSource",
-          "line": 120,
+          "line": 128,
           "expression": "s.identities.GetUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63285,7 +63390,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 65,
+            "line": 66,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "userSelect + ` WHERE id = $1`"
@@ -63317,30 +63422,30 @@
         "file": "internal/store/postgres/users.go",
         "name": "GetUserByEmail",
         "receiver": "*PgStore",
-        "line": 68,
-        "end": 70,
+        "line": 69,
+        "end": 71,
         "sha256": "b7cd3ac9f01c8dbdf53e8ec8729e4dd18dd2a85314db72b78ea393bd1d653ee6",
         "calls": [
           {
-            "line": 69,
+            "line": 70,
             "expr": "scanUser",
             "name": "scanUser"
           },
           {
-            "line": 69,
+            "line": 70,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "userSelect + ` WHERE LOWER(email) = LOWER($1)`"
           },
           {
-            "line": 69,
+            "line": 70,
             "expr": "strings.TrimSpace",
             "name": "TrimSpace"
           }
         ],
         "strings": [
           {
-            "line": 69,
+            "line": 70,
             "value": " WHERE LOWER(email) = LOWER($1)"
           }
         ],
@@ -63359,7 +63464,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Register",
           "file": "internal/api/handlers/auth.go",
           "function": "Register",
-          "line": 260,
+          "line": 264,
           "expression": "h.store.GetUserByEmail",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63411,7 +63516,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 69,
+            "line": 70,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "userSelect + ` WHERE LOWER(email) = LOWER($1)`"
@@ -63443,70 +63548,70 @@
         "file": "internal/store/postgres/users.go",
         "name": "ListUsers",
         "receiver": "*PgStore",
-        "line": 72,
-        "end": 94,
+        "line": 73,
+        "end": 95,
         "sha256": "9ba8b5a9846f016bcf5be79c92296b2df03b1ca3d96d5d5f3a7327f276edcf85",
         "calls": [
           {
-            "line": 73,
+            "line": 74,
             "expr": "pg.Normalize",
             "name": "Normalize"
           },
           {
-            "line": 75,
+            "line": 76,
             "expr": "s.pool.QueryRow(ctx, `SELECT COUNT(*) FROM users WHERE tenant_id = $1`, tenantID).Scan",
             "name": "Scan"
           },
           {
-            "line": 75,
+            "line": 76,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT COUNT(*) FROM users WHERE tenant_id = $1`"
           },
           {
-            "line": 79,
+            "line": 80,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "userSelect + ` WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`"
           },
           {
-            "line": 80,
+            "line": 81,
             "expr": "pg.Offset",
             "name": "Offset"
           },
           {
-            "line": 84,
+            "line": 85,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 86,
+            "line": 87,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 87,
+            "line": 88,
             "expr": "scanUser",
             "name": "scanUser"
           },
           {
-            "line": 91,
+            "line": 92,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 93,
+            "line": 94,
             "expr": "rows.Err",
             "name": "Err"
           }
         ],
         "strings": [
           {
-            "line": 75,
+            "line": 76,
             "value": "SELECT COUNT(*) FROM users WHERE tenant_id = $1"
           },
           {
-            "line": 80,
+            "line": 81,
             "value": " WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3"
           }
         ],
@@ -63559,13 +63664,13 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 75,
+            "line": 76,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT COUNT(*) FROM users WHERE tenant_id = $1`"
           },
           {
-            "line": 79,
+            "line": 80,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "userSelect + ` WHERE tenant_id = $1 ORDER BY created_at DESC LIMIT $2 OFFSET $3`"
@@ -63597,12 +63702,12 @@
         "file": "internal/store/postgres/users.go",
         "name": "MarkInvitationAccepted",
         "receiver": "*PgStore",
-        "line": 256,
-        "end": 259,
+        "line": 289,
+        "end": 292,
         "sha256": "a5ed0cc15b4263e4e8e0c7bf56f402be035f7db4dc991dadcdca2f9415fbd773",
         "calls": [
           {
-            "line": 257,
+            "line": 290,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE admin_invitations SET accepted_at = now() WHERE id = $1`"
@@ -63610,7 +63715,7 @@
         ],
         "strings": [
           {
-            "line": 257,
+            "line": 290,
             "value": "UPDATE admin_invitations SET accepted_at = now() WHERE id = $1"
           }
         ],
@@ -63645,7 +63750,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 257,
+            "line": 290,
             "sql_fragment": "UPDATE admin_invitations SET accepted_at = now() WHERE id = $1"
           }
         ],
@@ -63653,7 +63758,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 257,
+            "line": 290,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE admin_invitations SET accepted_at = now() WHERE id = $1`"
@@ -63685,12 +63790,12 @@
         "file": "internal/store/postgres/users.go",
         "name": "RevokeRefreshToken",
         "receiver": "*PgStore",
-        "line": 163,
-        "end": 166,
+        "line": 196,
+        "end": 199,
         "sha256": "4abfd859427db9d849cd3b96353379f351bf6fb5fa4ea1166ac50bf764043fc5",
         "calls": [
           {
-            "line": 164,
+            "line": 197,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL`"
@@ -63698,7 +63803,7 @@
         ],
         "strings": [
           {
-            "line": 164,
+            "line": 197,
             "value": "UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL"
           }
         ],
@@ -63733,7 +63838,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 164,
+            "line": 197,
             "sql_fragment": "UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL"
           }
         ],
@@ -63741,7 +63846,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 164,
+            "line": 197,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at = now() WHERE id = $1 AND revoked_at IS NULL`"
@@ -63773,55 +63878,55 @@
         "file": "internal/store/postgres/users.go",
         "name": "RevokeUserRefreshTokens",
         "receiver": "*PgStore",
-        "line": 168,
-        "end": 186,
+        "line": 201,
+        "end": 219,
         "sha256": "8444f091e388fdf3b9873efab3909b59b2bd55c75b4746f4e24a2b1c8a8a2f1f",
         "calls": [
           {
-            "line": 169,
+            "line": 202,
             "expr": "s.pool.Begin",
             "name": "Begin"
           },
           {
-            "line": 173,
+            "line": 206,
             "expr": "tx.Rollback",
             "name": "Rollback"
           },
           {
-            "line": 175,
+            "line": 208,
             "expr": "tx.QueryRow(ctx, `SELECT id FROM users WHERE id=$1 FOR UPDATE`, userID).Scan",
             "name": "Scan"
           },
           {
-            "line": 175,
+            "line": 208,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT id FROM users WHERE id=$1 FOR UPDATE`"
           },
           {
-            "line": 176,
+            "line": 209,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 182,
+            "line": 215,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND revoked_at IS NULL`"
           },
           {
-            "line": 185,
+            "line": 218,
             "expr": "tx.Commit",
             "name": "Commit"
           }
         ],
         "strings": [
           {
-            "line": 175,
+            "line": 208,
             "value": "SELECT id FROM users WHERE id=$1 FOR UPDATE"
           },
           {
-            "line": 182,
+            "line": 215,
             "value": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND revoked_at IS NULL"
           }
         ],
@@ -63832,7 +63937,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:ChangePassword",
           "file": "internal/api/handlers/auth.go",
           "function": "ChangePassword",
-          "line": 493,
+          "line": 497,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -63840,7 +63945,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Logout",
           "file": "internal/api/handlers/auth.go",
           "function": "Logout",
-          "line": 402,
+          "line": 406,
           "expression": "h.store.RevokeUserRefreshTokens",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -63861,32 +63966,32 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 182,
+            "line": 215,
             "sql_fragment": "UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND revoked_at IS NULL"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 175,
+            "line": 208,
             "sql_fragment": "SELECT id FROM users WHERE id=$1 FOR UPDATE"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 169,
+            "line": 202,
             "expr": "s.pool.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 175,
+            "line": 208,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT id FROM users WHERE id=$1 FOR UPDATE`"
           },
           {
-            "line": 182,
+            "line": 215,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE refresh_tokens SET revoked_at=clock_timestamp() WHERE user_id=$1 AND revoked_at IS NULL`"
@@ -63918,12 +64023,12 @@
         "file": "internal/store/postgres/users.go",
         "name": "TouchUserLogin",
         "receiver": "*PgStore",
-        "line": 127,
-        "end": 130,
+        "line": 128,
+        "end": 131,
         "sha256": "0cb7537938d1debf2df5ab4dc428ff5b5874098ffecbb85cacbbd24ed56ea026",
         "calls": [
           {
-            "line": 128,
+            "line": 129,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE users SET last_login_at = now() WHERE id = $1`"
@@ -63931,7 +64036,7 @@
         ],
         "strings": [
           {
-            "line": 128,
+            "line": 129,
             "value": "UPDATE users SET last_login_at = now() WHERE id = $1"
           }
         ],
@@ -63942,7 +64047,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:Login",
           "file": "internal/api/handlers/auth.go",
           "function": "Login",
-          "line": 193,
+          "line": 197,
           "expression": "h.store.TouchUserLogin",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -63975,7 +64080,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 128,
+            "line": 129,
             "sql_fragment": "UPDATE users SET last_login_at = now() WHERE id = $1"
           }
         ],
@@ -63983,7 +64088,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 128,
+            "line": 129,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE users SET last_login_at = now() WHERE id = $1`"
@@ -64015,35 +64120,35 @@
         "file": "internal/store/postgres/users.go",
         "name": "UpdateUser",
         "receiver": "*PgStore",
-        "line": 96,
-        "end": 105,
+        "line": 97,
+        "end": 106,
         "sha256": "3411076bd22f50fd0fd32dc3a92f6d2ca593c834743e34bc7586c40abdef33db",
         "calls": [
           {
-            "line": 97,
+            "line": 98,
             "expr": "time.Now",
             "name": "Now"
           },
           {
-            "line": 98,
+            "line": 99,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\tUPDATE users SET email = $2, display_name = $3, role = $4, is_active = $5,\n\t\t\tpermission_profile_id = $6, updated_at = $7\n\t\tWHERE id = $1`"
           },
           {
-            "line": 102,
+            "line": 103,
             "expr": "strings.ToLower",
             "name": "ToLower"
           },
           {
-            "line": 102,
+            "line": 103,
             "expr": "strings.TrimSpace",
             "name": "TrimSpace"
           }
         ],
         "strings": [
           {
-            "line": 98,
+            "line": 99,
             "value": "\n\t\tUPDATE users SET email = $2, display_name = $3, role = $4, is_active = $5,\n\t\t\tpermission_profile_id = $6, updated_at = $7\n\t\tWHERE id = $1"
           }
         ],
@@ -64078,7 +64183,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 98,
+            "line": 99,
             "sql_fragment": "\n\t\tUPDATE users SET email = $2, display_name = $3, role = $4, is_active = $5,\n\t\t\tpermission_profile_id = $6, updated_at = $7\n\t\tWHERE id = $1"
           }
         ],
@@ -64086,7 +64191,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 98,
+            "line": 99,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`\n\t\tUPDATE users SET email = $2, display_name = $3, role = $4, is_active = $5,\n\t\t\tpermission_profile_id = $6, updated_at = $7\n\t\tWHERE id = $1`"
@@ -64118,12 +64223,12 @@
         "file": "internal/store/postgres/users.go",
         "name": "UpdateUserPassword",
         "receiver": "*PgStore",
-        "line": 107,
-        "end": 110,
+        "line": 108,
+        "end": 111,
         "sha256": "5bb339838d011b058d893ded308af229c101cd1c7058f2ef4d343935a278f7f6",
         "calls": [
           {
-            "line": 108,
+            "line": 109,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE users SET password_hash = $2, session_version=session_version+1, updated_at = now() WHERE id = $1`"
@@ -64131,7 +64236,7 @@
         ],
         "strings": [
           {
-            "line": 108,
+            "line": 109,
             "value": "UPDATE users SET password_hash = $2, session_version=session_version+1, updated_at = now() WHERE id = $1"
           }
         ],
@@ -64142,7 +64247,7 @@
           "caller_id": "internal/api/handlers/auth.go:*AuthHandler:updatePasswordHash",
           "file": "internal/api/handlers/auth.go",
           "function": "updatePasswordHash",
-          "line": 525,
+          "line": 533,
           "expression": "h.store.UpdateUserPassword",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64175,7 +64280,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 108,
+            "line": 109,
             "sql_fragment": "UPDATE users SET password_hash = $2, session_version=session_version+1, updated_at = now() WHERE id = $1"
           }
         ],
@@ -64183,7 +64288,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 108,
+            "line": 109,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE users SET password_hash = $2, session_version=session_version+1, updated_at = now() WHERE id = $1`"
@@ -64215,22 +64320,22 @@
         "file": "internal/store/postgres/users.go",
         "name": "hashInviteCode",
         "receiver": "",
-        "line": 18,
-        "end": 21,
+        "line": 19,
+        "end": 22,
         "sha256": "a0418de78e5f9467f9260d888d13f64b1f12630d32ddddebdfd41dbb18b1aa3c",
         "calls": [
           {
-            "line": 19,
+            "line": 20,
             "expr": "sha256.Sum256",
             "name": "Sum256"
           },
           {
-            "line": 19,
+            "line": 20,
             "expr": "[]byte",
             "name": ""
           },
           {
-            "line": 20,
+            "line": 21,
             "expr": "hex.EncodeToString",
             "name": "EncodeToString"
           }
@@ -64243,7 +64348,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:CreateAdminInvitation",
           "file": "internal/store/postgres/users.go",
           "function": "CreateAdminInvitation",
-          "line": 230,
+          "line": 263,
           "expression": "hashInviteCode",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64251,7 +64356,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:GetAdminInvitationByCode",
           "file": "internal/store/postgres/users.go",
           "function": "GetAdminInvitationByCode",
-          "line": 240,
+          "line": 273,
           "expression": "hashInviteCode",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -64305,22 +64410,22 @@
         "file": "internal/store/postgres/users.go",
         "name": "scanUser",
         "receiver": "",
-        "line": 46,
-        "end": 62,
+        "line": 47,
+        "end": 63,
         "sha256": "e823e3666d1f6841ac13187b9e27c83607e46d8ba91e760bcce31805c992c541",
         "calls": [
           {
-            "line": 49,
+            "line": 50,
             "expr": "row.Scan",
             "name": "Scan"
           },
           {
-            "line": 51,
+            "line": 52,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 58,
+            "line": 59,
             "expr": "uuid.UUID",
             "name": "UUID"
           }
@@ -64402,10 +64507,18 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
+          "caller_id": "internal/store/postgres/users.go:*PgStore:CreateRefreshToken",
+          "file": "internal/store/postgres/users.go",
+          "function": "CreateRefreshToken",
+          "line": 155,
+          "expression": "scanUser",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
           "caller_id": "internal/store/postgres/users.go:*PgStore:GetUser",
           "file": "internal/store/postgres/users.go",
           "function": "GetUser",
-          "line": 65,
+          "line": 66,
           "expression": "scanUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64413,7 +64526,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:GetUserByEmail",
           "file": "internal/store/postgres/users.go",
           "function": "GetUserByEmail",
-          "line": 69,
+          "line": 70,
           "expression": "scanUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -64421,7 +64534,7 @@
           "caller_id": "internal/store/postgres/users.go:*PgStore:ListUsers",
           "file": "internal/store/postgres/users.go",
           "function": "ListUsers",
-          "line": 87,
+          "line": 88,
           "expression": "scanUser",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65076,7 +65189,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 523,
+          "line": 546,
           "expression": "s.store.CountAllZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -65651,7 +65764,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 403,
+          "line": 426,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -65828,7 +65941,7 @@
           "caller_id": "internal/app/submissions/service.go:*Service:SubmitAuthorized",
           "file": "internal/app/submissions/service.go",
           "function": "SubmitAuthorized",
-          "line": 241,
+          "line": 240,
           "expression": "s.store.GetZoneByDomain",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -68041,16 +68154,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
-  "current_review_boundary": "Revision 12 binds the final public three-round source. All 401 PostgreSQL function syntax bodies, classifications, manual review fields, 63 file hashes and 19 migrations remain byte-identical to revision 11. Only fresh call-name candidate facts are reconciled. This maintenance completes 0 implementation TODOs and grants no runtime, dependency, release, G0 or parent acceptance.",
+  "last_review_base_commit": "9b73b13f376f7e8d589a06fc7078dae4c342d5d5",
+  "current_review_boundary": "Revision 13 binds the final public DELIVER source. The one CreateRefreshToken body and classification are explicitly reviewed; remaining function bodies, all migrations, and manual judgments stay as recorded. Fresh syntax positions, exact assertion facts and name-match callers are resampled. Prior review text is historical where retained. Dynamic exec function aliases remain a manual review boundary of the unchanged syntax collector. Maintenance completes 0 implementation TODOs and grants no full runtime/release/parent acceptance.",
   "inventory_revision": {
-    "revision": 12,
-    "source_commit": "ed81ee2fcadc9e8cfcd165947561f8b4b65589e6",
+    "revision": 13,
+    "source_commit": "9b73b13f376f7e8d589a06fc7078dae4c342d5d5",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "58d0c9cf274569258319ff4b5dcab7912b0174f4",
-    "previous_snapshot_blob": "d6aacdc204f8d068f97aabd9eec5fd92b996fb4c",
-    "previous_sha256": "7b4737f5b1737206ededeb415a3fe6d69de94ff27ff51a24d93893e01cd60417",
+    "previous_snapshot_commit": "b7247c3f66bd5f0ec5c6390305e2ff7268c135f8",
+    "previous_snapshot_blob": "09d37f550af34fb94b653c8b401649a9a70d56c1",
+    "previous_sha256": "2fd33651488b60694657ae45b9bd34f03fe1015bdd4cbfecd4afb196543169ac",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION12-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION13-20261008/README.md"
   }
 }
