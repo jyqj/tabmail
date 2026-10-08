@@ -232,20 +232,25 @@ func TestRequireAuthRejectsAPIKey(t *testing.T) {
 	}
 }
 
-func TestRealIPPrefersProxyHeaders(t *testing.T) {
+func TestRealIPPrefersTrustedProxyChain(t *testing.T) {
 	rl := NewRateLimiter(nil, nil, 20, []string{"10.0.0.0/8"})
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.RemoteAddr = "10.0.0.9:1234"
 	req.Header.Set("X-Forwarded-For", "203.0.113.1, 198.51.100.2")
 	req.Header.Set("X-Real-Ip", "192.0.2.7")
 
-	if got := rl.realIP(req); got != "192.0.2.7" {
+	if got := rl.realIP(req); got != "198.51.100.2" {
 		t.Fatalf("unexpected real ip: %q", got)
 	}
 
 	req.Header.Del("X-Real-Ip")
-	if got := rl.realIP(req); got != "203.0.113.1" {
+	if got := rl.realIP(req); got != "198.51.100.2" {
 		t.Fatalf("unexpected forwarded ip: %q", got)
+	}
+	req.Header.Del("X-Forwarded-For")
+	req.Header.Set("X-Real-IP", "192.0.2.7")
+	if got := rl.realIP(req); got != "192.0.2.7" {
+		t.Fatalf("single-header compatibility broken: %q", got)
 	}
 }
 
