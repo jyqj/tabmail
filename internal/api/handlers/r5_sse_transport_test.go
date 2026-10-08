@@ -64,6 +64,7 @@ type r5SSEWriter struct {
 	deadlineAfterFailure int
 	cancel               context.CancelFunc
 	stopAtReady          bool
+	stopAtResync         bool
 }
 
 func (w *r5SSEWriter) SetWriteDeadline(deadline time.Time) error {
@@ -94,7 +95,7 @@ func (w *r5SSEWriter) Write(data []byte) (int, error) {
 		return n, nil
 	}
 	n, err := w.ResponseRecorder.Write(data)
-	if w.stopAtReady && strings.Contains(string(data), "event: ready") {
+	if (w.stopAtReady && strings.Contains(string(data), "event: ready")) || (w.stopAtResync && strings.Contains(string(data), "event: resync")) {
 		w.cancel()
 	}
 	return n, err
@@ -202,7 +203,10 @@ func TestR5SSETransportSuccessfulFrames(t *testing.T) {
 			for key, value := range headers {
 				req.Header.Set(key, value)
 			}
-			w := &r5SSEWriter{ResponseRecorder: httptest.NewRecorder(), cancel: cancel, stopAtReady: true}
+			// Each consumer stops only after its complete handshake. The mailbox
+			// emits ready before resync; cancellation at ready must now stop the
+			// next frame rather than being a success-test shutdown shortcut.
+			w := &r5SSEWriter{ResponseRecorder: httptest.NewRecorder(), cancel: cancel, stopAtReady: consumer == "monitor", stopAtResync: consumer == "mailbox"}
 			h.ServeHTTP(w, req)
 			body := w.Body.String()
 			if reader.reads != 1 || !strings.Contains(body, "event: ready\ndata: ") || !strings.Contains(body, "event: resync\ndata: ") {

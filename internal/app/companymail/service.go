@@ -148,7 +148,13 @@ func (s *Service) document(ctx context.Context, a authz.Actor, mailbox uuid.UUID
 			if e = s.recheckMessage(ctx, a, mailbox, m); e != nil {
 				return nil, e
 			}
-			return doc, nil
+			if mailcontent.ValidateSourceHash(doc.SourceKey, doc.SourceSHA256) == nil {
+				return doc, nil
+			}
+			// A missing or inconsistent derived checksum is a cache miss.
+			// Rebuild only after the authority check above, through the same
+			// bounded, integrity-checked raw read as an ordinary miss. Read or
+			// save failures must never fall back to this unverified old body.
 		}
 	}
 	doc, e := s.parser.Document(ctx, m.ID, m.RawObjectKey)

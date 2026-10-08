@@ -74,40 +74,67 @@ func (h *MailboxEventHandler) streamDurable(w http.ResponseWriter, r *http.Reque
 	defer ticker.Stop()
 	resync := time.NewTicker(25 * time.Second)
 	defer resync.Stop()
-	poll := func() bool {
+	currentAccess := func() (*http.Request, bool) {
+		if r.Context().Err() != nil {
+			return nil, false
+		}
 		fresh := r
 		var err error
 		if h.revalidate != nil {
 			fresh, err = h.revalidate(r)
 			if err != nil || fresh == nil {
-				return false
+				return nil, false
 			}
+		}
+		if fresh.Context().Err() != nil {
+			return nil, false
 		}
 		actor := middleware.ActorFromContext(fresh.Context())
 		current, err := h.eventReader.GetWorkMailbox(fresh.Context(), actor, mb.ID)
 		if err != nil || current == nil || !current.CanRead || current.Mailbox.ID != mb.ID || current.Mailbox.TenantID != mb.TenantID || actor.TenantID != mb.TenantID {
+			return nil, false
+		}
+		if r.Context().Err() != nil || fresh.Context().Err() != nil {
+			return nil, false
+		}
+		return fresh, true
+	}
+	frame := func(id, event string, payload any) bool {
+		// Event reads and earlier frame writes can outlive a read grant or
+		// session. Recheck immediately before releasing each bounded frame,
+		// including ready/cursor and resync metadata. This is a finite current
+		// check; it does not hold a database lock across transport I/O or revoke
+		// bytes already handed to the response writer.
+		if _, allowed := currentAccess(); !allowed {
+			return false
+		}
+		return writeSSEFrame(w, id, event, payload) == nil
+	}
+	poll := func() bool {
+		fresh, allowed := currentAccess()
+		if !allowed {
 			return false
 		}
 		events, next, err := h.eventReader.ListMailboxEvents(fresh.Context(), mb.TenantID, mb.ID, cursor, 200)
-		if err != nil {
+		if err != nil || r.Context().Err() != nil || fresh.Context().Err() != nil {
 			return false
 		}
-		cursor = next
 		for _, event := range events {
 			id := ""
 			if event.MessageID != nil {
 				id = event.MessageID.String()
 			}
-			if err := writeSSEFrame(w, strconv.FormatInt(event.Sequence, 10), event.Type, realtime.Event{Type: realtime.EventType(event.Type), Mailbox: mb.FullAddress, MessageID: id}); err != nil {
+			if !frame(strconv.FormatInt(event.Sequence, 10), event.Type, realtime.Event{Type: realtime.EventType(event.Type), Mailbox: mb.FullAddress, MessageID: id}) {
 				return false
 			}
 		}
+		cursor = next
 		return true
 	}
 	if !poll() {
 		return
 	}
-	if writeSSE(w, "ready", map[string]any{"mailbox": mb.FullAddress, "cursor": cursor}) != nil || writeSSE(w, "resync", map[string]string{"mailbox": mb.FullAddress}) != nil {
+	if !frame("", "ready", map[string]any{"mailbox": mb.FullAddress, "cursor": cursor}) || !frame("", "resync", map[string]string{"mailbox": mb.FullAddress}) {
 		return
 	}
 	for {
@@ -122,7 +149,7 @@ func (h *MailboxEventHandler) streamDurable(w http.ResponseWriter, r *http.Reque
 			if !poll() {
 				return
 			}
-			if writeSSE(w, "resync", map[string]string{"mailbox": mb.FullAddress}) != nil {
+			if !frame("", "resync", map[string]string{"mailbox": mb.FullAddress}) {
 				return
 			}
 		}
