@@ -1,0 +1,9 @@
+# Independent frontend-agent review of ADVANCE-07
+
+Decision: ACCEPT. Product `d652fd0a32385e674e1d1f39a328e374de49b367` changes only the structured To/Cc writer in builder.go. The single builder continues to leave BCC envelope-only, and the From/Subject writers are untouched. Folding occurs between already separate address tokens; spaces, commas, quoted escapes and Unicode inside a token are never treated as delimiters. The budget includes a following comma. The continuation prefix plus token is bounded to 998 octets, and the first token may move to a continuation after an empty field-name line without changing its parsed identity.
+
+Eighteen independently written fixed leaves cover both roles, the 78-column boundary at 73/74-character addresses, extreme single/first tokens of 996/997 octets, the comma overflow rejection, quoted spaces/commas/internal at signs/escaped quotes/backslashes/Unicode, exact caller envelope preservation, BCC non-disclosure and the previous sender/subject encoding contracts. The same test bytes produce **4 PASS / 14 FAIL / 0 SKIP** on the original builder at `fdea217` and **18 PASS / 0 FAIL / 0 SKIP** on the candidate.
+
+The independent race run also includes all 40 author leaves (including six actual Submit → FakeStore queue → MIME → real TCP direct/relay SMTP paths) plus the existing `TestBuild_` controls: **109 distinct leaf PASS / 0 FAIL / 0 SKIP**. These overlapping totals must not be added. No complete outbound suite or PostgreSQL qualification is claimed by this review.
+
+Command: `GOTOOLCHAIN=local GOPROXY=off GOMAXPROCS=2 go test -mod=readonly -race -p 1 ./internal/outbound -run '^(TestR5AdvanceRecipientHeader|TestAdvanceRecipientIndependent|TestBuild_)' -count=1 -json`. The baseline run selects only `^TestAdvanceRecipientIndependent`; both use the parent's pre-existing Go 1.25.7 runtime and caches. The original failed baseline and candidate raw logs are attached as compressed JSONL.

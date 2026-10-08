@@ -97,10 +97,14 @@ func Build(m Message) ([]byte, error) {
 
 	writeHeader(&buf, "From", m.From)
 	if len(m.To) > 0 {
-		writeHeader(&buf, "To", strings.Join(m.To, ", "))
+		if err := writeRecipientHeader(&buf, "To", m.To); err != nil {
+			return nil, err
+		}
 	}
 	if len(m.CC) > 0 {
-		writeHeader(&buf, "Cc", strings.Join(m.CC, ", "))
+		if err := writeRecipientHeader(&buf, "Cc", m.CC); err != nil {
+			return nil, err
+		}
 	}
 	writeSubjectHeader(&buf, m.Subject)
 	writeHeader(&buf, "Date", time.Now().UTC().Format(time.RFC1123Z))
@@ -299,6 +303,37 @@ func writeHeader(buf *bytes.Buffer, key, value string) {
 	io.WriteString(buf, ": ")
 	io.WriteString(buf, sanitizeHeaderValue(value))
 	io.WriteString(buf, "\r\n")
+}
+
+// Address values are already separate mailbox tokens. Fold only the whitespace
+// between them, never commas or spaces inside a quoted local part. Include the
+// separating comma in each token's budget so it cannot overflow a full line.
+// Long individual addresses may exceed the recommended 78 octets but must fit
+// the 998-octet hard limit with continuation whitespace (RFC 5322 section 2.1.1).
+func writeRecipientHeader(buf *bytes.Buffer, key string, addresses []string) error {
+	buf.WriteString(key)
+	buf.WriteByte(':')
+	lineLength := len(key) + 1
+	for i, address := range addresses {
+		token := sanitizeHeaderValue(address)
+		if i+1 < len(addresses) {
+			token += ","
+		}
+		if len(token) > 997 {
+			return fmt.Errorf("recipient address is too long for a MIME header")
+		}
+		if lineLength+1+len(token) > 78 {
+			buf.WriteString("\r\n ")
+			lineLength = 1
+		} else {
+			buf.WriteByte(' ')
+			lineLength++
+		}
+		buf.WriteString(token)
+		lineLength += len(token)
+	}
+	buf.WriteString("\r\n")
+	return nil
 }
 
 // Subject is unstructured text, unlike address and MIME headers. Encode all of

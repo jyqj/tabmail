@@ -62,6 +62,7 @@ export function TemplateEditorView({
   setMailbox,
   onSaved,
   onPublished,
+  writeBlocked = false,
 }: {
   edit: MailTemplateEditor | null;
   setEdit: (update: (prev: MailTemplateEditor | null) => MailTemplateEditor | null) => void;
@@ -71,6 +72,8 @@ export function TemplateEditorView({
   onSaved: (template: MailTemplate) => Promise<void>;
   /** Refresh only: publication is already acknowledged before this callback. */
   onPublished: (template: MailTemplate) => Promise<MailTemplate>;
+  /** A version mutation must be reconciled before using this draft revision. */
+  writeBlocked?: boolean;
 }) {
   const t = useText();
   const scope = useSessionScope();
@@ -169,7 +172,7 @@ export function TemplateEditorView({
   }
   async function save(publish: boolean) {
     const owner = lifetime.current;
-    if (!edit || !owner || !owns(owner) || publication) return;
+    if (!edit || !owner || !owns(owner) || publication || writeBlocked) return;
     const snapshot = edit;
     const started = edits.current;
     try {
@@ -376,13 +379,13 @@ export function TemplateEditorView({
       </ActionButton>
       <div className="flex flex-wrap gap-3">
         <ActionButton
-          disabled={busy || !!publication || editorScope !== scope || !edit.name}
+          disabled={busy || writeBlocked || !!publication || editorScope !== scope || !edit.name}
           onClick={() => run(() => save(false))}
         >
           {t("保存模板草稿", "Save template draft")}
         </ActionButton>
         <ActionButton
-          disabled={busy || !!publication || editorScope !== scope || !edit.name || edit.retired}
+          disabled={busy || writeBlocked || !!publication || editorScope !== scope || !edit.name || edit.retired}
           onClick={() => run(() => save(true))}
         >
           {t("保存并发布新版本", "Save and publish new version")}

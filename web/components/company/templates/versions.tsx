@@ -27,6 +27,9 @@ type VersionsProps = {
   template: MailTemplate | null;
   refreshKey: number;
   onRevoked?: () => void | Promise<void>;
+  /** The owning page keeps the mutation alive across its tab changes. */
+  onRevoke?: (version: TemplateVersion) => Promise<void>;
+  disabled?: boolean;
 };
 
 export function TemplateVersionsView(props: VersionsProps) {
@@ -38,7 +41,7 @@ export function TemplateVersionsView(props: VersionsProps) {
   />;
 }
 
-function TemplateVersionHistory({ template, refreshKey, onRevoked, scope }: VersionsProps & {
+function TemplateVersionHistory({ template, refreshKey, onRevoked, onRevoke, disabled = false, scope }: VersionsProps & {
   scope: string;
 }) {
   const t = useText();
@@ -63,7 +66,7 @@ function TemplateVersionHistory({ template, refreshKey, onRevoked, scope }: Vers
   function revokeVersion(v: TemplateVersion) {
     const observed = currentRead.current;
     const owner = lifetime.current;
-    if (!template?.id || busy || !owner || !owns(owner) || !observed?.ready ||
+    if (!template?.id || busy || disabled || !owner || !owns(owner) || !observed?.ready ||
       !observed.data?.includes(v) || v.template_id !== template.id || v.revoked_at) return;
     const confirmed = safeConfirm(
       t(
@@ -73,6 +76,10 @@ function TemplateVersionHistory({ template, refreshKey, onRevoked, scope }: Vers
     );
     if (!confirmed || currentRead.current !== observed || !owns(owner)) return;
     void run(async () => {
+      if (onRevoke) {
+        await onRevoke(v);
+        return;
+      }
       try {
         await revokeTemplateVersion(template.id!, v.version, template.revision);
         if (!owns(owner)) return;
@@ -134,7 +141,7 @@ function TemplateVersionHistory({ template, refreshKey, onRevoked, scope }: Vers
             {!v.revoked_at && (
               <button
                 type="button"
-                disabled={busy || !ready}
+                disabled={busy || disabled || !ready}
                 data-testid={`revoke-version-${v.version}`}
                 onClick={() => revokeVersion(v)}
                 className="shrink-0 rounded-md border border-destructive px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10 disabled:opacity-50"

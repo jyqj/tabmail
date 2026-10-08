@@ -141,8 +141,14 @@ func validateVariableScalar(v Variable, value string) error {
 	valid := true
 	switch v.Type {
 	case "email":
-		a, e := mail.ParseAddress(value)
-		valid = e == nil && a.Address == value
+		// Validate a bare addr-spec while retaining its original quoting as
+		// template data. ParseAddress decodes quoted local parts, so comparing
+		// its Address with value incorrectly rejects legitimate mailboxes.
+		// It also permits whitespace after @; keep that out of a scalar email
+		// while allowing spaces and @ inside a quoted local part.
+		_, e := mail.ParseAddress("<" + value + ">")
+		at := strings.LastIndex(value, "@")
+		valid = e == nil && at >= 0 && strings.TrimSpace(value) == value && !strings.ContainsAny(value[at+1:], " \t\r\n")
 	case "integer":
 		_, e := strconv.ParseInt(value, 10, 64)
 		valid = e == nil
