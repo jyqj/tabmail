@@ -7818,7 +7818,7 @@
       "clients": [
         {
           "source": "web/features/company/mailbox-admin.tsx",
-          "line": 65,
+          "line": 81,
           "branch": 0,
           "callee": "company",
           "owner": "MailboxAdmin",
@@ -10112,11 +10112,11 @@
   ],
   "source_closure": {
     "docs/company-mail/evidence/R5-API-MATRIX.json": "56cc04e6c7727346345853c7fb079eaac408e75164ea630372ad2c0f61d5fbdc",
-    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "7cc241cd0a0b83cab845bee62697a4301fa73a7de8115d3a56b09fbcbec64a60",
-    "internal/api/handlers/admin.go": "7bdcc137f5355abb8b0df2f41f2f38a9926ac94a3de1488a7bacbb9ce72c3917",
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": "c62f46e2b95aeea514050a1f4a09308f7d9be5815a1640bded077605abae9057",
+    "internal/api/handlers/admin.go": "efb4fd396514192f8857f6c884852a446d9c3ecb3768c135037f60b05c080bf7",
     "internal/api/handlers/app_error.go": "1c745e35259f538938df75356997861841a7bb83c7af2302caa8c661efe147ff",
     "internal/api/handlers/audit.go": "ac2cd9156fe0ccea8085670033dd1a2762a9589371e161dd7cc2a287df6dde73",
-    "internal/api/handlers/auth.go": "204248871797cbca6638f2d9da4faa46d07505e0d65629ea8e20022e20c7d806",
+    "internal/api/handlers/auth.go": "d5e286534fa0d9967a30772ee3f3268e876c2770472916e31dfb8c50216e509e",
     "internal/api/handlers/company.go": "175bd9f9715c8105ca36121942ecf39fe540a174178831735427babac0c3b09f",
     "internal/api/handlers/company_admin_stream.go": "8d6d18887be79ace5a8743adff6a196c4c7388ad9af2e11c34a2e8abfe204548",
     "internal/api/handlers/company_archive.go": "bed269f1af47955f734333b0f64460a08e06b2e6c0262deab05315e5f404b62e",
@@ -10161,7 +10161,7 @@
     "internal/company/lifecycle.go": "08e8f34c377969f2640e1a73401ee639c6c1b674c9ca487f208a8180f292d0e4",
     "internal/company/outbound_inspection.go": "c11e9f1959787b771eaecba15c217b4e7be2d5ac72c2c0dd955bdbd1584845e5",
     "internal/company/outbound_receipt.go": "76aa604d110974ccebc584ae497758edce30ad7d91219eeff0bb0b3ef619fee8",
-    "internal/company/permission_editor.go": "30755c1b11ddc4aa7af6f986e6f568d970a5138e9b4383e7afd7355d9e1d6a27",
+    "internal/company/permission_editor.go": "a8d93f2a6d3e19ccdfe21809e00f0d3fd43eca63f1b078b1fe21239e64dfd343",
     "internal/company/permission_editor_decode.go": "0bca03df38ea6a6095dd12c49ff6aecc7ccc406c944970c0759ee43d181ce219",
     "internal/company/permission_profile_json.go": "a2eade6ff3af01531cc75f4e4609057906de8b5305e5743c9e1eae7fd409a83d",
     "internal/company/submissions.go": "3e2cdbfd38091aef3dc7165aa08bf93004d60ee869c26d6c86573705018d1ee9",
@@ -10186,7 +10186,7 @@
     "web/features/company/company-event-consumer.tsx": "1f8b8a65839a5ea29542ac4ddda9b210003332a24b76f90242d3eff48a873096",
     "web/features/company/domain-settings.tsx": "fe8a3786aac3e8e5664f8767957e2839a0db5867d6dc4500cd6a7800bf1b16ec",
     "web/features/company/employees.tsx": "90a9b3089cd151333811df7ed00bed96cf2068cf09c45d1b6fa55bb6893df932",
-    "web/features/company/mailbox-admin.tsx": "70db99f72080531dc9c9c046c38b724cdb0cbb5c9f5b7d3e5e1218237055e4a6",
+    "web/features/company/mailbox-admin.tsx": "7b7076e0efc0baa919debe0f23851f9093f12f97664c2a92a1f5fe855c66eec9",
     "web/features/company/overview.tsx": "565a70314c43039d78415a63840defac31a812d40a40bf92f2e1a199ef486251",
     "web/features/mail/api.ts": "fb126f68df692218db562b651b5c4d9876f69d8485460d513a5548bddd6be7f5",
     "web/features/mail/components/conversation-list.tsx": "22db279e75a8f08545d63d26a583230b7649785dd2f5281f7f33b206ebc80d1f",
@@ -10212,17 +10212,17 @@
     "qualification": "historical_metadata_only_not_current_wire"
   },
   "acquisition": {
-    "base_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+    "base_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
     "producer": "fresh Go AST and TS 5.9.3 AST; syntax only"
   },
   "inventory_revision": {
-    "revision": 8,
-    "source_commit": "e0cd175996ca4ee314d7d8b8cf836023b680346c",
+    "revision": 9,
+    "source_commit": "25b0b294f4fa0bb93b0c82304a570eae43a0923a",
     "previous_snapshot": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
-    "previous_snapshot_commit": "f77c31e2da38bb926dfe6fa134eabad652e94f8c",
-    "previous_snapshot_blob": "1ae3373eb5b57c95e219420995558bb0afe68c8f",
-    "previous_sha256": "115294363d6c05a88e1bf08c535a7d4411f8e9409fe9b854dd71821760ec44f7",
+    "previous_snapshot_commit": "1d856bd8a552c30dfb48b4902858edad7e53aaf5",
+    "previous_snapshot_blob": "394dd577f1a08603b65546e904a637ad2eb80cf0",
+    "previous_sha256": "46eca04fa364ff6bf575b5828e6219b9b6b6e217d6ac836a9c1e35fa450dcd2d",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION8-20261008/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION9-20261008/README.md"
   }
 }

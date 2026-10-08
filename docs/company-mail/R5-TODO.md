@@ -1,11 +1,19 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-CLOSE-20261008:BEGIN -->
-## CLOSE 批次：十项独立 Issue 到关闭
+## CLOSE 批次：十项独立 Issue 已关闭
 
-本批从 #95 合入源 `1d856bd` 开始，以三个原生 subagent 与 root 认领十项新产品范围，初始逐项 Issue [#96–#105](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+CLOSE-%22)（未接线 #102 已撤销不计完成，以活跃凭证缺陷 [#108](https://github.com/jyqj/tabmail/issues/108) 替代），按 **4＋3＋3** 分轮验证、独立审查、合入并关闭。第一轮 [#106](https://github.com/jyqj/tabmail/pull/106) 已合入并关闭 #96/#99/#100/#103。第二轮 [#107](https://github.com/jyqj/tabmail/pull/107) 已合入并关闭 #97/#101/#104。完整认领、关闭条件、源码和逐轮数量见 [R5-CLOSE-20261008](R5-CLOSE-20261008.md)。
+本批从 #95 合入源 `1d856bd` 开始，以三个原生 subagent 与 root 分三轮实施、独立审查、合入并逐项关闭十项产品 Issue。初始认领 [#96–#105](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+CLOSE-%22)；未接线的 #102 撤销为 not_planned、计 0 completed，以真实活跃凭证缺陷 [#108](https://github.com/jyqj/tabmail/issues/108) 替代。
 
-当前本批 **7/10 关闭，剩余 3**；原父任务仍 **10/171 已验收，剩余 161**。原 M/G0 及发布门禁保持原条件，#56 保持 draft。
+| 轮次 | 合入 PR | 实际 closed-completed | 累计 | 本批剩余 |
+| --- | --- | --- | ---: | ---: |
+| 1 | [#106](https://github.com/jyqj/tabmail/pull/106) | #96 / #99 / #100 / #103 | 4/10 | 6 |
+| 2 | [#107](https://github.com/jyqj/tabmail/pull/107) | #97 / #101 / #104 | 7/10 | 3 |
+| 3 | [#109](https://github.com/jyqj/tabmail/pull/109) | #98 / #105 / #108 | 10/10 | 0 |
+
+**本批 10/10 实际关闭，剩余 0；原父任务仍 10/171 已验收，剩余 161。** 最终产品 merge `25b0b294f4fa0bb93b0c82304a570eae43a0923a`、tree `db7c422fcdd63405706a2f2cb7631a5380f87fd6` 已核对与审查本地树完全一致；第三轮 root 同源固定回归 Go 27 叶（race/count=1）及 UI 51 例全通过，逐项作者范围与失败基线见 [关闭账本](R5-CLOSE-20261008.md)。
+
+最终源的 [revision 9 静态目录对账](evidence/R5-CATALOG-REVISION9-20261008/README.md) 保留原保护源与历史，原三个 CLI、81 个选定 Python 测试及 27 个 Node 测试通过，并经两个 subagent 独审；root 整合后的原三个 CLI 也通过。原完整 source runner 的实际尝试在 Linux pinned-FD 前置检查失败，772 个已发现用例均未分派，未冒称全门禁通过。维护不另计实施项。原 M/G0、完整 PG、依赖审计及其他发布门禁保持原条件；#56 保持 draft，main 未合入。本地原始日志和运行包不属于公开交付。
 <!-- R5-CLOSE-20261008:END -->
 
 
