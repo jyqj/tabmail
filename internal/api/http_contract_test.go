@@ -226,7 +226,7 @@ func TestCompanyHTTPContract(t *testing.T) {
 		return a.Revision
 	}
 	call("grants.empty", "GET", mbp+"/grants", nil, admin, 200)
-	call("grants.update", "PUT", mbp+"/grants", map[string]any{"revision": revision(mb.ID), "user_id": admin.ID, "can_read": true}, admin, 200)
+	call("grants.update", "PUT", mbp+"/grants", map[string]any{"revision": revision(mb.ID), "user_id": admin.ID, "can_read": true, "can_organize": false, "can_send": false, "template_only": false}, admin, 200)
 	call("grants.list", "GET", mbp+"/grants", nil, admin, 200)
 	oldRevision := revision(mb.ID)
 	call("policy.update", "PUT", mbp+"/send-policy", map[string]any{"revision": oldRevision, "send_policy": "free"}, admin, 200)
