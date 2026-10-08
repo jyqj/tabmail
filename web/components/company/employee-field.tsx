@@ -6,11 +6,13 @@ export function EmployeeField({
   value,
   onChange,
   employees,
+  disabled = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   employees: AdminUser[];
+  disabled?: boolean;
 }) {
   const t = useText();
   return (
@@ -20,6 +22,7 @@ export function EmployeeField({
           id={id}
           className={inputClass}
           value={value}
+          disabled={disabled}
           onChange={(e) => onChange(e.target.value)}
         >
           <option value="">{t("请选择成员", "Select a member")}</option>

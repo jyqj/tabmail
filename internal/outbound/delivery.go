@@ -66,7 +66,46 @@ func deliverRelayTLS(ctx context.Context, cfg config.Outbound, from string, to [
 // When requireTLS is true, delivery fails if STARTTLS is unavailable or negotiation fails,
 // preventing MITM downgrade attacks.
 func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, requireTLS bool) error {
-	return deliverDirectWith(ctx, from, to, mime, requireTLS, (&net.Resolver{}).LookupMX, deliverDirectMX)
+	return deliverDirectWith(ctx, from, to, mime, requireTLS, smtpMXLookup(&net.Resolver{}), deliverDirectMX)
+}
+
+type smtpDNSResolver interface {
+	LookupMX(context.Context, string) ([]*net.MX, error)
+	LookupIPAddr(context.Context, string) ([]net.IPAddr, error)
+}
+
+// Keep both DNS record types bound to the same per-delivery resolver.
+func smtpMXLookup(resolver smtpDNSResolver) func(context.Context, string) ([]*net.MX, error) {
+	return func(ctx context.Context, domain string) ([]*net.MX, error) {
+		mxs, err := resolver.LookupMX(ctx, domain)
+		if err == nil {
+			return mxs, nil
+		}
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return nil, ctxErr
+		}
+		var dnsErr *net.DNSError
+		if !errors.As(err, &dnsErr) || !dnsErr.IsNotFound || dnsErr.Temporary() {
+			return nil, err
+		}
+		// Go reports both NXDOMAIN and an empty MX answer as IsNotFound.
+		// RFC 5321's implicit MX needs a usable address for the domain; never
+		// turn an unproven not-found result into a delivery attempt.
+		addresses, addressErr := resolver.LookupIPAddr(ctx, domain)
+		if ctxErr := ctx.Err(); ctxErr != nil {
+			return nil, ctxErr
+		}
+		if addressErr != nil {
+			return nil, fmt.Errorf("implicit MX address lookup: %w", addressErr)
+		}
+		for _, address := range addresses {
+			if address.IP.To16() != nil {
+				// The existing empty-answer path uses the domain as its MX.
+				return nil, nil
+			}
+		}
+		return nil, err
+	}
 }
 
 // deliverDirectWith keeps DNS normalization and direct-delivery orchestration
