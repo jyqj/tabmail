@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useI18n } from "@/lib/i18n";
 import { login, register } from "@/lib/api";
@@ -50,9 +50,13 @@ export function AuthDialog() {
   const [regPassword, setRegPassword] = useState("");
   const [regName, setRegName] = useState("");
   const [regLoading, setRegLoading] = useState(false);
+  const registrationHint = useId();
+  // Match the server's bcrypt input policy, preserving every password byte.
+  const registrationBytes = new TextEncoder().encode(regPassword).length;
+  const validRegistrationPassword = registrationBytes >= 12 && registrationBytes <= 72;
 
   const handleLogin = async () => {
-    if (!loginEmail.trim() || !loginPassword.trim()) return;
+    if (!loginEmail.trim() || !loginPassword) return;
     setLoginLoading(true);
     try {
       const res = await login(loginEmail.trim(), loginPassword);
@@ -72,8 +76,8 @@ export function AuthDialog() {
   };
 
   const handleRegister = async () => {
-    if (!regEmail.trim() || !regPassword.trim()) return;
-    if (regPassword.length < 8) {
+    if (!regEmail.trim()) return;
+    if (!validRegistrationPassword) {
       toast.error(t("auth.passwordMinLength"));
       return;
     }
@@ -332,7 +336,7 @@ export function AuthDialog() {
                     disabled={
                       loginLoading ||
                       !loginEmail.trim() ||
-                      !loginPassword.trim()
+                      !loginPassword
                     }
                   >
                     {loginLoading ? t("auth.loggingIn") : t("auth.loginBtn")}
@@ -423,6 +427,9 @@ export function AuthDialog() {
                         type={showPwd ? "text" : "password"}
                         placeholder="••••••••"
                         value={regPassword}
+                        autoComplete="new-password"
+                        aria-describedby={registrationHint}
+                        aria-invalid={regPassword.length > 0 && !validRegistrationPassword ? true : undefined}
                         onChange={(e) => setRegPassword(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && handleRegister()}
                       />
@@ -439,12 +446,15 @@ export function AuthDialog() {
                         )}
                       </button>
                     </div>
+                    <p id={registrationHint} className="text-xs text-muted-foreground" aria-live="polite">
+                      {t("auth.passwordBytes", { bytes: registrationBytes })}
+                    </p>
                   </div>
                   <Button
                     className="w-full h-11 mt-2 gap-2 text-[13px] font-semibold shadow-sm"
                     onClick={handleRegister}
                     disabled={
-                      regLoading || !regEmail.trim() || regPassword.length < 8
+                      regLoading || !regEmail.trim() || !validRegistrationPassword
                     }
                   >
                     {regLoading ? t("auth.registering") : t("auth.registerBtn")}

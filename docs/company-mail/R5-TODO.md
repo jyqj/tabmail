@@ -1,5 +1,11 @@
 # R5 全版本深度重构与优化任务清单
 
+<!-- R5-FINISH-20261009:BEGIN -->
+## FINISH批次：十项已认领，第一轮候选审查完成
+
+当前批次从公开 `be3a6bf4` 继续，十项 [#183–#192](https://github.com/jyqj/tabmail/issues?q=is%3Aissue+%22R5+FINISH-%22) 按4＋3＋3由root及三个原生subagent推进，范围及原始通过/失败见[FINISH账本](R5-FINISH-20261009.md)。第一轮4项已完成实现和限定交叉审查，等待PR合入；正式完成0/10、剩余10。原父任务仍10/171、剩余161。目录、测试、文档与PR维护不新增实施计数；未接入生产的旧mailboxapp候选已剔除，未认领或计数。#56保持draft。
+<!-- R5-FINISH-20261009:END -->
+
 <!-- R5-DELIVER-20261008:BEGIN -->
 ## DELIVER 批次：三轮十项已全部完成
 
