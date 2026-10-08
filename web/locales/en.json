@@ -364,6 +364,7 @@
   "plans.retentionHours": "Retention (hours)",
   "plans.rpmLimit": "RPM Limit",
   "plans.dailyQuota": "Daily Quota",
+  "plans.integerRequired": "Enter a whole number between -2147483648 and 2147483647.",
   "plans.creating": "Creating...",
   "plans.create": "Create",
   "plans.allPlans": "All Plans",

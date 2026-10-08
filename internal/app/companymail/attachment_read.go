@@ -2,6 +2,7 @@ package companymail
 
 import (
 	"context"
+	"errors"
 	"io"
 	"sync"
 )
@@ -14,11 +15,20 @@ func readAttachment(ctx context.Context, input io.Reader, limit int64) ([]byte, 
 
 // Object-store readers are owned by the download operation. As in the MIME
 // parser's ObjectReader contract, Close must unblock an in-flight Read.
-func readOwnedAttachment(ctx context.Context, input io.ReadCloser, limit int64) ([]byte, error) {
+func readOwnedAttachment(ctx context.Context, input io.ReadCloser, limit int64) (data []byte, err error) {
 	var once sync.Once
-	closeReader := func() { once.Do(func() { _ = input.Close() }) }
+	var closeErr error
+	closeReader := func() { once.Do(func() { closeErr = input.Close() }) }
 	stop := context.AfterFunc(ctx, closeReader)
-	defer func() { stop(); closeReader() }()
+	defer func() {
+		stop()
+		// Once also waits for a cancellation-triggered Close still in progress.
+		closeReader()
+		err = errors.Join(err, closeErr, ctx.Err())
+		if err != nil {
+			data = nil
+		}
+	}()
 	return readAttachment(ctx, input, limit)
 }
 
@@ -38,7 +48,7 @@ func (r *attachmentProgressReader) Read(p []byte) (int, error) {
 		n, err := r.input.Read(p)
 		if canceled := r.ctx.Err(); canceled != nil {
 			clear(p)
-			return 0, canceled
+			return 0, errors.Join(err, canceled)
 		}
 		if n < 0 || n > len(p) {
 			clear(p)

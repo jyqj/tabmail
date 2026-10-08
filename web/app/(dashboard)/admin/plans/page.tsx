@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useId, useState, type Dispatch, type SetStateAction } from "react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,34 @@ interface PlanFormData {
   daily_quota: string;
 }
 
+type NumericField = Exclude<keyof PlanFormData, "name">;
+const numericFields: NumericField[] = [
+  "max_domains", "max_mailboxes_per_domain", "max_messages_per_mailbox",
+  "max_message_bytes", "retention_hours", "rpm_limit", "daily_quota",
+];
+
+function parsePlanForm(form: PlanFormData) {
+  const errors: NumericField[] = [];
+  const values = {} as Record<NumericField, number>;
+  for (const key of numericFields) {
+    const raw = form[key].trim();
+    const value = Number(raw);
+    // Validate the decimal text too: Number can round a fractional value such
+    // as 1.0000000000000001 (or an underflow) to an apparently valid integer.
+    const [mantissa, exponent = "0"] = raw.toLowerCase().split("e");
+    const fractionLength = (mantissa.split(".")[1] ?? "").length - Number(exponent);
+    const digits = mantissa.replace(/[+.\-]/g, "");
+    const fractional = fractionLength > 0 && /[1-9]/.test(digits.slice(-fractionLength));
+    if (
+      !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw) ||
+      !Number.isFinite(value) || !Number.isInteger(value) || fractional ||
+      value < -2147483648 || value > 2147483647
+    ) errors.push(key);
+    else values[key] = value;
+  }
+  return { errors, input: { name: form.name.trim(), ...values } };
+}
+
 const defaultForm: PlanFormData = {
   name: "",
   max_domains: "5",
@@ -62,11 +90,13 @@ export default function PlansPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [creating, setCreating] = useState(false);
   const [form, setForm] = useState<PlanFormData>(defaultForm);
+  const [formErrors, setFormErrors] = useState<NumericField[]>([]);
 
   const [editOpen, setEditOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [editForm, setEditForm] = useState<PlanFormData>(defaultForm);
   const [saving, setSaving] = useState(false);
+  const [editErrors, setEditErrors] = useState<NumericField[]>([]);
 
   const fields: { key: keyof PlanFormData; label: string; type?: string }[] = [
     { key: "name", label: t("plans.name") },
@@ -81,18 +111,12 @@ export default function PlansPage() {
 
   const handleCreate = async () => {
     if (!form.name.trim()) return;
+    const parsed = parsePlanForm(form);
+    setFormErrors(parsed.errors);
+    if (parsed.errors.length) return;
     setCreating(true);
     try {
-      await createPlan({
-        name: form.name.trim(),
-        max_domains: Number(form.max_domains),
-        max_mailboxes_per_domain: Number(form.max_mailboxes_per_domain),
-        max_messages_per_mailbox: Number(form.max_messages_per_mailbox),
-        max_message_bytes: Number(form.max_message_bytes),
-        retention_hours: Number(form.retention_hours),
-        rpm_limit: Number(form.rpm_limit),
-        daily_quota: Number(form.daily_quota),
-      });
+      await createPlan(parsed.input);
       setForm(defaultForm);
       setDialogOpen(false);
       toast.success(t("plans.planCreated"));
@@ -118,6 +142,7 @@ export default function PlansPage() {
 
   const openEdit = (plan: Plan) => {
     setEditingPlan(plan);
+    setEditErrors([]);
     setEditForm({
       name: plan.name,
       max_domains: String(plan.max_domains),
@@ -133,18 +158,12 @@ export default function PlansPage() {
 
   const handleEdit = async () => {
     if (!editingPlan || !editForm.name.trim()) return;
+    const parsed = parsePlanForm(editForm);
+    setEditErrors(parsed.errors);
+    if (parsed.errors.length) return;
     setSaving(true);
     try {
-      await updatePlan(editingPlan.id, {
-        name: editForm.name.trim(),
-        max_domains: Number(editForm.max_domains),
-        max_mailboxes_per_domain: Number(editForm.max_mailboxes_per_domain),
-        max_messages_per_mailbox: Number(editForm.max_messages_per_mailbox),
-        max_message_bytes: Number(editForm.max_message_bytes),
-        retention_hours: Number(editForm.retention_hours),
-        rpm_limit: Number(editForm.rpm_limit),
-        daily_quota: Number(editForm.daily_quota),
-      });
+      await updatePlan(editingPlan.id, parsed.input);
       setEditOpen(false);
       setEditingPlan(null);
       toast.success(t("plans.updated"));
@@ -183,7 +202,7 @@ export default function PlansPage() {
               </Button>
             }
           >
-            <PlanFormFields fields={fields} value={form} onChange={setForm} />
+            <PlanFormFields fields={fields} value={form} onChange={setForm} errors={formErrors} setErrors={setFormErrors} />
           </FormDialog>
         }
       />
@@ -283,7 +302,7 @@ export default function PlansPage() {
             </Button>
           }
         >
-          <PlanFormFields fields={fields} value={editForm} onChange={setEditForm} />
+          <PlanFormFields fields={fields} value={editForm} onChange={setEditForm} errors={editErrors} setErrors={setEditErrors} />
         </FormDialog>
       )}
     </div>
@@ -294,24 +313,42 @@ function PlanFormFields({
   fields,
   value,
   onChange,
+  errors,
+  setErrors,
 }: {
   fields: { key: keyof PlanFormData; label: string; type?: string }[];
   value: PlanFormData;
   onChange: Dispatch<SetStateAction<PlanFormData>>;
+  errors: NumericField[];
+  setErrors: Dispatch<SetStateAction<NumericField[]>>;
 }) {
+  const id = useId();
+  const { t } = useI18n();
   return (
     <div className="space-y-3 py-4 max-h-[60vh] overflow-y-auto">
       {fields.map((f) => (
         <div key={f.key} className="space-y-1.5">
-          <Label className="text-xs">{f.label}</Label>
+          <Label htmlFor={`${id}-${f.key}`} className="text-xs">{f.label}</Label>
           <Input
+            id={`${id}-${f.key}`}
             type={f.type || "text"}
             value={value[f.key]}
-            onChange={(e) =>
-              onChange((prev) => ({ ...prev, [f.key]: e.target.value }))
-            }
+            min={f.type === "number" ? -2147483648 : undefined}
+            max={f.type === "number" ? 2147483647 : undefined}
+            step={f.type === "number" ? 1 : undefined}
+            aria-invalid={errors.some(key => key === f.key) || undefined}
+            aria-describedby={errors.some(key => key === f.key) ? `${id}-${f.key}-error` : undefined}
+            onChange={(e) => {
+              onChange((prev) => ({ ...prev, [f.key]: e.target.value }));
+              setErrors(prev => prev.filter(key => key !== f.key));
+            }}
             placeholder={f.label}
           />
+          {errors.some(key => key === f.key) && (
+            <p id={`${id}-${f.key}-error`} role="alert" className="text-xs text-destructive">
+              {t("plans.integerRequired")}
+            </p>
+          )}
         </div>
       ))}
     </div>
