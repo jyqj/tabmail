@@ -115,6 +115,13 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 		if e != nil {
 			return nil, e
 		}
+		if int64(len(raw)) > MaxBytes {
+			return nil, ErrMIMEBytes
+		}
+		sourceHash := Hash(raw)
+		if e = ValidateSourceHash(key, sourceHash); e != nil {
+			return nil, e
+		}
 		env, e := parseBoundedContext(parseCtx, raw)
 		if e != nil {
 			return nil, e
@@ -127,7 +134,7 @@ func (p *Parser) load(ctx context.Context, key string) (*parsed, error) {
 		for _, f := range parts {
 			size += int64(len(f.Content))
 		}
-		v := &parsed{env: env, hash: Hash(raw), size: size, key: key, until: time.Now().Add(2 * time.Minute)}
+		v := &parsed{env: env, hash: sourceHash, size: size, key: key, until: time.Now().Add(2 * time.Minute)}
 		p.mu.Lock()
 		defer p.mu.Unlock()
 		if e = parseCtx.Err(); e != nil {
