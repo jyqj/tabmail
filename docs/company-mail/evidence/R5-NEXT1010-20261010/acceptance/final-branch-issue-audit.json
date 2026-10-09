@@ -1,0 +1,1747 @@
+{
+  "schema": "recovered-final-pr-branch-issue-audit-v1",
+  "status": "PASS_READ_ONLY_FINAL_10_IMPLEMENTATION_TODOS",
+  "retrieval_started": "2026-10-09 21:44:01 UTC",
+  "retrieval_finished": "2026-10-09 21:45:53 UTC",
+  "scope": "Fresh GitHub read-only audit after all three implementation merges, catalog maintenance and separate R2 verification merge. No Go/PG rerun, PR mutation, issue mutation, branch deletion or source modification.",
+  "implementation_progress": {
+    "target": 10,
+    "completed": 10,
+    "remaining": 0,
+    "counted_issues": [
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      249,
+      250,
+      252,
+      253
+    ],
+    "withdrawn_not_planned_issues": [
+      248,
+      251
+    ],
+    "maintenance_and_verification_todos_counted": 0,
+    "rounds": [
+      {
+        "round": 1,
+        "issues": [
+          242,
+          243,
+          244,
+          245
+        ],
+        "newly_completed": 4,
+        "completed_total": 4,
+        "remaining": 6
+      },
+      {
+        "round": 2,
+        "issues": [
+          246,
+          247,
+          252
+        ],
+        "newly_completed": 3,
+        "completed_total": 7,
+        "remaining": 3
+      },
+      {
+        "round": 3,
+        "issues": [
+          249,
+          250,
+          253
+        ],
+        "newly_completed": 3,
+        "completed_total": 10,
+        "remaining": 0
+      }
+    ],
+    "checkboxes_checked": 40,
+    "checkboxes_unchecked": 0,
+    "all_counted_issues_independently_fresh_read": true
+  },
+  "issues": [
+    {
+      "number": 242,
+      "url": "https://github.com/jyqj/tabmail/issues/242",
+      "title": "R5 NEXT1010-01: Bind refresh JWT issuance to the rotated authentication snapshot",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T20:33:42Z",
+      "updated_at": "2026-10-09T20:33:42Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Capture the locked user authentication snapshot during rotation; issue only from an unchanged snapshot."
+        },
+        {
+          "checked": true,
+          "text": "Deterministic rotation-return barrier reproduces password change and freeze/reactivation races; reject changed identity/session and clear/revoke the descendant appropriately."
+        },
+        {
+          "checked": true,
+          "text": "Run real PostgreSQL and handler regressions, including successful refresh and transient post-rotation read failure."
+        },
+        {
+          "checked": true,
+          "text": "Review and merge implementation into #56 integration, then record exact source and test evidence."
+        }
+      ],
+      "body_utf8_sha256": "0c8d4a229c31d65f9b7a77f9f3714ae52f4f7e2628a02d7cd8db02e27191a0ba",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 243,
+      "url": "https://github.com/jyqj/tabmail/issues/243",
+      "title": "R5 NEXT1010-02: Include permission-management actions in company audit results",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T20:33:44Z",
+      "updated_at": "2026-10-09T20:33:44Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Add an explicit allowlist of the production permission management actions."
+        },
+        {
+          "checked": true,
+          "text": "Exercise real create/update/assign/override/delete commands and verify company audit pagination exposes their records."
+        },
+        {
+          "checked": true,
+          "text": "Preserve tenant/admin isolation, safe details projection and rejection of unknown permission actions."
+        },
+        {
+          "checked": true,
+          "text": "Run PostgreSQL and HTTP regressions, review and merge with exact evidence."
+        }
+      ],
+      "body_utf8_sha256": "79df341f64d048fa231c19d3c3713e310e5848bdeaa1915b328872b783798520",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 244,
+      "url": "https://github.com/jyqj/tabmail/issues/244",
+      "title": "R5 NEXT1010-03: Preserve newer tenant-create dialogs and drafts during pending requests",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T20:33:46Z",
+      "updated_at": "2026-10-09T20:33:46Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Bind submission completion and busy state to the opening, session and submitted draft."
+        },
+        {
+          "checked": true,
+          "text": "Keep a newer dialog or changed draft intact and prevent synchronous duplicate POSTs."
+        },
+        {
+          "checked": true,
+          "text": "Distinguish confirmed creation from a subsequent list-refresh failure; avoid stale/unmounted feedback."
+        },
+        {
+          "checked": true,
+          "text": "Run fixed real-component regressions, TypeScript and changed-code lint, then review and merge."
+        }
+      ],
+      "body_utf8_sha256": "48d8de1f4bfb98f8d41d6122cbb106377ae7442eea329f29b1e7f25f1ddb0c4a",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 245,
+      "url": "https://github.com/jyqj/tabmail/issues/245",
+      "title": "R5 NEXT1010-04: Honor configured batch sizes in serial-claim ingest and outbound workers",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T20:33:48Z",
+      "updated_at": "2026-10-09T20:33:48Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Wire production ingest and outbound constructors to serial-claim semantics."
+        },
+        {
+          "checked": true,
+          "text": "Verify configured batch progress for both adapters through their production worker construction."
+        },
+        {
+          "checked": true,
+          "text": "Do not preclaim future tasks during slow processing; preserve batch bound, empty queue, cancellation and shutdown behavior."
+        },
+        {
+          "checked": true,
+          "text": "Run fixed baseline/candidate tests and race regressions, review and merge."
+        }
+      ],
+      "body_utf8_sha256": "6361ca03353259cd9b19d6148af585f4904228f32a11c9bdd0745620f7143e63",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 246,
+      "url": "https://github.com/jyqj/tabmail/issues/246",
+      "title": "R5 NEXT1010-05: Fence employee activation against cross-home inviter revocation",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T21:40:12Z",
+      "updated_at": "2026-10-09T21:40:12Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Revalidate the current inviter under a lock held through activation commit; preserve lock ordering and bounded conflicts."
+        },
+        {
+          "checked": true,
+          "text": "Use a real PostgreSQL barrier to commit cross-home inviter revocation while activation is paused."
+        },
+        {
+          "checked": true,
+          "text": "Reject stale authority and roll back all user/mailbox/member/invitation side effects; retain legitimate cross-home activation."
+        },
+        {
+          "checked": true,
+          "text": "Review and merge with exact PostgreSQL evidence."
+        }
+      ],
+      "body_utf8_sha256": "222fb4aefa0d7d82e75885f27d3de816b1aafb72831e27d33a7abd070a622b3c",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 247,
+      "url": "https://github.com/jyqj/tabmail/issues/247",
+      "title": "R5 NEXT1010-06: Fence tenant deletion across confirmation, session changes and unmount",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T21:40:13Z",
+      "updated_at": "2026-10-09T21:40:13Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Capture and revalidate session/component ownership before and after confirmation."
+        },
+        {
+          "checked": true,
+          "text": "Guard duplicate row operations synchronously, including reentrant confirmation."
+        },
+        {
+          "checked": true,
+          "text": "Suppress obsolete completions and preserve confirmed deletion versus refresh-failure semantics."
+        },
+        {
+          "checked": true,
+          "text": "Run fixed real-component/request-layer regressions, TypeScript and lint, review and merge."
+        }
+      ],
+      "body_utf8_sha256": "b49f71b54b663671ae380976608b4545115b88e98afd462bc88824bc4803fd92",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 249,
+      "url": "https://github.com/jyqj/tabmail/issues/249",
+      "title": "R5 NEXT1010-08: Preserve activation storage failures instead of reporting duplicate identities",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T21:41:35Z",
+      "updated_at": "2026-10-09T21:41:35Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Map only relevant unique violations to duplicate-identity conflict."
+        },
+        {
+          "checked": true,
+          "text": "Preserve operational error chains and existing concurrent-operation error semantics."
+        },
+        {
+          "checked": true,
+          "text": "Inject real PostgreSQL user/mailbox write failures and test cancellation, real duplicates and complete transaction rollback."
+        },
+        {
+          "checked": true,
+          "text": "Review and merge with exact source and regression evidence."
+        }
+      ],
+      "body_utf8_sha256": "26ad1be27ad1b07c5a787e4163b6bb8ba71983148bec3e63e9c43b98a135b493",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 250,
+      "url": "https://github.com/jyqj/tabmail/issues/250",
+      "title": "R5 NEXT1010-09: Validate index-retry receipts and preserve confirmed recovery state",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T21:41:37Z",
+      "updated_at": "2026-10-09T21:41:37Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Validate the actual bounded integer receipt contract before claiming success."
+        },
+        {
+          "checked": true,
+          "text": "Bind recovery feedback and updates to the active mount/session."
+        },
+        {
+          "checked": true,
+          "text": "Retain a confirmed POST result on GET-refresh failure and provide read-only refresh recovery."
+        },
+        {
+          "checked": true,
+          "text": "Run malformed-receipt, duplicate-action, unmount/session and refresh-error component tests, TypeScript/lint; review and merge."
+        }
+      ],
+      "body_utf8_sha256": "29d278fba008fc1f623da6881b02b0c9a5dc80fcba9844695a2769947955529f",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 252,
+      "url": "https://github.com/jyqj/tabmail/issues/252",
+      "title": "R5 NEXT1010-11: Reject nested SMTP MAIL commands without mutating the active envelope",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T21:40:15Z",
+      "updated_at": "2026-10-09T21:40:15Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Reject out-of-sequence nested MAIL with 503 before invoking sender admission or changing transaction state."
+        },
+        {
+          "checked": true,
+          "text": "Publish backend sender state only after successful admission."
+        },
+        {
+          "checked": true,
+          "text": "Exercise real loopback SMTP DATA and BDAT, accepted/refused second senders, RSET/EHLO/transaction completion and durable/non-durable paths."
+        },
+        {
+          "checked": true,
+          "text": "Preserve existing tests and verify fixed baseline/candidate regressions and race suites; review and merge."
+        }
+      ],
+      "body_utf8_sha256": "d674571c244f3c251d616809f3d15e61a3f4df0c6ec248120609be9afc0532cb",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 253,
+      "url": "https://github.com/jyqj/tabmail/issues/253",
+      "title": "R5 NEXT1010-12: Resolve internationalized SMTP recipient domains through IDNA DNS names",
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T21:41:38Z",
+      "updated_at": "2026-10-09T21:41:38Z",
+      "checked": 4,
+      "unchecked": 0,
+      "task_checkboxes": [
+        {
+          "checked": true,
+          "text": "Convert recipient DNS domains to IDNA A-labels at the resolver boundary per RFC 6531."
+        },
+        {
+          "checked": true,
+          "text": "Use the converted domain consistently for MX lookup, implicit MX fallback and appropriate TLS server naming while preserving recipient identity."
+        },
+        {
+          "checked": true,
+          "text": "Cover Unicode DNS with a local deterministic DNS fixture, ASCII, address literals, null MX, temporary failures and cancellation."
+        },
+        {
+          "checked": true,
+          "text": "Run fixed baseline/candidate and race regressions, review and merge with evidence."
+        }
+      ],
+      "body_utf8_sha256": "10a5e84111a343ce52bfad8f0e50758d3373db517a9cf8bb62fb293d8e35d462",
+      "counted_implementation_todo": true
+    },
+    {
+      "number": 248,
+      "url": "https://github.com/jyqj/tabmail/issues/248",
+      "title": "R5 NEXT1010-07: Bound SMTP DATA persistence by the configured operation timeout",
+      "state": "closed",
+      "state_reason": "not_planned",
+      "closed_at": "2026-10-09T19:07:20Z",
+      "updated_at": "2026-10-09T19:07:21Z",
+      "checked": 0,
+      "unchecked": 4,
+      "task_checkboxes": [
+        {
+          "checked": false,
+          "text": "Give DATA persistence an independent configured timeout while retaining shutdown cancellation."
+        },
+        {
+          "checked": false,
+          "text": "Exercise real loopback SMTP with an adapter blocked until context cancellation; observe bounded temporary failure and released work."
+        },
+        {
+          "checked": false,
+          "text": "Preserve durable-acceptance uncertainty and raw-object recovery; never acknowledge non-durable writes as success."
+        },
+        {
+          "checked": false,
+          "text": "Run fixed baseline/candidate and race tests, review and merge."
+        }
+      ],
+      "body_utf8_sha256": "d81eab223bcd04df9f6d3def89d64f991cafc97986f6d3ccea27712f478e001d",
+      "counted_implementation_todo": false
+    },
+    {
+      "number": 251,
+      "url": "https://github.com/jyqj/tabmail/issues/251",
+      "title": "R5 NEXT1010-10: Validate SMTP envelope byte limits before outbound submission",
+      "state": "closed",
+      "state_reason": "not_planned",
+      "closed_at": "2026-10-09T19:07:22Z",
+      "updated_at": "2026-10-09T19:07:23Z",
+      "checked": 0,
+      "unchecked": 4,
+      "task_checkboxes": [
+        {
+          "checked": false,
+          "text": "Verify the octet limits against primary SMTP/SMTPUTF8 standards and enforce them in the shared production validation path."
+        },
+        {
+          "checked": false,
+          "text": "Cover ASCII, UTF-8, quoted local parts and address literals at exact boundaries."
+        },
+        {
+          "checked": false,
+          "text": "Invalid To/CC/BCC input must fail before quota, queue and raw-object side effects; valid limits remain supported."
+        },
+        {
+          "checked": false,
+          "text": "Run fixed baseline/candidate and race regressions, review and merge."
+        }
+      ],
+      "body_utf8_sha256": "c29407650557e8d59ab9bbc1cea05a7dedbcf21db5163387432c98a49cfe86c1",
+      "counted_implementation_todo": false
+    }
+  ],
+  "merged_prs": [
+    {
+      "number": 254,
+      "round": 1,
+      "url": "https://github.com/jyqj/tabmail/pull/254",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T20:33:19Z",
+      "head_ref": "fix/r5-next1010-round1",
+      "head_sha": "b458e917c6b084fbc557f351f03ca762b1c11924",
+      "base_ref": "integration/company-mail-r5-pr-management-20261007",
+      "payload_base_sha": "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+      "actual_merge_commit": "a6a0090fc069d131213b559f94c669184525f312",
+      "complete_tree": "8dba655927b80a1e5ee66228fd3d29bab3a8bee2",
+      "parents": [
+        "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+        "b458e917c6b084fbc557f351f03ca762b1c11924"
+      ],
+      "head_reachable_as_second_parent": true,
+      "merge_and_tree_match_expected": true,
+      "stale_payload_base_not_used_as_actual_ref": true
+    },
+    {
+      "number": 255,
+      "round": 2,
+      "url": "https://github.com/jyqj/tabmail/pull/255",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T21:39:36Z",
+      "head_ref": "fix/r5-next1010-round2",
+      "head_sha": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+      "base_ref": "integration/company-mail-r5-pr-management-20261007",
+      "payload_base_sha": "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+      "actual_merge_commit": "421293164295073a024799c5bf5bc2cc328647a0",
+      "complete_tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b",
+      "parents": [
+        "a6a0090fc069d131213b559f94c669184525f312",
+        "13a2a07979b2939fe30330e81cc5e12bec253be2"
+      ],
+      "head_reachable_as_second_parent": true,
+      "merge_and_tree_match_expected": true,
+      "stale_payload_base_not_used_as_actual_ref": true
+    },
+    {
+      "number": 256,
+      "round": 3,
+      "url": "https://github.com/jyqj/tabmail/pull/256",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T21:41:01Z",
+      "head_ref": "fix/r5-next1010-round3",
+      "head_sha": "177ee571b194836678cc9a473f178c655326ba7c",
+      "base_ref": "integration/company-mail-r5-pr-management-20261007",
+      "payload_base_sha": "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+      "actual_merge_commit": "66a059d90cd93069926595af4587e42998f0b53a",
+      "complete_tree": "2d5d2c44680f6a6cb2b2d1166e2923806beafcc8",
+      "parents": [
+        "421293164295073a024799c5bf5bc2cc328647a0",
+        "177ee571b194836678cc9a473f178c655326ba7c"
+      ],
+      "head_reachable_as_second_parent": true,
+      "merge_and_tree_match_expected": true,
+      "stale_payload_base_not_used_as_actual_ref": true
+    },
+    {
+      "number": 257,
+      "round": "catalog-maintenance",
+      "url": "https://github.com/jyqj/tabmail/pull/257",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T21:42:02Z",
+      "head_ref": "chore/r5-next1010-catalog18",
+      "head_sha": "6a402ce1269bfc41c932a67b592fee5bca235774",
+      "base_ref": "integration/company-mail-r5-pr-management-20261007",
+      "payload_base_sha": "ffb22b64698e4ff168a8d622018d3e169b3cdf07",
+      "actual_merge_commit": "f92517a2fe39cf2bc186ec1f57601cd438d81d72",
+      "complete_tree": "e8a04cbe516889f225d24ae7aed5d81d8e073650",
+      "parents": [
+        "66a059d90cd93069926595af4587e42998f0b53a",
+        "6a402ce1269bfc41c932a67b592fee5bca235774"
+      ],
+      "head_reachable_as_second_parent": true,
+      "merge_and_tree_match_expected": true,
+      "stale_payload_base_not_used_as_actual_ref": true
+    },
+    {
+      "number": 258,
+      "round": "verification-only",
+      "url": "https://github.com/jyqj/tabmail/pull/258",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T21:42:35Z",
+      "head_ref": "verification/r5-next1010-r2-replay",
+      "head_sha": "4cc223a901d39e74cf885f2e6ce848fa5dd09acc",
+      "base_ref": "verification/r5-next1010-r2-replay-base",
+      "payload_base_sha": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+      "actual_merge_commit": "c8bd2173b804654c4cd4e0ca6fb77cabdd2fd719",
+      "complete_tree": "47955583e2c043134d9a91aac587e4f5cc5d8ef0",
+      "parents": [
+        "13a2a07979b2939fe30330e81cc5e12bec253be2",
+        "4cc223a901d39e74cf885f2e6ce848fa5dd09acc"
+      ],
+      "head_reachable_as_second_parent": true,
+      "merge_and_tree_match_expected": true,
+      "stale_payload_base_not_used_as_actual_ref": true
+    }
+  ],
+  "integration": {
+    "ref": "integration/company-mail-r5-pr-management-20261007",
+    "actual_sha": "f92517a2fe39cf2bc186ec1f57601cd438d81d72",
+    "complete_tree": "e8a04cbe516889f225d24ae7aed5d81d8e073650"
+  },
+  "main": {
+    "actual_sha": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+    "unchanged": true
+  },
+  "integration_pr": {
+    "number": 56,
+    "url": "https://github.com/jyqj/tabmail/pull/56",
+    "state": "open",
+    "draft": true,
+    "head": "f92517a2fe39cf2bc186ec1f57601cd438d81d72",
+    "base": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+    "mergeable": true,
+    "mergeable_state": "unstable",
+    "not_merged_to_main": true
+  },
+  "remote_branch_inventory": {
+    "count": 118,
+    "unique_names": 118,
+    "page_sizes": [
+      100,
+      18,
+      0
+    ],
+    "per_page": 100,
+    "terminal_empty_page_observed": true,
+    "complete_at_retrieval_time": true,
+    "all_names_and_shas": [
+      {
+        "name": "audit-pr21-41b015c",
+        "commit": {
+          "sha": "d6640db3f1b6833f082d7d85948300c8aebdc186",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d6640db3f1b6833f082d7d85948300c8aebdc186"
+        },
+        "protected": false
+      },
+      {
+        "name": "candidate/r5-consumer-adapter-20261004",
+        "commit": {
+          "sha": "3ff6db72b579419a7145d2bc2a3b888c111c9b62",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/3ff6db72b579419a7145d2bc2a3b888c111c9b62"
+        },
+        "protected": false
+      },
+      {
+        "name": "candidate/r5-consumer-adapter-corrected-20261004",
+        "commit": {
+          "sha": "116d44a2a9c0b5d7ac6a09187bf3fae22c1a1e50",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/116d44a2a9c0b5d7ac6a09187bf3fae22c1a1e50"
+        },
+        "protected": false
+      },
+      {
+        "name": "candidate/r5-consumer-classifier-contract-20261004",
+        "commit": {
+          "sha": "0c9adb17559e347ed99b3661d789b80ba59762aa",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/0c9adb17559e347ed99b3661d789b80ba59762aa"
+        },
+        "protected": false
+      },
+      {
+        "name": "candidate/r5-consumer-generated-provenance-20261004",
+        "commit": {
+          "sha": "632d55de566254c618bca9a54c5dbae7b355fcf9",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/632d55de566254c618bca9a54c5dbae7b355fcf9"
+        },
+        "protected": false
+      },
+      {
+        "name": "candidate/r5-runtime-v3-20261004",
+        "commit": {
+          "sha": "97c54dc8dad6ab2da6d4dd29e43c20b7091db73f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/97c54dc8dad6ab2da6d4dd29e43c20b7091db73f"
+        },
+        "protected": false
+      },
+      {
+        "name": "candidate/r5-slice4-batch-20261004",
+        "commit": {
+          "sha": "5ebf159302520507829b93c5502b94b0f768f94e",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/5ebf159302520507829b93c5502b94b0f768f94e"
+        },
+        "protected": false
+      },
+      {
+        "name": "candidate/slice4-bridge-caller-20261004",
+        "commit": {
+          "sha": "4643de904ff171b9b14189f63ff5e28470a73c72",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/4643de904ff171b9b14189f63ff5e28470a73c72"
+        },
+        "protected": false
+      },
+      {
+        "name": "chore/company-mail-r5-checkpoint-20260930",
+        "commit": {
+          "sha": "c1b4deb17e02225804e30536e369a9905ce2cb94",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/c1b4deb17e02225804e30536e369a9905ce2cb94"
+        },
+        "protected": false
+      },
+      {
+        "name": "chore/selected-v3-metadata-gate-20261004-pnkZA9ce",
+        "commit": {
+          "sha": "de69c3ea0d3a744a5fd8dad86f699334b475c2f3",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/de69c3ea0d3a744a5fd8dad86f699334b475c2f3"
+        },
+        "protected": false
+      },
+      {
+        "name": "ci/company-mail-r5-wiring-20261003",
+        "commit": {
+          "sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/41b015c30c66b3ba58a3c1395e8559ebcd27a65f"
+        },
+        "protected": false
+      },
+      {
+        "name": "cloud/r5-source-integration-20261004",
+        "commit": {
+          "sha": "f52f8cbbf31dcbfb72ba062af6623248334a2e99",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f52f8cbbf31dcbfb72ba062af6623248334a2e99"
+        },
+        "protected": false
+      },
+      {
+        "name": "cloud/r5-union-components-f52-20261004-prestart-c741",
+        "commit": {
+          "sha": "fb30aa8142fa6857c5cf1fdecf14698f88c7823f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/fb30aa8142fa6857c5cf1fdecf14698f88c7823f"
+        },
+        "protected": false
+      },
+      {
+        "name": "cloud/r5-union-dbhttp-f52-20261004-0449",
+        "commit": {
+          "sha": "8cda0a51a5a9dc030a722b34423cef2b5bb1b9a8",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/8cda0a51a5a9dc030a722b34423cef2b5bb1b9a8"
+        },
+        "protected": false
+      },
+      {
+        "name": "cloud/r5-union-default-f52-20261004-0441",
+        "commit": {
+          "sha": "6dd507f565f2073ed1582d63cbc03ed10530014e",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/6dd507f565f2073ed1582d63cbc03ed10530014e"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/pe-independent-review",
+        "commit": {
+          "sha": "4502cf391d005bc3bbc500dffb5b63b65f7e3b0f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/4502cf391d005bc3bbc500dffb5b63b65f7e3b0f"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/pe-shared-adapter",
+        "commit": {
+          "sha": "9510bfd85264e92191cad277ef7187cd4fad8abf",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/9510bfd85264e92191cad277ef7187cd4fad8abf"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/r5-approved-catalog-reconciliation-20261004",
+        "commit": {
+          "sha": "4540fb91ba742443dcf0a872b80261e58af7b3ab",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/4540fb91ba742443dcf0a872b80261e58af7b3ab"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/r5-compatibility-source-boundary",
+        "commit": {
+          "sha": "ee3308fd3217246c9bdd43b07ae0609ebae6aeb6",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/ee3308fd3217246c9bdd43b07ae0609ebae6aeb6"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/r5-compile-stability-20261004",
+        "commit": {
+          "sha": "f25f7d22badf5240559f0144664e1fa1ef98f331",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f25f7d22badf5240559f0144664e1fa1ef98f331"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/r5-current-wire-20261003",
+        "commit": {
+          "sha": "ac5db2ee72b97b027a14d6e885d3870276bfaf82",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/ac5db2ee72b97b027a14d6e885d3870276bfaf82"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/r5-env-evidence-20261004",
+        "commit": {
+          "sha": "3f34c31ed51a721b318a76512805e4a14dc292c3",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/3f34c31ed51a721b318a76512805e4a14dc292c3"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/r5-external-runtime-20261003",
+        "commit": {
+          "sha": "4b2eb09c18adb50aa128af1907b53820e7305f95",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/4b2eb09c18adb50aa128af1907b53820e7305f95"
+        },
+        "protected": false
+      },
+      {
+        "name": "codex/r5-v3-preparation-slice2",
+        "commit": {
+          "sha": "7262e78e0120c5a203bb588807ca876b82c4d5bc",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/7262e78e0120c5a203bb588807ca876b82c4d5bc"
+        },
+        "protected": false
+      },
+      {
+        "name": "design/r5-v3-consumer-opt-in-20261004",
+        "commit": {
+          "sha": "42f49538f7bceb6eb8e698d716c1418f85343413",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/42f49538f7bceb6eb8e698d716c1418f85343413"
+        },
+        "protected": false
+      },
+      {
+        "name": "docs/r5-archive-boundary-v1",
+        "commit": {
+          "sha": "05b4bb886164d0d85353a542fbb2881f104089b4",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/05b4bb886164d0d85353a542fbb2881f104089b4"
+        },
+        "protected": false
+      },
+      {
+        "name": "evidence/r5-catalog-rev11-3a-20261008-b8f95a",
+        "commit": {
+          "sha": "f2713367dd949487c632ebee51de3a0cc1d2c6f7",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f2713367dd949487c632ebee51de3a0cc1d2c6f7"
+        },
+        "protected": false
+      },
+      {
+        "name": "experiment/goose-buffer-64k",
+        "commit": {
+          "sha": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f4ed1f4257ff104a53ffdb49416e50fd5c6668b4"
+        },
+        "protected": false
+      },
+      {
+        "name": "feat/r5-archive-boundary-v1",
+        "commit": {
+          "sha": "66eb5e819170d3508edb07db8ab1e0014555ff8c",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/66eb5e819170d3508edb07db8ab1e0014555ff8c"
+        },
+        "protected": false
+      },
+      {
+        "name": "feat/runtime-batch-validation",
+        "commit": {
+          "sha": "f5e54f101964822da6cea6f9e958fe89d1688a39",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f5e54f101964822da6cea6f9e958fe89d1688a39"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/auth-body-limit-20261005",
+        "commit": {
+          "sha": "0e0288fed6da7c8fdfae80c6b4bd4a9958e6b14b",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/0e0288fed6da7c8fdfae80c6b4bd4a9958e6b14b"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/batch-supervisor-lifecycle-20261004",
+        "commit": {
+          "sha": "68ae9c566af48c378c9f1958ae3f2caeeb66936e",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/68ae9c566af48c378c9f1958ae3f2caeeb66936e"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/browser-reply-journey-20261003",
+        "commit": {
+          "sha": "1be7c846e71ba21c26518cc4bcc5229fde73de12",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/1be7c846e71ba21c26518cc4bcc5229fde73de12"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/compose-query-completion-20261005",
+        "commit": {
+          "sha": "d1c7102507fe1cf050298b108096b3508662cd8f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d1c7102507fe1cf050298b108096b3508662cd8f"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/compose-send-lifecycle-20261005",
+        "commit": {
+          "sha": "4c8c6880e4936acfc933fde2102b88db21e8c754",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/4c8c6880e4936acfc933fde2102b88db21e8c754"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/direct-null-mx-20261006",
+        "commit": {
+          "sha": "2987f509131b0a569094959a2b35a5b8883e9c68",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/2987f509131b0a569094959a2b35a5b8883e9c68"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/draft-reload-serialization-20261005",
+        "commit": {
+          "sha": "1b85ff3e8a700fc179b64fdb93f951dbfb67b30f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/1b85ff3e8a700fc179b64fdb93f951dbfb67b30f"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/editor-opening-ownership-20261005",
+        "commit": {
+          "sha": "24f5bd4edcd50dbb4702b5fa109672697a8f0342",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/24f5bd4edcd50dbb4702b5fa109672697a8f0342"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/lf01-frozen-offboarding",
+        "commit": {
+          "sha": "648938a5baad2f35ba120da2cf5ae1001f8f3b4a",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/648938a5baad2f35ba120da2cf5ae1001f8f3b4a"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/live-content-refresh-20261005",
+        "commit": {
+          "sha": "71b99514f4aa4457462387abe2f68ca351185bff",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/71b99514f4aa4457462387abe2f68ca351185bff"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/mail-reader-invalidation-20261004",
+        "commit": {
+          "sha": "b90b91176ed0a85b14d1de63e869120fee89ee16",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/b90b91176ed0a85b14d1de63e869120fee89ee16"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/message-action-reconciliation-20261005",
+        "commit": {
+          "sha": "e80a057adefb1dfe7ec0389a6b03430c01222b2d",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/e80a057adefb1dfe7ec0389a6b03430c01222b2d"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/offboarding-successor-authz",
+        "commit": {
+          "sha": "062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/062c5bad63f2d37cedd0bfb1cdccf0fb7a195a8b"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/pr21-client-inventory",
+        "commit": {
+          "sha": "d9713c1222ef773ee27433eba42dff2e25716da2",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d9713c1222ef773ee27433eba42dff2e25716da2"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/pr21-harness-lint-41b015c",
+        "commit": {
+          "sha": "e04480866389b73e03fffd5c76f1b5a76a326214",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/e04480866389b73e03fffd5c76f1b5a76a326214"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/profile-refresh-three-way-20261003",
+        "commit": {
+          "sha": "7bb7658d363856e8f4a8cefc7630a6ec77e86f04",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/7bb7658d363856e8f4a8cefc7630a6ec77e86f04"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-benchmark-strict-evidence-20261001",
+        "commit": {
+          "sha": "5b7f8774643243711e8065f2403e419f5ba81065",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/5b7f8774643243711e8065f2403e419f5ba81065"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-descriptor-tests",
+        "commit": {
+          "sha": "f87830c265c9d4168f21bdbe04b8981b2dc04443",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f87830c265c9d4168f21bdbe04b8981b2dc04443"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-excluded-metadata",
+        "commit": {
+          "sha": "cb523295afc132869310d36d8de4d1fde25f32f4",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/cb523295afc132869310d36d8de4d1fde25f32f4"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-fixture-owner-join",
+        "commit": {
+          "sha": "8a5200bfd9496b02c2182cc0a04151103973a6e7",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/8a5200bfd9496b02c2182cc0a04151103973a6e7"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-legacy-recipients-alias-20261003",
+        "commit": {
+          "sha": "139b701a6d278f07bdd770fa1f4fc2c3c30f3d63",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/139b701a6d278f07bdd770fa1f4fc2c3c30f3d63"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-pe-seed-f875",
+        "commit": {
+          "sha": "d9a56effa08489f65ebc169ed161d18f8326ee25",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d9a56effa08489f65ebc169ed161d18f8326ee25"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-rc-receipt-contract-20261003",
+        "commit": {
+          "sha": "49776be96f0dfa860d2377447b407e037dcf4a90",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/49776be96f0dfa860d2377447b407e037dcf4a90"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-receipt-inspection-test-gate",
+        "commit": {
+          "sha": "b940c6e2a4aa050c657e065ff68c97de7f249b28",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/b940c6e2a4aa050c657e065ff68c97de7f249b28"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-receipt-surface-contract-20261003",
+        "commit": {
+          "sha": "9fc345308153fb664f115c7ac9ddd5abc3e46929",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/9fc345308153fb664f115c7ac9ddd5abc3e46929"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-router-touch-oracle",
+        "commit": {
+          "sha": "989171d9a32882b94d88c97e05c95cf87244034e",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/989171d9a32882b94d88c97e05c95cf87244034e"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-schema16-benchmark-fixtures",
+        "commit": {
+          "sha": "e9b243397f4a7d54e106d5bc6703c8ce0d0f948c",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/e9b243397f4a7d54e106d5bc6703c8ce0d0f948c"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-selected-source-binding-20261003",
+        "commit": {
+          "sha": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/529f54782f0cfc90ed2501c253723a4fd88497e0"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-shared-receipt-legacy-20261003",
+        "commit": {
+          "sha": "89e7af39aa53408225b284548bffe39ce467aa2d",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/89e7af39aa53408225b284548bffe39ce467aa2d"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-source-excluded-metadata-20261003",
+        "commit": {
+          "sha": "64cd11816cfd94c9dc80e65578edb06b92725e84",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/64cd11816cfd94c9dc80e65578edb06b92725e84"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-source-runner-preparation",
+        "commit": {
+          "sha": "92c040492d5a7ac94d5b72e63ca1be92c2fe5418",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/92c040492d5a7ac94d5b72e63ca1be92c2fe5418"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-stream-transport",
+        "commit": {
+          "sha": "f027fcd9f2720407d06a2459406b8af24ab38b90",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f027fcd9f2720407d06a2459406b8af24ab38b90"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-transaction-inventory",
+        "commit": {
+          "sha": "5bcfe6cd74dd4098d1b6362d61a666519f7cc765",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/5bcfe6cd74dd4098d1b6362d61a666519f7cc765"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-v3-producer-path-20261004",
+        "commit": {
+          "sha": "edd8e720c0b11c1bbacaaeffa7f8492129a2c098",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/edd8e720c0b11c1bbacaaeffa7f8492129a2c098"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/r5-v3-rejection-evidence-20261004",
+        "commit": {
+          "sha": "52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/52c2d4a996ff6e6bc7f7f8f36a3e161c5f6f3e73"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/receipt-aggregate-refresh-20261005",
+        "commit": {
+          "sha": "7a61bedef174ed82714323c743f33f6438ca3479",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/7a61bedef174ed82714323c743f33f6438ca3479"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/recipient-reload-display-20261005",
+        "commit": {
+          "sha": "e290412a0fb0cb1e303557edeff0d313427d2db3",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/e290412a0fb0cb1e303557edeff0d313427d2db3"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/selected-attestation-stable-capture",
+        "commit": {
+          "sha": "209d2f5db801dc4385cafd72d22301a056a3bd73",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/209d2f5db801dc4385cafd72d22301a056a3bd73"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/sent-action-lifecycle-20261005",
+        "commit": {
+          "sha": "00461ab2f5b8343b844c0cea1d014b20fe7c2ffb",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/00461ab2f5b8343b844c0cea1d014b20fe7c2ffb"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/smtp-data-cause-20261006",
+        "commit": {
+          "sha": "cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/cbc8c17ebd3599d5c92711d28088b0bf4edc3f8f"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/smtp-owner-logger-gate",
+        "commit": {
+          "sha": "c083d05e01a6fd5dd89a7e1412d415515f6b9b32",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/c083d05e01a6fd5dd89a7e1412d415515f6b9b32"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/sse-framing-20261004",
+        "commit": {
+          "sha": "650d4807359fae0b625d2a16a5b43466a2466ce0",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/650d4807359fae0b625d2a16a5b43466a2466ce0"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/subject-wire-encoding-20261006",
+        "commit": {
+          "sha": "9f2982d8366fabded56945991218a69cd715e1b8",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/9f2982d8366fabded56945991218a69cd715e1b8"
+        },
+        "protected": false
+      },
+      {
+        "name": "fix/tabmail-followup-recovery-20261008",
+        "commit": {
+          "sha": "fa6f559e12979fc76be8f876b135069358104d32",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/fa6f559e12979fc76be8f876b135069358104d32"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/catalog-v3-frozen-20261004",
+        "commit": {
+          "sha": "412f875985854527f5e7d74040f18954c3a352bf",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/412f875985854527f5e7d74040f18954c3a352bf"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/company-mail-r5-20261003",
+        "commit": {
+          "sha": "eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/eb366eecb6413f5aa025afb4ee63bd1eea7fdf7d"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/company-mail-r5-batch2-20261003",
+        "commit": {
+          "sha": "b4803fe6722ba05b83799459e88d4a014f546da2",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/b4803fe6722ba05b83799459e88d4a014f546da2"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/company-mail-r5-batch3-20261003",
+        "commit": {
+          "sha": "5ae68c2d037603cd0151e1b9188f2df4db1e45a1",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/5ae68c2d037603cd0151e1b9188f2df4db1e45a1"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/company-mail-r5-batch4-20261003",
+        "commit": {
+          "sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/e5e23e21abfe4c7e9f082405e56a95a7f346fa9a"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/company-mail-r5-batch5-20261003",
+        "commit": {
+          "sha": "4aec142bcffd53c6ab91f2263436aaf980833fab",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/4aec142bcffd53c6ab91f2263436aaf980833fab"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/company-mail-r5-pr-management-20261007",
+        "commit": {
+          "sha": "f92517a2fe39cf2bc186ec1f57601cd438d81d72",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f92517a2fe39cf2bc186ec1f57601cd438d81d72"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/pe-lf-components-20261004",
+        "commit": {
+          "sha": "5d3a8cfc81a77581919ea0b2a93f9c352fae5208",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/5d3a8cfc81a77581919ea0b2a93f9c352fae5208"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/r5-consumer-slices23-20261004",
+        "commit": {
+          "sha": "03f2f19b5e01f0f033405e7a84cde03794d491ca",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/03f2f19b5e01f0f033405e7a84cde03794d491ca"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/r5-slice4-combined-20261004",
+        "commit": {
+          "sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/593bbc6a3ac91b5dbf8917602e45900bff094e27"
+        },
+        "protected": false
+      },
+      {
+        "name": "integration/r5-source-combined-20261003",
+        "commit": {
+          "sha": "d97d45c0ea92d3733870ea8082a09f13160abe10",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d97d45c0ea92d3733870ea8082a09f13160abe10"
+        },
+        "protected": false
+      },
+      {
+        "name": "investigate/pe03-profile-editor",
+        "commit": {
+          "sha": "4b0bc7da980663069eb653e88f29e66dcb4e456a",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/4b0bc7da980663069eb653e88f29e66dcb4e456a"
+        },
+        "protected": false
+      },
+      {
+        "name": "main",
+        "commit": {
+          "sha": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d6d512172fb6b874c3283d9df3f4d56758684a13"
+        },
+        "protected": false
+      },
+      {
+        "name": "prep/source-policy-20261003",
+        "commit": {
+          "sha": "cf2c2cdd783d1484c5a964404bf90c4bc4c80d3f",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/cf2c2cdd783d1484c5a964404bf90c4bc4c80d3f"
+        },
+        "protected": false
+      },
+      {
+        "name": "r5-cloud-background-20261003",
+        "commit": {
+          "sha": "8d357eba379e510fdcde0a94648cdcf62ceb11f9",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/8d357eba379e510fdcde0a94648cdcf62ceb11f9"
+        },
+        "protected": false
+      },
+      {
+        "name": "r5-cloud-smtp-owner-20261003",
+        "commit": {
+          "sha": "b7ac8eb96bd8fabe7a7ddc3c3499679b13a19c87",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/b7ac8eb96bd8fabe7a7ddc3c3499679b13a19c87"
+        },
+        "protected": false
+      },
+      {
+        "name": "r5-permission-audit-20261003",
+        "commit": {
+          "sha": "7a436549ace77d1baf30f33f6fb8e163077fe34c",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/7a436549ace77d1baf30f33f6fb8e163077fe34c"
+        },
+        "protected": false
+      },
+      {
+        "name": "r5-source-v3-pure-isolated-20261003",
+        "commit": {
+          "sha": "8de4809516a39ad43b0e17afa288bcedab8b40a7",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/8de4809516a39ad43b0e17afa288bcedab8b40a7"
+        },
+        "protected": false
+      },
+      {
+        "name": "r5/formal-components-f875-20261004",
+        "commit": {
+          "sha": "46de5010b7dc79b841c52d6ff7245d070a846a76",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/46de5010b7dc79b841c52d6ff7245d070a846a76"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/external-batch-independent-20261004",
+        "commit": {
+          "sha": "89a8cfb670d974b8ab1694d2175fa0cc279d16fb",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/89a8cfb670d974b8ab1694d2175fa0cc279d16fb"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/independent-frontend-7a43654",
+        "commit": {
+          "sha": "08ea0791d3694fa0f85ae415c76eb7aa78170c99",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/08ea0791d3694fa0f85ae415c76eb7aa78170c99"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/offboarding-pair-independent-20261004",
+        "commit": {
+          "sha": "7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/7b30bbe38ec5ac76ae4fb2f21a1e8960cbc9df74"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-archive-fixed-0c1f4f6",
+        "commit": {
+          "sha": "de4ae883b33b5f903821502592f0568649d57bd2",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/de4ae883b33b5f903821502592f0568649d57bd2"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-catalog-independent-cloud-20261004",
+        "commit": {
+          "sha": "88c19552d8d0ba8728184085246d9948fb65261e",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/88c19552d8d0ba8728184085246d9948fb65261e"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-classifier-independent-20261004",
+        "commit": {
+          "sha": "bcae4d80ccd9d4f928676e63f977c015727a3daf",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/bcae4d80ccd9d4f928676e63f977c015727a3daf"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-corrected-independent-20261004",
+        "commit": {
+          "sha": "d0811178bc68760280c44a68cfd7f7bc0790c9b9",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d0811178bc68760280c44a68cfd7f7bc0790c9b9"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-env-independent-20261004",
+        "commit": {
+          "sha": "5b7368286b292ed540293bcb04d1d4c1bdc2e1c4",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/5b7368286b292ed540293bcb04d1d4c1bdc2e1c4"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-env-p2-delta-independent-20261004",
+        "commit": {
+          "sha": "5057e2070aa369e1d7879669bce876e902bb3901",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/5057e2070aa369e1d7879669bce876e902bb3901"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-generated-independent-20261004",
+        "commit": {
+          "sha": "6d7a3979ccea031f28f12e94f058731339044f19",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/6d7a3979ccea031f28f12e94f058731339044f19"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-independent-20261004",
+        "commit": {
+          "sha": "054d47924e041117afb88f4d8e74217a89bd2464",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/054d47924e041117afb88f4d8e74217a89bd2464"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-preparation-slice2-independent-20261004",
+        "commit": {
+          "sha": "f15468a0c06160dc3155e386c5f0dc8d7a862f54",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f15468a0c06160dc3155e386c5f0dc8d7a862f54"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-runtime-v3-slice3-independent-20261004",
+        "commit": {
+          "sha": "d6cda3a4b458aecf44b01467970796a143e89cb4",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/d6cda3a4b458aecf44b01467970796a143e89cb4"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-slice4-batch-independent-20261004",
+        "commit": {
+          "sha": "3637d25c80f85993509edd825089c7af25c0c4a9",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/3637d25c80f85993509edd825089c7af25c0c4a9"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/r5-slice5-independent-20261004",
+        "commit": {
+          "sha": "f89104c6e163a3555a5242d32f48f2af65c07262",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/f89104c6e163a3555a5242d32f48f2af65c07262"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/selected-attestation-v1-independent-20261003",
+        "commit": {
+          "sha": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/722fcf2f5f9d28c8f6372494b49cccc7b8816467"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/slice4-bridge-independent-20261004",
+        "commit": {
+          "sha": "53532161a1096b89f733e36c1b2b1e0ee4cde747",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/53532161a1096b89f733e36c1b2b1e0ee4cde747"
+        },
+        "protected": false
+      },
+      {
+        "name": "review/source-excluded-independent-20261003",
+        "commit": {
+          "sha": "30c25c57402a92f7126cb25ad77813fec811e470",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/30c25c57402a92f7126cb25ad77813fec811e470"
+        },
+        "protected": false
+      },
+      {
+        "name": "tooling/selected-binding-v3-20261004",
+        "commit": {
+          "sha": "c31076ab0c445f0fdb02da08f0fb3bbf79520271",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/c31076ab0c445f0fdb02da08f0fb3bbf79520271"
+        },
+        "protected": false
+      },
+      {
+        "name": "verification/r5-next1010-r2-replay-base",
+        "commit": {
+          "sha": "c8bd2173b804654c4cd4e0ca6fb77cabdd2fd719",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/c8bd2173b804654c4cd4e0ca6fb77cabdd2fd719"
+        },
+        "protected": false
+      },
+      {
+        "name": "verification/r5-slice5-closure-20261004",
+        "commit": {
+          "sha": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/78f0643e504a9a4978c12e8c7106f8aeb4006fb2"
+        },
+        "protected": false
+      },
+      {
+        "name": "verification/r5-slice5-physical-plan-v2-20261004",
+        "commit": {
+          "sha": "7e9c9a2f4cb8f0895802273fcc5812e5a1c5d611",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/7e9c9a2f4cb8f0895802273fcc5812e5a1c5d611"
+        },
+        "protected": false
+      },
+      {
+        "name": "verify/r5-next1543-pg-arm",
+        "commit": {
+          "sha": "964d947cee89c06554c25351d3b5002082dbf650",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/964d947cee89c06554c25351d3b5002082dbf650"
+        },
+        "protected": false
+      },
+      {
+        "name": "work/company-mail-r5-goal-20260930",
+        "commit": {
+          "sha": "29a388a3c7d6da03641abe79bb5c728b90b75273",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/29a388a3c7d6da03641abe79bb5c728b90b75273"
+        },
+        "protected": false
+      },
+      {
+        "name": "work/r5-followup-round3-source-20261007",
+        "commit": {
+          "sha": "79738c17d185f1cd5cd1c8d550a9f15a5501f31c",
+          "url": "https://api.github.com/repos/jyqj/tabmail/commits/79738c17d185f1cd5cd1c8d550a9f15a5501f31c"
+        },
+        "protected": false
+      }
+    ],
+    "not_a_count_delta_from_lost_pre_session_full_inventory": true
+  },
+  "deleted_batch_heads": [
+    {
+      "ref": "fix/r5-next1010-round1",
+      "listed_in_complete_inventory": false,
+      "named_branch_http_status": 404,
+      "consistent_with_enabled_delete_branch_on_merge": true,
+      "actual_deletion_actor_independently_verified": false
+    },
+    {
+      "ref": "fix/r5-next1010-round2",
+      "listed_in_complete_inventory": false,
+      "named_branch_http_status": 404,
+      "consistent_with_enabled_delete_branch_on_merge": true,
+      "actual_deletion_actor_independently_verified": false
+    },
+    {
+      "ref": "fix/r5-next1010-round3",
+      "listed_in_complete_inventory": false,
+      "named_branch_http_status": 404,
+      "consistent_with_enabled_delete_branch_on_merge": true,
+      "actual_deletion_actor_independently_verified": false
+    },
+    {
+      "ref": "chore/r5-next1010-catalog18",
+      "listed_in_complete_inventory": false,
+      "named_branch_http_status": 404,
+      "consistent_with_enabled_delete_branch_on_merge": true,
+      "actual_deletion_actor_independently_verified": false
+    },
+    {
+      "ref": "verification/r5-next1010-r2-replay",
+      "listed_in_complete_inventory": false,
+      "named_branch_http_status": 404,
+      "consistent_with_enabled_delete_branch_on_merge": true,
+      "actual_deletion_actor_independently_verified": false
+    }
+  ],
+  "retained_verification_base": {
+    "ref": "verification/r5-next1010-r2-replay-base",
+    "actual_sha": "c8bd2173b804654c4cd4e0ca6fb77cabdd2fd719",
+    "complete_tree": "47955583e2c043134d9a91aac587e4f5cc5d8ef0",
+    "purpose": "Retained standalone preinstalled PostgreSQL verification configuration evidence",
+    "merge_target_separate_from_integration_and_main": true
+  },
+  "historical_prs_and_eight_retained_refs": [
+    {
+      "number": 17,
+      "url": "https://github.com/jyqj/tabmail/pull/17",
+      "state": "open",
+      "draft": true,
+      "mergeable": false,
+      "mergeable_state": "dirty",
+      "head": {
+        "ref": "fix/r5-benchmark-strict-evidence-20261001",
+        "actual_sha": "5b7f8774643243711e8065f2403e419f5ba81065",
+        "pr_payload_sha": "5b7f8774643243711e8065f2403e419f5ba81065",
+        "payload_matches_actual_ref": true,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 3,
+        "behind_final_integration": 398,
+        "compare_status": "diverged"
+      },
+      "base": {
+        "ref": "work/company-mail-r5-goal-20260930",
+        "actual_sha": "29a388a3c7d6da03641abe79bb5c728b90b75273",
+        "pr_payload_sha": "587ba75c0d76b26d3f5a060b131d77fbc12495ac",
+        "payload_matches_actual_ref": false,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 0,
+        "behind_final_integration": 396,
+        "compare_status": "behind"
+      }
+    },
+    {
+      "number": 20,
+      "url": "https://github.com/jyqj/tabmail/pull/20",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "head": {
+        "ref": "review/selected-attestation-v1-independent-20261003",
+        "actual_sha": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+        "pr_payload_sha": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+        "payload_matches_actual_ref": true,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 8,
+        "behind_final_integration": 396,
+        "compare_status": "diverged"
+      },
+      "base": {
+        "ref": "fix/r5-selected-source-binding-20261003",
+        "actual_sha": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+        "pr_payload_sha": "529f54782f0cfc90ed2501c253723a4fd88497e0",
+        "payload_matches_actual_ref": true,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 7,
+        "behind_final_integration": 396,
+        "compare_status": "diverged"
+      }
+    },
+    {
+      "number": 24,
+      "url": "https://github.com/jyqj/tabmail/pull/24",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "mergeable_state": "unstable",
+      "head": {
+        "ref": "experiment/goose-buffer-64k",
+        "actual_sha": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+        "pr_payload_sha": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+        "payload_matches_actual_ref": true,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 3,
+        "behind_final_integration": 336,
+        "compare_status": "diverged"
+      },
+      "base": {
+        "ref": "integration/company-mail-r5-batch4-20261003",
+        "actual_sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+        "pr_payload_sha": "e5e23e21abfe4c7e9f082405e56a95a7f346fa9a",
+        "payload_matches_actual_ref": true,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 0,
+        "behind_final_integration": 335,
+        "compare_status": "behind"
+      }
+    },
+    {
+      "number": 40,
+      "url": "https://github.com/jyqj/tabmail/pull/40",
+      "state": "open",
+      "draft": true,
+      "mergeable": true,
+      "mergeable_state": "clean",
+      "head": {
+        "ref": "verification/r5-slice5-closure-20261004",
+        "actual_sha": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+        "pr_payload_sha": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+        "payload_matches_actual_ref": true,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 2,
+        "behind_final_integration": 214,
+        "compare_status": "diverged"
+      },
+      "base": {
+        "ref": "integration/r5-slice4-combined-20261004",
+        "actual_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+        "pr_payload_sha": "593bbc6a3ac91b5dbf8917602e45900bff094e27",
+        "payload_matches_actual_ref": true,
+        "retained": true,
+        "unchanged_from_recovered_pre_final_snapshot": true,
+        "unique_git_commits_vs_final_integration": 0,
+        "behind_final_integration": 214,
+        "compare_status": "behind"
+      }
+    }
+  ],
+  "branch_settings": {
+    "delete_branch_on_merge": true,
+    "allow_merge_commit": true,
+    "allow_squash_merge": true,
+    "allow_rebase_merge": true,
+    "inventory_protected_branch_count": 0,
+    "main_branch_reported_protection": {
+      "enabled": false,
+      "required_status_checks": {
+        "enforcement_level": "off",
+        "contexts": [],
+        "checks": []
+      }
+    },
+    "integration_branch_reported_protection": {
+      "enabled": false,
+      "required_status_checks": {
+        "enforcement_level": "off",
+        "contexts": [],
+        "checks": []
+      }
+    },
+    "visible_repository_and_parent_rulesets": [],
+    "classic_protection_admin_endpoint": {
+      "http_status": 403,
+      "message": "Resource not accessible by integration",
+      "not_independently_verified_from_admin_endpoint": true
+    },
+    "settings_not_modified": true
+  },
+  "interpretation": [
+    "The actual integration ref and merge objects take precedence over stale base.sha fields in closed PR payloads.",
+    "All five merged head branches are absent from the full inventory and individually return 404. This is consistent with automatic branch deletion being enabled; the deletion actor is not proven.",
+    "The four historical PR heads and PR20 base contain unique Git commits versus final integration. Unique commits alone do not establish unique patches or functional behavior.",
+    "PR17, PR24 and PR40 bases are ancestors of final integration, but all eight historical refs remain retained as requested.",
+    "PR17 remains draft and conflicting; PR56 remains draft/mergeable with an unstable summary. Neither was merged into main.",
+    "This audit observes API branch-protection fields and an empty visible ruleset list; the administrative classic-protection endpoint returned 403.",
+    "The temporary R2 verification merge targets its dedicated base. It contributes zero implementation TODOs.",
+    "This snapshot precedes any later documentation-only PR and does not assert later branch counts or heads."
+  ],
+  "evidence": [
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/branch-audit/final-api.json",
+      "bytes": 902169,
+      "sha256": "8a3aa623bea81bdf28019c5bd5d756f3982ea4bd756beabb1c8a82859a6a69c0"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/branch-audit/final-api-normalized.json",
+      "bytes": 512575,
+      "sha256": "8fba5946a74149d2f4402199c64a879e74448c7e86dba9ec61661476c141c187"
+    }
+  ],
+  "implementation_todos_completed_by_this_audit": 0
+}

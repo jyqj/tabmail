@@ -1,0 +1,10 @@
+{
+  "schema": "next1010-archive-receipt-v1",
+  "archive": "r5-next1010-evidence.tar.gz",
+  "bytes": 3037821,
+  "sha256": "ffe6e22ed76ae7dc6c8d694085485d667f78dcd2b0f0d4d76a9356047f009381",
+  "manifest_sha256": "c7e37016bfecfed88abbd85fb305b78b7ea6d6a2412843a9be2a8315e1f9ed15",
+  "file_count": 297,
+  "every_member_verified": true,
+  "source_membership_and_bytes_stable": true
+}

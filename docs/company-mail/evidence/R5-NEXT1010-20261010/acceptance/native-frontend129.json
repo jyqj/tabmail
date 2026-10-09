@@ -1,0 +1,342 @@
+{
+  "schema": "native129-final-public-source-reexecution-acceptance-v1",
+  "accepted": true,
+  "checks": {
+    "exact_public_source": true,
+    "source_clean_before_after": true,
+    "all_source_and_protected_bytes_unchanged": true,
+    "exact_nine_requested_files": true,
+    "all_five_commands_completed_once": true,
+    "original_commands_succeeded": true,
+    "execution_receipt_has_actual_test_commands": true,
+    "vitest_top_level_129_pass": true,
+    "no_failed_pending_todo": true,
+    "exact_actual_file_selection": true,
+    "all_129_distinct_assertions_passed": true,
+    "all_nine_file_results_passed": true,
+    "full_nonincremental_tsc_argv": true,
+    "normal_npm_ci": true,
+    "vitest_exact_argv": true,
+    "every_command_uses_pinned_web_cwd": true,
+    "all_protected_files_equal_public_git_blobs": true,
+    "live_source_still_exact_clean": true
+  },
+  "accepted_at_utc": "2026-10-09T21:37:22.925536+00:00",
+  "execution_kind": "New single execution at public 177ee571 after temporary evidence loss; not a reconstruction or rerun attributed to old native 16b6661.",
+  "source": {
+    "commit": "177ee571b194836678cc9a473f178c655326ba7c",
+    "tree": "2d5d2c44680f6a6cb2b2d1166e2923806beafcc8",
+    "web_tree": "b2eed55730431ff50443c6ebf331e173c4762a73",
+    "status": "",
+    "protected_sha256": {
+      "app/(dashboard)/admin/tenants/page.test.tsx": "5fdbafd6c7989fc550e99cb1f729c1b0a27596d004dbbadd4800c0647518cc43",
+      "app/(dashboard)/admin/tenants/api-keys-requests.test.tsx": "bfceecedb86cf63c3406de345397617220420f8fe2f7b41dc24f8777eb87e1fa",
+      "app/(dashboard)/admin/tenants/override-snapshot.test.tsx": "86a256756dd925439f83d70de2f3eac2f10a32432350b58734da2055bdef8a17",
+      "app/(dashboard)/admin/tenants/tenant-create-ownership.test.tsx": "3c401138642c50054df7907c479aaa8a810eacbb73a7b7b2f023915e628092c8",
+      "app/(dashboard)/admin/tenants/tenant-create-session-reset.test.tsx": "6d5194afb2fc14aa890a3e16d26625e1741336633314102d45b0b7ff2674279c",
+      "app/(dashboard)/admin/tenants/tenant-delete-ownership.test.tsx": "21111d8fb9b149ee83ee0e9b526e5513c6f31bda6a2817e52f23736955979c1b",
+      "features/company/overview.test.tsx": "7a8bb383366818b04478220104fd6fd87a7ff7bcaada461807beabef1a920343",
+      "features/company/overview-recovery-receipt.test.tsx": "9077b9b5636c952273f9d2b9331e7c3aa3250bff98d581dfcdbb7035a523c8b4",
+      "features/company/overview-read-denial.test.tsx": "c097aa2bba18ef731e5db9cd5afde693504c9a1b15a63e2d2679bbb26fd25772",
+      "package.json": "322b3dcc7b190e5365d0ceb08ce37da461301110b3d6eacaa41108de2016b5df",
+      "package-lock.json": "c4f70934466c07c0a2589ead49f120d1b2278d9775e13fdbf7386913b1658869",
+      "tsconfig.json": "be18523b23b78b6e1a876ddd107d330f0168bddf09d751b57e0b5edce69c66f3",
+      "vitest.config.ts": "3d754d8f3bd75d472d2025142426e1190fa8a417739e22411424308eceecffe4",
+      "vitest.setup.ts": "29ceea9d963e80fb0eabb31985b05a8c93b54e5ab1fd03bd7d5fa377b11ff7b8",
+      "app/(dashboard)/admin/tenants/page.tsx": "99099555dca343ed0b6ae07cb42a75a58da1a9b3f8f9cce304e665118ae9943e",
+      "features/company/overview.tsx": "13ae9674f2ddf9fa1383ec06c2e64de755144234ff865b0fbaa49442937eb813"
+    }
+  },
+  "source_after": {
+    "commit": "177ee571b194836678cc9a473f178c655326ba7c",
+    "tree": "2d5d2c44680f6a6cb2b2d1166e2923806beafcc8",
+    "web_tree": "b2eed55730431ff50443c6ebf331e173c4762a73",
+    "status": "",
+    "protected_sha256": {
+      "app/(dashboard)/admin/tenants/page.test.tsx": "5fdbafd6c7989fc550e99cb1f729c1b0a27596d004dbbadd4800c0647518cc43",
+      "app/(dashboard)/admin/tenants/api-keys-requests.test.tsx": "bfceecedb86cf63c3406de345397617220420f8fe2f7b41dc24f8777eb87e1fa",
+      "app/(dashboard)/admin/tenants/override-snapshot.test.tsx": "86a256756dd925439f83d70de2f3eac2f10a32432350b58734da2055bdef8a17",
+      "app/(dashboard)/admin/tenants/tenant-create-ownership.test.tsx": "3c401138642c50054df7907c479aaa8a810eacbb73a7b7b2f023915e628092c8",
+      "app/(dashboard)/admin/tenants/tenant-create-session-reset.test.tsx": "6d5194afb2fc14aa890a3e16d26625e1741336633314102d45b0b7ff2674279c",
+      "app/(dashboard)/admin/tenants/tenant-delete-ownership.test.tsx": "21111d8fb9b149ee83ee0e9b526e5513c6f31bda6a2817e52f23736955979c1b",
+      "features/company/overview.test.tsx": "7a8bb383366818b04478220104fd6fd87a7ff7bcaada461807beabef1a920343",
+      "features/company/overview-recovery-receipt.test.tsx": "9077b9b5636c952273f9d2b9331e7c3aa3250bff98d581dfcdbb7035a523c8b4",
+      "features/company/overview-read-denial.test.tsx": "c097aa2bba18ef731e5db9cd5afde693504c9a1b15a63e2d2679bbb26fd25772",
+      "package.json": "322b3dcc7b190e5365d0ceb08ce37da461301110b3d6eacaa41108de2016b5df",
+      "package-lock.json": "c4f70934466c07c0a2589ead49f120d1b2278d9775e13fdbf7386913b1658869",
+      "tsconfig.json": "be18523b23b78b6e1a876ddd107d330f0168bddf09d751b57e0b5edce69c66f3",
+      "vitest.config.ts": "3d754d8f3bd75d472d2025142426e1190fa8a417739e22411424308eceecffe4",
+      "vitest.setup.ts": "29ceea9d963e80fb0eabb31985b05a8c93b54e5ab1fd03bd7d5fa377b11ff7b8",
+      "app/(dashboard)/admin/tenants/page.tsx": "99099555dca343ed0b6ae07cb42a75a58da1a9b3f8f9cce304e665118ae9943e",
+      "features/company/overview.tsx": "13ae9674f2ddf9fa1383ec06c2e64de755144234ff865b0fbaa49442937eb813"
+    }
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "npm": "11.9.0",
+    "locked_installed_dependencies": {
+      "vitest": "4.1.11",
+      "typescript": "5.9.3",
+      "next": "16.3.8",
+      "react": "19.2.4",
+      "react-dom": "19.2.4"
+    }
+  },
+  "tests": {
+    "assertions": 129,
+    "files": 9,
+    "pending": 0,
+    "todo": 0,
+    "per_file": [
+      {
+        "path": "features/company/overview-read-denial.test.tsx",
+        "assertions": 3
+      },
+      {
+        "path": "features/company/overview-recovery-receipt.test.tsx",
+        "assertions": 23
+      },
+      {
+        "path": "features/company/overview.test.tsx",
+        "assertions": 1
+      },
+      {
+        "path": "app/(dashboard)/admin/tenants/api-keys-requests.test.tsx",
+        "assertions": 23
+      },
+      {
+        "path": "app/(dashboard)/admin/tenants/override-snapshot.test.tsx",
+        "assertions": 43
+      },
+      {
+        "path": "app/(dashboard)/admin/tenants/page.test.tsx",
+        "assertions": 3
+      },
+      {
+        "path": "app/(dashboard)/admin/tenants/tenant-create-ownership.test.tsx",
+        "assertions": 13
+      },
+      {
+        "path": "app/(dashboard)/admin/tenants/tenant-create-session-reset.test.tsx",
+        "assertions": 4
+      },
+      {
+        "path": "app/(dashboard)/admin/tenants/tenant-delete-ownership.test.tsx",
+        "assertions": 16
+      }
+    ]
+  },
+  "full_typecheck": {
+    "name": "tsc",
+    "argv": [
+      "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web/node_modules/.bin/tsc",
+      "--noEmit",
+      "--incremental",
+      "false"
+    ],
+    "cwd": "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web",
+    "started_at": "2026-10-09T21:36:15.358919+00:00",
+    "exit": 0,
+    "ended_at": "2026-10-09T21:36:23.666258+00:00",
+    "elapsed_seconds": 8.307347320998815
+  },
+  "commands": [
+    {
+      "name": "node-version",
+      "argv": [
+        "node",
+        "--version"
+      ],
+      "cwd": "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web",
+      "started_at": "2026-10-09T21:35:37.735274+00:00",
+      "exit": 0,
+      "ended_at": "2026-10-09T21:35:37.743268+00:00",
+      "elapsed_seconds": 0.007951346000481863
+    },
+    {
+      "name": "npm-version",
+      "argv": [
+        "npm",
+        "--version"
+      ],
+      "cwd": "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web",
+      "started_at": "2026-10-09T21:35:37.743527+00:00",
+      "exit": 0,
+      "ended_at": "2026-10-09T21:35:37.908379+00:00",
+      "elapsed_seconds": 0.16485782800009474
+    },
+    {
+      "name": "npm-ci",
+      "argv": [
+        "npm",
+        "ci"
+      ],
+      "cwd": "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web",
+      "started_at": "2026-10-09T21:35:37.908750+00:00",
+      "exit": 0,
+      "ended_at": "2026-10-09T21:35:59.103770+00:00",
+      "elapsed_seconds": 21.1950280559995
+    },
+    {
+      "name": "vitest",
+      "argv": [
+        "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web/node_modules/.bin/vitest",
+        "run",
+        "app/(dashboard)/admin/tenants/page.test.tsx",
+        "app/(dashboard)/admin/tenants/api-keys-requests.test.tsx",
+        "app/(dashboard)/admin/tenants/override-snapshot.test.tsx",
+        "app/(dashboard)/admin/tenants/tenant-create-ownership.test.tsx",
+        "app/(dashboard)/admin/tenants/tenant-create-session-reset.test.tsx",
+        "app/(dashboard)/admin/tenants/tenant-delete-ownership.test.tsx",
+        "features/company/overview.test.tsx",
+        "features/company/overview-recovery-receipt.test.tsx",
+        "features/company/overview-read-denial.test.tsx",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/vitest-results.json"
+      ],
+      "cwd": "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web",
+      "started_at": "2026-10-09T21:35:59.104186+00:00",
+      "exit": 0,
+      "ended_at": "2026-10-09T21:36:15.358555+00:00",
+      "elapsed_seconds": 16.25436833099957
+    },
+    {
+      "name": "tsc",
+      "argv": [
+        "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web/node_modules/.bin/tsc",
+        "--noEmit",
+        "--incremental",
+        "false"
+      ],
+      "cwd": "/workspace/scratch/831fbd171897/tabmail-frontend-native-recovery/web",
+      "started_at": "2026-10-09T21:36:15.358919+00:00",
+      "exit": 0,
+      "ended_at": "2026-10-09T21:36:23.666258+00:00",
+      "elapsed_seconds": 8.307347320998815
+    }
+  ],
+  "evidence_files": [
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/execute_once.py",
+      "bytes": 4429,
+      "sha256": "52931a308acc7b0ccc7c3d143ece9b7f823a611667ed162ac44d48a8c7d54ddc"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/execution.json",
+      "bytes": 7041,
+      "sha256": "00f02dd1570ed2cfbb36094c236388ec116dfa32c07143b6a4f828de250d3134"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/node-version.json",
+      "bytes": 313,
+      "sha256": "d6e068d683b80db6f17ffcbb282f65d5621881779b36d82b5631043583ee3860"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/node-version.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/node-version.stdout",
+      "bytes": 9,
+      "sha256": "b7677d3ec37ee1897ba07dc2cfe8292fe421c9ac93396cca5bbece486d1a2a41"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/npm-ci.json",
+      "bytes": 295,
+      "sha256": "9b053ad9d415f740dcf05ec36ef2fba03be70e7984d5362cdb1d34b4f601f4a4"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/npm-ci.stderr",
+      "bytes": 192,
+      "sha256": "af6b75f45421516809fe00479a1597390f0341514c95e578b08b1d1f942e57fd"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/npm-ci.stdout",
+      "bytes": 27,
+      "sha256": "46e83cd57add5b7e1fc83e595473ecfffab6e55865d83cd9de78937f6c015022"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/npm-version.json",
+      "bytes": 310,
+      "sha256": "ef6347343f985a915edb9f27448d53648af56e4121ed3b3bec085b7d90309423"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/npm-version.stderr",
+      "bytes": 99,
+      "sha256": "7125f194612fcff2f454c05d848e7cb71facc1967b4d5017e25b34fdee3ba74f"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/npm-version.stdout",
+      "bytes": 7,
+      "sha256": "d9f29f5aab43c8c1a8d6acc856e258b89735f541aa5e1f07b39a62f28bfa8d06"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/selection-pr256.json",
+      "bytes": 24185,
+      "sha256": "be8fd656238d3870b1430f359ac1edc973a6485867c7ffc89fdae3dcdbe13c91"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/selection.json",
+      "bytes": 906,
+      "sha256": "f19e2e52e818efd3af80b92b12e619a38a4dd6843b5c98056c6fd6c7235a4507"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/source-after.json",
+      "bytes": 2047,
+      "sha256": "7b3785acbd964342ee7b29fe6cf45b4437150eea377f41e5b856b8f37e958abd"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/source-before.json",
+      "bytes": 2047,
+      "sha256": "7b3785acbd964342ee7b29fe6cf45b4437150eea377f41e5b856b8f37e958abd"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/tsc.json",
+      "bytes": 420,
+      "sha256": "b1fcae65076cc5d44bbecb0a937c297d17c3cfa80b0ae6801eb7c1c891676705"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/tsc.stderr",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/tsc.stdout",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/verify_once.py",
+      "bytes": 5669,
+      "sha256": "661b5e2e0782e989230733c4e8587768f36db3d040daf4bdaa328166f00c6e6d"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/vitest-results.json",
+      "bytes": 40957,
+      "sha256": "7edfdf5fc987037a5c0510f2810517eb81eb9ca23f78af970901c9e96dbf3b82"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/vitest.json",
+      "bytes": 1071,
+      "sha256": "60f37da716074c630d2cca15df8ac27f02971a1350c65556faee2ebcbb9d1c83"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/vitest.stderr",
+      "bytes": 375,
+      "sha256": "b4acd4f819050212c4fe3b3ed8416421330f7ff8c72cb9bb667c335f3e24a94e"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/native129/vitest.stdout",
+      "bytes": 116,
+      "sha256": "a0d2ddebe31e20cddf934643c4c271cff7ee609156c8b16b7c77e1c96020d5db"
+    }
+  ],
+  "limits": [
+    "Historical native 16b6661 raw output remains lost; this report grants only the new final-public-source run.",
+    "Original fixed baseline failure logs were not regenerated in this scope.",
+    "Original EXEC 229 is a different file selection; it is not counted as execution of these nine suites."
+  ],
+  "todo_credit": 0,
+  "product_tests_or_lockfile_modified": false
+}
