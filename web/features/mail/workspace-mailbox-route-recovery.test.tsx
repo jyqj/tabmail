@@ -174,7 +174,7 @@ describe("explicit mailbox route recovery", () => {
   it("R12 does not report permanent unavailability during the initial read", async () => {
     location.query = "mailbox=mailbox-two";
     const pending = deferred();
-    intercept = call => call.path === listPath ? pending.promise : undefined;
+    intercept = call => call.path === listPath ? pending.promise.then(response => response.clone()) : undefined;
     render(<MailWorkspace />);
     await waitFor(() => expect(calls.filter(call => call.path === listPath)).toHaveLength(1));
     expect(screen.queryByText(/requested mailbox.*unavailable/i)).not.toBeInTheDocument();

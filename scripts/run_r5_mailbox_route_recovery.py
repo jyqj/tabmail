@@ -21,7 +21,7 @@ import time
 
 BASELINE = "ff43326e81f262daaac7b3dfd8b3047a8f51743b"
 TEST = "web/features/mail/workspace-mailbox-route-recovery.test.tsx"
-TEST_HASH = "39ba0a348019f730b741ce479b16a1b201ec60efb75fab172b28c0a14691fb0f"
+TEST_HASH = "2a72bb78cc5f9e82d037a0358875c2d0c433d8cd956e0e7801795756c88e9c66"
 GROUP = "explicit mailbox route recovery"
 TITLES = (
     "R01 keeps an unavailable inbox route unresolved",

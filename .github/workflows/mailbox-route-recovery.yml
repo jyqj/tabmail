@@ -16,7 +16,6 @@ jobs:
     timeout-minutes: 20
     env:
       R5_CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      R5_ROUTE_EVIDENCE: ${{ runner.temp }}/exec08-route-evidence
     steps:
       - name: Check out exact candidate
         uses: actions/checkout@v4
@@ -43,7 +42,7 @@ jobs:
         run: |
           python3 -B - <<'PY'
           import json, os, pathlib, subprocess, sys, time
-          root = pathlib.Path(os.environ["R5_ROUTE_EVIDENCE"])
+          root = pathlib.Path(os.environ["RUNNER_TEMP"]) / "exec08-route-evidence"
           root.mkdir(mode=0o700)
           command = [sys.executable, "-B", "-m", "unittest", "discover",
                      "-s", "candidate/scripts/tests", "-p", "test_r5_mailbox_route_recovery.py", "-v"]
@@ -64,13 +63,13 @@ jobs:
             --baseline "$GITHUB_WORKSPACE/baseline" \
             --candidate "$GITHUB_WORKSPACE/candidate" \
             --candidate-sha "$R5_CANDIDATE_SHA" \
-            --output "$R5_ROUTE_EVIDENCE/dual-source"
+            --output "$RUNNER_TEMP/exec08-route-evidence/dual-source"
       - name: Print every raw result and execution record
         if: always()
         run: |
           python3 -B - <<'PY'
           import json, os, pathlib, sys, uuid
-          root = pathlib.Path(os.environ["R5_ROUTE_EVIDENCE"])
+          root = pathlib.Path(os.environ["RUNNER_TEMP"]) / "exec08-route-evidence"
           token = uuid.uuid4().hex
           print("::stop-commands::" + token, flush=True)
           try:
