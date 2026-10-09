@@ -179,6 +179,6 @@ export function MailboxAdmin() {
         {mailbox && (<GrantEditor key={mailbox.mailbox.id} mailbox={mailbox} employees={active} refresh={() => boxes.mutate()}/>)}
         {mailbox && (<MailboxSendPolicyEditor key={`send-policy:${mailbox.mailbox.id}`} mailbox={mailbox} refresh={() => boxes.mutate()}/>)}
       </Section>
-    {mailbox && <AccessExplanationPanel key={mailbox.mailbox.id} mailbox={mailbox.mailbox.id} employees={members.data ?? []}/>}
+    {mailbox && <AccessExplanationPanel key={mailbox.mailbox.id} mailbox={mailbox.mailbox.id} employees={members.data ?? []} employeesReady={directoryReady} employeesError={members.error}/>}
     </div>;
 }

@@ -568,9 +568,14 @@ func (s *Service) releaseTenantDaily(ctx context.Context, reservationKey string)
 	if s.rdb == nil || reservationKey == "" {
 		return nil
 	}
+	// The increment belongs to a failed metadata attempt, so its compensation
+	// must survive that request's cancellation. Keep request values for tracing
+	// and bound the new operation instead of inheriting an expired deadline.
+	cleanup, cancel := context.WithTimeout(context.WithoutCancel(ctx), 5*time.Second)
+	defer cancel()
 	// A metadata write can finish after midnight; never debit the new day's
 	// unrelated reservations when unwinding an increment made on the old day.
-	_, err := s.rdb.Eval(ctx, `
+	_, err := s.rdb.Eval(cleanup, `
 local current = redis.call("GET", KEYS[1])
 if not current then
   return 0
@@ -581,6 +586,9 @@ if tonumber(current) <= 1 then
 end
 return redis.call("DECR", KEYS[1])
 `, []string{reservationKey}).Result()
+	if err != nil {
+		s.logger.Error().Err(err).Msg("release tenant daily quota")
+	}
 	return err
 }
 
