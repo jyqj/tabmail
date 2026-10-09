@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+  "baseline_commit": "17be458fb9d36e135a95962638b68ce105c16518",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -47,7 +47,7 @@
     },
     {
       "path": "internal/store/postgres/company_members.go",
-      "sha256": "0f55a9e4932745e8baf49f45ab7af5aebffb5012db909445f0c5257ca6bfcc8c"
+      "sha256": "d52c28079a66ddf32e39da1c35d1f0c2b4aa59fb825f60e155befca6ec741297"
     },
     {
       "path": "internal/store/postgres/company_message_read.go",
@@ -59,7 +59,7 @@
     },
     {
       "path": "internal/store/postgres/company_ops.go",
-      "sha256": "a807f87013979c120e1421b185d1feff9007712f67b39ea9b44b24b19f669a69"
+      "sha256": "aa074a3a22b0b7d2e5cc4163d8299d4c7942338967fdc46bdc77f3c4587bd0c2"
     },
     {
       "path": "internal/store/postgres/company_templates.go",
@@ -203,7 +203,7 @@
     },
     {
       "path": "internal/store/postgres/postgres.go",
-      "sha256": "bdb7ea7dc488b6e9c5dc5b174c105831eb86d9b2e91c1c24e1f051e98d90e11e"
+      "sha256": "9cc20e647d0e0dd0e07e4f3232ed5905c0914068cebcc00227e61225dfd7ccbe"
     },
     {
       "path": "internal/store/postgres/queue.go",
@@ -314,7 +314,27 @@
     "internal/store/postgres/company_members.go": {
       "group": "TX01",
       "review": "companyTxScope三种T模式：UPDATE/KEY SHARE/无T→actor SHARE→profile SHARE NOWAIT→callback→Commit；grant/移交先mailbox revision；Activate独立事务",
-      "remaining": "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+      "remaining": "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行",
+      "revision17_additions": {
+        "source_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+        "source_sha256": "d52c28079a66ddf32e39da1c35d1f0c2b4aa59fb825f60e155befca6ec741297",
+        "changed_functions": [
+          "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant"
+        ],
+        "added_functions": [],
+        "reviews": {
+          "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant": {
+            "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+            "source_sha256": "0d3a197e8dcb14aa5e25395031490e7bf8986d33aa865a45c15ae825dbd7f7db",
+            "role": "mailbox-grant-transaction-writer",
+            "trace": "companyTx keeps the tenant update lock, current actor/profile authorization, mailbox access and owner restrictions. Positive read/send/organize grants still require activeCompanyUser. A full revoke instead requires target membership in the same tenant, so frozen employees remain revocable. The existing mailbox revision CAS precedes grant DELETE or UPSERT, required audit/outbox and commit. Template-only without send remains invalid. No new write operation or migration is added.",
+            "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+            "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+          }
+        },
+        "note": "Unchanged functions may move within the file; their old manual fields are preserved.",
+        "qualification": "source-only"
+      }
     },
     "internal/store/postgres/company_message_read.go": {
       "group": "PR23-STRUCTURE",
@@ -329,7 +349,37 @@
     "internal/store/postgres/company_ops.go": {
       "group": "PR23-STRUCTURE",
       "review": "SweepCompanyMetadata: Sequential pool.Exec deletes sent items/assets/runtime instances/mailbox events; then sweepCompanyAttachmentTenants session scheduler.; sweepCompanyAttachments: Calls sweepCompanyAttachmentsWith(ctx,s.pool,tenant); helper owns Begin/Commit and attachment/pin fences.; sweepCompanyAttachmentsWith: db.Begin; tenant lock; exclude outbound/sent/draft pins BEFORE LIMIT 100; attachment UPDATE SKIP LOCKED; recheck expiry/pins in DELETE CTE and register orphan_objects; Commit.",
-      "remaining": "Source-only; see per-function unverified_risks. Existing unchanged functions retain historical bounded review, not new runtime proof."
+      "remaining": "Source-only; see per-function unverified_risks. Existing unchanged functions retain historical bounded review, not new runtime proof.",
+      "revision17_additions": {
+        "source_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+        "source_sha256": "aa074a3a22b0b7d2e5cc4163d8299d4c7942338967fdc46bdc77f3c4587bd0c2",
+        "changed_functions": [
+          "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound"
+        ],
+        "added_functions": [
+          "internal/store/postgres/company_ops.go::lockReconciliationLedger"
+        ],
+        "reviews": {
+          "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound": {
+            "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+            "source_sha256": "5dfb13e054e40779e65a184208104dc3ee575ae961d30c7bb24f2ade32b34d40",
+            "role": "audited-outbound-reconciliation-writer",
+            "trace": "Begin then recoveryReferencedActor retains tenant KEY SHARE and current actor checks. The job FOR UPDATE NOWAIT snapshot now includes rcpt_to; after version/state/ledger checks, lockReconciliationLedger fences the exact bounded recipient identity set. No selected recipient or parent job write occurs before that helper succeeds. All recipient locks remain held through the existing per-result writes, aggregate state transition, required outbound.reconcile audit/outbox and commit. SQLSTATE 55P03 and 40001 map to conflict. Partial results retain uncertainty; finalized temporary failures require an explicit retry instead of scheduling automatic replay.",
+            "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+            "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+          },
+          "internal/store/postgres/company_ops.go::lockReconciliationLedger": {
+            "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+            "source_sha256": "e9e6e7f97eb79b8cab829ca9ee1e2f8a73a77b47f477b8428f51818e85ac3e54",
+            "role": "recipient-ledger-lock-reader",
+            "trace": "Called only after ReconcileOutbound owns the parent job FOR UPDATE NOWAIT lock. Reject empty or over-50-recipient envelopes and empty identities. Build the expected unique address set, then SELECT all tenant/job recipient addresses ordered by address with LIMIT 51 FOR UPDATE NOWAIT. Reject unexpected identities or unequal complete set cardinality before returning success. Legacy duplicate envelope identities map to one existing ledger row. Rows are closed and transaction-owned locks survive until the outer reconciliation commit or rollback. This helper performs no data write.",
+            "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+            "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+          }
+        },
+        "note": "Unchanged functions may move within the file; their old manual fields are preserved.",
+        "qualification": "source-only"
+      }
     },
     "internal/store/postgres/company_templates.go": {
       "group": "CTX30",
@@ -481,7 +531,27 @@
     "internal/store/postgres/postgres.go": {
       "group": "CTX32",
       "review": "pool.New/Ping→Migrate，连接池close；hash helpers无自主写",
-      "remaining": "pool MaxConns/等待/ctx边界及迁移外部调用属于启动责任，不当本轮DB运行证据"
+      "remaining": "pool MaxConns/等待/ctx边界及迁移外部调用属于启动责任，不当本轮DB运行证据",
+      "revision17_additions": {
+        "source_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+        "source_sha256": "9cc20e647d0e0dd0e07e4f3232ed5905c0914068cebcc00227e61225dfd7ccbe",
+        "changed_functions": [
+          "internal/store/postgres/postgres.go::New"
+        ],
+        "added_functions": [],
+        "reviews": {
+          "internal/store/postgres/postgres.go::New": {
+            "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+            "source_sha256": "334f018cde7b26ff8c077893b72fe6b911b74d5cd1375b1cb4ee9b6d40bc9ac2",
+            "role": "validated-postgres-pool-constructor",
+            "trace": "config.DB.Validate runs before ParseConfig, narrowing integer conversion, pool creation, Ping or Migrate. It rejects MaxOpenConns outside 1..MaxInt32, MaxIdleConns outside 0..MaxOpenConns and nonpositive ConnMaxLifetime. Valid configuration retains the existing pool limits and lifetime, Ping, migrations and close-on-failure lifecycle. Load defaults and explicitly invalid values remain separate concerns.",
+            "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+            "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+          }
+        },
+        "note": "Unchanged functions may move within the file; their old manual fields are preserved.",
+        "qualification": "source-only"
+      }
     },
     "internal/store/postgres/queue.go": {
       "group": "CTX35",
@@ -4156,7 +4226,7 @@
           "caller_id": "internal/store/postgres/company_ops.go:*PgStore:SweepCompanyMetadata",
           "file": "internal/store/postgres/company_ops.go",
           "function": "SweepCompanyMetadata",
-          "line": 346,
+          "line": 400,
           "expression": "s.sweepCompanyAttachmentTenants",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -4396,7 +4466,7 @@
           "caller_id": "cmd/tabmail/main.go::bootstrapAdmin",
           "file": "cmd/tabmail/main.go",
           "function": "bootstrapAdmin",
-          "line": 368,
+          "line": 369,
           "expression": "st.BootstrapCompanyAdmin",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -9412,112 +9482,112 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "ConvertSharedMailbox",
         "receiver": "*PgStore",
-        "line": 794,
-        "end": 828,
+        "line": 808,
+        "end": 842,
         "sha256": "53575e11a2ed0edb920f3db7eb7766e793c319e7536b0310af2c809dc813da33",
         "calls": [
           {
-            "line": 795,
+            "line": 809,
             "expr": "credentials.AuditReason",
             "name": "AuditReason"
           },
           {
-            "line": 797,
+            "line": 811,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 799,
+            "line": 813,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 803,
+            "line": 817,
             "expr": "tx.QueryRow(ctx, `SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 803,
+            "line": 817,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 804,
+            "line": 818,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 807,
+            "line": 821,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 811,
+            "line": 825,
             "expr": "claimMailboxRevision",
             "name": "claimMailboxRevision"
           },
           {
-            "line": 814,
+            "line": 828,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`"
           },
           {
-            "line": 820,
+            "line": 834,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`"
           },
           {
-            "line": 826,
+            "line": 840,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 797,
+            "line": 811,
             "value": "reason must be 8-1000 bytes"
           },
           {
-            "line": 803,
+            "line": 817,
             "value": "SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 804,
+            "line": 818,
             "value": "mailbox not found"
           },
           {
-            "line": 806,
+            "line": 820,
             "value": "legacy"
           },
           {
-            "line": 807,
+            "line": 821,
             "value": "only an unchanged ownerless legacy mailbox may be converted"
           },
           {
-            "line": 814,
+            "line": 828,
             "value": "UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1"
           },
           {
-            "line": 820,
+            "line": 834,
             "value": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           },
           {
-            "line": 826,
+            "line": 840,
             "value": "mailbox.convert_shared"
           },
           {
-            "line": 826,
+            "line": 840,
             "value": "mailbox"
           },
           {
-            "line": 826,
+            "line": 840,
             "value": "reason"
           },
           {
-            "line": 826,
+            "line": 840,
             "value": "revision"
           }
         ],
@@ -9550,46 +9620,46 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 814,
+            "line": 828,
             "sql_fragment": "UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1"
           },
           {
-            "line": 820,
+            "line": 834,
             "sql_fragment": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 803,
+            "line": 817,
             "sql_fragment": "SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE"
           },
           {
-            "line": 820,
+            "line": 834,
             "sql_fragment": "WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 799,
+            "line": 813,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 803,
+            "line": 817,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`"
           },
           {
-            "line": 814,
+            "line": 828,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET mailbox_kind='shared',access_mode='token',expires_at=NULL,retention_hours_override=0,password_hash=NULL WHERE id=$1`"
           },
           {
-            "line": 820,
+            "line": 834,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`WITH locked AS MATERIALIZED (\n SELECT id FROM messages WHERE tenant_id=$1 AND mailbox_id=$2 AND deleted_at IS NULL ORDER BY id FOR NO KEY UPDATE NOWAIT\n) UPDATE messages m SET expires_at=NULL FROM locked l\n WHERE m.id=l.id AND m.tenant_id=$1 AND m.mailbox_id=$2 AND m.deleted_at IS NULL`"
@@ -9987,29 +10057,29 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "GetWorkMailbox",
         "receiver": "*PgStore",
-        "line": 772,
-        "end": 789,
+        "line": 786,
+        "end": 803,
         "sha256": "c4867bf5ad153a8ab939b91c2dcbe911df986cb1c1a5bf347424fcf87e98d6a0",
         "calls": [
           {
-            "line": 774,
+            "line": 788,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           },
           {
-            "line": 776,
+            "line": 790,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 784,
+            "line": 798,
             "expr": "app.NotFound",
             "name": "NotFound"
           }
         ],
         "strings": [
           {
-            "line": 784,
+            "line": 798,
             "value": "mailbox not found"
           }
         ],
@@ -10087,7 +10157,7 @@
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 774,
+            "line": 788,
             "expr": "s.companyReadTx",
             "name": "companyReadTx"
           }
@@ -11053,8 +11123,8 @@
         "name": "SetWorkGrant",
         "receiver": "*PgStore",
         "line": 704,
-        "end": 735,
-        "sha256": "8ef7aec4f5b27862523cee557076753cb64c58afb91656ca921bdd69b26dfab3",
+        "end": 749,
+        "sha256": "0d3a197e8dcb14aa5e25395031490e7bf8986d33aa865a45c15ae825dbd7f7db",
         "calls": [
           {
             "line": 706,
@@ -11062,49 +11132,65 @@
             "name": "BadRequest"
           },
           {
-            "line": 708,
+            "line": 709,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 709,
+            "line": 710,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 714,
+            "line": 715,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 716,
+            "line": 717,
             "expr": "guardMailboxOwner",
             "name": "guardMailboxOwner"
           },
           {
-            "line": 719,
+            "line": 721,
             "expr": "activeCompanyUser",
             "name": "activeCompanyUser"
           },
           {
-            "line": 722,
+            "line": 729,
+            "expr": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 729,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`"
+          },
+          {
+            "line": 733,
+            "expr": "app.BadRequest",
+            "name": "BadRequest"
+          },
+          {
+            "line": 736,
             "expr": "claimMailboxRevision",
             "name": "claimMailboxRevision"
           },
           {
-            "line": 726,
+            "line": 740,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`"
           },
           {
-            "line": 728,
+            "line": 742,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()`"
           },
           {
-            "line": 733,
+            "line": 747,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
@@ -11115,47 +11201,55 @@
             "value": "organize requires read; template-only requires send"
           },
           {
-            "line": 714,
+            "line": 715,
             "value": "owner rights are intrinsic; use handover"
           },
           {
-            "line": 726,
+            "line": 729,
+            "value": "SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)"
+          },
+          {
+            "line": 733,
+            "value": "same-company employee required"
+          },
+          {
+            "line": 740,
             "value": "DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3"
           },
           {
-            "line": 728,
+            "line": 742,
             "value": "INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "mailbox.grant"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "mailbox"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "revision"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "user_id"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "read"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "organize"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "send"
           },
           {
-            "line": 733,
+            "line": 747,
             "value": "template_only"
           }
         ],
@@ -11179,13 +11273,44 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "companyTx T UPDATE→actor/profile→M访问/owner层级资格→目标activeCompanyUser→mailbox revision CAS W→grant DELETE或UPSERT/FK M/U/granted_by→audit/outbox→Commit。",
+      "lock_fk_wait_fence": {
+        "boundary": "companyTx keeps the tenant update lock, current actor/profile authorization, mailbox access and owner restrictions. Positive read/send/organize grants still require activeCompanyUser. A full revoke instead requires target membership in the same tenant, so frozen employees remain revocable. The existing mailbox revision CAS precedes grant DELETE or UPSERT, required audit/outbox and commit. Template-only without send remains invalid. No new write operation or migration is added.",
+        "local_operations": [
+          {
+            "line": 709,
+            "operation": "s.companyTx",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 729,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 740,
+            "operation": "tx.Exec",
+            "sql_expression": "`DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 742,
+            "operation": "tx.Exec",
+            "sql_expression": "`INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "implicit_fk": "Existing mailbox/user/granted_by foreign keys and audit/outbox tenant references remain. The new same-tenant existence read adds no explicit row lock."
+      },
       "evidence": [
-        "internal/store/postgres/company_members.go:701-732 sha256=8ef7aec4f5b27862523cee557076753cb64c58afb91656ca921bdd69b26dfab3",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/company_members.go:704-749 sha256=0d3a197e8dcb14aa5e25395031490e7bf8986d33aa865a45c15ae825dbd7f7db",
+        "Original syntax producers; bounded product regressions retain separate execution receipts."
       ],
       "unverified_risks": [
-        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+        "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -11195,31 +11320,37 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 726,
+            "line": 740,
             "sql_fragment": "DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3"
           },
           {
-            "line": 728,
+            "line": 742,
             "sql_fragment": "INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 708,
+            "line": 709,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 726,
+            "line": 729,
+            "expr": "tx.QueryRow",
+            "name": "QueryRow",
+            "sql_expr": "`SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`"
+          },
+          {
+            "line": 740,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`DELETE FROM mailbox_grants WHERE tenant_id=$1 AND mailbox_id=$2 AND user_id=$3`"
           },
           {
-            "line": 728,
+            "line": 742,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO mailbox_grants(tenant_id,mailbox_id,user_id,can_read,can_organize,can_send,template_only,granted_by) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(mailbox_id,user_id) DO UPDATE SET can_read=EXCLUDED.can_read,can_organize=EXCLUDED.can_organize,can_send=EXCLUDED.can_send,template_only=EXCLUDED.template_only,granted_by=EXCLUDED.granted_by,updated_at=now()`"
@@ -11229,8 +11360,27 @@
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "companyTxScope三种T模式：UPDATE/KEY SHARE/无T→actor SHARE→profile SHARE NOWAIT→callback→Commit；grant/移交先mailbox revision；Activate独立事务",
-      "evidence_level": "source-only"
+      "file_family_context": "companyTx keeps the tenant update lock, current actor/profile authorization, mailbox access and owner restrictions. Positive read/send/organize grants still require activeCompanyUser. A full revoke instead requires target membership in the same tenant, so frozen employees remain revocable. The existing mailbox revision CAS precedes grant DELETE or UPSERT, required audit/outbox and commit. Template-only without send remains invalid. No new write operation or migration is added.",
+      "evidence_level": "source-only",
+      "historical_revision16_review": {
+        "lock_fk_wait_fence": "companyTx T UPDATE→actor/profile→M访问/owner层级资格→目标activeCompanyUser→mailbox revision CAS W→grant DELETE或UPSERT/FK M/U/granted_by→audit/outbox→Commit。",
+        "evidence": [
+          "internal/store/postgres/company_members.go:701-732 sha256=8ef7aec4f5b27862523cee557076753cb64c58afb91656ca921bdd69b26dfab3",
+          "migration source definitions; no current runtime catalog claim"
+        ],
+        "unverified_risks": [
+          "Activate普通定位tenant→T→invitation锁，profile/users/M新增含隐式FK；邀请expires使用now事务时间；验证末次期限及所有交叉等待未全执行"
+        ],
+        "file_family_context": "companyTxScope三种T模式：UPDATE/KEY SHARE/无T→actor SHARE→profile SHARE NOWAIT→callback→Commit；grant/移交先mailbox revision；Activate独立事务"
+      },
+      "source_review": {
+        "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+        "source_sha256": "0d3a197e8dcb14aa5e25395031490e7bf8986d33aa865a45c15ae825dbd7f7db",
+        "role": "mailbox-grant-transaction-writer",
+        "trace": "companyTx keeps the tenant update lock, current actor/profile authorization, mailbox access and owner restrictions. Positive read/send/organize grants still require activeCompanyUser. A full revoke instead requires target membership in the same tenant, so frozen employees remain revocable. The existing mailbox revision CAS precedes grant DELETE or UPSERT, required audit/outbox and commit. Template-only without send remains invalid. No new write operation or migration is added.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+      }
     },
     {
       "id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
@@ -11251,92 +11401,92 @@
         "file": "internal/store/postgres/company_members.go",
         "name": "SetWorkMailboxSendPolicy",
         "receiver": "*PgStore",
-        "line": 746,
-        "end": 770,
+        "line": 760,
+        "end": 784,
         "sha256": "f6595ace54ed6ef6127bee7b6150a6b971cd3abbf8c8e610b9e50ee8fcaf0bca",
         "calls": [
           {
-            "line": 749,
+            "line": 763,
             "expr": "strings.TrimSpace",
             "name": "TrimSpace"
           },
           {
-            "line": 751,
+            "line": 765,
             "expr": "validSendPolicy",
             "name": "validSendPolicy"
           },
           {
-            "line": 752,
+            "line": 766,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 754,
+            "line": 768,
             "expr": "s.companyTx",
             "name": "companyTx"
           },
           {
-            "line": 755,
+            "line": 769,
             "expr": "s.mailboxAccessTx",
             "name": "mailboxAccessTx"
           },
           {
-            "line": 759,
+            "line": 773,
             "expr": "guardMailboxOwner",
             "name": "guardMailboxOwner"
           },
           {
-            "line": 762,
+            "line": 776,
             "expr": "claimMailboxRevision",
             "name": "claimMailboxRevision"
           },
           {
-            "line": 765,
+            "line": 779,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3`"
           },
           {
-            "line": 768,
+            "line": 782,
             "expr": "companyAudit",
             "name": "companyAudit"
           }
         ],
         "strings": [
           {
-            "line": 747,
+            "line": 761,
             "value": ""
-          },
-          {
-            "line": 751,
-            "value": ""
-          },
-          {
-            "line": 752,
-            "value": "send_policy must be one of "
-          },
-          {
-            "line": 752,
-            "value": "; null inherits the company default"
           },
           {
             "line": 765,
+            "value": ""
+          },
+          {
+            "line": 766,
+            "value": "send_policy must be one of "
+          },
+          {
+            "line": 766,
+            "value": "; null inherits the company default"
+          },
+          {
+            "line": 779,
             "value": "UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3"
           },
           {
-            "line": 768,
+            "line": 782,
             "value": "mailbox.send_policy"
           },
           {
-            "line": 768,
+            "line": 782,
             "value": "mailbox"
           },
           {
-            "line": 768,
+            "line": 782,
             "value": "send_policy"
           },
           {
-            "line": 768,
+            "line": 782,
             "value": "revision"
           }
         ],
@@ -11368,21 +11518,21 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 765,
+            "line": 779,
             "sql_fragment": "UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3"
           }
         ],
         "direct_lock_fragments": [],
         "transaction_helper_calls": [
           {
-            "line": 754,
+            "line": 768,
             "expr": "s.companyTx",
             "name": "companyTx"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 765,
+            "line": 779,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE mailboxes SET send_policy=NULLIF($2,'') WHERE id=$1 AND tenant_id=$3`"
@@ -11743,7 +11893,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "GetWorkMailbox",
-          "line": 774,
+          "line": 788,
           "expression": "s.companyReadTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12193,7 +12343,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 799,
+          "line": 813,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12233,7 +12383,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 708,
+          "line": 709,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -12241,7 +12391,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 754,
+          "line": 768,
           "expression": "s.companyTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13007,7 +13157,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:GetWorkMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "GetWorkMailbox",
-          "line": 776,
+          "line": 790,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13023,7 +13173,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 709,
+          "line": 710,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13031,7 +13181,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 755,
+          "line": 769,
           "expression": "s.mailboxAccessTx",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13390,7 +13540,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 719,
+          "line": 721,
           "expression": "activeCompanyUser",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13588,7 +13738,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 826,
+          "line": 840,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13620,7 +13770,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 733,
+          "line": 747,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13628,7 +13778,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 768,
+          "line": 782,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -13652,7 +13802,7 @@
           "caller_id": "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound",
           "file": "internal/store/postgres/company_ops.go",
           "function": "ReconcileOutbound",
-          "line": 308,
+          "line": 318,
           "expression": "companyAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -14031,7 +14181,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 716,
+          "line": 717,
           "expression": "guardMailboxOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -14039,7 +14189,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 759,
+          "line": 773,
           "expression": "guardMailboxOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -14213,7 +14363,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 751,
+          "line": 765,
           "expression": "validSendPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -14562,34 +14712,34 @@
         "file": "internal/store/postgres/company_ops.go",
         "name": "CheckWorkers",
         "receiver": "*PgStore",
-        "line": 318,
-        "end": 331,
+        "line": 372,
+        "end": 385,
         "sha256": "1af5f470a2a6ad4a108d586e9dad73a537c32682405a6599e62707dbf33b6bee",
         "calls": [
           {
-            "line": 323,
+            "line": 377,
             "expr": "s.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM runtime_instances WHERE role IN ('all','worker') AND last_seen>now()-interval '90 seconds')`).Scan",
             "name": "Scan"
           },
           {
-            "line": 323,
+            "line": 377,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM runtime_instances WHERE role IN ('all','worker') AND last_seen>now()-interval '90 seconds')`"
           },
           {
-            "line": 328,
+            "line": 382,
             "expr": "fmt.Errorf",
             "name": "Errorf"
           }
         ],
         "strings": [
           {
-            "line": 323,
+            "line": 377,
             "value": "SELECT EXISTS(SELECT 1 FROM runtime_instances WHERE role IN ('all','worker') AND last_seen>now()-interval '90 seconds')"
           },
           {
-            "line": 328,
+            "line": 382,
             "value": "no recent outbound worker heartbeat"
           }
         ],
@@ -14600,7 +14750,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 224,
+          "line": 225,
           "expression": "pg.CheckWorkers",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -14638,7 +14788,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 323,
+            "line": 377,
             "expr": "s.pool.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT EXISTS(SELECT 1 FROM runtime_instances WHERE role IN ('all','worker') AND last_seen>now()-interval '90 seconds')`"
@@ -14670,12 +14820,12 @@
         "file": "internal/store/postgres/company_ops.go",
         "name": "Heartbeat",
         "receiver": "*PgStore",
-        "line": 314,
-        "end": 317,
+        "line": 368,
+        "end": 371,
         "sha256": "279a4ef5caf4e308c917971ef06facf99e6f397740256af6f61209d24a5d83e5",
         "calls": [
           {
-            "line": 315,
+            "line": 369,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO runtime_instances(id,role,last_seen) VALUES($1,$2,clock_timestamp()) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,last_seen=EXCLUDED.last_seen`"
@@ -14683,7 +14833,7 @@
         ],
         "strings": [
           {
-            "line": 315,
+            "line": 369,
             "value": "INSERT INTO runtime_instances(id,role,last_seen) VALUES($1,$2,clock_timestamp()) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,last_seen=EXCLUDED.last_seen"
           }
         ],
@@ -14694,7 +14844,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 196,
+          "line": 197,
           "expression": "pg.Heartbeat",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -14729,7 +14879,7 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 315,
+            "line": 369,
             "sql_fragment": "INSERT INTO runtime_instances(id,role,last_seen) VALUES($1,$2,clock_timestamp()) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,last_seen=EXCLUDED.last_seen"
           }
         ],
@@ -14737,7 +14887,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 315,
+            "line": 369,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "`INSERT INTO runtime_instances(id,role,last_seen) VALUES($1,$2,clock_timestamp()) ON CONFLICT(id) DO UPDATE SET role=EXCLUDED.role,last_seen=EXCLUDED.last_seen`"
@@ -15285,12 +15435,12 @@
         "file": "internal/store/postgres/company_ops.go",
         "name": "Readiness",
         "receiver": "*PgStore",
-        "line": 313,
-        "end": 313,
+        "line": 367,
+        "end": 367,
         "sha256": "89c5f732dd1187492b24aae23d2d595b6666b7025ab6fcc6653d866a8f3509e6",
         "calls": [
           {
-            "line": 313,
+            "line": 367,
             "expr": "s.pool.Ping",
             "name": "Ping"
           }
@@ -15303,7 +15453,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 218,
+          "line": 219,
           "expression": "pg.Readiness",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -15368,176 +15518,196 @@
         "name": "ReconcileOutbound",
         "receiver": "*PgStore",
         "line": 245,
-        "end": 312,
-        "sha256": "972be75d2a1df64c82e469b58eea7cf58159ac26aa9a9c3d046a0aa284b50d68",
+        "end": 322,
+        "sha256": "5dfb13e054e40779e65a184208104dc3ee575ae961d30c7bb24f2ade32b34d40",
         "calls": [
           {
             "line": 246,
+            "expr": "func() {\n\tvar pg *pgconn.PgError\n\tif errors.As(err, &pg) && (pg.Code == \"55P03\" || pg.Code == \"40001\") {\n\t\terr = app.Conflict(\"send job or recipient ledger is changing; inspect again\")\n\t}\n}",
+            "name": ""
+          },
+          {
+            "line": 248,
+            "expr": "errors.As",
+            "name": "As"
+          },
+          {
+            "line": 249,
+            "expr": "app.Conflict",
+            "name": "Conflict"
+          },
+          {
+            "line": 252,
             "expr": "credentials.AuditReason",
             "name": "AuditReason"
           },
           {
-            "line": 247,
+            "line": 253,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 247,
+            "line": 253,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 248,
+            "line": 254,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 250,
+            "line": 256,
             "expr": "s.pool.Begin",
             "name": "Begin"
           },
           {
-            "line": 254,
+            "line": 260,
             "expr": "tx.Rollback",
             "name": "Rollback"
           },
           {
-            "line": 255,
+            "line": 261,
             "expr": "recoveryReferencedActor",
             "name": "recoveryReferencedActor"
           },
           {
-            "line": 262,
-            "expr": "tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan",
+            "line": 269,
+            "expr": "tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 262,
+            "line": 269,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
-            "sql_expr": "`SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`"
+            "sql_expr": "`SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`"
           },
           {
-            "line": 263,
+            "line": 270,
             "expr": "errors.Is",
             "name": "Is"
           },
           {
-            "line": 264,
+            "line": 271,
             "expr": "app.NotFound",
             "name": "NotFound"
           },
           {
-            "line": 267,
+            "line": 274,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 269,
+            "line": 276,
             "expr": "string",
             "name": "string"
           },
           {
-            "line": 269,
+            "line": 276,
             "expr": "updated.Equal",
             "name": "Equal"
           },
           {
-            "line": 270,
+            "line": 277,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 274,
+            "line": 279,
+            "expr": "lockReconciliationLedger",
+            "name": "lockReconciliationLedger"
+          },
+          {
+            "line": 284,
             "expr": "delivery.IsCompletion",
             "name": "IsCompletion"
           },
           {
-            "line": 275,
+            "line": 285,
             "expr": "app.BadRequest",
             "name": "BadRequest"
           },
           {
-            "line": 278,
+            "line": 288,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state=ANY($5::text[])`"
           },
           {
-            "line": 278,
+            "line": 288,
             "expr": "delivery.RecipientSources",
             "name": "RecipientSources"
           },
           {
-            "line": 282,
+            "line": 292,
             "expr": "tag.RowsAffected",
             "name": "RowsAffected"
           },
           {
-            "line": 283,
+            "line": 293,
             "expr": "app.Conflict",
             "name": "Conflict"
           },
           {
-            "line": 287,
+            "line": 297,
             "expr": "tx.QueryRow(ctx, `SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2`, a.TenantID, id).Scan",
             "name": "Scan"
           },
           {
-            "line": 287,
+            "line": 297,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2`"
           },
           {
-            "line": 290,
+            "line": 300,
             "expr": "delivery.AfterReconciliation",
             "name": "AfterReconciliation"
           },
           {
-            "line": 295,
+            "line": 305,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE outbound_jobs SET in_flight_domain='',state=$3::outbound_state,last_error=$4,\n smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND id=$2`"
           },
           {
-            "line": 300,
+            "line": 310,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE outbound_jobs SET updated_at=clock_timestamp() WHERE id=$1`"
           },
           {
-            "line": 304,
+            "line": 314,
             "expr": "make",
             "name": "make"
           },
           {
-            "line": 304,
+            "line": 314,
             "expr": "len",
             "name": "len"
           },
           {
-            "line": 306,
+            "line": 316,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 306,
+            "line": 316,
             "expr": "company.Hash",
             "name": "Hash"
           },
           {
-            "line": 308,
+            "line": 318,
             "expr": "companyAudit",
             "name": "companyAudit"
           },
           {
-            "line": 308,
+            "line": 318,
             "expr": "company.Hash",
             "name": "Hash"
           },
           {
-            "line": 311,
+            "line": 321,
             "expr": "tx.Commit",
             "name": "Commit"
           }
@@ -15545,90 +15715,102 @@
         "strings": [
           {
             "line": 248,
+            "value": "55P03"
+          },
+          {
+            "line": 248,
+            "value": "40001"
+          },
+          {
+            "line": 249,
+            "value": "send job or recipient ledger is changing; inspect again"
+          },
+          {
+            "line": 254,
             "value": "explicit confirmed outcomes and reason required"
           },
           {
-            "line": 262,
-            "value": "SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT"
+            "line": 269,
+            "value": "SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT"
           },
           {
-            "line": 264,
+            "line": 271,
             "value": "send job not found"
           },
           {
-            "line": 267,
+            "line": 274,
             "value": "send job busy"
           },
           {
-            "line": 270,
+            "line": 277,
             "value": "job changed or needs legacy manual investigation"
           },
           {
-            "line": 275,
+            "line": 285,
             "value": "each recipient must have one confirmed accepted/not-accepted outcome"
           },
           {
-            "line": 278,
+            "line": 288,
             "value": "UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state=ANY($5::text[])"
           },
           {
-            "line": 283,
+            "line": 293,
             "value": "only uncertain recipients may be reconciled"
           },
           {
-            "line": 287,
+            "line": 297,
             "value": "SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2"
           },
           {
-            "line": 291,
+            "line": 301,
             "value": "Operator reconciliation complete; explicit retry required"
           },
           {
-            "line": 293,
+            "line": 303,
             "value": ""
           },
           {
-            "line": 295,
+            "line": 305,
             "value": "UPDATE outbound_jobs SET in_flight_domain='',state=$3::outbound_state,last_error=$4,\n smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND id=$2"
           },
           {
-            "line": 300,
+            "line": 310,
             "value": "UPDATE outbound_jobs SET updated_at=clock_timestamp() WHERE id=$1"
           },
           {
-            "line": 306,
+            "line": 316,
             "value": "recipient_hash"
           },
           {
-            "line": 306,
+            "line": 316,
             "value": "state"
           },
           {
-            "line": 308,
+            "line": 318,
             "value": "outbound.reconcile"
           },
           {
-            "line": 308,
+            "line": 318,
             "value": "outbound_job"
           },
           {
-            "line": 308,
+            "line": 318,
             "value": "reason"
           },
           {
-            "line": 308,
+            "line": 318,
             "value": "inspection_version"
           },
           {
-            "line": 308,
+            "line": 318,
             "value": "outcomes"
           },
           {
-            "line": 308,
+            "line": 318,
             "value": "previous_marker_hash"
           }
         ],
-        "params": "func(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, results []company.Recipient, reason string) error"
+        "params": "func(ctx context.Context, a authz.Actor, id uuid.UUID, version time.Time, results []company.Recipient, reason string) (err error)"
       },
       "callers": [
         {
@@ -15640,13 +15822,73 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "Begin→recoveryReferencedActor T KEY SHARE/当前actor SHARE→J UPDATE NOWAIT→state/updated_at/ledger检查→recipient及J W→必要audit/outbox→Commit。",
+      "lock_fk_wait_fence": {
+        "boundary": "Begin then recoveryReferencedActor retains tenant KEY SHARE and current actor checks. The job FOR UPDATE NOWAIT snapshot now includes rcpt_to; after version/state/ledger checks, lockReconciliationLedger fences the exact bounded recipient identity set. No selected recipient or parent job write occurs before that helper succeeds. All recipient locks remain held through the existing per-result writes, aggregate state transition, required outbound.reconcile audit/outbox and commit. SQLSTATE 55P03 and 40001 map to conflict. Partial results retain uncertainty; finalized temporary failures require an explicit retry instead of scheduling automatic replay.",
+        "local_operations": [
+          {
+            "line": 256,
+            "operation": "s.pool.Begin",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 260,
+            "operation": "tx.Rollback",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 269,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 288,
+            "operation": "tx.Exec",
+            "sql_expression": "`UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state=ANY($5::text[])`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 297,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 305,
+            "operation": "tx.Exec",
+            "sql_expression": "`UPDATE outbound_jobs SET in_flight_domain='',state=$3::outbound_state,last_error=$4,\n smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND id=$2`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 310,
+            "operation": "tx.Exec",
+            "sql_expression": "`UPDATE outbound_jobs SET updated_at=clock_timestamp() WHERE id=$1`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 321,
+            "operation": "tx.Commit",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 269,
+            "sql_fragment": "SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT"
+          }
+        ],
+        "implicit_fk": "The existing outbound recipient-to-job FK and parent job lock constrain inserts; the helper locks all current recipient rows including unselected rows. This source review does not independently prove every external worker lock order."
+      },
       "evidence": [
-        "internal/store/postgres/company_ops.go:245-312 sha256=972be75d2a1df64c82e469b58eea7cf58159ac26aa9a9c3d046a0aa284b50d68",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/company_ops.go:245-322 sha256=5dfb13e054e40779e65a184208104dc3ee575ae961d30c7bb24f2ade32b34d40",
+        "Original syntax producers; bounded product regressions retain separate execution receipts."
       ],
       "unverified_risks": [
-        "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证"
+        "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -15655,58 +15897,58 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 278,
+            "line": 288,
             "sql_fragment": "UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state=ANY($5::text[])"
           },
           {
-            "line": 295,
+            "line": 305,
             "sql_fragment": "UPDATE outbound_jobs SET in_flight_domain='',state=$3::outbound_state,last_error=$4,\n smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND id=$2"
           },
           {
-            "line": 300,
+            "line": 310,
             "sql_fragment": "UPDATE outbound_jobs SET updated_at=clock_timestamp() WHERE id=$1"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 262,
-            "sql_fragment": "SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT"
+            "line": 269,
+            "sql_fragment": "SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 250,
+            "line": 256,
             "expr": "s.pool.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 262,
+            "line": 269,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
-            "sql_expr": "`SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`"
+            "sql_expr": "`SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`"
           },
           {
-            "line": 278,
+            "line": 288,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE outbound_recipients SET state=$4,diagnostic='Operator confirmed outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND job_id=$2 AND address=$3 AND state=ANY($5::text[])`"
           },
           {
-            "line": 287,
+            "line": 297,
             "expr": "tx.QueryRow",
             "name": "QueryRow",
             "sql_expr": "`SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2`"
           },
           {
-            "line": 295,
+            "line": 305,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE outbound_jobs SET in_flight_domain='',state=$3::outbound_state,last_error=$4,\n smtp_response='Operator confirmed downstream outcome; see audit',updated_at=clock_timestamp() WHERE tenant_id=$1 AND id=$2`"
           },
           {
-            "line": 300,
+            "line": 310,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`UPDATE outbound_jobs SET updated_at=clock_timestamp() WHERE id=$1`"
@@ -15716,8 +15958,27 @@
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "recoveryReferencedActor T KEY SHARE→actor SHARE→I/J NOWAIT；Sweep前4个DELETE各自提交，附件T UPDATE→A按id SKIP LOCKED→引用复检→delete/orphan CTE",
-      "evidence_level": "source-only"
+      "file_family_context": "Begin then recoveryReferencedActor retains tenant KEY SHARE and current actor checks. The job FOR UPDATE NOWAIT snapshot now includes rcpt_to; after version/state/ledger checks, lockReconciliationLedger fences the exact bounded recipient identity set. No selected recipient or parent job write occurs before that helper succeeds. All recipient locks remain held through the existing per-result writes, aggregate state transition, required outbound.reconcile audit/outbox and commit. SQLSTATE 55P03 and 40001 map to conflict. Partial results retain uncertainty; finalized temporary failures require an explicit retry instead of scheduling automatic replay.",
+      "evidence_level": "source-only",
+      "historical_revision16_review": {
+        "lock_fk_wait_fence": "Begin→recoveryReferencedActor T KEY SHARE/当前actor SHARE→J UPDATE NOWAIT→state/updated_at/ledger检查→recipient及J W→必要audit/outbox→Commit。",
+        "evidence": [
+          "internal/store/postgres/company_ops.go:245-312 sha256=972be75d2a1df64c82e469b58eea7cf58159ac26aa9a9c3d046a0aa284b50d68",
+          "migration source definitions; no current runtime catalog claim"
+        ],
+        "unverified_risks": [
+          "InspectRecoveryReceipt虽读名称仍插audit；GC保护前缀饥饿及单次/跨轮扫描公平性未闭合；运维与worker等待需全族验证"
+        ],
+        "file_family_context": "recoveryReferencedActor T KEY SHARE→actor SHARE→I/J NOWAIT；Sweep前4个DELETE各自提交，附件T UPDATE→A按id SKIP LOCKED→引用复检→delete/orphan CTE"
+      },
+      "source_review": {
+        "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+        "source_sha256": "5dfb13e054e40779e65a184208104dc3ee575ae961d30c7bb24f2ade32b34d40",
+        "role": "audited-outbound-reconciliation-writer",
+        "trace": "Begin then recoveryReferencedActor retains tenant KEY SHARE and current actor checks. The job FOR UPDATE NOWAIT snapshot now includes rcpt_to; after version/state/ledger checks, lockReconciliationLedger fences the exact bounded recipient identity set. No selected recipient or parent job write occurs before that helper succeeds. All recipient locks remain held through the existing per-result writes, aggregate state transition, required outbound.reconcile audit/outbox and commit. SQLSTATE 55P03 and 40001 map to conflict. Partial results retain uncertainty; finalized temporary failures require an explicit retry instead of scheduling automatic replay.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+      }
     },
     {
       "id": "internal/store/postgres/company_ops.go:*PgStore:RetryRecoveryReceipt",
@@ -16134,37 +16395,37 @@
         "file": "internal/store/postgres/company_ops.go",
         "name": "SweepCompanyMetadata",
         "receiver": "*PgStore",
-        "line": 335,
-        "end": 347,
+        "line": 389,
+        "end": 401,
         "sha256": "182d7c85292e593f73a3078a1b0c217f294293f3cab3e56cb7e6e8d9a3d2d228",
         "calls": [
           {
-            "line": 342,
+            "line": 396,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "q"
           },
           {
-            "line": 346,
+            "line": 400,
             "expr": "s.sweepCompanyAttachmentTenants",
             "name": "sweepCompanyAttachmentTenants"
           }
         ],
         "strings": [
           {
-            "line": 337,
+            "line": 391,
             "value": "DELETE FROM sent_mail_items WHERE asset_id IN (SELECT asset_id FROM sent_mail_items WHERE purge_after<now() OR expires_at<now() ORDER BY COALESCE(purge_after,expires_at) LIMIT 1000)"
           },
           {
-            "line": 338,
+            "line": 392,
             "value": "DELETE FROM sent_mail_assets a WHERE a.id IN (SELECT x.id FROM sent_mail_assets x WHERE NOT EXISTS(SELECT 1 FROM sent_mail_items i WHERE i.asset_id=x.id) AND NOT EXISTS(SELECT 1 FROM outbound_jobs j WHERE j.id=x.id) LIMIT 1000)"
           },
           {
-            "line": 339,
+            "line": 393,
             "value": "DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'"
           },
           {
-            "line": 340,
+            "line": 394,
             "value": "DELETE FROM mailbox_event_log WHERE sequence IN (SELECT sequence FROM mailbox_event_log WHERE created_at<now()-interval '7 days' ORDER BY sequence LIMIT 5000)"
           }
         ],
@@ -16210,19 +16471,19 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 337,
+            "line": 391,
             "sql_fragment": "DELETE FROM sent_mail_items WHERE asset_id IN (SELECT asset_id FROM sent_mail_items WHERE purge_after<now() OR expires_at<now() ORDER BY COALESCE(purge_after,expires_at) LIMIT 1000)"
           },
           {
-            "line": 338,
+            "line": 392,
             "sql_fragment": "DELETE FROM sent_mail_assets a WHERE a.id IN (SELECT x.id FROM sent_mail_assets x WHERE NOT EXISTS(SELECT 1 FROM sent_mail_items i WHERE i.asset_id=x.id) AND NOT EXISTS(SELECT 1 FROM outbound_jobs j WHERE j.id=x.id) LIMIT 1000)"
           },
           {
-            "line": 339,
+            "line": 393,
             "sql_fragment": "DELETE FROM runtime_instances WHERE last_seen<now()-interval '1 day'"
           },
           {
-            "line": 340,
+            "line": 394,
             "sql_fragment": "DELETE FROM mailbox_event_log WHERE sequence IN (SELECT sequence FROM mailbox_event_log WHERE created_at<now()-interval '7 days' ORDER BY sequence LIMIT 5000)"
           }
         ],
@@ -16230,7 +16491,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 342,
+            "line": 396,
             "expr": "s.pool.Exec",
             "name": "Exec",
             "sql_expr": "q"
@@ -16269,12 +16530,12 @@
         "file": "internal/store/postgres/company_ops.go",
         "name": "sweepCompanyAttachments",
         "receiver": "*PgStore",
-        "line": 349,
-        "end": 351,
+        "line": 403,
+        "end": 405,
         "sha256": "0492df21cc15309e1e329c9111cc25c7ed7d2c6eb1f0905a36d8f19d45186753",
         "calls": [
           {
-            "line": 350,
+            "line": 404,
             "expr": "sweepCompanyAttachmentsWith",
             "name": "sweepCompanyAttachmentsWith"
           }
@@ -16616,7 +16877,7 @@
           "caller_id": "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound",
           "file": "internal/store/postgres/company_ops.go",
           "function": "ReconcileOutbound",
-          "line": 255,
+          "line": 261,
           "expression": "recoveryReferencedActor",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -16805,92 +17066,92 @@
         "file": "internal/store/postgres/company_ops.go",
         "name": "sweepCompanyAttachmentsWith",
         "receiver": "",
-        "line": 355,
-        "end": 408,
+        "line": 409,
+        "end": 462,
         "sha256": "489d2050cd27485e63d3e03e72541241e0264e13ff1fe503ba799a29f93eeab7",
         "calls": [
           {
-            "line": 358,
+            "line": 412,
             "expr": "db.Begin",
             "name": "Begin"
           },
           {
-            "line": 362,
+            "line": 416,
             "expr": "tx.Rollback",
             "name": "Rollback"
           },
           {
-            "line": 374,
+            "line": 428,
             "expr": "lockMemberTenant",
             "name": "lockMemberTenant"
           },
           {
-            "line": 380,
+            "line": 434,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT a.id FROM mail_attachments a WHERE a.tenant_id=$1 AND a.expires_at<now() AND ` + unreferenced + ` ORDER BY a.id LIMIT 100 FOR UPDATE OF a SKIP LOCKED`"
           },
           {
-            "line": 385,
+            "line": 439,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 387,
+            "line": 441,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 388,
+            "line": 442,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 391,
+            "line": 445,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 393,
+            "line": 447,
             "expr": "rows.Err",
             "name": "Err"
           },
           {
-            "line": 394,
+            "line": 448,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 398,
+            "line": 452,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`WITH gone AS (\n       DELETE FROM mail_attachments a WHERE a.tenant_id=$1 AND a.id=ANY($2::uuid[]) AND a.expires_at<now()\n       AND ` + unreferenced + `\n       RETURNING object_key)\n       INSERT INTO orphan_objects(object_key,first_failed_at,last_failed_at,attempts)\n       SELECT object_key,now(),now(),1 FROM gone ON CONFLICT DO NOTHING`"
           },
           {
-            "line": 407,
+            "line": 461,
             "expr": "tx.Commit",
             "name": "Commit"
           }
         ],
         "strings": [
           {
-            "line": 377,
+            "line": 431,
             "value": "NOT EXISTS(SELECT 1 FROM outbound_attachments o WHERE o.attachment_id=a.id)\n       AND NOT EXISTS(SELECT 1 FROM sent_asset_attachments o WHERE o.attachment_id=a.id)\n       AND NOT EXISTS(SELECT 1 FROM mail_drafts d WHERE d.tenant_id=a.tenant_id AND d.payload->'attachment_ids' ? a.id::text)"
           },
           {
-            "line": 380,
+            "line": 434,
             "value": "SELECT a.id FROM mail_attachments a WHERE a.tenant_id=$1 AND a.expires_at<now() AND "
           },
           {
-            "line": 380,
+            "line": 434,
             "value": " ORDER BY a.id LIMIT 100 FOR UPDATE OF a SKIP LOCKED"
           },
           {
-            "line": 398,
+            "line": 452,
             "value": "WITH gone AS (\n       DELETE FROM mail_attachments a WHERE a.tenant_id=$1 AND a.id=ANY($2::uuid[]) AND a.expires_at<now()\n       AND "
           },
           {
-            "line": 400,
+            "line": 454,
             "value": "\n       RETURNING object_key)\n       INSERT INTO orphan_objects(object_key,first_failed_at,last_failed_at,attempts)\n       SELECT object_key,now(),now(),1 FROM gone ON CONFLICT DO NOTHING"
           }
         ],
@@ -16918,7 +17179,7 @@
           "caller_id": "internal/store/postgres/company_ops.go:*PgStore:sweepCompanyAttachments",
           "file": "internal/store/postgres/company_ops.go",
           "function": "sweepCompanyAttachments",
-          "line": 350,
+          "line": 404,
           "expression": "sweepCompanyAttachmentsWith",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -16985,36 +17246,36 @@
       "assertions": {
         "direct_sql_effects": [
           {
-            "line": 398,
+            "line": 452,
             "sql_fragment": "WITH gone AS (\n       DELETE FROM mail_attachments a WHERE a.tenant_id=$1 AND a.id=ANY($2::uuid[]) AND a.expires_at<now()\n       AND "
           },
           {
-            "line": 400,
+            "line": 454,
             "sql_fragment": "\n       RETURNING object_key)\n       INSERT INTO orphan_objects(object_key,first_failed_at,last_failed_at,attempts)\n       SELECT object_key,now(),now(),1 FROM gone ON CONFLICT DO NOTHING"
           }
         ],
         "direct_lock_fragments": [
           {
-            "line": 380,
+            "line": 434,
             "sql_fragment": " ORDER BY a.id LIMIT 100 FOR UPDATE OF a SKIP LOCKED"
           }
         ],
         "transaction_helper_calls": [
           {
-            "line": 358,
+            "line": 412,
             "expr": "db.Begin",
             "name": "Begin"
           }
         ],
         "sql_execution_expressions": [
           {
-            "line": 380,
+            "line": 434,
             "expr": "tx.Query",
             "name": "Query",
             "sql_expr": "`SELECT a.id FROM mail_attachments a WHERE a.tenant_id=$1 AND a.expires_at<now() AND ` + unreferenced + ` ORDER BY a.id LIMIT 100 FOR UPDATE OF a SKIP LOCKED`"
           },
           {
-            "line": 398,
+            "line": 452,
             "expr": "tx.Exec",
             "name": "Exec",
             "sql_expr": "`WITH gone AS (\n       DELETE FROM mail_attachments a WHERE a.tenant_id=$1 AND a.id=ANY($2::uuid[]) AND a.expires_at<now()\n       AND ` + unreferenced + `\n       RETURNING object_key)\n       INSERT INTO orphan_objects(object_key,first_failed_at,last_failed_at,attempts)\n       SELECT object_key,now(),now(),1 FROM gone ON CONFLICT DO NOTHING`"
@@ -18702,7 +18963,7 @@
           "caller_id": "internal/outbound/service.go:*Service:SubmitWithReplay",
           "file": "internal/outbound/service.go",
           "function": "SubmitWithReplay",
-          "line": 171,
+          "line": 176,
           "expression": "s.governance.TemplateForSend",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26480,7 +26741,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 811,
+          "line": 825,
           "expression": "claimMailboxRevision",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26488,7 +26749,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkGrant",
-          "line": 722,
+          "line": 736,
           "expression": "claimMailboxRevision",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -26496,7 +26757,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkMailboxSendPolicy",
           "file": "internal/store/postgres/company_members.go",
           "function": "SetWorkMailboxSendPolicy",
-          "line": 762,
+          "line": 776,
           "expression": "claimMailboxRevision",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -29979,7 +30240,7 @@
           "caller_id": "internal/store/postgres/company_ops.go::sweepCompanyAttachmentsWith",
           "file": "internal/store/postgres/company_ops.go",
           "function": "sweepCompanyAttachmentsWith",
-          "line": 374,
+          "line": 428,
           "expression": "lockMemberTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -32695,7 +32956,7 @@
           "caller_id": "internal/store/postgres/postgres.go::New",
           "file": "internal/store/postgres/postgres.go",
           "function": "New",
-          "line": 38,
+          "line": 41,
           "expression": "Migrate",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -33371,7 +33632,7 @@
           "caller_id": "internal/outbound/service.go:*Service:createOutboundJob",
           "file": "internal/outbound/service.go",
           "function": "createOutboundJob",
-          "line": 295,
+          "line": 300,
           "expression": "s.store.CreateOutboundJobAuthorized",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -34896,7 +35157,7 @@
           "caller_id": "internal/outbound/service.go:*Service:processOne",
           "file": "internal/outbound/service.go",
           "function": "processOne",
-          "line": 391,
+          "line": 396,
           "expression": "s.store.MarkOutboundJobFailed",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39287,7 +39548,7 @@
           "caller_id": "internal/store/postgres/company_members.go:*PgStore:ConvertSharedMailbox",
           "file": "internal/store/postgres/company_members.go",
           "function": "ConvertSharedMailbox",
-          "line": 803,
+          "line": 817,
           "expression": "tx.QueryRow(ctx, `SELECT mailbox_kind,owner_user_id,lifecycle_revision FROM mailboxes WHERE tenant_id=$1 AND id=$2 FOR UPDATE`, a.TenantID, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39337,6 +39598,14 @@
           "function": "ListWorkMailboxes",
           "line": 530,
           "expression": "rows.Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/company_members.go:*PgStore:SetWorkGrant",
+          "file": "internal/store/postgres/company_members.go",
+          "function": "SetWorkGrant",
+          "line": 729,
+          "expression": "tx.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM users WHERE tenant_id=$1 AND id=$2)`, a.TenantID, g.UserID).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -39431,7 +39700,7 @@
           "caller_id": "internal/store/postgres/company_ops.go:*PgStore:CheckWorkers",
           "file": "internal/store/postgres/company_ops.go",
           "function": "CheckWorkers",
-          "line": 323,
+          "line": 377,
           "expression": "s.pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM runtime_instances WHERE role IN ('all','worker') AND last_seen>now()-interval '90 seconds')`).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39455,15 +39724,15 @@
           "caller_id": "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound",
           "file": "internal/store/postgres/company_ops.go",
           "function": "ReconcileOutbound",
-          "line": 262,
-          "expression": "tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan",
+          "line": 269,
+          "expression": "tx.QueryRow(ctx, `SELECT state,in_flight_domain,updated_at,recipient_ledger,rcpt_to FROM outbound_jobs WHERE tenant_id=$1 AND id=$2 FOR UPDATE NOWAIT`, a.TenantID, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
           "caller_id": "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound",
           "file": "internal/store/postgres/company_ops.go",
           "function": "ReconcileOutbound",
-          "line": 287,
+          "line": 297,
           "expression": "tx.QueryRow(ctx, `SELECT COALESCE(array_agg(state),'{}'::text[]) FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2`, a.TenantID, id).Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -39473,6 +39742,14 @@
           "function": "RetryRecoveryReceipt",
           "line": 193,
           "expression": "tx.QueryRow(ctx, `SELECT address,zone_id FROM ingest_recipient_outcomes WHERE job_id=$1 AND mailbox_id=$2 AND tenant_id=$3 AND state<>'delivered' FOR SHARE NOWAIT`, id, mb, a.TenantID).Scan",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/store/postgres/company_ops.go::lockReconciliationLedger",
+          "file": "internal/store/postgres/company_ops.go",
+          "function": "lockReconciliationLedger",
+          "line": 350,
+          "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
@@ -39503,7 +39780,7 @@
           "caller_id": "internal/store/postgres/company_ops.go::sweepCompanyAttachmentsWith",
           "file": "internal/store/postgres/company_ops.go",
           "function": "sweepCompanyAttachmentsWith",
-          "line": 387,
+          "line": 441,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -41539,7 +41816,7 @@
           "caller_id": "internal/outbound/service.go:*Service:SubmitWithReplay",
           "file": "internal/outbound/service.go",
           "function": "SubmitWithReplay",
-          "line": 156,
+          "line": 161,
           "expression": "repo.FindOutboundSubmission",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -42912,7 +43189,7 @@
           "caller_id": "internal/outbound/service.go:*Service:processOne",
           "file": "internal/outbound/service.go",
           "function": "processOne",
-          "line": 402,
+          "line": 407,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -43171,7 +43448,7 @@
           "caller_id": "internal/outbound/service.go:*Service:SubmitWithReplay",
           "file": "internal/outbound/service.go",
           "function": "SubmitWithReplay",
-          "line": 171,
+          "line": 176,
           "expression": "s.governance.TemplateForSend",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50646,12 +50923,12 @@
         "file": "internal/store/postgres/postgres.go",
         "name": "Close",
         "receiver": "*PgStore",
-        "line": 45,
-        "end": 48,
+        "line": 48,
+        "end": 51,
         "sha256": "909ed512b67d118b69f21a74c23a234f4d5414470deff900fed0ad1bed781e47",
         "calls": [
           {
-            "line": 46,
+            "line": 49,
             "expr": "s.pool.Close",
             "name": "Close"
           }
@@ -50672,7 +50949,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 94,
+          "line": 95,
           "expression": "rdb.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50680,7 +50957,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 235,
+          "line": 236,
           "expression": "rc.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50832,7 +51109,7 @@
           "caller_id": "internal/outbound/builder.go::encodeQP",
           "file": "internal/outbound/builder.go",
           "function": "encodeQP",
-          "line": 236,
+          "line": 239,
           "expression": "qpw.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50840,7 +51117,7 @@
           "caller_id": "internal/outbound/builder.go::writeBody",
           "file": "internal/outbound/builder.go",
           "function": "writeBody",
-          "line": 202,
+          "line": 205,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50848,7 +51125,7 @@
           "caller_id": "internal/outbound/builder.go::writeMessageBody",
           "file": "internal/outbound/builder.go",
           "function": "writeMessageBody",
-          "line": 183,
+          "line": 186,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50864,7 +51141,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 187,
+          "line": 198,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50872,7 +51149,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 198,
+          "line": 209,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50896,7 +51173,7 @@
           "caller_id": "internal/outbound/delivery.go::sendSMTP",
           "file": "internal/outbound/delivery.go",
           "function": "sendSMTP",
-          "line": 255,
+          "line": 266,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51301,6 +51578,14 @@
           "status": "name-match-candidate-not-dispatch-proof"
         },
         {
+          "caller_id": "internal/store/postgres/company_ops.go::lockReconciliationLedger",
+          "file": "internal/store/postgres/company_ops.go",
+          "function": "lockReconciliationLedger",
+          "line": 346,
+          "expression": "rows.Close",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
           "caller_id": "internal/store/postgres/company_ops.go::receiptTargets",
           "file": "internal/store/postgres/company_ops.go",
           "function": "receiptTargets",
@@ -51312,7 +51597,7 @@
           "caller_id": "internal/store/postgres/company_ops.go::sweepCompanyAttachmentsWith",
           "file": "internal/store/postgres/company_ops.go",
           "function": "sweepCompanyAttachmentsWith",
-          "line": 388,
+          "line": 442,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51320,7 +51605,7 @@
           "caller_id": "internal/store/postgres/company_ops.go::sweepCompanyAttachmentsWith",
           "file": "internal/store/postgres/company_ops.go",
           "function": "sweepCompanyAttachmentsWith",
-          "line": 394,
+          "line": 448,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51616,7 +51901,7 @@
           "caller_id": "internal/store/postgres/postgres.go:*PgStore:Close",
           "file": "internal/store/postgres/postgres.go",
           "function": "Close",
-          "line": 46,
+          "line": 49,
           "expression": "s.pool.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51624,7 +51909,7 @@
           "caller_id": "internal/store/postgres/postgres.go::New",
           "file": "internal/store/postgres/postgres.go",
           "function": "New",
-          "line": 35,
+          "line": 38,
           "expression": "pool.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51632,7 +51917,7 @@
           "caller_id": "internal/store/postgres/postgres.go::New",
           "file": "internal/store/postgres/postgres.go",
           "function": "New",
-          "line": 39,
+          "line": 42,
           "expression": "pool.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51942,76 +52227,81 @@
         "name": "New",
         "receiver": "",
         "line": 21,
-        "end": 43,
-        "sha256": "f1a0eeb3178f3bcc7cf21dc9345cc3ae9c4cc8235cc01b5060d9f8f8d361037e",
+        "end": 46,
+        "sha256": "334f018cde7b26ff8c077893b72fe6b911b74d5cd1375b1cb4ee9b6d40bc9ac2",
         "calls": [
           {
             "line": 22,
+            "expr": "cfg.Validate",
+            "name": "Validate"
+          },
+          {
+            "line": 25,
             "expr": "pgxpool.ParseConfig",
             "name": "ParseConfig"
           },
           {
-            "line": 24,
+            "line": 27,
             "expr": "fmt.Errorf",
             "name": "Errorf"
           },
           {
-            "line": 26,
-            "expr": "int32",
-            "name": "int32"
-          },
-          {
-            "line": 27,
+            "line": 29,
             "expr": "int32",
             "name": "int32"
           },
           {
             "line": 30,
+            "expr": "int32",
+            "name": "int32"
+          },
+          {
+            "line": 33,
             "expr": "pgxpool.NewWithConfig",
             "name": "NewWithConfig"
           },
           {
-            "line": 32,
+            "line": 35,
             "expr": "fmt.Errorf",
             "name": "Errorf"
           },
           {
-            "line": 34,
+            "line": 37,
             "expr": "pool.Ping",
             "name": "Ping"
           },
           {
-            "line": 35,
+            "line": 38,
             "expr": "pool.Close",
             "name": "Close"
           },
           {
-            "line": 36,
+            "line": 39,
             "expr": "fmt.Errorf",
             "name": "Errorf"
           },
           {
-            "line": 38,
+            "line": 41,
             "expr": "Migrate",
             "name": "Migrate"
           },
           {
-            "line": 39,
+            "line": 42,
             "expr": "pool.Close",
             "name": "Close"
           }
         ],
         "strings": [
           {
-            "line": 24,
+            "line": 27,
             "value": "postgres: parse dsn: %w"
           },
           {
-            "line": 32,
+            "line": 35,
             "value": "postgres: connect: %w"
           },
           {
-            "line": 36,
+            "line": 39,
             "value": "postgres: ping: %w"
           }
         ],
@@ -52038,7 +52328,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 103,
+          "line": 104,
           "expression": "fileobj.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52046,7 +52336,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 143,
+          "line": 144,
           "expression": "resolver.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52054,7 +52344,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 146,
+          "line": 147,
           "expression": "hooks.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52062,7 +52352,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 277,
+          "line": 278,
           "expression": "mailindex.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52070,7 +52360,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 281,
+          "line": 282,
           "expression": "retention.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52494,7 +52784,7 @@
           "caller_id": "internal/outbound/delivery.go::sendSMTP",
           "file": "internal/outbound/delivery.go",
           "function": "sendSMTP",
-          "line": 236,
+          "line": 247,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52518,7 +52808,7 @@
           "caller_id": "internal/outbound/service.go:*Service:SubmitWithReplay",
           "file": "internal/outbound/service.go",
           "function": "SubmitWithReplay",
-          "line": 224,
+          "line": 229,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52526,7 +52816,7 @@
           "caller_id": "internal/outbound/service.go:*Service:SubmitWithReplay",
           "file": "internal/outbound/service.go",
           "function": "SubmitWithReplay",
-          "line": 253,
+          "line": 258,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53492,17 +53782,18 @@
         }
       ],
       "lock_fk_wait_fence": {
-        "boundary": "无直接SQL执行；helper调用或纯值计算见syntax.calls",
+        "boundary": "config.DB.Validate runs before ParseConfig, narrowing integer conversion, pool creation, Ping or Migrate. It rejects MaxOpenConns outside 1..MaxInt32, MaxIdleConns outside 0..MaxOpenConns and nonpositive ConnMaxLifetime. Valid configuration retains the existing pool limits and lifetime, Ping, migrations and close-on-failure lifecycle. Load defaults and explicitly invalid values remain separate concerns.",
         "local_operations": [],
         "direct_lock_fragments": [],
-        "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
+        "implicit_fk": "There is no direct SQL execution or new lock in New. Startup network activity, pool behavior and migration transactions are delegated operations with their own runtime evidence boundaries."
       },
       "evidence": [
-        "internal/store/postgres/postgres.go:21-43 sha256=f1a0eeb3178f3bcc7cf21dc9345cc3ae9c4cc8235cc01b5060d9f8f8d361037e",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/postgres.go:21-46 sha256=334f018cde7b26ff8c077893b72fe6b911b74d5cd1375b1cb4ee9b6d40bc9ac2",
+        "Original syntax producers; bounded product regressions retain separate execution receipts."
       ],
       "unverified_risks": [
-        "pool MaxConns/等待/ctx边界及迁移外部调用属于启动责任，不当本轮DB运行证据"
+        "pool MaxConns/等待/ctx边界及迁移外部调用属于启动责任，不当本轮DB运行证据",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -53517,8 +53808,32 @@
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
         "entry_role": "local-or-adapter-helper"
       },
-      "file_family_context": "pool.New/Ping→Migrate，连接池close；hash helpers无自主写",
-      "evidence_level": "source-only"
+      "file_family_context": "config.DB.Validate runs before ParseConfig, narrowing integer conversion, pool creation, Ping or Migrate. It rejects MaxOpenConns outside 1..MaxInt32, MaxIdleConns outside 0..MaxOpenConns and nonpositive ConnMaxLifetime. Valid configuration retains the existing pool limits and lifetime, Ping, migrations and close-on-failure lifecycle. Load defaults and explicitly invalid values remain separate concerns.",
+      "evidence_level": "source-only",
+      "historical_revision16_review": {
+        "lock_fk_wait_fence": {
+          "boundary": "无直接SQL执行；helper调用或纯值计算见syntax.calls",
+          "local_operations": [],
+          "direct_lock_fragments": [],
+          "implicit_fk": "SQL所写表的migration REFERENCES与trigger定义需展开；见migrations及对应组，不推定未修改键也必取得所有父键锁"
+        },
+        "evidence": [
+          "internal/store/postgres/postgres.go:21-43 sha256=f1a0eeb3178f3bcc7cf21dc9345cc3ae9c4cc8235cc01b5060d9f8f8d361037e",
+          "migration source definitions; no current runtime catalog claim"
+        ],
+        "unverified_risks": [
+          "pool MaxConns/等待/ctx边界及迁移外部调用属于启动责任，不当本轮DB运行证据"
+        ],
+        "file_family_context": "pool.New/Ping→Migrate，连接池close；hash helpers无自主写"
+      },
+      "source_review": {
+        "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+        "source_sha256": "334f018cde7b26ff8c077893b72fe6b911b74d5cd1375b1cb4ee9b6d40bc9ac2",
+        "role": "validated-postgres-pool-constructor",
+        "trace": "config.DB.Validate runs before ParseConfig, narrowing integer conversion, pool creation, Ping or Migrate. It rejects MaxOpenConns outside 1..MaxInt32, MaxIdleConns outside 0..MaxOpenConns and nonpositive ConnMaxLifetime. Valid configuration retains the existing pool limits and lifetime, Ping, migrations and close-on-failure lifecycle. Load defaults and explicitly invalid values remain separate concerns.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+      }
     },
     {
       "id": "internal/store/postgres/postgres.go::hashKey",
@@ -53539,22 +53854,22 @@
         "file": "internal/store/postgres/postgres.go",
         "name": "hashKey",
         "receiver": "",
-        "line": 50,
-        "end": 53,
+        "line": 53,
+        "end": 56,
         "sha256": "9c0f5c3a3e790ab883eebba76512d78b62ff6c6d399b19aa908b39dae842d5f8",
         "calls": [
           {
-            "line": 51,
+            "line": 54,
             "expr": "sha256.Sum256",
             "name": "Sum256"
           },
           {
-            "line": 51,
+            "line": 54,
             "expr": "[]byte",
             "name": ""
           },
           {
-            "line": 52,
+            "line": 55,
             "expr": "hex.EncodeToString",
             "name": "EncodeToString"
           }
@@ -53620,8 +53935,8 @@
         "file": "internal/store/postgres/postgres.go",
         "name": "nonNil",
         "receiver": "",
-        "line": 55,
-        "end": 60,
+        "line": 58,
+        "end": 63,
         "sha256": "52543fb189bb752ebdcd5a96b1618327c6cd975069c5e4589125bb74e69c4c26",
         "calls": [],
         "strings": [],
@@ -60433,7 +60748,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 167,
+          "line": 168,
           "expression": "pg.GetSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60583,7 +60898,7 @@
           "caller_id": "cmd/tabmail/main.go::main",
           "file": "cmd/tabmail/main.go",
           "function": "main",
-          "line": 168,
+          "line": 169,
           "expression": "pg.UpsertSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -66773,7 +67088,7 @@
           "caller_id": "internal/outbound/service.go:*Service:processOne",
           "file": "internal/outbound/service.go",
           "function": "processOne",
-          "line": 402,
+          "line": 407,
           "expression": "s.store.GetZone",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -68129,6 +68444,202 @@
         "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
         "review": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md"
       }
+    },
+    {
+      "id": "internal/store/postgres/company_ops.go::lockReconciliationLedger",
+      "owner": "postgres.PgStore/company_ops.go",
+      "entry": "lockReconciliationLedger",
+      "group": "TX13",
+      "classification": {
+        "kind": "lock-reader",
+        "direct_write": false,
+        "write_closure": false,
+        "explicit_lock": true,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "syntax": {
+        "id": "internal/store/postgres/company_ops.go::lockReconciliationLedger",
+        "file": "internal/store/postgres/company_ops.go",
+        "name": "lockReconciliationLedger",
+        "receiver": "",
+        "line": 329,
+        "end": 365,
+        "sha256": "e9e6e7f97eb79b8cab829ca9ee1e2f8a73a77b47f477b8428f51818e85ac3e54",
+        "calls": [
+          {
+            "line": 330,
+            "expr": "len",
+            "name": "len"
+          },
+          {
+            "line": 330,
+            "expr": "len",
+            "name": "len"
+          },
+          {
+            "line": 331,
+            "expr": "app.Conflict",
+            "name": "Conflict"
+          },
+          {
+            "line": 333,
+            "expr": "make",
+            "name": "make"
+          },
+          {
+            "line": 333,
+            "expr": "len",
+            "name": "len"
+          },
+          {
+            "line": 336,
+            "expr": "app.Conflict",
+            "name": "Conflict"
+          },
+          {
+            "line": 342,
+            "expr": "tx.Query",
+            "name": "Query",
+            "sql_expr": "`SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT`"
+          },
+          {
+            "line": 346,
+            "expr": "rows.Close",
+            "name": "Close"
+          },
+          {
+            "line": 348,
+            "expr": "rows.Next",
+            "name": "Next"
+          },
+          {
+            "line": 350,
+            "expr": "rows.Scan",
+            "name": "Scan"
+          },
+          {
+            "line": 355,
+            "expr": "app.Conflict",
+            "name": "Conflict"
+          },
+          {
+            "line": 358,
+            "expr": "rows.Err",
+            "name": "Err"
+          },
+          {
+            "line": 361,
+            "expr": "len",
+            "name": "len"
+          },
+          {
+            "line": 362,
+            "expr": "app.Conflict",
+            "name": "Conflict"
+          }
+        ],
+        "strings": [
+          {
+            "line": 331,
+            "value": "recipient ledger is incomplete or exceeds recovery bounds; investigate separately"
+          },
+          {
+            "line": 335,
+            "value": ""
+          },
+          {
+            "line": 336,
+            "value": "recipient ledger does not match the envelope; investigate separately"
+          },
+          {
+            "line": 342,
+            "value": "SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT"
+          },
+          {
+            "line": 355,
+            "value": "recipient ledger does not match the envelope; investigate separately"
+          },
+          {
+            "line": 362,
+            "value": "recipient ledger does not match the envelope; investigate separately"
+          }
+        ],
+        "params": "func(ctx context.Context, tx pgx.Tx, tenant, job uuid.UUID, envelope []string) error"
+      },
+      "callers": [
+        {
+          "caller_id": "internal/store/postgres/company_ops.go:*PgStore:ReconcileOutbound",
+          "file": "internal/store/postgres/company_ops.go",
+          "function": "ReconcileOutbound",
+          "line": 279,
+          "expression": "lockReconciliationLedger",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": {
+        "boundary": "Called only after ReconcileOutbound owns the parent job FOR UPDATE NOWAIT lock. Reject empty or over-50-recipient envelopes and empty identities. Build the expected unique address set, then SELECT all tenant/job recipient addresses ordered by address with LIMIT 51 FOR UPDATE NOWAIT. Reject unexpected identities or unequal complete set cardinality before returning success. Legacy duplicate envelope identities map to one existing ledger row. Rows are closed and transaction-owned locks survive until the outer reconciliation commit or rollback. This helper performs no data write.",
+        "local_operations": [
+          {
+            "line": 342,
+            "operation": "tx.Query",
+            "sql_expression": "`SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [
+          {
+            "line": 342,
+            "sql_fragment": "SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT"
+          }
+        ],
+        "implicit_fk": "The caller holds the existing parent job lock; the recipient/job foreign key and all-row NOWAIT locks provide distinct constraints. SQL syntax alone does not establish a global concurrent-worker lock proof."
+      },
+      "evidence": [
+        "internal/store/postgres/company_ops.go:329-365 sha256=e9e6e7f97eb79b8cab829ca9ee1e2f8a73a77b47f477b8428f51818e85ac3e54",
+        "Original syntax producers; PostgreSQL ledger regression execution is separately source-bound."
+      ],
+      "unverified_risks": [
+        "The operation is bounded to 50 envelope recipients and rejects larger recovery jobs for investigation.",
+        "External mutation paths and cross-operation lock orders require their own executed evidence.",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
+      ],
+      "review_status": "static-type-review",
+      "followup_tasks": [
+        "R5-P6-070"
+      ],
+      "assertions": {
+        "direct_sql_effects": [],
+        "direct_lock_fragments": [
+          {
+            "line": 342,
+            "sql_fragment": "SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT"
+          }
+        ],
+        "transaction_helper_calls": [],
+        "sql_execution_expressions": [
+          {
+            "line": 342,
+            "expr": "tx.Query",
+            "name": "Query",
+            "sql_expr": "`SELECT address FROM outbound_recipients WHERE tenant_id=$1 AND job_id=$2 ORDER BY address LIMIT $3 FOR UPDATE NOWAIT`"
+          }
+        ],
+        "effect_status": "source-only lock reader; no direct data write",
+        "callback_effect": "No callback; caller supplies the existing reconciliation transaction.",
+        "entry_role": "Exact bounded recipient-set lock and coverage precondition for reconciliation."
+      },
+      "file_family_context": "Called only after ReconcileOutbound owns the parent job FOR UPDATE NOWAIT lock. Reject empty or over-50-recipient envelopes and empty identities. Build the expected unique address set, then SELECT all tenant/job recipient addresses ordered by address with LIMIT 51 FOR UPDATE NOWAIT. Reject unexpected identities or unequal complete set cardinality before returning success. Legacy duplicate envelope identities map to one existing ledger row. Rows are closed and transaction-owned locks survive until the outer reconciliation commit or rollback. This helper performs no data write.",
+      "evidence_level": "source-only",
+      "source_review": {
+        "base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+        "source_sha256": "e9e6e7f97eb79b8cab829ca9ee1e2f8a73a77b47f477b8428f51818e85ac3e54",
+        "role": "recipient-ledger-lock-reader",
+        "trace": "Called only after ReconcileOutbound owns the parent job FOR UPDATE NOWAIT lock. Reject empty or over-50-recipient envelopes and empty identities. Build the expected unique address set, then SELECT all tenant/job recipient addresses ordered by address with LIMIT 51 FOR UPDATE NOWAIT. Reject unexpected identities or unequal complete set cardinality before returning success. Legacy duplicate envelope identities map to one existing ledger row. Rows are closed and transaction-owned locks survive until the outer reconciliation commit or rollback. This helper performs no data write.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
+      }
     }
   ],
   "migrations": [
@@ -69220,16 +69731,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
-  "current_review_boundary": "Revision 16 binds the actual public EXEC merge. SaveMailTemplate rejects NUL names before SQL while preserving its prior manual fields in historical_revision15_review; the old entry had no source_review and that absence is preserved in the archive. SeedSetting is a new insert-only default statement with no conflict overwrite. Other existing body hashes/classifications, manual fields and unknown fields stay unchanged; fresh syntax, exact derived assertions, name-match callers and finite compatibility facts are reconciled. Existing file-level reviews remain with additive revision16 notes. Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+  "last_review_base_commit": "17be458fb9d36e135a95962638b68ce105c16518",
+  "current_review_boundary": "Revision 17 binds the final ten-task product source. SetWorkGrant permits same-tenant full revocation for frozen employees while positive grants remain active-only; ReconcileOutbound locks and validates its complete bounded recipient ledger before any recovery write; New validates pool bounds before connection side effects. All prior manual fields and optional source_review values are archived exactly. The new ledger helper is a lock reader, not a data writer. Existing file-level reviews are retained with additive revision17 notes. Other body hashes, classifications, manual fields and unknown fields are unchanged; fresh syntax, derived assertions, name-match callers and finite compatibility facts are reconciled. Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
   "inventory_revision": {
-    "revision": 16,
-    "source_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+    "revision": 17,
+    "source_commit": "17be458fb9d36e135a95962638b68ce105c16518",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "eae219951c6f9cbf17eb4062b69464c731807be7",
-    "previous_snapshot_blob": "bcdef4ebfddc1b71073881582b48b0b687b3aecf",
-    "previous_sha256": "c4a3f7491e63a8b8eb9bf95649ab874548417c0810ae181e7b10be49cd885b22",
+    "previous_snapshot_commit": "30d2d05ab6ddcc23f47d9b9786885817aef50a0f",
+    "previous_snapshot_blob": "668fc73bb22b9bede6ab9ef533ba8680a0241941",
+    "previous_sha256": "856a9377a8b327c9ce7e4f91cf290bc15a45bf832c3af327a7739d3599ce43c6",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION17-20261009/README.md"
   }
 }

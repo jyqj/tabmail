@@ -209,7 +209,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 24,
+    "line": 33,
     "branch": 0,
     "callee": "company",
     "owner": "grants",
@@ -222,7 +222,7 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 48,
+    "line": 63,
     "branch": 0,
     "callee": "company",
     "owner": "snapshot",
@@ -235,10 +235,10 @@
   },
   {
     "source": "web/components/company/grants.tsx",
-    "line": 127,
+    "line": 164,
     "branch": 0,
     "callee": "company",
-    "owner": "GrantEditor",
+    "owner": "GrantEditorSession",
     "expression": "`${workPath(mailbox.mailbox.id)}/grants`",
     "path": "/api/v1/company/mailboxes/{id}/grants",
     "methods": [
@@ -365,12 +365,12 @@
   },
   {
     "source": "web/features/company/access-explanation.tsx",
-    "line": 15,
+    "line": 63,
     "branch": 0,
     "callee": "company",
-    "owner": "access",
-    "expression": "`/mailboxes/${mailbox}/access/${user}`",
-    "path": "/api/v1/company/mailboxes/{dynamic}/access/{dynamic}",
+    "owner": "result",
+    "expression": "`/mailboxes/${encodeURIComponent(mailbox)}/access/${encodeURIComponent(user)}`",
+    "path": "/api/v1/company/mailboxes/{id}/access/{id}",
     "methods": [
       "GET"
     ],
@@ -1717,7 +1717,7 @@
   },
   {
     "source": "web/lib/legacy-outbound.ts",
-    "line": 12,
+    "line": 14,
     "branch": 0,
     "callee": "request",
     "owner": "result",
@@ -1730,7 +1730,7 @@
   },
   {
     "source": "web/lib/legacy-outbound.ts",
-    "line": 18,
+    "line": 27,
     "branch": 0,
     "callee": "request",
     "owner": "result",
@@ -1743,7 +1743,7 @@
   },
   {
     "source": "web/lib/legacy-outbound.ts",
-    "line": 18,
+    "line": 27,
     "branch": 1,
     "callee": "request",
     "owner": "result",
@@ -1756,7 +1756,7 @@
   },
   {
     "source": "web/lib/legacy-outbound.ts",
-    "line": 29,
+    "line": 38,
     "branch": 0,
     "callee": "request",
     "owner": "result",
