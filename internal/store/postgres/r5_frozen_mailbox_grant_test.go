@@ -53,7 +53,7 @@ func (f *frozenMailboxGrantFixture) state(t *testing.T) string {
  'grants',(SELECT jsonb_agg(to_jsonb(g) ORDER BY g.mailbox_id,g.user_id) FROM mailbox_grants g WHERE g.tenant_id=$1),
  'mailboxes',(SELECT jsonb_agg(jsonb_build_array(m.id,m.lifecycle_revision) ORDER BY m.id) FROM mailboxes m WHERE m.tenant_id=$1),
  'audits',(SELECT count(*) FROM audit_log WHERE tenant_id=$1),
- 'outbox',(SELECT count(*) FROM outbox_events WHERE tenant_id=$1))::text`, f.tenant.ID).Scan(&state))
+ 'outbox',(SELECT count(*) FROM outbox_events WHERE payload->>'tenant_id'=$1::text))::text`, f.tenant.ID).Scan(&state))
 	return state
 }
 
