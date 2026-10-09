@@ -1,13 +1,13 @@
 # R5 全版本深度重构与优化任务清单
 
 <!-- R5-EXEC-20261009:BEGIN -->
-## EXEC-20261009：前两轮七项已实际完成
+## EXEC-20261009：三轮十项已实际完成
 
-原生root与backend/frontend/transport按4＋3＋3推进本批新十项，并交由独立pr_audit复审。第一轮 [#222](https://github.com/jyqj/tabmail/pull/222) 四项实际合入 `602b17544d0cd12c04f1b90c116814ae0522199a`；第二轮 [#223](https://github.com/jyqj/tabmail/pull/223) 三项实际合入 `ff43326e81f262daaac7b3dfd8b3047a8f51743b`。#212–#218均closed/completed，实际merge tree分别与受审公开源和CI checkout完整一致。
+本批原生multi-subagent按4＋3＋3推进并交叉独审，三轮 [#222](https://github.com/jyqj/tabmail/pull/222)、[#223](https://github.com/jyqj/tabmail/pull/223)、[#224](https://github.com/jyqj/tabmail/pull/224) 已分别实际合入 `602b1754`、`ff43326e`、`b6516f9ac873f4464894933b5c3a0e046bc9a4a5`。#212–#221全部closed/completed，四验收checkbox齐。独立API终态审计核对每个issue、PR、ordered parents与完整tree。**本批10/10完成、剩余0；每轮剩余6→3→0。**
 
-第二轮公开专项CI705 Go叶、157 UI逐assertion和完整非增量TypeScript全部通过，0失败/跳过/pending/构建失败。第三轮设置原子seed、显式不可用邮箱路由、SMTPUTF8补丁已经复审，补做真实PG、重新固定UI双源和公开组合验证；未真实通过并合入前不计完成。执行环境断连与原UI223P/6pending/exit1按原状态保留，不将摘要success:true冒作229通过。全部边界和实际证据见 [EXEC账本](R5-EXEC-20261009.md)。
+第三轮最终产品tree `4034b36faa89a421f2a21b525cf35e93da4a1670` 与公开head、PG/SMTP/joint实际checkout及UI显式head完全一致。[累计专项37882924528](https://github.com/jyqj/tabmail/actions/runs/37882924528) **1668不同Go叶＋229实际UI assertions全PASS**，零失败/跳过/pending/build failure；完整非增量TypeScript通过。另有同字节真实PG8叶6P2F→8P、最终新UI18例5P13F→18P、SMTPUTF8 109叶71P38F→109P；48个checker方法单独计且实际通过。原失败、断连恢复、重新固定V2的完整记录与各来源边界见 [EXEC账本](R5-EXEC-20261009.md) 和原始证据。
 
-**正式完成7/10、剩余3；逐轮剩余6→3，第三轮待验收。** 原父任务仍 **10/171已验收、剩余161**。所有原checkbox逐字保持；历史批次、PR/目录/CI维护不重复计数。目录revision16将绑定最终真实产品源并保留原历史守卫。#56继续draft，全量PG、私有fixture、严格依赖审计与父项发布门槛保持。
+原父任务仍 **10/171已验收、剩余161**；所有原checkbox逐字保持，历史批次与PR/目录/CI维护不重复计数。revision16目录绑定实际产品merge并保留原collectors、完整source-version runner与历史负控，另作0项维护验收。#56仍draft；main未合入，完整PG、私有fixture、严格依赖审计及父项发布门槛保持。旧draft #17/#20/#24/#40保留。
 <!-- R5-EXEC-20261009:END -->
 
 <!-- R5-ADVANCE-20261009:BEGIN -->
