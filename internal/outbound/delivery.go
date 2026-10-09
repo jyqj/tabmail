@@ -70,7 +70,8 @@ func deliverRelayTLS(ctx context.Context, cfg config.Outbound, from string, to [
 	return sendSMTP(client, from, to, mime)
 }
 
-// DeliverDirect sends email by resolving MX records for each recipient domain.
+// DeliverDirect resolves recipient MX records, or connects directly to a valid
+// SMTP address literal without DNS (RFC 5321 section 4.1.3).
 // When requireTLS is true, delivery fails if STARTTLS is unavailable or negotiation fails,
 // preventing MITM downgrade attacks.
 func DeliverDirect(ctx context.Context, from string, to []string, mime []byte, requireTLS bool) error {
@@ -126,6 +127,16 @@ func deliverDirectWith(ctx context.Context, from string, to []string, mime []byt
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	for _, address := range to {
+		// Keep the established DNS route contract (including absolute domain
+		// names) unchanged; malformed literals must not become DNS targets.
+		if !strings.ContainsAny(address, "[]") {
+			continue
+		}
+		if _, err := ParseRecipientAddress(address); err != nil {
+			return &textproto.Error{Code: 553, Msg: "5.1.3 Invalid recipient address"}
+		}
+	}
 	byDomain := groupByDomain(to)
 	var failures []error
 	for domain, rcpts := range byDomain {
@@ -141,7 +152,7 @@ func deliverDirectWith(ctx context.Context, from string, to []string, mime []byt
 		delivered := false
 		for _, mx := range mxs {
 			host := strings.TrimSuffix(mx, ".")
-			addr := fmt.Sprintf("%s:25", host)
+			addr := net.JoinHostPort(host, "25")
 			err := session(ctx, host, addr, from, rcpts, mime, requireTLS)
 			if err != nil {
 				if errors.Is(err, store.ErrOutboundUncertain) || ctx.Err() != nil {
@@ -315,6 +326,12 @@ func groupByDomain(addrs []string) map[string][]string {
 }
 
 func lookupMXWithResolver(ctx context.Context, domain string, resolve func(context.Context, string) ([]*net.MX, error)) ([]string, error) {
+	if host, literal, err := addressLiteralHost(domain); literal {
+		if err != nil {
+			return nil, &textproto.Error{Code: 553, Msg: "5.1.3 Invalid recipient address literal"}
+		}
+		return []string{host}, nil
+	}
 	records, err := resolve(ctx, domain)
 	if err != nil {
 		return nil, err

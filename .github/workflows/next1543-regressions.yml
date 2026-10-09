@@ -10,7 +10,11 @@ concurrency:
   group: next1543-pg-${{ github.ref }}
   cancel-in-progress: true
 jobs:
-  frozen-mailbox-revocation:
+  postgres-regressions:
+    strategy:
+      fail-fast: false
+      matrix:
+        case: [mailbox-grants, derived-text]
     runs-on: ubuntu-latest
     timeout-minutes: 12
     services:
@@ -39,12 +43,12 @@ jobs:
       - name: Verify identical frozen baseline and candidate tests
         run: |
           python3 -B scripts/run_r5_next1543_pg.py --candidate . \
-            --case mailbox-grants --output "$RUNNER_TEMP/next1543-mailbox-grants"
+            --case "${{ matrix.case }}" --output "$RUNNER_TEMP/next1543-${{ matrix.case }}"
       - name: Preserve actual execution evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: next1543-mailbox-grants
-          path: ${{ runner.temp }}/next1543-mailbox-grants
+          name: next1543-${{ matrix.case }}
+          path: ${{ runner.temp }}/next1543-${{ matrix.case }}
           if-no-files-found: error
           retention-days: 14

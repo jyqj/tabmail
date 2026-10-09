@@ -183,22 +183,22 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 		}
 	}
 
-	// Validate all email addresses using RFC 5322 parsing.
+	// Validate mailbox syntax, including SMTP's tagged IPv6 recipient literal.
 	if _, err := mail.ParseAddress(req.From); err != nil {
 		return nil, false, app.BadRequest("invalid from address")
 	}
 	for _, addr := range req.To {
-		if _, err := mail.ParseAddress(addr); err != nil {
+		if _, err := ParseRecipientAddress(addr); err != nil {
 			return nil, false, app.BadRequest("invalid to address")
 		}
 	}
 	for _, addr := range req.CC {
-		if _, err := mail.ParseAddress(addr); err != nil {
+		if _, err := ParseRecipientAddress(addr); err != nil {
 			return nil, false, app.BadRequest("invalid cc address")
 		}
 	}
 	for _, addr := range req.BCC {
-		if _, err := mail.ParseAddress(addr); err != nil {
+		if _, err := ParseRecipientAddress(addr); err != nil {
 			return nil, false, app.BadRequest("invalid bcc address")
 		}
 	}
