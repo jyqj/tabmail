@@ -1,0 +1,79 @@
+{
+  "status": "ACCEPT_ROOT_INDEPENDENT_REPLAY_AND_NATIVE129",
+  "run": 37994091262,
+  "job": 114035525252,
+  "actual_product_source": {
+    "commit": "13a2a07979b2939fe30330e81cc5e12bec253be2",
+    "regression_sha256": {
+      "internal/api/handlers/r5_refresh_issuance_pg_test.go": "6404b853662b8d9dfec0f86aa4154674b5d63ea0f0f714af11cee54958e2297e",
+      "internal/api/handlers/r5_refresh_issuance_test.go": "b6877aa181da130982c0538ff4f8d56d6c78da3bd578c6f84e550528da09d53f"
+    },
+    "status": "",
+    "tree": "184992fa8a7c8cf3975f2ffb77f91629f4371b2b"
+  },
+  "exact_raw_log_sha256": "adc245c573becd29ede10dcb82f82c31d734ae40c3402f76675a6da59b78906a",
+  "frame_count": 11,
+  "all_frame_lengths_and_sha256_verified": true,
+  "go_jsonl_independently_reparsed": {
+    "baseline": {
+      "leaves": {
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/password": "fail",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze_unfreeze": "fail",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/role_change": "fail",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/deleted_user": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/unchanged": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/display_name": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/read_failure": "pass",
+        "TestR5RefreshIssuancePostgresRotationFailurePreservesAncestor": "pass"
+      },
+      "package_events": [
+        {
+          "package": "tabmail/internal/api/handlers",
+          "action": "start"
+        },
+        {
+          "package": "tabmail/internal/api/handlers",
+          "action": "fail"
+        }
+      ],
+      "jsonl_sha256": "719f094a6bf5ca408f20abefc83bd3d7bb98058ed4438a2e9c6ccbe0df53d856"
+    },
+    "candidate": {
+      "leaves": {
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/password": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/freeze_unfreeze": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/role_change": "pass",
+        "TestR5RefreshIssuancePostgresRejectsPostCommitAccountChange/deleted_user": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/unchanged": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/display_name": "pass",
+        "TestR5RefreshIssuancePostgresPreservesCurrentAndRetry/read_failure": "pass",
+        "TestR5RefreshIssuancePostgresRotationFailurePreservesAncestor": "pass"
+      },
+      "package_events": [
+        {
+          "package": "tabmail/internal/api/handlers",
+          "action": "start"
+        },
+        {
+          "package": "tabmail/internal/api/handlers",
+          "action": "pass"
+        }
+      ],
+      "jsonl_sha256": "2a412f4d9f534c4471f26e83b5ac61a76e0a53da7babc193dc9642e2f0641cf8"
+    }
+  },
+  "original_runner_unchanged": true,
+  "source_before_after_clean": true,
+  "native129_report_sha256": "6cdcea59589effd85f31f30c81ce757e04e94392d9ecca77e4f4e3d28e4ce4a5",
+  "native129": {
+    "tests": 129,
+    "files": 9,
+    "fail": 0,
+    "skip_or_todo": 0,
+    "typecheck_exit": 0
+  },
+  "reader_refinement": "Initial root inspection incorrectly treated original runner.stdout as pure JSON; its normal git worktree HEAD line is now preserved and the single original comparison JSON object is selected. No original bytes or acceptance condition changed.",
+  "qualification": "R2 product13a executed via a separate workflow definition head. Native frontend is a new final177 execution after evidence loss, not restoration of old native log bytes."
+}

@@ -1,0 +1,175 @@
+{
+  "schema": "recovered-exec-web-acceptance-v1",
+  "checks": {
+    "identity": true,
+    "successful": true,
+    "all_reported_steps_successful": true,
+    "all_required_steps_present_once": true,
+    "api_run_public_head": true,
+    "actual_merge_source_record_and_tree_equivalence": true,
+    "complete_nonincremental_typecheck": true,
+    "original_vitest_top_level_229_pass": true,
+    "exact_original_15_file_list": true,
+    "all_229_unique_assertions_passed": true,
+    "all_15_file_results_passed": true,
+    "artifact_api_and_upload_log_binding": true
+  },
+  "original_run_id": 37985791844,
+  "original_job_id": 114007319923,
+  "source": {
+    "public_head": "177ee571b194836678cc9a473f178c655326ba7c",
+    "actual_checkout": "b7834bf4f0a2511467bd86db4dd5971d2305424d",
+    "tree": "2d5d2c44680f6a6cb2b2d1166e2923806beafcc8",
+    "tree_equals_public_head": true,
+    "before_clean_status": "not recorded",
+    "after_snapshot": "not recorded",
+    "source_stability_claim": false
+  },
+  "tests": {
+    "assertions": 229,
+    "files": 15,
+    "original_report_suite_count": 30,
+    "passed_suite_count": 30,
+    "pending": 0,
+    "todo": 0,
+    "per_file": [
+      {
+        "path": "lib/compose-identity.test.ts",
+        "assertions": 4
+      },
+      {
+        "path": "components/company/compose-rich-initial.test.tsx",
+        "assertions": 11
+      },
+      {
+        "path": "components/company/compose-rich-reload.test.tsx",
+        "assertions": 16
+      },
+      {
+        "path": "components/company/grants-conflict-review.test.tsx",
+        "assertions": 16
+      },
+      {
+        "path": "components/company/grants.test.tsx",
+        "assertions": 2
+      },
+      {
+        "path": "components/company/mailbox-lifecycle-review.test.tsx",
+        "assertions": 21
+      },
+      {
+        "path": "features/mail/workspace-compose-navigation.test.tsx",
+        "assertions": 15
+      },
+      {
+        "path": "features/mail/workspace-editor-opening.test.tsx",
+        "assertions": 28
+      },
+      {
+        "path": "features/mail/workspace-events.test.tsx",
+        "assertions": 7
+      },
+      {
+        "path": "features/mail/workspace-mailbox-route-recovery.test.tsx",
+        "assertions": 18
+      },
+      {
+        "path": "features/company/mailbox-create-ownership.test.tsx",
+        "assertions": 19
+      },
+      {
+        "path": "features/company/mailbox-owner-freshness.test.tsx",
+        "assertions": 21
+      },
+      {
+        "path": "features/company/mailbox-retention.test.tsx",
+        "assertions": 24
+      },
+      {
+        "path": "features/mail/components/rich-message-paste.test.tsx",
+        "assertions": 25
+      },
+      {
+        "path": "features/mail/components/rich-message.test.tsx",
+        "assertions": 2
+      }
+    ]
+  },
+  "typecheck": "npx tsc --noEmit --incremental false",
+  "required_steps": [
+    "Record actual source",
+    "Complete TypeScript check",
+    "Mailbox lifecycle, ownership, rich drafts and explicit route regressions",
+    "Show complete original Vitest results"
+  ],
+  "artifact": {
+    "id": 11644124056,
+    "name": "exec-web-regressions",
+    "api_digest": "sha256:2584d980bf507a7e96ec09d77b16e81653ed79ecbcabafa4ea53b6d13f57446c",
+    "api_size": 9864,
+    "upload_log_digest_matches_api": true,
+    "zip_downloaded": false,
+    "zip_digest_locally_verified": false
+  },
+  "optional_bom_prefix_lines": [
+    1
+  ],
+  "scope": "Original EXEC web job only. Its 15 files do not include the newly added tenant/index files; no new execution of the lost native 129-test suite is claimed.",
+  "accepted": true,
+  "recovered_at_utc": "2026-10-09T21:33:35.167227+00:00",
+  "evidence_files": [
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/artifacts.json",
+      "bytes": 1410,
+      "sha256": "e7fa1989634e7640b823daa3e8650551088dda96516f5b63ae8391846e37a37b"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/jobs.json",
+      "bytes": 5886,
+      "sha256": "d402df00b1dcc724541182530091ef5a2e7c4de2e638066f51dbf3f310776624"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/merge-commit.json",
+      "bytes": 2573,
+      "sha256": "aab7dbfc9f6aa85c831143d6c6fa4029891cc4b69ba3e1dcc2185bbe47fd34ab"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/original-workflow.yml",
+      "bytes": 4650,
+      "sha256": "f12d6d03b5b25d31edd87d392b4b4df5886d5566056466953557969557a11bea"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/public-commit.json",
+      "bytes": 1302,
+      "sha256": "008f4d08608777b91a1828759a00f4cdcbb08f466cea8573ed76e9922898a669"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/run.json",
+      "bytes": 11926,
+      "sha256": "0c67e0e8aef90dfda18db43d2f3c7f0c0b3a0da0f46d7aaa0bd87303206b5508"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/vitest.json",
+      "bytes": 81512,
+      "sha256": "ef4b0fbcb5bac45861409348cfa559b7aa540b9a3bcf6d44f3f6569389604626"
+    },
+    {
+      "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/final-exec-web/web.log",
+      "bytes": 102888,
+      "sha256": "6c11d52dad375886a6a17ae364457f1a7219e3882ddea229adb0176217a5f177"
+    }
+  ],
+  "reader": {
+    "path": "/workspace/scratch/831fbd171897/tabmail-run-evidence/recovered/verify_recovered_ci.py",
+    "bytes": 16389,
+    "sha256": "577c695e4bc5dc588e11b4a50c4952abf329172cee77e65188901a5f16c91e1f"
+  },
+  "recovery_limitations": [
+    "Original CI job logs and API metadata were fetched again; derived JSON and this acceptance report were newly generated from those raw inputs.",
+    "Job log decoding removes only a timestamp prefix and its optional leading BOM. Raw UTF-8 files remain unchanged.",
+    "Artifact identity and digests are corroborated by API metadata and upload logs; no ZIP was downloaded or locally digest-verified.",
+    "Lost native 129-test logs, local 875-test failure traces, old local review files and continuous poll snapshots were not reconstructed from conversation summaries.",
+    "No original tests, collectors or runners were re-executed during recovery; no new TODO credit or issue-completion claim is granted."
+  ],
+  "todo_credit": 0
+}
