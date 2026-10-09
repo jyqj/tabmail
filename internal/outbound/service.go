@@ -127,6 +127,11 @@ func (s *Service) SubmitWithReplay(ctx context.Context, req SendRequest) (*model
 	if !s.cfg.Enabled {
 		return nil, false, app.BadRequest("outbound sending is disabled")
 	}
+	// Reject malformed custom MIME fields before a durable submission can
+	// consume its idempotency key, quota, attachments, or draft revision.
+	if err := validateCustomHeaders(req.Headers); err != nil {
+		return nil, false, app.BadRequest(err.Error())
+	}
 
 	canonical, err := authz.CanonicalSender(req.From)
 	if err != nil {
