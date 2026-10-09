@@ -1,0 +1,352 @@
+{
+  "schema": "tabmail-catalog16-source-version-independent-verification-v1",
+  "repository": "jyqj/tabmail",
+  "observed_at": "2026-10-09 04:50:48 UTC",
+  "verdict": "ACCEPT final maintenance source-version execution; preserve initial source-version failure",
+  "method": "Read complete original GitHub job logs via API, strip only GitHub timestamp prefixes to parse embedded reports, compare every ID and every group; preserve original job bytes including timestamp/BOM. SHA256 computed over UTF-8 bytes. ID hashes use lexicographically sorted exact IDs joined with LF plus final LF.",
+  "original_runner": {
+    "path": "scripts/run_r5_source_version_tests.py",
+    "compared_commits": [
+      "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+      "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+      "167e38b1541c027107fc81900f3e37fda7289677"
+    ],
+    "byte_identical": true,
+    "bytes": 9331,
+    "sha256": "f0c3f43ba9596ab5aa9563325858fbfa4f51944a445042579c7b208e3ba16303",
+    "frozen_source": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+    "frozen_ids": [
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_actual_full_scope_fresh_hashes",
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_capture_midflight_drift_refused",
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_omission_extra_hash_flags_abi_and_historical_rejected",
+      "test_r5_selected_source_binding.ActualRootBindingTests.test_real_receipt_roundtrip"
+    ],
+    "selection_and_dispatch": "Original discovery and current/frozen partition, child invocation and return-code policy retained; no new test execution or timeout change performed by this audit."
+  },
+  "executions": [
+    {
+      "phase": "initial",
+      "run_id": 37883870675,
+      "job_id": 113669399510,
+      "run_url": "https://github.com/jyqj/tabmail/actions/runs/37883870675",
+      "job_url": "https://github.com/jyqj/tabmail/actions/runs/37883870675/job/113669399510",
+      "run_head": "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+      "job_conclusion": "failure",
+      "runner_exit": 1,
+      "runner_exit_basis": "Raw GitHub shell reports exit code 1; current child exit 1 and frozen child exit 0.",
+      "source_before": {
+        "commit": "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+        "tree": "8374c1561e9da4d1630110407639a2b7d30c6b2b",
+        "status": ""
+      },
+      "source_after": {
+        "commit": "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+        "tree": "8374c1561e9da4d1630110407639a2b7d30c6b2b",
+        "status": ""
+      },
+      "source_unchanged_clean": true,
+      "raw": {
+        "blob": "b0398a6f50ddecce17cfd890984f4d973a5dc058",
+        "bytes": 5077420,
+        "sha256": "bd271dfa4e0942d9fcc125379b88085df3aa334afac4c50a4991d34731395d2e",
+        "complete": true
+      },
+      "embedded_report": {
+        "first_log_line": 1773,
+        "last_log_line": 68321,
+        "bytes": 2883507,
+        "sha256": "993a7bda8eba3dc589e63ca7873b03de26f4918efef174a5d728a9130b65516b"
+      },
+      "counts": {
+        "discovered": 869,
+        "run": 869,
+        "passed": 862,
+        "failures": 3,
+        "errors": 4,
+        "skips": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0
+      },
+      "discovered_ids": {
+        "count": 869,
+        "unique_count": 869,
+        "sha256": "e966bd6df09e61562891039ebc1c610abaeccf02baa9e767f0665f9108262fbe"
+      },
+      "actual_ids": {
+        "count": 869,
+        "unique_count": 869,
+        "sha256": "e966bd6df09e61562891039ebc1c610abaeccf02baa9e767f0665f9108262fbe"
+      },
+      "groups": [
+        {
+          "group": "current",
+          "source_sha": "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+          "child_exit": 1,
+          "argv": [
+            "/usr/bin/python3",
+            "-B",
+            "/home/runner/work/tabmail/tabmail/scripts/run_r5_source_version_tests.py",
+            "--child-root",
+            "/tmp/r5-version-rtw69h8r/current",
+            "--ids",
+            "/tmp/r5-version-rtw69h8r/current-ids.json",
+            "--output",
+            "/tmp/r5-version-rtw69h8r/current-report.json"
+          ],
+          "requested_ids": {
+            "count": 865,
+            "unique_count": 865,
+            "sha256": "c8edf8d916fa60159d69b1ce270d9b2713708cb3c656c5ade089d2728755143e"
+          },
+          "loaded_ids": {
+            "count": 865,
+            "unique_count": 865,
+            "sha256": "c8edf8d916fa60159d69b1ce270d9b2713708cb3c656c5ade089d2728755143e"
+          },
+          "actual_ids": {
+            "count": 865,
+            "unique_count": 865,
+            "sha256": "c8edf8d916fa60159d69b1ce270d9b2713708cb3c656c5ade089d2728755143e"
+          },
+          "ordered_arrays_identical": true,
+          "tests_run": 865,
+          "passed": 858,
+          "failures": [
+            "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_old_pins_reject_and_current_revision_passes_same_actual_facts",
+            "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_client_and_caller_locations_are_rejected",
+            "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_route_and_ast_fact_changes_rejected"
+          ],
+          "errors": [
+            "test_r5_catalog_reconciliation.ReviewedCatalogReconciliationTests.test_unapproved_actual_closure_bytes_rejected",
+            "test_r5_compatibility.CompatibilityGateTests.test_current_source_map_is_not_product_or_dependency_completion",
+            "test_r5_compatibility.CompatibilityGateTests.test_dns_exclusions_match_real_HTTP_methods_not_create",
+            "test_r5_transactions.TransactionInventoryTests.test_current_inventory_is_only_structure_evidence"
+          ],
+          "skips": [],
+          "expected_failures": [],
+          "unexpected_successes": []
+        },
+        {
+          "group": "frozen-v1",
+          "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+          "child_exit": 0,
+          "argv": [
+            "/usr/bin/python3",
+            "-B",
+            "/home/runner/work/tabmail/tabmail/scripts/run_r5_source_version_tests.py",
+            "--child-root",
+            "/tmp/r5-version-rtw69h8r/frozen-v1",
+            "--ids",
+            "/tmp/r5-version-rtw69h8r/frozen-v1-ids.json",
+            "--output",
+            "/tmp/r5-version-rtw69h8r/frozen-v1-report.json"
+          ],
+          "requested_ids": {
+            "count": 4,
+            "unique_count": 4,
+            "sha256": "4620cabd09e955b29e2046586ee799f94205e5be28119b3900dbb203a7fe9a9b"
+          },
+          "loaded_ids": {
+            "count": 4,
+            "unique_count": 4,
+            "sha256": "4620cabd09e955b29e2046586ee799f94205e5be28119b3900dbb203a7fe9a9b"
+          },
+          "actual_ids": {
+            "count": 4,
+            "unique_count": 4,
+            "sha256": "4620cabd09e955b29e2046586ee799f94205e5be28119b3900dbb203a7fe9a9b"
+          },
+          "ordered_arrays_identical": true,
+          "tests_run": 4,
+          "passed": 4,
+          "failures": [],
+          "errors": [],
+          "skips": [],
+          "expected_failures": [],
+          "unexpected_successes": []
+        }
+      ],
+      "independent_partition_checks": {
+        "duplicate_discovered_ids": 0,
+        "duplicate_actual_ids": 0,
+        "missing_ids": 0,
+        "extra_ids": 0,
+        "overlap_ids": 0,
+        "dispatch_equals_discovery": true
+      },
+      "preparation": {
+        "source_sha": "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+        "exit": 0,
+        "go_version": "go1.25.7",
+        "go_selection_unchanged": true,
+        "actual_started_test_ids": [
+          "TestOrdinaryReceiptOpenAPIWireFixtures"
+        ],
+        "actual_passed_test_ids": [
+          "TestOrdinaryReceiptOpenAPIWireFixtures"
+        ],
+        "fixture_sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+        "run_sha256": "f1aefecd69a78c9cfec1943d27c6a23f4926a4efe9caf361e8d84e4108f013f9",
+        "details": "Complete original preparation and selection inventories retained in embedded raw report; deliberately not duplicated in this compact receipt."
+      }
+    },
+    {
+      "phase": "final",
+      "run_id": 37884385919,
+      "job_id": 113670991637,
+      "run_url": "https://github.com/jyqj/tabmail/actions/runs/37884385919",
+      "job_url": "https://github.com/jyqj/tabmail/actions/runs/37884385919/job/113670991637",
+      "run_head": "167e38b1541c027107fc81900f3e37fda7289677",
+      "job_conclusion": "success",
+      "runner_exit": 0,
+      "runner_exit_basis": "GitHub original-runner step 9 success; both raw child exit fields are 0; unchanged runner returns 0.",
+      "source_before": {
+        "commit": "167e38b1541c027107fc81900f3e37fda7289677",
+        "tree": "2e254469358541c8aedb1e98c88d5d2edf6d44f8",
+        "status": ""
+      },
+      "source_after": {
+        "commit": "167e38b1541c027107fc81900f3e37fda7289677",
+        "tree": "2e254469358541c8aedb1e98c88d5d2edf6d44f8",
+        "status": ""
+      },
+      "source_unchanged_clean": true,
+      "raw": {
+        "blob": "2af19d07c8b21e532f4ffdff9355e11734f4b2eb",
+        "bytes": 5059014,
+        "sha256": "6e089cbb03f48f6e288f5d363009cbbe870672a4865155e193194a007c23dab7",
+        "complete": true
+      },
+      "embedded_report": {
+        "first_log_line": 1583,
+        "last_log_line": 68130,
+        "bytes": 2883810,
+        "sha256": "4cb15b20230f5113f8abd087bca1fb75644a9318a7cbee228be125913e4be6d6"
+      },
+      "counts": {
+        "discovered": 871,
+        "run": 871,
+        "passed": 871,
+        "failures": 0,
+        "errors": 0,
+        "skips": 0,
+        "expected_failures": 0,
+        "unexpected_successes": 0
+      },
+      "discovered_ids": {
+        "count": 871,
+        "unique_count": 871,
+        "sha256": "480b8b0c6cb955d4956867fe0a2ea43eb80facba00d2b7763fd050a4be78e847"
+      },
+      "actual_ids": {
+        "count": 871,
+        "unique_count": 871,
+        "sha256": "480b8b0c6cb955d4956867fe0a2ea43eb80facba00d2b7763fd050a4be78e847"
+      },
+      "groups": [
+        {
+          "group": "current",
+          "source_sha": "167e38b1541c027107fc81900f3e37fda7289677",
+          "child_exit": 0,
+          "argv": [
+            "/usr/bin/python3",
+            "-B",
+            "/home/runner/work/tabmail/tabmail/scripts/run_r5_source_version_tests.py",
+            "--child-root",
+            "/tmp/r5-version-h4x7s44c/current",
+            "--ids",
+            "/tmp/r5-version-h4x7s44c/current-ids.json",
+            "--output",
+            "/tmp/r5-version-h4x7s44c/current-report.json"
+          ],
+          "requested_ids": {
+            "count": 867,
+            "unique_count": 867,
+            "sha256": "751363858f6c9153050124603598f47a9a53daf400ae6f94084bb95446d205a1"
+          },
+          "loaded_ids": {
+            "count": 867,
+            "unique_count": 867,
+            "sha256": "751363858f6c9153050124603598f47a9a53daf400ae6f94084bb95446d205a1"
+          },
+          "actual_ids": {
+            "count": 867,
+            "unique_count": 867,
+            "sha256": "751363858f6c9153050124603598f47a9a53daf400ae6f94084bb95446d205a1"
+          },
+          "ordered_arrays_identical": true,
+          "tests_run": 867,
+          "passed": 867,
+          "failures": [],
+          "errors": [],
+          "skips": [],
+          "expected_failures": [],
+          "unexpected_successes": []
+        },
+        {
+          "group": "frozen-v1",
+          "source_sha": "41b015c30c66b3ba58a3c1395e8559ebcd27a65f",
+          "child_exit": 0,
+          "argv": [
+            "/usr/bin/python3",
+            "-B",
+            "/home/runner/work/tabmail/tabmail/scripts/run_r5_source_version_tests.py",
+            "--child-root",
+            "/tmp/r5-version-h4x7s44c/frozen-v1",
+            "--ids",
+            "/tmp/r5-version-h4x7s44c/frozen-v1-ids.json",
+            "--output",
+            "/tmp/r5-version-h4x7s44c/frozen-v1-report.json"
+          ],
+          "requested_ids": {
+            "count": 4,
+            "unique_count": 4,
+            "sha256": "4620cabd09e955b29e2046586ee799f94205e5be28119b3900dbb203a7fe9a9b"
+          },
+          "loaded_ids": {
+            "count": 4,
+            "unique_count": 4,
+            "sha256": "4620cabd09e955b29e2046586ee799f94205e5be28119b3900dbb203a7fe9a9b"
+          },
+          "actual_ids": {
+            "count": 4,
+            "unique_count": 4,
+            "sha256": "4620cabd09e955b29e2046586ee799f94205e5be28119b3900dbb203a7fe9a9b"
+          },
+          "ordered_arrays_identical": true,
+          "tests_run": 4,
+          "passed": 4,
+          "failures": [],
+          "errors": [],
+          "skips": [],
+          "expected_failures": [],
+          "unexpected_successes": []
+        }
+      ],
+      "independent_partition_checks": {
+        "duplicate_discovered_ids": 0,
+        "duplicate_actual_ids": 0,
+        "missing_ids": 0,
+        "extra_ids": 0,
+        "overlap_ids": 0,
+        "dispatch_equals_discovery": true
+      },
+      "preparation": {
+        "source_sha": "167e38b1541c027107fc81900f3e37fda7289677",
+        "exit": 0,
+        "go_version": "go1.25.7",
+        "go_selection_unchanged": true,
+        "actual_started_test_ids": [
+          "TestOrdinaryReceiptOpenAPIWireFixtures"
+        ],
+        "actual_passed_test_ids": [
+          "TestOrdinaryReceiptOpenAPIWireFixtures"
+        ],
+        "fixture_sha256": "9fdd0d734a549733a89fb9cb5f85035a137e9c5ff452276363579cf65b0950f3",
+        "run_sha256": "1ecf17cadbf7272cd67a0749c00945489e7cc7ed274783e0f32b1fd3a446fceb",
+        "details": "Complete original preparation and selection inventories retained in embedded raw report; deliberately not duplicated in this compact receipt."
+      }
+    }
+  ],
+  "scope": "Catalog/source maintenance only: zero additional implementation TODOs, no claim that Company release checks, dependency audit, main, full R5 parents or production acceptance are green."
+}

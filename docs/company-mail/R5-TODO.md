@@ -7,7 +7,7 @@
 
 第三轮最终产品tree `4034b36faa89a421f2a21b525cf35e93da4a1670` 与公开head、PG/SMTP/joint实际checkout及UI显式head完全一致。[累计专项37882924528](https://github.com/jyqj/tabmail/actions/runs/37882924528) **1668不同Go叶＋229实际UI assertions全PASS**，零失败/跳过/pending/build failure；完整非增量TypeScript通过。另有同字节真实PG8叶6P2F→8P、最终新UI18例5P13F→18P、SMTPUTF8 109叶71P38F→109P；48个checker方法单独计且实际通过。原失败、断连恢复、重新固定V2的完整记录与各来源边界见 [EXEC账本](R5-EXEC-20261009.md) 和原始证据。
 
-原父任务仍 **10/171已验收、剩余161**；所有原checkbox逐字保持，历史批次与PR/目录/CI维护不重复计数。revision16目录绑定实际产品merge并保留原collectors、完整source-version runner与历史负控，另作0项维护验收。#56仍draft；main未合入，完整PG、私有fixture、严格依赖审计及父项发布门槛保持。旧draft #17/#20/#24/#40保留。
+原父任务仍 **10/171已验收、剩余161**；所有原checkbox逐字保持，历史批次与PR/目录/CI维护不重复计数。revision16目录已在 [#225](https://github.com/jyqj/tabmail/pull/225) 的实际提交167e38b取得原3 CLI、5模块102测试及完整source-version runner871测试的通过资格（[原始CI](https://github.com/jyqj/tabmail/actions/runs/37884385919)），原collectors、全部旧测试ID和历史负控保留，维护计0项。#56仍draft；main未合入，完整PG、私有fixture、严格依赖审计及父项发布门槛保持。旧draft #17/#20/#24/#40保留。
 <!-- R5-EXEC-20261009:END -->
 
 <!-- R5-ADVANCE-20261009:BEGIN -->

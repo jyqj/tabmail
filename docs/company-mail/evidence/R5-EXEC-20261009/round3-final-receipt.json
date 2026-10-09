@@ -346,8 +346,50 @@
   "maintenance": {
     "counts_as_new_task": false,
     "catalog_revision16_source": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
-    "catalog_qualification": "pending",
-    "original_parent_checkboxes_unchanged": true
+    "catalog_qualification": "pass_on_exact_committed_candidate",
+    "original_parent_checkboxes_unchanged": true,
+    "catalog_revision": 16,
+    "catalog_commit": "167e38b1541c027107fc81900f3e37fda7289677",
+    "catalog_tree": "2e254469358541c8aedb1e98c88d5d2edf6d44f8",
+    "pull_request": 225,
+    "run_id": 37884385919,
+    "original_clis": {
+      "total": 3,
+      "passed": 3
+    },
+    "original_modules": {
+      "total": 5,
+      "tests_passed": 102,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0
+    },
+    "original_source_version_runner": {
+      "discovered_and_actual_unique_ids": 871,
+      "current": 867,
+      "frozen_v1": 4,
+      "failures": 0,
+      "errors": 0,
+      "skips": 0,
+      "missing": 0,
+      "overlap": 0,
+      "expected_failures": 0,
+      "unexpected_successes": 0,
+      "original_runner_unchanged": true
+    },
+    "initial_failure_preserved": {
+      "commit": "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+      "run_id": 37883870675,
+      "actual_ids": 869,
+      "failures": 3,
+      "errors": 4,
+      "missing": 0,
+      "skips": 0
+    },
+    "source_before_after_clean": true,
+    "qualification_scope": "Source catalogs and validation infrastructure only;0 additional implementation TODOs;no parent/runtime/release qualification.",
+    "final_metadata_scope": "Later documentation supplements preserve all nine generated file bytes. Final PR head checks and actual merge are recorded in PR225.",
+    "validation_document": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/FINAL-VALIDATION.md"
   },
   "release": {
     "qualified": false,
@@ -360,6 +402,42 @@
       20,
       24,
       40
-    ]
+    ],
+    "observed_after_catalog": {
+      "run_id": 37884386030,
+      "head": "167e38b1541c027107fc81900f3e37fda7289677",
+      "backend": {
+        "job_id": 113671069655,
+        "conclusion": "failure",
+        "failed_steps": [
+          "Race tests with PostgreSQL",
+          "Validation tool regressions",
+          "Real protocol baseline with explicit target failures"
+        ],
+        "evidence": "GitHub job/step metadata; full raw endpoint returned Transport closed twice, not claimed read"
+      },
+      "frontend": {
+        "job_id": 113671069779,
+        "conclusion": "failure",
+        "dependency_audit": "8 high severity vulnerabilities reported; strict zero-vulnerability check exit1",
+        "full_vitest_summary": [
+          " Test Files  1 failed | 119 passed (120)",
+          "      Tests  1 failed | 2088 passed (2089)"
+        ],
+        "failure": "r5-external-batch-probe.test.tsx: explicit private fixture required",
+        "source_version_and_catalog_checks": "success"
+      },
+      "production_web": {
+        "job_id": 113671069994,
+        "conclusion": "success"
+      },
+      "browser_journey": {
+        "job_id": 113671069889,
+        "conclusion": "success"
+      },
+      "product_green": false,
+      "main_merged": false,
+      "pr56_draft": true
+    }
   }
 }

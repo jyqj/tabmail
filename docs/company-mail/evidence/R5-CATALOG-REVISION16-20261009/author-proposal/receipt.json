@@ -1,0 +1,375 @@
+{
+  "schema_version": 1,
+  "qualification": "Author proposal generation, not validation of a later committed maintenance candidate.",
+  "workflow": {
+    "run_id": 37883870675,
+    "run_url": "https://github.com/jyqj/tabmail/actions/runs/37883870675",
+    "job_id": 113669399515,
+    "job_url": "https://github.com/jyqj/tabmail/actions/runs/37883870675/job/113669399515",
+    "status": "completed",
+    "conclusion": "success"
+  },
+  "invocation": {
+    "commit": "8dae88b51504b0bd8b3af59ef7b27911a752ba89",
+    "tree": "8374c1561e9da4d1630110407639a2b7d30c6b2b",
+    "status": ""
+  },
+  "product_source": {
+    "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+    "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+    "status": ""
+  },
+  "raw_job_log": {
+    "path": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/author-proposal/github-job-113669399515.raw.log",
+    "blob": "e24dc963eb57df56f277ce6374ca59770af9800b",
+    "sha256": "14ce49f7fc4c98cb0a171fad796b0047a2edf448c904e59a64a820814f389fdd",
+    "bytes": 6367638,
+    "representation": "Exact decoded UTF-8 job-log text returned by github_fetch_workflow_job_logs, re-encoded as UTF-8; timestamps and all BOMs retained. Not asserted byte-identical to the separate author.stdout artifact member."
+  },
+  "original_artifact": {
+    "id": 11595910176,
+    "name": "catalog16-proposal-37883870675-1",
+    "size_in_bytes": 1530604,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11595910176",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11595910176/zip",
+    "expired": false,
+    "created_at": "2026-10-09T04:27:30Z",
+    "expires_at": "2026-10-23T04:27:29Z",
+    "updated_at": "2026-10-09T04:27:30Z",
+    "digest": "sha256:1c92ff5e70fa71c7ee5f48e00612afd3aaa6dac6ebe733312928e676bd71c805",
+    "workflow_run": {
+      "id": 37883870675,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "chore/tabmail-catalog16-exec-20261009",
+      "head_sha": "8dae88b51504b0bd8b3af59ef7b27911a752ba89"
+    },
+    "verification": "GitHub-reported archive digest and length; archive bytes not independently downloaded or rehashed in this decoder."
+  },
+  "decoding": {
+    "chunks": 1306,
+    "files": 9,
+    "complete": true,
+    "duplicate_chunks": 0,
+    "missing_chunks": 0,
+    "bytes_blob_sha256_verified_for_every_file": true,
+    "normalization": "Only one U+FEFF before log timestamp framing and the timestamp framing were removed to decode JSON log records. No file chunk text was altered. An initial decoder omitted three BOM-prefixed records, then rejected missing chunks; the corrected decoder read every actual record and revalidated every complete file."
+  },
+  "proposal_files": {
+    "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md": {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md",
+      "blob": "354577481917e9a2715a44b48df7e47b51caa7aa",
+      "sha256": "184c706754cda71618ced4890207765f3de14d817cb74174c5005111d1cc2e6b",
+      "bytes": 2788
+    },
+    "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/reconciliation.json": {
+      "path": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/reconciliation.json",
+      "blob": "0c98df1ba582d4b70816c7ac7a0bbe37b272ec4e",
+      "sha256": "cc9dec5c0e86655e065685dd4f73cd1daf4f608d2a02bcd287e0181c708d93fb",
+      "bytes": 1234357
+    },
+    "docs/company-mail/evidence/R5-CLIENT-CALLS.json": {
+      "path": "docs/company-mail/evidence/R5-CLIENT-CALLS.json",
+      "blob": "36795f966b4793d7362650160b00ca5c734be018",
+      "sha256": "4720383e752863a4d15f1936e63efde79487874ac14fc614a927608ab8f3e732",
+      "bytes": 50377
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json",
+      "blob": "c9eb79188cfa6734ec4634c6d25a07f5ea250a9f",
+      "sha256": "a5252fd341b75be19afe75c71b7285a8520727d4671837b829b1de4a56bd396d",
+      "bytes": 41456
+    },
+    "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json": {
+      "path": "docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json",
+      "blob": "889d8b72f658ca18962d1d5681dd8782f92e9811",
+      "sha256": "8981a2534a81c321c65ad2b3538458dca48ba5304391668ff2e3f1a6a882fbea",
+      "bytes": 411943
+    },
+    "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json": {
+      "path": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
+      "blob": "668fc73bb22b9bede6ab9ef533ba8680a0241941",
+      "sha256": "856a9377a8b327c9ce7e4f91cf290bc15a45bf832c3af327a7739d3599ce43c6",
+      "bytes": 2935765
+    },
+    "scripts/tests/test_r5_catalog_reconciliation.py": {
+      "path": "scripts/tests/test_r5_catalog_reconciliation.py",
+      "blob": "ca95b1fdbaef51a80de18996aa98743308178022",
+      "sha256": "7179ed658d014ddbe35182918a7ce0ad71be5d723836f605a002f7f69f31699c",
+      "bytes": 729060
+    },
+    "scripts/tests/test_r5_compatibility.py": {
+      "path": "scripts/tests/test_r5_compatibility.py",
+      "blob": "aa9e166ff111236ddbc1cad9e7c0f486634b2c7e",
+      "sha256": "193447b257b2eb132da5002e386ba02db2a74f93895a453fc771dd38d9cfb143",
+      "bytes": 13605
+    },
+    "scripts/tests/test_r5_transactions.py": {
+      "path": "scripts/tests/test_r5_transactions.py",
+      "blob": "9655d9bfa5637d7c3160ec86244fcdeafa455e62",
+      "sha256": "a12be7723b1c4921ecd427f1495f7b1e44c90507c490764821fa59c181f5cb63",
+      "bytes": 15545
+    }
+  },
+  "original_commands": [
+    {
+      "label": "transactions",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "exit_code": 1,
+      "elapsed_seconds": 1.97084,
+      "before": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": ""
+      },
+      "after": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": ""
+      },
+      "stdout": {
+        "bytes": 2859,
+        "sha256": "8bb66a9111b0f8950833b759fe4da7b1d606ec1f986f8f264e203b2c3ca4b635"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "compatibility",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "exit_code": 1,
+      "elapsed_seconds": 3.024793,
+      "before": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": ""
+      },
+      "after": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": ""
+      },
+      "stdout": {
+        "bytes": 146,
+        "sha256": "a954d20d64d0e992b5e1fb6ce6fc0867a1871be7f54fd7426290df24c454da55"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "exit_code": 1,
+      "elapsed_seconds": 0.904144,
+      "before": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": ""
+      },
+      "after": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": ""
+      },
+      "stdout": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      "stderr": {
+        "bytes": 1174,
+        "sha256": "55c1865b84329d8b25dc9a9d1bdff015ab09df40626672b24bffd0e18a123d78"
+      }
+    },
+    {
+      "label": "transactions",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "scripts/check_r5_transactions.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.564058,
+      "before": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": " M docs/company-mail/evidence/R5-CLIENT-CALLS.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json\n M docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json\n"
+      },
+      "after": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": " M docs/company-mail/evidence/R5-CLIENT-CALLS.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json\n M docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json\n"
+      },
+      "stdout": {
+        "bytes": 309,
+        "sha256": "b62279e821c7f89de22eb02f739489ea8a53fd910ecc11d569f653edc5fe5e75"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "compatibility",
+      "argv": [
+        "/usr/bin/python3",
+        "-B",
+        "scripts/check_r5_compatibility.py"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 1.81116,
+      "before": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": " M docs/company-mail/evidence/R5-CLIENT-CALLS.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json\n M docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json\n"
+      },
+      "after": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": " M docs/company-mail/evidence/R5-CLIENT-CALLS.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json\n M docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json\n"
+      },
+      "stdout": {
+        "bytes": 1117,
+        "sha256": "4b3adfa3cf57ca7928419fb0df955d89d389d3e1db1de6f28e0bba647004512c"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    },
+    {
+      "label": "clients",
+      "argv": [
+        "node",
+        "scripts/collect_api_calls.cjs",
+        "--check"
+      ],
+      "exit_code": 0,
+      "elapsed_seconds": 0.916678,
+      "before": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": " M docs/company-mail/evidence/R5-CLIENT-CALLS.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json\n M docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json\n"
+      },
+      "after": {
+        "commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+        "status": " M docs/company-mail/evidence/R5-CLIENT-CALLS.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/clients.json\n M docs/company-mail/evidence/R5-COMPATIBILITY-GATES.json\n M docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json\n"
+      },
+      "stdout": {
+        "bytes": 73,
+        "sha256": "47b96ae470deec0228831298df2ab391d0e25b90aec7aaabbaa7c78ebc5536eb"
+      },
+      "stderr": {
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    }
+  ],
+  "facts": {
+    "transaction": {
+      "status": "PASS",
+      "postgres_files": 64,
+      "functions": 405,
+      "sql_execution_calls": 506,
+      "direct_write_functions": 140,
+      "write_closure_functions": 161,
+      "migration_files": 19,
+      "task_complete": false,
+      "runtime_verified": false,
+      "meaning": "syntax inventory current; no concurrency or behavior equivalence claim"
+    },
+    "compatibility": {
+      "wire_validation_scope": "not_checked_current_wire_required",
+      "historical_wire_reference": {
+        "artifact_ref": "docs/company-mail/evidence/R5-COMPATIBILITY-CURRENT-20261003/historical-map-v1.json",
+        "sha256": "61b039486bc7804366012298fe87203882b6fb52ba1b160eb8ee77d76989dc22",
+        "qualification": "historical_metadata_only_not_current_wire"
+      },
+      "status": "source_inventory_and_upgrade_plan_checked",
+      "task_complete": false,
+      "product_green": false,
+      "routes": 133,
+      "client_branches": 136,
+      "source_files": 97,
+      "openapi_missing": [
+        "DELETE /api/v1/suppression/{id}",
+        "GET /api/v1/suppression",
+        "GET /docs-assets/*"
+      ],
+      "no_shipped_client": [
+        "DELETE /api/v1/suppression/{id}",
+        "GET /api/v1/admin/status",
+        "GET /api/v1/auth/me",
+        "GET /api/v1/company/outbound/{id}/recipients",
+        "GET /api/v1/suppression",
+        "GET /docs",
+        "GET /docs-assets/*",
+        "GET /metrics",
+        "GET /openapi.yaml",
+        "GET /ready",
+        "GET /redoc"
+      ],
+      "runtime_boundary": "No HTTP/DB/old-client upgrade execution; fresh scoped evidence and dependency review remain required."
+    },
+    "postgres_body_changes": [
+      {
+        "id": "internal/store/postgres/company_templates.go:*PgStore:SaveMailTemplate",
+        "before_sha256": "2a1e100ed7c2de664f94313abb028a6f05d8f328aeefa8be246a81cfdb41f51f",
+        "after_sha256": "bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d"
+      }
+    ],
+    "postgres_classification_changes": [],
+    "added_entries": [
+      {
+        "id": "internal/store/postgres/settings.go:*PgStore:SeedSetting",
+        "entry_sha256": "26d690801258cf150bbbdd694a11c6cae4c94fd0e004ffca20f3db07ace9cc0e"
+      }
+    ],
+    "changed_existing_entries": 33,
+    "caller_changes": 32,
+    "route_fact_changes": 6,
+    "closure_changes": 8,
+    "historical_files": 142,
+    "protected_source_files": 186
+  },
+  "preservation_execution": {
+    "python_author_completed": true,
+    "candidate_module_compiled": true,
+    "candidate_module_test_methods": 35,
+    "original_test_methods": 33,
+    "original_unchanged_whole_methods": 30,
+    "historical_wrapped_original_bodies": 2,
+    "current_positive_with_five_exact_replacements": 1,
+    "original_top_level_assignments": 84,
+    "unchanged_assignment_values": 81,
+    "current_pins_advanced": 3,
+    "unchanged_negative_controls": 5,
+    "scope": "Executed author AST and source-segment checks, not execution of the generated test methods."
+  },
+  "committed_candidate_tests_executed": false,
+  "implementation_todos_completed": 0,
+  "runtime_verified": false,
+  "product_green": false,
+  "task_complete": false,
+  "parent_tasks": {
+    "accepted": 10,
+    "total": 171,
+    "remaining": 161
+  }
+}
