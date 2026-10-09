@@ -1,0 +1,281 @@
+{
+  "schema": 1,
+  "task": "EXEC07",
+  "qualification": "ACCEPT for the exact original PR224 candidate tree; later candidate heads require their own source-qualified results",
+  "public_head": "6c475d30e490ae69e2db512d431617aa4e9301d8",
+  "public_tree": "55a10b9e87f71bccd0a726cd184abeddeb6e78e1",
+  "actual_checkout": "bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+  "actual_checkout_parents": [
+    "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+    "6c475d30e490ae69e2db512d431617aa4e9301d8"
+  ],
+  "run": {
+    "id": 37882582303,
+    "url": "https://github.com/jyqj/tabmail/actions/runs/37882582303",
+    "attempt": 1,
+    "event": "pull_request",
+    "head_sha": "6c475d30e490ae69e2db512d431617aa4e9301d8",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-10-09T04:09:48Z",
+    "updated_at": "2026-10-09T04:11:02Z"
+  },
+  "job_id": 113665375102,
+  "runtime": {
+    "go": "go1.25.7 linux/amd64",
+    "postgres": "PostgreSQL 16.15 in owned disposable postgres:16 service",
+    "checker_unittest_methods": 6,
+    "checker_unittest_result": "OK"
+  },
+  "test_source_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a",
+  "baseline_public_source": "eae219951c6f9cbf17eb4062b69464c731807be7",
+  "raw_github_job_log": {
+    "blob_sha": "88a48711d5a83639269bdc4884335eed7e12656b",
+    "sha256": "0b1d7be193519ab49861eefdc17398a43176235110452c5e891d5b878053c577",
+    "utf8_bytes": 103797,
+    "complete": true,
+    "modified": false
+  },
+  "original_go_jsonl": {
+    "baseline": {
+      "blob_sha": "a872eda97ba5ea122df0684b2560651dda717ac4",
+      "sha256": "07c4af0d822b52e6e29a87ffa955974578eb4f6cc4de426ec0fc9e1b29bff619",
+      "bytes": 9334
+    },
+    "candidate": {
+      "blob_sha": "05c3f36f8217eef428ecebcf0ffa97ac9b0e47be",
+      "sha256": "28d78edabe83adbe67d217fab6a2be93bdb5edb8950f23f435cd05d82d9db40f",
+      "bytes": 8268
+    }
+  },
+  "original_stderr": {
+    "baseline_bytes": 0,
+    "candidate_bytes": 0,
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "github_artifact": {
+    "id": 11595217539,
+    "name": "settings-seed-evidence",
+    "size_in_bytes": 6468,
+    "url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11595217539",
+    "archive_download_url": "https://api.github.com/repos/jyqj/tabmail/actions/artifacts/11595217539/zip",
+    "expired": false,
+    "created_at": "2026-10-09T04:10:57Z",
+    "expires_at": "2026-10-23T04:10:56Z",
+    "updated_at": "2026-10-09T04:10:57Z",
+    "digest": "sha256:6212745ae53ca7e676d74edd763fa999ff9f398613cf135c14f3f7dce4cf20e1",
+    "workflow_run": {
+      "id": 37882582303,
+      "repository_id": 1188928152,
+      "head_repository_id": 1188928152,
+      "head_branch": "fix/tabmail-exec-round3-20261009",
+      "head_sha": "6c475d30e490ae69e2db512d431617aa4e9301d8"
+    }
+  },
+  "independent_checks": [
+    "Every extracted Go stdout/stderr byte sequence matched the execution record's original SHA256",
+    "Exact start and terminal ID sets, no missing/duplicate/skip/unexpected scope",
+    "All package and parent outcomes checked separately from leaves",
+    "No build-fail, FailedBuild, panic or data race",
+    "All source assertions checked across leaf, parent and package scopes",
+    "Actual defect observations checked against frozen fixture semantics, not runner summary",
+    "Before/after source identity unchanged; candidate tree equals the publicly retrieved head tree",
+    "Full original logs preserved; no local evidence reconstruction"
+  ],
+  "scope": "Actual PostgreSQL concurrency proof for atomic per-key seeding. Does not claim the full existing PostgreSQL release gate.",
+  "results": {
+    "baseline": {
+      "source": {
+        "commit": "b192fca8ed626718d34ffb974707eb46554de5cd",
+        "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+        "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+      },
+      "source_after": {
+        "commit": "b192fca8ed626718d34ffb974707eb46554de5cd",
+        "tree": "1386e731a4b6ed6c552e58bac427de3db2f78e15",
+        "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+      },
+      "exit_code": 1,
+      "timed_out": false,
+      "command": [
+        "go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=120s",
+        "-run",
+        "^TestR5SettingsSeedPG",
+        "./internal/settings"
+      ],
+      "package": "tabmail/internal/settings",
+      "package_result": "fail",
+      "package_elapsed": 3.409,
+      "event_count": 46,
+      "started_count": 10,
+      "leaf_count": 8,
+      "counts": {
+        "pass": 6,
+        "fail": 2,
+        "skip": 0
+      },
+      "source_assertion_count": 2,
+      "marker_count": 2,
+      "markers": [
+        {
+          "test": "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write",
+          "line": "r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_admin_write before_value=\"false\" after_value=\"true\" before_description=\"concurrent_admin_write committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:10:39.753977Z after_updated_at=2026-10-09T04:10:39.755866Z",
+          "message": "EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_admin_write before_value=\"false\" after_value=\"true\" before_description=\"concurrent_admin_write committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:10:39.753977Z after_updated_at=2026-10-09T04:10:39.755866Z",
+          "before_updated_at": "2026-10-09T04:10:39.753977Z",
+          "after_updated_at": "2026-10-09T04:10:39.755866Z"
+        },
+        {
+          "test": "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed",
+          "line": "r5_settings_seed_pg_test.go:147: EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_startup_seed before_value=\"false\" after_value=\"true\" before_description=\"concurrent_startup_seed committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:10:40.436331Z after_updated_at=2026-10-09T04:10:40.437807Z",
+          "message": "EXEC07_STALE_SEED_OVERWROTE_COMMITTED_SETTING writer=concurrent_startup_seed before_value=\"false\" after_value=\"true\" before_description=\"concurrent_startup_seed committed choice\" after_description=\"first startup environment\" before_updated_at=2026-10-09T04:10:40.436331Z after_updated_at=2026-10-09T04:10:40.437807Z",
+          "before_updated_at": "2026-10-09T04:10:40.436331Z",
+          "after_updated_at": "2026-10-09T04:10:40.437807Z"
+        }
+      ],
+      "leaf_results": [
+        {
+          "name": "TestR5SettingsSeedPGCancelledContext",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write",
+          "status": "fail"
+        },
+        {
+          "name": "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed",
+          "status": "fail"
+        },
+        {
+          "name": "TestR5SettingsSeedPGCreatesAbsentDefaults",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/empty",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/false",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/text",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/zero",
+          "status": "pass"
+        }
+      ],
+      "parent_results": [
+        {
+          "name": "TestR5SettingsSeedPGConcurrentWrites",
+          "status": "fail"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues",
+          "status": "pass"
+        }
+      ],
+      "stdout_sha256": "07c4af0d822b52e6e29a87ffa955974578eb4f6cc4de426ec0fc9e1b29bff619",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0
+    },
+    "candidate": {
+      "source": {
+        "commit": "bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+        "tree": "55a10b9e87f71bccd0a726cd184abeddeb6e78e1",
+        "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+      },
+      "source_after": {
+        "commit": "bd7bea1a4d400317641ce2c5e160eb31486e88a6",
+        "tree": "55a10b9e87f71bccd0a726cd184abeddeb6e78e1",
+        "test_sha256": "9a6f75b684824d06a763065823e488d961a1e8b033fa69e84de9ad1fe4b2198a"
+      },
+      "exit_code": 0,
+      "timed_out": false,
+      "command": [
+        "go",
+        "test",
+        "-mod=readonly",
+        "-json",
+        "-race",
+        "-p",
+        "1",
+        "-count=1",
+        "-timeout=120s",
+        "-run",
+        "^TestR5SettingsSeedPG",
+        "./internal/settings"
+      ],
+      "package": "tabmail/internal/settings",
+      "package_result": "pass",
+      "package_elapsed": 3.9459999999999997,
+      "event_count": 44,
+      "started_count": 10,
+      "leaf_count": 8,
+      "counts": {
+        "pass": 8,
+        "fail": 0,
+        "skip": 0
+      },
+      "source_assertion_count": 0,
+      "marker_count": 0,
+      "markers": [],
+      "leaf_results": [
+        {
+          "name": "TestR5SettingsSeedPGCancelledContext",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGConcurrentWrites/concurrent_admin_write",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGConcurrentWrites/concurrent_startup_seed",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGCreatesAbsentDefaults",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/empty",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/false",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/text",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues/zero",
+          "status": "pass"
+        }
+      ],
+      "parent_results": [
+        {
+          "name": "TestR5SettingsSeedPGConcurrentWrites",
+          "status": "pass"
+        },
+        {
+          "name": "TestR5SettingsSeedPGPreservesExistingValues",
+          "status": "pass"
+        }
+      ],
+      "stdout_sha256": "28d78edabe83adbe67d217fab6a2be93bdb5edb8950f23f435cd05d82d9db40f",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_bytes": 0
+    }
+  }
+}

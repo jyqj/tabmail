@@ -1,0 +1,305 @@
+{
+  "schema": 1,
+  "repository": "jyqj/tabmail",
+  "audit": "independent API terminal-state audit of R5 EXEC-20261009",
+  "observed_at_utc": "2026-10-09 04:22:45 UTC",
+  "qualification": "PASS",
+  "counts": {
+    "claimed_issue_count": 10,
+    "closed_completed_with_all_four_checks": 10,
+    "remaining": 0,
+    "round_completion_counts": [
+      4,
+      3,
+      3
+    ],
+    "round_remaining_counts": [
+      6,
+      3,
+      0
+    ]
+  },
+  "acceptance_criteria": [
+    "Freeze a regression that exposes the current defect; retain the actual failing result.",
+    "Implement the production fix and pass the same regression plus necessary affected checks.",
+    "Independent review and integrated-source verification completed.",
+    "Merge the reviewed round PR into #56's integration branch and record commit/test evidence in the R5 TODO ledger."
+  ],
+  "issues": [
+    {
+      "number": 212,
+      "url": "https://github.com/jyqj/tabmail/issues/212",
+      "title": "R5 EXEC-01: Reject incomplete SMTP policy replacements before side effects",
+      "round": 1,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T03:06:13Z",
+      "updated_at": "2026-10-09T03:06:13Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "24bca4ec12d905268739b94e0b7eead12ce493ad5900ad580b2e27b854af0d35"
+    },
+    {
+      "number": 213,
+      "url": "https://github.com/jyqj/tabmail/issues/213",
+      "title": "R5 EXEC-02: Keep mailbox lifecycle intents locked after revision conflicts",
+      "round": 1,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T03:06:14Z",
+      "updated_at": "2026-10-09T03:06:14Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "c77ce159cf19e95b52e4ad667ed8f4ab2cca400cb0cf6b66ba388838972b9d25"
+    },
+    {
+      "number": 214,
+      "url": "https://github.com/jyqj/tabmail/issues/214",
+      "title": "R5 EXEC-03: Reject truncated BDAT chunks instead of committing partial messages",
+      "round": 1,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T03:06:15Z",
+      "updated_at": "2026-10-09T03:06:15Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "1b6d1801c493359df05cda05cd52d6d2e063f9e19926ad558b0c31160c5536af"
+    },
+    {
+      "number": 215,
+      "url": "https://github.com/jyqj/tabmail/issues/215",
+      "title": "R5 EXEC-10: Reject NUL in persisted template content and rendered values",
+      "round": 1,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T03:06:16Z",
+      "updated_at": "2026-10-09T03:06:16Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "61e690245c672f985112ea24def144e150ec4edcfd3135f16c6b335ba6d7867a"
+    },
+    {
+      "number": 216,
+      "url": "https://github.com/jyqj/tabmail/issues/216",
+      "title": "R5 EXEC-04: Validate tenant and plan names against persistence limits",
+      "round": 2,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T03:28:23Z",
+      "updated_at": "2026-10-09T03:28:23Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "38c4d7cc24b61c9ccde8eea736fe698c23af3a9de979eceb8065ec831d7e3336"
+    },
+    {
+      "number": 217,
+      "url": "https://github.com/jyqj/tabmail/issues/217",
+      "title": "R5 EXEC-05: Preserve HTML when editing a reopened rich draft",
+      "round": 2,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T03:28:25Z",
+      "updated_at": "2026-10-09T03:28:25Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "f623622e7f513b2ec0dbc067a60640a7226007827cabc74a3ac47640a90afe04"
+    },
+    {
+      "number": 218,
+      "url": "https://github.com/jyqj/tabmail/issues/218",
+      "title": "R5 EXEC-06: Accept DATA messages exactly at the configured byte limit",
+      "round": 2,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T03:28:26Z",
+      "updated_at": "2026-10-09T03:28:26Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "7f042f97cb292debc14444a7f66a19f81734e9b6e23fdf9672d5cc2f51cf005c"
+    },
+    {
+      "number": 219,
+      "url": "https://github.com/jyqj/tabmail/issues/219",
+      "title": "R5 EXEC-07: Make settings bootstrap insert-if-absent atomic",
+      "round": 3,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T04:20:00Z",
+      "updated_at": "2026-10-09T04:20:00Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "d0652a0552d4fb30d451b8b832c788833952fb902e168cb9382436e6b7aaf4f6"
+    },
+    {
+      "number": 220,
+      "url": "https://github.com/jyqj/tabmail/issues/220",
+      "title": "R5 EXEC-08: Do not silently replace an explicitly unavailable mailbox",
+      "round": 3,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T04:20:02Z",
+      "updated_at": "2026-10-09T04:20:02Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "89280d2fde54b125ebe606ba247ccbc9c8cdc7d4e22a4fbdd0c33b08e79b829b"
+    },
+    {
+      "number": 221,
+      "url": "https://github.com/jyqj/tabmail/issues/221",
+      "title": "R5 EXEC-09: Require SMTPUTF8 capability before sending internationalized envelopes",
+      "round": 3,
+      "state": "closed",
+      "state_reason": "completed",
+      "closed_at": "2026-10-09T04:20:03Z",
+      "updated_at": "2026-10-09T04:20:03Z",
+      "checked_acceptance_items": 4,
+      "body_sha256": "7fd141e227e4d051f44448cf246bb2c87819d9a18ca6d40862fc160894702726"
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "issue_numbers": [
+        212,
+        213,
+        214,
+        215
+      ],
+      "completed_this_round": 4,
+      "cumulative_completed": 4,
+      "remaining": 6,
+      "pr": 222,
+      "url": "https://github.com/jyqj/tabmail/pull/222",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T03:05:38Z",
+      "base_ref": "integration/company-mail-r5-pr-management-20261007",
+      "actual_merge_commit": "602b17544d0cd12c04f1b90c116814ae0522199a",
+      "actual_merge_parents": [
+        "eae219951c6f9cbf17eb4062b69464c731807be7",
+        "1557b68a69cf70f9644046c8cacfac388daf1ae5"
+      ],
+      "candidate_head": "1557b68a69cf70f9644046c8cacfac388daf1ae5",
+      "merge_tree": "9356377bd7024d0578dc8dc9041855fa511f9565",
+      "candidate_tree": "9356377bd7024d0578dc8dc9041855fa511f9565",
+      "merge_tree_equals_candidate": true,
+      "api_sources": [
+        "https://api.github.com/repos/jyqj/tabmail/pulls/222",
+        "https://api.github.com/repos/jyqj/tabmail/git/commits/602b17544d0cd12c04f1b90c116814ae0522199a",
+        "https://api.github.com/repos/jyqj/tabmail/git/commits/1557b68a69cf70f9644046c8cacfac388daf1ae5"
+      ]
+    },
+    {
+      "round": 2,
+      "issue_numbers": [
+        216,
+        217,
+        218
+      ],
+      "completed_this_round": 3,
+      "cumulative_completed": 7,
+      "remaining": 3,
+      "pr": 223,
+      "url": "https://github.com/jyqj/tabmail/pull/223",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T03:27:44Z",
+      "base_ref": "integration/company-mail-r5-pr-management-20261007",
+      "actual_merge_commit": "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+      "actual_merge_parents": [
+        "602b17544d0cd12c04f1b90c116814ae0522199a",
+        "419848e51b2d5e509898c355ace1c0deffe47fd4"
+      ],
+      "candidate_head": "419848e51b2d5e509898c355ace1c0deffe47fd4",
+      "merge_tree": "a5d05c981558239810bb4dd1022fc52b32e16c90",
+      "candidate_tree": "a5d05c981558239810bb4dd1022fc52b32e16c90",
+      "merge_tree_equals_candidate": true,
+      "api_sources": [
+        "https://api.github.com/repos/jyqj/tabmail/pulls/223",
+        "https://api.github.com/repos/jyqj/tabmail/git/commits/ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+        "https://api.github.com/repos/jyqj/tabmail/git/commits/419848e51b2d5e509898c355ace1c0deffe47fd4"
+      ]
+    },
+    {
+      "round": 3,
+      "issue_numbers": [
+        219,
+        220,
+        221
+      ],
+      "completed_this_round": 3,
+      "cumulative_completed": 10,
+      "remaining": 0,
+      "pr": 224,
+      "url": "https://github.com/jyqj/tabmail/pull/224",
+      "state": "closed",
+      "merged": true,
+      "merged_at": "2026-10-09T04:19:20Z",
+      "base_ref": "integration/company-mail-r5-pr-management-20261007",
+      "actual_merge_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+      "actual_merge_parents": [
+        "ff43326e81f262daaac7b3dfd8b3047a8f51743b",
+        "a0c61d24b17030577566b120a7ddd810506b25e7"
+      ],
+      "candidate_head": "a0c61d24b17030577566b120a7ddd810506b25e7",
+      "merge_tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+      "candidate_tree": "4034b36faa89a421f2a21b525cf35e93da4a1670",
+      "merge_tree_equals_candidate": true,
+      "api_sources": [
+        "https://api.github.com/repos/jyqj/tabmail/pulls/224",
+        "https://api.github.com/repos/jyqj/tabmail/git/commits/b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "https://api.github.com/repos/jyqj/tabmail/git/commits/a0c61d24b17030577566b120a7ddd810506b25e7"
+      ]
+    }
+  ],
+  "integration_pr": {
+    "number": 56,
+    "url": "https://github.com/jyqj/tabmail/pull/56",
+    "state": "open",
+    "draft": true,
+    "merged": false,
+    "head_ref": "integration/company-mail-r5-pr-management-20261007",
+    "head": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+    "git_ref_head": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+    "base_ref": "main",
+    "base": "d6d512172fb6b874c3283d9df3f4d56758684a13"
+  },
+  "main_ref": {
+    "ref": "refs/heads/main",
+    "actual_head": "d6d512172fb6b874c3283d9df3f4d56758684a13",
+    "expected_head_matches": true,
+    "api_url": "https://api.github.com/repos/jyqj/tabmail/git/ref/heads/main"
+  },
+  "preserved_open_drafts": [
+    {
+      "number": 17,
+      "url": "https://github.com/jyqj/tabmail/pull/17",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "5b7f8774643243711e8065f2403e419f5ba81065",
+      "base_ref": "work/company-mail-r5-goal-20260930"
+    },
+    {
+      "number": 20,
+      "url": "https://github.com/jyqj/tabmail/pull/20",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "722fcf2f5f9d28c8f6372494b49cccc7b8816467",
+      "base_ref": "fix/r5-selected-source-binding-20261003"
+    },
+    {
+      "number": 24,
+      "url": "https://github.com/jyqj/tabmail/pull/24",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "f4ed1f4257ff104a53ffdb49416e50fd5c6668b4",
+      "base_ref": "integration/company-mail-r5-batch4-20261003"
+    },
+    {
+      "number": 40,
+      "url": "https://github.com/jyqj/tabmail/pull/40",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "head": "78f0643e504a9a4978c12e8c7106f8aeb4006fb2",
+      "base_ref": "integration/r5-slice4-combined-20261004"
+    }
+  ],
+  "audit_method": "Read all ten issue objects, all eight PR objects, both branch refs, and the three actual merge plus three candidate commit objects from GitHub API. Assert exact state/reason/checklist, target branch, ordered parents and merge/candidate tree equality. Counts are computed from those API objects.",
+  "scope": "These are ten bounded implementation issues. This receipt does not complete the larger original R5 parent TODOs, mark #56 ready, change main, or count PR/catalog/evidence maintenance as implementation work.",
+  "external_mutation": "Only this immutable JSON Git blob was created by the terminal-state audit; no issue/PR/ref was changed."
+}

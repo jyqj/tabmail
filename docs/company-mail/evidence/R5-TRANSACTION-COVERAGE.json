@@ -1,6 +1,6 @@
 {
   "schema": "r5-transaction-coverage-v1",
-  "baseline_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+  "baseline_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
   "task": "R5-P0-070",
   "task_complete": false,
   "runtime_verified": false,
@@ -63,7 +63,7 @@
     },
     {
       "path": "internal/store/postgres/company_templates.go",
-      "sha256": "520502656509d73730d7fed4587bbbe147ab12d22f3d4d75a30731f15ff5ae02"
+      "sha256": "c6759117c22885f90207a01090cdd63602e561fa6bc903985d995da4f23b8f38"
     },
     {
       "path": "internal/store/postgres/content_eligibility.go",
@@ -235,7 +235,7 @@
     },
     {
       "path": "internal/store/postgres/settings.go",
-      "sha256": "fbd3cf10ed46ef03aef235377c07c9b6fdbbfd02530320060a7ed59a139dd7c3"
+      "sha256": "567388e56f2374cebfb7bfc0d051dd362723c3eeef67d736641544a1bb9d720e"
     },
     {
       "path": "internal/store/postgres/smtp_policy.go",
@@ -334,7 +334,24 @@
     "internal/store/postgres/company_templates.go": {
       "group": "CTX30",
       "review": "Save/retire/revoke T KEY SHARE→actor/profile→template CAS或version UPDATE；publish/grant T UPDATE；FK版本→模板、grant→模板/M/U；immutable版本trigger保留",
-      "remaining": "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证"
+      "remaining": "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证",
+      "revision16_additions": {
+        "source_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "source_sha256": "c6759117c22885f90207a01090cdd63602e561fa6bc903985d995da4f23b8f38",
+        "changed_functions": [
+          "internal/store/postgres/company_templates.go:*PgStore:SaveMailTemplate"
+        ],
+        "added_functions": [],
+        "review": {
+          "base_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+          "source_sha256": "bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d",
+          "role": "input-checked-template-transaction-writer",
+          "trace": "TrimSpace(name) then reject empty, over-120-byte or NUL-bearing names before ValidateTemplate, JSON encoding or SQL. The accepted branch retains companyReferencedTx: tenant KEY SHARE then actor/profile authorization, new template INSERT or tenant/id/revision CAS UPDATE, required template.save audit and outer commit. The name check adds no database operation or lock.",
+          "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+          "review": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md"
+        },
+        "qualification": "source-only"
+      }
     },
     "internal/store/postgres/domain_delete.go": {
       "group": "TX23",
@@ -494,7 +511,25 @@
     "internal/store/postgres/settings.go": {
       "group": "CTX37",
       "review": "system setting UPSERT单SQL，无tenant FK",
-      "remaining": "settings service跨key多次UPSERT非整体事务；SMTP/config缓存刷新边界待验证"
+      "remaining": "settings service跨key多次UPSERT非整体事务；SMTP/config缓存刷新边界待验证",
+      "revision16_additions": {
+        "source_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "source_sha256": "567388e56f2374cebfb7bfc0d051dd362723c3eeef67d736641544a1bb9d720e",
+        "changed_functions": [],
+        "added_functions": [
+          "internal/store/postgres/settings.go:*PgStore:SeedSetting"
+        ],
+        "review": {
+          "base_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+          "source_sha256": "1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d",
+          "role": "insert-only-default-statement",
+          "trace": "A single pool.Exec issues INSERT INTO system_settings (...) VALUES (...) ON CONFLICT (key) DO NOTHING. An existing key keeps value, description and updated_at verbatim. The function returns true only when RowsAffected() == 1; an existing key returns false and database errors propagate. There is no read-then-upsert window, explicit transaction, extra lock SQL or callback.",
+          "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+          "review": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md"
+        },
+        "note": "ListSettings moves in this file without a function-body change; old manual fields are retained.",
+        "qualification": "source-only"
+      }
     },
     "internal/store/postgres/smtp_policy.go": {
       "group": "CTX37",
@@ -1087,7 +1122,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 393,
+          "line": 402,
           "expression": "s.store.CreateAPIKeyAuthorized",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1311,7 +1346,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 439,
+          "line": 448,
           "expression": "s.store.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1319,7 +1354,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 435,
+          "line": 444,
           "expression": "s.DeleteAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1441,7 +1476,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 419,
+          "line": 428,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -1590,7 +1625,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeys",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeys",
-          "line": 403,
+          "line": 412,
           "expression": "s.store.ListAPIKeys",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -1707,7 +1742,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAPIKeysByOwner",
           "file": "internal/app/admin/service.go",
           "function": "ListAPIKeysByOwner",
-          "line": 411,
+          "line": 420,
           "expression": "s.store.ListAPIKeysByOwner",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -2556,7 +2591,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 324,
+          "line": 330,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2564,7 +2599,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 259,
+          "line": 262,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2572,7 +2607,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKey",
-          "line": 442,
+          "line": 451,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2580,7 +2615,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 358,
+          "line": 367,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2588,7 +2623,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 304,
+          "line": 307,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2596,7 +2631,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 344,
+          "line": 353,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2604,7 +2639,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 555,
+          "line": 564,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2612,7 +2647,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 289,
+          "line": 292,
           "expression": "app.InsertAudit",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -2822,7 +2857,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 472,
+          "line": 481,
           "expression": "s.store.ListAuditEntries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -2959,7 +2994,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListAudit",
           "file": "internal/app/admin/service.go",
           "function": "ListAudit",
-          "line": 508,
+          "line": 517,
           "expression": "s.store.ListAuditEntriesPaged",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -18003,7 +18038,7 @@
         "receiver": "*PgStore",
         "line": 74,
         "end": 106,
-        "sha256": "2a1e100ed7c2de664f94313abb028a6f05d8f328aeefa8be246a81cfdb41f51f",
+        "sha256": "bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d",
         "calls": [
           {
             "line": 75,
@@ -18019,6 +18054,11 @@
             "line": 76,
             "expr": "len",
             "name": "len"
+          },
+          {
+            "line": 76,
+            "expr": "strings.ContainsRune",
+            "name": "ContainsRune"
           },
           {
             "line": 77,
@@ -18143,13 +18183,38 @@
           "status": "name-match-candidate-not-dispatch-proof"
         }
       ],
-      "lock_fk_wait_fence": "companyReferencedTx T KEY SHARE→actor/profile→new template INSERT/FK T或观察revision条件template UPDATE→audit/outbox→Commit；new唯一name可能等待。",
+      "lock_fk_wait_fence": {
+        "boundary": "TrimSpace(name) then reject empty, over-120-byte or NUL-bearing names before ValidateTemplate, JSON encoding or SQL. The accepted branch retains companyReferencedTx: tenant KEY SHARE then actor/profile authorization, new template INSERT or tenant/id/revision CAS UPDATE, required template.save audit and outer commit. The name check adds no database operation or lock.",
+        "local_operations": [
+          {
+            "line": 85,
+            "operation": "s.companyReferencedTx",
+            "sql_expression": "",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 91,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`INSERT INTO mail_templates(id,tenant_id,name,draft,created_by) VALUES($1,$2,$3,$4,$5) RETURNING revision,updated_at`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          },
+          {
+            "line": 95,
+            "operation": "tx.QueryRow",
+            "sql_expression": "`UPDATE mail_templates SET name=$3,draft=$4,revision=revision+1,updated_at=now() WHERE tenant_id=$1 AND id=$2 AND revision=$5 RETURNING revision,updated_at,retired`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "implicit_fk": "Existing template tenant and version/grant foreign-key definitions are unchanged; unique template names can wait. Static syntax does not establish a global lock order."
+      },
       "evidence": [
-        "internal/store/postgres/company_templates.go:74-106 sha256=2a1e100ed7c2de664f94313abb028a6f05d8f328aeefa8be246a81cfdb41f51f",
-        "migration source definitions; no current runtime catalog claim"
+        "internal/store/postgres/company_templates.go:74-106 sha256=bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d",
+        "Original syntax producers; bounded product regressions are recorded by their own EXEC source receipts."
       ],
       "unverified_risks": [
-        "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证"
+        "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
       ],
       "review_status": "static-type-review",
       "followup_tasks": [
@@ -18193,8 +18258,27 @@
         "callback_effect": "无声明式函数/Validator参数；调用的事务helper副作用见对应entry",
         "entry_role": "store-exported-interface-candidate"
       },
-      "file_family_context": "Save/retire/revoke T KEY SHARE→actor/profile→template CAS或version UPDATE；publish/grant T UPDATE；FK版本→模板、grant→模板/M/U；immutable版本trigger保留",
-      "evidence_level": "source-only"
+      "file_family_context": "TrimSpace(name) then reject empty, over-120-byte or NUL-bearing names before ValidateTemplate, JSON encoding or SQL. The accepted branch retains companyReferencedTx: tenant KEY SHARE then actor/profile authorization, new template INSERT or tenant/id/revision CAS UPDATE, required template.save audit and outer commit. The name check adds no database operation or lock.",
+      "evidence_level": "source-only",
+      "historical_revision15_review": {
+        "lock_fk_wait_fence": "companyReferencedTx T KEY SHARE→actor/profile→new template INSERT/FK T或观察revision条件template UPDATE→audit/outbox→Commit；new唯一name可能等待。",
+        "evidence": [
+          "internal/store/postgres/company_templates.go:74-106 sha256=2a1e100ed7c2de664f94313abb028a6f05d8f328aeefa8be246a81cfdb41f51f",
+          "migration source definitions; no current runtime catalog claim"
+        ],
+        "unverified_risks": [
+          "版本revoke先version→template，publish先template→version INSERT；不同版本/反向等待及旧模板资格跨语句需专项验证"
+        ],
+        "file_family_context": "Save/retire/revoke T KEY SHARE→actor/profile→template CAS或version UPDATE；publish/grant T UPDATE；FK版本→模板、grant→模板/M/U；immutable版本trigger保留"
+      },
+      "source_review": {
+        "base_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "source_sha256": "bbe9e0f9a355b76791ea350b36e32a992f450b81b2d18fec2cbdcfc3dcf45b0d",
+        "role": "input-checked-template-transaction-writer",
+        "trace": "TrimSpace(name) then reject empty, over-120-byte or NUL-bearing names before ValidateTemplate, JSON encoding or SQL. The accepted branch retains companyReferencedTx: tenant KEY SHARE then actor/profile authorization, new template INSERT or tenant/id/revision CAS UPDATE, required template.save audit and outer commit. The name check adds no database operation or lock.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md"
+      }
     },
     {
       "id": "internal/store/postgres/company_templates.go:*PgStore:SetMailTemplateRetired",
@@ -26884,7 +26968,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 464,
+          "line": 473,
           "expression": "s.store.CountAllMailboxes",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -30215,7 +30299,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 468,
+          "line": 477,
           "expression": "s.store.CountAllMessages",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -40747,7 +40831,7 @@
           "caller_id": "internal/store/postgres/settings.go:*PgStore:ListSettings",
           "file": "internal/store/postgres/settings.go",
           "function": "ListSettings",
-          "line": 43,
+          "line": 56,
           "expression": "rows.Scan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -42278,7 +42362,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteAPIKeyForTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteAPIKeyForTenant",
-          "line": 419,
+          "line": 428,
           "expression": "s.store.GetAPIKey",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50036,7 +50120,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreatePlan",
           "file": "internal/app/admin/service.go",
           "function": "CreatePlan",
-          "line": 321,
+          "line": 327,
           "expression": "s.store.CreatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50148,7 +50232,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeletePlan",
           "file": "internal/app/admin/service.go",
           "function": "DeletePlan",
-          "line": 355,
+          "line": 364,
           "expression": "s.store.DeletePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -50254,7 +50338,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 248,
+          "line": 251,
           "expression": "s.store.GetPlan",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50386,7 +50470,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 456,
+          "line": 465,
           "expression": "s.store.ListPlans",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -50490,7 +50574,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdatePlan",
           "file": "internal/app/admin/service.go",
           "function": "UpdatePlan",
-          "line": 341,
+          "line": 350,
           "expression": "s.store.UpdatePlan",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -50780,7 +50864,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 186,
+          "line": 187,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50788,7 +50872,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverDirectMXTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverDirectMXTLS",
-          "line": 197,
+          "line": 198,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50796,7 +50880,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverRelayTLS",
-          "line": 46,
+          "line": 47,
           "expression": "conn.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50804,7 +50888,7 @@
           "caller_id": "internal/outbound/delivery.go::deliverRelayTLS",
           "file": "internal/outbound/delivery.go",
           "function": "deliverRelayTLS",
-          "line": 49,
+          "line": 50,
           "expression": "client.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -50812,7 +50896,7 @@
           "caller_id": "internal/outbound/delivery.go::sendSMTP",
           "file": "internal/outbound/delivery.go",
           "function": "sendSMTP",
-          "line": 247,
+          "line": 255,
           "expression": "w.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -51636,7 +51720,7 @@
           "caller_id": "internal/store/postgres/settings.go:*PgStore:ListSettings",
           "file": "internal/store/postgres/settings.go",
           "function": "ListSettings",
-          "line": 39,
+          "line": 52,
           "expression": "rows.Close",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52290,7 +52374,7 @@
           "caller_id": "internal/company/templates.go::renderValidated",
           "file": "internal/company/templates.go",
           "function": "renderValidated",
-          "line": 170,
+          "line": 183,
           "expression": "texttemplate.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52298,7 +52382,7 @@
           "caller_id": "internal/company/templates.go::renderValidated",
           "file": "internal/company/templates.go",
           "function": "renderValidated",
-          "line": 186,
+          "line": 199,
           "expression": "htmltemplate.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -52403,6 +52487,14 @@
           "file": "internal/mailcontent/source.go",
           "function": "readOwnedSource",
           "line": 47,
+          "expression": "errors.New",
+          "status": "name-match-candidate-not-dispatch-proof"
+        },
+        {
+          "caller_id": "internal/outbound/delivery.go::sendSMTP",
+          "file": "internal/outbound/delivery.go",
+          "function": "sendSMTP",
+          "line": 236,
           "expression": "errors.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53138,7 +53230,7 @@
           "caller_id": "internal/testutil/fake_store_misc.go:*FakeStore:CreateIngestJob",
           "file": "internal/testutil/fake_store_misc.go",
           "function": "CreateIngestJob",
-          "line": 168,
+          "line": 184,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53146,7 +53238,7 @@
           "caller_id": "internal/testutil/fake_store_misc.go:*FakeStore:CreateMonitorEvent",
           "file": "internal/testutil/fake_store_misc.go",
           "function": "CreateMonitorEvent",
-          "line": 118,
+          "line": 134,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -53154,7 +53246,7 @@
           "caller_id": "internal/testutil/fake_store_misc.go:*FakeStore:InsertAudit",
           "file": "internal/testutil/fake_store_misc.go",
           "function": "InsertAudit",
-          "line": 86,
+          "line": 102,
           "expression": "uuid.New",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -55395,7 +55487,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListIngestJobs",
           "file": "internal/app/admin/service.go",
           "function": "ListIngestJobs",
-          "line": 519,
+          "line": 528,
           "expression": "s.store.ListIngestJobs",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -55664,7 +55756,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:ListWebhookDeliveries",
           "file": "internal/app/admin/service.go",
           "function": "ListWebhookDeliveries",
-          "line": 530,
+          "line": 539,
           "expression": "s.store.ListWebhookDeliveries",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -59998,16 +60090,7 @@
         ],
         "params": "func(ctx context.Context, key string) (*models.SystemSetting, error)"
       },
-      "callers": [
-        {
-          "caller_id": "internal/settings/settings.go:*Manager:Seed",
-          "file": "internal/settings/settings.go",
-          "function": "Seed",
-          "line": 45,
-          "expression": "m.store.GetSetting",
-          "status": "name-match-candidate-not-dispatch-proof"
-        }
-      ],
+      "callers": [],
       "lock_fk_wait_fence": {
         "boundary": "pool/database statement独立提交；多分支/循环不是整体事务",
         "local_operations": [
@@ -60070,45 +60153,45 @@
         "file": "internal/store/postgres/settings.go",
         "name": "ListSettings",
         "receiver": "*PgStore",
-        "line": 33,
-        "end": 49,
+        "line": 46,
+        "end": 62,
         "sha256": "d5c9b57600686b43fe7bfcece89963ae5ec5c680bc695950f38877d5783aa0dd",
         "calls": [
           {
-            "line": 34,
+            "line": 47,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "`SELECT key, value, description, updated_at FROM system_settings ORDER BY key`"
           },
           {
-            "line": 39,
+            "line": 52,
             "expr": "rows.Close",
             "name": "Close"
           },
           {
-            "line": 41,
+            "line": 54,
             "expr": "rows.Next",
             "name": "Next"
           },
           {
-            "line": 43,
+            "line": 56,
             "expr": "rows.Scan",
             "name": "Scan"
           },
           {
-            "line": 46,
+            "line": 59,
             "expr": "append",
             "name": "append"
           },
           {
-            "line": 48,
+            "line": 61,
             "expr": "rows.Err",
             "name": "Err"
           }
         ],
         "strings": [
           {
-            "line": 35,
+            "line": 48,
             "value": "SELECT key, value, description, updated_at FROM system_settings ORDER BY key"
           }
         ],
@@ -60135,7 +60218,7 @@
           "caller_id": "internal/settings/settings.go:*Manager:All",
           "file": "internal/settings/settings.go",
           "function": "All",
-          "line": 123,
+          "line": 118,
           "expression": "m.store.ListSettings",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60143,7 +60226,7 @@
           "caller_id": "internal/settings/settings.go:*Manager:refresh",
           "file": "internal/settings/settings.go",
           "function": "refresh",
-          "line": 140,
+          "line": 135,
           "expression": "m.store.ListSettings",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -60178,7 +60261,7 @@
         "transaction_helper_calls": [],
         "sql_execution_expressions": [
           {
-            "line": 34,
+            "line": 47,
             "expr": "s.pool.Query",
             "name": "Query",
             "sql_expr": "`SELECT key, value, description, updated_at FROM system_settings ORDER BY key`"
@@ -60241,18 +60324,10 @@
       },
       "callers": [
         {
-          "caller_id": "internal/settings/settings.go:*Manager:Seed",
-          "file": "internal/settings/settings.go",
-          "function": "Seed",
-          "line": 53,
-          "expression": "m.store.UpsertSetting",
-          "status": "name-match-candidate-not-dispatch-proof"
-        },
-        {
           "caller_id": "internal/settings/settings.go:*Manager:Set",
           "file": "internal/settings/settings.go",
           "function": "Set",
-          "line": 111,
+          "line": 106,
           "expression": "m.store.UpsertSetting",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -60374,7 +60449,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:GetSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "GetSMTPPolicy",
-          "line": 541,
+          "line": 550,
           "expression": "s.store.GetSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -60516,7 +60591,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateSMTPPolicy",
           "file": "internal/app/admin/service.go",
           "function": "UpdateSMTPPolicy",
-          "line": 552,
+          "line": 561,
           "expression": "s.store.UpsertSMTPPolicy",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62094,7 +62169,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateTenant",
           "file": "internal/app/admin/service.go",
           "function": "CreateTenant",
-          "line": 256,
+          "line": 259,
           "expression": "s.store.CreateTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62215,7 +62290,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:DeleteTenant",
           "file": "internal/app/admin/service.go",
           "function": "DeleteTenant",
-          "line": 301,
+          "line": 304,
           "expression": "s.store.DeleteTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62615,7 +62690,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:CreateAPIKey",
           "file": "internal/app/admin/service.go",
           "function": "CreateAPIKey",
-          "line": 375,
+          "line": 384,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62623,7 +62698,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 273,
+          "line": 276,
           "expression": "s.store.GetTenant",
           "status": "name-match-candidate-not-dispatch-proof"
         },
@@ -62764,7 +62839,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 452,
+          "line": 461,
           "expression": "s.store.ListTenants",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -62871,7 +62946,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:UpdateTenantOverride",
           "file": "internal/app/admin/service.go",
           "function": "UpdateTenantOverride",
-          "line": 286,
+          "line": 289,
           "expression": "s.store.UpsertOverride",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -66067,7 +66142,7 @@
           "caller_id": "internal/app/admin/service.go:*Service:Stats",
           "file": "internal/app/admin/service.go",
           "function": "Stats",
-          "line": 460,
+          "line": 469,
           "expression": "s.store.CountAllZones",
           "status": "name-match-candidate-not-dispatch-proof"
         }
@@ -67933,6 +68008,127 @@
       },
       "file_family_context": "zone Create/Update单SQL，tenant/owner/parent FK；DeleteZone在domain_delete.go",
       "evidence_level": "source-only"
+    },
+    {
+      "id": "internal/store/postgres/settings.go:*PgStore:SeedSetting",
+      "owner": "postgres.PgStore/settings.go",
+      "entry": "SeedSetting",
+      "group": "CTX37",
+      "classification": {
+        "kind": "direct-write",
+        "direct_write": true,
+        "write_closure": true,
+        "explicit_lock": false,
+        "transaction_calls": false,
+        "callback_parameter": false,
+        "dynamic_sql_expression": false
+      },
+      "syntax": {
+        "id": "internal/store/postgres/settings.go:*PgStore:SeedSetting",
+        "file": "internal/store/postgres/settings.go",
+        "name": "SeedSetting",
+        "receiver": "*PgStore",
+        "line": 35,
+        "end": 44,
+        "sha256": "1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d",
+        "calls": [
+          {
+            "line": 36,
+            "expr": "s.pool.Exec",
+            "name": "Exec",
+            "sql_expr": "`\n\t\tINSERT INTO system_settings (key, value, description, updated_at)\n\t\tVALUES ($1, $2, $3, $4)\n\t\tON CONFLICT (key) DO NOTHING`"
+          },
+          {
+            "line": 39,
+            "expr": "time.Now().UTC",
+            "name": "UTC"
+          },
+          {
+            "line": 39,
+            "expr": "time.Now",
+            "name": "Now"
+          },
+          {
+            "line": 43,
+            "expr": "result.RowsAffected",
+            "name": "RowsAffected"
+          }
+        ],
+        "strings": [
+          {
+            "line": 36,
+            "value": "\n\t\tINSERT INTO system_settings (key, value, description, updated_at)\n\t\tVALUES ($1, $2, $3, $4)\n\t\tON CONFLICT (key) DO NOTHING"
+          }
+        ],
+        "params": "func(ctx context.Context, key, value, description string) (bool, error)"
+      },
+      "callers": [
+        {
+          "caller_id": "internal/settings/settings.go:*Manager:Seed",
+          "file": "internal/settings/settings.go",
+          "function": "Seed",
+          "line": 45,
+          "expression": "m.store.SeedSetting",
+          "status": "name-match-candidate-not-dispatch-proof"
+        }
+      ],
+      "lock_fk_wait_fence": {
+        "boundary": "A single pool.Exec issues INSERT INTO system_settings (...) VALUES (...) ON CONFLICT (key) DO NOTHING. An existing key keeps value, description and updated_at verbatim. The function returns true only when RowsAffected() == 1; an existing key returns false and database errors propagate. There is no read-then-upsert window, explicit transaction, extra lock SQL or callback.",
+        "local_operations": [
+          {
+            "line": 36,
+            "operation": "s.pool.Exec",
+            "sql_expression": "`\n\t\tINSERT INTO system_settings (key, value, description, updated_at)\n\t\tVALUES ($1, $2, $3, $4)\n\t\tON CONFLICT (key) DO NOTHING`",
+            "status": "lexical-order-with-branches-not-single-total-runtime-order"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "implicit_fk": "system_settings.key is the existing primary key; this table has no tenant foreign key. The unique-key conflict may wait for another transaction. No row is overwritten on conflict."
+      },
+      "evidence": [
+        "internal/store/postgres/settings.go:35-44 sha256=1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d",
+        "Original syntax producers; actual PostgreSQL seed regressions remain separately source-bound."
+      ],
+      "unverified_risks": [
+        "Multiple setting keys are separate autocommit statements, not one atomic settings transaction.",
+        "Cache refresh and concurrent administrative writes outside this single insertion require their own review.",
+        "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance."
+      ],
+      "review_status": "static-type-review",
+      "followup_tasks": [
+        "R5-P1-030"
+      ],
+      "assertions": {
+        "direct_sql_effects": [
+          {
+            "line": 36,
+            "sql_fragment": "\n\t\tINSERT INTO system_settings (key, value, description, updated_at)\n\t\tVALUES ($1, $2, $3, $4)\n\t\tON CONFLICT (key) DO NOTHING"
+          }
+        ],
+        "direct_lock_fragments": [],
+        "transaction_helper_calls": [],
+        "sql_execution_expressions": [
+          {
+            "line": 36,
+            "expr": "s.pool.Exec",
+            "name": "Exec",
+            "sql_expr": "`\n\t\tINSERT INTO system_settings (key, value, description, updated_at)\n\t\tVALUES ($1, $2, $3, $4)\n\t\tON CONFLICT (key) DO NOTHING`"
+          }
+        ],
+        "effect_status": "source-fragments-not-evaluated-SQL",
+        "callback_effect": "No function or Validator parameter and no external callback; pool.Exec is the single database operation.",
+        "entry_role": "store-exported-interface-candidate"
+      },
+      "file_family_context": "A single pool.Exec issues INSERT INTO system_settings (...) VALUES (...) ON CONFLICT (key) DO NOTHING. An existing key keeps value, description and updated_at verbatim. The function returns true only when RowsAffected() == 1; an existing key returns false and database errors propagate. There is no read-then-upsert window, explicit transaction, extra lock SQL or callback.",
+      "evidence_level": "source-only",
+      "source_review": {
+        "base_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+        "source_sha256": "1ac3664fd7874220598410ce4ee0fd002ff69b9db6f331f4c91e58ba8627234d",
+        "role": "insert-only-default-statement",
+        "trace": "A single pool.Exec issues INSERT INTO system_settings (...) VALUES (...) ON CONFLICT (key) DO NOTHING. An existing key keeps value, description and updated_at verbatim. The function returns true only when RowsAffected() == 1; an existing key returns false and database errors propagate. There is no read-then-upsert window, explicit transaction, extra lock SQL or callback.",
+        "unverified": "Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
+        "review": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md"
+      }
     }
   ],
   "migrations": [
@@ -69024,16 +69220,16 @@
     "acceptance_layer": "independent manual task acceptance is separate from syntax checker, no runtime-everyfunction claim",
     "original_baseline_commit": "3893945"
   },
-  "last_review_base_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
-  "current_review_boundary": "Revision 15 binds the actual public ADVANCE merge 26a30e3. One existing trusted key-creation body is reclassified from direct-write to write-call-closure and its complete prior manual/source review is preserved in historical_revision14_review. Two new key-row/authorized-issuance functions are manually reviewed against exact body hashes. Existing file-review fields remain unchanged with one additive revision15 note. Fresh syntax, exact derived assertions, name-match callers, client locations and compatibility closure bytes are reconciled. Migrations, collectors, gates, frozen history and unapproved-source guards remain unchanged. Maintenance completes 0 implementation TODOs and grants no global runtime, release or parent acceptance.",
+  "last_review_base_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
+  "current_review_boundary": "Revision 16 binds the actual public EXEC merge. SaveMailTemplate rejects NUL names before SQL while preserving its prior manual fields in historical_revision15_review; the old entry had no source_review and that absence is preserved in the archive. SeedSetting is a new insert-only default statement with no conflict overwrite. Other existing body hashes/classifications, manual fields and unknown fields stay unchanged; fresh syntax, exact derived assertions, name-match callers and finite compatibility facts are reconciled. Existing file-level reviews remain with additive revision16 notes. Original syntax producers only; SQL fragments, name-match callers and local operation order do not prove resolved dispatch, executed SQL or concurrency correctness. Separately bound EXEC product regressions retain their own source identities and limited qualification. This maintenance adds zero implementation TODOs and grants no runtime, release or parent acceptance.",
   "inventory_revision": {
-    "revision": 15,
-    "source_commit": "26a30e3c6963d553efdd8a8b33c095feb924c758",
+    "revision": 16,
+    "source_commit": "b6516f9ac873f4464894933b5c3a0e046bc9a4a5",
     "previous_snapshot": "docs/company-mail/evidence/R5-TRANSACTION-COVERAGE.json",
-    "previous_snapshot_commit": "fdea2178759ce9842844926374ea98517bc4188b",
-    "previous_snapshot_blob": "1415c2f371648ac093f1d69a0cfb8242c50778f9",
-    "previous_sha256": "3061dda4280598710648616781b72dbe2cb2c2f78b28b70a636a976f0b0b644f",
+    "previous_snapshot_commit": "eae219951c6f9cbf17eb4062b69464c731807be7",
+    "previous_snapshot_blob": "bcdef4ebfddc1b71073881582b48b0b687b3aecf",
+    "previous_sha256": "c4a3f7491e63a8b8eb9bf95649ab874548417c0810ae181e7b10be49cd885b22",
     "qualification": "static-source-inventory-only; no new runtime, dependency or task acceptance",
-    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION15-20261009/README.md"
+    "review": "docs/company-mail/evidence/R5-CATALOG-REVISION16-20261009/README.md"
   }
 }
