@@ -15,10 +15,13 @@ jobs:
     env:
       GOSUMDB: sum.golang.org
       GODEBUG: asynctimerchan=0
-      TASK_EVIDENCE: ${{ runner.temp }}/next1010-r2-refresh-preinstalled
       TASK_PG_ROLE: tm_r2_refresh_${{ github.run_id }}_${{ github.run_attempt }}
       TASK_PG_DB: tm_r2_refresh_${{ github.run_id }}_${{ github.run_attempt }}
     steps:
+      - name: Initialize evidence path on the runner
+        shell: bash
+        run: |
+          printf 'TASK_EVIDENCE=%s\n' "$RUNNER_TEMP/next1010-r2-refresh-preinstalled" >> "$GITHUB_ENV"
       - uses: actions/checkout@v4
         with:
           ref: 13a2a07979b2939fe30330e81cc5e12bec253be2
