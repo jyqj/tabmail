@@ -29,7 +29,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 2dfebb7692700c14906ceba351e19893fb736656
+          ref: 17be458fb9d36e135a95962638b68ce105c16518
           persist-credentials: false
           fetch-depth: 0
       - uses: actions/setup-go@v5
@@ -51,16 +51,16 @@ jobs:
           output.mkdir(exist_ok=False)
           def git(*args):
               return subprocess.check_output(['git', '-C', str(root), *args], text=True).strip()
-          attestor_commit = '2dfebb7692700c14906ceba351e19893fb736656'
+          attestor_commit = '17be458fb9d36e135a95962638b68ce105c16518'
           assert git('rev-parse', 'HEAD') == attestor_commit
-          assert git('rev-parse', 'HEAD^{tree}') == '56c22d9dce089d399e2f58abfa732c045b7ef1c1'
+          assert git('rev-parse', 'HEAD^{tree}') == 'fd362eed901840f23f58b477104a642f2a6cbf51'
           assert not git('status', '--porcelain', '--untracked-files=all')
           attestor = root / 'scripts/run_r5_next1543_pg.py'
           attestor_sha256 = hashlib.sha256(attestor.read_bytes()).hexdigest()
           rounds = [
-              ('wave1', 'mailbox-grants', '7cfbe10b6b18483359f376e1ee4631ca2d40d6a1', 'fdcd8dd0e8ab91d0df7ff4ce17cdd16186b87dc9'),
-              ('wave2', 'derived-text', 'ad104624301ec1e21c2be20f6605e4dcb26e3a33', 'ca108e1b4461ffe0a9713ce474eaffbca17d65ef'),
-              ('wave3', 'reconcile-ledger', '2dfebb7692700c14906ceba351e19893fb736656', '56c22d9dce089d399e2f58abfa732c045b7ef1c1'),
+              ('wave1', 'mailbox-grants', '559d01edd58c6af5cbc5965e1202ff575e4e2cda', '3b1b2644c7e7f05b57396afbf04daf8b8394da33'),
+              ('wave2', 'derived-text', '7bb9b8abff9a6a53b1d0010f96cc13728a9330c5', '48f894a0417091278a9d197096d13995b9041b38'),
+              ('wave3', 'reconcile-ledger', '17be458fb9d36e135a95962638b68ce105c16518', 'fd362eed901840f23f58b477104a642f2a6cbf51'),
           ]
           results = []
           for label, case, commit, tree in rounds:
